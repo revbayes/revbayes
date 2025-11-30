@@ -260,7 +260,16 @@ ParseResult<TopologyNode*> parseSubTree(const std::string& input, int start_pos)
     else if (maybe_name.hard_failure())
         return maybe_name.as_failure();
 
-    //add name and children
+    // Read Length
+    if (auto maybe_length = parseLength(input, start_pos))
+    {
+        auto length = maybe_length.value();
+        if (length)
+            node->setBranchLength(*length);
+    }
+    else if (maybe_length.hard_failure())
+        return maybe_length.as_failure();
+
     return ParseSuccess(node, start_pos); 
 }
 
@@ -291,24 +300,6 @@ ParseResult<optional<double>> parseLength(const std::string& input, int start_po
     return ParseSuccess<optional<double>>(maybe_length.value(), maybe_length.next_pos());
 }
 
-
-// Branch -> Subtree Length
-ParseResult<TopologyNode*> parseBranch(const std::string& input, int start_pos)
-{
-    auto maybe_subtree = parseSubTree(input, start_pos);
-    if (not maybe_subtree) return maybe_subtree.as_failure();
-
-    auto maybe_length = parseLength(input, maybe_subtree.next_pos());
-    if (not maybe_length) return maybe_length.as_failure();
-
-    auto node = maybe_subtree.value();
-    auto length = maybe_length.value();
-    if (length)
-        node->setBranchLength(*length);
-
-    return ParseSuccess(node, maybe_length.next_pos());
-}
-
 // Descendants -> "(" > Branch ("," > Branch)* > ")"
 ParseResult<std::vector<TopologyNode*>> parseDescendants(const std::string& input, int start_pos)
 {
@@ -318,21 +309,21 @@ ParseResult<std::vector<TopologyNode*>> parseDescendants(const std::string& inpu
     else
         return maybe_lparen.as_failure();
 
-    vector<TopologyNode*> branches;
-    auto maybe_branch = parseBranch(input, start_pos);
-    if (not maybe_branch)
-        return maybe_branch.as_hard_failure();
-    branches.push_back(maybe_branch.value());
-    start_pos = maybe_branch.next_pos();
+    vector<TopologyNode*> subtrees;
+    auto maybe_subtree = parseSubTree(input, start_pos);
+    if (not maybe_subtree)
+        return maybe_subtree.as_hard_failure();
+    subtrees.push_back(maybe_subtree.value());
+    start_pos = maybe_subtree.next_pos();
 
     while(auto maybe_comma = checkChar(input, start_pos, ','))
     {
         start_pos = maybe_comma.next_pos();
-        auto maybe_branch2 = parseBranch(input, start_pos);
-        if (not maybe_branch2)
-            return maybe_branch2.as_hard_failure();
-        branches.push_back(maybe_branch2.value());
-        start_pos = maybe_branch2.next_pos();
+        auto maybe_subtree2 = parseSubTree(input, start_pos);
+        if (not maybe_subtree2)
+            return maybe_subtree2.as_hard_failure();
+        subtrees.push_back(maybe_subtree2.value());
+        start_pos = maybe_subtree2.next_pos();
     }
 
 
@@ -343,7 +334,7 @@ ParseResult<std::vector<TopologyNode*>> parseDescendants(const std::string& inpu
     else
         return maybe_rparen.as_hard_failure();
 
-    return ParseSuccess(branches, start_pos);
+    return ParseSuccess(subtrees, start_pos);
 }
 
 // this function is matching (not a quote) or (two quotes)
