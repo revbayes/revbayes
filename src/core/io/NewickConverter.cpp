@@ -449,7 +449,7 @@ ParseResult<char> parseUnquotedChar(const std::string& input, int start_pos)
     {
         char c = maybe_char.value();
         // c is _
-        if (c == '_')
+        if (c == '_' and false)
             return ParseSuccess(' ', maybe_char.next_pos());
         // c is a legal character that is not _
         else if (!strchr("()[]':;, ", c)) 
