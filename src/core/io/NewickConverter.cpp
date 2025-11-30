@@ -235,25 +235,9 @@ ParseResult<TopologyNode*> parseTree(const std::string& input, int start_pos)
     return ParseSuccess(check_subtree.value(), check_semi.next_pos());
 }
 
-// subtree -> internal OR leaf
-ParseResult<TopologyNode*> parseSubTree(const std::string& input, int start_pos){
-
-    if (auto checkInternal = parseInternal(input, start_pos); checkInternal.success() or checkInternal.hard_failure())
-        return checkInternal;
-    else if (auto checkLeaf = parseLeaf(input, start_pos))
-        return checkLeaf;
-    else {
-        if(checkInternal.err_pos()<checkLeaf.err_pos())
-            return checkLeaf;
-        else
-            return checkInternal;
-    }
-}
-
-
-
-// Internal -> Descendants > [Name]
-ParseResult<TopologyNode*> parseInternal(const std::string& input, int start_pos){
+// subtree -> [Descendants] [Name]
+ParseResult<TopologyNode*> parseSubTree(const std::string& input, int start_pos)
+{
     auto node = new TopologyNode;
 
     // Parse Descendants and add children to node
@@ -265,7 +249,7 @@ ParseResult<TopologyNode*> parseInternal(const std::string& input, int start_pos
             child->setParent(node);
         }
     }
-    else
+    else if (maybe_children.hard_failure())
         return maybe_children.as_failure();
     
     // Read Name
@@ -360,24 +344,6 @@ ParseResult<std::vector<TopologyNode*>> parseDescendants(const std::string& inpu
         return maybe_rparen.as_hard_failure();
 
     return ParseSuccess(branches, start_pos);
-}
-
-// Leaf -> name or empty
-ParseResult<TopologyNode*> parseLeaf(const std::string& input, int start_pos)
-{
-    //adding new node
-    auto node = new TopologyNode;
-
-    if (auto maybe_name = parseName(input, start_pos))
-    {
-        start_pos = maybe_name.next_pos();
-        node->setName(maybe_name.value());
-    }
-    else if (maybe_name.hard_failure())
-        return maybe_name.as_failure();
-
-    //add name and children
-    return ParseSuccess(node, start_pos);
 }
 
 // this function is matching (not a quote) or (two quotes)
