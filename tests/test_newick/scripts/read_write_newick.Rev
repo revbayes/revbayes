@@ -1,2 +1,10 @@
 t = readTrees(text="(a,(b,c));")[1]
 t
+t = readTrees(text="'''';")[1]
+t
+t = readTrees(text="'a b c';")[1]
+t
+t = readTrees(text="'a b(c';")[1]
+t
+t = readTrees(text="a_b_c;")[1]
+t

@@ -108,6 +108,20 @@ ParseResult<char> parseChar(const std::string& input, int start_pos)
     }
 }
 
+string escape(char c)
+{
+    if (c == '\'')
+        return "\\'";
+    else if (c == '\n')
+        return "\\n";
+    else if (c == '\r')
+        return "\\r";
+    else if (c == '\t')
+        return "\\t";
+    else
+        return string(1,c);
+}
+
 // returns a new start_pos if the input contains another character, and it is "c"
 ParseResult<char> checkChar(const std::string& input, int start_pos, char c)
 {
@@ -117,10 +131,10 @@ ParseResult<char> checkChar(const std::string& input, int start_pos, char c)
         if (maybe_char.value() == c)
             return maybe_char;
         else
-            return ParseFail(std::string("Expected '") + c + "'", start_pos);
+            return ParseFail(std::string("Expected '") + escape(c) + "'", start_pos);
     }
     else
-        return maybe_char;
+        return ParseFail(std::string("Reached end of input looking for '") + escape(c) + "'", start_pos);
 }
 
 
@@ -224,7 +238,7 @@ ParseResult<TopologyNode*> parseTree(const std::string& input, int start_pos)
 // subtree -> internal OR leaf
 ParseResult<TopologyNode*> parseSubTree(const std::string& input, int start_pos){
 
-    if (auto checkInternal = parseInternal(input, start_pos))
+    if (auto checkInternal = parseInternal(input, start_pos); checkInternal.success() or checkInternal.hard_failure())
         return checkInternal;
     else if (auto checkLeaf = parseLeaf(input, start_pos))
         return checkLeaf;
@@ -236,7 +250,7 @@ ParseResult<TopologyNode*> parseSubTree(const std::string& input, int start_pos)
     }
 }
 
-// Internal -> '(' BranchSet ')' Name
+// Internal -> '(' > BranchSet > ')' [Name]
 ParseResult<TopologyNode*> parseInternal(const std::string& input, int start_pos){
     auto node = new TopologyNode;
 
@@ -256,20 +270,22 @@ ParseResult<TopologyNode*> parseInternal(const std::string& input, int start_pos
         }
     }
     else
-        return maybe_children.as_failure();
+        return maybe_children.as_hard_failure();
 
     // Read right parenthesis
     if (auto maybe_rparen = checkChar(input, start_pos, ')')) {
         start_pos = maybe_rparen.next_pos();
     }
     else
-        return maybe_rparen.as_failure();
+        return maybe_rparen.as_hard_failure();
     
     // Read Name
     if (auto maybe_name = parseName(input, start_pos)) {
         start_pos = maybe_name.next_pos();
         node -> setName(maybe_name.value());
     }
+    else if (maybe_name.hard_failure())
+        return maybe_name.as_failure();
 
     //add name and children
     return ParseSuccess(node, start_pos); 
@@ -349,10 +365,13 @@ ParseResult<TopologyNode*> parseLeaf(const std::string& input, int start_pos)
     //adding new node
     auto node = new TopologyNode;
 
-    if (auto name = parseName(input, start_pos)){
-        start_pos = name.next_pos();
-        node->setName(name.value());
+    if (auto maybe_name = parseName(input, start_pos))
+    {
+        start_pos = maybe_name.next_pos();
+        node->setName(maybe_name.value());
     }
+    else if (maybe_name.hard_failure())
+        return maybe_name.as_failure();
 
     //add name and children
     return ParseSuccess(node, start_pos);
@@ -404,7 +423,7 @@ ParseResult<char> parseUnquotedChar(const std::string& input, int start_pos)
 }
 
 // QuotedName -> ' + QuotedChar* + '
-// quotedName -> char('\'') >> many(quotedChar) >> char('\'')
+// quotedName -> char('\'') > many(quotedChar) > char('\'')
 ParseResult<std::string> parseQuotedName(const std::string& input, int start_pos)
 {
     auto maybe_quote1 = checkChar(input, start_pos, '\'');
@@ -422,7 +441,7 @@ ParseResult<std::string> parseQuotedName(const std::string& input, int start_pos
 
     auto maybe_quote2 = checkChar(input, start_pos, '\'');
     if (not maybe_quote2)
-        return maybe_quote2.as_failure();
+        return maybe_quote2.as_hard_failure();
     else
         start_pos = maybe_quote2.next_pos();
 
@@ -453,13 +472,10 @@ ParseResult<std::string> parseUnquotedName(const std::string& input, int start_p
 
 // Name -> QuotedName | UnquotedName | empty
 ParseResult<std::string> parseName(const std::string& input, int start_pos){
-    if (auto check = parseQuotedName(input, start_pos))
-        return check;
-    
-    else {
+    if (auto maybe_quoted = parseQuotedName(input, start_pos); maybe_quoted.success() or maybe_quoted.hard_failure())
+        return maybe_quoted;
+    else 
         return parseUnquotedName(input, start_pos);
-    }
-
 }
 
 //AdmixtureTree* NewickConverter::getAdmixtureTreeFromNewick(std::string const &n)

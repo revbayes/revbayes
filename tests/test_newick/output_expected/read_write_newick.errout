@@ -1,1 +1,5 @@
    (a[&index=3],(b[&index=2],c[&index=1])[&index=4])[&index=5]:0.000000;
+   ''''[&index=1]:0.000000;
+   a_b_c[&index=1]:0.000000;
+   'a b(c'[&index=1]:0.000000;
+   a_b_c[&index=1]:0.000000;
