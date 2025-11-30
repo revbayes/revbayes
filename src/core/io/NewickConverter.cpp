@@ -270,8 +270,6 @@ ParseResult<TopologyNode*> parseInternal(const std::string& input, int start_pos
         start_pos = maybe_name.next_pos();
         node -> setName(maybe_name.value());
     }
-    else
-        return maybe_name.as_failure();
 
     //add name and children
     return ParseSuccess(node, start_pos); 
@@ -329,8 +327,9 @@ ParseResult<std::vector<TopologyNode*>> parseBranchSet(const std::string& input,
     auto maybe_branch = parseBranch(input, start_pos);
     if (not maybe_branch)
         return maybe_branch.as_failure();
-
+    branches.push_back(maybe_branch.value());
     start_pos = maybe_branch.next_pos();
+
     while(auto maybe_comma = checkChar(input, start_pos, ','))
     {
         start_pos = maybe_comma.next_pos();
@@ -338,6 +337,7 @@ ParseResult<std::vector<TopologyNode*>> parseBranchSet(const std::string& input,
         if (not maybe_branch2)
             return maybe_branch2.as_failure();
         branches.push_back(maybe_branch2.value());
+        start_pos = maybe_branch2.next_pos();
     }
 
     return ParseSuccess(branches, start_pos);
