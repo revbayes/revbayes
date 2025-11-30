@@ -65,26 +65,15 @@ Tree* NewickConverter::convertFromNewick(std::string const &newick)
 /* We are currently using this Newick grammar:
   
     Tree → Subtree ";"
-    Subtree → Leaf | Internal
-    Leaf → Name
-    Internal → "(" BranchSet ")" Name
-    BranchSet → Branch | Branch "," BranchSet
-    Branch → Subtree Length
-    Name -> QuotedName | UnquotedName | empty
-    Length → ":" number | empty
-
-But we should probably switch to this Newick grammar:
-
-    Tree → Subtree ";"
-    Subtree → [Descendants] [Name] [Length]
+    Subtree → [Descendants] [Name] [Branch]
     Descendants = "(" Subtree ("," Subtree)* ")"
     Name -> QuotedName | UnquotedName
-    Length -> ":" [Double]
+    Branch -> ":" [Double]
     QuotedName -> "'" QuotedChar* "'"
     UnquotedName -> UnquotedChar*
     UnquotedChar = not punctuation
 
-When we put the spacing in, we should get:
+When we put the spacing in, we get:
 
     Tree → SPACE<tree> Subtree ";" SPACE<ignore>
     Subtree → SPACE<node> [Descendants] SPACE<node> [Name] SPACE<node> (Length | empty<no length, no attributes>)
@@ -235,11 +224,21 @@ ParseResult<TopologyNode*> parseTree(const std::string& input, int start_pos)
     return ParseSuccess(check_subtree.value(), check_semi.next_pos());
 }
 
-// subtree -> [Descendants] [Name] [Branch]
+// subtree -> SPACE [Descendants] SPACE [Name] SPACE [Branch]
 ParseResult<TopologyNode*> parseSubTree(const std::string& input, int start_pos)
 {
     auto node = new TopologyNode;
+    vector<string> node_comments;
 
+    // Skip whitespace and record node_comments
+    if (auto maybe_whitespace = parseWhitespace(input, start_pos))
+    {
+        node_comments = std::move(maybe_whitespace.value());
+        start_pos = maybe_whitespace.next_pos();
+    }
+    else if (maybe_whitespace.hard_failure())
+        return maybe_whitespace.as_hard_failure();
+    
     // Parse [Descendants]
     if (auto maybe_children = parseDescendants(input, start_pos)) {
         start_pos = maybe_children.next_pos();
@@ -252,6 +251,16 @@ ParseResult<TopologyNode*> parseSubTree(const std::string& input, int start_pos)
     else if (maybe_children.hard_failure())
         return maybe_children.as_failure();
     
+    // Skip whitespace and record node_comments
+    if (auto maybe_whitespace = parseWhitespace(input, start_pos))
+    {
+        auto& new_comments = maybe_whitespace.value();
+        std::move(new_comments.begin(), new_comments.end(), std::back_inserter(node_comments));
+        start_pos = maybe_whitespace.next_pos();
+    }
+    else if (maybe_whitespace.hard_failure())
+        return maybe_whitespace.as_hard_failure();
+    
     // Parse [Name]
     if (auto maybe_name = parseName(input, start_pos)) {
         start_pos = maybe_name.next_pos();
@@ -260,21 +269,36 @@ ParseResult<TopologyNode*> parseSubTree(const std::string& input, int start_pos)
     else if (maybe_name.hard_failure())
         return maybe_name.as_failure();
 
+    // Skip whitespace and record node_comments
+    if (auto maybe_whitespace = parseWhitespace(input, start_pos))
+    {
+        auto& new_comments = maybe_whitespace.value();
+        std::move(new_comments.begin(), new_comments.end(), std::back_inserter(node_comments));
+        start_pos = maybe_whitespace.next_pos();
+    }
+    else if (maybe_whitespace.hard_failure())
+        return maybe_whitespace.as_hard_failure();
+    
     // Parse [Branch]
     if (auto maybe_branch = parseBranch(input, start_pos))
     {
         start_pos = maybe_branch.next_pos();
-        auto& [length, comments] = maybe_branch.value();
+        auto& [length, branch_comments] = maybe_branch.value();
         if (length)
             node->setBranchLength(*length);
-        if (not comments.empty())
+        if (not branch_comments.empty())
         {
-            // Add the comments to the branch!
+            // Add branch commments here!
         }
     }
     else if (maybe_branch.hard_failure())
         return maybe_branch.as_failure();
 
+    if (not node_comments.empty())
+    {
+        // Add node comments here!!
+    }
+    
     return ParseSuccess(node, start_pos); 
 }
 
@@ -312,6 +336,7 @@ ParseResult<pair<optional<double>,vector<string>>> parseBranch(const std::string
     else if (maybe_whitespace.hard_failure())
         return maybe_whitespace.as_hard_failure();
     
+    // Parse Length
     if (auto maybe_length = parseDouble(input, start_pos))
     {
         start_pos = maybe_length.next_pos();
@@ -320,6 +345,7 @@ ParseResult<pair<optional<double>,vector<string>>> parseBranch(const std::string
     else if (maybe_length.hard_failure())
         return maybe_length.as_hard_failure();
     
+    // Skip whitespace and record comments
     if (auto maybe_whitespace = parseWhitespace(input, start_pos))
     {
         auto& new_comments = maybe_whitespace.value();

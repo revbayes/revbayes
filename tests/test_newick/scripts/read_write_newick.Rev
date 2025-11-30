@@ -10,5 +10,5 @@ t = readTrees(text="a_b_c;")[1]
 t
 t = readTrees(text="(a:1.0,(b:2.0,c:3.0):4.0);")[1]
 t
-t = readTrees(text="(a: [asdf] 1.0 [qwerty] ,(b:2.0,c:3.0):4.0);")[1]
+t = readTrees(text="( [zxcv] a [asdf] : [asdf] 1.0 [qwerty] , [yuio] (b:2.0,c:3.0):4.0);")[1]
 t
