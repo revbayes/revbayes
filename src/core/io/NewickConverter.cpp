@@ -206,22 +206,44 @@ ParseResult<vector<string>> parseWhitespace(const std::string& input, int start_
 }
 
 
-// Tree -> Subtree ";"
+// Tree -> SPACE<tree> Subtree ";"
 ParseResult<TopologyNode*> parseTree(const std::string& input, int start_pos)
 {
-    // 1. Get the Subtree
-    auto check_subtree = parseSubTree(input,start_pos);
+    TopologyNode* node = nullptr;
+    vector<string> tree_comments;
 
-    // Return error message if we failed to find a subtree.
-    if (not check_subtree) return check_subtree;  
+    // 1. Skip whitespace and record tree_comments
+    if (auto maybe_whitespace = parseWhitespace(input, start_pos))
+    {
+        tree_comments = std::move(maybe_whitespace.value());
+        start_pos = maybe_whitespace.next_pos();
+    }
+    else if (maybe_whitespace.hard_failure())
+        return maybe_whitespace.as_hard_failure();
+    
+    // 2. Get the Subtree
+    if (auto check_subtree = parseSubTree(input,start_pos))
+    {
+        start_pos = check_subtree.next_pos();
+        node = check_subtree.value();
+    }
+    else
+        return check_subtree.as_failure();
 
-    // 2. Check the semicolon
-    auto check_semi = checkChar(input, check_subtree.next_pos(), ';');
+    // 3. Check the semicolon
+    if (auto check_semi = checkChar(input, start_pos, ';'))
+        start_pos = check_semi.next_pos();
+    else
+        return check_semi.as_failure();;
 
-    // Return error message if we failed to find a semicolon.
-    if (not check_semi) return check_semi.as_failure();
+    if (not tree_comments.empty())
+    {
+        // handle tree comments here
+        // [&R] -> rooted
+        // [&U] -> unrooted
+    }
 
-    return ParseSuccess(check_subtree.value(), check_semi.next_pos());
+    return ParseSuccess(node, start_pos);
 }
 
 // subtree -> SPACE [Descendants] SPACE [Name] SPACE [Branch]
