@@ -196,7 +196,7 @@ ParseResult<optional<string>> parseOneWhitespace(const std::string& input, int s
     else if (auto check_char = parseWhiteChar(input, start_pos))
     {
         // If we found a whitespace char, return success with no comment
-        return ParseSuccess<optional<string>>({}, check_comment.next_pos());
+        return ParseSuccess<optional<string>>({}, check_char.next_pos());
     }
     // 3. If no comment and no whitespace character, return null
     else
@@ -235,7 +235,7 @@ ParseResult<TopologyNode*> parseTree(const std::string& input, int start_pos)
     return ParseSuccess(check_subtree.value(), check_semi.next_pos());
 }
 
-// subtree -> [Descendants] [Name] [Length]
+// subtree -> [Descendants] [Name] [Branch]
 ParseResult<TopologyNode*> parseSubTree(const std::string& input, int start_pos)
 {
     auto node = new TopologyNode;
@@ -260,16 +260,20 @@ ParseResult<TopologyNode*> parseSubTree(const std::string& input, int start_pos)
     else if (maybe_name.hard_failure())
         return maybe_name.as_failure();
 
-    // Parse [Length]
-    if (auto maybe_length = parseLength(input, start_pos))
+    // Parse [Branch]
+    if (auto maybe_branch = parseBranch(input, start_pos))
     {
-        auto length = maybe_length.value();
-        start_pos = maybe_length.next_pos();
+        start_pos = maybe_branch.next_pos();
+        auto& [length, comments] = maybe_branch.value();
         if (length)
             node->setBranchLength(*length);
+        if (not comments.empty())
+        {
+            // Add the comments to the branch!
+        }
     }
-    else if (maybe_length.hard_failure())
-        return maybe_length.as_failure();
+    else if (maybe_branch.hard_failure())
+        return maybe_branch.as_failure();
 
     return ParseSuccess(node, start_pos); 
 }
@@ -287,18 +291,45 @@ ParseResult<double> parseDouble(const std::string& input, int start_pos)
         return ParseFail("Failure reading floating point number", start_pos);
 }
 
-// Length -> ":" number | empty
-ParseResult<optional<double>> parseLength(const std::string& input, int start_pos)
+// Length -> ":" SPACE [number] SPACE | empty
+ParseResult<pair<optional<double>,vector<string>>> parseBranch(const std::string& input, int start_pos)
 {
-    auto maybe_colon = checkChar(input, start_pos, ':');
-    if (not maybe_colon)
-        return ParseSuccess<optional<double>>({}, start_pos);
+    optional<double> length;
+    vector<string> comments;
 
-    auto maybe_length = parseDouble(input, maybe_colon.next_pos());
-    if (not maybe_length)
-        return ParseSuccess<optional<double>>({}, maybe_colon.next_pos());
+    // Check for colon
+    if (auto maybe_colon = checkChar(input, start_pos, ':'))
+        start_pos = maybe_colon.next_pos();
+    else
+        return ParseSuccess<pair<optional<double>,vector<string>>>({length, comments}, start_pos);
 
-    return ParseSuccess<optional<double>>(maybe_length.value(), maybe_length.next_pos());
+    // Skip whitespace and record comments
+    if (auto maybe_whitespace = parseWhitespace(input, start_pos))
+    {
+        comments = std::move(maybe_whitespace.value());
+        start_pos = maybe_whitespace.next_pos();
+    }
+    else if (maybe_whitespace.hard_failure())
+        return maybe_whitespace.as_hard_failure();
+    
+    if (auto maybe_length = parseDouble(input, start_pos))
+    {
+        start_pos = maybe_length.next_pos();
+        length = maybe_length.value();
+    }
+    else if (maybe_length.hard_failure())
+        return maybe_length.as_hard_failure();
+    
+    if (auto maybe_whitespace = parseWhitespace(input, start_pos))
+    {
+        auto& new_comments = maybe_whitespace.value();
+        std::move(new_comments.begin(), new_comments.end(), std::back_inserter(comments));
+        start_pos = maybe_whitespace.next_pos();
+    }
+    else if (maybe_whitespace.hard_failure())
+        return maybe_whitespace.as_hard_failure();
+    
+    return ParseSuccess<pair<optional<double>, vector<string>>>({length, comments}, start_pos);
 }
 
 // Descendants -> "(" > Branch ("," > Branch)* > ")"
