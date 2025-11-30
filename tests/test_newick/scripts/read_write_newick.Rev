@@ -8,3 +8,5 @@ t = readTrees(text="'a b(c';")[1]
 t
 t = readTrees(text="a_b_c;")[1]
 t
+t = readTrees(text="(a:1.0,(b:2.0,c:3.0):4.0);")[1]
+t

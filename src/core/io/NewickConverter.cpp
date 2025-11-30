@@ -235,12 +235,12 @@ ParseResult<TopologyNode*> parseTree(const std::string& input, int start_pos)
     return ParseSuccess(check_subtree.value(), check_semi.next_pos());
 }
 
-// subtree -> [Descendants] [Name]
+// subtree -> [Descendants] [Name] [Length]
 ParseResult<TopologyNode*> parseSubTree(const std::string& input, int start_pos)
 {
     auto node = new TopologyNode;
 
-    // Parse Descendants and add children to node
+    // Parse [Descendants]
     if (auto maybe_children = parseDescendants(input, start_pos)) {
         start_pos = maybe_children.next_pos();
         for(auto& child: maybe_children.value())
@@ -252,7 +252,7 @@ ParseResult<TopologyNode*> parseSubTree(const std::string& input, int start_pos)
     else if (maybe_children.hard_failure())
         return maybe_children.as_failure();
     
-    // Read Name
+    // Parse [Name]
     if (auto maybe_name = parseName(input, start_pos)) {
         start_pos = maybe_name.next_pos();
         node -> setName(maybe_name.value());
@@ -260,10 +260,11 @@ ParseResult<TopologyNode*> parseSubTree(const std::string& input, int start_pos)
     else if (maybe_name.hard_failure())
         return maybe_name.as_failure();
 
-    // Read Length
+    // Parse [Length]
     if (auto maybe_length = parseLength(input, start_pos))
     {
         auto length = maybe_length.value();
+        start_pos = maybe_length.next_pos();
         if (length)
             node->setBranchLength(*length);
     }
