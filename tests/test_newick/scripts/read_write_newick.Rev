@@ -1,0 +1,2 @@
+t = readTrees(text="(a,(b,c));")[1]
+t
