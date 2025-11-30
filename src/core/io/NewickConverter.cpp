@@ -250,18 +250,14 @@ ParseResult<TopologyNode*> parseSubTree(const std::string& input, int start_pos)
     }
 }
 
-// Internal -> '(' > BranchSet > ')' [Name]
+
+
+// Internal -> Descendants > [Name]
 ParseResult<TopologyNode*> parseInternal(const std::string& input, int start_pos){
     auto node = new TopologyNode;
 
-    // Read left parenthesis
-    if (auto maybe_lparen = checkChar(input, start_pos, '('))
-        start_pos = maybe_lparen.next_pos();
-    else
-        return maybe_lparen.as_failure();
-
-    // Parse BranchSet and add children to node
-    if (auto maybe_children = parseBranchSet(input, start_pos)) {
+    // Parse Descendants and add children to node
+    if (auto maybe_children = parseDescendants(input, start_pos)) {
         start_pos = maybe_children.next_pos();
         for(auto& child: maybe_children.value())
         {
@@ -270,14 +266,7 @@ ParseResult<TopologyNode*> parseInternal(const std::string& input, int start_pos
         }
     }
     else
-        return maybe_children.as_hard_failure();
-
-    // Read right parenthesis
-    if (auto maybe_rparen = checkChar(input, start_pos, ')')) {
-        start_pos = maybe_rparen.next_pos();
-    }
-    else
-        return maybe_rparen.as_hard_failure();
+        return maybe_children.as_failure();
     
     // Read Name
     if (auto maybe_name = parseName(input, start_pos)) {
@@ -336,13 +325,19 @@ ParseResult<TopologyNode*> parseBranch(const std::string& input, int start_pos)
     return ParseSuccess(node, maybe_length.next_pos());
 }
 
-// BranchSet -> Branch (, Branch)*
-ParseResult<std::vector<TopologyNode*>> parseBranchSet(const std::string& input, int start_pos)
+// Descendants -> "(" > Branch ("," > Branch)* > ")"
+ParseResult<std::vector<TopologyNode*>> parseDescendants(const std::string& input, int start_pos)
 {
+    // Read left parenthesis
+    if (auto maybe_lparen = checkChar(input, start_pos, '('))
+        start_pos = maybe_lparen.next_pos();
+    else
+        return maybe_lparen.as_failure();
+
     vector<TopologyNode*> branches;
     auto maybe_branch = parseBranch(input, start_pos);
     if (not maybe_branch)
-        return maybe_branch.as_failure();
+        return maybe_branch.as_hard_failure();
     branches.push_back(maybe_branch.value());
     start_pos = maybe_branch.next_pos();
 
@@ -351,10 +346,18 @@ ParseResult<std::vector<TopologyNode*>> parseBranchSet(const std::string& input,
         start_pos = maybe_comma.next_pos();
         auto maybe_branch2 = parseBranch(input, start_pos);
         if (not maybe_branch2)
-            return maybe_branch2.as_failure();
+            return maybe_branch2.as_hard_failure();
         branches.push_back(maybe_branch2.value());
         start_pos = maybe_branch2.next_pos();
     }
+
+
+    // Read right parenthesis
+    if (auto maybe_rparen = checkChar(input, start_pos, ')')) {
+        start_pos = maybe_rparen.next_pos();
+    }
+    else
+        return maybe_rparen.as_hard_failure();
 
     return ParseSuccess(branches, start_pos);
 }

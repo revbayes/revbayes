@@ -174,7 +174,7 @@ namespace RevBayesCore {
     ParseResult<TopologyNode*> parseInternal(const std::string& input, int start_pos);
     ParseResult<TopologyNode*> parseLeaf(const std::string& input, int start_pos);
     ParseResult<TopologyNode*> parseBranch(const std::string& input, int start_pos);
-    ParseResult<std::vector<TopologyNode*>> parseBranchSet(const std::string& input, int start_pos);
+    ParseResult<std::vector<TopologyNode*>> parseDescendants(const std::string& input, int start_pos);
     ParseResult<std::string> parseName(const std::string& input, int start_pos);
     ParseResult<char> parseUnquotedChar(const std::string& input, int start_pos);
 }
