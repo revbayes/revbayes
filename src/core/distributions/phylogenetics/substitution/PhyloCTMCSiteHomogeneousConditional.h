@@ -1281,6 +1281,33 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::simulateCondit
 
         }
 
+        // observation error portion
+        if ( child.isTip() && this->using_observation_error )
+        {
+            // get error probability
+            double error_prob = this->observation_error_probability->getValue();
+
+            if ( rng->uniform01() < error_prob )
+            {
+                // error happened, pick a new state based on the error frequencies
+                const Simplex& error_freq = this->observation_error_frequencies->getValue();
+                double u_err = rng->uniform01();
+                size_t observed_state_index = 0;
+
+                while ( error_freq[observed_state_index] < u_err )
+                {
+                    u_err -= error_freq[observed_state_index];
+                    ++observed_state_index;
+                }
+
+                c.setToFirstState();
+                for ( size_t k = 0; k < observed_state_index; ++k )
+                {
+                    ++c;
+                }
+            }
+        }
+
         if (child.isTip())
             charCounts[c.getStateIndex()]++;
         else
