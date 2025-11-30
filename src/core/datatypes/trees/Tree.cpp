@@ -884,7 +884,7 @@ size_t Tree::getNumberOfSampledAncestors( void ) const
 std::string Tree::getPlainNewickRepresentation() const
 {
 
-    return root->computePlainNewick();
+    return root->computePlainNewick() + ";";
 }
 
 
