@@ -338,7 +338,22 @@ double RevBayesCore::NodeRejectionSampleProposal<charType>::doProposal( void )
         }
         else
         {
+            // get log probability of old root state
+            const Simplex& rf = p->getRootFrequencies();
+
+            const std::vector<CharacterEvent*>& oldRootState = p->getHistory(*node).getChildCharacters();
+            size_t oldRootStateIndex = static_cast<CharacterEventDiscrete*>(oldRootState[0])->getState();
+
+            proposedLnProbRatio += log(rf[oldRootStateIndex]);
+
+            // sample new root state
             sampleRootCharacters();
+
+            // get log probability of proposed root state
+            const std::vector<CharacterEvent*>& newRootState = p->getHistory(*node).getChildCharacters();
+            size_t newRootStateIndex = static_cast<CharacterEventDiscrete*>(newRootState[0])->getState();
+
+            proposedLnProbRatio -= log(rf[newRootStateIndex]);
         }
 
         // update 2x child incident paths

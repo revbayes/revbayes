@@ -134,7 +134,7 @@
 #include "Dist_WeightedSample.h"
 
 /* Phylogenetic models (in folder "distributions/phylogenetics/") */
-#include "Dist_PhyloCharacterEvent.h"
+// #include "Dist_PhyloCharacterEvent.h"
 
 /* Character evolution models (in folder "distributions/phylogenetics/character") */
 #include "Dist_CTMC.h"
@@ -315,7 +315,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
         /* Evolutionary processes (in folder "distributions/phylogenetics") */
 
-        AddDistribution< CharacterHistory           >( new Dist_PhyloCharacterEvent()                           );
+//        AddDistribution< CharacterHistory           >( new Dist_PhyloCharacterEvent()                           );
 
         /* Branch rate processes (in folder "distributions/phylogenetics/branchrate") */
 

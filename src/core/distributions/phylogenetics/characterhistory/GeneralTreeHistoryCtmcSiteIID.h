@@ -153,7 +153,8 @@ double RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::computeRootLikelih
     std::vector<double> rf = getRootFrequencies();
     for (size_t i = 0; i < this->num_states; i++)
     {
-
+        std::cout << "rf" << i << "=" << rf[i] << "\n";
+        std::cout << "counts" << i << "=" << counts[i] << "\n";
         lnP += counts[i] * log( rf[i] );
 //        lnP += log( rf[i] );
     }
