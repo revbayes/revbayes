@@ -106,11 +106,11 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
         dist->setSigma( s );
     }
 
-    // set the root states
+    // set the root values
     if (rt == "parameter"){
-        RevBayesCore::TypedDagNode< double >* rs;
-        rs = static_cast<const Real &>( root_state->getRevObject() ).getDagNode();
-        dist->setRootState( rs );
+        RevBayesCore::TypedDagNode< double >* rv;
+        rv = static_cast<const Real &>( root_value->getRevObject() ).getDagNode();
+        dist->setRootValue( rv );
     }
 
     // @TODO: Need some way to check if rootTreatment = "parameter" is specified,
@@ -201,10 +201,10 @@ const MemberRules& Dist_PhyloOrnsteinUhlenbeckStateDependent::getParameterRules(
         sigmaTypes.push_back( ModelVector<RealPos>::getClassTypeSpec() );
         dist_member_rules.push_back( new ArgumentRule( "sigma" , sigmaTypes, "The rate of random drift (per state).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(1.0) ) );
 
-        std::vector<TypeSpec> rootStateTypes;
-        rootStateTypes.push_back( Real::getClassTypeSpec() );
-        Real *defaultRootState = new Real(0.0);
-        dist_member_rules.push_back( new ArgumentRule( "rootState" , rootStateTypes, "The state of the continuous trait at root.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, defaultRootState ) );
+        std::vector<TypeSpec> rootValueTypes;
+        rootValueTypes.push_back( Real::getClassTypeSpec() );
+        Real *defaultRootValue = new Real(0.0);
+        dist_member_rules.push_back( new ArgumentRule( "rootValue" , rootValueTypes, "The value of the continuous trait at root.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, defaultRootValue ) );
 
         std::vector<std::string> rootTreatmentTypes;
         rootTreatmentTypes.push_back( "optimum" );
@@ -289,9 +289,9 @@ void Dist_PhyloOrnsteinUhlenbeckStateDependent::setConstParameter(const std::str
     {
         sigma = var;
     }
-    else if ( name == "rootState" )
+    else if ( name == "rootValue" )
     {
-        root_state = var;
+        root_value = var;
     }
     else if ( name == "nSites" )
     {

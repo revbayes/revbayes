@@ -5,29 +5,15 @@ Phylogenetic state-dependent Ornstein-Uhlenbeck process
 ## description
 Univariate Ornstein-Uhlenbeck process over an augmented phylogeny (i.e., discrete character history)
 ## details
-The phylogenetic state-dependent Ornstein-Uhlenbeck process is an extension toto Hansen's (1997) Ornstein-Uhlenbeck process with state-dependent optima.
-The probability is computed using a pruing algorithm, which is derived from FitzJohn's (2012) pruning algorithm for a phylogenetic state-independent Ornstein-Uhlenbeck process.
-Specifically, `dnPhyloOUSD` uses an augmented tree structure, i.e., the character history with different character states (also referred to as "regimes"; Hansen 1997).
-Shifts in the character state is discrete and does not occur concurrently with speciation events, and can be represented by nodes of degree 2.
-As such, each branch in the augmented tree structure takes exactly one character state.
-Under this process, branches of the same character state share the same OU parameters (alpha, theta, sigma).
-These character states can correspond to the states of an observed discrete character.
+The phylogenetic state-dependent Ornstein-Uhlenbeck process is an extension toto Hansen's (1997) Ornstein-Uhlenbeck process with state-dependent optima. The probability is computed using a pruing algorithm, which is derived from FitzJohn's (2012) pruning algorithm for a phylogenetic state-independent Ornstein-Uhlenbeck process. Specifically, `dnPhyloOUSD` uses an augmented tree structure, i.e., the character history with different character states (also referred to as "regimes"; Hansen 1997). Shifts in the character state is discrete and does not occur concurrently with speciation events, and can be represented by nodes of degree 2. As such, each branch in the augmented tree structure takes exactly one character state. Under this process, branches of the same character state share the same OU parameters (alpha, theta, sigma). These character states can correspond to the states of an observed discrete character.
 
 Applications of this model include:
 
 1. State-dependent evolutionary continuous trait evolution conditionally on discrete character history
-
-In this application, the discrete character history (in `simmap` format) is read (using `readCharacterHistory`) and specified in the `characterHistory` argument.
-The `alpha`, `theta`, and `sigma` arugments represent the state-dependent OU parameters that controls continuous trait evolution in different discrete character states.
-Furthermore, the assumption of the continuous trait value at the root is specified using the `rootTreatment` argument.
-The continuous trait observations are fixed to the tips using `.clamp()`.
+In this application, the discrete character history (in `simmap` format) is read (using `readCharacterHistory`) and specified in the `characterHistory` argument. The `alpha`, `theta`, and `sigma` arugments represent the state-dependent OU parameters that controls continuous trait evolution in different discrete character states. Furthermore, the assumption of the continuous trait value at the root is specified using the `rootTreatment` argument. The continuous trait observations are fixed to the tips using `.clamp()`.
 
 2. Joint inference of discrete character history and state-dependent evolutionary continuous trait evolution
-In this application, the discrete character evolution is modeled using the distribution `dnPhyloCTMCDASiteIID` (see Landis et al. 2013, May and Moore 2020).
-The character history is retrieved from the distribution (using `.characterHistories`) and specified in the `characterHistory` argument.
-The `alpha`, `theta`, and `sigma` arugments represent the state-dependent OU parameters that controls continuous trait evolution in different discrete character states.
-Furthermore, the assumption of the continuous trait value at the root is specified using the `rootTreatment` argument.
-The continuous trait observations are fixed to the tips using `.clamp()`.
+In this application, the discrete character evolution is modeled using the distribution `dnPhyloCTMCDASiteIID` (see Landis et al. 2013, May and Moore 2020). The character history is retrieved from the distribution (using `.characterHistories`) and specified in the `characterHistory` argument. Other parameter specifications are same as above.
 
 ## authors
 Priscilla Lau

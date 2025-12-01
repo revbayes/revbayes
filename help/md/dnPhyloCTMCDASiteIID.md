@@ -3,20 +3,11 @@ dnPhyloCTMCDASiteIID
 ## title
 CTMC Distribution with sampled history and independent and identically distributed sites
 ## description
-Gives the probability distribution of the character state vectors at the leaves
-of a phylogenetic tree, given a phylogenetic continuous-time Markov chain
-model, assuming that each site evolves independently.
+The probability distribution of the character state vectors at the tips of a phylogenetic tree, given a phylogenetic continuous-time Markov chain model where each site evolves independently.
 ## details
-The parameters of a phylogenetic model -- a tree topology with branch lengths,
-a substitution model that describes how observations evolve over the tree, etc.
--- collectively form a distribution called the _phylogenetic continuous-time
-Markov chain_.
-
-In this distribution, the branch history is sampled (through data augmentation), instead of integrated out (as in `dnPhyloCTMCDASiteIID`).
-An instance of character history can therefore be retrieved from the distribution (using `.characterHistories`)
-The probability of observed character state vectors (specified via clamping the
-distribution to a `AbstractHomologousDiscreteCharacterData` object) is computed by summing the probability of the history on each branch.
-The probability of the history on a branch is the product of the probabilities of waiting times between events (or the probability of no event in the final segment) given the current rate of change (see May and Moore 2020).
+The parameters of a phylogenetic model -- a tree topology with branch lengths, a substitution model that describes how observations evolve over the tree, etc. -- collectively form a distribution called the _phylogenetic continuous-time
+Markov chain_. In this distribution, the branch history is sampled (through data augmentation), instead of integrated out (as in `dnPhyloCTMCDASiteIID`). An instance of character history can therefore be retrieved from the distribution (using `.characterHistories`) The probability of observed character state vectors (specified via clamping the
+distribution to a `AbstractHomologousDiscreteCharacterData` object) is computed by summing the probability of the history on each branch. The probability of the history on a branch is the product of the probabilities of waiting times between events (or the probability of no event in the final segment) given the current rate of change (see May and Moore 2020).
 
 ## authors
 Priscilla Lau

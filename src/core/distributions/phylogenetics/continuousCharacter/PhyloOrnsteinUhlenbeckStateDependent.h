@@ -30,7 +30,7 @@ namespace RevBayesCore {
 
         void                                                                setAlpha(const TypedDagNode< double >* a);
         void                                                                setAlpha(const TypedDagNode< RbVector< double > >* a);
-        void                                                                setRootState(const TypedDagNode< double >* s);
+        void                                                                setRootValue(const TypedDagNode< double >* s);
         void                                                                setSigma(const TypedDagNode< double >* s);
         void                                                                setSigma(const TypedDagNode< RbVector< double > >* s);
         void                                                                setTheta(const TypedDagNode< double >* t);
@@ -76,7 +76,7 @@ namespace RevBayesCore {
         std::vector<bool>                                                   dirty_nodes;
 
     private:
-        double                                                              computeRootState( void ) const;
+        double                                                              computeRootValue( void ) const;
         double                                                              computeStateDependentAlpha(size_t idx) const;
         double                                                              computeStateDependentSigma(size_t idx) const;
         double                                                              computeStateDependentTheta(size_t idx) const;
@@ -86,7 +86,7 @@ namespace RevBayesCore {
         ROOT_TREATMENT                                                      root_treatment;
         const TypedDagNode<CharacterHistoryDiscrete>*                       character_histories;
 
-        const TypedDagNode< double >*                                       root_state;
+        const TypedDagNode< double >*                                       root_value;
         const TypedDagNode< double >*                                       homogeneous_alpha;
         const TypedDagNode< double >*                                       homogeneous_sigma;
         const TypedDagNode< double >*                                       homogeneous_theta;

@@ -45,7 +45,7 @@ PhyloOrnsteinUhlenbeckStateDependent::PhyloOrnsteinUhlenbeckStateDependent(const
     character_histories( ch )
 {
     // initialize default parameters
-    root_state                  = new ConstantNode<double>("", new double(0.0) );
+    root_value                  = new ConstantNode<double>("", new double(0.0) );
     homogeneous_alpha           = new ConstantNode<double>("", new double(0.0) );
     homogeneous_sigma           = new ConstantNode<double>("", new double(1.0) );
     homogeneous_theta           = new ConstantNode<double>("", new double(0.0) );
@@ -60,7 +60,7 @@ PhyloOrnsteinUhlenbeckStateDependent::PhyloOrnsteinUhlenbeckStateDependent(const
     addParameter( homogeneous_sigma );
     addParameter( homogeneous_theta );
     addParameter( character_histories );
-    addParameter( root_state );
+    addParameter( root_value );
 
     // now we need to reset the value
     this->redrawValue();
@@ -150,13 +150,13 @@ double PhyloOrnsteinUhlenbeckStateDependent::computeStateDependentTheta(size_t s
 }
 
 
-double PhyloOrnsteinUhlenbeckStateDependent::computeRootState( void ) const
+double PhyloOrnsteinUhlenbeckStateDependent::computeRootValue( void ) const
 {
 
-    // get the root-state parameter
-    double rs = this->root_state->getValue();
+    // get the root-value parameter
+    double rv = this->root_value->getValue();
 
-    return rs;
+    return rv;
 }
 
 
@@ -371,13 +371,13 @@ void PhyloOrnsteinUhlenbeckStateDependent::recursiveComputeLnProbability( const 
                 if ( node.isRoot() == true )
                 {
                     double var_root;
-                    double root_state;
+                    double root_value;
                     size_t last_state_left  = static_cast<CharacterEventDiscrete*>(bh_left.getParentCharacters()[0])->getState();
                     if (root_treatment == OPTIMUM)
                     {
                         double theta = computeStateDependentTheta ( last_state_left );
                         var_root = var_node;
-                        root_state = theta;
+                        root_value = theta;
                     }
                     else if (root_treatment == EQUILIBRIUM)
                     {
@@ -385,19 +385,19 @@ void PhyloOrnsteinUhlenbeckStateDependent::recursiveComputeLnProbability( const 
                         double sigma = computeStateDependentSigma(last_state_left);
                         double alpha = computeStateDependentAlpha(last_state_left);
                         double stationary_variance = sigma * sigma / (2 * alpha);
-                        root_state = theta;
+                        root_value = theta;
                         var_root = var_node + stationary_variance;
                     }
                     else if (root_treatment == PARAMETER)
                     {
-                        root_state = computeRootState();
+                        root_value = computeRootValue();
                         var_root = var_node;
                     }
                     else
                     {
                         throw RbException("Unkown root treatment chosen for probability computation in state-dependent Ornstein-Uhlenbeck process.");
                     }
-                    lnl_node += RbStatistics::Normal::lnPdf( root_state, sqrt(var_root), mu_node[i]);
+                    lnl_node += RbStatistics::Normal::lnPdf( root_value, sqrt(var_root), mu_node[i]);
                 }
                 // sum up the log normalizing factors of the subtrees
                 p_node[i] = lnl_node + p_left[i] + p_right[i];
@@ -459,11 +459,11 @@ void PhyloOrnsteinUhlenbeckStateDependent::redrawValue(void)
     size_t root_index = tau.getRoot().getIndex();
     ContinuousTaxonData &root = taxa[ root_index ];
 
-    std::vector<double> root_state = simulateRootCharacters(num_sites);
+    std::vector<double> root_value = simulateRootCharacters(num_sites);
     for ( size_t i = 0; i < num_sites; ++i )
     {
         // create the character
-        double c = root_state[i];
+        double c = root_value[i];
 
         // add the character to the sequence
         root.addCharacter( c );
@@ -622,18 +622,18 @@ void PhyloOrnsteinUhlenbeckStateDependent::setAlpha(const TypedDagNode<RbVector<
 }
 
 
-void PhyloOrnsteinUhlenbeckStateDependent::setRootState(const TypedDagNode<double> *rs)
+void PhyloOrnsteinUhlenbeckStateDependent::setRootValue(const TypedDagNode<double> *rs)
 {
 
     // remove the old parameter first
-    this->removeParameter( root_state );
-    root_state = NULL;
+    this->removeParameter( root_value );
+    root_value = NULL;
 
     // set the value
-    root_state = rs;
+    root_value = rs;
 
     // add the new parameter
-    this->addParameter( root_state );
+    this->addParameter( root_value );
 
     // redraw the current value
     if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
@@ -928,10 +928,10 @@ std::vector<double> PhyloOrnsteinUhlenbeckStateDependent::simulateRootCharacters
         size_t left_index = left->getIndex();
         const CharacterHistory& left_history = character_histories->getValue();
         const BranchHistory& bh_left = left_history.getHistory(left_index);
-        size_t root_state_index  = static_cast<CharacterEventDiscrete*>(bh_left.getParentCharacters()[0])->getState();
-        theta = computeStateDependentTheta(root_state_index);
-        double sigma = computeStateDependentSigma(root_state_index);
-        double alpha = computeStateDependentAlpha(root_state_index);
+        size_t root_value_index  = static_cast<CharacterEventDiscrete*>(bh_left.getParentCharacters()[0])->getState();
+        theta = computeStateDependentTheta(root_value_index);
+        double sigma = computeStateDependentSigma(root_value_index);
+        double alpha = computeStateDependentAlpha(root_value_index);
         stationary_variance = sigma * sigma / (2 * alpha);
     }
 
@@ -948,7 +948,7 @@ std::vector<double> PhyloOrnsteinUhlenbeckStateDependent::simulateRootCharacters
         }
         else if (root_treatment == PARAMETER)
         {
-            chars[i] = computeRootState();
+            chars[i] = computeRootValue();
         }
         else
         {
@@ -1059,9 +1059,9 @@ void PhyloOrnsteinUhlenbeckStateDependent::touchSpecialization( const DagNode* a
 void PhyloOrnsteinUhlenbeckStateDependent::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
 {
 
-    if (oldP == root_state)
+    if (oldP == root_value)
     {
-        root_state = static_cast<const TypedDagNode< double >* >( newP );
+        root_value = static_cast<const TypedDagNode< double >* >( newP );
     }
 
     if (oldP == homogeneous_alpha)
