@@ -6,7 +6,6 @@
 #
 ################################################################################
 
-# printSeed()
 seed(12345)
 
 N_EFF     <- 10
@@ -15,7 +14,7 @@ ROOT_AGE  <- 2000000
 CODING    <- "variable"
 numSites  <- 100
 fn_tree   <- "data/luita.tre"
-fn_out    <- "test_PoMo_SNP/output/sim_"+CODING+".cf"
+fn_out    <- "test_PoMo_simulator/output/sim_"+CODING+".cf"
 
 
 CONDITION <- CODING == "variable"
