@@ -1,0 +1,18 @@
+#NEXUS
+
+	Begin taxa;
+	Dimensions ntax=7;
+	Taxlabels
+		GrPal
+		ItPie
+		ItSal
+		PoAlf
+		PoMon
+		PoSes
+		SwLa
+		;
+End;
+
+Begin trees;
+tree TREE1 = [&R]((((PoMon:66544.469958,PoSes:66544.469958)[&posterior=1.000000,age_95%_HPD={66229.6,66820.1}]:139339.102360,PoAlf:205883.572318)[&posterior=1.000000,age_95%_HPD={205230,206686}]:1566515.338930,GrPal:1772398.911249)[&posterior=1.000000,age_95%_HPD={1.76546e+06,1.7784e+06}]:86866.770937,((ItPie:112263.614573,SwLa:112263.614573)[&posterior=1.000000,age_95%_HPD={111713,112687}]:689690.618567,ItSal:801954.233140)[&posterior=1.000000,age_95%_HPD={798799,804484}]:1057311.449046)[&posterior=1.000000,age_95%_HPD={1.85384e+06,1.86521e+06}]:0.000000;
+End;

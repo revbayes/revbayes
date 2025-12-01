@@ -1,0 +1,43 @@
+################################################################################
+#
+# RevBayes script: Simulating allele frequencies under a Moran process
+#
+# authors: Wenjie Zhu, Sebastian Hoehna
+#
+################################################################################
+
+# printSeed()
+seed(12345)
+
+N_EFF     <- 10
+MUT_RATE  <- 0.0000000028
+ROOT_AGE  <- 2000000
+CODING    <- "variable"
+numSites  <- 100
+fn_tree   <- "data/luita.tre"
+fn_out    <- "test_PoMo_SNP/output/sim_"+CODING+".cf"
+
+
+CONDITION <- CODING == "variable"
+
+tree = readTrees( fn_tree )[1]
+tree.rescale( ROOT_AGE / tree.rootAge() )
+
+num_nodes = tree.nnodes()
+num_tips  = tree.ntips()
+
+for (i in 1:num_nodes) {
+  pop_sizes[i] <- N_EFF
+}
+gen_time <- 1.0
+mu[1] <- MUT_RATE
+mu[2] <- MUT_RATE
+for (i in 1:num_nodes) {
+  samples[i] <- N_EFF
+}
+root <- N_EFF * 20.0
+
+simulator = AlleleFrequencySimulator(gen_time, moranGenerations=TRUE, mu)
+simulator.dataMatrix(tree, pop_sizes, numSites, samples, root, variable=CONDITION, fn_out)
+
+q()
