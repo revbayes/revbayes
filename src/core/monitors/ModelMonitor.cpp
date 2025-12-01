@@ -29,6 +29,24 @@ ModelMonitor::~ModelMonitor()
 
 
 /**
+ * Add variable to monitor without sorting (we will sort once at the end).
+ * This override avoids the O(n log n) sort after each addition when adding many variables.
+ *
+ * \param[in]   n    DAG node to be added to the monitor.
+ */
+void ModelMonitor::addVariable(DagNode *n)
+{
+    nodes.push_back( n );
+    
+    // add myself to the set of monitors
+    n->addMonitor( this );
+        
+    // tell the node that we have a reference to it (avoids deletion)
+    n->incrementReferenceCount();
+}
+
+
+/**
  * The clone function is a convenience function to create proper copies of inherited objected.
  * E.g. a.clone() will create a clone of the correct type even if 'a' is of derived type 'B'.
  *
@@ -39,7 +57,6 @@ ModelMonitor* ModelMonitor::clone(void) const
     
     return new ModelMonitor(*this);
 }
-
 
 
 /**
@@ -149,6 +166,9 @@ void ModelMonitor::resetDagNodes( void )
                 }
             }
         }
+        
+        // Sort once after adding all variables (instead of sorting after each addition)
+        sortNodesByName(true);
     }
     
 }
@@ -168,8 +188,6 @@ void ModelMonitor::setModel(Model *m)
     
     // reset the DAG nodes that should be monitored
     resetDagNodes();
-    
-    sortNodesByName(true);
 }
 
 
@@ -185,6 +203,5 @@ void ModelMonitor::setStochasticNodesOnly(bool tf)
     
     // reset the DAG nodes that should be monitored
     resetDagNodes();
-    
 }
 
