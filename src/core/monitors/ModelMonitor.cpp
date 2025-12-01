@@ -1,6 +1,7 @@
 #include "ModelMonitor.h"
 
 #include <cstddef>
+#include <map>
 #include <set>
 #include <string>
 #include <vector>
@@ -62,7 +63,9 @@ void ModelMonitor::resetDagNodes( void )
         
         const std::vector<DagNode*> &n = model->getDagNodes();
         
-        // Step 1: collect base names of vector variables
+        // Step 1: collect base names of vector variables, and build a map from a vector's base name to its element variables
+        std::map<std::string, std::vector<DagNode*>> base_name_to_elements;
+        
         for (DagNode* the_node : n)
         {
             // only simple numeric variables can be monitored (i.e. only integers and real numbers)
@@ -76,11 +79,52 @@ void ModelMonitor::resetDagNodes( void )
                 {
                     std::string base_name = name.substr(0, bracket_pos);
                     vector_base_names.insert(base_name);
+                    base_name_to_elements[base_name].push_back(the_node);
                 }
             }
         }
         
-        // Step 2: add variables, including vector elements but not the vectors themselves
+        // Step 2: check if we have all element variables for every vector, and if not, remove those element variables that
+        // we do have and allow the vector itself to be monitored
+        for (auto it = base_name_to_elements.begin(); it != base_name_to_elements.end(); ++it)
+        {
+            const std::string &base_name = it->first;
+            const std::vector<DagNode*> &elements = it->second;
+                    
+            // find the vector node itself
+            DagNode* vector_node = NULL;
+            for (DagNode* the_node : n)
+            {
+                if (the_node->getName() == base_name && !the_node->isElementVariable())
+                {
+                    vector_node = the_node;
+                    break;
+                }
+            }
+                    
+            // if we found the vector node, check if we have all elements
+            if (vector_node != NULL)
+            {
+                size_t vector_size = vector_node->getNumberOfElements();
+                size_t found_elements = elements.size();
+                        
+                // if we don't have all elements, remove the ones we have and monitor the vector itself instead
+                if (found_elements != vector_size)
+                {
+                    // exclude element variables for this base name
+                    for (DagNode* elem_node : elements)
+                    {
+                        exclude.insert( elem_node->getName() );
+                    }
+                    
+                    // remove base name so vector itself can be monitored
+                    vector_base_names.erase(base_name);
+                }
+            }
+        }
+        
+        // Step 3: add variables, including vector elements but not the vectors themselves (unless we made an exception
+        // in the previous step)
         for (DagNode* the_node : n)
         {
             if ( the_node->isSimpleNumeric() && !the_node->isClamped() )
