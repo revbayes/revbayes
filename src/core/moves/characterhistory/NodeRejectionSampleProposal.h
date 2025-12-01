@@ -60,6 +60,7 @@ namespace RevBayesCore {
         void                                                        cleanProposal(void);
 //        virtual double                                              computeLnProposal();
         double                                                      doProposal(void);                                               //!< Perform proposal
+        size_t                                                      getNodeStateIndex(TopologyNode* nd);                            // get the index of the node state of the first character                                    //!< Get the name of the proposal for summary printing
         const std::string&                                          getProposalName(void) const;                                    //!< Get the name of the proposal for summary printing
         double                                                      getProposalTuningParameter(void) const;
         void                                                        printParameterSummary(std::ostream &o, bool name_only) const;                   //!< Print the parameter summary
@@ -338,21 +339,19 @@ double RevBayesCore::NodeRejectionSampleProposal<charType>::doProposal( void )
         }
         else
         {
-            // get log probability of old root state
+            // compute log probability of old root state
             const Simplex& rf = p->getRootFrequencies();
 
-            const std::vector<CharacterEvent*>& oldRootState = p->getHistory(*node).getChildCharacters();
-            size_t oldRootStateIndex = static_cast<CharacterEventDiscrete*>(oldRootState[0])->getState();
-
+            // const std::vector<CharacterEvent*>& oldRootState = p->getHistory(*node).getChildCharacters();
+            // size_t oldRootStateIndex = static_cast<CharacterEventDiscrete*>(oldRootState[0])->getState();
+            size_t oldRootStateIndex = getNodeStateIndex(node);
             proposedLnProbRatio += log(rf[oldRootStateIndex]);
 
             // sample new root state
             sampleRootCharacters();
 
-            // get log probability of proposed root state
-            const std::vector<CharacterEvent*>& newRootState = p->getHistory(*node).getChildCharacters();
-            size_t newRootStateIndex = static_cast<CharacterEventDiscrete*>(newRootState[0])->getState();
-
+            // compute log probability of new root state
+            size_t newRootStateIndex = getNodeStateIndex(node);
             proposedLnProbRatio -= log(rf[newRootStateIndex]);
         }
 
@@ -377,6 +376,16 @@ double RevBayesCore::NodeRejectionSampleProposal<charType>::doProposal( void )
     return proposedLnProbRatio;
 }
 
+template<class charType>
+size_t RevBayesCore::NodeRejectionSampleProposal<charType>::getNodeStateIndex(TopologyNode* node)
+{
+    TreeHistoryCtmc<charType>* p = dynamic_cast< TreeHistoryCtmc<charType>* >(&ctmc->getDistribution());
+
+    const std::vector<CharacterEvent*>& nodeState = p->getHistory(*node).getChildCharacters();
+    size_t stateIndex = static_cast<CharacterEventDiscrete*>(nodeState[0])->getState();
+
+    return stateIndex;
+}
 
 /**
  * Get Proposals' name of object
