@@ -7,6 +7,11 @@
 namespace RevBayesCore {
 
     class RandomNumberGenerator {
+        
+        double                                      last_u;
+        boost::mt19937                              rng;
+        unsigned int seed;
+
 
     public:
 
@@ -17,13 +22,10 @@ namespace RevBayesCore {
         unsigned int                                getSeed(void) const;                                    //!< Get the seed values
         void                                        setSeed(unsigned int s);                                //!< Set the seeds of the RNG
         double                                      uniform01(void);                                        //!< Get a random [0,1) var
-        double                                      exponential(void);                                      //!< Get a random variate from the standard exponential distribution
-
-    private:
-        
-        double                                      last_u;
-        boost::uniform_01<boost::mt19937>           zeroone;
-        unsigned int seed;
+        boost::mt19937&                             getGenerator()
+        {
+            return rng;
+        }
 
     };
 }
