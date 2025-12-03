@@ -22,13 +22,13 @@ Refer to respective tutorials for other usage of the data augmentation-based CTM
 Priscilla Lau
 ## see_also
 ## example
-The following example shows the set-up of character history moves when the CTMC distribution is used together with a trait evolution model (e.g, `dnPhyloOUSD`).
+# The following example shows the set-up of character history moves when the CTMC distribution is used together with a trait evolution model (e.g, `dnPhyloOUSD`).
 
-X ~ dnPhyloCTMCDASiteIID(tree, Q, branchRates=1, type="Standard", nSites=1)
+    X ~ dnPhyloCTMCDASiteIID(tree, Q, branchRates=1, type="Standard", nSites=1)
 
-moves.append( mvCharacterHistory(ctmc=X, qmap_site=Q, graph="root",   proposal="rejection", weight=10.0) )
-moves.append( mvCharacterHistory(ctmc=X, qmap_site=Q, graph="node",   proposal="rejection", weight=10.0) )
-moves.append( mvCharacterHistory(ctmc=X, qmap_site=Q, graph="branch", proposal="rejection", weight=10.0) )
-moves.append( mvCharacterHistory(ctmc=X, qmap_site=Q, graph="tip",    proposal="rejection", weight=10.0) )
+    moves.append( mvCharacterHistory(ctmc=X, qmap_site=Q, graph="root", proposal="rejection", weight=10.0) )
+    moves.append( mvCharacterHistory(ctmc=X, qmap_site=Q, graph="node", proposal="rejection", weight=10.0) )
+    moves.append( mvCharacterHistory(ctmc=X, qmap_site=Q, graph="branch", proposal="rejection", weight=10.0) )
+    moves.append( mvCharacterHistory(ctmc=X, qmap_site=Q, graph="tip", proposal="rejection", weight=10.0) )
 
 ## references

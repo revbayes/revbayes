@@ -5,7 +5,7 @@ Phylogenetic state-dependent Brownian process
 ## description
 Univariate Brownian process over an augmented phylogeny (i.e., discrete character history)
 ## details
-The phylogenetic state-dependent Brownian process is collapsed from the phylogenetic state-dependent Ornstein-Uhlenbeck process, in which `alpha` is always 0. The probability is computed using a pruing algorithm. Specifically, `dnPhyloBMSD` uses an augmented tree structure, i.e., the character history with different character states (also referred to as "regimes"; Hansen 1997). Shifts in the character state is discrete and does not occur concurrently with speciation events, and can be represented by nodes of degree 2. As such, each branch in the augmented tree structure takes exactly one character state. Under this process, branches of the same character state share the same OU parameters (sigma). These character states can correspond to the states of an observed discrete character.
+The phylogenetic state-dependent Brownian process is collapsed from the phylogenetic state-dependent Ornstein-Uhlenbeck process, in which `alpha` is always 0. The probability is computed using a pruing algorithm. Specifically, `dnPhyloBMSD` uses an augmented tree structure, i.e., the character history with different character states (also referred to as "regimes"; Hansen 1997). Shifts in the character state is discrete and does not occur concurrently with speciation events, and can be represented by nodes of degree 2. As such, each branch in the augmented tree structure takes exactly one character state. Under this process, branches of the same character state share the same rate parameter. These character states can correspond to the states of an observed discrete character.
 
 This model is equivalent to the MuSSCRat model (May and Moore 2020) if (1) the continuous trait is univariate, and (2) we assume no background rate variation. The major difference between these two models lies in the probability computation. The MuSSCRat model transforms the branch lengths according to the `sigma` parameter and computes the probability using a state-independent algorithm. The phyloBMSD model does not transform the phylogeny and computes the probability using a state-dependent algorithm.
 
@@ -40,7 +40,7 @@ readCharacterHistory
     }
     
     # basic use of the function
-    Y ~ dnPhyloOUSD(char_hist, sigma=sigma2^0.5)
+    Y ~ dnPhyloBMSD(char_hist, sigma=sigma2^0.5)
 
 
 
