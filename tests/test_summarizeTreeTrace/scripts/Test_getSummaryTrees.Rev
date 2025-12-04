@@ -23,15 +23,15 @@ tree_trace = treeTrace(trees, burnin=0)
 
 # generate the 50% majority-rule consensus tree
 
-ct = consensusTree(tree_trace, file = "output/myposterior.con.tre")
+ct = consensusTree(tree_trace, file = "output/myposterior.con.tre", differentiateMRCAs = true)
 
 # generate the maximum clade credibility (MCC) tree
 
-mcc = mccTree(tree_trace, file = "output/myposterior.mcc.tre")
+mcc = mccTree(tree_trace, file = "output/myposterior.mcc.tre", differentiateMRCAs = true)
 
 # generate the maximum a posteriori (MAP) tree
 
-map = mapTree(tree_trace, file = "output/myposterior.map.tre")
+map = mapTree(tree_trace, file = "output/myposterior.map.tre", differentiateMRCAs = true)
 
 
 q()
