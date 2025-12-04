@@ -29,7 +29,7 @@ namespace RevBayesCore {
      *  BTK
      *
      */
-    class FastBirthDeathShiftProcess : public TypedDistribution<Tree>, public TreeChangeEventListener, public MemberObject< RbVector<long> >, public MemberObject< RbVector<double> > {
+    class FastBirthDeathShiftProcess : public TypedDistribution<Tree>, public TreeChangeEventListener, public MemberObject< RbVector<int64_t> >, public MemberObject< RbVector<double> > {
         
     public:
         FastBirthDeathShiftProcess(const TypedDagNode<double> *root,
@@ -64,8 +64,8 @@ namespace RevBayesCore {
         std::vector<double>                                             getAverageSpeciationRatePerBranch(void) const;
         std::vector<double>                                             getDeltaSpeciationPerBranch(void) const;
         std::vector<double>                                             getDeltaExtinctionPerBranch(void) const;
-        std::vector<long>                                               getNumberOfSpeciationShiftEventsPerBranch(void) const;
-        std::vector<long>                                               getNumberOfExtinctionShiftEventsPerBranch(void) const;
+        std::vector<int64_t>                                            getNumberOfSpeciationShiftEventsPerBranch(void) const;
+        std::vector<int64_t>                                            getNumberOfExtinctionShiftEventsPerBranch(void) const;
         std::vector<double>                                             getTimeInStates(void) const;
         double                                                          getRootAge(void) const;
         virtual void                                                    redrawValue(void);
@@ -99,7 +99,7 @@ namespace RevBayesCore {
         // Parameter management functions. You need to override both if you have additional parameters
         virtual void                                                    swapParameterInternal(const DagNode *oldP, const DagNode *newP);                                    //!< Swap a parameter
         void                                                            executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const;  
-        void                                                            executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<long> &rv) const;     //!< Map the member methods to internal function calls
+        void                                                            executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<int64_t> &rv) const;     //!< Map the member methods to internal function calls
         RevLanguage::RevPtr<RevLanguage::RevVariable>                   executeProcedure(const std::string &name, const std::vector<DagNode *> args, bool &found);
         
         // helper functions
@@ -135,8 +135,8 @@ namespace RevBayesCore {
         std::vector<double>                                             average_extinction;
         std::vector<double>                                             delta_speciation;
         std::vector<double>                                             delta_extinction;
-        std::vector<long>                                               num_speciation_shift_events;
-        std::vector<long>                                               num_extinction_shift_events;
+        std::vector<int64_t>                                               num_speciation_shift_events;
+        std::vector<int64_t>                                               num_extinction_shift_events;
         std::vector<double>                                             time_in_states;
         std::string                                                     simmap;
         

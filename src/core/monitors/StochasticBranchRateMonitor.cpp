@@ -4,6 +4,7 @@
 #include <ostream>
 #include <vector>
 
+#include "FastBirthDeathShiftProcess.h"
 #include "GeneralizedLineageHeterogeneousBirthDeathSamplingProcess.h"
 #include "StochasticNode.h"
 #include "StateDependentSpeciationExtinctionProcess.h"
@@ -67,17 +68,32 @@ void StochasticBranchRateMonitor::monitorVariables(std::uint64_t gen)
 {
     auto& separator = to<SeparatorFormat>(format)->separator;
     
-	std::vector<double> speciation;
-	std::vector<double> extinction;
-	std::vector<double> sampling;
-	std::vector<double> destructive_sampling;
+    std::vector<double> speciation;
+    std::vector<double> extinction;
+    std::vector<double> sampling;
+    std::vector<double> destructive_sampling;
     std::vector<std::int64_t>   n_shifts;
+
+    // other variables for the birth-death-shift monitor 
+    std::vector<double>        delta_speciation;
+    std::vector<double>        delta_extinction;
+    std::vector<std::int64_t>  n_speciation_shifts;
+    std::vector<std::int64_t>  n_extinction_shifts;
+
 
     size_t num_nodes = cdbdp->getValue().getNumberOfNodes();
     std::vector<std::string> character_histories( num_nodes );
 
     StateDependentSpeciationExtinctionProcess *sse = dynamic_cast<StateDependentSpeciationExtinctionProcess*>( &cdbdp->getDistribution() );
-    if ( sse != NULL )
+    GeneralizedLineageHeterogeneousBirthDeathSamplingProcess *glhbdsp = dynamic_cast<GeneralizedLineageHeterogeneousBirthDeathSamplingProcess*>( &cdbdp->getDistribution() );
+    FastBirthDeathShiftProcess *bds = dynamic_cast<FastBirthDeathShiftProcess*>( &cdbdp->getDistribution() );
+
+    bool is_sse = sse != NULL;
+    bool is_glhbdsp = glhbdsp != NULL;
+    bool is_bds = bds != NULL;
+
+
+    if (is_sse)
     {
         // draw stochastic character map
         sse->drawStochasticCharacterMap( character_histories );
@@ -85,44 +101,79 @@ void StochasticBranchRateMonitor::monitorVariables(std::uint64_t gen)
         extinction = sse->getAverageExtinctionRatePerBranch();
         n_shifts   = sse->getNumberOfShiftEventsPerBranch();
     }
-    else
-    {
-    	GeneralizedLineageHeterogeneousBirthDeathSamplingProcess *glhbdsp = dynamic_cast<GeneralizedLineageHeterogeneousBirthDeathSamplingProcess*>( &cdbdp->getDistribution() );
-    	if ( glhbdsp != NULL )
-    	{
-    		glhbdsp->drawStochasticCharacterMap(character_histories, speciation, extinction, sampling, destructive_sampling, n_shifts);
-    	}
 
+    if (is_glhbdsp)
+    {
+        glhbdsp->drawStochasticCharacterMap(character_histories, speciation, extinction, sampling, destructive_sampling, n_shifts);
     }
+
+    if (is_bds)
+    {
+        bds->drawStochasticCharacterMap( character_histories );
+
+        // get the variables we are interested in
+        speciation = bds->getAverageSpeciationRatePerBranch();
+        extinction = bds->getAverageExtinctionRatePerBranch();
+        delta_speciation = bds->getDeltaSpeciationPerBranch();
+        delta_extinction = bds->getDeltaExtinctionPerBranch();
+        n_speciation_shifts = bds->getNumberOfSpeciationShiftEventsPerBranch();
+        n_extinction_shifts = bds->getNumberOfExtinctionShiftEventsPerBranch();
+    }
+
+    bool found_distribution = is_sse | is_glhbdsp | is_bds;
+
+    if (!found_distribution)
+    {
+        throw RbException("Could not cast the correct birth-death distribution (in StochasticBranchRateMonitor)");
+    }
+
     
     // print to monitor file
     for (int i = 0; i < speciation.size(); i++)
     {
         // add a separator before every new element
         out_stream << separator;
-        
         out_stream << speciation[i];
-        
     }
     
     for (int i = 0; i < extinction.size(); i++)
     {
-        // add a separator before every new element
         out_stream << separator;
-        
         out_stream << extinction[i];
-        
     }
-    
-    for (int i = 0; i < n_shifts.size(); i++)
-    {
-        // add a separator before every new element
-        out_stream << separator;
+
+    if (is_sse | is_glhbdsp) {
+     for (int i = 0; i < n_shifts.size(); i++)
+        {
+            out_stream << separator;
+            out_stream << n_shifts[i];
+        }   
+    }else {
+        for (int i = 0; i < delta_speciation.size(); i++)
+        {
+            out_stream << separator;
+            out_stream << delta_speciation[i];
+        }
+
+        for (int i = 0; i < delta_extinction.size(); i++)
+        {
+            out_stream << separator;
+            out_stream << delta_extinction[i];
+        }
+
         
-        out_stream << n_shifts[i];
-        
+        for (int i = 0; i < n_speciation_shifts.size(); i++)
+        {
+            out_stream << separator;
+            out_stream << n_speciation_shifts[i];
+        }
+
+        for (int i = 0; i < n_extinction_shifts.size(); i++)
+        {
+            out_stream << separator;
+            out_stream << n_extinction_shifts[i];
+        }
     }
-    
 }
 
 
@@ -139,11 +190,25 @@ void StochasticBranchRateMonitor::printFileHeader()
     std::vector<double> destructive_sampling;
     std::vector<std::int64_t>   n_shifts;
 
+    // other variables for the birth-death-shift monitor 
+    std::vector<double>        delta_speciation;
+    std::vector<double>        delta_extinction;
+    std::vector<std::int64_t>  n_speciation_shifts;
+    std::vector<std::int64_t>  n_extinction_shifts;
+
     size_t num_nodes = cdbdp->getValue().getNumberOfNodes();
     std::vector<std::string> character_histories( num_nodes );
 
     StateDependentSpeciationExtinctionProcess *sse = dynamic_cast<StateDependentSpeciationExtinctionProcess*>( &cdbdp->getDistribution() );
-    if ( sse != NULL )
+    GeneralizedLineageHeterogeneousBirthDeathSamplingProcess *glhbdsp = dynamic_cast<GeneralizedLineageHeterogeneousBirthDeathSamplingProcess*>( &cdbdp->getDistribution() );
+    FastBirthDeathShiftProcess *bds = dynamic_cast<FastBirthDeathShiftProcess*>( &cdbdp->getDistribution() );
+
+    bool is_sse = sse != NULL;
+    bool is_glhbdsp = glhbdsp != NULL;
+    bool is_bds = bds != NULL;
+
+
+    if (is_sse)
     {
         // draw stochastic character map
         sse->drawStochasticCharacterMap( character_histories );
@@ -151,14 +216,23 @@ void StochasticBranchRateMonitor::printFileHeader()
         extinction = sse->getAverageExtinctionRatePerBranch();
         n_shifts   = sse->getNumberOfShiftEventsPerBranch();
     }
-    else
-    {
-    	GeneralizedLineageHeterogeneousBirthDeathSamplingProcess *glhbdsp = dynamic_cast<GeneralizedLineageHeterogeneousBirthDeathSamplingProcess*>( &cdbdp->getDistribution() );
-    	if ( glhbdsp != NULL )
-    	{
-    		glhbdsp->drawStochasticCharacterMap(character_histories, speciation, extinction, sampling, destructive_sampling, n_shifts);
-    	}
 
+    if (is_glhbdsp)
+    {
+        glhbdsp->drawStochasticCharacterMap(character_histories, speciation, extinction, sampling, destructive_sampling, n_shifts);
+    }
+
+    if (is_bds)
+    {
+        bds->drawStochasticCharacterMap( character_histories );
+
+        // get the variables we are interested in
+        speciation = bds->getAverageSpeciationRatePerBranch();
+        extinction = bds->getAverageExtinctionRatePerBranch();
+        delta_speciation = bds->getDeltaSpeciationPerBranch();
+        delta_extinction = bds->getDeltaExtinctionPerBranch();
+        n_speciation_shifts = bds->getNumberOfSpeciationShiftEventsPerBranch();
+        n_extinction_shifts = bds->getNumberOfExtinctionShiftEventsPerBranch();
     }
     
 //    for (int i = 0; i < time_in_states.size(); i++)
@@ -182,13 +256,51 @@ void StochasticBranchRateMonitor::printFileHeader()
         out_stream << i + 1;
         out_stream << "]";
     }
-    
-    for (int i = 0; i < n_shifts.size(); i++)
+   
+    if (is_sse | is_glhbdsp)
     {
-        out_stream << separator;
-        out_stream << "num_shifts[";
-        out_stream << i + 1;
-        out_stream << "]";
+        for (int i = 0; i < n_shifts.size(); i++)
+        {
+            out_stream << separator;
+            out_stream << "num_shifts[";
+            out_stream << i + 1;
+            out_stream << "]";
+        }
+    }
+    else
+    {
+        for (int i = 0; i < delta_speciation.size(); i++)
+        {
+            out_stream << separator;
+            out_stream << "delta_lambda[";
+            out_stream << i + 1;
+            out_stream << "]";
+        }
+
+        for (int i = 0; i < delta_extinction.size(); i++)
+        {
+            out_stream << separator;
+            out_stream << "delta_mu[";
+            out_stream << i + 1;
+            out_stream << "]";
+        }
+
+        
+        for (int i = 0; i < n_speciation_shifts.size(); i++)
+        {
+            out_stream << separator;
+            out_stream << "num_speciation_shifts[";
+            out_stream << i + 1;
+            out_stream << "]";
+        }
+    
+        for (int i = 0; i < n_extinction_shifts.size(); i++)
+        {
+            out_stream << separator;
+            out_stream << "num_extinction_shifts[";
+            out_stream << i + 1;
+            out_stream << "]";
+        }
     }
     
 }

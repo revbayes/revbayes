@@ -84,8 +84,8 @@ FastBirthDeathShiftProcess::FastBirthDeathShiftProcess(const TypedDagNode<double
     sample_character_history( false ),
     average_speciation( std::vector<double>(5, 0.0) ),
     average_extinction( std::vector<double>(5, 0.0) ),
-    num_speciation_shift_events( std::vector<long>(5, 0.0) ),
-    num_extinction_shift_events( std::vector<long>(5, 0.0) ),
+    num_speciation_shift_events( std::vector<int64_t>(5, 0.0) ),
+    num_extinction_shift_events( std::vector<int64_t>(5, 0.0) ),
     time_in_states( std::vector<double>(num_speciation_classes*num_extinction_classes, 0.0) ),    
     simmap( "" ),
     process_age( age ),
@@ -484,13 +484,13 @@ void FastBirthDeathShiftProcess::drawStochasticCharacterMap(std::vector<std::str
         // get root frequencies
         const RbVector<double> &freqs = getRootFrequencies();
         
-        //std::map<std::vector<unsigned>, double> sample_probs;
+        //std::map<std::vector<int64_t>, double> sample_probs;
         std::vector<double> sample_probs(num_states, 0);
         double sample_probs_sum = 0.0;
 
 
-        size_t left_category;
-        size_t right_category;
+        size_t left_category = 0;
+        size_t right_category = 0;
 
         std::map<std::vector<unsigned>, double>::iterator it;
         
@@ -521,7 +521,6 @@ void FastBirthDeathShiftProcess::drawStochasticCharacterMap(std::vector<std::str
                 break;
             }
         }
-
 
     
         // save the character history for the root
@@ -580,24 +579,6 @@ bool FastBirthDeathShiftProcess::recursivelyDrawStochasticCharacterMap(
         u[i] = node_likelihood[i]; // E
         u[i + num_states] = node_likelihood[i + num_states]; // D
     }
-
-    /*
-    std::cout << "E_old: [";
-    std::cout << u[0];
-    for (size_t i = 1; i < num_states; i++){
-        std::cout << "," << u[i];
-    }
-    std::cout << "]" << std::endl;
-
-    std::cout << "D_old: [";
-    std::cout << u[num_states];
-    for (size_t i = 1; i < num_states; i++){
-        std::cout << "," << u[i+num_states];
-    }
-    std::cout << "]" << std::endl;
-    */
-
-    //throw std::invalid_argument( "received negative value" );
 
     // The final third of the vector represents the
     // posterior probability of rate category j given the upstream tree
@@ -1198,7 +1179,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> FastBirthDeathShiftProcess::execut
 }
 
 
-void FastBirthDeathShiftProcess::executeMethod(const std::string &name, const std::vector<const DagNode *> &args, RbVector<long> &rv) const
+void FastBirthDeathShiftProcess::executeMethod(const std::string &name, const std::vector<const DagNode *> &args, RbVector<int64_t> &rv) const
 {
    
     if ( name == "numberSpeciationShiftEvents" )
@@ -1295,12 +1276,12 @@ std::vector<double> FastBirthDeathShiftProcess::getDeltaExtinctionPerBranch( voi
 }
 
 
-std::vector<long> FastBirthDeathShiftProcess::getNumberOfExtinctionShiftEventsPerBranch( void ) const
+std::vector<int64_t> FastBirthDeathShiftProcess::getNumberOfExtinctionShiftEventsPerBranch( void ) const
 {
     return num_extinction_shift_events;
 }
 
-std::vector<long> FastBirthDeathShiftProcess::getNumberOfSpeciationShiftEventsPerBranch( void ) const
+std::vector<int64_t> FastBirthDeathShiftProcess::getNumberOfSpeciationShiftEventsPerBranch( void ) const
 {
     return num_speciation_shift_events;
 }
@@ -2806,7 +2787,7 @@ void FastBirthDeathShiftProcess::resizeVectors(size_t num_nodes)
     average_extinction = std::vector<double>(num_nodes, 0.0);
     delta_speciation = std::vector<double>(num_nodes, 0.0);
     delta_extinction = std::vector<double>(num_nodes, 0.0);
-    num_speciation_shift_events = std::vector<long>(num_nodes, 0.0);
-    num_extinction_shift_events = std::vector<long>(num_nodes, 0.0);
+    num_speciation_shift_events = std::vector<int64_t>(num_nodes, 0.0);
+    num_extinction_shift_events = std::vector<int64_t>(num_nodes, 0.0);
     time_in_states = std::vector<double>(num_states, 0.0);    
 }

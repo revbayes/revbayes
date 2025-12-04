@@ -68,14 +68,14 @@ void BirthDeathShiftMonitor::monitorVariables(unsigned long gen)
 {
     auto& separator = to<SeparatorFormat>(format)->separator;
     
-	std::vector<double> speciation;
-	std::vector<double> extinction;
-	std::vector<double> delta_speciation;
-	std::vector<double> delta_extinction;
-	std::vector<double> sampling;
-	std::vector<double> destructive_sampling;
-    std::vector<long>   n_speciation_shifts;
-    std::vector<long>   n_extinction_shifts;
+    std::vector<double> speciation;
+    std::vector<double> extinction;
+    std::vector<double> delta_speciation;
+    std::vector<double> delta_extinction;
+    std::vector<double> sampling;
+    std::vector<double> destructive_sampling;
+    std::vector<int64_t>   n_speciation_shifts;
+    std::vector<int64_t>   n_extinction_shifts;
 
     size_t num_nodes = bdsp->getValue().getNumberOfNodes();
     std::vector<std::string> character_histories( num_nodes );
@@ -91,8 +91,8 @@ void BirthDeathShiftMonitor::monitorVariables(unsigned long gen)
     extinction = bds->getAverageExtinctionRatePerBranch();
     delta_speciation = bds->getDeltaSpeciationPerBranch();
     delta_extinction = bds->getDeltaExtinctionPerBranch();
-    n_speciation_shifts   = bds->getNumberOfSpeciationShiftEventsPerBranch();
-    n_extinction_shifts   = bds->getNumberOfExtinctionShiftEventsPerBranch();
+    n_speciation_shifts = bds->getNumberOfSpeciationShiftEventsPerBranch();
+    n_extinction_shifts = bds->getNumberOfExtinctionShiftEventsPerBranch();
     
     // print to monitor file
     for (int i = 0; i < speciation.size(); i++)
@@ -155,8 +155,8 @@ void BirthDeathShiftMonitor::printFileHeader()
     std::vector<double> delta_extinction;
     std::vector<double> sampling;
     std::vector<double> destructive_sampling;
-    std::vector<long>   n_speciation_shifts;
-    std::vector<long>   n_extinction_shifts;
+    std::vector<int64_t>   n_speciation_shifts;
+    std::vector<int64_t>   n_extinction_shifts;
 
     size_t num_nodes = bdsp->getValue().getNumberOfNodes();
     std::vector<std::string> character_histories( num_nodes );
@@ -168,8 +168,8 @@ void BirthDeathShiftMonitor::printFileHeader()
     extinction = bds->getAverageExtinctionRatePerBranch();
     delta_speciation = bds->getDeltaSpeciationPerBranch();
     delta_extinction = bds->getDeltaExtinctionPerBranch();
-    n_speciation_shifts   = bds->getNumberOfSpeciationShiftEventsPerBranch();
-    n_extinction_shifts   = bds->getNumberOfExtinctionShiftEventsPerBranch();
+    n_speciation_shifts = bds->getNumberOfSpeciationShiftEventsPerBranch();
+    n_extinction_shifts = bds->getNumberOfExtinctionShiftEventsPerBranch();
         
     for (int i = 0; i < speciation.size(); i++)
     {
