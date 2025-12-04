@@ -440,18 +440,18 @@ mymcmc.run(generations=200000))");
 	help_strings[string("dnBeta")][string("details")] = string(R"(The Beta distribution takes two parameters, alpha and beta. It is equivalent to the uniform when alpha = beta = 1. 
 
 The probability density function is f(x) = x^(alpha - 1) * (1 - x)^(beta - 1) * Gamma(alpha + beta) / (Gamma(alpha) * Gamma(beta)), where Gamma is the gamma function.)");
-	help_strings[string("dnBeta")][string("example")] = string(R"(p ~ dnBeta(1.0,1.0)
+	help_strings[string("dnBeta")][string("example")] = string(R"(p ~ dnBeta(1.0, 1.0)
 x ~ dnBernoulli(p)
 x.clamp(1)
 moves[1] = mvSlide(p, delta=0.1, weight=1.0)
-monitors[1] = screenmonitor(printgen=1000, separator = "        ", x)
+monitors[1] = mnScreen(p, printgen=1000)
 mymodel = model(p)
 mymcmc = mcmc(mymodel, monitors, moves)
-mymcmc.burnin(generations=20000,tuningInterval=100)
+mymcmc.burnin(generations=20000, tuningInterval=100)
 mymcmc.run(generations=200000))");
 	help_strings[string("dnBeta")][string("name")] = string(R"(dnBeta)");
 	help_arrays[string("dnBeta")][string("see_also")].push_back(string(R"(dnDirichlet)"));
-	help_arrays[string("dnBeta")][string("see_also")].push_back(string(R"(gamma)"));
+	help_arrays[string("dnBeta")][string("see_also")].push_back(string(R"(dnGamma)"));
 	help_strings[string("dnBeta")][string("title")] = string(R"(Beta Distribution)");
 	help_arrays[string("dnBimodalLognormal")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("dnBimodalLognormal")][string("description")] = string(R"(The Bimodal Lognormal distribution unites two separate lognormal distributions.)");
