@@ -25,7 +25,7 @@ Core::PseudoData<double>* PseudoDataBetweenFunc(double a, double b, double lambd
 {
     Core::PseudoData<double>::func_t interval_func = [a,b,lambda](const double& x)
         {
-            if (x > a and x < b)
+            if (x >= a and x <= b)
                 return 0.0;
             else
             {
