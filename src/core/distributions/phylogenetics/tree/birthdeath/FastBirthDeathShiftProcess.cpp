@@ -21,7 +21,6 @@
 #include "StochasticNode.h"
 #include "TopologyNode.h"
 #include "AbstractDiscreteTaxonData.h"
-#include "AbstractTaxonData.h"
 #include "DiscreteCharacterState.h"
 #include "DiscreteTaxonData.h"
 #include "NaturalNumbersState.h"
@@ -204,7 +203,6 @@ std::vector<double> FastBirthDeathShiftProcess::calculateTotalAnageneticRatePerS
  */
 double FastBirthDeathShiftProcess::computeLnProbability( void )
 {
-    
     // check that the ages are in correct chronological order
     // i.e., no child is older than its parent
     const std::vector<TopologyNode*>& nodes = value->getNodes();
@@ -235,7 +233,6 @@ double FastBirthDeathShiftProcess::computeLnProbability( void )
         const TopologyNode &the_node = *(*it);
         if ( the_node.isSampledAncestorTip() == true )
         {
-            
             if ( the_node.isFossil() == false )
             {
                 return RbConstants::Double::neginf;
@@ -369,7 +366,6 @@ void FastBirthDeathShiftProcess::computeNodeProbability(const RevBayesCore::Topo
 
             // propagate the scaling factor (not re-scaling yet)
             scaling_factors[node_index][active_likelihood[node_index]] = scaling_factors[left_index][active_likelihood[left_index]] + scaling_factors[right_index][active_likelihood[right_index]];
-            
         }
       
         // find the time span for the ODE
@@ -522,12 +518,9 @@ void FastBirthDeathShiftProcess::drawStochasticCharacterMap(std::vector<std::str
             }
         }
 
-    
         // save the character history for the root
         std::string simmap_string = "{" + StringUtilities::toString(left_category) + "," + StringUtilities::toString( root.getBranchLength() ) + "}";
         character_histories[node_index] = simmap_string;
-        
-
 
         // recurse towards tips
         bool success_l = recursivelyDrawStochasticCharacterMap(left, left_category, character_histories, set_amb_char_data);
@@ -609,7 +602,6 @@ bool FastBirthDeathShiftProcess::recursivelyDrawStochasticCharacterMap(
     size_t num_episodes = 10;
     double delta_t = branch_length / num_episodes; // note dt is a negative number
     double t = start_time;
-
 
     // loop over every time slice, stopping before the last time slice
     for (size_t episode = 0; episode < num_episodes; episode++){
@@ -714,12 +706,10 @@ bool FastBirthDeathShiftProcess::recursivelyDrawStochasticCharacterMap(
             // check change in mu and lambda independently
 
             if (abs(mu[new_state] - mu[current_state]) > 0){
-                //std::cout << "simulated rate shift event (speciation)" << std::endl;
                 ++num_extinction_shift_events[node_index];
             }
 
             if (abs(lambda[new_state] - lambda[current_state]) > 0){
-                //std::cout << "simulated rate shift event (extinction)" << std::endl;
                 ++num_speciation_shift_events[node_index];
             }
 
@@ -1125,56 +1115,7 @@ void FastBirthDeathShiftProcess::recursivelyFlagNodeDirty( const RevBayesCore::T
 
 RevLanguage::RevPtr<RevLanguage::RevVariable> FastBirthDeathShiftProcess::executeProcedure(const std::string &name, const std::vector<DagNode *> args, bool &found)
 {    
-    if (name == "clampCharData")
-    {
-        found = true;
-        
-        const AbstractHomologousDiscreteCharacterData& v = static_cast<const TypedDagNode<AbstractHomologousDiscreteCharacterData > *>( args[0] )->getValue();
-    
-        // check if the tip names match
-        bool match = true;
-        std::vector<string> tips = value->getTipNames();
-        for (size_t i = 0; i < tips.size(); i++)
-        {
-            found = false;
-            for (size_t j = 0; j < v.getNumberOfTaxa(); j++)
-            {
-                if (tips[i] == v[j].getTaxonName()) 
-                {
-                    found = true;
-                    break;
-                }
-            }
-            if (found == false)
-            {
-                match = false;
-                break;
-            }
-        }
-        if (match == false)
-        {
-            throw RbException("To clamp a character data object all taxa present in the tree must be present in the character data.");
-        }
-        
-        static_cast<TreeDiscreteCharacterData*>(this->value)->setCharacterData( v.clone() );
-   
-        // Sebastian (20210519): We should not waste computations here if we actually don't need it. Try to do lazy evaluations.
-        // I keep this here if we find out later that these were indeed.
-        // simulate character history over the tree conditioned on the new tip data
-//        size_t num_nodes = value->getNumberOfNodes();
-//        std::vector<std::string> character_histories(num_nodes);
-//        drawStochasticCharacterMap(character_histories);
-//        static_cast<TreeDiscreteCharacterData*>(this->value)->setTimeInStates(time_in_states);
 
-        return NULL;
-    }
-    
-    if (name == "getCharData") 
-    { 
-        found = true;
-        RevLanguage::AbstractHomologousDiscreteCharacterData *tip_states = new RevLanguage::AbstractHomologousDiscreteCharacterData( getCharacterData() );
-        return new RevLanguage::RevVariable( tip_states );
-    }
     return TypedDistribution<Tree>::executeProcedure( name, args, found );
 }
 
@@ -2530,7 +2471,6 @@ bool FastBirthDeathShiftProcess::simulateTree( size_t attempts )
         {
             average_speciation[i] = branch_total_speciation/sim_tree->getNodes()[i]->getBranchLength();
             average_extinction[i] = branch_total_extinction/sim_tree->getNodes()[i]->getBranchLength();
-            // num_shift_events[i]   = sim_tree->getNodes()[i]->getNumberOfShiftEvents(); // this needs to be fixed
         }
     }    
     

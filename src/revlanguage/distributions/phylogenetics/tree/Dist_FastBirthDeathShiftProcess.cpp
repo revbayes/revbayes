@@ -210,13 +210,6 @@ MethodTable Dist_FastBirthDeathShiftProcess::getDistributionMethods( void ) cons
 {
     MethodTable methods = TypedDistribution<TimeTree>::getDistributionMethods();
     
-    ArgumentRules* clampCharDataArgRules = new ArgumentRules();
-    clampCharDataArgRules->push_back( new ArgumentRule( "value", AbstractHomologousDiscreteCharacterData::getClassTypeSpec(), "The observed value.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-    methods.addFunction( new MemberProcedure( "clampCharData", RlUtils::Void, clampCharDataArgRules ) );
-   
-    ArgumentRules* getCharDataArgRules = new ArgumentRules();
-    methods.addFunction( new MemberProcedure( "getCharData", AbstractHomologousDiscreteCharacterData::getClassTypeSpec(), getCharDataArgRules ) ); 
-    
     ArgumentRules* avgSpeciationArgRules = new ArgumentRules();
     methods.addFunction( new DistributionMemberFunction<Dist_FastBirthDeathShiftProcess, ModelVector<RealPos> >( "averageSpeciationRate", variable, avgSpeciationArgRules   ) );
 

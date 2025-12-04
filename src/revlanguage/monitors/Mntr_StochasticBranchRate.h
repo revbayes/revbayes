@@ -35,6 +35,7 @@ class TypeSpec;
         
         RevPtr<const RevVariable>                       cdbdp;
         RevPtr<const RevVariable>                       glhbdsp;
+        RevPtr<const RevVariable>                       bds;
 
     };
     

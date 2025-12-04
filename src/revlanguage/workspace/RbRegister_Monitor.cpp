@@ -48,7 +48,6 @@
 #include "Mntr_SiteMixtureAllocation.h"
 #include "Mntr_StochasticCharacterMapping.h"
 #include "Mntr_StochasticBranchRate.h"
-#include "Mntr_BirthDeathShift.h"
 #include "Mntr_StochasticBranchStateTimes.h"
 #include "Mntr_StochasticVariable.h"
 #include "Mntr_CharacterHistoryNewickFile.h"
@@ -66,7 +65,6 @@ void RevLanguage::Workspace::initializeMonitorGlobalWorkspace(void)
         ////////////////////////////////////////////////////////////////////////////////
 
 		addType( new Mntr_AncestralState()                       );
-        addType( new Mntr_BirthDeathShift()                      );
 		addType( new Mntr_HomeologPhase()                        );
         addType( new Mntr_JointConditionalAncestralState()       );
         addType( new Mntr_StochasticCharacterMapping()           );

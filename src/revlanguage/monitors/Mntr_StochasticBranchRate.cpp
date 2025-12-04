@@ -4,6 +4,7 @@
 #include <string>
 
 #include "ArgumentRule.h"
+#include "FastBirthDeathShiftProcess.h"
 #include "IntegerPos.h"
 #include "RevObject.h"
 #include "RlTimeTree.h"
@@ -66,6 +67,19 @@ void Mntr_StochasticBranchRate::constructInternalObject( void )
         sse_process->setSampleCharacterHistory( true );
 
         m = new RevBayesCore::StochasticBranchRateMonitor( cdbdp_sn, (std::uint64_t)print_gen, file_name, sep );
+        m->setAppend( app );
+        m->setPrintVersion( wv );
+    }
+    if ( static_cast<const RevLanguage::Tree&>( bds->getRevObject() ).isModelObject() )
+    {
+        RevBayesCore::TypedDagNode<RevBayesCore::Tree>* bds_tdn = static_cast<const RevLanguage::Tree&>( bds->getRevObject() ).getDagNode();
+        RevBayesCore::StochasticNode<RevBayesCore::Tree>* bds_sn  = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree>* >( bds_tdn );
+
+        RevBayesCore::FastBirthDeathShiftProcess *bds_process = NULL;
+        bds_process = dynamic_cast<RevBayesCore::FastBirthDeathShiftProcess*>( &bds_sn->getDistribution() );
+        bds_process->setSampleCharacterHistory( true );
+
+        m = new RevBayesCore::StochasticBranchRateMonitor( bds_sn, (std::uint64_t)print_gen, file_name, sep );
         m->setAppend( app );
         m->setPrintVersion( wv );
     }
@@ -139,6 +153,7 @@ const MemberRules& Mntr_StochasticBranchRate::getParameterRules(void) const
     {
         monitor_rules.push_back( new ArgumentRule("cdbdp"          , TimeTree::getClassTypeSpec(),  "The character dependent birth-death process to monitor.",                      ArgumentRule::BY_REFERENCE, ArgumentRule::ANY, NULL ) );
         monitor_rules.push_back( new ArgumentRule("glhbdsp"        , TimeTree::getClassTypeSpec(),  "The lineage-heterogeneous birth-death process to monitor.",                    ArgumentRule::BY_REFERENCE, ArgumentRule::ANY, NULL ) );
+        monitor_rules.push_back( new ArgumentRule("bds"            , TimeTree::getClassTypeSpec(),  "The birth-death-shift process to monitor.",                                    ArgumentRule::BY_REFERENCE, ArgumentRule::ANY, NULL ) );
         // add the rules from the base class
         const MemberRules &parentRules = FileMonitor::getParameterRules();
         monitor_rules.insert(monitor_rules.end(), parentRules.begin(), parentRules.end());
@@ -182,6 +197,10 @@ void Mntr_StochasticBranchRate::setConstParameter(const std::string& name, const
     else if ( name == "glhbdsp" )
     {
         glhbdsp = var;
+    }
+    else if ( name == "bds" )
+    {
+        bds = var;
     }
     else
     {

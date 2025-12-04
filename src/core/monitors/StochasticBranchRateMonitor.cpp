@@ -207,7 +207,6 @@ void StochasticBranchRateMonitor::printFileHeader()
     bool is_glhbdsp = glhbdsp != NULL;
     bool is_bds = bds != NULL;
 
-
     if (is_sse)
     {
         // draw stochastic character map
