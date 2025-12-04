@@ -362,6 +362,8 @@ void Monitor::setMcmc(Mcmc *m)
 
 /**
  * Sort the nodes by name so that the order is guaranteed of replicated runs.
+ *
+ * @param natural should we sort digits numerically ("x2" goes before "x10") or lexicographically ("x10" goes before "x2")?
  */
 void Monitor::sortNodesByName( bool natural )
 {
