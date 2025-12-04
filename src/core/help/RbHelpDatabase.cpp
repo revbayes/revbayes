@@ -5061,7 +5061,7 @@ for specifying how to separate values in the RevObject (default is "").)");
 # define RevObject to write
     x <- matrix([[1, 1],[1, 1]])
 # write to CSV file
-    write(x, "/path/to/file/filenmae.csv", false, ","))");
+    write(x, "/path/to/file/filename.csv", false, ","))");
 	help_strings[string("write")][string("name")] = string(R"(write)");
 	help_arrays[string("write")][string("see_also")].push_back(string(R"(writeDelimitedCharacterData)"));
 	help_arrays[string("write")][string("see_also")].push_back(string(R"(writeFasta)"));

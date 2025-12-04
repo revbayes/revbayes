@@ -2786,7 +2786,7 @@ void FastBirthDeathShiftProcess::updateQmatrix(){
 
         }
     }
-    for (size_t i; i < num_states; i++){
+    for (size_t i = 0; i < num_states; i++){
         Qmatrix(i,i) = -(a+b);
     }
 } 
