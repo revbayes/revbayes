@@ -54,7 +54,7 @@ namespace RevLanguage {
         std::string                 getGuiInfo(void) override { return ""; }
 
 
-        RevLanguage::RevPtr<RevLanguage::RevVariable> executeMethod(std::string const &name, const std::vector<Argument> &args, bool &found)
+        RevLanguage::RevPtr<RevLanguage::RevVariable> executeMethod(std::string const &name, const std::vector<Argument> &args, bool &found) override
         {
             if (name == "lnLikelihood")
             {

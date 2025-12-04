@@ -15,7 +15,7 @@ namespace RevLanguage
     public:
         Dist_Pseudo() {}
 
-        Dist_Pseudo<T>* clone() const
+        Dist_Pseudo<T>* clone() const override
         {
             return new Dist_Pseudo<T>(*this);
         }
@@ -37,7 +37,7 @@ namespace RevLanguage
         }
 
         //!< Get the type spec of the instance
-        const TypeSpec&                                 getTypeSpec(void) const
+        const TypeSpec&                                 getTypeSpec(void) const override
         {
             static TypeSpec ts = getClassTypeSpec();
 
@@ -52,12 +52,12 @@ namespace RevLanguage
          * \return Rev name of constructor function.
          */
         //!< Get the Rev-name for this distribution.
-        std::string                                     getDistributionFunctionName(void) const
+        std::string                                     getDistributionFunctionName(void) const override
         {
             return "Pseudo";
         }
 
-        const MemberRules&                              getParameterRules(void) const;
+        const MemberRules&                              getParameterRules(void) const override;
 
 
         // Distribution functions you have to override
@@ -65,7 +65,7 @@ namespace RevLanguage
 
     protected:
 
-        void                                            setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);       //!< Set member variable
+        void                                            setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var) override;   //!< Set member variable
 
     private:
         RevPtr<const RevVariable> parameter;
