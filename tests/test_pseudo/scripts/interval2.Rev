@@ -1,4 +1,4 @@
-seed(1)
+seed(152)
 
 t ~ dnNormal(0,10)
 
