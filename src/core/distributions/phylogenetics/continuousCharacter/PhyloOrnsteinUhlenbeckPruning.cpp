@@ -318,7 +318,7 @@ void PhyloOrnsteinUhlenbeckPruning::recursiveComputeLnProbability( const Topolog
 
                     mu_node[i] = mean_right;
                     v_node[i] = var_right;
-                    p_node[i] = p_right[i] + log_nf_right;
+                    p_node[i] = log_nf_right;
 
                 }
                 else if ( use_missing_data == true && missing_data[left_index][i] == false && missing_data[right_index][i] == true )
@@ -333,7 +333,7 @@ void PhyloOrnsteinUhlenbeckPruning::recursiveComputeLnProbability( const Topolog
 
                     mu_node[i] = mean_left;
                     v_node[i] = var_left;
-                    p_node[i] = p_left[i] + log_nf_left;
+                    p_node[i] = log_nf_left;
                 }
                 else
                 {
@@ -373,7 +373,7 @@ void PhyloOrnsteinUhlenbeckPruning::recursiveComputeLnProbability( const Topolog
                     double b = 0.5 * log( 2*RbConstants::PI*(var_left+var_right) );
                     double log_norm_factor = log_nf_left + log_nf_right + a - b;
                     double lnl_node = log_norm_factor;
-                    p_node[i] = lnl_node + p_left[i] + p_right[i];
+                    p_node[i] = lnl_node; //+ p_left[i] + p_right[i];
 
                     
                 } // end-if we had missing states for substrees
