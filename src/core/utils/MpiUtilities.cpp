@@ -72,19 +72,8 @@ void RevBayesCore::MpiUtilities::DebugMsg(const std::string& s, int x) {
     MPI_Comm_rank(MPI_COMM_WORLD, &pid);
     std::cout << pid << "   before: " << ss.str() << "\n";
     std::cout.flush();
-
-    MPI_Barrier(MPI_COMM_WORLD);
-
-    using namespace std::this_thread;     // sleep_for, sleep_until
-    using namespace std::chrono_literals; // ns, us, ms, s, h, etc.
-    using std::chrono::system_clock;
-
-    sleep_for(1s);
-
     MPI_Barrier(MPI_COMM_WORLD);
     std::cout << pid << "   after:  " << ss.str() << "\n";
-
-    sleep_for(1s);
 #endif
 #endif
 }
