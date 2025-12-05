@@ -3,7 +3,8 @@ readCharacterHistory
 ## title
 Function to read in character histories
 ## description
-Reads character histories (in `simmap` format) from a file and saves them in one vector object. 
+Reads character histories (in `simmap` format) from a file and saves them in
+one vector object. 
 ## details
 A file name must be provided as argument.
 

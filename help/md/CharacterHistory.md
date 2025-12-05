@@ -3,7 +3,8 @@ CharacterHistory
 ## title
 Discrete character history
 ## description
-Stores a discrete character history, usually produced by reading in a file in `simmap` format, or retrieving from a `dnPhyloCTMCDASiteIID` distribution.
+Stores a discrete character history, usually produced by reading in a file in
+`simmap` format, or retrieving from a `dnPhyloCTMCDASiteIID` distribution.
 ## details
 Individual character histories can be accessed as follows:
 
