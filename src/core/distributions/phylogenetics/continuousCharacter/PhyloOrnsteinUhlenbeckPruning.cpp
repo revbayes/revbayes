@@ -32,7 +32,7 @@ using namespace RevBayesCore;
 PhyloOrnsteinUhlenbeckPruning::PhyloOrnsteinUhlenbeckPruning(const TypedDagNode<Tree> *t, size_t ns) : AbstractPhyloContinuousCharacterProcess( t, ns ),
     partial_likelihoods( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
     means( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
-    variances_per_site( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
+    variances( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
     active_likelihood( std::vector<size_t>(this->num_nodes, 0) ),
     changed_nodes( std::vector<bool>(this->num_nodes, false) ),
     dirty_nodes( std::vector<bool>(this->num_nodes, true) )
@@ -259,7 +259,7 @@ void PhyloOrnsteinUhlenbeckPruning::recursiveComputeLnProbability( const Topolog
         dirty_nodes[node_index] = false;
 
         std::vector<double> &mu_node            = this->means[this->active_likelihood[node_index]][node_index];
-        std::vector<double> &v_node             = this->variances_per_site[this->active_likelihood[node_index]][node_index];
+        std::vector<double> &v_node             = this->variances[this->active_likelihood[node_index]][node_index];
         std::vector<double> &p_node             = this->partial_likelihoods[this->active_likelihood[node_index]][node_index];
 
         // get the number of children
@@ -282,8 +282,8 @@ void PhyloOrnsteinUhlenbeckPruning::recursiveComputeLnProbability( const Topolog
         const std::vector<double> &mu_left  = this->means[this->active_likelihood[left_index]][left_index];
         const std::vector<double> &mu_right = this->means[this->active_likelihood[right_index]][right_index];
 
-        const std::vector<double> &v_left   = this->variances_per_site[this->active_likelihood[left_index]][left_index];
-        const std::vector<double> &v_right  = this->variances_per_site[this->active_likelihood[right_index]][right_index];
+        const std::vector<double> &v_left   = this->variances[this->active_likelihood[left_index]][left_index];
+        const std::vector<double> &v_right  = this->variances[this->active_likelihood[right_index]][right_index];
 
         const std::vector<double> &p_left   = this->partial_likelihoods[this->active_likelihood[left_index]][left_index];
         const std::vector<double> &p_right  = this->partial_likelihoods[this->active_likelihood[right_index]][right_index];
@@ -431,10 +431,10 @@ void PhyloOrnsteinUhlenbeckPruning::resetValue( void )
 {
     
     // check if the vectors need to be resized
-    partial_likelihoods     = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
-    means                   = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
-    variances_per_site      = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
-    missing_data            = std::vector<std::vector<bool> >(this->num_nodes, std::vector<bool>(this->num_sites, false) );
+    partial_likelihoods  = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
+    means                = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
+    variances            = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
+    missing_data         = std::vector<std::vector<bool> >(this->num_nodes, std::vector<bool>(this->num_sites, false) );
 
     // create a vector with the correct site indices
     // some of the sites may have been excluded
@@ -494,8 +494,8 @@ void PhyloOrnsteinUhlenbeckPruning::resetValue( void )
                 means[0][(*it)->getIndex()][site] = c;
                 means[1][(*it)->getIndex()][site] = c;
 
-                variances_per_site[0][(*it)->getIndex()][site] = 0;
-                variances_per_site[1][(*it)->getIndex()][site] = 0;
+                variances[0][(*it)->getIndex()][site] = 0;
+                variances[1][(*it)->getIndex()][site] = 0;
             }
         }
     }
