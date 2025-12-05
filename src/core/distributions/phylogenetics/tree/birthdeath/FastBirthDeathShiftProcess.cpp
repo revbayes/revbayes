@@ -606,49 +606,7 @@ bool FastBirthDeathShiftProcess::recursivelyDrawStochasticCharacterMap(
     // loop over every time slice, stopping before the last time slice
     for (size_t episode = 0; episode < num_episodes; episode++){
 
-        if(false){
-            std::cout << "E_old: [";
-            std::cout << u[0];
-            for (size_t i = 1; i < num_states; i++){
-                std::cout << "," << u[i];
-            }
-            std::cout << "]" << std::endl;
-
-            std::cout << "D_old: [";
-            std::cout << u[num_states];
-            for (size_t i = 1; i < num_states; i++){
-                std::cout << "," << u[i+num_states];
-            }
-            std::cout << "]" << std::endl;
-        }
-
         numericallyIntegrateProcess(u, 0, delta_t, true);
-       
-        if (false){
-            std::cout << "E_young: [";
-            std::cout << u[0];
-            for (size_t i = 1; i < num_states; i++){
-                std::cout << "," << u[i];
-            }
-            std::cout << "]" << std::endl;
-
-            std::cout << "D_young: [";
-            std::cout << u[num_states];
-            for (size_t i = 1; i < num_states; i++){
-                std::cout << "," << u[i+num_states];
-            }
-            std::cout << "]" << std::endl;
-
-            std::cout << "F_young: [";
-            std::cout << u[2*num_states];
-            for (size_t i = 1; i < num_states; i++){
-                std::cout << "," << u[i+2*num_states];
-            }
-            std::cout << "]" << std::endl;
-
-            throw std::invalid_argument( "debug" );
-        } 
-
         // draw state for this time slice
         size_t new_state = current_state;
 
@@ -2684,9 +2642,6 @@ void FastBirthDeathShiftProcess::updateQmatrix(){
 
     for (size_t i = 0; i < num_states; i++){
         for (size_t j = 0; j < num_states; j++){
-            //std::cout << "i= " << i << "  j= " << j << std::endl;
-            //std::cout << "Qith entry: \t " << Qmatrix(i,j) << std::endl;
-
             size_t n_changes = 0;
             if (A[i] != A[j]){
                 n_changes += 1;
