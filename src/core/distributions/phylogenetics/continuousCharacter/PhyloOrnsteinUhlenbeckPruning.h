@@ -49,6 +49,7 @@ namespace RevBayesCore {
         std::vector<double>                                                 simulateRootCharacters(size_t n);
         double                                                              sumRootLikelihood(void);
         virtual void                                                        touchSpecialization(const DagNode *toucher, bool touchAll);
+        void                                                                propagateAuxiliaryVariables(double &mu, double &variance, double &log_nf, const TopologyNode& node );
         
         // Parameter management functions.
         virtual void                                                        swapParameterInternal(const DagNode *oldP, const DagNode *newP);                         //!< Swap a parameter

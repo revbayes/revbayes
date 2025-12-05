@@ -195,6 +195,32 @@ void PhyloOrnsteinUhlenbeckPruning::fireTreeChangeEvent( const TopologyNode &n, 
     
 }
 
+// this function changes mu, variance and log_nf in-place
+void PhyloOrnsteinUhlenbeckPruning::propagateAuxiliaryVariables(double &mu, double &variance, double &log_nf, const TopologyNode& node )
+{
+    size_t node_index = node.getIndex();
+    double time = node.getBranchLength();
+
+    double theta = computeBranchTheta(node_index);
+    double sigma = computeBranchSigma(node_index);
+    double alpha = computeBranchAlpha(node_index);
+               
+    double v;
+    if ( alpha > 1E-20 )
+    {
+        v = (sigma*sigma) / (2.0*alpha) * (exp(2.0*alpha*time) - 1.0 );
+        mu  = exp(1.0 * time  * alpha ) * (mu  - theta)  + theta;
+    }
+    else
+    {
+        v  = (sigma*sigma) * time;
+    }
+    variance = v + variance * exp(2.0*alpha *time);
+                
+    // update the log normalizing factor
+    log_nf += time * alpha;
+}
+
 
 void PhyloOrnsteinUhlenbeckPruning::keepSpecialization( const DagNode* affecter )
 {
@@ -222,8 +248,9 @@ void PhyloOrnsteinUhlenbeckPruning::recursiveComputeLnProbability( const Topolog
         // mark as computed
         dirty_nodes[node_index] = false;
         
-        std::vector<double> &p_node             = this->partial_likelihoods[this->active_likelihood[node_index]][node_index];
         std::vector<double> &mu_node            = this->means[this->active_likelihood[node_index]][node_index];
+        std::vector<double> &v_node             = this->variances_per_site[this->active_likelihood[node_index]][node_index];
+        std::vector<double> &p_node             = this->partial_likelihoods[this->active_likelihood[node_index]][node_index];
         
         // get the number of children
         size_t num_children = node.getNumberOfChildren();
@@ -244,43 +271,18 @@ void PhyloOrnsteinUhlenbeckPruning::recursiveComputeLnProbability( const Topolog
             size_t right_index = right.getIndex();
             recursiveComputeLnProbability( right, right_index );
             
-            const std::vector<double> &p_left  = this->partial_likelihoods[this->active_likelihood[left_index]][left_index];
-            const std::vector<double> &p_right = this->partial_likelihoods[this->active_likelihood[right_index]][right_index];
             
             // get the means for the left and right subtrees
             const std::vector<double> &mu_left  = this->means[this->active_likelihood[left_index]][left_index];
             const std::vector<double> &mu_right = this->means[this->active_likelihood[right_index]][right_index];
+
+            const std::vector<double> &v_left   = this->variances_per_site[this->active_likelihood[left_index]][left_index];
+            const std::vector<double> &v_right  = this->variances_per_site[this->active_likelihood[right_index]][right_index];
+
+            const std::vector<double> &p_left   = this->partial_likelihoods[this->active_likelihood[left_index]][left_index];
+            const std::vector<double> &p_right  = this->partial_likelihoods[this->active_likelihood[right_index]][right_index];
                         
             // calculate the variance accounting for the branch
-            double v_left  = 0.0;
-            double bl_left = left->getBranchLength();
-            double sigma_left = computeBranchSigma(left_index);
-            double alpha_left = computeBranchAlpha(left_index);
-            if ( alpha_left > 1E-20 )
-            {
-                v_left = (sigma_left*sigma_left) / (2.0*alpha_left) * expm1(2.0*alpha_left*bl_left);
-            }
-            else
-            {
-                v_left = (sigma_left*sigma_left) * bl_left;
-            }
-        
-            double v_right = 0.0;
-            double bl_right = right.getBranchLength();
-            double sigma_right = computeBranchSigma(right_index);
-            double alpha_right = computeBranchAlpha(right_index);
-            if ( alpha_right > 1E-20 )
-            {
-                v_right = (sigma_right*sigma_right) / (2.0*alpha_right) * expm1(2.0*alpha_right*bl_right);
-            }
-            else
-            {
-                v_right = (sigma_right*sigma_right) * bl_right;
-            }
-                        
-            double theta_left   = computeBranchTheta( left_index );
-            double theta_right  = computeBranchTheta( right_index );
-           
             // the next steps are setting up the Gaussian variable
             // according to the steps outlined in the supplement of
             // FitzJohn (2012, Methods in Ecol Evol). The Gaussian variable
@@ -290,110 +292,89 @@ void PhyloOrnsteinUhlenbeckPruning::recursiveComputeLnProbability( const Topolog
             // ii) a mean
             // iii) a normalizing factor
             
-            double delta_left  = 0.0;
-            double delta_right = 0.0;
-            double var_left    = 0.0;
-            double var_right   = 0.0;
-            double stdev       = 0.0;
-            // get the propagated uncertainties
-            if ( use_missing_data == false )
+           
+            size_t num_sites = this->num_sites;
+
+            for (size_t i=0; i < num_sites; i++)
             {
-                // get the variances for the left and right subtrees
-                // the name "delta" comes from Felsenstein (2004; Fig.23.3, page 407)
-                delta_left  = this->variances[this->active_likelihood[left_index]][left_index];
-                delta_right = this->variances[this->active_likelihood[right_index]][right_index];
-                
-                // add the branch variance with the variance of the subtrees
-                //                 (this branch)       (                 subtree                )
-                var_left  = v_left            + delta_left  * exp(2.0*alpha_left *bl_left);
-                var_right = v_right           + delta_right * exp(2.0*alpha_right*bl_right);
 
-                // i) computing the variance at the node
-                double var_node = (var_left*var_right) / (var_left+var_right);
-                this->variances[this->active_likelihood[node_index]][node_index] = var_node;
-                
-                stdev = sqrt(var_left+var_right);;
-            }
-            
-            for (int i=0; i<this->num_sites; i++)
-            {
-                if ( use_missing_data == true )
-                {
-                    delta_left  = this->variances_per_site[this->active_likelihood[left_index]][left_index][i];
-                    delta_right = this->variances_per_site[this->active_likelihood[right_index]][right_index][i];
-
-                    // add the propagated uncertainty to the branch lengths
-                    var_left  = v_left  + delta_left  * exp(2.0*alpha_left *bl_left);
-                    var_right = v_right + delta_right * exp(2.0*alpha_right*bl_right);
-
-                    // set delta_node = (t_l*t_r)/(t_l+t_r);
-                    double var_node = (var_left*var_right) / (var_left+var_right);
-                    this->variances_per_site[this->active_likelihood[node_index]][node_index][i] = var_node;
-                    
-                    stdev = sqrt(var_left+var_right);
-                }
-                
                 if ( use_missing_data == true && missing_data[left_index][i] == true && missing_data[right_index][i] == true )
                 {
                     missing_data[node_index][i] = true;
                     
-                    p_node[i]  = p_left[i] + p_right[i];
                     mu_node[i] = RbConstants::Double::nan;
-
-                    this->variances_per_site[this->active_likelihood[node_index]][node_index][i] = 0.0;
+                    v_node[i]  = 0.0;
+                    p_node[i]  = p_left[i] + p_right[i];
                 }
                 else if ( use_missing_data == true && missing_data[left_index][i] == true && missing_data[right_index][i] == false )
                 {
                     missing_data[node_index][i] = false;
                     
-                    p_node[i]  = p_left[i] + p_right[i];
-                    mu_node[i] = mu_right[i];
-                    
-                    this->variances_per_site[this->active_likelihood[node_index]][node_index][i] = var_right;
+                    double mean_right = mu_right[i];
+                    double var_right  = v_right[i];
+                    double log_nf_right = p_right[i];
+
+                    propagateAuxiliaryVariables(mean_right, var_right, log_nf_right, node);
+
+                    mu_node[i] = mean_right;
+                    v_node[i] = var_right;
+                    p_node[i] = p_right[i] + log_nf_right;
 
                 }
                 else if ( use_missing_data == true && missing_data[left_index][i] == false && missing_data[right_index][i] == true )
                 {
                     missing_data[node_index][i] = false;
                     
-                    p_node[i]  = p_left[i] + p_right[i];
-                    mu_node[i] = mu_left[i];
-                    
-                    this->variances_per_site[this->active_likelihood[node_index]][node_index][i] = var_left;
+                    double mean_left = mu_left[i];
+                    double var_left = v_left[i];
+                    double log_nf_left = p_left[i];
+
+                    propagateAuxiliaryVariables(mean_left, var_left, log_nf_left, node);
+
+                    mu_node[i] = mean_left;
+                    v_node[i] = var_left;
+                    p_node[i] = p_left[i] + log_nf_left;
                 }
                 else
                 {
+                    // update mu, v and z for the left branch
+                    double mean_left = mu_left[i];
+                    double log_nf_left = p_left[i];
+                    double var_left = v_left[i];
+                    propagateAuxiliaryVariables(mean_left, var_left, log_nf_left, node);
+
+
+                    // update mu, v and z for the right branch
+                    double mean_right = mu_right[i];
+                    double log_nf_right = p_right[i];
+                    double var_right = v_right[i];
+
+                    propagateAuxiliaryVariables(mean_right, var_right, log_nf_right, node);
                     
-                    // ii) computing the mean at the node
-                    double mean_left   = exp(1.0 * bl_left  * alpha_left ) * (mu_left[i]  - theta_left)  + theta_left;
-                    double mean_right  = exp(1.0 * bl_right * alpha_right) * (mu_right[i] - theta_right) + theta_right;
+                    
+                    // merging rule
+                    // D_node(y) = D_left(y) * D_right(y)
+                    
+                    // mean
                     double mean_node = (mean_left*var_right + mean_right*var_left) / (var_left+var_right);
                     mu_node[i] = mean_node;
-                    
-                    
-                    // iii) computing the (log) normalizing factor at the node
-                    //
-                    // unlike in FitzJohn(2012) supplement eq. (6), we don't propagate the
-                    // normalizing factors (1/z_left) and (1/z_right) of the left and
-                    // right subtrees, since this can lead to underflow. Instead we store the log
-                    // normalizing factors, and add them to the partial log likelihoods
-                    double log_nf_left  = alpha_left  * bl_left;
-                    double log_nf_right = alpha_right * bl_right;
-                    double contrast = mean_left - mean_right;
-                    double a = -1.0 * contrast * contrast / ( 2.0 *(var_left+var_right) );
-                    double b = 0.5 * log( 2*RbConstants::PI*(var_left+var_right) );
-                    
-                    double log_norm_factor = log_nf_left + log_nf_right + a - b;
-                    double lnl_node = log_norm_factor;
-                    
-                    // sum up the probabilities of the subtrees
-                    p_node[i] = lnl_node + p_left[i] + p_right[i];
-                    
+
+                    // var
+                    double var_node = (var_left*var_right) / (var_left+var_right);
                     if ( use_missing_data == true )
                     {
                         missing_data[node_index][i] = false;
-                        this->variances_per_site[this->active_likelihood[node_index]][node_index][i] = (var_left*var_right) / (var_left+var_right);
+                        v_node[i] = var_node;
                     }
+                    
+                    // log_nf
+                    double contrast = mean_left - mean_right;
+                    double a = -1.0 * contrast * contrast / ( 2.0 *(var_left+var_right) );
+                    double b = 0.5 * log( 2*RbConstants::PI*(var_left+var_right) );
+                    double log_norm_factor = log_nf_left + log_nf_right + a - b;
+                    double lnl_node = log_norm_factor;
+                    p_node[i] = lnl_node + p_left[i] + p_right[i];
+
                     
                 } // end-if we had missing states for substrees
                 
@@ -404,7 +385,7 @@ void PhyloOrnsteinUhlenbeckPruning::recursiveComputeLnProbability( const Topolog
                     // using generalized least squares with a variance-covariance matrix
                     // for the residuals (r = y - theta), also called the vcv-method (introduced in Hansen 1997)
                     double root_state = computeRootState();
-                    p_node[i] += RbStatistics::Normal::lnPdf( root_state, this->computeSiteRate(i)*stdev, mu_node[i]);
+                    p_node[i] += RbStatistics::Normal::lnPdf( root_state, v_node[i], mu_node[i]);
                 }
                 
             } // end for-loop over all characters
