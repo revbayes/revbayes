@@ -33,6 +33,7 @@ class DagNode;
         virtual void                        printHeader(void) = 0;
         
         // FileMonitor functions
+        path                                getMonitorFileName( void ) const;
         bool                                isFileMonitor( void ) const;
         void                                openStream(bool reopen);
         void                                setAppend(bool tf);   //!< Set if the monitor should append to an existing file
