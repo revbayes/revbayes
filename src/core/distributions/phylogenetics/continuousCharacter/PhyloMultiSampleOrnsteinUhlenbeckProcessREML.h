@@ -53,6 +53,7 @@ namespace RevBayesCore {
         void                                                                simulateTipSamples(const std::vector< ContinuousTaxonData > &td);
         double                                                              sumRootLikelihood(void);
         virtual void                                                        touchSpecialization(const DagNode *toucher, bool touchAll);
+        void                                                                propagateAuxiliaryVariables(double &mu, double &variance, double &log_nf, const TopologyNode& node );
         
         // Parameter management functions.
         virtual void                                                        swapParameterInternal(const DagNode *oldP, const DagNode *newP);                         //!< Swap a parameter
@@ -60,7 +61,7 @@ namespace RevBayesCore {
         // the likelihoods
         std::vector<std::vector<std::vector<double> > >                     partial_likelihoods;
         std::vector<std::vector<std::vector<double> > >                     means;
-        std::vector<std::vector<double> >                                   variances;
+        //std::vector<std::vector<double> >                                   variances;
         std::vector<std::vector<std::vector<double> > >                     variances_per_site;
         std::vector<std::vector<std::vector<double> > >                     normalizing_constants;
         std::vector<size_t>                                                 active_likelihood;
