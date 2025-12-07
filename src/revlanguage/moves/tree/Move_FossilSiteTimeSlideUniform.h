@@ -43,7 +43,7 @@ namespace RevLanguage {
         
         RevPtr<const RevVariable>                   tree;
         RevPtr<const RevVariable>                   origin;
-        RevPtr<const RevVariable>                   tip;
+        RevPtr<const RevVariable>                   clade;
         RevPtr<const RevVariable>                   max;
         RevPtr<const RevVariable>                   min;
         RevPtr<const RevVariable>                   delta;

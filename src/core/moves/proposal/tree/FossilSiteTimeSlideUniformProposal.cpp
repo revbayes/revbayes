@@ -13,6 +13,13 @@
 #include "StochasticNode.h"
 #include "TopologyNode.h"
 #include "Tree.h"
+#include "Taxon.h"
+#include "RlClade.h"
+#include "Clade.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
+#include "TreeChangeEventHandler.h"
+#include "TreeChangeEventMessage.h"
 
 namespace RevBayesCore { class DagNode; }
 
@@ -23,12 +30,12 @@ using namespace RevBayesCore;
  *
  * Here we simply allocate and initialize the Proposal object.
  */
-FossilSiteTimeSlideUniformProposal::FossilSiteTimeSlideUniformProposal( StochasticNode<Tree> *n, TypedDagNode<double> *o, TypedDagNode<double> *ma, TypedDagNode<double> *mi, const std::string& t, double l, double r ) : Proposal(r),
+FossilSiteTimeSlideUniformProposal::FossilSiteTimeSlideUniformProposal( StochasticNode<Tree> *n, TypedDagNode<double> *o, TypedDagNode<double> *ma, TypedDagNode<double> *mi, const Clade &c, double l, double r ) : Proposal(r),
     tree( n ),
     origin( o ),
     max( ma ),
     min( mi ),
-    tip_taxon( t ),
+    clade( c ),
     lambda( l )
 {
     // tell the base class to add the node
@@ -36,15 +43,6 @@ FossilSiteTimeSlideUniformProposal::FossilSiteTimeSlideUniformProposal( Stochast
     addNode( origin );
     addNode( max );
     addNode( min );
-    
-    if ( tip_taxon == "" )
-    {
-        use_index = false;
-    }
-    else
-    {
-        use_index = true;
-    }
     
 }
 
@@ -117,35 +115,12 @@ double FossilSiteTimeSlideUniformProposal::doProposal( void )
     // the node_index if (and only if) both conditions are met. However, this is not enough to prevent mismatches between the
     // node_index and tree->getValue().getTipIndex( tip_taxon ) later on. Recomputing the former every time we perform the
     // proposal is the only reliable way to get rid of this problem, so we just do that and eat the extra computational cost.
-    if ( use_index )
-    {
-        // Always recompute node_index
-        node_index = tree->getValue().getTipIndex( tip_taxon );
-    }
-    else
-    {
-        std::vector<size_t> tips;
-        for (size_t i = 0; i < tau.getNumberOfTips(); ++i)
-        {
-            TopologyNode* node = &tau.getNode(i);
-            if ( node->isFossil() )
-            {
-                tips.push_back(i);
-            }
 
-        }
 
-        if ( tips.empty() )
-        {
-            failed = true;
-            return 0;
-        }
+    // get node index HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    node_index = tree->getValue().getTipIndex( clade.getTaxonName(0) );
 
-        // pick a random fossil node
-        double u = rng->uniform01();
-        node_index = tips[ size_t( std::floor(tips.size() * u) ) ];
-    }
-    
+
     TopologyNode& node = tau.getNode(node_index);
 
     TopologyNode& parent = node.getParent();
@@ -311,10 +286,7 @@ void FossilSiteTimeSlideUniformProposal::swapNodeInternal(DagNode *oldN, DagNode
     if (oldN == tree)
     {
         tree = static_cast<StochasticNode<Tree>* >(newN) ;
-        if ( tip_taxon != "" )
-        {
-            node_index = tree->getValue().getTipIndex( tip_taxon );
-        }
+        node_index = tree->getValue().getTipIndex( clade.getTaxonName(0) );
     }
     else if (oldN == origin)
     {

@@ -6,6 +6,9 @@
 #include "Proposal.h"
 #include "StochasticNode.h"
 #include "Tree.h"
+#include "Clade.h"
+#include "RbVector.h"
+#include "RbVectorImpl.h"
 
 namespace RevBayesCore {
     
@@ -29,7 +32,7 @@ namespace RevBayesCore {
                                            TypedDagNode<double>* o,
                                            TypedDagNode<double>* ma,
                                            TypedDagNode<double>* mi,
-                                           const std::string& t,
+                                           const Clade &c,
                                            double l,
                                            double r=0.44);                                                      //!<  constructor
         
@@ -57,12 +60,11 @@ namespace RevBayesCore {
         TypedDagNode<double>*                   origin;
         TypedDagNode<double>*                   max;
         TypedDagNode<double>*                   min;
-        std::string                             tip_taxon;
 
-        bool                                    use_index;
         size_t                                  node_index;
 
         // stored objects to undo proposal
+        Clade                                   clade;
         double                                  stored_age;
         double                                  lambda;                                                                             //!< The value we propose.
 
