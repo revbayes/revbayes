@@ -136,6 +136,7 @@ RevPtr<RevVariable> AlleleFrequencySimulator::executeMethod(std::string const &n
         
         delete tree;
         
+        return NULL;
     }
     else if (name == "transitionProbabilityMatrix")
     {
