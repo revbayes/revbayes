@@ -14,7 +14,6 @@ RandomNumberGenerator::RandomNumberGenerator(void)
     
     seed = getNewSeed();
     
-    boost::mt19937 rng;
     rng.seed( seed );
 
     last_u = boost::random::uniform_real_distribution<>(0,1)(rng);
