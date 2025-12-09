@@ -1,8 +1,10 @@
+#include "DebugMove.h"
 #include "DistributionBeta.h"
 #include "RateAgeProposal.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RbException.h"
+#include "RbSettings.h"  // for debugMCMC setting
 #include "TreeUtilities.h"
 #include "TypedDagNode.h"
 
@@ -99,22 +101,29 @@ double RateAgeProposal::getProposalTuningParameter( void ) const
  */
 double RateAgeProposal::doProposal( void )
 {
+    int logMCMC = RbSettings::userSettings().getLogMCMC();
+    int debugMCMC = RbSettings::userSettings().getDebugMCMC();
     
-    // Get random number generator
-    RandomNumberGenerator* rng     = GLOBAL_RNG;
+    // get random number generator
+    RandomNumberGenerator* rng = GLOBAL_RNG;
     
     Tree& tau = tree->getValue();
     RbOrderedSet<DagNode*> affected;
     tree->getAffectedNodes( affected );
     
-    // pick a random node which is not the root, the direct descendant of the root, or the ancestor of a sampled ancestor tip
-    TopologyNode* node;
-    size_t node_index = 0;
-    do {
-        double u = rng->uniform01();
-        node_index = size_t( std::floor(tau.getNumberOfNodes() * u) );
-        node = &tau.getNode(node_index);
-    } while ( node->isRoot() || node->isTip() || node->isSampledAncestor(true) );
+    // pick a random node which is not the root, a tip, or the parent of a sampled ancestor
+    TopologyNode* node = tau.pickRandomInternalNode(rng);
+    if (node == NULL)
+    {
+        if (logMCMC >=1 or debugMCMC >=1)
+        {
+            std::cerr << "mvRateAgeProposal has no effect; the tree only contains the root, tips, and sampled ancestors." << std::endl;
+        }
+        
+        stored_node = nullptr;
+        return RbConstants::Double::neginf;
+    }
+    size_t node_index = node->getIndex();
         
     TopologyNode& parent = node->getParent();
     
@@ -249,6 +258,8 @@ void RateAgeProposal::printParameterSummary(std::ostream &o, bool name_only) con
 void RateAgeProposal::undoProposal( void )
 {
 
+    if (stored_node == nullptr) return;
+    
     // undo the proposal
 
     // get this node
