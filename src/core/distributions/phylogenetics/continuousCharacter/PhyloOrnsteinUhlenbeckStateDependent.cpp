@@ -952,7 +952,7 @@ std::vector<double> PhyloOrnsteinUhlenbeckStateDependent::simulateRootCharacters
         }
         else
         {
-            throw RbException( "Cannot simulate under a state-dependent Ornstein-Uhlenbeck process because the root treatment is not set correctly." );
+            throw RbException( "Cannot simulate under a state-dependent Ornstein-Uhlenbeck process because the root treatment is not set correctly. The valid options are \"optimum\", \"equilibrium\", and \"parameter\"." );
         }
     }
 

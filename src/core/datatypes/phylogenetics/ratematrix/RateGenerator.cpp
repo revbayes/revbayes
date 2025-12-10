@@ -86,11 +86,11 @@ double RateGenerator::getSumOfRatesDifferential(std::vector<CharacterEvent*> fro
 {
 
     double r = 0.0;
-
+    
     size_t old_state = static_cast<CharacterEventDiscrete*>(from[ to->getSiteIndex() ])->getState();
     size_t new_state = to->getState();
 
-
+    
     for (size_t possible_state = 0; possible_state < num_states; possible_state++)
     {
         // subtract the contribution of rates leaving the old state
@@ -98,14 +98,14 @@ double RateGenerator::getSumOfRatesDifferential(std::vector<CharacterEvent*> fro
         {
             r -= getRate(old_state, possible_state, age, rate);
         }
-
+        
         // add the contribution of rates leaving the new state
         if (possible_state != new_state)
         {
             r += getRate(new_state, possible_state, age, rate);
         }
     }
-
+    
     return r;
 }
 
@@ -147,15 +147,15 @@ void RateGenerator::executeMethod(const std::string &n, const std::vector<const 
 //
 //    // clear old values
 //    rv.clear();
-//
+//    
 //    TransitionProbabilityMatrix P(num_states);
-//
+//    
 //    double rate = static_cast<const TypedDagNode<double> *>( args[0] )->getValue();
 //    double start_age = static_cast<const TypedDagNode<double> *>( args[1] )->getValue();
 //    double end_age = static_cast<const TypedDagNode<double> *>( args[2] )->getValue();
-//
+//    
 //    calculateTransitionProbabilities( start_age, end_age, rate, P);
-//
+//    
 //    for (size_t i = 0; i < num_states; i++)
 //    {
 //        RbVector<double> v;
@@ -165,21 +165,21 @@ void RateGenerator::executeMethod(const std::string &n, const std::vector<const 
 //        }
 //        rv.push_back(v);
 //    }
-//
+//    
 //}
 
 
 void RateGenerator::executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const
 {
-
+    
     if ( n == "[]")
     {
         size_t n_states = this->getNumberOfStates();
         //    rv.resize(n_states);
         rv.clear();
-
+        
         size_t from_idx = static_cast<const TypedDagNode<std::int64_t> *>( args[0] )->getValue()-1;
-
+        
         for (size_t to_idx = 0; to_idx < n_states; to_idx++)
         {
             rv.push_back(this->getRate(from_idx, to_idx, 0.0, 1.0));
@@ -191,12 +191,12 @@ void RateGenerator::executeMethod(const std::string &n, const std::vector<const 
 
 void RateGenerator::executeMethod(const std::string &n, const std::vector<const DagNode*> &args, Simplex &rv) const
 {
-
+    
     if (n == "getStationaryFrequencies")
     {
         // clear old values
         rv.clear();
-
+        
         const RateMatrix *rm = dynamic_cast<const RateMatrix*>( this );
         if ( rm != NULL )
         {
@@ -207,7 +207,7 @@ void RateGenerator::executeMethod(const std::string &n, const std::vector<const 
             throw RbException("Stationary frequencies of RateGenerators that are not RateMatrices are not clearly defined.");
         }
     }
-
+    
 }
 
 //void RateGenerator::executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const
@@ -242,7 +242,7 @@ bool RateGenerator::simulateStochasticMapping(double startAge, double endAge, do
 json RateGenerator::toJSON() const
 {
     json matrix;
-
+    
     // print the RbMatrix with each column of equal width and each column centered on the decimal
     for (size_t i=0; i < size(); i++)
     {
@@ -259,7 +259,7 @@ void RateGenerator::printForUser(std::ostream &o, const std::string &sep, int l,
 {
     std::streamsize previous_precision = o.precision();
     std::ios_base::fmtflags previous_flags = o.flags();
-
+    
     o << std::fixed;
     o << std::setprecision(4);
 
@@ -274,7 +274,7 @@ void RateGenerator::printForUser(std::ostream &o, const std::string &sep, int l,
         {
             o << "  ";
         }
-
+        
         o << "[ ";
         for (size_t j = 0; j < size(); ++j)
         {
@@ -285,7 +285,7 @@ void RateGenerator::printForUser(std::ostream &o, const std::string &sep, int l,
             o << getRate( i, j, 1e-6,1.0);
         }
         o <<  " ]";
-
+        
         if (i == size()-1)
         {
             o << " ]";
@@ -295,17 +295,17 @@ void RateGenerator::printForUser(std::ostream &o, const std::string &sep, int l,
             o << " ,\n";
         }
     }
-
+    
     o.setf(previous_flags);
     o.precision(previous_precision);
-
+    
 }
 
 
 
 void RateGenerator::printForSimpleStoring(std::ostream &o, const std::string &sep, int l, bool left, bool flatten) const
 {
-
+    
     // print the RbMatrix with each column of equal width and each column centered on the decimal
     for (size_t i=0; i < size(); i++)
     {
@@ -321,7 +321,7 @@ void RateGenerator::printForSimpleStoring(std::ostream &o, const std::string &se
             }
             o << getRate( i, j, 1e-6, 1.0);
         }
-
+        
     }
 }
 
@@ -329,9 +329,9 @@ void RateGenerator::printForSimpleStoring(std::ostream &o, const std::string &se
 
 void RateGenerator::printForComplexStoring(std::ostream &o, const std::string &sep, int l, bool left, bool flatten) const
 {
-
+    
     o << "[ ";
-
+    
     // print the RbMatrix with each column of equal width and each column centered on the decimal
     for (size_t i=0; i < size(); i++)
     {
@@ -345,7 +345,7 @@ void RateGenerator::printForComplexStoring(std::ostream &o, const std::string &s
             o << getRate( i, j, 1e-6, 1.0);
         }
         o <<  " ]";
-
+        
         if (i == size()-1)
         {
             o << " ]";
@@ -354,7 +354,7 @@ void RateGenerator::printForComplexStoring(std::ostream &o, const std::string &s
         {
             o << " ,";
         }
-
+        
     }
-
+    
 }

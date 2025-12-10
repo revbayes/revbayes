@@ -29,16 +29,11 @@
 namespace RevBayesCore {
 
     /**
-     * The scaling operator.
-     *
-     * A scaling proposal draws a random uniform number u ~ unif (-0.5,0.5)
-     * and scales the current vale by a scaling factor
-     * sf = exp( lambda * u )
-     * where lambda is the tuning parameter of the Proposal to influence the size of the proposals.
+     * Resample a root-state and the branch history.
      *
      * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Michael Landis)
-     * @since 2009-09-08, version 1.0
+     * @author The RevBayes Development Core Team (Sebastian Hoehna)
+     * @since 2025-01-10, version 1.2.6
      *
      */
 
@@ -308,12 +303,6 @@ RevBayesCore::RootRejectionSampleProposal<charType>* RevBayesCore::RootRejection
 
 /**
  * Perform the Proposal.
- *
- * A scaling Proposal draws a random uniform number u ~ unif (-0.5,0.5)
- * and scales the current vale by a scaling factor
- * sf = exp( lambda * u )
- * where lambda is the tuning parameter of the Proposal to influence the size of the proposals.
- *
  * \return The hastings ratio.
  */
 template<class charType>

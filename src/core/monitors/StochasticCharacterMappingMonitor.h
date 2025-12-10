@@ -106,6 +106,7 @@ StochasticCharacterMappingMonitor<characterType>::StochasticCharacterMappingMoni
     addVariable( ctmc );
 }
 
+
 /**
  * Copy constructor.
  */
@@ -120,6 +121,7 @@ StochasticCharacterMappingMonitor<characterType>::StochasticCharacterMappingMoni
 {
 
 }
+
 
 /**
  * Destructor.
@@ -175,9 +177,9 @@ void StochasticCharacterMappingMonitor<characterType>::monitorVariables(std::uin
         }
         num_nodes = tree->getValue().getNumberOfNodes();
     }
-
+        
     std::vector<std::string> character_histories( num_nodes );
-
+    
     // draw stochastic character map
     if ( ctmc != NULL )
     {
@@ -185,14 +187,14 @@ void StochasticCharacterMappingMonitor<characterType>::monitorVariables(std::uin
     }
     else if ( sse_process != NULL )
     {
-        // sse_process->drawStochasticCharacterMap( character_histories );
         bool set_amb_char_data = false; // this is the default value for the arg
         sse_process->drawStochasticCharacterMap( character_histories, set_amb_char_data, use_simmap_default );
     }
     else
     {
-    	// glhbdsp_process->drawStochasticCharacterMap( character_histories );
-        glhbdsp_process->drawStochasticCharacterMap( character_histories, use_simmap_default );
+        
+        
+    	glhbdsp_process->drawStochasticCharacterMap( character_histories, use_simmap_default );
     }
 
     // print to monitor file
@@ -208,7 +210,7 @@ void StochasticCharacterMappingMonitor<characterType>::monitorVariables(std::uin
         // print out this branch's character history in the format
         // used by SIMMAP and phytools
         out_stream << character_histories[ node_index ];
-
+        
     }
 
     if ( include_simmaps == true )

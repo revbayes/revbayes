@@ -1,9 +1,9 @@
 ################################################################################
 #
-# RevBayes Validation Test: Brownian-Motion on a fixed tree
+# RevBayes Integration Test: Ornstein-Uhlenbeck on a fixed tree
 #
-# Model: Continuous character(s) evolve under state-dependent
-#            Ornstein-Uhlenbeck
+# Model: Univariate continuous character evolving under a state-dependent
+#            Ornstein-Uhlenbeck process
 #
 # authors: Priscilla Lau
 #
@@ -55,12 +55,8 @@ lambda ~ dnLognormal(ln(0.05), 0.4)
 
 Q := fnFreeK(lambda*rates, rescaled=FALSE)
 
-# set root prior
-rf_prior <- rep(1,num_disc_states)
-rf ~ dnDirichlet( rf_prior )
-moves.append( mvBetaSimplex( rf, weight=2 ) )
-moves.append( mvDirichletSimplex( rf, weight=2 ) )
-
+# set root frequencies
+rf <- simplex( rep(1/3, 3) )
 
 X ~ dnPhyloCTMCDASiteIID(tree, Q, branchRates=1, type="Standard", rootFrequencies=rf, nSites=1)
 X.setValue(disc)
@@ -110,7 +106,7 @@ Y.clamp(cont)
 
 mymodel = model(X)
 
-monitors.append( mnModel(filename="output/artiodactyla_OUsd.log", printgen=10) )
+monitors.append( mnModel(filename="output/artiodactyla_OUsd_stochasticHistory.log", printgen=10) )
 
 
 ################cd

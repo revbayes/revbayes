@@ -41,7 +41,7 @@ namespace RevBayesCore {
         TipRejectionSampleProposal( StochasticNode<AbstractHomologousDiscreteCharacterData> *n, double l=1.0, double r=0.234 );                                  //!<  constructor
         TipRejectionSampleProposal( const TipRejectionSampleProposal& p );                                                        //!<  constructor
         virtual                                                    ~TipRejectionSampleProposal(void);                              //!< Destructor
-        
+
         TipRejectionSampleProposal&                                 operator=(const TipRejectionSampleProposal& p);
 
         // Basic utility functions
@@ -93,7 +93,7 @@ namespace RevBayesCore {
         double                                                      lambda;
         std::set<size_t>                                            sampledCharacters;
         std::set<size_t>                                            allCharacters;
-    
+
 
     };
 
@@ -121,7 +121,7 @@ RevBayesCore::TipRejectionSampleProposal<charType>::TipRejectionSampleProposal( 
     addNode( ctmc );
 
     tip_branch_proposal  = new PathRejectionSampleProposal<charType>(n, l, r);
-    
+
     for (size_t i = 0; i < numCharacters; i++)
     {
         allCharacters.insert(i);
@@ -148,9 +148,9 @@ RevBayesCore::TipRejectionSampleProposal<charType>::TipRejectionSampleProposal( 
 {
 
     addNode( ctmc );
-        
+
     tip_branch_proposal = p.tip_branch_proposal->clone();
-    
+
     sampledCharacters   = p.sampledCharacters;
     allCharacters       = p.allCharacters;
 
@@ -170,7 +170,7 @@ RevBayesCore::TipRejectionSampleProposal<charType>::TipRejectionSampleProposal( 
  template<class charType>
  RevBayesCore::TipRejectionSampleProposal<charType>::~TipRejectionSampleProposal( void )
  {
-         
+
      delete tip_branch_proposal;
 
  }
@@ -188,9 +188,9 @@ RevBayesCore::TipRejectionSampleProposal<charType>& RevBayesCore::TipRejectionSa
     if (this != &p)
     {
         delete tip_branch_proposal;
-        
+
         removeNode(ctmc);
-        
+
         ctmc            = p.ctmc;
         q_map_site      = p.q_map_site;
         q_map_sequence  = p.q_map_sequence;
@@ -199,12 +199,12 @@ RevBayesCore::TipRejectionSampleProposal<charType>& RevBayesCore::TipRejectionSa
         node            = p.node;
         tip_tp_matrix   = p.tip_tp_matrix;
         lambda          = p.lambda;
-    
+
         addNode( ctmc );
-        
+
         tip_branch_proposal  = p.tip_branch_proposal->clone();
-        
-        
+
+
         sampledCharacters   = p.sampledCharacters;
         allCharacters       = p.allCharacters;
 
@@ -215,7 +215,7 @@ RevBayesCore::TipRejectionSampleProposal<charType>& RevBayesCore::TipRejectionSa
         proposedLnProb      = p.proposedLnProb;
     }
 
-    
+
     return *this;
 }
 
@@ -230,7 +230,7 @@ void RevBayesCore::TipRejectionSampleProposal<charType>::assignNode(TopologyNode
 template<class charType>
 std::set<size_t> RevBayesCore::TipRejectionSampleProposal<charType>::chooseCharactersToSample(double p)
 {
-    
+
     std::set<size_t> s;
     s.insert(GLOBAL_RNG->uniform01() * numCharacters);
     for (size_t i = 0; i < numCharacters; i++)
@@ -240,7 +240,7 @@ std::set<size_t> RevBayesCore::TipRejectionSampleProposal<charType>::chooseChara
             s.insert(i);
         }
     }
-    
+
     return s;
 }
 
@@ -269,12 +269,6 @@ RevBayesCore::TipRejectionSampleProposal<charType>* RevBayesCore::TipRejectionSa
 
 /**
  * Perform the Proposal.
- *
- * A scaling Proposal draws a random uniform number u ~ unif (-0.5,0.5)
- * and scales the current vale by a scaling factor
- * sf = exp( lambda * u )
- * where lambda is the tuning parameter of the Proposal to influence the size of the proposals.
- *
  * \return The hastings ratio.
  */
 template<class charType>
@@ -296,7 +290,7 @@ double RevBayesCore::TipRejectionSampleProposal<charType>::doProposal( void )
     // update incident path
     proposedLnProbRatio += tip_branch_proposal->doProposal();
 
-    
+
     return proposedLnProbRatio;
 }
 
@@ -365,7 +359,7 @@ void RevBayesCore::TipRejectionSampleProposal<charType>::prepareProposal( void )
         storedTipState[site_index] = s;
     }
 
-    
+
     // sample characters to be updated and pass to proposals
     sampledCharacters = chooseCharactersToSample(lambda);
     tip_branch_proposal->setSampledCharacters(sampledCharacters);
@@ -412,17 +406,17 @@ void RevBayesCore::TipRejectionSampleProposal<charType>::sampleTipCharacters( vo
 
     // we may also update this if it is the root state (not const)
     std::vector<CharacterEvent*>& nodeParentState = histories[node->getIndex()].getParentCharacters();
-    
+
     // get parent age
     double parent_age = node->getParent().getAge();
-    
+
     // get transition probs
     const RateGenerator& rm = ( q_map_sequence != NULL ? q_map_sequence->getValue() : q_map_site->getValue() );
     rm.calculateTransitionProbabilities(parent_age, node_age, node_rate, tip_tp_matrix);
 
-    
+
     std::set<size_t>::iterator it_s;
-    
+
     for (it_s = sampledCharacters.begin(); it_s != sampledCharacters.end(); it_s++)
     {
         size_t site_index = *it_s;
@@ -568,22 +562,22 @@ void RevBayesCore::TipRejectionSampleProposal<charType>::undoProposal( void )
         throw RbException("Failed cast.");
     }
     size_t num_sites = p->getNumberOfSites();
-    
+
     CharacterHistoryDiscrete& histories = p->getHistories();
-    
+
     // restore node state
     std::vector<CharacterEvent*>& nodeChildState = histories[node->getIndex()].getChildCharacters();
-    
+
     for (size_t site_index = 0; site_index < num_sites; ++site_index)
     {
         size_t s = storedTipState[site_index];
         static_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->setState(s);
     }
-    
-    
+
+
     // restore path state
     tip_branch_proposal->undoProposal();
-    
+
     // clear sampled character set
     sampledCharacters.clear();
 }

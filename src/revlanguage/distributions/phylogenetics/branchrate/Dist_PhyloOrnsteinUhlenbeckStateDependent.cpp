@@ -107,18 +107,33 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
     }
 
     // set the root values
-    if (rt == "parameter"){
-        RevBayesCore::TypedDagNode< double >* rv;
-        rv = static_cast<const Real &>( root_value->getRevObject() ).getDagNode();
-        dist->setRootValue( rv );
+    RevBayesCore::TypedDagNode< double >* rv = static_cast<const Real &>( root_value->getRevObject() ).getDagNode();
+
+    // if ( rt == "optimum" || rt == "equilibrium" )
+    // {
+    //     if ( rv != NULL )
+    //     {
+    //         throw RbException("To use the root treatment \"optimum\" or \"equilibrium\", you should not specify the argument rootValue ");
+    //     }
+    // }
+    // else
+    if ( rt == "parameter" )
+    {
+        if ( rv != NULL)
+        {
+            dist->setRootValue( rv );
+        }
+        else
+        {
+            throw RbException("To use the root treatment \"parameter\", you need to specify the argument rootValue ");
+        }
     }
 
     // @TODO: Need some way to check if rootTreatment = "parameter" is specified,
     // then the user must also specify the random variable for the ancestral value
     // and if not, then throw an error
+    // not fixed yet
 
-    // @TODO: Likewise, don't allow specifying "optimum" or "equilibrium" and at
-    // the same time supplying a parameter for the ancestral value.
     return dist;
 }
 

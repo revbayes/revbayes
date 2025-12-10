@@ -494,7 +494,6 @@ std::ostream& TopologyNode::buildNewick( std::ostream& o, bool simmap = false)
     // 5. Write ";" if we're done with the tree.
     if ( isRoot() )
     {
-        // FIXME - move to caller?
         o << ";";
     }
 
@@ -584,7 +583,6 @@ std::ostream& TopologyNode::buildNewickSimmap( std::ostream& o, const CharacterH
     // 5. Write ";" if we're done with the tree.
     if ( isRoot() )
     {
-        // FIXME - move to caller?
         o << ";";
     }
 
