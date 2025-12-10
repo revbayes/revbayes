@@ -225,7 +225,8 @@ for (i in 3:n_max_states) {
 mymodel = model(fbd_tree)
 
 # Add monitors
-monitors.append( mnModel(filename="output/mvFossilTimeSlideUniform_multiple_runs.log", printgen=5) )
+monitors.append( mnModel(filename="output/mvFossilTimeSlideUniform_multiple_runs.log", printgen=5,
+                         stochasticOnly=TRUE) )
 monitors.append( mnFile(filename="output/mvFossilTimeSlideUniform_multiple_runs.trees", printgen=5, fbd_tree) )
 
 # Initialize the MCMC object
