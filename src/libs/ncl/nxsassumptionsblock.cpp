@@ -1406,7 +1406,7 @@ void NxsAssumptionsBlock::HandleUserType(NxsToken& token)
 				cstreeform = true;
 			else if (token.Equals("NOTOKENS"))
 				GenerateNxsException(token, "NOTOKENS-style UserType are not supported");
-			else if (token.Equals("MatrixReal"))
+			else if (token.Equals("REALMATRIX"))
 				floatMat = true;
 			else if (token.Equals(";"))
 				{
@@ -1424,7 +1424,7 @@ void NxsAssumptionsBlock::HandleUserType(NxsToken& token)
 			}
 		token.GetNextToken();
 		}
-	if (token.Equals("STEPMATRIX") || token.Equals("MatrixReal"))
+	if (token.Equals("STEPMATRIX") || token.Equals("REALMATRIX"))
 		{
 		errormsg  << "UserType qualifier "<< token.GetTokenReference() << " should occur in parentheses ("<< token.GetTokenReference() <<") ";
 		nexusReader->NexusWarnToken(errormsg, NxsReader::DEPRECATED_WARNING, token);
@@ -1722,14 +1722,14 @@ void NxsAssumptionsBlock::HandleCodonPosSet(
 class NxsSetVectorItemValidator
 	{
 	public:
-		virtual ~NxsSetVectorItemValidator(){}
+		virtual ~NxsSetVectorItemValidator(){};
 		virtual std::string convert(NxsToken &) = 0;
 	};
 
 class WtSetVectorItemValidator: public NxsSetVectorItemValidator
 	{
 	public:
-		virtual ~WtSetVectorItemValidator(){}
+		virtual ~WtSetVectorItemValidator(){};
 		virtual std::string convert(NxsToken & token)
 			{
 			NxsString s = token.GetToken();
@@ -1853,13 +1853,13 @@ void NxsAssumptionsBlock::HandleCharSet(
 	//charset_name.ToUpper();
 	NxsAssumptionsBlockAPI * effectiveAssumpBlock = DealWithPossibleParensInCharDependentCmd(token, "CharSet");
 	token.GetNextToken();
-	effectiveAssumpBlock->readDiscreteCharsetDef(charset_name, token, asterisked);
+	effectiveAssumpBlock->ReadCharsetDef(charset_name, token, asterisked);
 	}
 
 /*!
 	Called after verifying that the correct Char block pointer is set.
 */
-void NxsAssumptionsBlock::readDiscreteCharsetDef(NxsString charset_name, NxsToken &token, bool asterisked)
+void NxsAssumptionsBlock::ReadCharsetDef(NxsString charset_name, NxsToken &token, bool asterisked)
 	{
 	NCL_ASSERT(charBlockPtr != NULL);
 	NxsCharactersBlockAPI &charBlock = *charBlockPtr;
@@ -2381,7 +2381,7 @@ void NxsAssumptionsBlock::Read(
 	n << NCL_BLOCKTYPE_ATTR_NAME;
 	DemandEndSemicolon(token, n.c_str());
 
-	for (;;)
+	for(;;)
 		{
 		token.GetNextToken();
 		
@@ -2431,7 +2431,7 @@ void NxsAssumptionsBlock::Read(
 				SkipCommand(token);
 
 			}
-		}	// for (;;)
+		}	// for(;;)
 	}
 void NxsAssumptionsBlock::HandleOptions(NxsToken &token)
 	{
@@ -2518,7 +2518,7 @@ void NxsAssumptionsBlock::Reset()
 	if (!passedRefOfOwnedBlock)
 		{
 		VecAssumpBlockPtr::iterator bIt = createdSubBlocks.begin();
-		for (; bIt != createdSubBlocks.end(); ++bIt)
+		for(; bIt != createdSubBlocks.end(); ++bIt)
 			{
 			if (*bIt)
 				delete *bIt;
@@ -2791,7 +2791,7 @@ VecBlockPtr NxsAssumptionsBlock::GetCreatedTaxaBlocks()
 	passedRefOfOwnedBlock = true;
 	VecBlockPtr r;
 	VecAssumpBlockPtr::iterator bIt = createdSubBlocks.begin();
-	for (; bIt != createdSubBlocks.end(); ++bIt)
+	for(; bIt != createdSubBlocks.end(); ++bIt)
 		r.push_back(*bIt);
 	return r;
 	}

@@ -204,87 +204,87 @@ void NxsDiscreteDatatypeMapper::DeleteStateIndices(const std::set<NxsDiscreteSta
 std::vector<NxsDiscreteStateCell> getToCodonRecodingMapper(NxsGeneticCodesEnum gCode)
 {
 	std::vector<NxsDiscreteStateCell> v;
-	if (gCode == NXS_GCODE_STANDARD) {
+	if(gCode == NXS_GCODE_STANDARD) {
 		const NxsDiscreteStateCell trnxs_gcode_standard[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, -1, 48, -1, 49, 50, 51, 52, 53, -1, 54, 55, 56, 57, 58, 59, 60};
 		std::copy(trnxs_gcode_standard, trnxs_gcode_standard + 64, std::back_inserter(v));
 		return v;
 	}
-	if (gCode == NXS_GCODE_VERT_MITO) {
+	if(gCode == NXS_GCODE_VERT_MITO) {
 		const NxsDiscreteStateCell trnxs_gcode_vert_mito[] = {0, 1, 2, 3, 4, 5, 6, 7, -1, 8, -1, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, -1, 46, -1, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59};
 		std::copy(trnxs_gcode_vert_mito, trnxs_gcode_vert_mito + 64, std::back_inserter(v));
 		return v;
 	}
-	if (gCode == NXS_GCODE_YEAST_MITO) {
+	if(gCode == NXS_GCODE_YEAST_MITO) {
 		const NxsDiscreteStateCell trnxs_gcode_yeast_mito[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, -1, 48, -1, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61};
 		std::copy(trnxs_gcode_yeast_mito, trnxs_gcode_yeast_mito + 64, std::back_inserter(v));
 		return v;
 	}
-	if (gCode == NXS_GCODE_MOLD_MITO) {
+	if(gCode == NXS_GCODE_MOLD_MITO) {
 		const NxsDiscreteStateCell trnxs_gcode_mold_mito[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, -1, 48, -1, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61};
 		std::copy(trnxs_gcode_mold_mito, trnxs_gcode_mold_mito + 64, std::back_inserter(v));
 		return v;
 	}
-	if (gCode == NXS_GCODE_INVERT_MITO) {
+	if(gCode == NXS_GCODE_INVERT_MITO) {
 		const NxsDiscreteStateCell trnxs_gcode_invert_mito[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, -1, 48, -1, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61};
 		std::copy(trnxs_gcode_invert_mito, trnxs_gcode_invert_mito + 64, std::back_inserter(v));
 		return v;
 	}
-	if (gCode == NXS_GCODE_CILIATE) {
+	if(gCode == NXS_GCODE_CILIATE) {
 		const NxsDiscreteStateCell trnxs_gcode_ciliate[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, -1, 56, 57, 58, 59, 60, 61, 62};
 		std::copy(trnxs_gcode_ciliate, trnxs_gcode_ciliate + 64, std::back_inserter(v));
 		return v;
 	}
-	if (gCode == NXS_GCODE_ECHINO_MITO) {
+	if(gCode == NXS_GCODE_ECHINO_MITO) {
 		const NxsDiscreteStateCell trnxs_gcode_echino_mito[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, -1, 48, -1, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61};
 		std::copy(trnxs_gcode_echino_mito, trnxs_gcode_echino_mito + 64, std::back_inserter(v));
 		return v;
 	}
-	if (gCode == NXS_GCODE_EUPLOTID) {
+	if(gCode == NXS_GCODE_EUPLOTID) {
 		const NxsDiscreteStateCell trnxs_gcode_euplotid[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, -1, 48, -1, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61};
 		std::copy(trnxs_gcode_euplotid, trnxs_gcode_euplotid + 64, std::back_inserter(v));
 		return v;
 	}
-	if (gCode == NXS_GCODE_PLANT_PLASTID) {
+	if(gCode == NXS_GCODE_PLANT_PLASTID) {
 		const NxsDiscreteStateCell trnxs_gcode_plant_plastid[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, -1, 48, -1, 49, 50, 51, 52, 53, -1, 54, 55, 56, 57, 58, 59, 60};
 		std::copy(trnxs_gcode_plant_plastid, trnxs_gcode_plant_plastid + 64, std::back_inserter(v));
 		return v;
 	}
-	if (gCode == NXS_GCODE_ALT_YEAST) {
+	if(gCode == NXS_GCODE_ALT_YEAST) {
 		const NxsDiscreteStateCell trnxs_gcode_alt_yeast[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, -1, 48, -1, 49, 50, 51, 52, 53, -1, 54, 55, 56, 57, 58, 59, 60};
 		std::copy(trnxs_gcode_alt_yeast, trnxs_gcode_alt_yeast + 64, std::back_inserter(v));
 		return v;
 	}
-	if (gCode == NXS_GCODE_ASCIDIAN_MITO) {
+	if(gCode == NXS_GCODE_ASCIDIAN_MITO) {
 		const NxsDiscreteStateCell trnxs_gcode_ascidian_mito[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, -1, 48, -1, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61};
 		std::copy(trnxs_gcode_ascidian_mito, trnxs_gcode_ascidian_mito + 64, std::back_inserter(v));
 		return v;
 	}
-	if (gCode == NXS_GCODE_ALT_FLATWORM_MITO) {
+	if(gCode == NXS_GCODE_ALT_FLATWORM_MITO) {
 		const NxsDiscreteStateCell trnxs_gcode_alt_flatworm_mito[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, -1, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62};
 		std::copy(trnxs_gcode_alt_flatworm_mito, trnxs_gcode_alt_flatworm_mito + 64, std::back_inserter(v));
 		return v;
 	}
-	if (gCode == NXS_GCODE_BLEPHARISMA_MACRO) {
+	if(gCode == NXS_GCODE_BLEPHARISMA_MACRO) {
 		const NxsDiscreteStateCell trnxs_gcode_blepharisma_macro[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, -1, 48, 49, 50, 51, 52, 53, 54, -1, 55, 56, 57, 58, 59, 60, 61};
 		std::copy(trnxs_gcode_blepharisma_macro, trnxs_gcode_blepharisma_macro + 64, std::back_inserter(v));
 		return v;
 	}
-	if (gCode == NXS_GCODE_CHLOROPHYCEAN_MITO) {
+	if(gCode == NXS_GCODE_CHLOROPHYCEAN_MITO) {
 		const NxsDiscreteStateCell trnxs_gcode_chlorophycean_mito[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, -1, 48, 49, 50, 51, 52, 53, 54, -1, 55, 56, 57, 58, 59, 60, 61};
 		std::copy(trnxs_gcode_chlorophycean_mito, trnxs_gcode_chlorophycean_mito + 64, std::back_inserter(v));
 		return v;
 	}
-	if (gCode == NXS_GCODE_TREMATODE_MITO) {
+	if(gCode == NXS_GCODE_TREMATODE_MITO) {
 		const NxsDiscreteStateCell trnxs_gcode_trematode_mito[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, -1, 48, -1, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61};
 		std::copy(trnxs_gcode_trematode_mito, trnxs_gcode_trematode_mito + 64, std::back_inserter(v));
 		return v;
 	}
-	if (gCode == NXS_GCODE_SCENEDESMUS_MITO) {
+	if(gCode == NXS_GCODE_SCENEDESMUS_MITO) {
 		const NxsDiscreteStateCell trnxs_gcode_scenedesmus_mito[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, -1, 48, 49, 50, -1, 51, 52, 53, -1, 54, 55, 56, 57, 58, 59, 60};
 		std::copy(trnxs_gcode_scenedesmus_mito, trnxs_gcode_scenedesmus_mito + 64, std::back_inserter(v));
 		return v;
 	}
-	if (gCode == NXS_GCODE_THRAUSTOCHYTRIUM_MITO) {
+	if(gCode == NXS_GCODE_THRAUSTOCHYTRIUM_MITO) {
 		const NxsDiscreteStateCell trnxs_gcode_thraustochytrium_mito[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, -1, 48, -1, 49, 50, 51, 52, 53, -1, 54, 55, 56, -1, 57, 58, 59};
 		std::copy(trnxs_gcode_thraustochytrium_mito, trnxs_gcode_thraustochytrium_mito + 64, std::back_inserter(v));
 		return v;
@@ -298,7 +298,7 @@ CodonRecodingStruct getCodonRecodingStruct(NxsGeneticCodesEnum gCode)
 	CodonRecodingStruct c;
 	unsigned n;
 
-	if (gCode == NXS_GCODE_STANDARD) {
+	if(gCode == NXS_GCODE_STANDARD) {
 		const int ccitacnxs_gcode_standard[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 49, 51, 52, 53, 54, 55, 57, 58, 59, 60, 61, 62, 63};
 		n = 61;
 		const int caaindnxs_gcode_standard[] = {8, 11, 8, 11, 16, 16, 16, 16, 14, 15, 14, 15, 7, 7, 10, 7, 13, 6, 13, 6, 12, 12, 12, 12, 14, 14, 14, 14, 9, 9, 9, 9, 3, 2, 3, 2, 0, 0, 0, 0, 5, 5, 5, 5, 17, 17, 17, 17, 19, 19, 15, 15, 15, 15, 1, 18, 1, 9, 4, 9, 4};
@@ -308,7 +308,7 @@ CodonRecodingStruct getCodonRecodingStruct(NxsGeneticCodesEnum gCode)
 		std::copy(ccodstrnxs_gcode_standard, ccodstrnxs_gcode_standard + n, std::back_inserter(c.codonStrings));
 		return c;
 	}
-	if (gCode == NXS_GCODE_VERT_MITO) {
+	if(gCode == NXS_GCODE_VERT_MITO) {
 		const int ccitacnxs_gcode_vert_mito[] = {0, 1, 2, 3, 4, 5, 6, 7, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 49, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63};
 		n = 60;
 		const int caaindnxs_gcode_vert_mito[] = {8, 11, 8, 11, 16, 16, 16, 16, 15, 15, 10, 7, 10, 7, 13, 6, 13, 6, 12, 12, 12, 12, 14, 14, 14, 14, 9, 9, 9, 9, 3, 2, 3, 2, 0, 0, 0, 0, 5, 5, 5, 5, 17, 17, 17, 17, 19, 19, 15, 15, 15, 15, 18, 1, 18, 1, 9, 4, 9, 4};
@@ -318,7 +318,7 @@ CodonRecodingStruct getCodonRecodingStruct(NxsGeneticCodesEnum gCode)
 		std::copy(ccodstrnxs_gcode_vert_mito, ccodstrnxs_gcode_vert_mito + n, std::back_inserter(c.codonStrings));
 		return c;
 	}
-	if (gCode == NXS_GCODE_YEAST_MITO) {
+	if(gCode == NXS_GCODE_YEAST_MITO) {
 		const int ccitacnxs_gcode_yeast_mito[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 49, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63};
 		n = 62;
 		const int caaindnxs_gcode_yeast_mito[] = {8, 11, 8, 11, 16, 16, 16, 16, 14, 15, 14, 15, 7, 7, 10, 7, 13, 6, 13, 6, 12, 12, 12, 12, 14, 14, 14, 14, 9, 9, 9, 9, 3, 2, 3, 2, 0, 0, 0, 0, 5, 5, 5, 5, 17, 17, 17, 17, 19, 19, 15, 15, 15, 15, 18, 1, 18, 1, 9, 4, 9, 4};
@@ -328,7 +328,7 @@ CodonRecodingStruct getCodonRecodingStruct(NxsGeneticCodesEnum gCode)
 		std::copy(ccodstrnxs_gcode_yeast_mito, ccodstrnxs_gcode_yeast_mito + n, std::back_inserter(c.codonStrings));
 		return c;
 	}
-	if (gCode == NXS_GCODE_MOLD_MITO) {
+	if(gCode == NXS_GCODE_MOLD_MITO) {
 		const int ccitacnxs_gcode_mold_mito[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 49, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63};
 		n = 62;
 		const int caaindnxs_gcode_mold_mito[] = {8, 11, 8, 11, 16, 16, 16, 16, 14, 15, 14, 15, 7, 7, 10, 7, 13, 6, 13, 6, 12, 12, 12, 12, 14, 14, 14, 14, 9, 9, 9, 9, 3, 2, 3, 2, 0, 0, 0, 0, 5, 5, 5, 5, 17, 17, 17, 17, 19, 19, 15, 15, 15, 15, 18, 1, 18, 1, 9, 4, 9, 4};
@@ -338,7 +338,7 @@ CodonRecodingStruct getCodonRecodingStruct(NxsGeneticCodesEnum gCode)
 		std::copy(ccodstrnxs_gcode_mold_mito, ccodstrnxs_gcode_mold_mito + n, std::back_inserter(c.codonStrings));
 		return c;
 	}
-	if (gCode == NXS_GCODE_INVERT_MITO) {
+	if(gCode == NXS_GCODE_INVERT_MITO) {
 		const int ccitacnxs_gcode_invert_mito[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 49, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63};
 		n = 62;
 		const int caaindnxs_gcode_invert_mito[] = {8, 11, 8, 11, 16, 16, 16, 16, 15, 15, 15, 15, 10, 7, 10, 7, 13, 6, 13, 6, 12, 12, 12, 12, 14, 14, 14, 14, 9, 9, 9, 9, 3, 2, 3, 2, 0, 0, 0, 0, 5, 5, 5, 5, 17, 17, 17, 17, 19, 19, 15, 15, 15, 15, 18, 1, 18, 1, 9, 4, 9, 4};
@@ -348,7 +348,7 @@ CodonRecodingStruct getCodonRecodingStruct(NxsGeneticCodesEnum gCode)
 		std::copy(ccodstrnxs_gcode_invert_mito, ccodstrnxs_gcode_invert_mito + n, std::back_inserter(c.codonStrings));
 		return c;
 	}
-	if (gCode == NXS_GCODE_CILIATE) {
+	if(gCode == NXS_GCODE_CILIATE) {
 		const int ccitacnxs_gcode_ciliate[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 57, 58, 59, 60, 61, 62, 63};
 		n = 63;
 		const int caaindnxs_gcode_ciliate[] = {8, 11, 8, 11, 16, 16, 16, 16, 14, 15, 14, 15, 7, 7, 10, 7, 13, 6, 13, 6, 12, 12, 12, 12, 14, 14, 14, 14, 9, 9, 9, 9, 3, 2, 3, 2, 0, 0, 0, 0, 5, 5, 5, 5, 17, 17, 17, 17, 13, 19, 13, 19, 15, 15, 15, 15, 1, 18, 1, 9, 4, 9, 4};
@@ -358,7 +358,7 @@ CodonRecodingStruct getCodonRecodingStruct(NxsGeneticCodesEnum gCode)
 		std::copy(ccodstrnxs_gcode_ciliate, ccodstrnxs_gcode_ciliate + n, std::back_inserter(c.codonStrings));
 		return c;
 	}
-	if (gCode == NXS_GCODE_ECHINO_MITO) {
+	if(gCode == NXS_GCODE_ECHINO_MITO) {
 		const int ccitacnxs_gcode_echino_mito[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 49, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63};
 		n = 62;
 		const int caaindnxs_gcode_echino_mito[] = {11, 11, 8, 11, 16, 16, 16, 16, 15, 15, 15, 15, 7, 7, 10, 7, 13, 6, 13, 6, 12, 12, 12, 12, 14, 14, 14, 14, 9, 9, 9, 9, 3, 2, 3, 2, 0, 0, 0, 0, 5, 5, 5, 5, 17, 17, 17, 17, 19, 19, 15, 15, 15, 15, 18, 1, 18, 1, 9, 4, 9, 4};
@@ -368,7 +368,7 @@ CodonRecodingStruct getCodonRecodingStruct(NxsGeneticCodesEnum gCode)
 		std::copy(ccodstrnxs_gcode_echino_mito, ccodstrnxs_gcode_echino_mito + n, std::back_inserter(c.codonStrings));
 		return c;
 	}
-	if (gCode == NXS_GCODE_EUPLOTID) {
+	if(gCode == NXS_GCODE_EUPLOTID) {
 		const int ccitacnxs_gcode_euplotid[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 49, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63};
 		n = 62;
 		const int caaindnxs_gcode_euplotid[] = {8, 11, 8, 11, 16, 16, 16, 16, 14, 15, 14, 15, 7, 7, 10, 7, 13, 6, 13, 6, 12, 12, 12, 12, 14, 14, 14, 14, 9, 9, 9, 9, 3, 2, 3, 2, 0, 0, 0, 0, 5, 5, 5, 5, 17, 17, 17, 17, 19, 19, 15, 15, 15, 15, 1, 1, 18, 1, 9, 4, 9, 4};
@@ -378,7 +378,7 @@ CodonRecodingStruct getCodonRecodingStruct(NxsGeneticCodesEnum gCode)
 		std::copy(ccodstrnxs_gcode_euplotid, ccodstrnxs_gcode_euplotid + n, std::back_inserter(c.codonStrings));
 		return c;
 	}
-	if (gCode == NXS_GCODE_PLANT_PLASTID) {
+	if(gCode == NXS_GCODE_PLANT_PLASTID) {
 		const int ccitacnxs_gcode_plant_plastid[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 49, 51, 52, 53, 54, 55, 57, 58, 59, 60, 61, 62, 63};
 		n = 61;
 		const int caaindnxs_gcode_plant_plastid[] = {8, 11, 8, 11, 16, 16, 16, 16, 14, 15, 14, 15, 7, 7, 10, 7, 13, 6, 13, 6, 12, 12, 12, 12, 14, 14, 14, 14, 9, 9, 9, 9, 3, 2, 3, 2, 0, 0, 0, 0, 5, 5, 5, 5, 17, 17, 17, 17, 19, 19, 15, 15, 15, 15, 1, 18, 1, 9, 4, 9, 4};
@@ -388,7 +388,7 @@ CodonRecodingStruct getCodonRecodingStruct(NxsGeneticCodesEnum gCode)
 		std::copy(ccodstrnxs_gcode_plant_plastid, ccodstrnxs_gcode_plant_plastid + n, std::back_inserter(c.codonStrings));
 		return c;
 	}
-	if (gCode == NXS_GCODE_ALT_YEAST) {
+	if(gCode == NXS_GCODE_ALT_YEAST) {
 		const int ccitacnxs_gcode_alt_yeast[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 49, 51, 52, 53, 54, 55, 57, 58, 59, 60, 61, 62, 63};
 		n = 61;
 		const int caaindnxs_gcode_alt_yeast[] = {8, 11, 8, 11, 16, 16, 16, 16, 14, 15, 14, 15, 7, 7, 10, 7, 13, 6, 13, 6, 12, 12, 12, 12, 14, 14, 14, 14, 9, 9, 15, 9, 3, 2, 3, 2, 0, 0, 0, 0, 5, 5, 5, 5, 17, 17, 17, 17, 19, 19, 15, 15, 15, 15, 1, 18, 1, 9, 4, 9, 4};
@@ -398,7 +398,7 @@ CodonRecodingStruct getCodonRecodingStruct(NxsGeneticCodesEnum gCode)
 		std::copy(ccodstrnxs_gcode_alt_yeast, ccodstrnxs_gcode_alt_yeast + n, std::back_inserter(c.codonStrings));
 		return c;
 	}
-	if (gCode == NXS_GCODE_ASCIDIAN_MITO) {
+	if(gCode == NXS_GCODE_ASCIDIAN_MITO) {
 		const int ccitacnxs_gcode_ascidian_mito[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 49, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63};
 		n = 62;
 		const int caaindnxs_gcode_ascidian_mito[] = {8, 11, 8, 11, 16, 16, 16, 16, 5, 15, 5, 15, 10, 7, 10, 7, 13, 6, 13, 6, 12, 12, 12, 12, 14, 14, 14, 14, 9, 9, 9, 9, 3, 2, 3, 2, 0, 0, 0, 0, 5, 5, 5, 5, 17, 17, 17, 17, 19, 19, 15, 15, 15, 15, 18, 1, 18, 1, 9, 4, 9, 4};
@@ -408,7 +408,7 @@ CodonRecodingStruct getCodonRecodingStruct(NxsGeneticCodesEnum gCode)
 		std::copy(ccodstrnxs_gcode_ascidian_mito, ccodstrnxs_gcode_ascidian_mito + n, std::back_inserter(c.codonStrings));
 		return c;
 	}
-	if (gCode == NXS_GCODE_ALT_FLATWORM_MITO) {
+	if(gCode == NXS_GCODE_ALT_FLATWORM_MITO) {
 		const int ccitacnxs_gcode_alt_flatworm_mito[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63};
 		n = 63;
 		const int caaindnxs_gcode_alt_flatworm_mito[] = {11, 11, 8, 11, 16, 16, 16, 16, 15, 15, 15, 15, 7, 7, 10, 7, 13, 6, 13, 6, 12, 12, 12, 12, 14, 14, 14, 14, 9, 9, 9, 9, 3, 2, 3, 2, 0, 0, 0, 0, 5, 5, 5, 5, 17, 17, 17, 17, 19, 19, 19, 15, 15, 15, 15, 18, 1, 18, 1, 9, 4, 9, 4};
@@ -418,7 +418,7 @@ CodonRecodingStruct getCodonRecodingStruct(NxsGeneticCodesEnum gCode)
 		std::copy(ccodstrnxs_gcode_alt_flatworm_mito, ccodstrnxs_gcode_alt_flatworm_mito + n, std::back_inserter(c.codonStrings));
 		return c;
 	}
-	if (gCode == NXS_GCODE_BLEPHARISMA_MACRO) {
+	if(gCode == NXS_GCODE_BLEPHARISMA_MACRO) {
 		const int ccitacnxs_gcode_blepharisma_macro[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 49, 50, 51, 52, 53, 54, 55, 57, 58, 59, 60, 61, 62, 63};
 		n = 62;
 		const int caaindnxs_gcode_blepharisma_macro[] = {8, 11, 8, 11, 16, 16, 16, 16, 14, 15, 14, 15, 7, 7, 10, 7, 13, 6, 13, 6, 12, 12, 12, 12, 14, 14, 14, 14, 9, 9, 9, 9, 3, 2, 3, 2, 0, 0, 0, 0, 5, 5, 5, 5, 17, 17, 17, 17, 19, 13, 19, 15, 15, 15, 15, 1, 18, 1, 9, 4, 9, 4};
@@ -428,7 +428,7 @@ CodonRecodingStruct getCodonRecodingStruct(NxsGeneticCodesEnum gCode)
 		std::copy(ccodstrnxs_gcode_blepharisma_macro, ccodstrnxs_gcode_blepharisma_macro + n, std::back_inserter(c.codonStrings));
 		return c;
 	}
-	if (gCode == NXS_GCODE_CHLOROPHYCEAN_MITO) {
+	if(gCode == NXS_GCODE_CHLOROPHYCEAN_MITO) {
 		const int ccitacnxs_gcode_chlorophycean_mito[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 49, 50, 51, 52, 53, 54, 55, 57, 58, 59, 60, 61, 62, 63};
 		n = 62;
 		const int caaindnxs_gcode_chlorophycean_mito[] = {8, 11, 8, 11, 16, 16, 16, 16, 14, 15, 14, 15, 7, 7, 10, 7, 13, 6, 13, 6, 12, 12, 12, 12, 14, 14, 14, 14, 9, 9, 9, 9, 3, 2, 3, 2, 0, 0, 0, 0, 5, 5, 5, 5, 17, 17, 17, 17, 19, 9, 19, 15, 15, 15, 15, 1, 18, 1, 9, 4, 9, 4};
@@ -438,7 +438,7 @@ CodonRecodingStruct getCodonRecodingStruct(NxsGeneticCodesEnum gCode)
 		std::copy(ccodstrnxs_gcode_chlorophycean_mito, ccodstrnxs_gcode_chlorophycean_mito + n, std::back_inserter(c.codonStrings));
 		return c;
 	}
-	if (gCode == NXS_GCODE_TREMATODE_MITO) {
+	if(gCode == NXS_GCODE_TREMATODE_MITO) {
 		const int ccitacnxs_gcode_trematode_mito[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 49, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63};
 		n = 62;
 		const int caaindnxs_gcode_trematode_mito[] = {11, 11, 8, 11, 16, 16, 16, 16, 15, 15, 15, 15, 10, 7, 10, 7, 13, 6, 13, 6, 12, 12, 12, 12, 14, 14, 14, 14, 9, 9, 9, 9, 3, 2, 3, 2, 0, 0, 0, 0, 5, 5, 5, 5, 17, 17, 17, 17, 19, 19, 15, 15, 15, 15, 18, 1, 18, 1, 9, 4, 9, 4};
@@ -448,7 +448,7 @@ CodonRecodingStruct getCodonRecodingStruct(NxsGeneticCodesEnum gCode)
 		std::copy(ccodstrnxs_gcode_trematode_mito, ccodstrnxs_gcode_trematode_mito + n, std::back_inserter(c.codonStrings));
 		return c;
 	}
-	if (gCode == NXS_GCODE_SCENEDESMUS_MITO) {
+	if(gCode == NXS_GCODE_SCENEDESMUS_MITO) {
 		const int ccitacnxs_gcode_scenedesmus_mito[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 49, 50, 51, 53, 54, 55, 57, 58, 59, 60, 61, 62, 63};
 		n = 61;
 		const int caaindnxs_gcode_scenedesmus_mito[] = {8, 11, 8, 11, 16, 16, 16, 16, 14, 15, 14, 15, 7, 7, 10, 7, 13, 6, 13, 6, 12, 12, 12, 12, 14, 14, 14, 14, 9, 9, 9, 9, 3, 2, 3, 2, 0, 0, 0, 0, 5, 5, 5, 5, 17, 17, 17, 17, 19, 9, 19, 15, 15, 15, 1, 18, 1, 9, 4, 9, 4};
@@ -458,7 +458,7 @@ CodonRecodingStruct getCodonRecodingStruct(NxsGeneticCodesEnum gCode)
 		std::copy(ccodstrnxs_gcode_scenedesmus_mito, ccodstrnxs_gcode_scenedesmus_mito + n, std::back_inserter(c.codonStrings));
 		return c;
 	}
-	if (gCode == NXS_GCODE_THRAUSTOCHYTRIUM_MITO) {
+	if(gCode == NXS_GCODE_THRAUSTOCHYTRIUM_MITO) {
 		const int ccitacnxs_gcode_thraustochytrium_mito[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 49, 51, 52, 53, 54, 55, 57, 58, 59, 61, 62, 63};
 		n = 60;
 		const int caaindnxs_gcode_thraustochytrium_mito[] = {8, 11, 8, 11, 16, 16, 16, 16, 14, 15, 14, 15, 7, 7, 10, 7, 13, 6, 13, 6, 12, 12, 12, 12, 14, 14, 14, 14, 9, 9, 9, 9, 3, 2, 3, 2, 0, 0, 0, 0, 5, 5, 5, 5, 17, 17, 17, 17, 19, 19, 15, 15, 15, 15, 1, 18, 1, 4, 9, 4};
@@ -2391,7 +2391,7 @@ bool NxsDiscreteDatatypeMapper::IsSemanticallyEquivalent(const NxsDiscreteDataty
 	if (thisHasGap != otherHasGap)
 		return false;
 	const NxsDiscreteStateCell nsc = (NxsDiscreteStateCell)GetHighestStateCode();
-	if (nsc != (NxsDiscreteStateCell) other.GetHighestStateCode())
+	if(nsc != (NxsDiscreteStateCell) other.GetHighestStateCode())
 		return false;
 	for (NxsDiscreteStateCell i = 0; i <= nsc; ++i)
 		{
@@ -4118,7 +4118,7 @@ void NxsCharactersBlock::HandleStdMatrix(
 		{
 		for (indOfTaxInCommand = 0; indOfTaxInCommand < nTaxWithData ; indOfTaxInCommand++)
 			{
-			unsigned num_charsSinceLastSignalCheck = 0;
+			unsigned numCharsSinceLastSignalCheck = 0;
 			if (checkingSignals && NxsReader::getNumSignalIntsCaught() != numSigInts)
 				{
 				if (datatype == NxsCharactersBlock::continuous)
@@ -4233,7 +4233,7 @@ void NxsCharactersBlock::HandleStdMatrix(
 				{
 				if (checkingSignals)
 					{
-					if (num_charsSinceLastSignalCheck >= MAX_NUM_CHARS_BETWEEN_SIGNAL_CHECKS)
+					if (numCharsSinceLastSignalCheck >= MAX_NUM_CHARS_BETWEEN_SIGNAL_CHECKS)
 						{
 						if (NxsReader::getNumSignalIntsCaught() != numSigInts)
 							{
@@ -4243,10 +4243,10 @@ void NxsCharactersBlock::HandleStdMatrix(
 								discreteMatrix.clear();
 							throw NxsSignalCanceledParseException("Reading Characters Block");
 							}
-						num_charsSinceLastSignalCheck = 0;
+						numCharsSinceLastSignalCheck = 0;
 						}
 					else
-						num_charsSinceLastSignalCheck++;
+						numCharsSinceLastSignalCheck++;
 					}
 
 				NxsDiscreteDatatypeMapper * currMapper =  GetMutableDatatypeMapperForChar(currChar);
@@ -5180,7 +5180,7 @@ void NxsCharactersBlock::ShowStateLabels(
 				else
 					{
 					vector<double>::const_iterator vIt = cit->second.begin();
-					for (; vIt != cit->second.end(); ++vIt)
+					for(; vIt != cit->second.end(); ++vIt)
 						{
 						if (*vIt == DBL_MAX)
 							out << missing << ' ';
