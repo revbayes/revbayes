@@ -113,6 +113,8 @@ double NodeTimeSlideWeightedProposal::doProposal( void )
         {
             std::cerr << "mvNodeTimeSlide has no effect; the tree only contains the root, tips, and sampled ancestors." << std::endl;
         }
+        
+        storedNode = nullptr;
         return RbConstants::Double::neginf;
     }
     
@@ -253,10 +255,10 @@ void NodeTimeSlideWeightedProposal::printParameterSummary(std::ostream &o, bool 
  */
 void NodeTimeSlideWeightedProposal::undoProposal( void )
 {
+    if (storedNode == nullptr) return;
     
     // undo the proposal
     variable->getValue().getNode(storedNode->getIndex()).setAge( storedAge );
-    
 }
 
 

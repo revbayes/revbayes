@@ -904,10 +904,36 @@ HomologousDiscreteCharacterData<StandardState>* NclReader::createStandardMatrix(
             }
             else
             {
-                for (unsigned int s=0; s<charblock->GetNumStates(origTaxIndex, *cit); s++)
+                // If we have a partial ambiguity and one of the states involved in the ambiguity is a gap / inapplicable state,
+                // set the matrix cell to missing data and emit a warning
+                if ( charblock->GetState(origTaxIndex, *cit, 0) == charblock->GetGapSymbol() )
+                {
+                    std::stringstream ambig_inapp_mssg;
+                    ambig_inapp_mssg << "Partial ambiguity involving a gap state (" << charblock->GetGapSymbol() << ") detected for taxon ";
+                    ambig_inapp_mssg << charblock->GetTaxonLabel(origTaxIndex) << " at character " << std::distance(charset.begin(), cit) + 1;
+                    ambig_inapp_mssg << "." << std::endl << "Replacing by missing data (" << charblock->GetMissingSymbol() << ").";
+                    RBOUT( ambig_inapp_mssg.str() );
+                    
+                    stdState.setMissingState(true);
+                }
+                else
                 {
                     stdState.setState( std::string(1, charblock->GetState(origTaxIndex, *cit, 0) ) );
-                    for (unsigned int s=1; s<charblock->GetNumStates(origTaxIndex, *cit); s++)
+                }
+                
+                for (unsigned int s=1; s<charblock->GetNumStates(origTaxIndex, *cit); s++)
+                {
+                    if ( charblock->GetState(origTaxIndex, *cit, s) == charblock->GetGapSymbol() )
+                    {
+                        std::stringstream ambig_inapp_mssg;
+                        ambig_inapp_mssg << "Partial ambiguity involving a gap state (" << charblock->GetGapSymbol() << ") detected for taxon ";
+                        ambig_inapp_mssg << charblock->GetTaxonLabel(origTaxIndex) << " at character " << std::distance(charset.begin(), cit) + 1;
+                        ambig_inapp_mssg << "." << std::endl << "Replacing by missing data (" << charblock->GetMissingSymbol() << ").";
+                        RBOUT( ambig_inapp_mssg.str() );
+                        
+                        stdState.setMissingState(true);
+                    }
+                    else
                     {
                         stdState.addState( std::string(1, charblock->GetState(origTaxIndex, *cit, s) ) );
                     }
@@ -948,6 +974,7 @@ void NclReader::getTranslateTables(std::vector<std::map<int,std::string> >& tran
     }
     
 }
+
 
 /** Attempt to determine the type of data this is being read */
 std::string NclReader::intuitDataType(std::string& s)

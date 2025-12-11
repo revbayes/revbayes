@@ -72,6 +72,12 @@ void AbstractFileMonitor::closeStream()
 }
 
 
+path AbstractFileMonitor::getMonitorFileName( void ) const
+{
+    return working_file_name;
+}
+
+
 bool AbstractFileMonitor::isFileMonitor( void ) const
 {
     return true;

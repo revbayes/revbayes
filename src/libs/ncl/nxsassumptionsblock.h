@@ -31,8 +31,6 @@
 class NxsCharactersBlockAPI;
 class NxsTaxaBlockAPI;
 
-using std::vector;
-
 class NxsAssumptionsBlockAPI
   : public NxsBlock
 	{
@@ -63,7 +61,7 @@ class NxsAssumptionsBlockAPI
 		virtual void FlagTaxaBlockAsUsed() = 0;
 		virtual void FlagTreesBlockAsUsed() = 0;
 
-  		virtual void readDiscreteCharsetDef(NxsString charset_name, NxsToken &token, bool asterisked) = 0;
+  		virtual void ReadCharsetDef(NxsString charset_name, NxsToken &token, bool asterisked) = 0;
   		virtual void ReadExsetDef(NxsString charset_name, NxsToken &token, bool asterisked) = 0;
 		virtual void ReadTaxsetDef(NxsString set_name, NxsToken &token, bool asterisked) = 0;
 		virtual void ReadTreesetDef(NxsString set_name, NxsToken &token, bool asterisked) = 0;
@@ -125,7 +123,7 @@ class NxsAssumptionsBlock
 		const NxsUnsignedSet *GetCharSet(NxsString nm) const; /*v2.1to2.2 4 */
 
 		int					GetNumCharPartitions(); /*v2.1to2.2 6 */
-		void				GetCharPartitionNames(vector<std::string> &names); /*v2.1to2.2 6 */
+		void				GetCharPartitionNames(std::vector<std::string> &names); /*v2.1to2.2 6 */
 		const NxsPartition		*GetCharPartition(std::string nm) const;
 
 		int					GetNumTaxSets(); /*v2.1to2.2 6 */
@@ -253,7 +251,7 @@ class NxsAssumptionsBlock
 	protected:
 		typedef std::vector<NxsAssumptionsBlockAPI *> VecAssumpBlockPtr;
 
-		virtual void 		readDiscreteCharsetDef(NxsString charset_name, NxsToken &token, bool asterisked);
+		virtual void 		ReadCharsetDef(NxsString charset_name, NxsToken &token, bool asterisked);
 		virtual void 		ReadExsetDef(NxsString charset_name, NxsToken &token, bool asterisked);
 		virtual void 		ReadTreesetDef(NxsString set_name, NxsToken &token, bool asterisked);
 		virtual void 		ReadTaxsetDef(NxsString set_name, NxsToken &token, bool asterisked);

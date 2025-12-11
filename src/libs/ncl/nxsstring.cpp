@@ -213,7 +213,7 @@ NxsString &NxsString::operator+=(
 	// Create a C-string representing the supplied double value.
 	// The # causes a decimal point to always be output.
 	//
-	snprintf(tmp, 81, "%#3.6f", d);
+	std::snprintf(tmp, 81, "%#3.6f", d);
 	unsigned tmplen = (unsigned)strlen(tmp);
 
 	// If the C-string has a lot of trailing zeros, lop them off

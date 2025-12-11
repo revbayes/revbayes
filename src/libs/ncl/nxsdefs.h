@@ -32,8 +32,6 @@
 #define NCL_COPYRIGHT         "Copyright (c) 1999-2011 by Paul O. Lewis and Mark T. Holder"
 #define NCL_HOMEPAGEURL       "http://sourceforge.net/projects/ncl"
 
-// RevBayes protects the ObjectiveC keyword "id"
-#define RESERVE_ID_KEYWORD 
 #if defined(RESERVE_ID_KEYWORD)
 #	define NCL_BLOCKTYPE_ATTR_NAME blockTypeName
 #else

@@ -130,6 +130,8 @@ double NodeRateTimeSlideUniformProposal::doProposal( void )
         {
             std::cerr << "mvNodeRateTimeSlideUniform has no effect; the tree only contains the root, tips, and sampled ancestors." << std::endl;
         }
+        
+        storedNode = nullptr;
         return RbConstants::Double::neginf;
     }
     
@@ -232,6 +234,7 @@ void NodeRateTimeSlideUniformProposal::printParameterSummary(std::ostream &o, bo
  */
 void NodeRateTimeSlideUniformProposal::undoProposal( void )
 {
+    if (storedNode == nullptr) return;
     
     // undo the proposal
     storedNode->setAge( storedAge );

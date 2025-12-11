@@ -1,0 +1,21 @@
+## continue-on-error
+print("> x[0]")
+x[0]        
+print("> x[1]")
+x[1]
+
+print("> x[-1] = -1")
+x[-1] = -1
+print("> x[0] = 0")
+x[0] = 0        
+print("> x[1] = 1")
+x[1] = 1
+print("> x[2] = -2")
+x[2] = -2
+print("> print(x)")        
+print(x)        
+
+print("> x[1.5]")
+x[1.5]
+print("> x[1.5] = 1")
+x[1.5] = 1
