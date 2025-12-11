@@ -407,7 +407,7 @@ std::string newickEscape(const std::string in_label)
         char c = in_label[i];
 
         // first check for any illegal characters or underscore
-        if (c == '\'' || c == '(' || c == ')' || c =='_' ||
+        if (c == '\'' || c == '(' || c == ')' || c ==' ' ||
             c == '[' || c ==']' || c == ':' || c == ';' || c ==',') {
             needs_quoting = true;
             // check for single quote
@@ -430,11 +430,11 @@ std::string newickEscape(const std::string in_label)
     } 
     // convert blanks to underscores
     else{
-        for (char& c : escaped) {
+        /*for (char& c : escaped) {
             if (c == ' ') {
                 c = '_';
             }
-        }
+        }*/
         return escaped;
     }
 }
