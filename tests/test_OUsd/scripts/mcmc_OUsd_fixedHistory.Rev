@@ -83,7 +83,6 @@ monitors.append( mnModel(filename="output/artiodactyla_OUsd_fixedHistory.log", p
 mymcmc = mcmc(mymodel, monitors, moves, nruns=1, combine="none")
 
 ### run the MCMC ###
-mymcmc.run(generations=500, tuningInterval=100)
 mymcmc.run(generations=500)
 
 
