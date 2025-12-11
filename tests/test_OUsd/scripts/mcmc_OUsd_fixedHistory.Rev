@@ -70,7 +70,7 @@ Y.clamp(cont)
 # The Model #
 #############
 
-mymodel = model(X)
+mymodel = model(Y)
 
 monitors.append( mnModel(filename="output/artiodactyla_OUsd_fixedHistory.log", printgen=10) )
 

@@ -1,3 +1,10 @@
    Successfully read one character matrix from file 'data/artiodactyla_hypsodonty.nex'
-   Missing Variable:	Variable X does not exist
-   Error:	Problem processing line 73 in file "./test_OUsd/scripts/mcmc_OUsd_fixedHistory.Rev"
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 9 different moves in a random move schedule with 9 moves per iteration
+   
+   Appending to previous MCMC simulation of 500 iterations
+   This simulation runs 1 independent replicate.
+   The simulator uses 9 different moves in a random move schedule with 9 moves per iteration
+   
