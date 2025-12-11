@@ -10,7 +10,7 @@
 
 ## Infrastructure
 
-# RevBayes 1.3.2 (Dec 1X, 2025)
+# RevBayes 1.3.2 (Dec 11, 2025)
 
 ## Backwards-incompatible changes
   * Restructure the command-line interface following Rscript syntax (#803, #827).
