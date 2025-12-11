@@ -106,7 +106,7 @@ Y.clamp(cont)
 
 mymodel = model(X)
 
-monitors.append( mnModel(filename="output/artiodactyla_OUsd_stochasticHistory.log", printgen=10) )
+monitors.append( mnModel(filename="output_expected/artiodactyla_OUsd_stochasticHistory.log", printgen=10) )
 
 
 ################cd

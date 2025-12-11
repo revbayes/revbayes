@@ -74,6 +74,7 @@ PhyloOrnsteinUhlenbeckStateDependent::PhyloOrnsteinUhlenbeckStateDependent(const
  * Destructor. Because we added ourselves as a reference to tau when we added a listener to its
  * TreeChangeEventHandler, we need to remove ourselves as a reference and possibly delete tau
  * when we die. All other parameters are handled by others.
+ * Currently, the topology will not be changed. We keep the code for future extension.
  */
 PhyloOrnsteinUhlenbeckStateDependent::~PhyloOrnsteinUhlenbeckStateDependent( void )
 {
