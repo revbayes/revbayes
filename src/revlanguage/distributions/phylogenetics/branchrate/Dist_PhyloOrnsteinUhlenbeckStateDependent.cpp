@@ -58,13 +58,20 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
    //    set the root treatment
     const std::string& rt = static_cast<const RlString &>( root_treatment->getRevObject() ).getValue();
     RevBayesCore::PhyloOrnsteinUhlenbeckStateDependent::ROOT_TREATMENT rtr;
-    if (rt == "optimum"){
+    if (rt == "optimum")
+    {
         rtr = RevBayesCore::PhyloOrnsteinUhlenbeckStateDependent::ROOT_TREATMENT::OPTIMUM;
-    }else if (rt == "equilibrium"){
+    }
+    else if (rt == "equilibrium")
+    {
         rtr = RevBayesCore::PhyloOrnsteinUhlenbeckStateDependent::ROOT_TREATMENT::EQUILIBRIUM;
-    }else if (rt == "parameter"){
+    }
+    else if (rt == "parameter")
+    {
         rtr = RevBayesCore::PhyloOrnsteinUhlenbeckStateDependent::ROOT_TREATMENT::PARAMETER;
-   }else{
+    }
+    else
+    {
         throw RbException("argument rootTreatment must be one of \"optimum\", \"equilibrium\" or \"parameter\"");
     }
 
@@ -109,15 +116,14 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
     // set the root values
     RevBayesCore::TypedDagNode< double >* rv = static_cast<const Real &>( root_value->getRevObject() ).getDagNode();
 
-    // if ( rt == "optimum" || rt == "equilibrium" )
-    // {
-    //     if ( rv != NULL )
-    //     {
-    //         throw RbException("To use the root treatment \"optimum\" or \"equilibrium\", you should not specify the argument rootValue ");
-    //     }
-    // }
-    // else
-    if ( rt == "parameter" )
+    if ( rt == "optimum" || rt == "equilibrium" )
+    {
+         if ( rv != NULL )
+         {
+             throw RbException("To use the root treatment \"optimum\" or \"equilibrium\", you should not specify the argument rootValue ");
+         }
+    }
+    else if ( rt == "parameter" )
     {
         if ( rv != NULL)
         {
@@ -128,11 +134,6 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
             throw RbException("To use the root treatment \"parameter\", you need to specify the argument rootValue ");
         }
     }
-
-    // @TODO: Need some way to check if rootTreatment = "parameter" is specified,
-    // then the user must also specify the random variable for the ancestral value
-    // and if not, then throw an error
-    // not fixed yet
 
     return dist;
 }
