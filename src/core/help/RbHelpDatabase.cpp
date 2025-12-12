@@ -1482,7 +1482,13 @@ writeNexus("simulatedData.nex", sim))");
 	help_strings[string("dnPhyloCTMCDASiteIID")][string("description")] = string(R"(The probability distribution of the character state vectors at the tips of a phylogenetic tree, given a phylogenetic continuous-time Markov chain model.)");
 	help_strings[string("dnPhyloCTMCDASiteIID")][string("details")] = string(R"(The parameters of a phylogenetic model -- a tree topology with branch lengths, a substitution model that describes how observations evolve over the tree, etc. -- collectively form a distribution called the _phylogenetic continuous-time
 Markov chain_. In this distribution, the branch history is sampled (through data augmentation), instead of integrated out (as in `dnPhyloCTMC`). An instance of character history can therefore be retrieved from the distribution (using `.characterHistories`) The probability of observed character state vectors (specified via clamping the
-distribution to a `AbstractHomologousDiscreteCharacterData` object) is computed by summing the probability of the history on each branch. The probability of the history on a branch is the product of the probabilities of waiting times between events (or the probability of no event in the final segment) given the current rate of change (see May and Moore 2020).)");
+distribution to a `AbstractHomologousDiscreteCharacterData` object) is computed by summing the probability of the history on each branch. The probability of the history on a branch is the product of the probabilities of waiting times between events (or the probability of no event in the final segment) given the current rate of change (see May and Moore 2020).
+
+Note that when `rootFrequencies` is not provided, the distribution assumes stationary frequencies at the root.
+The stationary frequencies will be calculated numerically if the tree has a root branch, and analytically otherwise.
+When `rootFrequencies` is provided, then stationarity at the root will not be assumed, and the likelihood calculation will be based on the provided root frequencies.
+
+If this distribution is used together with `dnPhyloOUSD` or `dnPhyloBMSD`, specify `nSites=1`.)");
 	help_strings[string("dnPhyloCTMCDASiteIID")][string("example")] = string(R"(# Read character data from a file
 chars <- readDiscreteCharacterData("myData.nex")
 taxa = chars.taxa()
