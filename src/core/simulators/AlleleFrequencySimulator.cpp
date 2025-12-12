@@ -604,10 +604,17 @@ std::int64_t AlleleFrequencySimulator::simulateAlongBranch( double this_populuat
 //            current_state += num_mutants;
             
             // draw the waiting time until the next mutation
-            int mutation_wait_generations = RbStatistics::Geometric::rv(per_generation_mutation_rate_0, *rng);
-            
+            std::int64_t mutation_wait_generations = RbStatistics::Geometric::rv(per_generation_mutation_rate_0, *rng);
+
+            double waiting_time_till_next_mutation = mutation_wait_generations * this_generation_time;
+
+            if ( waiting_time_till_next_mutation < 1e-6 )
+            {
+                throw RbException() << "Negative waiting time: " << waiting_time_till_next_mutation << " . Likely integer overflow.";
+            }
+
             // fast forward the generation time
-            current_time += mutation_wait_generations * this_generation_time;
+            current_time += waiting_time_till_next_mutation;
             
             // accept the mutation only if it happened within the time of this branch
             if ( current_time <= branch_length )
@@ -621,10 +628,17 @@ std::int64_t AlleleFrequencySimulator::simulateAlongBranch( double this_populuat
 //            current_state -= num_mutants;
             
             // draw the waiting time until the next mutation
-            int mutation_wait_generations = RbStatistics::Geometric::rv(per_generation_mutation_rate_1, *rng);
+            std::int64_t mutation_wait_generations = RbStatistics::Geometric::rv(per_generation_mutation_rate_1, *rng);
+
+            double waiting_time_till_next_mutation = mutation_wait_generations * this_generation_time;
+            
+            if ( waiting_time_till_next_mutation < 1e-6 )
+            {
+                throw RbException() << "Negative waiting time: " << waiting_time_till_next_mutation << " . Likely integer overflow.";
+            }
             
             // fast forward the generation time
-            current_time += mutation_wait_generations * this_generation_time;
+            current_time += waiting_time_till_next_mutation;
             
             // accept the mutation only if it happened within the time of this branch
             if ( current_time <= branch_length )
