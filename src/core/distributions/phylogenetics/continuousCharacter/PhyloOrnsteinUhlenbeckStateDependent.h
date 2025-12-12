@@ -39,7 +39,6 @@ namespace RevBayesCore {
         void                                                                setRootTreatment(ROOT_TREATMENT rt) { root_treatment = rt; }
         ROOT_TREATMENT                                                      getRootTreatment() const { return root_treatment; }
         // non-virtual
-//        void                                                                fireTreeChangeEvent(const TopologyNode &n, const unsigned& m=0);                                             //!< The tree has changed and we want to know which part.
         virtual void                                                        redrawValue(void);
         double                                                              computeLnProbability(void);
 
