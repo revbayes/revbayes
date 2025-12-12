@@ -64,20 +64,10 @@ PhyloBrownianProcessStateDependent::PhyloBrownianProcessStateDependent(const Typ
 
 /**
  * Destructor.
- * Because we added ourselves as a reference to tau when we added a listener to its
- * TreeChangeEventHandler, we need to remove ourselves as a reference and possibly delete tau
- * when we die. All other parameters are handled by others.
- * Currently, the topology will not be changed. We keep the code for future extension.
  */
 PhyloBrownianProcessStateDependent::~PhyloBrownianProcessStateDependent( void )
 {
     // We don't delete the params, because they might be used somewhere else too. The model needs to do that!
-
-//    // remove myself from the tree listeners
-//    if ( tau != NULL )
-//    {
-//        tau->getValue().getTreeChangeEventHandler().removeListener( this );
-//    }
 
 }
 
@@ -87,36 +77,6 @@ PhyloBrownianProcessStateDependent* PhyloBrownianProcessStateDependent::clone( v
 {
 
     return new PhyloBrownianProcessStateDependent( *this );
-}
-
-
-
-double PhyloBrownianProcessStateDependent::computeBranchTime( size_t node_idx, double brlen )
-{
-
-    // get the clock rate for the branch
-    double branch_time = 1.0;
-//    if ( this->heterogeneous_clock_rates != NULL )
-//    {
-//        double sigma = this->heterogeneous_clock_rates->getValue()[node_idx];
-//        branch_time = sigma * sigma * brlen;
-//    }
-//    else
-//    {
-//        double sigma = this->homogeneous_clock_rate->getValue();
-//        branch_time = sigma * sigma * brlen;
-//    }
-
-    return branch_time;
-}
-
-
-double PhyloBrownianProcessStateDependent::computeSiteRate( size_t site_idx )
-{
-
-    double rate = 1.0;
-
-    return rate;
 }
 
 
@@ -143,14 +103,6 @@ double PhyloBrownianProcessStateDependent::computeStateDependentSigma(size_t sta
 double PhyloBrownianProcessStateDependent::computeLnProbability( void )
 {
 
-//    // we need to check here if we still are listining to this tree for change events
-//    // the tree could have been replaced without telling us
-//    if ( tau->getValue().getTreeChangeEventHandler().isListening( this ) == false )
-//    {
-//        tau->getValue().getTreeChangeEventHandler().addListener( this );
-//        dirty_nodes = std::vector<bool>(tau->getValue().getNumberOfNodes(), true);
-//    }
-
     const Tree& tau = character_histories->getValue().getTree();
 
     // compute the ln probability by recursively calling the probability calculation for each node
@@ -172,15 +124,6 @@ double PhyloBrownianProcessStateDependent::computeLnProbability( void )
     return this->ln_prob;
 }
 
-
-
-//void PhyloBrownianProcessStateDependent::fireTreeChangeEvent( const TopologyNode &n, const unsigned& m )
-//{
-//
-//    // call a recursive flagging of all node above (closer to the root) and including this node
-//    recursivelyFlagNodeDirty( n );
-//
-//}
 
 
 void PhyloBrownianProcessStateDependent::keepSpecialization( const DagNode* affecter )
@@ -373,14 +316,11 @@ void PhyloBrownianProcessStateDependent::recursiveComputeLnProbability( const To
                 else
                 {
 
-                    // get the site specific rate of evolution
-                    double standDev = this->computeSiteRate(site) * stdev;
-
                     // compute the contrasts for this site and node
                     double contrast = mu_left[site] - mu_right[site];
 
                     // compute the probability for the contrasts at this node
-                    double lnl_node = RbStatistics::Normal::lnPdf(0, standDev, contrast);
+                    double lnl_node = RbStatistics::Normal::lnPdf(0, stdev, contrast);
 
                     // sum up the probabilities of the contrasts
                     p_node[site] = lnl_node + p_left[site] + p_right[site];
@@ -642,6 +582,12 @@ void PhyloBrownianProcessStateDependent::setSigma(const TypedDagNode<RbVector<do
     homogeneous_sigma       = NULL;
     state_dependent_sigma   = NULL;
 
+    size_t number_states = character_histories->getValue().getNumberStates();
+    // make sure that the state-space is correct
+    if ( s->getName().size() != number_states )
+    {
+        throw RbException() << "The number of states (" << number_states << ") in the character history doesn't match the number of sigma parameters (" << s->getValue().size() << ")";
+    }
 
     // set the value
     state_dependent_sigma = s;
@@ -693,9 +639,6 @@ void PhyloBrownianProcessStateDependent::simulateRecursively( const TopologyNode
         // get the branch length for this child
         double branch_length = child.getBranchLength();
 
-        // get the branch specific rate
-        double branch_time = computeBranchTime( child.getIndex(), branch_length );
-
         //@TODO: Need to change the simulation to actually use the states from the character history
 
         // get the branch specific rate
@@ -708,10 +651,9 @@ void PhyloBrownianProcessStateDependent::simulateRecursively( const TopologyNode
             double parent_state = parent.getCharacter( i );
 
             // compute the standard deviation for this site
-            double branch_rate = branch_time;
             double m = parent_state;
 
-            double stand_dev = branch_sigma * sqrt(branch_rate);
+            double stand_dev = branch_sigma * sqrt(branch_length);
 
             // create the character
             double c = RbStatistics::Normal::rv( m, stand_dev, *rng);
@@ -786,42 +728,18 @@ double PhyloBrownianProcessStateDependent::sumRootLikelihood( void )
 
 void PhyloBrownianProcessStateDependent::touchSpecialization( const DagNode* affecter, bool touchAll )
 {
-    const Tree& tau = character_histories->getValue().getTree();
 
-    // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
-    if ( affecter == this->state_dependent_sigma && false )
+    // currently we don't actually use any fetching of parts of the tree that don't need recomputation.
+    // this code is merely as a placeholder when this implemented in the future here.
+    bool touch_all = true;
+
+    if ( affecter == this->dag_node )
     {
-
-        const std::set<size_t> &indices = this->state_dependent_sigma->getTouchedElementIndices();
-
-        // maybe all of them have been touched or the flags haven't been set properly
-        if ( indices.size() == 0 )
-        {
-            // just flag everyting for recomputation
-            touchAll = true;
-        }
-        else
-        {
-            const std::vector<TopologyNode *> &nodes = tau.getNodes();
-            // flag recomputation only for the nodes
-            for (std::set<size_t>::iterator it = indices.begin(); it != indices.end(); ++it)
-            {
-                this->recursivelyFlagNodeDirty( *nodes[*it] );
-            }
-        }
-    }
-    else // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
-    {
-        touchAll = true;
-
-        if ( affecter == this->dag_node )
-        {
-            resetValue();
-        }
-
+        resetValue();
     }
 
-    if ( touchAll )
+
+    if ( touch_all )
     {
         for (std::vector<bool>::iterator it = dirty_nodes.begin(); it != dirty_nodes.end(); ++it)
         {
