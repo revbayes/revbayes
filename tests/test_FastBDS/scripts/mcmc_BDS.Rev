@@ -8,6 +8,8 @@
 #
 ################################################################################
 
+seed(12345)
+
 DATASET              = "primates_tree"
 NUM_RATE_CLASSES     = 6
 NUM_REPS             = 1
@@ -59,7 +61,7 @@ moves.append( mvScale(speciation_mean, lambda=1, tune=true, weight=2.0) )
 ### Create a lognormal distributed variable for the mean extinction rate
 extinction_mean ~ dnLoguniform( 1E-6, 1E2)
 extinction_mean.setValue( rate_mean / 2.0 )
-moves.append( mvScale(extinction_mean, lambda=1, tune=true, weight=1.0) )
+moves.append( mvScale(extinction_mean, lambda=1, tune=true, weight=2.0) )
 
 ## The spread of the base distributions
 speciation_sd <- 0.6
@@ -68,6 +70,8 @@ extinction_sd <- 0.6
 speciation_shift_rate ~ dnLognormal(ln(0.01), H)
 extinction_shift_rate ~ dnLognormal(ln(0.01), H)
 
+moves.append( mvScale(speciation_shift_rate, lambda=1, tune=true, weight=2.0) )
+moves.append( mvScale(extinction_shift_rate, lambda=1, tune=true, weight=2.0) )
 
 ### Create a uniformly distributed variable for the category at the root
 rate_cat_probs <- simplex( rep(1, NUM_RATE_CLASSES*NUM_RATE_CLASSES) )
@@ -100,7 +104,7 @@ mymodel = model(speciation_mean)
 
 
 ### set up the monitors that will output parameter values to file and screen
-monitors.append( mnScreen(printgen=1, speciation_mean, extinction_mean, speciation_shift_rate, extinction_shift_rate) )
+#monitors.append( mnScreen(printgen=1, speciation_mean, extinction_mean, speciation_shift_rate, extinction_shift_rate) )
 monitors.append( mnStochasticBranchRate(bds=timetree, printgen=1, filename="output/BDS_rates_primates.log") )
 
 
