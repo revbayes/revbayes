@@ -1091,7 +1091,7 @@ void FastBirthDeathShiftProcess::executeMethod(const std::string &name, const st
     }
     else
     {
-        throw RbException() << "The state dependent birth-death process does not have a member method called '" << name << "'.";
+        throw RbException() << "The fast birth-death-shift process does not have a member method called '" << name << "'.";
     }
 
 }
@@ -1122,7 +1122,7 @@ void FastBirthDeathShiftProcess::executeMethod(const std::string &name, const st
     }
     else
     {
-        throw RbException() << "The state dependent birth-death process does not have a member method called '" << name << "'.";
+        throw RbException() << "The fast birth-death-shift process does not have a member method called '" << name << "'.";
     }
 
 }
@@ -1332,7 +1332,6 @@ void FastBirthDeathShiftProcess::redrawValue( void )
 {
 
     size_t attempts = 0;    
-    //while (attempts < 100000)
     while (attempts < 10000)
     {
         bool success = false;
@@ -1370,7 +1369,7 @@ void FastBirthDeathShiftProcess::redrawValue( void )
         }
         ++attempts;
     }
-    throw RbException("After 100000 attempts a character-dependent birth death tree could not be simulated. Try changing minNumLineages or maxNumLineages.");
+    throw RbException("After 10000 attempts a birth-death-shift tree could not be simulated. Try changing minNumLineages or maxNumLineages.");
 }
 
 
@@ -1491,15 +1490,6 @@ void FastBirthDeathShiftProcess::setValue(Tree *v, bool f )
     }
     static_cast<TreeDiscreteCharacterData*>(this->value)->setCharacterData(tip_data);
     
-    // Sebastian (20210519): We should not waste computations here if we actually don't need it. Try to do lazy evaluations.
-    // I keep this here if we find out later that these were indeed.
-    // simulate character history over the new tree
-//    size_t num_nodes = value->getNumberOfNodes();
-//    if (num_nodes > 2)
-//    {
-//        std::vector<std::string> character_histories(num_nodes);
-//        drawStochasticCharacterMap(character_histories);
-//    }
     static_cast<TreeDiscreteCharacterData*>(this->value)->setTimeInStates(time_in_states);
 }
 
