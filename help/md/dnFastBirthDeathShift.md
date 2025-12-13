@@ -16,20 +16,20 @@ possible events:
 The possible speciation rates (lambda) and extinction rates (mu) are
 assumed to be distributed according to discretized base distributions.
 Currently, the log-normal base distribution is hard coded. The log-normal
-base distributions have location parameters (speciationScale, extinctionScale) 
-and spread parameters (speciationSD, extinctionSD), which can be fixed or
+base distributions have location parameters (`speciationScale`, `extinctionScale`) 
+and spread parameters (`speciationSD`, `extinctionSD`), which can be fixed or
 estimated using prior distributions.
 
-In comparison with dnCDBDP, the dnFastBirthDeathShift distribution is 
+In comparison with `dnCDBDP`, the `dnFastBirthDeathShift` distribution is 
 simplified and more optimized, allowing it to be significantly faster than 
-the implementation in dnCDBDP (some tests indicate 60-70x performance).
+the implementation in `dnCDBDP` (some tests indicate 60-70x performance).
 
 The model resembles the Birth-Death-Shift model of Hoehna et al. (2019), 
 but there are two differences: 
 
 1. speciation rate shift events and extinction rate shift events are allowed 
-   to occur at different rates (i.e., separate parameters alpha and beta 
-   instead of a single eta).
+   to occur at different rates (i.e., separate parameters `alpha` and `beta` 
+   instead of a single `eta`).
 2. rate shift events that lead to a simultaneous change in the speciation 
    and extinction rate are not allowed.
 
