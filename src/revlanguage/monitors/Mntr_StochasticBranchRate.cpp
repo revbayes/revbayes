@@ -94,7 +94,7 @@ void Mntr_StochasticBranchRate::constructInternalObject( void )
     }
     else
     {
-    	throw RbException("Must provide either a CDBDP or a GLHBDSP object.");
+    	throw RbException("Must provide either a CDBDP or a GLHBDSP or a FastBDS object.");
     }
 
     
