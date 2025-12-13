@@ -200,7 +200,7 @@ std::vector<std::string> Dist_FastBirthDeathShiftProcess::getDistributionFunctio
 {
     // create alternative constructor function names variable that is the same for all instance of this class
     std::vector<std::string> a_names;
-    a_names.push_back( "dist_alias_here" );
+    a_names.push_back( "FastBDS" );
 
     return a_names;
 }
@@ -256,8 +256,8 @@ const MemberRules& Dist_FastBirthDeathShiftProcess::getParameterRules(void) cons
         memberRules.push_back( new ArgumentRule( "speciationSD", RealPos::getClassTypeSpec(), "The spread (sigma-parameter in the log-normal distribution) of the speciation rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.587)));
         memberRules.push_back( new ArgumentRule( "extinctionSD", RealPos::getClassTypeSpec(), "The spread (sigma-parameter in the log-normal distribution) of the extinction rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.587)));
 
-        memberRules.push_back( new ArgumentRule( "alpha", RealPos::getClassTypeSpec()        , "the rate of shifts in speciation rate", ArgumentRule::BY_CONSTANT_REFERENCE   , ArgumentRule::ANY, NULL ) );
-        memberRules.push_back( new ArgumentRule( "beta", RealPos::getClassTypeSpec()        , "the rate of shifts in extinction rate", ArgumentRule::BY_CONSTANT_REFERENCE   , ArgumentRule::ANY, NULL ) );
+        memberRules.push_back( new ArgumentRule( "alpha", RealPos::getClassTypeSpec()        , "The rate of shifts in speciation rate", ArgumentRule::BY_CONSTANT_REFERENCE   , ArgumentRule::ANY, NULL ) );
+        memberRules.push_back( new ArgumentRule( "beta", RealPos::getClassTypeSpec()        , "The rate of shifts in extinction rate", ArgumentRule::BY_CONSTANT_REFERENCE   , ArgumentRule::ANY, NULL ) );
         memberRules.push_back( new ArgumentRule( "numSpeciationClasses", Natural::getClassTypeSpec(), "The number of speciation rate classes.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Natural(6) ) );
         memberRules.push_back( new ArgumentRule( "numExtinctionClasses", Natural::getClassTypeSpec(), "The number of extinction rate classes.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Natural(6) ) );
         
