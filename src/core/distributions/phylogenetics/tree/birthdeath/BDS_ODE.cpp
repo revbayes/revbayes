@@ -70,8 +70,6 @@ void dmv_special(
 
     size_t n_categories = n_speciation_classes * n_extinction_classes;
 
-    //size_t offset = offset_index * n_categories;
-
     // offset because we do it for E(t) and D(t)
     // if forward also for F(t)
     for (size_t offset_index = 0; offset_index < offsets; offset_index++){
@@ -190,16 +188,14 @@ void BDS_ODE::operator()(const std::vector< double > &x, std::vector< double > &
     }
 
     // for F(t)
-    if (forward == true ){
+    if (forward){
         for (size_t i = 0; i < num_categories; i++){
             // no event
             double no_event_rate = mu[i] + lambda[i];
 
             dxdt[i + 2*num_categories] += -no_event_rate * safe_x[i + 2*num_categories] + 2 * lambda[i] * safe_x[i] * safe_x[i + 2*num_categories];
         }
-    }
 
-    if (forward){
         for (size_t i = 0; i < (num_categories*2); i++){
             dxdt[i] = -dxdt[i];
         }
