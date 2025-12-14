@@ -21,4 +21,4 @@ fnF81
     # Binary Character Matrix
     q := fnJC(2)
 ## references
-- citation: Jukes TH, Cantor CR (1969). Evolution of Protein Molecules. New York: Academic Press. pp. 21–132.
+- citation: Jukes TH, Cantor CR (1969). Evolution of Protein Molecules. New York: Academic Press. pp. 21--132.

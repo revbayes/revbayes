@@ -22,7 +22,7 @@ Simplex::Simplex( void ) : RbVector<double>()
 }
 
 
-Simplex::Simplex( size_t n ) : RbVector<double>( n )
+Simplex::Simplex( size_t n ) : RbVector<double>( n, 1.0/n )
 {
     normalize();
 }
@@ -174,4 +174,18 @@ std::ostream& RevBayesCore::operator<<(std::ostream& o, const Simplex& x)
     
     return o;
 
+}
+
+
+void Simplex::writeToFile(const path &dir, const std::string &fn) const
+{
+    path filename = dir / (fn + ".out");
+    create_directories(dir);
+
+    std::ofstream o( filename );
+
+    o << *this;
+
+    o << std::endl;
+    o.close();
 }

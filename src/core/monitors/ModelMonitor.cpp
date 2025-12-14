@@ -1,6 +1,7 @@
 #include "ModelMonitor.h"
 
 #include <cstddef>
+#include <map>
 #include <set>
 #include <string>
 #include <vector>
@@ -28,6 +29,24 @@ ModelMonitor::~ModelMonitor()
 
 
 /**
+ * Add variable to monitor without sorting (we will sort once at the end).
+ * This override avoids the O(n log n) sort after each addition when adding many variables.
+ *
+ * \param[in]   n    DAG node to be added to the monitor.
+ */
+void ModelMonitor::addVariable(DagNode *n)
+{
+    nodes.push_back( n );
+    
+    // add myself to the set of monitors
+    n->addMonitor( this );
+        
+    // tell the node that we have a reference to it (avoids deletion)
+    n->incrementReferenceCount();
+}
+
+
+/**
  * The clone function is a convenience function to create proper copies of inherited objected.
  * E.g. a.clone() will create a clone of the correct type even if 'a' is of derived type 'B'.
  *
@@ -38,7 +57,6 @@ ModelMonitor* ModelMonitor::clone(void) const
     
     return new ModelMonitor(*this);
 }
-
 
 
 /**
@@ -56,35 +74,101 @@ void ModelMonitor::resetDagNodes( void )
     
     if ( model != NULL )
     {
-        // we only want to have each nodes once
-        // this should by default happen but here we check again
-        std::set<std::string> var_names;
+        // We only want to have each node once. This should happen by default, but here we check again.
+        std::set<std::string> added_var_names;
+        std::set<std::string> vector_base_names;
         
         const std::vector<DagNode*> &n = model->getDagNodes();
-        for (std::vector<DagNode*>::const_iterator it = n.begin(); it != n.end(); ++it) 
-        {
-
-            DagNode *the_node = *it;
-
-            // only simple numeric variables can be monitored (i.e. only integer and real numbers)
-            if ( the_node->isSimpleNumeric() && the_node->isClamped() == false )
-            {
-                if ( (!stochastic_nodes_only && !the_node->isConstant() && the_node->getName() != "" && !the_node->isHidden() && !the_node->isElementVariable() ) ||
-                     ( the_node->isStochastic() && !the_node->isClamped() && the_node->isHidden() == false  && the_node->isElementVariable() == false ) )
-                {
-                    const std::string &name = the_node->getName();
-                    if ( exclude.find(name) == exclude.end() && var_names.find( name ) == var_names.end() )
-                    {
-                        addVariable( the_node );
-                        var_names.insert( name );
-                    }
-                    
-                }
-                
-            }
         
+        // Step 1: collect base names of vector variables, and build a map from a vector's base name to its element variables
+        std::map<std::string, std::vector<DagNode*>> base_name_to_elements;
+        
+        for (DagNode* the_node : n)
+        {
+            // only simple numeric variables can be monitored (i.e. only integers and real numbers)
+            if ( the_node->isSimpleNumeric() && the_node->isElementVariable() )
+            {
+                const std::string &name = the_node->getName();
+                
+                // extract vector name from the name of a vector element: everything before the last '['
+                size_t bracket_pos = name.rfind('[');
+                if (bracket_pos != std::string::npos)
+                {
+                    std::string base_name = name.substr(0, bracket_pos);
+                    vector_base_names.insert(base_name);
+                    base_name_to_elements[base_name].push_back(the_node);
+                }
+            }
         }
         
+        // Step 2: check if we have all element variables for every vector, and if not, remove those element variables that
+        // we do have and allow the vector itself to be monitored
+        for (auto it = base_name_to_elements.begin(); it != base_name_to_elements.end(); ++it)
+        {
+            const std::string &base_name = it->first;
+            const std::vector<DagNode*> &elements = it->second;
+                    
+            // find the vector node itself
+            DagNode* vector_node = NULL;
+            for (DagNode* the_node : n)
+            {
+                if (the_node->getName() == base_name && !the_node->isElementVariable())
+                {
+                    vector_node = the_node;
+                    break;
+                }
+            }
+                    
+            // if we found the vector node, check if we have all elements
+            if (vector_node != NULL)
+            {
+                size_t vector_size = vector_node->getNumberOfElements();
+                size_t found_elements = elements.size();
+                        
+                // if we don't have all elements, remove the ones we have and monitor the vector itself instead
+                if (found_elements != vector_size)
+                {
+                    // exclude element variables for this base name
+                    for (DagNode* elem_node : elements)
+                    {
+                        exclude.insert( elem_node->getName() );
+                    }
+                    
+                    // remove base name so vector itself can be monitored
+                    vector_base_names.erase(base_name);
+                }
+            }
+        }
+        
+        // Step 3: add variables, including vector elements but not the vectors themselves (unless we made an exception
+        // in the previous step)
+        for (DagNode* the_node : n)
+        {
+            if ( the_node->isSimpleNumeric() && !the_node->isClamped() )
+            {
+                const std::string &name = the_node->getName();
+                
+                // skip this node if it is a vector whose elements we are already collecting
+                if ( vector_base_names.count(name) > 0 )
+                {
+                    continue;  // skip the non-element version
+                }
+                
+                bool condition = !stochastic_nodes_only && !the_node->isConstant() && name != "";
+                
+                if ( !the_node->isHidden() && ( condition || the_node->isStochastic() ) )
+                {
+                    if ( exclude.find(name) == exclude.end() && added_var_names.find(name) == added_var_names.end() )
+                    {
+                        addVariable( the_node );
+                        added_var_names.insert( name );
+                    }
+                }
+            }
+        }
+        
+        // Sort once after adding all variables (instead of sorting after each addition)
+        sortNodesByName(true);
     }
     
 }
@@ -104,8 +188,6 @@ void ModelMonitor::setModel(Model *m)
     
     // reset the DAG nodes that should be monitored
     resetDagNodes();
-    
-    sortNodesByName();
 }
 
 
@@ -121,6 +203,5 @@ void ModelMonitor::setStochasticNodesOnly(bool tf)
     
     // reset the DAG nodes that should be monitored
     resetDagNodes();
-    
 }
 

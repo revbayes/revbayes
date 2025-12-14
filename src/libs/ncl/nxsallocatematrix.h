@@ -39,7 +39,7 @@ void DeleteTwoDArray(T **& ptr);
 	The pointer should be freed by a call to DeleteThreeDArray
 
  the array is set up so that
- for (i = 0 ; i < f ; i++)
+ for(i = 0 ; i < f ; i++)
 	for (j = 0 ; j < s ; j++)
 		for (k = 0 ; k < t; k++)
 			array[i][j][k];
@@ -96,7 +96,7 @@ template<typename T> void DeleteThreeDArray	(T *** & ptr)
 
  	The array is set up so that:
 
-	for (i = 0 ; i < f ; i++)
+	for(i = 0 ; i < f ; i++)
 		for (j = 0 ; j < s ; j++)
 			array[i][j];
 

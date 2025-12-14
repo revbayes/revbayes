@@ -89,7 +89,8 @@ void PhyloBrownianProcess::redrawValue(void)
 
 void PhyloBrownianProcess::simulate()
 {
-    
+    size_t n_nodes = tau->getValue().getNumberOfNodes();
+    value->assign(n_nodes, 0.0);
     recursiveSimulate(tau->getValue().getRoot());
 }
 

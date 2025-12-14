@@ -165,15 +165,12 @@ print("Generate a summary of the trace, including all post-burnin trees and")
 print("all clades with a posterior probability of at least 0.05:")
 treetrace.summarize(1, 0.05, verbose=FALSE)
 
-###################
-# Test .methods() #
-###################
+print("\n###################")
+print("# Test .methods() #")
+print("###################\n")
 
-# print("Available methods for an object of type " + type(treetrace) + ":\n")
-# treetrace.methods()
-
-###### THIS TEST IS FAILING ON WINDOWS.
-###### Possibly due to #ea166b8?
+print("Available methods for an object of type " + type(treetrace) + ":\n")
+treetrace.methods()
 
 clear()
 

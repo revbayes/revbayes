@@ -4,6 +4,7 @@
 #include <vector>
 #include <set>
 #include "RbConstants.h"
+#include "RbOrderedSet.h"
 
 
 namespace RevBayesCore {
@@ -30,7 +31,7 @@ class Tree;
         
     private:
         
-        void                                    simulateClade( std::set<TopologyNode*> &nodes, double max_clade_age = RbConstants::Double::inf) const;
+        void                                    simulateClade( RbOrderedSet<TopologyNode*> &nodes, double max_clade_age = RbConstants::Double::inf) const;
         
     };
     
