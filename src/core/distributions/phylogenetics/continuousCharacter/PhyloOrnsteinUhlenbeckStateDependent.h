@@ -25,7 +25,7 @@ namespace RevBayesCore {
         virtual                                                            ~PhyloOrnsteinUhlenbeckStateDependent(void);                                                              //!< Virtual destructor
 
         // public member functions
-        // pure virtual
+        // virtual
         virtual PhyloOrnsteinUhlenbeckStateDependent*                       clone(void) const;                                                                      //!< Create an independent clone
 
         void                                                                setAlpha(const TypedDagNode< double >* a);
