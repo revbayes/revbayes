@@ -43,16 +43,8 @@ Vy <- cont.var(characterCont)
 
 
 for (i in 1:num_disc_states){
-  theta[i] ~ dnUniform(-10, 10)
-  moves.append(mvSlide(theta[i], weight = 1.0) )
 
-  a <- ln(2) / root_age
-
-  alpha[i] ~ dnLognormal(ln(a), 0.587405)
-  moves.append(mvScale(alpha[i], weight = 1.0) )
-
-  s <- Vy * 2 * a
-  sigma2[i] ~ dnLognormal(ln(s), 0.587405)
+  sigma2[i] ~ dnLognormal(ln(Vy), 0.587405)
   moves.append(mvScale(sigma2[i], weight = 1.0) )
 
 }
@@ -63,7 +55,7 @@ for (i in 1:num_disc_states){
 # Specify the OU process #
 ##########################
 
-Y ~ dnPhyloOUSD(char_hist, theta=theta, rootTreatment="optimum", alpha=alpha, sigma=sigma2^0.5)
+Y ~ dnPhyloOUSD(char_hist, sigma=sigma2^0.5)
 Y.clamp(cont)
 
 #############
@@ -72,7 +64,7 @@ Y.clamp(cont)
 
 mymodel = model(Y)
 
-monitors.append( mnModel(filename="output/artiodactyla_OUsd_fixedHistory.log", printgen=100) )
+monitors.append( mnModel(filename="output/artiodactyla_BMsd_fixedHistory.log", printgen=100) )
 
 
 ################cd

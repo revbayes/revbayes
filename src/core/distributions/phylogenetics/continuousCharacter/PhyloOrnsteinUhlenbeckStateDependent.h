@@ -22,21 +22,21 @@ namespace RevBayesCore {
         enum                                                                ROOT_TREATMENT { OPTIMUM, EQUILIBRIUM, PARAMETER };
         // Note, we need the size of the alignment in the constructor to correctly simulate an initial state
         PhyloOrnsteinUhlenbeckStateDependent(const TypedDagNode<CharacterHistoryDiscrete> *bh, size_t n_sites, ROOT_TREATMENT rt);
-        virtual                                                            ~PhyloOrnsteinUhlenbeckStateDependent(void);                                                              //!< Virtual destructor
+        virtual                                                            ~PhyloOrnsteinUhlenbeckStateDependent(void);                                             //!< Virtual destructor
 
         // public member functions
-        // pure virtual
+        // virtual
         virtual PhyloOrnsteinUhlenbeckStateDependent*                       clone(void) const;                                                                      //!< Create an independent clone
 
         void                                                                setAlpha(const TypedDagNode< double >* a);
         void                                                                setAlpha(const TypedDagNode< RbVector< double > >* a);
-        void                                                                setRootValue(const TypedDagNode< double >* s);
+        void                                                                setRootValue(const TypedDagNode< double >* rvl);
         void                                                                setSigma(const TypedDagNode< double >* s);
         void                                                                setSigma(const TypedDagNode< RbVector< double > >* s);
         void                                                                setTheta(const TypedDagNode< double >* t);
         void                                                                setTheta(const TypedDagNode< RbVector< double > >* t);
         void                                                                setValue(ContinuousCharacterData *v, bool f=false);                                     //!< Set the current value, e.g. attach an observation (clamp)
-        void                                                                setRootTreatment(ROOT_TREATMENT rt) { root_treatment = rt; }
+        void                                                                setRootTreatment(ROOT_TREATMENT rt);
         ROOT_TREATMENT                                                      getRootTreatment() const { return root_treatment; }
         // non-virtual
         virtual void                                                        redrawValue(void);
@@ -80,7 +80,9 @@ namespace RevBayesCore {
         double                                                              computeStateDependentSigma(size_t idx) const;
         double                                                              computeStateDependentTheta(size_t idx) const;
         double                                                              simulateEpisode(size_t state_index, double delta_t, double ancestral_value);
-        void                                                                computeEpisode(double &mu, double &variance, double &log_nf, size_t state_index, double time);
+        double                                                              computeEpisodeMean(double mu, size_t state_index, double time);
+        double                                                              computeEpisodeScalingFactor(double log_nf, size_t state_index, double time);
+        double                                                              computeEpisodeVariance(double var, size_t state_index, double time);
 
         ROOT_TREATMENT                                                      root_treatment;
         const TypedDagNode<CharacterHistoryDiscrete>*                       character_histories;

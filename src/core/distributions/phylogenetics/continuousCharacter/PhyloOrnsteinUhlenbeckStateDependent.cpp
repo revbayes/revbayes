@@ -146,9 +146,9 @@ double PhyloOrnsteinUhlenbeckStateDependent::computeRootValue( void ) const
 {
 
     // get the root-value parameter
-    double rv = this->root_value->getValue();
+    double rvl = this->root_value->getValue();
 
-    return rv;
+    return rvl;
 }
 
 
@@ -232,117 +232,131 @@ void PhyloOrnsteinUhlenbeckStateDependent::recursiveComputeLnProbability( const 
             double delta_left  = this->variances[this->active_likelihood[left_index]][left_index];
             double delta_right = this->variances[this->active_likelihood[right_index]][right_index];
 
+            // get character history for tree
+            const CharacterHistory& current_history = character_histories->getValue();
+
+            // BEGIN LEFT
+            // get branch history for the left branch
+            const BranchHistory& bh_left = current_history.getHistory(left_index);
+            const std::multiset<CharacterEvent*,CharacterEventCompare>& hist_left = bh_left.getHistory();
+
+            std::vector<double> times_left;
+            std::vector<size_t> states_left;
+            double begin_time_left = left->getAge();
+            for (std::multiset<CharacterEvent*, CharacterEventCompare>::const_iterator iter = hist_left.begin(); iter != hist_left.end(); ++iter)
+            {
+                // get the state change event
+                CharacterEventDiscrete* event = static_cast<CharacterEventDiscrete*>(*iter);
+
+                // get the state index
+                size_t current_state = event->getState();
+
+                // calculate the times
+                double event_time = event->getAge();
+                double delta_t = event_time - begin_time_left;
+                begin_time_left = event_time;
+
+                // save the time and state index
+                times_left.push_back(delta_t);
+                states_left.push_back(current_state);
+            }
+
+            // do it again, since the iterator above only does n-1 of the episodes
+            size_t state_left = static_cast<CharacterEventDiscrete*>(bh_left.getParentCharacters()[0])->getState();
+            double delta_t_left = node.getAge() - begin_time_left;
+            times_left.push_back(delta_t_left);
+            states_left.push_back(state_left);
+
+            // calculate the mean, variance and log nf along the branch segment
+            double var_left = delta_left;
+            double log_nf_left = 0;
+
+            for (size_t k = 0; k < times_left.size(); ++k)
+            {
+                size_t state = states_left[k];
+                double delta_t = times_left[k];
+                var_left    = computeEpisodeVariance(var_left, state, delta_t);
+                log_nf_left = computeEpisodeScalingFactor(log_nf_left, state, delta_t);
+            }
+
+            // BEGIN RIGHT
+            // get branch history for the right branch
+            const BranchHistory& bh_right = current_history.getHistory(right_index);
+            const std::multiset<CharacterEvent*,CharacterEventCompare>& hist_right = bh_right.getHistory();
+
+            std::vector<double> times_right;
+            std::vector<size_t> states_right;
+            double begin_time_right = right.getAge();
+            for (std::multiset<CharacterEvent*, CharacterEventCompare>::const_iterator iter = hist_right.begin(); iter != hist_right.end(); ++iter)
+            {
+                // get the state change event
+                CharacterEventDiscrete* event = static_cast<CharacterEventDiscrete*>(*iter);
+
+                // get the state index
+                size_t current_state = event->getState();
+
+                // calculate the times
+                double event_time = event->getAge();
+                double delta_t = event_time - begin_time_right;
+                begin_time_right = event_time;
+
+                // save the time and state index
+                times_right.push_back(delta_t);
+                states_right.push_back(current_state);
+            }
+
+            // do it again, since the iterator above only does n-1 of the episodes
+            size_t state_right = static_cast<CharacterEventDiscrete*>(bh_right.getParentCharacters()[0])->getState();
+            double delta_t_right = node.getAge() - begin_time_right;
+            times_right.push_back(delta_t_right);
+            states_right.push_back(state_right);
+
+            // calculate the mean, variance and log nf along the branch segment
+            double var_right = delta_right;
+            double log_nf_right = 0;
+
+            for (size_t k = 0; k < times_right.size(); ++k)
+            {
+                size_t state = states_right[k];
+                double delta_t = times_right[k];
+                var_right    = computeEpisodeVariance(var_right, state, delta_t);
+                log_nf_right = computeEpisodeScalingFactor(log_nf_right, state, delta_t);
+            }
+
+            // Do the merging rule
+            // calculate and store the node variance
+            double var_node = (var_left*var_right) / (var_left+var_right);
+            this->variances[this->active_likelihood[node_index]][node_index] = var_node;
+
 
             for (size_t site_index=0; site_index<this->num_sites; ++site_index)
             {
                 double mean_left  = mu_left[site_index];
                 double mean_right = mu_right[site_index];
-                
-                // get character history for tree
-                const CharacterHistory& current_history = character_histories->getValue();
-                
-                // BEGIN LEFT
-                // get branch history for the left branch
-                const BranchHistory& bh_left = current_history.getHistory(left_index);
-                const std::multiset<CharacterEvent*,CharacterEventCompare>& hist_left = bh_left.getHistory();
-                
-                std::vector<double> times_left;
-                std::vector<size_t> states_left;
-                double begin_time_left = left->getAge();
-                for (std::multiset<CharacterEvent*, CharacterEventCompare>::const_iterator iter = hist_left.begin(); iter != hist_left.end(); ++iter)
+
+                for (size_t k = 0; k < times_left.size(); ++k)
                 {
-                    // get the state change event
-                    CharacterEventDiscrete* event = static_cast<CharacterEventDiscrete*>(*iter);
-                    
-                    // get the state index
-                    size_t current_state = event->getState();
-                    
-                    // calculate the times
-                    double event_time = event->getAge();
-                    double delta_t = event_time - begin_time_left;
-                    begin_time_left = event_time;
-                    
-                    // save the time and state index
-                    times_left.push_back(delta_t);
-                    states_left.push_back(current_state);
+                    size_t state = states_left[k];
+                    double delta_t = times_left[k];
+                    mean_left   = computeEpisodeMean(mean_left, state, delta_t);
                 }
-                
-                // do it again, since the iterator above only does n-1 of the episodes
-                size_t state_left = static_cast<CharacterEventDiscrete*>(bh_left.getParentCharacters()[0])->getState();
-                double delta_t_left = node.getAge() - begin_time_left;
-                times_left.push_back(delta_t_left);
-                states_left.push_back(state_left);
-                
-                // calculate the mean, variance and log nf along the branch segment
-                double var_left = delta_left;
-                double log_nf_left = 0;
-                
-                for (size_t j = 0; j < times_left.size(); ++j)
+
+                for (size_t k = 0; k < times_right.size(); ++k)
                 {
-                    size_t state = states_left[j];
-                    double delta_t = times_left[j];
-                    computeEpisode(mean_left, var_left, log_nf_left, state, delta_t);
+                    size_t state = states_right[k];
+                    double delta_t = times_right[k];
+                    mean_right   = computeEpisodeMean(mean_right, state, delta_t);
                 }
-                
-                // BEGIN RIGHT
-                // get branch history for the right branch
-                const BranchHistory& bh_right = current_history.getHistory(right_index);
-                const std::multiset<CharacterEvent*,CharacterEventCompare>& hist_right = bh_right.getHistory();
-                
-                std::vector<double> times_right;
-                std::vector<size_t> states_right;
-                double begin_time_right = right.getAge();
-                for (std::multiset<CharacterEvent*, CharacterEventCompare>::const_iterator iter = hist_right.begin(); iter != hist_right.end(); ++iter)
-                {
-                    // get the state change event
-                    CharacterEventDiscrete* event = static_cast<CharacterEventDiscrete*>(*iter);
-                    
-                    // get the state index
-                    size_t current_state = event->getState();
-                    
-                    // calculate the times
-                    double event_time = event->getAge();
-                    double delta_t = event_time - begin_time_right;
-                    begin_time_right = event_time;
-                    
-                    // save the time and state index
-                    times_right.push_back(delta_t);
-                    states_right.push_back(current_state);
-                }
-                
-                // do it again, since the iterator above only does n-1 of the episodes
-                size_t state_right = static_cast<CharacterEventDiscrete*>(bh_right.getParentCharacters()[0])->getState();
-                double delta_t_right = node.getAge() - begin_time_right;
-                times_right.push_back(delta_t_right);
-                states_right.push_back(state_right);
-                
-                // calculate the mean, variance and log nf along the branch segment
-                double var_right = delta_right;
-                double log_nf_right = 0;
-                
-                for (size_t j = 0; j < times_right.size(); ++j)
-                {
-                    size_t state = states_right[j];
-                    double delta_t = times_right[j];
-                    computeEpisode(mean_right, var_right, log_nf_right, state, delta_t);
-                }
-                
-                
-                // Do the merging rule
-                // calculate and store the node variance
-                double var_node = (var_left*var_right) / (var_left+var_right);
-                this->variances[this->active_likelihood[node_index]][node_index] = var_node;
-                
-                
+
                 mu_node[site_index] = (var_left*mean_right + var_right*mean_left) / (var_left+var_right);
-                
+
                 // compute the contrasts for this site and node
                 double contrast = mean_left - mean_right;
-                
+
                 double a = -(contrast*contrast / (2*(var_left + var_right)));
                 double b = log(2*RbConstants::PI*(var_left+var_right))/2.0;
                 double lnl_node = log_nf_left + log_nf_right + a - b;
-                
+
                 if ( node.isRoot() == true )
                 {
                     double var_root;
@@ -363,24 +377,19 @@ void PhyloOrnsteinUhlenbeckStateDependent::recursiveComputeLnProbability( const 
                         root_value = theta;
                         var_root = var_node + stationary_variance;
                     }
-                    else if (root_treatment == PARAMETER)
+                    else
                     {
                         root_value = computeRootValue();
                         var_root = var_node;
                     }
-                    else
-                    {
-                        throw RbException("Unkown root treatment chosen for probability computation in state-dependent Ornstein-Uhlenbeck process.");
-                    }
+
                     lnl_node += RbStatistics::Normal::lnPdf( root_value, sqrt(var_root), mu_node[site_index]);
-                    
-                    // sum up the log normalizing factors of the subtrees
-                    p_node[site_index] = lnl_node + p_left[site_index] + p_right[site_index];
-                    
                 } // if this is the root node
-                
+
+                // sum up the log normalizing factors of the subtrees
+                p_node[site_index] = lnl_node + p_left[site_index] + p_right[site_index];
             } // end for-loop over all sites
-            
+
         } // end for-loop over all children
 
     } // end if we need to compute something for this node.
@@ -583,6 +592,12 @@ void PhyloOrnsteinUhlenbeckStateDependent::setAlpha(const TypedDagNode<RbVector<
     homogeneous_alpha       = NULL;
     state_dependent_alpha   = NULL;
 
+    size_t number_states = character_histories->getValue().getNumberStates();
+    // make sure that the state-space is correct
+    if ( a->getName().size() != number_states )
+    {
+    //    throw RbException() << "The number of states (" << number_states << ") in the character history doesn't match the number of alpha parameters (" << a->getValue().size() << ")";
+    }
 
     // set the value
     state_dependent_alpha   = a;
@@ -599,7 +614,22 @@ void PhyloOrnsteinUhlenbeckStateDependent::setAlpha(const TypedDagNode<RbVector<
 }
 
 
-void PhyloOrnsteinUhlenbeckStateDependent::setRootValue(const TypedDagNode<double> *rs)
+void PhyloOrnsteinUhlenbeckStateDependent::setRootTreatment(ROOT_TREATMENT rt)
+{
+
+    if ( rt == OPTIMUM || rt == EQUILIBRIUM || rt == PARAMETER )
+    {
+        root_treatment = rt;
+    }
+    else
+    {
+        throw RbException("Unkown root treatment chosen for probability computation in state-dependent Ornstein-Uhlenbeck process. Possible root treatments are \"optimum\", \"equilibrium\", and \"parameter\" ");
+    }
+
+}
+
+
+void PhyloOrnsteinUhlenbeckStateDependent::setRootValue(const TypedDagNode<double> *rvl)
 {
 
     // remove the old parameter first
@@ -607,7 +637,7 @@ void PhyloOrnsteinUhlenbeckStateDependent::setRootValue(const TypedDagNode<doubl
     root_value = NULL;
 
     // set the value
-    root_value = rs;
+    root_value = rvl;
 
     // add the new parameter
     this->addParameter( root_value );
@@ -656,6 +686,13 @@ void PhyloOrnsteinUhlenbeckStateDependent::setSigma(const TypedDagNode<RbVector<
     state_dependent_sigma   = NULL;
 
 
+    size_t number_states = character_histories->getValue().getNumberStates();
+    // make sure that the state-space is correct
+    if ( s->getName().size() != number_states )
+    {
+    //    throw RbException() << "The number of states (" << number_states << ") in the character history doesn't match the number of sigma parameters (" << s->getValue().size() << ")";
+    }
+
     // set the value
     state_dependent_sigma = s;
 
@@ -679,7 +716,6 @@ void PhyloOrnsteinUhlenbeckStateDependent::setTheta(const TypedDagNode<double> *
     this->removeParameter( state_dependent_theta );
     homogeneous_theta        = NULL;
     state_dependent_theta    = NULL;
-
 
     // set the value
     homogeneous_theta = t;
@@ -705,6 +741,12 @@ void PhyloOrnsteinUhlenbeckStateDependent::setTheta(const TypedDagNode<RbVector<
     homogeneous_theta        = NULL;
     state_dependent_theta    = NULL;
 
+    size_t number_states = character_histories->getValue().getNumberStates();
+    // make sure that the state-space is correct
+    if ( t->getName().size() != number_states )
+    {
+    //    throw RbException() << "The number of states (" << number_states << ") in the character history doesn't match the number of alpha parameters (" << t->getValue().size() << ")";
+    }
 
     // set the value
     state_dependent_theta = t;
@@ -735,29 +777,56 @@ void PhyloOrnsteinUhlenbeckStateDependent::setValue(ContinuousCharacterData *v, 
 
 }
 
-// this function changes mu, variance and log_nf in-place
-void PhyloOrnsteinUhlenbeckStateDependent::computeEpisode(double &mu, double &variance, double &log_nf, size_t state_index, double time )
+// this function returns the mean of the Gaussian (partial likelihood) function that is propagated rootwards for one event
+double PhyloOrnsteinUhlenbeckStateDependent::computeEpisodeMean(double mu, size_t state_index, double time)
 {
-
     double sigma = computeStateDependentSigma(state_index);
     double alpha = computeStateDependentAlpha(state_index);
     double theta = computeStateDependentTheta(state_index);
 
-    double v;
-    if ( alpha > 1E-20 )
+    if ( alpha > 1e-10 )
+    {
+        mu  = exp(1.0 * time  * alpha ) * (mu  - theta)  + theta;
+    }
+
+    return mu;
+}
+
+// this function returns the variance of the Gaussian (partial likelihood) function that is propagated rootwards for one event
+double PhyloOrnsteinUhlenbeckStateDependent::computeEpisodeVariance(double var, size_t state_index, double time)
+{
+    double sigma = computeStateDependentSigma(state_index);
+    double alpha = computeStateDependentAlpha(state_index);
+    double theta = computeStateDependentTheta(state_index);
+
+    double v = 0;
+    if ( alpha > 1e-10 )
     {
         v = (sigma*sigma) / (2.0*alpha) * (exp(2.0*alpha*time) - 1.0 );
-        mu  = exp(1.0 * time  * alpha ) * (mu  - theta)  + theta;
     }
     else
     {
         v  = (sigma*sigma) * time;
     }
-    variance = v + variance * exp(2.0*alpha *time);
+    var *= exp(2.0*alpha *time);
+    var += v;
+
+    return var;
+}
+
+// this function returns the scaling factor of the Gaussian (partial likelihood) function that is propagated rootwards for one event
+double PhyloOrnsteinUhlenbeckStateDependent::computeEpisodeScalingFactor(double log_nf, size_t state_index, double time)
+{
+    double sigma = computeStateDependentSigma(state_index);
+    double alpha = computeStateDependentAlpha(state_index);
+    double theta = computeStateDependentTheta(state_index);
 
     // update the log normalizing factor
     log_nf += time * alpha;
+
+    return log_nf;
 }
+
 
 double PhyloOrnsteinUhlenbeckStateDependent::simulateEpisode(size_t state_index, double delta_t, double ancestral_value)
 {

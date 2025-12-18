@@ -113,21 +113,20 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
         dist->setSigma( s );
     }
 
-    // set the root values
-    RevBayesCore::TypedDagNode< double >* rv = static_cast<const Real &>( root_value->getRevObject() ).getDagNode();
-
+    // set the root value
     if ( rt == "optimum" || rt == "equilibrium" )
     {
-         if ( rv != NULL )
+         if ( root_value->getRevObject() != RevNullObject::getInstance() )
          {
              throw RbException("To use the root treatment \"optimum\" or \"equilibrium\", you should not specify the argument rootValue ");
          }
     }
     else if ( rt == "parameter" )
     {
-        if ( rv != NULL)
+        if ( root_value->getRevObject() != RevNullObject::getInstance() )
         {
-            dist->setRootValue( rv );
+            RevBayesCore::TypedDagNode< double >* rvl = static_cast<const Real &>( root_value->getRevObject() ).getDagNode();
+            dist->setRootValue( rvl );
         }
         else
         {
@@ -219,8 +218,8 @@ const MemberRules& Dist_PhyloOrnsteinUhlenbeckStateDependent::getParameterRules(
 
         std::vector<TypeSpec> rootValueTypes;
         rootValueTypes.push_back( Real::getClassTypeSpec() );
-        Real *defaultRootValue = new Real(0.0);
-        dist_member_rules.push_back( new ArgumentRule( "rootValue" , rootValueTypes, "The value of the continuous trait at root.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, defaultRootValue ) );
+        //Real *defaultRootValue = new Real(0.0);
+        dist_member_rules.push_back( new ArgumentRule( "rootValue" , rootValueTypes, "The value of the continuous trait at root.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
         std::vector<std::string> rootTreatmentTypes;
         rootTreatmentTypes.push_back( "optimum" );
@@ -230,7 +229,7 @@ const MemberRules& Dist_PhyloOrnsteinUhlenbeckStateDependent::getParameterRules(
         // setting the default
         //RevBayesCore::PhyloOrnsteinUhlenbeckStateDependent::ROOT_TREATMENT rtr = RevBayesCore::PhyloOrnsteinUhlenbeckStateDependent::ROOT_TREATMENT::OPTIMUM;
 
-        dist_member_rules.push_back( new ArgumentRule( "nSites"         ,  Natural::getClassTypeSpec(), "The number of sites which is used for the initialized (random draw) from this distribution.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(10) ) );
+        dist_member_rules.push_back( new ArgumentRule( "nSites",  Natural::getClassTypeSpec(), "The number of sites which is used for the initialized (random draw) from this distribution.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1) ) );
 
         rules_set = true;
     }
