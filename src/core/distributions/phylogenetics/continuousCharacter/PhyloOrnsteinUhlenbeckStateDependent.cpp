@@ -592,7 +592,7 @@ void PhyloOrnsteinUhlenbeckStateDependent::setAlpha(const TypedDagNode<RbVector<
     homogeneous_alpha       = NULL;
     state_dependent_alpha   = NULL;
 
-    size_t number_states = character_histories->getValue().getNumberStates();
+    size_t number_states = character_histories->getValue().getNumberOfStates();
     // make sure that the state-space is correct
     if ( a->getName().size() != number_states )
     {
@@ -686,7 +686,7 @@ void PhyloOrnsteinUhlenbeckStateDependent::setSigma(const TypedDagNode<RbVector<
     state_dependent_sigma   = NULL;
 
 
-    size_t number_states = character_histories->getValue().getNumberStates();
+    size_t number_states = character_histories->getValue().getNumberOfStates();
     // make sure that the state-space is correct
     if ( s->getName().size() != number_states )
     {
@@ -741,7 +741,7 @@ void PhyloOrnsteinUhlenbeckStateDependent::setTheta(const TypedDagNode<RbVector<
     homogeneous_theta        = NULL;
     state_dependent_theta    = NULL;
 
-    size_t number_states = character_histories->getValue().getNumberStates();
+    size_t number_states = character_histories->getValue().getNumberOfStates();
     // make sure that the state-space is correct
     if ( t->getName().size() != number_states )
     {

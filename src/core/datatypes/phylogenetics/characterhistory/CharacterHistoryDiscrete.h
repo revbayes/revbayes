@@ -28,8 +28,10 @@ namespace RevBayesCore {
         
         // public methods
         CharacterHistoryDiscrete*               clone(void) const;
-        size_t                                  getNumberStates(void) const;
+        size_t                                  getMaxObservedState(void) const;
+        size_t                                  getNumberOfStates(void) const;
         CharacterEventDiscrete*                 pickRandomEvent(size_t &bi);
+        void                                    setNumberOfStates(size_t n);
         void                                    setTree(const Tree *t);
         
         

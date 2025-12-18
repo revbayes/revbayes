@@ -140,7 +140,7 @@ double EventBirthDeathFromAgeProposal::doBirthProposal( void )
     
     size_t num_events_before = history.getNumberEvents();
     size_t num_branches = history.getNumberBranches();
-    size_t num_states   = history.getNumberStates();
+    size_t num_states   = history.getNumberOfStates();
     
     // randomly pick a branch
     size_t branch_index = size_t( std::floor(num_branches * rng->uniform01()) );
@@ -177,7 +177,7 @@ double EventBirthDeathFromAgeProposal::doDeathProposal( void )
     
     size_t num_events_before = history.getNumberEvents();
     size_t num_branches = history.getNumberBranches();
-    size_t num_states   = history.getNumberStates();
+    size_t num_states   = history.getNumberOfStates();
     
     size_t branch_index = 0;
     CharacterEvent *event = history.pickRandomEvent( branch_index );

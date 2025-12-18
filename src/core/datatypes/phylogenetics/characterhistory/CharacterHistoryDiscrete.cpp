@@ -89,7 +89,30 @@ CharacterHistoryDiscrete* CharacterHistoryDiscrete::clone( void ) const
 /**
  * Get the number of states for this character.
  */
-size_t CharacterHistoryDiscrete::getNumberStates( void ) const
+size_t CharacterHistoryDiscrete::getMaxObservedState( void ) const
+{
+    size_t max_obs_state = 0;
+    
+    // create a branch history object for each branch
+    for (size_t i=0; i<n_branches; ++i)
+    {
+        size_t branch_max_states = static_cast<BranchHistoryDiscrete*>(histories[i])->getMaxObservedState();
+        
+        if ( branch_max_states > max_obs_state )
+        {
+            max_obs_state = branch_max_states;
+        }
+    }
+    
+    
+    return max_obs_state;
+}
+
+
+/**
+ * Get the number of states for this character.
+ */
+size_t CharacterHistoryDiscrete::getNumberOfStates( void ) const
 {
     return n_states;
 }
@@ -102,6 +125,23 @@ CharacterEventDiscrete* CharacterHistoryDiscrete::pickRandomEvent( size_t &branc
 {
     
     return static_cast<CharacterEventDiscrete *>( CharacterHistory::pickRandomEvent(branch_index) );
+}
+
+
+/**
+ * Set the number of states.
+ */
+void CharacterHistoryDiscrete::setNumberOfStates(size_t n)
+{
+    
+    n_states = n;
+    
+    // create a branch history object for each branch
+    for (size_t i=0; i<n_branches; ++i)
+    {
+        static_cast<BranchHistoryDiscrete*>(histories[i])->setNumberOfStates( n_states );
+    }
+    
 }
 
 

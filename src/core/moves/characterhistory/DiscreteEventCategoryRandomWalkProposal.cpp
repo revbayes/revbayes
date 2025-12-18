@@ -102,7 +102,7 @@ double DiscreteEventCategoryRandomWalkProposal::doProposal( void )
     if ( failed == false )
     {
         
-        size_t num_states   = history.getNumberStates();
+        size_t num_states   = history.getNumberOfStates();
         
         // pick a random event
         size_t branch_index = 0;

@@ -22,8 +22,10 @@ namespace RevBayesCore {
         
         // getters
         CharacterEventDiscrete*                                         getEvent(size_t i);
-        const size_t                                                    getNumberStates(void) const;
-        
+        size_t                                                          getMaxObservedState(void) const;
+        size_t                                                          getNumberOfStates(void) const;
+        void                                                            setNumberOfStates(size_t n);
+
         
     protected:
         
