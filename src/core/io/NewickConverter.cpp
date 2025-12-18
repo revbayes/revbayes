@@ -172,12 +172,6 @@ CharacterHistoryDiscrete* NewickConverter::convertSimmapFromNewick(const std::st
         }
         this_history->setHistory( new_history );
     }
-
-//    // if this tree is ultrametric, then we should use ages and transform so!
-//    if ( t->isUltrametric() == true )
-//    {
-//        root->setUseAges(true, true);
-//    }
     
     CharacterHistoryDiscrete* new_char_hist = new CharacterHistoryDiscrete();
     new_char_hist->setTree( t );
@@ -680,64 +674,6 @@ TopologyNode* NewickConverter::createSimmapNode(const std::string &n, std::vecto
         lbl += char( ss.get() );
     }
     node->setName( lbl );
-
-//    // read the optional branch length
-//    if ( char( ss.peek() ) == ':' )
-//    {
-//        
-//        ss.ignore();
-//            
-//        // the total branch time
-//        std::string time = "";
-//            
-//        // read the node character history
-//        if ( ss.peek() == '{' )
-//        {
-//            std::vector<size_t> states;
-//            std::vector<double> times;
-//            do
-//            {
-//                ss.ignore();
-//                
-//                // read the state
-//                std::string state_str = "";
-//                while ( ss.good() && (c = char( ss.peek() ) ) != ',' && c != '}')
-//                {
-//                    state_str += char( ss.get() );
-//                }
-//                size_t state = StringUtilities::asIntegerNumber( state_str );
-//                states.push_back( state );
-//
-//                // ignore the equal sign between parameter name and value
-//                if ( ss.peek() == ',')
-//                {
-//                    ss.ignore();
-//                }
-//
-//                // read the parameter name
-//                std::string duration_str = "";
-//                while ( ss.good() && (c = char( ss.peek() ) ) != ';' && c != '}' )
-//                {
-//                    duration_str += char( ss.get() );
-//                }
-//                double duration = atof( duration_str.c_str() );
-//                times.push_back( duration );
-//                time += duration;
-//
-//            } while ( (c = char( ss.peek() ) ) == ';' );
-//
-//            // ignore the final '}'
-//            if ( (c = char( ss.peek( ) ) ) == '}' )
-//            {
-//                ss.ignore();
-//            }
-//        }
-//    }
-//    else
-//    {
-//        nodes.push_back( node );
-//        brlens.push_back( 0.0 );
-//    }
 
 
     return node;
