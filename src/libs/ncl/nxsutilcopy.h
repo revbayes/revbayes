@@ -99,7 +99,7 @@ template<> struct CompileTimeChecker<false>{};
 ///
 ///	Implementation Details:
 ///
-///		ncl::hidden::CompileTimeChecker is a RlBoolean-templated class.
+///		ncl::hidden::CompileTimeChecker is a boolean-templated class.
 ///		The constructor of ncl::hidden::CompileTimeChecker<true> accepts any type
 ///		The the only constructor for ncl::hidden::CompileTimeChecker<false> is the default constructor
 ///		The macro COMPILE_TIME_ASSERT(condition, msg):

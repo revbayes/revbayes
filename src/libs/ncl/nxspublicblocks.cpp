@@ -164,7 +164,7 @@ void NxsStoreTokensBlockReader::Read(
 	begcmd += this->NCL_BLOCKTYPE_ATTR_NAME;
 	DemandEndSemicolon(token, begcmd.c_str());
 
-	for (;;)
+	for(;;)
 		{
 		token.GetNextToken();
         if (token.Equals("END") || token.Equals("ENDBLOCK"))

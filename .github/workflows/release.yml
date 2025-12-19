@@ -69,7 +69,7 @@ jobs:
             arch: mac-intel64
 
           - name: macos-xcode-26-arm
-            os: macos-14
+            os: macos-latest
             compiler: xcode
             version: "26"
             mpi: false

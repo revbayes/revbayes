@@ -282,6 +282,7 @@ NxsBlock::NxsBlock()
 	nexusReader(NULL),
 	next(NULL),
 	linkAPI(false),
+	autoTitle(false),
 	storeSkippedCommands(true)
 	{
 	}
