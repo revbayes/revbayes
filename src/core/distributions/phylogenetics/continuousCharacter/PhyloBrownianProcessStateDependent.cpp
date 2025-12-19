@@ -1,5 +1,6 @@
 #include <cmath>
 #include <cstddef>
+#include <deque>
 #include <iosfwd>
 #include <set>
 #include <string>
