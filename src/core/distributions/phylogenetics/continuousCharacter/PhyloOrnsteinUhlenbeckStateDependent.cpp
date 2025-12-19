@@ -594,9 +594,9 @@ void PhyloOrnsteinUhlenbeckStateDependent::setAlpha(const TypedDagNode<RbVector<
 
     size_t number_states = character_histories->getValue().getNumberOfStates();
     // make sure that the state-space is correct
-    if ( a->getName().size() != number_states )
+    if ( a->getValue().size() != number_states )
     {
-    //    throw RbException() << "The number of states (" << number_states << ") in the character history doesn't match the number of alpha parameters (" << a->getValue().size() << ")";
+        throw RbException() << "The number of states (" << number_states << ") in the character history doesn't match the number of alpha parameters (" << a->getValue().size() << ")";
     }
 
     // set the value
@@ -688,9 +688,9 @@ void PhyloOrnsteinUhlenbeckStateDependent::setSigma(const TypedDagNode<RbVector<
 
     size_t number_states = character_histories->getValue().getNumberOfStates();
     // make sure that the state-space is correct
-    if ( s->getName().size() != number_states )
+    if ( s->getValue().size() != number_states )
     {
-    //    throw RbException() << "The number of states (" << number_states << ") in the character history doesn't match the number of sigma parameters (" << s->getValue().size() << ")";
+        throw RbException() << "The number of states (" << number_states << ") in the character history doesn't match the number of sigma parameters (" << s->getValue().size() << ")";
     }
 
     // set the value
@@ -743,9 +743,9 @@ void PhyloOrnsteinUhlenbeckStateDependent::setTheta(const TypedDagNode<RbVector<
 
     size_t number_states = character_histories->getValue().getNumberOfStates();
     // make sure that the state-space is correct
-    if ( t->getName().size() != number_states )
+    if ( t->getValue().size() != number_states )
     {
-    //    throw RbException() << "The number of states (" << number_states << ") in the character history doesn't match the number of alpha parameters (" << t->getValue().size() << ")";
+        throw RbException() << "The number of states (" << number_states << ") in the character history doesn't match the number of alpha parameters (" << t->getValue().size() << ")";
     }
 
     // set the value
@@ -876,7 +876,7 @@ void PhyloOrnsteinUhlenbeckStateDependent::simulateRecursively( const TopologyNo
     {
         const TopologyNode &child = *(*it);
 
-        // get the branch specific rate
+        // get the branch history
         const CharacterHistory& current_history = character_histories->getValue();
         size_t child_index = child.getIndex();
         const BranchHistory& bh = current_history.getHistory(child_index);

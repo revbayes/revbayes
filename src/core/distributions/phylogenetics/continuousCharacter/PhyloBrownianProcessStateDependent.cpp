@@ -80,6 +80,13 @@ PhyloBrownianProcessStateDependent* PhyloBrownianProcessStateDependent::clone( v
 }
 
 
+double PhyloBrownianProcessStateDependent::computeRootValue( void ) const
+{
+    // get the root-value parameter
+    double rvl = this->root_value->getValue();
+
+    return rvl;
+}
 
 
 double PhyloBrownianProcessStateDependent::computeStateDependentSigma(size_t state_idx) const
@@ -548,6 +555,28 @@ void PhyloBrownianProcessStateDependent::restoreSpecialization( const DagNode* a
 }
 
 
+void PhyloBrownianProcessStateDependent::setRootValue(const TypedDagNode<double> *rvl)
+{
+
+    // remove the old parameter first
+    this->removeParameter( root_value );
+    root_value = NULL;
+
+    // set the value
+    root_value = rvl;
+
+    // add the new parameter
+    this->addParameter( root_value );
+
+    // redraw the current value
+    if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
+    {
+        this->redrawValue();
+    }
+
+}
+
+
 void PhyloBrownianProcessStateDependent::setSigma(const TypedDagNode<double> *s)
 {
 
@@ -620,6 +649,24 @@ void PhyloBrownianProcessStateDependent::setValue(ContinuousCharacterData *v, bo
 }
 
 
+double PhyloBrownianProcessStateDependent::simulateEpisode(size_t state_index, double delta_t, double ancestral_value)
+{
+    RandomNumberGenerator* rng = GLOBAL_RNG;
+
+    // get the parameter values
+    double sigma = computeStateDependentSigma(state_index);
+
+    // calculate the mean and the variance
+    double mu = ancestral_value;
+    double sd = sigma * sqrt(delta_t);
+
+    // draw the new character state as a Gaussian random variable
+    double y = RbStatistics::Normal::rv(mu, sd, *rng);
+
+    return y;
+}
+
+
 void PhyloBrownianProcessStateDependent::simulateRecursively( const TopologyNode &node, std::vector< ContinuousTaxonData > &taxa)
 {
 
@@ -636,30 +683,64 @@ void PhyloBrownianProcessStateDependent::simulateRecursively( const TopologyNode
     {
         const TopologyNode &child = *(*it);
 
-        // get the branch length for this child
-        double branch_length = child.getBranchLength();
+        // get the branch history
+        const CharacterHistory& current_history = character_histories->getValue();
+        size_t child_index = child.getIndex();
+        const BranchHistory& bh = current_history.getHistory(child_index);
 
-        //@TODO: Need to change the simulation to actually use the states from the character history
-
-        // get the branch specific rate
-        double branch_sigma = computeStateDependentSigma( 0 );
+        const std::multiset<CharacterEvent*,CharacterEventCompare>& history = bh.getHistory();
 
         ContinuousTaxonData &taxon = taxa[ child.getIndex() ];
         for ( size_t i = 0; i < num_sites; ++i )
         {
+            double youngest_time = child.getAge();
+            double begin_time = youngest_time;
+
+            // the episode states and times (if there was at least one discrete character state change)
+            // the loop is from young to old
+            // since it's pushed to the front of the deque,
+            // the array is in order of old to young
+
+            std::deque<double> times;
+            std::deque<size_t> states;
+
+            for (std::multiset<CharacterEvent*, CharacterEventCompare>::const_iterator iter = history.begin(); iter != history.end(); ++iter)
+            {
+                // get the state change event
+                CharacterEventDiscrete* event = static_cast<CharacterEventDiscrete*>(*iter);
+
+                // calculate the times
+                double event_time = event->getAge();
+                double delta_t = event_time - begin_time;
+                begin_time = event_time;
+
+                // get the state index
+                size_t current_state = event->getState();
+
+                // save the
+                times.push_front(delta_t);
+                states.push_front(current_state);
+            }
+
+            // do it again, since the iterator above only does n-1 of the episodes
+            size_t first_state = static_cast<CharacterEventDiscrete*>(bh.getParentCharacters()[0])->getState();
+            double first_delta_t = node.getAge() - begin_time;
+
+            times.push_front(first_delta_t);
+            states.push_front(first_state);
+
             // get the ancestral character for this site
-            double parent_state = parent.getCharacter( i );
+            double y = parent.getCharacter( i );
 
-            // compute the standard deviation for this site
-            double m = parent_state;
+            // simulate the episodes
+            for (size_t j = 0; j < times.size(); ++j)
+            {
+                size_t state = states[j];
+                double delta_t = times[j];
+                y = simulateEpisode(state, delta_t, y);
+            }
 
-            double stand_dev = branch_sigma * sqrt(branch_length);
-
-            // create the character
-            double c = RbStatistics::Normal::rv( m, stand_dev, *rng);
-
-            // add the character to the sequence
-            taxon.addCharacter( c );
+            taxon.addCharacter(y);
         }
 
         if ( child.isTip() )
@@ -679,11 +760,10 @@ void PhyloBrownianProcessStateDependent::simulateRecursively( const TopologyNode
 
 std::vector<double> PhyloBrownianProcessStateDependent::simulateRootCharacters(size_t n)
 {
-
     std::vector<double> chars = std::vector<double>(num_sites, 0);
     for (size_t i=0; i<num_sites; ++i)
     {
-        chars[i] = 0.0;
+        chars[i] = computeRootValue();
     }
 
     return chars;

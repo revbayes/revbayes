@@ -53,7 +53,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
 
     const CharacterHistory& rl_char_hist = static_cast<const RevLanguage::CharacterHistory&>( character_history->getRevObject() );
     RevBayesCore::TypedDagNode<RevBayesCore::CharacterHistoryDiscrete>* char_hist   =  rl_char_hist.getDagNode();
-
+    size_t number_states = char_hist->getValue().getNumberOfStates();
 
    //    set the root treatment
     const std::string& rt = static_cast<const RlString &>( root_treatment->getRevObject() ).getValue();
@@ -81,7 +81,14 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
     if ( alpha->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
     {
         RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* a = static_cast<const ModelVector<RealPos> &>( alpha->getRevObject() ).getDagNode();
-        dist->setAlpha( a );
+        if ( a->getValue().size() == number_states )
+        {
+            dist->setAlpha( a );
+        }
+        else
+        {
+            throw RbException() << "The number of states (" << number_states << ") in the character history doesn't match the number of alpha parameters (" << a->getValue().size() << ")";
+        }
     }
     else
     {
@@ -93,7 +100,14 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
     if ( theta->getRevObject().isType( ModelVector<Real>::getClassTypeSpec() ) )
     {
         RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* t = static_cast<const ModelVector<Real> &>( theta->getRevObject() ).getDagNode();
-        dist->setTheta( t );
+        if ( t->getValue().size() == number_states )
+        {
+            dist->setTheta( t );
+        }
+        else
+        {
+            throw RbException() << "The number of states (" << number_states << ") in the character history doesn't match the number of theta parameters (" << t->getValue().size() << ")";
+        }
     }
     else
     {
@@ -105,7 +119,14 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
     if ( sigma->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
     {
         RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* s = static_cast<const ModelVector<RealPos> &>( sigma->getRevObject() ).getDagNode();
-        dist->setSigma( s );
+        if ( s->getValue().size() == number_states )
+        {
+            dist->setSigma( s );
+        }
+        else
+        {
+            throw RbException() << "The number of states (" << number_states << ") in the character history doesn't match the number of sigma parameters (" << s->getValue().size() << ")";
+        }
     }
     else
     {
@@ -260,6 +281,15 @@ void Dist_PhyloOrnsteinUhlenbeckStateDependent::printValue(std::ostream& o) cons
     {
         o << "?";
     }
+    o << ", alpha=";
+    if ( alpha != NULL )
+    {
+        o << alpha->getName();
+    }
+    else
+    {
+        o << "?";
+    }
     o << ", sigma=";
     if ( sigma != NULL )
     {
@@ -269,7 +299,24 @@ void Dist_PhyloOrnsteinUhlenbeckStateDependent::printValue(std::ostream& o) cons
     {
         o << "?";
     }
-
+    o << ", theta=";
+    if ( theta != NULL )
+    {
+        o << theta->getName();
+    }
+    else
+    {
+        o << "?";
+    }
+    o << ", rootValue=";
+    if ( root_value != NULL )
+    {
+        o << root_value->getName();
+    }
+    else
+    {
+        o << "?";
+    }
     o << ", nSites=";
     if ( n_sites != NULL )
     {

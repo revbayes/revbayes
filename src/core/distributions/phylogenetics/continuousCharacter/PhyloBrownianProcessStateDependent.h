@@ -26,6 +26,7 @@ namespace RevBayesCore {
         // public member functions
         // virtual
         virtual PhyloBrownianProcessStateDependent*                         clone(void) const;                                                                      //!< Create an independent clone
+        void                                                                setRootValue(const TypedDagNode< double >* rvl);
         void                                                                setSigma(const TypedDagNode< double >* s);
         void                                                                setSigma(const TypedDagNode< RbVector< double > >* s);
         void                                                                setValue(ContinuousCharacterData *v, bool f=false);                                     //!< Set the current value, e.g. attach an observation (clamp)
@@ -38,11 +39,13 @@ namespace RevBayesCore {
     protected:
 
         // virtual methods that may be overwritten, but then the derived class should call this methods
+        double                                                              computeRootValue( void ) const;
         virtual void                                                        keepSpecialization(const DagNode* affecter);
         void                                                                recursiveComputeLnProbability( const TopologyNode &node, size_t node_index );
         void                                                                recursivelyFlagNodeDirty(const TopologyNode& n);
         void                                                                resetValue( void );
         virtual void                                                        restoreSpecialization(const DagNode *restorer);
+        double                                                              simulateEpisode(size_t state_index, double delta_t, double ancestral_value);
         void                                                                simulateRecursively(const TopologyNode& node, std::vector< ContinuousTaxonData > &t);
         std::vector<double>                                                 simulateRootCharacters(size_t n);
         void                                                                simulateTipSamples( const std::vector< ContinuousTaxonData > &taxon_data );
@@ -78,6 +81,7 @@ namespace RevBayesCore {
         const TypedDagNode<CharacterHistoryDiscrete>*                       character_histories;
 
         const TypedDagNode< double >*                                       homogeneous_sigma;
+        const TypedDagNode< double >*                                       root_value;
         const TypedDagNode< RbVector< double > >*                           state_dependent_sigma;
 
     };
