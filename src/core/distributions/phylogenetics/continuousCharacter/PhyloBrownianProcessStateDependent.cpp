@@ -46,6 +46,7 @@ PhyloBrownianProcessStateDependent::PhyloBrownianProcessStateDependent(const Typ
     use_missing_data(false)
 {
     // initialize default parameters
+    root_value                  = new ConstantNode<double>("", new double(0.0) );
     homogeneous_sigma           = new ConstantNode<double>("", new double(1.0) );
     state_dependent_sigma       = NULL;
 
@@ -53,6 +54,7 @@ PhyloBrownianProcessStateDependent::PhyloBrownianProcessStateDependent(const Typ
     // add parameters
     addParameter( homogeneous_sigma );
     addParameter( character_histories );
+    addParameter( root_value );
 
     // now we need to reset the value
     this->redrawValue();

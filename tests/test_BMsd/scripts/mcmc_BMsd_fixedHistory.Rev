@@ -55,7 +55,7 @@ for (i in 1:num_disc_states){
 # Specify the OU process #
 ##########################
 
-Y ~ dnPhyloOUSD(char_hist, sigma=sigma2^0.5)
+Y ~ dnPhyloBMSD(char_hist, sigma=sigma2^0.5, rootValue=1)
 Y.clamp(cont)
 
 #############

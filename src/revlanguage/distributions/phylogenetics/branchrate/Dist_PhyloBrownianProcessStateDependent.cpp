@@ -144,7 +144,7 @@ const MemberRules& Dist_PhyloBrownianProcessStateDependent::getParameterRules(vo
 
         dist_member_rules.push_back( new ArgumentRule( "rootValue" , Real::getClassTypeSpec(), "The value of the continuous trait at the root.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
-        dist_member_rules.push_back( new ArgumentRule( "nSites",  Natural::getClassTypeSpec(), "The number of sites which is used for the initialized (random draw) from this distribution.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(10) ) );
+        dist_member_rules.push_back( new ArgumentRule( "nSites",  Natural::getClassTypeSpec(), "The number of sites which is used for the initialized (random draw) from this distribution.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1) ) );
 
         rules_set = true;
     }
