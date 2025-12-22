@@ -31,7 +31,7 @@
       - Report 95% HPD intervals for the ages of sampled ancestors (#810).
       - Fix majority-rule consensus trees with sampled ancestors (#859).
   * MCMC
-      - Do not print confusing messages about tip age adjustments on initialiation (#821).
+      - Do not print confusing messages about tip age adjustments on initialization (#821).
       - Allow specifying `tuningInterval = 0` in `mcmc.burnin( )` (#843) and `powerPosterior.burnin( )` (#878).
       - Make sure `mnModel` extracts the right nodes from the model graph (#900).
   * Moves
