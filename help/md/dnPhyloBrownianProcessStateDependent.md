@@ -70,7 +70,7 @@ readCharacterHistory
     }
     
     # basic use of the function
-    Y ~ dnPhyloBMSD(char_hist, sigma=sigma2^0.5)
+    Y ~ dnPhyloBMSD(char_hist, sigma=sigma2^0.5, rootValue=2.5)
 
 
 
