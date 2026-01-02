@@ -176,6 +176,20 @@ jobs:
       if: runner.os == 'macOS'
       run: |
           brew install boost ccache coreutils meson
+          
+          # Boost 1.90 has a bug causing a compilation error.
+          # We'll use a static boost until the version in homebrew is fixed.
+          ( cd
+            curl -O -L https://archives.boost.io/release/1.89.0/source/boost_1_89_0.tar.gz
+            tar -xzvf boost_1_89_0.tar.gz
+            cd boost_1_89_0
+            ./bootstrap.sh --with-libraries=atomic,chrono,system,regex,thread,date_time,math,serialization --prefix=../installed-boost-1.89.0
+            ./b2 link=static install
+            echo -e "\n    BOOST root is at $(cd ../installed-boost-1.89.0; pwd)\n"
+            echo BOOST_ROOT=$(cd ../installed-boost-1.89.0; pwd) >> $GITHUB_ENV
+            echo CMAKE_PREFIX_PATH=$(cd ../installed-boost-1.89.0; pwd) >> $GITHUB_ENV
+          )
+
 
     - name: Install meson
       run: |
