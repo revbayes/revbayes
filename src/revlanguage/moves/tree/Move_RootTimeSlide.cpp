@@ -6,6 +6,7 @@
 #include "ArgumentRules.h"
 #include "MetropolisHastingsMove.h"
 #include "Move_RootTimeSlide.h"
+#include "Natural.h"
 #include "RootTimeSlideProposal.h"
 #include "RealPos.h"
 #include "RevObject.h"
@@ -56,11 +57,12 @@ void Move_RootTimeSlide::constructInternalObject( void )
     double d = static_cast<const RealPos &>( delta->getRevObject() ).getValue();
     
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     
     bool tune = static_cast<const RlBoolean &>( tuning->getRevObject() ).getValue();
 
     RevBayesCore::Proposal *p = new RevBayesCore::RootTimeSlideProposal( t, d );
-    value = new RevBayesCore::MetropolisHastingsMove(p,w,tune);
+    value = new RevBayesCore::MetropolisHastingsMove(p,w,del,tune);
 }
 
 

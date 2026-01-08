@@ -24,23 +24,23 @@ namespace RevBayesCore {
     class IndependentPriorProposal : public Proposal {
         
     public:
-        IndependentPriorProposal( StochasticNode<valueType> *n, bool mh = true);                            //!<  constructor
+        IndependentPriorProposal( StochasticNode<valueType> *n);                                                //!<  constructor
         
         // Basic utility functions
-        void                                    cleanProposal(void);                                        //!< Clean up proposal
-        IndependentPriorProposal*               clone(void) const;                                          //!< Clone object
-        double                                  doProposal(void);                                           //!< Perform proposal
-        const std::string&                      getProposalName(void) const;                                //!< Get the name of the proposal for summary printing
+        void                                    cleanProposal(void);                                            //!< Clean up proposal
+        IndependentPriorProposal*               clone(void) const;                                              //!< Clone object
+        double                                  doProposal(void);                                               //!< Perform proposal
+        const std::string&                      getProposalName(void) const;                                    //!< Get the name of the proposal for summary printing
         double                                  getProposalTuningParameter(void) const;
-        void                                    prepareProposal(void);                                      //!< Prepare the proposal
-        void                                    printParameterSummary(std::ostream &o, bool name_only) const;               //!< Print the parameter summary
+        void                                    prepareProposal(void);                                          //!< Prepare the proposal
+        void                                    printParameterSummary(std::ostream &o, bool name_only) const;   //!< Print the parameter summary
         void                                    setProposalTuningParameter(double tp);
-        void                                    tune(double r);                                             //!< Tune the proposal to achieve a better acceptance/rejection ratio
-        void                                    undoProposal(void);                                         //!< Reject the proposal
+        void                                    tune(double r);                                                 //!< Tune the proposal to achieve a better acceptance/rejection ratio
+        void                                    undoProposal(void);                                             //!< Reject the proposal
         
     protected:
         
-        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);             //!< Swap the DAG nodes on which the Proposal is working on
+        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);                 //!< Swap the DAG nodes on which the Proposal is working on
         
         
     private:
@@ -54,7 +54,7 @@ namespace RevBayesCore {
 
 
 template <class valueType>
-RevBayesCore::IndependentPriorProposal<valueType>::IndependentPriorProposal( RevBayesCore::StochasticNode<valueType> *v, bool mh) : RevBayesCore::Proposal(),
+RevBayesCore::IndependentPriorProposal<valueType>::IndependentPriorProposal( RevBayesCore::StochasticNode<valueType> *v) : RevBayesCore::Proposal(),
     variable( v ),
     stored_value(v->getValue())
 {

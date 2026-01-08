@@ -65,12 +65,14 @@ void Move_RandomNaturalWalk::constructInternalObject( void )
     
     // now allocate a new random-integer-walk move
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
+
     RevBayesCore::TypedDagNode<std::int64_t>* tmp = static_cast<const Natural &>( x->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<std::int64_t> *n = static_cast<RevBayesCore::StochasticNode<std::int64_t> *>( tmp );
     
     // finally create the internal move object
     RevBayesCore::Proposal *prop = new RevBayesCore::RandomIntegerWalkProposal(n);
-    value = new RevBayesCore::MetropolisHastingsMove(prop,w);
+    value = new RevBayesCore::MetropolisHastingsMove(prop,w,del,false);
     
 }
 

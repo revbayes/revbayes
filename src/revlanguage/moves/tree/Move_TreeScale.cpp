@@ -78,11 +78,12 @@ void Move_TreeScale::constructInternalObject( void )
         ra = static_cast<RevBayesCore::StochasticNode<double> *>( tmp );
     }
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     double l = static_cast<const RealPos &>( delta->getRevObject() ).getValue();
     bool tune = static_cast<const RlBoolean &>( tuning->getRevObject() ).getValue();
 
     RevBayesCore::Proposal *p = new RevBayesCore::TreeScaleProposal(t, vec_t, ra, l);
-    value = new RevBayesCore::MetropolisHastingsMove(p, w, tune);
+    value = new RevBayesCore::MetropolisHastingsMove(p, w, del, tune);
 }
 
 

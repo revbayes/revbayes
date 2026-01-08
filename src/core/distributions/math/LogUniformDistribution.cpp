@@ -100,12 +100,11 @@ double LogUniformDistribution::quantile(double p) const
 
 void LogUniformDistribution::redrawValue( void ) 
 {
-    double ln_a = log( min->getValue() );
-    double ln_b = log( max->getValue() );
 
-    double u = ln_a + (ln_b - ln_a) * GLOBAL_RNG->uniform01();
-
-    *value = exp( u );
+    double u = GLOBAL_RNG->uniform01();
+    double ln_min = log( min->getValue() );
+    double ln_max = log( max->getValue() );
+    *value = exp( u*(ln_max - ln_min) + ln_min);
 
 }
 

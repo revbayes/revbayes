@@ -66,13 +66,14 @@ void Move_VectorSlide::constructInternalObject( void )
     const RevBayesCore::RbVector<std::int64_t> &e = static_cast<const ModelVector<Natural> &>( inidices->getRevObject() ).getValue();
     double l = static_cast<const RealPos &>( delta->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp = static_cast<const ModelVector<RealPos> &>( x->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::RbVector<double> > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::RbVector<double> > *>( tmp );
     
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *prop = new RevBayesCore::VectorSlideProposal(n,e,l);
-    value = new RevBayesCore::MetropolisHastingsMove(prop,w,t);
+    value = new RevBayesCore::MetropolisHastingsMove(prop,w,del,t);
 }
 
 

@@ -7,6 +7,7 @@
 #include "GibbsDrawCharacterHistoryProposal.h"
 #include "MetropolisHastingsMove.h"
 #include "Move_GibbsDrawCharacterHistory.h"
+#include "Natural.h"
 #include "RealPos.h"
 #include "RlTimeTree.h"
 #include "TypeSpec.h"
@@ -62,11 +63,12 @@ void Move_GibbsDrawCharacterHistory::constructInternalObject( void )
     delete value;
     
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
 
     RevBayesCore::Proposal *p = new RevBayesCore::GibbsDrawCharacterHistoryProposal(n);
-    value = new RevBayesCore::MetropolisHastingsMove(p,w);
+    value = new RevBayesCore::MetropolisHastingsMove(p,w,del,false);
     
 }
 

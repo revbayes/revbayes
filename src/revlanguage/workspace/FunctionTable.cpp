@@ -103,8 +103,9 @@ bool FunctionTable::addFunction( Function *func, bool avoid_except )
     {
         if ( isDistinctFormal(i->second->getArgumentRules(), func->getArgumentRules()) == false )
         {
-	    // Don't throw an exception if we are just going to ignore it.
-	    if (avoid_except) return false;
+
+            // Don't throw an exception if we are just going to ignore it.
+            if (avoid_except) return false;
 
             std::ostringstream msg;
             i->second->printValue(msg, true);

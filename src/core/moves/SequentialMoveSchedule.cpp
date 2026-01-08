@@ -11,14 +11,14 @@
 using namespace RevBayesCore;
 
 SequentialMoveSchedule::SequentialMoveSchedule(RbVector<Move> *s) : MoveSchedule( s ),
-    currentMove( 0 ),
-    usedPropOfCurrentMove( 0 )
+    current_move( 0 ),
+    used_prop_of_current_move( 0 )
 {
     
-    movesPerIteration = 0.0;
+    moves_per_iteration = 0.0;
     for (RbIterator<Move> it = moves->begin(); it != moves->end(); ++it)
     {
-        movesPerIteration += it->getUpdateWeight();
+        moves_per_iteration += it->getUpdateWeight();
     }
 }
 
@@ -36,7 +36,7 @@ SequentialMoveSchedule* SequentialMoveSchedule::clone( void ) const
 
 double SequentialMoveSchedule::getNumberMovesPerIteration( void ) const
 {
-    return movesPerIteration;
+    return moves_per_iteration;
 }
 
 
@@ -46,32 +46,32 @@ Move& SequentialMoveSchedule::nextMove( std::uint64_t gen )
     bool found = false;
     do {
         
-        double remainingWeight = (*moves)[currentMove].getUpdateWeight() - usedPropOfCurrentMove;
+        double remainingWeight = (*moves)[current_move].getUpdateWeight() - used_prop_of_current_move;
         if ( remainingWeight >= 1.0 )
         {
-            usedPropOfCurrentMove++;
+            used_prop_of_current_move++;
             found = true;
         }
         else if ( remainingWeight > 0.0 )
         {
-            usedPropOfCurrentMove++;
+            used_prop_of_current_move++;
             RandomNumberGenerator* rng = GLOBAL_RNG;
             found = remainingWeight > rng->uniform01();
         } 
         else
         {
-            usedPropOfCurrentMove = 0.0;
+            used_prop_of_current_move = 0.0;
             do
             {
-                currentMove++;
-                if ( currentMove >= moves->size())
+                current_move++;
+                if ( current_move >= moves->size())
                 {
-                    currentMove = 0;
+                    current_move = 0;
                 }
-            } while ( !(*moves)[currentMove].isActive( gen ) );
+            } while ( !(*moves)[current_move].isActive( gen ) );
         }
         
     } while ( !found );
     
-    return (*moves)[currentMove];
+    return (*moves)[current_move];
 }

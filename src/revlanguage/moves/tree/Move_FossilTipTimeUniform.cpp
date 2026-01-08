@@ -7,6 +7,7 @@
 #include "ArgumentRules.h"
 #include "MetropolisHastingsMove.h"
 #include "Move_FossilTipTimeUniform.h"
+#include "Natural.h"
 #include "FossilTipTimeUniformProposal.h"
 #include "Probability.h"
 #include "RealPos.h"
@@ -90,8 +91,9 @@ void Move_FossilTipTimeUniform::constructInternalObject( void )
     }
 
     RevBayesCore::FossilTipTimeUniformProposal *p = new RevBayesCore::FossilTipTimeUniformProposal( t, org, ma, mi, tip_name );
-
-    value = new RevBayesCore::MetropolisHastingsMove(p, we, false);
+    
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
+    value = new RevBayesCore::MetropolisHastingsMove(p, we, del, false);
 }
 
 

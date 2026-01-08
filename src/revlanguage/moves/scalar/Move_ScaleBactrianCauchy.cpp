@@ -8,6 +8,7 @@
 #include "ContinuousStochasticNode.h"
 #include "MetropolisHastingsMove.h"
 #include "Move_ScaleBactrianCauchy.h"
+#include "Natural.h"
 #include "Probability.h"
 #include "RealPos.h"
 #include "RevObject.h"
@@ -67,13 +68,14 @@ void Move_ScaleBactrianCauchy::constructInternalObject( void )
     // now allocate a new sliding move
     double d = static_cast<const RealPos &>( lambda->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    double r = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double r = static_cast<const RealPos &>( tune_target->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode<double>* tmp = static_cast<const RealPos &>( x->getRevObject() ).getDagNode();
     RevBayesCore::ContinuousStochasticNode *n = static_cast<RevBayesCore::ContinuousStochasticNode *>( tmp );
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *p = new RevBayesCore::ScaleBactrianCauchyProposal(n, d, r);
-    value = new RevBayesCore::MetropolisHastingsMove(p, w, t);
+    value = new RevBayesCore::MetropolisHastingsMove(p, w, del, t);
     
 }
 

@@ -71,6 +71,7 @@ void Move_GraphShiftEdge::constructInternalObject( void )
     // now allocate a new sliding move
     double l = static_cast<const Probability &>( prob->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
     const RevBayesCore::RbVector<std::int64_t>& e = static_cast<const ModelVector<Natural> &>( vertices->getRevObject() ).getValue();
     
@@ -83,7 +84,7 @@ void Move_GraphShiftEdge::constructInternalObject( void )
     bool symm = v->getRevObject().isType( MatrixRealSymmetric::getClassTypeSpec() );
     p = new RevBayesCore::GraphShiftEdgeProposal(n, e, l, symm );
     
-    value = new RevBayesCore::MetropolisHastingsMove(p,w,t);
+    value = new RevBayesCore::MetropolisHastingsMove(p,w,del,t);
     
 }
 

@@ -7,6 +7,7 @@
 #include "ArgumentRules.h"
 #include "IndependentPriorProposal.h"
 #include "MetropolisHastingsMove.h"
+#include "Natural.h"
 #include "RealPos.h"
 #include "RlTree.h"
 #include "TypeSpec.h"
@@ -51,14 +52,13 @@ void Move_EmpiricalTree::constructInternalObject( void )
     
     // now allocate a new empirical tree move
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     
     RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = static_cast<const Tree &>( tree->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
     
-    bool mh = static_cast<const RlBoolean &>( metropolisHastings->getRevObject() ).getValue();
-
-    RevBayesCore::Proposal *p = new RevBayesCore::IndependentPriorProposal<RevBayesCore::Tree>(t, mh);
-    value = new RevBayesCore::MetropolisHastingsMove(p, w, false);
+    RevBayesCore::Proposal *p = new RevBayesCore::IndependentPriorProposal<RevBayesCore::Tree>(t);
+    value = new RevBayesCore::MetropolisHastingsMove(p, w, del, false);
     
 }
 
@@ -105,7 +105,6 @@ const MemberRules& Move_EmpiricalTree::getParameterRules(void) const
     if ( !rules_set )
     {
         move_member_rules.push_back( new ArgumentRule( "tree", Tree::getClassTypeSpec(), "The stochastic tree variable on which this moves operates.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
-        move_member_rules.push_back( new ArgumentRule( "metropolisHastings"   , RlBoolean::getClassTypeSpec(), "If TRUE, use the regular Metropolis-Hastings acceptance ratio. If FALSE, always accept this move and sample every tree uniformly.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( true ) ) );
 
         /* Inherit weight from Move, put it after variable */
         const MemberRules& inheritedRules = Move::getParameterRules();
@@ -150,10 +149,6 @@ void Move_EmpiricalTree::setConstParameter(const std::string& name, const RevPtr
     if ( name == "tree" )
     {
         tree = var;
-    }
-    else if ( name == "metropolisHastings" )
-    {
-        metropolisHastings = var;
     }
     else
     {

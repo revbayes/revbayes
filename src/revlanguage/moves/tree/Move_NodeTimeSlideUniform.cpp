@@ -66,9 +66,10 @@ void Move_NodeTimeSlideUniform::constructInternalObject( void )
     }
     
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *p = new RevBayesCore::NodeTimeSlideUniformProposal( t, vec_t );
-    value = new RevBayesCore::MetropolisHastingsMove(p,w,false);
+    value = new RevBayesCore::MetropolisHastingsMove(p,w,del,false);
 }
 
 

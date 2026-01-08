@@ -83,7 +83,8 @@ double RbStatistics::Lognormal::lnPdf(double x) {
  * \return Returns the natural log of the probability density.
  * \throws Does not throw an error.
  */
-double RbStatistics::Lognormal::lnPdf(double m, double s, double x) {
+double RbStatistics::Lognormal::lnPdf(double m, double s, double x) 
+{
     
 	double y = (log(x) - m) / s;
 	return -(RbConstants::LN_SQRT_2PI + 0.5 * y * y + log(x * s));
