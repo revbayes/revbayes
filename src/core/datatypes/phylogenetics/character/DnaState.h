@@ -63,7 +63,17 @@ namespace RevBayesCore {
         char                            state;
     
     };
-    
+
+    inline bool operator==(const DiscreteCharacterState& lhs, const DnaState& rhs)
+    {
+        return rhs.operator==(lhs);
+    }
+
+    inline bool operator==(const DnaState& rhs, const DiscreteCharacterState& lhs)
+    {
+        return lhs.operator==(rhs);
+    }
+
 }
 
 #endif
