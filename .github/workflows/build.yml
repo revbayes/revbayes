@@ -12,28 +12,20 @@ jobs:
   build:
     strategy:
       matrix:
-        name: [ubuntu-22.04-gcc-10,
-               ubuntu-gcc-11,
+        name: [ubuntu-gcc-11,
                ubuntu-gcc-11-mpi,
                ubuntu-22.04-gcc-12,
                ubuntu-gcc-13,
                ubuntu-gcc-14,
                ubuntu-gcc-15,
                ubuntu-gcc-15-debugoptimized,
-               ubuntu-clang-15,
+               ubuntu-clang-17,
                macos-xcode-16-intel,
                macos-xcode-26-arm,
                windows
                ]
 
         include:
-
-          - name: ubuntu-22.04-gcc-10
-            os: ubuntu-22.04
-            compiler: gcc
-            version: "10"
-            mpi: false
-            arch: linux64
 
           - name: ubuntu-gcc-11
             os: ubuntu-latest
@@ -90,10 +82,10 @@ jobs:
             project: meson
             buildtype: debugoptimized
 
-          - name: ubuntu-clang-15
+          - name: ubuntu-clang-17
             os: ubuntu-latest
             compiler: clang
-            version: "15"
+            version: "17"
             mpi: false
             arch: linux64
 
