@@ -2,7 +2,7 @@ project('RevBayes', ['cpp', 'c'],
         version: '1.3.2',
         default_options: [
           'buildtype=release',
-          'cpp_std=c++20',
+          'cpp_std=c++23',
           'b_ndebug=if-release'
         ],
         meson_version: '>= 1.0',
