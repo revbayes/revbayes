@@ -1541,8 +1541,8 @@ void NxsCharactersBlock::CreateDatatypeMapperObjects(const NxsPartition & dtPart
                 mixedTypeMapping.clear();
                 if (datatype != mixed)
                         {
-                        NxsDiscreteDatatypeMapper d(datatype, symbols, missing, gap, matchchar, respectingCase, userEquates);
-                        datatype = d.GetDatatype();
+                        auto d = std::make_shared<NxsDiscreteDatatypeMapper>(datatype, symbols, missing, gap, matchchar, respectingCase, userEquates);
+                        datatype = d->GetDatatype();
                         DatatypeMapperAndIndexSet das(d, NxsUnsignedSet());
                         datatypeMapperVec.clear();
                         datatypeMapperVec.push_back(das);
@@ -1559,7 +1559,7 @@ void NxsCharactersBlock::CreateDatatypeMapperObjects(const NxsPartition & dtPart
                                 std::string mt;
                                 if (*cIt == standard)
                                         mt.assign("0123456789"); /*mrbayes is the only program to support MIXED and it uses a default (not extendable) symbols list of 0123456789 rather than 01*/
-                                NxsDiscreteDatatypeMapper d(*cIt, mt, missing, gap, matchchar, respectingCase, userEquates);
+                                auto d = std::make_shared<NxsDiscreteDatatypeMapper>(*cIt, mt, missing, gap, matchchar, respectingCase, userEquates);
                                 const NxsUnsignedSet & indexSet = pIt->second;
                                 DatatypeMapperAndIndexSet das(d, pIt->second);
                                 NxsUnsignedSet & mappedInds =  mixedTypeMapping[*cIt];
@@ -1668,21 +1668,21 @@ bool NxsCharactersBlock::AugmentedSymbolsToMixed()
 
         /* copy the incoming matrix and mapper */
         VecDatatypeMapperAndIndexSet mdm = datatypeMapperVec;
-        const NxsDiscreteDatatypeMapper & oldMapper = mdm[0].first;
+        const NxsDiscreteDatatypeMapper & oldMapper = *mdm[0].first;
         if (oldMapper.GetUserDefinedEquatesBeforeConversion())
                 return false; /* dealing with equates correctly is not implemented below, so we'll bale out */
 
         /* add the new mappers */
         std::map<char, NxsString> noEquates;
         datatypeMapperVec.clear();
-        NxsDiscreteDatatypeMapper o(odt, origSymb, missing, gap, matchchar, respectingCase, noEquates);
+        auto o = std::make_shared<NxsDiscreteDatatypeMapper>(odt, origSymb, missing, gap, matchchar, respectingCase, noEquates);
         datatypeMapperVec.push_back(DatatypeMapperAndIndexSet(o, origTypeChars));
-        NxsDiscreteDatatypeMapper s(NxsCharactersBlock::standard, augmentSymbols, missing, gap, matchchar, respectingCase, noEquates);
+        auto s = std::make_shared<NxsDiscreteDatatypeMapper>(NxsCharactersBlock::standard, augmentSymbols, missing, gap, matchchar, respectingCase, noEquates);
         datatypeMapperVec.push_back(DatatypeMapperAndIndexSet(s, stdTypeChars));
 
 
-        NxsDiscreteDatatypeMapper & newOrigTMapper = datatypeMapperVec[0].first;
-        NxsDiscreteDatatypeMapper & newStdTMapper = datatypeMapperVec[1].first;
+        NxsDiscreteDatatypeMapper & newOrigTMapper = *datatypeMapperVec[0].first;
+        NxsDiscreteDatatypeMapper & newStdTMapper = *datatypeMapperVec[1].first;
 
         /* now we recode discrete matrix with new state codes */
         const NxsDiscreteStateCell nOrigStates = (NxsDiscreteStateCell) origSymb.size();
@@ -2297,7 +2297,7 @@ void NxsCharactersBlock::HandleFormat(
                 if (*b)
                         {
                         DatatypeMapperAndIndexSet &mapper = datatypeMapperVec.at(mapInd);
-                        mapper.first.SetWasRestrictionDataype(true);
+                        mapper.first->SetWasRestrictionDataype(true);
                         }
                 }
         }
@@ -4951,7 +4951,7 @@ void NxsCharactersBlock::WriteFormatCommand(std::ostream &out) const
                                 first = false;
                         else
                                 out << ", ";
-                        out << GetNameOfDatatype(mIt->first.GetDatatype()) << ':';
+                        out << GetNameOfDatatype(mIt->first->GetDatatype()) << ':';
                         NxsSetReader::WriteSetAsNexusValue(mIt->second, out);
                         }
                 out << ')';

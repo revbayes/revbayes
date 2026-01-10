@@ -23,6 +23,7 @@
 #include <sstream>
 #include <cfloat>
 #include <climits>
+#include <memory>
 
 #include "nxsdefs.h"
 #include "nxsdiscretedatum.h"
@@ -480,7 +481,7 @@ class NxsCharactersBlock
                 typedef std::vector<std::string> VecString;
                 typedef std::map<unsigned, std::string> IndexToLabelMap;
                 typedef std::map<std::string, unsigned> LabelToIndexMap;
-                typedef std::pair<NxsDiscreteDatatypeMapper, NxsUnsignedSet> DatatypeMapperAndIndexSet;
+                typedef std::pair<std::shared_ptr<NxsDiscreteDatatypeMapper>, NxsUnsignedSet> DatatypeMapperAndIndexSet;
                 typedef std::vector<DatatypeMapperAndIndexSet> VecDatatypeMapperAndIndexSet;
 
 
@@ -1535,7 +1536,7 @@ inline void NxsCharactersBlock::SetGapSymbol(char g)
         {
         gap = g;
         if (datatypeMapperVec.size() == 1)
-                datatypeMapperVec[0].first.SetGapSymbol(g);
+                datatypeMapperVec[0].first->SetGapSymbol(g);
         }
 
 
@@ -1551,7 +1552,7 @@ inline NxsCharactersBlock::DataTypesEnum NxsCharactersBlock::GetDataType() const
                 return datatype;
         if (datatypeMapperVec.size() > 1)
                 return mixed;
-        return datatypeMapperVec[0].first.GetDatatype();
+        return datatypeMapperVec[0].first->GetDatatype();
         }
 
 inline NxsCharactersBlock::DataTypesEnum NxsCharactersBlock::GetOriginalDataType() const
@@ -1937,12 +1938,12 @@ inline const NxsCharactersBlock::ContinuousCharRow & NxsCharactersBlock::GetCont
 inline NxsDiscreteDatatypeMapper * NxsCharactersBlock::GetMutableDatatypeMapperForChar(unsigned int charIndex)
         {
         if (datatypeMapperVec.size() == 1)
-                return &(datatypeMapperVec[0].first);
+                return datatypeMapperVec[0].first.get();
         for (VecDatatypeMapperAndIndexSet::iterator dmvIt = datatypeMapperVec.begin(); dmvIt != datatypeMapperVec.end(); ++dmvIt)
                 {
                 const NxsUnsignedSet & currCS = dmvIt->second;
                 if (currCS.count(charIndex) > 0)
-                        return &(dmvIt->first);
+                        return dmvIt->first.get();
                 }
         return NULL;
         }
@@ -1951,7 +1952,7 @@ inline std::vector<const NxsDiscreteDatatypeMapper *> NxsCharactersBlock::GetAll
         {
         std::vector<const NxsDiscreteDatatypeMapper *> v;
         for (VecDatatypeMapperAndIndexSet::const_iterator dmvIt = datatypeMapperVec.begin(); dmvIt != datatypeMapperVec.end(); ++dmvIt)
-                v.push_back(&(dmvIt->first));
+                v.push_back(dmvIt->first.get());
         return v;
         }
 
