@@ -185,7 +185,7 @@ bool WriteCommandAsNexus(std::ostream & out, const ProcessedNxsCommand &c)
 	if (c.empty())
 		return false;
 	out << "   "; /* command indentation  - 1 space*/
-	for (ProcessedNxsCommand::const_iterator cIt = c.begin(); cIt != c.end(); ++cIt)
+	for(ProcessedNxsCommand::const_iterator cIt = c.begin(); cIt != c.end(); ++cIt)
 		{
 		out << ' ';
 		cIt->WriteAsNexus(out);
@@ -225,7 +225,7 @@ inline void NxsToken::AdvanceToNextCharInStream()
 	posOffBy = -1;
 	if (nextCharInStream == 13 || nextCharInStream == 10)
 		{
-		if (nextCharInStream == 13)
+		if(nextCharInStream == 13)
 			{
 			if ((inputStream.rdbuf())->sgetc() == 10)	//peeks at the next char
 				{
@@ -255,14 +255,14 @@ inline char NxsToken::GetNextChar()
 
 	signed char ch = nextCharInStream;
 	AdvanceToNextCharInStream();
-	if (ch == EOF)
+	if(ch == EOF)
 		{
 		atEOF = true;
 		if (eofAllowed)
 			return '\0';
 		throw NxsX_UnexpectedEOF(*this);
 		}
-	if (ch == '\n')
+	if(ch == '\n')
 		{
 		fileLine++;
 		fileColumn = 1L;
@@ -574,7 +574,7 @@ bool NxsToken::GetComment()
 		if (ch != ']')
 			{
 			int level = 1;
-			for (;;)
+			for(;;)
 				{
 				ch = GetNextChar();
 				if (ch == ']')
@@ -657,7 +657,7 @@ void NxsToken::GetDoubleQuotedToken()
 	eofAllowed = false;
 	try
 		{
-		for (;;)
+		for(;;)
 			{
 			char ch = GetNextChar();
 			if (ch == '\"')
@@ -690,7 +690,7 @@ void NxsToken::GetQuoted()
 
 	try
 		{
-		for (;;)
+		for(;;)
 			{
 			char ch = GetNextChar();
 			if (ch == '\'')
@@ -698,6 +698,49 @@ void NxsToken::GetQuoted()
 				ch = GetNextChar();
 				if (ch == '\'')
 					AppendToToken(ch);
+				else
+					{
+					saved = ch;
+					break;
+					}
+				}
+			else
+				AppendToToken(ch);
+			}
+		}
+	catch (NxsX_UnexpectedEOF & x)
+		{
+		x.msg << " (end-of-file inside \' quoted token that started on line " << fl<< ", column " <<fc << ')';
+		eofAllowed = formerEOFAllowed;
+		throw x;
+		}
+	eofAllowed = formerEOFAllowed ;
+	}
+
+/*!
+Like GetQuoted, but emits both single quotes in the event of an
+internal single quote. Important for the double parsing of trees by the NxsTreesBlock
+*/
+void NxsToken::GetQuotedWithInternalSingleQuotesDoubled()
+	{
+	bool formerEOFAllowed = eofAllowed;
+	eofAllowed = false;
+	long fl = fileLine;
+	long fc = fileColumn;
+
+	try
+		{
+		for(;;)
+			{
+			char ch = GetNextChar();
+			if (ch == '\'')
+				{
+				ch = GetNextChar();
+				if (ch == '\'')
+					{
+					AppendToToken(ch);
+					AppendToToken(ch);
+					}
 				else
 					{
 					saved = ch;
@@ -731,7 +774,7 @@ void NxsToken::GetParentheticalToken()
 	embeddedComments.clear();
 	char ch;
 	ch = GetNextChar();
-	for (;;)
+	for(;;)
 		{
 		if (atEOF)
 			break;
@@ -739,7 +782,7 @@ void NxsToken::GetParentheticalToken()
 		if (ch == '\'')
 			{
 			AppendToToken('\'');
-			GetQuoted();
+			GetQuotedWithInternalSingleQuotesDoubled();
 			AppendToToken('\'');
 			ch = saved;
 			saved = '\0';
@@ -918,7 +961,7 @@ void NxsToken::GetNextToken()
 		saved = ch;
 		}
 
-	for (;;)
+	for(;;)
 		{
 		// Break now if singleCharacterToken mode on and token length > 0.
 		//
@@ -962,8 +1005,13 @@ void NxsToken::GetNextToken()
 				// Break only if we've begun adding to token (remember, if we hit a comment before a token,
 				// there might be further white space between the comment and the next token).
 				//
-				if (!token.empty())
-					break;
+				if (!token.empty()) 
+				    {
+				    if (ch == ' ' && (labileFlags & NxsToken::spaceDoesNotBreakToken))
+				        AppendToToken(ch);
+				    else
+    					break;
+					}
 				}
 			}
 		else if (ch == '_' || ch == '-')
@@ -1002,7 +1050,7 @@ void NxsToken::GetNextToken()
 				GetDoubleQuotedToken();
 			else if (ch == '\'' && token.empty())
 				GetQuoted();
-            else
+			else
 				{
 				//save if we have started a token, consider the punctuation to
 				// be the full token.

@@ -800,8 +800,18 @@ void Mcmc::initializeSamplerFromCheckpoint( void )
     {
         if ( monitors[j].isFileMonitor() )
         {
-            // set file monitors to append
             AbstractFileMonitor* m = dynamic_cast< AbstractFileMonitor *>( &monitors[j] );
+            std::ifstream monitorFile( m->getMonitorFileName().string() );
+            
+            // if there is no file yet at the location specified by the monitor, create one and write the header to it
+            if ( !monitorFile )
+            {
+                monitors[j].openStream(false);
+                monitors[j].printHeader();
+                monitors[j].closeStream();
+            }
+            
+            // set file monitors to append
             m->setAppend(true);
         }
     }

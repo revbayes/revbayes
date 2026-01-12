@@ -121,7 +121,7 @@ class NxsDefaultPublicBlockFactory
 	{
 	public:
 		/**----------------------------------------------------------------------------------------------------------------------
-		|	Constructor takes two RlBooleans.
+		|	Constructor takes two booleans.
 		|	If readUnknownBlocks is "true" then a NxsStoreTokensBlockReader will be spawned for every unknown block.
 		|	storeTokenInfo is passed to the NxsStoreTokensBlockReader constructor (true for storage of full token info - such as
 		|		file position.
@@ -602,7 +602,7 @@ class PublicNexusReader: public ExceptionRaisingNxsReader
 				-# call ClearContent()
 				-# add back the block instances that provide necessary context for additional parses.
 		*/
-		void AddreadDiscreteCharactersBlock(NxsCharactersBlock * block)
+		void AddReadCharactersBlock(NxsCharactersBlock * block)
 			{
 			charactersBlockVec.push_back(block);
 			AddReadBlock("CHARACTERS", block);
