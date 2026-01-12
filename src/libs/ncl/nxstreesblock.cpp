@@ -231,7 +231,7 @@ void NxsSimpleEdge::WriteAsNewick(std::ostream &out, bool nhx) const
 		}
 	}
 
-void NxsSimpleNode::WriteAsNewick(std::ostream &out, bool nhx, bool useLeafNames, bool escapeNames, const NxsTaxaBlockAPI *taxa) const
+void NxsSimpleNode::WriteAsNewick(std::ostream &out, bool nhx, bool useLeafNames, bool escapeNames, const NxsTaxaBlockAPI *taxa, bool escapeInternals) const
 	{
 	if (lChild)
 		{
@@ -241,12 +241,13 @@ void NxsSimpleNode::WriteAsNewick(std::ostream &out, bool nhx, bool useLeafNames
 			{
 			if (child != children.begin())
 				out << ',';
-			(*child)->WriteAsNewick(out, nhx, useLeafNames, escapeNames, taxa);
+			(*child)->WriteAsNewick(out, nhx, useLeafNames, escapeNames, taxa, escapeInternals);
 			}
 		out << ')';
 		if (!name.empty())
 			{
-			if (escapeNames)
+			if (escapeNames
+			    || (escapeInternals && (!children.empty())))
 				out << NxsString::GetEscaped(name);
 			else
 				out << name;
@@ -297,21 +298,21 @@ void NxsSimpleNode::AddSelfAndDesToPreorder(std::vector<const NxsSimpleNode *> &
 	for (;;)
 		{
 		p.push_back(currCh);
-		if (currCh->lChild) 
+		if (currCh->lChild)
 			{
 			currCh = currCh->lChild;
-			if (currCh->rSib) 
+			if (currCh->rSib)
 				{
 				ndStack.push(currCh->rSib);
 				}
 			}
-		else 
+		else
 			{
 			if (ndStack.empty())
 				break;
 			currCh = ndStack.top();
 			ndStack.pop();
-			if (currCh->rSib) 
+			if (currCh->rSib)
 				{
 				ndStack.push(currCh->rSib);
 				}
@@ -612,7 +613,7 @@ void NxsSimpleEdge::DealWithNexusComments(const std::vector<NxsComment> & ecs, b
 		}
 	}
 
-void NxsSimpleTree::Initialize(const NxsFullTreeDescription & td)
+void NxsSimpleTree::Initialize(const NxsFullTreeDescription & td, bool treatInternalNodeLabelsAsStrings)
 	{
 	if (!td.IsProcessed())
 		throw NxsNCLAPIException("A tree description must be processed by ProcessTree before calling NxsSimpleTree::NxsSimpleTree");
@@ -716,7 +717,12 @@ void NxsSimpleTree::Initialize(const NxsFullTreeDescription & td)
 			}
 		if (!handled)
 			{
-			bool wasReadAsNumber = NxsString::to_long(t, &currTaxNumber);
+			//std::cerr << "!handled t = " << t << "\n";
+
+			bool wasReadAsNumber = false;
+			if (currNd->IsTip() ||  !treatInternalNodeLabelsAsStrings) {
+				wasReadAsNumber = NxsString::to_long(t, &currTaxNumber);
+			}
 			if (wasReadAsNumber)
 				{
 				if (currTaxNumber < 1)
@@ -800,12 +806,14 @@ NxsTreesBlock::NxsTreesBlock(
   NxsTaxaBlockAPI *tb)	/* the NxsTaxaBlockAPI object to be queried for taxon names appearing in tree descriptions */
   :NxsTaxaBlockSurrogate(tb, NULL),
   processedTreeValidationFunction(NULL),
+  constructingTaxaBlock(false),
   ptvArg(NULL)
 	{
 	NCL_BLOCKTYPE_ATTR_NAME = "TREES";
 	defaultTreeInd = UINT_MAX;
 	writeTranslateTable = true;
 	allowImplicitNames = false;
+	warnAboutMissingTaxaBlock = true;
 	useNewickTokenizingDuringParse = false;
 	treatIntegerLabelsAsNumbers = false;
 	processAllTreesDuringParse = true;
@@ -813,6 +821,8 @@ NxsTreesBlock::NxsTreesBlock(
 	validateInternalNodeLabels = true;
 	treatAsRootedByDefault = true;
 	allowNumericInterpretationOfTaxLabels = true;
+	allowUnquotedSpaces = false;
+	disambiguateDuplicateNames = false;
 	}
 /*!
 	Clears `translateList', `rooted', `treeName' and `treeDescription'.
@@ -1011,12 +1021,12 @@ void NxsTreesBlock::WriteTreesCommand(std::ostream & out) const
 		if (writeFromNodeEdgeDataStructure)
 			{
 			nst.Initialize(treeDesc);
-			nst.WriteAsNewick(out, true, useLeafNames, true, taxa);
+			nst.WriteAsNewick(out, true, useLeafNames, true, taxa, true);
 			}
 		else
 			out << treeDesc.GetNewick();
 		out << ";\n";
-		
+
 
 #		if defined(PHYLOBASE_TESTING)
 			const NxsTreesBlock * treeBlock = this;
@@ -1026,10 +1036,10 @@ void NxsTreesBlock::WriteTreesCommand(std::ostream & out) const
 
 
         	std::vector<unsigned> parentVector; //Index of the parent. 0 means no parent.
-    	    std::vector<double> branchLengthVector; 
+    	    std::vector<double> branchLengthVector;
 			parentVector.clear();
 			branchLengthVector.clear();
-			const NxsFullTreeDescription & ftd = treeBlock->GetFullTreeDescription(k); 
+			const NxsFullTreeDescription & ftd = treeBlock->GetFullTreeDescription(k);
 			treeNames.push_back(ftd.GetName());
 			NxsSimpleTree simpleTree(ftd, -1, -1.0);
 			std::vector<const NxsSimpleNode *> ndVector =  simpleTree.GetPreorderTraversal();
@@ -1037,25 +1047,25 @@ void NxsTreesBlock::WriteTreesCommand(std::ostream & out) const
 			for (std::vector<const NxsSimpleNode *>::const_iterator ndIt = ndVector.begin(); ndIt != ndVector.end(); ++ndIt)
 				{
 				NxsSimpleNode * nd = (NxsSimpleNode *) *ndIt;
-				unsigned node_index;
+				unsigned nodeIndex;
 				if (nd->IsTip())
 					{
-					node_index = nd->GetTaxonIndex();
-					std::cout << " leaf node # = " <<  node_index << '\n';
+					nodeIndex = nd->GetTaxonIndex();
+					std::cout << " leaf node # = " <<  nodeIndex << '\n';
 					}
 				else
 					{
-					node_index = internalNdIndex++;
-					nd->SetTaxonIndex(node_index);
+					nodeIndex = internalNdIndex++;
+					nd->SetTaxonIndex(nodeIndex);
 					std::cout << " internal node # = " << nd->GetTaxonIndex()  << '\n';
 					}
-				if (parentVector.size() < node_index + 1)
+				if (parentVector.size() < nodeIndex + 1)
 					{
-					parentVector.resize(node_index + 1);
+					parentVector.resize(nodeIndex + 1);
 					}
-				if (branchLengthVector.size() < node_index + 1)
+				if (branchLengthVector.size() < nodeIndex + 1)
 					{
-					branchLengthVector.resize(node_index + 1);
+					branchLengthVector.resize(nodeIndex + 1);
 					}
 				NxsSimpleEdge edge = nd->GetEdgeToParent();
 
@@ -1063,24 +1073,24 @@ void NxsTreesBlock::WriteTreesCommand(std::ostream & out) const
 				par = (NxsSimpleNode *) edge.GetParent();
 				if (par != 0L)
 					{
-					parentVector[node_index] = 1 + par->GetTaxonIndex();
-					branchLengthVector[node_index] = edge.GetDblEdgeLen();
+					parentVector[nodeIndex] = 1 + par->GetTaxonIndex();
+					branchLengthVector[nodeIndex] = edge.GetDblEdgeLen();
 					}
 				else
 					{
-					parentVector[node_index] = 0;
-					branchLengthVector[node_index] = -1.0;
+					parentVector[nodeIndex] = 0;
+					branchLengthVector[nodeIndex] = -1.0;
 					}
 				}
 			std::cout << "Parents = [";
 			for (std::vector<unsigned>::const_iterator nIt = parentVector.begin(); nIt != parentVector.end(); ++nIt)
 				{
-				std::cout << *nIt << ", ";				
+				std::cout << *nIt << ", ";
 				}
 			std::cout << "]\nbranch lengths = [";
 			for (std::vector<double>::const_iterator nIt = branchLengthVector.begin(); nIt != branchLengthVector.end(); ++nIt)
 				{
-				std::cout << *nIt << ", ";				
+				std::cout << *nIt << ", ";
 				}
 			std::cout << "]\n";
 #endif
@@ -1125,7 +1135,7 @@ void NxsTreesBlock::ConstructDefaultTranslateTable(NxsToken &token, const char *
 		{
 		if (allowImplicitNames)
 			{
-			if (nexusReader)
+			if (nexusReader && this->warnAboutMissingTaxaBlock)
 				nexusReader->NexusWarnToken("A TAXA block should be read before the TREES block (but no TAXA block was found).  Taxa will be inferred from their usage in the TREES block.", NxsReader::AMBIGUOUS_CONTENT_WARNING , token);
 			constructingTaxaBlock = true;
 			newtaxa = true;
@@ -1220,8 +1230,9 @@ void NxsTreesBlock::ProcessTokenVecIntoTree(
   NxsReader * nexusReader,
   const bool respectCase,
   const bool validateInternalNodeLabels,
-  const bool treatIntegerLabelsAsNumbers, 
-  const bool allowNumericInterpretationOfTaxLabels)
+  const bool treatIntegerLabelsAsNumbers,
+  const bool allowNumericInterpretationOfTaxLabels,
+  const bool autoNumberDuplicateNames)
 	{
 	ProcessedNxsCommand::const_iterator tvIt = tokenVec.begin();
 	ostringstream tokenStream;
@@ -1247,8 +1258,18 @@ void NxsTreesBlock::ProcessTokenVecIntoTree(
 
 	try
 		{
-		ProcessTokenStreamIntoTree(token, td, taxa, capNameToInd, allowNewTaxa, nexusReader, respectCase, 
-								   validateInternalNodeLabels,  treatIntegerLabelsAsNumbers, allowNumericInterpretationOfTaxLabels);
+		ProcessTokenStreamIntoTree(token,
+		                           td,
+		                           taxa,
+		                           capNameToInd,
+		                           allowNewTaxa,
+		                           nexusReader,
+		                           respectCase,
+								   validateInternalNodeLabels,
+								   treatIntegerLabelsAsNumbers,
+								   allowNumericInterpretationOfTaxLabels,
+								   false,
+								   autoNumberDuplicateNames);
 		}
 	catch (NxsException & x)
 		{
@@ -1288,6 +1309,42 @@ std::vector<std::string> NxsFullTreeDescription::GetTreeTokens() const
 	}
 
 
+NxsString disambiguateName(const std::map<std::string, unsigned> &  capNameToInd,
+                               const std::set<unsigned> & taxaEncountered,
+                               NxsString & ucl,
+                               const char * t,
+                               bool respectCase)
+    {
+    std::map<std::string, unsigned>::const_iterator tt = capNameToInd.find(ucl);
+	unsigned ind = (tt == capNameToInd.end() ? UINT_MAX : tt->second);
+	std::set<unsigned>::const_iterator teIt = taxaEncountered.find(ind);
+	unsigned dupNum = UINT_MAX;
+    const char * origT = t;
+    NxsString nameDisambiguator(t);
+    std::string origUCL = ucl;
+    while (teIt != taxaEncountered.end())
+        {
+        if (dupNum == UINT_MAX)
+            dupNum = 2;
+        else
+            dupNum += 1;
+        std::stringstream disambigUCL;
+        if (!respectCase)
+            disambigUCL << origUCL << "_NCLDUPLICATE" << dupNum;
+        else
+            disambigUCL << origUCL << "_NCLDuplicate" << dupNum;
+        std::stringstream disambigRawStr;
+        disambigRawStr << origT << "_NCLDuplicate" << dupNum;
+        ucl.assign(disambigUCL.str());
+        nameDisambiguator.assign(disambigRawStr.str());
+        tt = capNameToInd.find(ucl);
+        ind = (tt == capNameToInd.end() ? UINT_MAX : tt->second);
+        teIt = taxaEncountered.find(ind);
+        //std::cerr << "nameDisambiguator = " << nameDisambiguator << " ind = " << ind << "\n";
+        }
+    return nameDisambiguator;
+    }
+
 void NxsTreesBlock::ProcessTokenStreamIntoTree(
   NxsToken & token,
   NxsFullTreeDescription & td,
@@ -1298,7 +1355,9 @@ void NxsTreesBlock::ProcessTokenStreamIntoTree(
   const bool respectCase,
   const bool validateInternalNodeLabels,
   const bool treatIntegerLabelsAsNumbers,
-  const bool allowNumericInterpretationOfTaxLabels)
+  const bool allowNumericInterpretationOfTaxLabels,
+  const bool allowUnquotedSpaces,
+  const bool autoNumberDuplicateNames)
 	{
 	bool previousNonIntegerLabels=false, previousAllIntegerLabels = false;
 	NxsString errormsg;
@@ -1322,6 +1381,8 @@ void NxsTreesBlock::ProcessTokenStreamIntoTree(
 	bool taxsetRead = false;
 	token.GetNextToken();
 	ostringstream newickStream;
+	NxsString nameDisambiguator;
+	const NxsString * taxaLabelPtr;
 	if (!token.Equals("("))
 		{
 		errormsg << "Expecting a ( to start the tree description, but found " << token.GetTokenReference();
@@ -1330,9 +1391,12 @@ void NxsTreesBlock::ProcessTokenStreamIntoTree(
 	nchildren.push(0);
 	newickStream << '(';
 	int prevToken = NXS_TREE_OPEN_PARENS_TOKEN;
+	if (allowUnquotedSpaces)
+	    token.SetLabileFlagBit(NxsToken::spaceDoesNotBreakToken);
 	token.GetNextToken();
 	for (;;)
 		{
+		//std::cerr << "t = \"" << token.GetToken() << "\"\n";
 		const std::vector<NxsComment> & ecs = token.GetEmbeddedComments();
 		for (std::vector<NxsComment>::const_iterator ecsIt = ecs.begin(); ecsIt != ecs.end(); ++ecsIt)
 			{
@@ -1470,6 +1534,7 @@ void NxsTreesBlock::ProcessTokenStreamIntoTree(
 					throw NxsException(errormsg, token);
 					}
 				taxsetRead = false;
+				taxaLabelPtr = &tstr;
 				NxsString ucl(t);
 				if (!respectCase)
 					ucl.ToUpper();
@@ -1478,18 +1543,25 @@ void NxsTreesBlock::ProcessTokenStreamIntoTree(
 					{
 					if (validateInternalNodeLabels)
 						{
+						//std::cerr << "validateInternalNodeLabels = true " << taxaLabelPtr << "\n";
 						std::map<std::string, unsigned>::const_iterator tt = capNameToInd.find(ucl);
 						unsigned ind = (tt == capNameToInd.end() ? UINT_MAX : tt->second);
 						if (taxaEncountered.find(ind) != taxaEncountered.end())
 							{
-							errormsg << "Taxon number " << ind + 1 << " (coded by the token " << tstr << ") has already been encountered in this tree. Duplication of taxa in a tree is prohibited.";
-							throw NxsException(errormsg, token);
+							if (!autoNumberDuplicateNames) {
+                                errormsg << "Taxon number " << ind + 1 << " (coded by the token " << tstr << ") has already been encountered in this tree. Duplication of taxa in a tree is prohibited.";
+                                throw NxsException(errormsg, token);
+                            }
+                            nameDisambiguator = disambiguateName(capNameToInd, taxaEncountered, ucl, t, respectCase);
+                            taxaLabelPtr = &nameDisambiguator;
+                            t = nameDisambiguator.c_str();
+
 							}
 						hasInternalLabels = true;
 						if (ind == UINT_MAX)
 							{
 							hasInternalLabelsNotInTaxa = true;
-							toAppend += NxsString::GetEscaped(tstr);
+							toAppend += NxsString::GetEscaped(*taxaLabelPtr);
 							}
 						else
 							{
@@ -1502,31 +1574,38 @@ void NxsTreesBlock::ProcessTokenStreamIntoTree(
 						{
 						hasInternalLabels = true;
 						hasInternalLabelsNotInTaxa = true;
-						toAppend += NxsString::GetEscaped(tstr);
+						toAppend += NxsString::GetEscaped(*taxaLabelPtr);
+						//std::cerr << "validateInternalNodeLabels = false " << toAppend << "\n";
 						}
 					}
 				else
 					{
 					std::map<std::string, unsigned>::const_iterator tt = capNameToInd.find(ucl);
 					unsigned ind = (tt == capNameToInd.end() ? UINT_MAX : tt->second);
-					if (taxaEncountered.find(ind) != taxaEncountered.end())
-						{
-						errormsg << "Taxon number " << ind + 1 << " (coded by the token " << tstr << ") has already been encountered in this tree. Duplication of taxa in a tree is prohibited.";
-						throw NxsException(errormsg, token);
-						}
+					std::set<unsigned>::const_iterator teIt = taxaEncountered.find(ind);
+					if (teIt != taxaEncountered.end())
+					    {
+                        if (!autoNumberDuplicateNames) {
+                            errormsg << "Taxon number " << ind + 1 << " (coded by the token " << tstr << ") has already been encountered in this tree. Duplication of taxa in a tree is prohibited.";
+                            throw NxsException(errormsg, token);
+                        }
+                        nameDisambiguator = disambiguateName(capNameToInd, taxaEncountered, ucl, t, respectCase);
+                        taxaLabelPtr = &nameDisambiguator;
+                        t = nameDisambiguator.c_str();
+                        }
 					if (ind == UINT_MAX)
 						{
 						std::set<unsigned> csinds;
 						if (allowNumericInterpretationOfTaxLabels) //@TEMPORARY hack
 							NxsLabelToIndicesMapper::allowNumberAsIndexPlusOne = false;
-						unsigned nadded = taxa->GetIndexSet(tstr, &csinds);
+						unsigned nadded = taxa->GetIndexSet(*taxaLabelPtr, &csinds);
 						if (allowNumericInterpretationOfTaxLabels) //@TEMPORARY hack
 							NxsLabelToIndicesMapper::allowNumberAsIndexPlusOne = true;
 						if (nadded == 0)
 							{
 							if (!allowNewTaxa)
 								{
-								errormsg << "Expecting a Taxon label after a \"" << (prevToken == NXS_TREE_OPEN_PARENS_TOKEN ? '(' : ',') << "\" character. Found \"" << tstr << "\" but this is not a recognized taxon label.";
+								errormsg << "Expecting a Taxon label after a \"" << (prevToken == NXS_TREE_OPEN_PARENS_TOKEN ? '(' : ',') << "\" character. Found \"" << *taxaLabelPtr << "\" but this is not a recognized taxon label.";
 								throw NxsException(errormsg, token);
 								}
 							long dummy;
@@ -1561,6 +1640,7 @@ void NxsTreesBlock::ProcessTokenStreamIntoTree(
 									errormsg << "Trees are being read in a mode that treats integer taxon labels as the number of the taxon - only numeric taxon labels were expected (the lookup table for "<< ucl << " failed to yield a hit, indicating that some non-numeric labels have been registered at some point)";
 									throw NxsException(errormsg, token);
 									}
+								//std::cerr << "1 taxaEncountered.insert " << indWithAdditions << "\n";
 								taxaEncountered.insert(indWithAdditions);
 								nchildren.top() += 1;
 								toAppend += (1 + indWithAdditions);
@@ -1576,7 +1656,7 @@ void NxsTreesBlock::ProcessTokenStreamIntoTree(
 										}
 									previousNonIntegerLabels = true;
 									}
-								std::string tasstring(tstr.c_str());
+								std::string tasstring(taxaLabelPtr->c_str());
 								unsigned valueInd = taxa->AppendNewLabel(tasstring);
 								if (allowNumericInterpretationOfTaxLabels)
 									{
@@ -1588,6 +1668,7 @@ void NxsTreesBlock::ProcessTokenStreamIntoTree(
 								if (!respectCase)
 									NxsString::to_upper(tasstring);
 								capNameToInd[tasstring] = valueInd;
+								//std::cerr << "2 taxaEncountered.insert " << valueInd << "for " << tasstring << "\n";
 								taxaEncountered.insert(valueInd);
 								nchildren.top() += 1;
 								toAppend += (1 + valueInd);
@@ -1600,9 +1681,10 @@ void NxsTreesBlock::ProcessTokenStreamIntoTree(
 								{
 								if (taxaEncountered.find(*cit) != taxaEncountered.end())
 									{
-									errormsg << "Taxon number " << *cit + 1 << " (one of the members of the taxset " << tstr << ") has already been encountered in this tree. Duplication of taxa in a tree is prohibited.";
+									errormsg << "Taxon number " << *cit + 1 << " (one of the members of the taxset " << *taxaLabelPtr << ") has already been encountered in this tree. Duplication of taxa in a tree is prohibited.";
 									throw NxsException(errormsg, token);
 									}
+								//std::cerr << "3 taxaEncountered.insert " << *cit << "\n";
 								taxaEncountered.insert(*cit);
 								nchildren.top() += 1;
 								if (!firstTaxonAdded)
@@ -1619,6 +1701,7 @@ void NxsTreesBlock::ProcessTokenStreamIntoTree(
 						}
 					else
 						{
+						//std::cerr << "4 taxaEncountered.insert " << ind << "\n";
 						taxaEncountered.insert(ind);
 						nchildren.top() += 1;
 						toAppend += (1 + ind);
@@ -1628,6 +1711,9 @@ void NxsTreesBlock::ProcessTokenStreamIntoTree(
 				prevToken = NXS_TREE_CLADE_NAME_TOKEN;
 				}
 			}
+		if (allowUnquotedSpaces)
+			token.SetLabileFlagBit(NxsToken::spaceDoesNotBreakToken);
+
 		token.GetNextToken();
 		}
 	td.flags |= NxsFullTreeDescription::NXS_TREE_PROCESSED;
@@ -1679,8 +1765,18 @@ void NxsTreesBlock::ProcessTree(NxsFullTreeDescription & ftd) const
 		{
 		token.UseNewickTokenization(true);
 		}
-	ProcessTokenStreamIntoTree(token, ftd, taxa, capNameToInd, constructingTaxaBlock, nexusReader, false, 
-								validateInternalNodeLabels, treatIntegerLabelsAsNumbers, allowNumericInterpretationOfTaxLabels);
+	ProcessTokenStreamIntoTree(token,
+	                           ftd,
+	                           taxa,
+	                           capNameToInd,
+	                           constructingTaxaBlock,
+	                           nexusReader,
+	                           false,
+	                           validateInternalNodeLabels,
+	                           treatIntegerLabelsAsNumbers,
+	                           allowNumericInterpretationOfTaxLabels,
+	                           allowUnquotedSpaces,
+	                           disambiguateDuplicateNames);
 	}
 
 void NxsTreesBlock::HandleTreeCommand(NxsToken &token, bool rooted)
@@ -1763,6 +1859,9 @@ void NxsTreesBlock::ReadTreeFromOpenParensToken(NxsFullTreeDescription &td, NxsT
 			if (token.Equals("(") || token.Equals(")") || token.Equals(","))
 				GenerateUnexpectedTokenNxsException(token, "root taxon information");
 			newickStream << NxsString::GetEscaped(token.GetTokenReference());
+			if (allowUnquotedSpaces) {
+			    token.SetLabileFlagBit(NxsToken::spaceDoesNotBreakToken);
+			}
 			token.GetNextToken();
 			const std::vector<NxsComment> & iecs = token.GetEmbeddedComments();
 			for (std::vector<NxsComment>::const_iterator iecsIt = iecs.begin(); iecsIt != iecs.end(); ++iecsIt)
@@ -1789,9 +1888,9 @@ void NxsTreesBlock::ReadTreeFromOpenParensToken(NxsFullTreeDescription &td, NxsT
 				}
 			}
 		}
-	catch (...) 
+	catch (...)
 		{
-		if (this->useNewickTokenizingDuringParse) 
+		if (this->useNewickTokenizingDuringParse)
 			token.UseNewickTokenization(false);
 		throw;
 		}
@@ -2016,7 +2115,7 @@ void NxsTreesBlock::ReadPhylipTreeFile(NxsToken & token)
 			this->useNewickTokenizingDuringParse = true;
 			ReadTreeFromOpenParensToken(td, token);
 			this->useNewickTokenizingDuringParse = prevUNTDP;
-			this->constructingTaxaBlock = false; // we have to signal that we are done constructing the TAXA block
+			//this->constructingTaxaBlock = false; // we have to signal that we are done constructing the TAXA block
 			}
 		}
 	catch (NxsX_UnexpectedEOF &)
@@ -2024,6 +2123,7 @@ void NxsTreesBlock::ReadPhylipTreeFile(NxsToken & token)
 		allowImplicitNames = prevAIN;
 		useNewickTokenizingDuringParse = prevUNTDP;
 		token.SetEOFAllowed(prevEOFAllowed);
+		this->constructingTaxaBlock = false; // we have to signal that we are done constructing the TAXA block
 		if (firstTree)
 			{
 			errormsg << "Unexpected end of file in tree description.\n";
@@ -2036,8 +2136,10 @@ void NxsTreesBlock::ReadPhylipTreeFile(NxsToken & token)
 		allowImplicitNames = prevAIN;
 		useNewickTokenizingDuringParse = prevUNTDP;
 		token.SetEOFAllowed(prevEOFAllowed);
+		this->constructingTaxaBlock = false; // we have to signal that we are done constructing the TAXA block
 		throw;
 		}
+	this->constructingTaxaBlock = false; // we have to signal that we are done constructing the TAXA block
 	token.SetEOFAllowed(prevEOFAllowed);
 	allowImplicitNames = prevAIN;
 	useNewickTokenizingDuringParse = prevUNTDP;

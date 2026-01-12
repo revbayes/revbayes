@@ -50,7 +50,7 @@
 #include "nxsmultiformat.h"
 #include "nxsstring.h"
 
-const unsigned MAX_BUFFER_SIZE = 0x80000;
+const unsigned long MAX_BUFFER_SIZE = 0x80000;
 
 
 
@@ -107,14 +107,17 @@ class FileToCharBuffer
 {
 		char prevChar;
 		std::istream & inf;
-		unsigned remaining;
-		unsigned pos;
+		unsigned long remaining;
+		unsigned long pos;
 	public:
-		unsigned totalSize;
+		unsigned long totalSize;
 	protected:
-		unsigned lineNumber;
-		unsigned prevNewlinePos;
+		unsigned long lineNumber;
+		unsigned long prevNewlinePos;
 	public:
+		unsigned long inbuffer;
+		char * buffer;
+
 		/* reads at most MAX_BUFFER_SIZE characters from inf into the buffer that is
 		returned. The caller must delete the buffer.  On exit `len` will store the
 		length of the buffer.
@@ -126,7 +129,7 @@ class FileToCharBuffer
 		Returns false if no characters are read.
 		If true is returned then `maxLen` will indicate the number of characters read.
 		*/
-		bool refillBuffer(unsigned offset);
+		bool refillBuffer(unsigned long offset);
 		char current() const
 			{
 			return buffer[pos];
@@ -172,23 +175,21 @@ class FileToCharBuffer
 			{
 			delete [] buffer;
 			}
-		unsigned position() const
+		unsigned long position() const
 			{
 			return totalSize +  pos - remaining - inbuffer;
 			}
-		unsigned line() const
+		unsigned long line() const
 			{
 			return lineNumber;
 			}
-		unsigned column() const
+		unsigned long column() const
 			{
-			unsigned p = position();
+			unsigned long p = position();
 			if (p < prevNewlinePos)
 				return 0;
 			return p - prevNewlinePos;
 			}
-		char * buffer;
-		unsigned inbuffer;
 
 };
 
@@ -240,12 +241,13 @@ FileToCharBuffer::FileToCharBuffer(std::istream & instream)
 		return;
 		}
 	inf.seekg(s);
-	totalSize = static_cast<unsigned>(e - s);
+	totalSize = static_cast<unsigned long>(e - s);
 	inbuffer = std::min(MAX_BUFFER_SIZE, totalSize);
 	remaining = totalSize - inbuffer;
 	buffer = new char [inbuffer];
 	inf.read(buffer, inbuffer);
 	const char c = current();
+
 	if (c == 13)
 		{
 		++lineNumber;
@@ -259,7 +261,7 @@ FileToCharBuffer::FileToCharBuffer(std::istream & instream)
 		}
 	}
 
-bool FileToCharBuffer::refillBuffer(unsigned offset)
+bool FileToCharBuffer::refillBuffer(unsigned long offset)
 	{
 	if (remaining  == 0)
 		return false;
@@ -450,56 +452,47 @@ void  MultiFormatReader::readPhylipData(
 			goto funcExit;
 		}
 
-	for (unsigned i = 0; i < n_taxa; ++i)
+	unsigned currentTaxon;
+	for (currentTaxon = 0; currentTaxon < n_taxa; ++currentTaxon)
 		{
-		std::string n = readPhylipName(ftcb, i, relaxedNames);
+		std::string n = readPhylipName(ftcb, currentTaxon, relaxedNames);
         taxaNames.push_back(n);
 		NCL_ASSERT(mIt != matList.end());
 		NxsDiscreteStateRow & row = *mIt++;
 		for (unsigned j = 0; j < n_char; ++j)
 			{
-			bool readDiscreteChar = false;
+			bool readChar = false;
 			for (;;)
 				{
 				const char c = ftcb.current();
 				if (isgraph(c))
 					{
-					/* Digits must be allowed in order to read standard state characters
-					if (isdigit(c))// I don't know why PHYLIP allows digits in the midst of the sequence, but it seems to.
-						{
-						err << "Number encountered (and ignored) within sequence for taxon " << n;
-						NexusWarn(err, NxsReader::PROBABLY_INCORRECT_CONTENT_WARNING, ftcb.position(), ftcb.line(), ftcb.column());
-						err.clear();
-						}
-					else
-						{*/
-						const NxsDiscreteStateCell stateCode = dm.GetStateCodeStored(c);
-						if (stateCode == NXS_INVALID_STATE_CODE)
-							{
-							if (c == '.')
-								{
-								if (i == 0)
-									{
-									err << "Illegal match character state code  \".\" found in the first taxon for character " << j + 1 ;
-									throw NxsException(err, ftcb.position(), ftcb.line(), ftcb.column());
-									}
-								NxsDiscreteStateRow & firstRow = *(matList.begin());
-								row[j] = firstRow.at(j);
-								}
-							else
-								{
-								err << "Illegal state code \"" << c << "\" found when reading site " << j + 1 << " for taxon " << n;
-								throw NxsException(err, ftcb.position(), ftcb.line(), ftcb.column());
-								}
-							}
-						else
-							row[j] = stateCode;
-						readDiscreteChar = true;
-						}
-					//}
+                    const NxsDiscreteStateCell stateCode = dm.GetStateCodeStored(c);
+                    if (stateCode == NXS_INVALID_STATE_CODE)
+                        {
+                        if (c == '.')
+                            {
+                            if (currentTaxon == 0)
+                                {
+                                err << "Illegal match character state code  \".\" found in the first taxon for character " << j + 1 ;
+                                throw NxsException(err, ftcb.position(), ftcb.line(), ftcb.column());
+                                }
+                            NxsDiscreteStateRow & firstRow = *(matList.begin());
+                            row[j] = firstRow.at(j);
+                            }
+                        else
+                            {
+                            err << "Illegal state code \"" << c << "\" found when reading site " << j + 1 << " for taxon " << n;
+                            throw NxsException(err, ftcb.position(), ftcb.line(), ftcb.column());
+                            }
+                        }
+                    else
+                        row[j] = stateCode;
+                    readChar = true;
+                    }
 				if (!ftcb.advance())
 					goto funcExit;
-				if (readDiscreteChar)
+				if (readChar)
 					break;
 				}
 			}
@@ -523,9 +516,9 @@ void  MultiFormatReader::readPhylipData(
 			}
 		}
 	funcExit:
-		if (matList.size() != n_taxa)
+		if (currentTaxon + 1 != n_taxa)
 			{
-			err << "Unexpected end of file.\nExpecting data for " << n_taxa << " taxa, but only found data for " << (unsigned) matList.size();
+			err << "Unexpected end of file.\nExpecting data for " << n_taxa << " taxa, but only found data for " << currentTaxon + 1;
 			throw NxsException(err, ftcb.position(), ftcb.line(), ftcb.column());
 			}
 		const NxsDiscreteStateRow & lastRow = *matList.rbegin();
@@ -558,16 +551,17 @@ void  MultiFormatReader::readInterleavedPhylipData(
 		if (!ftcb.advance())
 			goto funcExit;
 		}
+	unsigned currentTaxon;
 	while (startCharIndex < n_char)
 		{
-		for (unsigned i = 0; i < n_taxa; ++i)
+		for (currentTaxon = 0; currentTaxon < n_taxa; ++currentTaxon)
 			{
 			if (startCharIndex == 0)
 				{
-				std::string n = readPhylipName(ftcb, i, relaxedNames);
+				std::string n = readPhylipName(ftcb, currentTaxon, relaxedNames);
 				taxaNames.push_back(n);
 				}
-			if (i == 0)
+			if (currentTaxon == 0)
 				mIt = matList.begin();
 			NCL_ASSERT(mIt != matList.end());
 			NxsDiscreteStateRow & row = *mIt++;
@@ -579,7 +573,7 @@ void  MultiFormatReader::readInterleavedPhylipData(
 					{
 					if (j >= endCharIndex)
 						{
-						if (i == 0)
+						if (currentTaxon == 0)
 							{
 							err << "Too many characters were found for the taxon " << *(taxaNames.begin());
 							throw NxsException(err, ftcb.position(), ftcb.line(), ftcb.column());
@@ -587,59 +581,46 @@ void  MultiFormatReader::readInterleavedPhylipData(
 						else
 							{
 							std::list<std::string>::const_iterator nIt = taxaNames.begin();
-							for (unsigned q = 0; q < i ; ++q)
+							for (unsigned q = 0; q < currentTaxon ; ++q)
 								++nIt;
 							err << "Illegal character \"" << c << "\" found, after all of the data for this interleave page has been read for the taxon " << *nIt;
 							throw NxsException(err, ftcb.position(), ftcb.line(), ftcb.column());
 							}
 						}
-					/* Digits must be allowed in order to read standard state characters
-					if (isdigit(c))// I don't know why PHYLIP allows digits in the midst of the sequence, but it seems to.
-						{
-						std::list<std::string>::const_iterator nIt = taxaNames.begin();
-						for (unsigned q = 0; q < i ; ++q)
-							++nIt;
-						err << "Number encountered (and ignored) within sequence for taxon " << *nIt;
-						NexusWarn(err, NxsReader::PROBABLY_INCORRECT_CONTENT_WARNING, ftcb.position(), ftcb.line(), ftcb.column());
-						err.clear();
-						}
-					else
-						{*/
-						const NxsDiscreteStateCell stateCode = dm.GetStateCodeStored(c);
-						if (stateCode == NXS_INVALID_STATE_CODE)
-							{
-							if (c == '.')
-								{
-								if (i == 0)
-									{
-									err << "Illegal match character state code  \".\" found in the first taxon for character " << j + 1 ;
-									throw NxsException(err, ftcb.position(), ftcb.line(), ftcb.column());
-									}
-								NxsDiscreteStateRow & firstRow = *(matList.begin());
-								row[j] = firstRow.at(j);
-								}
-							else
-								{
-								std::list<std::string>::const_iterator nIt = taxaNames.begin();
-								for (unsigned q = 0; q < i ; ++q)
-									++nIt;
-								err << "Illegal state code \"" << c << "\" found when reading site " << j + 1 << " for taxon " << *nIt;
-								throw NxsException(err, ftcb.position(), ftcb.line(), ftcb.column());
-								}
-							}
-						else
-							row[j] = stateCode;
-						j++;
-						}
-					//}
+                    const NxsDiscreteStateCell stateCode = dm.GetStateCodeStored(c);
+                    if (stateCode == NXS_INVALID_STATE_CODE)
+                        {
+                        if (c == '.')
+                            {
+                            if (currentTaxon == 0)
+                                {
+                                err << "Illegal match character state code  \".\" found in the first taxon for character " << j + 1 ;
+                                throw NxsException(err, ftcb.position(), ftcb.line(), ftcb.column());
+                                }
+                            NxsDiscreteStateRow & firstRow = *(matList.begin());
+                            row[j] = firstRow.at(j);
+                            }
+                        else
+                            {
+                            std::list<std::string>::const_iterator nIt = taxaNames.begin();
+                            for (unsigned q = 0; q < currentTaxon ; ++q)
+                                ++nIt;
+                            err << "Illegal state code \"" << c << "\" found when reading site " << j + 1 << " for taxon " << *nIt;
+                            throw NxsException(err, ftcb.position(), ftcb.line(), ftcb.column());
+                            }
+                        }
+                    else
+                        row[j] = stateCode;
+                    j++;
+                    }
 				else if (c == '\r' || c == '\n')
 					{
-					if (i == 0)
+					if (currentTaxon == 0)
 						endCharIndex = j;
 					else if (j != endCharIndex)
 						{
 						std::list<std::string>::const_iterator nIt = taxaNames.begin();
-						for (unsigned q = 0; q < i ; ++q)
+						for (unsigned q = 0; q < currentTaxon ; ++q)
 							++nIt;
 						err << "Expecting " << endCharIndex -  startCharIndex << "characters  in this interleave page (based on the number of characters in the first taxon), but only found " << j - startCharIndex << " for taxon " << *nIt;
 						throw NxsException(err, ftcb.position(), ftcb.line(), ftcb.column());
@@ -659,9 +640,9 @@ void  MultiFormatReader::readInterleavedPhylipData(
 		endCharIndex = n_char;
 		}
 	funcExit:
-		if (matList.size() != n_taxa)
+		if (currentTaxon + 1 != n_taxa)
 			{
-			err << "Unexpected end of file.\nExpecting data for " << n_taxa << " taxa, but only found data for " << (unsigned) matList.size();
+			err << "Unexpected end of file.\nExpecting data for " << n_taxa << " taxa, but only found data for " << currentTaxon + 1;
 			throw NxsException(err, ftcb.position(), ftcb.line(), ftcb.column());
 			}
 		const NxsDiscreteStateRow & lastRow = *matList.rbegin();
@@ -1467,18 +1448,13 @@ void MultiFormatReader::readPhylipTreeFile(std::istream & inf, bool relaxedNames
 		clone template (gulp)
 	*/
 	NxsTreesBlock * treesB = static_cast<NxsTreesBlock *>(nb);
-        
-        
-        
 	NxsString err;
 	try {
 		treesB->Reset();
 		NxsToken inTokens(inf);
+		treesB->WarnAboutMissingTaxaBlock(false);
 		treesB->ReadPhylipTreeFile(inTokens);
-	
-        
-        
-        if (!relaxedNames)
+		if (!relaxedNames)
 			{
 			const NxsTaxaBlockAPI * taxa = treesB->GetTaxaBlockPtr(0L);
 			if (!taxa)

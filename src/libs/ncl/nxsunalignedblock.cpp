@@ -506,7 +506,7 @@ void NxsUnalignedBlock::HandleFormat(
 
 /*!
 	Called from HandleMatrix function to read in the next state. Returns true if next token encountered is a comma,
-	false otherwise. A comma MemberObject the end of data for the current taxon in an UNALIGNED block.
+	false otherwise. A comma signals the end of data for the current taxon in an UNALIGNED block.
 */
 bool NxsUnalignedBlock::HandleNextState(
   NxsToken & token,			/* is the token used to read from `in' */

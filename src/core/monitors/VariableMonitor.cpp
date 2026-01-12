@@ -11,8 +11,10 @@
 #include "RbVersion.h"
 #include "Cloneable.h"
 #include "StringUtilities.h"
+#include "nlohmann-json.h"
 
 using namespace RevBayesCore;
+using nlohmann::ordered_json;
 
 /* Constructor */
 VariableMonitor::VariableMonitor(DagNode *n, std::uint64_t g, const path &fname,
@@ -65,7 +67,7 @@ void VariableMonitor::printHeader( void )
 
 	if ( prior ) fields.push_back("Prior");
 
-	json header;
+	ordered_json header;
 	header["fields"] = fields;
 	header["format"] = "MCON";
 	header["version"] = "0.1";
@@ -76,7 +78,7 @@ void VariableMonitor::printHeader( void )
 	{
 	    RbVersion version;
 
-	    json rb;
+	    ordered_json rb;
 	    rb["version"] = version.getVersion();
 	    rb["branch"] = version.getGitBranch();
 	    rb["commit"] = version.getGitCommit();
@@ -168,27 +170,27 @@ void VariableMonitor::monitor(std::uint64_t gen)
 
     if (to<JSONFormat>(format))
     {
-	json line;
+	    ordered_json line;
 
-	line["Iteration"] = gen;
+	    line["Iteration"] = gen;
         
-	if (Posterior) line["Posterior"] = Posterior;
-	if (Likelihood) line["Likelihood"] = Likelihood;
-	if (Prior) line["Prior"] = Prior;
+	    if (Posterior) line["Posterior"] = Posterior;
+	    if (Likelihood) line["Likelihood"] = Likelihood;
+	    if (Prior) line["Prior"] = Prior;
 
-	for (auto& node: nodes)
-	{
-	    auto name = node->getName();
-	    if (name.empty())
-		name = std::to_string((uintptr_t)node);
-	    line[name] = node->getValueAsJSON();
-	}
+	    for (auto& node: nodes)
+	    {
+	        auto name = node->getName();
+	        if (name.empty())
+		    name = std::to_string((uintptr_t)node);
+	        line[name] = node->getValueAsJSON();
+	    }
 
-	out_stream << line << "\n";
+	    out_stream << line << "\n";
     }
     else
     {
-	auto& separator = to<SeparatorFormat>(format)->separator;
+	    auto& separator = to<SeparatorFormat>(format)->separator;
 
         if ( posterior == true )
         {
