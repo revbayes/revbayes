@@ -165,8 +165,12 @@ void CharacterHistory::clear( void )
  */
 const BranchHistory& CharacterHistory::getHistory(size_t n) const
 {
-    // @Priscilla: add check that there is a history for index n, otherwise throw error
-    return *histories[n];
+    if ( n > histories.size() )
+    {
+        throw RbException("Index out of bounds in character history.");
+    }
+    
+    return *(histories[n]);
 }
 
 
