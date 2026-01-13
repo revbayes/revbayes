@@ -102,6 +102,7 @@ namespace RevBayesCore {
 
         TreeSummary*                                   clone(void) const;
         void                                           annotateTree(Tree &inputTree, AnnotationReport report, bool verbose);
+        double                                         cladeWithMRCAProbability(const Clade &c, bool verbose);
         double                                         cladeProbability(const Clade &c, bool verbose);
         double                                         computeEntropy(double credible_interval_size, bool stochastic, bool verbose);
         std::vector<double>                            computePairwiseRFDistance(double credible_interval_size, bool stochastic, bool verbose);
@@ -135,6 +136,8 @@ namespace RevBayesCore {
         void                                           mapParameters(Tree &inputTree, bool verbose) const;
         std::int64_t                                   splitWithMRCACount(const SplitWithMRCA &n) const;
         double                                         splitWithMRCAFrequency(const SplitWithMRCA &n) const;
+        std::int64_t                                   splitCount(const Split &n) const;
+        double                                         splitFrequency(const Split &n) const;
         void                                           summarize(bool verbose);
 
         std::vector<TraceTree* >                       traces;
