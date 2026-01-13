@@ -42,6 +42,34 @@ namespace RevBayesCore {
             }
         };
 
+        /*
+         * This struct represents a tree bipartition (split) that can be rooted or unrooted
+         */
+        struct Split
+        {
+            RbBitSet include;
+
+            // RbBitSet exclude;
+            // std::shared_ptr< std::vector<Taxon> > taxon_order;
+
+            Split( RbBitSet b, bool r) : include( !r && b[0] ? ~b : b) {}
+
+            inline bool operator==(const Split& s) const
+            {
+                return include == s.include;
+            }
+
+            inline bool operator<(const Split& s) const
+            {
+                return include < s.include;
+            }
+
+            inline bool operator()(const Sample<Split>& s) const
+            {
+                return (*this) == s.first;
+            }
+        };
+
     public:
 
         /*
