@@ -152,10 +152,14 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
         Clade clade = n->getClade();
         SplitWithMRCA split_with_mrca( clade.getBitRepresentation(), clade.getMrca(), rooted);
 
+        // reset taxon bitset for the clade
+        clade.resetTaxonBitset( traces.front()->objectAt(0).getTaxonBitSetMap() );
+
         // annotate clade posterior prob
         if ( ( !n->isTip() || ( n->isRoot() && !clade.getMrca().empty() ) ) && report.clade_probs )
         {
-            double pp = cladeWithMRCAProbability( clade, false );
+            double pp = splitWithMRCAFrequency( SplitWithMRCA( clade.getBitRepresentation(), clade.getMrca(), rooted) );
+
             n->addBranchParameter("posterior",pp);
         }
 
@@ -309,17 +313,6 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
         mapParameters( tree, verbose );
     }
 
-}
-
-
-double TreeSummary::cladeWithMRCAProbability( const Clade &c, bool verbose )
-{
-    summarize( verbose );
-
-    Clade tmp = c;
-    tmp.resetTaxonBitset( traces.front()->objectAt(0).getTaxonBitSetMap() );
-
-    return splitWithMRCAFrequency( SplitWithMRCA( tmp.getBitRepresentation(), tmp.getMrca(), rooted) );
 }
 
 double TreeSummary::cladeProbability( const Clade &c, bool verbose )

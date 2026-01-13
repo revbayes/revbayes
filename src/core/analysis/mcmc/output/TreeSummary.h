@@ -102,8 +102,6 @@ namespace RevBayesCore {
 
         TreeSummary*                                   clone(void) const;
         void                                           annotateTree(Tree &inputTree, AnnotationReport report, bool verbose);
-        double                                         cladeWithMRCAProbability(const Clade &c, bool verbose);
-        double                                         cladeProbability(const Clade &c, bool verbose);
         double                                         computeEntropy(double credible_interval_size, bool stochastic, bool verbose);
         std::vector<double>                            computePairwiseRFDistance(double credible_interval_size, bool stochastic, bool verbose);
         std::vector<double>                            computeTreeLengths(void);
