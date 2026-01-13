@@ -80,6 +80,8 @@ namespace RevBayesCore {
             bool clade_probs = true;
             bool conditional_clade_with_mrca_ages = false;
             bool conditional_clade_with_mrca_probs = false;
+            bool conditional_clade_ages = false;
+            bool conditional_clade_probs = false;
             bool conditional_tree_ages = false;
             bool MAP_parameters = false;
             bool node_ages = true;
