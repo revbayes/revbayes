@@ -1197,7 +1197,7 @@ void TreeSummary::setOutgroup(const RevBayesCore::Clade &c)
 }
 
 
-TreeSummary::SplitWithMRCA TreeSummary::collectTreeSample(const TopologyNode& n, RbBitSet& intaxa, std::string newick, std::map<SplitWithMRCA, std::int64_t>& cladeCountMap)
+TreeSummary::SplitWithMRCA TreeSummary::collectTreeSampleWithMRCA(const TopologyNode& n, RbBitSet& intaxa, std::string newick, std::map<SplitWithMRCA, std::int64_t>& cladeCountMap)
 {
     double age = (clock ? n.getAge() : n.getBranchLength() );
 
@@ -1223,7 +1223,7 @@ TreeSummary::SplitWithMRCA TreeSummary::collectTreeSample(const TopologyNode& n,
         {
             const TopologyNode &child_node = n.getChild(i);
 
-            child_split_with_mrcas.push_back( collectTreeSample(child_node, taxa, newick, cladeCountMap) );
+            child_split_with_mrcas.push_back( collectTreeSampleWithMRCA(child_node, taxa, newick, cladeCountMap) );
 
             if ( rooted && child_node.isSampledAncestorTip() )
             {
@@ -1980,7 +1980,7 @@ void TreeSummary::summarize( bool verbose )
 
             // get the clades for this tree
             RbBitSet b( tree.getNumberOfTips(), false );
-            collectTreeSample(tree.getRoot(), b, newick, clade_with_mrca_counts);
+            collectTreeSampleWithMRCA(tree.getRoot(), b, newick, clade_with_mrca_counts);
         }
     }
 

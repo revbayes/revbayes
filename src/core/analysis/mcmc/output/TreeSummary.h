@@ -127,7 +127,8 @@ namespace RevBayesCore {
 
     protected:
 
-        SplitWithMRCA                                  collectTreeSample(const TopologyNode&, RbBitSet&, std::string, std::map<SplitWithMRCA, std::int64_t>&);
+        SplitWithMRCA                                  collectTreeSampleWithMRCA(const TopologyNode&, RbBitSet&, std::string, std::map<SplitWithMRCA, std::int64_t>&);
+        Split                                          collectTreeSample(const TopologyNode&, RbBitSet&, std::string, std::map<Split, std::int64_t>&);
         void                                           enforceNonnegativeBranchLengths(TopologyNode& tree) const;
         TopologyNode*                                  findParentNode(TopologyNode&, const SplitWithMRCA &, std::vector<TopologyNode*>&, RbBitSet& ) const;
         void                                           mapContinuous(Tree &inputTree, const std::string &n, size_t paramIndex, double hpd, bool np, bool verbose ) const;
@@ -145,6 +146,8 @@ namespace RevBayesCore {
         bool                                           computed = false;
         std::map<SplitWithMRCA, std::int64_t>          clade_with_mrca_counts;
         std::set<Sample<SplitWithMRCA> >               clade_with_mrca_samples;
+        std::map<Split, std::int64_t>                  clade_counts;
+        std::set<Sample<Split> >                       clade_samples;
         std::map<Taxon, std::int64_t >                 sampled_ancestor_counts;
         std::map<std::string, std::int64_t>            tree_counts;
         std::set<Sample<std::string> >                 tree_samples;
@@ -152,6 +155,10 @@ namespace RevBayesCore {
         std::map<SplitWithMRCA, std::vector<double> >                            clade_with_mrca_ages;
         std::map<SplitWithMRCA, std::map<SplitWithMRCA, std::vector<double> > >  conditional_clade_with_mrca_ages;
         std::map<std::string, std::map<SplitWithMRCA, std::vector<double> > >    tree_clade_with_mrca_ages;
+
+        std::map<Split, std::vector<double> >                            clade_ages;
+        std::map<Split, std::map<Split, std::vector<double> > >          conditional_clade_ages;
+        std::map<std::string, std::map<Split, std::vector<double> > >    tree_clade_ages;
 
         boost::optional<Clade>                         outgroup;
     };
