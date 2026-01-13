@@ -315,17 +315,6 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
 
 }
 
-double TreeSummary::cladeProbability( const Clade &c, bool verbose )
-{
-    summarize( verbose );
-
-    Clade tmp = c;
-    tmp.resetTaxonBitset( traces.front()->objectAt(0).getTaxonBitSetMap() );
-
-    return splitFrequency( Split( tmp.getBitRepresentation(), rooted) );
-}
-
-
 double TreeSummary::computeEntropy( double credible_interval_size, bool stochastic, bool verbose )
 {
     std::vector< std::pair<Tree, std::int64_t> > credible_set = getCredibleSetOfTrees(credible_interval_size, stochastic, false);
