@@ -115,7 +115,7 @@ double RateAgeSubtreeProposal::doProposal( void )
     {
         if (logMCMC >=1 or debugMCMC >=1)
         {
-            std::cerr << "RateAgeSubtreeProposal has no effect; the tree only contains the root, tips, and sampled ancestors." << std::endl;
+            std::cerr << "mvRateAgeSubtreeProposal has no effect; the tree only contains the root, tips, and sampled ancestors." << std::endl;
         }
 
         stored_node = nullptr;
@@ -230,6 +230,8 @@ void RateAgeSubtreeProposal::printParameterSummary(std::ostream &o, bool name_on
 void RateAgeSubtreeProposal::undoProposal( void )
 {
 
+    if (stored_node == nullptr) return;
+    
     // reset the branch rates
     std::vector<TopologyNode*> nodes = tree->getValue().getNodes();
     size_t num_nodes = nodes.size();
