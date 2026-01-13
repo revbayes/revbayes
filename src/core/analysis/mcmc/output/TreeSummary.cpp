@@ -135,7 +135,7 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
 
         delete tmp_tree;
 
-        if ( tree_clade_ages.find(newick) == tree_clade_ages.end() )
+        if ( tree_clade_with_mrca_ages.find(newick) == tree_clade_with_mrca_ages.end() )
         {
             throw(RbException("Could not find input tree in tree sample"));
         }
@@ -150,7 +150,7 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
         TopologyNode* n = nodes[i];
 
         Clade clade = n->getClade();
-        Split split( clade.getBitRepresentation(), clade.getMrca(), rooted);
+        SplitWithMRCA split_with_mrca( clade.getBitRepresentation(), clade.getMrca(), rooted);
 
         // annotate clade posterior prob
         if ( ( !n->isTip() || ( n->isRoot() && !clade.getMrca().empty() ) ) && report.clade_probs )
@@ -177,27 +177,27 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
         if ( !n->isRoot() )
         {
             Clade parent_clade = n->getParent().getClade();
-            Split parent_split = Split( parent_clade.getBitRepresentation(), parent_clade.getMrca(), rooted);
+            SplitWithMRCA parent_split_with_mrca = SplitWithMRCA( parent_clade.getBitRepresentation(), parent_clade.getMrca(), rooted);
 
-            std::map<Split, std::vector<double> >& condCladeAges = conditional_clade_ages[parent_split];
-            node_ages = report.conditional_clade_ages ? condCladeAges[split] : clade_ages[split];
+            std::map<SplitWithMRCA, std::vector<double> >& condCladeAges = conditional_clade_with_mrca_ages[parent_split_with_mrca];
+            node_ages = report.conditional_clade_with_mrca_ages ? condCladeAges[split_with_mrca] : clade_with_mrca_ages[split_with_mrca];
 
             // annotate CCPs
-            if ( !n->isTip() && report.conditional_clade_probs )
+            if ( !n->isTip() && report.conditional_clade_with_mrca_probs )
             {
-                double parentCladeFreq = splitCount( parent_split );
-                double ccp = condCladeAges[split].size() / parentCladeFreq;
+                double parentCladeFreq = splitWithMRCACount( parent_split_with_mrca );
+                double ccp = condCladeAges[split_with_mrca].size() / parentCladeFreq;
                 n->addNodeParameter("ccp",ccp);
             }
         }
         else
         {
-            node_ages = clade_ages[split];
+            node_ages = clade_with_mrca_ages[split_with_mrca];
         }
 
         if ( report.conditional_tree_ages )
         {
-            node_ages = tree_clade_ages[newick][split];
+            node_ages = tree_clade_with_mrca_ages[newick][split_with_mrca];
         }
 
         // Verify that we have age data for this node
@@ -326,7 +326,7 @@ double TreeSummary::cladeProbability( const Clade &c, bool verbose )
     Clade tmp = c;
     tmp.resetTaxonBitset( traces.front()->objectAt(0).getTaxonBitSetMap() );
 
-    return splitFrequency( Split( tmp.getBitRepresentation(), tmp.getMrca(), rooted) );
+    return splitWithMRCAFrequency( SplitWithMRCA( tmp.getBitRepresentation(), tmp.getMrca(), rooted) );
 }
 
 
@@ -561,7 +561,7 @@ std::vector<Clade> TreeSummary::getUniqueClades( double min_clade_probability, b
         progress.start();
     }
 
-    for (auto& [clade, count]: clade_samples | views::reverse)
+    for (auto& [clade, count]: clade_with_mrca_samples | views::reverse)
     {
         if (verbose) progress.update(counter);
         counter++;
@@ -754,34 +754,34 @@ double TreeSummary::maxdiff( bool verbose )
         throw RbException("At least 2 traces are required to compute maxdiff");
     }
 
-    std::set<Sample<Split> > splits_union;
+    std::set<Sample<SplitWithMRCA> > split_with_mrcas_union;
 
     for (auto& trace: traces)
     {
         trace->summarize(verbose);
 
-        splits_union.insert(trace->clade_samples.begin(), trace->clade_samples.end());
+        split_with_mrcas_union.insert(trace->clade_with_mrca_samples.begin(), trace->clade_with_mrca_samples.end());
     }
 
 
     double maxdiff = 0;
 
-    for (auto& [split, count]: splits_union)
+    for (auto& [split_with_mrca, count]: split_with_mrcas_union)
     {
-        std::vector<double> split_freqs;
+        std::vector<double> split_with_mrca_freqs;
 
         for(auto& trace: traces)
         {
-            double freq = trace->splitFrequency(split);
+            double freq = trace->splitWithMRCAFrequency(split_with_mrca);
 
-            split_freqs.push_back(freq);
+            split_with_mrca_freqs.push_back(freq);
         }
 
-        for(size_t i = 0; i < split_freqs.size(); i++)
+        for(size_t i = 0; i < split_with_mrca_freqs.size(); i++)
         {
-            for(size_t j = i+1; j < split_freqs.size(); j++)
+            for(size_t j = i+1; j < split_with_mrca_freqs.size(); j++)
             {
-                double diff = abs(split_freqs[i] - split_freqs[j]);
+                double diff = abs(split_with_mrca_freqs[i] - split_with_mrca_freqs[j]);
 
                 if(diff > maxdiff)
                 {
@@ -849,8 +849,8 @@ Tree* TreeSummary::mccTree( AnnotationReport report, bool verbose )
     {
         // find the product of the clade frequencies
         double cc = 0;
-        for (auto& [clade, age]: tree_clade_ages.at(newick))
-            cc += log( splitFrequency(clade) );
+        for (auto& [clade, age]: tree_clade_with_mrca_ages.at(newick))
+            cc += log( splitWithMRCAFrequency(clade) );
 
         if (not max_cc or cc > *max_cc)
         {
@@ -918,7 +918,7 @@ Tree* TreeSummary::mrTree(AnnotationReport report, double cutoff, bool verbose)
 
     double totalSamples = sampleSize(true);
 
-    for (const auto& [clade, count]: clade_samples | views::reverse)
+    for (const auto& [clade, count]: clade_with_mrca_samples | views::reverse)
     {
         float cladeFreq = count / totalSamples;
         if (cladeFreq < cutoff)  break;
@@ -1001,8 +1001,8 @@ Tree* TreeSummary::mrTree(AnnotationReport report, double cutoff, bool verbose)
     //now put the tree together
     consensusTree->setRoot(root, true);
 
-    report.conditional_clade_ages  = false;
-    report.conditional_clade_probs = false;
+    report.conditional_clade_with_mrca_ages  = false;
+    report.conditional_clade_with_mrca_probs = false;
     report.conditional_tree_ages   = false;
     report.node_ages               = true;
     annotateTree(*consensusTree, report, false);
@@ -1046,7 +1046,7 @@ void TreeSummary::printCladeSummary(std::ostream &o, double min_clade_probabilit
     std::vector<Taxon> ordered_taxa = traces.front()->objectAt(0).getTaxa();
     VectorUtilities::sort( ordered_taxa );
 
-    for (auto& [clade, count]: clade_samples | views::reverse)
+    for (auto& [clade, count]: clade_with_mrca_samples | views::reverse)
     {
         Clade c(clade.first, ordered_taxa);
         c.setMrca(clade.second);
@@ -1204,11 +1204,11 @@ void TreeSummary::setOutgroup(const RevBayesCore::Clade &c)
 }
 
 
-TreeSummary::Split TreeSummary::collectTreeSample(const TopologyNode& n, RbBitSet& intaxa, std::string newick, std::map<Split, std::int64_t>& cladeCountMap)
+TreeSummary::SplitWithMRCA TreeSummary::collectTreeSample(const TopologyNode& n, RbBitSet& intaxa, std::string newick, std::map<SplitWithMRCA, std::int64_t>& cladeCountMap)
 {
     double age = (clock ? n.getAge() : n.getBranchLength() );
 
-    std::vector<Split> child_splits;
+    std::vector<SplitWithMRCA> child_split_with_mrcas;
 
     RbBitSet taxa(intaxa.size());
     std::set<Taxon> mrca;
@@ -1230,7 +1230,7 @@ TreeSummary::Split TreeSummary::collectTreeSample(const TopologyNode& n, RbBitSe
         {
             const TopologyNode &child_node = n.getChild(i);
 
-            child_splits.push_back( collectTreeSample(child_node, taxa, newick, cladeCountMap) );
+            child_split_with_mrcas.push_back( collectTreeSample(child_node, taxa, newick, cladeCountMap) );
 
             if ( rooted && child_node.isSampledAncestorTip() )
             {
@@ -1241,28 +1241,28 @@ TreeSummary::Split TreeSummary::collectTreeSample(const TopologyNode& n, RbBitSe
 
     intaxa |= taxa;
 
-    Split parent_split(taxa, mrca, rooted);
+    SplitWithMRCA parent_split_with_mrca(taxa, mrca, rooted);
 
     if ( taxa.size() > 0 )
     {
-        // store the age for this split
-        clade_ages[parent_split].push_back( age );
+        // store the age for this split_with_mrca
+        clade_with_mrca_ages[parent_split_with_mrca].push_back( age );
 
-        // increment split count
-        cladeCountMap[parent_split]++;
+        // increment split_with_mrca count
+        cladeCountMap[parent_split_with_mrca]++;
 
         // add conditional clade ages
-        for (auto& child_split: child_splits)
+        for (auto& child_split_with_mrca: child_split_with_mrcas)
         {
             // inserts new entries if doesn't already exist
-            conditional_clade_ages[parent_split][child_split].push_back( clade_ages[child_split].back() );
+            conditional_clade_with_mrca_ages[parent_split_with_mrca][child_split_with_mrca].push_back( clade_with_mrca_ages[child_split_with_mrca].back() );
         }
 
-        // store the age for this split, conditional on the tree topology
-        tree_clade_ages[newick][parent_split].push_back( age );
+        // store the age for this split_with_mrca, conditional on the tree topology
+        tree_clade_with_mrca_ages[newick][parent_split_with_mrca].push_back( age );
     }
 
-    return parent_split;
+    return parent_split_with_mrca;
 }
 
 
@@ -1282,22 +1282,22 @@ void TreeSummary::enforceNonnegativeBranchLengths(TopologyNode& node) const
 }
 
 
-TopologyNode* TreeSummary::findParentNode(TopologyNode& n, const Split& split, std::vector<TopologyNode*>& children, RbBitSet& child_b ) const
+TopologyNode* TreeSummary::findParentNode(TopologyNode& n, const SplitWithMRCA& split_with_mrca, std::vector<TopologyNode*>& children, RbBitSet& child_b ) const
 {
     size_t num_taxa = child_b.size();
 
     RbBitSet node( num_taxa );
     n.getTaxa(node);
 
-    RbBitSet clade = split.first;
+    RbBitSet clade = split_with_mrca.first;
 
     RbBitSet mask  = node | clade;
 
     bool compatible = (mask == node);
     bool ischild      = (mask == clade);
 
-    Split c = split;
-    // check if the flipped unrooted split is compatible
+    SplitWithMRCA c = split_with_mrca;
+    // check if the flipped unrooted split_with_mrca is compatible
     if ( !rooted && !compatible && !ischild)
     {
         RbBitSet clade_flip = ~clade;
@@ -1907,20 +1907,20 @@ void TreeSummary::mapParameters( Tree &tree, bool verbose ) const
 }
 
 
-std::int64_t TreeSummary::splitCount(const Split &n) const
+std::int64_t TreeSummary::splitWithMRCACount(const SplitWithMRCA &n) const
 {
-    auto iter = clade_counts.find(n);
+    auto iter = clade_with_mrca_counts.find(n);
 
-    if (iter == clade_counts.end())
+    if (iter == clade_with_mrca_counts.end())
         return 0;
     else
         return iter->second;
 }
 
 
-double TreeSummary::splitFrequency(const Split &n) const
+double TreeSummary::splitWithMRCAFrequency(const SplitWithMRCA &n) const
 {
-    return double(splitCount(n))/sampleSize(true);
+    return double(splitWithMRCACount(n))/sampleSize(true);
 }
 
 
@@ -1938,16 +1938,16 @@ void TreeSummary::summarize( bool verbose )
 
     rooted = traces.front()->objectAt(0).isRooted();
 
-    clade_samples.clear();
+    clade_with_mrca_samples.clear();
     tree_samples.clear();
 
     sampled_ancestor_counts.clear();
 
-    clade_ages.clear();
-    conditional_clade_ages.clear();
-    tree_clade_ages.clear();
+    clade_with_mrca_ages.clear();
+    conditional_clade_with_mrca_ages.clear();
+    tree_clade_with_mrca_ages.clear();
 
-    clade_counts.clear();
+    clade_with_mrca_counts.clear();
     tree_counts.clear();
 
     ProgressBar progress = ProgressBar(sampleSize(true));
@@ -1992,7 +1992,7 @@ void TreeSummary::summarize( bool verbose )
             const std::map<std::string, size_t>& taxon_map = tree.getTaxonBitSetMap();
             size_t bitset_size = taxon_map.size();
             RbBitSet b( bitset_size, false );
-            collectTreeSample(tree.getRoot(), b, newick, clade_counts);
+            collectTreeSample(tree.getRoot(), b, newick, clade_with_mrca_counts);
         }
     }
 
@@ -2003,16 +2003,16 @@ void TreeSummary::summarize( bool verbose )
     // FIXME: Storing a second copy of everything just to know the order  wastes memory.
     //
     //        Possibly store the clades (and trees) in a vector, and then make
-    //        clade_counts/clade_samples (and tree_counts/tree_samples) just refer to the
+    //        clade_with_mrca_counts/clade_with_mrca_samples (and tree_counts/tree_samples) just refer to the
     //        index in the vector.
     
     // sort the clade samples in ascending frequency
-    for (auto& [clade, count]: clade_counts)
+    for (auto& [clade, count]: clade_with_mrca_counts)
     {
 //        if ( it->first.first.count() > 0 )
 //        if ( it->first.first.count() > 0 && it->first.first.count() < (num_taxa-1) )
         {
-            clade_samples.insert( Sample<Split>(clade, count) );
+            clade_with_mrca_samples.insert( Sample<SplitWithMRCA>(clade, count) );
         }
 
     }

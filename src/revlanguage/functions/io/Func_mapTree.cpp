@@ -75,8 +75,8 @@ RevPtr<RevVariable> Func_mapTree::execute( void )
     
     RevBayesCore::TreeSummary::AnnotationReport report;
 
-    report.conditional_clade_ages        = static_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
-    report.conditional_clade_probs       = static_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
+    report.conditional_clade_with_mrca_ages        = static_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
+    report.conditional_clade_with_mrca_probs       = static_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
     report.conditional_tree_ages         = static_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
     report.node_ages_HPD                 = static_cast<const Probability &>(args[arg_index++].getVariable()->getRevObject()).getValue();
     report.mean_node_ages                = static_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
