@@ -1,19 +1,35 @@
 ## name
 dnPhyloCTMCDASiteIID
 ## title
-Data augmentation-based phylogenetic continuous-time Markov chain distribution with IID sites
+Data augmentation-based phylogenetic continuous-time Markov chain distribution
+with independent and identically distributed sites
 ## description
-The probability distribution of the character state vectors at the tips of a phylogenetic tree, given a phylogenetic continuous-time Markov chain model.
+The probability distribution of the character state vectors at the tips of
+a phylogenetic tree, given a phylogenetic continuous-time Markov chain model.
 ## details
-The parameters of a phylogenetic model -- a tree topology with branch lengths, a substitution model that describes how observations evolve over the tree, etc. -- collectively form a distribution called the _phylogenetic continuous-time
-Markov chain_. In this distribution, the branch history is sampled (through data augmentation), instead of integrated out (as in `dnPhyloCTMC`). An instance of character history can therefore be retrieved from the distribution (using `.characterHistories`) The probability of observed character state vectors (specified via clamping the
-distribution to a `AbstractHomologousDiscreteCharacterData` object) is computed by summing the probability of the history on each branch. The probability of the history on a branch is the product of the probabilities of waiting times between events (or the probability of no event in the final segment) given the current rate of change (see May and Moore 2020).
+The parameters of a phylogenetic model -- a tree topology with branch lengths,
+a substitution model that describes how observations evolve over the tree, etc.
+-- collectively form a distribution called the _phylogenetic continuous-time
+Markov chain_. In this distribution, the branch history is sampled (through
+data augmentation), instead of integrated out (as in `dnPhyloCTMC`).
+An instance of character history can therefore be retrieved from the
+distribution (using `.characterHistories`). The probability of observed
+character state vectors (specified via clamping the distribution to an
+`AbstractHomologousDiscreteCharacterData` object) is computed by summing the
+probability of the history on each branch. The probability of the history on a
+branch is the product of the probabilities of waiting times between events (or
+the probability of no event in the final segment) given the current rate of
+change (see May and Moore 2020).
 
-Note that when `rootFrequencies` is not provided, the distribution assumes stationary frequencies at the root.
-The stationary frequencies will be calculated numerically if the tree has a root branch, and analytically otherwise.
-When `rootFrequencies` is provided, then stationarity at the root will not be assumed, and the likelihood calculation will be based on the provided root frequencies.
+Note that when `rootFrequencies` is not provided, the distribution assumes
+stationary frequencies at the root. The stationary frequencies will be
+calculated numerically if the tree has a root branch, and analytically
+otherwise. When `rootFrequencies` is provided, then stationarity at the root
+will not be assumed, and the likelihood calculation will be based on the
+provided root frequencies.
 
-If this distribution is used together with `dnPhyloOUSD` or `dnPhyloBMSD`, specify `nSites=1`.
+If this distribution is used together with `dnPhyloOUSD` or `dnPhyloBMSD`,
+specify `nSites=1`.
 
 ## authors
 Priscilla Lau

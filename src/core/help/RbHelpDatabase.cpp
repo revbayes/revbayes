@@ -1377,7 +1377,7 @@ the probability using a state-dependent algorithm.
 Applications of this model include:
 
 1. State-dependent continuous trait evolution conditional on discrete
-   discrete character history
+   character history
    
 In this application, the discrete character history (in `simmap` format) is
 read (using `readCharacterHistory`) and specified in the `characterHistory`
@@ -1410,8 +1410,9 @@ for (i in 1:num_states){
 }
 
 # basic use of the function
-Y ~ dnPhyloBMSD(char_hist, sigma=sigma2^0.5))");
+Y ~ dnPhyloBMSD(char_hist, sigma=sigma2^0.5, rootValue=2.5))");
 	help_strings[string("dnPhyloBrownianProcessStateDependent")][string("name")] = string(R"(dnPhyloBrownianProcessStateDependent)");
+	help_references[string("dnPhyloBrownianProcessStateDependent")].push_back(RbHelpReference(R"(Hansen TF (1997). Stabilizing selection and the comparative analysis of adaptation. Evolution, 51(5):1341-1351.)",R"(10.1111/j.1558-5646.1997.tb01457.x)",R"(https://academic.oup.com/evolut/article/51/5/1341/6757302 )"));
 	help_references[string("dnPhyloBrownianProcessStateDependent")].push_back(RbHelpReference(R"(Landis MJ, Matzke NJ, Moore BR, Huelsenbeck JP (2013). Bayesian analysis of biogeography when the number of areas is large. Systematic Biology, 62(6):789-804.)",R"(10.1093/sysbio/syt040)",R"(https://academic.oup.com/sysbio/article-abstract/62/6/789/1708738 )"));
 	help_references[string("dnPhyloBrownianProcessStateDependent")].push_back(RbHelpReference(R"(May MR, Moore BR (2020). A Bayesian approach for inferring the impact of a discrete character on rates of continuous-character evolution in the presence of background-rate variation. Systematic Biology, 69(3):530-544.)",R"(10.1093/sysbio/syz069)",R"(https://academic.oup.com/sysbio/article/69/3/530/5609130 )"));
 	help_arrays[string("dnPhyloBrownianProcessStateDependent")][string("see_also")].push_back(string(R"(dnPhyloOUSD)"));
@@ -1479,16 +1480,31 @@ writeNexus("simulatedData.nex", sim))");
 	help_strings[string("dnPhyloCTMCClado")][string("name")] = string(R"(dnPhyloCTMCClado)");
 	help_strings[string("dnPhyloCTMCDASequence")][string("name")] = string(R"(dnPhyloCTMCDASequence)");
 	help_arrays[string("dnPhyloCTMCDASiteIID")][string("authors")].push_back(string(R"(Priscilla Lau)"));
-	help_strings[string("dnPhyloCTMCDASiteIID")][string("description")] = string(R"(The probability distribution of the character state vectors at the tips of a phylogenetic tree, given a phylogenetic continuous-time Markov chain model.)");
-	help_strings[string("dnPhyloCTMCDASiteIID")][string("details")] = string(R"(The parameters of a phylogenetic model -- a tree topology with branch lengths, a substitution model that describes how observations evolve over the tree, etc. -- collectively form a distribution called the _phylogenetic continuous-time
-Markov chain_. In this distribution, the branch history is sampled (through data augmentation), instead of integrated out (as in `dnPhyloCTMC`). An instance of character history can therefore be retrieved from the distribution (using `.characterHistories`) The probability of observed character state vectors (specified via clamping the
-distribution to a `AbstractHomologousDiscreteCharacterData` object) is computed by summing the probability of the history on each branch. The probability of the history on a branch is the product of the probabilities of waiting times between events (or the probability of no event in the final segment) given the current rate of change (see May and Moore 2020).
+	help_strings[string("dnPhyloCTMCDASiteIID")][string("description")] = string(R"(The probability distribution of the character state vectors at the tips of
+a phylogenetic tree, given a phylogenetic continuous-time Markov chain model.)");
+	help_strings[string("dnPhyloCTMCDASiteIID")][string("details")] = string(R"(The parameters of a phylogenetic model -- a tree topology with branch lengths,
+a substitution model that describes how observations evolve over the tree, etc.
+-- collectively form a distribution called the _phylogenetic continuous-time
+Markov chain_. In this distribution, the branch history is sampled (through
+data augmentation), instead of integrated out (as in `dnPhyloCTMC`).
+An instance of character history can therefore be retrieved from the
+distribution (using `.characterHistories`). The probability of observed
+character state vectors (specified via clamping the distribution to an
+`AbstractHomologousDiscreteCharacterData` object) is computed by summing the
+probability of the history on each branch. The probability of the history on a
+branch is the product of the probabilities of waiting times between events (or
+the probability of no event in the final segment) given the current rate of
+change (see May and Moore 2020).
 
-Note that when `rootFrequencies` is not provided, the distribution assumes stationary frequencies at the root.
-The stationary frequencies will be calculated numerically if the tree has a root branch, and analytically otherwise.
-When `rootFrequencies` is provided, then stationarity at the root will not be assumed, and the likelihood calculation will be based on the provided root frequencies.
+Note that when `rootFrequencies` is not provided, the distribution assumes
+stationary frequencies at the root. The stationary frequencies will be
+calculated numerically if the tree has a root branch, and analytically
+otherwise. When `rootFrequencies` is provided, then stationarity at the root
+will not be assumed, and the likelihood calculation will be based on the
+provided root frequencies.
 
-If this distribution is used together with `dnPhyloOUSD` or `dnPhyloBMSD`, specify `nSites=1`.)");
+If this distribution is used together with `dnPhyloOUSD` or `dnPhyloBMSD`,
+specify `nSites=1`.)");
 	help_strings[string("dnPhyloCTMCDASiteIID")][string("example")] = string(R"(# Read character data from a file
 chars <- readDiscreteCharacterData("myData.nex")
 taxa = chars.taxa()
@@ -1513,7 +1529,8 @@ x.lnProbability())");
 	help_strings[string("dnPhyloCTMCDASiteIID")][string("name")] = string(R"(dnPhyloCTMCDASiteIID)");
 	help_references[string("dnPhyloCTMCDASiteIID")].push_back(RbHelpReference(R"(May MR, Moore BR (2020). A Bayesian approach for inferring the impact of a discrete character on rates of continuous-character evolution in the presence of background-rate variation. Systematic biology, 69(3):530-544.)",R"(10.1093/sysbio/syz069)",R"(https://academic.oup.com/sysbio/article/69/3/530/5609130 )"));
 	help_arrays[string("dnPhyloCTMCDASiteIID")][string("see_also")].push_back(string(R"(mvCharacterHistory)"));
-	help_strings[string("dnPhyloCTMCDASiteIID")][string("title")] = string(R"(Data augmentation-based phylogenetic continuous-time Markov chain distribution with IID sites)");
+	help_strings[string("dnPhyloCTMCDASiteIID")][string("title")] = string(R"(Data augmentation-based phylogenetic continuous-time Markov chain distribution
+with independent and identically distributed sites)");
 	help_strings[string("dnPhyloCTMCDollo")][string("name")] = string(R"(dnPhyloCTMCDollo)");
 	help_strings[string("dnPhyloDistanceGamma")][string("name")] = string(R"(dnPhyloDistanceGamma)");
 	help_strings[string("dnPhyloMultiSampleOrnsteinUhlenbeck")][string("name")] = string(R"(dnPhyloMultiSampleOrnsteinUhlenbeck)");
@@ -4481,7 +4498,7 @@ range(20,-20)
 	help_strings[string("readCharacterDataDelimited")][string("name")] = string(R"(readCharacterDataDelimited)");
 	help_arrays[string("readCharacterHistory")][string("authors")].push_back(string(R"(Priscilla Lau)"));
 	help_strings[string("readCharacterHistory")][string("description")] = string(R"(Reads character histories (in `simmap` format) from a file and saves them in
-one vector object.)");
+one vector object. The character states always should be 0-indexed.)");
 	help_strings[string("readCharacterHistory")][string("details")] = string(R"(A file name must be provided as argument.
 
 `char_hist = readCharacterHistory(...)` returns a `CharacterHistory[]` object.

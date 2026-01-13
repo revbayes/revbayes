@@ -29,7 +29,7 @@ the probability using a state-dependent algorithm.
 Applications of this model include:
 
 1. State-dependent continuous trait evolution conditional on discrete
-   discrete character history
+   character history
    
 In this application, the discrete character history (in `simmap` format) is
 read (using `readCharacterHistory`) and specified in the `characterHistory`
@@ -75,6 +75,9 @@ readCharacterHistory
 
 
 ## references
+- citation: Hansen TF (1997). Stabilizing selection and the comparative analysis of adaptation. Evolution, 51(5):1341-1351.
+  doi: 10.1111/j.1558-5646.1997.tb01457.x
+  url: https://academic.oup.com/evolut/article/51/5/1341/6757302
 - citation: Landis MJ, Matzke NJ, Moore BR, Huelsenbeck JP (2013). Bayesian analysis of biogeography when the number of areas is large. Systematic Biology, 62(6):789-804.
   doi: 10.1093/sysbio/syt040
   url: https://academic.oup.com/sysbio/article-abstract/62/6/789/1708738
