@@ -1204,10 +1204,16 @@ void TreeSummary::setOutgroup(const RevBayesCore::Clade &c)
 }
 
 
-TreeSummary::SplitWithMRCA TreeSummary::collectTreeSampleWithMRCA(const TopologyNode& n, RbBitSet& intaxa, std::string newick, std::map<SplitWithMRCA, std::int64_t>& cladeCountMap)
+// Maybe we need to merge this with collectdTreeSampleWithMRCA
+// Take two cladecountmaps, return a pair of Split, SplitWithMRCA
+std::pair<TreeSummary::Split, TreeSummary::SplitWithMRCA>
+TreeSummary::collectTreeSample(const TopologyNode& n, RbBitSet& intaxa, std::string newick,
+                               std::map<Split, std::int64_t>& cladeCountMap,
+                               std::map<SplitWithMRCA, std::int64_t>& cladeCountMapWithMRCA)
 {
     double age = (clock ? n.getAge() : n.getBranchLength() );
 
+    std::vector<Split> child_splits;
     std::vector<SplitWithMRCA> child_split_with_mrcas;
 
     RbBitSet taxa(intaxa.size());
@@ -1219,6 +1225,7 @@ TreeSummary::SplitWithMRCA TreeSummary::collectTreeSampleWithMRCA(const Topology
 
         if ( rooted && n.isSampledAncestorTip() )
         {
+            // We don't want to do this twice!  So maybe merge with the MRCA version.
             sampled_ancestor_counts[n.getTaxon()]++;
 
             mrca.insert( n.getTaxon() );
@@ -1230,7 +1237,10 @@ TreeSummary::SplitWithMRCA TreeSummary::collectTreeSampleWithMRCA(const Topology
         {
             const TopologyNode &child_node = n.getChild(i);
 
-            child_split_with_mrcas.push_back( collectTreeSampleWithMRCA(child_node, taxa, newick, cladeCountMap) );
+            auto [split, split_with_mrca] = collectTreeSample(child_node, taxa, newick, cladeCountMap, cladeCountMapWithMRCA);
+
+            child_splits.push_back( split );
+            child_split_with_mrcas.push_back( split_with_mrca );
 
             if ( rooted && child_node.isSampledAncestorTip() )
             {
@@ -1241,15 +1251,25 @@ TreeSummary::SplitWithMRCA TreeSummary::collectTreeSampleWithMRCA(const Topology
 
     intaxa |= taxa;
 
+    Split parent_split(taxa, rooted);
     SplitWithMRCA parent_split_with_mrca(taxa, mrca, rooted);
 
     if ( taxa.size() > 0 )
     {
-        // store the age for this split_with_mrca
+        // store the age for this split
+        clade_ages[parent_split].push_back( age );
         clade_with_mrca_ages[parent_split_with_mrca].push_back( age );
 
-        // increment split_with_mrca count
-        cladeCountMap[parent_split_with_mrca]++;
+        // increment split count
+        cladeCountMap[parent_split]++;
+        cladeCountMapWithMRCA[parent_split_with_mrca]++;
+
+        // add conditional clade ages
+        for (auto& child_split: child_splits)
+        {
+            // inserts new entries if doesn't already exist
+            conditional_clade_ages[parent_split][child_split].push_back( clade_ages[child_split].back() );
+        }
 
         // add conditional clade ages
         for (auto& child_split_with_mrca: child_split_with_mrcas)
@@ -1258,11 +1278,12 @@ TreeSummary::SplitWithMRCA TreeSummary::collectTreeSampleWithMRCA(const Topology
             conditional_clade_with_mrca_ages[parent_split_with_mrca][child_split_with_mrca].push_back( clade_with_mrca_ages[child_split_with_mrca].back() );
         }
 
-        // store the age for this split_with_mrca, conditional on the tree topology
+        // store the age for this split, conditional on the tree topology
+        tree_clade_ages[newick][parent_split].push_back( age );
         tree_clade_with_mrca_ages[newick][parent_split_with_mrca].push_back( age );
     }
 
-    return parent_split_with_mrca;
+    return {parent_split, parent_split_with_mrca};
 }
 
 
@@ -1992,7 +2013,7 @@ void TreeSummary::summarize( bool verbose )
             const std::map<std::string, size_t>& taxon_map = tree.getTaxonBitSetMap();
             size_t bitset_size = taxon_map.size();
             RbBitSet b( bitset_size, false );
-            collectTreeSampleWithMRCA(tree.getRoot(), b, newick, clade_with_mrca_counts);
+            collectTreeSample(tree.getRoot(), b, newick, clade_counts, clade_with_mrca_counts);
         }
     }
 
