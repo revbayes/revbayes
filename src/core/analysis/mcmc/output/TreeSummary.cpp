@@ -137,7 +137,13 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
 
         if ( tree_clade_with_mrca_ages.find(newick) == tree_clade_with_mrca_ages.end() )
         {
+            assert(tree_clade_ages.find(newick) == tree_clade_ages.end());
             throw(RbException("Could not find input tree in tree sample"));
+        }
+        else
+        {
+            // The newick string should be present in both tree_clade_ages/tree_clade_with_mrca_ages, or absent from both.
+            assert(tree_clade_ages.find(newick) != tree_clade_ages.end());
         }
     }
 
@@ -150,7 +156,6 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
         TopologyNode* n = nodes[i];
 
         Clade clade = n->getClade();
-        SplitWithMRCA split_with_mrca( clade.getBitRepresentation(), clade.getMrca(), rooted);
 
         // annotate clade posterior prob
         if ( ( !n->isTip() || ( n->isRoot() && !clade.getMrca().empty() ) ) && report.clade_probs )
@@ -174,30 +179,58 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
         // annotate conditional clade probs and get node ages
         std::vector<double> node_ages;
 
+        Split split( clade.getBitRepresentation(), rooted);
+        SplitWithMRCA split_with_mrca( clade.getBitRepresentation(), clade.getMrca(), rooted);
+
         if ( !n->isRoot() )
         {
+            // FIXME: do we need to remap the bits here?
             Clade parent_clade = n->getParent().getClade();
-            SplitWithMRCA parent_split_with_mrca = SplitWithMRCA( parent_clade.getBitRepresentation(), parent_clade.getMrca(), rooted);
 
-            std::map<SplitWithMRCA, std::vector<double> >& condCladeAges = conditional_clade_with_mrca_ages[parent_split_with_mrca];
-            node_ages = report.conditional_clade_with_mrca_ages ? condCladeAges[split_with_mrca] : clade_with_mrca_ages[split_with_mrca];
-
-            // annotate CCPs
-            if ( !n->isTip() && report.conditional_clade_with_mrca_probs )
+            if (differentiate_SAs)
             {
-                double parentCladeFreq = splitWithMRCACount( parent_split_with_mrca );
-                double ccp = condCladeAges[split_with_mrca].size() / parentCladeFreq;
-                n->addNodeParameter("ccp",ccp);
+                //----------- Splits-with-MRCA ------------/
+                SplitWithMRCA parent_split_with_mrca = SplitWithMRCA( parent_clade.getBitRepresentation(), parent_clade.getMrca(), rooted);
+
+                std::map<SplitWithMRCA, std::vector<double> >& condCladeWithMrcaAges = conditional_clade_with_mrca_ages.at(parent_split_with_mrca);
+                node_ages = report.conditional_clade_with_mrca_ages ? condCladeWithMrcaAges.at(split_with_mrca) : clade_with_mrca_ages.at(split_with_mrca);
+
+                // annotate CCPs
+                if ( !n->isTip() && report.conditional_clade_with_mrca_probs )
+                {
+                    double parentCladeFreq = splitWithMRCACount( parent_split_with_mrca );
+                    double ccp = condCladeWithMrcaAges.at(split_with_mrca).size() / parentCladeFreq;
+                    n->addNodeParameter("ccp",ccp);
+                }
+            }
+            else
+            {
+                //----------- Splits ------------/
+                Split parent_split= Split( parent_clade.getBitRepresentation(), rooted);
+
+                std::map<Split, std::vector<double> >& condCladeAges = conditional_clade_ages.at(parent_split);
+                node_ages = report.conditional_clade_ages ? condCladeAges.at(split) : clade_ages.at(split);
+
+                // annotate CCPs
+                if ( !n->isTip() && report.conditional_clade_probs )
+                {
+                    double parentCladeFreq = splitCount( parent_split );
+                    double ccp = condCladeAges.at(split).size() / parentCladeFreq;
+                    n->addNodeParameter("ccp",ccp);
+                }
             }
         }
         else
         {
-            node_ages = clade_with_mrca_ages[split_with_mrca];
+            node_ages = differentiate_SAs ? clade_with_mrca_ages.at(split_with_mrca) : clade_ages.at(split);
         }
 
         if ( report.conditional_tree_ages )
         {
-            node_ages = tree_clade_with_mrca_ages[newick][split_with_mrca];
+            if (differentiate_SAs)
+                node_ages = tree_clade_with_mrca_ages.at(newick).at(split_with_mrca);
+            else
+                node_ages = tree_clade_ages.at(newick).at(split);
         }
 
         // Verify that we have age data for this node
