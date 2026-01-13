@@ -161,6 +161,12 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
         if ( ( !n->isTip() || ( n->isRoot() && !clade.getMrca().empty() ) ) && report.clade_probs )
         {
             double pp = cladeWithMRCAProbability( clade, false );
+            n->addBranchParameter("posterior_mrca",pp);
+        }
+
+        if (!n->isTip())
+        {
+            double pp = cladeProbability( clade, false );
             n->addBranchParameter("posterior",pp);
         }
 
@@ -200,7 +206,7 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
                 {
                     double parentCladeFreq = splitWithMRCACount( parent_split_with_mrca );
                     double ccp = condCladeWithMrcaAges.at(split_with_mrca).size() / parentCladeFreq;
-                    n->addNodeParameter("ccp",ccp);
+                    n->addNodeParameter("ccp_mrca",ccp);
                 }
             }
             else
