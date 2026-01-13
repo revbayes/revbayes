@@ -155,7 +155,7 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
         // annotate clade posterior prob
         if ( ( !n->isTip() || ( n->isRoot() && !clade.getMrca().empty() ) ) && report.clade_probs )
         {
-            double pp = cladeProbability( clade, false );
+            double pp = cladeWithMRCAProbability( clade, false );
             n->addBranchParameter("posterior",pp);
         }
 
@@ -319,7 +319,7 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
 }
 
 
-double TreeSummary::cladeProbability( const Clade &c, bool verbose )
+double TreeSummary::cladeWithMRCAProbability( const Clade &c, bool verbose )
 {
     summarize( verbose );
 
@@ -327,6 +327,16 @@ double TreeSummary::cladeProbability( const Clade &c, bool verbose )
     tmp.resetTaxonBitset( traces.front()->objectAt(0).getTaxonBitSetMap() );
 
     return splitWithMRCAFrequency( SplitWithMRCA( tmp.getBitRepresentation(), tmp.getMrca(), rooted) );
+}
+
+double TreeSummary::cladeProbability( const Clade &c, bool verbose )
+{
+    summarize( verbose );
+
+    Clade tmp = c;
+    tmp.resetTaxonBitset( traces.front()->objectAt(0).getTaxonBitSetMap() );
+
+    return splitFrequency( Split( tmp.getBitRepresentation(), rooted) );
 }
 
 
@@ -1925,6 +1935,23 @@ void TreeSummary::mapParameters( Tree &tree, bool verbose ) const
 
     }
 
+}
+
+
+std::int64_t TreeSummary::splitCount(const Split &n) const
+{
+    auto iter = clade_counts.find(n);
+
+    if (iter == clade_counts.end())
+        return 0;
+    else
+        return iter->second;
+}
+
+
+double TreeSummary::splitFrequency(const Split &n) const
+{
+    return double(splitCount(n))/sampleSize(true);
 }
 
 
