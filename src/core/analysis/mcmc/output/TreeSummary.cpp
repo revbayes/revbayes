@@ -940,7 +940,7 @@ Tree* TreeSummary::mrTree(AnnotationReport report, double cutoff, bool verbose)
         //find parent node
         std::vector<TopologyNode*> children;
         RbBitSet tmp(tipNames.size());
-        TopologyNode* parentNode = findParentNode(*root, clade, children, tmp );
+        TopologyNode* parentNode = findParentNode(*root, clade.first, children, tmp );
 
         //skip this clade if it is not compatible
         if (not parentNode) continue;
@@ -1313,21 +1313,19 @@ void TreeSummary::enforceNonnegativeBranchLengths(TopologyNode& node) const
 }
 
 
-TopologyNode* TreeSummary::findParentNode(TopologyNode& n, const SplitWithMRCA& split_with_mrca, std::vector<TopologyNode*>& children, RbBitSet& child_b ) const
+TopologyNode* TreeSummary::findParentNode(TopologyNode& n, const RbBitSet& clade, std::vector<TopologyNode*>& children, RbBitSet& child_b ) const
 {
     size_t num_taxa = child_b.size();
 
     RbBitSet node( num_taxa );
     n.getTaxa(node);
 
-    RbBitSet clade = split_with_mrca.first;
-
     RbBitSet mask  = node | clade;
 
     bool compatible = (mask == node);
     bool ischild      = (mask == clade);
 
-    SplitWithMRCA c = split_with_mrca;
+    RbBitSet c = clade;
     // check if the flipped unrooted split_with_mrca is compatible
     if ( !rooted && !compatible && !ischild)
     {
@@ -1338,7 +1336,7 @@ TopologyNode* TreeSummary::findParentNode(TopologyNode& n, const SplitWithMRCA& 
 
         if ( compatible )
         {
-            c.first = clade_flip;
+            c = clade_flip;
         }
     }
 
@@ -1373,7 +1371,7 @@ TopologyNode* TreeSummary::findParentNode(TopologyNode& n, const SplitWithMRCA& 
         children = std::move(new_children);
 
         // check that we found all the children
-        if ( parent == &n && child_mask != c.first && !n.isTip())
+        if ( parent == &n && child_mask != c && !n.isTip())
         {
             parent = NULL;
         }
