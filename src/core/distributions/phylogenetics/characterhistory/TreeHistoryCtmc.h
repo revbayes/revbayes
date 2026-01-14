@@ -534,9 +534,13 @@ const double RevBayesCore::TreeHistoryCtmc<charType>::getRootBranchLength(void) 
 {
     double root_branch_length = tau->getValue().getRoot().getBranchLength();
 
-    // NOTE: we may remove this is if we want to require users to supply a root branch length
-    // if the root node is not assigned a branch length, assign a branch length
-    // edit (07.17.2025): root branch imputation disabled
+    /* NOTE: the code below is to impute a root branch length if the root node was not assigned
+     * one by the user, so that we can calculate the stationary frequencies at the root numerically.
+     * This imputation is now disabled: instead, the numerical calculation is only triggered when
+     * a root branch is supplied by the user; with no root branch, the stationary frequencies are
+     * computed analytically.
+     */
+    
     // if (root_branch_length == 0.0) {
     //     root_branch_length = tau->getValue().getRoot().getAge() * rootBranchLengthMultiplier;
     // }
