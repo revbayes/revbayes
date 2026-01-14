@@ -133,6 +133,8 @@ ParseResult<string> parseNewickComment(const std::string& input, int start_pos)
     auto check_open_bracket = checkChar(input, start_pos, '[');
     if (not check_open_bracket)
         return check_open_bracket.as_failure();
+    else
+        start_pos = check_open_bracket.next_pos();
 
     // FIXME: only some comments are supposed to be computer-readable.
     // Comments that start with [& should be saved.
@@ -205,12 +207,84 @@ ParseResult<vector<string>> parseWhitespace(const std::string& input, int start_
     return ParseSuccess(newick_comments, start_pos);
 }
 
+std::string trim(const std::string& s) {
+    // Define all characters considered "whitespace"
+    const std::string WHITESPACE = " \n\r\t\f\v";
 
+    // Find the first character that is NOT whitespace
+    size_t start = s.find_first_not_of(WHITESPACE);
+    
+    // If the string is all whitespace, return an empty string
+    if (start == std::string::npos) {
+        return "";
+    }
+
+    // Find the last character that is NOT whitespace
+    size_t end = s.find_last_not_of(WHITESPACE);
+
+    // Return the substring between start and end
+    return s.substr(start, end - start + 1);
+}
+
+/// Split by commas that are not inside { and }, then trim whitespace
+/// and add non-empty chunks to the output list.
+std::vector<std::string> split_comment(const std::string& comment)
+{
+// "[&B=2,C=4]" -> {"B=2", "C=4" }
+// "[&A=1]" -> { "A=1"}
+// "[  A=1  ]" -> { "A=1"}
+// "[  A=1 , R  ]" -> { "A=1", "R"}
+// "[  A=1 ,]" -> { "A=1"}
+// "[ , ]" -> { }
+// "[,]" -> { }
+
+    // The comment does NOT include the square brackets
+    assert(not comment.ends_with(']'));
+
+    // If the comment doesn't start with & or % then ignore it.
+    if (not (comment.starts_with('&') or comment.starts_with('%'))) return {};
+
+    // Note that this function does NOT handle NHX comments.
+    vector<std::string> chunks;
+    int start = 1;
+    int depth = 0;
+
+    // Handle chunks that are not the last chunk
+    for(int i=start;i<comment.size();i++)
+    {
+        char c = comment[i];
+
+        if (c == ',' and depth == 0)
+        {
+            auto chunk = trim( comment.substr(start,i) );
+            if (not chunk.empty())
+                chunks.push_back( chunk );
+            start = i+1;
+        }
+
+        // This is from BEAST.  Thanks for making our lives more complicated.
+        else if (c == '{')
+            depth++;
+
+        else if (c == '}')
+            depth--;
+    }
+
+    // Handle the last chunk
+    auto last_chunk = trim( comment.substr(start) );
+    if (not last_chunk.empty())
+        chunks.push_back( last_chunk );
+    
+    return chunks;
+}
+    
 // Tree -> SPACE<tree> Subtree ";"
 ParseResult<TopologyNode*> parseTree(const std::string& input, int start_pos)
 {
     TopologyNode* node = nullptr;
     vector<string> tree_comments;
+
+    Tree tree;
 
     // 1. Skip whitespace and record tree_comments
     if (auto maybe_whitespace = parseWhitespace(input, start_pos))
@@ -236,12 +310,9 @@ ParseResult<TopologyNode*> parseTree(const std::string& input, int start_pos)
     else
         return check_semi.as_failure();;
 
-    if (not tree_comments.empty())
-    {
-        // handle tree comments here
-        // [&R] -> rooted
-        // [&U] -> unrooted
-    }
+    for(auto& comment: tree_comments)
+        for(auto& chunk: split_comment(comment))
+            tree.addParameter_(chunk);
 
     return ParseSuccess(node, start_pos);
 }
@@ -308,18 +379,19 @@ ParseResult<TopologyNode*> parseSubTree(const std::string& input, int start_pos)
         auto& [length, branch_comments] = maybe_branch.value();
         if (length)
             node->setBranchLength(*length);
-        if (not branch_comments.empty())
-        {
-            // Add branch commments here!
-        }
+
+        // Add branch comments
+        for(auto& comment: branch_comments)
+            for(auto& chunk: split_comment(comment))
+                node->addBranchParameter_(chunk);
     }
     else if (maybe_branch.hard_failure())
         return maybe_branch.as_failure();
 
-    if (not node_comments.empty())
-    {
-        // Add node comments here!!
-    }
+    // Add node comments
+    for(auto& comment: node_comments)
+        for(auto& chunk: split_comment(comment))
+            node->addNodeParameter_(chunk);
     
     return ParseSuccess(node, start_pos); 
 }

@@ -1,2 +1,2 @@
-   (('a_b'[&index=3],('a''b'[&index=6],abc[&index=1])[&index=8])[&index=9],('a()[],; :'[&index=5],(a_b[&index=2],'a''''b'[&index=7])[&index=10])[&index=11],'a
+   ((a_b[&index=3],('a''b'[&index=6],abc[&index=1])[&index=8])[&index=9],('a()[],; :'[&index=5],('a b'[&index=2],'a''''b'[&index=7])[&index=10])[&index=11],'a
    (b'[&index=4])[&index=12];

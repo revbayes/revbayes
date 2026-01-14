@@ -184,6 +184,11 @@ void TopologyNode::addBranchParameter(const std::string &n, const std::string &p
 
 }
 
+void TopologyNode::addBranchParameter_(const std::string &chunk)
+{
+    branch_comments.push_back( chunk );
+}
+
 
 
 void TopologyNode::addBranchParameters(std::string const &n, const std::vector<double> &p, bool internalOnly) {
@@ -349,6 +354,11 @@ void TopologyNode::addNodeParameter_(const std::string &n, const std::string &p)
 {
     std::string comment = n + "=" + p;
     node_comments.push_back( comment );
+}
+
+void TopologyNode::addNodeParameter_(const std::string &chunk)
+{
+    node_comments.push_back( chunk );
 }
 
 

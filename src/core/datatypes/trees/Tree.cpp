@@ -2383,6 +2383,10 @@ void Tree::writeToFile( const path &dir, const std::string &fn ) const
     }
 }
 
+void Tree::addParameter_(const std::string& chunk)
+{
+    comments.push_back(chunk);
+}
 
 std::ostream& RevBayesCore::operator<<(std::ostream& o, const Tree& x)
 {
