@@ -10,5 +10,5 @@
 End;
 
 Begin trees;
-tree TREE1 = [&U](Tax3[&index=3]:0.419674,(Tax2[&index=2,sampled_ancestor=0.333333,age_95%_HPD={0.25,0.250001}]:0.126082,Tax1[&index=1]:0.376082)[&index=4,age_95%_HPD={0.313978,0.39822}]:0.043591[&posterior=0.500000])[&index=5,age_95%_HPD={0.377675,0.483824}]:0.000000[&posterior=1.000000];
+tree TREE1 = [&U](Tax3[&index=3]:0.419674,Tax2[&index=2,sampled_ancestor=0.333333,age_95%_HPD={0.25,0.25}]:0.169674,Tax1[&index=1]:0.419674)[&index=4,age_95%_HPD={0.377675,0.483824}]:0.000000[&posterior=1.000000];
 End;
