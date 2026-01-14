@@ -890,11 +890,41 @@ Tree* TreeSummary::mccTree( AnnotationReport report, bool verbose, bool differen
     // find the clade credibility score for each tree
     for (const auto& [newick, count]: tree_samples)
     {
-        // find the product of the clade frequencies
+        // find the score of the tree (i.e. either the product of clade-with-MRCA probabilities,
+        // or the product of clade probabilities and SA probabilities)
         double cc = 0;
-        for (auto& [clade, age]: tree_clade_with_mrca_ages.at(newick))
-            cc += log( splitWithMRCAFrequency(clade) );
 
+        // get tree from newick
+        NewickConverter converter;
+        Tree* sampled_tree = converter.convertFromNewick( newick );
+
+        // check if we want to differentiate clades on whether 
+        // their MRCA is an SA or speciation node
+        if (differentiate_SAs) {
+            // iterate through clades in this tree
+            for (auto& [clade, age]: tree_clade_with_mrca_ages.at(newick))
+                cc += log( splitWithMRCAFrequency(clade) );
+        } else {
+            // iterate through clades in this tree
+            for (auto& [clade, age]: tree_clade_ages.at(newick))
+                cc += log( splitFrequency(clade) );
+
+            // when differentiate_SAs is false, we need to set the sampled ancestor flags
+            if (!sampled_ancestor_counts.empty()) {
+                for (auto& t : sampled_tree->getTipNames()) {
+                    // get SA frequency
+                    double sa_freq = sampled_ancestor_counts[t] / sampleSize(true);
+
+                    // check if it is an SA
+                    bool is_SA = sampled_tree->getTipNodeWithName(t).isSampledAncestorTip();
+
+                    // add to cc based on that
+                    cc += log( is_SA ? sa_freq : 1 - sa_freq );
+                }
+            }
+        }
+
+        // if this tree is better than our best tree, make it the best tree
         if (not max_cc or cc > *max_cc)
         {
             max_cc = cc;
@@ -921,7 +951,7 @@ Tree* TreeSummary::mccTree( AnnotationReport report, bool verbose, bool differen
     }
 
     report.node_ages = true;
-    annotateTree(*best_tree, report, false, true);
+    annotateTree(*best_tree, report, false, differentiate_SAs);
 
     return best_tree;
 }
@@ -961,84 +991,134 @@ Tree* TreeSummary::mrTree(AnnotationReport report, double cutoff, bool verbose, 
 
     double totalSamples = sampleSize(true);
 
-    for (const auto& [clade, count]: clade_with_mrca_samples | views::reverse)
-    {
-        float cladeFreq = count / totalSamples;
-        if (cladeFreq < cutoff)  break;
-
-        //make sure we have an internal node
-        size_t clade_size = clade.first.count();
-        if (clade_size == 1 || clade_size == tipNames.size())  continue;
-
-        //find parent node
-        std::vector<TopologyNode*> children;
-        RbBitSet tmp(tipNames.size());
-        TopologyNode* parentNode = findParentNode(*root, clade.first, children, tmp );
-
-        //skip this clade if it is not compatible
-        if (not parentNode) continue;
-
-        // find the mrca child(ren) if they exist
-        std::vector<TopologyNode*> mrca;
-        if ( not clade.second.empty() )
+    if (differentiate_SAs) {
+        for (const auto& [clade, count]: clade_with_mrca_samples | views::reverse)
         {
-            for (auto& child: children)
+            float cladeFreq = count / totalSamples;
+            if (cladeFreq < cutoff)  break;
+
+            //make sure we have an internal node
+            size_t clade_size = clade.first.count();
+            if (clade_size == 1 || clade_size == tipNames.size())  continue;
+
+            //find parent node
+            std::vector<TopologyNode*> children;
+            RbBitSet tmp(tipNames.size());
+            TopologyNode* parentNode = findParentNode(*root, clade.first, children, tmp );
+
+            //skip this clade if it is not compatible
+            if (not parentNode) continue;
+
+            // find the mrca child(ren) if they exist
+            std::vector<TopologyNode*> mrca;
+            if ( not clade.second.empty() )
             {
-                // Add the child to the mrca if it's a tip and its taxon is in clade.second
-                if ( child->isTip() && std::find(clade.second.begin(), clade.second.end(), child->getTaxon() ) != clade.second.end() )
-                    mrca.push_back(child);
+                for (auto& child: children)
+                {
+                    // Add the child to the mrca if it's a tip and its taxon is in clade.second
+                    if ( child->isTip() && std::find(clade.second.begin(), clade.second.end(), child->getTaxon() ) != clade.second.end() )
+                        mrca.push_back(child);
+                }
+
+                // if we couldn't find all the mrcas, then this clade is not compatible
+                if ( mrca.size() != clade.second.size() )
+                {
+                    continue;
+                }
+                else
+                {
+                    for (auto& mrca_node: mrca)
+                        mrca_node->setSampledAncestor(true);
+                }
             }
 
-            // if we couldn't find all the mrcas, then this clade is not compatible
-            if ( mrca.size() != clade.second.size() )
-            {
-                continue;
-            }
-            else
-            {
-                for (auto& mrca_node: mrca)
-                    mrca_node->setSampledAncestor(true);
-            }
-        }
-
-        // avoid creating a new child if we've already found a clade compatible with it
-        if ( children.size() == parentNode->getNumberOfChildren() ) continue;
-
-        nIndex++;   //increment node index
-        TopologyNode* intNode = new TopologyNode(nIndex); //Topology node constructor, with proper node index
-
-        // move the children to a new internal node
-        for (size_t i = 0; i < children.size(); i++)
-        {
-            parentNode->removeChild(children[i]);
-            intNode->addChild(children[i]);
-            children[i]->setParent(intNode);
-        }
-
-        intNode->setParent(parentNode);
-        parentNode->addChild(intNode);
-
-        // add a mrca child if it exists and there is more than one non-mrca taxa
-        if ( mrca.empty() == false && children.size() > 2 )
-        {
-            TopologyNode* old_parent = parentNode;
+            // avoid creating a new child if we've already found a clade compatible with it
+            if ( children.size() == parentNode->getNumberOfChildren() ) continue;
 
             nIndex++;   //increment node index
-            parentNode = new TopologyNode(nIndex); //Topology node constructor, with proper node index
+            TopologyNode* intNode = new TopologyNode(nIndex); //Topology node constructor, with proper node index
 
-            intNode->removeChild(mrca[0]);
-            parentNode->addChild(mrca[0]);
-            mrca[0]->setParent(parentNode);
+            // move the children to a new internal node
+            for (size_t i = 0; i < children.size(); i++)
+            {
+                parentNode->removeChild(children[i]);
+                intNode->addChild(children[i]);
+                children[i]->setParent(intNode);
+            }
 
-            old_parent->removeChild(intNode);
-            old_parent->addChild(parentNode);
-            parentNode->setParent(old_parent);
-
-            parentNode->addChild(intNode);
             intNode->setParent(parentNode);
+            parentNode->addChild(intNode);
+
+            // add a mrca child if it exists and there is more than one non-mrca taxa
+            if ( mrca.empty() == false && children.size() > 2 )
+            {
+                TopologyNode* old_parent = parentNode;
+
+                nIndex++;   //increment node index
+                parentNode = new TopologyNode(nIndex); //Topology node constructor, with proper node index
+
+                intNode->removeChild(mrca[0]);
+                parentNode->addChild(mrca[0]);
+                mrca[0]->setParent(parentNode);
+
+                old_parent->removeChild(intNode);
+                old_parent->addChild(parentNode);
+                parentNode->setParent(old_parent);
+
+                parentNode->addChild(intNode);
+                intNode->setParent(parentNode);
+            }
+
+            root->setTree(consensusTree);
+        }
+    } else {
+        for (const auto& [clade, count]: clade_samples | views::reverse)
+        {
+            float cladeFreq = count / totalSamples;
+            if (cladeFreq < cutoff)  break;
+
+            //make sure we have an internal node
+            size_t clade_size = clade.include.count();
+            if (clade_size == 1 || clade_size == tipNames.size())  continue;
+
+            //find parent node
+            std::vector<TopologyNode*> children;
+            RbBitSet tmp(tipNames.size());
+            TopologyNode* parentNode = findParentNode(*root, clade.include, children, tmp );
+
+            //skip this clade if it is not compatible
+            if (not parentNode) continue;
+
+            // avoid creating a new child if we've already found a clade compatible with it
+            if ( children.size() == parentNode->getNumberOfChildren() ) continue;
+
+            nIndex++;   //increment node index
+            TopologyNode* intNode = new TopologyNode(nIndex); //Topology node constructor, with proper node index
+
+            // move the children to a new internal node
+            for (size_t i = 0; i < children.size(); i++)
+            {
+                parentNode->removeChild(children[i]);
+                intNode->addChild(children[i]);
+                children[i]->setParent(intNode);
+            }
+
+            intNode->setParent(parentNode);
+            parentNode->addChild(intNode);
+
+            root->setTree(consensusTree);
         }
 
-        root->setTree(consensusTree);
+        // when differentiate_SAs is false, we need to set the sampled ancestor flags
+        if (!sampled_ancestor_counts.empty()) {
+            for (auto& n : consensusTree->getNodes()) {
+                // if it's a tip and it's a sampled ancestor more than cutoff% of the time, make it an SA here
+                if (n->isTip() && sampled_ancestor_counts[n->getTaxon()] / sampleSize(true) >= cutoff) {
+                    n->setSampledAncestor(true);
+                }
+            }
+    }
+
     }
 
     //now put the tree together
