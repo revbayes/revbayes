@@ -91,7 +91,7 @@ RevPtr<RevVariable> Func_annotateTree::execute( void )
     // RevBayesCore::TreeSummary summary = RevBayesCore::TreeSummary( tt.getValue() );
     
     bool verbose = true;
-    summary->annotateTree( *tree, report, verbose );
+    summary->annotateTree( *tree, report, verbose, true );
     
     // return the tree
     if ( filename != "" )

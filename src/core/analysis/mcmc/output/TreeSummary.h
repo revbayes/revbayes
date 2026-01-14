@@ -101,7 +101,7 @@ namespace RevBayesCore {
         virtual ~TreeSummary(){}
 
         TreeSummary*                                   clone(void) const;
-        void                                           annotateTree(Tree &inputTree, AnnotationReport report, bool verbose);
+        void                                           annotateTree(Tree &inputTree, AnnotationReport report, bool verbose, bool differentiate_SAs);
         double                                         cladeWithMRCAProbability(const Clade &c, bool verbose);
         double                                         cladeProbability(const Clade &c, bool verbose);
         double                                         computeEntropy(double credible_interval_size, bool stochastic, bool verbose);
@@ -118,9 +118,9 @@ namespace RevBayesCore {
         bool                                           isDirty(void) const;
         double                                         jointCladeProbability(const RbVector<Clade> &c, bool verbose);
         double                                         maxdiff(bool verbose);
-        Tree*                                          mapTree(AnnotationReport report, bool verbose);
-        Tree*                                          mccTree(AnnotationReport report, bool verbose);
-        Tree*                                          mrTree(AnnotationReport report, double cutoff, bool verbose);
+        Tree*                                          mapTree(AnnotationReport report, bool verbose, bool differentiate_SAs);
+        Tree*                                          mccTree(AnnotationReport report, bool verbose, bool differentiate_SAs);
+        Tree*                                          mrTree(AnnotationReport report, double cutoff, bool verbose, bool differentiate_SAs);
         void                                           printCladeSummary(std::ostream& o, double min_clade_probability=0.05, bool verbose=true);
         void                                           printTreeSummary(std::ostream& o, double credible_interval_size=0.95, bool stochastic=true, bool verbose=true);
         std::int64_t                                   sampleSize(bool post = false) const;

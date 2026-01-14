@@ -92,7 +92,7 @@ TreeSummary* TreeSummary::clone(void) const
 }
 
 
-void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbose )
+void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbose, bool differentiate_SAs )
 {
     summarize( verbose );
 
@@ -805,7 +805,7 @@ double TreeSummary::maxdiff( bool verbose )
 }
 
 
-Tree* TreeSummary::mapTree( AnnotationReport report, bool verbose )
+Tree* TreeSummary::mapTree( AnnotationReport report, bool verbose, bool differentiate_SAs )
 {
     std::stringstream ss;
     ss << "Compiling maximum a posteriori tree from " << sampleSize(true) << " trees.\n";
@@ -837,13 +837,13 @@ Tree* TreeSummary::mapTree( AnnotationReport report, bool verbose )
 
     report.MAP_parameters = true;
     report.node_ages      = true;
-    annotateTree(*tmp_tree, report, false);
+    annotateTree(*tmp_tree, report, false, differentiate_SAs);
 
     return tmp_tree;
 }
 
 
-Tree* TreeSummary::mccTree( AnnotationReport report, bool verbose )
+Tree* TreeSummary::mccTree( AnnotationReport report, bool verbose, bool differentiate_SAs )
 {
     std::stringstream ss;
     ss << "Compiling maximum clade credibility tree from " << sampleSize(true) << " trees.\n";
@@ -888,13 +888,13 @@ Tree* TreeSummary::mccTree( AnnotationReport report, bool verbose )
     }
 
     report.node_ages = true;
-    annotateTree(*best_tree, report, false);
+    annotateTree(*best_tree, report, false, true);
 
     return best_tree;
 }
 
 
-Tree* TreeSummary::mrTree(AnnotationReport report, double cutoff, bool verbose)
+Tree* TreeSummary::mrTree(AnnotationReport report, double cutoff, bool verbose, bool differentiate_SAs)
 {
     if (cutoff < 0.0 || cutoff > 1.0) cutoff = 0.5;
 
@@ -1015,7 +1015,7 @@ Tree* TreeSummary::mrTree(AnnotationReport report, double cutoff, bool verbose)
     report.conditional_clade_with_mrca_probs = false;
     report.conditional_tree_ages   = false;
     report.node_ages               = true;
-    annotateTree(*consensusTree, report, false);
+    annotateTree(*consensusTree, report, false, differentiate_SAs);
 
     return consensusTree;
 }

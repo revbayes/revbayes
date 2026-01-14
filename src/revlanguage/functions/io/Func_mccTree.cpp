@@ -83,7 +83,7 @@ RevPtr<RevVariable> Func_mccTree::execute( void )
     report.force_positive_branch_lengths = static_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
     
     bool verbose = true;
-    RevBayesCore::Tree* tree = summary->mccTree(report, verbose);
+    RevBayesCore::Tree* tree = summary->mccTree(report, verbose, true);
     
     
     if ( filename != "" )
