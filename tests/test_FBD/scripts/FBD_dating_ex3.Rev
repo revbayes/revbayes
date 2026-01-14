@@ -141,7 +141,7 @@ for(i in 1:n_branches){
 # add a move on the branch rate vector #
 moves.append( mvVectorScale(branch_rates, lambda=0.5, tune=true, weight=4.0) )
 
-# add simulatenous rate/age proposals
+# add simultaneous rate/age proposals
 moves.append( mvRateAgeBetaShift(tree=timetree, rates=branch_rates, tune=true, weight=n_taxa) )
 
 moves.append( mvRateAgeProposal(timetree, weight=n_taxa, tune=true) )
@@ -181,7 +181,8 @@ monitors.append( mnFile(filename="output/bears_FBD_ex3_extant.trees", printgen=1
 mymcmc = mcmc(mymodel, monitors, moves, nruns=1, combine="mixed")
 
 # Run the MCMC #
-mymcmc.run(generations=1000, tuningInterval=200)
+mymcmc.burnin(generations=200, tuningInterval=40)
+mymcmc.run(generations=800)
 
 
 ########################
