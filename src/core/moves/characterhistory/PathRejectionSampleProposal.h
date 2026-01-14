@@ -448,7 +448,7 @@ const std::string& RevBayesCore::PathRejectionSampleProposal<charType>::getPropo
 template<class charType>
 const double RevBayesCore::PathRejectionSampleProposal<charType>::getRootBranchLength( void )
 {
-    // This is ad hoc code. Currently, getRootBranchLength() in TreeHistoryCtmc.h gives a fake root branch length if the true one is 0
+    // This is ad hoc code
     TreeHistoryCtmc<charType>* c = dynamic_cast< TreeHistoryCtmc<charType>* >(&ctmc->getDistribution());
     const Tree& tree = c->getTree();
     std::vector<TopologyNode*> nds = tree.getNodes();
