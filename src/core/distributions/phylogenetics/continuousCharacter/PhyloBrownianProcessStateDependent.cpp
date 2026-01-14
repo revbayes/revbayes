@@ -616,10 +616,11 @@ void PhyloBrownianProcessStateDependent::setSigma(const TypedDagNode<RbVector<do
 
     size_t number_states = character_histories->getValue().getNumberOfStates();
     // make sure that the state-space is correct
-    if ( s->getName().size() != number_states )
+    if ( s->getValue().size() != number_states )
     {
-        // throw RbException() << "The number of states (" << number_states << ") in the character history doesn't match the number of sigma parameters (" << s->getValue().size() << ")";
+        throw RbException() << "The number of states (" << number_states << ") in the character history doesn't match the number of sigma parameters (" << s->getValue().size() << ")";
     }
+
 
     // set the value
     state_dependent_sigma = s;
