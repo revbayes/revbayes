@@ -445,7 +445,7 @@ void PhyloBrownianProcessStateDependent::resetValue( void )
             ++site_index;
             if ( site_index >= this->value->getNumberOfCharacters()  )
             {
-                throw RbException( "The number of sites specified does not match with the number of characters included." );
+                throw RbException( "The number of sites specified does not match the number of characters included." );
             }
         }
         site_indices[i] = site_index;

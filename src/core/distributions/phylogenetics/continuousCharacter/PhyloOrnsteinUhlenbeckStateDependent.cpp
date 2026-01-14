@@ -489,7 +489,7 @@ void PhyloOrnsteinUhlenbeckStateDependent::resetValue( void )
             ++site_index;
             if ( site_index >= this->value->getNumberOfCharacters()  )
             {
-                throw RbException( "The character matrix cannot set to this variable because it does not have enough included characters." );
+                throw RbException( "The number of sites specified does not match the number of characters included." );
             }
         }
         site_indices[i] = site_index;
