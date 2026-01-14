@@ -3,6 +3,7 @@
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RbException.h"
+#include "RbSettings.h"  // for debugMCMC setting
 #include "TreeUtilities.h"
 #include "TypedDagNode.h"
 
@@ -98,6 +99,9 @@ double RateAgeSubtreeProposal::getProposalTuningParameter( void ) const
 double RateAgeSubtreeProposal::doProposal( void )
 {
     
+    int logMCMC = RbSettings::userSettings().getLogMCMC();
+    int debugMCMC = RbSettings::userSettings().getDebugMCMC();
+
     // Get random number generator
     RandomNumberGenerator* rng     = GLOBAL_RNG;
     
@@ -105,14 +109,19 @@ double RateAgeSubtreeProposal::doProposal( void )
     RbOrderedSet<DagNode*> affected;
     tree->getAffectedNodes( affected );
     
-    // pick a random node which is not the root and neithor the direct descendant of the root
-    TopologyNode* node;
-    size_t node_index = 0;
-    do {
-        double u = rng->uniform01();
-        node_index = size_t( std::floor(tau.getNumberOfNodes() * u) );
-        node = &tau.getNode(node_index);
-    } while ( node->isRoot() || node->isTip() );
+    // pick a random node which is not the root, a tip, or the parent of a sampled ancestor
+    TopologyNode* node = tau.pickRandomInternalNode(rng);
+    if (node == NULL)
+    {
+        if (logMCMC >=1 or debugMCMC >=1)
+        {
+            std::cerr << "mvRateAgeSubtreeProposal has no effect; the tree only contains the root, tips, and sampled ancestors." << std::endl;
+        }
+
+        stored_node = nullptr;
+        return RbConstants::Double::neginf;
+    }
+    size_t node_index = node->getIndex();
     
     TopologyNode& parent = node->getParent();
     
@@ -221,6 +230,8 @@ void RateAgeSubtreeProposal::printParameterSummary(std::ostream &o, bool name_on
 void RateAgeSubtreeProposal::undoProposal( void )
 {
 
+    if (stored_node == nullptr) return;
+    
     // reset the branch rates
     std::vector<TopologyNode*> nodes = tree->getValue().getNodes();
     size_t num_nodes = nodes.size();
