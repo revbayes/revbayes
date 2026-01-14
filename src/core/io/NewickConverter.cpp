@@ -31,10 +31,6 @@ NewickConverter::~NewickConverter()
 
 Tree* NewickConverter::convertFromNewick(std::string const &newick)
 {
-
-    // create and allocate the tree object
-    Tree *t = new Tree();
-
     // construct the tree starting from the root
     auto result = parseTree(newick, 0);
     if (not result){
@@ -44,22 +40,20 @@ Tree* NewickConverter::convertFromNewick(std::string const &newick)
         throw RbException()<<"Junk at end of newick string: '"<<newick.substr(result.next_pos())<<"'";
 
     // set up the tree
-    auto root = result.value();
-
-    t->setRoot( root, true );
+    auto tree = result.value();
 
     // try to set node indices from attributes
-    t->tryReadIndicesFromParameters(true);
+    tree->tryReadIndicesFromParameters(true);
 
     // trees with 2-degree root nodes should not be rerooted
-    t->setRooted( root->getNumberOfChildren() == 2 );
+    tree->setRooted( tree->getRoot().getNumberOfChildren() == 2 );
     
     // make this tree first a branch length tree
     // hence, tell the root to use branch lengths and not ages (with recursive call)
-    root->setUseAges(false, true);
+    tree->getRoot().setUseAges(false, true);
     
     // return the tree, the caller is responsible for destruction
-    return t;
+    return tree;
 }
 
 /* We are currently using this Newick grammar:
@@ -279,12 +273,9 @@ std::vector<std::string> split_comment(const std::string& comment)
 }
     
 // Tree -> SPACE<tree> Subtree ";"
-ParseResult<TopologyNode*> parseTree(const std::string& input, int start_pos)
+ParseResult<Tree*> parseTree(const std::string& input, int start_pos)
 {
-    TopologyNode* node = nullptr;
     vector<string> tree_comments;
-
-    Tree tree;
 
     // 1. Skip whitespace and record tree_comments
     if (auto maybe_whitespace = parseWhitespace(input, start_pos))
@@ -296,10 +287,11 @@ ParseResult<TopologyNode*> parseTree(const std::string& input, int start_pos)
         return maybe_whitespace.as_hard_failure();
     
     // 2. Get the Subtree
+    TopologyNode* root = nullptr;
     if (auto check_subtree = parseSubTree(input,start_pos))
     {
         start_pos = check_subtree.next_pos();
-        node = check_subtree.value();
+        root = check_subtree.value();
     }
     else
         return check_subtree.as_failure();
@@ -310,11 +302,16 @@ ParseResult<TopologyNode*> parseTree(const std::string& input, int start_pos)
     else
         return check_semi.as_failure();;
 
+    // 4. Create the tree
+    Tree* tree = new Tree();
+    
+    tree->setRoot( root, true );
+
     for(auto& comment: tree_comments)
         for(auto& chunk: split_comment(comment))
-            tree.addParameter_(chunk);
+            tree->addParameter_(chunk);
 
-    return ParseSuccess(node, start_pos);
+    return ParseSuccess(tree, start_pos);
 }
 
 // subtree -> SPACE [Descendants] SPACE [Name] SPACE [Branch]

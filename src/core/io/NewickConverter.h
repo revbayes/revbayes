@@ -164,7 +164,7 @@ namespace RevBayesCore {
         Tree*                   convertFromNewick(const std::string &n);
     };
 
-    ParseResult<TopologyNode*> parseTree(const std::string& input, int start_pos);
+    ParseResult<Tree*> parseTree(const std::string& input, int start_pos);
     ParseResult<TopologyNode*> parseSubTree(const std::string& input, int start_pos);
     ParseResult<char> checkChar(const std::string& input, int start_pos, char c);
     ParseResult<char> parseChar(const std::string& input, int start_pos);
