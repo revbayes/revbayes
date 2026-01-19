@@ -29,6 +29,10 @@
 #include "RbVectorImpl.h"
 #include "StringUtilities.h"
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 #ifdef RB_MPI
 #include <mpi.h>
 #endif
@@ -251,11 +255,20 @@ void Mcmcmc::checkpoint( void ) const
             path heat_checkpoint_file_name = appendToStem(chain_file_name, "_heat");
             
             // open the stream to the file
-            std::ofstream out_stream_mcmc( heat_checkpoint_file_name.string() );
+            path tmp_heat_checkpoint_file_name = heat_checkpoint_file_name.parent_path() / ("." + heat_checkpoint_file_name.filename().string() + ".tmp");
+            std::ofstream out_stream_mcmc( tmp_heat_checkpoint_file_name.string() );
             out_stream_mcmc << "heat = " << chains[i]->getChainPosteriorHeat() << std::endl;
             
             // clean up
             out_stream_mcmc.close();
+#ifdef _WIN32
+            if ( MoveFileExW(tmp_heat_checkpoint_file_name.wstring().c_str(), heat_checkpoint_file_name.wstring().c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH) == 0 )
+            {
+                throw RbException() << "Could not replace checkpoint file " << heat_checkpoint_file_name;
+            }
+#else
+            std::filesystem::rename(tmp_heat_checkpoint_file_name, heat_checkpoint_file_name);
+#endif
         }
         
     }
@@ -2035,4 +2048,3 @@ void Mcmcmc::writeMonitorHeaders( bool screen_monitor_only )
     }
     
 }
-
