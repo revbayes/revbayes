@@ -166,6 +166,7 @@
 #include "Dist_BDSTP.h"
 #include "Dist_FBDP.h"
 #include "Dist_BirthDeathBurstProcess.h"
+#include "Dist_BirthDeathJeffreys.h"
 #include "Dist_BranchRateTree.h"
 #include "Dist_CharacterDependentBirthDeathProcess.h"
 #include "Dist_Coalescent.h"
@@ -356,6 +357,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< TimeTree                   >( new Dist_bdp_complete());
 
         AddDistribution< TimeTree                   >( new Dist_BirthDeathBurstProcess());
+        AddDistribution< ModelVector<RealPos>       >( new Dist_BirthDeathJeffreys());
 
         AddDistribution< TimeTree                   >( new Dist_CharacterDependentBirthDeathProcess() );
         AddDistribution< TimeTree                   >( new Dist_heterogeneousRateBirthDeath() );
