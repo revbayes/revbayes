@@ -200,6 +200,13 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
             node_ages = tree_clade_ages[newick][split];
         }
 
+        // Verify that we have age data for this node
+        if ( node_ages.empty() )
+        {
+            std::string node_desc = n->isTip() ? ("tip '" + n->getName() + "'") : ("internal node with clade " + clade.toString());
+            throw RbException() << "No age samples found for " << node_desc << ". This may indicate a mismatch between the tree to be annotated and the tree trace.";
+        }
+
         // set the node ages/branch lengths
         if ( report.node_ages )
         {
@@ -1979,7 +1986,12 @@ void TreeSummary::summarize( bool verbose )
             tree_counts[newick]++;
 
             // get the clades for this tree
-            RbBitSet b( tree.getNumberOfTips(), false );
+            // Size the bitset based on the taxon bitset map, not just tip count,
+            // since getTaxa() uses indices from the map which may include sampled ancestors
+            // and other non-tip taxa. Ensure the map is built by calling getTaxonBitSetMap().
+            const std::map<std::string, size_t>& taxon_map = tree.getTaxonBitSetMap();
+            size_t bitset_size = taxon_map.size();
+            RbBitSet b( bitset_size, false );
             collectTreeSample(tree.getRoot(), b, newick, clade_counts);
         }
     }
