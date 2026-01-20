@@ -140,7 +140,7 @@ double EventBirthDeathFromAgeProposal::doBirthProposal( void )
     
     size_t num_events_before = history.getNumberEvents();
     size_t num_branches = history.getNumberBranches();
-    size_t num_states   = history.getNumberStates();
+    size_t num_states   = history.getNumberOfStates();
     
     // randomly pick a branch
     size_t branch_index = size_t( std::floor(num_branches * rng->uniform01()) );
@@ -177,7 +177,7 @@ double EventBirthDeathFromAgeProposal::doDeathProposal( void )
     
     size_t num_events_before = history.getNumberEvents();
     size_t num_branches = history.getNumberBranches();
-    size_t num_states   = history.getNumberStates();
+    size_t num_states   = history.getNumberOfStates();
     
     size_t branch_index = 0;
     CharacterEvent *event = history.pickRandomEvent( branch_index );
@@ -188,16 +188,13 @@ double EventBirthDeathFromAgeProposal::doDeathProposal( void )
     stored_branch_index = branch_index;
     
     double branch_length = distribution->getValue().getNode(branch_index).getBranchLength();
-//    double age = distribution->getValue().getNode(branch_index).getParent().getAge() - event->getTime();
     
     double log_death_move_prob = log(0.5);
     double log_birth_move_prob = log((num_events_before == 1 ? 1.0 : 0.5));
     double p_forward  = log_death_move_prob - log(num_events_before);
     double p_backward = log_birth_move_prob - log(num_branches) - log(num_states) - log(branch_length);
     double proposal_ratio = p_backward - p_forward;
-    
-//    std::cout << "D\ta:" << age << "\tl:" << branch_length << "\t(" << num_events_before << "->" << num_events_before-1 << ")" << "\n";
-    
+        
     return proposal_ratio;
 }
 

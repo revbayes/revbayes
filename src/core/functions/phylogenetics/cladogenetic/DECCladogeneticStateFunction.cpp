@@ -16,6 +16,7 @@
 #include "RbException.h"
 #include "RbMathCombinatorialFunctions.h"
 #include "BranchHistory.h"
+#include "CharacterHistoryDiscrete.h"
 #include "CharacterEventDiscrete.h"
 #include "Cloneable.h"
 #include "RbVector.h"
@@ -584,7 +585,7 @@ DECCladogeneticStateFunction* DECCladogeneticStateFunction::clone( void ) const
     return new DECCladogeneticStateFunction( *this );
 }
 
-double DECCladogeneticStateFunction::computeDataAugmentedCladogeneticLnProbability( const std::vector<BranchHistory*>& histories,
+double DECCladogeneticStateFunction::computeDataAugmentedCladogeneticLnProbability( CharacterHistoryDiscrete& histories,
                                                              size_t node_index,
                                                              size_t left_index,
                                                              size_t right_index ) const
@@ -592,9 +593,9 @@ double DECCladogeneticStateFunction::computeDataAugmentedCladogeneticLnProbabili
     double lnP = 0.0;
     double p = 1.0;
     
-    std::vector<CharacterEvent*>& nodeChildState = histories[ node_index ]->getChildCharacters();
-    std::vector<CharacterEvent*>& leftParentState = histories[ left_index ]->getParentCharacters();
-    std::vector<CharacterEvent*>& rightParentState = histories[ right_index ]->getParentCharacters();
+    std::vector<CharacterEvent*>& nodeChildState = histories[ node_index ].getChildCharacters();
+    std::vector<CharacterEvent*>& leftParentState = histories[ left_index ].getParentCharacters();
+    std::vector<CharacterEvent*>& rightParentState = histories[ right_index ].getParentCharacters();
 
 //    std::cout << "nodeChildState   : ";
 //    for (size_t i = 0; i < nodeChildState.size(); i++)
@@ -745,7 +746,7 @@ double DECCladogeneticStateFunction::computeDataAugmentedCladogeneticLnProbabili
 }
 
 
-std::string DECCladogeneticStateFunction::simulateDataAugmentedCladogeneticState(std::vector<BranchHistory*>& histories,
+std::string DECCladogeneticStateFunction::simulateDataAugmentedCladogeneticState(CharacterHistoryDiscrete& histories,
                                                                           size_t node_index, size_t left_index, size_t right_index) const
 
 {
@@ -777,9 +778,9 @@ std::string DECCladogeneticStateFunction::simulateDataAugmentedCladogeneticState
     }
     
     // get ranges
-    std::vector<CharacterEvent*>& nodeChildState = histories[ node_index ]->getChildCharacters();
-    std::vector<CharacterEvent*>& leftParentState = histories[ left_index ]->getParentCharacters();
-    std::vector<CharacterEvent*>& rightParentState = histories[ right_index ]->getParentCharacters();
+    std::vector<CharacterEvent*>& nodeChildState = histories[ node_index ].getChildCharacters();
+    std::vector<CharacterEvent*>& leftParentState = histories[ left_index ].getParentCharacters();
+    std::vector<CharacterEvent*>& rightParentState = histories[ right_index ].getParentCharacters();
     
     // get indices that are on/off for nodeChildState
     std::vector<size_t> node_child_on;
