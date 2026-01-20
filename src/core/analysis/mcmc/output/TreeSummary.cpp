@@ -204,7 +204,7 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
         if ( node_ages.empty() )
         {
             std::string node_desc = n->isTip() ? ("tip '" + n->getName() + "'") : ("internal node with clade " + clade.toString());
-            throw RbException() << "No age samples found for " << node_desc << ". This may indicate a mismatch between the tree to be annotated and the tree trace.";
+            throw RbException() << "No age samples found for " << node_desc << ".";
         }
 
         // set the node ages/branch lengths
