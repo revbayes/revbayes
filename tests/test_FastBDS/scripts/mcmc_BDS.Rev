@@ -18,7 +18,6 @@ NUM_MCMC_ITERATIONS  = 10
 setOption("useScaling","true")
 setOption("scalingDensity","1")
 
-#source("data/"+DATASET+".Rev")
 
 #######################
 # Reading in the Data #
@@ -41,7 +40,6 @@ moves    = VectorMoves()
 monitors = VectorMonitors()
 
 
-
 # Global parameters for our analysis
 H = 0.587405
 
@@ -56,12 +54,12 @@ rate_mean <- (NUM_TOTAL_SPECIES-2) / tree_length
 ### Create a lognormal distributed variable for the mean speciation rate
 speciation_mean ~ dnLoguniform( 1E-6, 1E2)
 speciation_mean.setValue( rate_mean )
-moves.append( mvScale(speciation_mean, lambda=1, tune=true, weight=2.0) )
+moves.append( mvScale(speciation_mean, lambda=1, weight=2.0) )
 
 ### Create a lognormal distributed variable for the mean extinction rate
 extinction_mean ~ dnLoguniform( 1E-6, 1E2)
 extinction_mean.setValue( rate_mean / 2.0 )
-moves.append( mvScale(extinction_mean, lambda=1, tune=true, weight=2.0) )
+moves.append( mvScale(extinction_mean, lambda=1, weight=2.0) )
 
 ## The spread of the base distributions
 speciation_sd <- 0.6
@@ -70,26 +68,25 @@ extinction_sd <- 0.6
 speciation_shift_rate ~ dnLognormal(ln(0.01), H)
 extinction_shift_rate ~ dnLognormal(ln(0.01), H)
 
-moves.append( mvScale(speciation_shift_rate, lambda=1, tune=true, weight=2.0) )
-moves.append( mvScale(extinction_shift_rate, lambda=1, tune=true, weight=2.0) )
+moves.append( mvScale(speciation_shift_rate, lambda=1, weight=2.0) )
+moves.append( mvScale(extinction_shift_rate, lambda=1, weight=2.0) )
 
 ### Create a uniformly distributed variable for the category at the root
 rate_cat_probs <- simplex( rep(1, NUM_RATE_CLASSES*NUM_RATE_CLASSES) )
 
 
-
 #### construct a variable for the tree drawn from a birth death process
-timetree ~ dnFastBirthDeathShift( rootAge           = root,
-                                  speciationScale   = speciation_mean,
-                                  extinctionScale   = extinction_mean,
-                                  speciationSD      = speciation_sd,
-                                  extinctionSD      = extinction_sd,
-                                  alpha             = speciation_shift_rate,
-                                  beta              = extinction_shift_rate,
+timetree ~ dnFastBirthDeathShift( rootAge              = root,
+                                  speciationScale      = speciation_mean,
+                                  extinctionScale      = extinction_mean,
+                                  speciationSD         = speciation_sd,
+                                  extinctionSD         = extinction_sd,
+                                  alpha                = speciation_shift_rate,
+                                  beta                 = extinction_shift_rate,
                                   numSpeciationClasses = NUM_RATE_CLASSES,
                                   numExtinctionClasses = NUM_RATE_CLASSES,
-                                  rho               = rho,
-                                  condition         = "time")
+                                  rho                  = rho,
+                                  condition            = "time")
 
 
 ### clamp the model with the "observed" tree
@@ -107,19 +104,18 @@ mymodel = model(speciation_mean)
 #monitors.append( mnScreen(printgen=1, speciation_mean, extinction_mean, speciation_shift_rate, extinction_shift_rate) )
 monitors.append( mnStochasticBranchRate(bds=timetree, printgen=1, filename="output/BDS_rates_primates.log") )
 
-
 monitors.append( mnModel(filename="output/BDS_primates.log",printgen=1, separator = TAB) )
-
 
 ################
 # The Analysis #
 ################
 
+
 ### workspace mcmc
 mymcmc = mcmc(mymodel, monitors, moves, nruns=NUM_REPS, combine="mixed")
 
 ### run the MCMC
-mymcmc.run(generations=NUM_MCMC_ITERATIONS, tuningInterval=200)
+mymcmc.run(generations=NUM_MCMC_ITERATIONS)
 
 ## quit ##
 q()
