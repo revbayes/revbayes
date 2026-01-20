@@ -96,9 +96,9 @@ typedef std::map<std::string, BlockReaderList> BlockTypeToBlockList;
 
 	The advantage of ExceptionRaisingNxsReader is that one is no longer required to subclass NxsReader to handle errors.
 
-	\section MemberObjectection Signal Handling in NCL:
+	\section signalsection Signal Handling in NCL:
 		Traditionally, the user of an application can send an SIGINT to cause it to stop. NCL has very limited support
-	for handling MemberObject, and this support is turned off by default.
+	for handling signals, and this support is turned off by default.
 
 		If you want NCL to raise an NxsSignalCanceledParseException if a signal is encountered during a parse then call:
 			NxsReader::setNCLCatchesSignals(true);
@@ -142,23 +142,23 @@ class NxsReader
 			SUPPRESS_WARNINGS_LEVEL = 8 /**<  if the NxsReader's warning level is set to this, then warnings will be suppressed */
 			};
 
-		/*! If true then NCL will call a handler function if MemberObject are encountered during NxsReader::Execute
+		/*! If true then NCL will call a handler function if signals are encountered during NxsReader::Execute
 			(signal handling is off by default).
-			\sa The section on signal handling \ref MemberObjectection
+			\sa The section on signal handling \ref signalsection
 		*/
 		static void setNCLCatchesSignals(bool);
-		/*! \returns true if NCL will call a handler function if MemberObject are encountered during NxsReader::Execute
+		/*! \returns true if NCL will call a handler function if signals are encountered during NxsReader::Execute
 					(signal handling is off by default).
-			\sa The section on signal handling \ref MemberObjectection
+			\sa The section on signal handling \ref signalsection
 		*/
 		static bool getNCLCatchesSignals();
 		/*! Usually used internally when signal catching is enabled. If the number of sigints has changed, since the last
 			call, then NCL has detected a signal.
-			\sa The section on signal handling \ref MemberObjectection
+			\sa The section on signal handling \ref signalsection
 		*/
 		static unsigned getNumSignalIntsCaught();
 		/*! Used internally.  If NCL is handling SIGINTs then this will be incremented with every SIGINT.
-			\sa The section on signal handling \ref MemberObjectection
+			\sa The section on signal handling \ref signalsection
 		*/
 		static void setNumSignalsIntsCaught(unsigned);
 
@@ -240,9 +240,9 @@ class NxsReader
 		NxsTreesBlockAPI 		*GetLastStoredTreesBlock();
 
 
-		NxsTaxaBlockAPI 		*GetTaxaBlockByTitle(const char *title, unsigned *num_matches);
-		NxsCharactersBlockAPI 	*GetCharBlockByTitle(const char *title, unsigned *num_matches);
-		NxsTreesBlockAPI 		*GetTreesBlockByTitle(const char *title, unsigned *num_matches);
+		NxsTaxaBlockAPI 		*GetTaxaBlockByTitle(const char *title, unsigned *nMatches);
+		NxsCharactersBlockAPI 	*GetCharBlockByTitle(const char *title, unsigned *nMatches);
+		NxsTreesBlockAPI 		*GetTreesBlockByTitle(const char *title, unsigned *nMatches);
 
 		NxsTaxaBlockFactory 	*GetTaxaBlockFactory();
 		//NxsCharactersBlockFactory 	*GetCharBlockFactory();
@@ -379,8 +379,8 @@ class NxsReader
 		bool 			BlockIsASingeltonReader(NxsBlock *) const ;
 		void 			BlockReadHook(const NxsString &currBlockName, NxsBlock *currBlock, NxsToken *token = NULL );
 		bool 			ExecuteBlock(NxsToken &token, const NxsString &currBlockName, NxsBlock *currBlock, NxsBlockFactory * sourceOfBlock);
-		NxsBlock	   *FindBlockOfTypeByTitle(const std::string &btype, const char *title, unsigned *num_matches);
-		NxsBlock	   *FindBlockByTitle(const BlockReaderList & chosenBlockList, const char *title, unsigned *num_matches);
+		NxsBlock	   *FindBlockOfTypeByTitle(const std::string &btype, const char *title, unsigned *nMatches);
+		NxsBlock	   *FindBlockByTitle(const BlockReaderList & chosenBlockList, const char *title, unsigned *nMatches);
 		BlockReaderList FindAllBlocksByTitle(const BlockReaderList & chosenBlockList, const char *title);
 		NxsBlock	   *GetLastStoredBlockByID(const std::string &key);
 		NxsTaxaBlockAPI *GetOriginalTaxaBlock(const NxsTaxaBlockAPI *) const;

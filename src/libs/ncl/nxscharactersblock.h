@@ -408,7 +408,7 @@ class NxsDiscreteDatatypeMapper;
 	Thus, a normal loop through all characters in the data matrix should look something
 	like this:
 >
-	for (unsigned j = 0; j < nchar; j++)
+	for(unsigned j = 0; j < nchar; j++)
 		{
 		if (IsExcluded(j))
 			continue;

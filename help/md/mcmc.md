@@ -18,7 +18,7 @@ The parameters `checkpointFile` and `checkpointInterval` generate snapshots of t
 The `mcmc.initializeFromCheckpoint()` method allows an analysis to be continued from a checkpoint file. New generations will be appended to existing monitor files.
 
 ## authors
-Sebastian Hoehna
+Sebastian Höhna
 ## see_also
 mcmcmc
 ## example
@@ -51,17 +51,9 @@ mcmcmc
     mymcmcObject.run( rules = [ srMaxIteration(400) ] )
 	
 ## references
-- citation: Metropolis N, AW Rosenbluth, MN Rosenbluth, AH Teller, E Teller (1953).
-    Equation of state calculations by fast computing machines. Journal of Chemical
-    Physics, 21:1087-1092.
+- citation: Metropolis N, AW Rosenbluth, MN Rosenbluth, AH Teller, E Teller (1953). Equation of state calculations by fast computing machines. Journal of Chemical Physics, 21:1087-1092.
   doi: 10.1063/1.1699114
-  url: null
-- citation: Hastings WK (1970) Monte Carlo sampling methods using Markov chains and
-    their applications. Biometrika, 57:97-109.
+- citation: Hastings WK (1970) Monte Carlo sampling methods using Markov chains and their applications. Biometrika, 57:97-109.
   doi: 10.2307/2334940
-  url: null
-- citation: Höhna S, Landis MJ, Heath TA (2017). 
-  Phylogenetic inference using `RevBayes`.
-  Current Protocols in Bioinformatics.
+- citation: Höhna S, Landis MJ, Heath TA (2017). Phylogenetic inference using `RevBayes`. Current Protocols in Bioinformatics, 57:6.16.1--6.16.34.
   doi: 10.1002/cpbi.22
-  url: null

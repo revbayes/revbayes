@@ -192,9 +192,9 @@ class NxsSimpleCommandStrings
 		typedef std::pair<NxsTokenPosInfo, std::string> SingleValFromFile;
 		typedef std::pair<NxsTokenPosInfo, VecString > MultiValFromFile;
 		typedef std::pair<NxsTokenPosInfo, MatString > MatFromFile;
-		typedef std::map<std::string, SingleValFromFile> stringToValFromFile;
-		typedef std::map<std::string,  MultiValFromFile> stringToMultiValFromFile;
-		typedef std::map<std::string,  MatFromFile> stringToMatFromFile;
+		typedef std::map<std::string, SingleValFromFile> StringToValFromFile;
+		typedef std::map<std::string,  MultiValFromFile> StringToMultiValFromFile;
+		typedef std::map<std::string,  MatFromFile> StringToMatFromFile;
 
 		// Looks for k in opts and multiOpts. Returns all of the values
 		// 	for the command option (will be an empty vector of strings if the option was not found).
@@ -203,7 +203,7 @@ class NxsSimpleCommandStrings
 		MultiValFromFile GetOptValue(const std::string &k) const
 			{
 			MultiValFromFile mvff;
-			stringToValFromFile::const_iterator s = this->opts.find(k);
+			StringToValFromFile::const_iterator s = this->opts.find(k);
 			if (s != this->opts.end())
 				{
 				const SingleValFromFile & v(s->second);
@@ -212,7 +212,7 @@ class NxsSimpleCommandStrings
 				}
 			else
 				{
-				stringToMultiValFromFile::const_iterator m = this->multiOpts.find(k);
+				StringToMultiValFromFile::const_iterator m = this->multiOpts.find(k);
 				if (m != this->multiOpts.end())
 					{
 					const MultiValFromFile & mv(m->second);
@@ -225,7 +225,7 @@ class NxsSimpleCommandStrings
 
 		MatFromFile GetMatOptValue(const std::string & k) const
 			{
-			stringToMatFromFile::const_iterator mIt = this->matOpts.find(k);
+			StringToMatFromFile::const_iterator mIt = this->matOpts.find(k);
 			if (mIt ==  this->matOpts.end())
 				return MatFromFile();
 			return mIt->second;
@@ -240,9 +240,9 @@ class NxsSimpleCommandStrings
 
 	  	std::string cmdName;
 	  	NxsTokenPosInfo cmdPos;
-		stringToValFromFile opts;
-		stringToMultiValFromFile multiOpts;
-		stringToMatFromFile matOpts;
+		StringToValFromFile opts;
+		StringToMultiValFromFile multiOpts;
+		StringToMatFromFile matOpts;
 	};
 
 /*!
@@ -318,7 +318,7 @@ class ProcessedNxsToken
 
 		void WriteAsNexus(std::ostream &out) const
 			{
-			for (std::vector<NxsComment>::const_iterator cIt = embeddedComments.begin(); cIt != embeddedComments.end(); ++cIt)
+			for(std::vector<NxsComment>::const_iterator cIt = embeddedComments.begin(); cIt != embeddedComments.end(); ++cIt)
 				cIt->WriteAsNexus(out);
 			out << NxsString::GetEscaped(token);
 			}
@@ -374,7 +374,8 @@ class NxsToken
 			useSpecialPunctuation	= 0x0080,	/* if set, character specified by the data member special is treated as punctuation and returned as a separate token */
 			hyphenNotPunctuation	= 0x0100,	/* if set, the hyphen character is not treated as punctutation (it is normally returned as a separate token) */
 			preserveUnderscores		= 0x0200,	/* if set, underscore characters inside tokens are not converted to blank spaces (normally, all underscores are automatically converted to blanks) */
-			ignorePunctuation		= 0x0400	/* if set, the normal punctuation symbols are treated the same as any other darkspace characters */
+			ignorePunctuation		= 0x0400,	/* if set, the normal punctuation symbols are treated the same as any other darkspace characters */
+			spaceDoesNotBreakToken  = 0x0800    /* if set, then internal spaces in a token will not caus it to be broken (useful for reading newick strings which do not have the correct quoting or _ for spaces) */
 			};
 
 		NxsString		errormsg;
@@ -451,6 +452,7 @@ class NxsToken
 		void			GetCurlyBracketedToken();
 		void			GetDoubleQuotedToken();
 		void			GetQuoted();
+		void			GetQuotedWithInternalSingleQuotesDoubled();
 		void			GetParentheticalToken();
 		bool			IsPunctuation(char ch);
 		bool			IsWhitespace(char ch);

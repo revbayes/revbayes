@@ -21,8 +21,8 @@ jobs:
                ubuntu-gcc-15,
                ubuntu-gcc-15-debugoptimized,
                ubuntu-clang-15,
-               macos-xcode-15-intel,
-               macos-xcode-16-arm,
+               macos-xcode-16-intel,
+               macos-xcode-26-arm,
                windows
                ]
 
@@ -97,17 +97,17 @@ jobs:
             mpi: false
             arch: linux64
 
-          - name: macos-xcode-15-intel
-            os: macos-13
+          - name: macos-xcode-16-intel
+            os: macos-15-intel
             compiler: xcode
-            version: "15"
+            version: "16"
             mpi: false
             arch: mac-intel64
 
-          - name: macos-xcode-16-arm
-            os: macos-14
+          - name: macos-xcode-26-arm
+            os: macos-latest
             compiler: xcode
-            version: "16"
+            version: "26"
             mpi: false
             arch: mac-arm64
 
@@ -176,6 +176,20 @@ jobs:
       if: runner.os == 'macOS'
       run: |
           brew install boost ccache coreutils meson
+          
+          # Boost 1.90 has a bug causing a compilation error.
+          # We'll use a static boost until the version in homebrew is fixed.
+          ( cd
+            curl -O -L https://archives.boost.io/release/1.89.0/source/boost_1_89_0.tar.gz
+            tar -xzvf boost_1_89_0.tar.gz
+            cd boost_1_89_0
+            ./bootstrap.sh --with-libraries=atomic,chrono,system,regex,thread,date_time,math,serialization --prefix=../installed-boost-1.89.0
+            ./b2 link=static install
+            echo -e "\n    BOOST root is at $(cd ../installed-boost-1.89.0; pwd)\n"
+            echo BOOST_ROOT=$(cd ../installed-boost-1.89.0; pwd) >> $GITHUB_ENV
+            echo CMAKE_PREFIX_PATH=$(cd ../installed-boost-1.89.0; pwd) >> $GITHUB_ENV
+          )
+
 
     - name: Install meson
       run: |

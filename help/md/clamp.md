@@ -6,7 +6,7 @@ Clamp a stochastic variable to a fixed/observed value
 `x.clamp(data)` fixes the value of the stochastic variable `x` to the observation `data`, and marks the variable as corresponding to an observation.
 
 ## details
-Once clamped, the value of `x` is thus expected to remain constant, unless `x` is subsequently unclamped – either explicitly with `x.unclamp()`, or implicitly with `x.clamp(different_data)`.
+Once clamped, the value of `x` is thus expected to remain constant, unless `x` is subsequently unclamped -- either explicitly with `x.unclamp()`, or implicitly with `x.clamp(different_data)`.
 
 `x.setValue()` evaluates probabilities at a specific value of `x` without fixing the value.
 

@@ -251,7 +251,7 @@ const MemberRules& Dist_FastBirthDeathShiftProcess::getParameterRules(void) cons
 
         std::vector<std::string> elabels;
         elabels.push_back("extinctionScale");
-        memberRules.push_back( new ArgumentRule( elabels     , RealPos::getClassTypeSpec() , "The scale (in the log-normal distribution) of the speciation rate.", ArgumentRule::BY_CONSTANT_REFERENCE   , ArgumentRule::ANY ) );
+        memberRules.push_back( new ArgumentRule( elabels     , RealPos::getClassTypeSpec() , "The scale (in the log-normal distribution) of the extinction rate.", ArgumentRule::BY_CONSTANT_REFERENCE   , ArgumentRule::ANY ) );
 
         memberRules.push_back( new ArgumentRule( "speciationSD", RealPos::getClassTypeSpec(), "The spread (sigma-parameter in the log-normal distribution) of the speciation rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.587)));
         memberRules.push_back( new ArgumentRule( "extinctionSD", RealPos::getClassTypeSpec(), "The spread (sigma-parameter in the log-normal distribution) of the extinction rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.587)));

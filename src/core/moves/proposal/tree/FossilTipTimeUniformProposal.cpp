@@ -39,12 +39,10 @@ FossilTipTimeUniformProposal::FossilTipTimeUniformProposal( StochasticNode<Tree>
     if ( tip_taxon == "" )
     {
         use_index = false;
-        node_index = -1;
     }
     else
     {
         use_index = true;
-        node_index = tree->getValue().getTipIndex( tip_taxon );
     }
     
 }
@@ -113,7 +111,12 @@ double FossilTipTimeUniformProposal::doProposal( void )
     
     Tree& tau = tree->getValue();
     
-    if ( use_index == false )
+    if ( use_index )
+    {
+        // Always recompute node_index
+        node_index = tree->getValue().getTipIndex( tip_taxon );
+    }
+    else
     {
         std::vector<size_t> tips;
         for (size_t i = 0; i < tau.getNumberOfTips(); ++i)
