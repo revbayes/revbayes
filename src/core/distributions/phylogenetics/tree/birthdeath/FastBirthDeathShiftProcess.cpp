@@ -1447,7 +1447,7 @@ void FastBirthDeathShiftProcess::setValue(Tree *v, bool f )
 {
     if (v->isBinary() == false)
     {
-        throw RbException("The character-dependent birth death process is only implemented for binary trees.");
+        throw RbException("The fast birth-death-shift process is only implemented for binary trees.");
     }
 
     value->getTreeChangeEventHandler().removeListener( this );
