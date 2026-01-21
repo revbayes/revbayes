@@ -31,6 +31,7 @@
 #include "RbVector.h"
 #include "RbVectorImpl.h"
 #include "RbSettings.h" // for logMCMC setting
+#include "RlUserInterface.h"
 #include "StringUtilities.h"
 
 #ifdef RB_MPI
@@ -264,6 +265,14 @@ void Mcmc::checkpoint( void ) const
         
         // clean up
         out_stream.close();
+        const bool ok = out_stream.good();
+        if ( !ok )
+        {
+            RBOUT( "Warning: failed to write checkpoint file \"" + checkpoint_file_name.string() + "\"; keeping existing file." );
+            std::error_code ec;
+            std::filesystem::remove(tmp_checkpoint_file_name, ec);
+        }
+        else
 #ifdef _WIN32
         if ( MoveFileExW(tmp_checkpoint_file_name.wstring().c_str(), checkpoint_file_name.wstring().c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH) == 0 )
         {
@@ -288,6 +297,14 @@ void Mcmc::checkpoint( void ) const
         
         // clean up
         out_stream_mcmc.close();
+        const bool ok_mcmc = out_stream_mcmc.good();
+        if ( !ok_mcmc )
+        {
+            RBOUT( "Warning: failed to write checkpoint file \"" + mcmc_checkpoint_file_name.string() + "\"; keeping existing file." );
+            std::error_code ec;
+            std::filesystem::remove(tmp_mcmc_checkpoint_file_name, ec);
+        }
+        else
 #ifdef _WIN32
         if ( MoveFileExW(tmp_mcmc_checkpoint_file_name.wstring().c_str(), mcmc_checkpoint_file_name.wstring().c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH) == 0 )
         {
@@ -323,6 +340,14 @@ void Mcmc::checkpoint( void ) const
         
         // clean up
         out_stream_moves.close();
+        const bool ok_moves = out_stream_moves.good();
+        if ( !ok_moves )
+        {
+            RBOUT( "Warning: failed to write checkpoint file \"" + moves_checkpoint_file_name.string() + "\"; keeping existing file." );
+            std::error_code ec;
+            std::filesystem::remove(tmp_moves_checkpoint_file_name, ec);
+        }
+        else
 #ifdef _WIN32
         if ( MoveFileExW(tmp_moves_checkpoint_file_name.wstring().c_str(), moves_checkpoint_file_name.wstring().c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH) == 0 )
         {
