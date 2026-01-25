@@ -9,9 +9,6 @@ namespace RevLanguage {
     
     /**
      * The RevLanguage wrapper of the minimum value function for ModelVector types.
-     *
-     * @copybrief RevBayesCore::MinFunction
-     * @see RevBayesCore::MinFunction for the internal object
      */
     template <typename valType, typename retType>
     class Func_min : public TypedFunction<retType> {

@@ -11,7 +11,7 @@ template <class valueType> class TypedDagNode;
     
     /**
      * @brief Declaration of the deterministic variable for minimum.
-     * The function returns the minimum value within a vector or matrix of doubles
+     * The function returns the minimum value within a vector or matrix of doubles.
      */
     class MinFunction : public TypedFunction<double> {
         
@@ -25,7 +25,7 @@ template <class valueType> class TypedDagNode;
         void                                                update(void);
         
     protected:
-        void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);            //!< Implementation of swaping parameters
+        void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);            //!< Implementation of swapping parameters
         
     private:
         

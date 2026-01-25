@@ -11,7 +11,7 @@ template <class valueType> class TypedDagNode;
     
     /**
      * @brief Declaration of the deterministic variable for maximum.
-     * The function returns the maximum value within a vector or matrix of doubles
+     * The function returns the maximum value within a vector or matrix of doubles.
      */
     
     class MaxFunction : public TypedFunction<double> {
@@ -31,7 +31,6 @@ template <class valueType> class TypedDagNode;
     private:
         
         // members
-        //!<
         bool                                                matrix;
         const DagNode*                                      vals;
         

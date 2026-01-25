@@ -5,20 +5,19 @@
 
 namespace RevBayesCore {
 class DagNode;
+class MatrixReal;
 template <class valueType> class RbVector;
 template <class valueType> class TypedDagNode;
     
     /**
-     * @brief Function for computation of the sum of a vector of  real numbers.
-     *
-     * This class is the function that computes the sum of a vector of numbers.
-     * The numbers are passed in as a DAG node whose value type is a std::vector<double>.
-     *
+     * @brief Declaration of the deterministic variable for minimum.
+     * The function returns the sum of a vector or matrix of doubles.
      */
     class SumFunction : public TypedFunction<double> {
         
     public:
-        SumFunction(const TypedDagNode<RbVector<double> > * v);
+        SumFunction(const TypedDagNode< RbVector<double> > * v);
+        SumFunction(const TypedDagNode< MatrixReal > * v);
         virtual                                            ~SumFunction(void);                                                         //!< Virtual destructor
         
         // public member functions
@@ -26,12 +25,13 @@ template <class valueType> class TypedDagNode;
         void                                                update(void);
         
     protected:
-        void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);            //!< Implementation of swaping parameters
+        void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);            //!< Implementation of swapping parameters
         
     private:
         
         // members
-        const TypedDagNode<RbVector<double> >*              vals;
+        bool                                                matrix;
+        const DagNode*                                      vals;
         
     };
     

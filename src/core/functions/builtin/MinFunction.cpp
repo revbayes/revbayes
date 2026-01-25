@@ -56,16 +56,16 @@ void MinFunction::update( void )
 {
     
     double m;
-    if( matrix == true )
+    if (matrix == true)
     {
         const MatrixReal &v = dynamic_cast<const TypedDagNode< MatrixReal >* >(vals)->getValue();
         m = RbConstants::Double::inf;
 
-        for ( size_t row = 0; row < v.size(); row++)
+        for (size_t row = 0; row < v.size(); row++)
         {
-            for ( size_t col = 0; col < v[row].size(); col++)
+            for (size_t col = 0; col < v[row].size(); col++)
             {
-                if( v[row][col] < m )
+                if ( v[row][col] < m )
                 {
                     m = v[row][col];
                 }
@@ -77,9 +77,9 @@ void MinFunction::update( void )
     {
         const RbVector<double> &v = dynamic_cast<const TypedDagNode< RbVector<double> >* >(vals)->getValue();
         m = RbConstants::Double::inf;
-        for ( size_t i=0; i<v.size(); ++i)
+        for (size_t i = 0; i < v.size(); ++i)
         {
-            if (  v[i] < m )
+            if ( v[i] < m )
             {
                 m = v[i];
             }

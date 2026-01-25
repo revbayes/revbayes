@@ -283,9 +283,7 @@
 #include "Func_SmoothTimeLine.h"
 #include "Func_sort.h"
 #include "Func_sum.h"
-#include "Func_sumPositive.h"
-#include "Func_sumInteger.h"
-#include "Func_sumNatural.h"
+#include "Func_sumMatrix.h"
 #include "Func_standardDeviation.h"
 #include "Func_sqrt.h"
 #include "Func_sin.h"
@@ -590,10 +588,11 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_sqrt()  );
 
         // sum function
-        addFunction( new Func_sum()  );
-        addFunction( new Func_sumPositive()  );
-        addFunction( new Func_sumInteger()  );
-        addFunction( new Func_sumNatural()  );
+        addFunction( new Func_sumMatrix()  );
+        addFunction( new Func_sum<Integer,Integer>()  );
+        addFunction( new Func_sum<IntegerPos,IntegerPos>()  );
+        addFunction( new Func_sum<Natural,Natural>()  );
+        addFunction( new Func_sum<RealPos,RealPos>()  ); // Also handles the Probability[] -> RealPos case
 
         // standard deviation function
         addFunction( new Func_standardDeviation()  );
@@ -603,7 +602,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_shortestDistance() );
 
         // trigonometric functions
-        addFunction( new Func_sin());
+        addFunction( new Func_sin()  );
         addFunction( new Func_cos()  );
 
         // hyperbolic tangent function

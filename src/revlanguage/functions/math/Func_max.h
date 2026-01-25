@@ -9,9 +9,6 @@ namespace RevLanguage {
     
     /**
      * The RevLanguage wrapper of the maximum value function for ModelVector types.
-     *
-     * @copybrief RevBayesCore::MaxFunction
-     * @see RevBayesCore::MaxFunction for the internal object
      */
     template <typename valType, typename retType>
     class Func_max : public TypedFunction<retType> {
