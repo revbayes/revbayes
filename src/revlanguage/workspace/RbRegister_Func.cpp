@@ -556,7 +556,12 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_meanSimplex()  );
 
         // median function
-        addFunction( new Func_median()  );
+        addFunction( new Func_median<Integer,Real>()  );
+        addFunction( new Func_median<IntegerPos,RealPos>()  );
+        addFunction( new Func_median<Natural,RealPos>()  );
+        addFunction( new Func_median<Probability,Probability>()  );
+        addFunction( new Func_median<Real,Real>()  );
+        addFunction( new Func_median<RealPos,RealPos>()  );
 
         // min function
         addFunction( new Func_minMatrix()  ); // Non-templated version for MatrixReal and ModelVector<Real>
