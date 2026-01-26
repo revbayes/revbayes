@@ -1,0 +1,44 @@
+   [ 1.414, -2.718, 3.142 ]
+This vector is of type Real[]
+The maximum is 3.142 and is of type Real
+The minimum is -2.718 and is of type Real
+The sum is 1.838 and is of type Real
+The median is 1.414 and is of type Real
+
+   [ 1.414, 2.718, 3.142 ]
+This vector is of type RealPos[]
+The maximum is 3.142 and is of type RealPos
+The minimum is 1.414 and is of type RealPos
+The sum is 7.274 and is of type RealPos
+The median is 2.718 and is of type RealPos
+
+   [ 1, -42, 69, -420 ]
+This vector is of type Integer[]
+The maximum is 69 and is of type Integer
+The minimum is -420 and is of type Integer
+The sum is -392 and is of type Integer
+The median is -20.5 and is of type Real
+
+   [ 1, 42, 69, 420 ]
+This vector is of type Natural[]
+The maximum is 420 and is of type Natural
+The minimum is 1 and is of type Natural
+The sum is 532 and is of type Natural
+The median is 55.5 and is of type RealPos
+
+   [ 0.100, 0.300, 0.400, 0.900 ]
+This vector is of type Probability[]
+The maximum is 0.9 and is of type Probability
+The minimum is 0.1 and is of type Probability
+The sum is 1.7 and is of type RealPos
+The median is 0.35 and is of type Probability
+
+   [ [ 0.0000, 0.1878, 0.2151, 0.1854, 0.3952 ] ,
+     [ 0.1878, 0.0000, 0.3796, 0.3410, 0.4376 ] ,
+     [ 0.2151, 0.3796, 0.0000, 0.3773, 0.5870 ] ,
+     [ 0.1854, 0.3410, 0.3773, 0.0000, 0.5484 ] ,
+     [ 0.3952, 0.4376, 0.5870, 0.5484, 0.0000 ] ]
+This matrix is of type MatrixReal
+The maximum is 0.587049 and is of type Real
+The minimum is 0 and is of type Real
+The sum is 7.30907 and is of type Real
