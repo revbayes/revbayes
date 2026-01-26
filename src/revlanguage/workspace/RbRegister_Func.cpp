@@ -597,7 +597,8 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_sum<Integer,Integer>()  );
         addFunction( new Func_sum<IntegerPos,IntegerPos>()  );
         addFunction( new Func_sum<Natural,Natural>()  );
-        addFunction( new Func_sum<RealPos,RealPos>()  ); // Also handles the Probability[] -> RealPos case
+        addFunction( new Func_sum<Probability,RealPos>()  );
+        addFunction( new Func_sum<RealPos,RealPos>()  );
 
         // standard deviation function
         addFunction( new Func_standardDeviation()  );
