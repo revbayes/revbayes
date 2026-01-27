@@ -31,6 +31,9 @@ class Model;
         // basic methods
         ModelMonitor*                       clone(void) const;                                                  //!< Clone the object
         
+        // Override addVariable to allow bulk addition without sorting
+        void                                addVariable(DagNode *n);                                            //!< Add variable to monitor (without sorting)
+        
         // getters and setters
         void                                setModel(Model* m);
         void                                setStochasticNodesOnly(bool tf);                                    //!< Set if only stochastic nodes should be monitored

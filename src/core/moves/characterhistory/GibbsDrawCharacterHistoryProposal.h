@@ -15,7 +15,7 @@ template <class variableType> class StochasticNode;
         
     public:
         
-        GibbsDrawCharacterHistoryProposal(StochasticNode<Tree> *n);                                                                              //!<  constructor
+        GibbsDrawCharacterHistoryProposal(StochasticNode<Tree> *n);                                                                         //!<  constructor
         void                                            cleanProposal(void);                                                                //!< Clean up proposal
         GibbsDrawCharacterHistoryProposal*              clone(void) const;                                                                  //!< Clone object
         double                                          doProposal(void);                                                                   //!< Perform proposal
