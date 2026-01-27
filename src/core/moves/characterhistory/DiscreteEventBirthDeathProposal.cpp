@@ -65,7 +65,7 @@ double DiscreteEventBirthDeathProposal::computeEventProposalProbability(Characte
     
     CharacterHistoryDiscrete &history = static_cast<CharacterHistoryDiscrete&>(distribution->getCharacterHistory());
     
-    size_t num_states         = history.getNumberStates();
+    size_t num_states         = history.getNumberOfStates();
     
     return -log( num_states );
 }
@@ -76,7 +76,7 @@ CharacterEvent* DiscreteEventBirthDeathProposal::drawNewEvent(double event_time)
 
     CharacterHistoryDiscrete &history = static_cast<CharacterHistoryDiscrete&>(distribution->getCharacterHistory());
     
-    size_t num_states         = history.getNumberStates();
+    size_t num_states         = history.getNumberOfStates();
     
     RandomNumberGenerator *rng = GLOBAL_RNG;
     

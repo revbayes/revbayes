@@ -7,13 +7,14 @@
 #include "RandomNumberGenerator.h"
 #include "RbException.h"
 #include "BranchHistory.h"
+#include "Tree.h"
 
 namespace RevBayesCore { class CharacterEvent; }
 
 using namespace RevBayesCore;
 
 
-CharacterHistory::CharacterHistory(Tree *t, size_t nc, bool rb ) :
+CharacterHistory::CharacterHistory(const Tree *t, size_t nc, bool rb ) :
     tree( t ),
     histories(),
     n_branches(),
@@ -94,6 +95,20 @@ CharacterHistory& CharacterHistory::operator=(const CharacterHistory &ch)
 /**
  * Index operator.
  */
+BranchHistory& CharacterHistory::operator[](size_t i)
+{
+    if ( i > histories.size() )
+    {
+        throw RbException("Index out of bounds in character history.");
+    }
+    
+    return *(histories[i]);
+}
+
+
+/**
+ * Index operator.
+ */
 const BranchHistory& CharacterHistory::operator[](size_t i) const
 {
     if ( i > histories.size() )
@@ -129,6 +144,38 @@ void CharacterHistory::addEvent( CharacterEvent *e, size_t branch_index)
 
 
 /**
+ * Clear the internal histories
+ */
+void CharacterHistory::clear( void )
+{
+    
+    for (size_t i=0; i<histories.size(); ++i)
+    {
+        BranchHistory *bh = histories[i];
+        delete bh;
+    }
+    histories.clear();
+    
+}
+
+
+
+/**
+ * Get the history for a branch.
+ */
+const BranchHistory& CharacterHistory::getHistory(size_t n) const
+{
+    if ( n > histories.size() )
+    {
+        throw RbException("Index out of bounds in character history.");
+    }
+    
+    return *(histories[n]);
+}
+
+
+
+/**
  * Get the number of branches of the tree.
  */
 size_t CharacterHistory::getNumberBranches( void ) const
@@ -144,6 +191,22 @@ size_t CharacterHistory::getNumberBranches( void ) const
 size_t CharacterHistory::getNumberEvents( void ) const
 {
     return n_events;
+}
+
+
+
+/**
+ * Get the tree.
+ */
+const Tree& CharacterHistory::getTree( void ) const
+{
+    return *tree;
+}
+
+
+bool CharacterHistory::hasTree( void ) const
+{
+    return tree != NULL;
 }
 
 
@@ -206,3 +269,40 @@ void CharacterHistory::removeEvent( CharacterEvent *e, size_t branch_index)
     }
     assert( counted_events == n_events );
 }
+
+
+void CharacterHistory::setHistory(BranchHistory* h, size_t index)
+{
+    if ( index >= histories.size() )
+    {
+        throw RbException("Index out of bounds in character history.");
+    }
+    
+    delete histories[index];
+    
+    histories[index] = h;
+}
+
+
+void CharacterHistory::setHistories(const std::vector<BranchHistory *>& h)
+{
+    histories = h;
+}
+
+
+void CharacterHistory::setNumberOfCharacters(size_t n)
+{
+    n_character = n;
+}
+
+
+std::ostream& RevBayesCore::operator<<(std::ostream& o, const CharacterHistory& x)
+{
+    if ( x.hasTree() )
+    {
+        o << x.getTree().getRoot().computeSimmapNewick(x, true);
+    }
+    
+    return o;
+}
+

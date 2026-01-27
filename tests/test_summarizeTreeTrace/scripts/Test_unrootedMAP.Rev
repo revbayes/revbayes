@@ -1,0 +1,18 @@
+################################################################################
+#
+# RevBayes Test-Script: Check that tree summarization recognizes unrooted trees
+#                       are identical even if their tips are ordered differently
+#
+#
+# authors: Junru Zhang, David Cerny
+#
+################################################################################
+
+# see https://github.com/revbayes/revbayes/issues/929
+
+treetrace = readTreeTrace("data/posterior.trees", treetype="non-clock", burnin=0)
+mapTree(treetrace, "output/map_tre.nex")
+
+clear()
+
+q()
