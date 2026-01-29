@@ -10,7 +10,7 @@ template <class valueType> class RbVector;
 template <class valueType> class TypedDagNode;
     
     /**
-     * @brief Declaration of the deterministic variable for minimum.
+     * @brief Declaration of the deterministic variable for sum.
      * The function returns the sum of a vector or matrix of doubles.
      */
     class SumFunction : public TypedFunction<double> {
@@ -21,11 +21,11 @@ template <class valueType> class TypedDagNode;
         virtual                                            ~SumFunction(void);                                                         //!< Virtual destructor
         
         // public member functions
-        SumFunction*                                        clone(void) const;                                                          //!< Create an independent clone
+        SumFunction*                                        clone(void) const;                                                         //!< Create an independent clone
         void                                                update(void);
         
     protected:
-        void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);            //!< Implementation of swapping parameters
+        void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);           //!< Implementation of swapping parameters
         
     private:
         
