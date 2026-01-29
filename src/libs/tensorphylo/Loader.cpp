@@ -17,8 +17,11 @@
 #include <boost/function.hpp>
 #include <boost/dll/import.hpp> // for import_alias
 #include <boost/system/error_code.hpp>
+#include <filesystem>
+#include <optional>
 
 using boost::system::error_code;
+namespace fs = std::filesystem;
 
 namespace Plugin {
 
@@ -35,17 +38,20 @@ bool Loader::isTensorPhyloLoaded() {
 	return pluginTensorPhylo.is_loaded();
 }
 
-bool Loader::loadTensorPhylo() {
+bool Loader::loadTensorPhylo()
+{
+    std::optional<fs::path> home;
+    if (auto HOME = std::getenv ("HOME"))
+        home = HOME;
+    else if (auto USERPROFILE = std::getenv("USERPROFILE"))  // for windows
+        home = USERPROFILE;
 
-	const char * home = std::getenv ("HOME");
-	if (home == NULL) {
-	  throw RbException("Path to your home folder not found.\nProvide the full path to the folder containing the TensorPhylo library.");
-	}
-	std::string pluginPath(home);
-	pluginPath += "/";
-	pluginPath += DEFAULT_PLUGIN_PATH;
+    if (not home)
+        throw RbException("Path to your home folder not found.\nProvide the full path to the folder containing the TensorPhylo library.");
 
-	return loadTensorPhylo(pluginPath);
+    auto pluginPath = *home / DEFAULT_PLUGIN_PATH;
+
+    return loadTensorPhylo(pluginPath.generic_string());
 }
 
 
