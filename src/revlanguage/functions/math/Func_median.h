@@ -54,8 +54,8 @@ namespace RevBayesCore {
     {
         double m = 0.0;
         
-        // get a copy of the original vector
-        RbVector<InputType> w = v;
+        // get a deep copy of the original vector
+        RbVector<InputType> w(v);
         
         if ( w.size() == 0 )
         {
