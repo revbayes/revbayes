@@ -100,6 +100,7 @@ RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::PhyloCTMCSiteHomoge
             numCorrectionPatterns = 1;
         }
 
+        // SH: here we need to use the number of possibly invariant states for this character, and not all characters
         correctionOffset        = this->num_chars*numCorrectionPatterns;
         correctionMaskOffset    = correctionOffset*this->num_chars;
         correctionMixtureOffset = numCorrectionMasks*correctionMaskOffset;
@@ -490,6 +491,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeTipCorr
             bool gap = correctionMaskMatrix[mask][data_tip_index];
 
             // iterate over ancestral (non-autapomorphic) states
+            // SH: This needs to change into the number of invariant states for this character type
             for (size_t a = 0; a < this->num_chars; a++)
             {
                 size_t offset = mixture*correctionMixtureOffset + mask*correctionMaskOffset + a*correctionOffset;
@@ -519,6 +521,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeTipCorr
                         // iterate over initial states
                         for (size_t ci = 0; ci < this->num_chars; ci++)
                         {
+                            // SH: here we need to use the a-th invariant state, and not a as the index itself.
                             uc[ci] = pij[ci][a];
                         }
                     }
