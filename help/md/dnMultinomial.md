@@ -5,10 +5,12 @@ Multinomial Distribution
 ## description
 A multinomial distribution defines a probability distribution on a vector of natural numbers. It is understood as randomly picking n times from the k categories with replacement where each catefory has its own probability p[i].
 ## details
+As a move, you might want to consider `mvRandomCategoryWalk`.
 ## authors
 Sebastian Hoehna
 ## see_also
 dnDirichlet
+mvRandomCategoryWalk
 ## example
 	p <- simplex(1,1,1,1)
 	x ~ dnMultinomial(10, p)
@@ -20,5 +22,5 @@ dnDirichlet
 	mymcmc = mcmc(mymodel, monitors, moves)
 	mymcmc.burnin(generations=20000,tuningInterval=100)
 	mymcmc.run(generations=200000)
-	
+
 ## references
