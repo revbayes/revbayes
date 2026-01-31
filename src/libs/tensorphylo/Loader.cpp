@@ -12,13 +12,13 @@
 #include <iostream>
 #include <cstdlib>
 #include <filesystem>
-
-#include <boost/dll.hpp>
-#include <boost/function.hpp>
-#include <boost/dll/import.hpp> // for import_alias
-#include <boost/system/error_code.hpp>
+#include <functional>
 #include <filesystem>
 #include <optional>
+
+#include <boost/dll.hpp>
+#include <boost/dll/import.hpp> // for import_alias
+#include <boost/system/error_code.hpp>
 
 using boost::system::error_code;
 namespace fs = std::filesystem;
@@ -51,69 +51,67 @@ bool Loader::loadTensorPhylo()
 
     auto pluginPath = *home / DEFAULT_PLUGIN_PATH;
 
-    return loadTensorPhylo(pluginPath.generic_string());
+    return loadTensorPhylo( pluginPath );
 }
 
 
-bool Loader::loadTensorPhylo(const std::string &aPluginFolder) {
+bool Loader::loadTensorPhylo(const fs::path &pluginPath) {
 
-	// Checking for the plugin folder
-	std::filesystem::path pluginPath(aPluginFolder);
-	if(!std::filesystem::is_directory(pluginPath)) {
-		throw RbException("The folder doesn't exist.");
-		return false;
-	}
+    // Checking for the plugin folder
+    if(!fs::is_directory(pluginPath)) {
+        throw RbException()<<"The folder "<<pluginPath<<" doesn't exist.";
+        return false;
+    }
 
-	// Listing all files
-	std::vector<std::filesystem::directory_entry> vecPlugins;
-    copy(std::filesystem::directory_iterator(pluginPath), std::filesystem::directory_iterator(), std::back_inserter(vecPlugins));
+    // Listing all files
+    std::vector<fs::directory_entry> vecPlugins;
+    copy(fs::directory_iterator(pluginPath), fs::directory_iterator(), std::back_inserter(vecPlugins));
 
     // Look for TensorPhylo
     bool found = false;
-	std::filesystem::path tensorPhyloPath;
-	for(std::vector<std::filesystem::directory_entry>::const_iterator it = vecPlugins.begin(); it != vecPlugins.end();  ++ it ) {
-		std::string filePath(it->path().string());
-		if(filePath.find(PLUGIN_TENSORPHYLO_NAME) != std::string::npos &&
-			 (filePath.find(".so") != std::string::npos ||
-		 	 filePath.find(".dylib") != std::string::npos ||
-		 	 filePath.find(".dll") != std::string::npos)) {
-			found =  true;
-			tensorPhyloPath = filePath;
-		}
-	}
+    fs::path tensorPhyloPath;
+    for(auto& dir_entry: vecPlugins) {
+        std::string filePath(dir_entry.path().string());
+        if(filePath.find(PLUGIN_TENSORPHYLO_NAME) != std::string::npos &&
+           (filePath.find(".so") != std::string::npos ||
+            filePath.find(".dylib") != std::string::npos ||
+            filePath.find(".dll") != std::string::npos)) {
+            found =  true;
+            tensorPhyloPath = filePath;
+        }
+    }
 
-	if(!found) {
-		throw RbException("Library libTensorPhylo not found in the given folder.");
-		return false;
-	}
+    if(!found) {
+        throw RbException("Library libTensorPhylo not found in the given folder.");
+        return false;
+    }
 
-	// try to load TensorPhylo
-	try {
-                pluginTensorPhylo.load(tensorPhyloPath, boost::dll::load_mode::append_decorations);
-	} catch(const std::exception& e) {
-		throw RbException("TensorPhylo failed to load.");
-		return false;
-	}
+    // try to load TensorPhylo
+    try {
+        pluginTensorPhylo.load(tensorPhyloPath, boost::dll::load_mode::append_decorations);
+    } catch(const std::exception& e) {
+        throw RbException("TensorPhylo failed to load.");
+        return false;
+    }
 
-	return true;
+    return true;
 }
 
 TensorPhylo::DistributionHandlerSharedPtr Loader::createTensorPhyloLik() const {
-	assert(pluginTensorPhylo.is_loaded() && "TensorPhylo must be loaded properly before trying to create a DistributionHandler (lik approximator).");
+    assert(pluginTensorPhylo.is_loaded() && "TensorPhylo must be loaded properly before trying to create a DistributionHandler (lik approximator).");
 
-	typedef boost::shared_ptr<TensorPhylo::Interface::DistributionHandler> (TensorDistributionHandler_create_t)();
-	boost::function<TensorDistributionHandler_create_t> creator;
+    typedef std::shared_ptr<TensorPhylo::Interface::DistributionHandler> (TensorDistributionHandler_create_t)();
+    std::function<TensorDistributionHandler_create_t> creator;
 
-	try {
-		creator = boost::dll::import_alias<TensorDistributionHandler_create_t>(pluginTensorPhylo, "createTensorPhyloDistributionHandler");
-	} catch(const std::exception& e) {
-		std::cerr << "Something unexpected happened while trying to create a TensorPhylo likelihood: " << e.what() << std::endl;
-	}
+    try {
+        creator = boost::dll::import_alias<TensorDistributionHandler_create_t>(pluginTensorPhylo, "createTensorPhyloDistributionHandler");
+    } catch(const std::exception& e) {
+        std::cerr << "Something unexpected happened while trying to create a TensorPhylo likelihood: " << e.what() << std::endl;
+    }
 
-	boost::shared_ptr<TensorPhylo::Interface::DistributionHandler> tpHandler = creator();
+    std::shared_ptr<TensorPhylo::Interface::DistributionHandler> tpHandler = creator();
 
-	return tpHandler;
-
+    return tpHandler;
 }
 
 
