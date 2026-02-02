@@ -106,8 +106,6 @@ double RateAgeSubtreeProposal::doProposal( void )
     RandomNumberGenerator* rng     = GLOBAL_RNG;
     
     Tree& tau = tree->getValue();
-    RbOrderedSet<DagNode*> affected;
-    tree->getAffectedNodes( affected );
     
     // pick a random node which is not the root, a tip, or the parent of a sampled ancestor
     TopologyNode* node = tau.pickRandomInternalNode(rng);
