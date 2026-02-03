@@ -543,12 +543,13 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_matrix() );
 
         // max function
-        addFunction( new Func_maxMatrix()  ); // Non-templated version for MatrixReal and ModelVector<Real>
+        addFunction( new Func_maxMatrix()  ); // Non-templated version for MatrixReal
         addFunction( new Func_max<Integer,Integer>()  );
         addFunction( new Func_max<IntegerPos,IntegerPos>()  );
         addFunction( new Func_max<Natural,Natural>()  );
         addFunction( new Func_max<Probability,Probability>()  );
         addFunction( new Func_max<RealPos,RealPos>()  );
+        addFunction( new Func_max<Real,Real>()  );
 
         // mean function
         addFunction( new Func_mean()  );
@@ -564,12 +565,13 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_median<RealPos,RealPos>()  );
 
         // min function
-        addFunction( new Func_minMatrix()  ); // Non-templated version for MatrixReal and ModelVector<Real>
+        addFunction( new Func_minMatrix()  ); // Non-templated version for MatrixReal
 		addFunction( new Func_min<Integer,Integer>()  );
         addFunction( new Func_min<IntegerPos,IntegerPos>()  );
         addFunction( new Func_min<Natural,Natural>()  );
         addFunction( new Func_min<Probability,Probability>()  );
         addFunction( new Func_min<RealPos,RealPos>()  );
+        addFunction( new Func_min<Real,Real>()  );
 
         // normalize vector function
 		addFunction( new Func_normalize()  );
@@ -593,12 +595,13 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_sqrt()  );
 
         // sum function
-        addFunction( new Func_sumMatrix()  );
+        addFunction( new Func_sumMatrix()  ); // Non-templated version for MatrixReal
         addFunction( new Func_sum<Integer,Integer>()  );
         addFunction( new Func_sum<IntegerPos,IntegerPos>()  );
         addFunction( new Func_sum<Natural,Natural>()  );
         addFunction( new Func_sum<Probability,RealPos>()  );
         addFunction( new Func_sum<RealPos,RealPos>()  );
+        addFunction( new Func_sum<Real,Real>()  );
 
         // standard deviation function
         addFunction( new Func_standardDeviation()  );

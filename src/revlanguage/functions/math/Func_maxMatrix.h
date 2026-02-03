@@ -10,10 +10,7 @@ namespace RevLanguage {
     
     /**
      * The RevLanguage wrapper of the maximum value function for MatrixReal.
-     * This non-templated version handles MatrixReal and ModelVector<Real>, returning Real.
-     *
-     * @copybrief RevBayesCore::MaxFunction
-     * @see RevBayesCore::MaxFunction for the internal object
+     * This non-templated version handles MatrixReal objects, returning Real.
      */
     class Func_maxMatrix : public TypedFunction<Real> {
         
@@ -42,7 +39,6 @@ namespace RevLanguage {
 #include "DagNode.h"
 #include "DeterministicNode.h"
 #include "DynamicNode.h"
-#include "MaxFunction.h"
 #include "ModelObject.h"
 #include "ModelVector.h"
 #include "RevObject.h"
@@ -56,10 +52,28 @@ namespace RevLanguage {
 #include "TypeSpec.h"
 #include "TypedDagNode.h"
 #include "TypedFunction.h"
+#include "GenericFunction.h"
+#include "RbConstants.h"
+#include "MatrixReal.h"
 
 
-namespace RevBayesCore { class MatrixReal; }
-namespace RevBayesCore { template <class valueType> class RbVector; }
+namespace RevBayesCore {
+    double* max_matrix(const MatrixReal& m)
+    {
+        double result = RbConstants::Double::neginf;
+        for (size_t row = 0; row < m.size(); row++)
+        {
+            for (size_t col = 0; col < m[row].size(); col++)
+            {
+                if (m[row][col] > result)
+                {
+                    result = m[row][col];
+                }
+            }
+        }
+        return new double(result);
+    }
+}
 
 using namespace RevLanguage;
 
@@ -86,14 +100,10 @@ Func_maxMatrix* Func_maxMatrix::clone( void ) const
 
 RevBayesCore::TypedFunction<double>* Func_maxMatrix::createFunction( void ) const
 {
-    RevBayesCore::DagNode* node = this->args[0].getVariable()->getRevObject().getDagNode();
-
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* arg_vector = dynamic_cast<RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*>(node);
-    RevBayesCore::TypedDagNode< RevBayesCore::MatrixReal >* arg_matrix = dynamic_cast<RevBayesCore::TypedDagNode< RevBayesCore::MatrixReal >*>(node);
+    const RevBayesCore::TypedDagNode< RevBayesCore::MatrixReal >* arg_matrix =
+        static_cast< const MatrixReal& >( this->args[0].getVariable()->getRevObject() ).getDagNode();
     
-    RevBayesCore::MaxFunction* f = arg_vector != NULL ? new RevBayesCore::MaxFunction( arg_vector ) : new RevBayesCore::MaxFunction( arg_matrix );
-    
-    return f;
+    return RevBayesCore::generic_function_ptr<double>(RevBayesCore::max_matrix, arg_matrix);
 }
 
 
@@ -106,10 +116,7 @@ const ArgumentRules& Func_maxMatrix::getArgumentRules( void ) const
     
     if ( !rules_set )
     {
-        std::vector<TypeSpec> paramTypes;
-        paramTypes.push_back( ModelVector<Real>::getClassTypeSpec() );
-        paramTypes.push_back( MatrixReal::getClassTypeSpec() );
-        argumentRules.push_back( new ArgumentRule( "x", paramTypes, "A vector/matrix of numbers.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "x", MatrixReal::getClassTypeSpec(), "A vector/matrix of numbers.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         
         rules_set = true;
     }
