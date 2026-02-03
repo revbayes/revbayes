@@ -156,6 +156,7 @@
 #include "Dist_PhyloMvtBrownian.h"
 #include "Dist_PhyloMultiSampleOrnsteinUhlenbeck.h"
 #include "Dist_PhyloMultiSampleOrnsteinUhlenbeckREML.h"
+#include "Dist_PhyloMultiSampleOrnsteinUhlenbeckStateDependent.h"
 #include "Dist_PhyloMultivariateBrownianREML.h"
 #include "Dist_PhyloMultivariateBrownianMultiSampleREML.h"
 #include "Dist_PhyloOrnsteinUhlenbeck.h"
@@ -334,6 +335,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< ContinuousCharacterData    >( new Dist_PhyloBrownianProcessStateDependent()            );
         AddDistribution< ContinuousCharacterData    >( new Dist_PhyloMultiSampleOrnsteinUhlenbeck()             );
         AddDistribution< ContinuousCharacterData    >( new Dist_PhyloMultiSampleOrnsteinUhlenbeckREML()         );
+        AddDistribution< ContinuousCharacterData    >( new Dist_PhyloMultiSampleOrnsteinUhlenbeckStateDependent()         );
         AddDistribution< ContinuousCharacterData    >( new Dist_PhyloMultivariateBrownianREML()                 );
         AddDistribution< ContinuousCharacterData    >( new Dist_PhyloMultivariateBrownianMultiSampleREML()      );
         AddDistribution< ModelVector<Real>          >( new Dist_PhyloOrnsteinUhlenbeck()                        );
