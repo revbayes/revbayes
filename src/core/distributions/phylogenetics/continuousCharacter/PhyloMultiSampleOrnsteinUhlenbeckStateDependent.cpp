@@ -200,7 +200,7 @@ double PhyloMultiSampleOrnsteinUhlenbeckStateDependent::computeSpeciesMean(const
 double PhyloMultiSampleOrnsteinUhlenbeckStateDependent::computeWithinSpeciesVariance(const std::string &name, size_t index)
 {
     double mean = computeSpeciesMean(name, index);
-    double num_samples = 0.0;
+    double num_samples = getNumberOfSamplesPerSpecies(name);
     double variance = 0.0;
 
     if ( within_species_variances == NULL && variances_of_within_species_variances != NULL)
@@ -216,7 +216,7 @@ double PhyloMultiSampleOrnsteinUhlenbeckStateDependent::computeWithinSpeciesVari
                 {
                     empirical_variance += (taxon.getCharacter(index) - mean) * (taxon.getCharacter(index) - mean);
 
-                    ++num_samples;
+                    //++num_samples;
                 }
             }
         }
@@ -234,6 +234,7 @@ double PhyloMultiSampleOrnsteinUhlenbeckStateDependent::computeWithinSpeciesVari
     else if ( within_species_variances != NULL && variances_of_within_species_variances == NULL)
     {
         variance = within_species_variances->getValue()[ index ];
+        variance /= num_samples;
     }
     else
     {
