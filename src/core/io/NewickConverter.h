@@ -19,6 +19,7 @@
 #ifndef NewickConverter_H
 #define NewickConverter_H
 
+#include "RbFileManager.h"
 
 #include <vector>
 #include <iosfwd>
@@ -29,6 +30,8 @@
 
 namespace RevBayesCore {
 
+    class BranchHistory;
+    class CharacterHistoryDiscrete;
     class Tree;
     class TopologyNode;
 
@@ -158,10 +161,14 @@ namespace RevBayesCore {
 
     public:
         NewickConverter();
-        virtual                 ~NewickConverter();
+        virtual                    ~NewickConverter();
         
-        
-        Tree*                   convertFromNewick(const std::string &n);
+        Tree*                       convertFromNewick(const std::string &n);
+        CharacterHistoryDiscrete*   convertSimmapFromNewick(const std::string &n );
+
+
+    private:
+        TopologyNode*           createSimmapNode(const std::string &n, std::vector<TopologyNode*> &nodes, std::vector<double> &brlens, std::vector<BranchHistory*> &histories);
     };
 
     ParseResult<Tree*> parseTree(const std::string& input, int start_pos);

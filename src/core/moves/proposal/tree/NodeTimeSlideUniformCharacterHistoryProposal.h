@@ -318,12 +318,12 @@ void RevBayesCore::NodeTimeSlideUniformCharacterHistoryProposal<charType>::undoP
         throw RbException("Failed cast.");
     }
     size_t num_sites = p->getNumberOfSites();
-    const std::vector<BranchHistory*>& histories = p->getHistories();
+    CharacterHistoryDiscrete& histories = p->getHistories();
 
     // restore node state
-    std::vector<CharacterEvent*>& node_child_state   = histories[stored_node->getIndex()]->getChildCharacters();
-    std::vector<CharacterEvent*>& left_parent_state  = histories[stored_node->getChild(0).getIndex()]->getParentCharacters();
-    std::vector<CharacterEvent*>& right_parent_state = histories[stored_node->getChild(1).getIndex()]->getParentCharacters();
+    std::vector<CharacterEvent*>& node_child_state   = histories[stored_node->getIndex()].getChildCharacters();
+    std::vector<CharacterEvent*>& left_parent_state  = histories[stored_node->getChild(0).getIndex()].getParentCharacters();
+    std::vector<CharacterEvent*>& right_parent_state = histories[stored_node->getChild(1).getIndex()].getParentCharacters();
     for (size_t site_index = 0; site_index < num_sites; ++site_index)
     {
         size_t s = stored_node_states[site_index];
@@ -351,7 +351,7 @@ void RevBayesCore::NodeTimeSlideUniformCharacterHistoryProposal<charType>::sampl
             throw RbException("Failed cast.");
         }
         size_t num_sites = c->getNumberOfSites();
-        const std::vector<BranchHistory*>& histories = c->getHistories();
+        CharacterHistoryDiscrete& histories = c->getHistories();
         
         TopologyNode &left_child  = node->getChild(0);
         TopologyNode &right_child = node->getChild(1);
@@ -370,20 +370,20 @@ void RevBayesCore::NodeTimeSlideUniformCharacterHistoryProposal<charType>::sampl
         rm.calculateTransitionProbabilities(node_age, right_age, right_rate, right_tp_matrix);
         
         // states for conditional sampling probs
-        const std::vector<CharacterEvent*>& leftChildState  = histories[left_child.getIndex()]->getChildCharacters();
-        const std::vector<CharacterEvent*>& rightChildState = histories[right_child.getIndex()]->getChildCharacters();
+        const std::vector<CharacterEvent*>& leftChildState  = histories[left_child.getIndex()].getChildCharacters();
+        const std::vector<CharacterEvent*>& rightChildState = histories[right_child.getIndex()].getChildCharacters();
         
         // states to update
-        std::vector<CharacterEvent*>& nodeChildState   = histories[node->getIndex()]->getChildCharacters();
-        std::vector<CharacterEvent*>& leftParentState  = histories[left_child.getIndex()]->getParentCharacters();
-        std::vector<CharacterEvent*>& rightParentState = histories[right_child.getIndex()]->getParentCharacters();
+        std::vector<CharacterEvent*>& nodeChildState   = histories[node->getIndex()].getChildCharacters();
+        std::vector<CharacterEvent*>& leftParentState  = histories[left_child.getIndex()].getParentCharacters();
+        std::vector<CharacterEvent*>& rightParentState = histories[right_child.getIndex()].getParentCharacters();
         
         if ( node->isRoot() == false )
         {
             double parent_age   = node->getParent().getAge();
             rm.calculateTransitionProbabilities(parent_age, node_age, node_rate, node_tp_matrix);
             
-            const std::vector<CharacterEvent*>& nodeParentState = histories[node->getIndex()]->getParentCharacters();
+            const std::vector<CharacterEvent*>& nodeParentState = histories[node->getIndex()].getParentCharacters();
             
             for (size_t site_index = 0; site_index < num_sites; ++site_index)
             {

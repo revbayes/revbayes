@@ -133,6 +133,9 @@
 #include "Dist_EmpiricalSample.h"
 #include "Dist_WeightedSample.h"
 
+/* Phylogenetic models (in folder "distributions/phylogenetics/") */
+// #include "Dist_PhyloCharacterEvent.h"
+
 /* Character evolution models (in folder "distributions/phylogenetics/character") */
 #include "Dist_CTMC.h"
 #include "Dist_phyloCTMC.h"
@@ -149,6 +152,7 @@
 #include "Dist_PhyloBrownianMVN.h"
 #include "Dist_PhyloBrownianREML.h"
 #include "Dist_PhyloBrownianMultiSampleREML.h"
+#include "Dist_PhyloBrownianProcessStateDependent.h"
 #include "Dist_PhyloMvtBrownian.h"
 #include "Dist_PhyloMultiSampleOrnsteinUhlenbeck.h"
 #include "Dist_PhyloMultiSampleOrnsteinUhlenbeckREML.h"
@@ -158,6 +162,7 @@
 #include "Dist_PhyloOrnsteinUhlenbeckMVN.h"
 #include "Dist_PhyloOrnsteinUhlenbeckPruning.h"
 #include "Dist_PhyloOrnsteinUhlenbeckThreePoint.h"
+#include "Dist_PhyloOrnsteinUhlenbeckStateDependent.h"
 #include "Dist_PhyloWhiteNoise.h"
 
 /* Tree priors (in folder "distributions/phylogenetics/tree") */
@@ -310,10 +315,12 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
         /* Evolutionary processes (in folder "distributions/phylogenetics") */
 
+//        AddDistribution< CharacterHistory           >( new Dist_PhyloCharacterEvent()                           );
+
         /* Branch rate processes (in folder "distributions/phylogenetics/branchrate") */
 
         // white noise process
-        AddDistribution< ModelVector<RealPos>       >( new Dist_PhyloWhiteNoise()          );
+        AddDistribution< ModelVector<RealPos>       >( new Dist_PhyloWhiteNoise()                               );
 
         /* trait evolution (in folder "distributions/phylogenetics/branchrate") */
 
@@ -324,6 +331,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< ContinuousCharacterData    >( new Dist_PhyloBrownianREML()                             );
         AddDistribution< ContinuousCharacterData    >( new Dist_PhyloBrownianMVN()                              );
         AddDistribution< ContinuousCharacterData    >( new Dist_PhyloBrownianMultiSampleREML()                  );
+        AddDistribution< ContinuousCharacterData    >( new Dist_PhyloBrownianProcessStateDependent()            );
         AddDistribution< ContinuousCharacterData    >( new Dist_PhyloMultiSampleOrnsteinUhlenbeck()             );
         AddDistribution< ContinuousCharacterData    >( new Dist_PhyloMultiSampleOrnsteinUhlenbeckREML()         );
         AddDistribution< ContinuousCharacterData    >( new Dist_PhyloMultivariateBrownianREML()                 );
@@ -332,6 +340,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< ContinuousCharacterData    >( new Dist_PhyloOrnsteinUhlenbeckMVN()                     );
         AddDistribution< ContinuousCharacterData    >( new Dist_PhyloOrnsteinUhlenbeckPruning()                 );
         AddDistribution< ContinuousCharacterData    >( new Dist_PhyloOrnsteinUhlenbeckThreePoint()              );
+        AddDistribution< ContinuousCharacterData    >( new Dist_PhyloOrnsteinUhlenbeckStateDependent()          );
 
         // multivariate brownian motion
         AddDistribution< ModelVector< ModelVector<Real> > >( new Dist_PhyloMvtBrownian() );
@@ -382,10 +391,10 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
         // coalescent (constant population sizes)
         AddDistribution< TimeTree                   >( new Dist_Coalescent() );
-        
+
         // coalescent (population sizes via demography functions)
         AddDistribution< TimeTree                   >( new Dist_CoalescentDemography() );
-        
+
         // coalescent (skyline population sizes)
         AddDistribution< TimeTree                   >( new Dist_CoalescentSkyline() );
 
