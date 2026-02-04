@@ -255,7 +255,8 @@ std::vector<std::string> split_comment(const std::string& comment)
 
         if (c == ',' and depth == 0)
         {
-            auto chunk = trim( comment.substr(start,i) );
+            int length = i-start;
+            auto chunk = trim( comment.substr(start,length) );
             if (not chunk.empty())
                 chunks.push_back( chunk );
             start = i+1;
