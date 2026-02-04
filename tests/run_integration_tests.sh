@@ -91,7 +91,7 @@ if [ ${#only_tests[@]} = 0 ] ; then
 (
     cd revbayes.github.io/tutorials
     ./run_tutorial_tests.sh ${rb_exec[@]}
-)
+) || exit 1
 fi
 
 if [ ${#only_tests[@]} -gt 0 ] ; then

@@ -26,6 +26,19 @@ if(!a)
 	help_arrays[string("BranchLengthTree")][string("see_also")].push_back(string(R"(TimeTree)"));
 	help_arrays[string("BranchLengthTree")][string("see_also")].push_back(string(R"(BranchLengthTree)"));
 	help_strings[string("BranchLengthTree")][string("title")] = string(R"(Tree datatype)");
+	help_arrays[string("CharacterHistory")][string("authors")].push_back(string(R"(Priscilla Lau)"));
+	help_strings[string("CharacterHistory")][string("description")] = string(R"(Stores a discrete character history, usually produced by reading in a file in
+`simmap` format, or retrieving from a `dnPhyloCTMCDASiteIID` distribution.)");
+	help_strings[string("CharacterHistory")][string("details")] = string(R"(Individual character histories can be accessed as follows:
+
+- `char_hist[n]`: returns the `n`th character history.)");
+	help_strings[string("CharacterHistory")][string("example")] = string(R"(# read character histories
+char_hist = readCharacterHistory("simmap.tree")
+
+# retrieve the first character history
+first_char_hist = char_hist[1])");
+	help_strings[string("CharacterHistory")][string("name")] = string(R"(CharacterHistory)");
+	help_strings[string("CharacterHistory")][string("title")] = string(R"(Discrete character history)");
 	help_strings[string("CharacterHistoryRateModifier")][string("name")] = string(R"(CharacterHistoryRateModifier)");
 	help_strings[string("CladogeneticProbabilityMatrix")][string("name")] = string(R"(CladogeneticProbabilityMatrix)");
 	help_strings[string("CladogeneticSpeciationRateMatrix")][string("name")] = string(R"(CladogeneticSpeciationRateMatrix)");
@@ -440,18 +453,18 @@ mymcmc.run(generations=200000))");
 	help_strings[string("dnBeta")][string("details")] = string(R"(The Beta distribution takes two parameters, alpha and beta. It is equivalent to the uniform when alpha = beta = 1. 
 
 The probability density function is f(x) = x^(alpha - 1) * (1 - x)^(beta - 1) * Gamma(alpha + beta) / (Gamma(alpha) * Gamma(beta)), where Gamma is the gamma function.)");
-	help_strings[string("dnBeta")][string("example")] = string(R"(p ~ dnBeta(1.0,1.0)
+	help_strings[string("dnBeta")][string("example")] = string(R"(p ~ dnBeta(1.0, 1.0)
 x ~ dnBernoulli(p)
 x.clamp(1)
 moves[1] = mvSlide(p, delta=0.1, weight=1.0)
-monitors[1] = screenmonitor(printgen=1000, separator = "        ", x)
+monitors[1] = mnScreen(p, printgen=1000)
 mymodel = model(p)
 mymcmc = mcmc(mymodel, monitors, moves)
-mymcmc.burnin(generations=20000,tuningInterval=100)
+mymcmc.burnin(generations=20000, tuningInterval=100)
 mymcmc.run(generations=200000))");
 	help_strings[string("dnBeta")][string("name")] = string(R"(dnBeta)");
 	help_arrays[string("dnBeta")][string("see_also")].push_back(string(R"(dnDirichlet)"));
-	help_arrays[string("dnBeta")][string("see_also")].push_back(string(R"(gamma)"));
+	help_arrays[string("dnBeta")][string("see_also")].push_back(string(R"(dnGamma)"));
 	help_strings[string("dnBeta")][string("title")] = string(R"(Beta Distribution)");
 	help_arrays[string("dnBimodalLognormal")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("dnBimodalLognormal")][string("description")] = string(R"(The Bimodal Lognormal distribution unites two separate lognormal distributions.)");
@@ -1338,6 +1351,74 @@ mymcmc.run(generations=200000))");
 	help_strings[string("dnPhyloBrownianMVN")][string("name")] = string(R"(dnPhyloBrownianMVN)");
 	help_strings[string("dnPhyloBrownianMultiSampleREML")][string("name")] = string(R"(dnPhyloBrownianMultiSampleREML)");
 	help_strings[string("dnPhyloBrownianMultiVariate")][string("name")] = string(R"(dnPhyloBrownianMultiVariate)");
+	help_arrays[string("dnPhyloBrownianProcessStateDependent")][string("authors")].push_back(string(R"(Priscilla Lau)"));
+	help_strings[string("dnPhyloBrownianProcessStateDependent")][string("description")] = string(R"(Univariate Brownian process over an augmented phylogeny (i.e., discrete
+character history))");
+	help_strings[string("dnPhyloBrownianProcessStateDependent")][string("details")] = string(R"(The phylogenetic state-dependent Brownian process is collapsed from the
+phylogenetic state-dependent Ornstein-Uhlenbeck process, in which `alpha` is
+always 0. The probability is computed using a pruning algorithm. Specifically,
+`dnPhyloBMSD` uses an augmented tree structure, i.e., the character history
+with different character states (also referred to as "regimes"; Hansen 1997).
+Shifts in the character state are discrete, do not occur concurrently with
+speciation events, and can be represented by nodes of degree 2. As such, each
+branch in the augmented tree structure takes exactly one character state. Under
+this process, branches of the same character state share the same rate
+parameter. These character states can correspond to the states of an observed
+discrete character.
+
+This model is equivalent to the MuSSCRat model (May and Moore 2020) if (1) the
+continuous trait is univariate, and (2) we assume no background rate variation.
+The major difference between these two models lies in the probability
+computation. The MuSSCRat model transforms the branch lengths according to the
+`sigma` parameter and computes the probability using a state-independent
+algorithm. The phyloBMSD model does not transform the phylogeny and computes
+the probability using a state-dependent algorithm.
+
+Applications of this model include:
+
+1. State-dependent continuous trait evolution conditional on discrete
+   character history
+   
+In this application, the discrete character history (in `simmap` format) is
+read (using `readCharacterHistory`) and specified in the `characterHistory`
+argument. The `sigma` arugments represents the state-dependent diffusion
+parameter that controls continuous trait evolution in different discrete
+character states. The continuous trait observations are fixed to the tips using
+`.clamp()`.
+
+2. Joint inference of discrete character history and state-dependent continuous
+   trait evolution
+   
+In this application, the discrete character evolution is modeled using the
+distribution `dnPhyloCTMCDASiteIID` (see Landis et al. 2013, May and Moore
+2020). The character history is retrieved from the distribution (using
+`.characterHistories`) and specified in the `characterHistory` argument. Other
+parameter specifications are same as above.)");
+	help_strings[string("dnPhyloBrownianProcessStateDependent")][string("example")] = string(R"(# setup for a two-state phyloOUSD model
+num_states = 2          # 0 and 1 are the only states
+
+# option 1: conditioning on a fixed character history
+char_hist = readCharacterHistory( simmap_path )[1]
+
+# option 2: joint inference of character history
+Q <- fnJC(num_disc_states)
+X ~ dnPhyloCTMCDASiteIID(tree, Q, branchRates=1, type="Standard")
+
+# set state-dependent OU parameters
+for (i in 1:num_states){
+  sigma2[i] ~ dnLognormal(1, 0.587405)
+}
+
+# basic use of the function
+Y ~ dnPhyloBMSD(char_hist, sigma=sigma2^0.5, rootValue=2.5))");
+	help_strings[string("dnPhyloBrownianProcessStateDependent")][string("name")] = string(R"(dnPhyloBrownianProcessStateDependent)");
+	help_references[string("dnPhyloBrownianProcessStateDependent")].push_back(RbHelpReference(R"(Hansen TF (1997). Stabilizing selection and the comparative analysis of adaptation. Evolution, 51(5):1341-1351.)",R"(10.1111/j.1558-5646.1997.tb01457.x)",R"(https://academic.oup.com/evolut/article/51/5/1341/6757302 )"));
+	help_references[string("dnPhyloBrownianProcessStateDependent")].push_back(RbHelpReference(R"(Landis MJ, Matzke NJ, Moore BR, Huelsenbeck JP (2013). Bayesian analysis of biogeography when the number of areas is large. Systematic Biology, 62(6):789-804.)",R"(10.1093/sysbio/syt040)",R"(https://academic.oup.com/sysbio/article-abstract/62/6/789/1708738 )"));
+	help_references[string("dnPhyloBrownianProcessStateDependent")].push_back(RbHelpReference(R"(May MR, Moore BR (2020). A Bayesian approach for inferring the impact of a discrete character on rates of continuous-character evolution in the presence of background-rate variation. Systematic Biology, 69(3):530-544.)",R"(10.1093/sysbio/syz069)",R"(https://academic.oup.com/sysbio/article/69/3/530/5609130 )"));
+	help_arrays[string("dnPhyloBrownianProcessStateDependent")][string("see_also")].push_back(string(R"(dnPhyloOUSD)"));
+	help_arrays[string("dnPhyloBrownianProcessStateDependent")][string("see_also")].push_back(string(R"(dnPhyloCTMCDASiteIID)"));
+	help_arrays[string("dnPhyloBrownianProcessStateDependent")][string("see_also")].push_back(string(R"(readCharacterHistory)"));
+	help_strings[string("dnPhyloBrownianProcessStateDependent")][string("title")] = string(R"(Phylogenetic state-dependent Brownian process)");
 	help_strings[string("dnPhyloBrownianREML")][string("name")] = string(R"(dnPhyloBrownianREML)");
 	help_strings[string("dnPhyloCTMC")][string("description")] = string(R"(Gives the probability distribution of the character state vectors at the leaves
 of a phylogenetic tree, given a phylogenetic continuous-time Markov chain
@@ -1398,7 +1479,58 @@ writeNexus("simulatedData.nex", sim))");
 	help_strings[string("dnPhyloCTMC")][string("title")] = string(R"(Distribution of a phylogenetic continuous-time Markov chain)");
 	help_strings[string("dnPhyloCTMCClado")][string("name")] = string(R"(dnPhyloCTMCClado)");
 	help_strings[string("dnPhyloCTMCDASequence")][string("name")] = string(R"(dnPhyloCTMCDASequence)");
+	help_arrays[string("dnPhyloCTMCDASiteIID")][string("authors")].push_back(string(R"(Priscilla Lau)"));
+	help_strings[string("dnPhyloCTMCDASiteIID")][string("description")] = string(R"(The probability distribution of the character state vectors at the tips of
+a phylogenetic tree, given a phylogenetic continuous-time Markov chain model.)");
+	help_strings[string("dnPhyloCTMCDASiteIID")][string("details")] = string(R"(The parameters of a phylogenetic model -- a tree topology with branch lengths,
+a substitution model that describes how observations evolve over the tree, etc.
+-- collectively form a distribution called the _phylogenetic continuous-time
+Markov chain_. In this distribution, the branch history is sampled (through
+data augmentation), instead of integrated out (as in `dnPhyloCTMC`).
+An instance of character history can therefore be retrieved from the
+distribution (using `.characterHistories`). The probability of observed
+character state vectors (specified via clamping the distribution to an
+`AbstractHomologousDiscreteCharacterData` object) is computed by summing the
+probability of the history on each branch. The probability of the history on a
+branch is the product of the probabilities of waiting times between events (or
+the probability of no event in the final segment) given the current rate of
+change (see May and Moore 2020).
+
+Note that when `rootFrequencies` is not provided, the distribution assumes
+stationary frequencies at the root. The stationary frequencies will be
+calculated numerically if the tree has a root branch, and analytically
+otherwise. When `rootFrequencies` is provided, then stationarity at the root
+will not be assumed, and the likelihood calculation will be based on the
+provided root frequencies.
+
+If this distribution is used together with `dnPhyloOUSD` or `dnPhyloBMSD`,
+specify `nSites=1`.)");
+	help_strings[string("dnPhyloCTMCDASiteIID")][string("example")] = string(R"(# Read character data from a file
+chars <- readDiscreteCharacterData("myData.nex")
+taxa = chars.taxa()
+
+# Draw a tree with branch lengths
+tree ~ dnUniformTopologyBranchLength( taxa, branchLengthDistribution=dnExp(10.0) )
+
+# Define a rate matrix
+q_matrix <- fnJC(4)
+
+rf <- rep(1/4, 4)
+
+# Create stochastic node with the tip distribution given by `tree` and `q_matrix`
+x ~ dnPhyloCTMCDASiteIID(tree = tree, Q = q_matrix, rootfrequencies=rf)
+char_hist := x.characterHistories()
+
+# Clamp observed characters to the node
+x.clamp(chars)
+
+# Calculate the probability of the observed characters under the given distribution
+x.lnProbability())");
 	help_strings[string("dnPhyloCTMCDASiteIID")][string("name")] = string(R"(dnPhyloCTMCDASiteIID)");
+	help_references[string("dnPhyloCTMCDASiteIID")].push_back(RbHelpReference(R"(May MR, Moore BR (2020). A Bayesian approach for inferring the impact of a discrete character on rates of continuous-character evolution in the presence of background-rate variation. Systematic biology, 69(3):530-544.)",R"(10.1093/sysbio/syz069)",R"(https://academic.oup.com/sysbio/article/69/3/530/5609130 )"));
+	help_arrays[string("dnPhyloCTMCDASiteIID")][string("see_also")].push_back(string(R"(mvCharacterHistory)"));
+	help_strings[string("dnPhyloCTMCDASiteIID")][string("title")] = string(R"(Data augmentation-based phylogenetic continuous-time Markov chain distribution
+with independent and identically distributed sites)");
 	help_strings[string("dnPhyloCTMCDollo")][string("name")] = string(R"(dnPhyloCTMCDollo)");
 	help_strings[string("dnPhyloDistanceGamma")][string("name")] = string(R"(dnPhyloDistanceGamma)");
 	help_strings[string("dnPhyloMultiSampleOrnsteinUhlenbeck")][string("name")] = string(R"(dnPhyloMultiSampleOrnsteinUhlenbeck)");
@@ -1425,6 +1557,72 @@ x)");
 	help_strings[string("dnPhyloOrnsteinUhlenbeck")][string("name")] = string(R"(dnPhyloOrnsteinUhlenbeck)");
 	help_strings[string("dnPhyloOrnsteinUhlenbeckMVN")][string("name")] = string(R"(dnPhyloOrnsteinUhlenbeckMVN)");
 	help_strings[string("dnPhyloOrnsteinUhlenbeckREML")][string("name")] = string(R"(dnPhyloOrnsteinUhlenbeckREML)");
+	help_arrays[string("dnPhyloOrnsteinUhlenbeckStateDependent")][string("authors")].push_back(string(R"(Priscilla Lau)"));
+	help_strings[string("dnPhyloOrnsteinUhlenbeckStateDependent")][string("description")] = string(R"(Univariate Ornstein-Uhlenbeck process over an augmented phylogeny (i.e.,
+discrete character history))");
+	help_strings[string("dnPhyloOrnsteinUhlenbeckStateDependent")][string("details")] = string(R"(The phylogenetic state-dependent Ornstein-Uhlenbeck process is an extension
+to Hansen's (1997) Ornstein-Uhlenbeck process with state-dependent optima. The
+probability is computed using a pruning algorithm, which is derived from
+FitzJohn's (2012) pruning algorithm for a phylogenetic state-independent
+Ornstein-Uhlenbeck process. Specifically, `dnPhyloOUSD` uses an augmented tree
+structure, i.e., the character history with different character states (also
+referred to as "regimes"; Hansen 1997). Shifts in the character state are
+discrete, do not occur concurrently with speciation events, and can be
+represented by nodes of degree 2. As such, each branch in the augmented tree
+structure takes exactly one character state. Under this process, branches of
+the same character state share the same OU parameters (`alpha`, `theta`,
+`sigma`). These character states can correspond to the states of an observed
+discrete character.
+
+Applications of this model include:
+
+1. State-dependent continuous trait evolution conditional on discrete
+   character history
+   
+In this application, the discrete character history (in `simmap` format) is
+read (using `readCharacterHistory`) and specified in the `characterHistory`
+argument. The `alpha`, `theta`, and `sigma` arugments represent the
+state-dependent OU parameters that control continuous trait evolution in
+different discrete character states. Furthermore, the assumed continuous trait
+value at the root is specified using the `rootTreatment` argument. The
+continuous trait observations are fixed to the tips using `.clamp()`.
+
+2. Joint inference of discrete character history and state-dependent continuous
+   trait evolution
+   
+In this application, the discrete character evolution is modeled using the
+distribution `dnPhyloCTMCDASiteIID` (see Landis et al. 2013, May and Moore
+2020). The character history is retrieved from the distribution (using
+`.characterHistories`) and specified in the `characterHistory` argument. Other
+parameter specifications are same as above.)");
+	help_strings[string("dnPhyloOrnsteinUhlenbeckStateDependent")][string("example")] = string(R"(# setup for a two-state phyloOUSD model
+num_states = 2          # 0 and 1 are the only states
+
+# option 1: conditioning on a fixed character history
+char_hist = readCharacterHistory( simmap_path )[1]
+
+# option 2: joint inference of character history
+Q <- fnJC(num_disc_states)
+X ~ dnPhyloCTMCDASiteIID(tree, Q, branchRates=1, type="Standard")
+
+# set state-dependent OU parameters
+for (i in 1:num_states){
+  theta[i] ~ dnUniform(-10, 10)
+  alpha[i] ~ dnLognormal(ln(2), 0.587405)
+  sigma2[i] ~ dnLognormal(1, 0.587405)
+}
+
+# basic use of the function (assuming the continuous trait value at the root is the same at the state-specific optimum)
+Y ~ dnPhyloOUSD(char_hist, theta=theta, rootTreatment="optimum", alpha=alpha, sigma=sigma2^0.5))");
+	help_strings[string("dnPhyloOrnsteinUhlenbeckStateDependent")][string("name")] = string(R"(dnPhyloOrnsteinUhlenbeckStateDependent)");
+	help_references[string("dnPhyloOrnsteinUhlenbeckStateDependent")].push_back(RbHelpReference(R"(Hansen TF (1997). Stabilizing selection and the comparative analysis of adaptation. Evolution, 51(5):1341-1351.)",R"(10.1111/j.1558-5646.1997.tb01457.x)",R"(https://academic.oup.com/evolut/article/51/5/1341/6757302 )"));
+	help_references[string("dnPhyloOrnsteinUhlenbeckStateDependent")].push_back(RbHelpReference(R"(FitzJohn RG (2012). Diversitree: comparative phylogenetic analyses of diversification in R. Methods in Ecology and Evolution, 3(6):1084-1092.)",R"(10.1111/j.2041-210X.2012.00234.x)",R"(https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/j.2041-210X.2012.00234.x )"));
+	help_references[string("dnPhyloOrnsteinUhlenbeckStateDependent")].push_back(RbHelpReference(R"(Landis MJ, Matzke NJ, Moore BR, Huelsenbeck JP (2013). Bayesian analysis of biogeography when the number of areas is large. Systematic biology, 62(6):789-804.)",R"(10.1093/sysbio/syt040)",R"(https://academic.oup.com/sysbio/article-abstract/62/6/789/1708738 )"));
+	help_references[string("dnPhyloOrnsteinUhlenbeckStateDependent")].push_back(RbHelpReference(R"(May MR, Moore BR (2020). A Bayesian approach for inferring the impact of a discrete character on rates of continuous-character evolution in the presence of background-rate variation. Systematic biology, 69(3):530-544.)",R"(10.1093/sysbio/syz069)",R"(https://academic.oup.com/sysbio/article/69/3/530/5609130 )"));
+	help_arrays[string("dnPhyloOrnsteinUhlenbeckStateDependent")][string("see_also")].push_back(string(R"(dnPhyloBMSD)"));
+	help_arrays[string("dnPhyloOrnsteinUhlenbeckStateDependent")][string("see_also")].push_back(string(R"(dnPhyloCTMCDASiteIID)"));
+	help_arrays[string("dnPhyloOrnsteinUhlenbeckStateDependent")][string("see_also")].push_back(string(R"(readCharacterHistory)"));
+	help_strings[string("dnPhyloOrnsteinUhlenbeckStateDependent")][string("title")] = string(R"(Phylogenetic state-dependent Ornstein-Uhlenbeck process)");
 	help_strings[string("dnPhyloOrnsteinUhlenbeckThreePoint")][string("name")] = string(R"(dnPhyloOrnsteinUhlenbeckThreePoint)");
 	help_strings[string("dnPhyloWhiteNoise")][string("name")] = string(R"(dnPhyloWhiteNoise)");
 	help_arrays[string("dnPointMass")][string("authors")].push_back(string(R"(Walker Pett)"));
@@ -3015,7 +3213,50 @@ Add random variables to the move directly (e.g. branch_rates[1], not branch_rate
 	help_strings[string("mvBirthDeathFromAgeEvent")][string("name")] = string(R"(mvBirthDeathFromAgeEvent)");
 	help_strings[string("mvBranchLengthScale")][string("name")] = string(R"(mvBranchLengthScale)");
 	help_strings[string("mvBurstEvent")][string("name")] = string(R"(mvBurstEvent)");
+	help_arrays[string("mvCharacterHistory")][string("authors")].push_back(string(R"(Priscilla Lau)"));
+	help_strings[string("mvCharacterHistory")][string("description")] = string(R"(A proposal to change the (discrete) character history, at a node or along a
+branch, for data augmentation-based CTMC distributions (`dnPhyloCTMCDASiteIID`
+or `dnPhyloCTMCDASequence`).)");
+	help_strings[string("mvCharacterHistory")][string("details")] = string(R"(The `graph` argument specifices where the move is put, the `proposal` argument
+specifies the type of sampler, while the `type` argument specifies the type of
+character.
+
+For state-dependent trait evolution (e.g, `dnPhyloOUSD`), moves can be put at
+the root node (`graph="root"`), at all the internal nodes (`graph="node"`),
+along branches (`graph="path"`), and at the tips (`graph="tip"`). In all these
+cases, a rejection sampler is used (`proposal="rejection"`). Note that if
+a move is put at a node, the sampler will propose new character history for the
+node and its ancestral and descendant branches (if they exist), without
+changing the state of the ancestral and descendant nodes. If a move is put
+along a branch, the sampler will propose new character history for the branch,
+without changing the state of the ancestral and descendant nodes.
+
+The root rejection sampler should only be used when there is only one
+character. Furthermore, if some tips have unobserved character states, or if
+a hidden-state model is used for the CTMC distribution, the character type
+should be set to natural numbers (`type="NaturalNumbers"`). Otherwise, the
+character type should be set to standard (`type="Standard"`).
+
+Refer to respective tutorials for other usage of the data augmentation-based
+CTMC distributions and the character history move: in particular, biogeographic
+reconstruction and modeling host repertoire evolution.)");
+	help_strings[string("mvCharacterHistory")][string("example")] = string(R"(# The following example shows the set-up of character history
+# moves when the CTMC distribution is used together with a
+# trait evolution model (e.g, `dnPhyloOUSD`).
+
+Q <- fnJC(2)
+X ~ dnPhyloCTMCDASiteIID(tree, Q, branchRates=1, type="Standard", nSites=1)
+
+moves.append( mvCharacterHistory(ctmc=X, qmap_site=Q, graph="root",
+                                 proposal="rejection", weight=10.0) )
+moves.append( mvCharacterHistory(ctmc=X, qmap_site=Q, graph="node",
+                                 proposal="rejection", weight=10.0) )
+moves.append( mvCharacterHistory(ctmc=X, qmap_site=Q, graph="branch",
+                                 proposal="rejection", weight=10.0) )
+moves.append( mvCharacterHistory(ctmc=X, qmap_site=Q, graph="tip",
+                                 proposal="rejection", weight=10.0) ))");
 	help_strings[string("mvCharacterHistory")][string("name")] = string(R"(mvCharacterHistory)");
+	help_strings[string("mvCharacterHistory")][string("title")] = string(R"(Character history move)");
 	help_strings[string("mvCollapseExpandFossilBranch")][string("name")] = string(R"(mvCollapseExpandFossilBranch)");
 	help_strings[string("mvConjugateInverseWishart")][string("name")] = string(R"(mvConjugateInverseWishart)");
 	help_strings[string("mvContinuousCharacterDataSlide")][string("name")] = string(R"(mvContinuousCharacterDataSlide)");
@@ -4255,6 +4496,17 @@ range(20,-20)
 	help_strings[string("readBranchLengthTrees")][string("name")] = string(R"(readBranchLengthTrees)");
 	help_strings[string("readCharacterData")][string("name")] = string(R"(readCharacterData)");
 	help_strings[string("readCharacterDataDelimited")][string("name")] = string(R"(readCharacterDataDelimited)");
+	help_arrays[string("readCharacterHistory")][string("authors")].push_back(string(R"(Priscilla Lau)"));
+	help_strings[string("readCharacterHistory")][string("description")] = string(R"(Reads character histories (in `simmap` format) from a file and saves them in
+one vector object. The character states always should be 0-indexed.)");
+	help_strings[string("readCharacterHistory")][string("details")] = string(R"(A file name must be provided as argument.
+
+`char_hist = readCharacterHistory(...)` returns a `CharacterHistory[]` object.
+`char_hist = readCharacterHistory(...)[i]` returns a `CharacterHistory` object.)");
+	help_strings[string("readCharacterHistory")][string("example")] = string(R"(# read a character history
+char_hist = readCharacterHistory("output/simmap.tree"))");
+	help_strings[string("readCharacterHistory")][string("name")] = string(R"(readCharacterHistory)");
+	help_strings[string("readCharacterHistory")][string("title")] = string(R"(Function to read in character histories)");
 	help_strings[string("readContinuousCharacterData")][string("name")] = string(R"(readContinuousCharacterData)");
 	help_strings[string("readDataDelimitedFile")][string("name")] = string(R"(readDataDelimitedFile)");
 	help_strings[string("readDiscreteCharacterData")][string("name")] = string(R"(readDiscreteCharacterData)");
