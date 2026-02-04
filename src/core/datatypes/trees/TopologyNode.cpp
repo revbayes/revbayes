@@ -1243,7 +1243,7 @@ double TopologyNode::getMaxDepth( void ) const
             m = node.getBranchLength() + node.getMaxDepth();
         }
 
-        if ( m > max )
+        if ( m > max or std::isnan(m))
         {
             max = m;
         }
