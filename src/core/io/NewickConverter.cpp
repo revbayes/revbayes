@@ -79,7 +79,7 @@ When we put the spacing in, we get:
     Descendants = "(" Subtree % "," ")"
     Length -> ":" SPACE<branch> [Double] SPACE<branch>
 
-where SPACE<x> means that we read whitepspace and newick comments, and the comments are attached to x.
+where SPACE<x> means that we read whitespace and newick comments, and the comments are attached to x.
 So for example SPACE<tree> means that any comments found are considered to refer to the tree.
 */
 
@@ -594,6 +594,8 @@ ParseResult<std::string> parseName(const std::string& input, int start_pos){
 }
 
 
+// NOTE: This code was created by duplicating and modifying the original
+//       convertFromNewick( ) function.
 CharacterHistoryDiscrete* NewickConverter::convertSimmapFromNewick(const std::string& n)
 {
     bool reindex = true;
