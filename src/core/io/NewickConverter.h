@@ -171,6 +171,10 @@ namespace RevBayesCore {
         TopologyNode*           createSimmapNode(const std::string &n, std::vector<TopologyNode*> &nodes, std::vector<double> &brlens, std::vector<BranchHistory*> &histories);
     };
 
+    void postProcessNewick(Tree* tree);
+    std::vector<Tree*> readNewicks(const std::string& input);
+
+    ParseResult<std::vector<Tree*>> parseTrees(const std::string& input, int start_pos);
     ParseResult<Tree*> parseTree(const std::string& input, int start_pos);
     ParseResult<TopologyNode*> parseSubTree(const std::string& input, int start_pos);
     ParseResult<char> checkChar(const std::string& input, int start_pos, char c);

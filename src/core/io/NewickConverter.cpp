@@ -33,6 +33,19 @@ NewickConverter::~NewickConverter()
 
 }
 
+void postProcessNewick(Tree* tree)
+{
+    // try to set node indices from attributes
+    tree->tryReadIndicesFromParameters(true);
+
+    // trees with 2-degree root nodes should not be rerooted
+    tree->setRooted( tree->getRoot().getNumberOfChildren() == 2 );
+    
+    // make this tree first a branch length tree
+    // hence, tell the root to use branch lengths and not ages (with recursive call)
+    tree->getRoot().setUseAges(false, true);
+}
+    
 Tree* NewickConverter::convertFromNewick(std::string const &newick)
 {
     // construct the tree starting from the root
@@ -43,23 +56,32 @@ Tree* NewickConverter::convertFromNewick(std::string const &newick)
     if (result.next_pos() != newick.size())
         throw RbException()<<"Junk at end of newick string: '"<<newick.substr(result.next_pos())<<"'";
 
-    // set up the tree
     auto tree = result.value();
 
-    // try to set node indices from attributes
-    tree->tryReadIndicesFromParameters(true);
-
-    // trees with 2-degree root nodes should not be rerooted
-    tree->setRooted( tree->getRoot().getNumberOfChildren() == 2 );
+    // post-process the tree
+    postProcessNewick(tree);
     
-    // make this tree first a branch length tree
-    // hence, tell the root to use branch lengths and not ages (with recursive call)
-    tree->getRoot().setUseAges(false, true);
-    
-    // return the tree, the caller is responsible for destruction
     return tree;
 }
 
+std::vector<Tree*> readNewicks(const std::string& input)
+{
+    auto result = parseTrees(input, 0);
+    if (not result)
+    {
+        throw RbException()<<result.err_message()<< " at location " << result.err_pos();
+    }
+    if (result.next_pos() != input.size())
+        throw RbException()<<"Junk at end of newick string: '"<<input.substr(result.next_pos())<<"'";
+
+    auto trees = result.value();
+
+    // post-process the trees
+    for(auto tree: trees)
+        postProcessNewick(tree);
+
+    return trees;
+}
 
 /* We are currently using this Newick grammar:
   
@@ -277,6 +299,28 @@ std::vector<std::string> split_comment(const std::string& comment)
     
     return chunks;
 }
+
+
+ParseResult<std::vector<Tree*>> parseTrees(const std::string& input, int start_pos)
+{
+    vector<Tree*> trees;
+
+    while(true)
+    {
+        if (auto check = parseTree(input, start_pos))
+        {
+            assert(check.value());
+            trees.push_back(check.value());
+            start_pos = check.next_pos();
+        }
+        else if (check.hard_failure())
+            return check.as_failure();
+        else
+            break;
+    }
+
+    return ParseSuccess(trees, start_pos);
+}
     
 // Tree -> SPACE<tree> Subtree ";"
 ParseResult<Tree*> parseTree(const std::string& input, int start_pos)
@@ -308,7 +352,11 @@ ParseResult<Tree*> parseTree(const std::string& input, int start_pos)
     else
         return check_semi.as_failure();;
 
-    // 4. Create the tree
+    // 4. Each plain whitechars (not newick comments)
+    while(auto check = parseWhiteChar(input, start_pos))
+        start_pos = check.next_pos();
+
+    // 5. Create the tree
     Tree* tree = new Tree();
     
     tree->setRoot( root, true );
