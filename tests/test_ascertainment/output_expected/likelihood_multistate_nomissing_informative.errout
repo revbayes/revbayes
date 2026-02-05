@@ -1,0 +1,7 @@
+   Attempting to read the contents of file "4_taxa.tre"
+   Successfully read file
+   Successfully read one character matrix from file 'data/4_taxa_1_char_multistate.nex'
+   Mk likelihood:-5.20911
+   Mkp likelihood:-2.93112
+   Successfully read one character matrix from file 'data/4_taxa_1_char_multistate_noninformative.nex'
+   Mkp likelihood based on informative character:-2.93112

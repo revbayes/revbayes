@@ -1,10 +1,11 @@
 #NEXUS
 BEGIN DATA;
-  DIMENSIONS NTAX=3 NCHAR=1;
+  DIMENSIONS NTAX=4 NCHAR=2;
   Format datatype=Standard symbols="01" missing=? gap=-;
   MATRIX
-Taxon_1 1
-Taxon_2 1
-Taxon_3 1
+Taxon_1 01
+Taxon_2 01
+Taxon_3 01
+Taxon_4 01
 ;
 END;

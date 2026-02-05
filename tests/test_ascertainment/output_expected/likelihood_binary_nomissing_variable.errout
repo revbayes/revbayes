@@ -3,6 +3,5 @@
    Successfully read one character matrix from file 'data/3_taxa_1_char_binary.nex'
    Mk likelihood:-2.62561
    Mkv likelihood:-1.49689
-   Successfully read one character matrix from file 'data/3_taxa_1_char_binary_invariant_0.nex'
-   Successfully read one character matrix from file 'data/3_taxa_1_char_binary_invariant_1.nex'
+   Successfully read one character matrix from file 'data/3_taxa_1_char_binary_invariant.nex'
    Mkv likelihood based on invariant character:-1.49689

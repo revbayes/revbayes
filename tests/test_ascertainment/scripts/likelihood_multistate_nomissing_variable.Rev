@@ -1,0 +1,40 @@
+################################################################################
+#
+# RevBayes Script: Test ascertainment bias correction: 
+#                  Multistate data, no missing, variable coding
+#
+# authors: Wenjie Zhu
+#
+################################################################################
+
+tree <- readTrees("data/3_taxa.tre")[1]
+
+Q <- fnGTR( exchangeRates=simplex(1,2,3), baseFrequencies=simplex(1,2,3) )
+
+X ~ dnPhyloCTMC(tree, Q, type="Standard", nSites=1)
+X_asc ~ dnPhyloCTMC(tree, Q, type="Standard", nSites=1, coding="variable")
+
+
+D = readDiscreteCharacterData("data/3_taxa_1_char_multistate.nex")
+
+X.setValue( D )
+X_asc.setValue( D )
+Mk_obs = X.lnProbability()
+Mkv_obs = X_asc.lnProbability()
+"Mk likelihood:" + X.lnProbability()
+"Mkv likelihood:" + X_asc.lnProbability()
+
+# Invariant patterns
+L_invar = 0
+D_invar = readDiscreteCharacterData("data/3_taxa_1_char_multistate_invariant.nex")
+
+for (i in 1:D_invar.nchar()) {
+    D_invar.excludeAll()
+    D_invar.includeCharacter(i)
+    X.setValue( D_invar )
+    L_invar = L_invar + exp(X.lnProbability())
+}
+
+"Mkv likelihood based on invariant character:" + ln( exp(Mk_obs) / (1-L_invar) )
+
+q()
