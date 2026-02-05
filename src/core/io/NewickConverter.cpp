@@ -38,8 +38,19 @@ void postProcessNewick(Tree* tree)
     // try to set node indices from attributes
     tree->tryReadIndicesFromParameters(true);
 
-    // trees with 2-degree root nodes should not be rerooted
-    tree->setRooted( tree->getRoot().getNumberOfChildren() == 2 );
+    // Determine rooting and remove [&R] / [&U]
+    auto rooted = tree->eraseTreeParameter("R");
+    auto unrooted = tree->eraseTreeParameter("U");
+
+    bool is_rooted;
+    if (rooted and not unrooted)
+        is_rooted = true;
+    else if (unrooted and not rooted)
+        is_rooted = false;
+    else
+        is_rooted = tree->getRoot().getNumberOfChildren() == 2;
+
+    tree->setRooted( is_rooted );
     
     // make this tree first a branch length tree
     // hence, tell the root to use branch lengths and not ages (with recursive call)
