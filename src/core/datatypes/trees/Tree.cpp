@@ -2383,9 +2383,93 @@ void Tree::writeToFile( const path &dir, const std::string &fn ) const
     }
 }
 
-void Tree::addParameter_(const std::string& chunk)
+void Tree::addTreeParameter_(const std::string& chunk)
 {
-    comments.push_back(chunk);
+    tree_comments.push_back( chunk );
+}
+
+void Tree::addTreeParameter(const std::string& key, const std::optional<std::string>& value)
+{
+    assert(not key.contains('='));
+    if (value)
+        tree_comments.push_back(key + '=' + *value);
+    else
+        tree_comments.push_back(key);
+}
+
+std::optional<std::string> getValueFromChunk(const std::string& key, const std::string& chunk)
+{
+    if (chunk.size() > key.size())
+    {
+        assert(chunk.starts_with(key +'='));
+        return chunk.substr(key.size()+1);
+    }
+    else
+    {
+        assert(chunk == key);
+        return {};
+    }
+}
+
+std::optional<int> getParameterIndex(const std::vector<std::string>& comments, const std::string& key)
+{
+    assert(not key.contains('='));
+
+    std::optional<int> found_index;
+    auto key_equals = key+'=';
+    for(int i=0;i<comments.size();i++)
+    {
+        auto& comment = comments[i];
+        if (comment == key or comment.starts_with(key_equals))
+        {
+            found_index = i;
+            break;
+        }
+    }
+
+    return found_index;
+}
+
+std::optional<std::optional<std::string>> getParameter(const std::vector<std::string>& comments, const std::string& key)
+{
+    if (auto found_index = getParameterIndex(comments, key))
+        return getValueFromChunk( key, comments[*found_index] );
+    else
+        return {};
+}
+
+// The outer optional says if the key exists.
+// The inner optional has no value if the comment chunk is just 'key', but
+//   has a value of the empty string if the comment is 'key='.
+std::optional<std::optional<std::string>> Tree::getTreeParameter(const std::string& key) const
+{
+    return getParameter(tree_comments, key);
+}
+
+std::optional<std::optional<std::string>> eraseParameter(std::vector<std::string>& comments, const std::string& key)
+{
+    if (auto found_index = getParameterIndex(comments, key))
+    {
+        // 1. Extract the value from the chunk
+        auto value = getValueFromChunk( key, comments[*found_index] );
+
+        // 2. Move the comment to the end of the array and pop it.
+        if (*found_index < comments.size()-1)
+        {
+            std::swap(comments[*found_index], comments.back());
+        }
+        comments.pop_back();
+
+        // 3. Return the value
+        return value;
+    }
+    else
+        return {};
+}
+
+std::optional<std::optional<std::string>> Tree::eraseTreeParameter(const std::string& key)
+{
+    return eraseParameter(tree_comments, key);
 }
 
 std::ostream& RevBayesCore::operator<<(std::ostream& o, const Tree& x)

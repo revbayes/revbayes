@@ -363,7 +363,7 @@ ParseResult<Tree*> parseTree(const std::string& input, int start_pos)
 
     for(auto& comment: tree_comments)
         for(auto& chunk: split_comment(comment))
-            tree->addParameter_(chunk);
+            tree->addTreeParameter_(chunk);
 
     return ParseSuccess(tree, start_pos);
 }
