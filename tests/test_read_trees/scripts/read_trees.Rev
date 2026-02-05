@@ -1,3 +1,2 @@
 trees_from_file = readTreeTrace("data/trees1.trees")
-print(filename = "output/Test_read_trees.txt", append = FALSE, trees_from_file.size())
-print(filename = "output/Test_read_trees.txt", append = TRUE, "\n")
+trees_from_file.size()
