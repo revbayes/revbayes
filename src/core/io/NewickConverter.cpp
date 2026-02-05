@@ -56,13 +56,91 @@ void postProcessNewick(Tree* tree)
     // hence, tell the root to use branch lengths and not ages (with recursive call)
     tree->getRoot().setUseAges(false, true);
 }
-    
+
+std::string getErrorMessage(const std::string& input, size_t pos, int tabWidth = 4) {
+    size_t line = 1;
+    size_t visualColumn = 1;
+    size_t lineStart = 0;
+    size_t prevLineStart = 0;
+    bool hasPrevLine = false;
+
+    // 1. Find Current and Previous Line starts
+    for (size_t i = 0; i < pos && i < input.length(); ++i) {
+        if (input[i] == '\n') {
+            hasPrevLine = true;
+            prevLineStart = lineStart;
+            lineStart = i + 1;
+            line++;
+            visualColumn = 1;
+        } else if (input[i] == '\t') {
+            visualColumn += (tabWidth - (visualColumn - 1) % tabWidth);
+        } else {
+            visualColumn++;
+        }
+    }
+
+    // 2. Helper to expand tabs and truncate a line
+    auto processLine = [&](size_t start, size_t end, size_t errPos, bool isErrLine) {
+        std::string raw = input.substr(start, end - start);
+        std::string expanded = "";
+        size_t visualErrIdx = 0;
+
+        for (size_t i = 0; i < raw.length(); ++i) {
+            if (start + i == errPos) visualErrIdx = expanded.length();
+            if (raw[i] == '\t') {
+                expanded.append(tabWidth - (expanded.length() % tabWidth), ' ');
+            } else {
+                expanded += raw[i];
+            }
+        }
+        if (errPos >= start + raw.length()) visualErrIdx = expanded.length();
+
+        // Sliding Window Logic
+        const size_t MAX_WIDTH = 60;
+        size_t dispStart = 0;
+        if (expanded.length() > MAX_WIDTH) {
+            dispStart = (visualErrIdx > 30) ? (visualErrIdx - 30) : 0;
+            if (dispStart + MAX_WIDTH > expanded.length()) dispStart = expanded.length() - MAX_WIDTH;
+            
+            // Protect error location from ellipsis
+            if (dispStart > 0 && (visualErrIdx - dispStart) < 3) dispStart = (visualErrIdx >= 3) ? (visualErrIdx - 3) : 0;
+        }
+
+        std::string snippet = expanded.substr(dispStart, MAX_WIDTH);
+        if (dispStart > 0) snippet.replace(0, 3, "...");
+        if (dispStart + MAX_WIDTH < expanded.length()) snippet.replace(snippet.length() - 3, 3, "...");
+
+        return std::make_pair(snippet, visualErrIdx - dispStart);
+    };
+
+    // 3. Extract the current line
+    size_t lineEnd = input.find('\n', lineStart);
+    if (lineEnd == std::string::npos) lineEnd = input.length();
+    auto current = processLine(lineStart, lineEnd, pos, true);
+
+    // 4. Build Output
+    std::string result = "Newick error at line " + std::to_string(line) + ", column " + std::to_string(visualColumn) + ":\n";
+
+    // If error is at the beginning of the line, show the previous line for context
+    if (hasPrevLine && visualColumn <= 5) {
+        size_t prevLineEnd = lineStart - 1;
+        // We pass a dummy errPos way outside the range for the previous line so it doesn't slide the window weirdly
+        auto prev = processLine(prevLineStart, prevLineEnd, 999999, false);
+        result += "|" + prev.first + "\n";
+    }
+
+    result += "|" + current.first + "\n";
+    result += "|" + std::string(current.second, ' ') + "^";
+
+    return result;
+}
+
 Tree* NewickConverter::convertFromNewick(std::string const &newick)
 {
     // construct the tree starting from the root
     auto result = parseTree(newick, 0);
     if (not result){
-        throw RbException()<<result.err_message()<< " at location " << result.err_pos();
+        throw RbException()<<getErrorMessage(newick, result.err_pos());
     }
     if (result.next_pos() != newick.size())
         throw RbException()<<"Junk at end of newick string: '"<<newick.substr(result.next_pos())<<"'";
@@ -80,7 +158,7 @@ std::vector<Tree*> readNewicks(const std::string& input)
     auto result = parseTrees(input, 0);
     if (not result)
     {
-        throw RbException()<<result.err_message()<< " at location " << result.err_pos();
+        throw RbException()<<getErrorMessage(input, result.err_pos());
     }
     if (result.next_pos() != input.size())
         throw RbException()<<"Junk at end of newick string: '"<<input.substr(result.next_pos())<<"'";
@@ -121,7 +199,7 @@ ParseResult<char> parseChar(const std::string& input, int start_pos)
 {
     // if reading beyond end of string return null
     if (start_pos >= input.size())
-        return ParseFail("End of input",start_pos);
+        return ParseFail(start_pos);
     else
     {
         char c = input[start_pos];
@@ -152,10 +230,10 @@ ParseResult<char> checkChar(const std::string& input, int start_pos, char c)
         if (maybe_char.value() == c)
             return maybe_char;
         else
-            return ParseFail(std::string("Expected '") + escape(c) + "'", start_pos);
+            return ParseFail(start_pos);
     }
     else
-        return ParseFail(std::string("Reached end of input looking for '") + escape(c) + "'", start_pos);
+        return ParseFail(start_pos);
 }
 
 
@@ -186,7 +264,7 @@ ParseResult<string> parseNewickComment(const std::string& input, int start_pos)
     }
 
     // 3. If we get here, then ending bracket is missing!
-    return ParseFail("Newick comment is missing final ']'", start_pos);
+    return ParseFail(start_pos, false);
 }
 
 // Which values should count as whitespace?
@@ -201,7 +279,7 @@ ParseResult<char> parseWhiteChar(const std::string& input, int start_pos)
         if (strchr(" \t\n\r", check_char.value()))
             return check_char;
         else
-            return ParseFail("Not whitespace", start_pos);
+            return ParseFail(start_pos);
     }
     else
         return check_char;
@@ -223,7 +301,7 @@ ParseResult<optional<string>> parseOneWhitespace(const std::string& input, int s
     }
     // 3. If no comment and no whitespace character, return null
     else
-        return ParseFail("Expected white space ", start_pos);
+        return ParseFail(start_pos);
 }
 
 // Whitespace -> OneWhitespace*
@@ -468,7 +546,7 @@ ParseResult<double> parseDouble(const std::string& input, int start_pos)
     if (errno == 0)
         return ParseSuccess(value, start_pos);
     else
-        return ParseFail("Failure reading floating point number", start_pos);
+        return ParseFail(start_pos);
 }
 
 // Length -> ":" SPACE [number] SPACE | empty
@@ -564,7 +642,7 @@ ParseResult<char> parseQuotedChar(const std::string& input, int start_pos){
                 return ParseSuccess<char>('\'', maybe_char2.next_pos());
             // one quote fails
             else
-                return ParseFail("Single quote not followed by another single quote", start_pos);
+                return ParseFail(start_pos);
         }
         else
             //new_start_pos will ALWAYS be start_pos+1
@@ -590,7 +668,7 @@ ParseResult<char> parseUnquotedChar(const std::string& input, int start_pos)
             return ParseSuccess(c, maybe_char.next_pos());
         // c is an illegal character (punctuation)
         else 
-            return ParseFail("Illegal character", start_pos);
+            return ParseFail(start_pos);
     }
     else
         return maybe_char;

@@ -45,10 +45,9 @@ namespace RevBayesCore {
 
     struct ParseFail
     {
-        std::string err_message; // informative error if success = false
-        int err_pos;             // where it failed
-        bool soft = true;        // soft means we didn't find something, hard means we found it but its malformed.
-        ParseFail(const std::string& s, int i): err_message(s), err_pos(i) {}
+        int err_pos;            // where it failed
+        bool soft;              // soft means we didn't find something, hard means we found it but its malformed.
+        ParseFail(int i, bool s=true): err_pos(i), soft(s) {}
     };
 
 
@@ -127,18 +126,6 @@ namespace RevBayesCore {
         {
             assert(success());
             return std::get<ParseSuccess<T>>(*this).next_pos;
-        }
-
-        std::string& err_message()
-        {
-            assert(not success());
-            return std::get<ParseFail>(*this).err_message;
-        }
-
-        const std::string& err_message() const
-        {
-            assert(not success());
-            return std::get<ParseFail>(*this).err_message;
         }
 
         int& err_pos()
