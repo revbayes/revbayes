@@ -37,12 +37,18 @@ std::vector<Tree*>* NewickTreeReader::readBranchLengthTrees(const path& fn)
     
     /* Read the whole file into a string */
     std::string input;
+    bool firstline = true;
     while ( inFile.good() ) 
     {
         // Read a line
         std::string line;
         safeGetline( inFile, line );
         
+        if (not firstline)
+            input += "\n";
+        else
+            firstline = false;
+
         input += line;
     }
     
