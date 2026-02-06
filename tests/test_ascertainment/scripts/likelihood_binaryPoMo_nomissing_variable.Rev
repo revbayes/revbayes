@@ -1,0 +1,44 @@
+################################################################################
+#
+# RevBayes Script: Test ascertainment bias correction: 
+#                  2-allele PoMo data, no missing, variable coding
+#
+# authors: Wenjie Zhu
+#
+# Note: this script only works for dev_PoMo_SNP
+#
+################################################################################
+
+tree <- readTrees("data/3_taxa.tre")[1]
+
+phi <- [1.0,1.0]
+mu  <- 0.0000000028
+Q := fnPoMoKN(K=2, V=3, N=3, [mu,mu], phi)
+
+X ~ dnPhyloCTMC(tree, Q, type="PoMo", nSites=1)
+# X_asc ~ dnPhyloCTMC(tree, Q, type="PoMo", nSites=1, coding="variable")
+
+
+D = readPoMoCountFile( countFile="data/3_pops_1_char_binaryPoMo.cf", virtualPopulationSize=3, format="PoMo")
+
+X.setValue( D )
+# X_asc.setValue( D )
+Mk_obs = X.lnProbability()
+# Mkv_obs = X_asc.lnProbability()
+"Mk likelihood:" + X.lnProbability()
+# "Mkv likelihood:" + X_asc.lnProbability()
+
+# Invariant patterns
+L_invar = 0
+D_invar = readPoMoCountFile( countFile="data/3_pops_1_char_binaryPoMo_invariant.cf", virtualPopulationSize=3, format="PoMo")
+
+for (i in 1:D_invar.nchar()) {
+    D_invar.excludeAll()
+    D_invar.includeCharacter(i)
+    X.setValue( D_invar )
+    L_invar = L_invar + exp(X.lnProbability())
+}
+
+"Mkv likelihood based on invariant character:" + ln( exp(Mk_obs) / (1-L_invar) )
+
+q()

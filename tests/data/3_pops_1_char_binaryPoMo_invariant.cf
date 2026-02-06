@@ -1,0 +1,4 @@
+COUNTSFILE NPOP 3 NSITES 4
+CHROM POS Taxon_1 Taxon_2 Taxon_3
+? ? 3,0 3,0 3,0
+? ? 0,3 0,3 0,3
