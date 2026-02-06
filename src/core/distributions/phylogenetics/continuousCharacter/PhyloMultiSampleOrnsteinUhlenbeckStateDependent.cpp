@@ -34,7 +34,7 @@ namespace RevBayesCore { class RandomNumberGenerator; }
 
 using namespace RevBayesCore;
 
-PhyloMultiSampleOrnsteinUhlenbeckStateDependent::PhyloMultiSampleOrnsteinUhlenbeckStateDependent(const TypedDagNode<CharacterHistoryDiscrete> *ch, size_t ns, ROOT_TREATMENT rt, const TypedDagNode< RbVector< double > > *v, const TypedDagNode< RbVector< double > > *vv, const std::vector<Taxon> &ta) : TypedDistribution< ContinuousCharacterData > ( new ContinuousCharacterData() ),
+PhyloMultiSampleOrnsteinUhlenbeckStateDependent::PhyloMultiSampleOrnsteinUhlenbeckStateDependent(const TypedDagNode<CharacterHistoryDiscrete> *ch, size_t ns, ROOT_TREATMENT rt, bool use_v, const TypedDagNode< RbVector< double > > *v, const TypedDagNode< RbVector< double > > *vv, const std::vector<Taxon> &ta) : TypedDistribution< ContinuousCharacterData > ( new ContinuousCharacterData() ),
     num_nodes( ch->getValue().getNumberBranches()+1 ),
     num_sites( ns ),
     partial_likelihoods( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
@@ -47,6 +47,7 @@ PhyloMultiSampleOrnsteinUhlenbeckStateDependent::PhyloMultiSampleOrnsteinUhlenbe
     within_species_variances( v ),
     variances_of_within_species_variances( vv ),
     num_species( ch->getValue().getTree().getNumberOfTips() ),
+    use_emp_var( use_v ),
     num_individuals( ta.size() ),
     taxa( ta )
 {
@@ -59,7 +60,6 @@ PhyloMultiSampleOrnsteinUhlenbeckStateDependent::PhyloMultiSampleOrnsteinUhlenbe
     state_dependent_sigma       = NULL;
     state_dependent_theta       = NULL;
     root_treatment              = rt;
-
 
     // add parameters
     addParameter( homogeneous_alpha );
@@ -203,43 +203,51 @@ double PhyloMultiSampleOrnsteinUhlenbeckStateDependent::computeWithinSpeciesVari
     double num_samples = getNumberOfSamplesPerSpecies(name);
     double variance = 0.0;
 
-    if ( within_species_variances == NULL && variances_of_within_species_variances != NULL)
-    {
-        double empirical_variance = 0.0;
-        for (size_t i=0; i<taxa.size(); ++i)
-        {
-            const Taxon &t = taxa[i];
-            if ( name == t.getSpeciesName() )
-            {
-                ContinuousTaxonData& taxon = this->value->getTaxonData( t.getName() );
-                if ( taxon.isCharacterResolved( index ) == true )
-                {
-                    empirical_variance += (taxon.getCharacter(index) - mean) * (taxon.getCharacter(index) - mean);
-
-                    //++num_samples;
-                }
-            }
-        }
-
-        // normalize
-        if ( num_samples > 0 )
-        {
-            empirical_variance /= num_samples;
-        }
-
-        double var_of_var = variances_of_within_species_variances->getValue()[index];
-
-        variance = RbStatistics::Normal::rv( empirical_variance, sqrt(var_of_var), *GLOBAL_RNG);
-    }
-    else if ( within_species_variances != NULL && variances_of_within_species_variances == NULL)
+    if ( num_samples == 1 )
     {
         variance = within_species_variances->getValue()[ index ];
-        variance /= num_samples;
     }
-    else
+    else if ( num_samples > 1 )
     {
-        // throw error
+        if ( variances_of_within_species_variances != NULL ) // use empirical within-species variance to estimate
+        {
+            double empirical_variance = 0.0;
+            for (size_t i=0; i<taxa.size(); ++i)
+            {
+                const Taxon &t = taxa[i];
+                if ( name == t.getSpeciesName() )
+                {
+                    ContinuousTaxonData& taxon = this->value->getTaxonData( t.getName() );
+                    if ( taxon.isCharacterResolved( index ) == true )
+                    {
+                        empirical_variance += (taxon.getCharacter(index) - mean) * (taxon.getCharacter(index) - mean);
+                        //++num_samples;
+                    }
+                }
+            }
+
+            // normalize
+            empirical_variance /= num_samples;
+
+            double var_of_var = variances_of_within_species_variances->getValue()[index];
+
+            variance = RbStatistics::Normal::rv( empirical_variance, sqrt(var_of_var), *GLOBAL_RNG);
+        }
+        else if ( variances_of_within_species_variances == NULL)
+        {
+            variance = within_species_variances->getValue()[ index ];
+            variance /= num_samples;
+        }
+        else
+        {
+            // throw error
+        }
     }
+
+    // else if num_sample == 0 ...
+
+
+
 
     // calculate mean (maybe change to get mean)
     // double mean = 0.0;

@@ -62,7 +62,7 @@ class TypeSpec;
         RevPtr<const RevVariable>                       character_history;
         RevPtr<const RevVariable>                       n_sites;
 //        RevPtr<const RevVariable>                       useEmpiricalSpeciesMean;
-        RevPtr<const RevVariable>                       useEmpiricalSpeciesVariances;
+        RevPtr<const RevVariable>                       use_empirical_variances;
         RevPtr<const RevVariable>                       within_species_variances;
         RevPtr<const RevVariable>                       variances_of_within_species_variances;
         RevPtr<const RevVariable>                       taxa;                       //!< The taxons

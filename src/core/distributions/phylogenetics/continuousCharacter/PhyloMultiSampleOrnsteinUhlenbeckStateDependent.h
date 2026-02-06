@@ -21,7 +21,7 @@ namespace RevBayesCore {
     public:
         enum                                                                ROOT_TREATMENT { OPTIMUM, EQUILIBRIUM, PARAMETER };
         // Note, we need the size of the alignment in the constructor to correctly simulate an initial state
-        PhyloMultiSampleOrnsteinUhlenbeckStateDependent(const TypedDagNode<CharacterHistoryDiscrete> *bh, size_t n_sites, ROOT_TREATMENT rt, const TypedDagNode< RbVector< double > > *v, const TypedDagNode< RbVector< double > > *vv, const std::vector<Taxon> &ta);
+        PhyloMultiSampleOrnsteinUhlenbeckStateDependent(const TypedDagNode<CharacterHistoryDiscrete> *bh, size_t n_sites, ROOT_TREATMENT rt, bool use_V, const TypedDagNode< RbVector< double > > *v, const TypedDagNode< RbVector< double > > *vv, const std::vector<Taxon> &ta);
         virtual                                                            ~PhyloMultiSampleOrnsteinUhlenbeckStateDependent(void);                                             //!< Virtual destructor
 
         // public member functions
@@ -102,6 +102,7 @@ namespace RevBayesCore {
         const TypedDagNode< RbVector< double > >*                           within_species_variances;
         const TypedDagNode< RbVector< double > >*                           variances_of_within_species_variances;
 
+        bool                                                                use_emp_var;
         size_t                                                              num_species;
         size_t                                                              num_individuals;
         std::vector<size_t>                                                 num_individuals_per_species;
