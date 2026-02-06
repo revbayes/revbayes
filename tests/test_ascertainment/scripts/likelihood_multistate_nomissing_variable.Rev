@@ -1,7 +1,7 @@
 ################################################################################
 #
 # RevBayes Script: Test ascertainment bias correction: 
-#                  Multistate data, no missing, variable coding
+#                  3-state data, no missing, variable coding
 #
 # authors: Wenjie Zhu
 #

@@ -1,0 +1,53 @@
+################################################################################
+#
+# RevBayes Script: Test ascertainment bias correction: 
+#                  Binary data, with missing, variable coding
+#
+# authors: Wenjie Zhu
+#
+################################################################################
+
+tree <- readTrees("data/3_taxa.tre")[1]
+
+Q <- fnF81( simplex(1,4) )
+
+X ~ dnPhyloCTMC(tree, Q, type="Standard", nSites=1)
+X_asc ~ dnPhyloCTMC(tree, Q, type="Standard", nSites=1, coding="variable")
+
+
+D = readDiscreteCharacterData("data/3_taxa_1_char_binary_missing.nex")
+
+X.setValue( D )
+X_asc.setValue( D )
+Mk_obs = X.lnProbability()
+Mkv_obs = X_asc.lnProbability()
+"Mk likelihood:" + X.lnProbability()
+"Mkv likelihood:" + X_asc.lnProbability()
+
+# possible variable patterns
+L_var = 0
+D_var = readDiscreteCharacterData("data/3_taxa_1_char_binary_variable.nex")
+
+ind = [1,6]
+for (i in ind) {
+    D_var.excludeAll()
+    D_var.includeCharacter(i)
+    X.setValue( D_var )
+    L_var = L_var + exp(X.lnProbability())
+}
+"Manual calculation of Mk likelihood:" + ln( L_var )
+
+# Condition on the observed sites are variable
+ind = [1,3,4,6]
+L_obs_var = 0
+D_obs_var = readDiscreteCharacterData("data/3_taxa_1_char_binary_variable.nex")
+for (i in ind) {
+    D_obs_var.excludeAll()
+    D_obs_var.includeCharacter(i)
+    X.setValue( D_obs_var )
+    L_obs_var = L_obs_var + exp(X.lnProbability())
+}
+
+"Mkv likelihood conditional on observed variable characters:" + ln( exp(Mk_obs) / L_obs_var )
+
+q()

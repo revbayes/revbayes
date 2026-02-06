@@ -9,7 +9,7 @@
 
 tree <- readTrees("data/4_taxa.tre")[1]
 
-Q <- fnF81( simplex(1,2,3) )
+Q <- fnGTR( exchangeRates=simplex(1,2,3), baseFrequencies=simplex(1,2,3) )
 
 X ~ dnPhyloCTMC(tree, Q, type="Standard", nSites=1)
 X_asc ~ dnPhyloCTMC(tree, Q, type="Standard", nSites=1, coding="informative")
