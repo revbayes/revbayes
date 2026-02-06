@@ -111,9 +111,15 @@ const MemberRules& Move_AdaptiveReversibleJumpSwitch::getParameterRules(void) co
         move_member_rules.push_back( new ArgumentRule( "waitBeforeUsing", Natural::getClassTypeSpec(), "Number of tries before using.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(10000) ) );
         move_member_rules.push_back( new ArgumentRule( "updateEvery", Natural::getClassTypeSpec(), "How frequent to update.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1) ) );
 
-        /* Inherit weight from Move, put it after variable */
+        /* Inherit weight (but not tuneTarget!) from Move and put it after the arguments created above */
         const MemberRules& inheritedRules = Move::getParameterRules();
-        move_member_rules.insert( move_member_rules.end(), inheritedRules.begin(), inheritedRules.end() );
+        for (size_t i = 0; i < inheritedRules.size(); ++i)
+        {
+            if ( inheritedRules[i].getArgumentLabel() == "weight" )
+            {
+                move_member_rules.push_back( inheritedRules[i].clone() );
+            }
+        }
         
         rules_set = true;
     }

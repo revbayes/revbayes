@@ -277,10 +277,11 @@ void RevBayesCore::AdaptiveReversibleJumpProposal::prepareProposal( void )
 /**
  * Print the summary of the Proposal.
  *
- * The summary just contains the current value of the tuning parameter.
+ * The summary just contains the current values of the mean and variance of the normal proposal distribution
  * It is printed to the stream that it passed in.
  *
  * \param[in]     o     The stream to which we print the summary.
+ * \param[in]     name_only    Should we only print the names of the parameters, or their values as well?
  */
 void RevBayesCore::AdaptiveReversibleJumpProposal::printParameterSummary(std::ostream &o, bool name_only) const
 {
@@ -327,25 +328,5 @@ void RevBayesCore::AdaptiveReversibleJumpProposal::swapNodeInternal(DagNode *old
 {
     
     variable = static_cast<StochasticNode<double>* >(newN) ;
-    
-}
-
-
-void RevBayesCore::AdaptiveReversibleJumpProposal::setProposalTuningParameter(double tp)
-{
-    // this proposal has no tuning parameter: nothing to do
-}
-
-
-/**
- * Tune the Proposal to accept the desired acceptance ratio.
- *
- * The acceptance ratio for this Proposal should be around 0.44.
- * If it is too large, then we increase the proposal size,
- * and if it is too small, then we decrease the proposal size.
- */
-void RevBayesCore::AdaptiveReversibleJumpProposal::tune( double rate )
-{
-    // nothing to do here.
     
 }
