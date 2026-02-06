@@ -1,0 +1,40 @@
+################################################################################
+#
+# RevBayes Script: Test ascertainment bias correction: 
+#                  3-state data, with missing, informative coding
+#
+# authors: Wenjie Zhu
+#
+################################################################################
+
+tree <- readTrees("data/5_taxa.tre")[1]
+
+Q <- fnGTR( exchangeRates=simplex(1,2,3), baseFrequencies=simplex(1,2,3) )
+
+X ~ dnPhyloCTMC(tree, Q, type="Standard", nSites=1)
+X_asc ~ dnPhyloCTMC(tree, Q, type="Standard", nSites=1, coding="informative")
+
+
+D = readDiscreteCharacterData("data/5_taxa_1_char_multistate_missing.nex")
+
+X.setValue( D )
+X_asc.setValue( D )
+Mk_obs = X.lnProbability()
+Mkv_obs = X_asc.lnProbability()
+"Mk likelihood:" + X.lnProbability()
+"Mkp likelihood:" + X_asc.lnProbability()
+
+
+# Condition on the observed sites are informative
+L_obs_inf = 0
+D_obs_inf = readDiscreteCharacterData("data/5_taxa_1_char_multistate_obs_informative_missing.nex")
+for (i in 1:D_obs_inf.nchar()) {
+    D_obs_inf.excludeAll()
+    D_obs_inf.includeCharacter(i)
+    X.setValue( D_obs_inf )
+    L_obs_inf = L_obs_inf + exp(X.lnProbability())
+}
+
+"Mkp likelihood conditional on observed informative characters:" + ln( exp(Mk_obs) / L_obs_inf )
+
+q()
