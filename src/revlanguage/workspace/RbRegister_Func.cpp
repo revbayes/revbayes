@@ -87,6 +87,7 @@
 #include "Func_chronoToPhylo.h"
 #include "Func_computeWeightedNodeOrderConstraintsScore.h"
 #include "Func_combineCharacter.h"
+#include "Func_computeEmpiricalWithinSpeciesVariances.h"
 #include "Func_concatenate.h"
 #include "Func_concatenateContinuousCharacterData.h"
 #include "Func_CladeSpecificHierarchicalBranchRate.h"
@@ -331,7 +332,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
 
         addFunction( new Func_FlowT2Populations()      );
 
-        
+
         /* Rate matrix generator functions (in folder "functions/evolution/ratematrix") */
         addFunction( new Func_BinaryMutationCoalescentRateMatrix()          );
         addFunction( new Func_blosum62()                                    );
@@ -442,6 +443,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_branchScoreDistance()                             );
         addFunction( new Func_checkNodeOrderConstraints()                       );
         addFunction( new Func_chronoToPhylo()                                   );
+        addFunction( new Func_computeEmpiricalWithinSpeciesVariances()          );
         addFunction( new Func_computeWeightedNodeOrderConstraintsScore()        );
         addFunction( new Func_combineCharacter()                                );
         addFunction( new Func_concatenate()                                     );
@@ -526,7 +528,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
 
         // geometric mean function
         addFunction( new Func_geometricMean() );
-        
+
         // logistic function
         addFunction( new Func_logistic() );
 

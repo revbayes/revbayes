@@ -9,6 +9,7 @@
 #include "AbstractPhyloContinuousCharacterProcess.h"
 #include "BranchHistory.h"
 #include "ConstantNode.h"
+#include "ComputeEmpiricalWithinSpeciesVariances.h"
 #include "DistributionNormal.h"
 #include "PhyloMultiSampleOrnsteinUhlenbeckStateDependent.h"
 #include "RandomNumberFactory.h"
@@ -34,7 +35,7 @@ namespace RevBayesCore { class RandomNumberGenerator; }
 
 using namespace RevBayesCore;
 
-PhyloMultiSampleOrnsteinUhlenbeckStateDependent::PhyloMultiSampleOrnsteinUhlenbeckStateDependent(const TypedDagNode<CharacterHistoryDiscrete> *ch, size_t ns, ROOT_TREATMENT rt, bool use_v, const TypedDagNode< RbVector< double > > *v, const TypedDagNode< RbVector< double > > *vv, const std::vector<Taxon> &ta) : TypedDistribution< ContinuousCharacterData > ( new ContinuousCharacterData() ),
+PhyloMultiSampleOrnsteinUhlenbeckStateDependent::PhyloMultiSampleOrnsteinUhlenbeckStateDependent(const TypedDagNode<CharacterHistoryDiscrete> *ch, size_t ns, ROOT_TREATMENT rt, const TypedDagNode< RbVector< double > > *v, const std::vector<Taxon> &ta) : TypedDistribution< ContinuousCharacterData > ( new ContinuousCharacterData() ),
     num_nodes( ch->getValue().getNumberBranches()+1 ),
     num_sites( ns ),
     partial_likelihoods( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
@@ -45,9 +46,7 @@ PhyloMultiSampleOrnsteinUhlenbeckStateDependent::PhyloMultiSampleOrnsteinUhlenbe
     dirty_nodes( std::vector<bool>(this->num_nodes, true) ),
     character_histories( ch ),
     within_species_variances( v ),
-    variances_of_within_species_variances( vv ),
     num_species( ch->getValue().getTree().getNumberOfTips() ),
-    use_emp_var( use_v ),
     num_individuals( ta.size() ),
     taxa( ta )
 {
@@ -68,14 +67,13 @@ PhyloMultiSampleOrnsteinUhlenbeckStateDependent::PhyloMultiSampleOrnsteinUhlenbe
     addParameter( character_histories );
     addParameter( root_value );
     addParameter( within_species_variances );
-    addParameter( variances_of_within_species_variances );
 
     num_individuals_per_species = std::vector<size_t>(num_species,0);
     const std::vector<TopologyNode *> &nodes = ch->getValue().getTree().getNodes();
     for (size_t i=0; i<num_species; ++i)
     {
         const std::string &species_name = nodes[i]->getSpeciesName();
-        num_individuals_per_species[i] = getNumberOfSamplesPerSpecies( species_name );
+        num_individuals_per_species[i] = getNumberOfSamplesForSpecies( species_name );
     }
 
     // now we need to reset the value
@@ -167,114 +165,114 @@ double PhyloMultiSampleOrnsteinUhlenbeckStateDependent::computeRootValue( void )
     return rvl;
 }
 
-double PhyloMultiSampleOrnsteinUhlenbeckStateDependent::computeSpeciesMean(const std::string &name, size_t index)
-{
+// double PhyloMultiSampleOrnsteinUhlenbeckStateDependent::computeSpeciesMean(const std::string &name, size_t index)
+// {
 
-    double mean = 0.0;
-    double num_samples = 0.0;
+//     double mean = 0.0;
+//     double num_samples = 0.0;
 
-    for (size_t i=0; i<taxa.size(); ++i)
-    {
-        const Taxon &t = taxa[i];
-        if ( name == t.getSpeciesName() )
-        {
-            ContinuousTaxonData& taxon = this->value->getTaxonData( t.getName() );
-            if ( taxon.isCharacterResolved( index ) == true )
-            {
-                mean += taxon.getCharacter(index);
+//     for (size_t i=0; i<taxa.size(); ++i)
+//     {
+//         const Taxon &t = taxa[i];
+//         if ( name == t.getSpeciesName() )
+//         {
+//             ContinuousTaxonData& taxon = this->value->getTaxonData( t.getName() );
+//             if ( taxon.isCharacterResolved( index ) == true )
+//             {
+//                 mean += taxon.getCharacter(index);
 
-                ++num_samples;
-            }
-        }
-    }
+//                 ++num_samples;
+//             }
+//         }
+//     }
 
-    // normalize
-    if ( num_samples > 0 )
-    {
-        mean /= num_samples;
-    }
+//     // normalize
+//     if ( num_samples > 0 )
+//     {
+//         mean /= num_samples;
+//     }
 
-    return mean;
-}
+//     return mean;
+// }
 
-double PhyloMultiSampleOrnsteinUhlenbeckStateDependent::computeWithinSpeciesVariance(const std::string &name, size_t index)
-{
-    double mean = computeSpeciesMean(name, index);
-    double num_samples = getNumberOfSamplesPerSpecies(name);
-    double variance = 0.0;
+// double PhyloMultiSampleOrnsteinUhlenbeckStateDependent::computeWithinSpeciesVariance(const std::string &name, size_t index)
+// {
+//     double mean = computeSpeciesMean(name, index);
+//     double num_samples = getNumberOfSamplesPerSpecies(name);
+//     double variance = 0.0;
 
-    if ( num_samples == 1 )
-    {
-        variance = within_species_variances->getValue()[ index ];
-    }
-    else if ( num_samples > 1 )
-    {
-        if ( variances_of_within_species_variances != NULL ) // use empirical within-species variance to estimate
-        {
-            double empirical_variance = 0.0;
-            for (size_t i=0; i<taxa.size(); ++i)
-            {
-                const Taxon &t = taxa[i];
-                if ( name == t.getSpeciesName() )
-                {
-                    ContinuousTaxonData& taxon = this->value->getTaxonData( t.getName() );
-                    if ( taxon.isCharacterResolved( index ) == true )
-                    {
-                        empirical_variance += (taxon.getCharacter(index) - mean) * (taxon.getCharacter(index) - mean);
-                        //++num_samples;
-                    }
-                }
-            }
+//     if ( num_samples == 1 )
+//     {
+//         variance = within_species_variances->getValue()[ index ];
+//     }
+//     else if ( num_samples > 1 )
+//     {
+//         if ( variances_of_within_species_variances != NULL ) // use empirical within-species variance to estimate
+//         {
+//             double empirical_variance = 0.0;
+//             for (size_t i=0; i<taxa.size(); ++i)
+//             {
+//                 const Taxon &t = taxa[i];
+//                 if ( name == t.getSpeciesName() )
+//                 {
+//                     ContinuousTaxonData& taxon = this->value->getTaxonData( t.getName() );
+//                     if ( taxon.isCharacterResolved( index ) == true )
+//                     {
+//                         empirical_variance += (taxon.getCharacter(index) - mean) * (taxon.getCharacter(index) - mean);
+//                         //++num_samples;
+//                     }
+//                 }
+//             }
 
-            // normalize
-            empirical_variance /= num_samples;
+//             // normalize
+//             empirical_variance /= num_samples;
 
-            double var_of_var = variances_of_within_species_variances->getValue()[index];
+//             double var_of_var = variances_of_within_species_variances->getValue()[index];
 
-            variance = RbStatistics::Normal::rv( empirical_variance, sqrt(var_of_var), *GLOBAL_RNG);
-        }
-        else if ( variances_of_within_species_variances == NULL)
-        {
-            variance = within_species_variances->getValue()[ index ];
-            variance /= num_samples;
-        }
-        else
-        {
-            // throw error
-        }
-    }
+//             variance = RbStatistics::Normal::rv( empirical_variance, sqrt(var_of_var), *GLOBAL_RNG);
+//         }
+//         else if ( variances_of_within_species_variances == NULL)
+//         {
+//             variance = within_species_variances->getValue()[ index ];
+//             variance /= num_samples;
+//         }
+//         else
+//         {
+//             // throw error
+//         }
+//     }
 
-    // else if num_sample == 0 ...
-
-
+//     // else if num_sample == 0 ...
 
 
-    // calculate mean (maybe change to get mean)
-    // double mean = 0.0;
 
 
-    // for (size_t i=0; i<taxa.size(); ++i)
-    // {
-    //     const Taxon &t = taxa[i];
-    //     if ( name == t.getSpeciesName() )
-    //     {
-    //         ContinuousTaxonData& taxon = this->value->getTaxonData( t.getName() );
-    //         if ( taxon.isCharacterResolved( index ) == true )
-    //         {
-    //             mean += taxon.getCharacter(index);
+//     // calculate mean (maybe change to get mean)
+//     // double mean = 0.0;
 
-    //             ++num_samples;
-    //         }
-    //     }
-    // }
 
-    // if ( num_samples > 0 )
-        // {
-        //     mean /= num_samples;
-        // }
+//     // for (size_t i=0; i<taxa.size(); ++i)
+//     // {
+//     //     const Taxon &t = taxa[i];
+//     //     if ( name == t.getSpeciesName() )
+//     //     {
+//     //         ContinuousTaxonData& taxon = this->value->getTaxonData( t.getName() );
+//     //         if ( taxon.isCharacterResolved( index ) == true )
+//     //         {
+//     //             mean += taxon.getCharacter(index);
 
-    return variance;
-}
+//     //             ++num_samples;
+//     //         }
+//     //     }
+//     // }
+
+//     // if ( num_samples > 0 )
+//         // {
+//         //     mean /= num_samples;
+//         // }
+
+//     return variance;
+// }
 
 
 double PhyloMultiSampleOrnsteinUhlenbeckStateDependent::computeLnProbability( void )
@@ -522,7 +520,7 @@ void PhyloMultiSampleOrnsteinUhlenbeckStateDependent::recursiveComputeLnProbabil
 }
 
 
-double PhyloMultiSampleOrnsteinUhlenbeckStateDependent::getNumberOfSamplesPerSpecies(const std::string &name)
+double PhyloMultiSampleOrnsteinUhlenbeckStateDependent::getNumberOfSamplesForSpecies(const std::string &name)
 {
 
     double num_samples = 0.0;
@@ -659,8 +657,10 @@ void PhyloMultiSampleOrnsteinUhlenbeckStateDependent::resetValue( void )
                 double &c = taxon.getCharacter(site_indices[site]);
                 means[0][(*it)->getIndex()][site] = c;
                 means[1][(*it)->getIndex()][site] = c;
-                variances[0][(*it)->getIndex()] = computeWithinSpeciesVariance((*it)->getName(), (*it)->getIndex());
-                variances[1][(*it)->getIndex()] = computeWithinSpeciesVariance((*it)->getName(), (*it)->getIndex());
+                variances[0][(*it)->getIndex()] = 0;
+                variances[1][(*it)->getIndex()] = 0;
+                //variances[0][(*it)->getIndex()] = computeWithinSpeciesVariance((*it)->getName(), (*it)->getIndex());
+                //variances[1][(*it)->getIndex()] = computeWithinSpeciesVariance((*it)->getName(), (*it)->getIndex());
             }
         }
     }
@@ -933,9 +933,7 @@ void PhyloMultiSampleOrnsteinUhlenbeckStateDependent::setWithinSpeciesVariances(
 
     // remove the old parameter first
     this->removeParameter( within_species_variances );
-    this->removeParameter( variances_of_within_species_variances );
     within_species_variances                = NULL;
-    variances_of_within_species_variances   = NULL;
 
     size_t number_tips = character_histories->getValue().getTree().getNumberOfTips();
     // make sure that the state-space is correct

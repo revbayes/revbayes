@@ -82,31 +82,8 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
 
     // set the within-species variances, or the variances of the within-species variances
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* var     = static_cast<const ModelVector<RealPos> &>( within_species_variances->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* var_var = static_cast<const ModelVector<RealPos> &>( variances_of_within_species_variances->getRevObject() ).getDagNode();
-    bool use_emp_var = static_cast<const RlBoolean &>( use_empirical_variances->getRevObject() ).getDagNode()->getValue();
-    if ( within_species_variances->getRevObject() == RevNullObject::getInstance() )
-    {
-        throw RbException("You have to specify \"withinSpeciesVariances\"");
-    }
 
-    if ( use_emp_var == true)
-    {
-         if ( variances_of_within_species_variances->getRevObject() == RevNullObject::getInstance())
-         {
-             throw RbException("To use empirical species variances, you have to specify \"variancesOfWithinSpeciesVariances\"");
-         }
-    }
-    else        // use_emp_var == FALSE
-    {
-        if ( variances_of_within_species_variances->getRevObject() != RevNullObject::getInstance())
-        {
-            throw RbException("If \"useEmpiricalSpeciesVariances\" is set to false, do not specify \"variancesOfWithinSpeciesVariances\"");
-        }
-    }
-
-
-
-    RevBayesCore::PhyloMultiSampleOrnsteinUhlenbeckStateDependent *dist = new RevBayesCore::PhyloMultiSampleOrnsteinUhlenbeckStateDependent(char_hist, n, rtr, use_empirical_variances, var, var_var, ta);
+    RevBayesCore::PhyloMultiSampleOrnsteinUhlenbeckStateDependent *dist = new RevBayesCore::PhyloMultiSampleOrnsteinUhlenbeckStateDependent(char_hist, n, rtr, var, ta);
 
     // set alpha
     if ( alpha->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
@@ -283,10 +260,8 @@ const MemberRules& Dist_PhyloMultiSampleOrnsteinUhlenbeckStateDependent::getPara
         //RevBayesCore::PhyloMultiSampleOrnsteinUhlenbeckStateDependent::ROOT_TREATMENT rtr = RevBayesCore::PhyloMultiSampleOrnsteinUhlenbeckStateDependent::ROOT_TREATMENT::OPTIMUM;
 
 //        dist_member_rules.push_back( new ArgumentRule( "useEmpiricalSpeciesMeans",     RlBoolean::getClassTypeSpec(), "Should the species means assumed to be equal to the empirical species mean or should we estimate them?",                        ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
-        dist_member_rules.push_back( new ArgumentRule( "useEmpiricalSpeciesVariances", RlBoolean::getClassTypeSpec(), "If \"TRUE\", the within-species variance estimates are informed by the empirical within-species variances.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
-        dist_member_rules.push_back( new ArgumentRule( "withinSpeciesVariances" , ModelVector<RealPos>::getClassTypeSpec(), "The within-species variance for each species.",                         ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        dist_member_rules.push_back( new ArgumentRule( "variancesOfWithinSpeciesVariances" , ModelVector<RealPos>::getClassTypeSpec(), "The variances of within-species variance for each species.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        dist_member_rules.push_back( new ArgumentRule( "taxa"  , ModelVector<Taxon>::getClassTypeSpec(), "The vector of taxa which have species and individual names.",                              ArgumentRule::BY_VALUE,              ArgumentRule::ANY ) );
+        dist_member_rules.push_back( new ArgumentRule( "withinSpeciesVariances" , ModelVector<Real>::getClassTypeSpec(), "The within-species variance for each species in log scale.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        dist_member_rules.push_back( new ArgumentRule( "taxa"  , ModelVector<Taxon>::getClassTypeSpec(), "The vector of taxa which have species and individual names.",      ArgumentRule::BY_VALUE,              ArgumentRule::ANY ) );
 
         dist_member_rules.push_back( new ArgumentRule( "nSites",  Natural::getClassTypeSpec(), "The number of sites which is used for the initialized (random draw) from this distribution.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1) ) );
 
@@ -364,28 +339,9 @@ void Dist_PhyloMultiSampleOrnsteinUhlenbeckStateDependent::printValue(std::ostre
     {
         o << "?";
     }
-    o << ")";
-    if ( use_empirical_variances != NULL )
-    {
-        o << use_empirical_variances->getName();
-    }
-    else
-    {
-        o << "?";
-    }
-    o << ")";
     if ( within_species_variances != NULL )
     {
         o << within_species_variances->getName();
-    }
-    else
-    {
-        o << "?";
-    }
-    o << ")";
-    if ( variances_of_within_species_variances != NULL )
-    {
-        o << variances_of_within_species_variances->getName();
     }
     else
     {
@@ -427,17 +383,9 @@ void Dist_PhyloMultiSampleOrnsteinUhlenbeckStateDependent::setConstParameter(con
     {
         root_treatment = var;
     }
-    else if ( name == "useEmpiricalSpeciesVariances" )
-    {
-        use_empirical_variances = var;
-    }
     else if ( name == "withinSpeciesVariances" )
     {
         within_species_variances = var;
-    }
-    else if ( name == "variancesOfWithinSpeciesVariances" )
-    {
-        variances_of_within_species_variances = var;
     }
     else if ( name == "taxa" )
     {
