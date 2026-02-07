@@ -2491,6 +2491,11 @@ std::optional<std::optional<std::string>> Tree::eraseTreeParameter(const std::st
     return eraseParameter(tree_comments, key);
 }
 
+const std::vector<std::string>&  Tree::getTreeParameters(void) const
+{
+    return tree_comments;
+}
+
 std::ostream& RevBayesCore::operator<<(std::ostream& o, const Tree& x)
 {
 

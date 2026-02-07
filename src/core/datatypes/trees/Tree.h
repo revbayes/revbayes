@@ -162,7 +162,7 @@ namespace RevBayesCore {
         void                                                addTreeParameter(const std::string& key, const std::optional<std::string>& value = {});             //!< Add a tree comment, maybe not of the form key = value
         std::optional<std::optional<std::string>>           getTreeParameter(const std::string& key) const;                                                     //!< 
         std::optional<std::optional<std::string>>           eraseTreeParameter(const std::string& key);                                                         //!< Erase a comment of the form key or key = value
-
+        const std::vector<std::string>&                     getTreeParameters(void) const;                                                                      //!< Get the branch length leading towards this node
     protected:
 
 
