@@ -14,7 +14,13 @@
 #include "Tree.h"
 #include "TreeUtilities.h"
 
-using namespace RevBayesCore;
+using std::optional;
+using std::pair;
+using std::string;
+using std::vector;
+
+namespace RevBayesCore
+{
 
 NewickConverter::NewickConverter()
 {
@@ -27,65 +33,706 @@ NewickConverter::~NewickConverter()
 
 }
 
-
-
-Tree* NewickConverter::convertFromNewick(std::string const &n)
+void postProcessNewick(Tree* tree)
 {
-
-    // create and allocate the tree object
-    Tree *t = new Tree();
-
-    std::vector<TopologyNode*> nodes;
-    std::vector<double> brlens;
-
-    // create a string-stream and throw the string into it
-    std::stringstream ss (std::stringstream::in | std::stringstream::out);
-    ss << n;
-
-    // ignore white spaces
-    std::string trimmed = "";
-    char c;
-    while ( ss.good() )
-    {
-        // check for EOF
-        int c_int = ss.get();
-        if (c_int != EOF)
-        {
-            c = char( c_int );
-            if ( c != ' ')
-            {
-                trimmed += c;
-            }
-        }
-    }
-
-    // construct the tree starting from the root
-    TopologyNode *root = createNode( trimmed, nodes, brlens );
-
-    // set up the tree
-    t->setRoot( root, true );
-
     // try to set node indices from attributes
-    t->tryReadIndicesFromParameters(true);
+    tree->tryReadIndicesFromParameters(true);
 
-    // set the branch lengths
-    for (size_t i = 0; i < nodes.size(); ++i)
-    {
-        t->getNode( nodes[i]->getIndex() ).setBranchLength( brlens[i] );
-    }
+    // Determine rooting and remove [&R] / [&U]
+    auto rooted = tree->eraseTreeParameter("R");
+    auto unrooted = tree->eraseTreeParameter("U");
 
-    // trees with 2-degree root nodes should not be rerooted
-    t->setRooted( root->getNumberOfChildren() == 2 );
+    bool is_rooted;
+    if (rooted and not unrooted)
+        is_rooted = true;
+    else if (unrooted and not rooted)
+        is_rooted = false;
+    else
+        is_rooted = tree->getRoot().getNumberOfChildren() == 2;
+
+    tree->setRooted( is_rooted );
     
     // make this tree first a branch length tree
     // hence, tell the root to use branch lengths and not ages (with recursive call)
-    root->setUseAges(false, true);
+    tree->getRoot().setUseAges(false, true);
+}
+
+std::string getErrorMessage(const std::string& input, size_t pos, int tabWidth = 4) {
+    size_t line = 1;
+    size_t visualColumn = 1;
+    size_t lineStart = 0;
+    size_t prevLineStart = 0;
+    bool hasPrevLine = false;
+
+    // 1. Find Current and Previous Line starts
+    for (size_t i = 0; i < pos && i < input.length(); ++i) {
+        if (input[i] == '\n') {
+            hasPrevLine = true;
+            prevLineStart = lineStart;
+            lineStart = i + 1;
+            line++;
+            visualColumn = 1;
+        } else if (input[i] == '\t') {
+            visualColumn += (tabWidth - (visualColumn - 1) % tabWidth);
+        } else {
+            visualColumn++;
+        }
+    }
+
+    // 2. Helper to expand tabs and truncate a line
+    auto processLine = [&](size_t start, size_t end, size_t errPos, bool isErrLine) {
+        std::string raw = input.substr(start, end - start);
+        std::string expanded = "";
+        size_t visualErrIdx = 0;
+
+        for (size_t i = 0; i < raw.length(); ++i) {
+            if (start + i == errPos) visualErrIdx = expanded.length();
+            if (raw[i] == '\t') {
+                expanded.append(tabWidth - (expanded.length() % tabWidth), ' ');
+            } else {
+                expanded += raw[i];
+            }
+        }
+        if (errPos >= start + raw.length()) visualErrIdx = expanded.length();
+
+        // Sliding Window Logic
+        const size_t MAX_WIDTH = 60;
+        size_t dispStart = 0;
+        if (expanded.length() > MAX_WIDTH) {
+            dispStart = (visualErrIdx > 30) ? (visualErrIdx - 30) : 0;
+            if (dispStart + MAX_WIDTH > expanded.length()) dispStart = expanded.length() - MAX_WIDTH;
+            
+            // Protect error location from ellipsis
+            if (dispStart > 0 && (visualErrIdx - dispStart) < 3) dispStart = (visualErrIdx >= 3) ? (visualErrIdx - 3) : 0;
+        }
+
+        std::string snippet = expanded.substr(dispStart, MAX_WIDTH);
+        if (dispStart > 0) snippet.replace(0, 3, "...");
+        if (dispStart + MAX_WIDTH < expanded.length()) snippet.replace(snippet.length() - 3, 3, "...");
+
+        return std::make_pair(snippet, visualErrIdx - dispStart);
+    };
+
+    // 3. Extract the current line
+    size_t lineEnd = input.find('\n', lineStart);
+    if (lineEnd == std::string::npos) lineEnd = input.length();
+    auto current = processLine(lineStart, lineEnd, pos, true);
+
+    // 4. Build Output
+    std::string result = "Newick error at line " + std::to_string(line) + ", column " + std::to_string(visualColumn) + ":\n";
+
+    // If error is at the beginning of the line, show the previous line for context
+    if (hasPrevLine && visualColumn <= 5) {
+        size_t prevLineEnd = lineStart - 1;
+        // We pass a dummy errPos way outside the range for the previous line so it doesn't slide the window weirdly
+        auto prev = processLine(prevLineStart, prevLineEnd, 999999, false);
+        result += "|" + prev.first + "\n";
+    }
+
+    result += "|" + current.first + "\n";
+    result += "|" + std::string(current.second, ' ') + "^";
+
+    return result;
+}
+
+Tree* NewickConverter::convertFromNewick(std::string const &newick)
+{
+    // construct the tree starting from the root
+    auto result = parseTree(newick, 0);
+    if (not result){
+        throw RbException()<<getErrorMessage(newick, result.err_pos());
+    }
+    if (result.next_pos() != newick.size())
+        throw RbException()<<"Junk at end of newick string: '"<<newick.substr(result.next_pos())<<"'";
+
+    auto tree = result.value();
+
+    // post-process the tree
+    postProcessNewick(tree);
     
-    // return the tree, the caller is responsible for destruction
-    return t;
+    return tree;
+}
+
+std::vector<Tree*> readNewicks(const std::string& input)
+{
+    auto result = parseTrees(input, 0);
+    if (not result)
+    {
+        throw RbException()<<getErrorMessage(input, result.err_pos());
+    }
+    if (result.next_pos() != input.size())
+        throw RbException()<<"Junk at end of newick string: '"<<input.substr(result.next_pos())<<"'";
+
+    auto trees = result.value();
+
+    // post-process the trees
+    for(auto tree: trees)
+        postProcessNewick(tree);
+
+    return trees;
+}
+
+/* We are currently using this Newick grammar:
+  
+    Tree → Subtree ";"
+    Subtree → [Descendants] [Name] [Branch]
+    Descendants = "(" Subtree ("," Subtree)* ")"
+    Name -> QuotedName | UnquotedName
+    Branch -> ":" [Double]
+    QuotedName -> "'" QuotedChar* "'"
+    UnquotedName -> UnquotedChar*
+    UnquotedChar = not punctuation
+
+When we put the spacing in, we get:
+
+    Tree → SPACE<tree> Subtree ";" SPACE<ignore>
+    Subtree → SPACE<node> [Descendants] SPACE<node> [Name] SPACE<node> (Length | empty<no length, no attributes>)
+    Descendants = "(" Subtree % "," ")"
+    Length -> ":" SPACE<branch> [Double] SPACE<branch>
+
+where SPACE<x> means that we read whitespace and newick comments, and the comments are attached to x.
+So for example SPACE<tree> means that any comments found are considered to refer to the tree.
+*/
+
+// succeeds if there is another character in the input, otherwise fails
+ParseResult<char> parseChar(const std::string& input, int start_pos)
+{
+    // if reading beyond end of string return null
+    if (start_pos >= input.size())
+        return ParseFail(start_pos);
+    else
+    {
+        char c = input[start_pos];
+        return ParseSuccess(c,start_pos+1);
+    }
+}
+
+string escape(char c)
+{
+    if (c == '\'')
+        return "\\'";
+    else if (c == '\n')
+        return "\\n";
+    else if (c == '\r')
+        return "\\r";
+    else if (c == '\t')
+        return "\\t";
+    else
+        return string(1,c);
+}
+
+// returns a new start_pos if the input contains another character, and it is "c"
+ParseResult<char> checkChar(const std::string& input, int start_pos, char c)
+{
+    // if reading beyond end of string return null
+    if (auto maybe_char = parseChar(input, start_pos))
+    {
+        if (maybe_char.value() == c)
+            return maybe_char;
+        else
+            return ParseFail(start_pos);
+    }
+    else
+        return ParseFail(start_pos);
 }
 
 
+ParseResult<string> parseNewickComment(const std::string& input, int start_pos)
+{
+    // 1. First check for an open bracket
+    auto check_open_bracket = checkChar(input, start_pos, '[');
+    if (not check_open_bracket)
+        return check_open_bracket.as_failure();
+    else
+        start_pos = check_open_bracket.next_pos();
+
+    // FIXME: only some comments are supposed to be computer-readable.
+    // Comments that start with [& should be saved.
+    // Also some others... [%U, [%R, and [&&NHX:
+    // Currently we don't try to decide here what to save and what to discard, and just pass back all comments.
+
+    // 2. Then read characters until an end bracket
+    std::string newick_comment;
+    while(auto check_char = parseChar(input, start_pos))
+    {
+        start_pos = check_char.next_pos();
+
+        if (check_char.value() != ']')
+            newick_comment += check_char.value();
+        else
+            return ParseSuccess(newick_comment, start_pos);
+    }
+
+    // 3. If we get here, then ending bracket is missing!
+    return ParseFail(start_pos, false);
+}
+
+// Which values should count as whitespace?
+
+// whiteChar -> [ \t\n\r]    
+ParseResult<char> parseWhiteChar(const std::string& input, int start_pos)
+{
+    // 1. Try to read a character
+    if (auto check_char = parseChar(input, start_pos))
+    {
+        // 2. If it is whitespace, return the character
+        if (strchr(" \t\n\r", check_char.value()))
+            return check_char;
+        else
+            return ParseFail(start_pos);
+    }
+    else
+        return check_char;
+}
+
+// OneWhitespace -> NewickComment OR WhiteChar    
+ParseResult<optional<string>> parseOneWhitespace(const std::string& input, int start_pos)
+{
+    // 1. First try to read a newick comment
+    if (auto check_comment = parseNewickComment(input, start_pos))
+    {
+        return ParseSuccess<optional<string>>({check_comment.value()}, check_comment.next_pos());
+    }
+    // 2. Then try to read a whitespace character
+    else if (auto check_char = parseWhiteChar(input, start_pos))
+    {
+        // If we found a whitespace char, return success with no comment
+        return ParseSuccess<optional<string>>({}, check_char.next_pos());
+    }
+    // 3. If no comment and no whitespace character, return null
+    else
+        return ParseFail(start_pos);
+}
+
+// Whitespace -> OneWhitespace*
+ParseResult<vector<string>> parseWhitespace(const std::string& input, int start_pos)
+{
+    vector<string> newick_comments;
+    while(auto check = parseOneWhitespace(input, start_pos))
+    {
+        start_pos = check.next_pos();
+        if (check.value())
+            newick_comments.push_back(*check.value());
+    }
+    return ParseSuccess(newick_comments, start_pos);
+}
+
+std::string trim(const std::string& s) {
+    // Define all characters considered "whitespace"
+    const std::string WHITESPACE = " \n\r\t\f\v";
+
+    // Find the first character that is NOT whitespace
+    size_t start = s.find_first_not_of(WHITESPACE);
+    
+    // If the string is all whitespace, return an empty string
+    if (start == std::string::npos) {
+        return "";
+    }
+
+    // Find the last character that is NOT whitespace
+    size_t end = s.find_last_not_of(WHITESPACE);
+
+    // Return the substring between start and end
+    return s.substr(start, end - start + 1);
+}
+
+/// Split by commas that are not inside { and }, then trim whitespace
+/// and add non-empty chunks to the output list.
+std::vector<std::string> split_comment(const std::string& comment)
+{
+// "[&B=2,C=4]" -> {"B=2", "C=4" }
+// "[&A=1]" -> { "A=1"}
+// "[  A=1  ]" -> { "A=1"}
+// "[  A=1 , R  ]" -> { "A=1", "R"}
+// "[  A=1 ,]" -> { "A=1"}
+// "[ , ]" -> { }
+// "[,]" -> { }
+
+    // The comment does NOT include the square brackets
+    assert(not comment.ends_with(']'));
+
+    // If the comment doesn't start with & or % then ignore it.
+    if (not (comment.starts_with('&') or comment.starts_with('%'))) return {};
+
+    // Note that this function does NOT handle NHX comments.
+    vector<std::string> chunks;
+    int start = 1;
+    int depth = 0;
+
+    // Handle chunks that are not the last chunk
+    for(int i=start;i<comment.size();i++)
+    {
+        char c = comment[i];
+
+        if (c == ',' and depth == 0)
+        {
+            int length = i-start;
+            auto chunk = trim( comment.substr(start,length) );
+            if (not chunk.empty())
+                chunks.push_back( chunk );
+            start = i+1;
+        }
+
+        // This is from BEAST.  Thanks for making our lives more complicated.
+        else if (c == '{')
+            depth++;
+
+        else if (c == '}')
+            depth--;
+    }
+
+    // Handle the last chunk
+    auto last_chunk = trim( comment.substr(start) );
+    if (not last_chunk.empty())
+        chunks.push_back( last_chunk );
+    
+    return chunks;
+}
+
+
+ParseResult<std::vector<Tree*>> parseTrees(const std::string& input, int start_pos)
+{
+    vector<Tree*> trees;
+
+    while(true)
+    {
+        if (auto check = parseTree(input, start_pos))
+        {
+            assert(check.value());
+            trees.push_back(check.value());
+            start_pos = check.next_pos();
+        }
+        else if (check.hard_failure())
+            return check.as_failure();
+        else
+            break;
+    }
+
+    return ParseSuccess(trees, start_pos);
+}
+    
+// Tree -> SPACE<tree> Subtree ";"
+ParseResult<Tree*> parseTree(const std::string& input, int start_pos)
+{
+    vector<string> tree_comments;
+
+    // 1. Skip whitespace and record tree_comments
+    if (auto maybe_whitespace = parseWhitespace(input, start_pos))
+    {
+        tree_comments = std::move(maybe_whitespace.value());
+        start_pos = maybe_whitespace.next_pos();
+    }
+    else if (maybe_whitespace.hard_failure())
+        return maybe_whitespace.as_hard_failure();
+    
+    // 2. Get the Subtree
+    TopologyNode* root = nullptr;
+    if (auto check_subtree = parseSubTree(input,start_pos))
+    {
+        start_pos = check_subtree.next_pos();
+        root = check_subtree.value();
+    }
+    else
+        return check_subtree.as_failure();
+
+    // 3. Check the semicolon
+    if (auto check_semi = checkChar(input, start_pos, ';'))
+        start_pos = check_semi.next_pos();
+    else
+        return check_semi.as_failure();;
+
+    // 4. Each plain whitechars (not newick comments)
+    while(auto check = parseWhiteChar(input, start_pos))
+        start_pos = check.next_pos();
+
+    // 5. Create the tree
+    Tree* tree = new Tree();
+    
+    tree->setRoot( root, true );
+
+    for(auto& comment: tree_comments)
+        for(auto& chunk: split_comment(comment))
+            tree->addTreeParameter_(chunk);
+
+    return ParseSuccess(tree, start_pos);
+}
+
+// subtree -> SPACE [Descendants] SPACE [Name] SPACE [Branch]
+ParseResult<TopologyNode*> parseSubTree(const std::string& input, int start_pos)
+{
+    auto node = new TopologyNode;
+    vector<string> node_comments;
+
+    // Skip whitespace and record node_comments
+    if (auto maybe_whitespace = parseWhitespace(input, start_pos))
+    {
+        node_comments = std::move(maybe_whitespace.value());
+        start_pos = maybe_whitespace.next_pos();
+    }
+    else if (maybe_whitespace.hard_failure())
+        return maybe_whitespace.as_hard_failure();
+    
+    // Parse [Descendants]
+    if (auto maybe_children = parseDescendants(input, start_pos)) {
+        start_pos = maybe_children.next_pos();
+        for(auto& child: maybe_children.value())
+        {
+            node->addChild(child);
+            child->setParent(node);
+        }
+    }
+    else if (maybe_children.hard_failure())
+        return maybe_children.as_failure();
+    
+    // Skip whitespace and record node_comments
+    if (auto maybe_whitespace = parseWhitespace(input, start_pos))
+    {
+        auto& new_comments = maybe_whitespace.value();
+        std::move(new_comments.begin(), new_comments.end(), std::back_inserter(node_comments));
+        start_pos = maybe_whitespace.next_pos();
+    }
+    else if (maybe_whitespace.hard_failure())
+        return maybe_whitespace.as_hard_failure();
+    
+    // Parse [Name]
+    if (auto maybe_name = parseName(input, start_pos)) {
+        start_pos = maybe_name.next_pos();
+        node -> setName(maybe_name.value());
+    }
+    else if (maybe_name.hard_failure())
+        return maybe_name.as_failure();
+
+    // Skip whitespace and record node_comments
+    if (auto maybe_whitespace = parseWhitespace(input, start_pos))
+    {
+        auto& new_comments = maybe_whitespace.value();
+        std::move(new_comments.begin(), new_comments.end(), std::back_inserter(node_comments));
+        start_pos = maybe_whitespace.next_pos();
+    }
+    else if (maybe_whitespace.hard_failure())
+        return maybe_whitespace.as_hard_failure();
+    
+    // Parse [Branch]
+    if (auto maybe_branch = parseBranch(input, start_pos))
+    {
+        start_pos = maybe_branch.next_pos();
+        auto& [length, branch_comments] = maybe_branch.value();
+        if (length)
+            node->setBranchLength(*length);
+
+        // Add branch comments
+        for(auto& comment: branch_comments)
+            for(auto& chunk: split_comment(comment))
+                node->addBranchParameter_(chunk);
+    }
+    else if (maybe_branch.hard_failure())
+        return maybe_branch.as_failure();
+
+    // Add node comments
+    for(auto& comment: node_comments)
+        for(auto& chunk: split_comment(comment))
+            node->addNodeParameter_(chunk);
+    
+    return ParseSuccess(node, start_pos); 
+}
+
+ParseResult<double> parseDouble(const std::string& input, int start_pos)
+{
+    char* endptr;
+    double value = std::strtod(input.c_str() + start_pos, &endptr);
+
+    errno = 0;
+    start_pos = endptr - input.c_str();
+    if (errno == 0)
+        return ParseSuccess(value, start_pos);
+    else
+        return ParseFail(start_pos);
+}
+
+// Length -> ":" SPACE [number] SPACE | empty
+ParseResult<pair<optional<double>,vector<string>>> parseBranch(const std::string& input, int start_pos)
+{
+    optional<double> length;
+    vector<string> comments;
+
+    // Check for colon
+    if (auto maybe_colon = checkChar(input, start_pos, ':'))
+        start_pos = maybe_colon.next_pos();
+    else
+        return ParseSuccess<pair<optional<double>,vector<string>>>({length, comments}, start_pos);
+
+    // Skip whitespace and record comments
+    if (auto maybe_whitespace = parseWhitespace(input, start_pos))
+    {
+        comments = std::move(maybe_whitespace.value());
+        start_pos = maybe_whitespace.next_pos();
+    }
+    else if (maybe_whitespace.hard_failure())
+        return maybe_whitespace.as_hard_failure();
+    
+    // Parse Length
+    if (auto maybe_length = parseDouble(input, start_pos))
+    {
+        start_pos = maybe_length.next_pos();
+        length = maybe_length.value();
+    }
+    else if (maybe_length.hard_failure())
+        return maybe_length.as_hard_failure();
+    
+    // Skip whitespace and record comments
+    if (auto maybe_whitespace = parseWhitespace(input, start_pos))
+    {
+        auto& new_comments = maybe_whitespace.value();
+        std::move(new_comments.begin(), new_comments.end(), std::back_inserter(comments));
+        start_pos = maybe_whitespace.next_pos();
+    }
+    else if (maybe_whitespace.hard_failure())
+        return maybe_whitespace.as_hard_failure();
+    
+    return ParseSuccess<pair<optional<double>, vector<string>>>({length, comments}, start_pos);
+}
+
+// Descendants -> "(" > Branch ("," > Branch)* > ")"
+ParseResult<std::vector<TopologyNode*>> parseDescendants(const std::string& input, int start_pos)
+{
+    // Read left parenthesis
+    if (auto maybe_lparen = checkChar(input, start_pos, '('))
+        start_pos = maybe_lparen.next_pos();
+    else
+        return maybe_lparen.as_failure();
+
+    vector<TopologyNode*> subtrees;
+    auto maybe_subtree = parseSubTree(input, start_pos);
+    if (not maybe_subtree)
+        return maybe_subtree.as_hard_failure();
+    subtrees.push_back(maybe_subtree.value());
+    start_pos = maybe_subtree.next_pos();
+
+    while(auto maybe_comma = checkChar(input, start_pos, ','))
+    {
+        start_pos = maybe_comma.next_pos();
+        auto maybe_subtree2 = parseSubTree(input, start_pos);
+        if (not maybe_subtree2)
+            return maybe_subtree2.as_hard_failure();
+        subtrees.push_back(maybe_subtree2.value());
+        start_pos = maybe_subtree2.next_pos();
+    }
+
+
+    // Read right parenthesis
+    if (auto maybe_rparen = checkChar(input, start_pos, ')')) {
+        start_pos = maybe_rparen.next_pos();
+    }
+    else
+        return maybe_rparen.as_hard_failure();
+
+    return ParseSuccess(subtrees, start_pos);
+}
+
+// this function is matching (not a quote) or (two quotes)
+// QuotedChar -> [^'] | ''
+ParseResult<char> parseQuotedChar(const std::string& input, int start_pos){
+    assert(start_pos>=0);
+
+    if (auto maybe_char1 = parseChar(input, start_pos)){
+        if (maybe_char1.value() == '\'') {
+            // two quotes returns quote
+            if (auto maybe_char2 = checkChar(input, maybe_char1.next_pos(), '\''))
+                // new_start_pos2 will ALWAYS be start_pos + 2
+                return ParseSuccess<char>('\'', maybe_char2.next_pos());
+            // one quote fails
+            else
+                return ParseFail(start_pos);
+        }
+        else
+            //new_start_pos will ALWAYS be start_pos+1
+            return ParseSuccess<char>(maybe_char1.value(), maybe_char1.next_pos());
+    }
+    else
+        return maybe_char1;
+}
+
+//no quotes 
+ParseResult<char> parseUnquotedChar(const std::string& input, int start_pos)
+{
+    assert(start_pos>=0);
+
+    if (auto maybe_char = parseChar(input, start_pos))
+    {
+        char c = maybe_char.value();
+        // c is _
+        if (c == '_' and false)
+            return ParseSuccess(' ', maybe_char.next_pos());
+        // c is a legal character that is not _
+        else if (!strchr("()[]':;, ", c)) 
+            return ParseSuccess(c, maybe_char.next_pos());
+        // c is an illegal character (punctuation)
+        else 
+            return ParseFail(start_pos);
+    }
+    else
+        return maybe_char;
+}
+
+// QuotedName -> ' + QuotedChar* + '
+// quotedName -> char('\'') > many(quotedChar) > char('\'')
+ParseResult<std::string> parseQuotedName(const std::string& input, int start_pos)
+{
+    auto maybe_quote1 = checkChar(input, start_pos, '\'');
+    if (not maybe_quote1)
+        return maybe_quote1.as_failure();
+    else
+        start_pos = maybe_quote1.next_pos();
+
+    std::string name; 
+    while (auto check = parseQuotedChar(input, start_pos))
+    {
+        name += check.value();
+        start_pos = check.next_pos();
+    }
+
+    auto maybe_quote2 = checkChar(input, start_pos, '\'');
+    if (not maybe_quote2)
+        return maybe_quote2.as_hard_failure();
+    else
+        start_pos = maybe_quote2.next_pos();
+
+    return ParseSuccess(name, start_pos);
+}
+
+// UnquotedName -> UnquotedChar+
+// unquotedName -> some(unquotedChar)
+ParseResult<std::string> parseUnquotedName(const std::string& input, int start_pos){
+    std::string name;
+    if (auto check = parseUnquotedChar(input, start_pos))
+    {
+        name += check.value();
+        start_pos = check.next_pos();
+    }
+    //if not return null
+    else
+        return check.as_failure();
+
+    //continue check
+    while (auto check = parseUnquotedChar(input, start_pos)){
+        name += check.value();
+        start_pos = check.next_pos();
+    }
+
+    return ParseSuccess(name, start_pos);
+}
+
+// Name -> QuotedName | UnquotedName | empty
+ParseResult<std::string> parseName(const std::string& input, int start_pos){
+    if (auto maybe_quoted = parseQuotedName(input, start_pos); maybe_quoted.success() or maybe_quoted.hard_failure())
+        return maybe_quoted;
+    else 
+        return parseUnquotedName(input, start_pos);
+}
+
+
+// NOTE: This code was created by duplicating and modifying the original
+//       convertFromNewick( ) function.
 CharacterHistoryDiscrete* NewickConverter::convertSimmapFromNewick(const std::string& n)
 {
     bool reindex = true;
@@ -183,332 +830,6 @@ CharacterHistoryDiscrete* NewickConverter::convertSimmapFromNewick(const std::st
     // return the tree, the caller is responsible for destruction
     return new_char_hist;
 }
-
-
-// This routine has 4 copies of attribute parsing from comments -- 2 for node attributes, and 2 for branch attributes.
-// Probably "index" should only be handled in node attributes.  And perhaps only allowed there too, since its a magic attribute.
-
-TopologyNode* NewickConverter::createNode(const std::string &n, std::vector<TopologyNode*> &nodes, std::vector<double> &brlens)
-{
-
-    // create a string-stream and throw the string into it
-    std::stringstream ss (std::stringstream::in | std::stringstream::out);
-    ss << n;
-
-    char c = ' ';
-    ss.get(c);
-
-    // the initial character has to be '('
-    //   fixme: actually, the string 'a;' is valid newick.
-    if ( c != '(')
-    {
-        throw RbException() << "Error while converting Newick tree. We expected an opening parenthesis, but didn't get one. Problematic string: " << n;
-    }
-
-    TopologyNode *node = new TopologyNode();
-    while ( ss.good() && ss.peek() != ')' )
-    {
-
-        TopologyNode *childNode;
-        if (ss.peek() == '(' )
-        {
-            // we received an internal node
-            int depth = 0;
-            std::string child = "";
-            do
-            {
-                ss.get(c);
-                child += c;
-                if ( c == '(' )
-                {
-                    depth++;
-                }
-                else if ( c == ')' )
-                {
-                    depth--;
-                }
-
-            } while ( ss.good() && depth > 0 );
-
-            // construct the child node
-            childNode = createNode( child, nodes, brlens );
-        }
-        else
-        {
-            // construct the node
-            childNode = new TopologyNode();
-        }
-
-        // set the parent child relationship
-        node->addChild( childNode );
-        childNode->setParent( node );
-
-        // read the optional label
-        std::string lbl = "";
-        while ( ss.good() && (c = char( ss.peek() ) ) != ':' && c != '[' && c != ';' && c != ',' && c != ')')
-        {
-            lbl += char( ss.get() );
-        }
-        childNode->setName( lbl );
-
-        // read the optional node parameters
-        if ( ss.peek() == '[' )
-        {
-
-            do
-            {
-
-                ss.ignore();
-                // ignore the '&' before parameter name
-                if ( ss.peek() == '&')
-                {
-                    ss.ignore();
-                }
-
-                // read the parameter name
-                std::string paramName = "";
-                while ( ss.good() && (c = char( ss.peek() ) ) != '=' && c != ',' && c != ']')
-                {
-                    paramName += char( ss.get() );
-                }
-
-                // ignore the equal sign between parameter name and value
-                if ( ss.peek() == '=')
-                {
-                    ss.ignore();
-                }
-
-                // read the parameter name
-                std::string paramValue = "";
-                while ( ss.good() && (c = char( ss.peek() ) ) != ']' && c != ',' && c != ':')
-                {
-                    paramValue += char( ss.get() );
-                }
-
-                childNode->addNodeParameter_(paramName, paramValue);
-
-            } while ( (c = char( ss.peek() ) ) == ',' );
-
-            // ignore the final ']'
-            if ( (c = char( ss.peek( ) ) ) == ']' )
-            {
-                ss.ignore();
-            }
-
-        }
-
-        // read the optional branch length
-        if ( ss.peek() == ':' )
-        {
-            ss.ignore();
-            std::string time = "";
-            while ( ss.good() && (c = char( ss.peek( ) ) ) != ';' && c != ',' && c != ')' && c != '[' )
-            {
-                time += char( ss.get() );
-            }
-
-            std::istringstream stm;
-            stm.str(time);
-            double d;
-            stm >> d;
-            nodes.push_back( childNode );
-            brlens.push_back( d );
-        }
-        else
-        {
-            nodes.push_back( childNode );
-            brlens.push_back( 0.0 );
-        }
-
-        // read the optional branch parameters
-        if ( char( ss.peek() ) == '[' )
-        {
-
-            do
-            {
-
-                ss.ignore();
-
-                // ignore the '&' before parameter name
-                if ( char( ss.peek() ) == '&')
-                {
-                    ss.ignore();
-                }
-
-                // read the parameter name
-                std::string paramName = "";
-                while ( ss.good() && (c = char( ss.peek() )) != '=' && c != ',')
-                {
-                    paramName += char( ss.get() );
-                }
-
-                // ignore the equal sign between parameter name and value
-                if ( char( ss.peek() ) == '=')
-                {
-                    ss.ignore();
-                }
-
-                // read the parameter name
-                std::string paramValue = "";
-                while ( ss.good() && (c = char( ss.peek() )) != ']' && c != ',' && c != ':')
-                {
-                    paramValue += char( ss.get() );
-                }
-
-                childNode->addBranchParameter(paramName, paramValue);
-
-            } while ( (c = char( ss.peek() )) != ']' );
-
-            ss.ignore();
-
-        }
-
-
-        // skip comma
-        if ( char( ss.peek() ) == ',' )
-        {
-            ss.ignore();
-        }
-
-        // skip comma
-        if ( char( ss.peek() ) == ';' )
-        {
-            // Avoid infinite loop.
-            throw RbException()<<"Not enough closing parentheses!";
-        }
-    }
-
-    // remove closing parenthesis
-    ss.ignore();
-
-    // read the optional label, checking for EOF = '\377'
-    std::string lbl = "";
-    while ( ss.good() && (c = char( ss.peek() )) != ':' && c != ';' && c != ',' && c != '[' && c != '\377')
-    {
-        lbl += char( ss.get() );
-    }
-    node->setName( lbl );
-
-    // read the optional node parameters
-    if ( char( ss.peek() ) == '[' )
-    {
-
-        do
-        {
-
-            ss.ignore();
-
-            // ignore the '&' before parameter name
-            if ( char( ss.peek() ) == '&')
-            {
-                ss.ignore();
-            }
-
-            // read the parameter name
-            std::string paramName = "";
-            while ( ss.good() && (c = char( ss.peek() )) != '=' && c != ',')
-            {
-                paramName += char( ss.get() );
-            }
-
-            // ignore the equal sign between parameter name and value
-            if ( char( ss.peek() ) == '=')
-            {
-                ss.ignore();
-            }
-
-            // read the parameter name
-            std::string paramValue = "";
-            while ( ss.good() && (c = char( ss.peek() )) != ']' && c != ',' && c != ':')
-            {
-                paramValue += char( ss.get() );
-            }
-
-            node->addNodeParameter_(paramName, paramValue);
-
-        } while ( (c = char( ss.peek() )) == ',' );
-
-        // ignore the final ']'
-        if ( (c = char( ss.peek() )) == ']' )
-        {
-            ss.ignore();
-        }
-
-    }
-
-    // read the optional branch length
-    if ( char( ss.peek() ) == ':' )
-    {
-        ss.ignore();
-        std::string time = "";
-        while ( ss.good() && (c = char( ss.peek() )) != ';' && c != ',' && c != '[' )
-        {
-            time += char( ss.get() );
-        }
-
-        std::istringstream stm;
-        stm.str(time);
-        double d;
-        stm >> d;
-        nodes.push_back( node );
-        brlens.push_back( d );
-    }
-    else
-    {
-        nodes.push_back( node );
-        brlens.push_back( 0.0 );
-    }
-
-
-
-    // read the optional branch parameters
-    if ( char( ss.peek() ) == '[' )
-    {
-
-        do
-        {
-
-            ss.ignore();
-
-            // ignore the '&' before parameter name
-            if ( char( ss.peek() ) == '&')
-            {
-                ss.ignore();
-            }
-
-            // read the parameter name
-            std::string paramName = "";
-            while ( ss.good() && (c = char( ss.peek() )) != '=' && c != ',')
-            {
-                paramName += char( ss.get() );
-            }
-
-            // ignore the equal sign between parameter name and value
-            if ( char( ss.peek() ) == '=')
-            {
-                ss.ignore();
-            }
-
-            // read the parameter name
-            std::string paramValue = "";
-            while ( ss.good() && (c = char( ss.peek() )) != ']' && c != ',' && c != ':')
-            {
-                paramValue += char( ss.get() );
-            }
-
-            node->addBranchParameter(paramName, paramValue);
-
-        } while ( (c = char( ss.peek() )) != ']' );
-
-        ss.ignore();
-
-    }
-
-
-    return node;
-}
-
-
 
 TopologyNode* NewickConverter::createSimmapNode(const std::string &n, std::vector<TopologyNode*> &nodes, std::vector<double> &brlens, std::vector<BranchHistory*> &histories)
 {
@@ -682,4 +1003,4 @@ TopologyNode* NewickConverter::createSimmapNode(const std::string &n, std::vecto
     return node;
 }
 
-
+}
