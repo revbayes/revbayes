@@ -113,9 +113,15 @@ const MemberRules& Move_NodeTimeSlideUniformAgeConstrained::getParameterRules(vo
         member_rules.push_back( new ArgumentRule( "tree", TimeTree::getClassTypeSpec(), "The tree on which this move operates.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
         member_rules.push_back( new ArgumentRule( "constraints", ModelVector<Clade>::getClassTypeSpec(), "The age constraints.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
 
-        /* Inherit weight from Move, put it after variable */
+        /* Inherit weight (but not tuneTarget!) from Move and put it after the arguments created above */
         const MemberRules& inherited_rules = Move::getParameterRules();
-        member_rules.insert( member_rules.end(), inherited_rules.begin(), inherited_rules.end() );
+        for (size_t i = 0; i < inherited_rules.size(); ++i)
+        {
+            if ( inherited_rules[i].getArgumentLabel() == "weight" )
+            {
+                member_rules.push_back( inherited_rules[i].clone() );
+            }
+        }
         
         rules_set = true;
     }

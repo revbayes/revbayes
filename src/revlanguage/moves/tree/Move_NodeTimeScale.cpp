@@ -111,9 +111,16 @@ const MemberRules& Move_NodeTimeScale::getParameterRules(void) const
         
         memberRules.push_back( new ArgumentRule( "tree", TimeTree::getClassTypeSpec(), "The tree on which this move operates.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
         memberRules.push_back( new ArgumentRule( "lambda", RealPos::getClassTypeSpec(), "The scaling factor (strength) of the proposals.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RealPos(1.0) ) );
-        /* Inherit weight from Move, put it after variable */
+        
+        /* Inherit weight (but not tuneTarget!) from Move and put it after the arguments created above */
         const MemberRules& inheritedRules = Move::getParameterRules();
-        memberRules.insert( memberRules.end(), inheritedRules.begin(), inheritedRules.end() );
+        for (size_t i = 0; i < inheritedRules.size(); ++i)
+        {
+            if ( inheritedRules[i].getArgumentLabel() == "weight" )
+            {
+                memberRules.push_back( inheritedRules[i].clone() );
+            }
+        }
         
         rules_set = true;
     }
