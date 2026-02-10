@@ -236,10 +236,18 @@ ParseResult<char> checkChar(const std::string& input, int start_pos, char c)
         return ParseFail(start_pos);
 }
 
-
-ParseResult<string> parseNewickComment(const std::string& input, int start_pos)
+// We don't need to construct a string, since we know how long the matched region is if parsing succeeds.
+// Then we can just take part of the input.
+// I suppose if we change the parser to allow a file as input then that might not work.
+ParseResult<std::monostate> parseNewickComment(const std::string& input, int start_pos)
 {
+    // TODO: make this part of a newick settings object.
+    // TODO: allow something like format="newick:nested_comments=1,underscore_is_space=0" to specify settings.
+    constexpr bool nested_comments = true;
+
     // 1. First check for an open bracket
+    int comment_start = start_pos;
+
     auto check_open_bracket = checkChar(input, start_pos, '[');
     if (not check_open_bracket)
         return check_open_bracket.as_failure();
@@ -252,15 +260,20 @@ ParseResult<string> parseNewickComment(const std::string& input, int start_pos)
     // Currently we don't try to decide here what to save and what to discard, and just pass back all comments.
 
     // 2. Then read characters until an end bracket
-    std::string newick_comment;
+    int depth = 1;
     while(auto check_char = parseChar(input, start_pos))
     {
         start_pos = check_char.next_pos();
 
-        if (check_char.value() != ']')
-            newick_comment += check_char.value();
-        else
-            return ParseSuccess(newick_comment, start_pos);
+        if (check_char.value() == '[')
+        {
+            if (nested_comments) depth ++;
+        }
+        else if (check_char.value() == ']')
+            depth--;
+
+        if (depth == 0)
+            return ParseSuccess(std::monostate(), start_pos);
     }
 
     // 3. If we get here, then ending bracket is missing!
@@ -291,7 +304,10 @@ ParseResult<optional<string>> parseOneWhitespace(const std::string& input, int s
     // 1. First try to read a newick comment
     if (auto check_comment = parseNewickComment(input, start_pos))
     {
-        return ParseSuccess<optional<string>>({check_comment.value()}, check_comment.next_pos());
+        int start = start_pos + 1;
+        int length = check_comment.next_pos() - start_pos - 2;
+        assert(length >= 0);
+        return ParseSuccess<optional<string>>(input.substr(start,length), check_comment.next_pos());
     }
     // 2. Then try to read a whitespace character
     else if (auto check_char = parseWhiteChar(input, start_pos))
@@ -357,6 +373,7 @@ std::vector<std::string> split_comment(const std::string& comment)
     // Note that this function does NOT handle NHX comments.
     vector<std::string> chunks;
     int start = 1;
+
     int depth = 0;
 
     // Handle chunks that are not the last chunk
@@ -373,11 +390,14 @@ std::vector<std::string> split_comment(const std::string& comment)
             start = i+1;
         }
 
-        // This is from BEAST.  Thanks for making our lives more complicated.
-        else if (c == '{')
+        // This allows [&x={1,2,3,4}] (BEAST) and [&x=[1,2,3,4]] (nested comments).
+        // The { } thing is from BEAST.  Thanks for making our lives more complicated.
+        // Now that we have nested comments, I wonder how they should handle commas?
+        // We do not currently return an error if we have something like "[ [ { ] } ]"
+        else if (c == '{' or c == '[')
             depth++;
 
-        else if (c == '}')
+        else if (c == '}' or c == ']')
             depth--;
     }
 
