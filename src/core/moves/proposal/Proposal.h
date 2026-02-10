@@ -32,6 +32,7 @@ namespace RevBayesCore {
         const std::vector<DagNode*>&                            getNodes(void) const;                                                                   //!< Get the vector of nodes for which the proposal is drawing new values.
         void                                                    swapNode(DagNode *oldN, DagNode *newN);                                                 //!< Swap the pointers to the variable on which the move works on.
         void                                                    setMove(Move *m);                                                                       //!< Set the pointer to move object holding this proposal
+        void                                                    setTargetAcceptanceRate(double p);                                                      //!< Set the target acceptance rate
         const Move*                                             getMove(void) const;                                                                    //!< Get the pointer to move object holding this proposal
 
         // pure virtual public methods
@@ -50,7 +51,7 @@ namespace RevBayesCore {
         
         
     protected:
-        Proposal(double p=0.44);                                                                                                                                 //!< Default constructor
+        Proposal(double p=0.44);                                                                                                                        //!< Default constructor
         Proposal(const Proposal &p);                                                                                                                    //!< Copy constructor
         Proposal&                                               operator=(const Proposal &p);                                                           //!< Assignment operator
         

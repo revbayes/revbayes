@@ -16,6 +16,7 @@
 #include "MemberProcedure.h"
 #include "MethodTable.h"
 #include "Move.h"
+#include "Probability.h"
 #include "RbBoolean.h"
 #include "RbHelpReference.h"
 #include "RevObject.h"
@@ -84,8 +85,11 @@ void Move_SpeciesTreeScale::constructInternalObject( void )
     RevBayesCore::StochasticNode<double> *ra = static_cast<RevBayesCore::StochasticNode<double> *>( tmp_a );
     double d = static_cast<const RealPos &>( delta->getRevObject() ).getValue();
     bool tune = static_cast<const RlBoolean &>( tuning->getRevObject() ).getValue();
+    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
 
-    RevBayesCore::Proposal *p = new RevBayesCore::SpeciesTreeScaleProposal(st,ra,d);
+    RevBayesCore::Proposal *p = new RevBayesCore::SpeciesTreeScaleProposal(st, ra, d);
+    p->setTargetAcceptanceRate(tt);
+    
     value = new RevBayesCore::MetropolisHastingsMove(p, w, tune);
 
 }
@@ -197,6 +201,9 @@ const MemberRules& Move_SpeciesTreeScale::getParameterRules(void) const
                 memberRules.push_back( inheritedRules[i].clone() );
             }
         }
+        
+        /* Provide our own default value for tuneTarget */
+        memberRules.push_back( new ArgumentRule( "tuneTarget", Probability::getClassTypeSpec(), "The acceptance probability targeted by auto-tuning.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability( 0.234 ) ) );
 
         rules_set = true;
     }

@@ -188,6 +188,15 @@ void Proposal::setMove(Move *m)
     
 }
 
+
+void Proposal::setTargetAcceptanceRate(double p)
+{
+    
+    targetAcceptanceRate = p;
+    
+}
+
+
 /**
  * Swap the old node with a new one.
  * This will be called for example when the entire model graph is cloned or

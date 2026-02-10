@@ -39,7 +39,7 @@ template <class variableType> class StochasticNode;
         const std::string&                              getProposalName(void) const;                                        //!< Get the name of the proposal for summary printing
         double                                          getProposalTuningParameter(void) const;
         void                                            prepareProposal(void);                                              //!< Prepare the proposal
-        void                                            printParameterSummary(std::ostream &o, bool name_only) const;                       //!< Print the parameter summary
+        void                                            printParameterSummary(std::ostream &o, bool name_only) const;       //!< Print the parameter summary
         void                                            removeGeneTree(StochasticNode<Tree> *gt);                           //!< Remove a DAG Node holding a gene tree on which this move should operate on
         void                                            setProposalTuningParameter(double tp);
         void                                            tune(double r);                                                     //!< Tune the proposal to achieve a better acceptance/rejection ratio
