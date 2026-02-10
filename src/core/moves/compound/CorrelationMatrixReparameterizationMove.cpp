@@ -382,17 +382,6 @@ void CorrelationMatrixReparameterizationMove::setNumberAcceptedTotal( size_t na 
 void CorrelationMatrixReparameterizationMove::tune( void )
 {
 
-//    double rate = numAccepted / double(num_tried);
-//    
-//    if ( rate > 0.44 )
-//    {
-//        delta /= (1.0 + ((rate-0.44)/0.56) );
-//    }
-//    else
-//    {
-//        delta *= (2.0 - rate/0.44 );
-//    }
-    
 }
 
 
