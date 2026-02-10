@@ -201,11 +201,11 @@ void BetaProbabilityProposal::tune( double rate )
     double p = this->targetAcceptanceRate;
     if ( rate > p )
     {
-        delta *= (1.0 + ((rate - p)/(1.0 - p)) );
+        delta /= (1.0 + ((rate - p)/(1.0 - p)) );
     }
     else
     {
-        delta /= (2.0 - rate/p);
+        delta *= (2.0 - rate/p);
     }
     
 }

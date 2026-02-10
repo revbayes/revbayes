@@ -609,13 +609,14 @@ void RateAgeBetaShift::tune( void )
     {
         double rate = num_accepted_current_period / double(num_tried_current_period);
         
-        if ( rate > 0.44 )
+        double p = this->targetAcceptanceRate;
+        if ( rate > p )
         {
-            delta /= (1.0 + ((rate-0.44)/0.56) );
+            delta /= (1.0 + ((rate - p)/(1.0 - p)) );
         }
         else
         {
-            delta *= (2.0 - rate/0.44 );
+            delta *= (2.0 - rate/p);
         }
     }
 
