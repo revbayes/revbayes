@@ -91,7 +91,8 @@ TopologyConstrainedTreeDistribution::TopologyConstrainedTreeDistribution(TypedDi
         
         if (!no_fossil)
         {
-            delete value;
+            // SH (20260211): Do not delete the value because our base distribution doesn't know about this!!!
+            // delete value;
             
             AbstractRootedTreeDistribution* tree_base_distribution = dynamic_cast<AbstractRootedTreeDistribution*>( base_distribution );
             std::vector<Taxon> taxa = tree_base_distribution->getTaxa();
@@ -99,7 +100,10 @@ TopologyConstrainedTreeDistribution::TopologyConstrainedTreeDistribution(TypedDi
             try
             {
                 RevBayesCore::Tree *my_tree = TreeUtilities::startingTreeInitializer( *t, taxa, age_check_precision );
-                value = my_tree->clone();
+                // SH (20260211): We need to give the value to the base distribution!!!
+                Tree* my_copy_of_starting_tree = my_tree->clone();
+                base_distribution->setValue( my_copy_of_starting_tree );
+                value = my_copy_of_starting_tree;
             }
             catch (RbException &e)
             {
