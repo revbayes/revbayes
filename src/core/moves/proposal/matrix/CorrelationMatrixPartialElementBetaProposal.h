@@ -32,7 +32,7 @@ template <class variableType> class StochasticNode;
         
         // Basic utility functions
         void                                     cleanProposal(void);                                                                //!< Clean up proposal
-        CorrelationMatrixPartialElementBetaProposal*    clone(void) const;                                                                  //!< Clone object
+        CorrelationMatrixPartialElementBetaProposal*    clone(void) const;                                                           //!< Clone object
         double                                   doProposal(void);                                                                   //!< Perform proposal
         const std::string&                       getProposalName(void) const;                                                        //!< Get the name of the proposal for summary printing
         double                                   getProposalTuningParameter(void) const;
@@ -50,9 +50,9 @@ template <class variableType> class StochasticNode;
         
         StochasticNode<MatrixReal >*             variable;
         
-        double                                   alpha;                                                                             //!< The Beta parameter of the move (larger lambda -> larger proposals).
+        double                                   alpha;                                                                              //!< The Beta parameter of the move (larger lambda -> larger proposals).
         //!< The two indices of the last modified element.
-        MatrixReal                               stored_matrix;                                                                          //!< The value we propose.
+        MatrixReal                               stored_matrix;                                                                      //!< The value we propose.
     };
     
 }

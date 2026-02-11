@@ -217,13 +217,6 @@ void RevBayesCore::FossilizedBirthDeathResampleAgeProposal<valType>::setProposal
 }
 
 
-/**
- * Tune the Proposal to accept the desired acceptance ratio.
- *
- * The acceptance ratio for this Proposal should be around 0.44.
- * If it is too large, then we increase the proposal size,
- * and if it is too small, then we decrease the proposal size.
- */
 template<class valType>
 void RevBayesCore::FossilizedBirthDeathResampleAgeProposal<valType>::tune( double rate )
 {

@@ -85,14 +85,15 @@ const std::string& RevBayesCore::HomeologPhaseProposal::getProposalName( void ) 
 
 double RevBayesCore::HomeologPhaseProposal::getProposalTuningParameter(void) const
 {
-    return 0;
+    // this proposal has no tuning parameter
+    return RbConstants::Double::nan;
 }
 
 
 void RevBayesCore::HomeologPhaseProposal::prepareProposal(void)
 {
+    
 }
-
 
 
 /**
@@ -110,6 +111,7 @@ void RevBayesCore::HomeologPhaseProposal::printParameterSummary(std::ostream &o,
 
 void RevBayesCore::HomeologPhaseProposal::setProposalTuningParameter(double tp)
 {
+    // this proposal has no tuning parameter: nothing to do
 }
 
 
@@ -131,6 +133,7 @@ void RevBayesCore::HomeologPhaseProposal::swapNodeInternal(DagNode *oldN, DagNod
 
 void RevBayesCore::HomeologPhaseProposal::tune(double r)
 {
+    // no tuning parameter
 }
 
 

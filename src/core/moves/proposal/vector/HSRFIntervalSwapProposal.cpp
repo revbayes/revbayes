@@ -76,6 +76,7 @@ const std::string& HSRFIntervalSwapProposal::getProposalName( void ) const
 
 double HSRFIntervalSwapProposal::getProposalTuningParameter( void ) const
 {
+    // this proposal has no tuning parameter
     return RbConstants::Double::nan;
 }
 
@@ -213,7 +214,7 @@ void HSRFIntervalSwapProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 
 void HSRFIntervalSwapProposal::setProposalTuningParameter(double tp)
 {
-
+    // this proposal has no tuning parameter: nothing to do
 }
 
 
@@ -226,5 +227,5 @@ void HSRFIntervalSwapProposal::setProposalTuningParameter(double tp)
  */
 void HSRFIntervalSwapProposal::tune( double rate )
 {
-
+    // no tuning parameter
 }
