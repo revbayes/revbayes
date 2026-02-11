@@ -47,9 +47,6 @@ namespace RevBayesCore {
     template<class ct>
     friend class FixedNodeheightPruneAndRegraftCharacterHistoryProposal;
 
-    template<class ct>
-    friend class NodeTimeSlideUniformCharacterHistoryProposal;
-
     public:
         PathRejectionSampleProposal( StochasticNode<AbstractHomologousDiscreteCharacterData> *n, double l=1.0, double r=0.234);   //!<  constructor
 
