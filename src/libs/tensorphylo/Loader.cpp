@@ -11,7 +11,7 @@
 #include <cassert>
 #include <iostream>
 #include <cstdlib>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include <boost/dll.hpp>
 #include <boost/function.hpp>
@@ -52,20 +52,20 @@ bool Loader::loadTensorPhylo() {
 bool Loader::loadTensorPhylo(const std::string &aPluginFolder) {
 
 	// Checking for the plugin folder
-	boost::filesystem::path pluginPath(aPluginFolder);
-	if(!boost::filesystem::is_directory(pluginPath)) {
+	std::filesystem::path pluginPath(aPluginFolder);
+	if(!std::filesystem::is_directory(pluginPath)) {
 		throw RbException("The folder doesn't exist.");
 		return false;
 	}
 
 	// Listing all files
-	std::vector<boost::filesystem::directory_entry> vecPlugins;
-    copy(boost::filesystem::directory_iterator(pluginPath), boost::filesystem::directory_iterator(), std::back_inserter(vecPlugins));
+	std::vector<std::filesystem::directory_entry> vecPlugins;
+    copy(std::filesystem::directory_iterator(pluginPath), std::filesystem::directory_iterator(), std::back_inserter(vecPlugins));
 
     // Look for TensorPhylo
     bool found = false;
-	boost::filesystem::path tensorPhyloPath;
-	for(std::vector<boost::filesystem::directory_entry>::const_iterator it = vecPlugins.begin(); it != vecPlugins.end();  ++ it ) {
+	std::filesystem::path tensorPhyloPath;
+	for(std::vector<std::filesystem::directory_entry>::const_iterator it = vecPlugins.begin(); it != vecPlugins.end();  ++ it ) {
 		std::string filePath(it->path().string());
 		if(filePath.find(PLUGIN_TENSORPHYLO_NAME) != std::string::npos &&
 			 (filePath.find(".so") != std::string::npos ||
@@ -83,7 +83,7 @@ bool Loader::loadTensorPhylo(const std::string &aPluginFolder) {
 
 	// try to load TensorPhylo
 	try {
-		pluginTensorPhylo.load(tensorPhyloPath, boost::dll::load_mode::append_decorations);
+                pluginTensorPhylo.load(tensorPhyloPath, boost::dll::load_mode::append_decorations);
 	} catch(const std::exception& e) {
 		throw RbException("TensorPhylo failed to load.");
 		return false;

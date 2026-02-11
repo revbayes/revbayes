@@ -25,6 +25,8 @@
 #include "RbBoolean.h"
 #include "Cloneable.h"
 #include "MemberObject.h"
+#include "RandomNumberFactory.h"
+#include "RandomNumberGenerator.h"
 #include "Serializable.h"
 #include "TreeChangeEventHandler.h"
 #include "Printable.h"
@@ -89,7 +91,7 @@ namespace RevBayesCore {
         const TopologyNode&                                 getNode(size_t idx) const;                                                                          //!< Get the node at index
         const std::vector<TopologyNode*>&                   getNodes(void) const;                                                                               //!< Get a pointer to the nodes in the Tree
         std::vector<RbBitSet>*                              getNodesAsBitset(void) const;                                                                       //!< Get a vector of bitset representations of nodes
-        std::vector<std::int64_t>                                   getNodeIndices(void) const;                                                                         //!< Get a vector of node indices
+        std::vector<std::int64_t>                           getNodeIndices(void) const;                                                                         //!< Get a vector of node indices
         size_t                                              getNumberOfInteriorNodes(void) const;                                                               //!< Get the number of non-root internal nodes in the Tree
         size_t                                              getNumberOfNodes(void) const;                                                                       //!< Get the number of nodes in the Tree
         size_t                                              getNumberOfExtantTips(void) const;                                                                  //!< Get the number of extant tip nodes in the Tree
@@ -120,16 +122,17 @@ namespace RevBayesCore {
         double                                              getTmrca(const std::vector<Taxon>& t);
         TreeChangeEventHandler&                             getTreeChangeEventHandler(void) const;                                                              //!< Get the change-event handler for this tree
         double                                              getTreeLength(void) const;
-        bool                                                hasSameTopology(const Tree &t) const;                                                             //!< Has this tree the same topology?
+        bool                                                hasSameTopology(const Tree &t) const;                                                               //!< Has this tree the same topology?
         bool                                                isBinary(void) const;                                                                               //!< Is the Tree binary
         bool                                                isBroken(void) const;                                                                               //!< Is this tree ultrametric?
         bool                                                isNegativeConstraint(void) const;                                                                   //!< Is this tree used as a negative constraint?
         bool                                                isRooted(void) const;                                                                               //!< Is the Tree rooted
         bool                                                isTimeTree(void) const;                                                                             //!< Is this a time tree?
-        void                                                makeRootBifurcating(const Clade& o);                                                              //!< Make the root bifurcating.
+        void                                                makeRootBifurcating(const Clade& o);                                                                //!< Make the root bifurcating.
         void                                                orderNodesByIndex();
         json                                                toJSON() const;             //!< Prints tree for user
-        void                                                printForUser(std::ostream &o, const std::string &sep, int l, bool left) const;                   //!< Prints tree for user
+        TopologyNode*                                       pickRandomInternalNode(RandomNumberGenerator* rng) const;                                           //!< Pick a random node which is not the root, a tip, or the parent of a sampled ancestor.
+        void                                                printForUser(std::ostream &o, const std::string &sep, int l, bool left) const;                      //!< Prints tree for user
         void                                                printForSimpleStoring(std::ostream &o, const std::string &sep, int l, bool left, bool flatten = true) const; //!< Prints tree for storing without rounding
         void                                                printForComplexStoring(std::ostream &o, const std::string &sep, int l, bool left, bool flatten = true) const; //!< Prints tree for storing with rounding (mainly checkpointing) 
         void                                                pruneTaxa(const RbBitSet& bs);

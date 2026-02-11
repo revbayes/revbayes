@@ -99,7 +99,7 @@ void Move_EllipticalSliceSamplingLognormalIID::constructInternalObject( void )
     
     // finally create the internal move object
     
-    value = new RevBayesCore::EllipticalSliceSamplingLognormalIIDMove(n, m, s, window_, weight_, del,tune_);
+    value = new RevBayesCore::EllipticalSliceSamplingLognormalIIDMove(n, m, s, window_, weight_, del, tune_);
 }
 
 

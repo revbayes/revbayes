@@ -1,6 +1,7 @@
 #include <cmath>
 #include <algorithm>
 #include <cstddef>
+#include <iomanip>
 #include <iostream>
 #include <map>
 #include <set>
@@ -17,6 +18,8 @@
 #include "TreeUtilities.h"
 #include "Clade.h"
 #include "DagNode.h"
+#include "RandomNumberFactory.h"
+#include "RandomNumberGenerator.h"
 #include "RbBitSet.h"
 #include "RbBoolean.h"
 #include "RbFileManager.h"
@@ -948,19 +951,48 @@ void RevBayesCore::Tree::checkTaxonAges(bool forceAdjust)
 {
     for (auto& node : nodes)
     {
-        if(!node->isTip()) continue;
+        if ( !node->isTip() ) continue;
         Taxon taxon = node->getTaxon();
-        if(node->getAge() < taxon.getMinAge()) {
-            if(forceAdjust) {
+        
+        if ( node->getAge() < taxon.getMinAge() )
+        {
+            if (forceAdjust)
+            {
                 node->setAge(taxon.getMinAge());
-                RBOUT("Age of taxon " + taxon.getName() + " was below the specified minimum and has been adjusted.");
-            } else throw RbException() << "Age of taxon " << taxon.getName() << " is below the specified minimum.";
+                
+                // only notify the user if we are making a non-trivial adjustment
+                if ( taxon.getMinAge() - node->getAge() > 1e-06 * node->getAge() )
+                {
+                    std::stringstream msg;
+                    msg << "Age of taxon " << taxon.getName() << " was below the specified minimum and has been adjusted from ";
+                    msg << std::setprecision(6) << std::noshowpoint << node->getAge() << " to " << taxon.getMinAge() << ".";
+                    RBOUT( msg.str() );
+                }
+            }
+            else
+            {
+                throw RbException() << "Age of taxon " << taxon.getName() << " is below the specified minimum.";
+            }
         }
-        if(node->getAge() > taxon.getMaxAge()) {
-            if(forceAdjust) {
+        if ( node->getAge() > taxon.getMaxAge() )
+        {
+            if (forceAdjust)
+            {
                 node->setAge(taxon.getMaxAge());
-                RBOUT("Age of taxon " + taxon.getName() + " was above the specified maximum and has been adjusted.");
-            } else throw RbException() << "Age of taxon " << taxon.getName() << " is above the specified maximum.";
+                
+                // only notify the user if we are making a non-trivial adjustment
+                if ( node->getAge() - taxon.getMaxAge() > 1e-06 * node->getAge() )
+                {
+                    std::stringstream msg;
+                    msg << "Age of taxon " << taxon.getName() << " was above the specified maximum and has been adjusted from ";
+                    msg << std::setprecision(6) << std::noshowpoint << node->getAge() << " to " << taxon.getMaxAge() << ".";
+                    RBOUT( msg.str() );
+                }
+            }
+            else
+            {
+                throw RbException() << "Age of taxon " << taxon.getName() << " is above the specified maximum.";
+            }
         }
     }
 }
@@ -1585,6 +1617,45 @@ void Tree::collapseSampledAncestors()
     setRoot(root, true);
 }
 
+// Pick a random node which is not the root, a tip, or the parent of a sampled ancestor.
+// First try doing so at random; if that does not work, use the more computationally demanding strategy of finding all eligible nodes.
+TopologyNode* Tree::pickRandomInternalNode(RandomNumberGenerator* rng) const
+{
+    TopologyNode* node;
+    
+    for (size_t i = 0; i < 10; i++)
+    {
+        double u = rng->uniform01();
+        size_t node_idx = size_t( std::floor(getNumberOfNodes() * u) );
+        node = (TopologyNode*)&getNode(node_idx);
+        if ( !node->isRoot() && !node->isTip() && !node->isSampledAncestorParent() ) return node;
+    }
+    
+    // check that there is at least one node which is not the root, a tip, or the parent of a SA
+    std::vector<TopologyNode*> eligible_nodes;
+        
+    for (auto& to_check: getNodes())
+    {
+        if ( !to_check->isRoot() && !to_check->isTip() && !to_check->isSampledAncestorParent() )
+        {
+            eligible_nodes.push_back( to_check );
+        }
+    }
+        
+    if (eligible_nodes.size() == 0)
+    {
+        node = NULL;
+    }
+    else
+    {
+        double u = rng->uniform01();
+        size_t node_idx = size_t( std::floor(eligible_nodes.size() * u) );
+        node = eligible_nodes[node_idx];
+    }
+    
+    return node;
+}
+
 void Tree::pruneTaxa(const RbBitSet& prune_map )
 {
     nodes.clear();
@@ -1931,10 +2002,9 @@ void Tree::reroot(TopologyNode &n, bool make_bifurcating, bool reindex)
 {
     // reset parent/child relationships
     reverseParentChild( n.getParent() );
-    n.getParent().setParent( NULL );
-    
-    // set the new root
-    setRoot( &n.getParent(), reindex );
+
+    // set the root
+    root = &n.getParent();
     
     // do we want to make the tree bifurcating?
     if ( make_bifurcating == true )
@@ -2011,10 +2081,10 @@ TopologyNode& Tree::reverseParentChild(TopologyNode &n)
         TopologyNode &p = n.getParent();
         ret = &(reverseParentChild(p));
 
-        // we need to re-orient the branches/indices so that
-        // nodes remain associated with the same parameters
-        p.setIndex(n.getIndex());
-        p.setBranchLength(n.getBranchLength());
+        // swap node indices, branch lengths and branch comments
+        std::swap(p.index, n.index);
+        std::swap(p.branch_length, n.branch_length);
+        std::swap(p.branch_comments, n.branch_comments);
 
         p.removeChild( &n );
         n.setParent( nullptr ); // Avoid loop in parent edges from n -> p -> n

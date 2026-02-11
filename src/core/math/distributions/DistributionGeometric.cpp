@@ -185,7 +185,7 @@ std::int64_t RbStatistics::Geometric::quantile(double q, double p)
 std::int64_t RbStatistics::Geometric::rv(double p, RevBayesCore::RandomNumberGenerator &rng)
 {
     if (!RbMath::isFinite(p) || p <= 0 || p > 1) 
-        throw RbException("NaN produced in rgeom");
+        throw RbException()<<"Sampling geometric random variable: invalid success probability p = "<<p;
     
     return RbStatistics::Poisson::rv(exp(rng.uniform01()) * ((1 - p) / p),rng)+1;
 }

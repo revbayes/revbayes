@@ -49,7 +49,6 @@ namespace RevBayesCore {
         // Parameter management functions. You need to override both if you have additional parameters
         virtual void                                        swapParameterInternal(const DagNode *oldP, const DagNode *newP);                                    //!< Swap a parameter
         
-        
         // helper functions
         bool                                                matchesBackbone(void);
         bool                                                matchesConstraints(void);
