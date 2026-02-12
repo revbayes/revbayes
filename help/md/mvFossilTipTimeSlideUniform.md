@@ -14,7 +14,7 @@ The minimum ages is computed either by its oldest descendant (for sampled ancest
 Sebastian Hoehna
 
 ## see_also
-mvFossilTipTimeSlideUniform
+mvFossilTipTimeUniform
 
 ## example
 
@@ -28,8 +28,9 @@ for(i in 1:fossils.size())
     a[i] = fossils[i].getMinAge()
     b[i] = fossils[i].getMaxAge()
 
-    F[i] ~ dnUniform(t[i] - b[i], t[i] - a[i])
-    F[i].clamp( 0 )
+    F[i] ~ dnPseudo( pdBetween(t[i], a[i], b[i]) )
+    F[i].clamp( pseudoObservation() )
+
     moves.append( mvFossilTipTimeUniform(fbd_tree, origin_time, min=a[i], max=b[i], tip=fossils[i], weight=5.0) )
     moves.append( mvFossilTipTimeSlideUniform(fbd_tree, origin_time, min=a[i], max=b[i], tip=fossils[i], weight=5.0) )
 }
