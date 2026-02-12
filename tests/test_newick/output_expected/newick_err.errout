@@ -1,0 +1,17 @@
+   Error:	Newick error at line 1, column 7:
+   |(a:1.0:1.0);
+   |      ^
+   Error:	Newick error at line 1, column 54:
+   |...htmakethelineoverflow,a:1.0:1.0,averylongtaxonnamethat...
+   |                              ^
+   Error:	Newick error at line 1, column 8:
+   |(a:1.0)
+   |       ^
+   Error:	Newick error at line 1, column 7:
+   |(a:1.0
+   |      ^
+   Attempting to read the contents of file "bad_trees1.tre"
+   Error:	Newick error at line 4, column 1:
+   |(a,(b,c)
+   |((a,b),c);
+   |^

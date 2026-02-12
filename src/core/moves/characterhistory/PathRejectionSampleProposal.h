@@ -23,7 +23,7 @@
 #include <string>
 
 namespace RevBayesCore {
-    
+
     /**
      * The scaling operator.
      *
@@ -40,7 +40,7 @@ namespace RevBayesCore {
 
     template<class charType>
     class PathRejectionSampleProposal : public Proposal {
-    
+
     template<class ct>
     friend class NarrowExchangeCharacterHistoryProposal;
 
@@ -61,6 +61,7 @@ namespace RevBayesCore {
         double                                                      doProposal(void);                                                               //!< Perform proposal
         virtual const std::string&                                  getProposalName(void) const;                                                    //!< Get the name of the proposal for summary printing
         double                                                      getProposalTuningParameter(void) const;
+        const double                                                getRootBranchLength(void);                                     //!< get the length of the root branch
         void                                                        printParameterSummary(std::ostream &o, bool name_only) const;                                   //!< Print the parameter summary
         void                                                        prepareProposal(void);                                                          //!< Prepare the proposal
         std::set<size_t>                                            sampleCharacters(double p);
@@ -82,7 +83,7 @@ namespace RevBayesCore {
         const TypedDagNode<RateGenerator>*                          q_map_site;
         const TypedDagNode<RateGeneratorSequence>*                  q_map_sequence;
 
-        std::multiset<CharacterEvent*,CharacterEventCompare>        storedHistory;
+        std::multiset<CharacterEvent*,CharacterEventCompare>        stored_history;
 
         const TopologyNode*                                         node;
 
@@ -124,7 +125,7 @@ RevBayesCore::PathRejectionSampleProposal<charType>::PathRejectionSampleProposal
 {
 
     addNode(ctmc);
-    
+
     for (size_t i = 0; i < numCharacters; i++)
     {
         allCharacters.insert(i);
@@ -149,11 +150,11 @@ void RevBayesCore::PathRejectionSampleProposal<charType>::cleanProposal( void )
 //    {
 //        return;
 //    }
-    
+
     // delete old events
     std::multiset<CharacterEvent*,CharacterEventCompare>::reverse_iterator it_h;
     std::vector<CharacterEvent*> events;
-    for (it_h = storedHistory.rbegin(); it_h != storedHistory.rend(); ++it_h)
+    for (it_h = stored_history.rbegin(); it_h != stored_history.rend(); ++it_h)
     {
         if (lambda == 1.0)
         {
@@ -169,10 +170,9 @@ void RevBayesCore::PathRejectionSampleProposal<charType>::cleanProposal( void )
         CharacterEvent* e = events[i];
         delete e;
     }
-
-    storedHistory.clear();
+    stored_history.clear();
     sampledCharacters.clear();
-    
+
     sampled_characters_assigned = false;
     node_assigned = false;
 
@@ -194,7 +194,7 @@ RevBayesCore::PathRejectionSampleProposal<charType>* RevBayesCore::PathRejection
 template<class charType>
 double RevBayesCore::PathRejectionSampleProposal<charType>::computeLnProposal(const TopologyNode& nd, const BranchHistory& bh)
 {
-    
+
 //    if ( nd.isRoot() && !useTail )
 //    {
 //        return 0.0;
@@ -206,16 +206,17 @@ double RevBayesCore::PathRejectionSampleProposal<charType>::computeLnProposal(co
     }
 
     double lnP = 0.0;
-    
+
     std::vector<CharacterEvent*> currState = bh.getParentCharacters();
     const std::multiset<CharacterEvent*,CharacterEventCompare>& history = bh.getHistory();
     std::multiset<CharacterEvent*,CharacterEventCompare>::reverse_iterator it_h;
 
     std::vector<size_t> counts(numStates,0);
     fillStateCounts(currState, counts);
-    
+
     // get model parameters
     double currAge = 0.0;
+
     if ( nd.isRoot() )
     {
         currAge = nd.getAge() + p->getRootBranchLength();
@@ -233,7 +234,7 @@ double RevBayesCore::PathRejectionSampleProposal<charType>::computeLnProposal(co
     double eventAge;
     double endAge = nd.getAge();
     double branchRate = getBranchRate(nd.getIndex());
-    
+
     for (it_h = history.rbegin(); it_h != history.rend(); ++it_h)
     {
         // next event time
@@ -251,11 +252,11 @@ double RevBayesCore::PathRejectionSampleProposal<charType>::computeLnProposal(co
         // update counts
         counts[ static_cast<CharacterEventDiscrete*>(currState[idx])->getState() ] -= 1;
         counts[ static_cast<CharacterEventDiscrete*>(*it_h)->getState() ] += 1;
-        
+
         // update state
         currState[idx] = *it_h;
         currAge = eventAge;
-        
+
     }
 
     // lnL for final non-event
@@ -289,12 +290,7 @@ double RevBayesCore::PathRejectionSampleProposal<charType>::getProposalTuningPar
 template<class charType>
 double RevBayesCore::PathRejectionSampleProposal<charType>::doProposal( void )
 {
-    
-//    if ( node->isRoot() && !useTail )
-//    {
-//        return 0.0;
-//    }
-    
+
     TreeHistoryCtmc<charType>* p = dynamic_cast< TreeHistoryCtmc<charType>* >( &ctmc->getDistribution() );
     if ( p == NULL )
     {
@@ -307,17 +303,17 @@ double RevBayesCore::PathRejectionSampleProposal<charType>::doProposal( void )
     {
         branch_length = p->getRootBranchLength();
     }
-    
-    
+
+
     // get sampling rates
     const RateGenerator& rm = ( q_map_sequence != NULL ? q_map_sequence->getValue() : q_map_site->getValue() );
-    
+
     // rejection sample path history
     BranchHistory* bh = &p->getHistory(*node);
     std::vector<CharacterEvent*> parent_states = bh->getParentCharacters();
     std::vector<CharacterEvent*> child_states  = bh->getChildCharacters();
     std::multiset<CharacterEvent*,CharacterEventCompare> proposed_histories;
-    
+
     // update histories for sites in sampledCharacters
     std::set<size_t>::iterator it_s;
     for (it_s = sampledCharacters.begin(); it_s != sampledCharacters.end(); it_s++)
@@ -326,16 +322,17 @@ double RevBayesCore::PathRejectionSampleProposal<charType>::doProposal( void )
         std::set<CharacterEvent*,CharacterEventCompare> tmpHistory;
         size_t currState = static_cast<CharacterEventDiscrete*>(parent_states[site_index])->getState();
         size_t endState  = static_cast<CharacterEventDiscrete*>(child_states[site_index])->getState();
+
         do
         {
             // delete previously rejected events
             tmpHistory.clear();
-            
+
             // proceed with rejection sampling
             currState = static_cast<CharacterEventDiscrete*>(parent_states[site_index])->getState();
             double end_age = node->getAge();
             double age = end_age + branch_length;
-            
+
             // repeated rejection sampling
             do
             {
@@ -362,15 +359,15 @@ double RevBayesCore::PathRejectionSampleProposal<charType>::doProposal( void )
                         break;
                     }
                 }
-                
                 // do not force valid time if event needed
                 age -= RbStatistics::Exponential::rv(r, *GLOBAL_RNG);
-                
+
                 if (age > end_age)
                 {
                     currState = nextState;
                     CharacterEvent* evt = new CharacterEventDiscrete(site_index, nextState, age);
                     tmpHistory.insert(evt);
+
                 }
                 else if (currState != endState)
                 {
@@ -378,30 +375,33 @@ double RevBayesCore::PathRejectionSampleProposal<charType>::doProposal( void )
                     {
                         delete *it_h;
                     }
-                    
+
                 }
             }
             while(age > end_age);
-            
+
         }
         while (currState != endState);
-        
+
         for (std::set<CharacterEvent*,CharacterEventCompare>::iterator it = tmpHistory.begin(); it != tmpHistory.end(); it++)
         {
             proposed_histories.insert(*it);
         }
     }
-    
+
     // assign values back to model for likelihood
-    if (lambda == 1.0) {
-        bh->updateHistory(proposed_histories);
-    } else {
+    if (lambda == 1.0)
+    {
+        bh->setHistory(proposed_histories);
+    }
+    else
+    {
         bh->updateHistory(proposed_histories, sampledCharacters);
     }
-    
+
     // return hastings ratio
     proposedLnProb = computeLnProposal(*node, *bh);
-    
+
     return storedLnProb - proposedLnProb;
 }
 
@@ -445,6 +445,21 @@ const std::string& RevBayesCore::PathRejectionSampleProposal<charType>::getPropo
     return name;
 }
 
+template<class charType>
+const double RevBayesCore::PathRejectionSampleProposal<charType>::getRootBranchLength( void )
+{
+    // This is ad hoc code
+    TreeHistoryCtmc<charType>* c = dynamic_cast< TreeHistoryCtmc<charType>* >(&ctmc->getDistribution());
+    const Tree& tree = c->getTree();
+    std::vector<TopologyNode*> nds = tree.getNodes();
+    node = nds[tree.getRoot().getIndex()];
+
+    double origin = c->getRootBranchLength();
+    double root_age = node->getAge();
+
+    const double root_branch_length = ( origin - root_age == 0 ) ? 0 : origin;
+    return root_branch_length;
+}
 
 /**
  *
@@ -458,7 +473,26 @@ void RevBayesCore::PathRejectionSampleProposal<charType>::prepareProposal( void 
         throw RbException("Failed cast.");
     }
 
-    storedHistory.clear();
+    // make sure the stored history is properly cleaned (no memory leaks)
+    std::multiset<CharacterEvent*,CharacterEventCompare>::reverse_iterator it_h;
+    std::vector<CharacterEvent*> old_events;
+    for (it_h = stored_history.rbegin(); it_h != stored_history.rend(); ++it_h)
+    {
+        if (lambda == 1.0)
+        {
+            old_events.push_back( *it_h );
+        }
+        else if (sampledCharacters.find( (*it_h)->getSiteIndex() ) != sampledCharacters.end())
+        {
+            old_events.push_back( *it_h );
+        }
+    }
+    for ( size_t i=0; i<old_events.size(); ++i )
+    {
+        CharacterEvent* e = old_events[i];
+        delete e;
+    }
+    stored_history.clear();
 
     storedLnProb = 0.0;
     proposedLnProb = 0.0;
@@ -470,35 +504,51 @@ void RevBayesCore::PathRejectionSampleProposal<charType>::prepareProposal( void 
         size_t num_nodes = tau.getNumberOfNodes();
 
         size_t node_index = 0;
-//        do {
+        const double root_branch_length = getRootBranchLength();
+        if ( root_branch_length == 0 )
+        {
+            do {
             node_index = GLOBAL_RNG->uniform01() * num_nodes;
             node = &tau.getNode(node_index);
-            
-//        } while ( node->isRoot() == true && !useTail );
-    }
-    
-    if (node->isRoot()) {
-//        std::cout << "root node!\n";
-//        std::cout << "\n";
+            } while ( node->isRoot() );
+        }
+        else
+        {
+            node_index = GLOBAL_RNG->uniform01() * num_nodes;
+            node = &tau.getNode(node_index);
+        }
     }
 
 
     BranchHistory* bh = &p->getHistory(*node);
+    //    stored_history = history;
     const std::multiset<CharacterEvent*,CharacterEventCompare>& history = bh->getHistory();
-    storedHistory = history;
+    for (it_h = history.rbegin(); it_h != history.rend(); ++it_h)
+    {
+        if (lambda == 1.0)
+        {
+            stored_history.insert( (*it_h)->clone() );
+        }
+        else if (sampledCharacters.find( (*it_h)->getSiteIndex() ) != sampledCharacters.end())
+        {
+            stored_history.insert( (*it_h)->clone() );
+        }
+    }
+
 
     // determine sampled characters
-    if (!sampled_characters_assigned) {
+    if (!sampled_characters_assigned)
+    {
         sampledCharacters = sampleCharacters(lambda);
     }
-    
+
     // flag node as dirty
     const_cast<TopologyNode*>(node)->fireTreeChangeEvent(RevBayesCore::TreeChangeEventMessage::CHARACTER_HISTORY);
 
     // compute backwards proposal probability
     double x = computeLnProposal(*node, *bh);
     storedLnProb = x;
-    
+
 }
 
 
@@ -524,7 +574,7 @@ std::set<size_t> RevBayesCore::PathRejectionSampleProposal<charType>::sampleChar
     {
         return allCharacters;
     }
-    
+
     std::set<size_t> s;
     s.insert(GLOBAL_RNG->uniform01() * numCharacters);
     for (size_t i = 0; i < numCharacters; i++)
@@ -535,7 +585,7 @@ std::set<size_t> RevBayesCore::PathRejectionSampleProposal<charType>::sampleChar
         }
     }
     return s;
-    
+
 }
 
 
@@ -543,9 +593,20 @@ template<class charType>
 void RevBayesCore::PathRejectionSampleProposal<charType>::setRateGenerator(const TypedDagNode<RateGenerator> *d)
 {
 
+    if ( q_map_site != NULL )
+    {
+        removeNode( const_cast<TypedDagNode<RateGenerator>*>(q_map_site) );
+    }
+    if ( q_map_sequence != NULL )
+    {
+        removeNode( const_cast<TypedDagNode<RateGeneratorSequence>*>(q_map_sequence) );
+    }
+
     q_map_site = d;
     numStates = q_map_site->getValue().getNumberOfStates();
 
+    addNode( const_cast<TypedDagNode<RateGenerator>*>(q_map_site) );
+    q_map_sequence = NULL;
 }
 
 
@@ -553,9 +614,21 @@ template<class charType>
 void RevBayesCore::PathRejectionSampleProposal<charType>::setRateGenerator(const TypedDagNode<RateGeneratorSequence> *d)
 {
 
+    if ( q_map_site != NULL )
+    {
+        removeNode( const_cast<TypedDagNode<RateGenerator>*>(q_map_site) );
+    }
+    if ( q_map_sequence != NULL )
+    {
+        removeNode( const_cast<TypedDagNode<RateGeneratorSequence>*>(q_map_sequence) );
+    }
+
     q_map_sequence = d;
     numStates = q_map_sequence->getValue().getNumberOfStates();
 
+
+    addNode( const_cast<TypedDagNode<RateGeneratorSequence>*>(q_map_sequence) );
+    q_map_site = NULL;
 }
 
 
@@ -635,11 +708,10 @@ void RevBayesCore::PathRejectionSampleProposal<charType>::undoProposal( void )
     {
         throw RbException("Failed cast.");
     }
-    
+
     // delete new events
     BranchHistory* bh = &p->getHistory(*node);
-    //    bh->print();
-    
+
     std::multiset<CharacterEvent*,CharacterEventCompare> proposed_history = bh->getHistory();
     std::multiset<CharacterEvent*,CharacterEventCompare>::reverse_iterator it_h;
     std::vector<CharacterEvent*> events;
@@ -659,23 +731,21 @@ void RevBayesCore::PathRejectionSampleProposal<charType>::undoProposal( void )
         CharacterEvent* e = events[i];
         delete e;
     }
-    
+
     // flag node as dirty
     const_cast<TopologyNode*>(node)->fireTreeChangeEvent(RevBayesCore::TreeChangeEventMessage::CHARACTER_HISTORY);
-    
+
     // swap current value and stored value
-    bh->setHistory(storedHistory);
+    bh->setHistory(stored_history);
 
     // clear old histories
     proposed_history.clear();
-    storedHistory.clear();
+    stored_history.clear();
     sampledCharacters.clear();
-    
+
     sampled_characters_assigned = false;
     node_assigned = false;
 
-    
-    
 }
 
 
