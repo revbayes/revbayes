@@ -81,7 +81,7 @@ mymodel = model(psi)
 
 
 mni = 0
-monitors[++mni] = mnModel(filename="test_OU_multisamples/output_expected/Drosophila_OU.log",printgen=10, separator = TAB)
+monitors[++mni] = mnModel(filename="output/Drosophila_OU.log",printgen=10, separator = TAB)
 
 mymcmc = mcmc(mymodel, monitors, moves)
 mymcmc.burnin(generations=500,tuningInterval=100)
