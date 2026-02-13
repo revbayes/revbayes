@@ -83,7 +83,6 @@ PhyloBrownianProcessMultiSampleREML* PhyloBrownianProcessMultiSampleREML::clone(
 
 double PhyloBrownianProcessMultiSampleREML::computeLnProbability( void )
 {
-    
     // we need to check here if we still are listining to this tree for change events
     // the tree could have been replaced without telling us
     if ( tau->getValue().getTreeChangeEventHandler().isListening( this ) == false )
@@ -209,7 +208,6 @@ void PhyloBrownianProcessMultiSampleREML::keepSpecialization( const DagNode* aff
 
 void PhyloBrownianProcessMultiSampleREML::recursiveComputeLnProbability( const TopologyNode &node, size_t node_index )
 {
-    
     // check for recomputation
     if ( node.isTip() == true && (dirty_nodes[node_index] == true || use_missing_data) )
     {
@@ -752,13 +750,14 @@ void PhyloBrownianProcessMultiSampleREML::touchSpecialization( const DagNode* af
         {
             const std::vector<TopologyNode *> &nodes = this->tau->getValue().getNodes();
             // flag recomputation only for the nodes
-            for (std::set<size_t>::iterator it = indices.begin(); it != indices.end(); ++it)
+            for (TopologyNode* node : nodes)
             {
-                if ( nodes[*it]->isRoot() == false )
+                if (node->isRoot() == false)
                 {
-                    this->recursivelyFlagNodeDirty( nodes[*it]->getParent() );
+                    this->recursivelyFlagNodeDirty(*node);
                 }
             }
+
         }
     }
     else if ( affecter == this->within_species_variances )
@@ -776,10 +775,9 @@ void PhyloBrownianProcessMultiSampleREML::touchSpecialization( const DagNode* af
         {
             const std::vector<TopologyNode *> &nodes = this->tau->getValue().getNodes();
             // flag recomputation only for the nodes
-            for (std::set<size_t>::iterator it = indices.begin(); it != indices.end(); ++it)
+            for (TopologyNode* node : nodes)
             {
-                this->recursivelyFlagNodeDirty( *nodes[*it] );
-                
+                this->recursivelyFlagNodeDirty(*node);
             }
         }
         
