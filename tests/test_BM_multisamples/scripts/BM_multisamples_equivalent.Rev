@@ -29,13 +29,14 @@ root_age := psi.rootAge()
 moves = VectorMoves()
 
 # BM-Model
-sigma ~ dnExponential( 10.0 )
+sigma ~ dnExponential( 1.0 )
 sigma.setValue(0.01)
 moves.append( mvScale(sigma) )
 
 ### Within-species taxon indices
 taxon_map = readTaxonData("data/Drosophila_species_map.txt")
 taxon_map_pruned = readTaxonData("data/Drosophila_species_map_pruned.txt")
+
 
 # Assume one variance parameter per species
 for (i in 1:psi.ntips()) {
@@ -74,15 +75,14 @@ if (abs(lp1 - lp2) < treshold){
 }
 
 # We can use any node of our model as a handle, here we chose to use the rate matrix.
-mymodel = model(psi)
+mymodel = model(traits)
 
 mni = 0
 monitors[++mni] = mnModel(filename="output/BM_multisamples_equivalent.log",printgen=10, separator = TAB)
 
 mymcmc = mcmc(mymodel, monitors, moves)
-mymcmc.burnin(generations=20,tuningInterval=5)
-mymcmc.run(generations=50)
-
+mymcmc.burnin(generations=50,tuningInterval=5)
+mymcmc.run(generations=100)
 
 
 # you may want to quit RevBayes now
