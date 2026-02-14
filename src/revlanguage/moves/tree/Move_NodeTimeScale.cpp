@@ -15,6 +15,7 @@
 #include "MetropolisHastingsMove.h"
 #include "Move_NodeTimeScale.h"
 #include "NodeTimeScaleProposal.h"
+#include "Probability.h"
 #include "RealPos.h"
 #include "RevObject.h"
 #include "RlTimeTree.h"
@@ -59,10 +60,14 @@ void Move_NodeTimeScale::constructInternalObject( void )
     
     // now allocate a new sliding move
     RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
+    RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     double l = static_cast<const RealPos &>( lambda->getRevObject() ).getValue();
-    RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
+    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    
     RevBayesCore::Proposal *p = new RevBayesCore::NodeTimeScaleProposal(t, l);
+    p->setTargetAcceptanceRate(tt);
+    
     value = new RevBayesCore::MetropolisHastingsMove(p, w, t);
 }
 
@@ -121,6 +126,9 @@ const MemberRules& Move_NodeTimeScale::getParameterRules(void) const
                 memberRules.push_back( inheritedRules[i].clone() );
             }
         }
+        
+        /* Provide our own default value for tuneTarget */
+        memberRules.push_back( new ArgumentRule( "tuneTarget", Probability::getClassTypeSpec(), "The acceptance probability targeted by auto-tuning.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability( 0.234 ) ) );
         
         rules_set = true;
     }

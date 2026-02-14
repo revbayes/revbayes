@@ -40,6 +40,8 @@ namespace RevBayesCore {
         double                                  getProposalTuningParameter(void) const;
         void                                    prepareProposal(void);                                        //!< Prepare the proposal
         void                                    printParameterSummary(std::ostream &o, bool name_only) const; //!< Print the parameter summary
+        void                                    setProposalTuningParameter(double tp);
+        void                                    tune(double r);                                               //!< Tune the proposal to achieve a better acceptance/rejection ratio
         void                                    undoProposal(void);                                           //!< Reject the proposal
         
     protected:
