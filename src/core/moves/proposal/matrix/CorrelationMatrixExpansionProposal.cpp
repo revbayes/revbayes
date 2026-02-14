@@ -277,16 +277,3 @@ void CorrelationMatrixExpansionProposal::swapNodeInternal(DagNode *oldN, DagNode
     }
     
 }
-
-
-void CorrelationMatrixExpansionProposal::setProposalTuningParameter(double tp)
-{
-    // this proposal has no tuning parameter: nothing to do
-}
-
-
-void CorrelationMatrixExpansionProposal::tune( double rate )
-{
-
-}
-

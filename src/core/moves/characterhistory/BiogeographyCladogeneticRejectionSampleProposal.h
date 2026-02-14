@@ -47,7 +47,7 @@ namespace RevBayesCore {
     class BiogeographicCladogeneticRejectionSampleProposal : public Proposal {
         
     public:
-        BiogeographicCladogeneticRejectionSampleProposal( StochasticNode<AbstractHomologousDiscreteCharacterData> *n, double l=1.0, double r=0.234 );                                  //!<  constructor
+        BiogeographicCladogeneticRejectionSampleProposal( StochasticNode<AbstractHomologousDiscreteCharacterData> *n, double l=1.0, double r=0.234 );                                  //!< Constructor
         
         // Basic utility functions
         void                                                        assignNode(TopologyNode* nd);
@@ -86,7 +86,7 @@ namespace RevBayesCore {
         double                                                      sampleJumpDispersalCharacters(void);
 //        double                                                      computeCladogenesisLnProposal();
         double                                                      computeAnagenesisConditionLnProposal();
-        void                                                        swapNodeInternal(DagNode *oldN, DagNode *newN);                 //!< Swap the DAG nodes on which the Proposal is working on
+        void                                                        swapNodeInternal(DagNode *oldN, DagNode *newN);                 //!< Swap the DAG nodes the Proposal is working on
         
         
         // parameters

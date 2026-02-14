@@ -106,12 +106,7 @@ void RevBayesCore::HomeologPhaseProposal::prepareProposal(void)
  */
 void RevBayesCore::HomeologPhaseProposal::printParameterSummary(std::ostream &o, bool name_only) const
 {
-}
-
-
-void RevBayesCore::HomeologPhaseProposal::setProposalTuningParameter(double tp)
-{
-    // this proposal has no tuning parameter: nothing to do
+    
 }
 
 
@@ -131,12 +126,6 @@ void RevBayesCore::HomeologPhaseProposal::swapNodeInternal(DagNode *oldN, DagNod
 }
 
 
-void RevBayesCore::HomeologPhaseProposal::tune(double r)
-{
-    // no tuning parameter
-}
-
-
 /**
  * Reject the Proposal.
  *
@@ -151,4 +140,3 @@ void RevBayesCore::HomeologPhaseProposal::undoProposal( void )
     ctmc_dist = static_cast<AbstractPhyloCTMCSiteHomogeneous<DnaState>* >( &ctmc->getDistribution() );
     ctmc_dist->swap_taxon_name_2_tip_index(tip1, tip2);
 }
-

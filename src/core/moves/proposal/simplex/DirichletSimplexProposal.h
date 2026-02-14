@@ -29,7 +29,7 @@ template <class variableType> class StochasticNode;
     class DirichletSimplexProposal : public Proposal {
         
     public:
-        DirichletSimplexProposal( StochasticNode<Simplex> *n, double a, size_t nc, double o, double k=0.0, double p=0.234);                                                                    //!<  constructor
+        DirichletSimplexProposal( StochasticNode<Simplex> *n, double a, size_t nc, double o, double k=0.0, double p=0.234);                                                                    //!< Constructor
         
         // Basic utility functions
         void                                    cleanProposal(void);                                                                //!< Clean up proposal
@@ -45,7 +45,7 @@ template <class variableType> class StochasticNode;
         
     protected:
         
-        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes on which the Proposal is working on
+        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes the Proposal is working on
         
         
     private:

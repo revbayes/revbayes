@@ -50,7 +50,7 @@
 ////    class BiogeographyPathRejectionSampleProposal : public PathRejectionSampleProposal<charType> {
 ////        
 ////    public:
-////        BiogeographyPathRejectionSampleProposal( StochasticNode<AbstractHomologousDiscreteCharacterData> *n, StochasticNode<Tree>* t, DeterministicNode<RateGeneratorSequence> *q, double l, TopologyNode* nd=NULL);   //!<  constructor
+////        BiogeographyPathRejectionSampleProposal( StochasticNode<AbstractHomologousDiscreteCharacterData> *n, StochasticNode<Tree>* t, DeterministicNode<RateGeneratorSequence> *q, double l, TopologyNode* nd=NULL);   //!< Constructor
 //////        BiogeographyPathRejectionSampleProposal( const BiogeographyPathRejectionSampleProposal& p );
 ////        
 ////        virtual void                                prepareProposal(void);

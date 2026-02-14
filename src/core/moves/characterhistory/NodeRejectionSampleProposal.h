@@ -47,8 +47,8 @@ namespace RevBayesCore {
 
     public:
         NodeRejectionSampleProposal( StochasticNode<AbstractHomologousDiscreteCharacterData> *n, double l=1.0, double r=0.234);
-        //!<  constructor
-        NodeRejectionSampleProposal( const NodeRejectionSampleProposal& p );                                                        //!<  constructor
+        //!< Constructor
+        NodeRejectionSampleProposal( const NodeRejectionSampleProposal& p );                                                        //!< Constructor
         virtual                                                    ~NodeRejectionSampleProposal(void);                              //!< Destructor
 
         NodeRejectionSampleProposal&                                operator=(const NodeRejectionSampleProposal& p);
@@ -78,7 +78,7 @@ namespace RevBayesCore {
 
     protected:
 
-        void                                                        swapNodeInternal(DagNode *oldN, DagNode *newN);                 //!< Swap the DAG nodes on which the Proposal is working on
+        void                                                        swapNodeInternal(DagNode *oldN, DagNode *newN);                 //!< Swap the DAG nodes the Proposal is working on
 
         // parameters
         StochasticNode<AbstractHomologousDiscreteCharacterData>*    ctmc;

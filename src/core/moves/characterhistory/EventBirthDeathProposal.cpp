@@ -262,15 +262,3 @@ void EventBirthDeathProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
         throw RbException("Wrong type of variable for BirthDeathEvent move.");
     }
 }
-
-void EventBirthDeathProposal::setProposalTuningParameter(double tp)
-{
-    // this proposal has no tuning parameter: nothing to do
-}
-
-
-void EventBirthDeathProposal::tune( double rate )
-{
-  
-}
-

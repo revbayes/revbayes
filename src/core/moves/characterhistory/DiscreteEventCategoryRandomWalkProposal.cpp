@@ -198,16 +198,3 @@ void DiscreteEventCategoryRandomWalkProposal::swapNodeInternal(DagNode *oldN, Da
         throw RbException("Wrong type of variable for BirthDeathEvent move.");
     }
 }
-
-
-void DiscreteEventCategoryRandomWalkProposal::setProposalTuningParameter(double tp)
-{
-    // this proposal has no tuning parameter: nothing to do
-}
-
-
-void DiscreteEventCategoryRandomWalkProposal::tune( double rate )
-{
-
-}
-

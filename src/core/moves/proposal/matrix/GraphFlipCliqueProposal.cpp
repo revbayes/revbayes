@@ -334,16 +334,3 @@ void GraphFlipCliqueProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
     }
     
 }
-
-
-void GraphFlipCliqueProposal::setProposalTuningParameter(double tp)
-{
-    // this proposal has no tuning parameter: nothing to do
-}
-
-
-void GraphFlipCliqueProposal::tune( double rate )
-{
-
-}
-

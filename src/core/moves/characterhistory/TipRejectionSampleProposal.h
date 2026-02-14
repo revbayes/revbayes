@@ -38,8 +38,8 @@ namespace RevBayesCore {
     class TipRejectionSampleProposal : public Proposal {
 
     public:
-        TipRejectionSampleProposal( StochasticNode<AbstractHomologousDiscreteCharacterData> *n, double l=1.0, double r=0.234 );                                  //!<  constructor
-        TipRejectionSampleProposal( const TipRejectionSampleProposal& p );                                                        //!<  constructor
+        TipRejectionSampleProposal( StochasticNode<AbstractHomologousDiscreteCharacterData> *n, double l=1.0, double r=0.234 );                                  //!< Constructor
+        TipRejectionSampleProposal( const TipRejectionSampleProposal& p );                                                        //!< Constructor
         virtual                                                    ~TipRejectionSampleProposal(void);                              //!< Destructor
 
         TipRejectionSampleProposal&                                 operator=(const TipRejectionSampleProposal& p);
@@ -67,7 +67,7 @@ namespace RevBayesCore {
 
     protected:
 
-        void                                                        swapNodeInternal(DagNode *oldN, DagNode *newN);                 //!< Swap the DAG nodes on which the Proposal is working on
+        void                                                        swapNodeInternal(DagNode *oldN, DagNode *newN);                 //!< Swap the DAG nodes the Proposal is working on
 
         // parameters
         StochasticNode<AbstractHomologousDiscreteCharacterData>*    ctmc;

@@ -28,7 +28,7 @@ template <class variableType> class StochasticNode;
     class SpeciesTreeScaleProposal : public Proposal {
         
     public:
-        SpeciesTreeScaleProposal(StochasticNode<Tree> *sp, StochasticNode<double> *r, double d );                           //!<  constructor
+        SpeciesTreeScaleProposal(StochasticNode<Tree> *sp, StochasticNode<double> *r, double d );                           //!< Constructor
         virtual ~SpeciesTreeScaleProposal(void);
         
         // Basic utility functions
@@ -47,7 +47,7 @@ template <class variableType> class StochasticNode;
         
     protected:
         
-        void                                            swapNodeInternal(DagNode *oldN, DagNode *newN);                     //!< Swap the DAG nodes on which the Proposal is working on
+        void                                            swapNodeInternal(DagNode *oldN, DagNode *newN);                     //!< Swap the DAG nodes the Proposal is working on
         
         
     private:

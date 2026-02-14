@@ -297,15 +297,3 @@ void FossilTipTimeUniformProposal::swapNodeInternal(DagNode *oldN, DagNode *newN
     }
     
 }
-
-
-void FossilTipTimeUniformProposal::setProposalTuningParameter(double tp)
-{
-    // this proposal has no tuning parameter: nothing to do
-}
-
-
-void FossilTipTimeUniformProposal::tune( double rate )
-{
-    
-}

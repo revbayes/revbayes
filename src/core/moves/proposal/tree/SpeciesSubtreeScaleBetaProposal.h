@@ -26,32 +26,32 @@ namespace RevBayesCore {
     class SpeciesSubtreeScaleBetaProposal : public Proposal {
         
     public:
-        SpeciesSubtreeScaleBetaProposal(StochasticNode<Tree> *sp, double a);                                        //!<  constructor
+        SpeciesSubtreeScaleBetaProposal(StochasticNode<Tree> *sp, double a);                                          //!< Constructor
         
         // Basic utility functions
-        void                                            addGeneTree(StochasticNode<Tree> *gt);                      //!< Add a DAG Node holding a gene tree on which this move should operate on
-        void                                            cleanProposal(void);                                        //!< Clean up proposal
-        SpeciesSubtreeScaleBetaProposal*                clone(void) const;                                          //!< Clone object
-        double                                          doProposal(void);                                           //!< Perform proposal
-        const std::string&                              getProposalName(void) const;                                //!< Get the name of the proposal for summary printing
+        void                                            addGeneTree(StochasticNode<Tree> *gt);                        //!< Add a DAG Node holding a gene tree on which this move should operate on
+        void                                            cleanProposal(void);                                          //!< Clean up proposal
+        SpeciesSubtreeScaleBetaProposal*                clone(void) const;                                            //!< Clone object
+        double                                          doProposal(void);                                             //!< Perform proposal
+        const std::string&                              getProposalName(void) const;                                  //!< Get the name of the proposal for summary printing
         double                                          getProposalTuningParameter(void) const;
-        void                                            prepareProposal(void);                                      //!< Prepare the proposal
-        void                                            printParameterSummary(std::ostream &o, bool name_only) const;               //!< Print the parameter summary
-        void                                            removeGeneTree(StochasticNode<Tree> *gt);                   //!< Remove a DAG Node holding a gene tree on which this move should operate on
+        void                                            prepareProposal(void);                                        //!< Prepare the proposal
+        void                                            printParameterSummary(std::ostream &o, bool name_only) const; //!< Print the parameter summary
+        void                                            removeGeneTree(StochasticNode<Tree> *gt);                     //!< Remove a DAG Node holding a gene tree on which this move should operate on
         void                                            setProposalTuningParameter(double tp);
-        void                                            tune(double r);                                             //!< Tune the proposal to achieve a better acceptance/rejection ratio
-        void                                            undoProposal(void);                                         //!< Reject the proposal
+        void                                            tune(double r);                                               //!< Tune the proposal to achieve a better acceptance/rejection ratio
+        void                                            undoProposal(void);                                           //!< Reject the proposal
         
     protected:
         
         std::vector<TopologyNode*>                      getOldestNodesInPopulation( Tree &tau, TopologyNode &n );
-        void                                            swapNodeInternal(DagNode *oldN, DagNode *newN);             //!< Swap the DAG nodes on which the Proposal is working on
+        void                                            swapNodeInternal(DagNode *oldN, DagNode *newN);               //!< Swap the DAG nodes the Proposal is working on
         
         
     private:
         
         // parameters
-        StochasticNode<Tree>*                           speciesTree;                                                //!< The variable the Proposal is working on
+        StochasticNode<Tree>*                           speciesTree;                                                  //!< The variable the Proposal is working on
         std::vector< StochasticNode<Tree> *>            geneTrees;
         
         // tuning parameter

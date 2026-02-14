@@ -29,7 +29,7 @@ namespace RevBayesCore {
     class TreeScaleProposal : public Proposal {
         
     public:
-        TreeScaleProposal( StochasticNode<Tree> *t, StochasticNode< RbVector<Tree> > *vec_n, StochasticNode<double> *r, double d );                                               //!<  constructor
+        TreeScaleProposal( StochasticNode<Tree> *t, StochasticNode< RbVector<Tree> > *vec_n, StochasticNode<double> *r, double d );                                               //!< Constructor
         
         // Basic utility functions
         void                                    cleanProposal(void);                                                //!< Clean up proposal
@@ -45,7 +45,7 @@ namespace RevBayesCore {
         
     protected:
         
-        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);                     //!< Swap the DAG nodes on which the Proposal is working on
+        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);                     //!< Swap the DAG nodes the Proposal is working on
         
         
     private:
@@ -53,7 +53,7 @@ namespace RevBayesCore {
         
         // member variables
         StochasticNode<Tree>*                   tree;
-        StochasticNode< RbVector<Tree> >*       vector_variable;                                                    //!< The laternative variable the proposal is working on
+        StochasticNode< RbVector<Tree> >*       vector_variable;                                                    //!< The alternative variable the proposal is working on
         StochasticNode<double>*                 rootAge;
         
         // parameters

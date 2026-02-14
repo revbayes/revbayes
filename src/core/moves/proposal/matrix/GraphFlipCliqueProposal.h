@@ -28,7 +28,7 @@ namespace RevBayesCore {
     class GraphFlipCliqueProposal : public Proposal {
         
     public:
-        GraphFlipCliqueProposal( StochasticNode<MatrixReal> *n, const RbVector<std::int64_t>& v, double l, double vp=0.1, double ep=1.0, bool s = false);                                                                      //!<  constructor
+        GraphFlipCliqueProposal( StochasticNode<MatrixReal> *n, const RbVector<std::int64_t>& v, double l, double vp=0.1, double ep=1.0, bool s = false);                                                                      //!< Constructor
         
         // Basic utility functions
         void                                    cleanProposal(void);                                                                //!< Clean up proposal
@@ -38,12 +38,10 @@ namespace RevBayesCore {
         double                                  getProposalTuningParameter(void) const;
         void                                    printParameterSummary(std::ostream &o, bool name_only) const;                       //!< Print the parameter summary
         void                                    prepareProposal(void);                                                              //!< Prepare the proposal
-        void                                    setProposalTuningParameter(double tp);
-        void                                    tune(double r);                                                                     //!< Tune the proposal to achieve a better acceptance/rejection ratio
         void                                    undoProposal(void);                                                                 //!< Reject the proposal
         
     protected:
-        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes on which the Proposal is working on
+        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes the Proposal is working on
         
     private:
         // parameters

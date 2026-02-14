@@ -48,7 +48,7 @@ namespace RevBayesCore {
     friend class FixedNodeheightPruneAndRegraftCharacterHistoryProposal;
 
     public:
-        PathRejectionSampleProposal( StochasticNode<AbstractHomologousDiscreteCharacterData> *n, double l=1.0, double r=0.234);   //!<  constructor
+        PathRejectionSampleProposal( StochasticNode<AbstractHomologousDiscreteCharacterData> *n, double l=1.0, double r=0.234);   //!< Constructor
 
         // Basic utility functions
         void                                                        assignNode(TopologyNode* nd);
@@ -71,7 +71,7 @@ namespace RevBayesCore {
 
     protected:
 
-        void                                                        swapNodeInternal(DagNode *oldN, DagNode *newN);                                 //!< Swap the DAG nodes on which the Proposal is working on
+        void                                                        swapNodeInternal(DagNode *oldN, DagNode *newN);                                 //!< Swap the DAG nodes the Proposal is working on
         void                                                        fillStateCounts(std::vector<CharacterEvent*> s, std::vector<size_t> &counts);
         double                                                      getBranchRate(size_t index) const;
 
