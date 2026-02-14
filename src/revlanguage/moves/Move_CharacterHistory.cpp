@@ -10,7 +10,6 @@
 #include "BiogeographyNodeRejectionSampleProposal.h"
 #include "BiogeographyCladogeneticRejectionShiftProposal.h"
 #include "BiogeographyCladogeneticRejectionSampleProposal.h"
-//#include "BiogeographyPathRejectionSampleProposal.h"
 #include "NodeRejectionSampleProposal.h"
 #include "MetropolisHastingsMove.h"
 #include "Move_CharacterHistory.h"
