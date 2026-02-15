@@ -30,17 +30,9 @@
 namespace RevBayesCore {
     
     /**
-     * The scaling operator.
-     *
-     * A scaling proposal draws a random uniform number u ~ unif (-0.5,0.5)
-     * and scales the current vale by a scaling factor
-     * sf = exp( lambda * u )
-     * where lambda is the tuning parameter of the Proposal to influence the size of the proposals.
-     *
      * @copyright Copyright 2009-
      * @author The RevBayes Development Core Team (Michael Landis)
      * @since 2009-09-08, version 1.0
-     *
      */
     
     template<class charType>
@@ -148,7 +140,7 @@ node( NULL ),
 nodeTpMatrix(2),
 leftTpMatrix(2),
 rightTpMatrix(2),
-lambda(1.0), // for now, lambda always == 1.0
+lambda(l),
 storedLnProb(0.0),
 proposedLnProb(0.0),
 storedCladogeneticEvent("")
@@ -562,11 +554,6 @@ void RevBayesCore::BiogeographicCladogeneticRejectionSampleProposal<charType>::c
 /**
  * Perform the Proposal.
  *
- * A scaling Proposal draws a random uniform number u ~ unif (-0.5,0.5)
- * and scales the current vale by a scaling factor
- * sf = exp( lambda * u )
- * where lambda is the tuning parameter of the Proposal to influence the size of the proposals.
- *
  * \return The hastings ratio.
  */
 template<class charType>
@@ -805,7 +792,11 @@ void RevBayesCore::BiogeographicCladogeneticRejectionSampleProposal<charType>::p
 template<class charType>
 void RevBayesCore::BiogeographicCladogeneticRejectionSampleProposal<charType>::printParameterSummary(std::ostream &o, bool name_only) const
 {
-    //    o << "lambda = " << lambda;
+    o << "lambda";
+    if (not name_only)
+    {
+        o << " = " << lambda;
+    }
 }
 
 
@@ -1341,7 +1332,7 @@ void RevBayesCore::BiogeographicCladogeneticRejectionSampleProposal<charType>::s
 
 
 /**
- * Tune the Proposal to accept the desired acceptance ratio.
+ * Tune the Proposal to accept at the desired acceptance ratio.
  */
 template<class charType>
 void RevBayesCore::BiogeographicCladogeneticRejectionSampleProposal<charType>::tune( double rate )

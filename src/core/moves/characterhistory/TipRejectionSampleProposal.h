@@ -378,10 +378,10 @@ void RevBayesCore::TipRejectionSampleProposal<charType>::prepareProposal( void )
 template<class charType>
 void RevBayesCore::TipRejectionSampleProposal<charType>::printParameterSummary(std::ostream &o, bool name_only) const
 {
-    o << "lambda = ";
-    if (name_only == false)
+    o << "lambda";
+    if (not name_only)
     {
-        o << lambda;
+        o << " = " << lambda;
     }
 }
 
@@ -526,7 +526,7 @@ void RevBayesCore::TipRejectionSampleProposal<charType>::setProposalTuningParame
 
 
 /**
- * Tune the Proposal to accept the desired acceptance ratio.
+ * Tune the Proposal to accept at the desired acceptance ratio.
  */
 template<class charType>
 void RevBayesCore::TipRejectionSampleProposal<charType>::tune( double rate )
