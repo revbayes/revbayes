@@ -12,6 +12,7 @@
 
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
+#include "RlBoolean.h"
 #include "MetropolisHastingsMove.h"
 #include "Move_NodeTimeScale.h"
 #include "NodeTimeScaleProposal.h"
@@ -21,6 +22,7 @@
 #include "RlTimeTree.h"
 #include "TypeSpec.h"
 #include "Move.h"
+#include "RbBoolean.h"
 #include "RevPtr.h"
 #include "RevVariable.h"
 #include "RlMove.h"
@@ -60,12 +62,13 @@ void Move_NodeTimeScale::constructInternalObject( void )
     
     // now allocate a new sliding move
     RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
-    RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    RevBayesCore::StochasticNode<RevBayesCore::Tree> *tr = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
     double l = static_cast<const RealPos &>( lambda->getRevObject() ).getValue();
+    bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
     
-    RevBayesCore::Proposal *p = new RevBayesCore::NodeTimeScaleProposal(t, l);
+    RevBayesCore::Proposal *p = new RevBayesCore::NodeTimeScaleProposal(tr, l);
     p->setTargetAcceptanceRate(tt);
     
     value = new RevBayesCore::MetropolisHastingsMove(p, w, t);
@@ -116,6 +119,7 @@ const MemberRules& Move_NodeTimeScale::getParameterRules(void) const
         
         memberRules.push_back( new ArgumentRule( "tree", TimeTree::getClassTypeSpec(), "The tree on which this move operates.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
         memberRules.push_back( new ArgumentRule( "lambda", RealPos::getClassTypeSpec(), "The scaling factor (strength) of the proposals.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RealPos(1.0) ) );
+        memberRules.push_back( new ArgumentRule( "tune", RlBoolean::getClassTypeSpec(), "Should we tune lambda during burnin?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( true ) ) );
         
         /* Inherit weight (but not tuneTarget!) from Move and put it after the arguments created above */
         const MemberRules& inheritedRules = Move::getParameterRules();
@@ -175,6 +179,10 @@ void Move_NodeTimeScale::setConstParameter(const std::string& name, const RevPtr
     else if ( name == "lambda" )
     {
         lambda = var;
+    }
+    else if ( name == "tune" )
+    {
+        tune = var;
     }
     else
     {
