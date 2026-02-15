@@ -47,7 +47,7 @@ namespace RevBayesCore {
         
         StochasticNode<Tree>*                           variable;                                                                           //!< The variable the Proposal is working on
         AbstractCharacterHistoryBirthDeathProcess*      distribution;
-        double                                          delta;
+        double                                          delta;                                                                              //!< The scale parameter of the proposal (smaller delta -> smaller a and b -> larger beta distr. variance -> larger proposals)
         double                                          offset;
 
         CharacterEvent*                                 stored_value;                                                                       //!< The stored value of the Proposal used for rejections.

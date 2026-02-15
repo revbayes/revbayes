@@ -48,7 +48,7 @@ namespace RevBayesCore {
         
         // parameters
         StochasticNode<Tree>*                   variable;                                                     //!< The variable the Proposal is working on
-        double                                  delta;
+        double                                  delta;                                                        //!< The scale parameter of the proposal (smaller delta -> smaller a and b -> larger beta distr. variance -> larger proposals)
         double                                  offset;
         
         // stored objects to undo proposal

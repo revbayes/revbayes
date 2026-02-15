@@ -50,8 +50,8 @@ template <class variableType> class StochasticNode;
         // parameters
         
         Simplex                                 storedValue;                                                                        //!< The stored value of the Proposal used for rejections.
-        double                                  alpha;                                                                              //!< The scaling parameter of the Proposal
-//        double                              proposedValue;                                                                        //!< The value we propose.
+        double                                  alpha;                                                                              //!< The scaling parameter of the proposal (smaller alpha -> smaller a and b -> larger beta distr. variance -> larger proposals)
+//        double                              proposedValue;                                                                          //!< The value we propose.
         
     };
     

@@ -42,7 +42,7 @@ namespace RevBayesCore {
         StochasticNode<Tree>*                   tree;
         std::vector<StochasticNode<double>* >   rates_vec;
         StochasticNode<RbVector<double> >*      rates;
-        double                                  delta;
+        double                                  delta;                                                              //!< The scale parameter of the proposal (smaller delta -> smaller a and b -> larger beta distr. variance -> larger proposals)
         double                                  targetAcceptanceRate;
         
         // stored objects to undo proposal

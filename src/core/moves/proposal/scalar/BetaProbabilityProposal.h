@@ -46,7 +46,7 @@ template <class variableType> class StochasticNode;
         // parameters
         
         double                                  stored_value;                                                                       //!< The stored value of the Proposal used for rejections.
-        double                                  delta;                                                                              //!< The scaling parameter of the Proposal
+        double                                  delta;                                                                              //!< The scaling parameter of the proposal (smaller delta -> smaller a and b -> larger beta distr. variance -> larger proposals)
         double                                  offset;                                                                             //!< The scaling parameter of the Proposal
 
     };

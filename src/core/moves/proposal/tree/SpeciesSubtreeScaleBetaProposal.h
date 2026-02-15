@@ -55,7 +55,7 @@ namespace RevBayesCore {
         std::vector< StochasticNode<Tree> *>            geneTrees;
         
         // tuning parameter
-        double                                          alpha;
+        double                                          alpha;                                                        //!< The scale parameter of the proposal (smaller alpha -> smaller a and b -> larger beta distr. variance -> larger proposals)
         
         // stored objects to undo proposal
         TopologyNode*                                   storedNode;
