@@ -26,6 +26,8 @@
 #include "RlMove.h"
 #include "StochasticNode.h"
 #include "TypedFunction.h"
+#include "Probability.h"
+#include "RevNullObject.h"
 
 namespace RevBayesCore { class Tree; }
 namespace RevBayesCore { template <class valueType> class RbVector; }
@@ -61,6 +63,7 @@ void Move_RateAgeBetaShift::constructInternalObject( void )
     double d = static_cast<const RealPos &>( delta->getRevObject() ).getValue();
     bool at = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* tmpRates = static_cast<const ModelVector<RealPos> &>( rates->getRevObject() ).getDagNode();
     std::vector< RevBayesCore::StochasticNode<double> *> rates;
@@ -86,7 +89,7 @@ void Move_RateAgeBetaShift::constructInternalObject( void )
         
     }
     
-    value = new RevBayesCore::RateAgeBetaShift(t, rates, snode_rates, d, at, w);
+    value = new RevBayesCore::RateAgeBetaShift(t, rates, snode_rates, d, at, w, tt);
 }
 
 

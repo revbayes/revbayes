@@ -42,8 +42,8 @@ namespace RevBayesCore {
 
     public:
         RootRejectionSampleProposal( StochasticNode<AbstractHomologousDiscreteCharacterData> *n, double l=1.0, double r=0.234);
-        //!<  constructor
-        RootRejectionSampleProposal( const RootRejectionSampleProposal& p );                                                        //!<  constructor
+        //!< Constructor
+        RootRejectionSampleProposal( const RootRejectionSampleProposal& p );                                                        //!< Constructor
         virtual                                                    ~RootRejectionSampleProposal(void);                              //!< Destructor
 
         RootRejectionSampleProposal&                                operator=(const RootRejectionSampleProposal& p);
@@ -73,7 +73,7 @@ namespace RevBayesCore {
 
     protected:
 
-        void                                                        swapNodeInternal(DagNode *oldN, DagNode *newN);                 //!< Swap the DAG nodes on which the Proposal is working on
+        void                                                        swapNodeInternal(DagNode *oldN, DagNode *newN);                 //!< Swap the DAG nodes the Proposal is working on
 
         // parameters
         StochasticNode<AbstractHomologousDiscreteCharacterData>*    ctmc;
@@ -488,10 +488,10 @@ void RevBayesCore::RootRejectionSampleProposal<charType>::prepareProposal( void 
 template<class charType>
 void RevBayesCore::RootRejectionSampleProposal<charType>::printParameterSummary(std::ostream &o, bool name_only) const
 {
-    o << "lambda = ";
-    if (name_only == false)
+    o << "lambda";
+    if (not name_only)
     {
-        o << lambda;
+        o << " = " << lambda;
     }
 }
 
@@ -883,7 +883,7 @@ void RevBayesCore::RootRejectionSampleProposal<charType>::setProposalTuningParam
 
 
 /**
- * Tune the Proposal to accept the desired acceptance ratio.
+ * Tune the Proposal to accept at the desired acceptance ratio.
  */
 template<class charType>
 void RevBayesCore::RootRejectionSampleProposal<charType>::tune( double rate )

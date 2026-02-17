@@ -20,7 +20,7 @@ moves[++mvi] = mvScaleBactrian(mu,weight=1)
 psi ~ dnBDP(lambda=lambda,mu=mu,rho=rho,rootAge=10,taxa=taxa)
 
 moves[++mvi] = mvNodeTimeSlideUniform(psi, weight=10.0)
-moves[++mvi] = mvNodeTimeScale(psi, weight=10.0)
+moves[++mvi] = mvNodeTimeScale(psi, weight=10.0, tune=FALSE)
 
 moves[++mvi] = mvNNI(psi,weight=2.0)
 moves[++mvi] = mvFNPR(psi,weight=2.0)

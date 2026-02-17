@@ -14,7 +14,7 @@ template <class variableType> class StochasticNode;
     class OrderedEventTimeSlideProposal : public Proposal {
         
     public:
-        OrderedEventTimeSlideProposal( StochasticNode<OrderedEventTimes> *n, double l );                                                       //!<  constructor
+        OrderedEventTimeSlideProposal( StochasticNode<OrderedEventTimes> *n, double l );                                                       //!< Constructor
         
         // Basic utility functions
         void                                    cleanProposal(void);                                           //!< Clean up proposal
@@ -30,7 +30,7 @@ template <class variableType> class StochasticNode;
         
     protected:
         
-        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);                //!< Swap the DAG nodes on which the Proposal is working on
+        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);                //!< Swap the DAG nodes the Proposal is working on
         
     private:
         

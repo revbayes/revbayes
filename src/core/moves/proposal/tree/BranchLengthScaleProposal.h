@@ -27,23 +27,23 @@ template <class variableType> class StochasticNode;
     class BranchLengthScaleProposal : public Proposal {
         
     public:
-        BranchLengthScaleProposal( StochasticNode<Tree> *t, double d );                                               //!<  constructor
+        BranchLengthScaleProposal( StochasticNode<Tree> *t, double d );                                       //!< Constructor
         
         // Basic utility functions
-        void                                    cleanProposal(void);                                        //!< Clean up proposal
-        BranchLengthScaleProposal*              clone(void) const;                                          //!< Clone object
-        double                                  doProposal(void);                                           //!< Perform proposal
-        const std::string&                      getProposalName(void) const;                                //!< Get the name of the proposal for summary printing
+        void                                    cleanProposal(void);                                          //!< Clean up proposal
+        BranchLengthScaleProposal*              clone(void) const;                                            //!< Clone object
+        double                                  doProposal(void);                                             //!< Perform proposal
+        const std::string&                      getProposalName(void) const;                                  //!< Get the name of the proposal for summary printing
         double                                  getProposalTuningParameter(void) const;
-        void                                    prepareProposal(void);                                      //!< Prepare the proposal
-        void                                    printParameterSummary(std::ostream &o, bool name_only) const;               //!< Print the parameter summary
+        void                                    prepareProposal(void);                                        //!< Prepare the proposal
+        void                                    printParameterSummary(std::ostream &o, bool name_only) const; //!< Print the parameter summary
         void                                    setProposalTuningParameter(double tp);
-        void                                    tune(double r);                                             //!< Tune the proposal to achieve a better acceptance/rejection ratio
-        void                                    undoProposal(void);                                         //!< Reject the proposal
+        void                                    tune(double r);                                               //!< Tune the proposal to achieve a better acceptance/rejection ratio
+        void                                    undoProposal(void);                                           //!< Reject the proposal
         
     protected:
         
-        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);             //!< Swap the DAG nodes on which the Proposal is working on
+        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);               //!< Swap the DAG nodes the Proposal is working on
         
         
     private:

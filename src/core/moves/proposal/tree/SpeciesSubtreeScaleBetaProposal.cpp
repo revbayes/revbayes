@@ -380,22 +380,23 @@ void SpeciesSubtreeScaleBetaProposal::setProposalTuningParameter(double tp)
 
 
 /**
- * Tune the Proposal to accept the desired acceptance ratio.
+ * Tune the Proposal to accept at the desired acceptance ratio.
  *
- * The acceptance ratio for this Proposal should be around 0.44.
+ * The acceptance ratio for this Proposal should be around 0.234.
  * If it is too large, then we increase the proposal size,
  * and if it is too small, then we decrease the proposal size.
  */
 void SpeciesSubtreeScaleBetaProposal::tune( double rate )
 {
 
-    if ( rate > 0.234 )
+    double p = this->targetAcceptanceRate;
+    if ( rate > p )
     {
-        alpha /= (1.0 + ((rate-0.234)/0.766) );
+        alpha /= (1.0 + ((rate - p)/(1.0 - p)) );
     }
     else
     {
-        alpha *= (2.0 - rate/0.234 );
+        alpha *= (2.0 - rate/p);
     }
 
 }

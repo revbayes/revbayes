@@ -10,6 +10,7 @@
 #include "Move_UpDownSlide.h"
 #include "UpDownSlideProposal.h"
 #include "RbException.h"
+#include "Probability.h"
 #include "RealPos.h"
 #include "RevObject.h"
 #include "RlBoolean.h"
@@ -120,9 +121,13 @@ void Move_UpDownSlide::constructInternalObject( void )
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
     
     // finally create the internal move object
     RevBayesCore::UpDownSlideProposal *prop = new RevBayesCore::UpDownSlideProposal(l);
+    
+    // set the target acceptance rate after construction
+    prop->setTargetAcceptanceRate(tt);
     
     value = new RevBayesCore::MetropolisHastingsMove(prop,w,t);
     
