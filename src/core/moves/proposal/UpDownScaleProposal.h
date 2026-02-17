@@ -29,7 +29,7 @@ template <class variableType> class StochasticNode;
     class UpDownScaleProposal : public Proposal {
         
     public:
-        UpDownScaleProposal(double l);                                 //!< Constructor
+        UpDownScaleProposal(double l);                                                                                                  //!< Constructor
         
         void                                        addVariable(StochasticNode<double> *v, bool up);                                    //!< Add an up-scaling variable
         void                                        addVariable(StochasticNode<RbVector<double> > *v, bool up);                         //!< Add an up-scaling variable
@@ -39,7 +39,7 @@ template <class variableType> class StochasticNode;
         double                                      doProposal(void);                                                                   //!< Perform proposal
         const std::string&                          getProposalName(void) const;                                                        //!< Get the name of the proposal for summary printing
         double                                      getProposalTuningParameter(void) const;
-        void                                        printParameterSummary(std::ostream &o, bool name_only) const;                                       //!< Print the parameter summary
+        void                                        printParameterSummary(std::ostream &o, bool name_only) const;                       //!< Print the parameter summary
         void                                        prepareProposal(void);                                                              //!< Prepare the proposal
         void                                        removeVariable(StochasticNode<double> *v, bool up);                                 //!< Add an up-scaling variable
         void                                        removeVariable(StochasticNode<RbVector<double> > *v, bool up);                      //!< Add an up-scaling variable
@@ -50,7 +50,7 @@ template <class variableType> class StochasticNode;
         
     protected:
         
-        void                                        swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes on which the Proposal is working on
+        void                                        swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes the Proposal is working on
         
         
     private:

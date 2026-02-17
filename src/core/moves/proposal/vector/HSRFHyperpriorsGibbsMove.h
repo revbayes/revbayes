@@ -13,26 +13,26 @@ namespace RevBayesCore {
     class HSRFHyperpriorsGibbsMove : public AbstractGibbsMove {
 
     public:
-        HSRFHyperpriorsGibbsMove( StochasticNode<double> *g, std::vector< StochasticNode<double> *> l, std::vector< StochasticNode<double> *> n, double p, double z, double w);                                                         //!<  constructor
-        virtual                                ~HSRFHyperpriorsGibbsMove(void);                                                             //!< Destructor
+        HSRFHyperpriorsGibbsMove( StochasticNode<double> *g, std::vector< StochasticNode<double> *> l, std::vector< StochasticNode<double> *> n, double p, double z, double w);                                                         //!< Constructor
+        virtual                                ~HSRFHyperpriorsGibbsMove(void);                               //!< Destructor
 
         // Basic utility functions
-        HSRFHyperpriorsGibbsMove*            clone(void) const;                                                                  //!< Clone object
-        const std::string&                      getMoveName(void) const;                                                            //!< Get the name of the move for summary printing
-        bool                                     heatsAreAllowable(double prHeat, double lHeat, double pHeat); //<! A check we can call for whether it is okay to use this move with given prior/likelihood/posterior heats
+        HSRFHyperpriorsGibbsMove*               clone(void) const;                                            //!< Clone object
+        const std::string&                      getMoveName(void) const;                                      //!< Get the name of the move for summary printing
+        bool                                    heatsAreAllowable(double prHeat, double lHeat, double pHeat); //!< A check we can call for whether it is okay to use this move with given prior/likelihood/posterior heats
         
     protected:
-        void                                    performGibbsMove(void);                                 //!< Perform move
-        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);                                             //!< Swap the pointers to the variable on which the move works on.
+        void                                    performGibbsMove(void);                                       //!< Perform move
+        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);               //!< Swap the pointers to the variable the move works on.
 
     private:
 
         // member variables
-        StochasticNode<double>*                 global_scale;                                          //!< The half-Cauchy variable the Proposal is working on
-        std::vector< StochasticNode<double> *>  local_scales;                                          //!< The half-Cauchy variables the Proposal is working on
-        std::vector< StochasticNode<double> *>  normals;                                               //!< The normal random variables on which this is a hyperprior
-        double                                  prop_global_only;                                      //!< The proportion of moves only on the global scale rather than the global and local scales
-        double                                  zeta;                                                  //!< Controls total scale of field, x is halfCauchy(0,zeta)
+        StochasticNode<double>*                 global_scale;                                                 //!< The half-Cauchy variable the Proposal is working on
+        std::vector< StochasticNode<double> *>  local_scales;                                                 //!< The half-Cauchy variables the Proposal is working on
+        std::vector< StochasticNode<double> *>  normals;                                                      //!< The normal random variables on which this is a hyperprior
+        double                                  prop_global_only;                                             //!< The proportion of moves only on the global scale rather than the global and local scales
+        double                                  zeta;                                                         //!< Controls total scale of field, x is halfCauchy(0,zeta)
 
     };
 

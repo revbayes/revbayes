@@ -21,27 +21,24 @@ namespace RevBayesCore {
     class AbstractGibbsMove : public AbstractMove {
 
     public:
-        virtual                                                ~AbstractGibbsMove(void);                            //!< Destructor
+        virtual                                                ~AbstractGibbsMove(void);                                      //!< Destructor
 
-        void                                                    printSummary(std::ostream &o, bool current_period) const;                //!< Print the move summary
+        void                                                    printSummary(std::ostream &o, bool current_period) const;     //!< Print the move summary
 
-        virtual bool                                            heatsAreAllowable(double prHeat, double lHeat, double pHeat); //<! A check we can call for whether it is okay to use this move with given prior/likelihood/posterior heats
+        virtual bool                                            heatsAreAllowable(double prHeat, double lHeat, double pHeat); //!< A check we can call for whether it is okay to use this move with given prior/likelihood/posterior heats
         
         // pure virtual public methods
         virtual AbstractGibbsMove*                              clone(void) const = 0;
-        virtual const std::string&                              getMoveName(void) const = 0;                        //!< Get the name of the move for summary printing
-
+        virtual const std::string&                              getMoveName(void) const = 0;                                  //!< Get the name of the move for summary printing
         virtual double                                          getMoveTuningParameter(void) const;
-        virtual void                                            setMoveTuningParameter(double tp);
 
     protected:
-        AbstractGibbsMove(double w);                                                         //!< Constructor
+        AbstractGibbsMove(double w);                                                                                          //!< Constructor
 
-        void                                                    performMcmcMove(double prHeat, double lHeat, double pHeat);            //!< Perform the move.
-        void                                                    tune(void);                                     //!< Specific tuning of the move
-
+        void                                                    performMcmcMove(double prHeat, double lHeat, double pHeat);   //!< Perform the move.
+        
         // pure virtual protected methods
-        virtual void                                            performGibbsMove(void) = 0;                         //!< Perform the move.
+        virtual void                                            performGibbsMove(void) = 0;                                   //!< Perform the move.
 
     };
 

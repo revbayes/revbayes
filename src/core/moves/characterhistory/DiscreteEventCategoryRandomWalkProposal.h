@@ -33,13 +33,11 @@ namespace RevBayesCore {
         double                                          getProposalTuningParameter(void) const override;
         void                                            printParameterSummary(std::ostream &o, bool name_only) const override;            //!< Print the parameter summary
         void                                            prepareProposal(void) override;                                                   //!< Prepare the proposal
-        void                                            setProposalTuningParameter(double tp) override;
-        void                                            tune(double r) override;                                                          //!< Tune the proposal to achieve a better acceptance/rejection ratio
         void                                            undoProposal(void) override;                                                      //!< Reject the proposal
         
     protected:
         
-        void                                            swapNodeInternal(DagNode *oldN, DagNode *newN) override;                          //!< Swap the DAG nodes on which the Proposal is working on
+        void                                            swapNodeInternal(DagNode *oldN, DagNode *newN) override;                          //!< Swap the DAG nodes the Proposal is working on
         
     private:
         // parameters

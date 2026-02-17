@@ -186,6 +186,11 @@ void TopologyNode::addBranchParameter(const std::string &n, const std::string &p
 
 }
 
+void TopologyNode::addBranchParameter_(const std::string &chunk)
+{
+    branch_comments.push_back( chunk );
+}
+
 
 
 void TopologyNode::addBranchParameters(std::string const &n, const std::vector<double> &p, bool internalOnly) {
@@ -353,6 +358,11 @@ void TopologyNode::addNodeParameter_(const std::string &n, const std::string &p)
     node_comments.push_back( comment );
 }
 
+void TopologyNode::addNodeParameter_(const std::string &chunk)
+{
+    node_comments.push_back( chunk );
+}
+
 
 void TopologyNode::addNodeParameters(std::string const &n, const std::vector<double> &p, bool internalOnly)
 {
@@ -397,6 +407,49 @@ void TopologyNode::addNodeParameters(std::string const &n, const std::vector<std
     }
 }
 
+/**
+ * This function will convert a raw string to a newick sting with escaped characters.
+ */
+std::string newickEscape(const std::string in_label)
+{
+    bool needs_quoting = false;
+    std::string escaped;
+
+    for (size_t i = 0; i < in_label.size(); ++i) {
+        char c = in_label[i];
+
+        // first check for any illegal characters or underscore
+        if (c == '\'' || c == '(' || c == ')' || c ==' ' ||
+            c == '[' || c ==']' || c == ':' || c == ';' || c ==',') {
+            needs_quoting = true;
+            // check for single quote
+            if (c == '\'') {
+                escaped += "''";
+            }
+            else {
+                escaped += c;
+            }
+        }
+
+        else{
+            escaped += c;
+        }
+    }
+
+    //return quoted string
+    if (needs_quoting) {
+        return "'" + escaped + "'";
+    } 
+    // convert blanks to underscores
+    else{
+        /*for (char& c : escaped) {
+            if (c == ' ') {
+                c = '_';
+            }
+        }*/
+        return escaped;
+    }
+}
 
 std::ostream& TopologyNode::buildNewick( std::ostream& o, bool simmap = false)
 {
@@ -423,7 +476,7 @@ std::ostream& TopologyNode::buildNewick( std::ostream& o, bool simmap = false)
 
     // 2. Write out the node name is there is any.
     if (children.size() < 2)
-        o << taxon.getName();
+        o << newickEscape(taxon.getName());
 
     // 3. Write out node comments if there are any and (simmap == false)
     if ( ( node_comments.size() > 0 or RbSettings::userSettings().getPrintNodeIndex() == true ) && simmap == false )
@@ -1190,7 +1243,7 @@ double TopologyNode::getMaxDepth( void ) const
             m = node.getBranchLength() + node.getMaxDepth();
         }
 
-        if ( m > max )
+        if ( m > max or std::isnan(m))
         {
             max = m;
         }
@@ -1997,7 +2050,12 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
 
             // create a parent for the two
             TopologyNode* prnt = new TopologyNode(); // leave the new node without index
-            prnt->setBranchLength(0.0);              // set the length of the branch subtending it to zero
+            
+            if (not std::isnan(branch_length))
+            {
+                prnt->setBranchLength(0.0);          // set the length of the branch subtending it to zero
+            }
+            
             prnt->addChild( leftChild );
             prnt->addChild( rightChild );
             leftChild->setParent( prnt );
@@ -2374,3 +2432,4 @@ std::pair<double,double> getStartEndAge(const RevBayesCore::TopologyNode& node)
 
     return {start_age, end_age};
 }
+

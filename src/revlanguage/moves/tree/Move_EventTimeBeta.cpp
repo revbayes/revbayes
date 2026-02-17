@@ -6,6 +6,7 @@
 #include "MetropolisHastingsMove.h"
 #include "Move_EventTimeBeta.h"
 #include "EventBranchTimeBetaProposal.h"
+#include "Probability.h"
 #include "RealPos.h"
 #include "RlBoolean.h"
 #include "RlTimeTree.h"
@@ -70,9 +71,12 @@ void Move_EventTimeBeta::constructInternalObject( void )
     double d = static_cast<const RealPos &>( delta->getRevObject() ).getValue();
     double o = static_cast<const RealPos &>( offset->getRevObject() ).getValue();
     bool tu = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
     
-    RevBayesCore::Proposal *p = new RevBayesCore::EventBranchTimeBetaProposal(n,d,o);
-    value = new RevBayesCore::MetropolisHastingsMove(p,w,tu);
+    RevBayesCore::Proposal *p = new RevBayesCore::EventBranchTimeBetaProposal(n, d, o);
+    p->setTargetAcceptanceRate(tt);
+    
+    value = new RevBayesCore::MetropolisHastingsMove(p, w, tu);
     
 }
 

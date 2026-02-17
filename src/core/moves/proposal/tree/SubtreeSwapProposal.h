@@ -27,7 +27,7 @@ template <class variableType> class StochasticNode;
     class SubtreeSwapProposal : public Proposal {
         
     public:
-        SubtreeSwapProposal( StochasticNode<Tree> *n);                                                          //!<  constructor
+        SubtreeSwapProposal( StochasticNode<Tree> *n);                                                          //!< Constructor
         
         // Basic utility functions
         void                                    cleanProposal(void);                                            //!< Clean up proposal
@@ -37,13 +37,11 @@ template <class variableType> class StochasticNode;
         double                                  getProposalTuningParameter(void) const;
         void                                    prepareProposal(void);                                          //!< Prepare the proposal
         void                                    printParameterSummary(std::ostream &o, bool name_only) const;   //!< Print the parameter summary
-        void                                    setProposalTuningParameter(double tp);
-        void                                    tune(double r);                                                 //!< Tune the proposal to achieve a better acceptance/rejection ratio
         void                                    undoProposal(void);                                             //!< Reject the proposal
         
     protected:
         
-        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);                 //!< Swap the DAG nodes on which the Proposal is working on
+        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);                 //!< Swap the DAG nodes the Proposal is working on
         
         
     private:
@@ -51,7 +49,7 @@ template <class variableType> class StochasticNode;
         bool                                    isDescendant(const TopologyNode &n, const TopologyNode &p);
 
         // parameters
-        StochasticNode<Tree>*                   tree;                                                   //!< The variable the Proposal is working on
+        StochasticNode<Tree>*                   tree;                                                           //!< The variable the Proposal is working on
         
         // stored objects to undo proposal
         bool                                    failed;

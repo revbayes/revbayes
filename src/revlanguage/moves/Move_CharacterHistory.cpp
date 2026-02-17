@@ -7,10 +7,9 @@
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 //#include "BiogeographicTreeHistoryCtmc.h"
-#include "BiogeographyNodeRejectionSampleProposal.h"
-#include "BiogeographyCladogeneticRejectionShiftProposal.h"
-#include "BiogeographyCladogeneticRejectionSampleProposal.h"
-//#include "BiogeographyPathRejectionSampleProposal.h"
+#include "BiogeographicNodeRejectionSampleProposal.h"
+#include "BiogeographicCladogeneticRejectionShiftProposal.h"
+#include "BiogeographicCladogeneticRejectionSampleProposal.h"
 #include "NodeRejectionSampleProposal.h"
 #include "MetropolisHastingsMove.h"
 #include "Move_CharacterHistory.h"
@@ -343,7 +342,7 @@ void RevLanguage::Move_CharacterHistory::constructInternalObject( void )
         }
         else if (gt == "cladogenetic" && pt == "rejection_shift")
         {
-            RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<RevBayesCore::StandardState> *tmp_p = new RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<RevBayesCore::StandardState>(ctmc_sn, l, r);
+            RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<RevBayesCore::StandardState> *tmp_p = new RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<RevBayesCore::StandardState>(ctmc_sn);
             //            tmp_p->setRateGenerator( qmap_tdn );
             if (use_site)
             {
@@ -442,7 +441,7 @@ void RevLanguage::Move_CharacterHistory::constructInternalObject( void )
         }
         else if (gt == "cladogenetic" && pt == "rejection_shift")
         {
-            RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<RevBayesCore::NaturalNumbersState> *tmp_p = new RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<RevBayesCore::NaturalNumbersState>(ctmc_sn, l, r);
+            RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<RevBayesCore::NaturalNumbersState> *tmp_p = new RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<RevBayesCore::NaturalNumbersState>(ctmc_sn);
             //            tmp_p->setRateGenerator( qmap_tdn );
             if (use_site)
             {
@@ -564,9 +563,9 @@ const MemberRules& RevLanguage::Move_CharacterHistory::getParameterRules(void) c
     {
 
         nodeChrsMoveMemberRules.push_back( new ArgumentRule( "ctmc", AbstractHomologousDiscreteCharacterData::getClassTypeSpec(), "The PhyloCTMC variable.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
-        nodeChrsMoveMemberRules.push_back( new ArgumentRule( "qmap_site", RateGenerator::getClassTypeSpec(),         "Per-site rate generator.",     ArgumentRule::BY_REFERENCE, ArgumentRule::ANY, NULL ) );
+        nodeChrsMoveMemberRules.push_back( new ArgumentRule( "qmap_site", RateGenerator::getClassTypeSpec(), "Per-site rate generator.", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY, NULL ) );
         nodeChrsMoveMemberRules.push_back( new ArgumentRule( "qmap_seq",  RateGeneratorSequence::getClassTypeSpec(), "Per-sequence rate generator.", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY, NULL ) );
-        nodeChrsMoveMemberRules.push_back( new ArgumentRule( "lambda", Probability::getClassTypeSpec(), "Tuning probability to propose new site history.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new Probability(1.0) ) );
+        nodeChrsMoveMemberRules.push_back( new ArgumentRule( "lambda", Probability::getClassTypeSpec(), "Tuning probability to propose new site history (has no effect if graph=\"cladogenetic\" and proposal=\"rejection_shift\").", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(1.0) ) );
 
         std::vector<std::string> optionsGraph;
         optionsGraph.push_back( "node" );
@@ -583,9 +582,18 @@ const MemberRules& RevLanguage::Move_CharacterHistory::getParameterRules(void) c
         optionsProposal.push_back( "uniformization" );
         nodeChrsMoveMemberRules.push_back( new OptionRule( "proposal", new RlString("rejection"), optionsProposal, "The type of sampler" ) );
 
-        /* Inherit weight from Move, put it after variable */
+        /* Inherit weight (but not tuneTarget!) from Move and put it after the arguments created above */
         const MemberRules& inheritedRules = Move::getParameterRules();
-        nodeChrsMoveMemberRules.insert( nodeChrsMoveMemberRules.end(), inheritedRules.begin(), inheritedRules.end() );
+        for (size_t i = 0; i < inheritedRules.size(); ++i)
+        {
+            if ( inheritedRules[i].getArgumentLabel() == "weight" )
+            {
+                nodeChrsMoveMemberRules.push_back( inheritedRules[i].clone() );
+            }
+        }
+                
+        /* Provide our own argument description for tuneTarget */
+        nodeChrsMoveMemberRules.push_back( new ArgumentRule( "tuneTarget", Probability::getClassTypeSpec(), "The acceptance probability targeted by auto-tuning (has no effect if graph=\"cladogenetic\" and proposal=\"rejection_shift\").", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability( 0.44 ) ) );
 
         rulesSet = true;
     }
