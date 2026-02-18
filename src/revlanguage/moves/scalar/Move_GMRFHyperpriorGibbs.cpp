@@ -144,9 +144,15 @@ const MemberRules& Move_GMRFHyperpriorGibbs::getParameterRules(void) const
         move_member_rules.push_back( new ArgumentRule( "zeta", RealPos::getClassTypeSpec()  , "The value controlling the shrinkage of the field, a scale by which x is multiplied, effectively making x ~ halfCauchy(0,zeta).", ArgumentRule::BY_VALUE    , ArgumentRule::ANY ) );
         move_member_rules.push_back( new ArgumentRule( "order", Natural::getClassTypeSpec()  , "The order of this GMRF model, first (1) or second (2). Defaults to first order.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new Natural(1) ) );
 
-        /* Inherit weight from Move, put it after variable */
+        /* Inherit weight (but not tuneTarget!) from Move and put it after the arguments created above */
         const MemberRules& inheritedRules = Move::getParameterRules();
-        move_member_rules.insert( move_member_rules.end(), inheritedRules.begin(), inheritedRules.end() );
+        for (size_t i = 0; i < inheritedRules.size(); ++i)
+        {
+            if ( inheritedRules[i].getArgumentLabel() == "weight" )
+            {
+                move_member_rules.push_back( inheritedRules[i].clone() );
+            }
+        }
 
         rules_set = true;
     }

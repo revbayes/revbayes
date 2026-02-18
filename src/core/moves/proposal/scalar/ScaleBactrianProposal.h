@@ -25,23 +25,23 @@ namespace RevBayesCore {
     class ScaleBactrianProposal : public SimpleProposal<double> {
         
     public:
-        ScaleBactrianProposal( StochasticNode<double> *n, double l, double p=0.44);                                                                    //!<  constructor
+        ScaleBactrianProposal( StochasticNode<double> *n, double l, double p=0.44);                                             //!< Constructor
         
         // Basic utility functions
         void                                cleanProposal(void);                                                                //!< Clean up proposal
-        ScaleBactrianProposal*                      clone(void) const;                                                                  //!< Clone object
+        ScaleBactrianProposal*              clone(void) const;                                                                  //!< Clone object
         const std::string&                  getProposalName(void) const;                                                        //!< Get the name of the proposal for summary printing
         double                              getProposalTuningParameter(void) const;
         void                                prepareProposal(void);                                                              //!< Prepare the proposal
-        void                                printParameterSummary(std::ostream &o, bool name_only) const;                                       //!< Print the parameter summary
-        double                              propose(double &v);                                                                  //!< Perform proposal
+        void                                printParameterSummary(std::ostream &o, bool name_only) const;                       //!< Print the parameter summary
+        double                              propose(double &v);                                                                 //!< Perform proposal
         void                                setProposalTuningParameter(double tp);
         void                                tune(double r);                                                                     //!< Tune the proposal to achieve a better acceptance/rejection ratio
         void                                undoProposal(void);                                                                 //!< Reject the proposal
         
     protected:
         
-        void                                swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes on which the Proposal is working on
+        void                                swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes the Proposal is working on
         
         
     private:

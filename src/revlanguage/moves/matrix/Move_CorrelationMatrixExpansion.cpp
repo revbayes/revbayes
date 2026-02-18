@@ -113,9 +113,15 @@ const MemberRules& Move_CorrelationMatrixExpansion::getParameterRules(void) cons
         move_member_rules.push_back( new ArgumentRule( "multivariateBM" ,   ContinuousCharacterData::getClassTypeSpec(), "The multivariate Brownian motion variable associated with the correlation matrix.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
         move_member_rules.push_back( new ArgumentRule( "variance",          ModelVector<RealPos>::getClassTypeSpec(),    "The vector of variances.", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY)  );
         
-        /* Inherit weight from Move, put it after variable */
+        /* Inherit weight (but not tuneTarget!) from Move and put it after the arguments created above */
         const MemberRules& inheritedRules = Move::getParameterRules();
-        move_member_rules.insert( move_member_rules.end(), inheritedRules.begin(), inheritedRules.end() );
+        for (size_t i = 0; i < inheritedRules.size(); ++i)
+        {
+            if ( inheritedRules[i].getArgumentLabel() == "weight" )
+            {
+                move_member_rules.push_back( inheritedRules[i].clone() );
+            }
+        }
         
         rules_set = true;
     }

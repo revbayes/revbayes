@@ -480,6 +480,13 @@ void AbstractMove::swapNode(DagNode *old_node, DagNode *new_node)
 }
 
 
+void AbstractMove::setMoveTuningParameter(double tp)
+{
+    // We assume by default that the move has no tuning parameter, and do nothing. If there is a tuning parameter,
+    // this function needs to be overridden.
+}
+
+
 void AbstractMove::setNumberAcceptedCurrentPeriod( size_t na )
 {
     num_tried_current_period = na;
@@ -502,6 +509,16 @@ void AbstractMove::setNumberTriedTotal( size_t nt )
 {
     num_tried_total = nt;
 }
+
+
+void AbstractMove::tune(void)
+{
+    // We assume by default that the move is not capable of being tuned, and do nothing. If the move can be tuned,
+    // this function needs to be overridden.
+}
+
+
+
 
 
 

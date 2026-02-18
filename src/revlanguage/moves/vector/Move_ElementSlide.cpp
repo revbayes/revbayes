@@ -9,6 +9,7 @@
 #include "ModelVector.h"
 #include "Move_ElementSlide.h"
 #include "RbException.h"
+#include "Probability.h"
 #include "Real.h"
 #include "RealPos.h"
 #include "RevObject.h"
@@ -75,9 +76,12 @@ void Move_ElementSlide::constructInternalObject( void )
     }
     
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
     
-    RevBayesCore::Proposal *prop = new RevBayesCore::ElementSlideProposal(n,l);
-    value = new RevBayesCore::MetropolisHastingsMove(prop,w,t);
+    RevBayesCore::Proposal *prop = new RevBayesCore::ElementSlideProposal(n, l);
+    prop->setTargetAcceptanceRate(tt);
+    
+    value = new RevBayesCore::MetropolisHastingsMove(prop, w, t);
 }
 
 
