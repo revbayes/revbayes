@@ -54,7 +54,7 @@ Func_logVector* Func_logVector::clone( void ) const
 RevBayesCore::TypedFunction<RevBayesCore::RbVector<double> >* Func_logVector::createFunction( void ) const
 {
 
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* a = static_cast<const ModelVector<Real> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* a = static_cast<const ModelVector<RealPos> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode<double>* b = static_cast<const RealPos &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
 
     RevBayesCore::LogVectorFunction* f = new RevBayesCore::LogVectorFunction( a, b );
@@ -73,7 +73,7 @@ const ArgumentRules& Func_logVector::getArgumentRules( void ) const
     if ( !rules_set )
     {
 
-        argumentRules.push_back( new ArgumentRule( "x", ModelVector<Real>::getClassTypeSpec(), "A vector of numbers.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "x", ModelVector<RealPos>::getClassTypeSpec(), "A vector of numbers.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         argumentRules.push_back( new ArgumentRule( "base", RealPos::getClassTypeSpec(), "The base of the logarithm.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
         rules_set = true;
@@ -96,7 +96,7 @@ const std::string& Func_logVector::getClassType(void)
 const TypeSpec& Func_logVector::getClassTypeSpec(void)
 {
 
-    static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( TypedFunction<ModelVector<Real> >::getClassTypeSpec() ) );
+    static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( TypedFunction<ModelVector<RealPos> >::getClassTypeSpec() ) );
 
     return rev_type_spec;
 }
