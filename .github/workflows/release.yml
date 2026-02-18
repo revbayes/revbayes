@@ -151,9 +151,11 @@ jobs:
     - name: ccache
       uses: hendrikmuhs/ccache-action@v1.2
       with:
-         key: ${{ matrix.name }}
+         key: ${{ matrix.name }}-${{ github.ref_name }}
          restore-keys: |
+           ${{ matrix.name }}-${{ github.ref_name }}
            ${{ matrix.name }}
+         save: ${{ github.event_name == 'push' }}
 
     - name: Compile static BOOST libs (Linux & Mac)
       if: matrix.name != 'windows'
@@ -236,7 +238,7 @@ jobs:
         else
            (
               cd projects/cmake
-              BUILD_DIR=build exec_name=rb ./build.sh -help2yml true -DCMAKE_INSTALL_PREFIX=$HOME/local -mpi ${{ matrix.mpi }}
+              BUILD_DIR=build exec_name=rb ./build.sh -help2yml true -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_INSTALL_PREFIX=$HOME/local -mpi ${{ matrix.mpi }}
               cmake --install build
            )
         fi
