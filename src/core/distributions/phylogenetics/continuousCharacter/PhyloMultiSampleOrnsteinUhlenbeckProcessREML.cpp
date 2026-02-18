@@ -333,11 +333,12 @@ void PhyloMultiSampleOrnsteinUhlenbeckProcessREML::recursiveComputeLnProbability
         std::vector<double> &p_node  = this->partial_likelihoods[this->active_likelihood[node_index]][node_index];
         
         const std::string &name = this->tau->getValue().getNode( node_index ).getName();
-        double num_samples = 0.0;
         
         double var = getWithinSpeciesVariance(name);
         
         double stdev = sqrt( var );
+
+        std::vector<double> num_samples(this->num_sites,0);
         
         for (int i=0; i<this->num_sites; i++)
         {
@@ -378,7 +379,7 @@ void PhyloMultiSampleOrnsteinUhlenbeckProcessREML::recursiveComputeLnProbability
                             // sum up the probabilities of the means
                             p_node[char_index] += lnl_node;
 
-                            ++num_samples;
+                            ++num_samples[char_index];
                         }
                         
                     } // end if is character resolved
@@ -400,7 +401,7 @@ void PhyloMultiSampleOrnsteinUhlenbeckProcessREML::recursiveComputeLnProbability
             }
             else
             {
-                variances_per_site[this->active_likelihood[node_index]][node_index][char_index] = var / num_samples;
+                variances_per_site[this->active_likelihood[node_index]][node_index][char_index] = var / num_samples[char_index];
             }
         }
         
