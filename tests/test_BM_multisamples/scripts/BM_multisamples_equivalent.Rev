@@ -19,7 +19,7 @@ data <- readContinuousCharacterData("data/Drosophila_tpm.nex")
 data_pruned <- readContinuousCharacterData("data/Drosophila_tpm_pruned.nex")
 
 # Get some useful variables from the data. We need these later on.
-taxa <- data.taxa()
+#taxa <- data.taxa()
 
 # Tree
 psi <- readTrees( "data/Drosophila.tre" )[1]
@@ -61,7 +61,9 @@ traits_pruned.clamp(data_pruned)
 # check if the two distributions 
 # give the same likelihood.
 lp1 = traits.lnProbability()
+#lp1 = 0.0
 lp2 = traits_pruned.lnProbability()
+#lp2 = 0.0
 
 treshold <- 0.0001
 

@@ -1,9 +1,0 @@
-   Successfully read one character matrix from file 'data/Drosophila_tpm.nex'
-   Successfully read one character matrix from file 'data/Drosophila_tpm_pruned.nex'
-   Attempting to read the contents of file "Drosophila.tre"
-   Successfully read file
-   Attempting to read the contents of file "Drosophila_pruned.tre"
-   Successfully read file
-lp1 = -678.304
-lp2 = -653.986
-likelihoods in BM multi-sample distributions not equal, test failed
