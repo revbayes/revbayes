@@ -285,20 +285,36 @@ a <- exp(1)				# exponential function
 print(filename = "output/Test_basic.txt", append = TRUE, a)
 print(filename = "output/Test_basic.txt", append = TRUE, "\n")
 
-b <- ln(1)				# logarithmic function with natural base
+b <- exp([1,2.5])		# exponential function of a vector
 print(filename = "output/Test_basic.txt", append = TRUE, b)
 print(filename = "output/Test_basic.txt", append = TRUE, "\n")
 
-c <- sqrt(16)			# square root function
+c <- ln(1)				# logarithmic function with natural base
 print(filename = "output/Test_basic.txt", append = TRUE, c)
 print(filename = "output/Test_basic.txt", append = TRUE, "\n")
 
-d <- power(2,2)			# power function: power(a,b) = a^b
+d <- ln([1,2.5])				# logarithmic function of a vector with natural base
 print(filename = "output/Test_basic.txt", append = TRUE, d)
 print(filename = "output/Test_basic.txt", append = TRUE, "\n")
 
-e <- abs(-3.2)			# absolute value function
+e <- ln(1)				# logarithmic function with base 10
 print(filename = "output/Test_basic.txt", append = TRUE, e)
+print(filename = "output/Test_basic.txt", append = TRUE, "\n")
+
+f <- ln([1,2.5])				# logarithmic function of a vector with base 10
+print(filename = "output/Test_basic.txt", append = TRUE, f)
+print(filename = "output/Test_basic.txt", append = TRUE, "\n")
+
+g <- sqrt(16)			# square root function
+print(filename = "output/Test_basic.txt", append = TRUE, g)
+print(filename = "output/Test_basic.txt", append = TRUE, "\n")
+
+h <- power(2,3)			# power function: power(a,b) = a^b
+print(filename = "output/Test_basic.txt", append = TRUE, h)
+print(filename = "output/Test_basic.txt", append = TRUE, "\n")
+
+i <- abs(-3.2)			# absolute value function
+print(filename = "output/Test_basic.txt", append = TRUE, i)
 print(filename = "output/Test_basic.txt", append = TRUE, "\n")
 clear()
 
@@ -308,7 +324,7 @@ a <- dbeta(0.5,1,1,log=FALSE)
 b <- dbeta(0.5,1,1)
 #c <- qbeta(0.5,1,1)
 #d <- pbeta(0.75,1,1)
-e ~ dnBeta(1,1) 
+e ~ dnBeta(1,1)
 f <- rbeta(1,1,1)[1]
 print(filename = "output/Test_basic.txt", append = TRUE, "Beta distribution")
 print(filename = "output/Test_basic.txt", append = TRUE, "\n")
@@ -324,7 +340,7 @@ p <- v(1,1,1,1)
 x <- simplex(1,1,1,1)
 a <- ddirichlet(x,p,log=FALSE)
 b <- ddirichlet(x,p)
-d ~ dnDirichlet(p) 
+d ~ dnDirichlet(p)
 e <- rdirichlet(1,p)[1]
 print(filename = "output/Test_basic.txt", append = TRUE, "Dirichlet distribution")
 print(filename = "output/Test_basic.txt", append = TRUE, "\n")
@@ -339,7 +355,7 @@ a <- dexp(1,1,log=FALSE)
 b <- dexp(1,1)
 c <- qexp(0.5,1)
 d <- pexp(0.5,1)
-e ~ dnExp(1) 
+e ~ dnExp(1)
 f <- rexp(1,1)[1]
 print(filename = "output/Test_basic.txt", append = TRUE, "Exponential distribution")
 print(filename = "output/Test_basic.txt", append = TRUE, "\n")
@@ -358,7 +374,7 @@ a <- dgamma(1,1,1,log=FALSE)
 b <- dgamma(1,1,1)
 c <- qgamma(0.5,1,1)
 d <- pgamma(10.0,1,1)
-e ~ dnGamma(1,1) 
+e ~ dnGamma(1,1)
 f <- rgamma(1,1,1)[1]
 print(filename = "output/Test_basic.txt", append = TRUE, "Gamma distribution")
 print(filename = "output/Test_basic.txt", append = TRUE, "\n")
@@ -377,7 +393,7 @@ a <- dlnorm(1,5,1,log=FALSE)
 b <- dlnorm(1,5,1)
 c <- qlnorm(0.5,5,1)
 d <- plnorm(1.0,5,1)
-e ~ dnLnorm(5,1) 
+e ~ dnLnorm(5,1)
 f <- rlnorm(1,5,1)[1]
 print(filename = "output/Test_basic.txt", append = TRUE, "Lognormal distribution")
 print(filename = "output/Test_basic.txt", append = TRUE, "\n")
@@ -396,7 +412,7 @@ a <- dnorm(1,log=FALSE)
 b <- dnorm(1)
 c <- qnorm(0.5)
 d <- pnorm(0.5)
-e ~ dnNorm(1) 
+e ~ dnNorm(1)
 f <- rnorm(1)[1]
 print(filename = "output/Test_basic.txt", append = TRUE, "Standard normal distribution")
 print(filename = "output/Test_basic.txt", append = TRUE, "\n")
@@ -415,7 +431,7 @@ a <- dnorm(1,0,10,log=FALSE)
 b <- dnorm(1,0,10)
 c <- qnorm(0.75,5,10)
 d <- pnorm(1.0,5,10)
-e ~ dnNorm(10,10) 
+e ~ dnNorm(10,10)
 f <- rnorm(1,10,10)[1]
 print(filename = "output/Test_basic.txt", append = TRUE, "Normal distribution")
 print(filename = "output/Test_basic.txt", append = TRUE, "\n")
@@ -434,7 +450,7 @@ a <- dunif(0,-1,1,log=FALSE)
 b <- dunif(0,-1,1)
 c <- qunif(0.25,-1,1)
 d <- punif(0.75,-1,1)
-e ~ dnUnif(-1,1) 
+e ~ dnUnif(-1,1)
 f <- runif(1,-1,1)[1]
 print(filename = "output/Test_basic.txt", append = TRUE, "Uniform distribution")
 print(filename = "output/Test_basic.txt", append = TRUE, "\n")
@@ -468,7 +484,7 @@ d <- ln(b)				# assignment of constant node 'd' with the value if the logarithmi
 print(filename = "output/Test_basic.txt", append = TRUE, d)
 print(filename = "output/Test_basic.txt", append = TRUE, "\n")
 
-e := c == d			
+e := c == d
 print(filename = "output/Test_basic.txt", append = TRUE, e)
 print(filename = "output/Test_basic.txt", append = TRUE, "\n")
 
@@ -496,7 +512,7 @@ print(filename = "output/Test_basic.txt", append = TRUE, "\n")
 
 mu <- 0
 sigma <- 1
-y ~ dnNorm(mu,sigma)	
+y ~ dnNorm(mu,sigma)
 y.clamp(0.0)
 print(filename = "output/Test_basic.txt", append = TRUE, y)
 print(filename = "output/Test_basic.txt", append = TRUE, "\n")

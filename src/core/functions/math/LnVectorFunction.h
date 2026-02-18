@@ -1,5 +1,5 @@
-#ifndef ExponentialVectorFunction_H
-#define ExponentialVectorFunction_H
+#ifndef LnVectorFunction_H
+#define LnVectorFunction_H
 
 #include "RbVector.h"
 #include "TypedFunction.h"
@@ -16,12 +16,12 @@ template <class valueType> class TypedDagNode;
      * Hence, the return value y = x if x >= 0 and y = -x if x < 0.
      *
      */
-    class ExponentialVectorFunction : public TypedFunction< RbVector<double> > {
+    class LnVectorFunction : public TypedFunction< RbVector<double> > {
 
     public:
-    	ExponentialVectorFunction(const TypedDagNode<RbVector<double> > *a);
+    	LnVectorFunction(const TypedDagNode<RbVector<double> > *a);
 
-    	ExponentialVectorFunction*                clone(void) const;                                                  //!< Create a clon.
+    	LnVectorFunction*                           clone(void) const;                                                  //!< Create a clon.
         void                                        update(void);                                                       //!< Recompute the value
 
     protected:
