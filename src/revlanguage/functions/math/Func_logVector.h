@@ -10,11 +10,11 @@
 namespace RevLanguage {
 
     /**
-     * The RevLanguage wrapper of the absolute value function.
+    * The RevLanguage wrapper of the logarithm vector function.
      *
      * The RevLanguage wrapper of the abs function connects
-     * the variables/parameters of the function and creates the internal AbsoluteValueFunction object.
-     * Please read the AbsoluteValueFunction.h for more info.
+     * the variables/parameters of the function and creates the internal LogVectorFunction object.
+     * Please read the LogVectorFunction.h for more info.
      *
      *
      * @copyright Copyright 2009-

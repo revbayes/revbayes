@@ -293,15 +293,15 @@ c <- ln(1)				# logarithmic function with natural base
 print(filename = "output/Test_basic.txt", append = TRUE, c)
 print(filename = "output/Test_basic.txt", append = TRUE, "\n")
 
-d <- ln([1,2.5])				# logarithmic function of a vector with natural base
+d <- ln([1,2.5])		# logarithmic function of a vector with natural base
 print(filename = "output/Test_basic.txt", append = TRUE, d)
 print(filename = "output/Test_basic.txt", append = TRUE, "\n")
 
-e <- ln(1)				# logarithmic function with base 10
+e <- log(1, 10)			# logarithmic function with base 10
 print(filename = "output/Test_basic.txt", append = TRUE, e)
 print(filename = "output/Test_basic.txt", append = TRUE, "\n")
 
-f <- ln([1,2.5])				# logarithmic function of a vector with base 10
+f <- log([1,2.5], 10)	# logarithmic function of a vector with base 10
 print(filename = "output/Test_basic.txt", append = TRUE, f)
 print(filename = "output/Test_basic.txt", append = TRUE, "\n")
 

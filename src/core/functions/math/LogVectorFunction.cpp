@@ -11,7 +11,7 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 /**
- * AbsoluteValueFunction of a RbVector Constructor.
+ * LogVectorFunction of a RbVector Constructor.
  * @param x a RbVector with values of type double
  */
 LogVectorFunction::LogVectorFunction(const TypedDagNode<RbVector<double> > *x, const TypedDagNode<double> *y) : TypedFunction<RbVector<double> >( new RbVector<double>(x->getValue().size(), 0.0) ),

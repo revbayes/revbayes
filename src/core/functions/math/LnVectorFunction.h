@@ -10,11 +10,7 @@ template <class valueType> class TypedDagNode;
 
 
     /**
-     * @brief Absolute value of a vector real number.
-     *
-     * The absolute value functons computes the value without sign.
-     * Hence, the return value y = x if x >= 0 and y = -x if x < 0.
-     *
+     * @brief Natural logarithm of a vector of real positive numbers.
      */
     class LnVectorFunction : public TypedFunction< RbVector<double> > {
 
