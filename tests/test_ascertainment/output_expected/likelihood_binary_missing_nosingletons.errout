@@ -1,0 +1,7 @@
+   Attempting to read the contents of file "5_taxa.tre"
+   Successfully read file
+   Successfully read one character matrix from file 'data/5_taxa_1_char_binary_missing.nex'
+   Mk likelihood:-2.72586
+   nosingletons likelihood:-2.25791
+   Successfully read one character matrix from file 'data/5_taxa_1_char_binary_all_patterns.nex'
+   Manual calculation of nosingletons likelihood:-2.25791

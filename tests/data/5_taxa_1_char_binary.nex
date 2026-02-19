@@ -5,7 +5,7 @@ BEGIN DATA;
   MATRIX
 Taxon_1 0
 Taxon_2 0
-Taxon_3 ?
+Taxon_3 0
 Taxon_4 1
 Taxon_5 1
 ;
