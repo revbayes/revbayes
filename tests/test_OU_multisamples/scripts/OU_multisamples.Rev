@@ -2,7 +2,13 @@
 #
 # RevBayes Validation Test: Ornstein-Uhlenbeck model with multiple samples
 # 
-# Model: Continuous character(s) evolve under OU model.
+# This test verifies that two datasets,
+#
+# i) a six-species phylogeny, with 25 missing data and 10 observations
+#
+# ii) a three-species phylogeny with 10 observations
+#
+# give the same likelihood score given the same parameter values.
 #            
 #
 # authors: Haoqing Du
