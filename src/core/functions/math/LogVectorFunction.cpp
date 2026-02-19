@@ -1,4 +1,4 @@
-#include "ExponentialVectorFunction.h"
+#include "LogVectorFunction.h"
 
 #include <cstddef>
 #include <cmath>
@@ -11,26 +11,28 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 /**
- * ExponentialVectorFunction of a RbVector Constructor.
+ * LogVectorFunction of a RbVector Constructor.
  * @param x a RbVector with values of type double
  */
-ExponentialVectorFunction::ExponentialVectorFunction(const TypedDagNode<RbVector<double> > *x) : TypedFunction<RbVector<double> >( new RbVector<double>(x->getValue().size(), 0.0) ),
-    a( x )
+LogVectorFunction::LogVectorFunction(const TypedDagNode<RbVector<double> > *x, const TypedDagNode<double> *y) : TypedFunction<RbVector<double> >( new RbVector<double>(x->getValue().size(), 0.0) ),
+    a( x ),
+    base( y )
 {
 
     addParameter( x );
+    addParameter( y );
 
 }
 
 
-ExponentialVectorFunction* ExponentialVectorFunction::clone( void ) const
+LogVectorFunction* LogVectorFunction::clone( void ) const
 {
 
-    return new ExponentialVectorFunction(*this);
+    return new LogVectorFunction(*this);
 }
 
 
-void ExponentialVectorFunction::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
+void LogVectorFunction::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
 {
 
     if (oldP == a)
@@ -44,12 +46,12 @@ void ExponentialVectorFunction::swapParameterInternal(const DagNode *oldP, const
 
 }
 
-void ExponentialVectorFunction::update( void )
+void LogVectorFunction::update( void )
 {
     size_t n = value->size();
     for (size_t i = 0; i < n; ++i)
     {
-        (*value)[i] = std::exp( a->getValue()[i] );
+        (*value)[i] = log10( a->getValue()[i] ) / log10( base->getValue() );
     }
 
 }
