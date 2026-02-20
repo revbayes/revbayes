@@ -20,7 +20,7 @@
 namespace RevBayesCore { class DagNode; }
 using namespace RevBayesCore;
 
-ApproximateTreeLikelihood::ApproximateTreeLikelihood(const TypedDagNode<Tree>* tt, TypedDagNode< RbVector<double> > *br, TypedDagNode< RbVector<double> > *gr, TypedDagNode< MatrixReal > *h, TRANSFORMATION tr) : TypedDistribution<Tree>( new Tree() ),
+ApproximateTreeLikelihood::ApproximateTreeLikelihood(const TypedDagNode<Tree>* tt, TypedDagNode< RbVector<double> > *br, RbVector<double> *gr, MatrixReal *h, TRANSFORMATION tr) : TypedDistribution<Tree>( new Tree() ),
     time_tree( tt ),
     branch_rates( br ),
     gradients( gr ),
@@ -34,14 +34,10 @@ ApproximateTreeLikelihood::ApproximateTreeLikelihood(const TypedDagNode<Tree>* t
     // this will also ensure that the parameters are not getting deleted before we do
     this->addParameter( branch_rates );
     this->addParameter( time_tree );
-    this->addParameter( gradients );
-    this->addParameter( hessian );
-
 
     simulateTree();
 
 }
-
 
 
 ApproximateTreeLikelihood::~ApproximateTreeLikelihood()
@@ -50,9 +46,6 @@ ApproximateTreeLikelihood::~ApproximateTreeLikelihood()
     // the tree will be deleted automatically by the base class
 
 }
-
-
-
 
 
 ApproximateTreeLikelihood* ApproximateTreeLikelihood::clone( void ) const
@@ -92,21 +85,18 @@ double ApproximateTreeLikelihood::computeLnProbability( void )
         topology_match_checked = true;
     }
     
-    // get all our variables to compute the
+    // get all our variables to compute the approximate likelihood
     std::vector<double> branch_lengths = computeBranchLengths();
-    const MatrixReal& h = hessian->getValue();
-    const RbVector<double>& g = gradients->getValue();
-    
-    size_t num_branches = g.size();
+    size_t num_branches = gradients->size();
     
     double ln_prob = 0.0;
     for (size_t i=0; i<num_branches; ++i)
     {
-        ln_prob += mle_branch_lengths[i] * g[i];
-        ln_prob += mle_branch_lengths[i] * mle_branch_lengths[i] * h[i][i] / 2.0;
+        ln_prob += mle_branch_lengths[i] * (*gradients)[i];
+        ln_prob += mle_branch_lengths[i] * mle_branch_lengths[i] * (*hessian)[i][i] / 2.0;
         for (size_t j=0; i<j; ++j)
         {
-            ln_prob += mle_branch_lengths[i] * mle_branch_lengths[j] * h[i][j];
+            ln_prob += mle_branch_lengths[i] * mle_branch_lengths[j] * (*hessian)[i][j];
         }
     }
     
@@ -117,10 +107,11 @@ double ApproximateTreeLikelihood::computeLnProbability( void )
 std::vector<double> ApproximateTreeLikelihood::computeBranchLengths( void )
 {
     
-    // get branch-length tree nodes
+    // get time tree nodes
     const std::vector<TopologyNode*> &time_tree_nodes = time_tree->getValue().getNodes();
+    size_t num_tips = time_tree->getValue().getNumberOfTips();
     
-    std::vector<double>& branch_lengths = std::vector<double>(time_tree_nodes.size()-1, 0.0);
+    std::vector<double> branch_lengths(time_tree_nodes.size()-1, 0.0);
 
     // loop through time tree nodes and draw new rates to get new branch lengths
     for (size_t i=0; i<time_tree_nodes.size(); ++i)
@@ -183,12 +174,8 @@ void ApproximateTreeLikelihood::fireTreeChangeEvent(const TopologyNode &n, const
 
     if ( m == TreeChangeEventMessage::TOPOLOGY )
     {
-
-//        dirty_topology = true;
         throw RbException("Don't do that!!");
-        
     }
-
 
 }
 
@@ -215,6 +202,8 @@ void ApproximateTreeLikelihood::setValue(RevBayesCore::Tree *v, bool force)
     
     // get branch-length tree nodes
     const std::vector<TopologyNode*> &bl_tree_nodes = value->getNodes();
+    size_t num_tips = value->getNumberOfTips();
+    
     mle_branch_lengths = std::vector<double>(bl_tree_nodes.size(), 0.0);
     split_to_index.clear();
     
@@ -256,11 +245,14 @@ void ApproximateTreeLikelihood::simulateTree( void )
     // internally, our tree nodes store both an age and branch length variable, but only one should be used.
     value->getRoot().setUseAges( false, true );
 
-    // get branch-length tree nodes
+    // get time tree nodes
     const std::vector<TopologyNode*> &time_tree_nodes = time_tree->getValue().getNodes();
+    size_t num_tips = time_tree->getValue().getNumberOfTips();
+    
+    RandomNumberGenerator *rng = GLOBAL_RNG;
     
     // simulate displacement around the MLE
-    std::vector<double> displacements = RbStatistics::MultivariateNormal::rvCovariance(gradients->getValue(), hessian->getValue(), GLOBAL_RNG, 1.0)
+    std::vector<double> displacements = RbStatistics::MultivariateNormal::rvCovariance(static_cast<const std::vector<double>&>(*gradients), *hessian, *rng);
 
     // loop through time tree nodes and draw new rates to get new branch lengths
     for (size_t i=0; i<time_tree_nodes.size(); ++i)
@@ -292,7 +284,7 @@ void ApproximateTreeLikelihood::simulateTree( void )
     // now unroot to get the final branch length tree
     value->unroot();
     
-    
+    const std::vector<TopologyNode*> &bl_tree_nodes = value->getNodes();
     mle_branch_lengths = std::vector<double>(bl_tree_nodes.size(), 0.0);
     split_to_index.clear();
     

@@ -21,13 +21,13 @@ class DagNode;
     class ApproximateTreeLikelihood : public TypedDistribution<Tree>, public TreeChangeEventListener {
 
     public:
-        ApproximateTreeLikelihood(const TypedDagNode<Tree>* tt, TypedDagNode< RbVector<double> > *br, TypedDagNode< RbVector<double> > *gr, TypedDagNode< MatrixReal > *h, TRANSFORMATION tr);
-        virtual                                            ~ApproximateTreeLikelihood(void);                                                                    //!< Virtual destructor
+        ApproximateTreeLikelihood(const TypedDagNode<Tree>* tt, TypedDagNode< RbVector<double> > *br, RbVector<double> *gr, MatrixReal *h, TRANSFORMATION tr);
+        virtual                                            ~ApproximateTreeLikelihood(void);                                        //!< Virtual destructor
 
         // public member functions
         ApproximateTreeLikelihood*                          clone(void) const;                                                      //!< Create an independent clone
         double                                              computeLnProbability(void);
-        virtual void                                        fireTreeChangeEvent(const TopologyNode &n, const unsigned& m=0);                                 //!< This node was changed in the tree
+        virtual void                                        fireTreeChangeEvent(const TopologyNode &n, const unsigned& m=0);        //!< This node was changed in the tree
         void                                                redrawValue(void);
         virtual void                                        setValue(Tree *v, bool f=false);                                        //!< Set the current value, e.g. attach an observation (clamp)
 
@@ -40,7 +40,9 @@ class DagNode;
         // helper functions
         bool                                                checkTopologyMatch(void) const;
         std::vector<double>                                 computeBranchLengths(void);
+        void                                                simulateTree(void);
         void                                                transformBranchLengths(std::vector<double>& bl);
+        
         virtual void                                        keepSpecialization(const DagNode* affecter);
         virtual void                                        restoreSpecialization(const DagNode *restorer);
         virtual void                                        touchSpecialization(const DagNode *toucher, bool touchAll);
@@ -48,8 +50,8 @@ class DagNode;
         // members
         const TypedDagNode<Tree>*                           time_tree;
         const TypedDagNode<RbVector<double> >*              branch_rates;
-        const TypedDagNode<RbVector<double> >*              gradients;
-        const TypedDagNode<MatrixReal>*                     hessian;
+        const RbVector<double>*                             gradients;
+        const MatrixReal*                                   hessian;
 
         TRANSFORMATION                                      transform;
         bool                                                topology_match_checked;
