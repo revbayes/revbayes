@@ -20,7 +20,7 @@
 namespace RevBayesCore { class DagNode; }
 using namespace RevBayesCore;
 
-ApproximateTreeLikelihood::ApproximateTreeLikelihood(const TypedDagNode<Tree>* tt, TypedDagNode< RbVector<double> > *br, RbVector<double> *gr, MatrixReal *h, TRANSFORMATION tr) : TypedDistribution<Tree>( new Tree() ),
+ApproximateTreeLikelihood::ApproximateTreeLikelihood(const TypedDagNode<Tree>* tt, TypedDagNode< RbVector<double> > *br, const RbVector<double> *gr, const MatrixReal *h, TRANSFORMATION tr) : TypedDistribution<Tree>( new Tree() ),
     time_tree( tt ),
     branch_rates( br ),
     gradients( gr ),

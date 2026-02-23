@@ -21,7 +21,7 @@ class DagNode;
     class ApproximateTreeLikelihood : public TypedDistribution<Tree>, public TreeChangeEventListener {
 
     public:
-        ApproximateTreeLikelihood(const TypedDagNode<Tree>* tt, TypedDagNode< RbVector<double> > *br, RbVector<double> *gr, MatrixReal *h, TRANSFORMATION tr);
+        ApproximateTreeLikelihood(const TypedDagNode<Tree>* tt, TypedDagNode< RbVector<double> > *br, const RbVector<double> *gr, const MatrixReal *h, TRANSFORMATION tr);
         virtual                                            ~ApproximateTreeLikelihood(void);                                        //!< Virtual destructor
 
         // public member functions
