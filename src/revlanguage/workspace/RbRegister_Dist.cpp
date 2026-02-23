@@ -165,6 +165,7 @@
 #include "Dist_PhyloWhiteNoise.h"
 
 /* Tree priors (in folder "distributions/phylogenetics/tree") */
+#include "Dist_ApproximateTreeLikelihood.h"
 #include "Dist_bdp.h"
 #include "Dist_bdp_complete.h"
 #include "Dist_BDSTP.h"
@@ -360,6 +361,9 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         addDistribution( new Dist_phyloCTMCClado() );
 
         /* Tree distributions (in folder "distributions/phylogenetics/tree") */
+        
+        // likelihood approximation
+        AddDistribution< BranchLengthTree           >( new Dist_ApproximateTreeLikelihood());
 
         // constant rate birth-death process
         AddDistribution< TimeTree                   >( new Dist_bdp());
