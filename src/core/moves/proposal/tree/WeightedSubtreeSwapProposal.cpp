@@ -637,25 +637,3 @@ void WeightedSubtreeSwapProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
     tree = static_cast<StochasticNode<Tree>* >(newN) ;
     
 }
-
-
-void WeightedSubtreeSwapProposal::setProposalTuningParameter(double tp)
-{
-    // this proposal has no tuning parameter: nothing to do
-}
-
-
-/**
- * Tune the Proposal to accept the desired acceptance ratio.
- *
- * The acceptance ratio for this Proposal should be around 0.44.
- * If it is too large, then we increase the proposal size,
- * and if it is too small, then we decrease the proposal size.
- */
-void WeightedSubtreeSwapProposal::tune( double rate )
-{
-    
-    // nothing to tune
-    
-}
-

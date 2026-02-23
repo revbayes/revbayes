@@ -112,9 +112,15 @@ const MemberRules& Move_WeightedSubtreePruneAndRegraft::getParameterRules(void) 
         move_member_rules.push_back( new ArgumentRule( "alpha"      , RealPos::getClassTypeSpec()  , "The parameter of the beta distribution to compute the break points.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY       , new RealPos( 0.5 ) ) );
         move_member_rules.push_back( new ArgumentRule( "numBreaks"  , Natural::getClassTypeSpec(), "The number of break points", ArgumentRule::BY_VALUE    , ArgumentRule::ANY       , new Natural( 6 ) ) );
        
-        /* Inherit weight from Move, put it after variable */
+        /* Inherit weight (but not tuneTarget!) from Move and put it after the arguments created above */
         const MemberRules& inheritedRules = Move::getParameterRules();
-        move_member_rules.insert( move_member_rules.end(), inheritedRules.begin(), inheritedRules.end() );
+        for (size_t i = 0; i < inheritedRules.size(); ++i)
+        {
+            if ( inheritedRules[i].getArgumentLabel() == "weight" )
+            {
+                move_member_rules.push_back( inheritedRules[i].clone() );
+            }
+        }
         
         rules_set = true;
     }

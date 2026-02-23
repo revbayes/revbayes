@@ -58,11 +58,9 @@ void Move_WeightedBranchLengthScale::constructInternalObject( void )
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     long n = static_cast<const Natural &>( num_breaks->getRevObject() ).getValue();
     double a = static_cast<const RealPos &>( alpha->getRevObject() ).getValue();
-//    bool tune = static_cast<const RlBoolean &>( tuning->getRevObject() ).getValue();
-    bool tune = false;
     
     RevBayesCore::Proposal *p = new RevBayesCore::WeightedBranchLengthScaleProposal(t, n, a);
-    value = new RevBayesCore::MetropolisHastingsMove(p, w, tune);
+    value = new RevBayesCore::MetropolisHastingsMove(p, w);
 }
 
 
@@ -108,13 +106,19 @@ const MemberRules& Move_WeightedBranchLengthScale::getParameterRules(void) const
     
     if ( rules_set == false )
     {
-        move_member_rules.push_back( new ArgumentRule( "tree"       , BranchLengthTree::getClassTypeSpec() , "The tree variable the move operates on.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
-        move_member_rules.push_back( new ArgumentRule( "alpha"      , RealPos::getClassTypeSpec()  , "The parameter of the beta distribution to compute the break points.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY       , new RealPos( 0.5 ) ) );
-        move_member_rules.push_back( new ArgumentRule( "numBreaks"  , Natural::getClassTypeSpec(), "The number of break points", ArgumentRule::BY_VALUE    , ArgumentRule::ANY       , new Natural( 6 ) ) );
+        move_member_rules.push_back( new ArgumentRule( "tree", BranchLengthTree::getClassTypeSpec(), "The tree variable the move operates on.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
+        move_member_rules.push_back( new ArgumentRule( "alpha", RealPos::getClassTypeSpec(), "The parameter of the beta distribution to compute the break points.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RealPos( 0.5 ) ) );
+        move_member_rules.push_back( new ArgumentRule( "numBreaks", Natural::getClassTypeSpec(), "The number of break points", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural( 6 ) ) );
         
-        /* Inherit weight from Move, put it after variable */
+        /* Inherit weight (but not tuneTarget!) from Move and put it after the arguments created above */
         const MemberRules& inheritedRules = Move::getParameterRules();
-        move_member_rules.insert( move_member_rules.end(), inheritedRules.begin(), inheritedRules.end() );
+        for (size_t i = 0; i < inheritedRules.size(); ++i)
+        {
+            if ( inheritedRules[i].getArgumentLabel() == "weight" )
+            {
+                move_member_rules.push_back( inheritedRules[i].clone() );
+            }
+        }
         
         rules_set = true;
     }

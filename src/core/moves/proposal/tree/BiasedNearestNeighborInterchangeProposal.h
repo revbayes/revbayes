@@ -14,36 +14,31 @@ class Tree;
 template <class variableType> class StochasticNode;
     
     /**
-     * The subtree-prune-and-regraft operator.
-     *
-     * A subtree-prune-and-regraft proposal is a SPR proposal on unrooted trees without changing the branch lengths.
-     *
+     * The biased nearest neighbor interchange (NNI) operator.
      *
      * @copyright Copyright 2009-
      * @author The RevBayes Development Core Team (Sebastian Hoehna)
-     * @since 2012-07-12, version 1.0
+     * @since 2024-03-19, version 1.4.0-preview
      *
      */
     class BiasedNearestNeighborInterchangeProposal : public Proposal {
         
     public:
-        BiasedNearestNeighborInterchangeProposal( StochasticNode<Tree> *n );                                               //!<  constructor
+        BiasedNearestNeighborInterchangeProposal( StochasticNode<Tree> *n );                                              //!< Constructor
         
         // Basic utility functions
-        void                                                cleanProposal(void);                                        //!< Clean up proposal
-        BiasedNearestNeighborInterchangeProposal*           clone(void) const;                                          //!< Clone object
-        double                                              doProposal(void);                                           //!< Perform proposal
-        const std::string&                                  getProposalName(void) const;                                //!< Get the name of the proposal for summary printing
+        void                                                cleanProposal(void);                                          //!< Clean up proposal
+        BiasedNearestNeighborInterchangeProposal*           clone(void) const;                                            //!< Clone object
+        double                                              doProposal(void);                                             //!< Perform proposal
+        const std::string&                                  getProposalName(void) const;                                  //!< Get the name of the proposal for summary printing
         double                                              getProposalTuningParameter(void) const;
-        void                                                prepareProposal(void);                                      //!< Prepare the proposal
-        void                                                printParameterSummary(std::ostream &o, bool name_only) const;               //!< Print the parameter summary
-        void                                                setProposalTuningParameter(double tp);
-        void                                                tune(double r);                                             //!< Tune the proposal to achieve a better acceptance/rejection ratio
-        void                                                undoProposal(void);                                         //!< Reject the proposal
+        void                                                prepareProposal(void);                                        //!< Prepare the proposal
+        void                                                printParameterSummary(std::ostream &o, bool name_only) const; //!< Print the parameter summary
+        void                                                undoProposal(void);                                           //!< Reject the proposal
         
     protected:
         
-        void                                                swapNodeInternal(DagNode *oldN, DagNode *newN);             //!< Swap the DAG nodes on which the Proposal is working on
+        void                                                swapNodeInternal(DagNode *oldN, DagNode *newN);               //!< Swap the DAG nodes the Proposal is working on
         void                                                storeTree(void);
         
     private:
