@@ -224,23 +224,3 @@ void NodeTimeSlideUniformAgeConstrainedProposal::swapNodeInternal(DagNode *oldN,
     variable = static_cast<StochasticNode<Tree>* >(newN) ;
     
 }
-
-
-void NodeTimeSlideUniformAgeConstrainedProposal::setProposalTuningParameter(double tp)
-{
-    // this proposal has no tuning parameter: nothing to do
-}
-
-
-/**
- * Tune the Proposal to accept the desired acceptance ratio.
- *
- * The acceptance ratio for this Proposal should be around 0.44.
- * If it is too large, then we increase the proposal size,
- * and if it is too small, then we decrease the proposal size.
- */
-void NodeTimeSlideUniformAgeConstrainedProposal::tune( double rate )
-{
-    
-}
-

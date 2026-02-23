@@ -14,7 +14,7 @@ namespace RevBayesCore {
     class OrderedEventVectorScaleProposal : public Proposal {
         
     public:
-        OrderedEventVectorScaleProposal( StochasticNode< OrderedEvents<valueType> > *n, double l=0.5 );                                                                    //!<  constructor
+        OrderedEventVectorScaleProposal( StochasticNode< OrderedEvents<valueType> > *n, double l=0.5 );                                                                    //!< Constructor
         
         // Basic utility functions
         void                                cleanProposal(void);                                                                //!< Clean up proposal
@@ -23,20 +23,20 @@ namespace RevBayesCore {
         const std::string&                  getProposalName(void) const;                                                        //!< Get the name of the proposal for summary printing
         double                              getProposalTuningParameter(void) const;
         void                                prepareProposal(void);                                                              //!< Prepare the proposal
-        void                                printParameterSummary(std::ostream &o, bool name_only) const;                                       //!< Print the parameter summary
+        void                                printParameterSummary(std::ostream &o, bool name_only) const;                       //!< Print the parameter summary
         void                                setProposalTuningParameter(double tp);
         void                                tune(double r);                                                                     //!< Tune the proposal to achieve a better acceptance/rejection ratio
         void                                undoProposal(void);                                                                 //!< Reject the proposal
         
     protected:
         
-        void                                swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes on which the Proposal is working on
+        void                                swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes the Proposal is working on
         
         
     private:
 
         // parameters
-        StochasticNode< OrderedEvents<valueType> >*        variable;                                                                           //!< The variable the Proposal is working on
+        StochasticNode< OrderedEvents<valueType> >*        variable;                                                            //!< The variable the Proposal is working on
         double                                             lambda;
         valueType                                          old_value;
         double                                             event_time;
@@ -248,8 +248,7 @@ void RevBayesCore::OrderedEventVectorScaleProposal<valueType>::swapNodeInternal(
 template <class valueType>
 void RevBayesCore::OrderedEventVectorScaleProposal<valueType>::setProposalTuningParameter(double tp)
 {
-    // this proposal has no tuning parameter: nothing to do
-	lambda = tp;
+    lambda = tp;
 }
 
 

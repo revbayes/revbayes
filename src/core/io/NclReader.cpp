@@ -1706,6 +1706,13 @@ std::vector<Tree*>* NclReader::readBranchLengthTrees(const path &fn)
         // read the files in the map containing the file names with the output being a vector of pointers to
         // the character matrices that have been read
         trees = readBranchLengthTrees( *p, "nexus" );
+
+        if ( trees == NULL || trees->size() == 0 )
+        {
+            delete trees;
+            trees = readBranchLengthTrees( *p, "newick" );
+        }
+
         if ( trees == NULL || trees->size() == 0 )
         {
             delete trees;
@@ -1724,11 +1731,6 @@ std::vector<Tree*>* NclReader::readBranchLengthTrees(const path &fn)
             }
         }
         
-        if ( trees == NULL || trees->size() == 0 )
-        {
-            delete trees;
-            trees = readBranchLengthTrees( *p, "newick" );
-        }
     }
     
 // We cannot reset the tip node indices in case the tree topology changed during ancestral state monitoring.
@@ -1848,17 +1850,19 @@ std::vector<Tree*>* NclReader::readBranchLengthTrees(const path &file_name, cons
             // NEXUS file format
             nexusReader.ReadFilepath( fns.c_str(), MultiFormatReader::NEXUS_FORMAT);
         }
-        else if (file_format == "phylip")
-        {
-            // phylip file format with std::int64_t taxon names
-            nexusReader.ReadFilepath( fns.c_str(), MultiFormatReader::RELAXED_PHYLIP_TREE_FORMAT);
-        }
         else if (file_format == "newick")
         {
             NewickTreeReader ntr;
             std::vector<Tree*>* trees = ntr.readBranchLengthTrees(fns);
             return trees;
         }
+        else if (file_format == "phylip")
+        {
+            // phylip file format with std::int64_t taxon names
+            nexusReader.ReadFilepath( fns.c_str(), MultiFormatReader::RELAXED_PHYLIP_TREE_FORMAT);
+        }
+        else
+            throw RbException()<<"I don't recognize tree format '"<<file_format<<"'";
     }
     catch(NxsException& err)
     {

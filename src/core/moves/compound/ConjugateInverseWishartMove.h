@@ -16,16 +16,16 @@ namespace RevBayesCore {
     class ConjugateInverseWishartMove : public AbstractGibbsMove {
         
     public:
-        ConjugateInverseWishartMove(StochasticNode<MatrixReal>* s, double w);                                                         //!<  constructor
-        virtual                                ~ConjugateInverseWishartMove(void);                                                             //!< Destructor
+        ConjugateInverseWishartMove(StochasticNode<MatrixReal>* s, double w);                           //!< Constructor
+        virtual                                ~ConjugateInverseWishartMove(void);                      //!< Destructor
         
         // Basic utility functions
-        ConjugateInverseWishartMove*            clone(void) const;                                                                  //!< Clone object
-        const std::string&                      getMoveName(void) const;                                                            //!< Get the name of the move for summary printing
+        ConjugateInverseWishartMove*            clone(void) const;                                      //!< Clone object
+        const std::string&                      getMoveName(void) const;                                //!< Get the name of the move for summary printing
         
     protected:
         void                                    performGibbsMove(void);                                 //!< Perform move
-        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);                                             //!< Swap the pointers to the variable on which the move works on.
+        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);         //!< Swap the pointers to the variable on which the move works on.
         
     private:
         

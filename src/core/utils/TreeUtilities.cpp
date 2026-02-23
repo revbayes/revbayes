@@ -551,6 +551,10 @@ void RevBayesCore::TreeUtilities::constructTimeTreeRecursively(TopologyNode& tn,
  */
 RevBayesCore::Tree* RevBayesCore::TreeUtilities::convertTree(const Tree& t, bool reset_index)
 {
+    // FIXME: This routine duplicates most of the machinery to copy trees.
+    //        Eventually stop doing that.  Instead just copy the tree and modify the copy.
+    // Tree *tt = new Tree(t);
+    
     // create time tree object (topology + times)
     Tree *tt = new Tree();
 
@@ -584,6 +588,10 @@ RevBayesCore::Tree* RevBayesCore::TreeUtilities::convertTree(const Tree& t, bool
 
     // copy the root edge
     root->setBranchLength( bln.getBranchLength() );
+
+    // copy the tree comments
+    for(auto& chunk: t.getTreeParameters())
+        tt->addTreeParameter_(chunk);
 
     return tt;
 }

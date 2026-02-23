@@ -14,7 +14,7 @@ namespace RevBayesCore {
     class GMRFOrder2HyperpriorGibbsMove : public AbstractGibbsMove {
 
     public:
-        GMRFOrder2HyperpriorGibbsMove( StochasticNode<double> *g, std::vector< StochasticNode<double> *> n, double z, double w);                                                         //!<  constructor
+        GMRFOrder2HyperpriorGibbsMove( StochasticNode<double> *g, std::vector< StochasticNode<double> *> n, double z, double w);                                                         //!< Constructor
         virtual                                ~GMRFOrder2HyperpriorGibbsMove(void);                                                             //!< Destructor
 
         // Basic utility functions

@@ -23,7 +23,7 @@ namespace RevBayesCore {
     class RootTimeSlideProposal : public Proposal {
         
     public:
-        RootTimeSlideProposal( StochasticNode<Tree> *n, double d);                                              //!<  constructor
+        RootTimeSlideProposal( StochasticNode<Tree> *n, double d);                                              //!< Constructor
         
         // Basic utility functions
         void                                    cleanProposal(void);                                            //!< Clean up proposal
@@ -39,7 +39,7 @@ namespace RevBayesCore {
         
     protected:
         
-        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);                 //!< Swap the DAG nodes on which the Proposal is working on
+        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);                 //!< Swap the DAG nodes the Proposal is working on
         
         
     private:

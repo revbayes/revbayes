@@ -159,20 +159,3 @@ void ElementSwapSimplexProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     variable = static_cast<StochasticNode<Simplex >* >(newN) ;
 }
-
-
-void ElementSwapSimplexProposal::setProposalTuningParameter(double tp)
-{
-    // this proposal has no tuning parameter: nothing to do
-}
-
-
-/**
- * Tune the Proposal to accept the desired acceptance ratio.
- *
- */
-void ElementSwapSimplexProposal::tune( double rate )
-{
-    
-}
-

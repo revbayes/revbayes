@@ -30,13 +30,6 @@
 namespace RevBayesCore {
     
     /**
-     * The scaling operator.
-     *
-     * A scaling proposal draws a random uniform number u ~ unif (-0.5,0.5)
-     * and scales the current vale by a scaling factor
-     * sf = exp( lambda * u )
-     * where lambda is the tuning parameter of the Proposal to influence the size of the proposals.
-     *
      * @copyright Copyright 2009-
      * @author The RevBayes Development Core Team (Michael Landis)
      * @since 2009-09-08, version 1.0
@@ -47,7 +40,7 @@ namespace RevBayesCore {
     class BiogeographicNodeRejectionShiftProposal : public Proposal {
         
     public:
-        BiogeographicNodeRejectionShiftProposal( StochasticNode<AbstractHomologousDiscreteCharacterData> *n, double pf=0.5, double r=0.234 );                                  //!<  constructor
+        BiogeographicNodeRejectionShiftProposal( StochasticNode<AbstractHomologousDiscreteCharacterData> *n, double pf=0.5, double r=0.234 );                                  //!< Constructor
         
         // Basic utility functions
         void                                                        assignNode(TopologyNode* nd);
@@ -57,7 +50,7 @@ namespace RevBayesCore {
         double                                                      doProposal(void);                                               //!< Perform proposal
         const std::string&                                          getProposalName(void) const;                                    //!< Get the name of the proposal for summary printing
         double                                                      getProposalTuningParameter(void) const;
-        void                                                        printParameterSummary(std::ostream &o, bool name_only) const;                   //!< Print the parameter summary
+        void                                                        printParameterSummary(std::ostream &o, bool name_only) const;   //!< Print the parameter summary
         void                                                        prepareProposal(void);                                          //!< Prepare the proposal
         void                                                        chooseCharactersToSample(const std::vector<CharacterEvent*>& h);
         void                                                        setSampledCharacters(const std::set<size_t>& s);
@@ -74,7 +67,7 @@ namespace RevBayesCore {
         virtual double                                              computeNodeLnProposal();
         virtual double                                              computeCladogenesisLnProposal();
         virtual double                                              computeAnagenesisConditionLnProposal();
-        void                                                        swapNodeInternal(DagNode *oldN, DagNode *newN);                 //!< Swap the DAG nodes on which the Proposal is working on
+        void                                                        swapNodeInternal(DagNode *oldN, DagNode *newN);                 //!< Swap the DAG nodes the Proposal is working on
         
         
         // parameters
@@ -133,7 +126,7 @@ node( NULL ),
 nodeTpMatrix(2),
 leftTpMatrix(2),
 rightTpMatrix(2),
-p_flip(pf), // for now, lambda always == 1.0
+p_flip(pf),
 storedLnProb(0.0),
 proposedLnProb(0.0),
 storedCladogeneticEvent("")
@@ -549,11 +542,6 @@ double RevBayesCore::BiogeographicNodeRejectionShiftProposal<charType>::computeN
 /**
  * Perform the Proposal.
  *
- * A scaling Proposal draws a random uniform number u ~ unif (-0.5,0.5)
- * and scales the current vale by a scaling factor
- * sf = exp( lambda * u )
- * where lambda is the tuning parameter of the Proposal to influence the size of the proposals.
- *
  * \return The hastings ratio.
  */
 template<class charType>
@@ -770,7 +758,11 @@ void RevBayesCore::BiogeographicNodeRejectionShiftProposal<charType>::preparePro
 template<class charType>
 void RevBayesCore::BiogeographicNodeRejectionShiftProposal<charType>::printParameterSummary(std::ostream &o, bool name_only) const
 {
-    //    o << "lambda = " << lambda;
+    o << "p_flip";
+    if (name_only == false)
+    {
+        o << " = " << p_flip;
+    }
 }
 
 template<class charType>
@@ -1243,7 +1235,7 @@ void RevBayesCore::BiogeographicNodeRejectionShiftProposal<charType>::setProposa
 
 
 /**
- * Tune the Proposal to accept the desired acceptance ratio.
+ * Tune the Proposal to accept at the desired acceptance ratio.
  */
 template<class charType>
 void RevBayesCore::BiogeographicNodeRejectionShiftProposal<charType>::tune( double rate )

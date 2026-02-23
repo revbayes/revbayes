@@ -26,30 +26,28 @@ namespace RevBayesCore {
     class NarrowExchangeRateMatrixProposal : public Proposal {
         
     public:
-        NarrowExchangeRateMatrixProposal( StochasticNode<Tree> *t, const std::vector<StochasticNode<RateGenerator> *> &rm);                                               //!<  constructor
+        NarrowExchangeRateMatrixProposal( StochasticNode<Tree> *t, const std::vector<StochasticNode<RateGenerator> *> &rm);                                               //!< Constructor
         
         // Basic utility functions
-        void                                    cleanProposal(void);                                        //!< Clean up proposal
-        NarrowExchangeRateMatrixProposal*       clone(void) const;                                          //!< Clone object
-        double                                  doProposal(void);                                           //!< Perform proposal
-        const std::string&                      getProposalName(void) const;                                //!< Get the name of the proposal for summary printing
+        void                                    cleanProposal(void);                                          //!< Clean up proposal
+        NarrowExchangeRateMatrixProposal*       clone(void) const;                                            //!< Clone object
+        double                                  doProposal(void);                                             //!< Perform proposal
+        const std::string&                      getProposalName(void) const;                                  //!< Get the name of the proposal for summary printing
         double                                  getProposalTuningParameter(void) const;
-        void                                    prepareProposal(void);                                      //!< Prepare the proposal
-        void                                    printParameterSummary(std::ostream &o, bool name_only) const;               //!< Print the parameter summary
-        void                                    setProposalTuningParameter(double tp);
-        void                                    tune(double r);                                             //!< Tune the proposal to achieve a better acceptance/rejection ratio
-        void                                    undoProposal(void);                                         //!< Reject the proposal
+        void                                    prepareProposal(void);                                        //!< Prepare the proposal
+        void                                    printParameterSummary(std::ostream &o, bool name_only) const; //!< Print the parameter summary
+        void                                    undoProposal(void);                                           //!< Reject the proposal
         
     protected:
         
-        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);             //!< Swap the DAG nodes on which the Proposal is working on
+        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);               //!< Swap the DAG nodes the Proposal is working on
         double                                  lnProposalProbabilityRateMatrix(const TopologyNode &n, size_t &oc, bool update);
         void                                    undoRateMatrixProposal(const TopologyNode &n, size_t i);
 
     private:
         
         // parameters
-        StochasticNode<Tree>*                           tree;                                                   //!< The variable the Proposal is working on
+        StochasticNode<Tree>*                           tree;                                                 //!< The variable the Proposal is working on
         std::vector<StochasticNode<RateGenerator> *>    rate_matrices;
         
         // stored objects to undo proposal

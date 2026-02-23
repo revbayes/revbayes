@@ -261,7 +261,9 @@
 #include "Func_hyperbolicTangent.h"
 #include "Func_hyperbolicSine.h"
 #include "Func_ln.h"
+#include "Func_lnVector.h"
 #include "Func_log.h"
+#include "Func_logVector.h"
 #include "Func_logit.h"
 #include "Func_logistic.h"
 #include "Func_matrix.h"
@@ -332,7 +334,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
 
         addFunction( new Func_FlowT2Populations()      );
 
-        
+
         /* Rate matrix generator functions (in folder "functions/evolution/ratematrix") */
         addFunction( new Func_BinaryMutationCoalescentRateMatrix()          );
         addFunction( new Func_blosum62()                                    );
@@ -528,15 +530,17 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
 
         // geometric mean function
         addFunction( new Func_geometricMean() );
-        
+
         // logistic function
         addFunction( new Func_logistic() );
 
         // natural log function
         addFunction( new Func_ln()  );
+        addFunction( new Func_lnVector()  );
 
         // log function
         addFunction( new Func_log()  );
+        addFunction( new Func_logVector()  );
 
         // logit function
         addFunction( new Func_logit()  );

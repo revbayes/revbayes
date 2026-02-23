@@ -7,6 +7,7 @@
 #include "MetropolisHastingsMove.h"
 #include "Move_MultiValueEventScale.h"
 #include "MultiValueEventScaleProposal.h"
+#include "Probability.h"
 #include "RealPos.h"
 #include "RevObject.h"
 #include "RlBoolean.h"
@@ -70,14 +71,18 @@ void Move_MultiValueEventScale::constructInternalObject( void )
     RevBayesCore::TypedDagNode<RevBayesCore::MultiValueEvent>* tmp = static_cast<const MultiValueEvent &>( x->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::MultiValueEvent> *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::MultiValueEvent> *>( tmp );
     
-    const std::string &v_name    = static_cast<const RlString &>( val_name->getRevObject() ).getValue();
-    bool tuning                  = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double l                     = static_cast<const RealPos &>( lambda->getRevObject() ).getValue();
-
+    const std::string &v_name = static_cast<const RlString &>( val_name->getRevObject() ).getValue();
+    bool tuning               = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    double l                  = static_cast<const RealPos &>( lambda->getRevObject() ).getValue();
+    double tt                 = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
     
     // finally create the internal move object
     RevBayesCore::Proposal *prop = new RevBayesCore::MultiValueEventScaleProposal(n, v_name, l);
-    value = new RevBayesCore::MetropolisHastingsMove(prop,w,tuning);
+    
+    // set the target acceptance rate after construction
+    prop->setTargetAcceptanceRate(tt);
+    
+    value = new RevBayesCore::MetropolisHastingsMove(prop, w, tuning);
     
 }
 
