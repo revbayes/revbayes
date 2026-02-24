@@ -34,20 +34,19 @@ Neither the [master](https://github.com/revbayes/revbayes/tree/master) branch no
 
 4. Merge development into master
     * On doing this, GitHub creates a merge commit, giving master 1 unique change that is not on development, and making this whole dance necessary next time
+    
+5. Generate a YAML-formatted help file
 
-5. Update website from within the [revbayes.github.io](https://github.com/revbayes/revbayes.github.io) repo
+    1. Re-build RevBayes from scratch. This automatically generates a `rb-help2yml` executable outside the `build` directory.
+    2. Run the executable to generate a `help.yml` file from the contents of [`help/md`](https://github.com/revbayes/revbayes/tree/master/help/md)
+        * `./rb-help2yml`
 
-    1. Checkout the source branch
-        * `git checkout source`
-        * `git pull`
-    2. Create a release branch off of source
-        * `git branch release-vX.Y.X`
-        * `git checkout release-vX.Y.Z`
-    3. Update download version by modifying `_config.yml`
-    4. Re-build RevBayes from scratch. This automatically generates a `help.yml` file from the contents of [`help/md`](https://github.com/revbayes/revbayes/tree/master/help/md).
-    5. Copy `help.yml` to the `_data` directory
-    6. Commit the changes
+6. Update website from within the [revbayes.github.io](https://github.com/revbayes/revbayes.github.io) repo
+
+    1. Update download version by modifying `_config.yml`
+    2. Copy `help.yml` to the `_data` directory
+    3. Commit the changes
         * `git add _config.yml`
         * `git add _data/help.yml`
         * `git commit -m "Update RB version to <X.Y.Z>"`
-    7. Open a pull request to merge the release branch into source
+
