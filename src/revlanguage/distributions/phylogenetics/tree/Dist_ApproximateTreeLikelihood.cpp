@@ -88,8 +88,8 @@ RevBayesCore::ApproximateTreeLikelihood* Dist_ApproximateTreeLikelihood::createD
     // get the parameters
     RevBayesCore::TypedDagNode< RevBayesCore::Tree >* tt = static_cast<const TimeTree &>( time_tree->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* br = static_cast<const ModelVector<RealPos> &>( branch_rates->getRevObject() ).getDagNode();
-    const RevBayesCore::RbVector<double>* gr = &static_cast<const ModelVector<RealPos> &>( gradients->getRevObject() ).getValue();
-    const RevBayesCore::MatrixReal* hess = &static_cast<const MatrixRealSymmetric &>( hessian->getRevObject() ).getDagNode()->getValue();
+    const RevBayesCore::RbVector<double>* gr = &static_cast<const ModelVector<Real> &>( gradients->getRevObject() ).getValue();
+    const RevBayesCore::MatrixReal* hess = &static_cast<const MatrixReal &>( hessian->getRevObject() ).getValue();
 
     const std::string& tr_str = static_cast<const RlString &>( transform->getRevObject() ).getValue();
     RevBayesCore::TRANSFORMATION tr = RevBayesCore::NONE;
@@ -167,8 +167,8 @@ const MemberRules& Dist_ApproximateTreeLikelihood::getParameterRules(void) const
     {
         member_rules.push_back( new ArgumentRule( "timeTree", TimeTree::getClassTypeSpec(), "The time tree", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         member_rules.push_back( new ArgumentRule( "branchRates", ModelVector<RealPos>::getClassTypeSpec(), "The vector of branch rates.",   ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        member_rules.push_back( new ArgumentRule( "gradientVector", ModelVector<RealPos>::getClassTypeSpec(), "The gradient vector (vector of first derivatives of the log-likelihood function).", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY ) );
-        member_rules.push_back( new ArgumentRule( "hessianMatrix", MatrixRealSymmetric::getClassTypeSpec(), "The Hessian matrix (matrix of second derivatives of the log-likelihood functon).", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY ) );
+        member_rules.push_back( new ArgumentRule( "gradientVector", ModelVector<Real>::getClassTypeSpec(), "The gradient vector (vector of first derivatives of the log-likelihood function).", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY ) );
+        member_rules.push_back( new ArgumentRule( "hessianMatrix", MatrixReal::getClassTypeSpec(), "The Hessian matrix (matrix of second derivatives of the log-likelihood functon).", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY ) );
         
         std::vector<std::string> options;
         options.push_back( "none" );
