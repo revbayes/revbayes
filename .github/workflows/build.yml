@@ -345,6 +345,8 @@ jobs:
            rm -f test_coalescent/output_expected/horses_het_GMRF_treebased*
            rm -f test_coalescent/output_expected/mcmc_heterochronous_BSP.errout
            rm -f test_coalescent/output_expected/mcmc_heterochronous_GMRF_treebased.errout
+
+           rm -rf test_OU_pruning/output_expected/OU_missing_data.log
         fi
 
         if [ ${{ matrix.arch }} = "win64" ] ; then
