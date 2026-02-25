@@ -62,7 +62,6 @@ namespace RevBayesCore {
         std::optional<std::vector<size_t>>                                  prev_active_likelihood;
 
         // convenience variables available for derived classes too
-        std::vector<bool>                                                   changed_nodes;
         std::vector<bool>                                                   dirty_nodes;
         
     private:

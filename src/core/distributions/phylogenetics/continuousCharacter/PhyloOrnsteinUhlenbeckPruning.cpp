@@ -34,7 +34,6 @@ PhyloOrnsteinUhlenbeckPruning::PhyloOrnsteinUhlenbeckPruning(const TypedDagNode<
     means( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
     variances( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
     active_likelihood( std::vector<size_t>(this->num_nodes, 0) ),
-    changed_nodes( std::vector<bool>(this->num_nodes, false) ),
     dirty_nodes( std::vector<bool>(this->num_nodes, true) )
 {
     // initialize default parameters
@@ -241,12 +240,6 @@ void PhyloOrnsteinUhlenbeckPruning::keepSpecialization( const DagNode* affecter 
     {
         (*it) = false;
     }
-    
-    for (std::vector<bool>::iterator it = this->changed_nodes.begin(); it != this->changed_nodes.end(); ++it)
-    {
-        (*it) = false;
-    }
-    
 }
 
 
@@ -418,7 +411,6 @@ void PhyloOrnsteinUhlenbeckPruning::recursivelyFlagNodeDirty( const TopologyNode
         
         // if we previously haven't touched this node, then we need to change the active likelihood pointer
         active_likelihood[index] = prev_active_likelihood.value()[index] == 0 ? 1 : 0;
-        changed_nodes[index] = true;
         assert(active_likelihood[index] != prev_active_likelihood.value()[index]);
     }
     
@@ -517,12 +509,6 @@ void PhyloOrnsteinUhlenbeckPruning::restoreSpecialization( const DagNode* affect
     }
     
     // restore the active likelihoods vector
-    for (size_t index = 0; index < changed_nodes.size(); ++index)
-    {
-        // set all flags to false
-        changed_nodes[index] = false;
-    }
-
     active_likelihood = *prev_active_likelihood;
     prev_active_likelihood = {};
 }
@@ -855,15 +841,9 @@ void PhyloOrnsteinUhlenbeckPruning::touchSpecialization( const DagNode* affecter
         }
         
         // flip the active likelihood pointers
-        for (size_t index = 0; index < changed_nodes.size(); ++index)
+        for (size_t index = 0; index < active_likelihood.size(); ++index)
         {
             active_likelihood[index] = prev_active_likelihood.value()[index] == 0 ? 1 : 0;
-            changed_nodes[index] = true;
-            assert(active_likelihood[index] != prev_active_likelihood.value()[index]);
-        }
-        for(int index=0; index < active_likelihood.size();index++)
-        {
-            assert(active_likelihood[index] != prev_active_likelihood.value()[index]);
         }
     }
 }
