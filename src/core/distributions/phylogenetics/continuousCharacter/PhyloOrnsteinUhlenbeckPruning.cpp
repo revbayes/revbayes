@@ -234,7 +234,8 @@ void PhyloOrnsteinUhlenbeckPruning::propagateAuxiliaryVariables(double &mu, doub
 
 void PhyloOrnsteinUhlenbeckPruning::keepSpecialization( const DagNode* affecter )
 {
-    
+    prev_active_likelihood = {};
+
     // reset all flags
     for (std::vector<bool>::iterator it = this->dirty_nodes.begin(); it != this->dirty_nodes.end(); ++it)
     {
@@ -403,7 +404,7 @@ void PhyloOrnsteinUhlenbeckPruning::recursivelyFlagNodeDirty( const TopologyNode
     // we need to flag this node and all ancestral nodes for recomputation
     size_t index = n.getIndex();
     
-    // if this node is already dirty, the also all the ancestral nodes must have been flagged as dirty
+    // if this node is already dirty, then also all the ancestral nodes must have been flagged as dirty
     if ( !dirty_nodes[index] )
     {
         // the root doesn't have an ancestor
@@ -420,6 +421,7 @@ void PhyloOrnsteinUhlenbeckPruning::recursivelyFlagNodeDirty( const TopologyNode
         {
             active_likelihood[index] = (active_likelihood[index] == 0 ? 1 : 0);
             changed_nodes[index] = true;
+            assert(active_likelihood[index] != prev_active_likelihood.value()[index]);
         }
         
     }
@@ -427,7 +429,7 @@ void PhyloOrnsteinUhlenbeckPruning::recursivelyFlagNodeDirty( const TopologyNode
 }
 
 
-void PhyloOrnsteinUhlenbeckPruning::resetValue( void )
+void PhyloOrnsteinUhlenbeckPruning::resetValue()
 {
     
     // check if the vectors need to be resized
@@ -506,14 +508,6 @@ void PhyloOrnsteinUhlenbeckPruning::resetValue( void )
     {
         (*it) = true;
     }
-    
-    // flip the active likelihood pointers
-    for (size_t index = 0; index < changed_nodes.size(); ++index)
-    {
-        active_likelihood[index] = 0;
-        changed_nodes[index] = true;
-    }
-    
 }
 
 
@@ -539,7 +533,8 @@ void PhyloOrnsteinUhlenbeckPruning::restoreSpecialization( const DagNode* affect
         // set all flags to false
         changed_nodes[index] = false;
     }
-    
+
+    prev_active_likelihood = {};
 }
 
 
@@ -827,11 +822,12 @@ double PhyloOrnsteinUhlenbeckPruning::sumRootLikelihood( void )
 
 void PhyloOrnsteinUhlenbeckPruning::touchSpecialization( const DagNode* affecter, bool touchAll )
 {
-    
+    if (not prev_active_likelihood)
+        prev_active_likelihood = active_likelihood;
+
     // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
     if ( affecter == this->heterogeneous_sigma )
     {
-        
         const std::set<size_t> &indices = this->heterogeneous_sigma->getTouchedElementIndices();
         
         // maybe all of them have been touched or the flags haven't been set properly
@@ -875,11 +871,18 @@ void PhyloOrnsteinUhlenbeckPruning::touchSpecialization( const DagNode* affecter
             {
                 active_likelihood[index] = (active_likelihood[index] == 0 ? 1 : 0);
                 changed_nodes[index] = true;
+                assert(active_likelihood[index] != prev_active_likelihood.value()[index]);
+            }
+            else
+            {
+                assert(active_likelihood[index] != prev_active_likelihood.value()[index]);
             }
         }
-        
+        for(int index=0; index < active_likelihood.size();index++)
+        {
+            assert(active_likelihood[index] != prev_active_likelihood.value()[index]);
+        }
     }
-    
 }
 
 
