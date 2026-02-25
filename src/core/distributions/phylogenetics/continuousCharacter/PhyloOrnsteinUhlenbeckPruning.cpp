@@ -417,13 +417,9 @@ void PhyloOrnsteinUhlenbeckPruning::recursivelyFlagNodeDirty( const TopologyNode
         dirty_nodes[index] = true;
         
         // if we previously haven't touched this node, then we need to change the active likelihood pointer
-        if ( changed_nodes[index] == false )
-        {
-            active_likelihood[index] = (active_likelihood[index] == 0 ? 1 : 0);
-            changed_nodes[index] = true;
-            assert(active_likelihood[index] != prev_active_likelihood.value()[index]);
-        }
-        
+        active_likelihood[index] = prev_active_likelihood.value()[index] == 0 ? 1 : 0;
+        changed_nodes[index] = true;
+        assert(active_likelihood[index] != prev_active_likelihood.value()[index]);
     }
     
 }
@@ -523,17 +519,11 @@ void PhyloOrnsteinUhlenbeckPruning::restoreSpecialization( const DagNode* affect
     // restore the active likelihoods vector
     for (size_t index = 0; index < changed_nodes.size(); ++index)
     {
-        // we have to restore, that means if we have changed the active likelihood vector
-        // then we need to revert this change
-        if ( changed_nodes[index] == true )
-        {
-            active_likelihood[index] = (active_likelihood[index] == 0 ? 1 : 0);
-        }
-        
         // set all flags to false
         changed_nodes[index] = false;
     }
 
+    active_likelihood = *prev_active_likelihood;
     prev_active_likelihood = {};
 }
 
@@ -867,16 +857,9 @@ void PhyloOrnsteinUhlenbeckPruning::touchSpecialization( const DagNode* affecter
         // flip the active likelihood pointers
         for (size_t index = 0; index < changed_nodes.size(); ++index)
         {
-            if ( changed_nodes[index] == false )
-            {
-                active_likelihood[index] = (active_likelihood[index] == 0 ? 1 : 0);
-                changed_nodes[index] = true;
-                assert(active_likelihood[index] != prev_active_likelihood.value()[index]);
-            }
-            else
-            {
-                assert(active_likelihood[index] != prev_active_likelihood.value()[index]);
-            }
+            active_likelihood[index] = prev_active_likelihood.value()[index] == 0 ? 1 : 0;
+            changed_nodes[index] = true;
+            assert(active_likelihood[index] != prev_active_likelihood.value()[index]);
         }
         for(int index=0; index < active_likelihood.size();index++)
         {
