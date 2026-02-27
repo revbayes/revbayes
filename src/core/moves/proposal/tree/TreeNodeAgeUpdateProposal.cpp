@@ -131,6 +131,8 @@ double TreeNodeAgeUpdateProposal::doProposal( void )
         {
             std::cerr << "mvSpeciesNodeTimeSlideUniform has no effect; the tree only contains the root, tips, and sampled ancestors." << std::endl;
         }
+        
+        storedNode = nullptr;
         return RbConstants::Double::neginf;
     }
 
@@ -373,10 +375,9 @@ void TreeNodeAgeUpdateProposal::printParameterSummary(std::ostream &o, bool name
  */
 void TreeNodeAgeUpdateProposal::undoProposal( void )
 {
-
+    if (storedNode == nullptr) return;
+    
     // undo the proposal
-
-
     TopologyNode& parent = storedNode->getParent();
 
     // we need to work with the times
@@ -397,7 +398,6 @@ void TreeNodeAgeUpdateProposal::undoProposal( void )
 
         for (size_t j=0; j<nodes.size(); ++j)
         {
-
             double new_a = nodes[j]->getAge();
             double a = new_a;
             if ( new_a > my_new_age )
@@ -412,7 +412,6 @@ void TreeNodeAgeUpdateProposal::undoProposal( void )
             // set the new age of this gene tree node
             geneTree.getNode( nodes[j]->getIndex() ).setAge( a );
         }
-
     }
 
     // set the age of the species tree node
@@ -462,26 +461,5 @@ void TreeNodeAgeUpdateProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
             }
         }
     }
-
-}
-
-
-void TreeNodeAgeUpdateProposal::setProposalTuningParameter(double tp)
-{
-    // this proposal has no tuning parameter: nothing to do
-}
-
-
-/**
- * Tune the Proposal to accept the desired acceptance ratio.
- *
- * The acceptance ratio for this Proposal should be around 0.44.
- * If it is too large, then we increase the proposal size,
- * and if it is too small, then we decrease the proposal size.
- */
-void TreeNodeAgeUpdateProposal::tune( double rate )
-{
-
-    // nothing to tune
 
 }

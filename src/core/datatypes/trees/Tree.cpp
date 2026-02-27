@@ -1,6 +1,7 @@
 #include <cmath>
 #include <algorithm>
 #include <cstddef>
+#include <iomanip>
 #include <iostream>
 #include <map>
 #include <set>
@@ -40,7 +41,8 @@ Tree::Tree(const Tree& t) :
     is_negative_constraint( t.is_negative_constraint ),
     num_tips( t.num_tips ),
     num_nodes( t.num_nodes ),
-    taxon_bitset_map( t.taxon_bitset_map )
+    taxon_bitset_map( t.taxon_bitset_map ),
+    tree_comments( t.tree_comments )
 {
 
     // need to perform a deep copy of the BranchLengthTree nodes
@@ -100,6 +102,7 @@ Tree& Tree::operator=(const Tree &t)
         num_nodes              = t.num_nodes;
         rooted                 = t.rooted;
         is_negative_constraint = t.is_negative_constraint;
+        tree_comments          = t.tree_comments;
 
         TopologyNode* newRoot = t.root->clone();
 
@@ -133,6 +136,7 @@ Tree& Tree::operator=(Tree&& t)
         std::swap( root                  , t.root                  );
         std::swap( nodes                 , t.nodes                 );
         std::swap( taxon_bitset_map      , t.taxon_bitset_map      );
+        std::swap( tree_comments         , t.tree_comments         );
 
         // This loop is maybe a reason to NOT record a tree pointer on the nodes...
         for(auto& node: nodes)
@@ -707,7 +711,23 @@ std::string Tree::getNewickRepresentation(bool round ) const
     }
     else
     {
-        return root->computeNewick( round );
+        std::ostringstream o;
+        if ( tree_comments.size() > 0 )
+        {
+            o << "[&";
+            for (size_t i = 0; i < tree_comments.size(); ++i)
+            {
+                if ( i > 0 )
+                {
+                    o << ",";
+                }
+                o << tree_comments[i];
+            }
+            o << "] ";
+        }
+
+        
+        return o.str() + root->computeNewick( round );
     }
 
 }
@@ -883,7 +903,7 @@ size_t Tree::getNumberOfSampledAncestors( void ) const
 std::string Tree::getPlainNewickRepresentation() const
 {
 
-    return root->computePlainNewick();
+    return root->computePlainNewick() + ";";
 }
 
 
@@ -950,19 +970,48 @@ void RevBayesCore::Tree::checkTaxonAges(bool forceAdjust)
 {
     for (auto& node : nodes)
     {
-        if(!node->isTip()) continue;
+        if ( !node->isTip() ) continue;
         Taxon taxon = node->getTaxon();
-        if(node->getAge() < taxon.getMinAge()) {
-            if(forceAdjust) {
+        
+        if ( node->getAge() < taxon.getMinAge() )
+        {
+            if (forceAdjust)
+            {
                 node->setAge(taxon.getMinAge());
-                RBOUT("Age of taxon " + taxon.getName() + " was below the specified minimum and has been adjusted.");
-            } else throw RbException() << "Age of taxon " << taxon.getName() << " is below the specified minimum.";
+                
+                // only notify the user if we are making a non-trivial adjustment
+                if ( taxon.getMinAge() - node->getAge() > 1e-06 * node->getAge() )
+                {
+                    std::stringstream msg;
+                    msg << "Age of taxon " << taxon.getName() << " was below the specified minimum and has been adjusted from ";
+                    msg << std::setprecision(6) << std::noshowpoint << node->getAge() << " to " << taxon.getMinAge() << ".";
+                    RBOUT( msg.str() );
+                }
+            }
+            else
+            {
+                throw RbException() << "Age of taxon " << taxon.getName() << " is below the specified minimum.";
+            }
         }
-        if(node->getAge() > taxon.getMaxAge()) {
-            if(forceAdjust) {
+        if ( node->getAge() > taxon.getMaxAge() )
+        {
+            if (forceAdjust)
+            {
                 node->setAge(taxon.getMaxAge());
-                RBOUT("Age of taxon " + taxon.getName() + " was above the specified maximum and has been adjusted.");
-            } else throw RbException() << "Age of taxon " << taxon.getName() << " is above the specified maximum.";
+                
+                // only notify the user if we are making a non-trivial adjustment
+                if ( node->getAge() - taxon.getMaxAge() > 1e-06 * node->getAge() )
+                {
+                    std::stringstream msg;
+                    msg << "Age of taxon " << taxon.getName() << " was above the specified maximum and has been adjusted from ";
+                    msg << std::setprecision(6) << std::noshowpoint << node->getAge() << " to " << taxon.getMaxAge() << ".";
+                    RBOUT( msg.str() );
+                }
+            }
+            else
+            {
+                throw RbException() << "Age of taxon " << taxon.getName() << " is above the specified maximum.";
+            }
         }
     }
 }
@@ -1972,10 +2021,9 @@ void Tree::reroot(TopologyNode &n, bool make_bifurcating, bool reindex)
 {
     // reset parent/child relationships
     reverseParentChild( n.getParent() );
-    n.getParent().setParent( NULL );
-    
-    // set the new root
-    setRoot( &n.getParent(), reindex );
+
+    // set the root
+    root = &n.getParent();
     
     // do we want to make the tree bifurcating?
     if ( make_bifurcating == true )
@@ -2052,10 +2100,10 @@ TopologyNode& Tree::reverseParentChild(TopologyNode &n)
         TopologyNode &p = n.getParent();
         ret = &(reverseParentChild(p));
 
-        // we need to re-orient the branches/indices so that
-        // nodes remain associated with the same parameters
-        p.setIndex(n.getIndex());
-        p.setBranchLength(n.getBranchLength());
+        // swap node indices, branch lengths and branch comments
+        std::swap(p.index, n.index);
+        std::swap(p.branch_length, n.branch_length);
+        std::swap(p.branch_comments, n.branch_comments);
 
         p.removeChild( &n );
         n.setParent( nullptr ); // Avoid loop in parent edges from n -> p -> n
@@ -2354,6 +2402,99 @@ void Tree::writeToFile( const path &dir, const std::string &fn ) const
     }
 }
 
+void Tree::addTreeParameter_(const std::string& chunk)
+{
+    tree_comments.push_back( chunk );
+}
+
+void Tree::addTreeParameter(const std::string& key, const std::optional<std::string>& value)
+{
+    assert(not key.contains('='));
+    if (value)
+        tree_comments.push_back(key + '=' + *value);
+    else
+        tree_comments.push_back(key);
+}
+
+std::optional<std::string> getValueFromChunk(const std::string& key, const std::string& chunk)
+{
+    if (chunk.size() > key.size())
+    {
+        assert(chunk.starts_with(key +'='));
+        return chunk.substr(key.size()+1);
+    }
+    else
+    {
+        assert(chunk == key);
+        return {};
+    }
+}
+
+std::optional<int> getParameterIndex(const std::vector<std::string>& comments, const std::string& key)
+{
+    assert(not key.contains('='));
+
+    std::optional<int> found_index;
+    auto key_equals = key+'=';
+    for(int i=0;i<comments.size();i++)
+    {
+        auto& comment = comments[i];
+        if (comment == key or comment.starts_with(key_equals))
+        {
+            found_index = i;
+            break;
+        }
+    }
+
+    return found_index;
+}
+
+std::optional<std::optional<std::string>> getParameter(const std::vector<std::string>& comments, const std::string& key)
+{
+    if (auto found_index = getParameterIndex(comments, key))
+        return getValueFromChunk( key, comments[*found_index] );
+    else
+        return {};
+}
+
+// The outer optional says if the key exists.
+// The inner optional has no value if the comment chunk is just 'key', but
+//   has a value of the empty string if the comment is 'key='.
+std::optional<std::optional<std::string>> Tree::getTreeParameter(const std::string& key) const
+{
+    return getParameter(tree_comments, key);
+}
+
+std::optional<std::optional<std::string>> eraseParameter(std::vector<std::string>& comments, const std::string& key)
+{
+    if (auto found_index = getParameterIndex(comments, key))
+    {
+        // 1. Extract the value from the chunk
+        auto value = getValueFromChunk( key, comments[*found_index] );
+
+        // 2. Move the comment to the end of the array and pop it.
+        if (*found_index < comments.size()-1)
+        {
+            std::swap(comments[*found_index], comments.back());
+        }
+        comments.pop_back();
+
+        // 3. Return the value
+        return value;
+    }
+    else
+        return {};
+}
+
+std::optional<std::optional<std::string>> Tree::eraseTreeParameter(const std::string& key)
+{
+    return eraseParameter(tree_comments, key);
+}
+
+const std::vector<std::string>&  Tree::getTreeParameters(void) const
+{
+    return tree_comments;
+}
 
 std::ostream& RevBayesCore::operator<<(std::ostream& o, const Tree& x)
 {

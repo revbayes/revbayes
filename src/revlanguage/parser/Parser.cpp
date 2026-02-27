@@ -11,6 +11,7 @@
 #include "RbException.h"
 #include "RbHelpRenderer.h"
 #include "RbHelpSystem.h"
+#include "RbHelpDatabase.h"
 #include "RbSettings.h"
 #include "RbUtil.h"
 #include "RevNullObject.h"
@@ -25,6 +26,7 @@
 #include "RevObject.h"
 #include "RlFunction.h"
 #include "SyntaxFormal.h" // IWYU pragma: keep
+#include "RevClient.h"    // for RevClient::shutdown()
 
 #ifdef RB_MPI
 #include <mpi.h>
@@ -164,14 +166,8 @@ int RevLanguage::Parser::execute(SyntaxElement* root, const std::shared_ptr<Envi
         {
             delete( root);
             
-            Workspace::userWorkspace().clear();
-            Workspace::globalWorkspace().clear();
-            
-#ifdef RB_MPI
-            MPI_Barrier(MPI_COMM_WORLD);
-            MPI_Finalize();
-#endif
-            
+            RevClient::shutdown();
+
             exit(0);
         }
 
@@ -288,11 +284,22 @@ int RevLanguage::Parser::help(const std::string& symbol) const
     
     // Get some help
     RevBayesCore::RbHelpSystem& hs = RevBayesCore::RbHelpSystem::getHelpSystem();
+    RevBayesCore::RbHelpDatabase& hd = RevBayesCore::RbHelpDatabase::getHelpDatabase();
+    const std::string& help_title = hd.getHelpString(symbol, "name");
+    
     if ( hs.isHelpAvailableForQuery(symbol) )
     {
         const RevBayesCore::RbHelpEntry& h = hs.getHelp( symbol );
         RevBayesCore::HelpRenderer hRenderer;
         std::string hStr = hRenderer.renderHelp(h, RbSettings::userSettings().getLineWidth() - RevBayesCore::RbUtils::PAD.size());
+        UserInterface::userInterface().output("\n", true);
+        UserInterface::userInterface().output("\n", true);
+        UserInterface::userInterface().output(hStr, true);
+    }
+    else if ( not hs.isHelpAvailableForQuery(symbol) and help_title.size() > 0 )
+    {
+        RevBayesCore::HelpRenderer hRenderer;
+        std::string hStr = hRenderer.renderHelp(hd, symbol, RbSettings::userSettings().getLineWidth() - RevBayesCore::RbUtils::PAD.size());
         UserInterface::userInterface().output("\n", true);
         UserInterface::userInterface().output("\n", true);
         UserInterface::userInterface().output(hStr, true);
@@ -444,13 +451,7 @@ int RevLanguage::Parser::processCommand(std::string& command, const std::shared_
             // Catch a quit request in case it was not caught before
             if (rbException.getExceptionType() == RbException::QUIT)
             {
-                Workspace::userWorkspace().clear();
-                Workspace::globalWorkspace().clear();
-                
-#ifdef RB_MPI
-                MPI_Finalize();
-#endif
-                
+                RevClient::shutdown();
                 exit(0);
             }
             // All other uncaught exceptions

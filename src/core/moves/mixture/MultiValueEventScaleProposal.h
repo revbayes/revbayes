@@ -27,7 +27,7 @@ template <class variableType> class StochasticNode;
     class MultiValueEventScaleProposal : public Proposal {
         
     public:
-        MultiValueEventScaleProposal( StochasticNode<MultiValueEvent> *n, const std::string &vn, double l );                                                       //!<  constructor
+        MultiValueEventScaleProposal( StochasticNode<MultiValueEvent> *n, const std::string &vn, double l );                                                       //!< Constructor
         
         // Basic utility functions
         bool                                    allowClamped() const override { return true; }                         //!< Proposal doesn't change the tree, but changes parameters describing the process that generates the tree. See #600
@@ -44,7 +44,7 @@ template <class variableType> class StochasticNode;
         
     protected:
         
-        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN) override;               //!< Swap the DAG nodes on which the Proposal is working on
+        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN) override;               //!< Swap the DAG nodes the Proposal is working on
         
     private:
         

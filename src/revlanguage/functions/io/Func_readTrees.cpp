@@ -91,10 +91,7 @@ RevPtr<RevVariable> Func_readTrees::execute( void )
                     if (unroot_nonclock)
                     {
                         tree->removeRootIfDegree2();
-//                      Perhaps we should mark the tree unrooted, since we have removed the old root,
-//                        and chosen a neighbor as the now root.
-//                      However, RevBayes has bugs with unrooted trees and may crash.
-//                        tree->setRooted(false);
+                        tree->setRooted(false);
                     }
 
                     trees->push_back( BranchLengthTree(*tree) );

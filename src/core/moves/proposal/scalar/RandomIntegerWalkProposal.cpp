@@ -153,23 +153,3 @@ void RandomIntegerWalkProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
     variable = static_cast<StochasticNode<std::int64_t>* >(newN) ;
     
 }
-
-
-void RandomIntegerWalkProposal::setProposalTuningParameter(double tp)
-{
-    // this proposal has no tuning parameter: nothing to do
-}
-
-
-/**
- * Tune the Proposal to accept the desired acceptance ratio.
- *
- * There is no tuning parameter here.
- */
-void RandomIntegerWalkProposal::tune( double rate )
-{
-    
-    // no tuning parameter
-    
-}
-

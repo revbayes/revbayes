@@ -31,10 +31,15 @@
 #include "RbVector.h"
 #include "RbVectorImpl.h"
 #include "RbSettings.h" // for logMCMC setting
+#include "RlUserInterface.h"
 #include "StringUtilities.h"
 
 #ifdef RB_MPI
 #include <mpi.h>
+#endif
+
+#ifdef _WIN32
+#include <windows.h>
 #endif
 
 
@@ -212,8 +217,9 @@ void Mcmc::checkpoint( void ) const
         // the following is useful for ensuring that in MCMCMC analyses, the chain indices in the checkpoint file names are ordered by heat:
         // std::cout << "Printing file " << checkpoint_file_name << " for chain with a posterior heat of " << getChainPosteriorHeat() << std::endl;
         
+        path tmp_checkpoint_file_name = checkpoint_file_name.parent_path() / ("." + checkpoint_file_name.filename().string() + ".tmp");
         // open the stream to the file
-        std::ofstream out_stream( checkpoint_file_name.string() );
+        std::ofstream out_stream( tmp_checkpoint_file_name.string() );
 
         // first, we write the names of the variables
         for (std::vector<DagNode *>::const_iterator it=variable_nodes.begin(); it!=variable_nodes.end(); ++it)
@@ -259,6 +265,22 @@ void Mcmc::checkpoint( void ) const
         
         // clean up
         out_stream.close();
+        const bool ok = out_stream.good();
+        if ( !ok )
+        {
+            RBOUT( "Warning: failed to write checkpoint file \"" + checkpoint_file_name.string() + "\"; keeping existing file." );
+            std::error_code ec;
+            std::filesystem::remove(tmp_checkpoint_file_name, ec);
+        }
+        else
+#ifdef _WIN32
+        if ( MoveFileExW(tmp_checkpoint_file_name.wstring().c_str(), checkpoint_file_name.wstring().c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH) == 0 )
+        {
+            throw RbException() << "Could not replace checkpoint file " << checkpoint_file_name;
+        }
+#else
+        std::filesystem::rename(tmp_checkpoint_file_name, checkpoint_file_name);
+#endif
         
         
         /////////
@@ -268,12 +290,29 @@ void Mcmc::checkpoint( void ) const
         // assemble the new filename
         path mcmc_checkpoint_file_name = appendToStem(checkpoint_file_name, "_mcmc");
         
+        path tmp_mcmc_checkpoint_file_name = mcmc_checkpoint_file_name.parent_path() / ("." + mcmc_checkpoint_file_name.filename().string() + ".tmp");
         // open the stream to the file
-        std::ofstream out_stream_mcmc( mcmc_checkpoint_file_name.string() );
+        std::ofstream out_stream_mcmc( tmp_mcmc_checkpoint_file_name.string() );
         out_stream_mcmc << "iter = " << generation << std::endl;
         
         // clean up
         out_stream_mcmc.close();
+        const bool ok_mcmc = out_stream_mcmc.good();
+        if ( !ok_mcmc )
+        {
+            RBOUT( "Warning: failed to write checkpoint file \"" + mcmc_checkpoint_file_name.string() + "\"; keeping existing file." );
+            std::error_code ec;
+            std::filesystem::remove(tmp_mcmc_checkpoint_file_name, ec);
+        }
+        else
+#ifdef _WIN32
+        if ( MoveFileExW(tmp_mcmc_checkpoint_file_name.wstring().c_str(), mcmc_checkpoint_file_name.wstring().c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH) == 0 )
+        {
+            throw RbException() << "Could not replace checkpoint file " << mcmc_checkpoint_file_name;
+        }
+#else
+        std::filesystem::rename(tmp_mcmc_checkpoint_file_name, mcmc_checkpoint_file_name);
+#endif
         
         
         /////////
@@ -283,8 +322,9 @@ void Mcmc::checkpoint( void ) const
         // assemble the new filename
         path moves_checkpoint_file_name = appendToStem(checkpoint_file_name, "_moves");
         
+        path tmp_moves_checkpoint_file_name = moves_checkpoint_file_name.parent_path() / ("." + moves_checkpoint_file_name.filename().string() + ".tmp");
         // open the stream to the file
-        std::ofstream out_stream_moves( moves_checkpoint_file_name.string() );
+        std::ofstream out_stream_moves( tmp_moves_checkpoint_file_name.string() );
         
         for (size_t i = 0; i < moves.size(); ++i)
         {
@@ -300,6 +340,22 @@ void Mcmc::checkpoint( void ) const
         
         // clean up
         out_stream_moves.close();
+        const bool ok_moves = out_stream_moves.good();
+        if ( !ok_moves )
+        {
+            RBOUT( "Warning: failed to write checkpoint file \"" + moves_checkpoint_file_name.string() + "\"; keeping existing file." );
+            std::error_code ec;
+            std::filesystem::remove(tmp_moves_checkpoint_file_name, ec);
+        }
+        else
+#ifdef _WIN32
+        if ( MoveFileExW(tmp_moves_checkpoint_file_name.wstring().c_str(), moves_checkpoint_file_name.wstring().c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH) == 0 )
+        {
+            throw RbException() << "Could not replace checkpoint file " << moves_checkpoint_file_name;
+        }
+#else
+        std::filesystem::rename(tmp_moves_checkpoint_file_name, moves_checkpoint_file_name);
+#endif
     }
     
 }
@@ -800,8 +856,18 @@ void Mcmc::initializeSamplerFromCheckpoint( void )
     {
         if ( monitors[j].isFileMonitor() )
         {
-            // set file monitors to append
             AbstractFileMonitor* m = dynamic_cast< AbstractFileMonitor *>( &monitors[j] );
+            std::ifstream monitorFile( m->getMonitorFileName().string() );
+            
+            // if there is no file yet at the location specified by the monitor, create one and write the header to it
+            if ( !monitorFile )
+            {
+                monitors[j].openStream(false);
+                monitors[j].printHeader();
+                monitors[j].closeStream();
+            }
+            
+            // set file monitors to append
             m->setAppend(true);
         }
     }
@@ -1425,4 +1491,3 @@ void Mcmc::tune( void )
     }
     
 }
-

@@ -39,12 +39,10 @@ FossilTipTimeUniformProposal::FossilTipTimeUniformProposal( StochasticNode<Tree>
     if ( tip_taxon == "" )
     {
         use_index = false;
-        node_index = -1;
     }
     else
     {
         use_index = true;
-        node_index = tree->getValue().getTipIndex( tip_taxon );
     }
     
 }
@@ -113,7 +111,12 @@ double FossilTipTimeUniformProposal::doProposal( void )
     
     Tree& tau = tree->getValue();
     
-    if ( use_index == false )
+    if ( use_index )
+    {
+        // Always recompute node_index
+        node_index = tree->getValue().getTipIndex( tip_taxon );
+    }
+    else
     {
         std::vector<size_t> tips;
         for (size_t i = 0; i < tau.getNumberOfTips(); ++i)
@@ -292,24 +295,5 @@ void FossilTipTimeUniformProposal::swapNodeInternal(DagNode *oldN, DagNode *newN
     {
         min = static_cast<TypedDagNode<double>* >(newN) ;
     }
-    
-}
-
-
-void FossilTipTimeUniformProposal::setProposalTuningParameter(double tp)
-{
-    // this proposal has no tuning parameter: nothing to do
-}
-
-
-/**
- * Tune the Proposal to accept the desired acceptance ratio.
- *
- * The acceptance ratio for this Proposal should be around 0.44.
- * If it is too large, then we increase the proposal size,
- * and if it is too small, then we decrease the proposal size.
- */
-void FossilTipTimeUniformProposal::tune( double rate )
-{
     
 }

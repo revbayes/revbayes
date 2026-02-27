@@ -130,6 +130,8 @@ double NodeRateTimeSlideUniformProposal::doProposal( void )
         {
             std::cerr << "mvNodeRateTimeSlideUniform has no effect; the tree only contains the root, tips, and sampled ancestors." << std::endl;
         }
+        
+        storedNode = nullptr;
         return RbConstants::Double::neginf;
     }
     
@@ -232,6 +234,7 @@ void NodeRateTimeSlideUniformProposal::printParameterSummary(std::ostream &o, bo
  */
 void NodeRateTimeSlideUniformProposal::undoProposal( void )
 {
+    if (storedNode == nullptr) return;
     
     // undo the proposal
     storedNode->setAge( storedAge );
@@ -278,23 +281,3 @@ void NodeRateTimeSlideUniformProposal::swapNodeInternal(DagNode *oldN, DagNode *
     }
     
 }
-
-
-void NodeRateTimeSlideUniformProposal::setProposalTuningParameter(double tp)
-{
-    // this proposal has no tuning parameter: nothing to do
-}
-
-
-/**
- * Tune the Proposal to accept the desired acceptance ratio.
- *
- * The acceptance ratio for this Proposal should be around 0.44.
- * If it is too large, then we increase the proposal size,
- * and if it is too small, then we decrease the proposal size.
- */
-void NodeRateTimeSlideUniformProposal::tune( double rate )
-{
-    
-}
-

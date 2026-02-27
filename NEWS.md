@@ -10,6 +10,72 @@
 
 ## Infrastructure
 
+# RevBayes 1.3.2 (Dec 11, 2025)
+
+## Backwards-incompatible changes
+  * Restructure the command-line interface following Rscript syntax (#803, #827).
+  * Change the name of the first argument of `TraceTree.getUniqueTrees( )` from `credibleTreeSetSize` to `minCladeProbability` (#819).
+  * Change the name of the first argument of `TraceTree.isTreeCovered( )` from `ci_size` to `credibleTreeSetSize` (#819).
+  * Remove the argument `num_taxa` from `TraceTree.computeEntropy( )` (#819).
+  * Remove `mvAddRemoveTip` (#862).
+
+## Features
+  * Allow executing Rev expressions from the command line (#803).
+  * Allow handling partial ambiguities involving a gap state (#838).
+  * Add function for writing alignments to Phylip format (#882).
+  * Add arguments to `dnPhyloCTMC` to account for observational error (#901).
+
+## Bug fixes
+  * Summary trees
+      - Prevent `.reroot( )` from incorrectly reassigning node and branch annotations (#804).
+      - Report 95% HPD intervals for the ages of sampled ancestors (#810).
+      - Fix majority-rule consensus trees with sampled ancestors (#859).
+  * MCMC
+      - Do not print confusing messages about tip age adjustments on initialiation (#821).
+      - Allow specifying `tuningInterval = 0` in `mcmc.burnin( )` (#843) and `powerPosterior.burnin( )` (#878).
+      - Make sure `mnModel` extracts the right nodes from the model graph (#900).
+  * Moves
+      - Safely undo node time moves if there are no nodes for them to operate on (#829).
+      - Make sure tip time moves use the right node index in each MCMC run (#895).
+  * Crash / NaN
+      - Fix the block bootstrap when the number of samples is small (#842).
+      - Fix a segfault in FBD analyses with multiple parameter-specific timelines (#861).
+  * Misc
+      - Multiple fixes for `TraceTree` methods (#819).
+      - Fix FBD analyses with a single parameter-specific timeline (#845).
+      - Allow subscripting arrays by any variable that can be typecast to `Natural` (#856).
+      - Fix printing `Simplex` objects in validation analyses (#876).
+      - Fix the ODE solver used in `dnCDBDP` and `dnTVSSE` (#883).
+      - Remove null terminators from `.methods( )` output (#886).
+      - Ensure compiler-independent output in complex FBD analyses (#895).
+      - Fix `dnPhyloBrownian` (#897).
+      - Fix `dnGeometric` (#907, #915).
+
+## Documentation improvements
+  * Expand documentation for `mvSlice` (#614).
+  * `args` (#830, #851).
+  * `dnPhyloCTMC`
+      - Add a description of the `coding` argument (#832).
+      - Expand the provided example to show how to simulate characters (#868).
+      - Formatting fixes (#867, #871).
+  * `mvFNPR` (#839).
+  * Typo fix in `write` (#852).
+  * Corrections to `srGeweke` and multispecies coalescent distributions (#871).
+  * Add a description of the `burninMethod` argument of convergence rules (#871).
+  * Miscellaneous formatting fixes (#871).
+
+## Infrastructure
+  * Do not require the `system` boost library in `CMakeLists.txt` (#831).
+  * Increase the minimum CMake version from 3.5 to 3.10.2 (#834).
+  * Sync the Nexus Class Library (NCL) with the upstream repo (#837)
+  * GitHub Actions updates (#841, #892).
+  * Update meson build instructions (#857).
+  * Remove a duplicated test file to suppress a `git clone` warning (#873).
+  
+## New contributors
+  * @mcranium made their first contribution in #839.
+  * @curiosusJR made their first contribution in #873.
+
 # RevBayes 1.3.1 (Aug 14, 2025)
 
 ## Backwards-incompatible changes
@@ -19,7 +85,7 @@
   * Distributions
       - Add a topologically constrained distribution for the state-dependent speciation and extinction process (#693).
       - Allow nonzero `rho` values in FBD analyses without extant tips (#788).
-      - Make dnGLHBDSP faster and allow reporting stochastic mappings (#693)
+      - Make `dnGLHBDSP` faster and allow reporting stochastic mappings (#693).
   * Methods / arguments
       - Add an `.nbranches( )` method to `Tree` (#759).
       - Add a method for calculating the standard error of marginal likelihood estimates (#779).
@@ -27,7 +93,7 @@
   * Interface
       - Nicer printing of member method lists (#800).
   * Misc
-      - Biogeography: allow regional features and non-existant regions (#693).
+      - Biogeography: allow regional features and non-existent regions (#693).
 
 ## Bug fixes
   * **Regression fixes**
@@ -67,8 +133,7 @@
   * Allow specifying a required exit code to allow/require failure (#773).
   * Fix check for missing output files (#773).
   * Make test runner output clearer and more informative (#773).
-  * Replace boost::filesystem with std::filesystem (#807).
-
+  * Replace `boost::filesystem` with `std::filesystem` (#807).
 
 ## New contributors
   * @prilau made their first contribution in #796.
@@ -163,7 +228,7 @@
   * @raymondcast18 made their first contribution in #649.
   * @PhyloevoTi made their first contribution in #655.
   * @ixchelgzlzr made their first contribution in #703.
-  * @basanta33 made their first contribution in #704.
+  * @basantakhakurel made their first contribution in #704.
   * @Levi-Raskin made their first contribution in #711.
 
 # RevBayes 1.2.5 (Dec 19, 2024)
@@ -190,7 +255,7 @@
   * Types
       - Fix type conversion to integer so that it employs deterministic nodes (#545).
       - Make `RealPos` coherent between conversion and construction (#554).
-      - Make `vectorFlatten` work on more type (#514).
+      - Make `vectorFlatten` work on more types (#514).
   * Crash / NaN
       - Fix `dnMixture` of rate matrices and other `Cloneable` objects (#501).
       - Fix `treeAssembly` sometimes failing to initialize branch lengths (#509).

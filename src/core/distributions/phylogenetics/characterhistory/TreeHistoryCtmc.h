@@ -4,6 +4,7 @@
 #include "AbstractHomologousDiscreteCharacterData.h"
 #include "BranchHistoryDiscrete.h"
 #include "CharacterEventDiscrete.h"
+#include "CharacterHistoryDiscrete.h"
 #include "ConstantNode.h"
 #include "ContinuousTaxonData.h"
 #include "ContinuousCharacterData.h"
@@ -27,7 +28,7 @@
 namespace RevBayesCore {
 
     template<class charType>
-    class TreeHistoryCtmc : public TypedDistribution< AbstractHomologousDiscreteCharacterData >, public TreeChangeEventListener, public MemberObject< Simplex >, public MemberObject< RbVector<std::int64_t> > {
+    class TreeHistoryCtmc : public TypedDistribution< AbstractHomologousDiscreteCharacterData >, public TreeChangeEventListener, public MemberObject< Simplex >, public MemberObject< RbVector<std::int64_t> >, public MemberObject< CharacterHistoryDiscrete > {
 
     public:
         // Note, we need the size of the alignment in the constructor to correctly simulate an initial state
@@ -42,7 +43,8 @@ namespace RevBayesCore {
         virtual bool                                                        drawInitValue(void) = 0;
         virtual void                                                        initializeTipValues(void) = 0;
         void                                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<std::int64_t> &rv) const;     //!< Map the member methods to internal function calls
-        void                                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, Simplex &rv) const;     //!< Map the member methods to internal function calls
+        void                                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, Simplex &rv) const;                    //!< Map the member methods to internal function calls
+        void                                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, CharacterHistoryDiscrete &rv) const;   //!< Map the member methods to internal function calls
         virtual double                                                      getBranchRate(size_t idx) const;
         virtual std::vector<double>                                         getRootFrequencies(void) const = 0;
         virtual bool                                                        samplePathStart(const TopologyNode& node) = 0;
@@ -54,13 +56,13 @@ namespace RevBayesCore {
         void                                                                fireTreeChangeEvent(const TopologyNode &n, const unsigned& m=0);                         //!< The tree has changed and we want to know which part.
         BranchHistory&                                                      getHistory(const TopologyNode& nd);
         const BranchHistory&                                                getHistory(const TopologyNode& nd) const;
-        std::vector<BranchHistory*>                                         getHistories(void);
-        const std::vector<BranchHistory*>&                                  getHistories(void) const;
+        CharacterHistoryDiscrete&                                           getHistories(void);
+        const CharacterHistoryDiscrete&                                     getHistories(void) const;
         size_t                                                              getNumberOfSites(void) const;
         const double                                                        getRootBranchLength(void) const;
         const Tree&                                                         getTree(void) const;
         void                                                                setHistory(const BranchHistoryDiscrete& bh, const TopologyNode& nd);
-        void                                                                setHistories(const std::vector<BranchHistory*>& bh);
+        void                                                                setHistories(const CharacterHistoryDiscrete& bh);
         void                                                                setValue(AbstractHomologousDiscreteCharacterData *v, bool f=false);           //!< Set the current value, e.g. attach an observation (clamp)
         void                                                                setTipProbs(const HomologousCharacterData* tp);
 
@@ -69,7 +71,7 @@ namespace RevBayesCore {
         void                                                                setClockRate(const TypedDagNode< RbVector< double > > *r);
         void                                                                setSiteRates(const TypedDagNode< RbVector< double > > *r);
 
-        
+
         virtual const std::vector<double>&                                  getTipProbs(const TopologyNode& nd);
         virtual const std::vector<std::vector<double> >&                    getTipProbs(void);
 
@@ -96,7 +98,7 @@ namespace RevBayesCore {
         virtual double                                                      computeTipLikelihood(const TopologyNode &nd) = 0;
 
         // members
-        double                                                              lnProb;
+        double                                                              ln_prob;
         const size_t                                                        num_states;
         size_t                                                              num_sites;
         size_t                                                              num_site_rates;
@@ -104,17 +106,17 @@ namespace RevBayesCore {
 
         // the likelihoods
         std::vector<size_t>                                                 active_likelihood;
-        std::vector<std::vector<double> >                                   historyLikelihoods;
+        std::vector<std::vector<double> >                                   history_likelihoods;
 
         // the data
-        std::vector<std::vector<std::uint64_t> >                            charMatrix;
-        std::vector<std::vector<bool> >                                     gapMatrix;
-        std::vector<BranchHistory*>                                         histories;
-        std::vector<std::vector<double> >                                   tipProbs;
+        std::vector<std::vector<std::uint64_t> >                            char_matrix;
+        std::vector<std::vector<bool> >                                     gap_matrix;
+        CharacterHistoryDiscrete                                            histories;
+        std::vector<std::vector<double> >                                   tip_probs;
 
         // convenience variables available for derived classes too
-        std::vector<bool>                                                   changedNodes;
-        std::vector<bool>                                                   dirtyNodes;
+        std::vector<bool>                                                   changed_nodes;
+        std::vector<bool>                                                   dirty_nodes;
 
         // flags
         bool                                                                usingAmbiguousCharacters;
@@ -122,22 +124,22 @@ namespace RevBayesCore {
         bool                                                                treatAmbiguousAsGaps;
         bool                                                                tipsInitialized;
         bool                                                                branchHeterogeneousClockRates;
-        bool                                                                useDirtyNodes;
+        bool                                                                use_dirty_nodes;
         bool                                                                store_internal_nodes;
 
         charType                                                            template_state;                                 //!< Template state used for ancestral state estimation. This makes sure that the state labels are preserved.
 
         // helper variables
         double                                                              rootBranchLengthMultiplier;
-        
+
     private:
-        
+
         // members
-        const TypedDagNode< double >*                       homogeneousClockRate;
-        const TypedDagNode< RbVector< double > >*           heterogeneousClockRates;
-        const TypedDagNode< RbVector< double > >*           siteRates;
-        const TypedDagNode< RbVector< double > >*           siteRatesProbs;
-        
+        const TypedDagNode< double >*                                       homogeneousClockRate;
+        const TypedDagNode< RbVector< double > >*                           heterogeneousClockRates;
+        const TypedDagNode< RbVector< double > >*                           siteRates;
+        const TypedDagNode< RbVector< double > >*                           siteRatesProbs;
+
         // private methods
         void                                                                fillLikelihoodVector(const TopologyNode &n);
         void                                                                initializeHistoriesVector(void);
@@ -155,17 +157,17 @@ RevBayesCore::TreeHistoryCtmc<charType>::TreeHistoryCtmc(const TypedDagNode<Tree
     num_site_rates( 1 ),
     tau( t ),
     active_likelihood( std::vector<size_t>(tau->getValue().getNumberOfNodes(), 0) ),
-    historyLikelihoods(),
-    charMatrix(),
-    gapMatrix(),
-    histories(),
-    changedNodes( std::vector<bool>(tau->getValue().getNumberOfNodes(),false) ),
-    dirtyNodes( std::vector<bool>(tau->getValue().getNumberOfNodes(), true) ),
+    history_likelihoods(),
+    char_matrix(),
+    gap_matrix(),
+    histories( CharacterHistoryDiscrete(&(tau->getValue()), nSites, nChars, true) ),
+    changed_nodes( std::vector<bool>(tau->getValue().getNumberOfNodes(),false) ),
+    dirty_nodes( std::vector<bool>(tau->getValue().getNumberOfNodes(), true) ),
     usingAmbiguousCharacters( useAmbigChar ),
     treatUnknownAsGap( true ),
     treatAmbiguousAsGaps( true ),
     tipsInitialized( false ),
-    useDirtyNodes(false),
+    use_dirty_nodes(false),
     rootBranchLengthMultiplier(1),
     store_internal_nodes( internal )
 {
@@ -174,10 +176,10 @@ RevBayesCore::TreeHistoryCtmc<charType>::TreeHistoryCtmc(const TypedDagNode<Tree
     heterogeneousClockRates     = NULL;
     siteRates                   = NULL;
     siteRatesProbs              = NULL;
-    
+
     // flags specifying which model variants we use
     branchHeterogeneousClockRates               = false;
-    
+
     // add the parameters to our set (in the base class)
     // in that way other class can easily access the set of our parameters
     // this will also ensure that the parameters are not getting deleted before we do
@@ -205,13 +207,13 @@ RevBayesCore::TreeHistoryCtmc<charType>::TreeHistoryCtmc(const TreeHistoryCtmc &
     num_site_rates( n.num_site_rates ),
     tau( n.tau ),
     active_likelihood( n.active_likelihood ),
-    historyLikelihoods( n.historyLikelihoods ),
-    charMatrix( n.charMatrix ),
-    gapMatrix( n.gapMatrix ),
+    history_likelihoods( n.history_likelihoods ),
+    char_matrix( n.char_matrix ),
+    gap_matrix( n.gap_matrix ),
     histories( n.histories ),
-    tipProbs( n.tipProbs ),
-    changedNodes( n.changedNodes ),
-    dirtyNodes( n.dirtyNodes ),
+    tip_probs( n.tip_probs ),
+    changed_nodes( n.changed_nodes ),
+    dirty_nodes( n.dirty_nodes ),
     usingAmbiguousCharacters( n.usingAmbiguousCharacters ),
     treatUnknownAsGap( n.treatUnknownAsGap ),
     treatAmbiguousAsGaps( n.treatAmbiguousAsGaps ),
@@ -220,17 +222,17 @@ RevBayesCore::TreeHistoryCtmc<charType>::TreeHistoryCtmc(const TreeHistoryCtmc &
     rootBranchLengthMultiplier( n.rootBranchLengthMultiplier ),
     store_internal_nodes( n.store_internal_nodes )
 {
-    
+
     homogeneousClockRate        = n.homogeneousClockRate;
     heterogeneousClockRates     = n.heterogeneousClockRates;
     siteRates                   = n.siteRates;
     siteRatesProbs              = n.siteRatesProbs;
-    
+
     // flags specifying which model variants we use
     branchHeterogeneousClockRates               = n.branchHeterogeneousClockRates;
-    useDirtyNodes                               = n.useDirtyNodes;
+    use_dirty_nodes                               = n.use_dirty_nodes;
 
-    
+
     // We don'e want tau to die before we die, or it can't remove us as listener
     tau->getValue().getTreeChangeEventHandler().addListener( this );
 
@@ -274,10 +276,10 @@ double RevBayesCore::TreeHistoryCtmc<charType>::computeLnProbability( void )
     if ( tau->getValue().getTreeChangeEventHandler().isListening( this ) == false )
     {
         tau->getValue().getTreeChangeEventHandler().addListener( this );
-        dirtyNodes = std::vector<bool>(tau->getValue().getNumberOfNodes(), true);
+        dirty_nodes = std::vector<bool>(tau->getValue().getNumberOfNodes(), true);
     }
 
-    this->lnProb = 0.0;
+    this->ln_prob = 0.0;
 
     const std::vector<TopologyNode*>& nodes = tau->getValue().getNodes();
 
@@ -286,11 +288,11 @@ double RevBayesCore::TreeHistoryCtmc<charType>::computeLnProbability( void )
         const TopologyNode& nd = *nodes[i];
         size_t nodeIndex = nd.getIndex();
         fillLikelihoodVector(nd);
-        double nodeLnProb = historyLikelihoods[ active_likelihood[nodeIndex] ][nodeIndex];
-        this->lnProb += nodeLnProb;
+        double node_ln_prob = history_likelihoods[ active_likelihood[nodeIndex] ][nodeIndex];
+        this->ln_prob += node_ln_prob;
     }
 
-    return this->lnProb;
+    return this->ln_prob;
 }
 
 
@@ -306,7 +308,7 @@ void RevBayesCore::TreeHistoryCtmc<charType>::executeMethod(const std::string &n
         int index = (int)static_cast<const TypedDagNode<std::int64_t>* >( args[0] )->getValue() - 1;
 
         //        const BranchHistory& bh = branch_histories[ index ];
-        const std::multiset<CharacterEvent*,CharacterEventCompare> &states = this->histories[index]->getHistory();
+        const std::multiset<CharacterEvent*,CharacterEventCompare> &states = this->histories[index].getHistory();
 
         std::multiset<CharacterEvent*,CharacterEventCompare>::const_iterator it;
         for (it = states.begin(); it != states.end(); ++it)
@@ -336,7 +338,7 @@ void RevBayesCore::TreeHistoryCtmc<charType>::executeMethod(const std::string &n
         std::int64_t index = static_cast<const TypedDagNode<std::int64_t>* >( args[0] )->getValue() - 1;
 
 //        const BranchHistory& bh = branch_histories[ index ];
-        const std::vector<CharacterEvent*> &states = this->histories[index]->getChildCharacters();
+        const std::vector<CharacterEvent*> &states = this->histories[index].getChildCharacters();
 
         if ( states.size() != num_sites )
         {
@@ -356,18 +358,17 @@ void RevBayesCore::TreeHistoryCtmc<charType>::executeMethod(const std::string &n
         rv.clear();
         rv.resize( num_states );
 
-        
         std::int64_t node_index = static_cast<const TypedDagNode<std::int64_t>* >( args[0] )->getValue() - 1;
         std::int64_t site_index = static_cast<const TypedDagNode<std::int64_t>* >( args[1] )->getValue() - 1;
 
         //        const BranchHistory& bh = branch_histories[ index ];
-        const std::vector<CharacterEvent*> &states = this->histories[node_index]->getParentCharacters();
+        const std::vector<CharacterEvent*> &states = this->histories[node_index].getParentCharacters();
 
         double branch_length = tau->getValue().getNode(node_index).getBranchLength();
 
         size_t current_state = static_cast<CharacterEventDiscrete*>(states[site_index])->getState();
         double previous_age = tau->getValue().getNode(node_index).getParent().getAge();
-        const std::multiset<CharacterEvent*,CharacterEventCompare> &events = this->histories[node_index]->getHistory();
+        const std::multiset<CharacterEvent*,CharacterEventCompare> &events = this->histories[node_index].getHistory();
         std::multiset<CharacterEvent*,CharacterEventCompare>::const_iterator it;
         for (it = events.begin(); it != events.end(); ++it)
         {
@@ -391,11 +392,29 @@ void RevBayesCore::TreeHistoryCtmc<charType>::executeMethod(const std::string &n
 }
 
 
+
+template<class charType>
+void RevBayesCore::TreeHistoryCtmc<charType>::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, CharacterHistoryDiscrete &rv) const
+{
+
+    if ( n == "characterHistories" )
+    {
+        rv = getHistories();
+    }
+    else
+    {
+        throw RbException("The character history process does not have a member method called '" + n + "'.");
+    }
+
+}
+
+
+
 template<class charType>
 void RevBayesCore::TreeHistoryCtmc<charType>::fillLikelihoodVector(const TopologyNode &node)
 {
     size_t nodeIndex = node.getIndex();
-    if ( dirtyNodes[nodeIndex] == false && useDirtyNodes )
+    if ( dirty_nodes[nodeIndex] == false && use_dirty_nodes )
     {
         return;
     }
@@ -410,14 +429,14 @@ void RevBayesCore::TreeHistoryCtmc<charType>::fillLikelihoodVector(const Topolog
 
     if ( node.isRoot() == true )
     {
-        
+
         lnL += computeRootLikelihood(node);
     }
 
-    historyLikelihoods[ active_likelihood[nodeIndex] ][nodeIndex] = lnL;
+    history_likelihoods[ active_likelihood[nodeIndex] ][nodeIndex] = lnL;
 
     // mark as computed
-    dirtyNodes[nodeIndex] = false;
+    dirty_nodes[nodeIndex] = false;
 
 }
 
@@ -441,17 +460,17 @@ void RevBayesCore::TreeHistoryCtmc<charType>::flagNodeDirty( const RevBayesCore:
     size_t index = n.getIndex();
 
     // if this node is already dirty, the also all the ancestral nodes must have been flagged as dirty
-    if ( dirtyNodes[index] == false && useDirtyNodes )
+    if ( dirty_nodes[index] == false && use_dirty_nodes )
     {
         // set the flag
-        dirtyNodes[index] = true;
+        dirty_nodes[index] = true;
 
         // if we previously haven't touched this node, then we need to change the active likelihood pointer
-        if ( changedNodes[index] == false )
+        if ( changed_nodes[index] == false )
         {
             active_likelihood[index] = (active_likelihood[index] == 0 ? 1 : 0);
             //active_likelihood[index] = 0;
-            changedNodes[index] = true;
+            changed_nodes[index] = true;
         }
 
     }
@@ -461,7 +480,7 @@ void RevBayesCore::TreeHistoryCtmc<charType>::flagNodeDirty( const RevBayesCore:
 template<class charType>
 double RevBayesCore::TreeHistoryCtmc<charType>::getBranchRate(size_t nide_idx) const
 {
-    
+
     // get the clock rate for the branch
     double rate;
     if ( this->branchHeterogeneousClockRates == true )
@@ -472,7 +491,7 @@ double RevBayesCore::TreeHistoryCtmc<charType>::getBranchRate(size_t nide_idx) c
     {
         rate = this->homogeneousClockRate->getValue();
     }
-    
+
     return rate;
 }
 
@@ -480,25 +499,25 @@ double RevBayesCore::TreeHistoryCtmc<charType>::getBranchRate(size_t nide_idx) c
 template<class charType>
 const RevBayesCore::BranchHistory&  RevBayesCore::TreeHistoryCtmc<charType>::getHistory(const TopologyNode& nd) const
 {
-    return *histories[nd.getIndex()];
+    return histories[nd.getIndex()];
 }
 
 template<class charType>
 RevBayesCore::BranchHistory&  RevBayesCore::TreeHistoryCtmc<charType>::getHistory(const TopologyNode& nd)
 {
-    return *histories[nd.getIndex()];
+    return histories[nd.getIndex()];
 }
 
 
 template<class charType>
-const std::vector<RevBayesCore::BranchHistory*>& RevBayesCore::TreeHistoryCtmc<charType>::getHistories(void) const
+const RevBayesCore::CharacterHistoryDiscrete& RevBayesCore::TreeHistoryCtmc<charType>::getHistories(void) const
 {
     return histories;
 }
 
 
 template<class charType>
-std::vector<RevBayesCore::BranchHistory*> RevBayesCore::TreeHistoryCtmc<charType>::getHistories(void)
+RevBayesCore::CharacterHistoryDiscrete& RevBayesCore::TreeHistoryCtmc<charType>::getHistories(void)
 {
     return histories;
 }
@@ -514,13 +533,18 @@ template<class charType>
 const double RevBayesCore::TreeHistoryCtmc<charType>::getRootBranchLength(void) const
 {
     double root_branch_length = tau->getValue().getRoot().getBranchLength();
+
+    /* NOTE: the code below is to impute a root branch length if the root node was not assigned
+     * one by the user, so that we can calculate the stationary frequencies at the root numerically.
+     * This imputation is now disabled: instead, the numerical calculation is only triggered when
+     * a root branch is supplied by the user; with no root branch, the stationary frequencies are
+     * computed analytically.
+     */
     
-    // NOTE: we may remove this is if we want to require users to supply a root branch length
-    // if the root node is not assigned a branch length, assign a branch length
-    if (root_branch_length == 0.0) {
-        root_branch_length = tau->getValue().getRoot().getAge() * rootBranchLengthMultiplier;
-    }
-    
+    // if (root_branch_length == 0.0) {
+    //     root_branch_length = tau->getValue().getRoot().getAge() * rootBranchLengthMultiplier;
+    // }
+
     return root_branch_length;
 }
 
@@ -528,13 +552,13 @@ const double RevBayesCore::TreeHistoryCtmc<charType>::getRootBranchLength(void) 
 template<class charType>
 const std::vector<std::vector<double> >& RevBayesCore::TreeHistoryCtmc<charType>::getTipProbs(void)
 {
-    return tipProbs;
+    return tip_probs;
 }
 
 template<class charType>
 const std::vector<double>& RevBayesCore::TreeHistoryCtmc<charType>::getTipProbs(const TopologyNode& nd)
 {
-    return tipProbs[nd.getIndex()];
+    return tip_probs[nd.getIndex()];
 }
 
 
@@ -550,26 +574,25 @@ const RevBayesCore::Tree& RevBayesCore::TreeHistoryCtmc<charType>::getTree( void
 template<class charType>
 void RevBayesCore::TreeHistoryCtmc<charType>::initializeHistoriesVector( void )
 {
-    for (size_t i = 0; i < histories.size(); ++i)
-    {
-        BranchHistory *tmp = histories[i];
-        delete tmp;
-    }
+
     histories.clear();
+    histories.setNumberOfCharacters( this->num_sites );
 
     std::vector<TopologyNode*> nodes = tau->getValue().getNodes();
-    histories.resize(nodes.size());
+    std::vector<BranchHistory*> new_histories = std::vector<BranchHistory*>(nodes.size(), NULL);
     for (size_t i = 0; i < nodes.size(); ++i)
     {
         TopologyNode* nd = nodes[i];
-        histories[nd->getIndex()] = new BranchHistoryDiscrete(num_sites,num_states,nd->getIndex());
+        new_histories[nd->getIndex()] = new BranchHistoryDiscrete(num_sites,num_states,nd->getIndex());
     }
+    histories.setHistories(new_histories);
 
-    historyLikelihoods.resize(2);
+    history_likelihoods.resize(2);
     for (size_t i = 0; i < 2; ++i)
     {
-        historyLikelihoods[i].resize(nodes.size(), 0.0);
+        history_likelihoods[i].resize(nodes.size(), 0.0);
     }
+    histories.setTree( &(tau->getValue()) );
 
 }
 
@@ -579,12 +602,12 @@ void RevBayesCore::TreeHistoryCtmc<charType>::keepSpecialization( const DagNode*
 {
 
     // reset all flags
-    for (std::vector<bool>::iterator it = this->dirtyNodes.begin(); it != this->dirtyNodes.end(); ++it)
+    for (std::vector<bool>::iterator it = this->dirty_nodes.begin(); it != this->dirty_nodes.end(); ++it)
     {
         (*it) = false;
     }
 
-    for (std::vector<bool>::iterator it = this->changedNodes.begin(); it != this->changedNodes.end(); ++it)
+    for (std::vector<bool>::iterator it = this->changed_nodes.begin(); it != this->changed_nodes.end(); ++it)
     {
         (*it) = false;
     }
@@ -597,7 +620,7 @@ void RevBayesCore::TreeHistoryCtmc<charType>::restoreSpecialization( const DagNo
 {
 
     // reset the flags
-    for (std::vector<bool>::iterator it = dirtyNodes.begin(); it != dirtyNodes.end(); ++it)
+    for (std::vector<bool>::iterator it = dirty_nodes.begin(); it != dirty_nodes.end(); ++it)
     {
         (*it) = false;
     }
@@ -605,17 +628,17 @@ void RevBayesCore::TreeHistoryCtmc<charType>::restoreSpecialization( const DagNo
     //std::cout << "affecter " << affecter->getName() << "\n";
 
     // restore the active likelihoods vector
-    for (size_t index = 0; index < changedNodes.size(); ++index)
+    for (size_t index = 0; index < changed_nodes.size(); ++index)
     {
         // we have to restore, that means if we have changed the active likelihood vector
         // then we need to revert this change
-        if ( changedNodes[index])
+        if ( changed_nodes[index])
         {
             active_likelihood[index] = (active_likelihood[index] == 0 ? 1 : 0);
         }
-        
+
         // set all flags to false
-        changedNodes[index] = false;
+        changed_nodes[index] = false;
     }
 
 
@@ -625,7 +648,7 @@ void RevBayesCore::TreeHistoryCtmc<charType>::restoreSpecialization( const DagNo
 template<class charType>
 void RevBayesCore::TreeHistoryCtmc<charType>::setClockRate(const TypedDagNode< double > *r)
 {
-    
+
     // remove the old parameter first
     if ( homogeneousClockRate != NULL )
     {
@@ -637,20 +660,20 @@ void RevBayesCore::TreeHistoryCtmc<charType>::setClockRate(const TypedDagNode< d
         this->removeParameter( heterogeneousClockRates );
         heterogeneousClockRates = NULL;
     }
-    
+
     // set the value
     branchHeterogeneousClockRates = false;
     homogeneousClockRate = r;
-    
+
     // add the new parameter
     this->addParameter( homogeneousClockRate );
-    
+
     // redraw the current value
     if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
     {
         this->redrawValue();
     }
-    
+
 }
 
 
@@ -658,7 +681,7 @@ void RevBayesCore::TreeHistoryCtmc<charType>::setClockRate(const TypedDagNode< d
 template<class charType>
 void RevBayesCore::TreeHistoryCtmc<charType>::setClockRate(const TypedDagNode< RbVector< double > > *r)
 {
-    
+
     // remove the old parameter first
     if ( homogeneousClockRate != NULL )
     {
@@ -670,42 +693,36 @@ void RevBayesCore::TreeHistoryCtmc<charType>::setClockRate(const TypedDagNode< R
         this->removeParameter( heterogeneousClockRates );
         heterogeneousClockRates = NULL;
     }
-    
+
     // set the value
     branchHeterogeneousClockRates = true;
     heterogeneousClockRates = r;
-    
+
     // add the new parameter
     this->addParameter( heterogeneousClockRates );
-    
+
     // redraw the current value
     if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
     {
         this->redrawValue();
     }
-    
+
 }
 
 template<class charType>
 void RevBayesCore::TreeHistoryCtmc<charType>::setHistory(const BranchHistoryDiscrete& bh, const TopologyNode& nd)
 {
-    // free memory
-    delete histories[ nd.getIndex() ];
 
-    // create new branch history object
-    histories[ nd.getIndex() ] = new BranchHistoryDiscrete(bh);
+    histories.setHistory( bh.clone(), nd.getIndex() );
 
 }
 
 
 template<class charType>
-void RevBayesCore::TreeHistoryCtmc<charType>::setHistories(const std::vector<BranchHistory*>& bh)
+void RevBayesCore::TreeHistoryCtmc<charType>::setHistories(const CharacterHistoryDiscrete& bh)
 {
-    for (size_t i = 0; i < bh.size(); ++i)
-    {
-        delete histories[i];
-        histories[i] = bh[i];
-    }
+
+    histories = bh;
 
 }
 
@@ -713,14 +730,14 @@ void RevBayesCore::TreeHistoryCtmc<charType>::setHistories(const std::vector<Bra
 template<class charType>
 void RevBayesCore::TreeHistoryCtmc<charType>::setSiteRates(const TypedDagNode< RbVector< double > > *r)
 {
-    
+
     // remove the old parameter first
     if ( siteRates != NULL )
     {
         this->removeParameter( siteRates );
         siteRates = NULL;
     }
-    
+
     if ( r != NULL )
     {
         // set the value
@@ -734,12 +751,12 @@ void RevBayesCore::TreeHistoryCtmc<charType>::setSiteRates(const TypedDagNode< R
         siteRates = NULL;
         this->num_site_rates = 1;
         //        this->resizeLikelihoodVectors();
-        
+
     }
-    
+
     // add the new parameter
     this->addParameter( siteRates );
-    
+
     // redraw the current value
     if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
     {
@@ -755,14 +772,14 @@ void RevBayesCore::TreeHistoryCtmc<charType>::setTipProbs(const HomologousCharac
 
     throw RbException("Bogus implementation for setTipProb (Sebastian)");
 
-    tipProbs.clear();
+    tip_probs.clear();
 
     size_t num_taxa = tp->getNumberOfTaxa();
     size_t numCharacters = tp->getNumberOfCharacters();
 
     const std::vector<TopologyNode*>& nodes = this->tau->getValue().getNodes();
 
-    tipProbs.resize(num_taxa);
+    tip_probs.resize(num_taxa);
     const ContinuousCharacterData* ccdp = static_cast<const ContinuousCharacterData*>(tp);
     for (size_t i = 0; i < nodes.size(); i++)
     {
@@ -776,8 +793,8 @@ void RevBayesCore::TreeHistoryCtmc<charType>::setTipProbs(const HomologousCharac
         for (size_t j = 0; j < numCharacters; j++)
         {
             double v = cd->getCharacter(j);
-            //tipProbs[nd->getIndex()].push_back(1-v);
-            tipProbs[nd->getIndex()].push_back(v);
+            //tip_probs[nd->getIndex()].push_back(1-v);
+            tip_probs[nd->getIndex()].push_back(v);
         }
 
     }
@@ -798,16 +815,16 @@ void RevBayesCore::TreeHistoryCtmc<charType>::setValue(AbstractHomologousDiscret
     template_state.setGapState( false );
     template_state.setMissingState( false );
 
-
     tipsInitialized = false;
     this->num_sites = v->getNumberOfCharacters();
     initializeHistoriesVector();
 
     bool valid_draw = false;
-    while (!valid_draw) {
+    while (valid_draw == false)
+    {
         valid_draw = drawInitValue();
     }
-    
+
 
     if ( this->dag_node != NULL )
     {
@@ -832,8 +849,7 @@ void RevBayesCore::TreeHistoryCtmc<charType>::simulate(void)
 
     // recursively simulate, starting with the root heading tipwards
     const TopologyNode& nd = tau->getValue().getRoot();
-    histories[ nd.getIndex() ] = new BranchHistoryDiscrete(num_sites, num_states, nd.getIndex());
-    BranchHistory* bh = histories[ nd.getIndex() ];
+    BranchHistory* bh = &histories[ nd.getIndex() ];
 
     simulate(nd, bh, taxa);
 
@@ -898,7 +914,7 @@ void RevBayesCore::TreeHistoryCtmc<charType>::touchSpecialization( const DagNode
 {
 
     // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
-    if ( affecter == this->dag_node && useDirtyNodes )
+    if ( affecter == this->dag_node && use_dirty_nodes )
     {
         // do nothing, assume tree events have been fired
         ;
@@ -906,19 +922,19 @@ void RevBayesCore::TreeHistoryCtmc<charType>::touchSpecialization( const DagNode
     else if ( affecter != tau )
     {
 
-        for (std::vector<bool>::iterator it = dirtyNodes.begin(); it != dirtyNodes.end(); ++it)
+        for (std::vector<bool>::iterator it = dirty_nodes.begin(); it != dirty_nodes.end(); ++it)
         {
             (*it) = true;
         }
 
         // flip the active likelihood pointers
-        for (size_t index = 0; index < changedNodes.size(); ++index)
+        for (size_t index = 0; index < changed_nodes.size(); ++index)
         {
-            if ( !changedNodes[index])
+            if ( !changed_nodes[index])
             {
                 active_likelihood[index] = (active_likelihood[index] == 0 ? 1 : 0);
                 //active_likelihood[index] = 0;
-                changedNodes[index] = true;
+                changed_nodes[index] = true;
             }
 
         }

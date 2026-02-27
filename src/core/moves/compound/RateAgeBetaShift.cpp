@@ -24,11 +24,12 @@ namespace views = ranges::views;
 
 using namespace RevBayesCore;
 
-RateAgeBetaShift::RateAgeBetaShift(StochasticNode<Tree> *tr, std::vector<StochasticNode<double> *> v, StochasticNode<RbVector<double> > *sv, double d, bool t, double w) : AbstractMove( w, t),
+RateAgeBetaShift::RateAgeBetaShift(StochasticNode<Tree> *tr, std::vector<StochasticNode<double> *> v, StochasticNode<RbVector<double> > *sv, double d, bool t, double w, double targetAcceptanceRate) : AbstractMove( w, t),
     tree( tr ),
     rates_vec( v ),
     rates( sv ),
     delta( d ),
+    targetAcceptanceRate( targetAcceptanceRate ),
     stored_node( NULL ),
     stored_age( 0.0 ),
     stored_rates( (rates == NULL ? rates_vec.size() : rates->getValue().size()), 0.0 ),
@@ -175,6 +176,8 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
         {
             std::cerr << "mvRateAgeBetaShift has no effect; the tree only contains the root, tips, and sampled ancestors." << std::endl;
         }
+        
+        stored_node = nullptr;
         return;
     }
     size_t node_idx = node->getIndex();
@@ -502,6 +505,7 @@ void RateAgeBetaShift::printSummary(std::ostream &o, bool current_period) const
 
 void RateAgeBetaShift::reject( void )
 {
+    if (stored_node == nullptr) return;
     
     // undo the proposal
     tree->getValue().getNode( stored_node->getIndex() ).setAge( stored_age );
@@ -530,8 +534,7 @@ void RateAgeBetaShift::reject( void )
             rates->touch();
         }
     }
-
-    
+        
 #ifdef ASSERTIONS_TREE
     if ( fabs(storedAge - storedNode->getAge()) > 1E-8 )
     {
@@ -607,13 +610,14 @@ void RateAgeBetaShift::tune( void )
     {
         double rate = num_accepted_current_period / double(num_tried_current_period);
         
-        if ( rate > 0.44 )
+        double p = this->targetAcceptanceRate;
+        if ( rate > p )
         {
-            delta /= (1.0 + ((rate-0.44)/0.56) );
+            delta /= (1.0 + ((rate - p)/(1.0 - p)) );
         }
         else
         {
-            delta *= (2.0 - rate/0.44 );
+            delta *= (2.0 - rate/p);
         }
     }
 

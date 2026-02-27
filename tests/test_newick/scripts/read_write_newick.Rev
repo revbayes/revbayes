@@ -1,0 +1,22 @@
+t = readTrees(text="(a,(b,c));")[1]
+t
+t = readTrees(text="'''';")[1]
+t
+t = readTrees(text="'a b c';")[1]
+t
+t = readTrees(text="'a b(c';")[1]
+t
+t = readTrees(text="a_b_c;")[1]
+t
+t = readTrees(text="(a:1.0,(b:2.0,c:3.0):4.0);")[1]
+t
+t = readTrees(text="( [zxcv] a [asdf] : [asdf] 1.0 [qwerty] , [yuio] (b:2.0,c:3.0):4.0);")[1]
+t
+t = readTrees(text="[&R,asdf=2]( [&A] a [&B=2] : [&C] 1.0 [&D=abc] , [yuio] (b:2.0,c:3.0):4.0);")[1]
+t
+# Test nested comments
+t = readTrees(text="([&x[1,A]=2,x[2,B]=4]a:1.0,[&x[1,C]=3,x[2,D]=5]b:1.0);")[1]
+t
+# Test BEAST-style lists
+t = readTrees(text="([&HPD={1,2}]a:1.0,[&HPD={3,4}]b:1.0);")[1]
+t

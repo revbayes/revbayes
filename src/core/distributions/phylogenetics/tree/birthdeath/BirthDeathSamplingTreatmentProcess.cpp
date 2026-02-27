@@ -228,9 +228,9 @@ void BirthDeathSamplingTreatmentProcess::addTimesToGlobalTimeline(std::set<doubl
   if ( par_times != NULL )
   {
       const std::vector<double>& times = par_times->getValue();
-      for (std::vector<double>::const_iterator it = times.begin(); it != times.end(); ++it)
+      for (size_t i = 0; i < times.size(); ++i)
       {
-          event_times.insert( *it );
+          event_times.insert( times[i] );
       }
   }
 
@@ -881,9 +881,9 @@ void BirthDeathSamplingTreatmentProcess::expandNonGlobalProbabilityParameterVect
     for (size_t i=0; i<global_timeline.size(); ++i)
     {
         bool global_time_is_variable_time = false;
-        for (size_t j=0; i<par_times.size(); ++j)
+        for (size_t j=0; j<par_times.size(); ++j)
         {
-            if ( fabs(par_times[j] - global_timeline[j]) < DBL_EPSILON )
+            if ( fabs(par_times[j] - global_timeline[i]) < DBL_EPSILON )
             {
                 // time is in variable's timeline
                 par[i] = old_par[j];
@@ -912,11 +912,12 @@ void BirthDeathSamplingTreatmentProcess::expandNonGlobalRateParameterVector(std:
     std::vector<double> old_par = par;
 
     // For each time in the global timeline, find the rate according to this variable's own timeline
+    par.clear();
     for (size_t i=0; i<global_timeline.size(); ++i)
     {
       // Where is this global time interval in the variable's timeline?
       size_t idx = findIndex(global_timeline[i],par_times);
-      par[i] = old_par[idx];
+      par.push_back( old_par[idx] );
     }
 
 }
@@ -1298,16 +1299,19 @@ void BirthDeathSamplingTreatmentProcess::prepareTimeline( void ) const
 
         // now we start assembling the global timeline by finding the union of unique intervals for all parameters
         std::set<double> event_times;
-        addTimesToGlobalTimeline(event_times,interval_times_speciation);
-        addTimesToGlobalTimeline(event_times,interval_times_extinction);
-        addTimesToGlobalTimeline(event_times,interval_times_sampling);
-        addTimesToGlobalTimeline(event_times,interval_times_treatment);
-        addTimesToGlobalTimeline(event_times,interval_times_event_speciation);
-        addTimesToGlobalTimeline(event_times,interval_times_event_extinction);
-        addTimesToGlobalTimeline(event_times,interval_times_event_sampling);
+        addTimesToGlobalTimeline(event_times, interval_times_speciation);
+        addTimesToGlobalTimeline(event_times, interval_times_extinction);
+        addTimesToGlobalTimeline(event_times, interval_times_sampling);
+        addTimesToGlobalTimeline(event_times, interval_times_treatment);
+        addTimesToGlobalTimeline(event_times, interval_times_event_speciation);
+        addTimesToGlobalTimeline(event_times, interval_times_event_extinction);
+        addTimesToGlobalTimeline(event_times, interval_times_event_sampling);
+        
+        for (auto it : event_times) {
+            global_timeline.push_back( it );
+        }
 
-
-        // we are done with setting up the timeline (i.e., using the all the provided timeline) and checking all dimension of parameters
+        // we are done with setting up the timeline (i.e., using all the provided timelines) and checking all dimensions of parameters
 
     }
 

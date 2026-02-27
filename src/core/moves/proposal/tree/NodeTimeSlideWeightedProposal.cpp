@@ -113,6 +113,8 @@ double NodeTimeSlideWeightedProposal::doProposal( void )
         {
             std::cerr << "mvNodeTimeSlide has no effect; the tree only contains the root, tips, and sampled ancestors." << std::endl;
         }
+        
+        storedNode = nullptr;
         return RbConstants::Double::neginf;
     }
     
@@ -253,10 +255,10 @@ void NodeTimeSlideWeightedProposal::printParameterSummary(std::ostream &o, bool 
  */
 void NodeTimeSlideWeightedProposal::undoProposal( void )
 {
+    if (storedNode == nullptr) return;
     
     // undo the proposal
     variable->getValue().getNode(storedNode->getIndex()).setAge( storedAge );
-    
 }
 
 
@@ -272,23 +274,3 @@ void NodeTimeSlideWeightedProposal::swapNodeInternal(DagNode *oldN, DagNode *new
     variable = static_cast<StochasticNode<Tree>* >(newN) ;
     
 }
-
-
-void NodeTimeSlideWeightedProposal::setProposalTuningParameter(double tp)
-{
-    // this proposal has no tuning parameter: nothing to do
-}
-
-
-/**
- * Tune the Proposal to accept the desired acceptance ratio.
- *
- * The acceptance ratio for this Proposal should be around 0.44.
- * If it is too large, then we increase the proposal size,
- * and if it is too small, then we decrease the proposal size.
- */
-void NodeTimeSlideWeightedProposal::tune( double rate )
-{
-    
-}
-

@@ -102,7 +102,7 @@ double DiscreteEventCategoryRandomWalkProposal::doProposal( void )
     if ( failed == false )
     {
         
-        size_t num_states   = history.getNumberStates();
+        size_t num_states   = history.getNumberOfStates();
         
         // pick a random event
         size_t branch_index = 0;
@@ -198,32 +198,3 @@ void DiscreteEventCategoryRandomWalkProposal::swapNodeInternal(DagNode *oldN, Da
         throw RbException("Wrong type of variable for BirthDeathEvent move.");
     }
 }
-
-
-void DiscreteEventCategoryRandomWalkProposal::setProposalTuningParameter(double tp)
-{
-    // this proposal has no tuning parameter: nothing to do
-}
-
-
-/**
- * Tune the Proposal to accept the desired acceptance ratio.
- *
- * The acceptance ratio for this Proposal should be around 0.44.
- * If it is too large, then we increase the proposal size,
- * and if it is too small, then we decrease the proposal size.
- */
-void DiscreteEventCategoryRandomWalkProposal::tune( double rate )
-{
-    
-    //    if ( rate > 0.44 )
-    //    {
-    //        delta *= (1.0 + ((rate-0.44)/0.56) );
-    //    }
-    //    else
-    //    {
-    //        delta /= (2.0 - rate/0.44 );
-    //    }
-    
-}
-
