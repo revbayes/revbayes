@@ -1,0 +1,43 @@
+################################################################################
+#
+# RevBayes Test-Script: Applying a time-scaling move to an analysis of a dataset
+#                       that favors "pathological" trees which only contain the
+#                       root, tips, and sampled ancestors.
+#
+# authors: David Cerny
+#
+################################################################################
+
+seed(1912414797)
+setOption("debugMCMC", 1)
+
+# read in a simulated dataset that favors trees with no regular (i.e., degree-3)
+# internal nodes, originally provided by Niklas Hohmann (see
+# https://github.com/revbayes/revbayes/issues/795)
+
+taxa <- readTaxonData("data/fossils_cont_rho0_1.csv", separator = ",")
+
+moves = VectorMoves()
+
+origin_time <- 2.0
+psi ~ dnExponential(lambda = 1.0)
+moves.append( mvScale(psi, weight = 15.0) )
+
+fbd_tree ~ dnFBDP(origin = origin_time, lambda = 1.0, mu = 0.3, psi = psi, rho = 0.0, taxa = taxa)
+
+moves.append( mvFNPR(fbd_tree, weight = 200.0) )
+moves.append( mvCollapseExpandFossilBranch(fbd_tree, origin_time, weight = 300.0) )
+moves.append( mvNodeTimeScale(fbd_tree, weight = 20.0))
+
+phy_morpho ~ dnPhyloCTMC(tree = fbd_tree, branchRates = 0.1, Q = fnJC(2), type = "Standard", coding = "all")
+mymodel = model(phy_morpho)
+
+monitors = VectorMonitors()
+monitors.append( mnModel(filename = "output/FBD_no_degree_3_nodes.log", printgen = 50) )
+monitors.append( mnFile(filename = "output/FBD_no_degree_3_nodes.trees", printgen = 50, fbd_tree))
+
+mymcmc = mcmc(mymodel, monitors, moves)
+mymcmc.run(generations = 250)
+
+clear()
+q()

@@ -686,7 +686,7 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
     }
     
     // If the conditions above are satisfied and we are resuming from a checkpoint, print the current stopping rule values too
-    if ( runs[0]->getCurrentGeneration() != 0 and (rules.size() > 1 or rules[0].printAsStatement(0, true) != ""))
+    if ( runs[0] != NULL and runs[0]->getCurrentGeneration() != 0 and (rules.size() > 1 or rules[0].printAsStatement(0, true) != ""))
     {
         std::stringstream ss;
         ss << "Current value" << (rules.size() > 1 ? "s" : "") << ":\n";

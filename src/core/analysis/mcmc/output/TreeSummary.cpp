@@ -1248,7 +1248,7 @@ std::int64_t TreeSummary::getTopologyCount(const RevBayesCore::Tree &tree, bool 
 
 double TreeSummary::getTopologyFrequency(const RevBayesCore::Tree &tree, bool verbose)
 {
-    return getTopologyCount(tree,verbose)/sampleSize(true);
+    return getTopologyCount(tree,verbose) / (double)sampleSize(true);
 }
 
 std::vector<Clade> TreeSummary::getUniqueClades( double min_clade_prob, bool non_trivial_only, bool verbose )

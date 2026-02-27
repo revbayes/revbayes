@@ -17,6 +17,8 @@
 #include "TreeUtilities.h"
 #include "Clade.h"
 #include "DagNode.h"
+#include "RandomNumberFactory.h"
+#include "RandomNumberGenerator.h"
 #include "RbBitSet.h"
 #include "RbBoolean.h"
 #include "RbFileManager.h"
@@ -495,6 +497,10 @@ void Tree::executeMethod(const std::string &n, const std::vector<const DagNode *
     else if (n == "nnodes")
     {
         rv = nodes.size();
+    }
+    else if (n == "nbranches")
+    {
+        rv = nodes.size() - 1;
     }
     else if (n == "ntips")
     {
@@ -1581,6 +1587,45 @@ void Tree::collapseSampledAncestors()
     setRoot(root, true);
 }
 
+// Pick a random node which is not the root, a tip, or the parent of a sampled ancestor.
+// First try doing so at random; if that does not work, use the more computationally demanding strategy of finding all eligible nodes.
+TopologyNode* Tree::pickRandomInternalNode(RandomNumberGenerator* rng) const
+{
+    TopologyNode* node;
+    
+    for (size_t i = 0; i < 10; i++)
+    {
+        double u = rng->uniform01();
+        size_t node_idx = size_t( std::floor(getNumberOfNodes() * u) );
+        node = (TopologyNode*)&getNode(node_idx);
+        if ( !node->isRoot() && !node->isTip() && !node->isSampledAncestorParent() ) return node;
+    }
+    
+    // check that there is at least one node which is not the root, a tip, or the parent of a SA
+    std::vector<TopologyNode*> eligible_nodes;
+        
+    for (auto& to_check: getNodes())
+    {
+        if ( !to_check->isRoot() && !to_check->isTip() && !to_check->isSampledAncestorParent() )
+        {
+            eligible_nodes.push_back( to_check );
+        }
+    }
+        
+    if (eligible_nodes.size() == 0)
+    {
+        node = NULL;
+    }
+    else
+    {
+        double u = rng->uniform01();
+        size_t node_idx = size_t( std::floor(eligible_nodes.size() * u) );
+        node = eligible_nodes[node_idx];
+    }
+    
+    return node;
+}
+
 void Tree::pruneTaxa(const RbBitSet& prune_map )
 {
     nodes.clear();
@@ -1975,24 +2020,21 @@ void Tree::resetTaxonBitSetMap( void )
 
 void Tree::resolveMultifurcations( bool resolve_root )
 {
-    bool does_use_ages = isTimeTree();
-    
-    for (size_t i = 0; i < nodes.size(); i++)
-    {
-        if ( nodes[i]->getNumberOfChildren() > 2 )
-        {
-            // set the 'use_ages' attribute for this node and for its descendants (recursive = true)
-            nodes[i]->setUseAges( does_use_ages, true );
-            // resolve the multifurcation
-            nodes[i]->resolveMultifurcation( resolve_root );
-            // we need to reindex nodes because we added new ones
-            reindexNodes();
-        }
-    }
-    
-    // Remove the outdegree-1 nodes ("knuckles") introduced by the above process of resolving multifurcations.
-    // NOTE: This only works if we assume that trees can contain multifurcations or knuckles, but not both.
-    suppressOutdegreeOneNodes( false );
+    // Collect the multifurcation nodes.
+    std::vector<TopologyNode*> multifurcating_nodes;
+    for (auto node: nodes)
+        if (node->getNumberOfChildren() > 2)
+            multifurcating_nodes.push_back(node);
+
+    // set the 'use_ages' attribute for all nodes
+    root->setUseAges( isTimeTree(), true );
+
+    // Resolve the multifurcations.
+    for(auto node: multifurcating_nodes)
+        node->resolveMultifurcation( resolve_root );
+
+    // We need to reindex nodes because we added new ones
+    reindexNodes();
 }
 
 

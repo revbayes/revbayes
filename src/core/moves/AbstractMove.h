@@ -26,9 +26,8 @@ namespace RevBayesCore {
         
         // public methods
         const std::vector<DagNode*>&                            getDagNodes(void) const;                                            //!< Get the nodes vector
-        const RbOrderedSet<DagNode*>&                           getAffectedNodes(void) const;                                       //!< Get the nodes vector
+        RbOrderedSet<DagNode*>                                  getAffectedNodes(void) const;                                       //!< Get the nodes vector
         void                                                    swapNode(DagNode *oldN, DagNode *newN);                             //!< Swap the pointers to the variable on which the move works on.
-        
         
         // pure virtual public methods
         virtual AbstractMove*                                   clone(void) const = 0;
@@ -75,7 +74,6 @@ namespace RevBayesCore {
         
         // parameters
         std::vector<DagNode*>                                   nodes;
-        RbOrderedSet<DagNode*>                                  affected_nodes;                                                     //!< The affected nodes by this move.
         double                                                  weight;
         bool                                                    auto_tuning;
         size_t                                                  num_tried_current_period;                                           //!< Number of times tried

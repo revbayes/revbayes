@@ -1,0 +1,12 @@
+   Successfully read one character matrix from file 'data/nextest_statelabels_end_comma.nex'
+   Taxa: 5
+   Characters: 3
+
+   Successfully read one character matrix from file 'data/nextest_statelabels_no_end_comma.nex'
+   Taxa: 5
+   Characters: 3
+
+   An ASSUMPTIONS block was found and will be ignored.
+   Successfully read one character matrix from file 'data/nextest_assumptions.nex'
+   Taxa: 5
+   Characters: 3

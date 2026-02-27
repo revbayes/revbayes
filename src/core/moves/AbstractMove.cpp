@@ -20,7 +20,6 @@ using namespace RevBayesCore;
  */
 AbstractMove::AbstractMove( double weight, bool tuning ) :
     nodes(  ),
-    affected_nodes(  ),
     weight( weight ),
     auto_tuning( tuning ),
     num_tried_current_period( 0 ),
@@ -41,7 +40,6 @@ AbstractMove::AbstractMove( double weight, bool tuning ) :
  */
 AbstractMove::AbstractMove( const std::vector<DagNode*> &nodes, double weight, bool tuning ) :
     nodes( nodes ),
-    affected_nodes( ),
     weight( weight ),
     auto_tuning( tuning ),
     num_tried_current_period( 0 ),
@@ -61,32 +59,11 @@ AbstractMove::AbstractMove( const std::vector<DagNode*> &nodes, double weight, b
         
     }
     
-    
-    // remove all "core" nodes from affectedNodes so their probabilities are not double-counted
-    for (size_t i = 0; i < affected_nodes.size(); ++i)
-    {
-        RbOrderedSet<DagNode*>::iterator it = affected_nodes.begin();
-        std::advance(it, i);
-        
-        for (size_t j = 0; j < nodes.size(); ++j)
-        {
-            if ( nodes[j] == *it )
-            {
-                affected_nodes.erase(*it);
-                --i;
-                break;
-            }
-            
-        }
-        
-    }
-    
 }
 
 
 AbstractMove::AbstractMove( const AbstractMove &move ) : Move( move ),
     nodes( move.nodes ),
-    affected_nodes( move.affected_nodes ),
     weight( move.weight ),
     auto_tuning( move.auto_tuning  ),
     num_tried_current_period( move.num_tried_current_period ),
@@ -164,7 +141,6 @@ AbstractMove& AbstractMove::operator=(const RevBayesCore::AbstractMove &move)
             
         }
         
-        affected_nodes              = move.affected_nodes;
         nodes                       = move.nodes;
         num_tried_current_period    = move.num_tried_current_period;
         num_tried_total             = move.num_tried_total;
@@ -185,6 +161,39 @@ AbstractMove& AbstractMove::operator=(const RevBayesCore::AbstractMove &move)
     }
     
     return *this;
+}
+
+// Why are we basically duplicating the work of `touch()` here?
+RbOrderedSet<DagNode*> AbstractMove::getAffectedNodes() const
+{
+    RbOrderedSet<DagNode*> affected_nodes;
+    
+    for (auto node: nodes)
+    {
+        // BDR: We always need to recompute the set of affected nodes because for some distributions
+        // (I'm look at you, ReversibleJumpMixtureConstantDistribution) it depends on the parameter values.
+        node->initiateGetAffectedNodes( affected_nodes );
+    }
+    
+    // remove all "core" nodes from affectedNodes so their probabilities are not double-counted
+    for (size_t i = 0; i < affected_nodes.size(); ++i)
+    {
+        RbOrderedSet<DagNode*>::iterator it = affected_nodes.begin();
+        std::advance(it, i);
+        
+        for (size_t j = 0; j < nodes.size(); ++j)
+        {
+            if ( nodes[j] == *it )
+            {
+                affected_nodes.erase(*it);
+                --i;
+                break;
+            }
+            
+        }
+    }
+
+    return affected_nodes;
 }
 
 
@@ -252,19 +261,6 @@ void AbstractMove::decrementTriedCounter( void )
     --num_tried_total;
     
 }
-
-
-/**
- * Get the set of affected nodes by a this move excluding the "core" nodes.
- *
- * \return The set of affected nodes.
- */
-const RbOrderedSet<DagNode*>& AbstractMove::getAffectedNodes( void ) const
-{
-    
-    return affected_nodes;
-}
-
 
 /**
  * Get the set of nodes on which this move is working on.
@@ -477,38 +473,6 @@ void AbstractMove::swapNode(DagNode *old_node, DagNode *new_node)
     if ( old_node->decrementReferenceCount() == 0 )
     {
         throw RbException("Memory leak in Metropolis-Hastings move. Please report this bug to Sebastian.");
-    }
-    
-    affected_nodes.clear();
-    
-    for (std::vector<DagNode*>::iterator it = nodes.begin(); it != nodes.end(); ++it)
-    {
-        // get the pointer to the current node
-        DagNode* the_node = *it;
-    
-        // get the affected nodes if we would update this node
-        // then we don't need to get the affected nodes every time again
-        the_node->initiateGetAffectedNodes( affected_nodes );
-        
-    }
-    
-    // remove all "core" nodes from affectedNodes so their probabilities are not double-counted
-    for (size_t i = 0; i < affected_nodes.size(); ++i)
-    {
-        RbOrderedSet<DagNode*>::iterator it = affected_nodes.begin();
-        std::advance(it, i);
-        
-        for (size_t j = 0; j < nodes.size(); ++j)
-        {
-            if ( nodes[j] == *it )
-            {
-                affected_nodes.erase(*it);
-                --i;
-                break;
-            }
-            
-        }
-        
     }
     
     swapNodeInternal(old_node, new_node);

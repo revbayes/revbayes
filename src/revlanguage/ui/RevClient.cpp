@@ -11,8 +11,6 @@
 #include "RevPtr.h"
 #include "TypeSpec.h"
 #include "boost/algorithm/string/trim.hpp"
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/operations.hpp>
 
 #ifdef RB_MPI
 #include <mpi.h>
@@ -22,7 +20,7 @@ extern "C" {
 #include "linenoise.h"
 }
 
-#include <boost/foreach.hpp>
+#include <filesystem>
 #include <boost/algorithm/string/predicate.hpp>
 #include <cstdlib>
 #include <iostream>
@@ -40,7 +38,7 @@ const char* prompt = default_prompt;
 
 using namespace RevLanguage;
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 std::vector<std::string> getFileList(const RevBayesCore::path& dir)
 {
@@ -176,7 +174,7 @@ void completeOnTab(const char *buf, linenoiseCompletions *lc)
 
         // find position of right most expression separator in cmd
 
-        BOOST_FOREACH(std::string s, expressionSeparator)
+        for(auto& s: expressionSeparator)
         {
             if (debug) { std::cout << "linenoise-debug: rfind(\"" << s << "\",\"" << cmd << "\")=" << cmd.rfind(s) << "\n"; }
             size_t find_idx = cmd.rfind(s);
@@ -251,7 +249,7 @@ void completeOnTab(const char *buf, linenoiseCompletions *lc)
 
     // populate linenoise completions
     
-    BOOST_FOREACH(std::string m, completions)
+    for(auto& m: completions)
     {
         if (boost::starts_with(m, compMatch))
         {

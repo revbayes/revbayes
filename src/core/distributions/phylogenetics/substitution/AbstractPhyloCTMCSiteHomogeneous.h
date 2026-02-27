@@ -649,7 +649,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::checkInvariants( 
     for(auto node: tree_nodes)
     {
 	int index = node->getIndex();
-	if (pmat_dirty_branches[index])
+	if (pmat_dirty_branches[index] and not node->isRoot())
 	    assert(dirty_branches[index]);
     }
 }
@@ -5231,6 +5231,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
         rate = this->homogeneous_clock_rate->getValue();
     }
 
+    pmat_dirty_branches[node_idx] = false;
+
     // 2. Handle the mixture model object case.
     if (mixture_model)
     {
@@ -5342,6 +5344,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
         rate = this->homogeneous_clock_rate->getValue();
     }
 
+    pmat_dirty_branches[node_idx] = false;
+
     // 2. Handle the mixture model object case.
     if (mixture_model)
     {
@@ -5436,10 +5440,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
             if ((*it)->isRoot() == false)
             {
                 updateTransitionProbabilityMatrix(node_index);
+                assert(not pmat_dirty_nodes[node_index]);
             }
-
-            // mark as computed
-            pmat_dirty_branches[node_index] = false;
         }
     }
     

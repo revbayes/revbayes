@@ -2,7 +2,7 @@
 #
 # RevBayes Test-Script: Bayesian inference of diversification rates under an
 #                       episodic birth-death model with empirical taxon sampling
-# 
+#
 # authors: Sebastian Hoehna, David Cerny
 #
 #################################################################################
@@ -51,7 +51,7 @@ extinction[1] := exp( log_extinction[1] )
 
 for (i in 1:NUM_INTERVALS) {
     index = i+1
-    
+
     # specify normal priors (= Brownian motion) on the log of the rates
     log_speciation[index] ~ dnNormal( mean=log_speciation[i], sd=speciation_sd )
     log_extinction[index] ~ dnNormal( mean=log_extinction[i], sd=extinction_sd )
@@ -59,6 +59,11 @@ for (i in 1:NUM_INTERVALS) {
     # apply moves on the rates
     moves[++mvi] = mvSlide(log_speciation[index], weight=2)
     moves[++mvi] = mvSlide(log_extinction[index], weight=2)
+
+    delta_up_down_move[i] = mvUpDownSlide(weight=5.0, delta=0.01)
+    delta_up_down_move[i].addVariable(log_speciation[i],TRUE)
+    delta_up_down_move[i].addVariable(log_extinction[i],TRUE)
+    moves[++mvi] =  delta_up_down_move[i]
 
     # transform the log-rate into actual rates
     speciation[index] := exp( log_speciation[index] )
