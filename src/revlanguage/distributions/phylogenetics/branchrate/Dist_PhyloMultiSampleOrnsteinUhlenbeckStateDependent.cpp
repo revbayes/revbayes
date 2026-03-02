@@ -7,6 +7,7 @@
 #include "RlTree.h"
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
+#include "MatrixReal.h"
 #include "ModelObject.h"
 #include "ModelVector.h"
 #include "Natural.h"
@@ -17,6 +18,7 @@
 #include "RlBoolean.h"
 #include "RlCharacterHistory.h"
 #include "RlDistribution.h"
+#include "RlMatrixReal.h"
 #include "RlString.h"
 #include "RlTaxon.h"
 #include "StringUtilities.h"
@@ -58,6 +60,13 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
     RevBayesCore::TypedDagNode<RevBayesCore::CharacterHistoryDiscrete>* char_hist   =  rl_char_hist.getDagNode();
     size_t number_states = char_hist->getValue().getNumberOfStates();
 
+    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal>* va  = static_cast<const MatrixReal&>( within_species_variances_per_site->getRevObject() ).getDagNode();
+    if (va->getValue().size() != n)
+    {
+        throw RbException()<< "The number of sites (" << n << ") specified doesn't match the size of the within-species variance matrix (" << va->getValue().size() << ")";
+    }
+
+
    //    set the root treatment
     const std::string& rt = static_cast<const RlString &>( root_treatment->getRevObject() ).getValue();
     RevBayesCore::PhyloMultiSampleOrnsteinUhlenbeckStateDependent::ROOT_TREATMENT rtr;
@@ -80,10 +89,8 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
 
     const std::vector<RevBayesCore::Taxon> &ta = static_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
 
-    // set the within-species variances, or the variances of the within-species variances
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* var     = static_cast<const ModelVector<RealPos> &>( within_species_variances->getRevObject() ).getDagNode();
 
-    RevBayesCore::PhyloMultiSampleOrnsteinUhlenbeckStateDependent *dist = new RevBayesCore::PhyloMultiSampleOrnsteinUhlenbeckStateDependent(char_hist, n, rtr, var, ta);
+    RevBayesCore::PhyloMultiSampleOrnsteinUhlenbeckStateDependent *dist = new RevBayesCore::PhyloMultiSampleOrnsteinUhlenbeckStateDependent(char_hist, n, rtr, ta, va);
 
     // set alpha
     if ( alpha->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
@@ -141,6 +148,30 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
         RevBayesCore::TypedDagNode< double >* s = static_cast<const RealPos &>( sigma->getRevObject() ).getDagNode();
         dist->setSigma( s );
     }
+
+    // set the within-species variances
+    // if ( within_species_variances->getRevObject().isType( ModelVector<ModelVector<Real> >::getClassTypeSpec() ) )
+    // {
+        // RevBayesCore::TypedDagNode<RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* v = static_cast<const ModelVector<ModelVector<Real> > &>( within_species_variances->getRevObject() ).getDagNode();
+
+        // dist->setWithinSpeciesVariances( v );
+    // }
+    // else
+    // {
+        // RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* v = static_cast<const ModelVector<Real> &>( within_species_variances->getRevObject() ).getDagNode();
+
+        // dist->setWithinSpeciesVariances( v );
+
+    // }
+    // if ( v.size() == ta.getNumberOfSpecies() )
+    // {
+    //     dist->setWithinSpeciesVariances( v );
+    // }
+    // else
+    // {
+    //     throw RbException() << "The number of within-species variances (" << v.size() << ") doesn't match the number of sigma parameters (" << ta.getNumberOfSpecies() << ")";
+    // }
+
 
     // set the root value
     if ( rt == "optimum" || rt == "equilibrium" )
@@ -260,7 +291,7 @@ const MemberRules& Dist_PhyloMultiSampleOrnsteinUhlenbeckStateDependent::getPara
         //RevBayesCore::PhyloMultiSampleOrnsteinUhlenbeckStateDependent::ROOT_TREATMENT rtr = RevBayesCore::PhyloMultiSampleOrnsteinUhlenbeckStateDependent::ROOT_TREATMENT::OPTIMUM;
 
 //        dist_member_rules.push_back( new ArgumentRule( "useEmpiricalSpeciesMeans",     RlBoolean::getClassTypeSpec(), "Should the species means assumed to be equal to the empirical species mean or should we estimate them?",                        ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
-        dist_member_rules.push_back( new ArgumentRule( "withinSpeciesVariances" , ModelVector<Real>::getClassTypeSpec(), "The within-species variance for each species in log scale.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        dist_member_rules.push_back( new ArgumentRule( "withinSpeciesVariances" , MatrixReal::getClassTypeSpec(), "The within-species variance for each species for each site in log scale.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         dist_member_rules.push_back( new ArgumentRule( "taxa"  , ModelVector<Taxon>::getClassTypeSpec(), "The vector of taxa which have species and individual names.",      ArgumentRule::BY_VALUE,              ArgumentRule::ANY ) );
 
         dist_member_rules.push_back( new ArgumentRule( "nSites",  Natural::getClassTypeSpec(), "The number of sites which is used for the initialized (random draw) from this distribution.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1) ) );
@@ -339,9 +370,9 @@ void Dist_PhyloMultiSampleOrnsteinUhlenbeckStateDependent::printValue(std::ostre
     {
         o << "?";
     }
-    if ( within_species_variances != NULL )
+    if ( within_species_variances_per_site != NULL )
     {
-        o << within_species_variances->getName();
+        o << within_species_variances_per_site->getName();
     }
     else
     {
@@ -385,7 +416,7 @@ void Dist_PhyloMultiSampleOrnsteinUhlenbeckStateDependent::setConstParameter(con
     }
     else if ( name == "withinSpeciesVariances" )
     {
-        within_species_variances = var;
+        within_species_variances_per_site = var;
     }
     else if ( name == "taxa" )
     {

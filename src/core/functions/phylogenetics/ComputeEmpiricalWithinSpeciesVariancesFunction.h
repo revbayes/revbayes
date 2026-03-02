@@ -19,7 +19,8 @@ template <class valueType> class TypedDagNode;
     class ComputeEmpiricalWithinSpeciesVariancesFunction : public TypedFunction< RbVector<double> > {
 
     public:
-        ComputeEmpiricalWithinSpeciesVariancesFunction(const TypedDagNode<Tree> *t, const TypedDagNode<ContinuousCharacterData> *d, const TypedDagNode<std::int64_t>* s, const std::vector<Taxon> &ta, bool lt, RevBayesCore::TypedDagNode<double>* dv );
+        enum                                                                MISSING_TREATMENT { MEAN, MEDIAN, NONE };
+        ComputeEmpiricalWithinSpeciesVariancesFunction(const TypedDagNode<ContinuousCharacterData> *d, const TypedDagNode<std::int64_t>* s, const std::vector<Taxon> &ta, MISSING_TREATMENT mtr );
         virtual                                                ~ComputeEmpiricalWithinSpeciesVariancesFunction(void);                                                         //!< Virtual destructor
 
         // public member functions
@@ -28,20 +29,21 @@ template <class valueType> class TypedDagNode;
 
     protected:
         double                                                              computeMeanForSpecies(const std::string &n, size_t i);
-        double                                                              computeWithinSpeciesVariance(const std::string &n, size_t i, bool lt);
+        double                                                              computeWithinSpeciesVariance(const std::string &n, size_t i);
+        double                                                              computeMeanWithinSpeciesVariance(void);
+        double                                                              computeMedianWithinSpeciesVariance(void);
         double                                                              getNumberOfSamplesForSpecies(const std::string &n);
+        std::vector<std::string>                                            getAlphabeticalSpeciesNames(void);
         void                                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);                    //!< Implementation of swaping parameters
         void                                                                resetWithinSpeciesVariances(void);
 
     private:
 
         // members
-        const TypedDagNode<Tree>*                                           tau;
         const TypedDagNode<ContinuousCharacterData>*                        data;
         const TypedDagNode<std::int64_t>*                                   site;
-        bool                                                                log_transformed;
         std::vector<Taxon>                                                  taxa;
-        RevBayesCore::TypedDagNode<double>*                                 default_var;
+        MISSING_TREATMENT                                                   missing_var_treatment;
 
         std::vector<double>                                                 within_species_variance;
 

@@ -1,10 +1,13 @@
 #include "ComputeEmpiricalWithinSpeciesVariancesFunction.h"
 
 #include <cmath>
+#include <cstddef>
 #include <string>
+#include <vector>
 
 #include "ContinuousCharacterData.h"
 #include "ContinuousTaxonData.h"
+#include "RbException.h"
 #include "RbVectorImpl.h"
 #include "Tree.h"
 #include "TypedDagNode.h"
@@ -13,18 +16,16 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
-ComputeEmpiricalWithinSpeciesVariancesFunction::ComputeEmpiricalWithinSpeciesVariancesFunction(const TypedDagNode<Tree> *t, const TypedDagNode<ContinuousCharacterData> *d, const TypedDagNode<std::int64_t> *s, const std::vector<Taxon> &ta, bool lt, RevBayesCore::TypedDagNode<double>* dv ) : TypedFunction< RbVector<double> >( new RbVector<double>() ),
-    tau( t ),
+ComputeEmpiricalWithinSpeciesVariancesFunction::ComputeEmpiricalWithinSpeciesVariancesFunction(const TypedDagNode<ContinuousCharacterData> *d, const TypedDagNode<std::int64_t> *s, const std::vector<Taxon> &ta, MISSING_TREATMENT mtr ) : TypedFunction< RbVector<double> >( new RbVector<double>() ),
     data( d ),
     site( s ),
-    log_transformed( lt ),
-    taxa( ta ),
-    default_var( dv )
+    taxa( ta )
 {
+    missing_var_treatment = mtr;
+
     // add the lambda parameter as a parent
-    addParameter( tau );
     addParameter( data );
-    addParameter( s );
+    addParameter( site );
 
     resetWithinSpeciesVariances();
     update();
@@ -73,7 +74,7 @@ double ComputeEmpiricalWithinSpeciesVariancesFunction::computeMeanForSpecies(con
 }
 
 
-double ComputeEmpiricalWithinSpeciesVariancesFunction::computeWithinSpeciesVariance(const std::string &name, size_t index, bool log_tr)
+double ComputeEmpiricalWithinSpeciesVariancesFunction::computeWithinSpeciesVariance(const std::string &name, size_t index)
 {
 
     double num_samples = getNumberOfSamplesForSpecies(name);
@@ -101,14 +102,26 @@ double ComputeEmpiricalWithinSpeciesVariancesFunction::computeWithinSpeciesVaria
         // normalize
         var /= num_samples;
 
-        if ( log_tr == true )
-        {
-            var = log(var);
-        }
     }
     else
     {
-        var = default_var->getValue();
+        // change here with options MISSING_TREATMENT
+        if ( missing_var_treatment == MEAN )
+        {
+            var = computeMeanWithinSpeciesVariance();
+        }
+        else if ( missing_var_treatment == MEDIAN )
+        {
+            var = computeMedianWithinSpeciesVariance();
+        }
+        else if ( missing_var_treatment == NONE )
+        {
+            var = -1.0;
+        }
+        else
+        {
+            throw RbException( "Argument missingVarianceTreatment must be one of \"mean\", \"median\" or \"none\"" );
+        }
         //static_cast< double >( default_var );
     }
 
@@ -136,27 +149,112 @@ double ComputeEmpiricalWithinSpeciesVariancesFunction::getNumberOfSamplesForSpec
 }
 
 
-void ComputeEmpiricalWithinSpeciesVariancesFunction::resetWithinSpeciesVariances( void )
+std::vector<std::string> ComputeEmpiricalWithinSpeciesVariancesFunction::getAlphabeticalSpeciesNames(void)
 {
-    size_t num_tips = tau->getValue().getNumberOfTips();
 
-    // check if the vectors need to be resized
-    within_species_variance     = std::vector<double>(num_tips, 0);
+    std::vector<std::string> species_names;
 
-    // create a vector with the correct site indices
+    for (size_t i=0; i<taxa.size(); ++i)
+    {
+
+      const std::string &name = taxa[i].getSpeciesName();
+      species_names.push_back(name);
+
+    }
+
+    species_names.erase(std::unique(species_names.begin(), species_names.end()), species_names.end());
+    sort( species_names.begin(), species_names.end() );
+
+    return species_names;
+}
+
+
+double ComputeEmpiricalWithinSpeciesVariancesFunction::computeMeanWithinSpeciesVariance( void )
+{
+
     // some of the sites may have been excluded
     size_t site_index = site->getValue()-1;
 
-    std::vector<TopologyNode*> nodes = this->tau->getValue().getNodes();
-    for (std::vector<TopologyNode*>::iterator it = nodes.begin(); it != nodes.end(); ++it)
+    double mean_var                   = 0.0;
+    double num_taxa_multi_sample = 0.0;
+
+    std::vector<std::string> species_names = getAlphabeticalSpeciesNames();
+    size_t num_species = species_names.size();
+
+    for (size_t i=0; i<species_names.size(); ++i)
     {
-        if ( (*it)->isTip() )
+
+        std::string name = species_names[i];
+        double num_samples = getNumberOfSamplesForSpecies(name);
+
+        if ( num_samples > 1 )
         {
-
-            const std::string &name = (*it)->getName();
-            within_species_variance[(*it)->getIndex()] = computeWithinSpeciesVariance(name,site_index,log_transformed);
-
+            mean_var += computeWithinSpeciesVariance(name,site_index);
+            num_taxa_multi_sample++;
         }
+
+    }
+
+    mean_var /= num_taxa_multi_sample;
+    return mean_var;
+}
+
+double ComputeEmpiricalWithinSpeciesVariancesFunction::computeMedianWithinSpeciesVariance( void )
+{
+    size_t site_index = site->getValue()-1;
+
+    std::vector<double> vars = std::vector<double>(0, 0);
+
+    std::vector<std::string> species_names = getAlphabeticalSpeciesNames();
+    size_t num_species = species_names.size();
+
+    for (size_t i=0; i<species_names.size(); ++i)
+    {
+
+        std::string name = species_names[i];
+        double num_samples = getNumberOfSamplesForSpecies(name);
+
+        if ( num_samples > 1 )
+        {
+            double var = computeWithinSpeciesVariance(name,site_index);
+            vars.push_back(var);
+        }
+
+    }
+
+    sort( vars.begin(), vars.end() );
+
+    double med_var = 0.0;
+    if (vars.size() % 2 != 0) // if the number of elements is odd
+    {
+        med_var = vars[vars.size() / 2];
+    }
+    else                      // if the number of elements is odd
+    {
+        med_var = (vars[(vars.size() - 1) / 2] + vars[vars.size() / 2]) / 2.0;
+    }
+
+    return med_var;
+}
+
+
+void ComputeEmpiricalWithinSpeciesVariancesFunction::resetWithinSpeciesVariances( void )
+{
+
+    std::vector<std::string> species_names = getAlphabeticalSpeciesNames();
+    size_t num_species = species_names.size();
+
+    // check if the vectors need to be resized
+    within_species_variance     = std::vector<double>(num_species, 0);
+
+    // some of the sites may have been excluded
+    size_t site_index = site->getValue()-1;
+
+    for (size_t i=0; i<species_names.size(); ++i)
+    {
+
+        std::string name = species_names[i];
+        within_species_variance[i] = computeWithinSpeciesVariance(name,site_index);
 
     }
 
@@ -165,11 +263,7 @@ void ComputeEmpiricalWithinSpeciesVariancesFunction::resetWithinSpeciesVariances
 void ComputeEmpiricalWithinSpeciesVariancesFunction::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
 {
 
-    if (oldP == tau)
-    {
-        tau = static_cast<const TypedDagNode<Tree>* >( newP );
-    }
-    else if (oldP == data)
+    if (oldP == data)
     {
         data = static_cast<const TypedDagNode<ContinuousCharacterData>* >( newP );
     }
@@ -177,22 +271,24 @@ void ComputeEmpiricalWithinSpeciesVariancesFunction::swapParameterInternal(const
     {
         site = static_cast<const TypedDagNode<std::int64_t>* >( newP );
     }
+
 }
 
 
 void ComputeEmpiricalWithinSpeciesVariancesFunction::update( void )
 {
     RbVector<double> &v = *value;
-    const Tree &tree = tau->getValue();
 
-    size_t num_tips = tree.getNumberOfTips();
 
-    if ( v.size() != num_tips )
+    std::vector<std::string> species_names = getAlphabeticalSpeciesNames();
+    size_t num_species = species_names.size();
+
+    if ( v.size() != num_species )
     {
-        v.resize( num_tips );
+        v.resize( num_species );
     }
 
-    for (size_t i=0; i<num_tips; ++i)
+    for (size_t i=0; i<num_species; ++i)
     {
         v[i] = within_species_variance[i];
     }

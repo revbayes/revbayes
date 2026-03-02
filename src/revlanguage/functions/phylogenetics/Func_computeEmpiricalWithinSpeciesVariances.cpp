@@ -18,6 +18,7 @@
 #include "IndirectReferenceFunction.h"
 #include "ModelObject.h"
 #include "Natural.h"
+#include "OptionRule.h"
 #include "RbBoolean.h"
 #include "RbVector.h"
 #include "Real.h"
@@ -28,6 +29,7 @@
 #include "RlDeterministicNode.h"
 #include "RlFunction.h"
 #include "RlTypedFunction.h"
+#include "RlString.h"
 #include "TypedDagNode.h"
 #include "TypedFunction.h"
 #include "UserFunctionNode.h"
@@ -60,14 +62,32 @@ Func_computeEmpiricalWithinSpeciesVariances* Func_computeEmpiricalWithinSpeciesV
 
 RevBayesCore::TypedFunction<RevBayesCore::RbVector<double> >* Func_computeEmpiricalWithinSpeciesVariances::createFunction( void ) const
 {
-    const RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = static_cast<const TimeTree &>( args[0].getVariable()->getRevObject() ).getDagNode();
-    const RevBayesCore::TypedDagNode<RevBayesCore::ContinuousCharacterData>* data = static_cast<const ContinuousCharacterData &>( args[1].getVariable()->getRevObject() ).getDagNode();
-    const RevBayesCore::TypedDagNode<std::int64_t>* site = static_cast<const Natural &>( args[2].getVariable()->getRevObject() ).getDagNode();
-    const RevBayesCore::RbVector<RevBayesCore::Taxon>& taxa = static_cast<const ModelVector<Taxon> &>( args[3].getVariable()->getRevObject() ).getValue();
-    const bool& log_transformed = static_cast<const RlBoolean &>( args[4].getVariable()->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<double>* default_var = static_cast<const Real &>( args[5].getVariable()->getRevObject() ).getDagNode();
+    const RevBayesCore::TypedDagNode<RevBayesCore::ContinuousCharacterData>* data = static_cast<const ContinuousCharacterData &>( args[0].getVariable()->getRevObject() ).getDagNode();
+    const RevBayesCore::TypedDagNode<std::int64_t>* site = static_cast<const Natural &>( args[1].getVariable()->getRevObject() ).getDagNode();
+    const RevBayesCore::RbVector<RevBayesCore::Taxon>& taxa = static_cast<const ModelVector<Taxon> &>( args[2].getVariable()->getRevObject() ).getValue();
 
-    RevBayesCore::ComputeEmpiricalWithinSpeciesVariancesFunction* f = new RevBayesCore::ComputeEmpiricalWithinSpeciesVariancesFunction( tau, data, site, taxa, log_transformed, default_var );
+    const std::string& tr = static_cast<const RlString &>( args[3].getVariable()->getRevObject() ).getValue();
+
+    RevBayesCore::ComputeEmpiricalWithinSpeciesVariancesFunction::MISSING_TREATMENT mtr;
+    if (tr == "mean")
+    {
+        mtr = RevBayesCore::ComputeEmpiricalWithinSpeciesVariancesFunction::MISSING_TREATMENT::MEAN;
+    }
+    else if (tr == "median")
+    {
+        mtr = RevBayesCore::ComputeEmpiricalWithinSpeciesVariancesFunction::MISSING_TREATMENT::MEDIAN;
+    }
+    else if (tr == "none")
+    {
+        mtr = RevBayesCore::ComputeEmpiricalWithinSpeciesVariancesFunction::MISSING_TREATMENT::NONE;
+    }
+    else
+    {
+        throw RbException("argument missingVarianceTreatment must be one of \"mean\", \"median\" or \"none\"");
+    }
+
+
+    RevBayesCore::ComputeEmpiricalWithinSpeciesVariancesFunction* f = new RevBayesCore::ComputeEmpiricalWithinSpeciesVariancesFunction( data, site, taxa, mtr );
 
     return f;
 }
@@ -83,17 +103,15 @@ const ArgumentRules& Func_computeEmpiricalWithinSpeciesVariances::getArgumentRul
     if ( rules_set == false )
     {
 
-        argument_rules.push_back( new ArgumentRule( "tree", TimeTree::getClassTypeSpec(), "The phylogeny.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         argument_rules.push_back( new ArgumentRule( "data", ContinuousCharacterData::getClassTypeSpec(), "The character data object.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         argument_rules.push_back( new ArgumentRule( "site", Natural::getClassTypeSpec(), "The site for which we compute the number of samples per species.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         argument_rules.push_back( new ArgumentRule( "taxa", ModelVector<Taxon>::getClassTypeSpec(), "The vector of taxa which have species and individual names.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        argument_rules.push_back( new ArgumentRule( "log",  RlBoolean::getClassTypeSpec(), "If the output should be in log space or not.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        argument_rules.push_back( new ArgumentRule( "defaultVariance", Real::getClassTypeSpec(), "The default within-species variance if a species has only one sample.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
-        // std::vector<TypeSpec> defaultVarianceTypes;
-        // defaultVarianceTypes.push_back( RealPos::getClassTypeSpec() );
-        // defaultVarianceTypes.push_back( Real::getClassTypeSpec() );
-        // argument_rules.push_back( new ArgumentRule( "defaultVariance" , sigmaTypes, "The rate of random drift (per state).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        std::vector<std::string> missingTreatmentTypes;
+        missingTreatmentTypes.push_back( "mean" );
+        missingTreatmentTypes.push_back( "median" );
+        missingTreatmentTypes.push_back( "none" );
+        argument_rules.push_back( new OptionRule ("missingVarianceTreatment", new RlString("none"), missingTreatmentTypes, "The within-species variance for species with only one sample. Options \"mean\" and \"median\" return the mean/median of within-species variance of all species with multiple samples. Option \"none\" returns -1 and requires the user to manually specify the within-species variance afterwards.") );
 
         rules_set = true;
     }
