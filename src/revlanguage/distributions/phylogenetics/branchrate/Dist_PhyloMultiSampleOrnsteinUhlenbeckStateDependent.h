@@ -61,9 +61,8 @@ class TypeSpec;
         RevPtr<const RevVariable>                       root_treatment;
         RevPtr<const RevVariable>                       character_history;
         RevPtr<const RevVariable>                       n_sites;
-//        RevPtr<const RevVariable>                       useEmpiricalSpeciesMean;
         RevPtr<const RevVariable>                       within_species_variances_per_site;
-        RevPtr<const RevVariable>                       taxa;                       //!< The taxons
+        RevPtr<const RevVariable>                       taxa;                       //!< The individual samples
 
 
     };

@@ -149,30 +149,6 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
         dist->setSigma( s );
     }
 
-    // set the within-species variances
-    // if ( within_species_variances->getRevObject().isType( ModelVector<ModelVector<Real> >::getClassTypeSpec() ) )
-    // {
-        // RevBayesCore::TypedDagNode<RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* v = static_cast<const ModelVector<ModelVector<Real> > &>( within_species_variances->getRevObject() ).getDagNode();
-
-        // dist->setWithinSpeciesVariances( v );
-    // }
-    // else
-    // {
-        // RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* v = static_cast<const ModelVector<Real> &>( within_species_variances->getRevObject() ).getDagNode();
-
-        // dist->setWithinSpeciesVariances( v );
-
-    // }
-    // if ( v.size() == ta.getNumberOfSpecies() )
-    // {
-    //     dist->setWithinSpeciesVariances( v );
-    // }
-    // else
-    // {
-    //     throw RbException() << "The number of within-species variances (" << v.size() << ") doesn't match the number of sigma parameters (" << ta.getNumberOfSpecies() << ")";
-    // }
-
-
     // set the root value
     if ( rt == "optimum" || rt == "equilibrium" )
     {
@@ -287,8 +263,6 @@ const MemberRules& Dist_PhyloMultiSampleOrnsteinUhlenbeckStateDependent::getPara
         rootTreatmentTypes.push_back( "equilibrium" );
         rootTreatmentTypes.push_back( "parameter" );
         dist_member_rules.push_back( new OptionRule ("rootTreatment", new RlString("optimum"), rootTreatmentTypes, "Whether the root value should be assumed to be equal to the optimum at the root (the default), assumed to be a random variable distributed according to the equilibrium state of the OU process, or whether to estimate the ancestral value as an independent parameter.") );
-        // setting the default
-        //RevBayesCore::PhyloMultiSampleOrnsteinUhlenbeckStateDependent::ROOT_TREATMENT rtr = RevBayesCore::PhyloMultiSampleOrnsteinUhlenbeckStateDependent::ROOT_TREATMENT::OPTIMUM;
 
 //        dist_member_rules.push_back( new ArgumentRule( "useEmpiricalSpeciesMeans",     RlBoolean::getClassTypeSpec(), "Should the species means assumed to be equal to the empirical species mean or should we estimate them?",                        ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
         dist_member_rules.push_back( new ArgumentRule( "withinSpeciesVariances" , MatrixReal::getClassTypeSpec(), "The within-species variance for each species for each site in log scale.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
