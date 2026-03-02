@@ -1,4 +1,4 @@
-#include "ComputeEmpiricalWithinSpeciesVariancesFunction.h"
+#include "ComputeWithinSpeciesVarianceFromCharacterDataFunction.h"
 
 #include <cmath>
 #include <cstddef>
@@ -16,88 +16,49 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
-ComputeEmpiricalWithinSpeciesVariancesFunction::ComputeEmpiricalWithinSpeciesVariancesFunction(const TypedDagNode<ContinuousCharacterData> *d, const TypedDagNode<std::int64_t> *s, const std::vector<Taxon> &ta, MISSING_TREATMENT mtr ) : TypedFunction< RbVector<double> >( new RbVector<double>() ),
+ComputeWithinSpeciesVarianceFromCharacterDataFunction::ComputeWithinSpeciesVarianceFromCharacterDataFunction(const TypedDagNode<ContinuousCharacterData> *d, const TypedDagNode<std::int64_t> *vs, const TypedDagNode<std::int64_t> *ns, const std::vector<Taxon> &ta, MISSING_TREATMENT mtr ) : TypedFunction< RbVector<double> >( new RbVector<double>() ),
     data( d ),
-    site( s ),
+    variance_site( vs ),
+    num_sample_site( ns ),
     taxa( ta )
 {
     missing_var_treatment = mtr;
 
     // add the lambda parameter as a parent
     addParameter( data );
-    addParameter( site );
+    addParameter( variance_site );
+    addParameter( num_sample_site );
 
     resetWithinSpeciesVariances();
     update();
 }
 
 
-ComputeEmpiricalWithinSpeciesVariancesFunction::~ComputeEmpiricalWithinSpeciesVariancesFunction( void )
+ComputeWithinSpeciesVarianceFromCharacterDataFunction::~ComputeWithinSpeciesVarianceFromCharacterDataFunction( void )
 {
     // We don't delete the parameters, because they might be used somewhere else too. The model needs to do that!
 }
 
 
 
-ComputeEmpiricalWithinSpeciesVariancesFunction* ComputeEmpiricalWithinSpeciesVariancesFunction::clone( void ) const
+ComputeWithinSpeciesVarianceFromCharacterDataFunction* ComputeWithinSpeciesVarianceFromCharacterDataFunction::clone( void ) const
 {
-    return new ComputeEmpiricalWithinSpeciesVariancesFunction( *this );
+    return new ComputeWithinSpeciesVarianceFromCharacterDataFunction( *this );
 }
 
 
-double ComputeEmpiricalWithinSpeciesVariancesFunction::computeMeanForSpecies(const std::string &name, size_t index)
+double ComputeWithinSpeciesVarianceFromCharacterDataFunction::computeWithinSpeciesVariance(const std::string &name, size_t v_site_index, size_t n_site_index)
 {
 
-    double mean = 0.0;
-    double num_samples = getNumberOfSamplesForSpecies(name);
-
-    const ContinuousCharacterData &d = data->getValue();
-
-    for (size_t i=0; i<taxa.size(); ++i)
-    {
-
-        const Taxon &t = taxa[i];
-        if ( name == t.getSpeciesName() )
-        {
-            const ContinuousTaxonData& taxon = d.getTaxonData( t.getName() );
-            mean += taxon.getCharacter(index);
-
-        }
-
-    }
-
-    // normalize
-    mean /= num_samples;
-
-
-    return mean;
-}
-
-
-double ComputeEmpiricalWithinSpeciesVariancesFunction::computeWithinSpeciesVariance(const std::string &name, size_t index)
-{
-
-    double num_samples = getNumberOfSamplesForSpecies(name);
+    double num_samples = getNumberOfSamplesForSpecies(name, n_site_index);
     double var = 0.0;
 
     if ( num_samples > 1 )
     {
-        double mean = computeMeanForSpecies(name, index);
-
         const ContinuousCharacterData &d = data->getValue();
 
-        for (size_t i=0; i<taxa.size(); ++i)
-        {
-
-            const Taxon &t = taxa[i];
-            if ( name == t.getSpeciesName() )
-            {
-                const ContinuousTaxonData& taxon = d.getTaxonData( t.getName() );
-                var += (taxon.getCharacter(index) - mean) * (taxon.getCharacter(index) - mean);
-
-            }
-
-        }
+        const ContinuousTaxonData& taxon = d.getTaxonData( name );
+        var = taxon.getCharacter(v_site_index);
 
         // normalize
         var /= num_samples;
@@ -129,27 +90,21 @@ double ComputeEmpiricalWithinSpeciesVariancesFunction::computeWithinSpeciesVaria
 }
 
 
-double ComputeEmpiricalWithinSpeciesVariancesFunction::getNumberOfSamplesForSpecies(const std::string &name)
+double ComputeWithinSpeciesVarianceFromCharacterDataFunction::getNumberOfSamplesForSpecies(const std::string &name, size_t n_site_index)
 {
 
     double num_samples = 0.0;
 
-    for (size_t i=0; i<taxa.size(); ++i)
-    {
+    const ContinuousCharacterData &d = data->getValue();
 
-        const Taxon &t = taxa[i];
-        if ( name == t.getSpeciesName() )
-        {
-            ++num_samples;
-        }
-
-    }
+    const ContinuousTaxonData& taxon = d.getTaxonData( name );
+    num_samples = taxon.getCharacter(n_site_index);
 
     return num_samples;
 }
 
 
-std::vector<std::string> ComputeEmpiricalWithinSpeciesVariancesFunction::getAlphabeticalSpeciesNames(void)
+std::vector<std::string> ComputeWithinSpeciesVarianceFromCharacterDataFunction::getAlphabeticalSpeciesNames(void)
 {
 
     std::vector<std::string> species_names;
@@ -169,14 +124,15 @@ std::vector<std::string> ComputeEmpiricalWithinSpeciesVariancesFunction::getAlph
 }
 
 
-double ComputeEmpiricalWithinSpeciesVariancesFunction::computeMeanWithinSpeciesVariance( void )
+double ComputeWithinSpeciesVarianceFromCharacterDataFunction::computeMeanWithinSpeciesVariance( void )
 {
 
     // some of the sites may have been excluded
-    size_t site_index = site->getValue()-1;
+    size_t v_site_index = variance_site->getValue()-1;
+    size_t n_site_index = num_sample_site->getValue()-1;
 
     double mean_var              = 0.0;
-    double num_taxa_multi_sample = 0.0;
+    size_t num_taxa_multi_sample = 0.0;
 
     std::vector<std::string> species_names = getAlphabeticalSpeciesNames();
     size_t num_species = species_names.size();
@@ -185,11 +141,11 @@ double ComputeEmpiricalWithinSpeciesVariancesFunction::computeMeanWithinSpeciesV
     {
 
         std::string name = species_names[i];
-        double num_samples = getNumberOfSamplesForSpecies(name);
+        double num_samples = getNumberOfSamplesForSpecies(name, n_site_index);
 
         if ( num_samples > 1 )
         {
-            mean_var += computeWithinSpeciesVariance(name,site_index);
+            mean_var += computeWithinSpeciesVariance(name, v_site_index, n_site_index);
             num_taxa_multi_sample++;
         }
 
@@ -199,9 +155,10 @@ double ComputeEmpiricalWithinSpeciesVariancesFunction::computeMeanWithinSpeciesV
     return mean_var;
 }
 
-double ComputeEmpiricalWithinSpeciesVariancesFunction::computeMedianWithinSpeciesVariance( void )
+double ComputeWithinSpeciesVarianceFromCharacterDataFunction::computeMedianWithinSpeciesVariance( void )
 {
-    size_t site_index = site->getValue()-1;
+    size_t v_site_index = variance_site->getValue()-1;
+    size_t n_site_index = num_sample_site->getValue()-1;
 
     std::vector<double> vars = std::vector<double>(0, 0);
 
@@ -212,11 +169,11 @@ double ComputeEmpiricalWithinSpeciesVariancesFunction::computeMedianWithinSpecie
     {
 
         std::string name = species_names[i];
-        double num_samples = getNumberOfSamplesForSpecies(name);
+        double num_samples = getNumberOfSamplesForSpecies(name, n_site_index);
 
         if ( num_samples > 1 )
         {
-            double var = computeWithinSpeciesVariance(name,site_index);
+            double var = computeWithinSpeciesVariance(name, v_site_index, n_site_index);
             vars.push_back(var);
         }
 
@@ -238,7 +195,7 @@ double ComputeEmpiricalWithinSpeciesVariancesFunction::computeMedianWithinSpecie
 }
 
 
-void ComputeEmpiricalWithinSpeciesVariancesFunction::resetWithinSpeciesVariances( void )
+void ComputeWithinSpeciesVarianceFromCharacterDataFunction::resetWithinSpeciesVariances( void )
 {
 
     std::vector<std::string> species_names = getAlphabeticalSpeciesNames();
@@ -248,34 +205,39 @@ void ComputeEmpiricalWithinSpeciesVariancesFunction::resetWithinSpeciesVariances
     within_species_variance     = std::vector<double>(num_species, 0);
 
     // some of the sites may have been excluded
-    size_t site_index = site->getValue()-1;
+    size_t v_site_index = variance_site->getValue()-1;
+    size_t n_site_index = num_sample_site->getValue()-1;
 
     for (size_t i=0; i<species_names.size(); ++i)
     {
 
         std::string name = species_names[i];
-        within_species_variance[i] = computeWithinSpeciesVariance(name,site_index);
+        within_species_variance[i] = computeWithinSpeciesVariance(name, v_site_index, n_site_index);
 
     }
 
 }
 
-void ComputeEmpiricalWithinSpeciesVariancesFunction::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
+void ComputeWithinSpeciesVarianceFromCharacterDataFunction::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
 {
 
     if (oldP == data)
     {
         data = static_cast<const TypedDagNode<ContinuousCharacterData>* >( newP );
     }
-    else if (oldP == site)
+    else if (oldP == variance_site)
     {
-        site = static_cast<const TypedDagNode<std::int64_t>* >( newP );
+        variance_site = static_cast<const TypedDagNode<std::int64_t>* >( newP );
+    }
+    else if (oldP == num_sample_site)
+    {
+        num_sample_site = static_cast<const TypedDagNode<std::int64_t>* >( newP );
     }
 
 }
 
 
-void ComputeEmpiricalWithinSpeciesVariancesFunction::update( void )
+void ComputeWithinSpeciesVarianceFromCharacterDataFunction::update( void )
 {
     RbVector<double> &v = *value;
 

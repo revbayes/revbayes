@@ -112,6 +112,7 @@
 #include "Func_simStartingTree.h"
 #include "Func_simTree.h"
 #include "Func_simCompleteTree.h"
+#include "Func_computeWithinSpeciesVarianceFromCharacterData.h"
 #include "Func_stitchTree.h"
 #include "Func_symmetricDifference.h"
 #include "Func_tmrca.h"
@@ -474,6 +475,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_simStartingTree()                                 );
         addFunction( new Func_simTree()                                         );
         addFunction( new Func_simCompleteTree()                                 );
+        addFunction( new Func_computeWithinSpeciesVarianceFromCharacterData()        );
         addFunction( new Func_stitchTree()                                      );
         addFunction( new Func_symmetricDifference()                             );
         addFunction( new Func_tmrca()                                           );
