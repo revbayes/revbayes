@@ -92,6 +92,7 @@ double ApproximateTreeLikelihood::computeLnProbability( void )
     double ln_prob = 0.0;
     for (size_t i=0; i<num_branches; ++i)
     {
+        std::cerr << "The i-th branch length is " << mle_branch_lengths[i] << " and the i-th gradient is " << (*gradients)[i] << std::endl;
         ln_prob += mle_branch_lengths[i] * (*gradients)[i];
         ln_prob += mle_branch_lengths[i] * mle_branch_lengths[i] * (*hessian)[i][i] / 2.0;
         for (size_t j=0; i<j; ++j)
@@ -211,6 +212,7 @@ void ApproximateTreeLikelihood::setValue(RevBayesCore::Tree *v, bool force)
     for (size_t i=0; i<bl_tree_nodes.size(); ++i)
     {
         TopologyNode* the_node = bl_tree_nodes[i];
+        std::cerr << "The branch length of the i-th node is " << the_node->getBranchLength() << std::endl;
                 
         RbBitSet split = RbBitSet(num_tips);
         the_node->getTaxa(split);
