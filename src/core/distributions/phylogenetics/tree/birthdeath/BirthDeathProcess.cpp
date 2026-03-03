@@ -110,7 +110,19 @@ double BirthDeathProcess::computeLnProbabilityTimes( void ) const
         
         if ( F_t > (1.0+RbSettings::userSettings().getTolerance()) || F_t < -RbSettings::userSettings().getTolerance() )
         {
-            throw RbException("Problem in computing the probability of missing species in BDP.");
+            RbException e;
+            e<<std::setprecision(17);
+            e<<"Problem in computing the probability of missing species in BDP / diversified with tolerance = "<<RbSettings::userSettings().getTolerance()<<".\n";
+            e<<"  p_0_t = "<<p_0_t<<"   p_0_T = "<<p_0_T<<"  present_time = "<<present_time<<"\n";
+            e<<"  divergence_times = [";
+            for(int i=0;i<divergence_times.size();i++)
+            {
+                e<<divergence_times[i];
+                if (i != divergence_times.size()-1)
+                    e<<", ";
+            }
+            e<<"]";
+            throw e;
         }
         
         // get an estimate of the actual number of taxa
@@ -133,7 +145,10 @@ double BirthDeathProcess::computeLnProbabilityTimes( void ) const
 
         if ( log_F_t > RbSettings::userSettings().getTolerance() )
         {
-            throw RbException("Problem in computing the probability of missing species in BDP.");
+            throw RbException()
+                <<std::setprecision(17)
+                <<"Problem in computing the probability of missing species in BDP with tolerance = "<<RbSettings::userSettings().getTolerance()<<".\n"
+                <<"  log_p_0_t = "<<log_p_0_t<<"   log_p_0_T = "<<log_p_0_T<<"  present_time = "<<present_time<<"   last_event_time = "<<last_event_time<<"\n";
         }
 
         // get an estimate of the actual number of taxa
