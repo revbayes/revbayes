@@ -1,0 +1,9 @@
+   Attempting to read the contents of file "rooted_4_tip_tree.tre"
+   Successfully read file
+   Successfully read one character matrix from file 'data/rooted_4_tip_tree_discrete.nex'
+   Successfully read one character matrix from file 'data/rooted_4_tip_tree_multiSample_continuous.nex'
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 6 different moves in a random move schedule with 6 moves per iteration
+   

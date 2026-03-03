@@ -1,0 +1,78 @@
+################################################################################
+#
+# RevBayes Integration Test: Ornstein-Uhlenbeck on a fixed tree
+#
+# Model: Univariate continuous character evolving under a state-dependent
+#            Ornstein-Uhlenbeck process
+#
+# authors: Priscilla Lau
+#
+################################################################################
+
+seed(12345)
+
+moves    = VectorMoves()
+monitors = VectorMonitors()
+
+#######################
+# Reading in the Data #
+#######################
+
+
+tree <- readTrees("data/rooted_4_tip_tree.tre")[1]
+root_age := tree.rootAge()
+
+disc <- readDiscreteCharacterData("data/rooted_4_tip_tree_discrete.nex")
+disc.excludeAll()
+disc.includeCharacter(1)
+num_disc_states <- disc.getStateDescriptions().size()
+
+cont <- readContinuousCharacterData("data/rooted_4_tip_tree_multiSample_continuous.nex")
+cont.excludeAll()
+cont.includeCharacter(1)
+
+taxon_map = readTaxonData("data/rooted_4_tip_tree_taxon_map.txt")
+
+########################
+# Setting up the Model #
+########################
+
+Q <- fnJC(num_disc_states)
+rf <- rep(1/num_disc_states, num_disc_states)
+lambda <- 0.05
+
+X ~ dnPhyloCTMCDASiteIID(tree, Q, branchRates=lambda, rootFrequencies=rf, type="Standard", nSites=1)
+X.setValue(disc)
+
+char_hist := X.characterHistories()
+
+for (i in 1:2){
+  sigma[i] ~ dnLognormal(0.1, 0.6)
+  moves.append( mvScale(sigma[i], weight=1.0) )
+  alpha[i] ~ dnLognormal(0.1, 0.6)
+  moves.append( mvScale(alpha[i], weight=1.0) )
+  theta[i] ~ dnUniform(-1, 1.0)
+  moves.append( mvSlide(theta[i], weight=1.0) )
+}
+
+
+empirical_variance[1] <- fnComputeEmpiricalWithinSpeciesVariances(cont, 1, taxon_map, "mean")
+wsv <- matrix(empirical_variance)
+
+
+
+Y ~ dnPhyloMultiSampleOUSD(characterHistory=char_hist, alpha=alpha, theta=theta, sigma=sigma, withinSpeciesVariances=wsv, taxa=taxon_map, nSites=1, rootTreatment = "optimum")
+Y.clamp(cont)
+
+
+mymodel = model(Y)
+
+monitors.append( mnModel(filename="output/OUsd_multiSample.log", printgen=100) )
+
+### workspace mcmc ###
+mymcmc = mcmc(mymodel, monitors, moves, nruns=1, combine="none")
+mymcmc.run(generations=500)
+
+
+# you may want to quit RevBayes now
+q()

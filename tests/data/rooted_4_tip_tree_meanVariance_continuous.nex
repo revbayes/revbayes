@@ -1,0 +1,12 @@
+#NEXUS
+
+Begin data;
+Dimensions ntax=4 nchar=3;
+Format datatype=Continuous missing=? gap=-;
+Matrix           [ mean         var      sample_size]
+a                  0.023707     0.006    2
+b                 -0.595995     0.190    3
+c                 -0.608359     0.038    10
+d                 -0.204917     0.026    1
+;
+End;

@@ -1,0 +1,54 @@
+###############################################################################################
+#
+# RevBayes Integration Test: Compute within-species variance
+#
+#
+# authors: Priscilla Lau
+#
+###############################################################################################
+
+seed(12345)
+
+#######################
+# Reading in the Data #
+#######################
+
+# Computing within-species variance from summary (variance and number of samples for each species)
+cont <- readContinuousCharacterData("data/rooted_4_tip_tree_meanVariance_continuous.nex")
+cont.includeAll()
+
+a <- fnComputeWithinSpeciesVarianceFromCharacterData(cont, 2, 3, "mean")
+b <- fnComputeWithinSpeciesVarianceFromCharacterData(cont, 2, 3, "median")
+c <- fnComputeWithinSpeciesVarianceFromCharacterData(cont, 2, 3, "none")
+
+# Computing within-species variance from individual observations
+cont2 <- readContinuousCharacterData("data/rooted_4_tip_tree_multiSample_continuous.nex")
+cont2.excludeAll()
+cont2.includeCharacter(1)
+taxon_map = readTaxonData("data/rooted_4_tip_tree_taxon_map.txt")
+
+d <- fnComputeEmpiricalWithinSpeciesVariances(cont2, 1, taxon_map, "mean")
+e <- fnComputeEmpiricalWithinSpeciesVariances(cont2, 1, taxon_map, "median")
+f <- fnComputeEmpiricalWithinSpeciesVariances(cont2, 1, taxon_map, "none")
+
+
+print(filename = "output/compute_within_species_variance.txt", append = FALSE, a )
+print(filename = "output/compute_within_species_variance.txt", append = TRUE, "\n")
+
+print(filename = "output/compute_within_species_variance.txt", append = TRUE, b)
+print(filename = "output/compute_within_species_variance.txt", append = TRUE, "\n")
+
+print(filename = "output/compute_within_species_variance.txt", append = TRUE, c)
+print(filename = "output/compute_within_species_variance.txt", append = TRUE, "\n")
+
+print(filename = "output/compute_within_species_variance.txt", append = TRUE, d)
+print(filename = "output/compute_within_species_variance.txt", append = TRUE, "\n")
+
+print(filename = "output/compute_within_species_variance.txt", append = TRUE, e)
+print(filename = "output/compute_within_species_variance.txt", append = TRUE, "\n")
+
+print(filename = "output/compute_within_species_variance.txt", append = TRUE, f)
+print(filename = "output/compute_within_species_variance.txt", append = TRUE, "\n")
+
+# you may want to quit RevBayes now
+q()

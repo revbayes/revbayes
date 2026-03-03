@@ -1,0 +1,17 @@
+Taxon	Species	Age
+a_ind1	a       0
+b_ind1	b       0
+b_ind2	b       0
+b_ind3	b       0
+b_ind4	b       0
+b_ind5	b       0
+c_ind1	c       0
+c_ind2	c       0
+c_ind3	c       0
+c_ind4	c       0
+c_ind5	c       0
+d_ind1	d       0
+d_ind2	d       0
+d_ind3	d       0
+d_ind4	d       0
+d_ind5	d       0
