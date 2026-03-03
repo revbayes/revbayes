@@ -16,11 +16,10 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
-ComputeWithinSpeciesVarianceFromCharacterDataFunction::ComputeWithinSpeciesVarianceFromCharacterDataFunction(const TypedDagNode<ContinuousCharacterData> *d, const TypedDagNode<std::int64_t> *vs, const TypedDagNode<std::int64_t> *ns, const std::vector<Taxon> &ta, MISSING_TREATMENT mtr ) : TypedFunction< RbVector<double> >( new RbVector<double>() ),
+ComputeWithinSpeciesVarianceFromCharacterDataFunction::ComputeWithinSpeciesVarianceFromCharacterDataFunction(const TypedDagNode<ContinuousCharacterData> *d, const TypedDagNode<std::int64_t> *vs, const TypedDagNode<std::int64_t> *ns, MISSING_TREATMENT mtr ) : TypedFunction< RbVector<double> >( new RbVector<double>() ),
     data( d ),
     variance_site( vs ),
-    num_sample_site( ns ),
-    taxa( ta )
+    num_sample_site( ns )
 {
     missing_var_treatment = mtr;
 
@@ -93,12 +92,10 @@ double ComputeWithinSpeciesVarianceFromCharacterDataFunction::computeWithinSpeci
 double ComputeWithinSpeciesVarianceFromCharacterDataFunction::getNumberOfSamplesForSpecies(const std::string &name, size_t n_site_index)
 {
 
-    double num_samples = 0.0;
-
     const ContinuousCharacterData &d = data->getValue();
-
     const ContinuousTaxonData& taxon = d.getTaxonData( name );
-    num_samples = taxon.getCharacter(n_site_index);
+
+    double num_samples = taxon.getCharacter(n_site_index);
 
     return num_samples;
 }
@@ -106,6 +103,8 @@ double ComputeWithinSpeciesVarianceFromCharacterDataFunction::getNumberOfSamples
 
 std::vector<std::string> ComputeWithinSpeciesVarianceFromCharacterDataFunction::getAlphabeticalSpeciesNames(void)
 {
+    const ContinuousCharacterData &d = data->getValue();
+    const std::vector<Taxon> &taxa = d.getTaxa();
 
     std::vector<std::string> species_names;
 

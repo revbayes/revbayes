@@ -20,7 +20,7 @@ template <class valueType> class TypedDagNode;
 
     public:
         enum                                                                MISSING_TREATMENT { MEAN, MEDIAN, NONE };
-        ComputeWithinSpeciesVarianceFromCharacterDataFunction(const TypedDagNode<ContinuousCharacterData> *d, const TypedDagNode<std::int64_t>* vs, const TypedDagNode<std::int64_t>* ns, const std::vector<Taxon> &ta, MISSING_TREATMENT mtr );
+        ComputeWithinSpeciesVarianceFromCharacterDataFunction(const TypedDagNode<ContinuousCharacterData> *d, const TypedDagNode<std::int64_t>* vs, const TypedDagNode<std::int64_t>* ns, MISSING_TREATMENT mtr );
         virtual                                                ~ComputeWithinSpeciesVarianceFromCharacterDataFunction(void);                                                         //!< Virtual destructor
 
         // public member functions
@@ -42,7 +42,6 @@ template <class valueType> class TypedDagNode;
         const TypedDagNode<ContinuousCharacterData>*                        data;
         const TypedDagNode<std::int64_t>*                                   variance_site;
         const TypedDagNode<std::int64_t>*                                   num_sample_site;
-        std::vector<Taxon>                                                  taxa;
         MISSING_TREATMENT                                                   missing_var_treatment;
 
         std::vector<double>                                                 within_species_variance;

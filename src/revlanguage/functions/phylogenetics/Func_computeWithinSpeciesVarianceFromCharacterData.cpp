@@ -65,9 +65,7 @@ RevBayesCore::TypedFunction<RevBayesCore::RbVector<double> >* Func_computeWithin
     const RevBayesCore::TypedDagNode<RevBayesCore::ContinuousCharacterData>* data = static_cast<const ContinuousCharacterData &>( args[0].getVariable()->getRevObject() ).getDagNode();
     const RevBayesCore::TypedDagNode<std::int64_t>* v_site = static_cast<const Natural &>( args[1].getVariable()->getRevObject() ).getDagNode();
     const RevBayesCore::TypedDagNode<std::int64_t>* n_site = static_cast<const Natural &>( args[2].getVariable()->getRevObject() ).getDagNode();
-    const RevBayesCore::RbVector<RevBayesCore::Taxon>& taxa = static_cast<const ModelVector<Taxon> &>( args[3].getVariable()->getRevObject() ).getValue();
-
-    const std::string& tr = static_cast<const RlString &>( args[4].getVariable()->getRevObject() ).getValue();
+    const std::string& tr = static_cast<const RlString &>( args[3].getVariable()->getRevObject() ).getValue();
 
     RevBayesCore::ComputeWithinSpeciesVarianceFromCharacterDataFunction::MISSING_TREATMENT mtr;
     if (tr == "mean")
@@ -88,7 +86,7 @@ RevBayesCore::TypedFunction<RevBayesCore::RbVector<double> >* Func_computeWithin
     }
 
 
-    RevBayesCore::ComputeWithinSpeciesVarianceFromCharacterDataFunction* f = new RevBayesCore::ComputeWithinSpeciesVarianceFromCharacterDataFunction( data, v_site, n_site, taxa, mtr );
+    RevBayesCore::ComputeWithinSpeciesVarianceFromCharacterDataFunction* f = new RevBayesCore::ComputeWithinSpeciesVarianceFromCharacterDataFunction( data, v_site, n_site, mtr );
 
     return f;
 }
@@ -107,7 +105,6 @@ const ArgumentRules& Func_computeWithinSpeciesVarianceFromCharacterData::getArgu
         argument_rules.push_back( new ArgumentRule( "data", ContinuousCharacterData::getClassTypeSpec(), "The character data object.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         argument_rules.push_back( new ArgumentRule( "variance_site", Natural::getClassTypeSpec(), "The site that stores the trait variance.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         argument_rules.push_back( new ArgumentRule( "num_sample_site", Natural::getClassTypeSpec(), "The site that stores the number of samples per species.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        argument_rules.push_back( new ArgumentRule( "taxa", ModelVector<Taxon>::getClassTypeSpec(), "The vector of taxa which have species and individual names.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
 
         std::vector<std::string> missingTreatmentTypes;
         missingTreatmentTypes.push_back( "mean" );
