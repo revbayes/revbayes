@@ -1255,7 +1255,7 @@ void PhyloMultiSampleOrnsteinUhlenbeckStateDependent::swapParameterInternal(cons
     }
     else if (oldP == within_species_variances_per_site)
     {
-        within_species_variances_per_site = static_cast<const const TypedDagNode< MatrixReal >* >( newP );
+        within_species_variances_per_site = static_cast<const TypedDagNode< MatrixReal >* >( newP );
     }
     if (oldP == character_histories)
     {
