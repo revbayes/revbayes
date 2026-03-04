@@ -127,9 +127,9 @@ double BirthDeathProcess::computeLnProbabilityTimes( void ) const
         // "Inferring Speciation and Extinction Rates under Different Sampling Schemes"
         double last_event_time = root_age - incomplete_clade_ages[i];
         
-        double p_0_T = 1.0 - pSurvival(0,present_time,1.0)               * exp( rateIntegral(0,present_time) );
-        double p_0_t = 1.0 - pSurvival(last_event_time,present_time,1.0) * exp( rateIntegral(last_event_time,present_time) );
-        double log_F_t = log(p_0_t) - log(p_0_T);
+        double log_p_0_T = log1p( - pSurvival(0,present_time,1.0)               * exp( rateIntegral(0,present_time) ) );
+        double log_p_0_t = log1p( - pSurvival(last_event_time,present_time,1.0) * exp( rateIntegral(last_event_time,present_time) ) );
+        double log_F_t = log_p_0_t - log_p_0_T;
 
         if ( log_F_t > RbSettings::userSettings().getTolerance() )
         {
