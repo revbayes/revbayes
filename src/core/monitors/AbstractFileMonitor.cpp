@@ -1,5 +1,8 @@
 #include "AbstractFileMonitor.h"
 
+#include <cctype>
+#include <cstdlib>
+#include <filesystem>
 #include <string>
 
 #include "RbFileManager.h"
@@ -100,6 +103,54 @@ void AbstractFileMonitor::openStream( bool reopen )
         out_stream.open( working_file_name.string(), std::fstream::in | std::fstream::out);
     }
         
+}
+
+
+void AbstractFileMonitor::truncateAfterGeneration(std::uint64_t lastGen)
+{
+    std::ifstream infile( working_file_name.string(), std::ios::binary );
+    if ( !infile.good() ) return;
+
+    std::string line;
+
+    while ( true )
+    {
+        std::streampos pos = infile.tellg();
+        if ( !safeGetline(infile, line) ) break;
+
+        if ( line.empty() ) continue;
+
+        std::uint64_t gen = 0;
+        bool found = false;
+
+        if ( std::isdigit(static_cast<unsigned char>(line[0])) )
+        {
+            // separator format: generation is the first field
+            char *end_ptr = NULL;
+            gen = static_cast<std::uint64_t>( std::strtoull(line.c_str(), &end_ptr, 10) );
+            found = (end_ptr != line.c_str());
+        }
+        else if ( line[0] == '{' )
+        {
+            // JSON format: look for "Iteration": <number>
+            size_t it_pos = line.find("\"Iteration\":");
+            size_t num_start = (it_pos != std::string::npos) ? line.find_first_of("0123456789", it_pos + 12) : std::string::npos;
+            if ( num_start != std::string::npos )
+            {
+                char *end_ptr = NULL;
+                gen = static_cast<std::uint64_t>( std::strtoull(line.c_str() + num_start, &end_ptr, 10) );
+                found = (end_ptr != line.c_str() + num_start);
+            }
+        }
+
+        if ( found == true && gen > lastGen )
+        {
+            infile.close();
+            std::filesystem::resize_file(working_file_name, pos);
+            return;
+        }
+    }
+
 }
 
 
