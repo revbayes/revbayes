@@ -24,7 +24,7 @@ namespace RevBayesCore {
         
         // public member functions
         // pure virtual
-        virtual PhyloOrnsteinUhlenbeckPruning*                                 clone(void) const;                                                                      //!< Create an independent clone
+        virtual PhyloOrnsteinUhlenbeckPruning*                              clone(void) const;                                                                      //!< Create an independent clone
         void                                                                setAlpha(const TypedDagNode< double >* a);
         void                                                                setAlpha(const TypedDagNode< RbVector< double > >* a);
         void                                                                setRootState(const TypedDagNode< double >* s);
@@ -49,6 +49,7 @@ namespace RevBayesCore {
         std::vector<double>                                                 simulateRootCharacters(size_t n);
         double                                                              sumRootLikelihood(void);
         virtual void                                                        touchSpecialization(const DagNode *toucher, bool touchAll);
+        void                                                                propagateAuxiliaryVariables(double &mu, double &variance, double &log_nf, const TopologyNode& node );
         
         // Parameter management functions.
         virtual void                                                        swapParameterInternal(const DagNode *oldP, const DagNode *newP);                         //!< Swap a parameter
@@ -56,11 +57,11 @@ namespace RevBayesCore {
         // the likelihoods
         std::vector<std::vector<std::vector<double> > >                     partial_likelihoods;
         std::vector<std::vector<std::vector<double> > >                     means;
-        std::vector<std::vector<double> >                                   variances;
+        std::vector<std::vector<std::vector<double> > >                     variances;
         std::vector<size_t>                                                 active_likelihood;
-        
+        std::optional<std::vector<size_t>>                                  prev_active_likelihood;
+
         // convenience variables available for derived classes too
-        std::vector<bool>                                                   changed_nodes;
         std::vector<bool>                                                   dirty_nodes;
         
     private:
