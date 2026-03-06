@@ -91,6 +91,7 @@ RevPtr<RevVariable> Func_readTrees::execute( void )
                     if (unroot_nonclock)
                     {
                         tree->removeRootIfDegree2();
+                        tree->setRooted(false);
                     }
                     else
                     {
@@ -145,6 +146,7 @@ RevPtr<RevVariable> Func_readTrees::execute( void )
                 if (unroot_nonclock)
                 {
                     blTree->removeRootIfDegree2();
+                    blTree->setRooted(false);
                 }
                 else
                 {
