@@ -54,6 +54,10 @@ void MrcaIndexStatistic::initialize( void )
 
 void MrcaIndexStatistic::update( void )
 {
+    if (not tree->getValue().isRooted())
+    {
+        throw RbException("Most recent common ancestor is undefined for unrooted trees.");
+    }
     
     const std::vector<TopologyNode*> &n = tree->getValue().getNodes();
     size_t min_clade_size = n.size() + 2;
