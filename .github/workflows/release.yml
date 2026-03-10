@@ -47,17 +47,17 @@ jobs:
   build_and_upload:
     strategy:
       matrix:
-        name: [ubuntu-22.04-gcc-12,
+        name: [ubuntu-24.04-gcc-12,
                macos-xcode-16-intel,
                macos-xcode-26-arm,
                windows
                ]
 
         include:
-          - name: ubuntu-22.04-gcc-12
-            os: ubuntu-22.04
+          - name: ubuntu-24.04-gcc-12
+            os: ubuntu-24.04
             compiler: gcc
-            version: "12"
+            version: "14"
             mpi: false
             arch: linux64
 
