@@ -531,6 +531,10 @@ WorkspaceVector<TraceTree>* Func_readTreeTrace::readTreesNexus(const std::vector
                         tree->removeRootIfDegree2();
                         tree->setRooted(false);
                     }
+                    else
+                    {
+                        tree->setRooted(true);
+                    }
 
                     tt.addObject(tree);
                 }
