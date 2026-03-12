@@ -58,6 +58,13 @@ else
   boost = dependency('boost', modules : boost_modules, version: '>=1.71')
 endif
 
+if get_option('beagle')
+  add_project_arguments(['-DRB_BEAGLE'], language: 'cpp')
+  beagle = dependency('hmsbeagle')
+else
+  beagle = dependency('', required: false)
+endif
+
 rb_name = 'rb'
 if get_option('mpi')
   add_project_arguments(['-DRB_MPI'], language: 'cpp')
@@ -109,12 +116,12 @@ libdl = cpp.find_library('dl')
 core = static_library('rb-core',
                       core_sources,
                       include_directories: [src_inc],
-                      dependencies: [boost,mpi])
+                      dependencies: [boost,mpi,beagle])
 
 revlanguage = static_library('rb-revlanguage',
                              revlanguage_sources,
                              include_directories: [src_inc],
-                             dependencies: [boost,mpi])
+                             dependencies: [boost,mpi,beagle])
 
 libs = static_library('rb-lib',
                       libs_sources,
@@ -132,7 +139,7 @@ rb = executable(rb_name,
                 ['src/revlanguage/main.cpp'],
                 link_with: [core, revlanguage, libs],
                 include_directories: [src_inc],
-                dependencies: [boost, mpi],
+                dependencies: [boost, mpi, beagle],
                 install_rpath: extra_rpath,
                 install: true)
 

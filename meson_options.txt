@@ -1,4 +1,5 @@
 option('mpi', type : 'boolean', value : false, description: 'Compile with MPI')
+option('beagle', type: 'boolean', value : false, description: 'Compile with BEAGLE')
 option('studio', type: 'boolean', value: false, description: 'Build gtk shell')
 option('static_boost', type: 'boolean', value: false, description: 'Require boost libraries to be static')
 option('help2yml', type : 'boolean', value : false, description: 'Build help2yml')
