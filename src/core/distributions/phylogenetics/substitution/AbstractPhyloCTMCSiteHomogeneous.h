@@ -5557,7 +5557,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
             if ((*it)->isRoot() == false)
             {
                 updateTransitionProbabilityMatrix(node_index);
-                assert(not pmat_dirty_nodes[node_index]);
+                assert(not pmat_dirty_branches[node_index]);
             }
         }
     }
