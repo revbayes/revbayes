@@ -14,7 +14,7 @@ jobs:
   build_singularity_and_upload:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     - uses: eWaterCycle/setup-apptainer@v2
     - uses: actions/setup-python@v5
       with:
@@ -151,9 +151,11 @@ jobs:
     - name: ccache
       uses: hendrikmuhs/ccache-action@v1.2
       with:
-         key: ${{ matrix.name }}
+         key: ${{ matrix.name }}-${{ github.ref_name }}
          restore-keys: |
+           ${{ matrix.name }}-${{ github.ref_name }}
            ${{ matrix.name }}
+         save: ${{ github.event_name == 'push' }}
 
     - name: Compile static BOOST libs (Linux & Mac)
       if: matrix.name != 'windows'
@@ -236,7 +238,7 @@ jobs:
         else
            (
               cd projects/cmake
-              BUILD_DIR=build exec_name=rb ./build.sh -help2yml true -DCMAKE_INSTALL_PREFIX=$HOME/local -mpi ${{ matrix.mpi }}
+              BUILD_DIR=build exec_name=rb ./build.sh -help2yml true -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_INSTALL_PREFIX=$HOME/local -mpi ${{ matrix.mpi }}
               cmake --install build
            )
         fi
@@ -260,6 +262,7 @@ jobs:
         cp $($CXX --print-file-name libstdc++-6.dll)      $PREFIX/bin
         cp $($CXX --print-file-name libssp-0.dll)         $PREFIX/bin
         cp $($CXX --print-file-name libwinpthread-1.dll)  $PREFIX/bin
+        cp $($CXX --print-file-name libgomp-1.dll)        $PREFIX/bin
         # Copy all DLLs to get the graphics DLLs.
         cp $WINROOT/mingw64/bin/*.dll                     $PREFIX/bin
 
