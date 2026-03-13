@@ -92,7 +92,7 @@ seq.clamp(data)
 mymodel = model(Q)
 
 
-monitors.append( mnStochasticVariable(filename="output/mcmc_threshold_scaling_large_1.out",printgen=100, separator = TAB) )
+monitors.append( mnStochasticVariable(filename="output/mcmc_node_scaling_large_1.out",printgen=100, separator = TAB) )
 monitors.append( mnScreen(printgen=100) )
 
 mymcmc = mcmc(mymodel, monitors, moves, moveschedule="single")

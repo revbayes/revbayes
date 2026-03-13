@@ -91,12 +91,11 @@ mymodel = model(Q)
 
 
 monitors.append( mnStochasticVariable(filename="output/mcmc_no_scaling.out",printgen=1, separator = TAB) )
-monitors.append( mnScreen(printgen=10000) )
 
 mymcmc = mcmc(mymodel, monitors, moves, moveschedule="single")
 
 
-mymcmc.run(generations=500000)
+mymcmc.run(generations=1000)
 
 
 # you may want to quit RevBayes now
