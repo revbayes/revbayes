@@ -81,6 +81,21 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> BranchLengthTree::executeMethod(st
         
         return new RevVariable( new TimeTree( tree ) );
     }
+    else if (name == "unroot")
+    {
+        found = true;
+        
+        RevBayesCore::Tree &tree = dag_node->getValue();
+        
+        if ( not tree.isRooted() )
+        {
+            throw RbException("The tree is already unrooted.");
+        }
+        
+        tree.unroot();
+        
+        return NULL;
+    }
     
     return Tree::executeMethod( name, args, found );
 }
@@ -120,4 +135,7 @@ void BranchLengthTree::initMethods( void )
 {
     ArgumentRules* makeUltraArgRules = new ArgumentRules();
     methods.addFunction( new MemberProcedure( "makeUltrametric", RlUtils::Void, makeUltraArgRules ) );
+    
+    ArgumentRules* unrootArgRules = new ArgumentRules();
+    methods.addFunction( new MemberProcedure( "unroot", RlUtils::Void, unrootArgRules ) );
 }
