@@ -4,6 +4,7 @@
 #include <cmath>
 #include <cstddef>
 #include <ostream>
+#include <set>
 #include <string>
 
 #include "Monitor.h"
@@ -12,6 +13,18 @@
 #include "RbOrderedSet.h"
 
 using namespace RevBayesCore;
+
+// Anonymous namespace to keep the two sets below private to this file (i.e., no other file can mutate them)
+namespace {
+
+    // Nodes currently in the touch propagation stack (used to detect cycles).
+    thread_local std::set<DagNode*> nodes_currently_touched;
+
+    // Nodes currently being visited by isConstant() (used to detect cycles among parameters).
+    thread_local std::set<const DagNode*> is_constant_visiting;
+
+}  // namespace
+
 
 /**
  * Construct an empty DAG node, potentially
@@ -412,6 +425,24 @@ const std::string& DagNode::getName( void ) const
 
 
 /**
+ * Get a name we can display when throwing a warning that a cycle has been detected.
+ */
+std::string DagNode::getNodeDisplayName(const DagNode* n)
+{
+    if ( n == nullptr ) return "<null>";
+    const std::string& nm = n->getName();
+    if ( !nm.empty() ) return nm;
+    switch ( n->getDagNodeType() )
+    {
+        case DagNode::CONSTANT:     return "<unnamed> (constant node)";
+        case DagNode::DETERMINISTIC: return "<unnamed> (deterministic node)";
+        case DagNode::STOCHASTIC:   return "<unnamed> (stochastic node)";
+    }
+    return "<unnamed>";
+}
+
+
+/**
  * Get the number of children for this DAG node.
  */
 size_t DagNode::getNumberOfChildren( void ) const
@@ -435,6 +466,12 @@ std::vector<const DagNode*> DagNode::getParents( void ) const
 {
 
     return std::vector<const DagNode*>();
+}
+
+
+double DagNode::getPrevLnProbability(void) const
+{
+    throw RbException()<<"getPrevLnProbability: not a stochastic node!";
 }
 
 
@@ -682,6 +719,17 @@ void DagNode::keepAffected()
 }
 
 
+/**
+ * Removes n from the per-thread set of the nodes we are currently visiting during the isConstant() traversal.
+ * This function is a counterpart to tryPushIsConstantVisit(), which adds a node that we enter during the traversal.
+ * popIsConstantVisit() removes a node that we leave during the traversal.
+ */
+void DagNode::popIsConstantVisit(const DagNode* n)
+{
+    is_constant_visiting.erase( n );
+}
+
+
 /** Print children. We assume indent is from line 2 (hanging indent). Line length is lineLen. */
 void DagNode::printChildren( std::ostream& o, size_t indent, size_t lineLen, bool verbose ) const
 {
@@ -892,9 +940,6 @@ void DagNode::removeChild(DagNode *child) const
 }
 
 
-
-
-
 /**
  * Remove the monitor from our set of monitors.
  *
@@ -1100,18 +1145,41 @@ void DagNode::touch(bool touchAll)
 
 /**
  * Tell affected variable nodes to touch themselves (i.e. that they've been touched).
+ * Throws if a cycle is detected (e.g. two deterministic nodes that depend on each other).
  */
 void DagNode::touchAffected(bool touchAll)
 {
-    // touch all my children
+    if ( nodes_currently_touched.count( this ) != 0 )
+    {
+        throw RbException( "Cycle detected in DAG during touch propagation: node '" + getNodeDisplayName( this ) + "' was reached again. The model may have a circular dependency (e.g. two deterministic nodes that depend on each other)." );
+    }
+    nodes_currently_touched.insert( this );
     for (std::vector<DagNode*>::const_iterator it=children.begin(); it!=children.end(); ++it)
     {
         DagNode *child = *it;
+        if ( nodes_currently_touched.count( child ) != 0 )
+        {
+            nodes_currently_touched.erase( this );
+            throw RbException( "Cycle detected in DAG during touch propagation: node '" + getNodeDisplayName( child ) + "' is both a child and an ancestor of '" + getNodeDisplayName( this ) + "'. The model may have a circular dependency." );
+        }
         child->touchMe( this, touchAll );
     }
+    nodes_currently_touched.erase( this );
 }
 
-double DagNode::getPrevLnProbability(void) const
+
+/**
+ * Keep a per-thread set of the nodes we are currently visiting in the isConstant() walk across the DAG.
+ * If node n is not in that set, add it and return true: "we are now visiting this node".
+ * If node n is already in the set, we must have come back to it while it is still inside, so we have found a cycle. In that case, return false.
+ */
+bool DagNode::tryPushIsConstantVisit(const DagNode* n)
 {
-    throw RbException()<<"getPrevLnProbability: not a stochastic node!";
+    if ( is_constant_visiting.count( n ) != 0 )
+    {
+        return false;
+    }
+    
+    is_constant_visiting.insert( n );
+    return true;
 }
