@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
+#include <map>
 #include <ostream>
 #include <set>
 #include <string>
@@ -23,7 +24,7 @@ namespace {
     // Nodes currently being visited by isConstant() (used to detect cycles among parameters).
     thread_local std::set<const DagNode*> is_constant_visiting;
 
-}  // namespace
+}
 
 
 /**
@@ -1151,7 +1152,7 @@ void DagNode::touchAffected(bool touchAll)
 {
     if ( nodes_currently_touched.count( this ) != 0 )
     {
-        throw RbException( "Cycle detected in DAG during touch propagation: node '" + getNodeDisplayName( this ) + "' was reached again. The model may have a circular dependency (e.g. two deterministic nodes that depend on each other)." );
+        throw RbException( "Cycle detected in DAG during touch propagation: node '" + getNodeDisplayName( this ) + "' was reached again. The model may have a circular dependency." );
     }
     nodes_currently_touched.insert( this );
     for (std::vector<DagNode*>::const_iterator it=children.begin(); it!=children.end(); ++it)
@@ -1160,7 +1161,7 @@ void DagNode::touchAffected(bool touchAll)
         if ( nodes_currently_touched.count( child ) != 0 )
         {
             nodes_currently_touched.erase( this );
-            throw RbException( "Cycle detected in DAG during touch propagation: node '" + getNodeDisplayName( child ) + "' is both a child and an ancestor of '" + getNodeDisplayName( this ) + "'. The model may have a circular dependency." );
+            throw RbException( "Cycle detected in DAG during touch propagation: node '" + getNodeDisplayName( child ) + "' is both a child and an ancestor of '" + getNodeDisplayName( this ) + "'." );
         }
         child->touchMe( this, touchAll );
     }
