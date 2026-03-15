@@ -1,0 +1,17 @@
+## continue-on-error
+
+################################################################################
+#
+# RevBayes Test Script: Checking that RevBayes does not segfault when the model
+#                       graph contains a cycle
+#
+#
+# authors: David Cerny
+#
+################################################################################
+
+# See https://github.com/revbayes/revbayes/issues/237
+
+a ~ dnUnif(0, 10)
+b := ln(a)
+a := exp(b)
