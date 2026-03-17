@@ -181,7 +181,7 @@ namespace RevBayesCore {
         std::optional<double>                                               storedLnProb;
         size_t                                                              num_nodes;
         size_t                                                              num_sites;
-        const size_t                                                        num_chars;
+        size_t                                                              num_chars;
         size_t                                                              num_site_rates;
         size_t                                                              num_site_mixtures;
         size_t                                                              num_matrices = 1;
@@ -935,6 +935,16 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
 
     // we start with the root and then traverse down the tree
     size_t root_index = root.getIndex();
+
+    // Guard against out-of-bounds root index: this indicates tree/PhyloCTMC desynchronisation
+    if ( root_index >= num_nodes )
+    {
+        throw RbException() << "BUG in dnPhyloCTMC: root node index " << root_index
+                            << " is out of bounds for num_nodes=" << num_nodes
+                            << " (tree reports " << tau->getValue().getNumberOfNodes() << " nodes)."
+                            << " This usually means a topology proposal corrupted the tree's node"
+                            << " indices or the Tree::root pointer became stale.";
+    }
 
     // only necessary if the root is actually dirty
     if ( dirty_nodes[root_index] == true )
@@ -2381,6 +2391,15 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::recursivelyFlagNo
 
     // we need to flag this node and all ancestral nodes for recomputation
     size_t index = n.getIndex();
+
+    // Guard against out-of-bounds index from a corrupted tree state
+    if ( index >= dirty_nodes.size() )
+    {
+        throw RbException() << "BUG in recursivelyFlagNodeDirty: node index " << index
+                            << " >= dirty_nodes.size()=" << dirty_nodes.size()
+                            << " (num_nodes=" << num_nodes << ")."
+                            << " Tree topology proposal likely corrupted a node's index.";
+    }
 
     // if this node is already dirty, the also all the ancestral nodes must have been flagged as dirty
     if ( dirty_nodes[index] == false )
@@ -4253,9 +4272,29 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::touchSpecializati
     }
     else if ( affecter == root_frequencies )
     {
+        // If root-frequency dimension changed (e.g. DAG swap to a different-size simplex),
+        // reallocate the likelihood buffer before flagging nodes dirty.
+        size_t new_num_chars = root_frequencies->getValue().size();
+        if ( new_num_chars != num_chars )
+        {
+            num_chars = new_num_chars;
+            resizeLikelihoodVectors();
+        }
 
         const TopologyNode &root = this->tau->getValue().getRoot();
         this->recursivelyFlagNodeDirty( root );
+    }
+    else if ( affecter == homogeneous_rate_matrix )
+    {
+        // If the rate-matrix dimension changed (e.g. DAG swap to a different-size Q),
+        // reallocate the likelihood buffer before flagging nodes dirty.
+        size_t new_num_chars = homogeneous_rate_matrix->getValue().getNumberOfStates();
+        if ( new_num_chars != num_chars )
+        {
+            num_chars = new_num_chars;
+            resizeLikelihoodVectors();
+        }
+        touch_all = true;
     }
     else if ( affecter == p_inv )
     {
