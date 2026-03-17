@@ -4,6 +4,8 @@
 #include "Proposal.h"
 #include "StochasticNode.h"
 
+#include <limits>
+
 namespace RevBayesCore {
     
     /**
@@ -22,7 +24,7 @@ namespace RevBayesCore {
     class RandomGeometricWalkProposal : public Proposal {
         
     public:
-        RandomGeometricWalkProposal( StochasticNode<std::int64_t> *n, double a);                                                //!< Constructor
+        RandomGeometricWalkProposal( StochasticNode<std::int64_t> *n, double a, std::int64_t lowerBound = std::numeric_limits<std::int64_t>::min() ); //!< Constructor
         
         // Basic utility functions
         void                                cleanProposal(void);                                                                //!< Clean up proposal
@@ -47,6 +49,7 @@ namespace RevBayesCore {
         StochasticNode<std::int64_t>*       variable;                                                                           //!< The variable the Proposal is working on
         std::int64_t                        stored_value;                                                                       //!< The stored value of the Proposal used for rejections.
         double                              alpha;
+        std::int64_t                        lower_bound;                                                                        //!< Lower bound for reflection (default no lower bound).
         
     };
     

@@ -1,0 +1,15 @@
+# Regression test for bounded natural random walk proposals.
+
+x ~ dnGeometric(0.5)
+x.setValue(0)
+
+moves = VectorMoves()
+moves.append(mvRandomNaturalWalk(x, weight=1.0))
+
+mymodel = model(x)
+
+monitors = VectorMonitors()
+monitors.append(mnScreen(x, printgen=100))
+
+mymcmc = mcmc(mymodel, monitors, moves)
+mymcmc.run(generations=10000)

@@ -14,9 +14,10 @@ using namespace RevBayesCore;
  *
  * Here we simply allocate and initialize the Proposal object.
  */
-RandomIntegerWalkProposal::RandomIntegerWalkProposal( StochasticNode<std::int64_t> *n) : Proposal(),
+RandomIntegerWalkProposal::RandomIntegerWalkProposal( StochasticNode<std::int64_t> *n, std::int64_t lowerBound) : Proposal(),
     variable( n ),
-    stored_value( 0 )
+    stored_value( 0 ),
+    lower_bound( lowerBound )
 {
     // tell the base class to add the node
     addNode( variable );
@@ -86,7 +87,7 @@ double RandomIntegerWalkProposal::doProposal( void )
     // copy value
     stored_value = val;
     
-    // Generate new value (no reflection, so we simply abort later if we propose value here outside of support)
+    // Generate new value.
     double u = rng->uniform01();
     if ( u >= 0.5 )
     {
@@ -95,6 +96,10 @@ double RandomIntegerWalkProposal::doProposal( void )
     else
     {
         --val;
+        if ( val < lower_bound )
+        {
+            val = 2 * lower_bound - val;
+        }
     }
     
     return 0.0;
