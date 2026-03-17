@@ -7,6 +7,7 @@
 #include "Integer.h"
 #include "MetropolisHastingsMove.h"
 #include "Move_RandomGeometricWalk.h"
+#include "Natural.h"
 #include "Probability.h"
 #include "RandomGeometricWalkProposal.h"
 #include "RealPos.h"
@@ -20,6 +21,8 @@
 #include "RevVariable.h"
 #include "RlMove.h"
 #include "StochasticNode.h"
+
+#include <limits>
 
 namespace RevBayesCore { class Proposal; }
 namespace RevBayesCore { template <class valueType> class TypedDagNode; }
@@ -74,8 +77,15 @@ void Move_RandomGeometricWalk::constructInternalObject( void )
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
     double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
 
+    // Natural-valued variables are bounded below by 1.
+    std::int64_t lower_bound = std::numeric_limits<std::int64_t>::min();
+    if ( dynamic_cast<const Natural *>( &x->getRevObject() ) != NULL )
+    {
+        lower_bound = 1;
+    }
+
     // finally create the internal move object
-    RevBayesCore::Proposal *prop = new RevBayesCore::RandomGeometricWalkProposal(n, a);
+    RevBayesCore::Proposal *prop = new RevBayesCore::RandomGeometricWalkProposal(n, a, lower_bound);
     prop->setTargetAcceptanceRate(tt);
     
     value = new RevBayesCore::MetropolisHastingsMove(prop, w, t);
