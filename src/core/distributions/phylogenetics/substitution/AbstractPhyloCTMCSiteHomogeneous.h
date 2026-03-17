@@ -4272,29 +4272,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::touchSpecializati
     }
     else if ( affecter == root_frequencies )
     {
-        // If root-frequency dimension changed (e.g. DAG swap to a different-size simplex),
-        // reallocate the likelihood buffer before flagging nodes dirty.
-        size_t new_num_chars = root_frequencies->getValue().size();
-        if ( new_num_chars != num_chars )
-        {
-            num_chars = new_num_chars;
-            resizeLikelihoodVectors();
-        }
-
         const TopologyNode &root = this->tau->getValue().getRoot();
         this->recursivelyFlagNodeDirty( root );
-    }
-    else if ( affecter == homogeneous_rate_matrix )
-    {
-        // If the rate-matrix dimension changed (e.g. DAG swap to a different-size Q),
-        // reallocate the likelihood buffer before flagging nodes dirty.
-        size_t new_num_chars = homogeneous_rate_matrix->getValue().getNumberOfStates();
-        if ( new_num_chars != num_chars )
-        {
-            num_chars = new_num_chars;
-            resizeLikelihoodVectors();
-        }
-        touch_all = true;
     }
     else if ( affecter == p_inv )
     {
