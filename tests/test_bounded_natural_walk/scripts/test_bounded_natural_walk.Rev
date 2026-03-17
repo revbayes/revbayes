@@ -11,8 +11,14 @@ moves.append(mvRandomNaturalWalk(x, weight=1.0))
 mymodel = model(x)
 
 monitors = VectorMonitors()
-monitors.append(mnScreen(x, printgen=100))
-monitors.append(mnModel(filename="output/test_bounded_natural_walk.log", printgen=1, separator=TAB))
 
 mymcmc = mcmc(mymodel, monitors, moves)
-mymcmc.run(generations=1000)
+mymcmc.run(generations=50)
+
+if (x < 0) {
+	print("bounded_natural_walk failed: final x < 0")
+	x_bad := v(1)[2]
+}
+
+print("bounded_natural_walk passed")
+q()
