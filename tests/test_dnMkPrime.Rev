@@ -1,0 +1,305 @@
+################################################################################
+#
+# dnMkPrime integration test scaffold (Agent B / T-007)
+#
+# This script checks three things:
+# 1) dnMkPrime is callable from Rev.
+# 2) At u = 0, dnMkPrime lnL matches dnPhyloCTMC on the same partition.
+# 3) A long smoke MCMC run with a stochastic u executes and logs posterior values.
+#    Note: movement is stochastic and may remain
+#    at its initial value; check `tests/output/test_dnMkPrime.log` for the `u`
+#    column to confirm movement when needed.
+#
+# NOTE:
+# Full behavioural validation of variable-k updates depends on T-006.
+#
+################################################################################
+
+seed(42)
+setOption("outputPrecision", 14, FALSE)
+
+moves = VectorMoves()
+monitors = VectorMonitors()
+edge_failures = 0
+
+# Use an existing morphology matrix and build one binary partition (kObs = 2).
+morpho <- readDiscreteCharacterData("tests/data/ceratosauria_morphology.nex")
+morpho_bin <- morpho
+morpho_bin.setNumStatesPartition(2)
+
+nchar_bin = morpho_bin.nchar()
+print("dnMkPrime test: binary partition has " + nchar_bin + " characters")
+
+# If no binary characters are present, exit cleanly.
+if (nchar_bin == 0) {
+    print("No kObs=2 characters found; skipping dnMkPrime test.")
+    q()
+}
+
+taxa <- morpho_bin.taxa()
+num_branches = 2 * taxa.size() - 3
+
+for (i in 1:num_branches) {
+    bl[i] ~ dnExponential(1.0)
+    moves.append( mvScale(bl[i], weight=0.1) )
+}
+
+topology ~ dnUniformTopology(taxa=taxa)
+moves.append( mvNNI(topology, weight=1.0) )
+
+psi := fnTreeAssembly(topology, bl)
+
+# -----------------------------------------------------------------------------
+# Check 1 + 2: dnMkPrime callable and u=0 equivalence against standard Mk.
+# -----------------------------------------------------------------------------
+
+k_obs = 2
+k_max = 8
+u0 <- 0
+
+mkprime_u0 ~ dnMkPrime(tree=psi, kObs=k_obs, u=u0, prior="geometric", priorParam=0.4, coding="variable", kMax=k_max)
+mkprime_u0.clamp(morpho_bin)
+
+Q2 := fnJC(2)
+mk_standard ~ dnPhyloCTMC(tree=psi, Q=Q2, type="Standard", coding="variable")
+mk_standard.clamp(morpho_bin)
+
+lp_mkprime_u0 = mkprime_u0.lnProbability()
+lp_mk_standard = mk_standard.lnProbability()
+lp_diff = abs(lp_mkprime_u0 - lp_mk_standard)
+
+# Additional diagnostic: repeat comparison with coding="all" to isolate
+# ascertainment effects from Mk' correction effects.
+mkprime_u0_all ~ dnMkPrime(tree=psi, kObs=k_obs, u=u0, prior="geometric", priorParam=0.4, coding="all", kMax=k_max)
+mkprime_u0_all.clamp(morpho_bin)
+
+mk_standard_all ~ dnPhyloCTMC(tree=psi, Q=Q2, type="Standard", coding="all")
+mk_standard_all.clamp(morpho_bin)
+
+lp_mkprime_u0_all = mkprime_u0_all.lnProbability()
+lp_mk_standard_all = mk_standard_all.lnProbability()
+lp_diff_all = abs(lp_mkprime_u0_all - lp_mk_standard_all)
+
+ln4 = log(4.0, 2.718281828459045)
+delta_variable_in_ln4_units = (lp_mkprime_u0 - lp_mk_standard) / ln4
+delta_all_in_ln4_units = (lp_mkprime_u0_all - lp_mk_standard_all) / ln4
+
+tol = 1e-6
+print("dnMkPrime(u=0) lnL = " + lp_mkprime_u0)
+print("dnPhyloCTMC lnL   = " + lp_mk_standard)
+print("abs diff          = " + lp_diff)
+print("diagnostic: (mkprime - standard) / ln(4), coding=variable = " + delta_variable_in_ln4_units)
+
+print("dnMkPrime(u=0, coding=all) lnL = " + lp_mkprime_u0_all)
+print("dnPhyloCTMC(coding=all) lnL     = " + lp_mk_standard_all)
+print("abs diff (coding=all)           = " + lp_diff_all)
+print("diagnostic: (mkprime - standard) / ln(4), coding=all = " + delta_all_in_ln4_units)
+
+if (lp_diff < tol) {
+    print("u=0 equivalence check passed")
+} else {
+    print("u=0 equivalence check failed")
+    fail_dnMkPrime_u0_equivalence()
+}
+
+if (lp_diff_all < tol) {
+    print("u=0 equivalence check (coding=all) passed")
+} else {
+    print("u=0 equivalence check (coding=all) failed")
+    fail_dnMkPrime_u0_equivalence_all()
+}
+
+# -----------------------------------------------------------------------------
+# Edge checks (fixed-u only; no stochastic u dependency)
+# -----------------------------------------------------------------------------
+
+# Boundary case: u = kMax - kObs
+u_upper <- k_max - k_obs
+mkprime_u_upper ~ dnMkPrime(tree=psi, kObs=k_obs, u=u_upper, prior="geometric", priorParam=0.4, coding="all", kMax=k_max)
+mkprime_u_upper.clamp(morpho_bin)
+lp_mkprime_u_upper = mkprime_u_upper.lnProbability()
+print("boundary check (u = kMax-kObs) lnL = " + lp_mkprime_u_upper)
+if (lp_mkprime_u_upper <= -1e300) {
+    print("boundary check failed: lnL is effectively -inf")
+    edge_failures += 1
+} else {
+    print("boundary check passed")
+}
+
+# Single-character batch check
+morpho_single <- morpho_bin
+morpho_single.excludeAll()
+morpho_single.includeCharacter(1)
+nchar_single = morpho_single.nchar()
+nincluded_single = morpho_single.getIncludedCharacterIndices().size()
+print("single-character subset diagnostics: nchar=" + nchar_single + ", included=" + nincluded_single)
+mkprime_single_u0 ~ dnMkPrime(tree=psi, kObs=k_obs, u=u0, prior="geometric", priorParam=0.4, coding="all", kMax=k_max)
+mkprime_single_u0.clamp(morpho_single)
+lp_single = mkprime_single_u0.lnProbability()
+print("single-character check lnL = " + lp_single)
+if (lp_single <= -1e300) {
+    print("single-character check failed: lnL is effectively -inf")
+    edge_failures += 1
+} else {
+    print("single-character check passed")
+}
+
+# 100-character (or fewer if unavailable) batch check
+n_many = 100
+if (nchar_bin < 100) {
+    n_many = nchar_bin
+}
+
+morpho_many <- morpho_bin
+morpho_many.excludeAll()
+bin_indices = morpho_bin.getIncludedCharacterIndices()
+for (i in 1:n_many) {
+    morpho_many.includeCharacter(bin_indices[i])
+}
+
+nchar_many = morpho_many.nchar()
+nincluded_many = morpho_many.getIncludedCharacterIndices().size()
+print("many-character subset diagnostics: nchar=" + nchar_many + ", included=" + nincluded_many)
+
+mkprime_many_u0 ~ dnMkPrime(tree=psi, kObs=k_obs, u=u0, prior="geometric", priorParam=0.4, coding="all", kMax=k_max)
+mkprime_many_u0.clamp(morpho_many)
+lp_many = mkprime_many_u0.lnProbability()
+print("many-character check (n=" + n_many + ") lnL = " + lp_many)
+
+mk_standard_many ~ dnPhyloCTMC(tree=psi, Q=Q2, type="Standard", coding="all")
+mk_standard_many.clamp(morpho_many)
+lp_standard_many = mk_standard_many.lnProbability()
+print("many-character baseline dnPhyloCTMC lnL = " + lp_standard_many)
+
+lp_many_diff = abs(lp_many - lp_standard_many)
+print("many-character abs diff vs dnPhyloCTMC = " + lp_many_diff)
+
+if (lp_many <= -1e300 || lp_standard_many <= -1e300) {
+    print("many-character check failed: one or both lnL values are effectively -inf")
+    edge_failures += 1
+} else if (lp_many_diff > tol) {
+    print("many-character check failed: dnMkPrime and dnPhyloCTMC differ at u=0")
+    edge_failures += 1
+} else {
+    print("many-character check passed")
+}
+
+# Prior-family checks at fixed u=0
+mkprime_u0_geo ~ dnMkPrime(tree=psi, kObs=k_obs, u=u0, prior="geometric", priorParam=0.4, coding="all", kMax=k_max)
+mkprime_u0_geo.clamp(morpho_bin)
+lp_geo = mkprime_u0_geo.lnProbability()
+
+mkprime_u0_logseries ~ dnMkPrime(tree=psi, kObs=k_obs, u=u0, prior="logseries", priorParam=0.7, coding="all", kMax=k_max)
+mkprime_u0_logseries.clamp(morpho_bin)
+lp_logseries = mkprime_u0_logseries.lnProbability()
+
+mkprime_u0_powerlaw ~ dnMkPrime(tree=psi, kObs=k_obs, u=u0, prior="powerlaw", priorParam=2.1, coding="all", kMax=k_max)
+mkprime_u0_powerlaw.clamp(morpho_bin)
+lp_powerlaw = mkprime_u0_powerlaw.lnProbability()
+
+print("prior-family check (geometric, u=0) lnL = " + lp_geo)
+print("prior-family check (logseries, u=0) lnL = " + lp_logseries)
+print("prior-family check (powerlaw, u=0) lnL = " + lp_powerlaw)
+
+lp_prior_diff_1 = abs(lp_geo - lp_logseries)
+lp_prior_diff_2 = abs(lp_geo - lp_powerlaw)
+lp_prior_diff_3 = abs(lp_logseries - lp_powerlaw)
+lp_prior_family_span = lp_prior_diff_1
+if (lp_prior_diff_2 > lp_prior_family_span) {
+    lp_prior_family_span = lp_prior_diff_2
+}
+if (lp_prior_diff_3 > lp_prior_family_span) {
+    lp_prior_family_span = lp_prior_diff_3
+}
+print("prior-family fixed-u max abs diff = " + lp_prior_family_span)
+
+if (lp_geo <= -1e300 || lp_logseries <= -1e300 || lp_powerlaw <= -1e300) {
+    print("prior-family check failed: at least one lnL is effectively -inf")
+    edge_failures += 1
+} else if (lp_prior_family_span > tol) {
+    print("prior-family check failed: fixed-u prior families should match")
+    edge_failures += 1
+} else {
+    print("prior-family check passed")
+}
+
+# kObs = kMax check (conditional on data availability)
+morpho_kmax <- morpho
+morpho_kmax.setNumStatesPartition(k_max)
+nchar_kmax = morpho_kmax.nchar()
+if (nchar_kmax > 0) {
+    u_kmax <- 0
+    mkprime_kmax ~ dnMkPrime(tree=psi, kObs=k_max, u=u_kmax, prior="geometric", priorParam=0.4, coding="all", kMax=k_max)
+    mkprime_kmax.clamp(morpho_kmax)
+    lp_kmax = mkprime_kmax.lnProbability()
+    print("kObs=kMax check lnL = " + lp_kmax + " (nchar=" + nchar_kmax + ")")
+    if (lp_kmax <= -1e300) {
+        print("kObs=kMax check failed: lnL is effectively -inf")
+        edge_failures += 1
+    } else {
+        print("kObs=kMax check passed")
+    }
+} else {
+    print("kObs=kMax check skipped (no characters in kObs=" + k_max + " partition).")
+}
+
+print("fixed-u edge checks: failures = " + edge_failures)
+if (edge_failures > 0) {
+    print("fixed-u edge checks failed")
+    fail_dnMkPrime_edge_checks()
+}
+
+# -----------------------------------------------------------------------------
+# Check 3: short MCMC run with stochastic u.
+# -----------------------------------------------------------------------------
+
+run_stochastic_u = TRUE
+
+if (run_stochastic_u) {
+    u ~ dnUniformNatural(0, k_max - k_obs)
+    moves.append( mvRandomIntegerWalk(u) )
+
+    mkprime_stoch ~ dnMkPrime(tree=psi, kObs=k_obs, u=u, prior="geometric", priorParam=0.4, coding="variable", kMax=k_max)
+    mkprime_stoch.clamp(morpho_bin)
+
+    mymodel = model(psi)
+
+    monitors.append( mnScreen(printgen=10) )
+    monitors.append( mnModel(filename="tests/output/test_dnMkPrime.log", printgen=10, separator=TAB) )
+
+    mymcmc = mcmc(mymodel, monitors, moves, moveschedule="single")
+    mymcmc.run(generations=1000)
+
+    # Prior-family sensitivity check with stochastic (unclamped) u at u=0.
+    # This is placed after MCMC so it does not alter the model used above.
+    u_prior_check ~ dnUniformNatural(0, k_max - k_obs)
+    u_prior_check.setValue(0)
+
+    mkprime_u0_geo_stoch ~ dnMkPrime(tree=psi, kObs=k_obs, u=u_prior_check, prior="geometric", priorParam=0.4, coding="all", kMax=k_max)
+    mkprime_u0_geo_stoch.clamp(morpho_bin)
+    lp_geo_stoch = mkprime_u0_geo_stoch.lnProbability()
+
+    mkprime_u0_logseries_stoch ~ dnMkPrime(tree=psi, kObs=k_obs, u=u_prior_check, prior="logseries", priorParam=0.7, coding="all", kMax=k_max)
+    mkprime_u0_logseries_stoch.clamp(morpho_bin)
+    lp_logseries_stoch = mkprime_u0_logseries_stoch.lnProbability()
+
+    mkprime_u0_powerlaw_stoch ~ dnMkPrime(tree=psi, kObs=k_obs, u=u_prior_check, prior="powerlaw", priorParam=2.1, coding="all", kMax=k_max)
+    mkprime_u0_powerlaw_stoch.clamp(morpho_bin)
+    lp_powerlaw_stoch = mkprime_u0_powerlaw_stoch.lnProbability()
+
+    print("prior-family stochastic-u check (geometric, u=0) lnL = " + lp_geo_stoch)
+    print("prior-family stochastic-u check (logseries, u=0) lnL = " + lp_logseries_stoch)
+    print("prior-family stochastic-u check (powerlaw, u=0) lnL = " + lp_powerlaw_stoch)
+
+    if (abs(lp_geo_stoch - lp_logseries_stoch) < tol && abs(lp_geo_stoch - lp_powerlaw_stoch) < tol && abs(lp_logseries_stoch - lp_powerlaw_stoch) < tol) {
+        print("prior-family stochastic-u check failed: all families give identical lnL")
+        edge_failures += 1
+        fail_dnMkPrime_stochastic_prior_check()
+    } else {
+        print("prior-family stochastic-u check passed")
+    }
+} else {
+    print("Skipping stochastic-u MCMC block (known core blocker during rate-matrix swap).")
+}
+
+q()
