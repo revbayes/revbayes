@@ -2023,7 +2023,7 @@ void Tree::reroot(TopologyNode &n, bool make_bifurcating, bool reindex)
     reverseParentChild( n.getParent() );
 
     // set the root — use setRoot() so that nodes[] and num_nodes are rebuilt,
-    // not just the raw root pointer (the old bare assignment left nodes[] stale).
+    // not just the raw root pointer.
     setRoot( &n.getParent(), reindex );
     
     // do we want to make the tree bifurcating?
