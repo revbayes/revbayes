@@ -105,8 +105,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihood( si
                                 << f.size() << " does not match num_chars "
                                 << this->num_chars << ". The rate matrix or root-frequency "
                                 << "parameter changed dimension during MCMC without triggering "
-                                << "resizeLikelihoodVectors(). This is the proximate cause of "
-                                << "the Mk' heap-buffer-overflow bug.";
+                                << "resizeLikelihoodVectors().";
         std::vector<double>::const_iterator f_end       = f.end();
         std::vector<double>::const_iterator f_begin     = f.begin();
 
@@ -180,8 +179,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihood( si
                                 << f.size() << " does not match num_chars "
                                 << this->num_chars << ". The rate matrix or root-frequency "
                                 << "parameter changed dimension during MCMC without triggering "
-                                << "resizeLikelihoodVectors(). This is the proximate cause of "
-                                << "the Mk' heap-buffer-overflow bug.";
+                                << "resizeLikelihoodVectors().";
         std::vector<double>::const_iterator f_end       = f.end();
         std::vector<double>::const_iterator f_begin     = f.begin();
 

@@ -5,6 +5,7 @@
 #include "ConstantNode.h"
 #include "DiscreteTaxonData.h"
 #include "DnaState.h"
+#include "StandardState.h"
 #include "MatrixReal.h"
 #include "MemberObject.h"
 #include "RbConstants.h"
@@ -21,6 +22,7 @@
 #include "SiteMixtureModel.h"
 
 #include <memory.h>
+#include <type_traits>
 
 namespace RevBayesCore {
 
@@ -917,6 +919,40 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
         tau->getValue().getTreeChangeEventHandler().addListener( this );
         dirty_nodes = std::vector<bool>(num_nodes, true);
         pmat_dirty_nodes = std::vector<bool>(num_nodes, true);
+    }
+
+    // Keep num_chars synchronized with the active Q matrix dimension.
+    // For fixed-state sequence data (e.g. DNA), mismatches are user errors.
+    // For morphology (StandardState), allow dynamic state-space updates.
+    size_t q_num_chars = num_chars;
+    bool has_q_dimension = false;
+    if ( mixture_model != NULL )
+    {
+        q_num_chars = static_cast<size_t>( mixture_model->getValue().getNumberOfStates() );
+        has_q_dimension = true;
+    }
+    else if ( branch_heterogeneous_substitution_matrices == true && heterogeneous_rate_matrices != NULL && heterogeneous_rate_matrices->getValue().size() > 0 )
+    {
+        q_num_chars = heterogeneous_rate_matrices->getValue()[0].getNumberOfStates();
+        has_q_dimension = true;
+    }
+    else if ( homogeneous_rate_matrix != NULL )
+    {
+        q_num_chars = homogeneous_rate_matrix->getValue().getNumberOfStates();
+        has_q_dimension = true;
+    }
+
+    if ( has_q_dimension == true && q_num_chars != num_chars )
+    {
+        if ( std::is_base_of<StandardState, charType>::value == false )
+        {
+            throw RbException() << "dnPhyloCTMC state-space mismatch: active rate matrix has "
+                                << q_num_chars << " states, but the current CTMC dimension is "
+                                << num_chars << ". For fixed-state data (e.g. DNA), these must match.";
+        }
+
+        num_chars = q_num_chars;
+        resizeLikelihoodVectors();
     }
 
     checkInvariants();
