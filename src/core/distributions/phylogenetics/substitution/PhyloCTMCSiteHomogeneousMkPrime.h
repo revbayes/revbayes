@@ -246,8 +246,9 @@ inline void RevBayesCore::PhyloCTMCSiteHomogeneousMkPrime::updateRateMatrixIfNee
     this->homogeneous_rate_matrix = newRateMatrixNode;
 
     // A k-change modifies Q, so both transition probabilities and partials must be recomputed.
-    for (size_t i = 0; i < this->dirty_nodes.size(); ++i) {
-        this->dirty_nodes[i] = true;
+    // PR #816 replaced dirty_nodes[] with null shared_ptrs; use the new wrapper.
+    this->markAllPartialLikelihoodsDirty();
+    for (size_t i = 0; i < this->changed_nodes.size(); ++i) {
         this->changed_nodes[i] = true;
     }
     for (size_t i = 0; i < this->pmat_dirty_nodes.size(); ++i) {
