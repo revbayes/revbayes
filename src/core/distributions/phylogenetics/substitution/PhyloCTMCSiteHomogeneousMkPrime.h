@@ -72,28 +72,23 @@ inline RevBayesCore::PhyloCTMCSiteHomogeneousMkPrime::PhyloCTMCSiteHomogeneousMk
     const std::vector<double>& priorParams,
     size_t kMax,
     AscertainmentBias::Coding coding)
-    : PhyloCTMCSiteHomogeneousConditional<StandardState>(
-          t,
-          kMax,
-          true,
-          0,
-          false,
-          coding),
+    : PhyloCTMCSiteHomogeneousConditional<StandardState>(t, kMax, true, 0, false, coding),
       kObs_(kObs),
       kMax_(kMax),
       currentK_(u->getValue() < 0 ? 0 : kObs + static_cast<size_t>(u->getValue())),
       priorFamily_(priorFamily),
       priorParams_(priorParams),
-            u_(u),
-            activeRateMatrixNode_(NULL) {
+      u_(u),
+      activeRateMatrixNode_(NULL)
+{
     this->addParameter(u_);
 
-        logFactorial_.resize(kMax_ + 1, 0.0);
-        for (size_t i = 1; i <= kMax_; ++i) {
-                logFactorial_[i] = logFactorial_[i - 1] + std::log(static_cast<double>(i));
-        }
+    logFactorial_.resize(kMax_ + 1, 0.0);
+    for (size_t i = 1; i <= kMax_; ++i) {
+        logFactorial_[i] = logFactorial_[i - 1] + std::log(static_cast<double>(i));
+    }
 
-        updateRateMatrixIfNeeded();
+    updateRateMatrixIfNeeded();
 }
 
 inline RevBayesCore::PhyloCTMCSiteHomogeneousMkPrime::PhyloCTMCSiteHomogeneousMkPrime(
@@ -105,10 +100,11 @@ inline RevBayesCore::PhyloCTMCSiteHomogeneousMkPrime::PhyloCTMCSiteHomogeneousMk
       priorFamily_(other.priorFamily_),
       priorParams_(other.priorParams_),
       u_(other.u_),
-    activeRateMatrixNode_(NULL),
-    logFactorial_(other.logFactorial_) {
-    for (std::map<size_t, RateGenerator*>::const_iterator it = other.rateMatrixCache_.begin(); it != other.rateMatrixCache_.end(); ++it) {
-        rateMatrixCache_[it->first] = it->second->clone();
+      activeRateMatrixNode_(NULL),
+      logFactorial_(other.logFactorial_)
+{
+    for (const auto& kv : other.rateMatrixCache_) {
+        rateMatrixCache_[kv.first] = kv.second->clone();
     }
 
     updateRateMatrixIfNeeded();
@@ -164,14 +160,18 @@ inline void RevBayesCore::PhyloCTMCSiteHomogeneousMkPrime::swapParameterInternal
                                                                                   const DagNode* newP) {
     if (oldP == u_) {
         u_ = static_cast<const TypedDagNode<std::int64_t>*>(newP);
-    } else if (oldP->getName() == "mkPrimeRateMatrix" || newP->getName() == "mkPrimeRateMatrix") {
-        // Internal mkPrime rate-matrix nodes can be replaced between cached k values.
-        // Ignore explicit swap bookkeeping here; updateRateMatrixIfNeeded() maintains
-        // the active pointer and dirty flags during likelihood evaluation.
         return;
-    } else {
-        PhyloCTMCSiteHomogeneousConditional<StandardState>::swapParameterInternal(oldP, newP);
     }
+
+    // Our privately-owned rate-matrix nodes are never registered in
+    // Distribution::parameters, so we intercept any swap request targeting them
+    // and silently ignore it.  updateRateMatrixIfNeeded() is the sole authority
+    // on which Q node is active; DAG bookkeeping must not interfere.
+    for (const ConstantNode<RateGenerator>* owned : ownedRateMatrixNodes_) {
+        if (oldP == owned || newP == owned) return;
+    }
+
+    PhyloCTMCSiteHomogeneousConditional<StandardState>::swapParameterInternal(oldP, newP);
 }
 
 inline RevBayesCore::RateGenerator* RevBayesCore::PhyloCTMCSiteHomogeneousMkPrime::getOrCreateRateMatrix(size_t k) {
