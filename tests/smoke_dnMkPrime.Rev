@@ -1,0 +1,101 @@
+################################################################################
+# smoke_dnMkPrime.Rev — minimal smoke test for the native dnMkPrime distribution
+#
+# What it checks:
+#   1. dnMkPrime is callable and returns a finite log-likelihood
+#   2. At u=0, dnMkPrime lnL matches dnPhyloCTMC (kObs-state JC) exactly
+#   3. At u>0, dnMkPrime lnL is strictly less than at u=0 (penalty for extra states)
+#   4. A 50-generation MCMC with stochastic u runs to completion without crashing
+#
+# Run from the repository root:
+#   build_try/rb.exe tests/smoke_dnMkPrime.Rev
+#
+# Expected output: four PASS lines followed by MCMC screen output.
+# Any FAIL line or exception indicates a build / implementation problem.
+################################################################################
+
+seed(1234)
+
+# ── Data ──────────────────────────────────────────────────────────────────────
+morpho      <- readDiscreteCharacterData("tests/data/ceratosauria_morphology.nex")
+morpho_bin  <- morpho
+morpho_bin.setNumStatesPartition(2)
+
+if (morpho_bin.nchar() == 0) {
+    print("SKIP: no binary characters in ceratosauria_morphology.nex")
+    q()
+}
+
+taxa        <- morpho_bin.taxa()
+num_branches = 2 * taxa.size() - 3
+
+# ── Tree model ────────────────────────────────────────────────────────────────
+for (i in 1:num_branches) {
+    bl[i] ~ dnExponential(1.0)
+}
+topology ~ dnUniformTopology(taxa=taxa)
+psi := fnTreeAssembly(topology, bl)
+
+# ── Check 1: finite lnL ───────────────────────────────────────────────────────
+u_fixed <- 0
+d ~ dnMkPrime(tree=psi, kObs=2, u=u_fixed, prior="geometric", priorParam=0.4,
+              coding="variable", kMax=8)
+d.clamp(morpho_bin)
+lp = d.lnProbability()
+
+if (lp > -1e300) {
+    print("CHECK 1 PASS: dnMkPrime returned finite lnL = " + lp)
+} else {
+    print("CHECK 1 FAIL: dnMkPrime returned -inf")
+    q()
+}
+
+# ── Check 2: u=0 equivalence with dnPhyloCTMC ─────────────────────────────────
+Q2 := fnJC(2)
+baseline ~ dnPhyloCTMC(tree=psi, Q=Q2, type="Standard", coding="variable")
+baseline.clamp(morpho_bin)
+lp_base = baseline.lnProbability()
+
+diff = abs(lp - lp_base)
+if (diff < 1e-6) {
+    print("CHECK 2 PASS: u=0 lnL matches dnPhyloCTMC (|diff| = " + diff + ")")
+} else {
+    print("CHECK 2 FAIL: u=0 lnL mismatch — dnMkPrime=" + lp + " dnPhyloCTMC=" + lp_base)
+    q()
+}
+
+# ── Check 3: u>0 gives lower lnL (relabelling penalty) ───────────────────────
+u_pos <- 2
+d_u2 ~ dnMkPrime(tree=psi, kObs=2, u=u_pos, prior="geometric", priorParam=0.4,
+                 coding="variable", kMax=8)
+d_u2.clamp(morpho_bin)
+lp_u2 = d_u2.lnProbability()
+
+if (lp_u2 < lp) {
+    print("CHECK 3 PASS: u=2 lnL (" + lp_u2 + ") < u=0 lnL (" + lp + ")")
+} else {
+    print("CHECK 3 FAIL: relabelling penalty not applied (u=2 lnL >= u=0 lnL)")
+    q()
+}
+
+# ── Check 4: short MCMC with stochastic u ─────────────────────────────────────
+u_stoch ~ dnUniformNatural(0, 6)
+moves = VectorMoves()
+moves.append( mvRandomIntegerWalk(u_stoch) )
+for (i in 1:num_branches) { moves.append( mvScale(bl[i], weight=0.1) ) }
+moves.append( mvNNI(topology, weight=1.0) )
+
+d_mcmc ~ dnMkPrime(tree=psi, kObs=2, u=u_stoch, prior="geometric", priorParam=0.4,
+                   coding="variable", kMax=8)
+d_mcmc.clamp(morpho_bin)
+
+monitors = VectorMonitors()
+monitors.append( mnScreen(u_stoch, printgen=10) )
+
+mymodel = model(psi)
+mymcmc  = mcmc(mymodel, monitors, moves, moveschedule="single")
+mymcmc.run(generations=50)
+
+print("CHECK 4 PASS: 50-generation MCMC completed without crash")
+
+q()
