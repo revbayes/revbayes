@@ -5,6 +5,8 @@
 #include <filesystem>
 #include <string>
 
+#include "nlohmann-json.h"
+
 #include "RbFileManager.h"
 #include "Cloneable.h"
 
@@ -113,41 +115,61 @@ void AbstractFileMonitor::truncateAfterGeneration(std::uint64_t lastGen)
 
     std::string line;
 
+    // detect format from the first data line
+    bool is_json = false;
+    std::streampos data_start;
     while ( true )
     {
-        std::streampos pos = infile.tellg();
-        if ( !safeGetline(infile, line) ) break;
-
+        data_start = infile.tellg();
+        if ( !safeGetline(infile, line) ) return;
         if ( line.empty() ) continue;
+        if ( std::isdigit(static_cast<unsigned char>(line[0])) ) { is_json = false; break; }
+        if ( line[0] == '{' )                                     { is_json = true;  break; }
+        // otherwise a header/comment line — keep scanning
+    }
+    infile.seekg(data_start);
 
-        std::uint64_t gen = 0;
-        bool found = false;
+    if ( is_json )
+    {
+        while ( true )
+        {
+            std::streampos pos = infile.tellg();
+            if ( !safeGetline(infile, line) ) break;
+            if ( line.empty() ) continue;
 
-        if ( std::isdigit(static_cast<unsigned char>(line[0])) )
-        {
-            // separator format: generation is the first field
-            char *end_ptr = NULL;
-            gen = static_cast<std::uint64_t>( std::strtoull(line.c_str(), &end_ptr, 10) );
-            found = (end_ptr != line.c_str());
-        }
-        else if ( line[0] == '{' )
-        {
-            // JSON format: look for "Iteration": <number>
-            size_t it_pos = line.find("\"Iteration\":");
-            size_t num_start = (it_pos != std::string::npos) ? line.find_first_of("0123456789", it_pos + 12) : std::string::npos;
-            if ( num_start != std::string::npos )
+            try
             {
-                char *end_ptr = NULL;
-                gen = static_cast<std::uint64_t>( std::strtoull(line.c_str() + num_start, &end_ptr, 10) );
-                found = (end_ptr != line.c_str() + num_start);
+                auto j = nlohmann::json::parse(line);
+                if ( j.contains("Iteration") && j["Iteration"].is_number_unsigned() )
+                {
+                    std::uint64_t gen = j["Iteration"].get<std::uint64_t>();
+                    if ( gen > lastGen )
+                    {
+                        infile.close();
+                        std::filesystem::resize_file(working_file_name, pos);
+                        return;
+                    }
+                }
             }
+            catch ( const nlohmann::json::exception& ) { }
         }
-
-        if ( found == true && gen > lastGen )
+    }
+    else
+    {
+        while ( true )
         {
-            infile.close();
-            std::filesystem::resize_file(working_file_name, pos);
-            return;
+            std::streampos pos = infile.tellg();
+            if ( !safeGetline(infile, line) ) break;
+            if ( line.empty() ) continue;
+
+            char *end_ptr = NULL;
+            std::uint64_t gen = static_cast<std::uint64_t>( std::strtoull(line.c_str(), &end_ptr, 10) );
+            if ( end_ptr != line.c_str() && gen > lastGen )
+            {
+                infile.close();
+                std::filesystem::resize_file(working_file_name, pos);
+                return;
+            }
         }
     }
 
