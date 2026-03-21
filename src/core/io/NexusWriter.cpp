@@ -74,17 +74,34 @@ void NexusWriter::writeNexusBlock(const AbstractHomologousDiscreteCharacterData 
     out_stream << "Format datatype=" << data.getDataType() << " ";
     if ( data.getDataType() == "Standard" )
     {
-        std::string labels = data.getTaxonData(0).getCharacter(0).getStateLabels();
-        out_stream << "symbols=\"";
-        for (size_t i = 0; i < labels.size(); ++i)
+        // get character state labels
+        // set keeps sorted set of unique objects
+        std::set<char> unique_labels;
+        // Using the first taxon to obtain the character indices
+        const AbstractDiscreteTaxonData &first_taxon = data.getTaxonData(0);
+        size_t nChars = data.getNumberOfIncludedCharacters();
+        
+        for (size_t i = 0; i < nChars; ++i)
         {
-            out_stream << labels[i];
-//            if (i < (labels.size()-1))
-//                out_stream<< " ";
-            
+            if ( !data.isCharacterExcluded(i) )
+            {
+                std::string char_labels = first_taxon.getCharacter(i).getStateLabels();
+                for (size_t j = 0; j < char_labels.size(); ++j)
+                {
+                    unique_labels.insert(char_labels[j]);
+                }
+            }
+        }
+        
+        // write the set as state symbols to the NEXUS format block
+        out_stream << "symbols=\"";
+        for (std::set<char>::iterator it = unique_labels.begin(); it != unique_labels.end(); ++it)
+        {
+            out_stream << *it;
         }
         out_stream << "\" ";
     }
+    
     out_stream << "missing=? gap=-;" << std::endl;
     out_stream << "Matrix" << std::endl;
 
