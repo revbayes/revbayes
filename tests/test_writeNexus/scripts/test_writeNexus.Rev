@@ -1,0 +1,64 @@
+################################################################################
+#
+# RevBayes Test-Script: This test ensures that when concatenating
+#                                          matrices with different state spaces,
+#              the NexusWriter correctly outputs the union of all state symbols.
+#
+# authors: Basanta Khakurel (From Alessio Capobianco's bug report (#969))
+#
+################################################################################
+seed(200456)
+
+t <- simTree(4)
+alpha <- 3.36
+sr := fnDiscretizeGamma(alpha, alpha, 4)
+
+Q_1 <- fnJC(4)
+Q_2 <- fnJC(4)
+Q_3 <- fnJC(6)
+
+phy_1 ~ dnPhyloCTMC(tree = t, siteRates = sr, Q = Q_1, nSites = 100, type = "Standard")
+phy_2 ~ dnPhyloCTMC(tree = t, siteRates = sr, Q = Q_2, nSites = 100, type = "Standard")
+phy_3 ~ dnPhyloCTMC(tree = t, siteRates = sr, Q = Q_3, nSites = 100, type = "Standard")
+
+# concatenate simulated matrices
+# same state space
+PHY <- concatenate(phy_1, phy_2)
+# different state space
+PHY2 <- concatenate(phy_1, phy_3)
+# mixed with same and different state spaces
+PHY3 <- concatenate(phy_1, phy_2, phy_3)
+
+# checking state descriptions before write
+if (phy_1.getStateDescriptions().size() != 4) { print("FAIL: phy_1 should have 4 state descriptions"); q() }
+if (PHY.getStateDescriptions().size()   != 4) { print("FAIL: PHY (4+4) should have 4 state descriptions"); q() }
+if (PHY2.getStateDescriptions().size()  != 6) { print("FAIL: PHY2 (4+6) should have 6 state descriptions"); q() }
+if (PHY3.getStateDescriptions().size()  != 6) { print("FAIL: PHY3 (4+4+6) should have 6 state descriptions"); q() }
+
+# write the nexus files
+writeNexus("test_noConcat.nex", phy_1)
+writeNexus("test_sameStateConcat.nex", PHY)
+writeNexus("test_differentStateConcat.nex", PHY2)
+writeNexus("test_multipleConcat.nex", PHY3)
+
+# read in the nexus files back
+r <- readDiscreteCharacterData("test_noConcat.nex")
+r1 <- readDiscreteCharacterData("test_sameStateConcat.nex")
+r2 <- readDiscreteCharacterData("test_differentStateConcat.nex")
+r3 <- readDiscreteCharacterData("test_multipleConcat.nex")
+
+# make sure number of characters is correct
+if (r.nchar() != 100) { print("FAIL: r should have 100 characters"); q() }
+if (r1.nchar() != 200) { print("FAIL: r1 should have 200 characters"); q() }
+if (r2.nchar() != 200) { print("FAIL: r2 should have 200 characters"); q() }
+if (r3.nchar() != 300) { print("FAIL: r3 should have 300 characters"); q() }
+
+# make sure that state descriptions are correct
+if (r.getStateDescriptions().size()  != 4) { print("FAIL: r should have 4 states"); q() }
+if (r1.getStateDescriptions().size() != 4) { print("FAIL: r1 should have 4 states"); q() }
+if (r2.getStateDescriptions().size() != 6) { print("FAIL: r2 should have 6 states"); q() }
+if (r3.getStateDescriptions().size() != 6) { print("FAIL: r3 should have 6 states"); q() }
+
+print("Test passed: Concatenated matrices were written and read properly.")
+
+q()
