@@ -669,9 +669,12 @@ const TopologyNode& Tree::getInteriorNode( size_t indx ) const
     size_t n = getNumberOfTips();
     if ( indx > (n-2) )
     {
-        throw RbException() << "Cannot acces interior node '" << StringUtilities::to_string(indx) << "' for a tree with " << StringUtilities::to_string(n) << " tips.";
+        throw RbException() << "Cannot access interior node '" << StringUtilities::to_string(indx) << "' for a tree with " << StringUtilities::to_string(n) << " tips.";
     }
-    return *nodes[ indx + n ];
+
+    auto& node = getNode( indx + n );
+    assert(node.isInternal());
+    return node;
 }
 
 
@@ -736,25 +739,31 @@ std::string Tree::getNewickRepresentation(bool round ) const
 
 TopologyNode& Tree::getNode(size_t idx)
 {
-
     if ( idx >= nodes.size() )
     {
         throw RbException("Index out of bounds in getNode.");
     }
 
-    return *nodes[idx];
+    auto& node = *nodes[idx];
+
+    assert(node.index == idx);
+    
+    return node;
 }
 
 
 const TopologyNode& Tree::getNode(size_t idx) const
 {
-
     if ( idx >= nodes.size() )
     {
         throw RbException("Index out of bounds in getNode.");
     }
 
-    return *nodes[idx];
+    auto& node = *nodes[idx];
+
+    assert(node.index == idx);
+    
+    return node;
 }
 
 
@@ -1097,7 +1106,11 @@ TopologyNode& Tree::getTipNode( size_t index )
 //        throw RbException("Node at index is not a tip but should have been!");
 //    }
 
-    return *nodes[ index ];
+    auto& node = getNode(index);
+
+    assert(node.isTip());
+
+    return node;
 }
 
 
@@ -2019,11 +2032,15 @@ void Tree::reroot(const std::string &outgroup, bool make_bifurcating, bool reind
 
 void Tree::reroot(TopologyNode &n, bool make_bifurcating, bool reindex)
 {
-    // reset parent/child relationships
+    // Reset parent/child relationships
     reverseParentChild( n.getParent() );
 
-    // set the root — use setRoot() so that nodes[] and num_nodes are rebuilt,
-    // not just the raw root pointer.
+    // Given that the same index refers BOTH to the node AND to its parent branch
+    //   we cannot preserve both when we reroot.
+    // The current code preserves the mapping between index <=> branch, and therefore
+    //   the mapping from index <==> node get altered. 
+    // So use setRoot() to rebuild the index <==> node mapping instead of just setting
+    //   the raw root pointer.
     setRoot( &n.getParent(), reindex );
     
     // do we want to make the tree bifurcating?
