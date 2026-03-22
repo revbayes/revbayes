@@ -95,9 +95,9 @@ void NexusWriter::writeNexusBlock(const AbstractHomologousDiscreteCharacterData 
         
         // write the set as state symbols to the NEXUS format block
         out_stream << "symbols=\"";
-        for (std::set<char>::iterator it = unique_labels.begin(); it != unique_labels.end(); ++it)
+        for (char label : unique_labels)
         {
-            out_stream << *it;
+            out_stream << label;
         }
         out_stream << "\" ";
     }
