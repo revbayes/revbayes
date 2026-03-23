@@ -7,6 +7,7 @@
 #include "Delimiter.h"
 #include "MatrixReal.h"
 #include "MatrixReader.h"
+#include "RlBoolean.h"
 #include "RlMatrixReal.h"
 #include "RlString.h"
 #include "Argument.h"
@@ -39,8 +40,9 @@ RevPtr<RevVariable> Func_readMatrix::execute( void )
 	// get the information from the arguments for reading the file
 	const RlString&    fn  = static_cast<const RlString&>( args[0].getVariable()->getRevObject() );
     const std::string& del = static_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
+    bool hasHeaders        = static_cast<const RlBoolean&>( args[2].getVariable()->getRevObject() ).getValue();
 
-    RevBayesCore::MatrixReader* mr = new RevBayesCore::MatrixReader( fn.getValue(), del );
+    RevBayesCore::MatrixReader* mr = new RevBayesCore::MatrixReader( fn.getValue(), del, 0, hasHeaders );
     RevBayesCore::MatrixReal    m  = mr->getMatrix();
     MatrixReal*                 rm = new MatrixReal( m );
 
@@ -61,6 +63,7 @@ const ArgumentRules& Func_readMatrix::getArgumentRules( void ) const
 		
 		argumentRules.push_back( new ArgumentRule( "file", RlString::getClassTypeSpec(), "The name of the file to read.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
 		argumentRules.push_back( new Delimiter() );
+		argumentRules.push_back( new ArgumentRule( "hasNames", RlBoolean::getClassTypeSpec(), "Does the file have column names in the first row and row names in the first column?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
 		rules_set = true;
 		
 	}

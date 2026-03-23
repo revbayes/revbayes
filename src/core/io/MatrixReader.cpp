@@ -16,23 +16,22 @@
 using namespace RevBayesCore;
 
 
-MatrixReader::MatrixReader(const std::string &fn, std::string d, size_t lines_skipped) : DelimitedDataReader(fn, d, lines_skipped)
+MatrixReader::MatrixReader(const std::string &fn, std::string d, size_t lines_skipped, bool hasHeaders) : DelimitedDataReader(fn, d, lines_skipped)
 {
     
-    //First, get the size of the matrix
-    int nrow = int( chars.size() ) - 1;    //atoi( chars[0][0].c_str() );
-    int ncol = int( chars[1].size() ) - 1;
+    const size_t row_start = hasHeaders ? 1 : 0;
+    const size_t col_start = hasHeaders ? 1 : 0;
+
+    int nrow = int( chars.size() ) - int( row_start );
+    int ncol = int( chars[row_start].size() ) - int( col_start );
     matrix = MatrixReal( nrow, ncol );
 
-    for (size_t i = 1; i < chars.size(); ++i)
+    for (size_t i = row_start; i < chars.size(); ++i)
     {
-        std::string name = chars[i][0];
-
-        for (size_t j = 1; j < chars[i].size(); ++j)
+        for (size_t j = col_start; j < chars[i].size(); ++j)
         {
-            matrix[i-1][j-1] = atof( chars[i][j].c_str() );
+            matrix[i - row_start][j - col_start] = atof( chars[i][j].c_str() );
         }
-
     }
     
 }

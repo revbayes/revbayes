@@ -22,7 +22,7 @@ namespace RevBayesCore {
 	class MatrixReader : public DelimitedDataReader {
 		
     public:
-        MatrixReader(const std::string &fn, std::string d="", size_t ls=0);
+        MatrixReader(const std::string &fn, std::string d="", size_t ls=0, bool hasHeaders=true);
         
         const MatrixReal&   							    getMatrix(void);
 
