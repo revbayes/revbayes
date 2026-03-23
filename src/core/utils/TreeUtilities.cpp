@@ -1779,3 +1779,39 @@ Tree* RevBayesCore::TreeUtilities::startingTreeInitializer(Tree& treeToChange, s
     RevBayesCore::Tree *p = &treeToChange;
     return p;
 }
+
+
+/**
+ * Assign preorder indices by depth-first traversal, visiting each node
+ * before its descendants.  Children are visited in their existing order.
+ */
+static void assignPreorderIndices(TopologyNode& node, size_t& nextIndex)
+{
+    node.setIndex(nextIndex++);
+    for (size_t i = 0; i < node.getNumberOfChildren(); ++i)
+    {
+        assignPreorderIndices(node.getChild(i), nextIndex);
+    }
+}
+
+
+/**
+ * Reorder an existing tree so that node indices follow a preorder
+ * (depth-first, "cladewise") traversal starting from the root.
+ *
+ * After calling this function, tree.getNode(0) is the root and iterating
+ * from 0 to getNumberOfNodes()-1 visits nodes in preorder.  The branch
+ * lengths extracted in this order (skipping the root, which has no parent
+ * edge) match the ordering produced by ape's reorder(tree, "cladewise").
+ *
+ * NOTE: this changes node indices from the default RevBayes convention
+ * (tips 0..n-1, internals n..2n-2) to a flat preorder numbering.
+ * Functions that assume the default convention (e.g. getInteriorNode,
+ * getTipNode) will not return the expected nodes after this call.
+ */
+void TreeUtilities::reorderPreorder(Tree& tree)
+{
+    size_t index = 0;
+    assignPreorderIndices(tree.getRoot(), index);
+    tree.orderNodesByIndex();
+}

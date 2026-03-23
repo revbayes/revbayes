@@ -14,6 +14,7 @@
 #include "RbException.h"
 #include "StochasticNode.h"
 #include "TopologyNode.h"
+#include "TreeUtilities.h"
 #include "TypedDagNode.h"
 #include "TreeChangeEventMessage.h"
 
@@ -201,11 +202,17 @@ void ApproximateTreeLikelihood::setValue(RevBayesCore::Tree *v, bool force)
 
     // Sebastian: check if anything special needs to be done
     
-    // get branch-length tree nodes
-    const std::vector<TopologyNode*> &bl_tree_nodes = value->getNodes();
-    size_t num_tips = value->getNumberOfTips();
+    // copy the branch-length tree, reorder the copy by preorder traversal, and get its nodes
+    Tree* v_copy = v->clone();
+    TreeUtilities::reorderPreorder( *v_copy );
+    std::vector<TopologyNode*> bl_tree_nodes;
     
-    mle_branch_lengths = std::vector<double>(bl_tree_nodes.size(), 0.0);
+    for (size_t i = 1; i < v_copy->getNumberOfNodes(); ++i)  // skip root (i=0)
+    {
+        bl_tree_nodes.push_back( &v_copy->getNode(i) );
+    }
+    
+    size_t num_tips = value->getNumberOfTips();
     split_to_index.clear();
     
     // loop through tree nodes and draw new rates to get new branch lengths

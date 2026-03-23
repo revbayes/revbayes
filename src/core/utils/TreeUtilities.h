@@ -59,11 +59,12 @@ namespace RevBayesCore {
         void                                        makeUltrametric(Tree& t);                                                                               //!< make the tree ultrametric by extending terminal branches
         Tree*                                       minBLTimeScaling(Tree& treeToScale, const std::vector<Taxon>& taxa, const double minBrLen);             //!< time-scale a tree using the minimum branch length method
         void                                        offsetTree(TopologyNode& n, double factor);                                                             //!< offset node and its children by a factor
-        std::vector< std::pair<size_t, double> >    parseSIMMAPForNode(std::string character_history);                                                     //!< rescale tree ages below a node by a factor
+        std::vector< std::pair<size_t, double> >    parseSIMMAPForNode(std::string character_history);                                                      //!< rescale tree ages below a node by a factor
+        void                                        reorderPreorder(Tree& tree);                                                                            //!< reorder the nodes of the tree according to preorder traversal
         void                                        rescaleSubtree(TopologyNode& n, double factor, bool v=false);                                           //!< rescale tree ages below a node by a factor, except tips
         void                                        rescaleTree(TopologyNode& n, double factor);                                                            //!< rescale tree ages below a node by a factor
         void                                        setAges(TopologyNode& n, const std::vector<double>& ages);                                              //!< set ages of a node and children from a vector
-        void                                        setAgesRecursively(TopologyNode& n, double age);                                                        //!< set age of a node and rescale its children
+        void                                        setAgesRecursively(TopologyNode& n, double age);                                                        //!< set age of a node and rescale its children                                                                          //!< reorder node indices by preorder (cladewise) traversal, matching ape's reorder(tree, "cladewise")
         Tree*                                       startingTreeInitializer(Tree& treeToChange, std::vector<Taxon>& taxaToCopy, std::int64_t agePrecision);         //!< make sure starting tree satisfies age constraints, and assign min/max ages to its tips
 
         // internal helper functions
