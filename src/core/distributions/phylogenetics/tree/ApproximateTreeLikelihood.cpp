@@ -89,11 +89,12 @@ double ApproximateTreeLikelihood::computeLnProbability( void )
     // get all our variables to compute the approximate likelihood
     std::vector<double> branch_lengths = computeBranchLengths();
     size_t num_branches = gradients->size();
-    
+    std::cerr << "The number of branches / gradient vector entries is " << num_branches << std::endl;
+
     double ln_prob = 0.0;
     for (size_t i=0; i<num_branches; ++i)
     {
-        std::cerr << "The i-th branch length is " << mle_branch_lengths[i] << " and the i-th gradient is " << (*gradients)[i] << std::endl;
+        std::cerr << "The " << i << "-th branch length is " << mle_branch_lengths[i] << " and the " << i << "-th gradient is " << (*gradients)[i] << std::endl;
         ln_prob += mle_branch_lengths[i] * (*gradients)[i];
         ln_prob += mle_branch_lengths[i] * mle_branch_lengths[i] * (*hessian)[i][i] / 2.0;
         for (size_t j=0; i<j; ++j)
@@ -219,7 +220,7 @@ void ApproximateTreeLikelihood::setValue(RevBayesCore::Tree *v, bool force)
     for (size_t i=0; i<bl_tree_nodes.size(); ++i)
     {
         TopologyNode* the_node = bl_tree_nodes[i];
-        std::cerr << "The branch length of the i-th node is " << the_node->getBranchLength() << std::endl;
+        std::cerr << "The branch length of the " << i << "-th node is " << the_node->getBranchLength() << std::endl;
                 
         RbBitSet split = RbBitSet(num_tips);
         the_node->getTaxa(split);
@@ -236,6 +237,7 @@ void ApproximateTreeLikelihood::setValue(RevBayesCore::Tree *v, bool force)
     
     transformBranchLengths( mle_branch_lengths );
     topology_match_checked = false;
+    delete v_copy;
 }
 
 
@@ -268,26 +270,29 @@ void ApproximateTreeLikelihood::simulateTree( void )
     {
         TopologyNode* the_node = time_tree_nodes[i];
 
-        // get the branch time
-        double branch_time = the_node->getBranchLength();
-
-        // get branch rate
-        double new_branch_rate = branch_rates->getValue()[i];
-
-        // get new branch length
-        // SH: maybe add code here to transform branches (log, arcsin, sqrt)
-        // David: Maybe make nicer
-        double d = 0.0;
-        if ( i < displacements.size() )
+        if ( the_node->isRoot() == false )
         {
-            d = displacements[i];
-        }
-        double new_branch_length = new_branch_rate * branch_time + d;
-        
-        new_branch_length = fmax(0,new_branch_length);
+            // get the branch time
+            double branch_time = the_node->getBranchLength();
 
-        // set new branch length
-        the_node->setBranchLength( new_branch_length );
+            // get branch rate
+            double new_branch_rate = branch_rates->getValue()[i];
+
+            // get new branch length
+            // SH: maybe add code here to transform branches (log, arcsin, sqrt)
+            // David: Maybe make nicer
+            double d = 0.0;
+            if ( i < displacements.size() )
+            {
+                d = displacements[i];
+            }
+            double new_branch_length = new_branch_rate * branch_time + d;
+
+            new_branch_length = fmax(0,new_branch_length);
+
+            // set new branch length
+            the_node->setBranchLength( new_branch_length );
+        }
     }
 
     // now unroot to get the final branch length tree
