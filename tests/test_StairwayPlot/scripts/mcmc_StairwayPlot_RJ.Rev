@@ -1,0 +1,169 @@
+################################################################################
+#
+# RevBayes script: Estimating the demographic history using StairwayPlot under a
+#                  piecewise-constant demography model with reversible-jump MCMC
+#
+# authors: Sebastian Hoehna
+#
+################################################################################
+
+seed(12345)
+
+
+# general settings
+mu         = 2.8E-9
+GEN_TIME   = 1.0
+USE_FOLDED = TRUE
+
+
+#######################################
+# Reading the site frequency spectrum #
+#######################################
+
+source("data/laspl_autosomes_all_SFS_GeMu.Rev")
+TOTAL_NUM_SITES <- sum(obs_sfs)
+
+obs_sfs[1] <- 0
+obs_sfs[obs_sfs.size()] <- 0
+obs_sfs[1] <- TOTAL_NUM_SITES - sum(obs_sfs)
+
+N_IND   = abs(obs_sfs.size() - 1)
+N_SITES = round( sum(obs_sfs) )
+
+print("Number of individuals:\t" + N_IND)
+
+if (USE_FOLDED == TRUE) {
+    NUM_IND = abs(obs_sfs.size() - 1)
+    tmp_sfs[1] <- obs_sfs[1] + obs_sfs[NUM_IND+1]
+    for (i in 1:ceil(NUM_IND/2)) {
+        if (i != NUM_IND/2) {
+            tmp_sfs[i+1] <- obs_sfs[i+1] + obs_sfs[NUM_IND-i+1]
+	} else {
+            tmp_sfs[i+1] <- obs_sfs[i+1]
+	}
+    }
+    obs_sfs <- tmp_sfs
+}
+
+obs_sfs
+
+
+##################
+# Initialization #
+##################
+
+# setting up a vector variable that holds all the moves and monitors
+
+moves    = VectorMoves()
+monitors = VectorMonitors()
+
+
+#####################
+# Demographic model #
+#####################
+
+mix_prob <- 0.5
+
+# now specify a different theta per interval
+for (i in 1:(N_IND - 1)) {
+
+    # for the first interval, we need to draw theta from the prior distribution
+    if (i == 1) {
+        theta[i] ~ dnUnif( 0.0, 0.1 )
+
+        # set a scaling move for this variable
+        moves.append( mvScale(theta[i], weight=2) )
+        indicator[1] <- 1
+    } else {
+        # for all other following intervals, we draw theta either from a uniform distribution,
+        # or set it to the same value as the previous interval
+        theta[i] ~ dnReversibleJumpMixture(theta[i - 1],
+                                           dnUnif(0.0, 0.1),
+                                           mix_prob)
+
+        # specify the reversible-jump move
+        moves.append( mvRJSwitch(theta[i], weight=5.0) )
+
+        # specify the reversible-jump move
+        moves.append( mvAdaptiveRJSwitch(theta[i],
+                                         waitBeforeLearning=10,
+                                         waitBeforeUsing=100,
+                                         updateEvery=10,
+                                         weight=10.0) )
+
+        # our indicator variable if the interval was the same as before or not
+        indicator[i] := ifelse( theta[i] == theta[i - 1], 0, 1 )
+
+        # also a scaling move when the variable is different
+        moves.append( mvScale(theta[i], weight=2) )
+    }
+
+}
+
+
+#################
+# Stairway plot #
+#################
+
+sfs ~ dnStairwayPlot( theta, numSites=N_SITES, numIndividuals=N_IND, folded=USE_FOLDED, monomorphicProbability="treelength" )
+sfs.clamp( obs_sfs )
+
+
+##############
+# Statistics #
+##############
+
+times := sfs.getTimes()
+
+ordered_theta := rev(theta) / 4.0 / mu
+ordered_times := rev(times) / mu * GEN_TIME
+
+esfs := sfs.getExpectedAlleleFrequencies()
+
+
+#########
+# Model #
+#########
+
+my_model = model(sfs)
+
+
+############
+# Monitors #
+############
+
+# specifying monitors and output files
+
+monitors.append( mnModel(filename="output/StairwayPlot_autosomes_all_GeMu_RJ.log", printgen=10) )
+monitors.append( mnFile(ordered_theta, filename="output/StairwayPlot_autosomes_all_GeMu_RJ_ordered_Ne.log", printgen=10) )
+monitors.append( mnFile(ordered_times, filename="output/StairwayPlot_autosomes_all_GeMu_RJ_ordered_times.log", printgen=10) )
+monitors.append( mnFile(esfs, filename="output/StairwayPlot_autosomes_all_GeMu_RJ_esfs.log", printgen=10) )
+
+
+########
+# MCMC #
+########
+
+# running the MCMC simulation
+my_mcmc = mcmc(my_model, monitors, moves)
+my_mcmc.burnin( generations=100, tuningInterval=10 )
+my_mcmc.run( generations=1000 )
+
+
+#################
+# Model testing #
+#################
+
+cpo = ConditionalPosteriorOrdinate(filename="output/StairwayPlot_autosomes_all_GeMu_RJ_esfs.log")
+pred_prob = cpo.predictiveProbability(obs_sfs, log=FALSE, folded=TRUE)
+
+print("Predictive probability: " + pred_prob)
+write(pred_prob, file="output/StairwayPlot_autosomes_all_GeMu_RJ_CPO.txt")
+
+
+##########
+# Finish #
+##########
+
+# quitting revbayes
+q()
