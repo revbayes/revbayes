@@ -46,6 +46,7 @@
 #include "TypedDagNode.h"
 #include "TypedDistribution.h"
 #include "boost/numeric/odeint.hpp" // IWYU pragma: keep
+#include "RlUserInterface.h"  // for RBOUT
 
 namespace RevBayesCore { class DagNode; }
 namespace RevBayesCore { template <class valueType> class RbOrderedSet; }
@@ -318,15 +319,14 @@ double StateDependentSpeciationExtinctionProcess::computeLnProbability( void )
 
 void StateDependentSpeciationExtinctionProcess::computeNodeProbability(const RevBayesCore::TopologyNode &node, size_t node_index) const
 {
-    
+    std::vector<double> &node_likelihood  = node_partial_likelihoods[node_index][active_likelihood[node_index]];
+
     // check for recomputation
     if ( dirty_nodes[node_index] == true || sample_character_history == true )
     {
         // mark as computed
         dirty_nodes[node_index] = false;
         
-        std::vector<double> &node_likelihood  = node_partial_likelihoods[node_index][active_likelihood[node_index]];
-
         if ( node.isTip() == true )
         {
             // this is a tip node
@@ -374,11 +374,21 @@ void StateDependentSpeciationExtinctionProcess::computeNodeProbability(const Rev
                 gap = (state.isMissingState() == true || state.isGapState() == true);
             }
 
+            if (obs_state.size() > num_states)
+                throw RbException()<<"SSE model has "<<num_states<<" states, but observed data set has "<<obs_state.size()<<" states!";
+            else if (obs_state.size() < num_states)
+            {
+                std::ostringstream o;
+                o<<"Warning: SSE model has "<<num_states<<" states, but observed data set has only "<<obs_state.size()<<" states!";
+                RBOUT(o.str());
+            }
+
+            double all_states_impossible = true;
             for (size_t j = 0; j < num_states; ++j)
             {
-                
+
                 node_likelihood[j] = extinction[j];
-                
+
                 if ( obs_state.test( j ) == true || gap == true )
                 {
                 	if ( node.isFossil() )
@@ -394,8 +404,12 @@ void StateDependentSpeciationExtinctionProcess::computeNodeProbability(const Rev
                 {
                     node_likelihood[num_states+j] = 0.0;
                 }
+
+                if (node_likelihood[num_states+j] > 0) all_states_impossible = false;
             }
-            
+
+            // Should we print something here?  Possibly this never happens.
+            assert(not all_states_impossible);
         }
         else
         {
@@ -521,23 +535,27 @@ void StateDependentSpeciationExtinctionProcess::computeNodeProbability(const Rev
                 }
             }
 //            max *= num_states;
-            
-            for (size_t i=0; i<num_states; ++i)
+
+            if (max > 0)
             {
-                node_likelihood[num_states+i] /= max;
+                assert(std::isfinite(max) and std::isfinite(1/max));
+                for (size_t i=0; i<num_states; ++i)
+                {
+                    node_likelihood[num_states+i] /= max;
+                }
+
+                scaling_factors[node_index][active_likelihood[node_index]] = log(max);
+
+                if ( node.isTip() == false )
+                {
+                    const TopologyNode          &left           = node.getChild(0);
+                    size_t                      left_index      = left.getIndex();
+                    const TopologyNode          &right          = node.getChild(1);
+                    size_t                      right_index     = right.getIndex();
+                    scaling_factors[node_index][active_likelihood[node_index]] += scaling_factors[left_index][active_likelihood[left_index]] + scaling_factors[right_index][active_likelihood[right_index]];
+                }
             }
 
-            scaling_factors[node_index][active_likelihood[node_index]] = log(max);
-
-            if ( node.isTip() == false )
-            {
-                const TopologyNode          &left           = node.getChild(0);
-                size_t                      left_index      = left.getIndex();
-                const TopologyNode          &right          = node.getChild(1);
-                size_t                      right_index     = right.getIndex();
-                scaling_factors[node_index][active_likelihood[node_index]] += scaling_factors[left_index][active_likelihood[left_index]] + scaling_factors[right_index][active_likelihood[right_index]];
-            }
-            
         }
         
     }
