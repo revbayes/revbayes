@@ -1,0 +1,19 @@
+   Successfully read one character matrix from file 'data/primates_small.nex'
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 1 different moves in a random move schedule with 5 moves per iteration
+   
+
+Iter        |      Posterior   |     Likelihood   |          Prior   |    elapsed   |        ETA   |
+----------------------------------------------------------------------------------------------------
+0           |       -20.5099   |       -22.3016   |        1.79176   |   00:00:00   |   --:--:--   |
+10          |       -12.6622   |        -14.454   |        1.79176   |   00:00:00   |   --:--:--   |
+   Appending to previous MCMC simulation of 7 iterations
+   This simulation runs 1 independent replicate.
+   The simulator uses 1 different moves in a random move schedule with 5 moves per iteration
+   
+
+Iter        |      Posterior   |     Likelihood   |          Prior   |    elapsed   |        ETA   |
+----------------------------------------------------------------------------------------------------
+10          |       -15.3481   |       -17.1399   |        1.79176   |   00:00:00   |   --:--:--   |

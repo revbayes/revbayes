@@ -129,14 +129,14 @@ void AbstractFileMonitor::truncateAfterGeneration(std::uint64_t lastGen)
     }
     infile.seekg(data_start);
 
-    if ( is_json )
+    while ( true )
     {
-        while ( true )
-        {
-            std::streampos pos = infile.tellg();
-            if ( !safeGetline(infile, line) ) break;
-            if ( line.empty() ) continue;
+        std::streampos pos = infile.tellg();
+        if ( !safeGetline(infile, line) ) break;
+        if ( line.empty() ) continue;
 
+        if ( is_json )
+        {
             try
             {
                 auto j = nlohmann::json::parse(line);
@@ -153,15 +153,8 @@ void AbstractFileMonitor::truncateAfterGeneration(std::uint64_t lastGen)
             }
             catch ( const nlohmann::json::exception& ) { }
         }
-    }
-    else
-    {
-        while ( true )
+        else
         {
-            std::streampos pos = infile.tellg();
-            if ( !safeGetline(infile, line) ) break;
-            if ( line.empty() ) continue;
-
             char *end_ptr = NULL;
             std::uint64_t gen = static_cast<std::uint64_t>( std::strtoull(line.c_str(), &end_ptr, 10) );
             if ( end_ptr != line.c_str() && gen > lastGen )
