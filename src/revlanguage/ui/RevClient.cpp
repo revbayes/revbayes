@@ -12,15 +12,15 @@
 #include "RevPtr.h"
 #include "TypeSpec.h"
 #include "boost/algorithm/string/trim.hpp"
+#include <unistd.h>
 
 #ifdef RB_MPI
 #include <mpi.h>
 #endif
 
-extern "C" {
-#include "linenoise.h"
-}
+#include "replxx.hxx"
 
+#include <ranges>
 #include <filesystem>
 #include <boost/algorithm/string/predicate.hpp>
 #include <cstdlib>
@@ -60,57 +60,184 @@ std::vector<std::string> getFileList(const RevBayesCore::path& dir)
 
 std::vector<std::string> getDefaultCompletions( void )
 {
-    std::set<std::string> c;
+    using namespace RevLanguage; 
+
+    std::set<std::string> all_names;
     
     const FunctionTable& ft = RevLanguage::Workspace::userWorkspace().getFunctionTable();
-    for (std::multimap<std::string, Function*>::const_iterator it = ft.begin(); it != ft.end(); ++it)
+    for (auto& [func_name, func]: ft)
     {
-        c.insert(it->first);
+        all_names.insert(func_name);
     }
     
+    // This seems to be a duplicate??
     std::vector<std::string> function_table_names;
     ft.getFunctionNames(function_table_names);
-    for (size_t i = 0; i < function_table_names.size(); i++)
+    for (auto& func_name: function_table_names)
     {
-//        std::cout << function_table_names[i] << "\n";
-        c.insert(function_table_names[i]);
+        all_names.insert(func_name);
     }
     
-    VariableTable v = RevLanguage::Workspace::userWorkspace().getVariableTable();
-    
-    for (VariableTable::iterator it = v.begin(); it != v.end(); ++it)
+    for (auto& [var_name, var]: Workspace::userWorkspace().getVariableTable())
     {
-        c.insert(it->first);
+        all_names.insert(var_name);
     }
     
-    v = RevLanguage::Workspace::globalWorkspace().getVariableTable();
-        
-    for (VariableTable::iterator it = v.begin(); it != v.end(); ++it)
+    for (auto& [var_name, var]: Workspace::globalWorkspace().getVariableTable())
     {
-        c.insert(it->first);
+        all_names.insert(var_name);
     }
 
-    const TypeTable& t_user = RevLanguage::Workspace::userWorkspace().getTypeTable();
-    
-    for (TypeTable::const_iterator it = t_user.begin(); it != t_user.end(); ++it)
+    for (auto& [type_name, type]: Workspace::userWorkspace().getTypeTable())
     {
-        c.insert(it->first);
+        all_names.insert(type_name);
     }
     
-    const TypeTable& t_global = RevLanguage::Workspace::globalWorkspace().getTypeTable();
-    
-    for (TypeTable::const_iterator it = t_global.begin(); it != t_global.end(); ++it)
+    for (auto& [type_name, type]: Workspace::globalWorkspace().getTypeTable())
     {
-        c.insert(it->first);
+        all_names.insert(type_name);
     }
     
-    std::vector<std::string> vec;
-    for (std::set<std::string>::iterator it = c.begin(); it != c.end(); ++it)
-    {
-        vec.push_back( *it );
+    return all_names | std::ranges::to<std::vector>();
+}
+
+replxx::Replxx::completions_t getCompletions(const std::string& buf, int& contextLen)
+{
+    std::string cmd = buf;
+    std::vector<std::string> completions;
+
+    // parse command
+    RevLanguage::ParserInfo pi =
+        RevLanguage::Parser::getParser().checkCommand(
+            cmd,
+            RevLanguage::Workspace::userWorkspacePtr()
+            );
+
+    if (pi.inComment) {
+        return replxx::Replxx::completions_t{};
     }
 
-    return vec;
+    size_t commandPos = 0;
+
+    if (pi.inQuote) {
+        // ---------- in quote ------------
+        commandPos = cmd.rfind("\"") + 1;
+        completions = getFileList(cmd.substr(commandPos));
+    }
+    else {
+        std::vector<std::string> expressionSeparator = {
+            " ", "%", "~", "=", "&", "|", "+", "-", "*", "/",
+            "^", "!", "=", ",", "<", ">", ")", "[", "]", "{", "}"
+        };
+
+        for (auto const& s : expressionSeparator) {
+            size_t find_idx = cmd.rfind(s);
+            if (find_idx < cmd.size()) {
+                commandPos = std::max(commandPos, find_idx);
+            }
+        }
+
+        if (pi.function_name != "") {
+            if (pi.argument_label != "") {
+                commandPos = cmd.rfind("=") + 1;
+                completions = getDefaultCompletions();
+            }
+            else {
+                commandPos = std::max(cmd.rfind("("), cmd.rfind(",")) + 1;
+
+                auto v = Workspace::globalWorkspace()
+                    .getFunctionTable()
+                    .findFunctions(pi.function_name);
+
+                for (auto* fn : v) {
+                    const auto& argRules = fn->getArgumentRules();
+                    for (size_t i = 0; i < argRules.size(); i++) {
+                        completions.push_back(argRules[i].getArgumentLabel());
+                    }
+                }
+            }
+        }
+        else {
+            if (commandPos > 0) {
+                commandPos++;
+            }
+            completions = getDefaultCompletions();
+        }
+    }
+
+    // skip leading spaces
+    while (commandPos < cmd.size() && cmd[commandPos] == ' ') {
+        commandPos++;
+    }
+
+    // 🔑 THIS replaces your prefix logic
+    contextLen = static_cast<int>(cmd.size() - commandPos);
+
+    std::string compMatch = cmd.substr(commandPos);
+
+    // No completions if we don't have at least two characters.
+    if (compMatch.size() < 2) return {};
+
+    replxx::Replxx::completions_t result;
+
+    for (auto const& m : completions) {
+        if (boost::starts_with(m, compMatch)) {
+            result.emplace_back(m);
+        }
+    }
+
+    return result;
+}
+
+replxx::Replxx::hints_t getHints(std::string const& buf,
+                                 int& contextLen,
+                                 replxx::Replxx::Color& color)
+{
+    std::string cmd = buf;
+
+    RevLanguage::ParserInfo pi =
+        RevLanguage::Parser::getParser().checkCommand(
+            cmd,
+            RevLanguage::Workspace::userWorkspacePtr()
+            );
+
+    replxx::Replxx::hints_t hints;
+
+    if (!pi.inQuote &&
+        Workspace::globalWorkspace().existsFunction(pi.function_name))
+    {
+        auto functions =
+            Workspace::globalWorkspace()
+            .getFunctionTable()
+            .findFunctions(pi.function_name);
+
+        for (auto* f : functions)
+        {
+            std::string hint;
+
+            hint += f->getReturnType().getType();
+            hint += " ";
+            hint += pi.function_name;
+            hint += "(";
+
+            const auto& argRules = f->getArgumentRules();
+            for (size_t i = 0; i < argRules.size(); i++)
+            {
+                hint += argRules[i].getArgumentLabel();
+                if (i + 1 < argRules.size())
+                    hint += ", ";
+            }
+
+            hint += ")";
+
+            hints.emplace_back(std::move(hint));
+        }
+
+        contextLen = 0;
+        color = replxx::Replxx::Color::GRAY;
+    }
+
+    return hints;
 }
 
 /**
@@ -120,7 +247,7 @@ std::vector<std::string> getDefaultCompletions( void )
  * 
  * @param buf
  * @param lc
- */
+
 void completeOnTab(const char *buf, linenoiseCompletions *lc)
 {
     bool debug = false;
@@ -261,13 +388,6 @@ void completeOnTab(const char *buf, linenoiseCompletions *lc)
     }
 }
 
-/**
- * Print out function signatures
- * @param buf The buffer into which we print
- * @param len The length
- * @param c The character
- * @return  Returns the status
- */
 int printFunctionParameters(const char *buf, size_t len, char c)
 {
     std::string cmd = buf;
@@ -301,6 +421,8 @@ int printFunctionParameters(const char *buf, size_t len, char c)
     }
     return 0;
 }
+
+*/
 
 namespace RevClient
 {
@@ -405,24 +527,33 @@ void startInterpreter()
 #ifdef RB_MPI
     MPI_Comm_rank(MPI_COMM_WORLD, &pid);
 #endif
-    
-    /* Set tab completion callback */
-    linenoiseSetCompletionCallback( completeOnTab );
 
-    /* Load history from file. The history file is just a plain text file
-     * where entries are separated by newlines. */
+    replxx::Replxx rx;
+
     if ( pid == 0 )
     {
-        linenoiseHistoryLoad("history.txt"); /* Load the history at startup */
+        rx.set_word_break_characters(" %~=&|+-*/^!,<>\t\n\"\\'`@$;{(");
+
+        /* Load history from file. The history file is just a plain text file
+         * where entries are separated by newlines. */
+        rx.history_load("history.txt");
+
+        /* Set tab completion callback */
+        rx.set_completion_callback( getCompletions );
+
+        /* Callback for printing function signatures on '('.
+           It doesn't seem to do anything at the moment: pi.function_name is never set. */
+        rx.set_hint_callback( getHints );
+
+//        // Replxx uses CTRL-P/N to cycle through alternative completions.
+//        // These settings make Replxx match linenoise.        
+//
+//        rx.bind_key_internal( replxx::Replxx::KEY::control('P'),
+//                              "history_previous" );
+//
+//        rx.bind_key_internal( replxx::Replxx::KEY::control('N'),
+//                              "history_next" );
     }
-    
-    /* callback for printing function signatures on opening bracket*/
-
-    // Currently disabled because
-    // (i) it doesn't seem to do anything at the moment: pi.function_name is never set.
-    // (ii) it makes parsing go crazy if the '(' is inside a string.
-
-    // linenoiseSetCharacterCallback(printFunctionParameters, '(');
 
     int result = 0;
     std::string commandLine;
@@ -430,8 +561,6 @@ void startInterpreter()
 
     while (true)
     {
-        
-        char *line = NULL;
         
         // set prompt
         if (result == 0 || result == 2)
@@ -443,12 +572,11 @@ void startInterpreter()
             prompt = incomplete_prompt;
         }
 
-
         // process command line
         if ( pid == 0 )
         {
-            line = linenoise(prompt);
-            
+            const char* line = rx.input("> ");
+
             if (!line) 
             {
                 // [JS, 2015-11-03]
@@ -458,17 +586,17 @@ void startInterpreter()
 
                 exit(0);
             }
-            else
+            else if (*line)
             {
-                linenoiseHistoryAdd(line);              /* Add to the history. */
-                linenoiseHistorySave("history.txt");    /* Save the history on disk. */
+                rx.history_add(line);                /* Add to the history. */
+                rx.history_save("history.txt");      /* Save the history on disk. */
            
                 cmd = line;
                 boost::trim(cmd);
 
                 if (cmd == "clr" || cmd == "clear")
                 {
-                    linenoiseClearScreen();
+                    rx.clear_screen();
                 }
                 else
                 {
@@ -494,12 +622,6 @@ void startInterpreter()
 
 /* The typed string is returned as a malloc() allocated string by
          * linenoise, so the user needs to free() it. */
-        
-        if ( pid == 0 )
-        {
-            free(line);
-        }
-        
     }
     
     
