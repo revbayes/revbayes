@@ -16,5 +16,12 @@ find libs revlanguage core cmd help2yml -name '*.h*' |
     uniq |
     sed "s|^|'|" |
     sed "s|$|',|" >> meson.build
+find libs revlanguage core cmd help2yml -name '*.hxx*' |
+    sed "s|/[^/]*$||g" |
+    sed "s|libs/\([^/]*\)/.*|libs/\1|" |
+    sort |
+    uniq |
+    sed "s|^|'|" |
+    sed "s|$|',|" >> meson.build
 echo "])" >> meson.build
 echo >> meson.build

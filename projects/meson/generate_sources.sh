@@ -16,6 +16,11 @@ find . -name '*.cpp' |
     sed "s|$|',|" |
     grep -v '/\.' |
     grep -v 'main.cpp' >> meson.build
+find . -name '*.cxx' |
+    sed "s|^|'|" |
+    sed "s|$|',|" |
+    grep -v '/\.' |
+    grep -v 'main.cpp' >> meson.build
 find . -name '*.c' |
     sed "s|^|'|" |
     sed "s|$|',|" |
