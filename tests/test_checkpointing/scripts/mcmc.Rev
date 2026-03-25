@@ -30,13 +30,11 @@ monitors.append( mnNexus(filename="output/nexus.trees", tree=topology, isNodePar
 monitors.append( mnFile(filename="output/file.log", printgen=1, separator=TAB, topology, TL) )
 monitors.append( mnFile(filename="output/file.json", printgen=1, format = "json", topology, TL) )
 
-monitors.append( mnScreen(printgen=10) )
-
 mymcmc = mcmc(mymodel, monitors, moves, nruns=1, combine="none")
-mymcmc.run(generations=10, checkpointFile="output/posterior.checkpoint", checkpointInterval=7, tuningInterval=2)
+mymcmc.run(generations=10, checkpointFile="output/posterior.checkpoint", checkpointInterval=7)
 
 mymcmc.initializeFromCheckpoint("output/posterior.checkpoint")
-mymcmc.run(generations=10, checkpointFile="output/posterior.checkpoint", checkpointInterval=7, tuningInterval=2)
+mymcmc.run(generations=10, checkpointFile="output/posterior.checkpoint", checkpointInterval=7)
 
 clear()
 q()
