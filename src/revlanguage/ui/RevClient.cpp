@@ -34,8 +34,8 @@ extern "C" {
 #include "RbException.h"
 //#define ctrl(C) ((C) - '@')
 
-const char* default_prompt = (char*) "> ";
-const char* incomplete_prompt = (char*) "+ ";
+const char* default_prompt = (const char*) "> ";
+const char* incomplete_prompt = (const char*) "+ ";
 const char* prompt = default_prompt;
 
 using namespace RevLanguage;
@@ -351,17 +351,19 @@ void execute_file(const fs::path& filename, bool echo, bool continue_on_error)
         // Read a line
         std::string line;
         RevBayesCore::safeGetline(inFile, line);
+        // Don't execute an empty line at the end of the file
+        if (line.empty() and not inFile.good()) break;
+
         lineNumber++;
-        
         if ( echo )
         {
             if ( result == 1 )
             {
-                std::cout << "+ " << line << std:: endl;
+                std::cout << incomplete_prompt << line << std:: endl;
             }
             else
             {
-                std::cout << "> " << line << std::endl;
+                std::cout << default_prompt << line << std::endl;
             }
         }
         
@@ -525,11 +527,11 @@ void startJupyterInterpreter()
         {
             if (result == 0 || result == 2)
             {
-                std::cout << "> ";
+                std::cout << default_prompt ;
             }
             else
             {
-                std::cout << "+ ";
+                std::cout << incomplete_prompt;
             }
 
             /* Get the line */
