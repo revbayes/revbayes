@@ -137,6 +137,7 @@ private:
 	Replxx::modify_callback_t _modifyCallback;
 	Replxx::completion_callback_t _completionCallback;
 	Replxx::highlighter_callback_t _highlighterCallback;
+	Replxx::highlighter_callback_with_pos_t _highlighterCallbackWithPosition;
 	Replxx::hint_callback_t _hintCallback;
 	key_presses_t _keyPresses;
 	messages_t _messages;
@@ -156,13 +157,21 @@ private:
 	bool _hasNewlines;
 	int _oldPos;
 	bool _moveCursor;
+	bool _ignoreCase;
 	mutable std::mutex _mutex;
+
+	std::istream & _in;
+	[[ maybe_unused ]] std::ostream & _out;
+	int _in_fd = 0;
+	int _out_fd = 1;
+	int _err_fd = 2;
 public:
-	ReplxxImpl( FILE*, FILE*, FILE* );
+	ReplxxImpl( std::istream & in_, std::ostream & out_, int in_fd_, int out_fd_, int err_fd_ );
 	virtual ~ReplxxImpl( void );
 	void set_modify_callback( Replxx::modify_callback_t const& fn );
 	void set_completion_callback( Replxx::completion_callback_t const& fn );
 	void set_highlighter_callback( Replxx::highlighter_callback_t const& fn );
+	void set_highlighter_callback_with_pos( Replxx::highlighter_callback_with_pos_t const& fn );
 	void set_hint_callback( Replxx::hint_callback_t const& fn );
 	char const* input( std::string const& prompt );
 	void history_add( std::string const& line );
@@ -200,6 +209,7 @@ public:
 	void bind_key_internal( char32_t, char const* );
 	Replxx::State get_state( void ) const;
 	void set_state( Replxx::State const& );
+	void set_ignore_case( bool val );
 private:
 	ReplxxImpl( ReplxxImpl const& ) = delete;
 	ReplxxImpl& operator = ( ReplxxImpl const& ) = delete;
@@ -239,11 +249,15 @@ private:
 	Replxx::ACTION_RESULT delete_character( char32_t );
 	Replxx::ACTION_RESULT backspace_character( char32_t );
 	Replxx::ACTION_RESULT commit_line( char32_t );
+	Replxx::ACTION_RESULT line_next( char32_t );
+	Replxx::ACTION_RESULT line_previous( char32_t );
 	Replxx::ACTION_RESULT history_next( char32_t );
 	Replxx::ACTION_RESULT history_previous( char32_t );
 	Replxx::ACTION_RESULT history_move( bool );
 	Replxx::ACTION_RESULT history_first( char32_t );
 	Replxx::ACTION_RESULT history_last( char32_t );
+	Replxx::ACTION_RESULT history_restore( char32_t );
+	Replxx::ACTION_RESULT history_restore_current( char32_t );
 	Replxx::ACTION_RESULT history_jump( bool );
 	Replxx::ACTION_RESULT hint_next( char32_t );
 	Replxx::ACTION_RESULT hint_previous( char32_t );
@@ -266,7 +280,7 @@ private:
 	void call_modify_callback( void );
 	completions_t call_completer( std::string const& input, int& ) const;
 	hints_t call_hinter( std::string const& input, int&, Replxx::Color& color ) const;
-	void refresh_line( HINT_ACTION = HINT_ACTION::REGENERATE );
+	void refresh_line( HINT_ACTION = HINT_ACTION::REGENERATE, bool refreshPrompt_ = false );
 	void move_cursor( void );
 	void indent( void );
 	int virtual_render( char32_t const*, int, int&, int&, Prompt const* = nullptr );

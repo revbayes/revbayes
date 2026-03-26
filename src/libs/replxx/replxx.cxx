@@ -126,8 +126,8 @@ void delete_ReplxxImpl( Replxx::ReplxxImpl* impl_ ) {
 }
 }
 
-Replxx::Replxx( void )
-	: _impl( new Replxx::ReplxxImpl( nullptr, nullptr, nullptr ), delete_ReplxxImpl ) {
+Replxx::Replxx( std::istream & input_stream_, std::ostream & output_stream_, int in_fd_, int out_fd_, int err_fd_ )
+	: _impl( new Replxx::ReplxxImpl( input_stream_, output_stream_, in_fd_, out_fd_, err_fd_ ), delete_ReplxxImpl ) {
 }
 
 void Replxx::set_completion_callback( completion_callback_t const& fn ) {
@@ -140,6 +140,10 @@ void Replxx::set_modify_callback( modify_callback_t const& fn ) {
 
 void Replxx::set_highlighter_callback( highlighter_callback_t const& fn ) {
 	_impl->set_highlighter_callback( fn );
+}
+
+void Replxx::set_highlighter_callback( highlighter_callback_with_pos_t const& fn ) {
+	_impl->set_highlighter_callback_with_pos( fn );
 }
 
 void Replxx::set_hint_callback( hint_callback_t const& fn ) {
@@ -266,6 +270,10 @@ void Replxx::set_state( Replxx::State const& state_ ) {
 	_impl->set_state( state_ );
 }
 
+void Replxx::set_ignore_case( bool val ) {
+	_impl->set_ignore_case( val );
+}
+
 int Replxx::install_window_change_handler( void ) {
 	return ( _impl->install_window_change_handler() );
 }
@@ -335,10 +343,10 @@ Replxx::Color rgb666( int red_, int green_, int blue_ ) {
 
 }
 
-::Replxx* replxx_init() {
-	typedef ::Replxx* replxx_data_t;
-	return ( reinterpret_cast<replxx_data_t>( new replxx::Replxx::ReplxxImpl( nullptr, nullptr, nullptr ) ) );
-}
+// ::Replxx* replxx_init() {
+// 	typedef ::Replxx* replxx_data_t;
+// 	return ( reinterpret_cast<replxx_data_t>( new replxx::Replxx::ReplxxImpl( nullptr, nullptr, nullptr ) ) );
+// }
 
 void replxx_end( ::Replxx* replxx_ ) {
 	delete reinterpret_cast<replxx::Replxx::ReplxxImpl*>( replxx_ );
@@ -388,6 +396,11 @@ void replxx_get_state( ::Replxx* replxx_, ReplxxState* state ) {
 void replxx_set_state( ::Replxx* replxx_, ReplxxState* state ) {
 	replxx::Replxx::ReplxxImpl* replxx( reinterpret_cast<replxx::Replxx::ReplxxImpl*>( replxx_ ) );
 	replxx->set_state( replxx::Replxx::State( state->text, state->cursorPosition ) );
+}
+
+void replxx_set_ignore_case( ::Replxx* replxx_, int val ) {
+	replxx::Replxx::ReplxxImpl* replxx( reinterpret_cast<replxx::Replxx::ReplxxImpl*>( replxx_ ) );
+	replxx->set_ignore_case( val );
 }
 
 /**
@@ -674,7 +687,7 @@ int replxx_history_size( ::Replxx* replxx_ ) {
 void replxx_debug_dump_print_codes(void) {
 	char quit[4];
 
-	printf(
+	dprintf(_out_fd,
 			"replxx key codes debugging mode.\n"
 			"Press keys to see scan codes. Type 'quit' at any time to exit.\n");
 	if (enableRawMode() == -1) return;
@@ -693,9 +706,9 @@ void replxx_debug_dump_print_codes(void) {
 		quit[sizeof(quit) - 1] = c; /* Insert current char on the right. */
 		if (memcmp(quit, "quit", sizeof(quit)) == 0) break;
 
-		printf("'%c' %02x (%d) (type quit to exit)\n", isprint(c) ? c : '?', (int)c,
+		dprintf(_out_fd,"'%c' %02x (%d) (type quit to exit)\n", isprint(c) ? c : '?', (int)c,
 					 (int)c);
-		printf("\r"); /* Go left edge manually, we are in raw mode. */
+		dprintf(_out_fd,"\r"); /* Go left edge manually, we are in raw mode. */
 		fflush(stdout);
 	}
 	disableRawMode();

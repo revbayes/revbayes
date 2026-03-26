@@ -60,6 +60,11 @@ enum { ERROR_BB1CA97EC761FC37101737BA0AA2E7C5 = ERROR };
 #undef ERROR
 enum { ERROR = ERROR_BB1CA97EC761FC37101737BA0AA2E7C5 };
 #endif
+#ifdef ABORT
+enum { ABORT_8D12A2CA7E5A64036D7251A3EDA51A38 = ABORT };
+#undef ABORT
+enum { ABORT = ABORT_8D12A2CA7E5A64036D7251A3EDA51A38 };
+#endif
 #ifdef DELETE
 enum { DELETE_32F68A60CEF40FAEDBC6AF20298C1A1E = DELETE };
 #undef DELETE
@@ -144,6 +149,7 @@ public:
 		static char32_t const BACKSPACE    = 'H' | BASE_CONTROL;
 		static char32_t const TAB          = 'I' | BASE_CONTROL;
 		static char32_t const ENTER        = 'M' | BASE_CONTROL;
+		static char32_t const ABORT        = 'C' | BASE_CONTROL | BASE_META;
 	};
 	/*! \brief List of built-in actions that act upon user input.
 	 */
@@ -170,11 +176,16 @@ public:
 		MOVE_CURSOR_ONE_SUBWORD_RIGHT,
 		MOVE_CURSOR_LEFT,
 		MOVE_CURSOR_RIGHT,
+		LINE_NEXT,
+		LINE_PREVIOUS,
 		HISTORY_NEXT,
 		HISTORY_PREVIOUS,
 		HISTORY_FIRST,
 		HISTORY_LAST,
+		HISTORY_RESTORE,
+		HISTORY_RESTORE_CURRENT,
 		HISTORY_INCREMENTAL_SEARCH,
+		HISTORY_SEEDED_INCREMENTAL_SEARCH,
 		HISTORY_COMMON_PREFIX_SEARCH,
 		HINT_NEXT,
 		HINT_PREVIOUS,
@@ -322,6 +333,22 @@ public:
 	 */
 	typedef std::function<void ( std::string const& input, colors_t& colors )> highlighter_callback_t;
 
+	/*! \brief Highlighter callback type definition.
+	 *
+	 * If user want to have colorful input she must simply install highlighter callback.
+	 * The callback would be invoked by the library after each change to the input done by
+	 * the user. After callback returns library uses data from colors buffer to colorize
+	 * displayed user input.
+	 *
+	 * Size of \e colors buffer is equal to number of code points in user \e input
+	 * which will be different from simple `input.length()`!
+	 *
+	 * \param input - an UTF-8 encoded input entered by the user so far.
+	 * \param colors - output buffer for color information.
+	 * \param pos - current cursor position in code points.
+	 */
+	typedef std::function<void ( std::string const& input, colors_t& colors , int pos )> highlighter_callback_with_pos_t;
+
 	/*! \brief Hints callback type definition.
 	 *
 	 * \e contextLen is counted in Unicode code points (not in bytes!).
@@ -380,7 +407,7 @@ private:
 #endif
 
 public:
-	Replxx( void );
+	Replxx( std::istream & input_stream_, std::ostream & output_stream_, int in_fd_, int out_fd_, int err_fd_ );
 	Replxx( Replxx&& ) = default;
 	Replxx& operator = ( Replxx&& ) = default;
 
@@ -401,6 +428,12 @@ public:
 	 * \param fn - user defined callback function.
 	 */
 	void set_highlighter_callback( highlighter_callback_t const& fn );
+
+	/*! \brief Register highlighter callback with position.
+	 *
+	 * \param fn - user defined callback function.
+	 */
+	void set_highlighter_callback( highlighter_callback_with_pos_t const& fn );
 
 	/*! \brief Register hints callback.
 	 *
@@ -432,6 +465,12 @@ public:
 	 * \param state - new state of the model.
 	 */
 	void set_state( State const& state );
+
+	/*! \brief Enable/disable case insensitive history search and completion.
+	 *
+	 * \param val - if set to non-zero then history search and completion will be case insensitive.
+	 */
+	void set_ignore_case( bool val );
 
 	/*! \brief Print formatted string to standard output.
 	 *
@@ -487,8 +526,8 @@ public:
 	 *
 	 * Action names are the same as names of Replxx::ACTION enumerations
 	 * but in lower case, e.g.: an action for recalling previous history line
-	 * is \e Replxx::ACTION::HISTORY_PREVIOUS so action name to be used in this
-	 * interface for the same effect is "history_previous".
+	 * is \e Replxx::ACTION::LINE_PREVIOUS so action name to be used in this
+	 * interface for the same effect is "line_previous".
 	 *
 	 * \param code - handle this key-press event with following handler.
 	 * \param actionName - name of internal action to be invoked on key press.

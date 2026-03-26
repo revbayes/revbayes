@@ -12,7 +12,7 @@ namespace EscapeSequenceProcessing {
 // dispatch routines, then eventually returns the final (possibly extended or
 // special) character.
 //
-typedef char32_t (*CharacterDispatchRoutine)(char32_t);
+typedef char32_t (*CharacterDispatchRoutine)(int, int, char32_t);
 
 // This structure is used by doDispatch() to hold a list of characters to test
 // for and
@@ -27,7 +27,7 @@ struct CharacterDispatch {
 	CharacterDispatchRoutine* dispatch; // array of routines to call
 };
 
-char32_t doDispatch(char32_t c);
+char32_t doDispatch(int in_fd_, int err_fd, char32_t c);
 
 }
 

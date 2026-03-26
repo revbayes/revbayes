@@ -43,13 +43,17 @@ private:
 #endif
 	bool _rawMode; /* for destructor to check if restore is needed */
 	Utf8String _utf8;
+
+	int _in_fd = 0;
+	int _out_fd = 1;
+	int _err_fd = 2;
 public:
 	enum class CLEAR_SCREEN {
 		WHOLE,
 		TO_END
 	};
 public:
-	Terminal( void );
+	explicit Terminal(int in_fd_= 0, int out_fd_ = 1);
 	~Terminal( void );
 	void write32( char32_t const*, int );
 	void write8( char const*, int );
@@ -80,13 +84,17 @@ private:
 	Terminal& operator = ( Terminal&& ) = delete;
 };
 
-void beep();
-char32_t read_unicode_character(void);
+void beep(int fd_);
+char32_t read_unicode_character(int in_fd_);
 
 namespace tty {
 
+extern bool is_a_tty( int fd_ );
+
+/**
 extern bool in;
 extern bool out;
+*/
 
 }
 

@@ -65,8 +65,11 @@ bool is_a_tty( int fd_ ) {
 	return ( aTTY );
 }
 
+/**
+The patch to support arbitrary file descriptors made these functions unusable.
 bool in( is_a_tty( 0 ) );
 bool out( is_a_tty( 1 ) );
+*/
 
 }
 
@@ -81,7 +84,7 @@ static void WindowSizeChanged( int ) {
 #endif
 
 
-Terminal::Terminal( void )
+Terminal::Terminal(int in_fd_, int out_fd_)
 #ifdef _WIN32
 	: _consoleOut( INVALID_HANDLE_VALUE )
 	, _consoleIn( INVALID_HANDLE_VALUE )
@@ -99,7 +102,9 @@ Terminal::Terminal( void )
 	, _interrupt()
 #endif
 	, _rawMode( false )
-	, _utf8() {
+	, _utf8()
+	, _in_fd(in_fd_)
+	, _out_fd(out_fd_) {
 #ifdef _WIN32
 	_interrupt = CreateEvent( nullptr, true, false, TEXT( "replxx_interrupt_event" ) );
 #else
@@ -128,7 +133,7 @@ void Terminal::write32( char32_t const* text32, int len32 ) {
 void Terminal::write8( char const* data_, int size_ ) {
 #ifdef _WIN32
 	bool temporarilyEnabled( false );
-	if ( ! _rawMode ) {
+	if ( _consoleOut == INVALID_HANDLE_VALUE ) {
 		enable_out();
 		temporarilyEnabled = true;
 	}
@@ -137,7 +142,7 @@ void Terminal::write8( char const* data_, int size_ ) {
 		disable_out();
 	}
 #else
-	int nWritten( write( 1, data_, size_ ) );
+	int nWritten( write( _out_fd, data_, size_ ) );
 #endif
 	if ( nWritten != size_ ) {
 		throw std::runtime_error( "write failed" );
@@ -153,7 +158,7 @@ int Terminal::get_screen_columns( void ) {
 	cols = inf.dwSize.X;
 #else
 	struct winsize ws;
-	cols = ( ioctl( 1, TIOCGWINSZ, &ws ) == -1 ) ? 80 : ws.ws_col;
+	cols = ( ioctl( _out_fd, TIOCGWINSZ, &ws ) == -1 ) ? 80 : ws.ws_col;
 #endif
 	// cols is 0 in certain circumstances like inside debugger, which creates
 	// further issues
@@ -168,7 +173,7 @@ int Terminal::get_screen_rows( void ) {
 	rows = 1 + inf.srWindow.Bottom - inf.srWindow.Top;
 #else
 	struct winsize ws;
-	rows = (ioctl(1, TIOCGWINSZ, &ws) == -1) ? 24 : ws.ws_row;
+	rows = (ioctl(_out_fd, TIOCGWINSZ, &ws) == -1) ? 24 : ws.ws_row;
 #endif
 	return (rows > 0) ? rows : 24;
 }
@@ -217,10 +222,10 @@ int Terminal::enable_raw_mode( void ) {
 	GetConsoleMode( _consoleIn, &_origInMode );
 #else
 
-	if ( ! tty::in ) {
+	if ( ! tty::is_a_tty(_in_fd) ) {
 		return ( notty() );
 	}
-	if ( tcgetattr( 0, &_origTermios ) == -1 ) {
+	if ( tcgetattr( _in_fd, &_origTermios ) == -1 ) {
 		return ( notty() );
 	}
 
@@ -263,14 +268,14 @@ int Terminal::reset_raw_mode( void ) {
 #ifdef _WIN32
 	SetConsoleMode(
 		_consoleIn,
-		( _origInMode & ~( ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT | ENABLE_PROCESSED_INPUT ) ) | ENABLE_QUICK_EDIT_MODE 
+		( _origInMode & ~( ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT | ENABLE_PROCESSED_INPUT ) ) | ENABLE_QUICK_EDIT_MODE
 	);
 	SetConsoleCP( 65001 );
 	enable_out();
 	return ( 0 );
 #else
 	/* put terminal in raw mode after flushing */
-	return ( tcsetattr( 0, TCSADRAIN, &_rawModeTermios ) );
+	return ( tcsetattr( _in_fd, TCSADRAIN, &_rawModeTermios ) );
 #endif
 }
 
@@ -285,7 +290,7 @@ void Terminal::disable_raw_mode(void) {
 	_consoleIn = INVALID_HANDLE_VALUE;
 #else
 	_terminal_ = nullptr;
-	if ( tcsetattr( 0, TCSADRAIN, &_origTermios ) == -1 ) {
+	if ( tcsetattr( _in_fd, TCSADRAIN, &_origTermios ) == -1 ) {
 		return;
 	}
 #endif
@@ -301,7 +306,7 @@ void Terminal::disable_raw_mode(void) {
  *
  * @return char32_t Unicode character
  */
-char32_t read_unicode_character(void) {
+char32_t read_unicode_character(int in_fd_) {
 	static char8_t utf8String[5];
 	static size_t utf8Count = 0;
 	while (true) {
@@ -310,7 +315,7 @@ char32_t read_unicode_character(void) {
 		/* Continue reading if interrupted by signal. */
 		ssize_t nread;
 		do {
-			nread = read( STDIN_FILENO, &c, 1 );
+			nread = read( in_fd_, &c, 1 );
 		} while ((nread == -1) && (errno == EINTR));
 
 		if (nread <= 0) return 0;
@@ -335,9 +340,9 @@ char32_t read_unicode_character(void) {
 
 #endif // #ifndef _WIN32
 
-void beep() {
-	fprintf(stderr, "\x7");	// ctrl-G == bell/beep
-	fflush(stderr);
+void beep(int fd_) {
+	dprintf(fd_, "\x7");	// ctrl-G == bell/beep
+	fsync(fd_);
 }
 
 // replxx_read_char -- read a keystroke or keychord from the keyboard, and translate it
@@ -488,7 +493,7 @@ char32_t Terminal::read_char( void ) {
 	}
 
 #else
-	c = read_unicode_character();
+	c = read_unicode_character(_in_fd);
 	if (c == 0) {
 		return 0;
 	}
@@ -502,7 +507,7 @@ char32_t Terminal::read_char( void ) {
 #ifdef __REPLXX_DEBUG__
 	if (c == ctrlChar('^')) {	// ctrl-^, special debug mode, prints all keys hit,
 														 // ctrl-C to get out
-		printf(
+		dprintf(_out_fd,
 				"\nEntering keyboard debugging mode (on ctrl-^), press ctrl-C to exit "
 				"this mode\n");
 		while (true) {
@@ -510,7 +515,7 @@ char32_t Terminal::read_char( void ) {
 			int ret = read(0, keys, 10);
 
 			if (ret <= 0) {
-				printf("\nret: %d\n", ret);
+				dprintf(_out_fd,"\nret: %d\n", ret);
 			}
 			for (int i = 0; i < ret; ++i) {
 				char32_t key = static_cast<char32_t>(keys[i]);
@@ -538,13 +543,13 @@ char32_t Terminal::read_char( void ) {
 					friendlyTextBuf[2] = 0;
 					friendlyTextPtr = friendlyTextBuf;
 				}
-				printf("%d x%02X (%s%s)	", key, key, prefixText, friendlyTextPtr);
+				dprintf(_out_fd,"%d x%02X (%s%s)	", key, key, prefixText, friendlyTextPtr);
 			}
-			printf("\x1b[1G\n");	// go to first column of new line
+			dprintf(_out_fd,"\x1b[1G\n");	// go to first column of new line
 
 			// drop out of this loop on ctrl-C
 			if (keys[0] == ctrlChar('C')) {
-				printf("Leaving keyboard debugging mode (on ctrl-C)\n");
+				dprintf(_out_fd,"Leaving keyboard debugging mode (on ctrl-C)\n");
 				fflush(stdout);
 				return -2;
 			}
@@ -552,7 +557,7 @@ char32_t Terminal::read_char( void ) {
 	}
 #endif // __REPLXX_DEBUG__
 
-	c = EscapeSequenceProcessing::doDispatch(c);
+	c = EscapeSequenceProcessing::doDispatch(_in_fd, _err_fd, c);
 	if ( is_control_code( c ) ) {
 		c = Replxx::KEY::control( control_to_human( c ) );
 	}
@@ -630,10 +635,10 @@ Terminal::EVENT_TYPE Terminal::wait_for_input( int long timeout_ ) {
 	}
 #else
 	fd_set fdSet;
-	int nfds( max( _interrupt[0], _interrupt[1] ) + 1 );
+	int nfds( max( max(_interrupt[0], _interrupt[1]), _in_fd) + 1 );
 	while ( true ) {
 		FD_ZERO( &fdSet );
-		FD_SET( 0, &fdSet );
+		FD_SET( _in_fd, &fdSet );
 		FD_SET( _interrupt[0], &fdSet );
 		timeval tv{ timeout_ / 1000, static_cast<suseconds_t>( ( timeout_ % 1000 ) * 1000 ) };
 		int err( select( nfds, &fdSet, nullptr, nullptr, timeout_ > 0 ? &tv : nullptr ) );
@@ -656,7 +661,7 @@ Terminal::EVENT_TYPE Terminal::wait_for_input( int long timeout_ ) {
 				return ( EVENT_TYPE::RESIZE );
 			}
 		}
-		if ( FD_ISSET( 0, &fdSet ) ) {
+		if ( FD_ISSET( _in_fd, &fdSet ) ) {
 			return ( EVENT_TYPE::KEY_PRESS );
 		}
 	}
@@ -682,10 +687,10 @@ void Terminal::clear_screen( CLEAR_SCREEN clearScreen_ ) {
 #endif
 		if ( clearScreen_ == CLEAR_SCREEN::WHOLE ) {
 			char const clearCode[] = "\033c\033[H\033[2J\033[0m";
-			static_cast<void>( write(1, clearCode, sizeof ( clearCode ) - 1) >= 0 );
+			static_cast<void>( write(_out_fd, clearCode, sizeof ( clearCode ) - 1) >= 0 );
 		} else {
 			char const clearCode[] = "\033[J";
-			static_cast<void>( write(1, clearCode, sizeof ( clearCode ) - 1) >= 0 );
+			static_cast<void>( write(_out_fd, clearCode, sizeof ( clearCode ) - 1) >= 0 );
 		}
 		return;
 #ifdef _WIN32
@@ -750,17 +755,17 @@ void Terminal::set_cursor_visible( bool ) {}
 #ifndef _WIN32
 int Terminal::read_verbatim( char32_t* buffer_, int size_ ) {
 	int len( 0 );
-	buffer_[len ++] = read_unicode_character();
-	int statusFlags( ::fcntl( STDIN_FILENO, F_GETFL, 0 ) );
-	::fcntl( STDIN_FILENO, F_SETFL, statusFlags | O_NONBLOCK );
+	buffer_[len ++] = read_unicode_character(_in_fd);
+	int statusFlags( ::fcntl( _in_fd, F_GETFL, 0 ) );
+	::fcntl( _in_fd, F_SETFL, statusFlags | O_NONBLOCK );
 	while ( len < size_ ) {
-		char32_t c( read_unicode_character() );
+		char32_t c( read_unicode_character(_in_fd) );
 		if ( c == 0 ) {
 			break;
 		}
 		buffer_[len ++] = c;
 	}
-	::fcntl( STDIN_FILENO, F_SETFL, statusFlags );
+	::fcntl( _in_fd, F_SETFL, statusFlags );
 	return ( len );
 }
 
@@ -778,4 +783,3 @@ int Terminal::install_window_change_handler( void ) {
 #endif
 
 }
-

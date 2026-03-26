@@ -13,7 +13,7 @@ namespace replxx {
 
 int mk_wcwidth( char32_t );
 
-int virtual_render( char32_t const* display_, int size_, int& x_, int& y_, int screenColumns_, int promptLen_, char32_t* rendered_, int* renderedSize_ ) {
+int virtual_render( char32_t const* display_, int size_, int& x_, int& y_, int screenColumns_, int promptLen_, char32_t* rendered_, int* renderedSize_, int out_fd_) {
 	char32_t* out( rendered_ );
 	int visibleCount( 0 );
 	auto render = [&rendered_, &renderedSize_, &out, &visibleCount]( char32_t c_, bool visible_, bool renderAttributes_ = true ) {
@@ -35,7 +35,7 @@ int virtual_render( char32_t const* display_, int size_, int& x_, int& y_, int s
 			wrapped = true;
 		}
 	};
-	bool const renderAttributes( !!tty::out );
+	bool const renderAttributes( !!tty::is_a_tty(out_fd_) );
 	int pos( 0 );
 	while ( pos < size_ ) {
 		char32_t c( display_[pos] );

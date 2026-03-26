@@ -528,7 +528,9 @@ void startInterpreter()
     MPI_Comm_rank(MPI_COMM_WORLD, &pid);
 #endif
 
-    replxx::Replxx rx;
+    // Pass in streams and file descriptor.
+    // I can't seem to get this to draw the prompt with MPI - sigh.
+    replxx::Replxx rx(std::cin, std::cout, 0, 1, 2);
 
     if ( pid == 0 )
     {

@@ -134,6 +134,7 @@ enum { REPLXX_KEY_PASTE_FINISH = REPLXX_KEY_PASTE_START + 1 };
 enum { REPLXX_KEY_BACKSPACE    = REPLXX_KEY_CONTROL( 'H' ) };
 enum { REPLXX_KEY_TAB          = REPLXX_KEY_CONTROL( 'I' ) };
 enum { REPLXX_KEY_ENTER        = REPLXX_KEY_CONTROL( 'M' ) };
+enum { REPLXX_KEY_ABORT        = REPLXX_KEY_META( REPLXX_KEY_CONTROL( 'M' ) ) };
 
 /*! \brief List of built-in actions that act upon user input.
  */
@@ -160,11 +161,16 @@ typedef enum {
 	REPLXX_ACTION_MOVE_CURSOR_ONE_SUBWORD_RIGHT,
 	REPLXX_ACTION_MOVE_CURSOR_LEFT,
 	REPLXX_ACTION_MOVE_CURSOR_RIGHT,
-	REPLXX_ACTION_HISTORY_NEXT,
-	REPLXX_ACTION_HISTORY_PREVIOUS,
+	REPLXX_ACTION_LINE_NEXT,
+	REPLXX_ACTION_LINE_PREVIOUS,
+	REPLXX_ACTION_HISTORY_MOVE_NEXT,
+	REPLXX_ACTION_HISTORY_MOVE_PREVIOUS,
 	REPLXX_ACTION_HISTORY_FIRST,
 	REPLXX_ACTION_HISTORY_LAST,
+	REPLXX_ACTION_HISTORY_RESTORE,
+	REPLXX_ACTION_HISTORY_RESTORE_CURRENT,
 	REPLXX_ACTION_HISTORY_INCREMENTAL_SEARCH,
+	REPLXX_ACTION_HISTORY_SEEDED_INCREMENTAL_SEARCH,
 	REPLXX_ACTION_HISTORY_COMMON_PREFIX_SEARCH,
 	REPLXX_ACTION_HINT_NEXT,
 	REPLXX_ACTION_HINT_PREVIOUS,
@@ -218,7 +224,7 @@ typedef struct ReplxxHistoryEntryTag {
  *
  * \return Replxx library resource holder.
  */
-REPLXX_IMPEXP Replxx* replxx_init( void );
+// REPLXX_IMPEXP Replxx* replxx_init( void );
 
 /*! \brief Cleanup resources used by Replxx library.
  *
@@ -387,6 +393,12 @@ REPLXX_IMPEXP void replxx_get_state( Replxx*, ReplxxState* state );
  */
 REPLXX_IMPEXP void replxx_set_state( Replxx*, ReplxxState* state );
 
+/*! \brief Enable/disable case insensitive history search and completion.
+ *
+ * \param val - if set to non-zero then history search and completion will be case insensitive.
+ */
+REPLXX_IMPEXP void replxx_set_ignore_case( Replxx*, int val );
+
 /*! \brief Print formatted string to standard output.
  *
  * This function ensures proper handling of ANSI escape sequences
@@ -442,8 +454,8 @@ REPLXX_IMPEXP void replxx_bind_key( Replxx*, int code, key_press_handler_t handl
  *
  * Action names are the same as unique part of names of ReplxxAction enumerations
  * but in lower case, e.g.: an action for recalling previous history line
- * is \e REPLXX_ACTION_HISTORY_PREVIOUS so action name to be used in this
- * interface for the same effect is "history_previous".
+ * is \e REPLXX_ACTION_LINE_PREVIOUS so action name to be used in this
+ * interface for the same effect is "line_previous".
  *
  * \param code - handle this key-press event with following handler.
  * \param actionName - name of internal action to be invoked on key press.
