@@ -1,1 +1,3 @@
-   Error:	Cycle detected in DAG during touch propagation: node 'b' is both a child and an ancestor of 'a'.
+   Error:	Cannot complete this assignment: 'a' depends on 'a', so replacing one with the other would create a circular dependency.
+   9.296161
+   2.229602

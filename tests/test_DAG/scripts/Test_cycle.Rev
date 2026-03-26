@@ -10,8 +10,13 @@
 #
 ################################################################################
 
-# See https://github.com/revbayes/revbayes/issues/237
+seed(12345)
 
 a ~ dnUnif(0, 10)
 b := ln(a)
-a := exp(b)
+a := b + 3.0
+
+# After the failure of the last line above, we should still keep b and the original a
+
+a
+b
