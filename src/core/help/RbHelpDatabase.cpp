@@ -10,9 +10,7 @@ using namespace std;
 
 RevBayesCore::RbHelpDatabase::RbHelpDatabase()
 {
-	help_strings[string("AbstractDiscreteTaxonData")][string("name")] = string(R"(AbstractDiscreteTaxonData)");
 	help_strings[string("AbstractHomologousDiscreteCharacterData")][string("name")] = string(R"(AbstractHomologousDiscreteCharacterData)");
-	help_strings[string("AverageDistanceMatrix")][string("name")] = string(R"(AverageDistanceMatrix)");
 	help_arrays[string("Bool")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("Bool")][string("description")] = string(R"(Bool variables can be either `true` or `false` (`TRUE` or `FALSE` also work).)");
 	help_strings[string("Bool")][string("example")] = string(R"(a <- FALSE
@@ -45,12 +43,21 @@ first_char_hist = char_hist[1])");
 	help_strings[string("CladogeneticProbabilityMatrix")][string("name")] = string(R"(CladogeneticProbabilityMatrix)");
 	help_strings[string("CladogeneticSpeciationRateMatrix")][string("name")] = string(R"(CladogeneticSpeciationRateMatrix)");
 	help_arrays[string("ConditionalPosteriorOrdinate")][string("authors")].push_back(string(R"(Sebastian Höhna)"));
+	help_strings[string("ConditionalPosteriorOrdinate")][string("description")] = string(R"(Model selection via leave one out cross-validation. Cross-­ validation assesses the fit of a model by using a subset of the data to estimate parameters (i.e., train the model) and the remaining observations to evaluate the predictive fitness. In the most extreme case of leave-­one-­out cross-­validation, we use all but one observation to estimate the parameters, P(𝜃| X(−i)), then compute the probability of observing the removed observed, P(Xi| 𝜃) , integrate over all parameters, P(Xi| X(−i)) = ∫ p(Xi| 𝜃)p(𝜃| X(−i))d𝜃, and repeat this process for all data points.)");
+	help_strings[string("ConditionalPosteriorOrdinate")][string("details")] = string(R"(A cross-validation analysis assumes that one has a trace of samples of the probabilities for each data point (e.g., site or column) from your data stored in a file. Each data point probability is important for the computation of the leave-one-out cross-validation probability. We read in this trace using the function `ConditionalPosteriorOrdinate`. This "constructor" function requires the `filename` as an argument.
+
+Then, you can calculate the leave-one-out cross-validation probability using the member method `.predictiveProbability()`. In the current implementation, the member method `.predictiveProbability()` requires two argument, the `counts` which are a vector of observations as real numbers, `log` which tells if the probabilities in the trace are log-transformed . The result of this function is the leave-one-out cross-validation probability.)");
+	help_strings[string("ConditionalPosteriorOrdinate")][string("example")] = string(R"(obs_sfs = [ 305082, 44248, 32223, 28733, 28220, 26205, 27477, 26618, 27533, 26945, 28736, 28671, 31277, 31250, 34352, 34859, 38331 ]
+
+cpo = ConditionalPosteriorOrdinate( filename="output/StairwayPlot_esfs.log" )
+cpo.predictiveProbability( obs_sfs, log=FALSE ))");
 	help_strings[string("ConditionalPosteriorOrdinate")][string("name")] = string(R"(ConditionalPosteriorOrdinate)");
 	help_references[string("ConditionalPosteriorOrdinate")].push_back(RbHelpReference(R"(Lewis PO, Xie W, Chen M-H, Fan Y, Kuo L (2014). Posterior predictive Bayesian phylogenetic model selection. Systematic Biology, 63(3):309-321.)",R"(10.1093/sysbio/syt068)",R"(https://pmc.ncbi.nlm.nih.gov/articles/PMC3985471/pdf/syt068.pdf )"));
 	help_references[string("ConditionalPosteriorOrdinate")].push_back(RbHelpReference(R"(Lartillot N (2023). Identifying the best approximating model in Bayesian phylogenetics: Bayes factors, cross-validation or wAIC? Systematic Biology, 72(3):616-638.)",R"(10.1093/sysbio/syad004)",R"(https://pmc.ncbi.nlm.nih.gov/articles/PMC10276628/pdf/syad004.pdf )"));
+	help_references[string("ConditionalPosteriorOrdinate")].push_back(RbHelpReference(R"(Höhna S, Catalán A (2025). Bayesian StairwayPlot for inferring single population demographic histories from site frequency spectra. Molecular Ecology Resources, 25(6):e14087.)",R"(10.1111/1755-0998.14087)",R"(https://onlinelibrary.wiley.com/doi/pdf/10.1111/1755-0998.14087 )"));
 	help_arrays[string("ConditionalPosteriorOrdinate")][string("see_also")].push_back(string(R"(pathSampler)"));
 	help_arrays[string("ConditionalPosteriorOrdinate")][string("see_also")].push_back(string(R"(steppingStoneSampler)"));
-	help_strings[string("ConditionalPosteriorOrdinate")][string("title")] = string(R"(Conditional posterior ordinate)");
+	help_strings[string("ConditionalPosteriorOrdinate")][string("title")] = string(R"(Conditional posterior ordinate (a.k.a. cross-validation))");
 	help_strings[string("ContinuousCharacterData")][string("name")] = string(R"(ContinuousCharacterData)");
 	help_strings[string("CorrespondenceAnalysis")][string("name")] = string(R"(CorrespondenceAnalysis)");
 	help_strings[string("DistanceMatrix")][string("name")] = string(R"(DistanceMatrix)");
@@ -84,8 +91,6 @@ y ~ dnUniformInteger(1, 10))");
 	help_arrays[string("Integer")][string("see_also")].push_back(string(R"(Natural)"));
 	help_arrays[string("Integer")][string("see_also")].push_back(string(R"(Real)"));
 	help_strings[string("Integer")][string("title")] = string(R"(Integer data type)");
-	help_strings[string("IntegerPos")][string("name")] = string(R"(IntegerPos)");
-	help_strings[string("MatrixBoolean")][string("name")] = string(R"(MatrixBoolean)");
 	help_strings[string("MatrixReal")][string("name")] = string(R"(MatrixReal)");
 	help_strings[string("MatrixRealPos")][string("name")] = string(R"(MatrixRealPos)");
 	help_strings[string("MatrixRealSymmetric")][string("name")] = string(R"(MatrixRealSymmetric)");
@@ -110,7 +115,6 @@ type(y))");
 	help_arrays[string("Probability")][string("see_also")].push_back(string(R"(Real)"));
 	help_arrays[string("Probability")][string("see_also")].push_back(string(R"(RealPos)"));
 	help_strings[string("Probability")][string("title")] = string(R"(Probability data type)");
-	help_strings[string("PseudoObservation")][string("name")] = string(R"(PseudoObservation)");
 	help_strings[string("RateGenerator")][string("name")] = string(R"(RateGenerator)");
 	help_strings[string("Real")][string("description")] = string(R"(The real number data type can hold any real number value.
 Not to be confused with integers which are whole numbers, or
@@ -127,7 +131,6 @@ c = a + b
 	help_strings[string("Real")][string("title")] = string(R"(Real number data type)");
 	help_strings[string("RealPos")][string("name")] = string(R"(RealPos)");
 	help_strings[string("RevObject")][string("name")] = string(R"(RevObject)");
-	help_strings[string("RlRegionalFeatureLayer")][string("name")] = string(R"(RlRegionalFeatureLayer)");
 	help_strings[string("Simplex")][string("description")] = string(R"(A simplex is a vector of elements that sum to 1.)");
 	help_strings[string("Simplex")][string("example")] = string(R"(x <- simplex([2, 2, 6])
 x # = [ 0.2, 0.2, 0.6]
@@ -154,7 +157,6 @@ M.rootFrequencies(1)
 M := fnJC(4) |> fnGammaASRV(alpha=1) |> fnInvASRV(pInv=0.1))");
 	help_strings[string("SiteMixtureModel")][string("name")] = string(R"(SiteMixtureModel)");
 	help_strings[string("SiteMixtureModel")][string("title")] = string(R"(SiteMixtureModel)");
-	help_strings[string("StochasticMatrix")][string("name")] = string(R"(StochasticMatrix)");
 	help_strings[string("String")][string("name")] = string(R"(String)");
 	help_strings[string("TimeTree")][string("description")] = string(R"(The Tree datatype stores information to describe the shared ancestryof a taxon set. Information includes taxon labels, topology, nodecount, and branch lengths. Tree objects also possess several usefulmethods to traverse and manipulate the Tree's value.)");
 	help_strings[string("TimeTree")][string("name")] = string(R"(TimeTree)");
@@ -239,16 +241,9 @@ thinned_trees.getTrees()[1] # Returns the first sampled tree after excluding the
 	help_arrays[string("Tree")][string("see_also")].push_back(string(R"(TimeTree)"));
 	help_arrays[string("Tree")][string("see_also")].push_back(string(R"(BranchLengthTree)"));
 	help_strings[string("Tree")][string("title")] = string(R"(Tree datatype)");
-	help_strings[string("UPGMA")][string("name")] = string(R"(UPGMA)");
 	help_strings[string("VectorMonitors")][string("name")] = string(R"(VectorMonitors)");
 	help_strings[string("VectorMoves")][string("name")] = string(R"(VectorMoves)");
 	help_strings[string("[]")][string("name")] = string(R"([])");
-	help_strings[string("_RateGenerator[]2SiteMixtureModel[]")][string("name")] = string(R"(_RateGenerator[]2SiteMixtureModel[])");
-	help_strings[string("_RateMatrix2SiteMixtureModel")][string("name")] = string(R"(_RateMatrix2SiteMixtureModel)");
-	help_strings[string("_add")][string("name")] = string(R"(_add)");
-	help_strings[string("_and")][string("name")] = string(R"(_and)");
-	help_strings[string("_mul")][string("name")] = string(R"(_mul)");
-	help_strings[string("_sub")][string("name")] = string(R"(_sub)");
 	help_arrays[string("abs")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("abs")][string("description")] = string(R"(The 'abs' function returns the absolute value of a number.)");
 	help_strings[string("abs")][string("example")] = string(R"(# compute the absolute value of a real number
@@ -447,23 +442,13 @@ map_tree = consensusTree(trace=tree_trace, cutoff=0.5, file="consensus.tree"))")
 	help_arrays[string("consensusTree")][string("see_also")].push_back(string(R"(mccTree)"));
 	help_arrays[string("consensusTree")][string("see_also")].push_back(string(R"(treeTrace)"));
 	help_arrays[string("consensusTree")][string("see_also")].push_back(string(R"(readTreeTrace)"));
-	help_strings[string("convertCountFileToNaturalNumbers")][string("name")] = string(R"(convertCountFileToNaturalNumbers)");
-	help_strings[string("convertFastaFileToNaturalNumbers")][string("name")] = string(R"(convertFastaFileToNaturalNumbers)");
 	help_strings[string("convertToPhylowood")][string("name")] = string(R"(convertToPhylowood)");
-	help_strings[string("cos")][string("name")] = string(R"(cos)");
-	help_strings[string("d_add")][string("name")] = string(R"(d_add)");
-	help_strings[string("d_mul")][string("name")] = string(R"(d_mul)");
-	help_strings[string("d_sub")][string("name")] = string(R"(d_sub)");
-	help_strings[string("dexponential")][string("name")] = string(R"(dexponential)");
 	help_strings[string("dfConstant")][string("name")] = string(R"(dfConstant)");
 	help_strings[string("dfExponential")][string("name")] = string(R"(dfExponential)");
 	help_strings[string("dfLinear")][string("name")] = string(R"(dfLinear)");
 	help_arrays[string("diagonalMatrix")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("diagonalMatrix")][string("description")] = string(R"(Building a identity/diagonal matrix with 'n' columns and rows.)");
 	help_strings[string("diagonalMatrix")][string("name")] = string(R"(diagonalMatrix)");
-	help_strings[string("dinvlogit")][string("name")] = string(R"(dinvlogit)");
-	help_strings[string("dlogit")][string("name")] = string(R"(dlogit)");
-	help_strings[string("dnAutocorrelatedEvent")][string("name")] = string(R"(dnAutocorrelatedEvent)");
 	help_arrays[string("dnBernoulli")][string("authors")].push_back(string(R"(John Huelsenbeck)"));
 	help_strings[string("dnBernoulli")][string("description")] = string(R"(The Bernoulli distribution represents a weighted coin toss.)");
 	help_strings[string("dnBernoulli")][string("details")] = string(R"(The Bernoulli distribution takes a parameter p, between 0 and 1, and returns 1 with probability p and 0 with probability (1 - p).)");
@@ -569,7 +554,6 @@ mymcmc.run(generations=200000))");
 	help_references[string("dnBivariatePoisson")].push_back(RbHelpReference(R"(Karlis D, Ntzoufras J (2003). Bayesian and Non-Bayesian Analysis of Soccer Data using Bivariate Poisson Regression Models. 16th Panhelenic Conference in Statistics, Kavala, April 2003.)",R"()",R"()"));
 	help_arrays[string("dnBivariatePoisson")][string("see_also")].push_back(string(R"(dnPoisson)"));
 	help_strings[string("dnBivariatePoisson")][string("title")] = string(R"(Bivariate Poisson Distribution)");
-	help_strings[string("dnBranchRateTree")][string("name")] = string(R"(dnBranchRateTree)");
 	help_strings[string("dnCBDSP")][string("description")] = string(R"(Simulates a tree under a birth-death process with shifts in birth and death
 rates among lineages, conditioned on the assumption that no shifts take place
 along extinct lineages.)");
@@ -723,7 +707,6 @@ timetree ~ dnCDBDP(rootAge   = root_age,
 	help_arrays[string("dnCDBDP")][string("see_also")].push_back(string(R"(fnCladogeneticProbabilityMatrix)"));
 	help_arrays[string("dnCDBDP")][string("see_also")].push_back(string(R"(fnCladogeneticSpeciationRateMatrix)"));
 	help_strings[string("dnCDBDP")][string("title")] = string(R"(Character-dependent birth-death process)");
-	help_strings[string("dnCTMC")][string("name")] = string(R"(dnCTMC)");
 	help_arrays[string("dnCategorical")][string("authors")].push_back(string(R"(Fredrik Ronquist)"));
 	help_strings[string("dnCategorical")][string("description")] = string(R"(The Categorical distribution generalizes the Bernoulli distribution, describing the probability of choosing from a number of outcomes, each with their own probability.)");
 	help_strings[string("dnCategorical")][string("details")] = string(R"(The categorical distribution takes a parameter p, a simplex (i.e. vector, the elements of which sum to 1). It returns outcome i with probability p[i].
@@ -905,8 +888,6 @@ x ~ dnExponential(lambda=rate)
 x.probability())");
 	help_strings[string("dnExponential")][string("name")] = string(R"(dnExponential)");
 	help_strings[string("dnExponential")][string("title")] = string(R"(Exponential Distribution)");
-	help_strings[string("dnExponentialError")][string("name")] = string(R"(dnExponentialError)");
-	help_strings[string("dnFossilizedBirthDeath")][string("name")] = string(R"(dnFossilizedBirthDeath)");
 	help_arrays[string("dnFossilizedBirthDeathRange")][string("authors")].push_back(string(R"(Walker Pett)"));
 	help_strings[string("dnFossilizedBirthDeathRange")][string("description")] = string(R"(The fossilized birth death range process (FBDRP) describes the distribution of a matrix of species origination and extinction times under a model of asymmetric speciation and sampling of extinct species.)");
 	help_strings[string("dnFossilizedBirthDeathRange")][string("details")] = string(R"(Fossil species are represented by a collection of fossil occurrences with uncertainty. Speciation, extinction and sampling rates may be time-homogeneous or piecewise time-heterogeneous. If time-heterogeneous rates are provided, then a vector of rate change time-points musts also be provided. If only a subset of fossil occurrences is provided for each species (e.g. only first and last occurrencces), then the remaining number of fossil samples may be marginalized by specifying `complete=FALSE`. Under the hood, the fossil data is augmented with oldest occurrence ages for each species, which must be sampled during MCMC using `mvResampleFBD`. Setting `BDS` to true causes the model to assume complete lineage sampling i.e. using the Birth-Death with Rateshifts (BDS) model of Silvestro et al. (2019).)");
@@ -952,7 +933,6 @@ moves.append( mvTipTimeSlideUniform(bd, weight = taxa.size()) ))");
 	help_arrays[string("dnFossilizedBirthDeathSpeciation")][string("see_also")].push_back(string(R"(dnFossilizedBirthDeathRange)"));
 	help_arrays[string("dnFossilizedBirthDeathSpeciation")][string("see_also")].push_back(string(R"(dnBirthDeathSamplingTreatment)"));
 	help_arrays[string("dnFossilizedBirthDeathSpeciation")][string("see_also")].push_back(string(R"(mvResampleFBD)"));
-	help_strings[string("dnFossilizedBirthDeathSpecies")][string("name")] = string(R"(dnFossilizedBirthDeathSpecies)");
 	help_arrays[string("dnGamma")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("dnGamma")][string("description")] = string(R"(The Gamma distribution describes the probability of the sum of exponentially distributed variables.)");
 	help_strings[string("dnGamma")][string("details")] = string(R"(The gamma distribution takes two parameters, shape and rate. Similar to how 1/rate gives the mean of the exponential, shape/rate gives the mean of the gamma. It provides a natural prior distribution for parameters that could be considered as sums of exponential variables.
@@ -969,7 +949,6 @@ x)");
 	help_strings[string("dnGamma")][string("name")] = string(R"(dnGamma)");
 	help_arrays[string("dnGamma")][string("see_also")].push_back(string(R"(dnExponential)"));
 	help_strings[string("dnGamma")][string("title")] = string(R"(Gamma Distribution)");
-	help_strings[string("dnGeneralizedLineageHeterogeneousBirthDeathProcess")][string("name")] = string(R"(dnGeneralizedLineageHeterogeneousBirthDeathProcess)");
 	help_arrays[string("dnGeometric")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("dnGeometric")][string("description")] = string(R"(A geometric distribution defines a random variable on natural numbers. The geometric distribution describes the number of success until the first failure, with success probability p.)");
 	help_strings[string("dnGeometric")][string("example")] = string(R"(p ~ dnBeta(1.0,1.0)
@@ -1027,7 +1006,6 @@ sd(x))");
 	help_strings[string("dnHalfNormal")][string("title")] = string(R"(half-Normal Distribution)");
 	help_strings[string("dnHeterochronousCoalescent")][string("name")] = string(R"(dnHeterochronousCoalescent)");
 	help_strings[string("dnHeterochronousCoalescentSkyline")][string("name")] = string(R"(dnHeterochronousCoalescentSkyline)");
-	help_strings[string("dnIID")][string("name")] = string(R"(dnIID)");
 	help_arrays[string("dnInverseGamma")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("dnInverseGamma")][string("description")] = string(R"(inverse-gamma probability distribution for positive real numbers.)");
 	help_strings[string("dnInverseGamma")][string("details")] = string(R"(The inverse Gamma distribution is the probability of the sum of exponentially distributed variables. Thus, it provides a natural prior distribution for parameters that could be considered as sums of exponential variables.)");
@@ -1109,7 +1087,6 @@ x ~ dnLog(dnMultivariateNormal(mu,Sigma)))");
 	help_arrays[string("dnLog")][string("see_also")].push_back(string(R"(dnLognormal)"));
 	help_arrays[string("dnLog")][string("see_also")].push_back(string(R"(dnLoguniform)"));
 	help_strings[string("dnLog")][string("title")] = string(R"(Log-scaled distribution)");
-	help_strings[string("dnLogExponential")][string("name")] = string(R"(dnLogExponential)");
 	help_arrays[string("dnLognormal")][string("authors")].push_back(string(R"(Michael Landis)"));
 	help_strings[string("dnLognormal")][string("description")] = string(R"(Lognormal distribution is the distribution for a log-transformed normally distributed random variable with mean 'mu' and standard deviation 'sigma'.)");
 	help_strings[string("dnLognormal")][string("details")] = string(R"(The lognormal random variable is defined as
@@ -1145,10 +1122,7 @@ X ~ dnBrownian(trueTree,sigma)
 	help_strings[string("dnLoguniform")][string("name")] = string(R"(dnLoguniform)");
 	help_arrays[string("dnLoguniform")][string("see_also")].push_back(string(R"(dnUniform)"));
 	help_strings[string("dnLoguniform")][string("title")] = string(R"(Log-Uniform Distribution)");
-	help_strings[string("dnMarkovEvents")][string("name")] = string(R"(dnMarkovEvents)");
-	help_strings[string("dnMarkovTimes")][string("name")] = string(R"(dnMarkovTimes)");
 	help_strings[string("dnMixture")][string("name")] = string(R"(dnMixture)");
-	help_strings[string("dnMixtureAnalytical")][string("name")] = string(R"(dnMixtureAnalytical)");
 	help_strings[string("dnMixtureVector")][string("name")] = string(R"(dnMixtureVector)");
 	help_arrays[string("dnMultiSpeciesCoalescent")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_arrays[string("dnMultiSpeciesCoalescent")][string("authors")].push_back(string(R"(Bastien Boussau)"));
@@ -1304,6 +1278,7 @@ for (i in 1:(n_genes)) {
 	help_strings[string("dnMultiValueEvent")][string("title")] = string(R"(MultiValueEvent Distribution)");
 	help_arrays[string("dnMultinomial")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("dnMultinomial")][string("description")] = string(R"(A multinomial distribution defines a probability distribution on a vector of natural numbers. It is understood as randomly picking n times from the k categories with replacement where each catefory has its own probability p[i].)");
+	help_strings[string("dnMultinomial")][string("details")] = string(R"(As a move, you might want to consider `mvRandomCategoryWalk`.)");
 	help_strings[string("dnMultinomial")][string("example")] = string(R"(p <- simplex(1,1,1,1)
 x ~ dnMultinomial(10, p)
 y ~ dnDirichlet(x)
@@ -1316,8 +1291,8 @@ mymcmc.burnin(generations=20000,tuningInterval=100)
 mymcmc.run(generations=200000))");
 	help_strings[string("dnMultinomial")][string("name")] = string(R"(dnMultinomial)");
 	help_arrays[string("dnMultinomial")][string("see_also")].push_back(string(R"(dnDirichlet)"));
+	help_arrays[string("dnMultinomial")][string("see_also")].push_back(string(R"(mvRandomCategoryWalk)"));
 	help_strings[string("dnMultinomial")][string("title")] = string(R"(Multinomial Distribution)");
-	help_strings[string("dnMultispeciesCoalescentMigration")][string("name")] = string(R"(dnMultispeciesCoalescentMigration)");
 	help_arrays[string("dnMultivariateNormal")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_arrays[string("dnMultivariateNormal")][string("authors")].push_back(string(R"(Michael Landis)"));
 	help_strings[string("dnMultivariateNormal")][string("description")] = string(R"(The multivariate normal distribution has the probability density:
@@ -1390,7 +1365,6 @@ mymcmc.run(generations=200000))");
 	help_arrays[string("dnOrnsteinUhlenbeck")][string("see_also")].push_back(string(R"(dnBinomial)"));
 	help_strings[string("dnOrnsteinUhlenbeck")][string("title")] = string(R"(Bernoulli Distribution)");
 	help_strings[string("dnOutgroupBirthDeath")][string("name")] = string(R"(dnOutgroupBirthDeath)");
-	help_strings[string("dnPhyloBranchRateBM")][string("name")] = string(R"(dnPhyloBranchRateBM)");
 	help_strings[string("dnPhyloBrownian")][string("name")] = string(R"(dnPhyloBrownian)");
 	help_strings[string("dnPhyloBrownianMVN")][string("name")] = string(R"(dnPhyloBrownianMVN)");
 	help_strings[string("dnPhyloBrownianMultiSampleREML")][string("name")] = string(R"(dnPhyloBrownianMultiSampleREML)");
@@ -1600,7 +1574,6 @@ x)");
 	help_strings[string("dnPhyloMultivariateBrownianREML")][string("title")] = string(R"(Phylogenetic Multivariate Brownian Motion)");
 	help_strings[string("dnPhyloOrnsteinUhlenbeck")][string("name")] = string(R"(dnPhyloOrnsteinUhlenbeck)");
 	help_strings[string("dnPhyloOrnsteinUhlenbeckMVN")][string("name")] = string(R"(dnPhyloOrnsteinUhlenbeckMVN)");
-	help_strings[string("dnPhyloOrnsteinUhlenbeckPruning")][string("name")] = string(R"(dnPhyloOrnsteinUhlenbeckPruning)");
 	help_strings[string("dnPhyloOrnsteinUhlenbeckREML")][string("name")] = string(R"(dnPhyloOrnsteinUhlenbeckREML)");
 	help_arrays[string("dnPhyloOrnsteinUhlenbeckStateDependent")][string("authors")].push_back(string(R"(Priscilla Lau)"));
 	help_strings[string("dnPhyloOrnsteinUhlenbeckStateDependent")][string("description")] = string(R"(Univariate Ornstein-Uhlenbeck process over an augmented phylogeny (i.e.,
@@ -1670,8 +1643,6 @@ Y ~ dnPhyloOUSD(char_hist, theta=theta, rootTreatment="optimum", alpha=alpha, si
 	help_strings[string("dnPhyloOrnsteinUhlenbeckStateDependent")][string("title")] = string(R"(Phylogenetic state-dependent Ornstein-Uhlenbeck process)");
 	help_strings[string("dnPhyloOrnsteinUhlenbeckThreePoint")][string("name")] = string(R"(dnPhyloOrnsteinUhlenbeckThreePoint)");
 	help_strings[string("dnPhyloWhiteNoise")][string("name")] = string(R"(dnPhyloWhiteNoise)");
-	help_strings[string("dnPhylodynamicBirthDeathProcess")][string("name")] = string(R"(dnPhylodynamicBirthDeathProcess)");
-	help_strings[string("dnPiecewiseOccurrenceBirthDeath")][string("name")] = string(R"(dnPiecewiseOccurrenceBirthDeath)");
 	help_arrays[string("dnPointMass")][string("authors")].push_back(string(R"(Walker Pett)"));
 	help_strings[string("dnPointMass")][string("description")] = string(R"(Point mass distribution.)");
 	help_strings[string("dnPointMass")][string("details")] = string(R"(The point mass distribution, or Dirac delta function, has density f(x) = 1 when x is equal to the point mass value.)");
@@ -1745,10 +1716,37 @@ mymcmc.run(generations=200000))");
 	help_arrays[string("dnSoftBoundUniformNormal")][string("see_also")].push_back(string(R"(dnUniform)"));
 	help_strings[string("dnSoftBoundUniformNormal")][string("title")] = string(R"(Softbound Uniform Distribution with Normal distributed tails.)");
 	help_arrays[string("dnStairwayPlot")][string("authors")].push_back(string(R"(Sebastian Höhna)"));
+	help_strings[string("dnStairwayPlot")][string("description")] = string(R"(Bayesian StairwayPlot for Inferring Single Population Demographic Histories From Site Frequency Spectra)");
+	help_strings[string("dnStairwayPlot")][string("details")] = string(R"(The ``StairwayPlot Distribution`` specifies a distribution on the site frequency spectrum of a single panmictic population. The site frequency spectrum varies depending on the demographic history, that is, the vector of effective population size. You can pass in a vector of effective population sizes, which are assumed to change exactly at the expected coalescent events (see the publications for the description of the theory). The name of the distribution comes from the stepwise function, looking like a stairway, of the effective population sizes.
+
+The most important arguments are:
+``theta``: the vector of effective population sizes in units of 4 * Ne * mu. This vector must be of sizes N-1, where N is the number of individuals.
+``numSites``: The number of sites used. This should be the same as summing the SFS, but is required for simulation/initialization.
+``numIndividuals``: The number of individuals, which corresponds to the number of bins in the SFS. The fixed sites are not considered. This should be the same as in the observed SFS, but is required for simulation/initialization.
+``folded``: Whether the likelihood is computed based on a folded SFS or not.
+``monomorphicProbability``: How should we compute the probability of monomorphic sites. See publication for details.
+``coding``: Are we conditioning on not including monomorphic sites ("no-monomorphic"), not including singletons ("no-singletons"), or do we have "all" sites.)");
+	help_strings[string("dnStairwayPlot")][string("example")] = string(R"(# let's assume we have some SFS "observed"
+obs_sfs = [ 305082, 44248, 32223, 28733, 28220, 26205, 27477, 26618, 27533, 26945, 28736, 28671, 31277, 31250, 34352, 34859, 38331, 40005, 45666, 48986, 65829, 64363, 70895, 74114, 82705, 88226, 102194, 114566, 130176, 143775, 169216, 191624, 230016, 276489, 333069, 394810, 501961, 653809, 890077, 1349350, 50296796 ]
+
+# we need to remove the fixed sites
+obs_sfs[obs_sfs.size()] <- 0
+
+# obtain the number of individuals and the number of sites
+N_IND   = abs(obs_sfs.size()-1)
+N_SITES = round(sum(obs_sfs))
+
+# now specify a different theta per interval
+for (i in 1:(N_IND-1)) {
+  theta[i] ~ dnLognormal( ln_theta_mean, theta_sd )
+}
+
+sfs ~ dnStairwayPlot( theta, numSites=N_SITES, numIndividuals=N_IND, folded=USE_FOLDED, monomorphicProbability="rest", coding="all" )
+sfs.clamp( obs_sfs ))");
 	help_strings[string("dnStairwayPlot")][string("name")] = string(R"(dnStairwayPlot)");
-	help_references[string("dnStairwayPlot")].push_back(RbHelpReference(R"(Liu X, Fu Y-X (2015). Exploring population size changes using SNP frequency spectra. Nature Genetics, 47:555-559.)",R"(10.1038/ng.3254)",R"(https://pmc.ncbi.nlm.nih.gov/articles/PMC4414822/pdf/nihms-668186.pdf )"));
-	help_references[string("dnStairwayPlot")].push_back(RbHelpReference(R"(Höhna S, Catalán A (2025). Bayesian StairwayPlot for inferring single population demographic histories from site frequency spectra. Molecular Ecology Resources, 25(6):e14087.)",R"(10.1111/1755-0998.14087)",R"(https://onlinelibrary.wiley.com/doi/pdf/10.1111/1755-0998.14087 )"));
-	help_strings[string("dnStairwayPlot")][string("title")] = string(R"(StairwayPlot distribution)");
+	help_references[string("dnStairwayPlot")].push_back(RbHelpReference(R"(Liu & Fu (2015). Exploring population size changes using SNP frequency spectra. Nature Genetics, 555--559.)",R"(10.1038/ng.3254)",R"(https://pmc.ncbi.nlm.nih.gov/articles/PMC4414822/pdf/nihms-668186.pdf )"));
+	help_references[string("dnStairwayPlot")].push_back(RbHelpReference(R"(Höhna & Catalán (2025). Bayesian StairwayPlot for Inferring Single Population Demographic Histories From Site Frequency Spectra. Molecular Ecology Resources, 25:e14087.)",R"(10.1111/1755-0998.14087)",R"(https://onlinelibrary.wiley.com/doi/pdf/10.1111/1755-0998.14087 )"));
+	help_strings[string("dnStairwayPlot")][string("title")] = string(R"(StairwayPlot Distribution)");
 	help_arrays[string("dnStudentT")][string("authors")].push_back(string(R"(Wade Dismukes and Kevin Quinteros)"));
 	help_strings[string("dnStudentT")][string("description")] = string(R"(The student's t probability distribution.)");
 	help_strings[string("dnStudentT")][string("example")] = string(R"(# The most important use of the Student T distribution
@@ -1785,7 +1783,6 @@ x ~ dnUniformInteger(1, 10))");
 	help_arrays[string("dnUniformInteger")][string("see_also")].push_back(string(R"(dnNormal)"));
 	help_strings[string("dnUniformInteger")][string("title")] = string(R"(Uniform Integer Distribution)");
 	help_strings[string("dnUniformNatural")][string("name")] = string(R"(dnUniformNatural)");
-	help_strings[string("dnUniformSerialSampledTimeTree")][string("name")] = string(R"(dnUniformSerialSampledTimeTree)");
 	help_strings[string("dnUniformTimeTree")][string("name")] = string(R"(dnUniformTimeTree)");
 	help_strings[string("dnUniformTopology")][string("name")] = string(R"(dnUniformTopology)");
 	help_strings[string("dnUniformTopologyBranchLength")][string("name")] = string(R"(dnUniformTopologyBranchLength)");
@@ -1823,8 +1820,6 @@ x)");
 	help_arrays[string("dnWhiteNoise")][string("see_also")].push_back(string(R"(dnGamma)"));
 	help_strings[string("dnWhiteNoise")][string("title")] = string(R"(White-Noise Process)");
 	help_strings[string("dnWishart")][string("name")] = string(R"(dnWishart)");
-	help_strings[string("dscale")][string("name")] = string(R"(dscale)");
-	help_strings[string("dshift")][string("name")] = string(R"(dshift)");
 	help_arrays[string("exists")][string("authors")].push_back(string(R"(Michael Landis)"));
 	help_strings[string("exists")][string("description")] = string(R"(Determines whether the RevBayes workspace contains a variable named 'name')");
 	help_strings[string("exists")][string("details")] = string(R"('exists' returns 'true' if the workspace contains a variable whose name matches the String 'name' and 'false' otherwise. One use of 'exists' is to add Move and Monitor objects conditional on the variable 'x' existing. The function 'ls' provides a summary for all variable names that 'exists' would evaluate as 'true'.)");
@@ -1849,7 +1844,6 @@ if (ln_of_ex != 1) {
 	help_strings[string("exp")][string("name")] = string(R"(exp)");
 	help_arrays[string("exp")][string("see_also")].push_back(string(R"(ln)"));
 	help_strings[string("exp")][string("title")] = string(R"(Exponential of a number)");
-	help_strings[string("fileExists")][string("name")] = string(R"(fileExists)");
 	help_strings[string("floor")][string("description")] = string(R"(Rounds a number down to the nearest integer.)");
 	help_strings[string("floor")][string("details")] = string(R"(The floor function takes as input a real number x, and gives as output the
 greatest integer less than or equal to x.)");
@@ -1862,14 +1856,19 @@ floor(y) # returns -3)");
 	help_arrays[string("floor")][string("see_also")].push_back(string(R"(trunc)"));
 	help_strings[string("floor")][string("title")] = string(R"(The floor function.)");
 	help_strings[string("fnAdjacentRateModifier")][string("name")] = string(R"(fnAdjacentRateModifier)");
-    help_strings[string("fnAverageDistanceMatrix")][string("name")] = string(R"(fnAverageDistanceMatrix)");
 	help_arrays[string("fnBSPInterval")][string("authors")].push_back(string(R"(Sebastian Höhna)"));
+	help_strings[string("fnBSPInterval")][string("description")] = string(R"(A Bayesian skyline approach, as suggested by Drummond et al. (2005; https://doi.org/10.1093/molbev/msi103) and Billenstein and Höhna (2024; https://doi.org/10.1093/molbev/msae073), requires as an input a vector of values. These values can be the same for several consecutive entries. For example, if the total number of intervals is 4, and we have the two values 0.2 and 0.5, where the first value is used once and the second used three times, we could create a Bayesian skyline vector as `[0.2,0.5,0.5,0.5]`. To construct such a vector, we use the function `fnBSPInterval`.)");
+	help_strings[string("fnBSPInterval")][string("details")] = string(R"(The function `fnBSPInterval` takes in two arguments: `x` which are the values, and `n` which are how often each value is replicated. Currently, this function assumes that all values are positive real numbers, as the `fnBSPInterval` is used for population sizes in coalescent methods.)");
+	help_strings[string("fnBSPInterval")][string("example")] = string(R"(a <- [0.1,0.2,0.3]
+b <- [2,1,4]
+fnBSPInterval( a, b ))");
 	help_strings[string("fnBSPInterval")][string("name")] = string(R"(fnBSPInterval)");
+	help_arrays[string("fnBSPInterval")][string("see_also")].push_back(string(R"(dnCoalescent)"));
+	help_strings[string("fnBSPInterval")][string("title")] = string(R"(Expand value vector for Bayesian skyline method input)");
 	help_strings[string("fnBetaBrokenStick")][string("name")] = string(R"(fnBetaBrokenStick)");
 	help_strings[string("fnBinaryMutationCoalescentRateMatrix")][string("name")] = string(R"(fnBinaryMutationCoalescentRateMatrix)");
 	help_strings[string("fnBiogeoDE")][string("name")] = string(R"(fnBiogeoDE)");
 	help_strings[string("fnBiogeographyCladoEventsBD")][string("name")] = string(R"(fnBiogeographyCladoEventsBD)");
-	help_strings[string("fnBiogeographyRateMatrix")][string("name")] = string(R"(fnBiogeographyRateMatrix)");
 	help_strings[string("fnBlosum62")][string("name")] = string(R"(fnBlosum62)");
 	help_strings[string("fnChromosomes")][string("name")] = string(R"(fnChromosomes)");
 	help_strings[string("fnChromosomesCladoEventsBD")][string("name")] = string(R"(fnChromosomesCladoEventsBD)");
@@ -1878,7 +1877,6 @@ floor(y) # returns -3)");
 	help_strings[string("fnChromosomesPloidyCladoEventsBD")][string("name")] = string(R"(fnChromosomesPloidyCladoEventsBD)");
 	help_strings[string("fnChronoToPhylo")][string("name")] = string(R"(fnChronoToPhylo)");
 	help_strings[string("fnCladeSpecificHierarchicalBranchRate")][string("name")] = string(R"(fnCladeSpecificHierarchicalBranchRate)");
-	help_strings[string("fnCladogeneticProbabilityMatrix")][string("name")] = string(R"(fnCladogeneticProbabilityMatrix)");
 	help_strings[string("fnCladogeneticSpeciationRateMatrix")][string("name")] = string(R"(fnCladogeneticSpeciationRateMatrix)");
 	help_arrays[string("fnCoala")][string("authors")].push_back(string(R"(Bastien Boussau)"));
 	help_strings[string("fnCoala")][string("name")] = string(R"(fnCoala)");
@@ -1960,7 +1958,6 @@ Q2 := fndNdS( omega, fnX3( fnHKY( kappa, pi) ) ) # MG94K = HKY + X3 + dNdS)");
 	help_references[string("fnCodonMG94K")].push_back(RbHelpReference(R"(Muse, S. and B. Gaut (1994) A likelihood approach for comparing synonymous and nonsynonymous nucleotide substitution rates, with application to the chloroplast genome. Mol. Biol. Evol. (1994) 11 (5):715-724)",R"(https://doi.org/10.1093/oxfordjournals.molbev.a040152 )",R"()"));
 	help_arrays[string("fnCodonMG94K")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94K)"));
 	help_strings[string("fnCodonMG94K")][string("title")] = string(R"(The Muse-Gaut (1994) codon rate matrix + K.)");
-	help_strings[string("fnCollapseSA")][string("name")] = string(R"(fnCollapseSA)");
 	help_arrays[string("fnCovarion")][string("authors")].push_back(string(R"(Sebastian Hoehna and Lyndon Coghill)"));
 	help_strings[string("fnCovarion")][string("description")] = string(R"(The `fnCovarion` function defines a covarion model rate matrix for character evolution.
 The resulting rate matrix incorporates rate heterogeneity where the characters/sites are allowed to move between rate categories with a switching rate.)");
@@ -2192,8 +2189,6 @@ Q2 := fndNdS( fnMutSelAA( fnX3( fnGTR(er, nuc_pi)), F), omega))");
 	help_references[string("fnFMutSel0")].push_back(RbHelpReference(R"(Yang, Z. and R. Nielsen. Mutation-Selection Models of Codon Substitution and Their Use to Estimate Selective Strengths on Codon Usage.  Mol. Biol. Evol. (2008) 25(3):568--579)",R"(https://doi.org/10.1093/molbev/msm284 )",R"()"));
 	help_arrays[string("fnFMutSel0")][string("see_also")].push_back(string(R"(fnCodonGY94, fnCodonMG94, fnFMutSel0, fnMutSel)"));
 	help_strings[string("fnFMutSel0")][string("title")] = string(R"(The FMutSel0 model)");
-	help_strings[string("fnFeatureInformedRates")][string("name")] = string(R"(fnFeatureInformedRates)");
-	help_strings[string("fnFlowT2Populations")][string("name")] = string(R"(fnFlowT2Populations)");
 	help_strings[string("fnFreeBinary")][string("description")] = string(R"(Constructs a transition rate matrix between two states.)");
 	help_strings[string("fnFreeBinary")][string("details")] = string(R"(This function enables the user to define the non-normalized off-diagonal elements of the matrix while also providing the option to normalize the matrix. Normalization ensures that the mean instantaneous rate equals 1. For example, a branch of length 1 in a non-clock tree corresponds to an expected 1 substitution per character.
  
@@ -2361,7 +2356,6 @@ Q := fnHKY(kappa,pi))");
 	help_strings[string("fnHKY")][string("title")] = string(R"(The Hasegawa-Kishino-Yano (1985) nucleotide rate matrix)");
 	help_strings[string("fnHiddenStateRateMatrix")][string("name")] = string(R"(fnHiddenStateRateMatrix)");
 	help_strings[string("fnHostSwitchRateModifier")][string("name")] = string(R"(fnHostSwitchRateModifier)");
-	help_strings[string("fnInferAncestralPopSize")][string("name")] = string(R"(fnInferAncestralPopSize)");
 	help_strings[string("fnInfiniteSites")][string("name")] = string(R"(fnInfiniteSites)");
 	help_arrays[string("fnInvASRV")][string("authors")].push_back(string(R"(Benjamin Redelings)"));
 	help_strings[string("fnInvASRV")][string("description")] = string(R"(Add an invariable-sites component to a site model.)");
@@ -2615,21 +2609,10 @@ Q := fnMutSelAA(fnX3(fnGTR(er, nuc_pi)), F))");
 	help_strings[string("fnPhylogeneticIndependentContrasts")][string("name")] = string(R"(fnPhylogeneticIndependentContrasts)");
 	help_strings[string("fnPhylogeneticIndependentContrastsMultiSample")][string("name")] = string(R"(fnPhylogeneticIndependentContrastsMultiSample)");
 	help_strings[string("fnPoMo")][string("name")] = string(R"(fnPoMo)");
-	help_strings[string("fnPoMo2N")][string("name")] = string(R"(fnPoMo2N)");
-	help_strings[string("fnPoMo4N")][string("name")] = string(R"(fnPoMo4N)");
-	help_strings[string("fnPoMoKN")][string("name")] = string(R"(fnPoMoKN)");
 	help_strings[string("fnPruneTree")][string("name")] = string(R"(fnPruneTree)");
 	help_strings[string("fnRangeEvolutionRateModifier")][string("name")] = string(R"(fnRangeEvolutionRateModifier)");
 	help_strings[string("fnRateGeneratorSequence")][string("name")] = string(R"(fnRateGeneratorSequence)");
 	help_strings[string("fnReversiblePoMo")][string("name")] = string(R"(fnReversiblePoMo)");
-	help_strings[string("fnReversiblePoMo2N")][string("name")] = string(R"(fnReversiblePoMo2N)");
-	help_strings[string("fnReversiblePoMo4N")][string("name")] = string(R"(fnReversiblePoMo4N)");
-	help_strings[string("fnReversiblePoMoBalance4N")][string("name")] = string(R"(fnReversiblePoMoBalance4N)");
-	help_strings[string("fnReversiblePoMoKN")][string("name")] = string(R"(fnReversiblePoMoKN)");
-	help_strings[string("fnReversiblePoMoNeutralM4N")][string("name")] = string(R"(fnReversiblePoMoNeutralM4N)");
-	help_strings[string("fnReversiblePoMoThree4")][string("name")] = string(R"(fnReversiblePoMoThree4)");
-	help_strings[string("fnReversiblePoMoThree4N")][string("name")] = string(R"(fnReversiblePoMoThree4N)");
-	help_strings[string("fnReversiblePoMoTwo4N")][string("name")] = string(R"(fnReversiblePoMoTwo4N)");
 	help_strings[string("fnRtRev")][string("name")] = string(R"(fnRtRev)");
 	help_strings[string("fnSampledCladogenesisRootFrequencies")][string("name")] = string(R"(fnSampledCladogenesisRootFrequencies)");
 	help_arrays[string("fnScale")][string("authors")].push_back(string(R"(Benjamin Redelings)"));
@@ -2671,7 +2654,6 @@ M := fnScale(MM, 1/MM.rate()))");
 	help_arrays[string("fnScale")][string("see_also")].push_back(string(R"(fnMixtureASRV)"));
 	help_strings[string("fnScale")][string("title")] = string(R"(fnScale)");
 	help_strings[string("fnSegregatingSites")][string("name")] = string(R"(fnSegregatingSites)");
-	help_strings[string("fnShiftEvents")][string("name")] = string(R"(fnShiftEvents)");
 	help_strings[string("fnShortestDistance")][string("name")] = string(R"(fnShortestDistance)");
 	help_strings[string("fnSiteRateModifier")][string("name")] = string(R"(fnSiteRateModifier)");
 	help_arrays[string("fnSmoothTimeLine")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
@@ -2859,7 +2841,6 @@ Q3 := fndNdS(fnX3(fnGTR(er, nuc_pi)), omega)         # GTR + X3 + dNdS)");
 	help_strings[string("fndNdS")][string("title")] = string(R"(Add a dN/dS factor to a codon rate matrix.)");
 	help_strings[string("formatDiscreteCharacterData")][string("name")] = string(R"(formatDiscreteCharacterData)");
 	help_strings[string("gamma")][string("name")] = string(R"(gamma)");
-	help_strings[string("geometricMean")][string("name")] = string(R"(geometricMean)");
 	help_arrays[string("getOption")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("getOption")][string("description")] = string(R"(Get a global option for RevBayes.)");
 	help_strings[string("getOption")][string("details")] = string(R"(Runtime options are used to personalize RevBayes and are stored on the local machine. See `setOption` for the list of available keys and their associated values.)");
@@ -2905,7 +2886,6 @@ a <- 2
 b)");
 	help_strings[string("ifelse")][string("name")] = string(R"(ifelse)");
 	help_strings[string("ifelse")][string("title")] = string(R"(If-else statement as a function)");
-	help_strings[string("int")][string("name")] = string(R"(int)");
 	help_arrays[string("license")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("license")][string("description")] = string(R"(Print the copyright license of RevBayes.)");
 	help_strings[string("license")][string("example")] = string(R"(license())");
@@ -2933,7 +2913,6 @@ y # y has the determined value of 1.07846)");
 	help_strings[string("ln")][string("name")] = string(R"(ln)");
 	help_arrays[string("ln")][string("see_also")].push_back(string(R"(log)"));
 	help_strings[string("ln")][string("title")] = string(R"(Natural log function)");
-	help_strings[string("loadPlugin")][string("name")] = string(R"(loadPlugin)");
 	help_strings[string("log")][string("name")] = string(R"(log)");
 	help_strings[string("logistic")][string("description")] = string(R"(Compute the logistic function)");
 	help_strings[string("logistic")][string("details")] = string(R"(The function is defined as
@@ -2949,7 +2928,6 @@ p := logistic(x))");
 	help_strings[string("logistic")][string("name")] = string(R"(logistic)");
 	help_arrays[string("logistic")][string("see_also")].push_back(string(R"(logit)"));
 	help_strings[string("logistic")][string("title")] = string(R"(The logistic function)");
-	help_strings[string("logit")][string("name")] = string(R"(logit)");
 	help_arrays[string("ls")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("ls")][string("description")] = string(R"(Show the content of the workspace.)");
 	help_strings[string("ls")][string("details")] = string(R"(The list functions shows all the variables in the current workspace. You can also see all the functions available if you use ls(all=TRUE))");
@@ -3224,7 +3202,6 @@ mymcmc.run(generations=1000))");
 	help_strings[string("mnNexus")][string("name")] = string(R"(mnNexus)");
 	help_strings[string("mnProbability")][string("name")] = string(R"(mnProbability)");
 	help_strings[string("mnScreen")][string("name")] = string(R"(mnScreen)");
-	help_strings[string("mnSiteMixtureAllocation")][string("name")] = string(R"(mnSiteMixtureAllocation)");
 	help_strings[string("mnStochasticBranchRate")][string("name")] = string(R"(mnStochasticBranchRate)");
 	help_strings[string("mnStochasticBranchStateTimes")][string("name")] = string(R"(mnStochasticBranchStateTimes)");
 	help_strings[string("mnStochasticCharacterMap")][string("name")] = string(R"(mnStochasticCharacterMap)");
@@ -3284,6 +3261,16 @@ Non-simplex-valued vector random variables are untransformed.
 Add random variables to the move directly (e.g. branch_rates[1], not branch_rates).WARNING: Disabling tuning disables both tuning of proposal variance and learning of empirical covariance matrix.)");
 	help_strings[string("mvAVMVN")][string("name")] = string(R"(mvAVMVN)");
 	help_arrays[string("mvAdaptiveRJSwitch")][string("authors")].push_back(string(R"(Sebastian Höhna)"));
+	help_strings[string("mvAdaptiveRJSwitch")][string("description")] = string(R"(A move that performs a reversible-jump between a fixed value and a value drawn from a distribution. The standard approach is that the value is drawn from the prior distribution. As this can be inefficient for broad priors, we learn here the proposal distribution. Currently, we only support a normal distribution. Thus, we learn the mean and variance of this normal distribution during the learning phase before actually applying it.)");
+	help_strings[string("mvAdaptiveRJSwitch")][string("example")] = string(R"(
+theta ~ dnReversibleJumpMixture(0.01,
+                        dnUnif( 0.0, 0.1 ),
+                        0.5)
+
+moves.append( mvAdaptiveRJSwitch(theta, waitBeforeLearning=100,
+                                        waitBeforeUsing=1000,
+                                        updateEvery=10,
+                                        weight=10.0) ))");
 	help_strings[string("mvAdaptiveRJSwitch")][string("name")] = string(R"(mvAdaptiveRJSwitch)");
 	help_arrays[string("mvAdaptiveRJSwitch")][string("see_also")].push_back(string(R"(mvRJSwitch)"));
 	help_strings[string("mvAdaptiveRJSwitch")][string("title")] = string(R"(Adaptive Reversible-Jump (RJ) move)");
@@ -3598,7 +3585,6 @@ mymcmc.run(30000,underPrior=TRUE);)");
 	help_strings[string("mvGraphFlipEdge")][string("name")] = string(R"(mvGraphFlipEdge)");
 	help_strings[string("mvGraphShiftEdge")][string("name")] = string(R"(mvGraphShiftEdge)");
 	help_strings[string("mvHSRFHyperpriorsGibbs")][string("name")] = string(R"(mvHSRFHyperpriorsGibbs)");
-	help_strings[string("mvHSRFIntervalSwap")][string("name")] = string(R"(mvHSRFIntervalSwap)");
 	help_strings[string("mvHSRFUnevenGridHyperpriorsGibbs")][string("name")] = string(R"(mvHSRFUnevenGridHyperpriorsGibbs)");
 	help_strings[string("mvHomeologPhase")][string("name")] = string(R"(mvHomeologPhase)");
 	help_arrays[string("mvIidPrior")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
@@ -3722,23 +3708,19 @@ moves.append( mvNNI(tree=timetree, weight=taxa.size()) ))");
 	help_strings[string("mvNodeTimeSlidePathTruncatedNormal")][string("name")] = string(R"(mvNodeTimeSlidePathTruncatedNormal)");
 	help_strings[string("mvNodeTimeSlideUniform")][string("name")] = string(R"(mvNodeTimeSlideUniform)");
 	help_strings[string("mvNodeTimeSlideUniformAgeConstrained")][string("name")] = string(R"(mvNodeTimeSlideUniformAgeConstrained)");
-	help_strings[string("mvOrderedEventBirthDeath")][string("name")] = string(R"(mvOrderedEventBirthDeath)");
-	help_strings[string("mvOrderedEventScaleRealPos")][string("name")] = string(R"(mvOrderedEventScaleRealPos)");
-	help_strings[string("mvOrderedEventSlideProbability")][string("name")] = string(R"(mvOrderedEventSlideProbability)");
-	help_strings[string("mvOrderedEventSlideReal")][string("name")] = string(R"(mvOrderedEventSlideReal)");
-	help_strings[string("mvOrderedEventSlideRealPos")][string("name")] = string(R"(mvOrderedEventSlideRealPos)");
-	help_strings[string("mvOrderedEventTimeSlide")][string("name")] = string(R"(mvOrderedEventTimeSlide)");
-	help_strings[string("mvOrderedEventVectorScaleRealPos")][string("name")] = string(R"(mvOrderedEventVectorScaleRealPos)");
-	help_strings[string("mvOrderedEventVectorSlideProbability")][string("name")] = string(R"(mvOrderedEventVectorSlideProbability)");
-	help_strings[string("mvOrderedEventVectorSlideReal")][string("name")] = string(R"(mvOrderedEventVectorSlideReal)");
-	help_strings[string("mvOrderedEventVectorSlideRealPos")][string("name")] = string(R"(mvOrderedEventVectorSlideRealPos)");
 	help_strings[string("mvRJSwitch")][string("name")] = string(R"(mvRJSwitch)");
 	help_arrays[string("mvRandomCategoryWalk")][string("authors")].push_back(string(R"(Sebastian Höhna)"));
+	help_strings[string("mvRandomCategoryWalk")][string("description")] = string(R"(This random walk proposal picks a random index of a vector. Then, it picks a random neighbor, either one index left or one index right. Then it decreases the current value at the chosen index by one, and increases the value of the neighbor by one.
+
+Such a move is important for a value from a multinomial distribution because it keeps the total equal.)");
+	help_strings[string("mvRandomCategoryWalk")][string("example")] = string(R"(num_e_prior <- simplex(rep(1, 6))
+number_events_pi ~ dnMultinomial(p=num_e_prior, size=20)
+
+moves.append( mvRandomCategoryWalk(x=number_events_pi, weight=5) ))");
 	help_strings[string("mvRandomCategoryWalk")][string("name")] = string(R"(mvRandomCategoryWalk)");
 	help_arrays[string("mvRandomCategoryWalk")][string("see_also")].push_back(string(R"(mvRandomGeometricWalk)"));
-	help_arrays[string("mvRandomCategoryWalk")][string("see_also")].push_back(string(R"(mvRandomIntegerWalk)"));
-	help_arrays[string("mvRandomCategoryWalk")][string("see_also")].push_back(string(R"(mvRandomNaturalWalk)"));
-	help_strings[string("mvRandomCategoryWalk")][string("title")] = string(R"(Random walk on vector elements)");
+	help_arrays[string("mvRandomCategoryWalk")][string("see_also")].push_back(string(R"(dnMultinomial)"));
+	help_strings[string("mvRandomCategoryWalk")][string("title")] = string(R"(Random walk on vector of naturals (e.g., from multinomial distribution) keeping the sum.)");
 	help_strings[string("mvRandomDive")][string("description")] = string(R"(The multiplicative proposal of Dutta 2012, allows for long-distance moves.
 
 Useful for fat-tailed distributions, possibly for bimoodal distributions.
@@ -3815,8 +3797,6 @@ remains unchanged for the tree branches.)");
 	help_arrays[string("mvRateAgeBetaShift")][string("see_also")].push_back(string(R"(mvRateAgeProposal)"));
 	help_arrays[string("mvRateAgeBetaShift")][string("see_also")].push_back(string(R"(mvRateAgeSubtreeProposal)"));
 	help_strings[string("mvRateAgeBetaShift")][string("title")] = string(R"(The RateAgeBetaShift move)");
-	help_strings[string("mvRateAgeProposal")][string("name")] = string(R"(mvRateAgeProposal)");
-	help_strings[string("mvRateAgeSubtreeProposal")][string("name")] = string(R"(mvRateAgeSubtreeProposal)");
 	help_arrays[string("mvResampleFBD")][string("authors")].push_back(string(R"(Walker Pett)"));
 	help_strings[string("mvResampleFBD")][string("description")] = string(R"(This move resamples an oldest occurrence age for a random species in a fossilized birth death process described by `dnFBDRP` or `dnFBDRMatrix`)");
 	help_strings[string("mvResampleFBD")][string("details")] = string(R"(Under the hood, FBD fossil data is augmented with oldest occurrence ages for each species, which are automatically marginalized during when the model is sampled using MCMC. These ages can also be resampled manually using this move.)");
@@ -3828,7 +3808,6 @@ moves.append( mvResampleFBD(bd, weight=taxa.size()) ))");
 	help_arrays[string("mvResampleFBD")][string("see_also")].push_back(string(R"(dnFossilizedBirthDeathRange)"));
 	help_arrays[string("mvResampleFBD")][string("see_also")].push_back(string(R"(dnFossilizedBirthDeathRangeMatrix)"));
 	help_strings[string("mvRootTimeScaleBactrian")][string("name")] = string(R"(mvRootTimeScaleBactrian)");
-	help_strings[string("mvRootTimeSlide")][string("name")] = string(R"(mvRootTimeSlide)");
 	help_strings[string("mvRootTimeSlideUniform")][string("name")] = string(R"(mvRootTimeSlideUniform)");
 	help_strings[string("mvSPR")][string("description")] = string(R"(Tree topology move that performs a Subtree Prune and Regraft (SPR) on
 an unrooted tree.)");
@@ -4288,7 +4267,6 @@ mymcmc.operatorSummary())");
 	help_arrays[string("mvSpeciesTreeScale")][string("see_also")].push_back(string(R"(mvSpeciesSubtreeScale)"));
 	help_strings[string("mvSpeciesTreeScale")][string("title")] = string(R"(Tree scale move on species tree and gene trees for multispecies coalescent models.)");
 	help_strings[string("mvSubtreeScale")][string("name")] = string(R"(mvSubtreeScale)");
-	help_strings[string("mvSubtreeSwap")][string("name")] = string(R"(mvSubtreeSwap)");
 	help_strings[string("mvSymmetricMatrixElementSlide")][string("name")] = string(R"(mvSymmetricMatrixElementSlide)");
 	help_strings[string("mvSynchronizedVectorFixedSingleElementSlide")][string("name")] = string(R"(mvSynchronizedVectorFixedSingleElementSlide)");
 	help_strings[string("mvTreeScale")][string("description")] = string(R"(Scales the ages of all internal nodes in a `TimeTree` by the same factor while
@@ -4462,28 +4440,6 @@ ps.stdError(bootstrap=TRUE, replicates=50, printFiles=TRUE) # bootstrap (50 repl
 	help_arrays[string("pathSampler")][string("see_also")].push_back(string(R"(powerPosterior)"));
 	help_arrays[string("pathSampler")][string("see_also")].push_back(string(R"(steppingStoneSampler)"));
 	help_strings[string("pathSampler")][string("title")] = string(R"(Path-sampling marginal likelihood estimation)");
-	help_arrays[string("pdRequire")][string("authors")].push_back(string(R"(Ben Redelings)"));
-	help_strings[string("pdRequire")][string("description")] = string(R"(Evidence that a boolean statement is true.)");
-	help_strings[string("pdRequire")][string("details")] = string(R"(This represents a pseudodata likelihood that is
-* 1 if condition is true
-* 0 otherwise
-
-Note the pseudodata likelihood is NOT a density, and is not
-normalized to sum to 1.  Instead it is normalized so that the
-maximum value is 1.
-
-If weight argument is given, then when the condition is
-false the pseudodata likelihood is:
-* exp(-weight))");
-	help_strings[string("pdRequire")][string("example")] = string(R"(
-# Evidence that y > x^2
-x ~ dnNormal(0,1)
-y ~ dnNormal(0,1)
-f ~ dnPseudo( pdRequire(y > x^2) )
-f.clamp( pseudoObservation() ))");
-	help_strings[string("pdRequire")][string("name")] = string(R"(pdRequire)");
-	help_arrays[string("pdRequire")][string("see_also")].push_back(string(R"(dnPseudo)"));
-	help_strings[string("pdRequire")][string("title")] = string(R"(Requirement PseudoDataLikelihood)");
 	help_strings[string("pomoRF")][string("name")] = string(R"(pomoRF)");
 	help_strings[string("pomoState4Convert")][string("name")] = string(R"(pomoState4Convert)");
 	help_strings[string("posteriorPredictiveAnalysis")][string("name")] = string(R"(posteriorPredictiveAnalysis)");
@@ -4602,7 +4558,6 @@ printSeed())");
 	help_strings[string("printSeed")][string("name")] = string(R"(printSeed)");
 	help_arrays[string("printSeed")][string("see_also")].push_back(string(R"(seed)"));
 	help_strings[string("printSeed")][string("title")] = string(R"(Print the random number generator seed)");
-	help_strings[string("profile")][string("name")] = string(R"(profile)");
 	help_strings[string("quantile")][string("name")] = string(R"(quantile)");
 	help_arrays[string("quit")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("quit")][string("description")] = string(R"(Terminates the currently running instance of RevBayes.)");
@@ -4611,9 +4566,6 @@ q()
 # you can always start again later ...)");
 	help_strings[string("quit")][string("name")] = string(R"(quit)");
 	help_strings[string("quit")][string("title")] = string(R"(Quit RevBayes)");
-	help_strings[string("r_add")][string("name")] = string(R"(r_add)");
-	help_strings[string("r_mul")][string("name")] = string(R"(r_mul)");
-	help_strings[string("r_sub")][string("name")] = string(R"(r_sub)");
 	help_arrays[string("range")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("range")][string("description")] = string(R"(Create a sequence of number in the given range (interval).)");
 	help_strings[string("range")][string("details")] = string(R"(This function is a simplified version of the sequence function 'seq'. The range function creates a sequence of integer numbers with a step size of 1.)");
@@ -4645,13 +4597,10 @@ char_hist = readCharacterHistory("output/simmap.tree"))");
 	help_strings[string("readCharacterHistory")][string("title")] = string(R"(Function to read in character histories)");
 	help_strings[string("readContinuousCharacterData")][string("name")] = string(R"(readContinuousCharacterData)");
 	help_strings[string("readDataDelimitedFile")][string("name")] = string(R"(readDataDelimitedFile)");
-	help_strings[string("readDelimitedCharacterData")][string("name")] = string(R"(readDelimitedCharacterData)");
-	help_strings[string("readDelimitedDataFile")][string("name")] = string(R"(readDelimitedDataFile)");
 	help_strings[string("readDiscreteCharacterData")][string("name")] = string(R"(readDiscreteCharacterData)");
 	help_strings[string("readDistanceMatrix")][string("name")] = string(R"(readDistanceMatrix)");
 	help_strings[string("readMatrix")][string("name")] = string(R"(readMatrix)");
 	help_strings[string("readPoMoCountFile")][string("name")] = string(R"(readPoMoCountFile)");
-	help_strings[string("readRegionalFeatures")][string("name")] = string(R"(readRegionalFeatures)");
 	help_strings[string("readRelativeNodeAgeConstraints")][string("name")] = string(R"(readRelativeNodeAgeConstraints)");
 	help_strings[string("readRelativeNodeAgeWeightedConstraints")][string("name")] = string(R"(readRelativeNodeAgeWeightedConstraints)");
 	help_strings[string("readStochasticVariableTrace")][string("name")] = string(R"(readStochasticVariableTrace)");
@@ -4741,13 +4690,8 @@ only allows for 0, 1, and . characters in the VCF file.)");
 reverse(x))");
 	help_strings[string("reverse")][string("name")] = string(R"(reverse)");
 	help_strings[string("reverse")][string("title")] = string(R"(Reverse function)");
-	help_strings[string("rexponential")][string("name")] = string(R"(rexponential)");
-	help_strings[string("rinvlogit")][string("name")] = string(R"(rinvlogit)");
-	help_strings[string("rlogit")][string("name")] = string(R"(rlogit)");
 	help_strings[string("rootedTripletDist")][string("name")] = string(R"(rootedTripletDist)");
 	help_strings[string("round")][string("name")] = string(R"(round)");
-	help_strings[string("rscale")][string("name")] = string(R"(rscale)");
-	help_strings[string("rshift")][string("name")] = string(R"(rshift)");
 	help_strings[string("seed")][string("description")] = string(R"(Sets the random number generator seed given a natural number.)");
 	help_strings[string("seed")][string("example")] = string(R"(# pick some definitely random number
 seed(80797980)
@@ -4861,11 +4805,9 @@ getwd())");
 	help_strings[string("setwd")][string("name")] = string(R"(setwd)");
 	help_arrays[string("setwd")][string("see_also")].push_back(string(R"(getwd)"));
 	help_strings[string("setwd")][string("title")] = string(R"(Set and print the working directory)");
-	help_strings[string("sigmoid")][string("name")] = string(R"(sigmoid)");
 	help_strings[string("simBirthDeath")][string("description")] = string(R"(Simulates a tree under a very general birth-death process. Parameters are fed in as a n_cats by n_intervals matrix, such that the ith row is the rate vector for the ith category.)");
 	help_strings[string("simBirthDeath")][string("name")] = string(R"(simBirthDeath)");
 	help_strings[string("simCompleteTree")][string("name")] = string(R"(simCompleteTree)");
-	help_strings[string("simForwardBirthDeath")][string("name")] = string(R"(simForwardBirthDeath)");
 	help_strings[string("simStartingTree")][string("name")] = string(R"(simStartingTree)");
 	help_strings[string("simTree")][string("name")] = string(R"(simTree)");
 	help_arrays[string("sin")][string("authors")].push_back(string(R"(Sigournie Brock)"));
@@ -5569,7 +5511,6 @@ for specifying how to separate values in the RevObject (default is "").)");
 	help_arrays[string("write")][string("see_also")].push_back(string(R"(writeFasta)"));
 	help_strings[string("write")][string("title")] = string(R"(Write RevObject to file)");
 	help_strings[string("writeCharacterDataDelimited")][string("name")] = string(R"(writeCharacterDataDelimited)");
-	help_strings[string("writeDelimitedCharacterData")][string("name")] = string(R"(writeDelimitedCharacterData)");
 	help_strings[string("writeFasta")][string("description")] = string(R"(This function writes out a FASTA formatted file given 
 data of class `AbstractHomologousDiscreteCharacterData`.
 Filename is specified using the `filename` argument.)");
