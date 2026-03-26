@@ -251,13 +251,17 @@ int main(int argc, char* argv[])
     RevLanguage::UserInterface::userInterface().setOutputStream( rev_output );
 
     /* Any script or expressions from `-e expr` are executed here. */
-    rl.startRevLanguageEnvironment(cmd_line.expressions, cmd_line.filename, cmd_line.args);
+    int result = rl.startRevLanguageEnvironment(cmd_line.expressions, cmd_line.filename, cmd_line.args);
 
+    /* Don't do anything if we encountered an error and aren't interactive */
+    if (result != 0 and not cmd_line.force_interactive)
+        ;
     /* Interactive or jupyter commands are executed here. */
-    if ( cmd_line.jupyter )
+    else if ( cmd_line.jupyter )
     {
         RevClient::startJupyterInterpreter();
     }
+    /* Start the interactive loop or there's no script or we are told to do so */
     else if ( not cmd_line.script_or_expr() or cmd_line.force_interactive )
     {
         enableTermAnsi();
@@ -265,11 +269,10 @@ int main(int argc, char* argv[])
         RevClient::startInterpreter();
     }
 
-#   ifdef RB_MPI
-    MPI_Finalize();
-#   endif
-
-    return 0;
+    // MPI finalize is called here.
+    RevClient::shutdown();
+    
+    return result;
 }
 
 #endif
