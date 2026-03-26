@@ -237,7 +237,7 @@ double WeightedBranchLengthScaleProposal::doProposal( void )
             proposed_branch_fraction = x1 + sol;
             if ( proposed_branch_fraction < x1 || proposed_branch_fraction > x2 )
             {
-                throw RbException("Wrong proposal");
+                throw RbException("Issue in proposing a new branch length using the weighted branch-length proposal. The proposed branch length is outside the fraction.");
             }
         }
         u -= block;
