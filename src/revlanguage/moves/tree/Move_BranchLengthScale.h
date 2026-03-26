@@ -30,7 +30,7 @@ namespace RevLanguage {
         void                                        setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);       //!< Set member variable
         
         RevPtr<const RevVariable>                   tree;
-        RevPtr<const RevVariable>                   delta;
+        RevPtr<const RevVariable>                   lambda;
         RevPtr<const RevVariable>                   external;
         RevPtr<const RevVariable>                   tuning;
         
