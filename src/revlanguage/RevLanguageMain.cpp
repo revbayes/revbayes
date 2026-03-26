@@ -26,7 +26,7 @@ RevLanguageMain::RevLanguageMain(bool c, bool e, bool q)
 }
 
 
-void RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string> &expressions, const std::optional<std::string>& filename, const std::vector<std::string> &args)
+int RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string> &expressions, const std::optional<std::string>& filename, const std::vector<std::string> &args)
 {
     auto& settings = RbSettings::userSettings();
 
@@ -85,9 +85,7 @@ void RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string>
         // We just hope for better input next time
         if ( result == 2 and not continue_on_error )
         {
-            RevClient::shutdown();
-                
-            exit(1);
+            return 1; // exit(1)
         }
     }
 
@@ -103,9 +101,7 @@ void RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string>
         // We just hope for better input next time
         if (result == 2 and not continue_on_error)
         {
-            RevClient::shutdown();
-                
-            exit(1);
+            return 1; // exit(1)
         }
     }
 
@@ -124,7 +120,7 @@ void RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string>
             e.print(msg);
             RBOUT(msg.str());
         }
-        std::exit(1);
+        return 1; // exit(1)
     }
     catch (const std::exception& e)
     {
@@ -132,7 +128,7 @@ void RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string>
         {
             RBOUT(e.what());
         }
-        std::exit(1);
+        return 1; // exit(1)
     }
     catch (...)
     {
@@ -140,8 +136,9 @@ void RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string>
         {
             RBOUT("Error:\tunknown exception!");
         }
-        std::exit(1);
+        return 1; // exit(1)
     }
     
+    return 0;
 }
 

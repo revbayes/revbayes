@@ -38,7 +38,7 @@ template <class valueType> class TypedDagNode;
         
         // public member functions
         DECCladogeneticStateFunction*                           clone(void) const;                                                              //!< Create an independent clone
-        virtual double computeDataAugmentedCladogeneticLnProbability( CharacterHistoryDiscrete& histories,
+        virtual double computeDataAugmentedCladogeneticLnProbability( const CharacterHistoryDiscrete& histories,
                                                                      size_t node_index,
                                                                      size_t left_index,
                                                                      size_t right_index ) const;

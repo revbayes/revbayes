@@ -585,7 +585,7 @@ DECCladogeneticStateFunction* DECCladogeneticStateFunction::clone( void ) const
     return new DECCladogeneticStateFunction( *this );
 }
 
-double DECCladogeneticStateFunction::computeDataAugmentedCladogeneticLnProbability( CharacterHistoryDiscrete& histories,
+double DECCladogeneticStateFunction::computeDataAugmentedCladogeneticLnProbability( const CharacterHistoryDiscrete& histories,
                                                              size_t node_index,
                                                              size_t left_index,
                                                              size_t right_index ) const
@@ -593,9 +593,9 @@ double DECCladogeneticStateFunction::computeDataAugmentedCladogeneticLnProbabili
     double lnP = 0.0;
     double p = 1.0;
     
-    std::vector<CharacterEvent*>& nodeChildState = histories[ node_index ].getChildCharacters();
-    std::vector<CharacterEvent*>& leftParentState = histories[ left_index ].getParentCharacters();
-    std::vector<CharacterEvent*>& rightParentState = histories[ right_index ].getParentCharacters();
+    const std::vector<CharacterEvent*>& nodeChildState = histories[ node_index ].getChildCharacters();
+    const std::vector<CharacterEvent*>& leftParentState = histories[ left_index ].getParentCharacters();
+    const std::vector<CharacterEvent*>& rightParentState = histories[ right_index ].getParentCharacters();
 
 //    std::cout << "nodeChildState   : ";
 //    for (size_t i = 0; i < nodeChildState.size(); i++)
