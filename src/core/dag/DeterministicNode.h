@@ -300,11 +300,6 @@ const valueType& RevBayesCore::DeterministicNode<valueType>::getValue( void ) co
 template<class valueType>
 bool RevBayesCore::DeterministicNode<valueType>::isConstant( void ) const
 {
-    // Detect cycles among parameters (e.g. vector and scalar each other's parents).
-    if ( DagNode::tryPushIsConstantVisit( this ) == false )
-    {
-        throw RbException( "Cycle detected in DAG during isConstant() check: node '" + DagNode::getNodeDisplayName( this ) + "' was reached again via its parameters. The model may have a circular dependency among deterministic nodes." );
-    }
 
     // iterate over all parents and only if all parents are constant then this node is constant too
     const std::vector<const DagNode*>& parents = function->getParameters();
@@ -312,12 +307,10 @@ bool RevBayesCore::DeterministicNode<valueType>::isConstant( void ) const
     {
         if ( (*it)->isConstant() == false )
         {
-            DagNode::popIsConstantVisit( this );
             return false;
         }
     }
 
-    DagNode::popIsConstantVisit( this );
     return true;
 }
 

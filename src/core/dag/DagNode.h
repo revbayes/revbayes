@@ -84,6 +84,7 @@ template <class valueType> class RbOrderedSet;
         const std::vector<Monitor*>&                                getMonitors(void) const;                                                                    //!< Get the set of monitors
         const std::vector<Move*>&                                   getMoves(void) const;                                                                       //!< Get the set of moves
         const std::string&                                          getName(void) const;                                                                        //!< Get the of the node
+        static bool                                                 dependsOn(const DagNode* node, const DagNode* target);                                      //!< Does `node` transitively depend on `target` through its parents?
         static std::string                                          getNodeDisplayName(const DagNode* n);                                                       //!< Return the node's name if set, or "<unnamed> (node type)" otherwise
         size_t                                                      getNumberOfChildren(void) const;                                                            //!< Get the number of children for this node
         virtual size_t                                              getNumberOfMixtureElements(void) const;                                                        //!< Get the number of elements for this value
@@ -107,7 +108,6 @@ template <class valueType> class RbOrderedSet;
         void                                                        keep(void);
         void                                                        keepAffected(void);                                                                         //!< Keep value of affected nodes
         void                                                        keepVector(std::vector<DagNode *>& nodes);
-        static void                                                 popIsConstantVisit(const DagNode* n);                                                       //!< Remove n from the set of nodes currently visited in isConstant() when leaving the node
         virtual void                                                reInitialized(void);                                                                        //!< The DAG was re-initialized so maybe you want to reset some stuff
         virtual void                                                reInitializeAffected(void);                                                                 //!< The DAG was re-initialized so maybe you want to reset some stuff
         virtual void                                                reInitializeMe(void);                                                                       //!< The DAG was re-initialized so maybe you want to reset some stuff
@@ -129,8 +129,6 @@ template <class valueType> class RbOrderedSet;
         virtual void                                                swapParent(const DagNode *oldP, const DagNode *newP);                                       //!< Exchange the parent node which includes setting myself as a child of the new parent and removing myself from my old parents children list
         void                                                        touch(bool touchAll=false);
         void                                                        touchAffected(bool touchAll=false);                                                         //!< Touch affected nodes (flag for recalculation)
-        static bool                                                 tryPushIsConstantVisit(const DagNode* n);                                                   //!< Try to add n to the set of nodes currently visited in isConstant()
-
 
     protected:
                                                                     DagNode(const std::string &n);                                                              //!< Constructor
@@ -163,7 +161,7 @@ template <class valueType> class RbOrderedSet;
     private:
 
         mutable size_t                                              ref_count;
-        mutable std::vector<bool>                                   visit_flags; // in order: affected, find, keep, reinitialize, restore
+        mutable std::vector<bool>                                   visit_flags;                                                                                //!< In order: affected, find, keep, reinitialize, restore
     };
 
 }

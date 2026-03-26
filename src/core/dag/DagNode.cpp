@@ -3,9 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
-#include <map>
 #include <ostream>
-#include <set>
 #include <string>
 
 #include "Monitor.h"
@@ -14,18 +12,6 @@
 #include "RbOrderedSet.h"
 
 using namespace RevBayesCore;
-
-// Anonymous namespace to keep the two sets below private to this file (i.e., no other file can mutate them)
-namespace {
-
-    // Nodes currently in the touch propagation stack (used to detect cycles).
-    thread_local std::set<DagNode*> nodes_currently_touched;
-
-    // Nodes currently being visited by isConstant() (used to detect cycles among parameters).
-    thread_local std::set<const DagNode*> is_constant_visiting;
-
-}
-
 
 /**
  * Construct an empty DAG node, potentially
@@ -394,7 +380,6 @@ std::vector<double> DagNode::getMixtureProbabilities(void) const
 }
 
 
-
 /**
  * Get a const reference to our local monitor set.
  */
@@ -435,9 +420,9 @@ std::string DagNode::getNodeDisplayName(const DagNode* n)
     if ( !nm.empty() ) return nm;
     switch ( n->getDagNodeType() )
     {
-        case DagNode::CONSTANT:     return "<unnamed> (constant node)";
+        case DagNode::CONSTANT:      return "<unnamed> (constant node)";
         case DagNode::DETERMINISTIC: return "<unnamed> (deterministic node)";
-        case DagNode::STOCHASTIC:   return "<unnamed> (stochastic node)";
+        case DagNode::STOCHASTIC:    return "<unnamed> (stochastic node)";
     }
     return "<unnamed>";
 }
@@ -509,7 +494,6 @@ void DagNode::getPrintableChildren(std::vector<DagNode *> &c) const
 }
 
 
-
 /**
  * Get the printable parents by filling the set of DAG nodes with the printable parents.
  * This method will skip hidden variables and instead replace the hidden variables by their parents,
@@ -560,6 +544,7 @@ const std::set<size_t>& DagNode::getTouchedElementIndices( void ) const
 
     return touched_elements;
 }
+
 
 bool DagNode::getVisitFlag( const size_t flagType ) const
 {
@@ -717,17 +702,6 @@ void DagNode::keepAffected()
         }
     }
 
-}
-
-
-/**
- * Removes n from the per-thread set of the nodes we are currently visiting during the isConstant() traversal.
- * This function is a counterpart to tryPushIsConstantVisit(), which adds a node that we enter during the traversal.
- * popIsConstantVisit() removes a node that we leave during the traversal.
- */
-void DagNode::popIsConstantVisit(const DagNode* n)
-{
-    is_constant_visiting.erase( n );
 }
 
 
@@ -984,11 +958,74 @@ void DagNode::removeMove(Move *m)
 
 
 /**
+ * Find out if `node`, or any of its ancestors, equals `target`.
+ *
+ * Strategy: Iteratively check a list of nodes and schedule their parents
+ *              to be checked next.
+ *           It is important that we never schedule a node to be checked twice, as this
+ *              can lead to exponential blowup.
+ *           A node can be scheduled twice if there are multiple paths to reach it from
+ *              a descendant.
+ *           For example, if y is the parent x, and z is the parent of y and x then
+ *              we can find z through the path z->x and the path z->y->x.
+ *           If z also has an ancestor w that can be reached in two ways, then we check 
+ *              z twice, w four times, etc.
+ */
+bool DagNode::dependsOn(const DagNode* node, const DagNode* target)
+{
+//    std::cerr<<"dependsOn("<<target->getName()<<"):\n";
+
+    // The set of nodes we have already started checking -- to avoid (exponential!) duplicate work.
+    std::set<const DagNode*> scheduled_nodes;
+
+    // The set of nodes to check in the next iteration.
+    std::vector<const DagNode*> check_next = {node};
+
+    // If the next batch is empty then we are done.
+    while(not check_next.empty())
+    {
+        auto check_now = std::move(check_next);
+        check_next.clear();
+
+        for(auto node_to_check: check_now)
+        {
+            // We have already started checking this, don't start checking it (and its ancestors) again!
+            if (not scheduled_nodes.contains(node_to_check))
+            {
+//                std::cerr<<"    checking("<<node_to_check->getName()<<")\n";
+
+                // We have started checking this node, so mark it as scheduled to avoid walking it again.
+                scheduled_nodes.insert(node_to_check);
+            
+                // Check the node.
+                if (node_to_check == target) return true;
+
+                // Check the ancestors of the node.
+                for(auto parent: node_to_check->getParents())
+                    check_next.push_back(parent);
+            }
+        }
+    }
+
+    return false;
+}
+
+
+/**
  * Replace the DAG node.
  * We call swap parent for all children so that they get a new parent. We do not change the parents.
  */
 void DagNode::replace( DagNode *n )
 {
+
+    // Before modifying anything, verify the replacement would not create a cycle.
+    // After replacement, all of this node's children become n's children.
+    // If n already depends (transitively) on this node, that dependency chain
+    // would close into a loop.
+    if ( n != NULL && dependsOn(n, this) )
+    {
+        throw RbException( "Cannot complete this assignment: '" + getNodeDisplayName( n ) + "' depends on '" + getNodeDisplayName( this ) + "', so replacing one with the other would create a circular dependency." );
+    }
 
     // replace myself for all my monitor
     while ( monitors.empty() == false )
@@ -1146,41 +1183,13 @@ void DagNode::touch(bool touchAll)
 
 /**
  * Tell affected variable nodes to touch themselves (i.e. that they've been touched).
- * Throws if a cycle is detected (e.g. two deterministic nodes that depend on each other).
  */
 void DagNode::touchAffected(bool touchAll)
 {
-    if ( nodes_currently_touched.count( this ) != 0 )
+    // touch all my children
+    for (std::vector<DagNode*>::const_iterator it = children.begin(); it != children.end(); ++it)
     {
-        throw RbException( "Cycle detected in DAG during touch propagation: node '" + getNodeDisplayName( this ) + "' was reached again. The model may have a circular dependency." );
+        (*it)->touchMe( this, touchAll );
     }
-    nodes_currently_touched.insert( this );
-    for (std::vector<DagNode*>::const_iterator it=children.begin(); it!=children.end(); ++it)
-    {
-        DagNode *child = *it;
-        if ( nodes_currently_touched.count( child ) != 0 )
-        {
-            nodes_currently_touched.erase( this );
-            throw RbException( "Cycle detected in DAG during touch propagation: node '" + getNodeDisplayName( child ) + "' is both a child and an ancestor of '" + getNodeDisplayName( this ) + "'." );
-        }
-        child->touchMe( this, touchAll );
-    }
-    nodes_currently_touched.erase( this );
 }
 
-
-/**
- * Keep a per-thread set of the nodes we are currently visiting in the isConstant() walk across the DAG.
- * If node n is not in that set, add it and return true: "we are now visiting this node".
- * If node n is already in the set, we must have come back to it while it is still inside, so we have found a cycle. In that case, return false.
- */
-bool DagNode::tryPushIsConstantVisit(const DagNode* n)
-{
-    if ( is_constant_visiting.count( n ) != 0 )
-    {
-        return false;
-    }
-    
-    is_constant_visiting.insert( n );
-    return true;
-}
