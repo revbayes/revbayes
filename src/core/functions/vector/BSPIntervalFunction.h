@@ -28,30 +28,30 @@
 #include <vector>
 
 namespace RevBayesCore {
-    
+
     template <class valueType>
     class BSPIntervalFunction : public TypedFunction< RbVector<valueType> > {
-        
+
     public:
         BSPIntervalFunction(const TypedDagNode< RbVector<valueType> > *v, const TypedDagNode< RbVector<std::int64_t> > *n);
         virtual                                            ~BSPIntervalFunction(void);                                                  //!< Virtual destructor
-        
+
         // public member functions
         BSPIntervalFunction*                                clone(void) const;                                                          //!< Create an independent clone
         const std::vector<const TypedDagNode<valueType>* >& getVectorParameters(void) const;
         void                                                update(void);
-        
+
     protected:
         void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);            //!< Implementation of swaping parameters
-        
+
     private:
-        
+
         // members
         const TypedDagNode< RbVector<valueType> >*          value_param;
         const TypedDagNode< RbVector<std::int64_t> >*       num_rep;
-        
+
     };
-    
+
 }
 
 
@@ -61,11 +61,16 @@ RevBayesCore::BSPIntervalFunction<valueType>::BSPIntervalFunction(const TypedDag
     value_param( v ),
     num_rep( n )
 {
-    
+
     // add the parameter as a parent
     this->addParameter( value_param );
     this->addParameter( num_rep );
-    
+
+    if ( value_param->getValue().size() != num_rep->getValue().size() )
+    {
+        throw RbException("The size of the two vectors in 'BSPInterval' need to be the same. We expect to replicate each value exatly the number of times given in the replicates vector.");
+    }
+
     update();
 }
 
@@ -95,14 +100,14 @@ const std::vector<const RevBayesCore::TypedDagNode<valueType>* >& RevBayesCore::
 template <class valueType>
 void RevBayesCore::BSPIntervalFunction<valueType>::update( void )
 {
-    
+
     // empty current vector
     this->value->clear();
-    
+
     const RbVector<std::int64_t>    reps = num_rep->getValue();
     const RbVector<valueType>&      vals = value_param->getValue();
     size_t num_cats = reps.size();
-    
+
     for (size_t i=0; i<num_cats; ++i)
     {
         const valueType& v = vals[i];
@@ -111,7 +116,7 @@ void RevBayesCore::BSPIntervalFunction<valueType>::update( void )
             this->value->push_back( v );
         }
     }
-    
+
 }
 
 
@@ -119,7 +124,7 @@ void RevBayesCore::BSPIntervalFunction<valueType>::update( void )
 template <class valueType>
 void RevBayesCore::BSPIntervalFunction<valueType>::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
 {
-    
+
     if ( oldP == value_param )
     {
         value_param = static_cast<const TypedDagNode< RbVector<valueType> >* >( newP );
@@ -128,7 +133,12 @@ void RevBayesCore::BSPIntervalFunction<valueType>::swapParameterInternal(const D
     {
         num_rep = static_cast<const TypedDagNode< RbVector<std::int64_t> >* >( newP );
     }
-    
+
+    if ( value_param->getValue().size() != num_rep->getValue().size() )
+    {
+        throw RbException("The size of the two vectors in 'BSPInterval' need to be the same. We expect to replicate each value exatly the number of times given in the replicates vector.");
+    }
+
 }
 
 #endif
