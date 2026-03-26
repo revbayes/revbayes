@@ -6,6 +6,7 @@
 #include "MetropolisHastingsMove.h"
 #include "Move_ContinuousEventScale.h"
 #include "ContinuousEventScaleProposal.h"
+#include "Probability.h"
 #include "RealPos.h"
 #include "RlBoolean.h"
 #include "RlTimeTree.h"
@@ -71,9 +72,12 @@ void Move_ContinuousEventScale::constructInternalObject( void )
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
     
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
     
-    RevBayesCore::Proposal *p = new RevBayesCore::ContinuousEventScaleProposal(n,l);
-    value = new RevBayesCore::MetropolisHastingsMove(p,w,t);
+    RevBayesCore::Proposal *p = new RevBayesCore::ContinuousEventScaleProposal(n, l);
+    p->setTargetAcceptanceRate(tt);
+    
+    value = new RevBayesCore::MetropolisHastingsMove(p, w, t);
     
 }
 

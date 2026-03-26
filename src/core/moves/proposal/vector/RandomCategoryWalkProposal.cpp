@@ -189,21 +189,3 @@ void RandomCategoryWalkProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
         variable = static_cast<StochasticNode< RbVector<std::int64_t> > *>(newN);
     }
 }
-
-
-void RandomCategoryWalkProposal::setProposalTuningParameter(double tp)
-{
-    // nothing to be done
-}
-
-
-/**
- * Tune the Proposal to accept the desired acceptance ratio.
- *
- * There is no tuning possible
- */
-void RandomCategoryWalkProposal::tune( double rate )
-{
-    // nothing to be done
-}
-

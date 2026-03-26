@@ -219,7 +219,7 @@ void VectorBinarySwitchProposal::setProposalTuningParameter(double tp)
 
 
 /**
- * Tune the Proposal to accept the desired acceptance ratio.
+ * Tune the Proposal to accept at the desired acceptance ratio.
  *
  * The acceptance ratio for this Proposal should be around 0.44.
  * If it is too large, then we increase the proposal size,
@@ -228,13 +228,14 @@ void VectorBinarySwitchProposal::setProposalTuningParameter(double tp)
 void VectorBinarySwitchProposal::tune( double rate )
 {
     
-    if ( rate > 0.44 )
+    double p = this->targetAcceptanceRate;
+    if ( rate > p )
     {
-        switch_probability *= (1.0 + ((rate-0.44)/0.56) );
+        switch_probability *= (1.0 + ((rate - p)/(1.0 - p)) );
     }
     else
     {
-        switch_probability /= (2.0 - rate/0.44 );
+        switch_probability /= (2.0 - rate/p);
     }
     
     // bound value s.t. 0 < switch_probability <= 1.0

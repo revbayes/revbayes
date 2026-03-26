@@ -364,8 +364,10 @@ void Monitor::setMcmc(Mcmc *m)
 
 /**
  * Sort the nodes by name so that the order is guaranteed of replicated runs.
+ *
+ * @param natural should we sort digits numerically ("x2" goes before "x10") or lexicographically ("x10" goes before "x2")?
  */
-void Monitor::sortNodesByName( void )
+void Monitor::sortNodesByName( bool natural )
 {
     
     std::vector<std::string> names;
@@ -380,7 +382,15 @@ void Monitor::sortNodesByName( void )
     }
     
     nodes.clear();
-    std::sort (names.begin(), names.end());
+    
+    if (natural)
+    {
+        std::sort(names.begin(), names.end(), StringUtilities::naturalSort);
+    }
+    else
+    {
+        std::sort(names.begin(), names.end());
+    }
     
     for (std::vector<std::string>::iterator it = names.begin(); it != names.end(); ++it)
     {

@@ -30,14 +30,14 @@ template <class variableType> class StochasticNode;
     class VectorFixedSingleElementSlideProposal : public Proposal {
         
     public:
-        VectorFixedSingleElementSlideProposal(StochasticNode<RbVector<double> >* n, double l, size_t i);                                 //!< Constructor
+        VectorFixedSingleElementSlideProposal(StochasticNode<RbVector<double> >* n, double l, size_t i);                                //!< Constructor
         
         void                                        cleanProposal(void);                                                                //!< Clean up proposal
         VectorFixedSingleElementSlideProposal*      clone(void) const;                                                                  //!< Clone object
         double                                      doProposal(void);                                                                   //!< Perform proposal
         const std::string&                          getProposalName(void) const;                                                        //!< Get the name of the proposal for summary printing
         double                                      getProposalTuningParameter(void) const;
-        void                                        printParameterSummary(std::ostream &o, bool name_only) const;                                       //!< Print the parameter summary
+        void                                        printParameterSummary(std::ostream &o, bool name_only) const;                       //!< Print the parameter summary
         void                                        prepareProposal(void);                                                              //!< Prepare the proposal
         void                                        setProposalTuningParameter(double tp);
         void                                        tune(double r);                                                                     //!< Tune the proposal to achieve a better acceptance/rejection ratio
@@ -45,7 +45,7 @@ template <class variableType> class StochasticNode;
         
     protected:
         
-        void                                        swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes on which the Proposal is working on
+        void                                        swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes the Proposal is working on
         
         
     private:

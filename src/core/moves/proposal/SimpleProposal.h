@@ -39,8 +39,6 @@ namespace RevBayesCore {
         virtual double                                          getProposalTuningParameter(void) const = 0;
         virtual void                                            prepareProposal(void) = 0;                                                              //!< Propose a new state
         virtual void                                            printParameterSummary(std::ostream &o, bool name_only) const = 0;                       //!< Print the parameter summary
-        virtual void                                            setProposalTuningParameter(double tp) = 0;
-        virtual void                                            tune(double r) = 0;                                                                     //!< Tune the parameters of the proposal.
         virtual void                                            undoProposal(void) = 0;                                                                 //!< Undo the proposal.
         
         virtual double                                          propose(valueType &v) = 0;                                                              //!< Actually do the proposal.

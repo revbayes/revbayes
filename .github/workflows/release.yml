@@ -48,8 +48,8 @@ jobs:
     strategy:
       matrix:
         name: [ubuntu-22.04-gcc-12,
-               macos-xcode-15-intel,
-               macos-xcode-15-arm,
+               macos-xcode-16-intel,
+               macos-xcode-26-arm,
                windows
                ]
 
@@ -61,17 +61,17 @@ jobs:
             mpi: false
             arch: linux64
 
-          - name: macos-xcode-15-intel
-            os: macos-13
+          - name: macos-xcode-16-intel
+            os: macos-15-intel
             compiler: xcode
-            version: "15"
+            version: "16"
             mpi: false
             arch: mac-intel64
 
-          - name: macos-xcode-15-arm
-            os: macos-14
+          - name: macos-xcode-26-arm
+            os: macos-latest
             compiler: xcode
-            version: "15"
+            version: "26"
             mpi: false
             arch: mac-arm64
 
@@ -181,6 +181,27 @@ jobs:
         ${GITHUB_WORKSPACE}/projects/make_winroot.sh -ccache true -gtk true
         ( cd ${GITHUB_WORKSPACE}/projects/meson/ ; ./generate.sh )
         
+    - name: Clone and build Tensorphylo
+      run: |
+        if [ "${{ matrix.name }}" = "windows" ] ; then
+            meson_args=--cross-file=win64-cross.txt
+        fi
+        git clone https://bredelings@bitbucket.org/mrmay/tensorphylo.git
+        meson setup tpbuild tensorphylo --prefix=$HOME/local ${meson_args}
+        meson install -C tpbuild
+        if [ "${{ matrix.name }}" = "windows" ] ; then
+            # Get the user profile dir for windows, then find where it is as a Linux path
+            USERPROFILE=$(winepath -u $(wine cmd /c echo %USERPROFILE% | tr -d '\r'))
+            mkdir $USERPROFILE/.plugins
+            cp tpbuild/src/libTensorPhylo.dll $USERPROFILE/.plugins
+        elif [ "${{ runner.os }}" = macOS ] ; then
+            mkdir ~/.plugins
+            cp tpbuild/src/libTensorPhylo.dylib ~/.plugins
+        else
+            mkdir ~/.plugins
+            cp tpbuild/src/libTensorPhylo.so ~/.plugins
+        fi
+
     - name: Configure and build
       if: matrix.name != 'windows'
       env:

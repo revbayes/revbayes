@@ -35,6 +35,7 @@
 #include "Taxon.h"
 #include "TopologyNode.h"
 #include "boost/unordered_set.hpp"
+#include "boost/algorithm/string/trim.hpp"
 
 using namespace RevBayesCore;
 
@@ -550,6 +551,10 @@ void RevBayesCore::TreeUtilities::constructTimeTreeRecursively(TopologyNode& tn,
  */
 RevBayesCore::Tree* RevBayesCore::TreeUtilities::convertTree(const Tree& t, bool reset_index)
 {
+    // FIXME: This routine duplicates most of the machinery to copy trees.
+    //        Eventually stop doing that.  Instead just copy the tree and modify the copy.
+    // Tree *tt = new Tree(t);
+    
     // create time tree object (topology + times)
     Tree *tt = new Tree();
 
@@ -583,6 +588,10 @@ RevBayesCore::Tree* RevBayesCore::TreeUtilities::convertTree(const Tree& t, bool
 
     // copy the root edge
     root->setBranchLength( bln.getBranchLength() );
+
+    // copy the tree comments
+    for(auto& chunk: t.getTreeParameters())
+        tt->addTreeParameter_(chunk);
 
     return tt;
 }
@@ -1167,6 +1176,35 @@ std::vector<double> RevBayesCore::TreeUtilities::getPSSP(const Tree& tree, const
     return branch_lengths;
 }
 
+
+/**
+ * Helper function to find the tip name that comes alphabetically first (or more accurately, is lexicographically smallest) in the subtree
+ * originating with a given node. This is useful for deterministically setting left vs. right child of a node.
+ * @param node node whose smallest tip we want to find
+ * @return lexicographically smallest tip name in the subtree originating with node
+ */
+std::string RevBayesCore::TreeUtilities::getSmallestTipName(const TopologyNode* node)
+{
+    if (node->isTip())
+    {
+        return node->getName();
+    }
+    
+    std::string smallest = "";
+    
+    for (size_t i = 0; i < node->getNumberOfChildren(); ++i)
+    {
+        std::string child_name = getSmallestTipName(&node->getChild(i));
+        if (smallest.empty() || child_name < smallest)
+        {
+            smallest = child_name;
+        }
+    }
+    
+    return smallest;
+}
+
+
 /**
  * Get all tips below specified node, recursively
  * @param n current node
@@ -1306,6 +1344,72 @@ void RevBayesCore::TreeUtilities::offsetTree(TopologyNode& node, double factor)
     }
 
 }
+
+
+/*
+ * Helper function that parses a SIMMAP character history for a single branch.
+ * These strings represent character histories for a single branch in the form
+ * {state_2,time_in_state_2:state_1,time_in_state_1} where the states are
+ * listed left to right from the tip to the root (backward time). We loop through
+ * the string from right to left to store events in forward time (root to tip).
+ * Returns vector of events: [<state_1, time_in_state_1>, <state_2, time_in_state_2>]
+ */
+std::vector< std::pair<size_t, double> > RevBayesCore::TreeUtilities::parseSIMMAPForNode(std::string character_history)
+{
+    
+    boost::trim(character_history);
+    
+    // Now parse the sampled SIMMAP string:
+    bool parsed_time = false;
+    std::vector< std::pair<size_t, double> > this_branch_map = std::vector< std::pair<size_t, double> >();
+    std::pair<size_t, double> this_event = std::pair<size_t, double>();
+    std::string state = "";
+    std::string time = "";
+    size_t k = character_history.size();
+    
+    while (true)
+    {
+        
+        if ( k == (character_history.size() - 1) &&
+            std::string(1, character_history[0]).compare("{") != 0 &&
+            std::string(1, character_history[k]).compare("}") != 0 )
+        {
+            throw RbException("Error while summarizing character maps: trace does not contain valid SIMMAP string.");
+        }
+        else if ( std::string(1, character_history[k]).compare(",") == 0 )
+        {
+            parsed_time = true;
+            this_event.second = std::atof( time.c_str() );
+        }
+        else if ( std::string(1, character_history[k]).compare(":") == 0 || k == 0 )
+        {
+            this_event.first = std::atoi( state.c_str() );
+            this_branch_map.push_back( this_event );
+            if (k == 0)
+            {
+                break;
+            }
+            else
+            {
+                state = "";
+                time = "";
+                parsed_time = false;
+            }
+        }
+        else if ( parsed_time == false )
+        {
+            time = std::string(1, character_history[k]) + time;
+        }
+        else
+        {
+            state = std::string(1, character_history[k]) + state;
+        }
+        k--;
+    }
+    
+    return this_branch_map;
+}
+
 
 
 /**

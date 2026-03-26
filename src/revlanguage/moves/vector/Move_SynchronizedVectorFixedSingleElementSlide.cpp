@@ -11,6 +11,7 @@
 #include "Move_SynchronizedVectorFixedSingleElementSlide.h"
 #include "Natural.h"
 #include "RbException.h"
+#include "Probability.h"
 #include "Real.h"
 #include "RealPos.h"
 #include "RevObject.h"
@@ -76,9 +77,6 @@ void Move_SynchronizedVectorFixedSingleElementSlide::constructInternalObject( vo
         }
     }
     
-    
-    bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    
     std::vector<std::int64_t> e;
     if ( which_element->getRevObject().isType( ModelVector<Natural>::getClassTypeSpec() ) )
     {
@@ -95,9 +93,13 @@ void Move_SynchronizedVectorFixedSingleElementSlide::constructInternalObject( vo
     {
         --e[i];
     }
-
+    
+    bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *prop = new RevBayesCore::SynchronizedVectorFixedSingleElementSlideProposal(n, l, e);
+    prop->setTargetAcceptanceRate(tt);
+    
     value = new RevBayesCore::MetropolisHastingsMove(prop, w, t);
     
 }

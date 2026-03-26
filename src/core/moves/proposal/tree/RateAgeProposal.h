@@ -46,7 +46,7 @@ namespace RevBayesCore {
         
     protected:
         
-        void                                        swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes on which the Proposal is working on
+        void                                        swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes the Proposal is working on
         
         
     private:
@@ -60,7 +60,7 @@ namespace RevBayesCore {
         double                                               stored_age;
         std::vector< RbVector<double> >                      stored_rates;
 
-        double                                               alpha;                                                                     //!< The scale parameter of the Proposal (larger lambda -> larger proposals).
+        double                                               alpha;                                                                     //!< The scale parameter of the proposal (smaller alpha -> smaller a and b -> larger beta distr. variance -> larger proposals)
         
         
     };

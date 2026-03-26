@@ -50,7 +50,11 @@ AdaptiveReversibleJumpProposal::AdaptiveReversibleJumpProposal( const AdaptiveRe
     wait_before_learning( p.wait_before_learning ),
     wait_before_using ( p.wait_before_using ),
     updates_every ( p.updates_every ),
-    num_tried ( p.num_tried )
+    num_tried ( p.num_tried ),
+    sampled_values( p.sampled_values ),
+    sampled_mean( p.sampled_mean ),
+    sampled_var( p.sampled_var ),
+    proposal_distribution( p.proposal_distribution )
 {
     // tell the base class to add the node
     addNode( variable );
@@ -90,10 +94,17 @@ RevBayesCore::AdaptiveReversibleJumpProposal& RevBayesCore::AdaptiveReversibleJu
     {
         Proposal::Cloneable::operator=( p );
     
-        
-        stored_value    = p.stored_value;
-        variable        = p.variable;
-        stored_index    = p.stored_index;
+        variable              = p.variable;
+        stored_value          = p.stored_value;
+        stored_index          = p.stored_index;
+        wait_before_learning  = p.wait_before_learning;
+        wait_before_using     = p.wait_before_using;
+        updates_every         = p.updates_every;
+        num_tried             = p.num_tried;
+        sampled_values        = p.sampled_values;
+        sampled_mean          = p.sampled_mean;
+        sampled_var           = p.sampled_var;
+        proposal_distribution = p.proposal_distribution;
         
     }
     
@@ -277,10 +288,11 @@ void RevBayesCore::AdaptiveReversibleJumpProposal::prepareProposal( void )
 /**
  * Print the summary of the Proposal.
  *
- * The summary just contains the current value of the tuning parameter.
+ * The summary just contains the current values of the mean and variance of the normal proposal distribution
  * It is printed to the stream that it passed in.
  *
  * \param[in]     o     The stream to which we print the summary.
+ * \param[in]     name_only    Should we only print the names of the parameters, or their values as well?
  */
 void RevBayesCore::AdaptiveReversibleJumpProposal::printParameterSummary(std::ostream &o, bool name_only) const
 {
@@ -327,25 +339,5 @@ void RevBayesCore::AdaptiveReversibleJumpProposal::swapNodeInternal(DagNode *old
 {
     
     variable = static_cast<StochasticNode<double>* >(newN) ;
-    
-}
-
-
-void RevBayesCore::AdaptiveReversibleJumpProposal::setProposalTuningParameter(double tp)
-{
-    // this proposal has no tuning parameter: nothing to do
-}
-
-
-/**
- * Tune the Proposal to accept the desired acceptance ratio.
- *
- * The acceptance ratio for this Proposal should be around 0.44.
- * If it is too large, then we increase the proposal size,
- * and if it is too small, then we decrease the proposal size.
- */
-void RevBayesCore::AdaptiveReversibleJumpProposal::tune( double rate )
-{
-    // nothing to do here.
     
 }

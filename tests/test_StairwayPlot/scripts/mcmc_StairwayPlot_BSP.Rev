@@ -1,0 +1,163 @@
+################################################################################
+#
+# RevBayes script: Estimating the demographic history using StairwayPlot
+#
+# authors: Sebastian Hoehna
+#
+################################################################################
+
+seed(12345)
+
+
+# general settings
+mu         = 2.8E-9
+GEN_TIME   = 1.0
+USE_FOLDED = TRUE
+
+
+#######################################
+# Reading the site frequency spectrum #
+#######################################
+
+source("data/laspl_autosomes_all_SFS_GeMu.Rev")
+TOTAL_NUM_SITES <- sum(obs_sfs)
+
+obs_sfs[1] <- 0
+obs_sfs[obs_sfs.size()] <- 0
+obs_sfs[1] <- TOTAL_NUM_SITES - sum(obs_sfs)
+
+N_IND   = abs(obs_sfs.size() - 1)
+N_SITES = round( sum(obs_sfs) )
+
+print("Number of individuals:\t" + N_IND)
+
+if (USE_FOLDED == TRUE) {
+    NUM_IND = abs(obs_sfs.size() - 1)
+    tmp_sfs[1] <- obs_sfs[1] + obs_sfs[NUM_IND+1]
+    for (i in 1:ceil(NUM_IND/2)) {
+        if (i != NUM_IND/2) {
+            tmp_sfs[i+1] <- obs_sfs[i+1] + obs_sfs[NUM_IND-i+1]
+	} else {
+            tmp_sfs[i+1] <- obs_sfs[i+1]
+	}
+    }
+    obs_sfs <- tmp_sfs
+}
+
+obs_sfs
+
+
+##################
+# Initialization #
+##################
+
+# setting up a vector variable that holds all the moves and monitors
+
+moves    = VectorMoves()
+monitors = VectorMonitors()
+
+
+#####################
+# Demographic model #
+#####################
+
+NUM_CATS <- round(N_IND / 4.0)
+num_events_pi <- rep(1, NUM_CATS)
+
+# We need to draw the number of thetas per category (in total '#ind-1' thetas).
+# There is at least one theta in each category, so the number of free thetas to
+# assign is (#ind - 1) - N_CATS.
+
+n_multi <- N_IND - 1 - NUM_CATS
+
+# we use a flat prior on the number of thetas in each category
+num_e_prior <- simplex( rep(1, NUM_CATS) )
+number_events_pi ~ dnMultinomial(p=num_e_prior, size=n_multi)
+final_number_events_pi := num_events_pi + number_events_pi
+
+moves.append( mvRandomCategoryWalk(x=number_events_pi, weight=NUM_CATS*5) )
+
+avmvn = mvAVMVN(weight=50)
+
+# now specify a different theta per interval
+for (i in 1:NUM_CATS) {
+    # draw theta from a uniform prior distribution
+    theta_cat[i] ~ dnUnif(0.0, 0.1)
+
+    # set a scaling move for this variable
+    moves.append( mvScale(theta_cat[i], weight=5) )
+
+    avmvn.addVariable(theta_cat[i])
+}
+
+moves.append( avmvn )
+
+theta := fnBSPInterval(theta_cat, final_number_events_pi)
+
+
+#################
+# Stairway plot #
+#################
+
+sfs ~ dnStairwayPlot( theta, numSites=N_SITES, numIndividuals=N_IND, folded=USE_FOLDED, monomorphicProbability="treelength" )
+sfs.clamp( obs_sfs )
+
+
+##############
+# Statistics #
+##############
+
+times := sfs.getTimes()
+
+ordered_theta := rev(theta) / 4.0 / mu
+ordered_times := rev(times) / mu * GEN_TIME
+
+esfs := sfs.getExpectedAlleleFrequencies()
+
+
+#########
+# Model #
+#########
+
+my_model = model(sfs)
+
+
+############
+# Monitors #
+############
+
+# specifying monitors and output files
+
+monitors.append( mnModel(filename="output/StairwayPlot_autosomes_all_GeMu_BSP.log", printgen=10) )
+monitors.append( mnFile(ordered_theta, filename="output/StairwayPlot_autosomes_all_GeMu_BSP_ordered_Ne.log", printgen=10) )
+monitors.append( mnFile(ordered_times, filename="output/StairwayPlot_autosomes_all_GeMu_BSP_ordered_times.log", printgen=10) )
+monitors.append( mnFile(esfs, filename="output/StairwayPlot_autosomes_all_GeMu_BSP_esfs.log", printgen=10) )
+
+
+########
+# MCMC #
+########
+
+# running the MCMC simulation
+my_mcmc = mcmc(my_model, monitors, moves)
+my_mcmc.burnin( generations=100, tuningInterval=10 )
+my_mcmc.run( generations=1000 )
+
+
+#################
+# Model testing #
+#################
+
+cpo = ConditionalPosteriorOrdinate(filename="output/StairwayPlot_autosomes_all_GeMu_BSP_esfs.log")
+pred_prob = cpo.predictiveProbability(obs_sfs, log=FALSE, folded=TRUE)
+
+print("Predictive probability: " + pred_prob)
+write(pred_prob, file="output/StairwayPlot_autosomes_all_GeMu_BSP_CPO.txt")
+
+
+##########
+# Finish #
+##########
+
+# quitting revbayes
+q()

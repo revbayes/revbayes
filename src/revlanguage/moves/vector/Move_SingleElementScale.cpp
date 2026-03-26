@@ -15,6 +15,7 @@
 #include "Move.h"
 #include "RbBoolean.h"
 #include "RbException.h"
+#include "Probability.h"
 #include "Real.h"
 #include "RevObject.h"
 #include "RevPtr.h"
@@ -63,9 +64,12 @@ void Move_SingleElementScale::constructInternalObject( void )
     }
 
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
 
-    RevBayesCore::Proposal *prop = new RevBayesCore::SingleElementScaleProposal(n,l);
-    value = new RevBayesCore::MetropolisHastingsMove(prop,w,t);
+    RevBayesCore::Proposal *prop = new RevBayesCore::SingleElementScaleProposal(n, l);
+    prop->setTargetAcceptanceRate(tt);
+    
+    value = new RevBayesCore::MetropolisHastingsMove(prop, w, t);
 }
 
 

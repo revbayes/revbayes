@@ -32,20 +32,20 @@ template <class variableType> class StochasticNode;
     public:
         VectorSingleElementSlideProposal(StochasticNode<RbVector<double> >* n, double l);                                 //!< Constructor
         
-        void                                        cleanProposal(void);                                                                //!< Clean up proposal
-        VectorSingleElementSlideProposal*           clone(void) const;                                                                  //!< Clone object
-        double                                      doProposal(void);                                                                   //!< Perform proposal
-        const std::string&                          getProposalName(void) const;                                                        //!< Get the name of the proposal for summary printing
+        void                                        cleanProposal(void);                                                  //!< Clean up proposal
+        VectorSingleElementSlideProposal*           clone(void) const;                                                    //!< Clone object
+        double                                      doProposal(void);                                                     //!< Perform proposal
+        const std::string&                          getProposalName(void) const;                                          //!< Get the name of the proposal for summary printing
         double                                      getProposalTuningParameter(void) const;
-        void                                        printParameterSummary(std::ostream &o, bool name_only) const;                                       //!< Print the parameter summary
-        void                                        prepareProposal(void);                                                              //!< Prepare the proposal
+        void                                        printParameterSummary(std::ostream &o, bool name_only) const;         //!< Print the parameter summary
+        void                                        prepareProposal(void);                                                //!< Prepare the proposal
         void                                        setProposalTuningParameter(double tp);
-        void                                        tune(double r);                                                                     //!< Tune the proposal to achieve a better acceptance/rejection ratio
-        void                                        undoProposal(void);                                                                 //!< Reject the proposal
+        void                                        tune(double r);                                                       //!< Tune the proposal to achieve a better acceptance/rejection ratio
+        void                                        undoProposal(void);                                                   //!< Reject the proposal
         
     protected:
         
-        void                                        swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes on which the Proposal is working on
+        void                                        swapNodeInternal(DagNode *oldN, DagNode *newN);                       //!< Swap the DAG nodes the Proposal is working on
         
         
     private:
@@ -53,9 +53,9 @@ template <class variableType> class StochasticNode;
         
         StochasticNode<RbVector<double> >*          variable;
         
-        double                                      lambda;                                                                             //!< The Slide parameter of the move (larger lambda -> larger proposals).
-        size_t                                      index;                                                                              //!< The index of the last modified element.
-        double                                      storedValue;                                                                        //!< The stored value of the last modified element.
+        double                                      lambda;                                                               //!< The Slide parameter of the move (larger lambda -> larger proposals).
+        size_t                                      index;                                                                //!< The index of the last modified element.
+        double                                      storedValue;                                                          //!< The stored value of the last modified element.
         
         
         

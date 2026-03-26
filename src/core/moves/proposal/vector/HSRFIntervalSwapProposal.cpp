@@ -76,6 +76,7 @@ const std::string& HSRFIntervalSwapProposal::getProposalName( void ) const
 
 double HSRFIntervalSwapProposal::getProposalTuningParameter( void ) const
 {
+    // this proposal has no tuning parameter
     return RbConstants::Double::nan;
 }
 
@@ -207,24 +208,5 @@ void HSRFIntervalSwapProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
             sigma[i] = static_cast<StochasticNode<double> *>(newN);
         }
     }
-
-}
-
-
-void HSRFIntervalSwapProposal::setProposalTuningParameter(double tp)
-{
-
-}
-
-
-/**
- * Tune the Proposal to accept the desired acceptance ratio.
- *
- * The acceptance ratio for this Proposal should be around 0.44.
- * If it is too large, then we increase the proposal size,
- * and if it is too small, then we decrease the proposal size.
- */
-void HSRFIntervalSwapProposal::tune( double rate )
-{
 
 }
