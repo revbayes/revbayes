@@ -1,0 +1,39 @@
+## Non-centered parameterization. Doesn't work if N is large (Rev will need to be force-closed)
+
+seed(1)
+        
+N = 20  # The run time is exponential in N.
+        
+x[1] ~ dnNormal(0,1)
+
+delta ~ dnNormal(0,sqrt(1/3))
+
+x[2] := x[1] + delta
+
+for (i in 3:N) {
+
+  dx[i-2] ~ dnNormal(0,1)
+
+  x[i] := dx[i-2] - x[i-1] + 2 * x[i-1]
+
+  # Use below print statement to watch how time progresses as model is built
+
+  print("i = " + i + "   pr(dx) = " + dx[i-2].lnProbability())
+}
+
+print("Calculating log-probability of x[1]")
+
+print(x[1].lnProbability())
+
+moves[1] = mvSlide(x[1])
+
+mymodel = model(x[1])
+
+# mymodel.graph("temp.dot",verbose=true,bg="honeydew2")
+
+# make the monitors
+monitors[1] = mnModel(printgen = 10, filename = "output/order-two-v2.log")
+
+mymcmc = mcmc(mymodel, moves, monitors)
+
+mymcmc.run(10)
