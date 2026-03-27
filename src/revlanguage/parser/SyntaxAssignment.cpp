@@ -9,6 +9,9 @@
 #include "RevPtr.h"
 #include "RevVariable.h"
 #include "SyntaxElement.h"
+#include "RbSettings.h"
+#include "RevNullObject.h"
+#include "RlUserInterface.h"
 
 using namespace RevLanguage;
 
@@ -80,18 +83,25 @@ RevPtr<RevVariable> SyntaxAssignment::evaluateContent( const std::shared_ptr<Env
     // Get variable slot from lhs
     RevPtr<RevVariable> the_slot = lhsExpression->evaluateLHSContent( env, the_variable->getRevObject().getType() );
     
-//    // let us remove all potential indexed variables
-//    removeElementVariables(env, the_slot);
+    bool slot_was_occupied = ( &the_slot->getRevObject() != &RevNullObject::getInstance() );
+
+    if (slot_was_occupied)
+    {
+        auto p = RbSettings::userSettings().getRedefinitionPolicy();
+        if (p == RedefinitionPolicy::Warn)
+        {
+            std::ostringstream o;
+            o<<"Warning:   variable '"<<the_slot->getName()<<"' redefined.";
+            RBOUT(o.str());
+        }
+        else if (p == RedefinitionPolicy::Error)
+            throw RbException()<<"variable '"<<the_slot->getName()<<"' redefined.  (Not allowed by current policy)";
+    }
     
     try
     {
         // now we delegate to the derived class
         assign(the_slot, the_variable);
-        
-//        if ( the_slot->isElementVariable() == true )
-//        {
-//            static_cast< SyntaxIndexOperation *>( lhsExpression )->updateVariable( env, the_slot->getName() );
-//        }
     }
     catch (RbException &e)
     {

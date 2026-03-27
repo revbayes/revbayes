@@ -21,6 +21,31 @@
 using namespace RevBayesCore;
 
 
+RedefinitionPolicy parseRedefinitionPolicy(const std::string& s)
+{
+    if (s == "allow")
+        return RedefinitionPolicy::Allow;
+    else if (s == "warn")
+        return RedefinitionPolicy::Warn;
+    else if (s == "error")
+        return RedefinitionPolicy::Error;
+    else
+        throw RbException()<<"parseRedefinitionPolicy: '"<<s<<"' not recognized!";
+}
+        
+std::string printRedefinitionPolicy(RedefinitionPolicy p)
+{
+    if (p == RedefinitionPolicy::Allow)
+        return "allow";
+    else if (p == RedefinitionPolicy::Warn)
+        return "warn";
+    else if (p == RedefinitionPolicy::Error)
+        return "error";
+    else
+        throw RbException()<<"printRedefinitionPolicy: "<<std::to_underlying(p)<<" not recognized!";
+}
+        
+
 /** Default constructor: The default settings are first read, and
  * then potentially overwritten by values contained in a file.  */
 RbSettings::RbSettings(void)
@@ -66,6 +91,12 @@ int RbSettings::getLogMCMC( void ) const
     return logMCMC;
 }
 
+RedefinitionPolicy RbSettings::getRedefinitionPolicy( void ) const
+{
+    // return the internal value
+    return redefinitionPolicy;
+}
+
 std::string bool_to_string(bool b)
 {
     return b ? "TRUE" : "FALSE";
@@ -108,6 +139,10 @@ std::string RbSettings::getOption(const std::string &key) const
     else if ( key == "logMCMC" )
     {
         return std::to_string(logMCMC);
+    }
+    else if ( key == "redef" )
+    {
+        return printRedefinitionPolicy(redefinitionPolicy);
     }
     else
     {
@@ -168,6 +203,8 @@ void RbSettings::readUserSettings(void)
 }
 
 
+
+
 void RbSettings::listOptions() const
 {
     std::cout << "moduledir = " << moduleDir << std::endl;
@@ -179,6 +216,7 @@ void RbSettings::listOptions() const
     std::cout << "scalingDensity = " << scalingDensity << std::endl;
     std::cout << "debugMCMC = " << debugMCMC << std::endl;
     std::cout << "logMCMC = " << logMCMC << std::endl;
+    std::cout << "redef = " << printRedefinitionPolicy(redefinitionPolicy) << std::endl;
 }
 
 
@@ -243,6 +281,15 @@ void RbSettings::setLogMCMC(int d)
     writeUserSettings();
 }
 
+void RbSettings::setRedefinitionPolicy(RedefinitionPolicy p)
+{
+    // replace the internal value with this new value
+    redefinitionPolicy = p;
+
+    // save the current settings for the future.
+    writeUserSettings();
+}
+
 std::optional<bool> string_to_bool(const std::string& option)
 {
     if (option == "TRUE" or option == "true")
@@ -302,6 +349,10 @@ void RbSettings::setOption(const std::string &key, const std::string &v, bool wr
     {
         logMCMC = boost::lexical_cast<int>(value);
     }
+    else if ( key == "redef" )
+    {
+        redefinitionPolicy = parseRedefinitionPolicy(value);
+    }
     else
     {
         std::cout << "Unknown user setting with key '" << key << "'." << std::endl;
@@ -314,7 +365,6 @@ void RbSettings::setOption(const std::string &key, const std::string &v, bool wr
     }
     
 }
-
 
 void RbSettings::setOutputPrecision(size_t p)
 {
@@ -342,6 +392,8 @@ void RbSettings::setTolerance(double t)
     writeUserSettings();
 }
 
+
+
 void RbSettings::writeUserSettings( void )
 {
     // Does this always work on windows?
@@ -359,7 +411,8 @@ void RbSettings::writeUserSettings( void )
     writeStream << "linewidth=" << lineWidth << std::endl;
     writeStream << "useScaling=" << (useScaling ? "true" : "false") << std::endl;
     writeStream << "scalingDensity=" << scalingDensity << std::endl;
-
+    writeStream << "redef="<<printRedefinitionPolicy(redefinitionPolicy) << std::endl;
+    
     writeStream.close();
 }
 

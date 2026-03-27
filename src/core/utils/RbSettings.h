@@ -8,6 +8,13 @@
 
 #include "RbFileManager.h"
 
+enum class RedefinitionPolicy
+{
+    Allow,
+    Warn,
+    Error
+};
+
 class RbSettings {
 
 public:
@@ -32,6 +39,7 @@ public:
     bool                        getUseScaling(void) const;                          //!< Retrieve the flag whether we should scale the likelihood in CTMC models
     int                         getDebugMCMC(void) const;                           //!< How much work should we perform to check MCMC?
     int                         getLogMCMC(void) const;                             //!< How much logging should we perform to check MCMC?
+    RedefinitionPolicy          getRedefinitionPolicy(void) const;                  //!< What should happen when we redefine a variable?
 
     // setters
     void                        setLineWidth(size_t w);                             //!< Set the line width that will be used for the screen width when printing
@@ -44,6 +52,7 @@ public:
     void                        setUseScaling(bool s);                              //!< Set the flag whether we should scale the likelihood in CTMC models
     void                        setDebugMCMC(int d);                                //!< How much work should we perform to check MCMC?
     void                        setLogMCMC(int d);                                  //!< How much logging should we perform to check MCMC?
+    void                        setRedefinitionPolicy(RedefinitionPolicy p);        //!< What should happen when we redefine a variable?
     
 private:
     RbSettings(void);                                   //!< Default constructor
@@ -61,6 +70,7 @@ private:
     bool                        useScaling=true;
     int                         debugMCMC = 0;
     int                         logMCMC = 0;
+    RedefinitionPolicy          redefinitionPolicy = RedefinitionPolicy::Allow;
 };
 
 void showDebug(const std::string& s, int level=1);
