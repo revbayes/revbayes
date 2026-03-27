@@ -36,8 +36,9 @@ PhyloMultiSampleOrnsteinUhlenbeckProcessREML::PhyloMultiSampleOrnsteinUhlenbeckP
     num_individuals( ta.size() ),
     taxa( ta ),
     partial_likelihoods( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
-    contrasts( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
-    contrast_uncertainty( std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) ) ),
+    means( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
+    //variances( std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) ) ),
+    variances_per_site( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
     normalizing_constants( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 1.0) ) ) ),
     active_likelihood( std::vector<size_t>(this->num_nodes, 0) ),
     changed_nodes( std::vector<bool>(this->num_nodes, false) ),
@@ -74,7 +75,7 @@ PhyloMultiSampleOrnsteinUhlenbeckProcessREML::PhyloMultiSampleOrnsteinUhlenbeckP
     // now we need to reset the value
     this->redrawValue();
     
-    // we need to reset the contrasts
+    // we need to reset the means
     resetValue();
 }
 
@@ -172,16 +173,26 @@ double PhyloMultiSampleOrnsteinUhlenbeckProcessREML::computeMeanForSpecies(const
         if ( name == t.getSpeciesName() )
         {
             ContinuousTaxonData& taxon = this->value->getTaxonData( t.getName() );
-            mean += taxon.getCharacter(index);
             
-            ++num_samples;
+            if ( taxon.isCharacterResolved( index ) == true )
+            {
+                mean += taxon.getCharacter(index);
+            
+                ++num_samples;
+            }
         }
         
     }
     
     // normalize
-    mean /= num_samples;
-    
+    if ( num_samples > 0 )
+    {
+        mean /= num_samples;
+    }
+    else
+    {
+        mean = RbConstants::Double::nan;
+    }
     
     return mean;
 }
@@ -218,13 +229,13 @@ double PhyloMultiSampleOrnsteinUhlenbeckProcessREML::computeLnProbability( void 
     if ( this->dirty_nodes[rootIndex] )
     {
         
-        
         recursiveComputeLnProbability( root, rootIndex );
         
-        // sum the partials up
-        this->ln_prob = sumRootLikelihood();
-        
     }
+    
+    // sum the partials up
+    this->ln_prob = sumRootLikelihood();
+    
     return this->ln_prob;
 }
 
@@ -284,23 +295,50 @@ void PhyloMultiSampleOrnsteinUhlenbeckProcessREML::keepSpecialization( const Dag
     
 }
 
+void PhyloMultiSampleOrnsteinUhlenbeckProcessREML::propagateAuxiliaryVariables(double &mu, double &variance, double &log_nf, const TopologyNode& node )
+{
+    size_t node_index = node.getIndex();
+    double time = node.getBranchLength();
+
+    double theta = computeBranchTheta(node_index);
+    double sigma = computeBranchSigma(node_index);
+    double alpha = computeBranchAlpha(node_index);
+               
+    double v;
+    if ( alpha > 1E-20 )
+    {
+        v = (sigma*sigma) / (2.0*alpha) * (exp(2.0*alpha*time) - 1.0 );
+        mu  = exp(1.0 * time  * alpha ) * (mu  - theta)  + theta;
+    }
+    else
+    {
+        v  = (sigma*sigma) * time;
+    }
+    variance = v + variance * exp(2.0*alpha *time);
+                
+    // update the log normalizing factor
+    log_nf += time * alpha;
+}
+
 
 void PhyloMultiSampleOrnsteinUhlenbeckProcessREML::recursiveComputeLnProbability( const TopologyNode &node, size_t node_index )
 {
     
     // check for recomputation
-    if ( node.isTip() == true && dirty_nodes[node_index] == true )
+    if ( node.isTip() == true && (dirty_nodes[node_index] == true || use_missing_data) )
     {
         
+        std::vector<double> &mu_node = this->means[this->active_likelihood[node_index]][node_index];
+        std::vector<double> &v_node  = this->variances_per_site[this->active_likelihood[node_index]][node_index];
         std::vector<double> &p_node  = this->partial_likelihoods[this->active_likelihood[node_index]][node_index];
-        std::vector<double> &mu_node  = this->contrasts[this->active_likelihood[node_index]][node_index];
         
         const std::string &name = this->tau->getValue().getNode( node_index ).getName();
-        double num_samples = 0.0;
         
         double var = getWithinSpeciesVariance(name);
         
         double stdev = sqrt( var );
+
+        std::vector<double> num_samples(this->num_sites,0);
         
         for (int i=0; i<this->num_sites; i++)
         {
@@ -314,33 +352,58 @@ void PhyloMultiSampleOrnsteinUhlenbeckProcessREML::recursiveComputeLnProbability
             if ( name == t.getSpeciesName() )
             {
                 
-                for (int i=0; i<this->num_sites; i++)
+                for (int char_index=0; char_index<this->num_sites; ++char_index)
                 {
                     
                     ContinuousTaxonData& taxon = this->value->getTaxonData( t.getName() );
-                    double x = taxon.getCharacter( site_indices[i] );
-                    
-                    // get the site specific rate of evolution
-                    double standDev = this->computeSiteRate(i) * stdev;
-                    
-                    // compute the contrasts for this site and node
-                    double contrast = mu_node[i] - x;
-                    
-                    // compute the probability for the contrasts at this node
-                    double lnl_node = RbStatistics::Normal::lnPdf(0, standDev, contrast);
-                    
-                    // sum up the probabilities of the contrasts
-                    p_node[i] += lnl_node;
+                    if ( taxon.isCharacterResolved( site_indices[char_index] ) )
+                    {
+                        double x = taxon.getCharacter( site_indices[char_index] );
+
+                        if ( std::isfinite(x) ){
+                                                
+                            // get the site specific rate of evolution
+                            double standDev = this->computeSiteRate(char_index) * stdev;
+                        
+                            // compute the means for this site and node
+                            double contrast = mu_node[char_index] - x;
+                        
+                            // compute the probability for the means at this node
+                            double lnl_node = RbStatistics::Normal::lnPdf(0, standDev, contrast);
+                            
+                            if ( RbMath::isFinite(lnl_node) == false )
+                            {
+                                std::cerr << "Issue." << std::endl;
+                            }
+                        
+                            // sum up the probabilities of the means
+                            p_node[char_index] += lnl_node;
+
+                            ++num_samples[char_index];
+                        }
+                        
+                    } // end if is character resolved
                     
                 } // end for-loop over all sites
+
                 
-                
-                ++num_samples;
             }
             
         }
-        
-        contrast_uncertainty[this->active_likelihood[node_index]][node_index] = var / num_samples;
+
+        for (int char_index=0; char_index<this->num_sites; ++char_index)
+        {
+            
+            if ( missing_data[node_index][char_index] == true )
+            {
+                // there was no sample, so do not include it in the likelihood computation
+                variances_per_site[this->active_likelihood[node_index]][node_index][char_index] = 0.0;
+            }
+            else
+            {
+                variances_per_site[this->active_likelihood[node_index]][node_index][char_index] = var / num_samples[char_index];
+            }
+        }
         
     }
     else if ( node.isTip() == false && dirty_nodes[node_index] == true )
@@ -348,126 +411,135 @@ void PhyloMultiSampleOrnsteinUhlenbeckProcessREML::recursiveComputeLnProbability
         // mark as computed
         dirty_nodes[node_index] = false;
         
-        std::vector<double> &p_node             = this->partial_likelihoods[this->active_likelihood[node_index]][node_index];
-        std::vector<double> &mu_node            = this->contrasts[this->active_likelihood[node_index]][node_index];
-        std::vector<double> &norm_const_node    = this->normalizing_constants[this->active_likelihood[node_index]][node_index];
-        
+        std::vector<double> &mu_node = this->means[this->active_likelihood[node_index]][node_index];
+        std::vector<double> &v_node  = this->variances_per_site[this->active_likelihood[node_index]][node_index];
+        std::vector<double> &p_node  = this->partial_likelihoods[this->active_likelihood[node_index]][node_index];
         
         // get the number of children
         size_t num_children = node.getNumberOfChildren();
-        
-        for (size_t j = 1; j < num_children; ++j)
+        if (num_children != 2 )
         {
+            throw RbException("internal node in the phylogeny does not have two descendants (in PhyloMultiSampleOrnsteinUhlenbeckREML), not supported");
+        }
             
-            size_t left_index = node_index;
-            const TopologyNode *left = &node;
-            if ( j == 1 )
+        const TopologyNode &left = node.getChild(0);
+        size_t left_index = left.getIndex();
+        recursiveComputeLnProbability( left, left_index );
+
+        const TopologyNode &right = node.getChild(1);
+        size_t right_index = right.getIndex();
+        recursiveComputeLnProbability( right, right_index );
+
+        const std::vector<double> &mu_left  = this->means[this->active_likelihood[left_index]][left_index];
+        const std::vector<double> &mu_right = this->means[this->active_likelihood[right_index]][right_index];
+
+        const std::vector<double> &v_left   = this->variances_per_site[this->active_likelihood[left_index]][left_index];
+        const std::vector<double> &v_right  = this->variances_per_site[this->active_likelihood[right_index]][right_index];
+        
+        const std::vector<double> &p_left   = this->partial_likelihoods[this->active_likelihood[left_index]][left_index];
+        const std::vector<double> &p_right  = this->partial_likelihoods[this->active_likelihood[right_index]][right_index];
+        
+
+        size_t num_sites = this->num_sites;
+
+        for (size_t char_index = 0; char_index < num_sites; char_index++)
+        {
+            bool left_missing = missing_data[left_index][char_index];
+            bool right_missing = missing_data[right_index][char_index];
+
+            if ( use_missing_data == true && left_missing && right_missing )
             {
-                left = &node.getChild(0);
-                left_index = left->getIndex();
-                recursiveComputeLnProbability( *left, left_index );
+                missing_data[node_index][char_index] = true;
+
+                mu_node[char_index] = RbConstants::Double::nan;
+                v_node[char_index]  = 0.0;
+                p_node[char_index]  = p_left[char_index] + p_right[char_index];
             }
-            
-            const TopologyNode &right = node.getChild(j);
-            size_t right_index = right.getIndex();
-            recursiveComputeLnProbability( right, right_index );
-            
-            const std::vector<double> &p_left  = this->partial_likelihoods[this->active_likelihood[left_index]][left_index];
-            const std::vector<double> &p_right = this->partial_likelihoods[this->active_likelihood[right_index]][right_index];
-            
-            // get the per node and site contrasts
-            const std::vector<double> &mu_left  = this->contrasts[this->active_likelihood[left_index]][left_index];
-            const std::vector<double> &mu_right = this->contrasts[this->active_likelihood[right_index]][right_index];
-            
-            // get the per node and site normalizing constants
-            const std::vector<double> &norm_const_left  = this->normalizing_constants[this->active_likelihood[left_index]][left_index];
-            const std::vector<double> &norm_const_right = this->normalizing_constants[this->active_likelihood[right_index]][right_index];
-            
-            // get the propagated uncertainties
-            double delta_left  = this->contrast_uncertainty[this->active_likelihood[left_index]][left_index];
-            double delta_right = this->contrast_uncertainty[this->active_likelihood[right_index]][right_index];
-            
-            // get the scaled branch lengths
-            double v_left  = 0;
-            //            if ( j == 1 )
-            //            {
-            double bl_left = left->getBranchLength();
-            double sigma_left = computeBranchSigma(left_index);
-            double alpha_left = computeBranchAlpha(left_index);
-            if ( alpha_left > 1E-20 )
+            else if ( use_missing_data == true && left_missing && !right_missing )
             {
-                //                    v_left = (sigma_left*sigma_left) / (2.0*alpha_left) * (1.0 - exp(-2.0*alpha_left*bl_left) );
-                v_left = (sigma_left*sigma_left) / (2.0*alpha_left) * (exp(2.0*alpha_left*bl_left) - 1.0 );
+                missing_data[node_index][char_index] = false;
+                
+                double mean_right = mu_right[char_index];
+                double var_right  = v_right[char_index];
+                double log_nf_right = p_right[char_index];
+
+                propagateAuxiliaryVariables(mean_right, var_right, log_nf_right, right);
+
+                mu_node[char_index] = mean_right;
+                v_node[char_index] = var_right;
+                p_node[char_index] = log_nf_right;
+
+            }
+            else if ( use_missing_data == true && !left_missing && right_missing )
+            {
+                missing_data[node_index][char_index] = false;
+                
+                double mean_left = mu_left[char_index];
+                double var_left = v_left[char_index];
+                double log_nf_left = p_left[char_index];
+
+                propagateAuxiliaryVariables(mean_left, var_left, log_nf_left, left);
+
+                mu_node[char_index] = mean_left;
+                v_node[char_index] = var_left;
+                p_node[char_index] = log_nf_left;
+
             }
             else
             {
-                v_left = (sigma_left*sigma_left) * bl_left;
-            }
-            //            }
-            
-            double bl_right = right.getBranchLength();
-            double sigma_right = computeBranchSigma(right_index);
-            double alpha_right = computeBranchAlpha(right_index);
-            double v_right =0.0;
-            if ( alpha_right > 1E-20 )
-            {
-                //                v_right = (sigma_right*sigma_right) / (2.0*alpha_right) * (1.0 - exp(-2.0*alpha_right*bl_right) );
-                v_right = (sigma_right*sigma_right) / (2.0*alpha_right) * (exp(2.0*alpha_right*bl_right) - 1.0 );
-            }
-            else
-            {
-                v_right = (sigma_right*sigma_right) * bl_right;
-            }
-            
-            // add the propagated uncertainty to the branch lengths
-            double var_left  = (v_left)  + delta_left  * exp(2.0*alpha_left *bl_left);
-            double var_right = (v_right) + delta_right * exp(2.0*alpha_right*bl_right);
-            
-            // set delta_node = (t_l*t_r)/(t_l+t_r);
-            double var_node = (var_left*var_right) / (var_left+var_right);
-            this->contrast_uncertainty[this->active_likelihood[node_index]][node_index] = var_node;
-            
-            double theta_left   = computeBranchTheta( left_index );
-            double theta_right  = computeBranchTheta( right_index );
-            
-            double stdev = sqrt(var_left+var_right);
-            for (int i=0; i<this->num_sites; i++)
-            {
+                // update mu, v and z for the left branch
+                double mean_left = mu_left[char_index];
+                double log_nf_left = p_left[char_index];
+                double var_left = v_left[char_index];
+
+                propagateAuxiliaryVariables(mean_left, var_left, log_nf_left, left);
+
+
+                // update mu, v and z for the right branch
+                double mean_right = mu_right[char_index];
+                double log_nf_right = p_right[char_index];
+                double var_right = v_right[char_index];
+
+                propagateAuxiliaryVariables(mean_right, var_right, log_nf_right, right);
+
+
+                // merging rule
+                // D_node(y) = D_left(y) * D_right(y)
                 
-                double m_left   = exp(1.0 * bl_left  * alpha_left ) * (mu_left[i]  - theta_left)  + theta_left;
-                double m_right  = exp(1.0 * bl_right * alpha_right) * (mu_right[i] - theta_right) + theta_right;
-                mu_node[i] = (m_left*var_right + m_right*var_left) / (var_left+var_right);
-                
-                // get the site specific rate of evolution
-                double standDev = this->computeSiteRate(i) * stdev;
-                
-                // compute the contrasts for this site and node
-                double contrast = m_left - m_right;
-                
-                // compute the probability for the contrasts at this node
-                double z_left  = norm_const_left[i];
-                double z_right = norm_const_right[i];
-                double z_node  = exp(alpha_left*bl_left+alpha_right*bl_right)/(z_left*z_right) * exp( -1.0 * contrast * contrast / ( 2.0 *(var_left+var_right) ) ) / RbConstants::SQRT_2PI / stdev;
-                norm_const_node[i] = 1.0;
-                
-                double lnl_node = log( z_node );
-                //                lnl_node -= RbConstants::LN_SQRT_2PI - log( sqrt( var_node ) );
-                //                lnl_node -= ( (contrast-mu_node[i])*(contrast-mu_node[i]) ) / (2.0*var_node);
-                //                lnl_node -= ( mu_node[i]*mu_node[i] ) / (2.0*var_node);
-                
-                if ( node.isRoot() == true )
+                // mean
+                double mean_node = (mean_left*var_right + mean_right*var_left) / (var_left+var_right);
+                mu_node[char_index] = mean_node;
+
+                // var
+                double var_node = (var_left*var_right) / (var_left+var_right);
+                v_node[char_index] = var_node;
+
+                if ( use_missing_data == true )
                 {
-                    double root_state = computeRootState();
-                    // dnorm(root.x, vals[1], sqrt(vals[2]), TRUE)
-                    lnl_node += RbStatistics::Normal::lnPdf( root_state, sqrt((var_left*var_right) / (var_left+var_right)), mu_node[i]);
+                    missing_data[node_index][char_index] = false;
                 }
                 
-                // sum up the probabilities of the contrasts
-                p_node[i] = lnl_node + p_left[i] + p_right[i];
+                // log_nf
+                double contrast = mean_left - mean_right;
+                double a = -1.0 * contrast * contrast / ( 2.0 *(var_left+var_right) );
+                double b = 0.5 * log( 2*RbConstants::PI*(var_left+var_right) );
+                double log_norm_factor = log_nf_left + log_nf_right + a - b;
+                double lnl_node = log_norm_factor;
+                p_node[char_index] = lnl_node; 
                 
-            } // end for-loop over all sites
+            } // end-if we had missing states for subtrees
             
-        } // end for-loop over all children
+            if ( node.isRoot() == true )
+            {
+                // this pruning algorithm is 100% equivalent to the likelihood obtained
+                // using generalized least squares with a variance-covariance matrix
+                // for the residuals (r = y - theta), also called the vcv-method (introduced in Hansen 1997)
+                double root_state = computeRootState();
+                p_node[char_index] += RbStatistics::Normal::lnPdf( root_state, v_node[char_index], mu_node[char_index]);
+
+            }
+            
+        } // end for loop for character site index
         
     } // end if we need to compute something for this node.
     
@@ -509,11 +581,13 @@ void PhyloMultiSampleOrnsteinUhlenbeckProcessREML::resetValue( void )
 {
     
     // check if the vectors need to be resized
-    partial_likelihoods = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
-    contrasts = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
-    contrast_uncertainty = std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) );
-    normalizing_constants = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 1.0) ) );
-    
+    partial_likelihoods     = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
+    means                   = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
+    //variances               = std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) );
+    variances_per_site      = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
+    normalizing_constants   = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 1.0) ) );
+    missing_data            = std::vector<std::vector<bool> >(this->num_nodes, std::vector<bool>(this->num_sites, true) );
+
     // create a vector with the correct site indices
     // some of the sites may have been excluded
     site_indices = std::vector<size_t>(this->num_sites,0);
@@ -532,7 +606,43 @@ void PhyloMultiSampleOrnsteinUhlenbeckProcessREML::resetValue( void )
         ++site_index;
     }
     
+    // first we check for missing data
+    for (size_t site = 0; site < this->num_sites; ++site)
+    {
+        for (size_t i=0; i<taxa.size(); ++i)
+        {
+            const Taxon &t = taxa[i];
+            const ContinuousTaxonData& taxon = this->value->getTaxonData( t.getName() );
+            double c = taxon.getCharacter(site_indices[site]);
+            
+            if ( taxon.isCharacterResolved(site_indices[site]) == true && RbMath::isFinite(c) == true )
+            {
+                size_t species_index = tau->getValue().getTipIndex( t.getSpeciesName() );
+                missing_data[species_index][site] = false;
+            }
+        }
+    }
+    use_missing_data = false;
     std::vector<TopologyNode*> nodes = this->tau->getValue().getNodes();
+    for (size_t site = 0; site < this->num_sites; ++site)
+    {
+        
+        for (std::vector<TopologyNode*>::iterator it = nodes.begin(); it != nodes.end(); ++it)
+        {
+            if ( (*it)->isTip() )
+            {
+                size_t species_index = (*it)->getIndex();
+                
+                if ( missing_data[species_index][site] )
+                {
+                    use_missing_data = true;
+                    break;
+                }
+                
+            }
+        }
+    }
+                
     for (size_t site = 0; site < this->num_sites; ++site)
     {
         
@@ -542,10 +652,21 @@ void PhyloMultiSampleOrnsteinUhlenbeckProcessREML::resetValue( void )
             {
                 const std::string &name = (*it)->getName();
                 double c = computeMeanForSpecies(name, site_indices[site]);
-                contrasts[0][(*it)->getIndex()][site] = c;
-                contrasts[1][(*it)->getIndex()][site] = c;
-                contrast_uncertainty[0][(*it)->getIndex()] = sqrt( getWithinSpeciesVariance(name) ) / getNumberOfSamplesForSpecies(name);
-                contrast_uncertainty[1][(*it)->getIndex()] = sqrt( getWithinSpeciesVariance(name) ) / getNumberOfSamplesForSpecies(name);
+
+                means[0][(*it)->getIndex()][site] = c;
+                means[1][(*it)->getIndex()][site] = c;
+
+                if (  missing_data[(*it)->getIndex()][site] == true )
+                {
+                    variances_per_site[0][(*it)->getIndex()][site] = 0;
+                    variances_per_site[1][(*it)->getIndex()][site] = 0;
+                }
+                else
+                {
+                    variances_per_site[0][(*it)->getIndex()][site] = sqrt( getWithinSpeciesVariance(name) ) / getNumberOfSamplesForSpecies(name);
+                    variances_per_site[1][(*it)->getIndex()][site] = sqrt( getWithinSpeciesVariance(name) ) / getNumberOfSamplesForSpecies(name);
+                }
+
             }
         }
     }

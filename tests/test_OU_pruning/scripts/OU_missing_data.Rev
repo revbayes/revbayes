@@ -1,0 +1,91 @@
+################################################################################
+#
+# RevBayes Validation Test: Ornstein-Uhlenbeck model with and without missing data
+#
+# This test verifies that two datasets,
+#
+# i) a six-species phylogeny, with 3 missing data and 3 observations
+#
+# ii) a three-species phylogeny with 3 observations
+#
+# give the same likelihood score given the same parameter values.
+#
+# authors: Haoqing Du + BTK
+#
+################################################################################
+
+seed(12345)
+
+#######################
+# Reading in the Data #
+#######################
+
+data <- readContinuousCharacterData("data/Drosophila_tpm_species.nex")
+data_pruned <- readContinuousCharacterData("data/Drosophila_tpm_species_pruned.nex")
+
+# Get some useful variables from the data. We need these later on.
+
+# Tree
+psi <- readTrees( "data/Drosophila.tre" )[1]
+psi_pruned <- readTrees( "data/Drosophila_pruned.tre" )[1]
+root_age := psi.rootAge()
+
+moves = VectorMoves()
+mvi = 0
+
+# OU parameters
+
+sigma ~ dnLognormal( ln(10.0), sd=0.587405 )
+optimum ~ dnUniform(-10,10)
+attraction ~ dnExponential(1.0)
+
+moves.append( mvScale(sigma, lambda=1.0, tune=true, weight=2.0) )
+moves.append( mvSlide(optimum, delta=1.0, tune=true, weight=2.0) )
+moves.append( mvScale(attraction, lambda=1.0, tune=true, weight=2.0) )
+
+
+
+
+###################
+# PhyloCTMC Model #
+###################
+traits ~ dnPhyloOrnsteinUhlenbeckPruning(psi, sigma=sigma, alpha=attraction, theta=optimum, rootState=optimum, nSites=1)
+traits_pruned ~ dnPhyloOrnsteinUhlenbeckPruning(psi_pruned, sigma=sigma, alpha=attraction, theta=optimum, rootState=optimum, nSites=1)
+
+# attach the data
+traits.clamp(data)
+traits_pruned.clamp(data_pruned)
+
+# check if the two distributions 
+# give the same likelihood.
+lp1 = traits.lnProbability()
+#lp1 = 0.0
+lp2 = traits_pruned.lnProbability()
+#lp2 = 0.0
+
+treshold <- 0.0001
+
+print("lp1 = " + lp1)
+print("lp2 = " + lp2)
+
+if (abs(lp1 - lp2) < treshold){
+    print("likelihoods in OU distribution equal, test passed")
+}else{
+    print("likelihoods in OU distributions not equal, test failed")
+}
+
+# We can use any node of our model as a handle, here we chose to use the rate matrix.
+mymodel = model(traits)
+
+monitors = VectorMonitors()
+
+monitors.append( mnModel(filename="output/OU_missing_data.log",printgen=10, separator = TAB) )
+
+mymcmc = mcmc(mymodel, monitors, moves)
+mymcmc.burnin(generations=50,tuningInterval=5)
+mymcmc.run(generations=100)
+
+
+# you may want to quit RevBayes now
+q()
+
