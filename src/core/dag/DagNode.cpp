@@ -1187,9 +1187,9 @@ void DagNode::touch(bool touchAll)
 void DagNode::touchAffected(bool touchAll)
 {
     // touch all my children
-    for (std::vector<DagNode*>::const_iterator it = children.begin(); it != children.end(); ++it)
+    for (DagNode* child: children)
     {
-        (*it)->touchMe( this, touchAll );
+        child->touchMe( this, touchAll );
     }
 }
 
