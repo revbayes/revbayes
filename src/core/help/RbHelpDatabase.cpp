@@ -3190,7 +3190,16 @@ print(a) # Value is unchanged in the workspace - only the copy is modified)");
 	help_strings[string("model")][string("name")] = string(R"(model)");
 	help_strings[string("model")][string("title")] = string(R"(Create a model object)");
 	help_strings[string("module")][string("name")] = string(R"(module)");
+	help_arrays[string("mrcaIndex")][string("authors")].push_back(string(R"(Michael Landis)"));
+	help_strings[string("mrcaIndex")][string("description")] = string(R"(Returns the index of the most recent common ancestor (MRCA) of a given `clade`
+in a given `tree`.)");
+	help_strings[string("mrcaIndex")][string("example")] = string(R"(# Read in a tree
+tr <- readTrees(text="(((Lemur,Galago),Tarsius),((Pan,Homo),Alouatta));")[1]
+
+# Find the node index of the MRCA of Pan and Homo
+mrcaIndex(tr, clade("Homo", "Pan")))");
 	help_strings[string("mrcaIndex")][string("name")] = string(R"(mrcaIndex)");
+	help_arrays[string("mrcaIndex")][string("see_also")].push_back(string(R"(tmrca)"));
 	help_strings[string("mvAVMVN")][string("description")] = string(R"(The adaptive variance multivariate-normal proposal of Baele et al. 2017, uses MCMC samples to fit covariance matrix to parameters.
 
 After user-defined waiting time, proposes using covariance matrix epsilon * I + (1 - epsilon) * sigmaSquared * empirical_matrix.
