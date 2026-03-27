@@ -3490,22 +3490,6 @@ for(i in 1:fossils.size())
 	help_strings[string("mvFossilTipTimeUniform")][string("title")] = string(R"(Move to uniformly draw fossil tip ages)");
 	help_strings[string("mvGMRFHyperpriorGibbs")][string("name")] = string(R"(mvGMRFHyperpriorGibbs)");
 	help_strings[string("mvGMRFUnevenGridHyperpriorGibbs")][string("name")] = string(R"(mvGMRFUnevenGridHyperpriorGibbs)");
-	help_arrays[string("mvGPR")][string("authors")].push_back(string(R"(Sebastian Höhna)"));
-	help_strings[string("mvGPR")][string("description")] = string(R"(Tree topology move that performs a Gibbs Subtree Prune and Regraft (GPR) on
-a rooted tree.)");
-	help_strings[string("mvGPR")][string("details")] = string(R"(`mvGPR` basically performs a FNPR but tries all possible reattachment points, evaluates these based on the current joint DAG probability density, and then proposes the reattachment based on the probability density.
-This move can be efficient to reach quicker the stationary distribution, but is also more costly in computational time.)");
-	help_strings[string("mvGPR")][string("example")] = string(R"(taxa <- v(taxon("A"), taxon("B"), taxon("C"), taxon("D"), taxon("E"), taxon("F"))
-moves = VectorMoves()
-
-root_age <- 1.0
-
-topology ~ dnUniformTimeTree(taxa, root_age)
-moves.append( mvGPR(topology, weight=taxa.size()) ))");
-	help_strings[string("mvGPR")][string("name")] = string(R"(mvGPR)");
-	help_references[string("mvGPR")].push_back(RbHelpReference(R"(Höhna S & Drummond AJ (2012). Guided Tree Topology Proposals for Bayesian Phylogenetic Inference. Systematic Biology, 61(1):1-11.)",R"(10.1093/sysbio/syr074)",R"(https://academic.oup.com/sysbio/article-abstract/61/1/1/1676649 )"));
-	help_arrays[string("mvGPR")][string("see_also")].push_back(string(R"(mvFNPR)"));
-	help_strings[string("mvGPR")][string("title")] = string(R"(Gibbs Subtree Prune and Regraft (GPR) move.)");
 	help_arrays[string("mvGammaScale")][string("authors")].push_back(string(R"(Jeremy M. Brown)"));
 	help_strings[string("mvGammaScale")][string("description")] = string(R"(A move to scale a single continuous value by multiplying by a value drawn from a Gamma(lambda,1) distribution. Lambda is the tuning parameter that controls the size of the proposals.)");
 	help_strings[string("mvGammaScale")][string("example")] = string(R"(# Here is a simple example for conducting MCMC on the mean and sd of a Normal distribution.
@@ -3542,10 +3526,25 @@ mymcmc.run(30000,underPrior=TRUE);)");
 	help_strings[string("mvGammaScale")][string("name")] = string(R"(mvGammaScale)");
 	help_arrays[string("mvGammaScale")][string("see_also")].push_back(string(R"(mvScale)"));
 	help_strings[string("mvGibbsDrawCharacterHistory")][string("name")] = string(R"(mvGibbsDrawCharacterHistory)");
+	help_arrays[string("mvGibbsFNPR")][string("authors")].push_back(string(R"(Sebastian Höhna)"));
+	help_strings[string("mvGibbsFNPR")][string("description")] = string(R"(Tree topology move that performs a Gibbs Fixed-nodeheight Subtree Prune and Regraft on a rooted tree.)");
+	help_strings[string("mvGibbsFNPR")][string("details")] = string(R"(`mvGibbsFNPR` basically performs a FNPR but tries all possible reattachment points, evaluates these based on the current joint DAG probability density, and then proposes the reattachment based on the probability density.
+This move can be efficient to reach quicker the stationary distribution, but is also more costly in computational time.)");
+	help_strings[string("mvGibbsFNPR")][string("example")] = string(R"(taxa <- v(taxon("A"), taxon("B"), taxon("C"), taxon("D"), taxon("E"), taxon("F"))
+moves = VectorMoves()
+
+root_age <- 1.0
+
+topology ~ dnUniformTimeTree(taxa, root_age)
+moves.append( mvGibbsFNPR(topology, weight=taxa.size()) ))");
+	help_strings[string("mvGibbsFNPR")][string("name")] = string(R"(mvGibbsFNPR)");
+	help_references[string("mvGibbsFNPR")].push_back(RbHelpReference(R"(Höhna S & Drummond AJ (2012). Guided Tree Topology Proposals for Bayesian Phylogenetic Inference. Systematic Biology, 61(1):1-11.)",R"(10.1093/sysbio/syr074)",R"(https://academic.oup.com/sysbio/article-abstract/61/1/1/1676649 )"));
+	help_arrays[string("mvGibbsFNPR")][string("see_also")].push_back(string(R"(mvFNPR)"));
+	help_strings[string("mvGibbsFNPR")][string("title")] = string(R"(Gibbs Fixed-nodeheight Subtree Prune and Regraft move.)");
 	help_strings[string("mvGibbsMixtureAllocation")][string("name")] = string(R"(mvGibbsMixtureAllocation)");
 	help_arrays[string("mvGibbsSubtreePruneAndRegraft")][string("authors")].push_back(string(R"(Sebastian Höhna)"));
 	help_strings[string("mvGibbsSubtreePruneAndRegraft")][string("description")] = string(R"(Tree topology move that performs a Gibbs Subtree Prune and Regraft (GPR) on
-a rooted tree.)");
+an unrooted tree.)");
 	help_strings[string("mvGibbsSubtreePruneAndRegraft")][string("details")] = string(R"(`mvGibbsSubtreePruneAndRegraft` basically performs a SPR but tries all possible reattachment points, evaluates these based on the current joint DAG probability density, and then proposes the reattachment based on the probability density.
 This move can be efficient to reach quicker the stationary distribution, but is also more costly in computational time.)");
 	help_strings[string("mvGibbsSubtreePruneAndRegraft")][string("example")] = string(R"(taxa <- v(taxon("A"), taxon("B"), taxon("C"), taxon("D"), taxon("E"), taxon("F"))
