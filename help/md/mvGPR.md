@@ -20,7 +20,6 @@ mvFNPR
 
     topology ~ dnUniformTimeTree(taxa, root_age)
     moves.append( mvGPR(topology, weight=taxa.size()) )
-
 ## references
 - citation: Höhna S & Drummond AJ (2012). Guided Tree Topology Proposals for Bayesian Phylogenetic Inference. Systematic Biology, 61(1):1-11.
   doi: 10.1093/sysbio/syr074
