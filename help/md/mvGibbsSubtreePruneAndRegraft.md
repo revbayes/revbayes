@@ -4,7 +4,7 @@ mvGibbsSubtreePruneAndRegraft
 Gibbs Subtree Prune and Regraft (GPR) move.
 ## description
 Tree topology move that performs a Gibbs Subtree Prune and Regraft (GPR) on
-a rooted tree.
+an unrooted tree.
 ## details
 `mvGibbsSubtreePruneAndRegraft` basically performs a SPR but tries all possible reattachment points, evaluates these based on the current joint DAG probability density, and then proposes the reattachment based on the probability density.
 This move can be efficient to reach quicker the stationary distribution, but is also more costly in computational time.
