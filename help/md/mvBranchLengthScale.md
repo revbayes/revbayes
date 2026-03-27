@@ -12,8 +12,8 @@ Sebastian Höhna
 mvScaleBactrian
 mvScale
 ## example
+    taxa <- v(taxon("A"), taxon("B"), taxon("C"), taxon("D"), taxon("E"), taxon("F"))
     moves = VectorMoves()
     phylogeny ~ dnUniformTopologyBranchLength(taxa, branchLengthDistribution=dnExponential(10.0))
     moves.append( mvBranchLengthScale(phylogeny, weight=1) )
-
 ## references
