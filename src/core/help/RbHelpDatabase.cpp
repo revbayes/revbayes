@@ -3542,20 +3542,20 @@ moves.append( mvGibbsFNPR(topology, weight=taxa.size()) ))");
 	help_arrays[string("mvGibbsFNPR")][string("see_also")].push_back(string(R"(mvFNPR)"));
 	help_strings[string("mvGibbsFNPR")][string("title")] = string(R"(Gibbs Fixed-nodeheight Subtree Prune and Regraft move.)");
 	help_strings[string("mvGibbsMixtureAllocation")][string("name")] = string(R"(mvGibbsMixtureAllocation)");
-	help_arrays[string("mvGibbsSubtreePruneAndRegraft")][string("authors")].push_back(string(R"(Sebastian Höhna)"));
-	help_strings[string("mvGibbsSubtreePruneAndRegraft")][string("description")] = string(R"(Tree topology move that performs a Gibbs Subtree Prune and Regraft (GPR) on
+	help_arrays[string("mvGibbsSPR")][string("authors")].push_back(string(R"(Sebastian Höhna)"));
+	help_strings[string("mvGibbsSPR")][string("description")] = string(R"(Tree topology move that performs a Gibbs Subtree Prune and Regraft (GPR) on
 an unrooted tree.)");
-	help_strings[string("mvGibbsSubtreePruneAndRegraft")][string("details")] = string(R"(`mvGibbsSubtreePruneAndRegraft` basically performs a SPR but tries all possible reattachment points, evaluates these based on the current joint DAG probability density, and then proposes the reattachment based on the probability density.
+	help_strings[string("mvGibbsSPR")][string("details")] = string(R"(`mvGibbsSubtreePruneAndRegraft` basically performs a SPR but tries all possible reattachment points, evaluates these based on the current joint DAG probability density, and then proposes the reattachment based on the probability density.
 This move can be efficient to reach quicker the stationary distribution, but is also more costly in computational time.)");
-	help_strings[string("mvGibbsSubtreePruneAndRegraft")][string("example")] = string(R"(taxa <- v(taxon("A"), taxon("B"), taxon("C"), taxon("D"), taxon("E"), taxon("F"))
+	help_strings[string("mvGibbsSPR")][string("example")] = string(R"(taxa <- v(taxon("A"), taxon("B"), taxon("C"), taxon("D"), taxon("E"), taxon("F"))
 moves = VectorMoves()
 
 phylogeny ~ dnUniformTopologyBranchLength(taxa, branchLengthDistribution=dnExponential(10.0))
 moves.append( mvGibbsSubtreePruneAndRegraft(topology, weight=taxa.size()) ))");
-	help_strings[string("mvGibbsSubtreePruneAndRegraft")][string("name")] = string(R"(mvGibbsSubtreePruneAndRegraft)");
-	help_references[string("mvGibbsSubtreePruneAndRegraft")].push_back(RbHelpReference(R"(Höhna S & Drummond AJ (2012). Guided Tree Topology Proposals for Bayesian Phylogenetic Inference. Systematic Biology, 61(1):1-11.)",R"(10.1093/sysbio/syr074)",R"(https://academic.oup.com/sysbio/article-abstract/61/1/1/1676649 )"));
-	help_arrays[string("mvGibbsSubtreePruneAndRegraft")][string("see_also")].push_back(string(R"(mvGPR)"));
-	help_strings[string("mvGibbsSubtreePruneAndRegraft")][string("title")] = string(R"(Gibbs Subtree Prune and Regraft (GPR) move.)");
+	help_strings[string("mvGibbsSPR")][string("name")] = string(R"(mvGibbsSubtreePruneAndRegraft)");
+	help_references[string("mvGibbsSPR")].push_back(RbHelpReference(R"(Höhna S & Drummond AJ (2012). Guided Tree Topology Proposals for Bayesian Phylogenetic Inference. Systematic Biology, 61(1):1-11.)",R"(10.1093/sysbio/syr074)",R"(https://academic.oup.com/sysbio/article-abstract/61/1/1/1676649 )"));
+	help_arrays[string("mvGibbsSPR")][string("see_also")].push_back(string(R"(mvGPR)"));
+	help_strings[string("mvGibbsSPR")][string("title")] = string(R"(Gibbs Subtree Prune and Regraft (GPR) move.)");
 	help_arrays[string("mvGibbsSubtreeSwap")][string("authors")].push_back(string(R"(Sebastian Höhna)"));
 	help_strings[string("mvGibbsSubtreeSwap")][string("description")] = string(R"(Tree topology move that performs a Gibbs Subtree Swap on an unrooted tree.)");
 	help_strings[string("mvGibbsSubtreeSwap")][string("details")] = string(R"(`mvGibbsSubtreeSwap` randomly picks a first internal node (clade). Then it finds all possible other clades it can be swap with. Now it tries all these possible swaps and computes the resulting joint probability density. The final proposal is done proportional to the probability density.
