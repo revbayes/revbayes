@@ -3778,7 +3778,7 @@ namespace meta
         /// \ingroup integral
         template <char... Chs>
         constexpr fold<list<char_<Chs>...>, meta::size_t<0>, quote<detail::atoi_>>
-            operator"" _z()
+            operator""_z()
         {
             return {};
         }

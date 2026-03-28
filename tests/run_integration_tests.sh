@@ -131,6 +131,9 @@ for t in ${TESTS}; do
         if grep "^## continue-on-error" "$f" 2>&1 >/dev/null ; then
             rb_options="-c"
         fi
+        if grep "^## print-commands" "$f" 2>&1 >/dev/null ; then
+            rb_options="$rb_options -p"
+        fi
         ${rb_exec[@]} ${rb_options} $f &> output/${script_name}.errout # print output so we can see any error messages
         script_result="$?"
 
