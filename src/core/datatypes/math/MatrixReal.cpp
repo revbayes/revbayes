@@ -628,7 +628,7 @@ void MatrixReal::resize(size_t r, size_t c)
     elements = RbVector<RbVector<double> >(r, RbVector<double>(c,0.0) );
     
     n_rows = r;
-    n_rows = c;
+    n_cols = c;
     
     eigen_needs_update = true;
     cholesky_needs_update = true;
