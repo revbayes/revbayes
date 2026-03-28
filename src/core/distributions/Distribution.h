@@ -51,6 +51,8 @@ namespace RevBayesCore {
         void                                                    keep(const DagNode* affecter);
         virtual void                                            reInitialized( void );                                                              //!< The model was re-initialized
         void                                                    restore(const DagNode *restorer);
+        virtual std::string                                     getHiddenStateString(void) const { return ""; }                                     //!< Get hidden internal state as string (e.g. mixture allocation index)
+        virtual void                                            setHiddenStateFromString(const std::string &s) {}                                   //!< Set hidden internal state from string
         virtual void                                            setMcmcMode(bool tf);                                                               //!< Change the likelihood computation to or from MCMC mode.
         void                                                    swapParameter(const DagNode *oldP, const DagNode *newP);                            //!< Exchange the parameter
         void                                                    touch(const DagNode *toucher, bool touchAll);

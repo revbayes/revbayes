@@ -245,12 +245,12 @@ void RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::redrawValue( void
     RandomNumberGenerator *rng = GLOBAL_RNG;
     double u = rng->uniform01();
     size_t index = 0;
-    while ( u > probs[index] )
+    while ( index + 1 < probs.size() && u > probs[index] )
     {
         u -= probs[index];
         ++index;
     }
-    
+
     TypedDistribution<mixtureType> *selected_base_dist = base_distributions[index];
     selected_base_dist->redrawValue();
     if constexpr (std::is_base_of_v<Cloneable, mixtureType>)

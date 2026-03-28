@@ -6,6 +6,8 @@
 #include <vector>
 
 #include "DagNode.h"
+#include "Distribution.h"
+#include "FileFormat.h"
 #include "Model.h"
 #include "Monitor.h"
 #include "Cloneable.h"
@@ -43,6 +45,39 @@ StochasticVariableMonitor* StochasticVariableMonitor::clone(void) const
     return new StochasticVariableMonitor(*this);
 }
 
+
+
+/**
+ * Monitor variables, writing hidden state (e.g. mixture allocation index) instead of value
+ * for distributions that have hidden state. This is for state reconstruction (PPS, checkpoint).
+ */
+void StochasticVariableMonitor::monitorVariables(std::uint64_t gen)
+{
+    auto& separator = to<SeparatorFormat>(format)->separator;
+
+    for (std::vector<DagNode*>::iterator i = nodes.begin(); i != nodes.end(); ++i)
+    {
+        // add a separator before every new element
+        out_stream << separator;
+
+        // get the node
+        DagNode *node = *i;
+
+        if (node->isStochastic())
+        {
+            std::string hidden = node->getDistribution().getHiddenStateString();
+            if (!hidden.empty())
+            {
+                // write only the hidden state (e.g. mixture allocation index)
+                out_stream << hidden;
+                continue;
+            }
+        }
+
+        // write the value normally
+        node->printValue(out_stream, separator, -1, false, false, true, flatten);
+    }
+}
 
 
 /**

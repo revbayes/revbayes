@@ -36,6 +36,8 @@ namespace RevBayesCore {
         void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, std::int64_t &rv) const;     //!< Map the member methods to internal function calls
         const RevBayesCore::RbVector<mixtureType>&          getParameterValues(void) const;
         size_t                                              getCurrentIndex(void) const;
+        std::string                                         getHiddenStateString(void) const override;
+        void                                                setHiddenStateFromString(const std::string &s) override;
         std::vector<double>                                 getMixtureProbabilities(void) const;
         size_t                                              getNumberOfMixtureElements(void) const;                                                        //!< Get the number of elements for this value
         void                                                redrawValue(void);
@@ -142,6 +144,29 @@ size_t RevBayesCore::MixtureDistribution<mixtureType>::getCurrentIndex( void ) c
 
 
 template <class mixtureType>
+std::string RevBayesCore::MixtureDistribution<mixtureType>::getHiddenStateString( void ) const
+{
+    return std::to_string(index);
+}
+
+
+template <class mixtureType>
+void RevBayesCore::MixtureDistribution<mixtureType>::setHiddenStateFromString( const std::string &s )
+{
+    index = std::stoul(s);
+
+    const mixtureType &tmp = parameter_values->getValue()[index];
+    if constexpr(std::is_base_of_v<Cloneable, mixtureType>)
+    {
+        delete this->value;
+        this->value = tmp.clone();
+    }
+    else
+        (*this->value) = tmp;
+}
+
+
+template <class mixtureType>
 std::vector<double> RevBayesCore::MixtureDistribution<mixtureType>::getMixtureProbabilities( void ) const
 {
 
@@ -184,12 +209,12 @@ const mixtureType& RevBayesCore::MixtureDistribution<mixtureType>::simulate()
     RandomNumberGenerator *rng = GLOBAL_RNG;
     double u = rng->uniform01();
     index = 0;
-    while ( u > probs[index] )
+    while ( index + 1 < probs.size() && u > probs[index] )
     {
         u -= probs[index];
         ++index;
     }
-    
+
     return parameter_values->getValue()[index];
 }
 
@@ -277,7 +302,7 @@ void RevBayesCore::MixtureDistribution<mixtureType>::setValue(mixtureType *v, bo
             break;
         }
     }
-    
+
     // delegate class
     TypedDistribution<mixtureType>::setValue( v, force );
 }
