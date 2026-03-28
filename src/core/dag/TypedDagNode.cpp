@@ -83,6 +83,9 @@ bool TypedDagNode<Simplex>::isSimpleNumeric(void) const
     return true;
 }
 
+/* This is requirement of printing in mnModel.
+ * MatrixReal can be flatten as simple numeric so here return true.
+ * Same behavior with Simplex and RbVector.*/
 template<>
 bool TypedDagNode<MatrixReal>::isSimpleNumeric(void) const
 {

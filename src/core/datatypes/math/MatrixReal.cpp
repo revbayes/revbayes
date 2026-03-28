@@ -658,42 +658,22 @@ void MatrixReal::initFromString(const std::string &s)
 {
     clear();
 
-    if (s == "[]")
+    json j = json::parse(s);
+
+    if (!j.is_array() || j.empty())
     {
         return;
     }
 
-    if (s.size() < 4 || s[0] != '[' || s[1] != '[' || s[s.size()-2] != ']' || s[s.size()-1] != ']')
+    size_t nr = j.size();
+    size_t nc = j[0].size();
+    resize(nr, nc);
+
+    for (size_t i = 0; i < nr; ++i)
     {
-      throw RbException() << "Could not parse MatrixReal from string:\n" << s;
-    }
-
-    std::string body = s.substr(2, s.size() - 4);
-    std::vector<std::string> row_strings;
-    StringUtilities::stringSplit(body, "],[", row_strings);
-
-    if (row_strings.empty())
-    {
-        return;
-    }
-
-    std::vector<std::string> element_strings;
-    StringUtilities::stringSplit(row_strings[0], ",", element_strings);
-    resize(row_strings.size(), element_strings.size());
-
-    for (size_t j = 0; j < element_strings.size(); ++j)
-    {
-        RevBayesCore::Serializer<double, IsDerivedFrom<double, Serializable>::Is >::ressurectFromString(&elements[0][j], element_strings[j]);
-    }
-
-    for (size_t i = 1; i < row_strings.size(); ++i)
-    {
-        element_strings.clear();
-        StringUtilities::stringSplit(row_strings[i], ",", element_strings);
-
-        for (size_t j = 0; j < element_strings.size(); ++j)
+        for (size_t j2 = 0; j2 < nc; ++j2)
         {
-            RevBayesCore::Serializer<double, IsDerivedFrom<double, Serializable>::Is >::ressurectFromString(&elements[i][j], element_strings[j]);
+            elements[i][j2] = j[i][j2].get<double>();
         }
     }
 }
