@@ -339,6 +339,11 @@ void shutdown()
 
 void execute_file(const fs::path& filename, bool echo, bool continue_on_error)
 {
+    int rank = 0;
+#ifdef RB_MPI
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+#endif
+
     auto& settings = RbSettings::userSettings();
     std::stringstream inFile = RevBayesCore::readFileAsStringStream(filename);
 
@@ -355,7 +360,7 @@ void execute_file(const fs::path& filename, bool echo, bool continue_on_error)
         if (line.empty() and not inFile.good()) break;
 
         lineNumber++;
-        if ( echo )
+        if ( echo and rank == 0 )
         {
             if ( result == 1 )
             {
