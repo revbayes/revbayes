@@ -12,6 +12,7 @@
 #include "RbSettings.h"
 #include "RevNullObject.h"
 #include "RlUserInterface.h"
+#include "DynamicNode.h"
 
 using namespace RevLanguage;
 
@@ -85,17 +86,24 @@ RevPtr<RevVariable> SyntaxAssignment::evaluateContent( const std::shared_ptr<Env
     
     bool slot_was_occupied = ( &the_slot->getRevObject() != &RevNullObject::getInstance() );
 
-    if (slot_was_occupied)
+    if (slot_was_occupied and the_slot->getRevObject().hasDagNode())
     {
-        auto p = RbSettings::userSettings().getRedefinitionPolicy();
-        if (p == RedefinitionPolicy::Warn)
+        auto old_dag_node = the_slot->getRevObject().getDagNode();
+        if (dynamic_cast<const RevBayesCore::DynamicNodeBase*>(old_dag_node))
         {
-            std::ostringstream o;
-            o<<"Warning:   variable '"<<the_slot->getName()<<"' redefined.";
-            RBOUT(o.str());
+            std::string node_type = old_dag_node->isStochastic() ? "stochastic" : "deterministic";
+
+            auto p = RbSettings::userSettings().getRedefinitionPolicy();
+
+            if (p == RedefinitionPolicy::Warn)
+            {
+                std::ostringstream o;
+                o<<"Warning:   "<<node_type<<" variable '"<<the_slot->getName()<<"' redefined.";
+                RBOUT(o.str());
+            }
+            else if (p == RedefinitionPolicy::Error)
+                throw RbException()<<node_type<<" variable '"<<the_slot->getName()<<"' redefined.  (Not allowed by current policy)";
         }
-        else if (p == RedefinitionPolicy::Error)
-            throw RbException()<<"variable '"<<the_slot->getName()<<"' redefined.  (Not allowed by current policy)";
     }
     
     try
