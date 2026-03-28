@@ -1,4 +1,3 @@
-#include <cctype>
 #include <cmath>
 #include <cstring>
 #include <fstream>
@@ -25,163 +24,43 @@ using namespace RevBayesCore;
 
 namespace {
 
-void skipWhitespace(const std::string &s, size_t &pos)
+void printFlattenedMatrix(std::ostream &o, const MatrixReal &matrix, const std::string &sep)
 {
-    while (pos < s.size() && std::isspace(static_cast<unsigned char>(s[pos])) != 0)
+    for (size_t i = 0; i < matrix.getNumberOfRows(); ++i)
     {
-        ++pos;
-    }
-}
-
-[[noreturn]] void throwParseError(const std::string &s, const std::string &message)
-{
-    throw RbException() << "Could not parse MatrixReal from string:\n" << s << "\n" << message;
-}
-
-void expectChar(const std::string &s, size_t &pos, char expected)
-{
-    skipWhitespace(s, pos);
-    if (pos >= s.size() || s[pos] != expected)
-    {
-        std::stringstream msg;
-        msg << "Expected '" << expected << "' at position " << pos << ".";
-        throwParseError(s, msg.str());
-    }
-
-    ++pos;
-}
-
-std::string readNumberToken(const std::string &s, size_t &pos)
-{
-    skipWhitespace(s, pos);
-
-    size_t start = pos;
-    while (pos < s.size() && s[pos] != ',' && s[pos] != ']')
-    {
-        ++pos;
-    }
-
-    size_t end = pos;
-    while (end > start && std::isspace(static_cast<unsigned char>(s[end - 1])) != 0)
-    {
-        --end;
-    }
-
-    if (start == end)
-    {
-        std::stringstream msg;
-        msg << "Expected a numeric token at position " << start << ".";
-        throwParseError(s, msg.str());
-    }
-
-    return s.substr(start, end - start);
-}
-
-RbVector<double> parseRow(const std::string &s, size_t &pos)
-{
-    expectChar(s, pos, '[');
-
-    RbVector<double> row;
-
-    skipWhitespace(s, pos);
-    if (pos < s.size() && s[pos] == ']')
-    {
-        ++pos;
-        return row;
-    }
-
-    while (true)
-    {
-        double value = 0.0;
-        std::string token = readNumberToken(s, pos);
-        Serializer<double, IsDerivedFrom<double, Serializable>::Is >::ressurectFromString(&value, token);
-        row.push_back(value);
-
-        skipWhitespace(s, pos);
-        if (pos >= s.size())
+        for (size_t j = 0; j < matrix.getNumberOfColumns(); ++j)
         {
-            throwParseError(s, "Unexpected end of string while parsing a matrix row.");
-        }
-
-        if (s[pos] == ',')
-        {
-            ++pos;
-            continue;
-        }
-
-        if (s[pos] == ']')
-        {
-            ++pos;
-            break;
-        }
-
-        std::stringstream msg;
-        msg << "Expected ',' or ']' at position " << pos << ".";
-        throwParseError(s, msg.str());
-    }
-
-    return row;
-}
-
-template <typename StreamSetter>
-void printMatrix(const MatrixReal &matrix, std::ostream &o, const std::string &sep, int l, bool left, bool flatten, StreamSetter setStreamState)
-{
-    std::streamsize previousPrecision = o.precision();
-    std::ios_base::fmtflags previousFlags = o.flags();
-
-    setStreamState(o);
-
-    std::stringstream ss;
-    ss.flags(o.flags());
-    ss.precision(o.precision());
-
-    if (flatten)
-    {
-        for (size_t i = 0; i < matrix.getNumberOfRows(); ++i)
-        {
-            for (size_t j = 0; j < matrix.getNumberOfColumns(); ++j)
+            if (i != 0 || j != 0)
             {
-                if (i != 0 || j != 0)
-                {
-                    ss << sep;
-                }
-                ss << matrix[i][j];
+                o << sep;
             }
+            o << matrix[i][j];
         }
     }
-    else
+}
+
+void printStoredMatrix(std::ostream &o, const MatrixReal &matrix)
+{
+    o << "[";
+    for (size_t i = 0; i < matrix.getNumberOfRows(); ++i)
     {
-        ss << "[";
-        for (size_t i = 0; i < matrix.getNumberOfRows(); ++i)
+        if (i > 0)
         {
-            if (i > 0)
-            {
-                ss << ",";
-            }
-
-            ss << "[";
-            for (size_t j = 0; j < matrix.getNumberOfColumns(); ++j)
-            {
-                if (j > 0)
-                {
-                    ss << ",";
-                }
-                ss << matrix[i][j];
-            }
-            ss << "]";
+            o << ",";
         }
-        ss << "]";
-    }
 
-    std::string s = ss.str();
-    if (l > 0)
-    {
-        StringUtilities::fillWithSpaces(s, l, left);
+        o << "[";
+        for (size_t j = 0; j < matrix.getNumberOfColumns(); ++j)
+        {
+            if (j > 0)
+            {
+                o << ",";
+            }
+            o << matrix[i][j];
+        }
+        o << "]";
     }
-
-    o.setf(previousFlags);
-    o.precision(previousPrecision);
-    o << s;
+    o << "]";
 }
 
 } // namespace
@@ -777,75 +656,46 @@ size_t MatrixReal::size( void ) const
 
 void MatrixReal::initFromString(const std::string &s)
 {
-    size_t pos = 0;
-    skipWhitespace(s, pos);
-    expectChar(s, pos, '[');
+    clear();
 
-    std::vector<RbVector<double> > rows;
-
-    skipWhitespace(s, pos);
-    if (pos < s.size() && s[pos] == ']')
+    if (s == "[]")
     {
-        ++pos;
+        return;
     }
-    else
+
+    if (s.size() < 4 || s[0] != '[' || s[1] != '[' || s[s.size()-2] != ']' || s[s.size()-1] != ']')
     {
-        while (true)
+      throw RbException() << "Could not parse MatrixReal from string:\n" << s;
+    }
+
+    std::string body = s.substr(2, s.size() - 4);
+    std::vector<std::string> row_strings;
+    StringUtilities::stringSplit(body, "],[", row_strings);
+
+    if (row_strings.empty())
+    {
+        return;
+    }
+
+    std::vector<std::string> element_strings;
+    StringUtilities::stringSplit(row_strings[0], ",", element_strings);
+    resize(row_strings.size(), element_strings.size());
+
+    for (size_t j = 0; j < element_strings.size(); ++j)
+    {
+        RevBayesCore::Serializer<double, IsDerivedFrom<double, Serializable>::Is >::ressurectFromString(&elements[0][j], element_strings[j]);
+    }
+
+    for (size_t i = 1; i < row_strings.size(); ++i)
+    {
+        element_strings.clear();
+        StringUtilities::stringSplit(row_strings[i], ",", element_strings);
+
+        for (size_t j = 0; j < element_strings.size(); ++j)
         {
-            rows.push_back(parseRow(s, pos));
-
-            skipWhitespace(s, pos);
-            if (pos >= s.size())
-            {
-                throwParseError(s, "Unexpected end of string while parsing a matrix.");
-            }
-
-            if (s[pos] == ',')
-            {
-                ++pos;
-                continue;
-            }
-
-            if (s[pos] == ']')
-            {
-                ++pos;
-                break;
-            }
-
-            std::stringstream msg;
-            msg << "Expected ',' or ']' at position " << pos << ".";
-            throwParseError(s, msg.str());
+            RevBayesCore::Serializer<double, IsDerivedFrom<double, Serializable>::Is >::ressurectFromString(&elements[i][j], element_strings[j]);
         }
     }
-
-    skipWhitespace(s, pos);
-    if (pos != s.size())
-    {
-        std::stringstream msg;
-        msg << "Unexpected trailing content at position " << pos << ".";
-        throwParseError(s, msg.str());
-    }
-
-    size_t rowCount = rows.size();
-    size_t columnCount = rowCount == 0 ? 0 : rows[0].size();
-    for (size_t i = 1; i < rowCount; ++i)
-    {
-        if (rows[i].size() != columnCount)
-        {
-            throwParseError(s, "Matrix rows have inconsistent lengths.");
-        }
-    }
-
-    elements.clear();
-    for (const auto &row : rows)
-    {
-        elements.push_back(row);
-    }
-
-    n_rows = rowCount;
-    n_cols = columnCount;
-    eigen_needs_update = true;
-    cholesky_needs_update = true;
 }
 
 
@@ -923,24 +773,36 @@ void MatrixReal::printForUser(std::ostream &o, const std::string & /*sep*/, int 
 
 void MatrixReal::printForSimpleStoring(std::ostream &o, const std::string &sep, int l, bool left, bool flatten) const
 {
-    printMatrix(*this, o, sep, l, left, flatten, [](std::ostream & /*stream*/) {});
+    if (flatten)
+    {
+        printFlattenedMatrix(o, *this, sep);
+    }
+    else
+    {
+        printStoredMatrix(o, *this);
+    }
 }
 
 
 void MatrixReal::printForComplexStoring(std::ostream &o, const std::string &sep, int l, bool left, bool flatten) const
 {
-    printMatrix(
-        *this,
-        o,
-        sep,
-        l,
-        left,
-        flatten,
-        [](std::ostream &stream) {
-            stream.precision(std::numeric_limits<double>::max_digits10);
-            stream.setf(std::ios::fmtflags(0), std::ios::floatfield);
-        }
-    );
+    std::streamsize previous_precision = o.precision();
+    std::ios_base::fmtflags previous_flags = o.flags();
+    
+    o.precision( std::numeric_limits<double>::digits10 );
+    o.setf( std::ios::fmtflags(0), std::ios::floatfield );
+    
+    if (flatten)
+    {
+        printFlattenedMatrix(o, *this, sep);
+    }
+    else
+    {
+        printStoredMatrix(o, *this);
+    }
+    
+    o.setf( previous_flags );
+    o.precision( previous_precision );
 }
 
 
