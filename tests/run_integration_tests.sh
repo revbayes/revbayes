@@ -36,6 +36,7 @@ while echo $1 | grep ^- > /dev/null; do
 Command line options are:
 -h, --help                              : print this help and exit.
 -t, --tests test1 [test2 ...]           : only run these tests
+-skip-tutorials BOOLEAN                 : don't run the tutorial tests
 -mpi BOOLEAN                            : run with mpi (currently disabled)
 -windows BOOLEAN                        : run under windows
 "
@@ -87,7 +88,7 @@ if [ ! -d "revbayes.github.io" ] ; then
 fi
 
 # Run the tutorial tests using the script from the website
-if [ ${#only_tests[@]} = 0 ] ; then
+if [ ${#only_tests[@]} = 0 ] && [ "${skip_tutorials}" = true ] ; then
 (
     cd revbayes.github.io/tutorials
     ./run_tutorial_tests.sh ${rb_exec[@]}
