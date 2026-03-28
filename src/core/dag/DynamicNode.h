@@ -7,8 +7,14 @@
 
 namespace RevBayesCore {
     
+    class DynamicNodeBase
+    {
+    protected:
+        bool touched = true;
+    };
+
     template<class valueType>
-    class DynamicNode : public TypedDagNode<valueType> {
+    class DynamicNode : public DynamicNodeBase, public TypedDagNode<valueType> {
         
     public:
         
@@ -29,11 +35,6 @@ namespace RevBayesCore {
         virtual void                                        keepMe(const DagNode* affecter);                                                //!< Keep value of this and affected nodes
         virtual void                                        restoreMe(const DagNode *restorer);                                             //!< Restore value of this node
         virtual void                                        touchMe(const DagNode *toucher, bool touchAll);                                 //!< Tell affected nodes value is reset
-        
-        
-        // members
-        bool                                                touched;
-        
     };
     
 }
@@ -42,16 +43,14 @@ namespace RevBayesCore {
 #include "RbOptions.h"
 
 template<class valueType>
-RevBayesCore::DynamicNode<valueType>::DynamicNode( const std::string &n ) : TypedDagNode<valueType>( n ),
-    touched( true )
+RevBayesCore::DynamicNode<valueType>::DynamicNode( const std::string &n ) : TypedDagNode<valueType>( n )
 {
     // nothing to do here
 }
 
 
 template<class valueType>
-RevBayesCore::DynamicNode<valueType>::DynamicNode( const DynamicNode<valueType> &n ) : TypedDagNode<valueType>( n ),
-    touched( true )
+RevBayesCore::DynamicNode<valueType>::DynamicNode( const DynamicNode<valueType> &n ) : TypedDagNode<valueType>( n )
 {
     // nothing to do here
 }
