@@ -39,7 +39,7 @@ namespace RevBayesCore {
         virtual std::vector<double>         getStationaryFrequencies(void) const = 0;
         
         using RateGenerator::getSumOfRates;
-        virtual double                      getSumOfRates(std::vector<CharacterEvent*> from, const std::vector<std::set<size_t> >& sites_with_states, double age=0.0, double rate=1.0) const = 0;
+        virtual double                      getSumOfRates(const std::vector<CharacterEvent*>& from, const std::vector<std::set<size_t> >& sites_with_states, double age=0.0, double rate=1.0) const = 0;
         
         virtual double                      getSumOfRatesDifferential(std::vector<CharacterEvent*> from, CharacterEventDiscrete* to, double age=0.0, double rate=1.0) const = 0;
         virtual double                      getSumOfRatesDifferential(std::vector<CharacterEvent*> from, CharacterEventDiscrete* to, const std::vector<std::set<size_t> >& sites_with_states, double age=0.0, double rate=1.0) const = 0;

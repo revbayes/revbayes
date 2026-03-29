@@ -94,7 +94,7 @@ int RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string> 
     {
         // Should we be using RBOUT here?  It looks weird with the 2 spaces of padding.
         if (echo and rank == 0)
-            std::cerr<<"> "<<expression<<"\n";
+            std::cout<<"> "<<expression<<"\n";
 
         int result = RevLanguage::Parser::getParser().processCommand(expression, RevLanguage::Workspace::userWorkspacePtr());
         
