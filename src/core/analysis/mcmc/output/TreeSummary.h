@@ -30,7 +30,10 @@ namespace RevBayesCore {
         };
 
         /*
-         * This struct represents a tree bipartition (split) that can be rooted or unrooted
+         * This struct represents a tree bipartition (split) that can be rooted or unrooted. The first argument represents
+         * the taxa included in the bipartition (b); the middle argument is a taxon-set representation of the most recent
+         * common ancestor (MRCA; m) of the clade in question, which contains the sampled MRCA if there is one and which is
+         * empty for clades without sampled MRCAs; and the last argument indicates whether the bipartition is rooted (r).
          */
         struct Split : public std::pair<RbBitSet, std::set<Taxon> >
         {
@@ -71,8 +74,8 @@ namespace RevBayesCore {
         virtual ~TreeSummary(){}
 
         TreeSummary*                                   clone(void) const;
-        void                                           annotateTree(Tree &inputTree, AnnotationReport report, bool verbose);
-        double                                         cladeProbability(const Clade &c, bool verbose);
+        void                                           annotateTree(Tree &inputTree, AnnotationReport report, bool verbose, bool differentiate_SAs);
+        double                                         cladeProbability(const Clade &c, bool verbose, bool differentiate_SAs);
         double                                         computeEntropy(double credible_interval_size, bool stochastic, bool verbose);
         std::vector<double>                            computePairwiseRFDistance(double credible_interval_size, bool stochastic, bool verbose);
         std::vector<double>                            computeTreeLengths(void);
@@ -87,9 +90,9 @@ namespace RevBayesCore {
         bool                                           isDirty(void) const;
         double                                         jointCladeProbability(const RbVector<Clade> &c, bool verbose);
         double                                         maxdiff(bool verbose);
-        Tree*                                          mapTree(AnnotationReport report, bool verbose);
-        Tree*                                          mccTree(AnnotationReport report, bool verbose);
-        Tree*                                          mrTree(AnnotationReport report, double cutoff, bool verbose);
+        Tree*                                          mapTree(AnnotationReport report, bool verbose, bool differentiate_SAs);
+        Tree*                                          mccTree(AnnotationReport report, bool verbose, bool differentiate_SAs);
+        Tree*                                          mrTree(AnnotationReport report, double cutoff, bool verbose, bool differentiate_SAs);
         void                                           printCladeSummary(std::ostream& o, double min_clade_probability=0.05, bool verbose=true);
         void                                           printTreeSummary(std::ostream& o, double credible_interval_size=0.95, bool stochastic=true, bool verbose=true);
         std::int64_t                                   sampleSize(bool post = false) const;

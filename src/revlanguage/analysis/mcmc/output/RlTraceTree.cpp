@@ -145,9 +145,10 @@ RevPtr<RevVariable> TraceTree::executeMethod(std::string const &name, const std:
         found = true;
         
         const RevBayesCore::Clade &c = static_cast<const Clade &>( args[0].getVariable()->getRevObject() ).getValue();
-        bool verbose = static_cast<const RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
+        bool differentiate_samp_anc = static_cast<const RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
+        bool verbose = static_cast<const RlBoolean &>( args[2].getVariable()->getRevObject() ).getValue();
         
-        double p = this->value->cladeProbability( c, verbose );
+        double p = this->value->cladeProbability( c, verbose, differentiate_samp_anc );
         
         return new RevVariable( new Probability( p ) );
         
@@ -503,6 +504,7 @@ void TraceTree::initMethods( void )
     
     ArgumentRules* cladeProbArgRules = new ArgumentRules();
     cladeProbArgRules->push_back( new ArgumentRule("clade", Clade::getClassTypeSpec(), "The clade whose probability is to be computed.", ArgumentRule::BY_VALUE, ArgumentRule::ANY) );
+    cladeProbArgRules->push_back( new ArgumentRule("differentiateMRCAs", RlBoolean::getClassTypeSpec(), "Should we treat clades of identical composition as different if they differ in their most recent common ancestor?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false)) );
     cladeProbArgRules->push_back( new ArgumentRule("verbose", RlBoolean::getClassTypeSpec(), "Printing verbose output.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true)) );
     this->methods.addFunction( new MemberProcedure( "cladeProbability", Probability::getClassTypeSpec(), cladeProbArgRules) );
     

@@ -92,7 +92,7 @@ TreeSummary* TreeSummary::clone(void) const
 }
 
 
-void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbose )
+void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbose, bool differentiate_SAs )
 {
     summarize( verbose );
 
@@ -155,7 +155,7 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
         // annotate clade posterior prob
         if ( ( !n->isTip() || ( n->isRoot() && !clade.getMrca().empty() ) ) && report.clade_probs )
         {
-            double pp = cladeProbability( clade, false );
+            double pp = cladeProbability( clade, false, differentiate_SAs );
             n->addBranchParameter("posterior",pp);
         }
 
@@ -319,14 +319,53 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
 }
 
 
-double TreeSummary::cladeProbability( const Clade &c, bool verbose )
+double TreeSummary::cladeProbability( const Clade &c, bool verbose, bool differentiate_SAs )
 {
     summarize( verbose );
 
     Clade tmp = c;
     tmp.resetTaxonBitset( traces.front()->objectAt(0).getTaxonBitSetMap() );
+    double prob = 0.0;
+    bool any_member_is_ancestor = false;
+    
+    for (size_t i = 0; i < tmp.getTaxa().size(); i++)
+    {
+        // Check whether a given member of the clade is also its most recent common ancestor (MRCA)
+        bool this_member_is_ancestor = tmp.getMrca().find( tmp.getTaxa()[i] ) != tmp.getMrca().end();
+        any_member_is_ancestor |= this_member_is_ancestor;
+        
+        /* If differentiate_SAs == true (i.e., we consider clades of identical membership to be different
+         * when they differ in their MRCA) and one of the members of the clade is also its MRCA, this
+         * if-statement will only be triggered once, precisely for that taxon which is the MRCA. If
+         * differentiate_SAs == true but the clade does not have a sampled MRCA (i.e., the MRCA is a
+         * speciation node, not any of the member taxa), the if-statement will never be triggered and we
+         * will instead execute the if-statement outside the for-loop. If differentiate_SAs == false, the
+         * if-statement will be triggered on every iteration of the for-loop: in this case, we want to
+         * calculate the probability of _every_ member taxon being the MRCA, and add it to the overall
+         * probability of the clade.
+         */
+        if (not differentiate_SAs or this_member_is_ancestor)
+        {
+            std::set<Taxon> tax_set;
+            // Add the current taxon as the MRCA of the split whose probability we want to calculate
+            tax_set.insert( tmp.getTaxa()[i] );
+            prob += splitFrequency( Split( tmp.getBitRepresentation(), tax_set, rooted) );
+        }
+    }
+    
+    /* If differentiate_SAs == true, this if-statement will only be triggered if the clade does not have
+     * a sampled MRCA. If differentiate_SAs == false, the if-statement will always be triggered in order
+     * to calculate the probability that the MRCA is a speciation node rather than any of the member
+     * taxa, and add it to the overall probability of the clade.
+     */
+    if (not differentiate_SAs or not any_member_is_ancestor)
+    {
+        // Deliberately leaving the tax_set empty to represent a non-sampled MRCA
+        std::set<Taxon> tax_set;
+        prob += splitFrequency( Split( tmp.getBitRepresentation(), tax_set, rooted) );
+    }
 
-    return splitFrequency( Split( tmp.getBitRepresentation(), tmp.getMrca(), rooted) );
+    return prob;
 }
 
 
@@ -795,7 +834,7 @@ double TreeSummary::maxdiff( bool verbose )
 }
 
 
-Tree* TreeSummary::mapTree( AnnotationReport report, bool verbose )
+Tree* TreeSummary::mapTree( AnnotationReport report, bool verbose, bool differentiate_SAs )
 {
     std::stringstream ss;
     ss << "Compiling maximum a posteriori tree from " << sampleSize(true) << " trees.\n";
@@ -827,13 +866,13 @@ Tree* TreeSummary::mapTree( AnnotationReport report, bool verbose )
 
     report.MAP_parameters = true;
     report.node_ages      = true;
-    annotateTree(*tmp_tree, report, false);
+    annotateTree(*tmp_tree, report, false, differentiate_SAs);
 
     return tmp_tree;
 }
 
 
-Tree* TreeSummary::mccTree( AnnotationReport report, bool verbose )
+Tree* TreeSummary::mccTree( AnnotationReport report, bool verbose, bool differentiate_SAs )
 {
     std::stringstream ss;
     ss << "Compiling maximum clade credibility tree from " << sampleSize(true) << " trees.\n";
@@ -847,10 +886,46 @@ Tree* TreeSummary::mccTree( AnnotationReport report, bool verbose )
     // find the clade credibility score for each tree
     for (const auto& [newick, count]: tree_samples)
     {
+        // get tree from newick
+        NewickConverter converter;
+        Tree* tmp_tree = converter.convertFromNewick( newick );
+
+        // get vector of nodes
+        const std::vector<TopologyNode*> &nodes = tmp_tree->getNodes();
+
         // find the product of the clade frequencies
         double cc = 0;
-        for (auto& [clade, age]: tree_clade_ages.at(newick))
-            cc += log( splitFrequency(clade) );
+        for (size_t i = 0; i < nodes.size(); ++i)
+        {
+            // get this node
+            TopologyNode* n = nodes[i];
+
+            // and clade
+            Clade clade = n->getClade();
+
+            // get clade probability
+            cc += log( cladeProbability(clade, verbose, differentiate_SAs) );
+
+            // if differentiate_SAs is false, and there are SAs at all,
+            // need to multiply probabilities by sampled ancestor probs
+            if (!differentiate_SAs && !sampled_ancestor_counts.empty())
+            {
+                // get member taxa of clade
+                const std::vector<Taxon> taxa = clade.getTaxa();
+
+                for (size_t j = 0; j < taxa.size(); ++j)
+                {
+                    // get SA frequency
+                    double sa_freq = sampled_ancestor_counts[taxa[j]] / sampleSize(true);
+
+                    // check if it is an SA
+                    bool is_SA = tmp_tree->getTipNodeWithName(taxa[i].getName()).isSampledAncestorTip();
+                    
+                    // add to cc based on that
+                    cc += log( is_SA ? sa_freq : 1 - sa_freq );
+                }
+            }
+        }
 
         if (not max_cc or cc > *max_cc)
         {
@@ -858,8 +933,6 @@ Tree* TreeSummary::mccTree( AnnotationReport report, bool verbose )
 
             delete best_tree;
 
-            NewickConverter converter;
-            Tree* tmp_tree = converter.convertFromNewick( newick );
             tmp_tree->suppressOutdegreeOneNodes(true);
             if ( clock == true )
             {
@@ -878,13 +951,13 @@ Tree* TreeSummary::mccTree( AnnotationReport report, bool verbose )
     }
 
     report.node_ages = true;
-    annotateTree(*best_tree, report, false);
+    annotateTree(*best_tree, report, false, differentiate_SAs);
 
     return best_tree;
 }
 
 
-Tree* TreeSummary::mrTree(AnnotationReport report, double cutoff, bool verbose)
+Tree* TreeSummary::mrTree( AnnotationReport report, double cutoff, bool verbose, bool differentiate_SAs )
 {
     if (cutoff < 0.0 || cutoff > 1.0) cutoff = 0.5;
 
@@ -918,36 +991,41 @@ Tree* TreeSummary::mrTree(AnnotationReport report, double cutoff, bool verbose)
 
     double totalSamples = sampleSize(true);
 
-    for (const auto& [clade, count]: clade_samples | views::reverse)
+    for (const auto& [split, count]: clade_samples | views::reverse)
     {
-        float cladeFreq = count / totalSamples;
+        // get a clade from the split in clade_samples
+        Clade clade = Clade(traces.front()->objectAt(0).getTaxa(), split.first);
+
+        // set its MRCA
+        clade.setMrca(split.second);
+        double cladeFreq = cladeProbability(clade, false, differentiate_SAs);
         if (cladeFreq < cutoff)  break;
 
         //make sure we have an internal node
-        size_t clade_size = clade.first.count();
+        size_t clade_size = split.first.count();
         if (clade_size == 1 || clade_size == tipNames.size())  continue;
 
         //find parent node
         std::vector<TopologyNode*> children;
         RbBitSet tmp(tipNames.size());
-        TopologyNode* parentNode = findParentNode(*root, clade, children, tmp );
+        TopologyNode* parentNode = findParentNode(*root, split, children, tmp );
 
         //skip this clade if it is not compatible
         if (not parentNode) continue;
 
         // find the mrca child(ren) if they exist
         std::vector<TopologyNode*> mrca;
-        if ( not clade.second.empty() )
+        if ( not split.second.empty() && differentiate_SAs)
         {
             for (auto& child: children)
             {
                 // Add the child to the mrca if it's a tip and its taxon is in clade.second
-                if ( child->isTip() && std::find(clade.second.begin(), clade.second.end(), child->getTaxon() ) != clade.second.end() )
+                if ( child->isTip() && std::find(split.second.begin(), split.second.end(), child->getTaxon() ) != split.second.end() )
                     mrca.push_back(child);
             }
 
             // if we couldn't find all the mrcas, then this clade is not compatible
-            if ( mrca.size() != clade.second.size() )
+            if ( mrca.size() != split.second.size() )
             {
                 continue;
             }
@@ -1001,11 +1079,21 @@ Tree* TreeSummary::mrTree(AnnotationReport report, double cutoff, bool verbose)
     //now put the tree together
     consensusTree->setRoot(root, true);
 
+    // deal with SAs when differentiate_SAs is false
+    if (!differentiate_SAs && !sampled_ancestor_counts.empty()) {
+        for (auto& n : consensusTree->getNodes()) {
+            // if it's a tip and it's a sampled ancestor more than cutoff% of the time, make it an SA here
+            if (n->isTip() && sampled_ancestor_counts[n->getTaxon()] / sampleSize(true) >= cutoff) {
+                n->setSampledAncestor(true);
+            } 
+        }
+    }
+
     report.conditional_clade_ages  = false;
     report.conditional_clade_probs = false;
     report.conditional_tree_ages   = false;
     report.node_ages               = true;
-    annotateTree(*consensusTree, report, false);
+    annotateTree(*consensusTree, report, false, differentiate_SAs);
 
     return consensusTree;
 }

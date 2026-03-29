@@ -193,17 +193,17 @@ mymcmc.run(generations=800)
 trace_extant = readTreeTrace("output/bears_FBD_ex3_extant.trees")
 trace = readTreeTrace("output/bears_FBD_ex3_all.trees")
 
-# Maximum clade credibility tree #
-#consensusTree(trace_extant, file="output/bears_FBD_extant.con.tre" )
-#consensusTree(trace, file="output/bears_FBD_ex3_all.con.tre" )
+# Majority-rule consensus tree #
+#consensusTree(trace_extant, file="output/bears_FBD_extant.con.tre", differentiateMRCAs=TRUE)
+#consensusTree(trace, file="output/bears_FBD_ex3_all.con.tre", differentiateMRCAs=TRUE)
+
+# Maximum a posteriori tree #
+mapTree(trace_extant, file="output/bears_FBD_ex3_extant.map.tre", differentiateMRCAs=TRUE)
+mapTree(trace, file="output/bears_FBD_ex3_all.map.tre", differentiateMRCAs=TRUE)
 
 # Maximum clade credibility tree #
-mapTree(trace_extant, file="output/bears_FBD_ex3_extant.map.tre" )
-mapTree(trace, file="output/bears_FBD_ex3_all.map.tre" )
-
-# Maximum clade credibility tree #
-mccTree(trace_extant, file="output/bears_FBD_ex3_extant.mcc.tre" )
-mccTree(trace, file="output/bears_FBD_ex3_all.mcc.tre" )
+mccTree(trace_extant, file="output/bears_FBD_ex3_extant.mcc.tre", differentiateMRCAs=TRUE)
+mccTree(trace, file="output/bears_FBD_ex3_all.mcc.tre", differentiateMRCAs=TRUE)
 
 # Quit RevBayes #
 q()

@@ -115,10 +115,10 @@ mymcmc.run(generations=300)
 # Load the tree trace
 trace = readTreeTrace("output/test1.trees", treetype="clock")
 
-# Maximum clade credibility tree #
-consensusTree(trace, file="output/test1.con.tre" )
-mapTree(trace, file="output/test1.map.tre" )
-mccTree(trace, file="output/test1.mcc.tre" )
+# Summary trees #
+consensusTree(trace, file="output/test1.con.tre", differentiateMRCAs=TRUE)
+mapTree(trace, file="output/test1.map.tre", differentiateMRCAs=TRUE)
+mccTree(trace, file="output/test1.mcc.tre", differentiateMRCAs=TRUE)
 
 # Quit RevBayes #
 q()
