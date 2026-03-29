@@ -950,7 +950,6 @@ void RevBayesCore::PhyloCTMCClado<charType>::drawJointConditionalAncestralStates
         } // end-for over all mixtures (=rate categories)
 
         // sample char from p
-        bool stop = false;
         charType ca = charType( this->template_state );
         charType cl = charType( this->template_state );
         charType cr = charType( this->template_state );
@@ -971,7 +970,6 @@ void RevBayesCore::PhyloCTMCClado<charType>::drawJointConditionalAncestralStates
                 startStates[left][i] = cl;
                 startStates[right][i] = cr;
                 sampledSiteRates[i] = v[3];
-                stop = true;
                 break;
             }
         }
