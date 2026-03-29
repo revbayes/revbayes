@@ -333,7 +333,7 @@ double RateGeneratorSequence_Biogeography::getSiteRate( size_t from, size_t to, 
     return rate;
 }
 
-double RateGeneratorSequence_Biogeography::getSumOfRates( std::vector<CharacterEvent*> from, std::vector<size_t> counts, double age, double r) const
+double RateGeneratorSequence_Biogeography::getSumOfRates( const std::vector<CharacterEvent*>& from, const std::vector<size_t>& counts, double age, double r) const
 {
 
     if (useUnnormalizedRates)
@@ -399,7 +399,7 @@ double RateGeneratorSequence_Biogeography::getSumOfRates( std::vector<CharacterE
     return sum;
 }
 
-double RateGeneratorSequence_Biogeography::getSumOfRates( std::vector<CharacterEvent*> from, double age, double r) const
+double RateGeneratorSequence_Biogeography::getSumOfRates( const std::vector<CharacterEvent*>& from, double age, double r) const
 {
     size_t n1 = numOn(from);
 

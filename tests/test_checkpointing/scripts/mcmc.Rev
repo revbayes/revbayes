@@ -1,0 +1,40 @@
+seed(1234)
+
+data <- readDiscreteCharacterData("data/primates_small.nex")
+n_taxa <- data.ntaxa()
+taxa <- data.taxa()
+
+moves = VectorMoves()
+Q := fnJC(4) 
+
+# topology ~ dnUniformTopologyBranchLength(taxa, branchLengthDistribution=dnExponential(10.0))
+topology ~ dnUniformTimeTree(rootAge=1.0, taxa=taxa)
+TL := topology.treeLength()
+moves.append( mvNNI(topology, weight=n_taxa) )
+
+seq ~ dnPhyloCTMC(tree=topology,  Q=Q,  type="DNA")
+seq.clamp(data)
+mymodel = model(Q)
+
+monitors = VectorMonitors()
+monitors.append( mnModel(filename="output/model.log",printgen=1, separator = TAB) )
+monitors.append( mnModel(filename="output/model.json",printgen=1, format = "json") )
+
+monitors.append( mnProbability(filename="output/probability.log", printgen=1, separator=TAB) )
+
+monitors.append( mnStochasticVariable(filename="output/variable.var",printgen=1) )
+
+monitors.append( mnExtNewick(tree=topology, filename="output/extnewick.trees", isNodeParameter=FALSE, printgen=1, separator=TAB) )
+monitors.append( mnNexus(filename="output/nexus.trees", tree=topology, isNodeParameter=FALSE, writeTaxa=FALSE, printgen=1) )
+
+monitors.append( mnFile(filename="output/file.log", printgen=1, separator=TAB, topology, TL) )
+monitors.append( mnFile(filename="output/file.json", printgen=1, format = "json", topology, TL) )
+
+mymcmc = mcmc(mymodel, monitors, moves, nruns=1, combine="none")
+mymcmc.run(generations=10, checkpointFile="output/posterior.checkpoint", checkpointInterval=7)
+
+mymcmc.initializeFromCheckpoint("output/posterior.checkpoint")
+mymcmc.run(generations=10, checkpointFile="output/posterior.checkpoint", checkpointInterval=7)
+
+clear()
+q()

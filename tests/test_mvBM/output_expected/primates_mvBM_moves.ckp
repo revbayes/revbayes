@@ -1,0 +1,2 @@
+Sliding(variable=rate_log,num_tried_current=5005,num_tried_total=14927,num_accepted_current=2313,num_accepted_total=6373,tuning_value=0.307311)
+CorrelationMatrixSingleElementBeta(variable=sigma,num_tried_current=4995,num_tried_total=15073,num_accepted_current=2175,num_accepted_total=5290,tuning_value=1110.47)
