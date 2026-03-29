@@ -7,6 +7,8 @@
 #include "TypedDagNode.h"
 #include "TypedDistribution.h"
 
+#include <iostream>
+
 namespace RevBayesCore {
     
     
@@ -146,23 +148,14 @@ size_t RevBayesCore::MixtureDistribution<mixtureType>::getCurrentIndex( void ) c
 template <class mixtureType>
 std::string RevBayesCore::MixtureDistribution<mixtureType>::getHiddenStateString( void ) const
 {
-    return std::to_string(index);
+    return std::to_string( getCurrentIndex() );
 }
 
 
 template <class mixtureType>
 void RevBayesCore::MixtureDistribution<mixtureType>::setHiddenStateFromString( const std::string &s )
 {
-    index = std::stoul(s);
-
-    const mixtureType &tmp = parameter_values->getValue()[index];
-    if constexpr(std::is_base_of_v<Cloneable, mixtureType>)
-    {
-        delete this->value;
-        this->value = tmp.clone();
-    }
-    else
-        (*this->value) = tmp;
+    setCurrentIndex( std::stoul(s) );
 }
 
 
@@ -209,7 +202,7 @@ const mixtureType& RevBayesCore::MixtureDistribution<mixtureType>::simulate()
     RandomNumberGenerator *rng = GLOBAL_RNG;
     double u = rng->uniform01();
     index = 0;
-    while ( index + 1 < probs.size() && u > probs[index] )
+    while ( u > probs[index] )
     {
         u -= probs[index];
         ++index;
@@ -301,6 +294,12 @@ void RevBayesCore::MixtureDistribution<mixtureType>::setValue(mixtureType *v, bo
         {
             break;
         }
+    }
+
+    if ( index >= vals.size() )
+    {
+        std::cerr << "Warning: mixture allocation index could not be reconstructed from value. Hidden state not restored." << std::endl;
+        index = 0;
     }
 
     // delegate class

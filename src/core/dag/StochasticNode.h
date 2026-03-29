@@ -857,10 +857,10 @@ void RevBayesCore::StochasticNode<valueType>::setValueFromFile(const RevBayesCor
 template<class valueType>
 void RevBayesCore::StochasticNode<valueType>::setValueFromString(const std::string &v)
 {
-    if ( !distribution->getHiddenStateString().empty() )
+    if ( v.size() >= 2 && v.front() == '\'' && v.back() == '\'' )
     {
-        // this distribution has hidden state — the serialized string is the hidden state (e.g. mixture index)
-        distribution->setHiddenStateFromString(v);
+        // quoted string — this is a hidden state (e.g. allocation index)
+        distribution->setHiddenStateFromString(v.substr(1, v.size() - 2));
         this->touch();
     }
     else

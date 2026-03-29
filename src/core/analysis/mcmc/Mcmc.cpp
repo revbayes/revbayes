@@ -264,8 +264,8 @@ void Mcmc::checkpoint( void ) const
                 std::string hidden = node->getDistribution().getHiddenStateString();
                 if (!hidden.empty())
                 {
-                    // write only the hidden state (e.g. mixture allocation index)
-                    out_stream << hidden;
+                    // write hidden state as quoted string to distinguish from numeric values
+                    out_stream << "'" << hidden << "'";
                     continue;
                 }
             }

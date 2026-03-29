@@ -251,7 +251,7 @@ void RevBayesCore::VectorMixtureDistribution<mixtureType>::redrawValue( void )
     RandomNumberGenerator *rng = GLOBAL_RNG;
     double u = rng->uniform01();
     size_t index = 0;
-    while ( index + 1 < probs.size() && u > probs[index] )
+    while ( u > probs[index] )
     {
         u -= probs[index];
         ++index;
