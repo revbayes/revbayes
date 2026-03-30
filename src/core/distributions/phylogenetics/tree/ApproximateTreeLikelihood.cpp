@@ -86,19 +86,22 @@ double ApproximateTreeLikelihood::computeLnProbability( void )
         topology_match_checked = true;
     }
     
-    // get all our variables to compute the approximate likelihood
+    // get the current branch lengths from the MCMC state
     std::vector<double> branch_lengths = computeBranchLengths();
     size_t num_branches = gradients->size();
 
+    // second-order Taylor expansion of ln L around the MLE branch lengths:
+    // ln L(b) ≈ const + g'(b - b_mle) + 1/2 (b - b_mle)' H (b - b_mle)
     double ln_prob = 0.0;
     for (size_t i=0; i<num_branches; ++i)
     {
-        // std::cerr << "The " << i << "-th branch length is " << mle_branch_lengths[i] << " and the " << i << "-th gradient is " << (*gradients)[i] << std::endl;
-        ln_prob += mle_branch_lengths[i] * (*gradients)[i];
-        ln_prob += mle_branch_lengths[i] * mle_branch_lengths[i] * (*hessian)[i][i] / 2.0;
-        for (size_t j=0; i<j; ++j)
+        double delta_i = branch_lengths[i] - mle_branch_lengths[i];
+        ln_prob += delta_i * (*gradients)[i];
+        ln_prob += delta_i * delta_i * (*hessian)[i][i] / 2.0;
+        for (size_t j=0; j<i; ++j)
         {
-            ln_prob += mle_branch_lengths[i] * mle_branch_lengths[j] * (*hessian)[i][j];
+            double delta_j = branch_lengths[j] - mle_branch_lengths[j];
+            ln_prob += delta_i * delta_j * (*hessian)[i][j];
         }
     }
     
