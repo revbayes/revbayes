@@ -1,6 +1,10 @@
+#include <algorithm>
 #include <cstddef>
 #include <cmath>
+#include <filesystem>
+#include <fstream>
 #include <iostream>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -14,8 +18,12 @@
 #include "Cloneable.h"
 #include "MonteCarloAnalysisOptions.h"
 #include "Parallelizable.h"
+#include "RlUserInterface.h"
 #include "StringUtilities.h"
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 #ifdef RB_MPI
 #include <mpi.h>
@@ -28,7 +36,9 @@ PowerPosteriorAnalysis::PowerPosteriorAnalysis(MonteCarloSampler *m, const path 
     powers(),
     sampler( m ),
     sampleFreq( 100 ),
-    processors_per_likelihood( k )
+    processors_per_likelihood( k ),
+    resume_from_checkpoint( false ),
+    ckp_stone_file()
 {
     
     initMPI();
@@ -40,7 +50,9 @@ PowerPosteriorAnalysis::PowerPosteriorAnalysis(const PowerPosteriorAnalysis &a) 
     powers( a.powers ),
     sampler( a.sampler->clone() ),
     sampleFreq( a.sampleFreq ),
-    processors_per_likelihood( a.processors_per_likelihood )
+    processors_per_likelihood( a.processors_per_likelihood ),
+    resume_from_checkpoint( a.resume_from_checkpoint ),
+    ckp_stone_file( a.ckp_stone_file )
 {
     
 }
@@ -71,6 +83,8 @@ PowerPosteriorAnalysis& PowerPosteriorAnalysis::operator=(const PowerPosteriorAn
         sampler                         = a.sampler->clone();
         sampleFreq                      = a.sampleFreq;
         processors_per_likelihood       = a.processors_per_likelihood;
+        resume_from_checkpoint          = a.resume_from_checkpoint;
+        ckp_stone_file                  = a.ckp_stone_file;
         
     }
     
@@ -134,6 +148,39 @@ void PowerPosteriorAnalysis::burnin(size_t generations, size_t tuningInterval)
 }
 
 
+void PowerPosteriorAnalysis::checkpoint( size_t stone_idx, const path &base_checkpoint_file_name ) const
+{
+    path stone_file_name = appendToStem( base_checkpoint_file_name, "_stone_" + std::to_string(stone_idx + 1) );
+    
+    sampler->setCheckpointFile( stone_file_name );
+    sampler->checkpoint();
+    
+    // save the power for this stone
+    path power_checkpoint_file_name = appendToStem(stone_file_name, "_power");
+    
+    path tmp_power_checkpoint_file_name = power_checkpoint_file_name.parent_path() / ("." + power_checkpoint_file_name.filename().string() + ".tmp");
+    std::ofstream out_stream_mcmc( tmp_power_checkpoint_file_name.string() );
+    out_stream_mcmc << "power = " << powers[stone_idx] << std::endl;
+    
+    out_stream_mcmc.close();
+    const bool ok = out_stream_mcmc.good();
+    if ( !ok )
+    {
+        RBOUT( "Warning: failed to write checkpoint file \"" + power_checkpoint_file_name.string() + "\"; keeping existing file." );
+        std::error_code ec;
+        std::filesystem::remove(tmp_power_checkpoint_file_name, ec);
+    }
+    else
+#ifdef _WIN32
+    if ( MoveFileExW(tmp_power_checkpoint_file_name.wstring().c_str(), power_checkpoint_file_name.wstring().c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH) == 0 )
+    {
+        throw RbException() << "Could not replace checkpoint file " << power_checkpoint_file_name;
+    }
+#else
+    std::filesystem::rename(tmp_power_checkpoint_file_name, power_checkpoint_file_name);
+#endif
+}
+
 
 PowerPosteriorAnalysis* PowerPosteriorAnalysis::clone( void ) const
 {
@@ -145,6 +192,53 @@ PowerPosteriorAnalysis* PowerPosteriorAnalysis::clone( void ) const
 std::vector<double> PowerPosteriorAnalysis::getPowers( void ) const
 {
     return powers;
+}
+
+
+/**
+ * Initialize the analysis from checkpoint files. Note that this function is much "lighter" than the equivalent functions of the
+ * Mcmc and Mcmcmc classes, as it does not itself load the sampler state: we need to leave that up to runStone() / runAll().
+ * This is because PowerPosteriorAnalysis only has one MonteCarloSampler* for all stones, unlike the previous two classes that
+ * have a different one for each run / chain. We therefore have no place to hold the full state of each stone. Iterating over
+ * stone_indices would just load the sampler state for each stone, overwriting the previous one. Instead, this function just
+ * (1) checks that we can find the checkpoint files for the requested stones, (2) records their full paths for runStone() / runAll()
+ * to use, and (3) sets the resume_from_checkpoint variable that tells those two functions to not start fresh.
+ *
+ * @param base_checkpoint_file_name The base name of the checkpoint files.
+ * @param stone_indices The 1-based indices of the stones to restore from checkpoint.
+ */
+void PowerPosteriorAnalysis::initializeFromCheckpoint(const path &base_checkpoint_file_name, const std::vector<size_t> &stone_indices )
+{
+    if ( stone_indices.empty() )
+    {
+        throw RbException() << "Specify which stones should be restored from checkpoint.";
+    }
+    
+    // Convert the 1-based stone indices passed from Rev to 0-based internal keys, sort, and check for duplicates
+    std::vector<size_t> sorted_one_based( stone_indices.size() );
+    std::transform(stone_indices.begin(), stone_indices.end(), sorted_one_based.begin(), [](size_t x) { return x - 1; });
+    std::sort( sorted_one_based.begin(), sorted_one_based.end() );
+    sorted_one_based.erase( std::unique( sorted_one_based.begin(), sorted_one_based.end() ), sorted_one_based.end() );
+    
+    ckp_stone_file.clear();
+    
+    for (size_t idx : sorted_one_based)
+    {
+        if ( idx >= powers.size() )
+        {
+            throw RbException() << "Stone index " << (idx + 1) << " is larger than the number of stones (" << powers.size() << ").";
+        }
+        
+        path stone_file_name = appendToStem( base_checkpoint_file_name, "_stone_" + std::to_string(idx + 1) );
+        if ( !is_regular_file( stone_file_name ) )
+        {
+            throw RbException() << "No checkpoint file found for stone " << (idx + 1) << ".";
+        }
+        
+        ckp_stone_file[idx] = stone_file_name;
+    }
+    
+    resume_from_checkpoint = true;
 }
 
 
@@ -162,7 +256,7 @@ void PowerPosteriorAnalysis::initMPI( void )
 }
 
 
-void PowerPosteriorAnalysis::runAll(size_t gen, double burnin_fraction, size_t pre_burnin_generations, size_t tuning_interval)
+void PowerPosteriorAnalysis::runAll(size_t gen, double burnin_fraction, size_t pre_burnin_generations, size_t tuning_interval, const path &checkpoint_file, size_t checkpoint_interval)
 {
     
     //    initMPI();
@@ -183,25 +277,37 @@ void PowerPosteriorAnalysis::runAll(size_t gen, double burnin_fraction, size_t p
         std::cout << "Running power posterior analysis ..." << std::endl;
     }
     
-    // compute which block of the data this process needs to compute
-    //    size_t stone_block_start = size_t(floor( (double(pid)   / num_processes ) * powers.size()) );
-    //    size_t stone_block_end   = size_t(floor( (double(pid+1) / num_processes ) * powers.size()) );
-    
-    size_t stone_block_start =  floor( ( floor( pid   /double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * powers.size() );
-    size_t stone_block_end   =  floor( ( ceil( (pid+1)/double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * powers.size() );
-    
 #ifdef RB_MPI
     // Wait until all processes are complete: this is to make sure we do not print step 1 before the message above
     MPI_Barrier(MPI_COMM_WORLD);
 #endif
     
-    // Run the chain
-    for (size_t i = stone_block_start; i < stone_block_end; ++i)
+    if ( resume_from_checkpoint )
     {
-    
-        // run the i-th stone
-        runStone(i, gen, burnin_fraction, pre_burnin_generations, tuning_interval, false);
+        auto resurrection_indices = ckp_stone_file | std::views::keys | std::ranges::to<std::vector>();
+        size_t m = resurrection_indices.size();
+
+        size_t block_start = size_t( floor( ( floor( pid   / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * m ) );
+        size_t block_end   = size_t( floor( ( ceil( (pid + 1) / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * m ) );
         
+        for (size_t j = block_start; j < block_end; ++j)
+        {
+            runStone( resurrection_indices[j], gen, burnin_fraction, pre_burnin_generations, tuning_interval, false, checkpoint_file, checkpoint_interval );
+        }
+    }
+    else
+    {
+        // compute which block of the data this process needs to compute
+        //    size_t stone_block_start = size_t(floor( (double(pid)   / num_processes ) * powers.size()) );
+        //    size_t stone_block_end   = size_t(floor( (double(pid+1) / num_processes ) * powers.size()) );
+
+        size_t stone_block_start = size_t( floor( ( floor( pid   / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * powers.size() ) );
+        size_t stone_block_end   = size_t( floor( ( ceil( (pid + 1) / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * powers.size() ) );
+        
+        for (size_t i = stone_block_start; i < stone_block_end; ++i)
+        {
+            runStone( i, gen, burnin_fraction, pre_burnin_generations, tuning_interval, false, checkpoint_file, checkpoint_interval );
+        }
     }
     
 #ifdef RB_MPI
@@ -222,8 +328,7 @@ void PowerPosteriorAnalysis::runAll(size_t gen, double burnin_fraction, size_t p
 }
 
 
-
-void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_fraction, size_t pre_burnin_generations, size_t tuning_interval, bool one_only)
+void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_fraction, size_t pre_burnin_generations, size_t tuning_interval, bool one_only, const path &checkpoint_file, size_t checkpoint_interval)
 {
     // create the directory if necessary
     if (filename.filename().empty() or filename.filename() == "." or filename.filename() == "..")
@@ -235,9 +340,6 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
 
     path stoneFileName = appendToStem(filename, stone_tag);
     createDirectoryForFile( stoneFileName );
-    
-    std::ofstream outStream( stoneFileName.string() );
-    outStream << "state\t" << "power\t" << "likelihood" << std::endl;
 
     // reset the sampler
     sampler->reset();
@@ -273,7 +375,7 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
         // Get the width of a given number in characters
         auto width = [&](size_t x) { return size_t( ceil( log10(x + 0.1) ) ); };
         
-        if (num_processes == 1 or one_only == true)
+        if (num_processes == 1 or one_only == true or resume_from_checkpoint == true)
         {
             // Figure out how much whitespace the lines should be padded out with to keep everything neatly aligned
             size_t digits = width( powers.size() );
@@ -322,35 +424,114 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
         std::cout.flush();
     }
     
-    // set the power of this sampler
-    sampler->setLikelihoodHeat( powers[idx] );
-    
     sampler->addFileMonitorExtension(stone_tag, false);
     
-    // let's do a pre-burnin
-    for (size_t k=1; k<=pre_burnin_generations; k++)
+    size_t k_start = 0;
+    
+    if ( resume_from_checkpoint )
     {
-        
-        sampler->nextCycle(false);
-        
-        // check for autotuning
-        if ( k % tuning_interval == 0 && k != pre_burnin_generations )
+        // If we call .runOneStone() after .initializeFromCheckpoint(), we need the user to provide an index for which we do in fact
+        // have a checkpoint file (whose name is now stored in ckp_stone_file). Trying to call the method with a different index
+        // will throw an error.
+        auto it = ckp_stone_file.find( idx );
+        if ( it == ckp_stone_file.end() )
         {
-            sampler->tune();
+            throw RbException() << "Stone " << (idx + 1) << " was not initialized from checkpoint.";
         }
         
+        // We checked that the checkpoint file exists in initializeFromCheckpoint(); now we load it. We do not check again here:
+        // this amounts to the assumption that it has not been deleted between the .initializeFromCheckpoint() and .runStone() calls.
+        const path &stone_file_name = it->second;
+        
+        // give the stone back its correct power
+        double stone_power;
+            
+        // assemble the new filename
+        path power_checkpoint_file_name = appendToStem( stone_file_name, "_power");
+
+        // open file and initialize variables for parsing
+        std::ifstream in_file_power( power_checkpoint_file_name.string() );
+        std::string line_power;
+        std::map<std::string, std::string> power_pars;
+        
+        // command-processing loop
+        while ( in_file_power.good() )
+        {
+            // read a line
+            safeGetline( in_file_power, line_power );
+            
+            if ( line_power != "" )
+            {
+                std::vector<std::string> key_value;
+                StringUtilities::stringSplit(line_power, " = ", key_value);
+                power_pars.insert( std::pair<std::string, std::string>(key_value[0], key_value[1]) );
+            }
+            
+        }
+        
+        stone_power = StringUtilities::asDoubleNumber( power_pars["power"] );
+        
+        // clean up
+        in_file_power.close();
+
+        sampler->setLikelihoodHeat( stone_power );
+
+        // We only restore from checkpoint *after* we have set the correct heat, so that the DAG touches use the right likelihood
+        // temperature. This is different from setting the chain posterior heat in MC^3, which only takes effect when applying moves.
+        sampler->setCheckpointFile( stone_file_name );
+        sampler->initializeSamplerFromCheckpoint();
+        
+        k_start = sampler->getCurrentGeneration();
+    }
+    else
+    {
+        sampler->setLikelihoodHeat( powers[idx] );
+        
+        // let's do a pre-burnin
+        for (size_t k=1; k<=pre_burnin_generations; k++)
+        {
+            sampler->nextCycle(false);
+            
+            // check for autotuning
+            if ( k % tuning_interval == 0 && k != pre_burnin_generations )
+            {
+                sampler->tune();
+            }
+        }
     }
     
     // Monitor. Note that if we are running just one stone at a time, only one process is allowed to write the monitors.
     if (not one_only or (one_only and pid == pid_to_print))
     {
-        sampler->startMonitors(gen, false);
-        sampler->writeMonitorHeaders( false );
-        sampler->monitor(0);
+        sampler->startMonitors(gen, resume_from_checkpoint);
+        if ( not resume_from_checkpoint )
+        {
+            sampler->writeMonitorHeaders( false );
+        }
+        sampler->monitor(k_start);
+    }
+    
+    // Open the output file: append if resuming, overwrite if starting fresh.
+    std::ofstream outStream;
+    if ( resume_from_checkpoint )
+    {
+        outStream.open( stoneFileName.string(), std::ios::app );
+    }
+    else
+    {
+        outStream.open( stoneFileName.string() );
+        outStream << "state\t" << "power\t" << "likelihood" << std::endl;
     }
     
     double p = powers[idx];
-    for (size_t k = 1; k <= gen; ++k)
+
+    // We don't want the sampler's internal generation counter to keep accumulating across stones: it should stay in sync
+    // with the stone-local counter k. This is especially important for checkpointing. On a fresh start k_start is 0;
+    // on resumption it holds the checkpointed iteration. Then nextCycle(true) increments generation each call,
+    // keeping it equal to k.
+    sampler->setCurrentGeneration( k_start );
+    
+    for (size_t k = k_start + 1; k <= gen; ++k)
     {
         
         if (pid == pid_to_print)
@@ -376,6 +557,12 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
             // compute the joint likelihood
             double likelihood = sampler->getModelLnProbability(true);
             outStream << k << "\t" << p << "\t" << likelihood << std::endl;
+        }
+        
+        // periodically checkpoint
+        if ( k > burnin && checkpoint_interval != 0 && (k % checkpoint_interval) == 0 )
+        {
+            checkpoint( idx, checkpoint_file );
         }
             
     }
