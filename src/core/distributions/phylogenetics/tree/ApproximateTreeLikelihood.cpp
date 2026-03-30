@@ -76,7 +76,7 @@ double ApproximateTreeLikelihood::computeLnProbability( void )
 {
 
     // only check once if the topologies are the same
-    if ( topology_match_checked )
+    if ( topology_match_checked == false )
     {
         bool match = checkTopologyMatch();
         if ( match == false )
