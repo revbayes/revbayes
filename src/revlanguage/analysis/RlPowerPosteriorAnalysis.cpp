@@ -48,14 +48,13 @@ PowerPosteriorAnalysis::PowerPosteriorAnalysis() : WorkspaceToCoreWrapperObject<
     run_arg_rules->push_back( new ArgumentRule("burninFraction", Probability::getClassTypeSpec(), "The fraction of samples to discard.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.25) ) );
     run_arg_rules->push_back( new ArgumentRule("preburninGenerations", Natural::getClassTypeSpec(), "The number of generations to run as pre-burnin when parameter tuning is done.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
     run_arg_rules->push_back( new ArgumentRule("tuningInterval", Natural::getClassTypeSpec(), "The number of generations to run.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(100) ) );
+    run_arg_rules->push_back( new ArgumentRule("checkpointFile", RlString::getClassTypeSpec(), "The filename for the checkpoint file.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("") ) );
+    run_arg_rules->push_back( new ArgumentRule("checkpointInterval", Natural::getClassTypeSpec(), "The interval when to write parameters values to a file for checkpointing.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0) ) );
     methods.addFunction( new MemberProcedure( "run", RlUtils::Void, run_arg_rules) );
     
     ArgumentRules* run_one_stone_arg_rules = new ArgumentRules();
     run_one_stone_arg_rules->push_back( new ArgumentRule("index", Natural::getClassTypeSpec(), "Index of the stone/power to run.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-    run_one_stone_arg_rules->push_back( new ArgumentRule("generations", Natural::getClassTypeSpec(), "The number of generations to run.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-    run_one_stone_arg_rules->push_back( new ArgumentRule("burninFraction", Probability::getClassTypeSpec(), "The fraction of samples to discard.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.25) ) );
-    run_one_stone_arg_rules->push_back( new ArgumentRule("preburninGenerations", Natural::getClassTypeSpec(), "The number of generations to run as pre-burnin when parameter tuning is done.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
-    run_one_stone_arg_rules->push_back( new ArgumentRule("tuningInterval", Natural::getClassTypeSpec(), "The number of generations to run.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(100) ) );
+    run_one_stone_arg_rules->insert( run_one_stone_arg_rules->end(), run_arg_rules->begin(), run_arg_rules->end() );
     methods.addFunction( new MemberProcedure( "runOneStone", RlUtils::Void, run_one_stone_arg_rules) );
     
     ArgumentRules* summarize_arg_rules = new ArgumentRules();
@@ -65,6 +64,11 @@ PowerPosteriorAnalysis::PowerPosteriorAnalysis() : WorkspaceToCoreWrapperObject<
     burnin_arg_rules->push_back( new ArgumentRule("generations"   , Natural::getClassTypeSpec(), "The number of generations to run.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     burnin_arg_rules->push_back( new ArgumentRule("tuningInterval", Natural::getClassTypeSpec(), "The frequency at which the moves are tuned (usually between 50 and 1000).", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     methods.addFunction( new MemberProcedure( "burnin", RlUtils::Void, burnin_arg_rules) );
+
+    ArgumentRules* init_from_ckp_rules = new ArgumentRules();
+    init_from_ckp_rules->push_back( new ArgumentRule("checkpointFile", RlString::getClassTypeSpec(), "The checkpoint file base name.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    init_from_ckp_rules->push_back( new ArgumentRule("stones", ModelVector<Natural>::getClassTypeSpec(), "Indices of the stones/powers to be initialized from checkpoint.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    methods.addFunction( new MemberProcedure( "initializeFromCheckpoint", RlUtils::Void, init_from_ckp_rules ) );
 
 }
 
@@ -148,7 +152,10 @@ RevPtr<RevVariable> PowerPosteriorAnalysis::executeMethod(std::string const &nam
             preburn_gen = static_cast<const Natural &>( args[2].getVariable()->getRevObject() ).getValue();
         }
         size_t tune_int = static_cast<const Natural &>( args[3].getVariable()->getRevObject() ).getValue();
-        value->runAll( size_t(gen), burn_frac, preburn_gen, tune_int );
+        const std::string ckp_file = static_cast<const RlString &>( args[4].getVariable()->getRevObject() ).getValue();
+        size_t ckp_int = static_cast<const Natural &>( args[5].getVariable()->getRevObject() ).getValue();
+        
+        value->runAll( size_t(gen), burn_frac, preburn_gen, tune_int, ckp_file, ckp_int );
 
         return NULL;
     }
@@ -160,7 +167,7 @@ RevPtr<RevVariable> PowerPosteriorAnalysis::executeMethod(std::string const &nam
         size_t ind = static_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue() - 1;
         if (ind < 0 or ind > value->getPowers().size() - 1)
         {
-            throw RbException() << "Index cannot be smaller than 1 or larger than " << value->getPowers().size();
+            throw RbException() << "Index cannot be smaller than 1 or larger than " << value->getPowers().size() << ".";
         }
         std::int64_t gen = static_cast<const Natural &>( args[1].getVariable()->getRevObject() ).getValue();
         double burn_frac = static_cast<const Probability &>( args[2].getVariable()->getRevObject() ).getValue();
@@ -170,7 +177,10 @@ RevPtr<RevVariable> PowerPosteriorAnalysis::executeMethod(std::string const &nam
             preburn_gen = static_cast<const Natural &>( args[3].getVariable()->getRevObject() ).getValue();
         }
         size_t tune_int = static_cast<const Natural &>( args[4].getVariable()->getRevObject() ).getValue();
-        value->runStone( ind, size_t(gen), burn_frac, preburn_gen, tune_int, true );
+        const std::string ckp_file = static_cast<const RlString &>( args[5].getVariable()->getRevObject() ).getValue();
+        size_t ckp_int = static_cast<const Natural &>( args[6].getVariable()->getRevObject() ).getValue();
+        
+        value->runStone( ind, size_t(gen), burn_frac, preburn_gen, tune_int, true, ckp_file, ckp_int );
         
         return NULL;
     }
@@ -191,6 +201,26 @@ RevPtr<RevVariable> PowerPosteriorAnalysis::executeMethod(std::string const &nam
         int tuningInterval = (int)static_cast<const Natural &>( args[1].getVariable()->getRevObject() ).getValue();
         value->burnin( size_t(gen), size_t(tuningInterval) );
 
+        return NULL;
+    }
+    else if ( name == "initializeFromCheckpoint")
+    {
+        found = true;
+        
+        const std::string &checkpoint_filename = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
+        const std::vector<std::int64_t> &mv = static_cast<const ModelVector<Natural> &>( args[1].getVariable()->getRevObject() ).getValue();
+        std::vector<size_t> stone_indices( mv.begin(), mv.end() );
+
+        for (size_t i = 0; i < stone_indices.size(); ++i)
+        {
+            if ( stone_indices[i] < 1 or stone_indices[i] > value->getPowers().size() )
+            {
+                throw RbException() << "Index cannot be smaller than 1 or larger than " << value->getPowers().size() << ".";
+            }
+        }
+        
+        value->initializeFromCheckpoint( checkpoint_filename, stone_indices );
+        
         return NULL;
     }
 
