@@ -284,7 +284,9 @@ void PowerPosteriorAnalysis::runAll(size_t gen, double burnin_fraction, size_t p
     
     if ( resume_from_checkpoint )
     {
-        auto resurrection_indices = ckp_stone_file | std::views::keys | std::ranges::to<std::vector>();
+        std::vector<size_t> resurrection_indices;
+        for (auto& [k, v] : ckp_stone_file) resurrection_indices.push_back(k);
+        
         size_t m = resurrection_indices.size();
 
         size_t block_start = size_t( floor( ( floor( pid   / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * m ) );
