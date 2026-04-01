@@ -91,9 +91,13 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLike
     this->getRootFrequencies(ff);
     
     // get the pointers to the partial likelihoods of the left and right subtree
-          double* p        = this->partialLikelihoods + this->activeLikelihood[root]  *this->activeLikelihoodOffset + root   * this->nodeOffset;
-    const double* p_left   = this->partialLikelihoods + this->activeLikelihood[left]  *this->activeLikelihoodOffset + left   * this->nodeOffset;
-    const double* p_right  = this->partialLikelihoods + this->activeLikelihood[right] *this->activeLikelihoodOffset + right  * this->nodeOffset;
+    auto& PL_left = this->getPartialLikelihoodsForNode(left);
+    auto& PL_right= this->getPartialLikelihoodsForNode(right);
+    const double* p_left   = PL_left.likelihoods.data();
+    const double* p_right  = PL_right.likelihoods.data();
+    assert(PL_left.dims == PL_right.dims);
+    
+    double* p        = this->getCreatePartialLikelihoodsForNode(root, PL_left.dims).likelihoods.data();
     
     // get pointers the likelihood for both subtrees
           double*   p_mixture          = p;
@@ -142,10 +146,16 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLike
     this->getRootFrequencies(ff);
     
     // get the pointers to the partial likelihoods of the left and right subtree
-          double* p        = this->partialLikelihoods + this->activeLikelihood[root]  *this->activeLikelihoodOffset + root   * this->nodeOffset;
-    const double* p_left   = this->partialLikelihoods + this->activeLikelihood[left]  *this->activeLikelihoodOffset + left   * this->nodeOffset;
-    const double* p_right  = this->partialLikelihoods + this->activeLikelihood[right] *this->activeLikelihoodOffset + right  * this->nodeOffset;
-    const double* p_middle = this->partialLikelihoods + this->activeLikelihood[middle]*this->activeLikelihoodOffset + middle * this->nodeOffset;
+    auto& PL_left = this->getPartialLikelihoodsForNode(left);
+    auto& PL_right = this->getPartialLikelihoodsForNode(right);
+    auto& PL_middle = this->getPartialLikelihoodsForNode(middle);
+    const double* p_left   = PL_left.likelihoods.data();
+    const double* p_right  = PL_right.likelihoods.data();
+    const double* p_middle = PL_middle.likelihoods.data();
+    assert(PL_left.dims == PL_right.dims);
+    assert(PL_left.dims == PL_middle.dims);
+
+    double* p        = this->getCreatePartialLikelihoodsForNode(root, PL_left.dims).likelihoods.data();
     
     // get pointers the likelihood for both subtrees
           double*   p_mixture          = p;
@@ -194,18 +204,26 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
     
 #   if defined ( SSE_ENABLED )
     
-    double* p_left   = this->partialLikelihoods + this->activeLikelihood[left]*this->activeLikelihoodOffset + left*this->nodeOffset;
-    double* p_right  = this->partialLikelihoods + this->activeLikelihood[right]*this->activeLikelihoodOffset + right*this->nodeOffset;
-    double* p_node   = this->partialLikelihoods + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
-    //    __m128d* p_left   = (__m128d *) this->partialLikelihoods + this->activeLikelihood[left]*this->activeLikelihoodOffset + left*this->nodeOffset;
-    //    __m128d* p_right  = (__m128d *) this->partialLikelihoods + this->activeLikelihood[right]*this->activeLikelihoodOffset + right*this->nodeOffset;
-    //    __m128d* p_node   = (__m128d *) this->partialLikelihoods + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
+    auto& PL_left = this->getPartialLikelihoodsForNode(left);
+    auto& PL_right = this->getPartialLikelihoodsForNode(right);
+    const double* p_left   = PL_left.likelihoods.data();
+    const double* p_right  = PL_right.likelihoods.data();
+    assert(PL_left.dims == PL_right.dims);
+
+    double* p_node   = this->getCreatePartialLikelihoodsForNode(node_index, PL_left.dims).likelihoods.data();
+    //    __m128d* p_left   = (__m128d *) this->getPartialLikelihoodsForNode(left);
+    //    __m128d* p_right  = (__m128d *) this->getPartialLikelihoodsForNode(right);
+    //    __m128d* p_node   = (__m128d *) this->getPartialLikelihoodsForNode(node_index);
     
 #   elif defined ( AVX_ENABLED )
 
-    double* p_left   = this->partialLikelihoods + this->activeLikelihood[left]*this->activeLikelihoodOffset + left*this->nodeOffset;
-    double* p_right  = this->partialLikelihoods + this->activeLikelihood[right]*this->activeLikelihoodOffset + right*this->nodeOffset;
-    double* p_node   = this->partialLikelihoods + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
+    auto& PL_left = this->getPartialLikelihoodsForNode(left);
+    auto& PL_right = this->getPartialLikelihoodsForNode(right);
+    const double* p_left   = PL_left.likelihoods.data();
+    const double* p_right  = PL_right.likelihoods.data();
+    assert(PL_left.dims == PL_right.dims);
+
+    double* p_node   = this->getCreatePartialLikelihoodsForNode(node_index, PL_left.dims).likelihoods.data();
 
     double* tmp_ac = new double[4];
     double* tmp_gt = new double[4];
@@ -216,9 +234,13 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
 #   else
 
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
-    const double*   p_left  = this->partialLikelihoods + this->activeLikelihood[left]*this->activeLikelihoodOffset + left*this->nodeOffset;
-    const double*   p_right = this->partialLikelihoods + this->activeLikelihood[right]*this->activeLikelihoodOffset + right*this->nodeOffset;
-    double*         p_node  = this->partialLikelihoods + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
+    auto& PL_left = this->getPartialLikelihoodsForNode(left);
+    auto& PL_right = this->getPartialLikelihoodsForNode(right);
+    const double*   p_left  = PL_left.likelihoods.data();
+    const double*   p_right = PL_right.likelihoods.data();
+    assert(PL_left.dims = PL_right.dims);
+
+    double*         p_node  = this->getCreatePartialLikelihoodsForNode(node_index, PL_left.dims).likelihoods.data();
 
 #   endif
     
@@ -389,10 +411,16 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
     size_t pmat_offset = this->active_pmatrices[node_index] * this->activePmatrixOffset + node_index * this->pmatNodeOffset;
     
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
-    const double*   p_left      = this->partialLikelihoods + this->activeLikelihood[left]*this->activeLikelihoodOffset + left*this->nodeOffset;
-    const double*   p_middle    = this->partialLikelihoods + this->activeLikelihood[middle]*this->activeLikelihoodOffset + middle*this->nodeOffset;
-    const double*   p_right     = this->partialLikelihoods + this->activeLikelihood[right]*this->activeLikelihoodOffset + right*this->nodeOffset;
-    double*         p_node      = this->partialLikelihoods + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
+    auto& PL_left = this->getPartialLikelihoodsForNode(left);
+    auto& PL_middle = this->getPartialLikelihoodsForNode(middle);
+    auto& PL_right = this->getPartialLikelihoodsForNode(right);
+    const double*   p_left      = PL_left.likelihoods.data();
+    const double*   p_middle    = PL_middle.likelihoods.data();
+    const double*   p_right     = PL_right.likelihoods.data();
+    assert(PL_left.dims == PL_middle.dims);
+    assert(PL_left.dims == PL_right.dims);
+    
+    double*         p_node      = this->getCreatePartialLikelihoodsForNode(node_index, PL_left.dims).likelihoods.data();
     
     // iterate over all mixture categories
     for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
@@ -556,7 +584,7 @@ template<class charType>
 void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeTipLikelihood(const TopologyNode &node, size_t node_index) 
 {    
     
-    double* p_node = this->partialLikelihoods + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
+    double* p_node = this->getCreatePartialLikelihoodsForNode(node_index, {this->num_site_mixtures, this->pattern_block_size, this->num_chars}).likelihoods.data();
     
     size_t data_tip_index = this->taxon_name_2_tip_index_map[ node.getName() ];
     const std::vector<bool> &gap_node = this->gap_matrix[data_tip_index];
