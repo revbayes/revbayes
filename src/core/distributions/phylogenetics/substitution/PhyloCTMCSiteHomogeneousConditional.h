@@ -48,7 +48,7 @@ namespace RevBayesCore {
         virtual void                                        resizeLikelihoodVectors(void);
 
         vector<double>::const_iterator                      getCorrectionLikelihoodsForNode(int node_index) const;
-        vector<double>::iterator                            getCorrectionLikelihoodsForNode(int node_index);
+        vector<double>::iterator                            getMutableCorrectionLikelihoodsForNode(int node_index);
 
         bool                                                warned;
 
@@ -313,7 +313,7 @@ std::vector<size_t> RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>:
 
 
 template<class charType>
-inline vector<double>::iterator RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::getCorrectionLikelihoodsForNode( int node_index )
+inline vector<double>::iterator RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::getMutableCorrectionLikelihoodsForNode( int node_index )
 {
     return correctionLikelihoods.begin() + this->activeLikelihood[node_index]*this->activeCorrectionOffset + node_index*correctionNodeOffset;
 }
@@ -487,7 +487,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeTipLike
 template<class charType>
 void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeTipCorrection(const TopologyNode &node, size_t node_index)
 {
-    std::vector<double>::iterator p_node = getCorrectionLikelihoodsForNode(node_index);
+    std::vector<double>::iterator p_node = getMutableCorrectionLikelihoodsForNode(node_index);
     
     size_t data_tip_index = this->taxon_name_2_tip_index_map[ node.getName() ];
     
@@ -562,7 +562,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeInterna
     std::vector<double>::const_iterator   p_left   = getCorrectionLikelihoodsForNode(left);
     std::vector<double>::const_iterator   p_right  = getCorrectionLikelihoodsForNode(right);
     std::vector<double>::const_iterator   p_middle = getCorrectionLikelihoodsForNode(middle);
-    std::vector<double>::iterator         p_node   = getCorrectionLikelihoodsForNode(node_index);
+    std::vector<double>::iterator         p_node   = getMutableCorrectionLikelihoodsForNode(node_index);
     
     size_t pmat_offset = this->active_pmatrices[node_index] * this->activePmatrixOffset + node_index * this->pmatNodeOffset;
 
@@ -635,7 +635,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeInterna
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
     std::vector<double>::const_iterator   p_left  = getCorrectionLikelihoodsForNode(left);
     std::vector<double>::const_iterator   p_right = getCorrectionLikelihoodsForNode(right);
-    std::vector<double>::iterator         p_node  = getCorrectionLikelihoodsForNode(node_index);
+    std::vector<double>::iterator         p_node  = getMutableCorrectionLikelihoodsForNode(node_index);
     
     size_t pmat_offset = this->active_pmatrices[node_index] * this->activePmatrixOffset + node_index * this->pmatNodeOffset;
 
@@ -695,7 +695,7 @@ template<class charType>
 void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeRootCorrection( size_t root, size_t left, size_t right, size_t middle)
 {
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
-    std::vector<double>::iterator         p_node   = getCorrectionLikelihoodsForNode(root);
+    std::vector<double>::iterator         p_node   = getMutableCorrectionLikelihoodsForNode(root);
     std::vector<double>::const_iterator   p_left   = getCorrectionLikelihoodsForNode(left);
     std::vector<double>::const_iterator   p_right  = getCorrectionLikelihoodsForNode(right);
     std::vector<double>::const_iterator   p_middle = getCorrectionLikelihoodsForNode(middle);
@@ -766,7 +766,7 @@ template<class charType>
 void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeRootCorrection( size_t root, size_t left, size_t right)
 {
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
-    std::vector<double>::iterator         p_node  = getCorrectionLikelihoodsForNode(root);
+    std::vector<double>::iterator         p_node  = getMutableCorrectionLikelihoodsForNode(root);
     std::vector<double>::const_iterator   p_left  = getCorrectionLikelihoodsForNode(left);
     std::vector<double>::const_iterator   p_right = getCorrectionLikelihoodsForNode(right);
 

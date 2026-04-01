@@ -712,7 +712,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeTipLikelihood(const Top
 
 void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeTipCorrection(const TopologyNode &node, size_t node_index)
 {
-    std::vector<double>::iterator p_node = this->getCorrectionLikelihoodsForNode(node_index);
+    std::vector<double>::iterator p_node = this->getMutableCorrectionLikelihoodsForNode(node_index);
     std::vector<double>::iterator c_node = perMaskMixtureCorrections.begin() + this->activeLikelihood[node_index]*activeMassOffset + node_index*massNodeOffset;
 
     std::vector<std::vector<std::vector<double> > > partialNodeCorrections = std::vector<std::vector<std::vector<double> > >(dim + 1, std::vector<std::vector<double> >(dim + 1, std::vector<double>(numCorrectionPatterns, 0.0)));
@@ -798,7 +798,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeInternalNodeCorrection(
     std::vector<double>::const_iterator   p_left   = this->getCorrectionLikelihoodsForNode(left);
     std::vector<double>::const_iterator   p_right  = this->getCorrectionLikelihoodsForNode(right);
     std::vector<double>::const_iterator   p_middle = this->getCorrectionLikelihoodsForNode(middle);
-    std::vector<double>::iterator         p_node   = this->getCorrectionLikelihoodsForNode(node_index);
+    std::vector<double>::iterator         p_node   = this->getMutableCorrectionLikelihoodsForNode(node_index);
 
     std::vector<double>::iterator c_node   = perMaskMixtureCorrections.begin() + this->activeLikelihood[node_index]*activeMassOffset + node_index*massNodeOffset;
 
@@ -885,7 +885,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeInternalNodeCorrection(
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
     std::vector<double>::const_iterator   p_left   = this->getCorrectionLikelihoodsForNode(left);
     std::vector<double>::const_iterator   p_right  = this->getCorrectionLikelihoodsForNode(right);
-    std::vector<double>::iterator         p_node   = this->getCorrectionLikelihoodsForNode(node_index);
+    std::vector<double>::iterator         p_node   = this->getMutableCorrectionLikelihoodsForNode(node_index);
 
     std::vector<double>::iterator c_node   = perMaskMixtureCorrections.begin() + this->activeLikelihood[node_index]*activeMassOffset + node_index*massNodeOffset;
 
@@ -959,7 +959,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeInternalNodeCorrection(
 void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeRootCorrection( size_t root, size_t left, size_t right, size_t middle)
 {
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
-    std::vector<double>::iterator         p_node   = this->getCorrectionLikelihoodsForNode(root);
+    std::vector<double>::iterator         p_node   = this->getMutableCorrectionLikelihoodsForNode(root);
     std::vector<double>::const_iterator   p_left   = this->getCorrectionLikelihoodsForNode(left);
     std::vector<double>::const_iterator   p_right  = this->getCorrectionLikelihoodsForNode(right);
     std::vector<double>::const_iterator   p_middle = this->getCorrectionLikelihoodsForNode(middle);
@@ -1043,7 +1043,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeRootCorrection( size_t 
 void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeRootCorrection( size_t root, size_t left, size_t right)
 {
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
-    std::vector<double>::iterator         p_node   = this->getCorrectionLikelihoodsForNode(root);
+    std::vector<double>::iterator         p_node   = this->getMutableCorrectionLikelihoodsForNode(root);
     std::vector<double>::const_iterator   p_left   = this->getCorrectionLikelihoodsForNode(left);
     std::vector<double>::const_iterator   p_right  = this->getCorrectionLikelihoodsForNode(right);
 
