@@ -84,7 +84,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihood( si
     const double* p_right  = PL_right.likelihoods.data();
     assert(PL_left.dims == PL_right.dims);
 
-    auto& PL_root = this->getCreatePartialLikelihoodsForNode( root, PL_left.dims);
+    auto& PL_root = this->createEmptyPartialLikelihoodsForNode( root, PL_left.dims);
     double* p = PL_root.likelihoods.data();
 
     // create a vector for the per mixture likelihoods
@@ -162,7 +162,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihood( si
     assert(PL_left.dims == PL_right.dims);
     assert(PL_left.dims == PL_middle.dims);
 
-    auto& PL_node = this->getCreatePartialLikelihoodsForNode(root, PL_left.dims);
+    auto& PL_node = this->createEmptyPartialLikelihoodsForNode(root, PL_left.dims);
     double* p = PL_node.likelihoods.data();
 
     // get pointers the likelihood for both subtrees
@@ -241,7 +241,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
     const double* p_right  = PL_right.likelihoods.data();
     assert(PL_left.dims == PL_right.dims);
 
-    auto& PL_node = this->getCreatePartialLikelihoodsForNode(node_index, PL_left.dims);
+    auto& PL_node = this->createEmptyPartialLikelihoodsForNode(node_index, PL_left.dims);
     double* p_node = PL_node.likelihoods.data();
 
     // iterate over all mixture categories
@@ -313,7 +313,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
     assert(PL_left.dims == PL_right.dims);
     assert(PL_left.dims == PL_middle.dims);
 
-    auto& PL_node = this->getCreatePartialLikelihoodsForNode(node_index, PL_left.dims);
+    auto& PL_node = this->createEmptyPartialLikelihoodsForNode(node_index, PL_left.dims);
     double* p_node = PL_node.likelihoods.data();
 
     // iterate over all mixture categories
@@ -373,7 +373,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
 template<class charType>
 void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(const TopologyNode &node, size_t node_index)
 {
-    double* p_node = this->getCreatePartialLikelihoodsForNode(node_index, {this->num_site_mixtures, this->pattern_block_size, this->num_chars}).likelihoods.data();
+    double* p_node = this->createEmptyPartialLikelihoodsForNode(node_index, {this->num_site_mixtures, this->pattern_block_size, this->num_chars}).likelihoods.data();
     
     // get the current correct tip index in case the whole tree change (after performing an empiricalTree Proposal)
     size_t data_tip_index = this->taxon_name_2_tip_index_map[ node.getName() ];

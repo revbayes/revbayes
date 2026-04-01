@@ -270,7 +270,7 @@ void RevBayesCore::PhyloCTMCClado<charType>::computeRootLikelihood( size_t root,
     // get the pointers to the partial likelihoods of the left and right subtree
     auto& PL_left  = this->getPartialLikelihoodsForNode(left);
     auto& PL_right = this->getPartialLikelihoodsForNode(right);
-    auto& PL_root  = this->getCreatePartialLikelihoodsForNode(root, PL_left.dims);
+    auto& PL_root  = this->createEmptyPartialLikelihoodsForNode(root, PL_left.dims);
     assert(PL_root.dims == PL_left.dims);
     assert(PL_root.dims == PL_right.dims);
     
@@ -369,7 +369,7 @@ void RevBayesCore::PhyloCTMCClado<charType>::computeInternalNodeLikelihood(const
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
     auto& PL_left  = this->getPartialLikelihoodsForNode(left);
     auto& PL_right = this->getPartialLikelihoodsForNode(right);
-    auto& PL_node  = this->getCreatePartialLikelihoodsForNode(node_index, PL_left.dims);
+    auto& PL_node  = this->createEmptyPartialLikelihoodsForNode(node_index, PL_left.dims);
     assert(PL_node.dims == PL_left.dims);
     assert(PL_node.dims == PL_right.dims);
 
@@ -626,7 +626,7 @@ template<class charType>
 void RevBayesCore::PhyloCTMCClado<charType>::computeTipLikelihood(const TopologyNode &node, size_t node_index)
 {
     
-    double* p_node = this->getCreatePartialLikelihoodsForNode(node_index, {this->num_site_mixtures, this->pattern_block_size, this->num_chars}).likelihoods.data();
+    double* p_node = this->createEmptyPartialLikelihoodsForNode(node_index, {this->num_site_mixtures, this->pattern_block_size, this->num_chars}).likelihoods.data();
     
     // get the current correct tip index in case the whole tree change (after performing an empiricalTree Proposal)
     size_t data_tip_index = this->taxon_name_2_tip_index_map[ node.getName() ];

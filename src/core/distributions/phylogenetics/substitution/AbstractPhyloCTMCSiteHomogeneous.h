@@ -189,8 +189,8 @@ namespace RevBayesCore {
         void                                                                markAllPartialLikelihoodsDirty() const;
         bool                                                                partialLikelihoodsDirtyForNode(int node) const;
         const PartialLikelihoods&                                           getPartialLikelihoodsForNode(int node) const;
-        PartialLikelihoods&                                                 getCreatePartialLikelihoodsForNode(int node, const PartialLikelihoods::Dims& d) const;
-        PartialLikelihoods&                                                 getModifyPartialLikelihoodsForNode(int node) const;
+        PartialLikelihoods&                                                 createEmptyPartialLikelihoodsForNode(int node, const PartialLikelihoods::Dims& d) const;
+        PartialLikelihoods&                                                 getMutablePartialLikelihoodsForNode(int node) const;
         void                                                                allocatePartialLikelihoods() const;
         const double*                                                       getMarginalLikelihoodsForNode(int node) const;
         double*                                                             getMarginalLikelihoodsForNode(int node);
@@ -683,7 +683,7 @@ inline const PartialLikelihoods& RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<
 }
 
 template<class charType>
-inline PartialLikelihoods& RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::getCreatePartialLikelihoodsForNode(int node_index, const PartialLikelihoods::Dims& dims) const
+inline PartialLikelihoods& RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::createEmptyPartialLikelihoodsForNode(int node_index, const PartialLikelihoods::Dims& dims) const
 {
     assert(partialLikelihoodsDirtyForNode(node_index));
     partialLikelihoods[node_index] = std::make_shared<PartialLikelihoods>(dims);
@@ -691,7 +691,7 @@ inline PartialLikelihoods& RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charTy
 }
 
 template<class charType>
-inline PartialLikelihoods& RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::getModifyPartialLikelihoodsForNode(int node_index) const
+inline PartialLikelihoods& RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::getMutablePartialLikelihoodsForNode(int node_index) const
 {
     assert(not partialLikelihoodsDirtyForNode(node_index));
     return *this->partialLikelihoods[node_index];
@@ -2777,8 +2777,8 @@ template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t node_index)
 {
 
-    double* p_node = getModifyPartialLikelihoodsForNode(node_index).likelihoods.data();
-    auto& log_scale = getModifyPartialLikelihoodsForNode(node_index).log_scale;
+    double* p_node = getMutablePartialLikelihoodsForNode(node_index).likelihoods.data();
+    auto& log_scale = getMutablePartialLikelihoodsForNode(node_index).log_scale;
 
     if ( RbSettings::userSettings().getUseScaling() == true && node_index % RbSettings::userSettings().getScalingDensity() == 0 )
     {
@@ -2845,8 +2845,8 @@ template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t node_index, size_t left, size_t right )
 {
 
-    double* p_node = getModifyPartialLikelihoodsForNode(node_index).likelihoods.data();
-    auto& log_scale_node = getModifyPartialLikelihoodsForNode(node_index).log_scale;
+    double* p_node = getMutablePartialLikelihoodsForNode(node_index).likelihoods.data();
+    auto& log_scale_node = getMutablePartialLikelihoodsForNode(node_index).log_scale;
     auto& log_scale_left = getPartialLikelihoodsForNode(left).log_scale;
     auto& log_scale_right = getPartialLikelihoodsForNode(right).log_scale;
 
@@ -2918,8 +2918,8 @@ template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t node_index, size_t left, size_t right, size_t middle )
 {
 
-    double* p_node = getModifyPartialLikelihoodsForNode(node_index).likelihoods.data();
-    auto& log_scale_node = getModifyPartialLikelihoodsForNode(node_index).log_scale;
+    double* p_node = getMutablePartialLikelihoodsForNode(node_index).likelihoods.data();
+    auto& log_scale_node = getMutablePartialLikelihoodsForNode(node_index).log_scale;
     auto& log_scale_left = getPartialLikelihoodsForNode(left).log_scale;
     auto& log_scale_right = getPartialLikelihoodsForNode(right).log_scale;
     auto& log_scale_middle = getPartialLikelihoodsForNode(middle).log_scale;
@@ -3816,7 +3816,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
 
     // get the pointers to the partial likelihoods of the left and right subtree
     const double*  p_node  = getPartialLikelihoodsForNode(node_index).likelihoods.data();
-    auto& log_scale_node = getModifyPartialLikelihoodsForNode(node_index).log_scale;
+    auto& log_scale_node = getMutablePartialLikelihoodsForNode(node_index).log_scale;
 
     // create a vector for the per mixture likelihoods
     // we need this vector to sum over the different mixture likelihoods
