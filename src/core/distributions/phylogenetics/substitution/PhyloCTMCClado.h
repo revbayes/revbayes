@@ -472,7 +472,7 @@ void RevBayesCore::PhyloCTMCClado<charType>::computeMarginalNodeLikelihood( size
     // get the pointers to the partial likelihoods and the marginal likelihoods
     const double*   p_node                          = this->getPartialLikelihoodsForNode(node_index).likelihoods.data();
     const double*   p_parent_node_marginal          = this->getMarginalLikelihoodsForNode(parentnode_index);
-    double*         p_node_marginal                 = this->getMarginalLikelihoodsForNode(node_index);
+    double*         p_node_marginal                 = this->getMutableMarginalLikelihoodsForNode(node_index);
     const double*   p_clado_node                    = this->cladoPartialLikelihoods.data() + this->activeLikelihood[node_index]*this->cladoActiveLikelihoodOffset + node_index*this->cladoNodeOffset;
     const double*   p_clado_parent_node_marginal    = this->cladoMarginalLikelihoods.data() + parentnode_index*this->cladoNodeOffset;
     double*         p_clado_node_marginal           = this->cladoMarginalLikelihoods.data() + node_index*this->cladoNodeOffset;
@@ -579,7 +579,7 @@ void RevBayesCore::PhyloCTMCClado<charType>::computeMarginalRootLikelihood( void
 
     // get the pointers to the partial likelihoods and the marginal likelihoods
     const double*   p_node           = this->getPartialLikelihoodsForNode(node_index).likelihoods.data();
-    double*         p_node_marginal  = this->getMarginalLikelihoodsForNode(node_index);
+    double*         p_node_marginal  = this->getMutableMarginalLikelihoodsForNode(node_index);
     
     // get pointers the likelihood for both subtrees
     const double*   p_mixture           = p_node;
@@ -1366,21 +1366,21 @@ std::vector< std::vector<double> >* RevBayesCore::PhyloCTMCClado<charType>::sumM
     std::vector< std::vector<double> >* per_mixture_Likelihoods = new std::vector< std::vector<double> >(this->num_patterns, std::vector<double>(this->num_chars, 0.0) );
     
     // get the pointers to the partial likelihoods and the marginal likelihoods
-    double*         p_node_marginal         = this->getMarginalLikelihoodsForNode(node_index);
+    const double* p_node_marginal = this->getMarginalLikelihoodsForNode(node_index);
     
     // get pointers the likelihood for both subtrees
-    double*         p_mixture_marginal          = p_node_marginal;
+    const double* p_mixture_marginal = p_node_marginal;
     // iterate over all mixture categories
     for (size_t mixture = 0; mixture < this->num_site_rates; ++mixture)
     {
 
         // get pointers to the likelihood for this mixture category
-        double*         p_site_mixture_marginal         = p_mixture_marginal;
+        const double* p_site_mixture_marginal = p_mixture_marginal;
         // iterate over all sites
         for (size_t site = 0; site < this->num_patterns; ++site)
         {
             // get the pointers to the likelihoods for this site and mixture category
-            double*         p_site_marginal_j           = p_site_mixture_marginal;
+            const double* p_site_marginal_j = p_site_mixture_marginal;
             // iterate over all starting states
             for (size_t j=0; j<this->num_chars; ++j)
             {

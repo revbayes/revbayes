@@ -193,7 +193,7 @@ namespace RevBayesCore {
         PartialLikelihoods&                                                 getMutablePartialLikelihoodsForNode(int node) const;
         void                                                                allocatePartialLikelihoods() const;
         const double*                                                       getMarginalLikelihoodsForNode(int node) const;
-        double*                                                             getMarginalLikelihoodsForNode(int node);
+              double*                                                       getMutableMarginalLikelihoodsForNode(int node);
 
         // Parameter management functions.
         virtual void                                                        swapParameterInternal(const DagNode *oldP, const DagNode *newP);                             //!< Swap a parameter
@@ -711,7 +711,7 @@ inline const double* RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::g
 }
 
 template<class charType>
-inline double* RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::getMarginalLikelihoodsForNode(int node_index)
+inline double* RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::getMutableMarginalLikelihoodsForNode(int node_index)
 {
     return this->marginalLikelihoods.data() + node_index*this->nodeOffset;
 }
@@ -1084,7 +1084,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeMarginalNo
 
     // get the pointers to the partial likelihoods and the marginal likelihoods
     const double*   p_node                  = getPartialLikelihoodsForNode(node_index).likelihoods.data();
-    double*         p_node_marginal         = getMarginalLikelihoodsForNode(node_index);
+    double*         p_node_marginal         = getMutableMarginalLikelihoodsForNode(node_index);
     const double*   p_parent_node_marginal  = getMarginalLikelihoodsForNode(parentnode_index);
 
     // get pointers the likelihood for both subtrees
@@ -1160,7 +1160,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeMarginalRo
 
     // get the pointers to the partial likelihoods and the marginal likelihoods
     const double*   p_node           = getPartialLikelihoodsForNode(node_index).likelihoods.data();
-    double*         p_node_marginal  = getMarginalLikelihoodsForNode(node_index);
+    double*         p_node_marginal  = getMutableMarginalLikelihoodsForNode(node_index);
 
     // get pointers the likelihood for both subtrees
     const double*   p_mixture           = p_node;
@@ -3603,21 +3603,21 @@ std::vector< std::vector<double> >* RevBayesCore::AbstractPhyloCTMCSiteHomogeneo
     std::vector<double> mixture_probs = getMixtureProbs();
 
     // get the pointers to the partial likelihoods and the marginal likelihoods
-    double*         p_node_marginal         = getMarginalLikelihoodsForNode(node_index);
+    const double* p_node_marginal = getMarginalLikelihoodsForNode(node_index);
 
     // get pointers the likelihood for both subtrees
-    double*         p_mixture_marginal          = p_node_marginal;
+    const double* p_mixture_marginal = p_node_marginal;
     // iterate over all mixture categories
     for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
     {
 
         // get pointers to the likelihood for this mixture category
-        double*         p_site_mixture_marginal         = p_mixture_marginal;
+        const double* p_site_mixture_marginal = p_mixture_marginal;
         // iterate over all sites
         for (size_t site = 0; site < this->pattern_block_size; ++site)
         {
             // get the pointers to the likelihoods for this site and mixture category
-            double*         p_site_marginal_j           = p_site_mixture_marginal;
+            const double* p_site_marginal_j = p_site_mixture_marginal;
             // iterate over all starting states
             for (size_t j=0; j<num_chars; ++j)
             {
