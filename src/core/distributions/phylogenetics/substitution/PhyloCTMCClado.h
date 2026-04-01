@@ -197,17 +197,7 @@ RevBayesCore::PhyloCTMCClado<charType>::PhyloCTMCClado(const PhyloCTMCClado &n) 
     heterogeneousCladogenesisMatrices   = n.heterogeneousCladogenesisMatrices;
     cladogenesisTimes                   = n.cladogenesisTimes;
     
-    // copy the partial likelihoods if necessary
-    if ( this->in_mcmc_mode == true )
-    {
-        assert(cladoPartialLikelihoods.size() == 2*this->num_nodes*this->num_site_rates*this->num_sites*this->num_chars*this->num_chars );
-    }
-    
-    // copy the marginal likelihoods if necessary
-    if ( this->useMarginalLikelihoods == true )
-    {
-        assert(cladoMarginalLikelihoods.size() == this->num_nodes*this->num_site_rates*this->num_sites*this->num_chars*this->num_chars);
-    }
+    assert(cladoPartialLikelihoods.size() == 2*this->num_nodes*this->num_site_rates*this->num_sites*this->num_chars*this->num_chars );
     
     cladoActiveLikelihoodOffset      =  this->num_nodes*this->num_site_rates*this->num_patterns*this->num_chars*this->num_chars;
     cladoNodeOffset                  =                  this->num_site_rates*this->num_patterns*this->num_chars*this->num_chars;
