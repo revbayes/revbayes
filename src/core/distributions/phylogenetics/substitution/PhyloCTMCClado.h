@@ -268,11 +268,11 @@ void RevBayesCore::PhyloCTMCClado<charType>::computeRootLikelihood( size_t root,
     bool has_sampled_ancestor_child = node.getChild(0).isSampledAncestorTip() || node.getChild(1).isSampledAncestorTip();
     
     // get the pointers to the partial likelihoods of the left and right subtree
-    auto& PL_left  = this->getPartialLikelihoodsForNode(left);
-    auto& PL_right = this->getPartialLikelihoodsForNode(right);
-    auto& PL_root  = this->createEmptyPartialLikelihoodsForNode(root, PL_left.dims);
-    assert(PL_root.dims == PL_left.dims);
-    assert(PL_root.dims == PL_right.dims);
+    auto& pl_left  = this->getPartialLikelihoodsForNode(left);
+    auto& pl_right = this->getPartialLikelihoodsForNode(right);
+    auto& pl_root  = this->createEmptyPartialLikelihoodsForNode(root, pl_left.dims);
+    assert(pl_root.dims == pl_left.dims);
+    assert(pl_root.dims == pl_right.dims);
     
     // iterate over all mixture categories
     for (size_t mixture = 0; mixture < this->num_site_rates; ++mixture)
@@ -280,9 +280,9 @@ void RevBayesCore::PhyloCTMCClado<charType>::computeRootLikelihood( size_t root,
 
         // get the pointers to the likelihood for this mixture category
         size_t offset = mixture*this->mixtureOffset;
-        double*          p_site_mixture          = PL_root.likelihoods.data()  + offset;
-        const double*    p_site_mixture_left     = PL_left.likelihoods.data()  + offset;
-        const double*    p_site_mixture_right    = PL_right.likelihoods.data() + offset;
+        double*          p_site_mixture          = pl_root.likelihoods.data()  + offset;
+        const double*    p_site_mixture_left     = pl_left.likelihoods.data()  + offset;
+        const double*    p_site_mixture_right    = pl_right.likelihoods.data() + offset;
 
         // compute the per site probabilities
         for (size_t site = 0; site < this->num_patterns ; ++site)
@@ -367,11 +367,11 @@ void RevBayesCore::PhyloCTMCClado<charType>::computeInternalNodeLikelihood(const
     this->updateTransitionProbabilities( node_index );
 
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
-    auto& PL_left  = this->getPartialLikelihoodsForNode(left);
-    auto& PL_right = this->getPartialLikelihoodsForNode(right);
-    auto& PL_node  = this->createEmptyPartialLikelihoodsForNode(node_index, PL_left.dims);
-    assert(PL_node.dims == PL_left.dims);
-    assert(PL_node.dims == PL_right.dims);
+    auto& pl_left  = this->getPartialLikelihoodsForNode(left);
+    auto& pl_right = this->getPartialLikelihoodsForNode(right);
+    auto& pl_node  = this->createEmptyPartialLikelihoodsForNode(node_index, pl_left.dims);
+    assert(pl_node.dims == pl_left.dims);
+    assert(pl_node.dims == pl_right.dims);
 
     double*         p_clado_node  = this->cladoPartialLikelihoods.data() + this->activeLikelihood[node_index]*this->cladoActiveLikelihoodOffset + node_index*this->cladoNodeOffset;
 
@@ -383,10 +383,10 @@ void RevBayesCore::PhyloCTMCClado<charType>::computeInternalNodeLikelihood(const
         
         // get the pointers to the likelihood for this mixture category
         size_t offset = mixture*this->mixtureOffset;
-        double*          p_site_mixture          = PL_node.likelihoods.data() + offset;
+        double*          p_site_mixture          = pl_node.likelihoods.data() + offset;
         double*          p_clado_site_mixture    = p_clado_node + mixture * this->cladoMixtureOffset;
-        const double*    p_site_mixture_left     = PL_left.likelihoods.data()  + offset;
-        const double*    p_site_mixture_right    = PL_right.likelihoods.data() + offset;
+        const double*    p_site_mixture_left     = pl_left.likelihoods.data()  + offset;
+        const double*    p_site_mixture_right    = pl_right.likelihoods.data() + offset;
 
         // compute the per site probabilities
         for (size_t site = 0; site < this->num_patterns ; ++site)
