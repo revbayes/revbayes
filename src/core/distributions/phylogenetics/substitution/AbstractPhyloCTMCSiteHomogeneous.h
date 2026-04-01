@@ -1058,8 +1058,7 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
     if ( in_mcmc_mode == false )
     {
         // free the partial likelihoods
-        partialLikelihoods.clear();
-        partialLikelihoods.resize(num_nodes);
+        allocatePartialLikelihoods();
     }
 
     // set the ancestral states as stale
@@ -1753,8 +1752,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::executeMethod(con
         if ( delete_partial_likelihoods == true )
         {
             // free the partial likelihoods
-            partialLikelihoods.clear();
-            partialLikelihoods.resize(num_nodes);
+            allocatePartialLikelihoods();
             in_mcmc_mode = false;
         }
 
@@ -1818,8 +1816,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::executeMethod(con
         if ( delete_partial_likelihoods == true )
         {
             // free the partial likelihoods
-            partialLikelihoods.clear();
-            partialLikelihoods.resize(num_nodes);
+            allocatePartialLikelihoods();
             in_mcmc_mode = false;
         }
 
@@ -1930,8 +1927,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::executeMethod(con
         if ( delete_partial_likelihoods == true )
         {
             // free the partial likelihoods
-            partialLikelihoods.clear();
-            partialLikelihoods.resize(num_nodes);
+            allocatePartialLikelihoods();
             in_mcmc_mode = false;
         }
 
@@ -1979,8 +1975,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::executeMethod(con
         if ( delete_partial_likelihoods == true )
         {
             // free the partial likelihoods
-            partialLikelihoods.clear();
-            partialLikelihoods.resize(num_nodes);
+            allocatePartialLikelihoods();
             in_mcmc_mode = false;
         }
 
@@ -2698,8 +2693,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::resizeLikelihoodV
     if ( in_mcmc_mode == true )
     {
         // we resize the partial likelihood vectors to the new dimensions
-        partialLikelihoods.clear();
-        partialLikelihoods.resize(num_nodes);
         allocatePartialLikelihoods();
     }
 
@@ -3220,8 +3213,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setMcmcMode(bool 
     // free old memory
     if ( in_mcmc_mode == true )
     {
-        partialLikelihoods.clear();
-        partialLikelihoods.resize(num_nodes);
+        allocatePartialLikelihoods();
     }
 
     // set our internal flag
