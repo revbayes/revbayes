@@ -35,7 +35,7 @@ namespace RevBayesCore {
         // public methods
         PowerPosteriorAnalysis*                 clone(void) const;
         void                                    burnin(size_t g, size_t ti);
-        void                                    checkpoint(size_t stone_idx, const path &bcp_file) const;
+        void                                    checkpoint(size_t stone_idx, const path &bcp_file, size_t planned_burnin) const;
         std::vector<double>                     getPowers(void) const;
         void                                    initializeFromCheckpoint(const path &bcp_file, const std::vector<size_t> &stone_indices); //!< Makes sure checkpoint files exist but does not load the sampler
         void                                    runAll(size_t g, double burn_frac, size_t preburn_gen, size_t tune_int, const path &cp_file, size_t ci = 0);

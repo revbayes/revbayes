@@ -148,36 +148,37 @@ void PowerPosteriorAnalysis::burnin(size_t generations, size_t tuningInterval)
 }
 
 
-void PowerPosteriorAnalysis::checkpoint( size_t stone_idx, const path &base_checkpoint_file_name ) const
+void PowerPosteriorAnalysis::checkpoint( size_t stone_idx, const path &base_checkpoint_file_name, size_t planned_burnin ) const
 {
     path stone_file_name = appendToStem( base_checkpoint_file_name, "_stone_" + std::to_string(stone_idx + 1) );
     
     sampler->setCheckpointFile( stone_file_name );
     sampler->checkpoint();
     
-    // save the power for this stone
-    path power_checkpoint_file_name = appendToStem(stone_file_name, "_power");
-    
-    path tmp_power_checkpoint_file_name = power_checkpoint_file_name.parent_path() / ("." + power_checkpoint_file_name.filename().string() + ".tmp");
-    std::ofstream out_stream_mcmc( tmp_power_checkpoint_file_name.string() );
+    // save the power and planned burnin for this stone
+    path stone_info_file_name = appendToStem( stone_file_name, "_stone_info" );
+
+    path tmp_stone_info_file_name = stone_info_file_name.parent_path() / ("." + stone_info_file_name.filename().string() + ".tmp");
+    std::ofstream out_stream_mcmc( tmp_stone_info_file_name.string() );
     out_stream_mcmc << "power = " << powers[stone_idx] << std::endl;
-    
+    out_stream_mcmc << "planned_burnin = " << planned_burnin << std::endl;
+
     out_stream_mcmc.close();
     const bool ok = out_stream_mcmc.good();
     if ( !ok )
     {
-        RBOUT( "Warning: failed to write checkpoint file \"" + power_checkpoint_file_name.string() + "\"; keeping existing file." );
+        RBOUT( "Warning: failed to write \"" + stone_info_file_name.string() + "\"; keeping existing file." );
         std::error_code ec;
-        std::filesystem::remove(tmp_power_checkpoint_file_name, ec);
+        std::filesystem::remove( tmp_stone_info_file_name, ec );
     }
     else
 #ifdef _WIN32
-    if ( MoveFileExW(tmp_power_checkpoint_file_name.wstring().c_str(), power_checkpoint_file_name.wstring().c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH) == 0 )
+    if ( MoveFileExW( tmp_stone_info_file_name.wstring().c_str(), stone_info_file_name.wstring().c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH ) == 0 )
     {
-        throw RbException() << "Could not replace checkpoint file " << power_checkpoint_file_name;
+        throw RbException() << "Could not replace checkpoint file " << stone_info_file_name;
     }
 #else
-    std::filesystem::rename(tmp_power_checkpoint_file_name, power_checkpoint_file_name);
+    std::filesystem::rename(tmp_stone_info_file_name, stone_info_file_name);
 #endif
 }
 
@@ -346,7 +347,6 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
     // reset the sampler
     sampler->reset();
 
-    size_t burnin = size_t( ceil( burnin_fraction*gen ) );
     size_t printInterval = size_t( round( fmax(1,gen/40.0) ) );
     
     /* Print output for users.
@@ -429,6 +429,7 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
     sampler->addFileMonitorExtension(stone_tag, false);
     
     size_t k_start = 0;
+    size_t burnin = 0;
     
     if ( resume_from_checkpoint )
     {
@@ -444,37 +445,38 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
         // We checked that the checkpoint file exists in initializeFromCheckpoint(); now we load it. We do not check again here:
         // this amounts to the assumption that it has not been deleted between the .initializeFromCheckpoint() and .runStone() calls.
         const path &stone_file_name = it->second;
-        
-        // give the stone back its correct power
+
+        // give the stone back its correct power and planned_burnin
         double stone_power;
             
         // assemble the new filename
-        path power_checkpoint_file_name = appendToStem( stone_file_name, "_power");
+        path stone_info_file_name = appendToStem(stone_file_name, "_stone_info");
 
         // open file and initialize variables for parsing
-        std::ifstream in_file_power( power_checkpoint_file_name.string() );
-        std::string line_power;
-        std::map<std::string, std::string> power_pars;
+        std::ifstream in_file_stone_info( stone_info_file_name.string() );
+        std::string line;
+        std::map<std::string, std::string> pars;
         
         // command-processing loop
-        while ( in_file_power.good() )
+        while ( in_file_stone_info.good() )
         {
             // read a line
-            safeGetline( in_file_power, line_power );
+            safeGetline( in_file_stone_info, line );
             
-            if ( line_power != "" )
+            if ( line != "" )
             {
                 std::vector<std::string> key_value;
-                StringUtilities::stringSplit(line_power, " = ", key_value);
-                power_pars.insert( std::pair<std::string, std::string>(key_value[0], key_value[1]) );
+                StringUtilities::stringSplit(line, " = ", key_value);
+                pars.insert( std::pair<std::string, std::string>(key_value[0], key_value[1]) );
             }
             
         }
         
-        stone_power = StringUtilities::asDoubleNumber( power_pars["power"] );
+        stone_power = StringUtilities::asDoubleNumber( pars["power"] );
+        burnin = size_t( StringUtilities::asIntegerNumber( pars["planned_burnin"] ) );
         
         // clean up
-        in_file_power.close();
+        in_file_stone_info.close();
 
         sampler->setLikelihoodHeat( stone_power );
 
@@ -484,6 +486,11 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
         sampler->initializeSamplerFromCheckpoint();
         
         k_start = sampler->getCurrentGeneration();
+
+        if (pid == pid_to_print and k_start < burnin)
+        {
+            RBOUT( "   Stone " + std::to_string( idx + 1 ) + ": finishing a previously scheduled and interrupted burnin stage; burninFraction of the current run() is ignored." );
+        }
     }
     else
     {
@@ -500,7 +507,12 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
                 sampler->tune();
             }
         }
+
+        burnin = size_t( ceil( burnin_fraction * gen ) );
     }
+
+    // We will run this stone for an additional 'gen' iterations, even if we are resuming from checkpoint.
+    const size_t k_final = k_start + gen;
     
     // Monitor. Note that if we are running just one stone at a time, only one process is allowed to write the monitors.
     if (not one_only or (one_only and pid == pid_to_print))
@@ -510,7 +522,11 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
         {
             sampler->writeMonitorHeaders( false );
         }
-        sampler->monitor(k_start);
+        // Do not re-print the checkpoint generation before the next cycle (avoids duplicate monitor lines).
+        if ( not resume_from_checkpoint )
+        {
+            sampler->monitor(k_start);
+        }
     }
     
     // Open the output file: append if resuming, overwrite if starting fresh.
@@ -532,8 +548,8 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
     // on resumption it holds the checkpointed iteration. Then nextCycle(true) increments generation each call,
     // keeping it equal to k.
     sampler->setCurrentGeneration( k_start );
-    
-    for (size_t k = k_start + 1; k <= gen; ++k)
+
+    for (size_t k = k_start + 1; k <= k_final; ++k)
     {
         
         if (pid == pid_to_print)
@@ -561,10 +577,10 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
             outStream << k << "\t" << p << "\t" << likelihood << std::endl;
         }
         
-        // periodically checkpoint
-        if ( k > burnin && checkpoint_interval != 0 && (k % checkpoint_interval) == 0 )
+        // periodically checkpoint (including during burnin)
+        if ( checkpoint_interval != 0 && (k % checkpoint_interval) == 0 )
         {
-            checkpoint( idx, checkpoint_file );
+            checkpoint( idx, checkpoint_file, burnin );
         }
             
     }
