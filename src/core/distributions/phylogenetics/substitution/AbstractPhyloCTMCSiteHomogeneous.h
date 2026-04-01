@@ -2788,7 +2788,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t nod
                 // get the pointers to the likelihood for this mixture category
                 size_t offset = mixture*this->mixtureOffset + site*this->siteOffset;
 
-                double* p_site_mixture = p_node + offset;
+                const double* p_site_mixture = p_node + offset;
 
                 for ( size_t i=0; i<this->num_chars; ++i)
                 {
@@ -3808,7 +3808,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
 
     // get the pointers to the partial likelihoods of the left and right subtree
     const double*  p_node  = getPartialLikelihoodsForNode(node_index).likelihoods.data();
-    auto& log_scale_node = getMutablePartialLikelihoodsForNode(node_index).log_scale;
+    auto& log_scale_node = getPartialLikelihoodsForNode(node_index).log_scale;
 
     // create a vector for the per mixture likelihoods
     // we need this vector to sum over the different mixture likelihoods
