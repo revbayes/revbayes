@@ -677,12 +677,6 @@ bool RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::partialLikelihood
 }
 
 template<class charType>
-inline const PartialLikelihoods& RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::getPartialLikelihoodsForNode(int node_index) const
-{
-    return *this->partialLikelihoods[node_index];
-}
-
-template<class charType>
 inline PartialLikelihoods& RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::createEmptyPartialLikelihoodsForNode(int node_index, const PartialLikelihoods::Dims& dims) const
 {
     assert(partialLikelihoodsDirtyForNode(node_index));
@@ -690,6 +684,19 @@ inline PartialLikelihoods& RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charTy
     return *partialLikelihoods[node_index];
 }
 
+// Usually after we have created partial likelihoods for a node they are done, and should not be touched.
+// The default accessor thus returns a const references, so that users cannot modify them by accident.
+template<class charType>
+inline const PartialLikelihoods& RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::getPartialLikelihoodsForNode(int node_index) const
+{
+    return *this->partialLikelihoods[node_index];
+}
+
+// The rescaling functions DO modify the partial likelihoods after the have been computed.
+// So here we add a special accessor which returns a modifiable references, just so the scaling functions can modify stuff.
+// Ideally we would move rescaling into the computation of the partial likelihoods, which already have a non-const reference.
+// That would avoid reading the partial likelihoods into cache twice.
+// When that happens, we can remove this function.
 template<class charType>
 inline PartialLikelihoods& RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::getMutablePartialLikelihoodsForNode(int node_index) const
 {
