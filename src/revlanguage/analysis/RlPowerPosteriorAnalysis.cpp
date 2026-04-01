@@ -209,11 +209,14 @@ RevPtr<RevVariable> PowerPosteriorAnalysis::executeMethod(std::string const &nam
         
         const std::string &checkpoint_filename = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
         const std::vector<std::int64_t> &mv = static_cast<const ModelVector<Natural> &>( args[1].getVariable()->getRevObject() ).getValue();
-        std::vector<size_t> stone_indices( mv.begin(), mv.end() );
+        
+        // subtract 1 to account for the difference between (user-facing / Rev) 1-based indexing and (internal / C++) 0-based indexing
+        std::vector<size_t> stone_indices( mv.size() );
+        std::transform(mv.begin(), mv.end(), stone_indices.begin(), [](std::int64_t x) { return (size_t)(x - 1); });
 
         for (size_t i = 0; i < stone_indices.size(); ++i)
         {
-            if ( stone_indices[i] < 1 or stone_indices[i] > value->getPowers().size() )
+            if ( stone_indices[i] < 0 or stone_indices[i] > value->getPowers().size() - 1 )
             {
                 throw RbException() << "Index cannot be smaller than 1 or larger than " << value->getPowers().size() << ".";
             }

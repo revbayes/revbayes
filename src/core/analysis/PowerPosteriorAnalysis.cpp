@@ -215,15 +215,14 @@ void PowerPosteriorAnalysis::initializeFromCheckpoint(const path &base_checkpoin
         throw RbException() << "Specify which stones should be restored from checkpoint.";
     }
     
-    // Convert the 1-based stone indices passed from Rev to 0-based internal keys, sort, and check for duplicates
-    std::vector<size_t> sorted_one_based( stone_indices.size() );
-    std::transform(stone_indices.begin(), stone_indices.end(), sorted_one_based.begin(), [](size_t x) { return x - 1; });
-    std::sort( sorted_one_based.begin(), sorted_one_based.end() );
-    sorted_one_based.erase( std::unique( sorted_one_based.begin(), sorted_one_based.end() ), sorted_one_based.end() );
+    // sort the indices and check for duplicates
+    std::vector<size_t> sorted_indices( stone_indices.size() );
+    std::sort( sorted_indices.begin(), sorted_indices.end() );
+    sorted_indices.erase( std::unique( sorted_indices.begin(), sorted_indices.end() ), sorted_indices.end() );
     
     ckp_stone_file.clear();
     
-    for (size_t idx : sorted_one_based)
+    for (size_t idx : sorted_indices)
     {
         if ( idx >= powers.size() )
         {
