@@ -11,7 +11,8 @@ Progress:
 
 
 Running power posterior analysis ...
-Steps 1--10 / 10		**********
+Stone pre-burnin: -, burnin: +, sampling phase: *
+Steps 1--10 / 10		----------+++*******
 
 Marginal likelihood estimates when running the stones all at once:
 
