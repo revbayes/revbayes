@@ -508,15 +508,17 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::checkInvariants( 
     auto tree_nodes = tau->getValue().getNodes();
     for(auto node: tree_nodes)
     {
-	if (partialLikelihoodsDirtyForNode(node->getIndex()) and not node->isRoot())
+        // The root node has no parent.
+	if (not node->isRoot() and partialLikelihoodsDirtyForNode(node->getIndex()))
 	    assert(partialLikelihoodsDirtyForNode(node->getParent().getIndex()));
     }
 
     // 2. Invariant: if the P-matrix for a node is dirty, then the conditional likelihoods should be dirty
     for(auto node: tree_nodes)
     {
+        // The root node has no P-matrix, since there is no branch above it.
 	int index = node->getIndex();
-	if (pmat_dirty_nodes[index] and not node->isRoot())
+	if (not node->isRoot() and pmat_dirty_nodes[index])
 	    assert(partialLikelihoodsDirtyForNode(index));
     }
 }
