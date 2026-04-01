@@ -276,6 +276,7 @@ void PowerPosteriorAnalysis::runAll(size_t gen, double burnin_fraction, size_t p
     {
         std::cout << std::endl;
         std::cout << "Running power posterior analysis ..." << std::endl;
+        std::cout << "Stone pre-burnin: -, burnin: +, sampling phase: *" << std::endl;
     }
     
 #ifdef RB_MPI
@@ -347,7 +348,8 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
     // reset the sampler
     sampler->reset();
 
-    size_t printInterval = size_t( round( fmax(1,gen/40.0) ) );
+    size_t preburninPrintInterval = size_t( round( fmax(1, pre_burnin_generations/40.0) ) );
+    size_t printInterval = size_t( round( fmax(1, gen/40.0) ) );
     
     /* Print output for users.
      * First, we will find the smallest PID such that the number of stones assigned to the corresponding process is equal to
@@ -496,9 +498,18 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
     {
         sampler->setLikelihoodHeat( powers[idx] );
         
-        // let's do a pre-burnin
+        // Let's do a stone-specific pre-burnin: this is different from the pre-burnin performed by .burnin(), which is global.
         for (size_t k=1; k<=pre_burnin_generations; k++)
         {
+            if (pid == pid_to_print)
+            {
+                if (k % preburninPrintInterval == 0)
+                {
+                    std::cout << "-";
+                    std::cout.flush();
+                }
+            }
+
             sampler->nextCycle(false);
             
             // check for autotuning
@@ -556,8 +567,16 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
         {
             if (k % printInterval == 0)
             {
-                std::cout << "*";
-                std::cout.flush();
+                if (k <= burnin)
+                {
+                    std::cout << "+";
+                    std::cout.flush();
+                }
+                else
+                {
+                    std::cout << "*";
+                    std::cout.flush();
+                }
             }
         }
         
