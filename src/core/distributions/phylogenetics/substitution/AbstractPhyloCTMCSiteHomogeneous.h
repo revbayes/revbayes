@@ -46,22 +46,6 @@ namespace RevBayesCore {
      * The data are stored for convenience in this class in a matrix (std::vector<std::vector< unsigned > >) 
      * and can be compressed.
      *
-     * The partial likelihoods are stored in a c-style array called partialLikelihoods. The dimension are
-     * partialLikelihoods[active][node_index][siteRateIndex][siteIndex][charIndex], however, since this is
-     * a one-dimensional c-style array, you have to access the partialLikelihoods via
-     * partialLikelihoods[active*num_nodes*num_site_mixtures*pattern_block_size*num_chars +
-     *                    node_index*num_site_mixtures*pattern_block_size*num_chars +
-     *                    siteRateIndex*pattern_block_size*num_chars +
-     *                    siteIndex*num_chars +
-     *                    charIndex]
-     * Since this is a bit complex, we have some offset variables for convenience:
-     * activeLikelihoodOffset      =  num_nodes*num_site_mixtures*pattern_block_size*num_chars;
-     * nodeOffset                  =  num_site_mixtures*pattern_block_size*num_chars;
-     * mixtureOffset               =  pattern_block_size*num_chars;
-     * siteOffset                  =  num_chars;
-     * This gives the more convenient access via
-     * partialLikelihoods[active*activeLikelihoodOffset + node_index*nodeOffset + siteRateIndex*mixtureOffset + siteIndex*siteOffset + charIndex]
-     *
      * Our implementation of the partial likelihoods means that we can store the partial likelihood of a node,
      * but not for site rates.
      * We also use twice as much memory because we store the partial likelihood along each branch and not only 
@@ -103,6 +87,10 @@ namespace RevBayesCore {
         };
 
         Dims dims;
+
+        // This shows how the entries are laid out inside the linear array.
+        double& likelihood(int m, int p, int s) {return likelihoods[s + dims.num_states*(p + dims.num_patterns*m)];}
+        double likelihood(int m, int p, int s) const {return likelihoods[s + dims.num_states*(p + dims.num_patterns*m)];}
 
         std::vector<double> likelihoods; // per mixture * pattern * state
         std::vector<double> log_scale; // per site
