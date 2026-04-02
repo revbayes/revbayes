@@ -216,7 +216,7 @@ void PowerPosteriorAnalysis::initializeFromCheckpoint(const path &base_checkpoin
     }
     
     // sort the indices and check for duplicates
-    std::vector<size_t> sorted_indices( stone_indices.size() );
+    std::vector<size_t> sorted_indices( stone_indices.begin(), stone_indices.end() );
     std::sort( sorted_indices.begin(), sorted_indices.end() );
     sorted_indices.erase( std::unique( sorted_indices.begin(), sorted_indices.end() ), sorted_indices.end() );
     
