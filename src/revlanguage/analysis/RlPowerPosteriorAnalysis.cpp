@@ -66,8 +66,11 @@ PowerPosteriorAnalysis::PowerPosteriorAnalysis() : WorkspaceToCoreWrapperObject<
     methods.addFunction( new MemberProcedure( "burnin", RlUtils::Void, burnin_arg_rules) );
 
     ArgumentRules* init_from_ckp_rules = new ArgumentRules();
+    std::vector<TypeSpec> index_types;
+    index_types.push_back( Natural::getClassTypeSpec() );
+    index_types.push_back( ModelVector<Natural>::getClassTypeSpec() );
     init_from_ckp_rules->push_back( new ArgumentRule("checkpointFile", RlString::getClassTypeSpec(), "The checkpoint file base name.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-    init_from_ckp_rules->push_back( new ArgumentRule("stones", ModelVector<Natural>::getClassTypeSpec(), "Indices of the stones/powers to be initialized from checkpoint.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    init_from_ckp_rules->push_back( new ArgumentRule("stones", index_types, "Indices of the stones/powers to be initialized from checkpoint.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     methods.addFunction( new MemberProcedure( "initializeFromCheckpoint", RlUtils::Void, init_from_ckp_rules ) );
 
 }
@@ -208,8 +211,18 @@ RevPtr<RevVariable> PowerPosteriorAnalysis::executeMethod(std::string const &nam
         found = true;
         
         const std::string &checkpoint_filename = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
-        const std::vector<std::int64_t> &mv = static_cast<const ModelVector<Natural> &>( args[1].getVariable()->getRevObject() ).getValue();
+        std::vector<std::int64_t> mv;
         
+        if ( args[1].getVariable()->getRevObject().isType( ModelVector<Natural>::getClassTypeSpec() ) )
+        {
+            mv = static_cast<const ModelVector<Natural> &>( args[1].getVariable()->getRevObject() ).getValue();
+        }
+        else
+        {
+            std::int64_t index = static_cast<const Natural &>( args[1].getVariable()->getRevObject() ).getValue();
+            mv.push_back( index );
+        }
+                
         // subtract 1 to account for the difference between (user-facing / Rev) 1-based indexing and (internal / C++) 0-based indexing
         std::vector<size_t> stone_indices( mv.size() );
         std::transform(mv.begin(), mv.end(), stone_indices.begin(), [](std::int64_t x) { return (size_t)(x - 1); });
