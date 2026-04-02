@@ -6,6 +6,7 @@
 #include <iostream>
 #include <map>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 #include "MonteCarloSampler.h"
@@ -38,7 +39,8 @@ PowerPosteriorAnalysis::PowerPosteriorAnalysis(MonteCarloSampler *m, const path 
     sampleFreq( 100 ),
     processors_per_likelihood( k ),
     resume_from_checkpoint( false ),
-    ckp_stone_file()
+    ckp_stone_file(),
+    resume_stone_sequences()
 {
     
     initMPI();
@@ -52,7 +54,8 @@ PowerPosteriorAnalysis::PowerPosteriorAnalysis(const PowerPosteriorAnalysis &a) 
     sampleFreq( a.sampleFreq ),
     processors_per_likelihood( a.processors_per_likelihood ),
     resume_from_checkpoint( a.resume_from_checkpoint ),
-    ckp_stone_file( a.ckp_stone_file )
+    ckp_stone_file( a.ckp_stone_file ),
+    resume_stone_sequences( a.resume_stone_sequences )
 {
     
 }
@@ -85,6 +88,7 @@ PowerPosteriorAnalysis& PowerPosteriorAnalysis::operator=(const PowerPosteriorAn
         processors_per_likelihood       = a.processors_per_likelihood;
         resume_from_checkpoint          = a.resume_from_checkpoint;
         ckp_stone_file                  = a.ckp_stone_file;
+        resume_stone_sequences          = a.resume_stone_sequences;
         
     }
     
@@ -203,17 +207,20 @@ std::vector<double> PowerPosteriorAnalysis::getPowers( void ) const
  * have a different one for each run / chain. We therefore have no place to hold the full state of each stone. Iterating over
  * stone_indices would just load the sampler state for each stone, overwriting the previous one. Instead, this function just
  * (1) checks that we can find the checkpoint files for the requested stones, (2) records their full paths for runStone() / runAll()
- * to use, and (3) sets the resume_from_checkpoint variable that tells those two functions to not start fresh.
+ * to use, (3) sets the resume_from_checkpoint variable that tells those two functions to not start fresh, and (4) clears any
+ * custom resurrection layout.
  *
  * @param base_checkpoint_file_name The base name of the checkpoint files.
- * @param stone_indices The 1-based indices of the stones to restore from checkpoint.
+ * @param stone_indices The 0-based indices of the stones to restore from checkpoint.
  */
 void PowerPosteriorAnalysis::initializeFromCheckpoint(const path &base_checkpoint_file_name, const std::vector<size_t> &stone_indices )
 {
     if ( stone_indices.empty() )
     {
-        throw RbException() << "Specify which stones should be restored from checkpoint.";
+        throw RbException() << "Specify which stones or stone sequences should be restored from checkpoint.";
     }
+
+    resume_stone_sequences.clear();
     
     // sort the indices and check for duplicates
     std::vector<size_t> sorted_indices( stone_indices.begin(), stone_indices.end() );
@@ -238,6 +245,56 @@ void PowerPosteriorAnalysis::initializeFromCheckpoint(const path &base_checkpoin
         ckp_stone_file[idx] = stone_file_name;
     }
     
+    resume_from_checkpoint = true;
+}
+
+
+/**
+ * Checkpoint resurrection with a nested layout reflecting a custom per-worker stone order. Each inner vector lists 0-based
+ * stone indices for one parallel worker, in the order they should be run. Worker rank is PID / processors_per_likelihood; the outer
+ * vector has one entry per one likelihood calculation, i.e. num_processes / processors_per_likelihood (integer division).
+ * Leftover MPI ranks do not receive a sequence and run no stones in this layout. Only the first stone in each non-empty inner
+ * sequence must have a checkpoint file on disk; that stone is recorded in ckp_stone_file. Later stones in the same inner vector
+ * are still listed in resume_stone_sequences but are not in ckp_stone_file and runStone() treats them as fresh starts.
+ */
+void PowerPosteriorAnalysis::initializeFromCheckpoint(const path &base_checkpoint_file_name, const std::vector<std::vector<size_t>> &stone_sequences_per_worker )
+{
+    if ( stone_sequences_per_worker.empty() )
+    {
+        throw RbException() << "Specify which stones or stone sequences should be restored from checkpoint.";
+    }
+
+    ckp_stone_file.clear();
+    std::unordered_set<size_t> seen;
+
+    for ( const std::vector<size_t> &seq : stone_sequences_per_worker )
+    {
+        for ( size_t pos = 0; pos < seq.size(); ++pos )
+        {
+            size_t idx = seq[pos];
+            if ( !seen.insert( idx ).second )
+            {
+                throw RbException() << "A stone index appears in more than one resumption sequence.";
+            }
+            if ( idx >= powers.size() )
+            {
+                throw RbException() << "Stone index " << (idx + 1) << " is larger than the number of stones (" << powers.size() << ").";
+            }
+
+            if ( pos == 0 )
+            {
+                path stone_file_name = appendToStem( base_checkpoint_file_name, "_stone_" + std::to_string( idx + 1 ) );
+                if ( !is_regular_file( stone_file_name ) )
+                {
+                    throw RbException() << "No checkpoint file found for stone " << (idx + 1) << " (first stone of a resumption sequence must have a checkpoint).";
+                }
+
+                ckp_stone_file[idx] = stone_file_name;
+            }
+        }
+    }
+
+    resume_stone_sequences = stone_sequences_per_worker;
     resume_from_checkpoint = true;
 }
 
@@ -285,17 +342,39 @@ void PowerPosteriorAnalysis::runAll(size_t gen, double burnin_fraction, size_t p
     
     if ( resume_from_checkpoint )
     {
-        std::vector<size_t> resurrection_indices;
-        for (auto& [k, v] : ckp_stone_file) resurrection_indices.push_back(k);
-        
-        size_t m = resurrection_indices.size();
-
-        size_t block_start = size_t( floor( ( floor( pid   / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * m ) );
-        size_t block_end   = size_t( floor( ( ceil( (pid + 1) / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * m ) );
-        
-        for (size_t j = block_start; j < block_end; ++j)
+        if ( !resume_stone_sequences.empty() )
         {
-            runStone( resurrection_indices[j], gen, burnin_fraction, pre_burnin_generations, tuning_interval, false, checkpoint_file, checkpoint_interval );
+            // One parallel stone lane per full processors_per_likelihood-sized MPI group; leftover ranks do not get a sequence.
+            size_t worker_count = size_t( floor( double(num_processes) / processors_per_likelihood ) );
+            if ( resume_stone_sequences.size() > worker_count )
+            {
+                throw RbException() << "Received a request to run " << resume_stone_sequences.size() << " stone sequences in parallel, but only "
+                                      << worker_count << ( (worker_count > 1) ? " parallel workers are" : " parallel worker is" ) << " available.";
+            }
+
+            size_t worker_rank = size_t( floor( pid / double(processors_per_likelihood) ) );
+            if ( worker_rank < resume_stone_sequences.size() )
+            {
+                for (size_t j = 0; j < resume_stone_sequences[worker_rank].size(); ++j)
+                {
+                    runStone( resume_stone_sequences[worker_rank][j], gen, burnin_fraction, pre_burnin_generations, tuning_interval, false, checkpoint_file, checkpoint_interval );
+                }
+            }
+        }
+        else
+        {
+            std::vector<size_t> resurrection_indices;
+            for (auto& [k, v] : ckp_stone_file) resurrection_indices.push_back(k);
+            
+            size_t m = resurrection_indices.size();
+
+            size_t stone_block_start = size_t( floor( ( floor( pid   / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * m ) );
+            size_t stone_block_end   = size_t( floor( ( ceil( (pid + 1) / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * m ) );
+            
+            for (size_t j = stone_block_start; j < stone_block_end; ++j)
+            {
+                runStone( resurrection_indices[j], gen, burnin_fraction, pre_burnin_generations, tuning_interval, false, checkpoint_file, checkpoint_interval );
+            }
         }
     }
     else
@@ -431,21 +510,15 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
     
     size_t k_start = 0;
     size_t burnin = 0;
-    
-    if ( resume_from_checkpoint )
+
+    auto ckp_it = ckp_stone_file.find( idx );
+    const bool stone_resumes_from_checkpoint = ( ckp_it != ckp_stone_file.end() );
+
+    if ( stone_resumes_from_checkpoint )
     {
-        // If we call .runOneStone() after .initializeFromCheckpoint(), we need the user to provide an index for which we do in fact
-        // have a checkpoint file (whose name is now stored in ckp_stone_file). Trying to call the method with a different index
-        // will throw an error.
-        auto it = ckp_stone_file.find( idx );
-        if ( it == ckp_stone_file.end() )
-        {
-            throw RbException() << "Stone " << (idx + 1) << " was not initialized from checkpoint.";
-        }
-        
         // We checked that the checkpoint file exists in initializeFromCheckpoint(); now we load it. We do not check again here:
         // this amounts to the assumption that it has not been deleted between the .initializeFromCheckpoint() and .runStone() calls.
-        const path &stone_file_name = it->second;
+        const path &stone_file_name = ckp_it->second;
 
         // give the stone back its correct power and planned_burnin
         double stone_power;
@@ -495,6 +568,16 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
     }
     else
     {
+        // Flat initializeFromCheckpoint leaves resume_stone_sequences empty: that is normal. We throw only if we are in that
+        // flat-resume mode (i.e., we have called initializeFromCheckpoint()) but are now calling runStone() with an index for
+        // which we do not have a checkpoint file (i.e., the expected file name is missing from ckp_stone_file). Nested layouts
+        // keep resume_stone_sequences non-empty; stones past the first in each inner vector are intentionally absent from
+        // ckp_stone_file and fall through here without throwing.
+        if ( resume_from_checkpoint && resume_stone_sequences.empty() )
+        {
+            throw RbException() << "Stone " << (idx + 1) << " was not initialized from checkpoint.";
+        }
+
         sampler->setLikelihoodHeat( powers[idx] );
         
         // Let's do a stone-specific pre-burnin: this is different from the pre-burnin performed by .burnin(), which is global.
@@ -527,13 +610,13 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
     // Monitor. Note that if we are running just one stone at a time, only one process is allowed to write the monitors.
     if (not one_only or (one_only and pid == pid_to_print))
     {
-        sampler->startMonitors(gen, resume_from_checkpoint);
-        if ( not resume_from_checkpoint )
+        sampler->startMonitors( gen, stone_resumes_from_checkpoint );
+        if ( not stone_resumes_from_checkpoint )
         {
             sampler->writeMonitorHeaders( false );
         }
         // Do not re-print the checkpoint generation before the next cycle (avoids duplicate monitor lines).
-        if ( not resume_from_checkpoint )
+        if ( not stone_resumes_from_checkpoint )
         {
             sampler->monitor(k_start);
         }
@@ -541,7 +624,7 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
     
     // Open the output file: append if resuming, overwrite if starting fresh.
     std::ofstream outStream;
-    if ( resume_from_checkpoint )
+    if ( stone_resumes_from_checkpoint )
     {
         outStream.open( stoneFileName.string(), std::ios::app );
     }

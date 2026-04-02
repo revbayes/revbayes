@@ -38,6 +38,7 @@ namespace RevBayesCore {
         void                                    checkpoint(size_t stone_idx, const path &bcp_file, size_t planned_burnin) const;
         std::vector<double>                     getPowers(void) const;
         void                                    initializeFromCheckpoint(const path &bcp_file, const std::vector<size_t> &stone_indices); //!< Makes sure checkpoint files exist but does not load the sampler
+        void                                    initializeFromCheckpoint(const path &bcp_file, const std::vector<std::vector<size_t>> &stone_sequences_per_worker); //!< Records stone sequence per worker; only first stone per sequence needs a checkpoint
         void                                    runAll(size_t g, double burn_frac, size_t preburn_gen, size_t tune_int, const path &cp_file, size_t ci = 0);
         void                                    runStone(size_t idx, size_t g, double burn_frac, size_t preburn_gen, size_t tune_int, bool one_only, const path &cp_file, size_t ci = 0);
         void                                    summarizeStones(void);
@@ -56,7 +57,8 @@ namespace RevBayesCore {
         size_t                                  processors_per_likelihood;
         
         bool                                    resume_from_checkpoint;                                     //!< Set true by initializeFromCheckpoint()
-        std::map<size_t, path>                  ckp_stone_file;                                             //!< Ordered by increasing stone index.
+        std::map<size_t, path>                  ckp_stone_file;                                             //!< Checkpoint file paths for stones that have one (all listed stones for flat init; first-of-sequence only for nested init)
+        std::vector<std::vector<size_t>>        resume_stone_sequences;                                     //!< If empty, assign stones by the usual block formula; if not, one inner vector per full MPI group (num_processes / processors_per_likelihood)
     };
     
 }
