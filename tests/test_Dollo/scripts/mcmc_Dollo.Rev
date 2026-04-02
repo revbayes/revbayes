@@ -1,0 +1,62 @@
+# RevBayes Test Script
+# Authors: Basanta Khakurel
+# Date: 2026-03-23
+seed(200456)
+
+
+morpho <- readDiscreteCharacterData("data/bears_morphology.nex")
+taxa <- morpho.taxa()
+
+n_taxa <- taxa.size()
+
+# vectors for moves and monitors
+moves = VectorMoves()
+monitors = VectorMonitors()
+
+topology ~ dnUniformTopology(taxa)
+moves.append(mvNNI(topology))
+moves.append(mvSPR(topology))
+
+n_branches <- 2 * n_taxa - 3
+for (i in 1:n_branches) {
+   br_lens[i] ~ dnExponential(10.0)
+   moves.append( mvScale(br_lens[i]) )
+}
+
+# tree length
+TL := sum(br_lens)
+
+phylogeny := treeAssembly(topology, br_lens)
+
+max_state <- morpho.maxStates()
+
+# Apply a dollo model of irreversibility
+Q_morpho := fnJC(max_state)
+# this is the deathrate
+mu ~ dnExp(10)
+
+moves.append(mvScale(mu, lambda=1.0, weight=2.0))
+
+# Dollo CTMC
+phyMorpho ~ dnPhyloCTMCDollo(
+    tree            = phylogeny,
+    Q               = Q_morpho,
+    deathRate       = mu,
+    type            = "Binary"
+)
+
+phyMorpho.clamp(morpho)
+
+mymodel = model(phyMorpho)
+
+# add log and screen monitors
+monitors.append(mnModel(filename="output/Dollo.log", printgen=1))
+monitors.append(mnFile(filename="output/Dollo.trees", printgen=1, phylogeny))
+
+# initialize the MCMC object
+mymcmc = mcmc(mymodel, monitors, moves)
+
+# run the MCMC
+mymcmc.run(generations = 40)
+
+q()
