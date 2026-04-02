@@ -9,6 +9,8 @@ n_species <- data.ntaxa()
 n_branches <- 2*n_species - 3
 taxa <- data.taxa()
 
+moves = VectorMoves()
+monitors = VectorMonitors()
 ######################
 # Substitution matrix
 ######################
@@ -16,6 +18,7 @@ taxa <- data.taxa()
 # prior for the stationary frequency is Beta(1,1)
 pi_prior <- v(1,1)
 pi ~ dnDirichlet(pi_prior)
+moves.append(mvSimplexElementScale(pi, weight=0.02, alpha=1000))
 
 # Create a deterministic variable for the rate matrix
 Q := fnFreeBinary(transition_rates=pi,rescaled=true)
@@ -26,6 +29,7 @@ Q := fnFreeBinary(transition_rates=pi,rescaled=true)
 
 # Prior for shape parameter is Exp(1)
 alpha ~ dnExponential(1)
+moves.append(mvScale(alpha, weight=0.02, lambda=0.2))
 
 # Create a discretized Gamma(alpha,alpha) distribution with 4 rate categories
 gamma_rates := fnDiscretizeGamma( alpha, alpha, 4, true )
@@ -36,12 +40,14 @@ gamma_rates := fnDiscretizeGamma( alpha, alpha, 4, true )
 
 # Prior mean branch length mu is Exp(10)
 mu ~ dnExponential(10)
-
+moves.append(mvScale(mu, weight=0.02, lambda=0.3))
 # branch lengths are iid Exp(1/mu)
 rec_mu := 1/mu
 for(i in 1:n_branches){
 	brlens[i] ~ dnExp(rec_mu)
+  moves.append(mvScale(brlens[i], weight=0.02, lambda=2*ln(1.16)))
 }
+
 
 ####################################
 # Tree prior
@@ -49,6 +55,9 @@ for(i in 1:n_branches){
 
 # Uniform prior on the topology
 tau ~ dnUniformTopology(taxa=taxa)
+
+moves.append(mvSPR(tau, weight=0.3848))
+
 psi := fnTreeAssembly(topology=tau, brlens=brlens)
 
 ####################################
@@ -57,7 +66,7 @@ psi := fnTreeAssembly(topology=tau, brlens=brlens)
 
 # Initialize the substitution model
 # seq ~ dnPhyloCTMC(tree=psi, Q=Q, siteRates=gamma_rates, type="Restriction", coding="noabsencesites|nosingletonpresence")
-seq ~ dnPhyloCTMCDollo(tree=psi, siteRates=gamma_rates, type="Restriction", coding="noabsencesites|nosingletonpresence")
+seq ~ dnPhyloCTMCDollo(tree=psi, Q= Q, deathRate = mu, siteRates=gamma_rates, type="Restriction", coding="noabsencesites|nosingletonpresence")
 
 # Attach the data
 seq.clamp(data)
@@ -67,30 +76,14 @@ seq.clamp(data)
 ####################################
 
 # Initialize the DAG model
-mymodel = model(Q)
-
-# Initialize the proposal moves
-# set move index
-mi = 0
-wp = 0.02
-wa = 0.02
-wm = 0.02
-wb = 0.3846
-wt = 0.3848
-total = wp + wa + wm + wb + wt
-moves[++mi] = mvSimplexElementScale(pi, weight=wp/total, alpha=1000)
-moves[++mi] = mvScale(alpha, weight=wa/total, lambda=0.2)
-moves[++mi] = mvScale(mu, weight=wm/total,0.3)
-for(i in 1:n_branches)
-{
-     moves[++mi] = mvScale(brlens[i], weight=wb/(total*n_branches), lambda=2*ln(1.16))
-}
-moves[++mi] = mvSPR(tau, weight=wt/total)
+mymodel = model(seq)
+mymodel.graph("output/graph.dot")
 
 # Initialize the monitors
-monitors[1] = mnModel(filename="metazoa.trace",printgen=100, separator = TAB)
-monitors[2] = mnFile(filename="metazoa.treelist",printgen=100, separator = TAB, posterior=false,likelihood=false,prior=false,psi)
-monitors[3] = mnScreen(printgen=10000, alpha, mu, pi)
+
+monitors.append(mnModel(filename="metazoa.trace",printgen=100, separator = TAB))
+monitors.append(mnFile(filename="metazoa.treelist",printgen=100, separator = TAB, posterior=false,likelihood=false,prior=false,psi))
+monitors.append(mnScreen(printgen=10, alpha, mu, pi))
 
 # Initialize and run the MCMC
 mymcmc = mcmc(mymodel, monitors, moves, nruns=2)
