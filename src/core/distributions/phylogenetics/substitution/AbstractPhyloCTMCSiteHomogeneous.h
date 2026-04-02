@@ -20,7 +20,8 @@
 #include "TypedDistribution.h"
 #include "SiteMixtureModel.h"
 
-#include <memory.h>
+#include <memory>
+#include <new>
 
 namespace RevBayesCore {
 
@@ -65,6 +66,37 @@ namespace RevBayesCore {
      * pmatrices[active * activePmatrixOffset + node_index * nodeOffset + site_mixture_index]
      *
      */
+    template <typename T>
+    struct no_init_allocator {
+        using value_type = T;
+
+        no_init_allocator() = default;
+
+        template <class U>
+        no_init_allocator(const no_init_allocator<U>&) noexcept {}
+
+        T* allocate(std::size_t n) {
+            return std::allocator<T>{}.allocate(n);
+        }
+        void deallocate(T* p, std::size_t n) {
+            std::allocator<T>{}.deallocate(p, n);
+        }
+
+        // Called with no args during value-init → skip zeroing
+        template <typename U>
+        void construct(U* p) noexcept {
+            ::new (static_cast<void*>(p)) U; // default-init, NOT value-init
+        }
+
+        // All other construct calls (copy, move, etc.) behave normally
+        template <typename U, typename... Args>
+        void construct(U* p, Args&&... args) {
+            ::new (static_cast<void*>(p)) U(std::forward<Args>(args)...);
+        }
+    };
+
+    template <typename T>
+    using no_init_vector = std::vector<T, no_init_allocator<T>>;
 
     struct PartialLikelihoods
     {
@@ -92,13 +124,13 @@ namespace RevBayesCore {
         double& likelihood(int m, int p, int s) {return likelihoods[s + dims.num_states*(p + dims.num_patterns*m)];}
         double likelihood(int m, int p, int s) const {return likelihoods[s + dims.num_states*(p + dims.num_patterns*m)];}
 
-        std::vector<double> likelihoods; // per mixture * pattern * state
-        std::vector<double> log_scale; // per site
+        no_init_vector<double> likelihoods; // per mixture * pattern * state
+        no_init_vector<double> log_scale; // per site
 
         PartialLikelihoods(const Dims& d)
             :dims(d),
-             likelihoods(dims.size(), 0),
-             log_scale(dims.num_patterns, 0)
+             likelihoods(dims.size()),
+             log_scale(dims.num_patterns)
         {
         }
     };
