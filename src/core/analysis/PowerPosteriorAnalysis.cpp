@@ -451,13 +451,17 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
     }
     
     size_t pid_to_print = *std::min_element(ceil_pids.begin(), ceil_pids.end());
+
+    auto ckp_it = ckp_stone_file.find( idx );
+    const bool stone_resumes_from_checkpoint = ( ckp_it != ckp_stone_file.end() );
     
     if (pid == pid_to_print)
     {
         // Get the width of a given number in characters
         auto width = [&](size_t x) { return size_t( ceil( log10(x + 0.1) ) ); };
         
-        if (num_processes == 1 or one_only == true or resume_from_checkpoint == true)
+        // Flat resume uses the single-line "Step n" style; nested resume matches the fresh MPI layout.
+        if ( num_processes == 1 or one_only == true or ( stone_resumes_from_checkpoint && resume_stone_sequences.empty() ) )
         {
             // Figure out how much whitespace the lines should be padded out with to keep everything neatly aligned
             size_t digits = width( powers.size() );
@@ -510,9 +514,6 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
     
     size_t k_start = 0;
     size_t burnin = 0;
-
-    auto ckp_it = ckp_stone_file.find( idx );
-    const bool stone_resumes_from_checkpoint = ( ckp_it != ckp_stone_file.end() );
 
     if ( stone_resumes_from_checkpoint )
     {
