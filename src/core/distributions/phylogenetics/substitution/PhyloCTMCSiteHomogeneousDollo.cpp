@@ -107,6 +107,9 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::resizeLikelihoodVectors( void 
 
 void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::updateTransitionProbabilities(size_t node_idx)
 {
+    // Mark this node's transition matrix as up-to-date for the current pass.
+    pmat_dirty_nodes[node_idx] = false;
+
     // first, get the clock rate for the branch
     double rate = 1.0;
     if ( this->branch_heterogeneous_clock_rates == true )
@@ -223,11 +226,6 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::updateTransitionProbabilities(
             }
         }
     }
-    TransitionProbabilityMatrix m1 = transition_prob_matrices[0];
-    TransitionProbabilityMatrix m2 = transition_prob_matrices[1];
-    TransitionProbabilityMatrix m3 = transition_prob_matrices[2];
-    TransitionProbabilityMatrix m4 = transition_prob_matrices[3];
-
     return;
 }
 
@@ -319,7 +317,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeRootLikelihood( size_t 
 
     // get the root frequencies
     std::vector<std::vector<double> > ff;
-    this->getStationaryFrequencies(ff);
+    this->getRootFrequencies(ff);
 
     // get the pointers to the partial likelihoods of the left and right subtree
           double* p        = partialLikelihoods + activeLikelihood[root]  * activeLikelihoodOffset + root  * nodeOffset;
@@ -335,7 +333,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeRootLikelihood( size_t 
     for (size_t mixture = 0; mixture < num_site_mixtures; ++mixture)
     {
         // get the root frequencies
-        const std::vector<double> &f = branch_heterogeneous_substitution_matrices ? ff[root] : ff[mixture % ff.size()];
+        const std::vector<double> &f = ff[mixture % ff.size()];
 
         // get pointers to the likelihood for this mixture category
               double*   p_site_mixture          = p_mixture;
@@ -595,12 +593,12 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeTipLikelihood(const Top
 
     double* p_node = partialLikelihoods + activeLikelihood[node_index]*activeLikelihoodOffset + node_index*nodeOffset;
 
-    
+
     size_t data_tip_index = this->taxon_name_2_tip_index_map[ node.getName() ];
     const std::vector<bool> &gap_node = this->gap_matrix[data_tip_index];
     const std::vector<std::uint64_t> &char_node = this->char_matrix[data_tip_index];
     const std::vector<RbBitSet> &amb_char_node = this->ambiguous_char_matrix[data_tip_index];
-    
+
     // compute the transition probabilities
     updateTransitionProbabilities( node_index );
 
@@ -1264,7 +1262,7 @@ double RevBayesCore::PhyloCTMCSiteHomogeneousDollo::sumRootLikelihood( void )
                 double tmp = 0;
                 MPI_Status status;
                 MPI_Recv(&tmp, 1, MPI_DOUBLE, int(i), 0, MPI_COMM_WORLD, &status);
-                
+
                 sumPartialProbs += tmp;
             }
         }
@@ -1282,7 +1280,7 @@ double RevBayesCore::PhyloCTMCSiteHomogeneousDollo::sumRootLikelihood( void )
             MPI_Status status;
             MPI_Recv(&sumPartialProbs, 1, MPI_DOUBLE, int(active_PID), 0, MPI_COMM_WORLD, &status);
         }
-    
+
     }
 
 #endif
@@ -1302,7 +1300,7 @@ double RevBayesCore::PhyloCTMCSiteHomogeneousDollo::sumRootLikelihood( void )
                 perMaskCorrections[mask] += c_node_mixture[mixture];
             }
         }
-        
+
         if (perMaskCorrections[mask] <= 0.0)
             perMaskCorrections[mask] = RbConstants::Double::nan;
 
