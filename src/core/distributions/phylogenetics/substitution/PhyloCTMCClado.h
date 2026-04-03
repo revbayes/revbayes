@@ -258,9 +258,9 @@ void RevBayesCore::PhyloCTMCClado<charType>::computeRootLikelihood( size_t root,
     // get the pointers to the partial likelihoods of the left and right subtree
     auto& pl_left  = this->getPartialLikelihoodsForNode(left);
     auto& pl_right = this->getPartialLikelihoodsForNode(right);
-    auto& pl_root  = this->createEmptyPartialLikelihoodsForNode(root, pl_left.dims);
-    assert(pl_root.dims == pl_left.dims);
-    assert(pl_root.dims == pl_right.dims);
+    auto& pl_root  = this->createEmptyPartialLikelihoodsForNode(root, pl_left.dims());
+    assert(pl_root.dims() == pl_left.dims());
+    assert(pl_root.dims() == pl_right.dims());
     
     // iterate over all mixture categories
     for (size_t mixture = 0; mixture < this->num_site_rates; ++mixture)
@@ -357,9 +357,9 @@ void RevBayesCore::PhyloCTMCClado<charType>::computeInternalNodeLikelihood(const
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
     auto& pl_left  = this->getPartialLikelihoodsForNode(left);
     auto& pl_right = this->getPartialLikelihoodsForNode(right);
-    auto& pl_node  = this->createEmptyPartialLikelihoodsForNode(node_index, pl_left.dims);
-    assert(pl_node.dims == pl_left.dims);
-    assert(pl_node.dims == pl_right.dims);
+    auto& pl_node  = this->createEmptyPartialLikelihoodsForNode(node_index, pl_left.dims());
+    assert(pl_node.dims() == pl_left.dims());
+    assert(pl_node.dims() == pl_right.dims());
 
     double*         p_clado_node  = this->cladoPartialLikelihoods.data() + this->activeLikelihood[node_index]*this->cladoActiveLikelihoodOffset + node_index*this->cladoNodeOffset;
 

@@ -95,9 +95,9 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLike
     auto& pl_right= this->getPartialLikelihoodsForNode(right);
     const double* p_left   = pl_left.likelihoods.data();
     const double* p_right  = pl_right.likelihoods.data();
-    assert(pl_left.dims == pl_right.dims);
+    assert(pl_left.dims() == pl_right.dims());
     
-    double* p        = this->createEmptyPartialLikelihoodsForNode(root, pl_left.dims).likelihoods.data();
+    double* p        = this->createEmptyPartialLikelihoodsForNode(root, pl_left.dims()).likelihoods.data();
     
     // get pointers the likelihood for both subtrees
           double*   p_mixture          = p;
@@ -152,10 +152,10 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLike
     const double* p_left   = pl_left.likelihoods.data();
     const double* p_right  = pl_right.likelihoods.data();
     const double* p_middle = pl_middle.likelihoods.data();
-    assert(pl_left.dims == pl_right.dims);
-    assert(pl_left.dims == pl_middle.dims);
+    assert(pl_left.dims() == pl_right.dims());
+    assert(pl_left.dims() == pl_middle.dims());
 
-    double* p        = this->createEmptyPartialLikelihoodsForNode(root, pl_left.dims).likelihoods.data();
+    double* p        = this->createEmptyPartialLikelihoodsForNode(root, pl_left.dims()).likelihoods.data();
     
     // get pointers the likelihood for both subtrees
           double*   p_mixture          = p;
@@ -208,9 +208,9 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
     auto& pl_right = this->getPartialLikelihoodsForNode(right);
     const double* p_left   = pl_left.likelihoods.data();
     const double* p_right  = pl_right.likelihoods.data();
-    assert(pl_left.dims == pl_right.dims);
+    assert(pl_left.dims() == pl_right.dims());
 
-    double* p_node   = this->createEmptyPartialLikelihoodsForNode(node_index, pl_left.dims).likelihoods.data();
+    double* p_node   = this->createEmptyPartialLikelihoodsForNode(node_index, pl_left.dims()).likelihoods.data();
     //    __m128d* p_left   = (__m128d *) this->getPartialLikelihoodsForNode(left);
     //    __m128d* p_right  = (__m128d *) this->getPartialLikelihoodsForNode(right);
     //    __m128d* p_node   = (__m128d *) this->getPartialLikelihoodsForNode(node_index);
@@ -221,9 +221,9 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
     auto& pl_right = this->getPartialLikelihoodsForNode(right);
     const double* p_left   = pl_left.likelihoods.data();
     const double* p_right  = pl_right.likelihoods.data();
-    assert(pl_left.dims == pl_right.dims);
+    assert(pl_left.dims() == pl_right.dims());
 
-    double* p_node   = this->createEmptyPartialLikelihoodsForNode(node_index, pl_left.dims).likelihoods.data();
+    double* p_node   = this->createEmptyPartialLikelihoodsForNode(node_index, pl_left.dims()).likelihoods.data();
 
     double* tmp_ac = new double[4];
     double* tmp_gt = new double[4];
@@ -238,9 +238,9 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
     auto& pl_right = this->getPartialLikelihoodsForNode(right);
     const double*   p_left  = pl_left.likelihoods.data();
     const double*   p_right = pl_right.likelihoods.data();
-    assert(pl_left.dims = pl_right.dims);
+    assert(pl_left.dims() = pl_right.dims());
 
-    double*         p_node  = this->createEmptyPartialLikelihoodsForNode(node_index, pl_left.dims).likelihoods.data();
+    double*         p_node  = this->createEmptyPartialLikelihoodsForNode(node_index, pl_left.dims()).likelihoods.data();
 
 #   endif
     
@@ -417,10 +417,10 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
     const double*   p_left      = pl_left.likelihoods.data();
     const double*   p_middle    = pl_middle.likelihoods.data();
     const double*   p_right     = pl_right.likelihoods.data();
-    assert(pl_left.dims == pl_middle.dims);
-    assert(pl_left.dims == pl_right.dims);
+    assert(pl_left.dims() == pl_middle.dims());
+    assert(pl_left.dims() == pl_right.dims());
     
-    double*         p_node      = this->createEmptyPartialLikelihoodsForNode(node_index, pl_left.dims).likelihoods.data();
+    double*         p_node      = this->createEmptyPartialLikelihoodsForNode(node_index, pl_left.dims()).likelihoods.data();
     
     // iterate over all mixture categories
     for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)

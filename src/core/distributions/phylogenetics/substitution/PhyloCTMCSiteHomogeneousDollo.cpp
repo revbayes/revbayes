@@ -311,9 +311,9 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeRootLikelihood( size_t 
     auto& pl_right = getPartialLikelihoodsForNode(right);
     const double* p_left = pl_left.likelihoods.data();
     const double* p_right = pl_right.likelihoods.data();
-    assert(pl_left.dims == pl_right.dims);
+    assert(pl_left.dims() == pl_right.dims());
 
-    double* p        = this->createEmptyPartialLikelihoodsForNode(root, pl_left.dims).likelihoods.data();
+    double* p        = this->createEmptyPartialLikelihoodsForNode(root, pl_left.dims()).likelihoods.data();
 
     // get pointers the likelihood for both subtrees
           double*   p_mixture          = p;
@@ -381,9 +381,9 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeRootLikelihood( size_t 
     const double* p_right  = pl_left.likelihoods.data();
     const double* p_middle = pl_middle.likelihoods.data();
     const double* p_left   = pl_right.likelihoods.data();
-    assert(pl_left.dims == pl_right.dims);
+    assert(pl_left.dims() == pl_right.dims());
 
-    double* p        = this->createEmptyPartialLikelihoodsForNode(root, pl_left.dims).likelihoods.data();
+    double* p        = this->createEmptyPartialLikelihoodsForNode(root, pl_left.dims()).likelihoods.data();
 
     // get pointers the likelihood for both subtrees
           double*   p_mixture          = p;
@@ -453,9 +453,9 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeInternalNodeLikelihood(
     auto& pl_right = getPartialLikelihoodsForNode(right);
     const double*   p_left  = pl_left.likelihoods.data();
     const double*   p_right = pl_right.likelihoods.data();
-    assert(pl_left.dims == pl_right.dims);
+    assert(pl_left.dims() == pl_right.dims());
 
-    double*         p_node  = this->createEmptyPartialLikelihoodsForNode(node_index, pl_left.dims).likelihoods.data();
+    double*         p_node  = this->createEmptyPartialLikelihoodsForNode(node_index, pl_left.dims()).likelihoods.data();
 
     // iterate over all mixture categories
     for (size_t mixture = 0; mixture < num_site_mixtures; ++mixture)
@@ -530,10 +530,10 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeInternalNodeLikelihood(
     const double*   p_left      = pl_left.likelihoods.data();
     const double*   p_middle    = pl_middle.likelihoods.data();
     const double*   p_right     = pl_right.likelihoods.data();
-    assert(pl_left.dims == pl_right.dims);
-    assert(pl_left.dims == pl_middle.dims);
+    assert(pl_left.dims() == pl_right.dims());
+    assert(pl_left.dims() == pl_middle.dims());
 
-    double*         p_node      = createEmptyPartialLikelihoodsForNode(node_index, pl_left.dims).likelihoods.data();
+    double*         p_node      = createEmptyPartialLikelihoodsForNode(node_index, pl_left.dims()).likelihoods.data();
 
     // iterate over all mixture categories
     for (size_t mixture = 0; mixture < num_site_mixtures; ++mixture)

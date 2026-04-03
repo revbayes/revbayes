@@ -75,6 +75,8 @@ namespace RevBayesCore {
         template <class U>
         no_init_allocator(const no_init_allocator<U>&) noexcept {}
 
+        bool operator==(const no_init_allocator<T>&) const = default;
+
         T* allocate(std::size_t n) {
             return std::allocator<T>{}.allocate(n);
         }
@@ -98,8 +100,9 @@ namespace RevBayesCore {
     template <typename T>
     using no_init_vector = std::vector<T, no_init_allocator<T>>;
 
-    struct PartialLikelihoods
+    class PartialLikelihoods
     {
+    public:
         // With MPI, these might not be ALL the site patterns, but they are all the ones stored in this process.
         struct Dims
         {
@@ -118,23 +121,155 @@ namespace RevBayesCore {
                 { }
         };
 
-        Dims dims;
+    private:
+        // We can't change this without reallocating.
+        Dims dims_;
+
+    public:
+
+        const Dims& dims() const {return dims_;}
 
         // This shows how the entries are laid out inside the linear array.
-        double& likelihood(int m, int p, int s) {return likelihoods[s + dims.num_states*(p + dims.num_patterns*m)];}
-        double likelihood(int m, int p, int s) const {return likelihoods[s + dims.num_states*(p + dims.num_patterns*m)];}
+        double& likelihood(int m, int p, int s)       {return likelihoods[s + dims_.num_states*(p + dims_.num_patterns*m)];}
+        double  likelihood(int m, int p, int s) const {return likelihoods[s + dims_.num_states*(p + dims_.num_patterns*m)];}
 
         no_init_vector<double> likelihoods; // per mixture * pattern * state
         no_init_vector<double> log_scale; // per site
 
+        PartialLikelihoods& operator=(const PartialLikelihoods&) = default;
+        PartialLikelihoods& operator=(PartialLikelihoods&&) noexcept = default;
+
+        PartialLikelihoods(const PartialLikelihoods&) = default;
+        PartialLikelihoods(PartialLikelihoods&&) noexcept = default;
+
+        PartialLikelihoods()
+            :dims_{0,0,0}
+            {}
+
         PartialLikelihoods(const Dims& d)
-            :dims(d),
-             likelihoods(dims.size()),
-             log_scale(dims.num_patterns)
+            :dims_(d),
+             likelihoods(dims_.size()),
+             log_scale(dims_.num_patterns)
         {
         }
     };
 
+    template <typename T>
+    class IndexedCache {
+        struct ItemState {
+            unsigned active : 1;   // which slot: 0 or 1
+            unsigned dirty  : 1;   // does this slot need recomputation?
+        };
+
+        size_t num_items;
+        std::vector<T> slots;               // size = 2 * num_items
+        std::vector<ItemState> current_state;
+        std::optional<std::vector<ItemState>> prev_state;
+
+        T& slot(size_t item, unsigned s) {
+            return slots[s * num_items + item];
+        }
+
+    public:
+        IndexedCache(size_t n, const T& init = T{})
+            : num_items(n),
+              slots(2 * n, init),
+              current_state(n, {0, 1})   // all start as slot 0, dirty
+            {}
+
+        size_t size() const { return num_items;}
+
+        bool is_dirty(size_t item) const { return current_state[item].dirty; }
+
+        const T& operator[](size_t item) const
+        {
+            assert( not is_dirty(item) );
+
+            return slots[current_state[item].active * num_items + item];
+        }
+
+        // Read/Write access to the current_state value (must not be dirty)
+        T& get_mutable_item(size_t item)
+        {
+            assert( not is_dirty(item) );
+
+            return slots[current_state[item].active * num_items + item];
+        }
+
+        void mark_dirty(size_t item)
+        {
+            // Should we assume that we only mark things dirty after touching?
+            // assert( is_touched() );
+
+            // Here is where we unshare with the previous state.
+            if (prev_state and not (*prev_state)[item].dirty and not is_dirty(item))
+            {
+                // If we mark something dirty multiple times, we don't want to flip the bit twice!
+                current_state[item].active = (*prev_state)[item].active ^ 1;
+            }
+
+            current_state[item].dirty = 1;
+        }
+
+        bool is_touched() const
+        {
+            return prev_state;
+        }
+
+        void mark_all_dirty()
+        {
+            for(size_t i = 0; i < num_items; i++)
+                mark_dirty(i);
+        }
+
+        // Get a mutable reference to dirty slot and mark it clean.
+        T& init_for_writing(size_t item)
+        {
+            // Don't over-write something that hasn't been invalidated.
+            assert(is_dirty(item));
+
+            // Mark the item clean.
+            current_state[item].dirty = 0;
+
+            // Access the now-clean item.
+            return get_mutable_item(item);
+        }
+
+        void keep()
+        {
+            // We should only call keep if we proposed a new state and are accepting it.
+            assert(prev_state);
+
+            prev_state.reset();
+        }
+
+        void restore()
+        {
+            // Moving back to the previous state makes no state if there is no previous state.
+            assert(prev_state);
+
+            current_state = *prev_state;
+            prev_state.reset();
+        }
+
+        void touch()
+        {
+            if (not prev_state)
+                prev_state = current_state;
+        }
+
+        // For resize after tree topology changes, etc.
+        void resize(size_t n, const T& init = T{})
+        {
+            num_items = n;
+            slots.assign(2 * n, init);
+            current_state.assign(n, {0, 1});
+
+            // if we change the number of nodes, how would we restore?
+            if (prev_state)
+                prev_state = current_state;
+        }
+    };
 
     template<class charType>
     class AbstractPhyloCTMCSiteHomogeneous : public TypedDistribution< AbstractHomologousDiscreteCharacterData >, public MemberObject< RbVector<double> >, public MemberObject < MatrixReal >, public TreeChangeEventListener {
@@ -267,8 +402,7 @@ namespace RevBayesCore {
         // the likelihoods
         std::vector<size_t>                                                 activeLikelihood;
     private:        
-        mutable std::vector< std::shared_ptr<PartialLikelihoods>>           partialLikelihoods;
-        std::optional<std::vector< std::shared_ptr<PartialLikelihoods>>>    prevPartialLikelihoods;
+        mutable IndexedCache<PartialLikelihoods>                            partialLikelihoods;
         std::vector<double>                                                 marginalLikelihoods;
 
     protected:
@@ -453,7 +587,6 @@ num_matrices( n.num_matrices ),
 tau( n.tau ),
 transition_prob_matrices( n.transition_prob_matrices ),
 partialLikelihoods( n.partialLikelihoods ),
-prevPartialLikelihoods( n.prevPartialLikelihoods ),
 activeLikelihood( n.activeLikelihood ),
 marginalLikelihoods( n.marginalLikelihoods ),
 ambiguous_char_matrix( n.ambiguous_char_matrix ),
@@ -673,35 +806,37 @@ inline bool has_weighted_characters(AbstractHomologousDiscreteCharacterData& dat
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::allocatePartialLikelihoods() const
 {
-    partialLikelihoods.clear();
-    partialLikelihoods.resize(num_nodes);
+    PartialLikelihoods::Dims dims(num_site_mixtures, pattern_block_size, num_chars);
+    partialLikelihoods.resize(num_nodes, dims);
 }
 
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::markPartialLikelihoodsDirtyForNode(int node_index) const
 {
-    partialLikelihoods[node_index].reset();
+    partialLikelihoods.mark_dirty(node_index);
 }
 
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::markAllPartialLikelihoodsDirty() const
 {
-    for(auto& pl: partialLikelihoods)
-        pl.reset();
+    partialLikelihoods.mark_all_dirty();
 }
 
 template<class charType>
 bool RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::partialLikelihoodsDirtyForNode(int node_index) const
 {
-    return not this->partialLikelihoods[node_index];
+    return partialLikelihoods.is_dirty(node_index);
 }
 
 template<class charType>
 inline PartialLikelihoods& RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::createEmptyPartialLikelihoodsForNode(int node_index, const PartialLikelihoods::Dims& dims) const
 {
-    assert(partialLikelihoodsDirtyForNode(node_index));
-    partialLikelihoods[node_index] = std::make_shared<PartialLikelihoods>(dims);
-    return *partialLikelihoods[node_index];
+    auto& pl = partialLikelihoods.init_for_writing(node_index);
+    if (pl.dims() != dims)
+    {
+        pl = PartialLikelihoods(dims);
+    }
+    return pl;
 }
 
 // Usually after we have created partial likelihoods for a node they are done, and should not be touched.
@@ -709,7 +844,7 @@ inline PartialLikelihoods& RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charTy
 template<class charType>
 inline const PartialLikelihoods& RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::getPartialLikelihoodsForNode(int node_index) const
 {
-    return *this->partialLikelihoods[node_index];
+    return partialLikelihoods[node_index];
 }
 
 // The rescaling functions DO modify the partial likelihoods after the have been computed.
@@ -720,8 +855,7 @@ inline const PartialLikelihoods& RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<
 template<class charType>
 inline PartialLikelihoods& RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::getMutablePartialLikelihoodsForNode(int node_index) const
 {
-    assert(not partialLikelihoodsDirtyForNode(node_index));
-    return *this->partialLikelihoods[node_index];
+    return partialLikelihoods.get_mutable_item(node_index);
 }
 
 template<class charType>
@@ -2432,7 +2566,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::keepSpecializatio
 
     // reset all flags
     prev_pmat_dirty_nodes = {};
-    prevPartialLikelihoods = {};
+    partialLikelihoods.keep();
 
     for (std::vector<bool>::iterator it = this->changed_nodes.begin(); it != this->changed_nodes.end(); ++it)
     {
@@ -2760,8 +2894,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::restoreSpecializa
     // reset the flags
     lnProb = *storedLnProb;
     storedLnProb = {};
-    std::swap(partialLikelihoods,  *prevPartialLikelihoods);
-    prevPartialLikelihoods = {};
+    partialLikelihoods.restore();
 
     // restore the active likelihoods vector
     for (size_t index = 0; index < changed_nodes.size(); ++index)
@@ -4268,7 +4401,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::touchSpecializati
         this->storedLnProb = this->lnProb;
 
         prev_pmat_dirty_nodes = pmat_dirty_nodes;
-        prevPartialLikelihoods = partialLikelihoods;
+
+        partialLikelihoods.touch();
     }
 
 
