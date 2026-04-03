@@ -4,6 +4,8 @@
 #include <string>
 
 #include "ArgumentRule.h"
+#include "FastBirthDeathShiftProcess.h"
+#include "GeneralizedLineageHeterogeneousBirthDeathSamplingProcess.h"
 #include "IntegerPos.h"
 #include "RevObject.h"
 #include "RlTimeTree.h"
@@ -50,37 +52,38 @@ void Mntr_StochasticBranchRate::constructInternalObject( void )
     
     const std::string& file_name      = static_cast<const RlString  &>( filename->getRevObject()           ).getValue();
     const std::string& sep            = static_cast<const RlString  &>( separator->getRevObject()          ).getValue();
-    unsigned int       print_gen      = (int)static_cast<const IntegerPos   &>( printgen->getRevObject()      ).getValue();
+    unsigned int       print_gen      = (int)static_cast<const IntegerPos   &>( printgen->getRevObject()   ).getValue();
     bool               app            = static_cast<const RlBoolean &>( append->getRevObject()             ).getValue();
     bool               wv             = static_cast<const RlBoolean &>( version->getRevObject()            ).getValue();
     
     RevBayesCore::StochasticBranchRateMonitor *m;
-
-    if ( static_cast<const RevLanguage::Tree&>( cdbdp->getRevObject() ).isModelObject() )
+    
+    if ( static_cast<const RevLanguage::Tree&>( process->getRevObject() ).isModelObject() )
     {
-        RevBayesCore::TypedDagNode<RevBayesCore::Tree>* cdbdp_tdn = static_cast<const RevLanguage::Tree&>( cdbdp->getRevObject() ).getDagNode();
-        RevBayesCore::StochasticNode<RevBayesCore::Tree>* cdbdp_sn  = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree>* >( cdbdp_tdn );
+        RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tdn = static_cast<const RevLanguage::Tree&>( process->getRevObject() ).getDagNode();
+        RevBayesCore::StochasticNode<RevBayesCore::Tree>* sn  = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree>* >( tdn );
+        
+        auto& dist = sn->getDistribution();
+        if (auto* sse = dynamic_cast<RevBayesCore::StateDependentSpeciationExtinctionProcess*>(&dist))
+        {
+            sse->setSampleCharacterHistory(true);
+        }
+        else if (auto* bds = dynamic_cast<RevBayesCore::FastBirthDeathShiftProcess*>(&dist))
+        {
+            bds->setSampleCharacterHistory(true);
+        }
+        else if (auto* glhbdsp = dynamic_cast<RevBayesCore::GeneralizedLineageHeterogeneousBirthDeathSamplingProcess*>(&dist))
+        {
+            // GLHBDSP does not have the .setSampleCharacterHistory() method, so nothing here
+        }
+        else
+        {
+            throw RbException("Must provide a CDBDP or a FastBDS or a GLHBDSP object.");
+        }
 
-        RevBayesCore::StateDependentSpeciationExtinctionProcess *sse_process = NULL;
-        sse_process = dynamic_cast<RevBayesCore::StateDependentSpeciationExtinctionProcess*>( &cdbdp_sn->getDistribution() );
-        sse_process->setSampleCharacterHistory( true );
-
-        m = new RevBayesCore::StochasticBranchRateMonitor( cdbdp_sn, (std::uint64_t)print_gen, file_name, sep );
-        m->setAppend( app );
-        m->setPrintVersion( wv );
-    }
-    else if ( static_cast<const RevLanguage::Tree&>( glhbdsp->getRevObject() ).isModelObject() )
-    {
-        RevBayesCore::TypedDagNode<RevBayesCore::Tree>* glhbdsp_tdn = static_cast<const RevLanguage::Tree&>( glhbdsp->getRevObject() ).getDagNode();
-        RevBayesCore::StochasticNode<RevBayesCore::Tree>* glhbdsp_sn  = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree>* >( glhbdsp_tdn );
-
-        m = new RevBayesCore::StochasticBranchRateMonitor( glhbdsp_sn, (std::uint64_t)print_gen, file_name, sep );
-        m->setAppend( app );
-        m->setPrintVersion( wv );
-    }
-    else
-    {
-    	throw RbException("Must provide either a CDBDP or a GLHBDSP object.");
+        m = new RevBayesCore::StochasticBranchRateMonitor(sn, (std::uint64_t)print_gen, file_name, sep);
+        m->setAppend(app);
+        m->setPrintVersion(wv);
     }
 
     
@@ -137,8 +140,13 @@ const MemberRules& Mntr_StochasticBranchRate::getParameterRules(void) const
     
     if ( !rules_set )
     {
-        monitor_rules.push_back( new ArgumentRule("cdbdp"          , TimeTree::getClassTypeSpec(),  "The character dependent birth-death process to monitor.",                      ArgumentRule::BY_REFERENCE, ArgumentRule::ANY, NULL ) );
-        monitor_rules.push_back( new ArgumentRule("glhbdsp"        , TimeTree::getClassTypeSpec(),  "The lineage-heterogeneous birth-death process to monitor.",                    ArgumentRule::BY_REFERENCE, ArgumentRule::ANY, NULL ) );
+        std::vector<std::string> aliases;
+        aliases.push_back("process");
+        aliases.push_back("cdbdp");   // legacy; for backward compatibility
+        aliases.push_back("glhbdsp"); // legacy; for backward compatibility
+        
+        monitor_rules.push_back( new ArgumentRule(aliases, TimeTree::getClassTypeSpec(), "The birth-death process to monitor. Can be character-dependent (CDBDP), lineage-heterogeneous (GLHBDSP), or fast with shifts (FastBDS).", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY, NULL ) );
+
         // add the rules from the base class
         const MemberRules &parentRules = FileMonitor::getParameterRules();
         monitor_rules.insert(monitor_rules.end(), parentRules.begin(), parentRules.end());
@@ -175,13 +183,9 @@ void Mntr_StochasticBranchRate::printValue(std::ostream &o) const
 void Mntr_StochasticBranchRate::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
 {
     
-    if ( name == "cdbdp" )
+    if ( name == "process" || name == "cdbdp" || name == "glhbdsp" )
     {
-        cdbdp = var;
-    }
-    else if ( name == "glhbdsp" )
-    {
-        glhbdsp = var;
+        process = var;
     }
     else
     {

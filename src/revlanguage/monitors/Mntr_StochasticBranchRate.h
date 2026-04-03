@@ -33,8 +33,7 @@ class TypeSpec;
         
         void                                            setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);       //!< Set member variable
         
-        RevPtr<const RevVariable>                       cdbdp;
-        RevPtr<const RevVariable>                       glhbdsp;
+        RevPtr<const RevVariable>                       process;
 
     };
     

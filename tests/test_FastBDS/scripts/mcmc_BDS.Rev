@@ -1,0 +1,121 @@
+################################################################################
+#
+# RevBayes test: Bayesian inference of diversification rates under a
+#                relaxed birth-death-shift model
+#
+#
+# authors: Bjorn Kopperud & Sebastian Hoehna
+#
+################################################################################
+
+seed(12345)
+
+DATASET              = "primates_tree"
+NUM_RATE_CLASSES     = 6
+NUM_REPS             = 1
+NUM_MCMC_ITERATIONS  = 10
+
+setOption("useScaling","true")
+setOption("scalingDensity","1")
+
+
+#######################
+# Reading in the Data #
+#######################
+
+# Read in the observed phylogeny
+observed_phylogeny <- readTrees("data/"+DATASET+".nex")[1]
+
+# rho is the probability of sampling species at the present
+rho <- 0.635
+
+# Get the names of the taxa in the tree and the age of the tree. We need these later on.
+taxa <- observed_phylogeny.taxa()
+root <- observed_phylogeny.rootAge()
+tree_length <- observed_phylogeny.treeLength()
+
+
+# Create some vector for the moves and monitors of this analysis
+moves    = VectorMoves()
+monitors = VectorMonitors()
+
+
+# Global parameters for our analysis
+H = 0.587405
+
+####################
+# Create the rates #
+####################
+
+### Specify a prior on the speciation and extinction rates
+NUM_TOTAL_SPECIES = 232
+rate_mean <- (NUM_TOTAL_SPECIES-2) / tree_length
+
+### Create a lognormal distributed variable for the mean speciation rate
+speciation_mean ~ dnLoguniform( 1E-6, 1E2)
+speciation_mean.setValue( rate_mean )
+moves.append( mvScale(speciation_mean, lambda=1, weight=2.0) )
+
+### Create a lognormal distributed variable for the mean extinction rate
+extinction_mean ~ dnLoguniform( 1E-6, 1E2)
+extinction_mean.setValue( rate_mean / 2.0 )
+moves.append( mvScale(extinction_mean, lambda=1, weight=2.0) )
+
+## The spread of the base distributions
+speciation_sd <- 0.6
+extinction_sd <- 0.6
+
+speciation_shift_rate ~ dnLognormal(ln(0.01), H)
+extinction_shift_rate ~ dnLognormal(ln(0.01), H)
+
+moves.append( mvScale(speciation_shift_rate, lambda=1, weight=2.0) )
+moves.append( mvScale(extinction_shift_rate, lambda=1, weight=2.0) )
+
+### Create a uniformly distributed variable for the category at the root
+rate_cat_probs <- simplex( rep(1, NUM_RATE_CLASSES*NUM_RATE_CLASSES) )
+
+
+#### construct a variable for the tree drawn from a birth death process
+timetree ~ dnFastBirthDeathShift( rootAge              = root,
+                                  speciationScale      = speciation_mean,
+                                  extinctionScale      = extinction_mean,
+                                  speciationSD         = speciation_sd,
+                                  extinctionSD         = extinction_sd,
+                                  alpha                = speciation_shift_rate,
+                                  beta                 = extinction_shift_rate,
+                                  numSpeciationClasses = NUM_RATE_CLASSES,
+                                  numExtinctionClasses = NUM_RATE_CLASSES,
+                                  rho                  = rho,
+                                  condition            = "time")
+
+
+### clamp the model with the "observed" tree
+timetree.clamp(observed_phylogeny)
+
+#############
+# The Model #
+#############
+
+### workspace model wrapper ###
+mymodel = model(speciation_mean)
+
+
+### set up the monitors that will output parameter values to file and screen
+#monitors.append( mnScreen(printgen=1, speciation_mean, extinction_mean, speciation_shift_rate, extinction_shift_rate) )
+monitors.append( mnStochasticBranchRate(process=timetree, printgen=1, filename="output/BDS_rates_primates.log") )
+
+monitors.append( mnModel(filename="output/BDS_primates.log",printgen=1, separator = TAB) )
+
+################
+# The Analysis #
+################
+
+
+### workspace mcmc
+mymcmc = mcmc(mymodel, monitors, moves, nruns=NUM_REPS, combine="mixed")
+
+### run the MCMC
+mymcmc.run(generations=NUM_MCMC_ITERATIONS)
+
+## quit ##
+q()
