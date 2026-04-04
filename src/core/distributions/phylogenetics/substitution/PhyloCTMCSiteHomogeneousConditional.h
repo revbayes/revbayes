@@ -487,17 +487,18 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeTipLike
 template<class charType>
 void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeTipCorrection(const TopologyNode &node, size_t node_index)
 {
+    // ensure we actually have a matrix to use
+    this->updateTransitionProbabilityMatrix(node_index);
+
     std::vector<double>::iterator p_node = getMutableCorrectionLikelihoodsForNode(node_index);
     
     size_t data_tip_index = this->taxon_name_2_tip_index_map[ node.getName() ];
     
-    size_t pmat_offset = this->active_pmatrices[node_index] * this->activePmatrixOffset + node_index * this->pmatNodeOffset;
-
     // iterate over all mixture categories
     for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
     {
         // const TransitionProbabilityMatrix&    pij = this->transition_prob_matrices[mixture];
-        const TransitionProbabilityMatrix&    pij = this->pmatrices[pmat_offset + mixture];
+        const TransitionProbabilityMatrix&    pij = this->pmatrices[node_index][mixture];
 
         // iterate over correction masks
         for (size_t mask = 0; mask < numCorrectionMasks; mask++)
@@ -558,19 +559,20 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeTipCorr
 template<class charType>
 void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeInternalNodeCorrection(const TopologyNode &node, size_t node_index, size_t left, size_t right, size_t middle)
 {
+    // ensure we actually have a matrix to use
+    this->updateTransitionProbabilityMatrix(node_index);
+
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
     std::vector<double>::const_iterator   p_left   = getCorrectionLikelihoodsForNode(left);
     std::vector<double>::const_iterator   p_right  = getCorrectionLikelihoodsForNode(right);
     std::vector<double>::const_iterator   p_middle = getCorrectionLikelihoodsForNode(middle);
     std::vector<double>::iterator         p_node   = getMutableCorrectionLikelihoodsForNode(node_index);
     
-    size_t pmat_offset = this->active_pmatrices[node_index] * this->activePmatrixOffset + node_index * this->pmatNodeOffset;
-
     // iterate over all mixture categories
     for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
     {
         // const TransitionProbabilityMatrix&    pij = this->transition_prob_matrices[mixture];
-        const TransitionProbabilityMatrix&    pij = this->pmatrices[pmat_offset + mixture];
+        const TransitionProbabilityMatrix&    pij = this->pmatrices[node_index][mixture];
 
         // iterate over correction masks
         for (size_t mask = 0; mask < numCorrectionMasks; mask++)
@@ -632,18 +634,19 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeInterna
 template<class charType>
 void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeInternalNodeCorrection(const TopologyNode &node, size_t node_index, size_t left, size_t right)
 {
+    // ensure we actually have a matrix to use
+    this->updateTransitionProbabilityMatrix(node_index);
+
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
     std::vector<double>::const_iterator   p_left  = getCorrectionLikelihoodsForNode(left);
     std::vector<double>::const_iterator   p_right = getCorrectionLikelihoodsForNode(right);
     std::vector<double>::iterator         p_node  = getMutableCorrectionLikelihoodsForNode(node_index);
     
-    size_t pmat_offset = this->active_pmatrices[node_index] * this->activePmatrixOffset + node_index * this->pmatNodeOffset;
-
     // iterate over all mixture categories
     for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
     {
         // const TransitionProbabilityMatrix&    pij = this->transition_prob_matrices[mixture];
-        const TransitionProbabilityMatrix&    pij = this->pmatrices[pmat_offset + mixture];
+        const TransitionProbabilityMatrix&    pij = this->pmatrices[node_index][mixture];
 
         // iterate over correction masks
         for (size_t mask = 0; mask < numCorrectionMasks; mask++)
@@ -1149,6 +1152,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::redrawValue( v
     this->reInitialized();
 
     this->markAllPartialLikelihoodsDirty();
+    this->pmatrices.mark_all_dirty();
 
     // flip the active likelihood pointers
     for (size_t index = 0; index < this->changed_nodes.size(); ++index)
@@ -1172,15 +1176,6 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::redrawValue( v
     for (std::vector<bool>::iterator it = this->pmat_dirty_nodes.begin(); it != this->pmat_dirty_nodes.end(); ++it)
     {
         (*it) = true;
-    }
-    
-    for (size_t index = 0; index < this->pmat_changed_nodes.size(); ++index)
-    {
-        if ( this->pmat_changed_nodes[index] == false )
-        {
-            this->active_pmatrices[index] = (this->active_pmatrices[index] == 0 ? 1 : 0);
-            this->pmat_changed_nodes[index] = true;
-        }
     }
 
 }
