@@ -229,9 +229,8 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihood( si
 template<class charType>
 void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikelihood(const TopologyNode &node, size_t node_index, size_t left, size_t right)
 {
-
-    // compute the transition probability matrix
-//    this->updateTransitionProbabilities( node_index );
+    // update transition probability matrices
+    this->updateTransitionProbabilityMatrix(node_index);
 
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
     auto& pl_left = this->getPartialLikelihoodsForNode(left);
@@ -297,9 +296,8 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
 template<class charType>
 void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikelihood(const TopologyNode &node, size_t node_index, size_t left, size_t right, size_t middle)
 {
-
-    // compute the transition probability matrix
-//    this->updateTransitionProbabilities( node_index );
+    // update transition probability matrices
+    this->updateTransitionProbabilityMatrix(node_index);
 
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
     auto& pl_left = this->getPartialLikelihoodsForNode(left);
@@ -371,6 +369,9 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
 template<class charType>
 void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(const TopologyNode &node, size_t node_index)
 {
+    // update transition probability matrices
+    this->updateTransitionProbabilityMatrix(node_index);
+
     double* p_node = this->createEmptyPartialLikelihoodsForNode(node_index, {this->num_site_mixtures, this->pattern_block_size, this->num_chars}).likelihoods.data();
     
     // get the current correct tip index in case the whole tree change (after performing an empiricalTree Proposal)

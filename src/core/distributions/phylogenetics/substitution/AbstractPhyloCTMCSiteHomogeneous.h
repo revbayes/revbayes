@@ -569,7 +569,6 @@ gap_match_clamped( gapmatch )
 
     // initially we use only a single processor until someone else tells us otherwise
     this->setActivePID( this->pid, 1 );
-
 }
 
 
@@ -667,7 +666,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::checkInvariants( 
     {
         // The root node has no P-matrix, since there is no branch above it.
 	int index = node->getIndex();
-	if (not node->isRoot() and pmat_dirty_nodes[index])
+	if (not node->isRoot() and pmatrices.is_dirty(index))
 	    assert(partialLikelihoodsDirtyForNode(index));
     }
 }
@@ -1151,14 +1150,12 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
     {
         tau->getValue().getTreeChangeEventHandler().addListener( this );
         markAllPartialLikelihoodsDirty();
+        pmatrices.mark_all_dirty();
         pmat_dirty_nodes = std::vector<bool>(num_nodes, true);
     }
 
     checkInvariants();
-
-    // update transition probability matrices
-    this->updateTransitionProbabilityMatrices();
-
+    
     // if we are not in MCMC mode, then we need to (temporarily) allocate memory
     if ( in_mcmc_mode == false )
     {
@@ -1230,7 +1227,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeMarginalNo
 {
 
     // compute the transition probability matrix
-    this->updateTransitionProbabilities( node_index );
+    this->updateTransitionProbabilityMatrix( node_index );
 
     // get the pointers to the partial likelihoods and the marginal likelihoods
     const double*   p_node                  = getPartialLikelihoodsForNode(node_index).likelihoods.data();
@@ -1246,7 +1243,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeMarginalNo
     for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
     {
         // the transition probability matrix for this mixture category
-        const double*    tp_begin                = this->transition_prob_matrices[mixture].theMatrix;
+        const double*    tp_begin                = this->pmatrices[node_index][mixture].theMatrix;
 
         // get pointers to the likelihood for this mixture category
         const double*   p_site_mixture                  = p_mixture;
@@ -2170,7 +2167,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::recursivelyDrawJo
     //    size_t parentIndex = node.getParent().getIndex();
 
     // get transition probabilities
-    this->updateTransitionProbabilities( node_index );
+    this->updateTransitionProbabilityMatrix( node_index );
 
     // get the pointers to the partial likelihoods and the marginal likelihoods
     const double*   p_left  = getPartialLikelihoodsForNode(left).likelihoods.data();
@@ -2207,7 +2204,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::recursivelyDrawJo
         // iterate over possible end states for each site given start state
         for (size_t j = 0; j < this->num_chars; j++)
         {
-            double tp_kj = this->transition_prob_matrices[cat][k][j];
+            double tp_kj = this->pmatrices[node_index][cat][k][j];
             p[j] = tp_kj * *p_left_site_mixture_j * *p_right_site_mixture_j;
             sum += p[j];
 
@@ -2267,7 +2264,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::tipDrawJointCondi
     size_t node_index = node.getIndex();
 
     // get transition probabilities
-    this->updateTransitionProbabilities( node_index );
+    this->updateTransitionProbabilityMatrix( node_index );
 
     const AbstractHomologousDiscreteCharacterData& d = this->getValue();
     const HomologousDiscreteCharacterData<charType>& dd = static_cast<const HomologousDiscreteCharacterData<charType>& >( d );
@@ -2317,7 +2314,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::tipDrawJointCondi
             // iterate over possible end states for each site given start state
             for (size_t j = 0; j < this->num_chars; j++)
             {
-                double tp_kj = this->transition_prob_matrices[cat][k][j] * bs[j];
+                double tp_kj = this->pmatrices[node_index][cat][k][j] * bs[j];
                 p[j] = tp_kj;
                 sum += p[j];
             }
@@ -2548,7 +2545,6 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::getPInv( void )
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::keepSpecialization( const DagNode* affecter )
 {
-
     // reset flags for likelihood computation
     touched = false;
 
@@ -3157,7 +3153,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setValue(Abstract
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::simulate( const TopologyNode &node, std::vector< DiscreteTaxonData< charType > > &taxa, const std::vector<bool> &invariant, const std::vector<size_t> &perSiteMixtures)
 {
-
     // get the children of the node
     const std::vector<TopologyNode*>& children = node.getChildren();
 
@@ -3172,7 +3167,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::simulate( const T
         const TopologyNode &child = *(*it);
 
         // update the transition probability matrix
-        updateTransitionProbabilities( child.getIndex() );
+        updateTransitionProbabilityMatrix( child.getIndex() );
 
         DiscreteTaxonData< charType > &taxon = taxa[ child.getIndex() ];
         for ( size_t i = 0; i < num_sites; ++i )
@@ -3189,7 +3184,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::simulate( const T
                 // get the ancestral character for this site
                 std::uint64_t parentState = parent.getCharacter( i ).getStateIndex();
 
-                double *freqs = transition_prob_matrices[ perSiteMixtures[i] ][ parentState ];
+                const double *freqs = pmatrices[ child.getIndex() ][ perSiteMixtures[i] ][ parentState ];
 
                 // create the character
                 charType c = charType( num_chars );
@@ -4488,6 +4483,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateMarginalNod
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionProbabilities(size_t node_idx)
 {
+    updateTransitionProbabilityMatrix(node_idx);
+
     const TopologyNode* node = tau->getValue().getNodes()[node_idx];
 
     if ( node->isRoot() == true )
@@ -4505,8 +4502,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
     {
         rate = this->homogeneous_clock_rate->getValue();
     }
-
-    pmat_dirty_nodes[node_idx] = false;
 
     // 2. Handle the mixture model object case.
     if (mixture_model)

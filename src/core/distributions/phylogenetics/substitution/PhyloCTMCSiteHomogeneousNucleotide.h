@@ -198,8 +198,8 @@ template<class charType>
 void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternalNodeLikelihood(const TopologyNode &node, size_t node_index, size_t left, size_t right) 
 {   
     
-    // compute the transition probability matrix
-//    this->updateTransitionProbabilities( node_index );
+    // update the transition probability matrix
+    this->updateTransitionProbabilityMatrix( node_index );
     
 #   if defined ( SSE_ENABLED )
     
@@ -405,8 +405,8 @@ template<class charType>
 void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternalNodeLikelihood(const TopologyNode &node, size_t node_index, size_t left, size_t right, size_t middle)
 {
     
-    // compute the transition probability matrix
-//     this->updateTransitionProbabilities( node_index );
+    // update the transition probability matrix
+    this->updateTransitionProbabilityMatrix( node_index );
     
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
     auto& pl_left = this->getPartialLikelihoodsForNode(left);
@@ -589,8 +589,8 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeTipLikel
     const std::vector<std::uint64_t> &char_node = this->char_matrix[data_tip_index];
     const std::vector<RbBitSet> &amb_char_node = this->ambiguous_char_matrix[data_tip_index];
     
-    // compute the transition probabilities
-//     this->updateTransitionProbabilities( node_index );
+    // update the transition probabilities
+    this->updateTransitionProbabilityMatrix( node_index );
     
     double*   p_mixture      = p_node;
     
