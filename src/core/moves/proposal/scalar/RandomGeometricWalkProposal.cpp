@@ -16,10 +16,11 @@ using namespace RevBayesCore;
  *
  * Here we simply allocate and initialize the Proposal object.
  */
-RandomGeometricWalkProposal::RandomGeometricWalkProposal( StochasticNode<std::int64_t> *n, double a ) : Proposal(),
+RandomGeometricWalkProposal::RandomGeometricWalkProposal( StochasticNode<std::int64_t> *n, double a, std::int64_t lowerBound ) : Proposal(),
     variable( n ),
     stored_value( 0 ),
-    alpha( a )
+    alpha( a ),
+    lower_bound( lowerBound )
 {
     // tell the base class to add the node
     addNode( variable );
@@ -97,6 +98,10 @@ double RandomGeometricWalkProposal::doProposal( void )
     else
     {
         val -= RbStatistics::Geometric::rv(alpha, *rng);
+        if ( val < lower_bound )
+        {
+            val = 2 * lower_bound - val;
+        }
     }
     
     return 0.0;

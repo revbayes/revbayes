@@ -5,6 +5,7 @@
 #include "ConstantNode.h"
 #include "DiscreteTaxonData.h"
 #include "DnaState.h"
+#include "StandardState.h"
 #include "MatrixReal.h"
 #include "MemberObject.h"
 #include "RbConstants.h"
@@ -21,6 +22,7 @@
 #include "SiteMixtureModel.h"
 
 #include <memory.h>
+#include <type_traits>
 
 namespace RevBayesCore {
 
@@ -181,7 +183,7 @@ namespace RevBayesCore {
         std::optional<double>                                               storedLnProb;
         size_t                                                              num_nodes;
         size_t                                                              num_sites;
-        const size_t                                                        num_chars;
+        size_t                                                              num_chars;
         size_t                                                              num_site_rates;
         size_t                                                              num_site_mixtures;
         size_t                                                              num_matrices = 1;
@@ -919,6 +921,40 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
         pmat_dirty_nodes = std::vector<bool>(num_nodes, true);
     }
 
+    // Keep num_chars synchronized with the active Q matrix dimension.
+    // For fixed-state sequence data (e.g. DNA), mismatches are user errors.
+    // For morphology (StandardState), allow dynamic state-space updates.
+    size_t q_num_chars = num_chars;
+    bool has_q_dimension = false;
+    if ( mixture_model != NULL )
+    {
+        q_num_chars = static_cast<size_t>( mixture_model->getValue().getNumberOfStates() );
+        has_q_dimension = true;
+    }
+    else if ( branch_heterogeneous_substitution_matrices == true && heterogeneous_rate_matrices != NULL && heterogeneous_rate_matrices->getValue().size() > 0 )
+    {
+        q_num_chars = heterogeneous_rate_matrices->getValue()[0].getNumberOfStates();
+        has_q_dimension = true;
+    }
+    else if ( homogeneous_rate_matrix != NULL )
+    {
+        q_num_chars = homogeneous_rate_matrix->getValue().getNumberOfStates();
+        has_q_dimension = true;
+    }
+
+    if ( has_q_dimension == true && q_num_chars != num_chars )
+    {
+        if ( std::is_base_of<StandardState, charType>::value == false )
+        {
+            throw RbException() << "dnPhyloCTMC state-space mismatch: active rate matrix has "
+                                << q_num_chars << " states, but the current CTMC dimension is "
+                                << num_chars << ". For fixed-state data (e.g. DNA), these must match.";
+        }
+
+        num_chars = q_num_chars;
+        resizeLikelihoodVectors();
+    }
+
     checkInvariants();
 
     // update transition probability matrices
@@ -935,6 +971,16 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
 
     // we start with the root and then traverse down the tree
     size_t root_index = root.getIndex();
+
+    // Guard against out-of-bounds root index: this indicates tree/PhyloCTMC desynchronisation
+    if ( root_index >= num_nodes )
+    {
+        throw RbException() << "BUG in dnPhyloCTMC: root node index " << root_index
+                            << " is out of bounds for num_nodes=" << num_nodes
+                            << " (tree reports " << tau->getValue().getNumberOfNodes() << " nodes)."
+                            << " This usually means a topology proposal corrupted the tree's node"
+                            << " indices or the Tree::root pointer became stale.";
+    }
 
     // only necessary if the root is actually dirty
     if ( dirty_nodes[root_index] == true )
@@ -2381,6 +2427,15 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::recursivelyFlagNo
 
     // we need to flag this node and all ancestral nodes for recomputation
     size_t index = n.getIndex();
+
+    // Guard against out-of-bounds index from a corrupted tree state
+    if ( index >= dirty_nodes.size() )
+    {
+        throw RbException() << "BUG in recursivelyFlagNodeDirty: node index " << index
+                            << " >= dirty_nodes.size()=" << dirty_nodes.size()
+                            << " (num_nodes=" << num_nodes << ")."
+                            << " Tree topology proposal likely corrupted a node's index.";
+    }
 
     // if this node is already dirty, the also all the ancestral nodes must have been flagged as dirty
     if ( dirty_nodes[index] == false )
@@ -4253,7 +4308,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::touchSpecializati
     }
     else if ( affecter == root_frequencies )
     {
-
         const TopologyNode &root = this->tau->getValue().getRoot();
         this->recursivelyFlagNodeDirty( root );
     }
