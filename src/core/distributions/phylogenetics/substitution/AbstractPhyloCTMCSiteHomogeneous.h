@@ -338,7 +338,6 @@ namespace RevBayesCore {
         void                                                                flagNodeDirtyPmatrix(size_t node_idx);
         virtual void                                                        resizeLikelihoodVectors(void);
         virtual void                                                        setActivePIDSpecialized(size_t i, size_t n);                                                          //!< Set the number of processes for this distribution.
-        virtual void                                                        updateTransitionProbabilities(size_t node_idx);
         virtual void                                                        updateTransitionProbabilityMatrix(size_t node_idx);
         virtual void                                                        updateTransitionProbabilityMatrices(void);
         virtual std::vector<double>                                         getRootFrequencies( size_t mixture = 0 ) const;
@@ -396,15 +395,10 @@ namespace RevBayesCore {
         size_t                                                              num_matrices = 1;
         const TypedDagNode<Tree>*                                           tau;
 
-        // the old pmatrix system
-        std::vector<TransitionProbabilityMatrix>                            transition_prob_matrices;
-        mutable std::vector<bool>                                           pmat_dirty_nodes;
-        std::optional<std::vector<bool>>                                    prev_pmat_dirty_nodes;
-        
-        // the new pmatrix system
+        // the transition probability matrices
         mutable IndexedCache<std::vector<TransitionProbabilityMatrix>>      pmatrices;
 
-        // the likelihoods
+        // the likelihood states
         std::vector<size_t>                                                 activeLikelihood;
     private:        
         mutable IndexedCache<PartialLikelihoods>                            partialLikelihoods;
@@ -523,7 +517,6 @@ num_chars( nChars ),
 num_site_rates( nMix ),
 num_site_mixtures( nMix ),
 tau( t ),
-transition_prob_matrices( std::vector<TransitionProbabilityMatrix>(num_site_mixtures, TransitionProbabilityMatrix(num_chars) ) ),
 pmatrices( num_nodes ),
 partialLikelihoods( num_nodes ),
 activeLikelihood( std::vector<size_t>(num_nodes, 0) ),
@@ -547,8 +540,6 @@ gap_match_clamped( gapmatch )
     tau->getValue().getTreeChangeEventHandler().addListener( this );
 
     siteOffset                  =  num_chars;
-
-    pmat_dirty_nodes            =  std::vector<bool>(num_nodes, true);
 
     // add the parameters to our set (in the base class)
     // in that way other class can easily access the set of our parameters
@@ -584,7 +575,6 @@ num_site_rates( n.num_site_rates ),
 num_site_mixtures( n.num_site_mixtures ),
 num_matrices( n.num_matrices ),
 tau( n.tau ),
-transition_prob_matrices( n.transition_prob_matrices ),
 pmatrices( n.pmatrices ),
 partialLikelihoods( n.partialLikelihoods ),
 activeLikelihood( n.activeLikelihood ),
@@ -638,9 +628,6 @@ sampled_site_matrix_component( n.sampled_site_matrix_component )
     mixtureOffset               =  n.mixtureOffset;
     siteOffset                  =  n.siteOffset;
     
-    pmat_dirty_nodes            =  n.pmat_dirty_nodes;
-    prev_pmat_dirty_nodes       =  n.prev_pmat_dirty_nodes;
-
     // flags specifying which model variants we use
     branch_heterogeneous_clock_rates               = n.branch_heterogeneous_clock_rates;
     branch_heterogeneous_substitution_matrices     = n.branch_heterogeneous_substitution_matrices;
@@ -1151,11 +1138,11 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
         tau->getValue().getTreeChangeEventHandler().addListener( this );
         markAllPartialLikelihoodsDirty();
         pmatrices.mark_all_dirty();
-        pmat_dirty_nodes = std::vector<bool>(num_nodes, true);
     }
 
     checkInvariants();
     
+    // TODO: REMOVE!  We should update individual matrices right before we use them.
     // if we are not in MCMC mode, then we need to (temporarily) allocate memory
     if ( in_mcmc_mode == false )
     {
@@ -2401,7 +2388,6 @@ template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::flagNodeDirtyPmatrix(size_t node_idx)
 {
     
-    pmat_dirty_nodes[node_idx] = true;
     pmatrices.mark_dirty(node_idx);
 }
 
@@ -2552,7 +2538,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::keepSpecializatio
     storedLnProb = {};
 
     // reset all flags
-    prev_pmat_dirty_nodes = {};
     partialLikelihoods.keep();
     pmatrices.keep();
 
@@ -2783,11 +2768,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::redrawValue( void
         }
     }
     
-    for (std::vector<bool>::iterator it = pmat_dirty_nodes.begin(); it != pmat_dirty_nodes.end(); ++it)
-    {
-        (*it) = true;
-    }
-    
     pmatrices.mark_all_dirty();
 }
 
@@ -2848,14 +2828,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::resizeLikelihoodV
     }
 
     pmatrices.resize(num_nodes);
-
-    for (auto&& pmat_dirty_node: pmat_dirty_nodes)
-    {
-        pmat_dirty_node = true;
-    }
-
-    transition_prob_matrices = std::vector<TransitionProbabilityMatrix>(num_site_mixtures, TransitionProbabilityMatrix(num_chars) );
-
 }
 
 
@@ -2882,10 +2854,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::restoreSpecializa
         // set all flags to false
         changed_nodes[index] = false;
     }
-
-    // reset the flags
-    pmat_dirty_nodes = *prev_pmat_dirty_nodes;
-    prev_pmat_dirty_nodes = {};
 }
 
 template<class charType>
@@ -4361,8 +4329,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::touchSpecializati
         touched = true;
         this->storedLnProb = this->lnProb;
 
-        prev_pmat_dirty_nodes = pmat_dirty_nodes;
-
         partialLikelihoods.touch();
         pmatrices.touch();
     }
@@ -4450,13 +4416,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::touchSpecializati
                 changed_nodes[index] = true;
             }
         }
-        
-        for (std::vector<bool>::iterator it = pmat_dirty_nodes.begin(); it != pmat_dirty_nodes.end(); ++it)
-        {
-            (*it) = true;
-        }
-        
-        // flip the active transition probability matrices pointers
     }
 }
 
@@ -4465,130 +4424,13 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::touchSpecializati
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateMarginalNodeLikelihoods( void )
 {
-
     // calculate the root marginal likelihood, then start the recursive call down the tree
     this->computeMarginalRootLikelihood();
 
     // update the marginal likelihoods by a recursive downpass
     this->recursiveMarginalLikelihoodComputation( tau->getValue().getRoot().getIndex() );
-
-
 }
 
-
-
-/*
- * Update the transition probability matrices for the branch attached to the given node index.
- */
-template<class charType>
-void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionProbabilities(size_t node_idx)
-{
-    updateTransitionProbabilityMatrix(node_idx);
-
-    const TopologyNode* node = tau->getValue().getNodes()[node_idx];
-
-    if ( node->isRoot() == true )
-    {
-        throw RbException("dnPhyloCTMC called updateTransitionProbabilities for the root node\n");
-    }
-
-    // 1. Get the clock rate for the branch
-    double rate = 1.0;
-    if ( this->branch_heterogeneous_clock_rates == true )
-    {
-        rate = this->heterogeneous_clock_rates->getValue()[node_idx];
-    }
-    else if (homogeneous_clock_rate != NULL)
-    {
-        rate = this->homogeneous_clock_rate->getValue();
-    }
-
-    // 2. Handle the mixture model object case.
-    if (mixture_model)
-    {
-        transition_prob_matrices = mixture_model->getValue().calculateTransitionProbabilities(tau->getValue(), node_idx, rate);
-        return;
-    }
-
-    auto [start_age, end_age] = getStartEndAge(*node);
-
-    // we rescale the rate by the inverse of the proportion of invariant sites
-    rate /= ( 1.0 - getPInv() );
-
-    // first, get the rate matrix for this branch
-    RateMatrix_JC jc(this->num_chars);
-
-    if (this->branch_heterogeneous_substitution_matrices == false )
-    {
-        // loop now over all per-site rate matrices (could also be only a single one, as by default)
-        for (size_t matrix = 0; matrix < this->num_matrices; ++matrix)
-        {
-            const RateGenerator *rm = nullptr;
-
-            // get the i-th rate matrix
-            if ( this->heterogeneous_rate_matrices != NULL )
-            {
-                rm = &this->heterogeneous_rate_matrices->getValue()[matrix];
-            }
-            else if ( this->homogeneous_rate_matrix != NULL )
-            {
-                rm = &this->homogeneous_rate_matrix->getValue();
-            }
-            else
-            {
-                rm = &jc;
-            }
-
-	    // The rm can change behind our back if the user redefines it.
-	    if (rm->size() != num_chars)
-		throw RbException()<<"Rate generator with "<<rm->size()<<" states does not match data with "<<num_chars<<" states";
-
-            // now also get the site specific rates
-            for (size_t j = 0; j < this->num_site_rates; ++j)
-            {
-                double r = 1.0;
-                if ( this->rate_variation_across_sites == true )
-                {
-                    r = this->site_rates->getValue()[j];
-                }
-
-                rm->calculateTransitionProbabilities( start_age, end_age,  rate * r, this->transition_prob_matrices[j*this->num_matrices + matrix] );
-            }
-        }
-    }
-    else
-    {
-        const RateGenerator *rm = nullptr;
-
-        if ( this->heterogeneous_rate_matrices != NULL )
-        {
-            rm = &this->heterogeneous_rate_matrices->getValue()[node_idx];
-        }
-        else if ( this->homogeneous_rate_matrix != NULL )
-        {
-            rm = &this->homogeneous_rate_matrix->getValue();
-        }
-        else
-        {
-            rm = &jc; // BAD!!
-        }
-
-	// The rm can change behind our back if the user redefines it.
-	if (rm->size() != num_chars)
-	    throw RbException()<<"Rate generator with "<<rm->size()<<" states does not match data with "<<num_chars<<" states";
-
-        for (size_t j = 0; j < this->num_site_rates; ++j)
-        {
-            double r = 1.0;
-            if ( this->rate_variation_across_sites == true )
-            {
-                r = this->site_rates->getValue()[j];
-            }
-
-            rm->calculateTransitionProbabilities( start_age, end_age,  rate * r, this->transition_prob_matrices[j] );
-        }
-    }
-}
 
 
 /*
@@ -4605,7 +4447,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
     // 0. Mark clean
     if (not pmatrices.is_dirty(node_idx)) return;
 
-    pmat_dirty_nodes[node_idx] = false;
     auto& pmat_mixture = pmatrices.init_for_writing(node_idx);
 
     // 1. Get the clock rate for the branch
@@ -4717,7 +4558,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
 
             updateTransitionProbabilityMatrix(node_index);
             assert(not pmatrices.is_dirty(node_index));
-            assert(not pmat_dirty_nodes[node_index]);
         }
     }
     

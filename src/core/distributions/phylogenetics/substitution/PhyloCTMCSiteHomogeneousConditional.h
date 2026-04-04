@@ -1163,21 +1163,8 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::redrawValue( v
             this->changed_nodes[index] = true;
         }
     }
-    
-    for (std::vector<bool>::iterator it = this->pmat_dirty_nodes.begin(); it != this->pmat_dirty_nodes.end(); ++it)
-    {
-        (*it) = true;
-    }
-    
-    // update transition probability matrices
-    this->updateTransitionProbabilityMatrices();
+
     updateCorrections(root, root_index);
-
-    for (std::vector<bool>::iterator it = this->pmat_dirty_nodes.begin(); it != this->pmat_dirty_nodes.end(); ++it)
-    {
-        (*it) = true;
-    }
-
 }
 
 template<class charType>
@@ -1192,19 +1179,17 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::simulateCondit
 
     // simulate the sequence for each child
     RandomNumberGenerator* rng = GLOBAL_RNG;
-    for (std::vector< TopologyNode* >::const_iterator it = children.begin(); it != children.end(); ++it)
+    for (auto child: node.getChildren())
     {
-        const TopologyNode &child = *(*it);
-
         // update the transition probability matrix
-        this->updateTransitionProbabilities( child.getIndex() );
+        this->updateTransitionProbabilityMatrix( child->getIndex() );
 
         std::uint64_t cp = parentState.getStateIndex();
 
-        double *freqs = this->transition_prob_matrices[ rateIndex ][ cp ];
+        const double *freqs = this->pmatrices[child->getIndex()][ rateIndex ][ cp ];
 
         // create the character
-        charType &c = data[ child.getIndex() ];
+        charType &c = data[ child->getIndex() ];
         c.setToFirstState();
         // draw the state
         double u = rng->uniform01();
@@ -1226,10 +1211,10 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::simulateCondit
 
         }
 
-        if (child.isTip())
+        if (child->isTip())
             charCounts[c.getStateIndex()]++;
         else
-            simulateConditional( child, data, rateIndex, charCounts);
+            simulateConditional( *child, data, rateIndex, charCounts);
     }
 
 }

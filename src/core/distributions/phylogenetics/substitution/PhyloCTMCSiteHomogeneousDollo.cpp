@@ -90,8 +90,10 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::resizeLikelihoodVectors( void 
     assert(activeLikelihoodOffset ==  num_nodes*nodeOffset);
 }
 
-void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::updateTransitionProbabilities(size_t node_idx)
+void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::updateTransitionProbabilityMatrix(size_t node_idx)
 {
+    vector<TransitionProbabilityMatrix> transition_prob_matrices(this->num_site_mixtures, TransitionProbabilityMatrix(this->num_chars));
+
     // first, get the clock rate for the branch
     double rate = 1.0;
     if ( this->branch_heterogeneous_clock_rates == true )
@@ -183,27 +185,27 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::updateTransitionProbabilities(
 
                 if (rm != NULL)
                 {
-                    rm->calculateTransitionProbabilities( startAge, endAge,  r * beta, this->transition_prob_matrices[matrix_index] );
+                    rm->calculateTransitionProbabilities( startAge, endAge,  r * beta, transition_prob_matrices[matrix_index] );
 
                     for (size_t a = 0; a < dim; a++)
                     {
                         for (size_t b = 0; b < dim; b++)
                         {
-                            this->transition_prob_matrices[matrix_index][a][b] *= survival[i];
+                            transition_prob_matrices[matrix_index][a][b] *= survival[i];
                         }
 
-                        this->transition_prob_matrices[matrix_index][a][dim] = 1.0 - survival[i];
-                        this->transition_prob_matrices[matrix_index][dim][a] = 0.0;
+                        transition_prob_matrices[matrix_index][a][dim] = 1.0 - survival[i];
+                        transition_prob_matrices[matrix_index][dim][a] = 0.0;
                     }
 
-                    this->transition_prob_matrices[matrix_index][dim][dim] = 1.0;
+                    transition_prob_matrices[matrix_index][dim][dim] = 1.0;
                 }
                 else
                 {
-                    this->transition_prob_matrices[matrix_index][1][1] = 1.0;
-                    this->transition_prob_matrices[matrix_index][1][0] = 0.0;
-                    this->transition_prob_matrices[matrix_index][0][1] = 1.0 - survival[i];
-                    this->transition_prob_matrices[matrix_index][0][0] = survival[i];
+                    transition_prob_matrices[matrix_index][1][1] = 1.0;
+                    transition_prob_matrices[matrix_index][1][0] = 0.0;
+                    transition_prob_matrices[matrix_index][0][1] = 1.0 - survival[i];
+                    transition_prob_matrices[matrix_index][0][0] = survival[i];
                 }
             }
         }
@@ -213,7 +215,8 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::updateTransitionProbabilities(
     TransitionProbabilityMatrix m3 = transition_prob_matrices[2];
     TransitionProbabilityMatrix m4 = transition_prob_matrices[3];
 
-    return;
+
+    pmatrices.init_for_writing(node_idx) = std::move(transition_prob_matrices);
 }
 
 
@@ -300,7 +303,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::setDeathRate(const TypedDagNod
 void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeRootLikelihood( size_t root, size_t left, size_t right)
 {
     // compute the transition probability matrix
-    updateTransitionProbabilities( root );
+    updateTransitionProbabilityMatrix( root );
 
     // get the root frequencies
     std::vector<std::vector<double> > ff;
@@ -368,7 +371,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeRootLikelihood( size_t 
 void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeRootLikelihood( size_t root, size_t left, size_t right, size_t middle)
 {
     // compute the transition probability matrix
-    updateTransitionProbabilities( root );
+    updateTransitionProbabilityMatrix( root );
 
     // get the root frequencies
     std::vector<std::vector<double> > ff;
@@ -442,7 +445,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeRootLikelihood( size_t 
 void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeInternalNodeLikelihood(const TopologyNode &node, size_t node_index, size_t left, size_t right)
 {
     // compute the transition probability matrix
-    updateTransitionProbabilities( node_index );
+    updateTransitionProbabilityMatrix( node_index );
 
     // get the root frequencies
     std::vector<std::vector<double> > ff;
@@ -464,7 +467,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeInternalNodeLikelihood(
         const std::vector<double> &f = branch_heterogeneous_substitution_matrices ? ff[node_index % ff.size()] : ff[mixture % ff.size()];
 
         // the transition probability matrix for this mixture category
-        const TransitionProbabilityMatrix&    pij = this->transition_prob_matrices[mixture];
+        const TransitionProbabilityMatrix&    pij = this->pmatrices[node_index][mixture];
 
         // get the pointers to the likelihood for this mixture category
         double*          p_site_mixture          = p_node;
@@ -515,9 +518,8 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeInternalNodeLikelihood(
 
 void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeInternalNodeLikelihood(const TopologyNode &node, size_t node_index, size_t left, size_t right, size_t middle)
 {
-
     // compute the transition probability matrix
-    updateTransitionProbabilities( node_index );
+    updateTransitionProbabilityMatrix( node_index );
 
     // get the root frequencies
     std::vector<std::vector<double> > ff;
@@ -542,7 +544,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeInternalNodeLikelihood(
         const std::vector<double> &f = branch_heterogeneous_substitution_matrices ? ff[node_index % ff.size()] : ff[mixture % ff.size()];
 
         // the transition probability matrix for this mixture category
-        const TransitionProbabilityMatrix&    pij = this->transition_prob_matrices[mixture];
+        const TransitionProbabilityMatrix&    pij = this->pmatrices[node_index][mixture];
 
         // get the pointers to the likelihood for this mixture category
         double*          p_site_mixture          = p_node;
@@ -605,7 +607,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeTipLikelihood(const Top
     const std::vector<RbBitSet> &amb_char_node = this->ambiguous_char_matrix[data_tip_index];
     
     // compute the transition probabilities
-    updateTransitionProbabilities( node_index );
+    updateTransitionProbabilityMatrix( node_index );
 
     // get the root frequencies
     std::vector<std::vector<double> > ff;
@@ -620,7 +622,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeTipLikelihood(const Top
         const std::vector<double> &f = branch_heterogeneous_substitution_matrices ? ff[node_index % ff.size()] : ff[mixture % ff.size()];
 
         // the transition probability matrix for this mixture category
-        const TransitionProbabilityMatrix&    pij = this->transition_prob_matrices[mixture];
+        const TransitionProbabilityMatrix&    pij = this->pmatrices[node_index][mixture];
 
         // get the pointer to the likelihoods for this site and mixture category
         double*     p_site_mixture      = p_mixture;
@@ -733,7 +735,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeTipCorrection(const Top
         // iterate over all mixture categories
         for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
         {
-            const TransitionProbabilityMatrix&    pij = this->transition_prob_matrices[mixture];
+            const TransitionProbabilityMatrix&    pij = this->pmatrices[node_index][mixture];
 
             // iterate over ancestral (non-autapomorphic) states
             for (size_t a = 0; a < dim + 1; a++)
@@ -818,7 +820,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeInternalNodeCorrection(
         // iterate over all mixture categories
         for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
         {
-            const TransitionProbabilityMatrix&    pij = this->transition_prob_matrices[mixture];
+            const TransitionProbabilityMatrix&    pij = this->pmatrices[node_index][mixture];
 
             // iterate over ancestral (non-autapomorphic) states
             for (size_t a = 0; a < dim + 1; a++)
@@ -905,7 +907,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeInternalNodeCorrection(
         // iterate over all mixture categories
         for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
         {
-            const TransitionProbabilityMatrix&    pij = this->transition_prob_matrices[mixture];
+            const TransitionProbabilityMatrix&    pij = this->pmatrices[node_index][mixture];
 
             // iterate over ancestral (non-autapomorphic) states
             for (size_t a = 0; a < dim + 1; a++)
@@ -1739,7 +1741,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::simulateDollo( const TopologyN
         const TopologyNode &child = *(*it);
 
         // update the transition probability matrix
-        this->updateTransitionProbabilities( child.getIndex() );
+        this->updateTransitionProbabilityMatrix( child.getIndex() );
 
         double u = rng->uniform01();
 
@@ -1747,7 +1749,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::simulateDollo( const TopologyN
         {
             std::uint64_t cp = parentState.getStateIndex() - 1;
 
-            double *freqs = this->transition_prob_matrices[ rateIndex ][ cp ];
+            const double *freqs = this->pmatrices[ child.getIndex() ][ rateIndex ][ cp ];
 
             // create the character
             StandardState &c = data[ child.getIndex() ];
