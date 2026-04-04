@@ -564,7 +564,7 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
 
         if (pid == pid_to_print and k_start < burnin)
         {
-            RBOUT( "   Stone " + std::to_string( idx + 1 ) + ": finishing a previously scheduled and interrupted burnin stage; burninFraction of the current run() is ignored." );
+            RBOUT( "   Finishing a previously scheduled and interrupted burnin stage; burninFraction of the current run() is ignored." );
         }
     }
     else
