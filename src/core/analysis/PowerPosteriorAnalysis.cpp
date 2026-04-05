@@ -627,6 +627,8 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
     std::ofstream outStream;
     if ( stone_resumes_from_checkpoint )
     {
+        // Match AbstractFileMonitor resume behavior: drop rows with generation > checkpoint
+        truncateMonitorFileAfterGeneration( stoneFileName, static_cast<std::uint64_t>( k_start ) );
         outStream.open( stoneFileName.string(), std::ios::app );
     }
     else
