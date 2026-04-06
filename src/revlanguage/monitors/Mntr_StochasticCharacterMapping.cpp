@@ -11,9 +11,13 @@
 #include <cstddef>
 #include <string>
 
+#include "AminoAcidState.h"
 #include "ArgumentRule.h"
+#include "BinaryState.h"
+#include "DnaState.h"
 #include "IntegerPos.h"
 #include "NaturalNumbersState.h"
+#include "PoMoState.h"
 #include "StandardState.h"
 #include "RbException.h"
 #include "RevObject.h"
@@ -61,7 +65,6 @@ Mntr_StochasticCharacterMapping* Mntr_StochasticCharacterMapping::clone(void) co
 
 void Mntr_StochasticCharacterMapping::constructInternalObject( void )
 {
-
     const std::string& file_name      = static_cast<const RlString        &>( filename->getRevObject()           ).getValue();
     bool               is             = static_cast<const RlBoolean       &>( include_simmap->getRevObject()     ).getValue();
     bool               sd             = static_cast<const RlBoolean       &>( use_simmap_default->getRevObject() ).getValue();
@@ -125,8 +128,43 @@ void Mntr_StochasticCharacterMapping::constructInternalObject( void )
     
     if ( model_type == "ctmc" )
     {
-        std::string data_type = ctmc_sn->getValue().getDataType();
-        if (data_type == "Standard") {
+        if (data_type == "AA" || data_type == "Protein") {
+            RevBayesCore::StochasticCharacterMappingMonitor<RevBayesCore::AminoAcidState>* m;
+            m = new RevBayesCore::StochasticCharacterMappingMonitor<RevBayesCore::AminoAcidState>( ctmc_sn, (std::uint64_t)print_gen, file_name, is, sd, sep, idx - 1 );
+            m->setAppend( app );
+            m->setPrintVersion( wv );
+
+            delete value;
+            value = m;
+
+        } else if (data_type == "DNA") {
+            RevBayesCore::StochasticCharacterMappingMonitor<RevBayesCore::DnaState>* m;
+            m = new RevBayesCore::StochasticCharacterMappingMonitor<RevBayesCore::DnaState>( ctmc_sn, (std::uint64_t)print_gen, file_name, is, sd, sep, idx - 1 );
+            m->setAppend( app );
+            m->setPrintVersion( wv );
+
+            delete value;
+            value = m;
+            
+        } else if (data_type == "PoMo") {
+            RevBayesCore::StochasticCharacterMappingMonitor<RevBayesCore::PoMoState>* m;
+            m = new RevBayesCore::StochasticCharacterMappingMonitor<RevBayesCore::PoMoState>( ctmc_sn, (std::uint64_t)print_gen, file_name, is, sd, sep, idx - 1 );
+            m->setAppend( app );
+            m->setPrintVersion( wv );
+
+            delete value;
+            value = m;
+
+        } else if (data_type == "RNA") {
+            RevBayesCore::StochasticCharacterMappingMonitor<RevBayesCore::DnaState>* m;
+            m = new RevBayesCore::StochasticCharacterMappingMonitor<RevBayesCore::DnaState>( ctmc_sn, (std::uint64_t)print_gen, file_name, is, sd, sep, idx - 1 );
+            m->setAppend( app );
+            m->setPrintVersion( wv );
+
+            delete value;
+            value = m;
+
+        } else if (data_type == "Standard") {
             RevBayesCore::StochasticCharacterMappingMonitor<RevBayesCore::StandardState>* m;
             m = new RevBayesCore::StochasticCharacterMappingMonitor<RevBayesCore::StandardState>( ctmc_sn, (std::uint64_t)print_gen, file_name, is, sd, sep, idx - 1 );
             m->setAppend( app );
@@ -143,6 +181,16 @@ void Mntr_StochasticCharacterMapping::constructInternalObject( void )
             
             delete value;
             value = m;
+        } else if (data_type == "Binary" || data_type == "Restriction") {
+            RevBayesCore::StochasticCharacterMappingMonitor<RevBayesCore::BinaryState>* m;
+            m = new RevBayesCore::StochasticCharacterMappingMonitor<RevBayesCore::BinaryState>( ctmc_sn, (std::uint64_t)print_gen, file_name, is, sd, sep, idx - 1 );
+            m->setAppend( app );
+            m->setPrintVersion( wv );
+
+            delete value;
+            value = m;
+        } else {
+            throw RbException( "Incorrect character type specified. Valid options are: AA, DNA, NaturalNumbers, PoMo, Protein, RNA, Standard, Binary/Restriction" );
         }
         
     }
