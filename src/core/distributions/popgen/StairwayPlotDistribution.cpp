@@ -33,6 +33,9 @@ StairwayPlotDistribution::StairwayPlotDistribution(const TypedDagNode< RbVector<
     addParameter( theta );
     
     initialize();
+    
+    // simulate a value
+    redrawValue();
 }
 
 
