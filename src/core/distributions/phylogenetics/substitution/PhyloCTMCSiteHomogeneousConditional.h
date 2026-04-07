@@ -828,7 +828,6 @@ template<class charType>
 double RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::sumRootLikelihood( void )
 {
     double sumPartialProbs = PhyloCTMCSiteHomogeneous<charType>::sumRootLikelihood();
-    
     if (coding == AscertainmentBias::ALL)
         return sumPartialProbs;
 
@@ -896,12 +895,8 @@ double RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::sumRootLikel
                     }
                 }
             }
-
-            // impose a per-mixture boundary
-            if (prob < 0.0 || prob > 1.0)
-            {
-                prob = RbConstants::Double::nan;
-            }
+            assert(std::isnan(prob) || (0.0 <= prob and prob <= 1.00000000001));
+            prob = std::min(prob, 1.0);
 
 //            perMaskCorrections[mask] += prob * 0.25;
 //            perMaskMixtureCorrections[mask*this->num_site_mixtures + mixture] = (1.0 - prob) * 0.25;
@@ -917,7 +912,7 @@ double RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::sumRootLikel
             }
             
         }
-        
+
         // add corrections for invariant sites
         double prob_invariant = this->getPInv();
         if (prob_invariant > 0.0)
@@ -930,15 +925,11 @@ double RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::sumRootLikel
 
         // normalize the log-probability
 //        perMaskCorrections[mask] /= this->num_site_mixtures;
+        assert(std::isnan(perMaskCorrections[mask]) || (0.0 <= perMaskCorrections[mask] and perMaskCorrections[mask] <= 1.00000000001));
+        perMaskCorrections[mask] = std::min(perMaskCorrections[mask], 1.0);
 
-        // impose a per-mask boundary
-        if (perMaskCorrections[mask] < 0.0 || perMaskCorrections[mask] >= 1.0)
-        {
-            perMaskCorrections[mask] = RbConstants::Double::nan;
-        }
+        perMaskCorrections[mask] = log1p(-perMaskCorrections[mask]);
 
-        perMaskCorrections[mask] = log(1.0 - perMaskCorrections[mask]);
-        
         // apply the correction for this correction mask
         sumPartialProbs -= perMaskCorrections[mask]*correctionMaskCounts[mask];
     }
