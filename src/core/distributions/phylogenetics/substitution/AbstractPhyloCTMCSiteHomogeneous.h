@@ -2891,7 +2891,11 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t nod
             }
 
             // Don't divide by zero or NaN.
-            if (not (max > 0)) continue;
+            if (not (max > 0))
+            {
+                log_scale[site] = 0;
+                continue;
+            }
 
             log_scale[site] = -log(max);
 
@@ -2962,7 +2966,11 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t nod
             }
 
             // Don't divide by zero or NaN.
-            if (not (max > 0)) continue;
+            if (not (max > 0))
+            {
+                log_scale_node[site] = 0;
+                continue;
+            }
 
             log_scale_node[site] = log_scale_left[site] + log_scale_right[site] - log(max);
 
@@ -3035,7 +3043,11 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t nod
             }
 
             // Don't divide by zero or NaN.
-            if (not (max > 0)) continue;
+            if (not (max > 0))
+            {
+                log_scale_node[site] = 0;
+                continue;
+            }
 
             log_scale_node[site] = log_scale_left[site] + log_scale_right[site] + log_scale_middle[site] - log(max);
 
