@@ -2,6 +2,7 @@
 
 #include <stddef.h>
 
+#include "DistributionMultinomial.h"
 #include "DistributionPoisson.h"
 #include "RandomNumberFactory.h"
 #include "RbMathFunctions.h"
@@ -296,7 +297,79 @@ void StairwayPlotDistribution::initialize( void )
 
 void StairwayPlotDistribution::redrawValue( void )
 {
-    *value = RbVector<double>( num_individuals+1, 1 );
+    // compute the expected SFS, i.e., the expected frequency of observing a site with frequency i
+    bool success = calculateExpectedSFS();
+
+    size_t max_freq = num_individuals;
+    if ( folded == true )
+    {
+        max_freq = floor( num_individuals / 2.0 ) + 1;
+    }
+
+    std::vector<double> bin_probs = std::vector<double>(max_freq+1, 0.0);
+
+    // check for the coding
+    // only add the monomorphic probability of we use the coding "all"
+    if ( coding == ALL )
+    {
+        bin_probs[0] = expected_SFS[0];
+    }
+
+    // shift the smallest allele count depending on coding
+    size_t smallest_allele_count = 1;
+    if ( coding == NO_SINGLETONS )
+    {
+        smallest_allele_count = 2;
+        // also shift the max allele count if we don't allow for singletons
+        if ( folded == false )
+        {
+            max_freq = num_individuals-1;
+            bin_probs[0] = expected_SFS[0]+expected_SFS[1];
+        }
+        else
+        {
+            bin_probs[0] = expected_SFS[0]+expected_SFS[1]+expected_SFS[num_individuals-1];
+        }
+    }
+    
+    // compute the probability for all allele frequency counts
+    for (size_t i=smallest_allele_count; i<max_freq; ++i)
+    {
+
+        // compute the multinomial probability for the SFS frequency
+        if ( folded == false )
+        {
+            bin_probs[i] = expected_SFS[i];
+        }
+        else
+        {
+            if ( i == (num_individuals/2.0) )
+            {
+                bin_probs[i] = expected_SFS[i];
+            }
+            else
+            {
+                bin_probs[i] = expected_SFS[i]+expected_SFS[num_individuals-i];
+            }
+        }
+    }
+
+    // draw the new SFS
+    std::vector<std::int64_t> tmp = RbStatistics::Multinomial::rv(expected_SFS, num_sites, *GLOBAL_RNG);
+
+    // make sure that we have a memory slot for the value
+    if ( value == NULL )
+    {
+        value = new RbVector<double>(tmp.size(), 0.0);
+    }
+    // make sure the sizes match (might happen if the value was allocated before)
+    if ( tmp.size() != value->size() )
+    {
+        
+    }
+    // now copy to convert the data type
+    std::copy(tmp.begin(), tmp.end(), value->begin());
+
 }
 
 
