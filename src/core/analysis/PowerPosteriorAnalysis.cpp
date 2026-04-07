@@ -5,6 +5,7 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <ranges>
 #include <string>
 #include <unordered_set>
 #include <vector>
@@ -313,6 +314,191 @@ void PowerPosteriorAnalysis::initMPI( void )
 }
 
 
+void PowerPosteriorAnalysis::printStoneAssignmentToWorkers( void )
+{
+    size_t worker_count = size_t( floor( double(num_processes) / processors_per_likelihood ) );
+    size_t step_count;
+    
+    if ( resume_from_checkpoint and !resume_stone_sequences.empty() )
+    {
+        // Step count is the length of the largest of the inner vectors
+        step_count = 1;
+        for (size_t i = 0; i < resume_stone_sequences.size(); ++i)
+        {
+            step_count = std::max( step_count, resume_stone_sequences[i].size() );
+        }
+    }
+    else if ( resume_from_checkpoint and resume_stone_sequences.empty() )
+    {
+        step_count = ceil( ckp_stone_file.size() / double(worker_count) );
+    }
+    else
+    {
+        step_count = ceil( powers.size() / double(worker_count) );
+    }
+    
+    if ( process_active )
+    {
+        std::string worker_name;
+        if (processors_per_likelihood == 1 and worker_count == 1)
+        {
+            worker_name = " process";
+        }
+        else if (processors_per_likelihood == 1 and worker_count > 1)
+        {
+            worker_name = " processes";
+        }
+        else if (processors_per_likelihood > 1 and worker_count == 1)
+        {
+            worker_name = " group of processes";
+        }
+        else
+        {
+            worker_name = " groups of processes";
+        }
+        
+        std::cout << "The " << powers.size() << " requested stones will be executed in " << step_count << (step_count > 1 ? " steps" : " step");
+        std::cout << " using " << worker_count << worker_name;
+        if (processors_per_likelihood > 1)
+        {
+            std::cout << " (" << processors_per_likelihood << " processes per stone)";
+        }
+        std::cout << " as follows:" << std::endl;
+        std::cout << std::endl;
+        std::cout << (processors_per_likelihood > 1 ? "Group of processes " : "Process ") << "|";
+        
+        // An arbitrary threshold: if there is more than n = 12 steps, we will only print steps 1, 2, n - 1, and n, and use ranges in between
+        if (step_count > 12)
+        {
+            std::cout << " Step 1 | Step 2 | Steps 3--" << (step_count - 2) << " | Step " << (step_count - 1) << " | Step ";
+            std::cout << step_count << std::endl;
+            
+            size_t tmp0 = std::to_string(step_count - 2).size() + 11; // 11 is the number of chars in " Steps 3--" and " "
+            std::cout << (processors_per_likelihood > 1 ? std::string(19, '-') : std::string(8, '-')) << "|";
+            std::cout << "--------|--------|" << std::string(tmp0, '-') << "|" << std::string( std::to_string(step_count - 1).size() + 7, '-' );
+            std::cout << "|" << std::string( std::to_string(step_count).size() + 7, '-' ) << std::endl;
+        }
+        else {
+            for (size_t i = 0; i < step_count - 1; ++i)
+            {
+                std::cout << " Step " << (i + 1) << " |";
+            }
+            std::cout << " Step " << step_count << std::endl;
+            
+            std::cout << (processors_per_likelihood > 1 ? std::string(19, '-') : std::string(8, '-')) << "|";
+            for (size_t i = 0; i < step_count - 1; ++i)
+            {
+                std::string tmp = " Step " + std::to_string(i + 1) + " ";
+                std::cout << std::string(tmp.size(), '-') << "|";
+            }
+            std::cout << std::string( std::to_string(step_count).size() + 7, '-' ) << std::endl; // 7 is the number of chars in " Step " and " "
+        }
+        
+        for (size_t i = 0; i < worker_count; ++i)
+        {
+            // Process-agnostic versions of the stone sequences defined in runAll(): we use a shared iterator rather than a PID
+            std::vector<size_t> stone_sequence;
+            size_t bs;
+            size_t be;
+            
+            if ( resume_from_checkpoint and !resume_stone_sequences.empty() )
+            {
+                size_t worker_rank = size_t( floor(i / double(processors_per_likelihood)) );
+                bs = 0;
+                be = resume_stone_sequences[worker_rank].size();
+                
+                stone_sequence = resume_stone_sequences[worker_rank];
+            }
+            else if ( resume_from_checkpoint and resume_stone_sequences.empty() )
+            {
+                std::vector<size_t> resurrection_indices;
+                for (auto& [k, v] : ckp_stone_file) resurrection_indices.push_back(k);
+                
+                size_t m = resurrection_indices.size();
+                
+                bs = size_t( floor( ( floor(i / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * m ) );
+                be = size_t( floor( ( ceil((i + 1) / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * m ) );
+                
+                for (size_t j = bs; j < be; ++j)
+                {
+                    stone_sequence.push_back( resurrection_indices[j] );
+                }
+            }
+            else
+            {
+                bs = size_t( floor( ( floor(i / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * powers.size() ) );
+                be = size_t( floor( ( ceil((i + 1) / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * powers.size() ) );
+                
+                for (size_t j = bs; j < be; ++j)
+                {
+                    stone_sequence.push_back( j );
+                }
+            }
+            
+            // Width of the worker number in characters
+            size_t work_num_char = std::to_string(i + 1).size();
+            
+            std::cout << (processors_per_likelihood > 1 ? std::string(18 - work_num_char, ' ') : std::string(7 - work_num_char, ' ')) << (i + 1) << " |";
+            
+            // Some processes may be handling one fewer stone than others
+            size_t iter_end;
+            iter_end = (be - bs == step_count) ? (stone_sequence.size() - 1) : stone_sequence.size();
+            
+            if (step_count > 12)
+            {
+                for (size_t j = 0; j < 2; ++j)
+                {
+                    size_t tmp0 = std::to_string( j + 1 ).size() + 7; // 7 is the number of chars in " Step " and " "
+                    size_t tmp1 = std::to_string( stone_sequence[j] + 1 ).size() + 1;
+                    std::cout << std::string(tmp0 - tmp1, ' ') << (stone_sequence[j] + 1) << " |";
+                }
+                
+                // Print the range in the middle
+                size_t aux0 = std::to_string(step_count - 2).size() + 11; // 11 is the number of chars in " Steps 3--" and " "
+                std::string aux1 = " " + std::to_string( stone_sequence[2] + 1 ) + "--" + std::to_string( stone_sequence[iter_end - 2] + 1 ) + " ";
+                std::cout << std::string( aux0 - aux1.size(), ' ' ) << aux1 << "|";
+                
+                // Print the (n - 1)th step
+                std::cout << std::string( std::to_string(step_count - 1).size() + 6 - std::to_string( stone_sequence[iter_end - 1] + 1 ).size(), ' ' );
+                std::cout << (stone_sequence[iter_end - 1] + 1) << " |";
+            }
+            else
+            {
+                for (size_t j = 0; j < iter_end; ++j)
+                {
+                    size_t tmp0 = std::to_string( j + 1 ).size() + 7;
+                    size_t tmp1 = std::to_string( stone_sequence[j] + 1 ).size() + 1;
+                    std::cout << std::string(tmp0 - tmp1, ' ') << (stone_sequence[j] + 1) << " |";
+                }
+            }
+            
+            if (be - bs == step_count)
+            {
+                std::cout << std::string( std::to_string(step_count).size() + 6 - std::to_string( stone_sequence[iter_end] + 1 ).size(), ' ' );
+                std::cout << (stone_sequence[iter_end] + 1) << std::endl;
+            }
+            else
+            {
+                std::cout << std::endl;
+            }
+        }
+    }
+    
+#ifdef RB_MPI
+    // Wait until all processes are complete: this is to make sure we print the messages above and below in the right order
+    MPI_Barrier(MPI_COMM_WORLD);
+#endif
+    
+    // print some information to the screen but only if we are the active process
+    if ( process_active )
+    {
+        std::cout << std::endl;
+        std::cout << "Running power posterior analysis ..." << std::endl;
+        std::cout << "Stone pre-burnin: -, burnin: +, sampling phase: *" << std::endl;
+    }
+}
+
+
 void PowerPosteriorAnalysis::runAll(size_t gen, double burnin_fraction, size_t pre_burnin_generations, size_t tuning_interval, const path &checkpoint_file, size_t checkpoint_interval)
 {
     
@@ -326,14 +512,7 @@ void PowerPosteriorAnalysis::runAll(size_t gen, double burnin_fraction, size_t p
     // disable the screen monitor(s) if any
     sampler->disableScreenMonitor(true, 0);
     
-    
-    // print some information to the screen but only if we are the active process
-    if ( process_active == true )
-    {
-        std::cout << std::endl;
-        std::cout << "Running power posterior analysis ..." << std::endl;
-        std::cout << "Stone pre-burnin: -, burnin: +, sampling phase: *" << std::endl;
-    }
+    size_t worker_count = size_t( floor( double(num_processes) / processors_per_likelihood ) );
     
 #ifdef RB_MPI
     // Wait until all processes are complete: this is to make sure we do not print step 1 before the message above
@@ -345,7 +524,6 @@ void PowerPosteriorAnalysis::runAll(size_t gen, double burnin_fraction, size_t p
         if ( !resume_stone_sequences.empty() )
         {
             // One parallel stone lane per full processors_per_likelihood-sized MPI group; leftover ranks do not get a sequence.
-            size_t worker_count = size_t( floor( double(num_processes) / processors_per_likelihood ) );
             if ( resume_stone_sequences.size() > worker_count )
             {
                 throw RbException() << "Received a request to run " << resume_stone_sequences.size() << " stone sequences in parallel, but only "
@@ -353,6 +531,9 @@ void PowerPosteriorAnalysis::runAll(size_t gen, double burnin_fraction, size_t p
             }
 
             size_t worker_rank = size_t( floor( pid / double(processors_per_likelihood) ) );
+            
+            printStoneAssignmentToWorkers();
+            
             if ( worker_rank < resume_stone_sequences.size() )
             {
                 for (size_t j = 0; j < resume_stone_sequences[worker_rank].size(); ++j)
@@ -368,8 +549,10 @@ void PowerPosteriorAnalysis::runAll(size_t gen, double burnin_fraction, size_t p
             
             size_t m = resurrection_indices.size();
 
-            size_t stone_block_start = size_t( floor( ( floor( pid   / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * m ) );
+            size_t stone_block_start = size_t( floor( ( floor( pid / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * m ) );
             size_t stone_block_end   = size_t( floor( ( ceil( (pid + 1) / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * m ) );
+            
+            printStoneAssignmentToWorkers();
             
             for (size_t j = stone_block_start; j < stone_block_end; ++j)
             {
@@ -382,9 +565,11 @@ void PowerPosteriorAnalysis::runAll(size_t gen, double burnin_fraction, size_t p
         // compute which block of the data this process needs to compute
         //    size_t stone_block_start = size_t(floor( (double(pid)   / num_processes ) * powers.size()) );
         //    size_t stone_block_end   = size_t(floor( (double(pid+1) / num_processes ) * powers.size()) );
-
-        size_t stone_block_start = size_t( floor( ( floor( pid   / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * powers.size() ) );
+        
+        size_t stone_block_start = size_t( floor( ( floor( pid / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * powers.size() ) );
         size_t stone_block_end   = size_t( floor( ( ceil( (pid + 1) / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * powers.size() ) );
+        
+        printStoneAssignmentToWorkers();
         
         for (size_t i = stone_block_start; i < stone_block_end; ++i)
         {

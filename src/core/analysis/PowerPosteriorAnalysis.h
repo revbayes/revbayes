@@ -39,6 +39,7 @@ namespace RevBayesCore {
         std::vector<double>                     getPowers(void) const;
         void                                    initializeFromCheckpoint(const path &bcp_file, const std::vector<size_t> &stone_indices); //!< Makes sure checkpoint files exist but does not load the sampler
         void                                    initializeFromCheckpoint(const path &bcp_file, const std::vector<std::vector<size_t>> &stone_sequences_per_worker); //!< Records stone sequence per worker; only first stone per sequence needs a checkpoint
+        void                                    printStoneAssignmentToWorkers(void); //!< Prints a table showing which stones are assigned to which (groups of) processes
         void                                    runAll(size_t g, double burn_frac, size_t preburn_gen, size_t tune_int, const path &cp_file, size_t ci = 0);
         void                                    runStone(size_t idx, size_t g, double burn_frac, size_t preburn_gen, size_t tune_int, bool one_only, const path &cp_file, size_t ci = 0);
         void                                    summarizeStones(void);
