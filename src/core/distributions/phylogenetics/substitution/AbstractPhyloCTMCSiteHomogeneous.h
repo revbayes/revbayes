@@ -252,7 +252,7 @@ namespace RevBayesCore {
 
         void restore()
         {
-            // Moving back to the previous state makes no state if there is no previous state.
+            // Moving back to the previous state makes no sense if there is no previous state.
             assert(prev_state);
 
             current_state = *prev_state;
@@ -275,6 +275,14 @@ namespace RevBayesCore {
             // if we change the number of nodes, how would we restore?
             if (prev_state)
                 prev_state = current_state;
+        }
+
+        void clear()
+        {
+            slots.clear();
+            current_state.clear();
+            num_items = 0;
+            prev_state = current_state;
         }
     };
 
@@ -354,6 +362,7 @@ namespace RevBayesCore {
         PartialLikelihoods&                                                 createEmptyPartialLikelihoodsForNode(int node, const PartialLikelihoods::Dims& d) const;
         PartialLikelihoods&                                                 getMutablePartialLikelihoodsForNode(int node) const;
         void                                                                allocatePartialLikelihoods() const;
+        void                                                                deallocatePartialLikelihoods() const;
         const double*                                                       getMarginalLikelihoodsForNode(int node) const;
               double*                                                       getMutableMarginalLikelihoodsForNode(int node);
 
@@ -793,6 +802,12 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::allocatePartialLi
 }
 
 template<class charType>
+void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::deallocatePartialLikelihoods() const
+{
+    partialLikelihoods.clear();
+}
+
+template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::markPartialLikelihoodsDirtyForNode(int node_index) const
 {
     partialLikelihoods.mark_dirty(node_index);
@@ -1140,14 +1155,13 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
         pmatrices.mark_all_dirty();
     }
 
-    checkInvariants();
-    
-    // TODO: REMOVE!  We should update individual matrices right before we use them.
     // if we are not in MCMC mode, then we need to (temporarily) allocate memory
     if ( in_mcmc_mode == false )
     {
         allocatePartialLikelihoods();
     }
+
+    checkInvariants();
 
     // compute the ln probability by recursively calling the probability calculation for each node
     const TopologyNode &root = tau->getValue().getRoot();
@@ -1199,7 +1213,7 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
     if ( in_mcmc_mode == false )
     {
         // free the partial likelihoods
-        allocatePartialLikelihoods();
+        deallocatePartialLikelihoods();
     }
 
     // set the ancestral states as stale
@@ -1893,7 +1907,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::executeMethod(con
         if ( delete_partial_likelihoods == true )
         {
             // free the partial likelihoods
-            allocatePartialLikelihoods();
+            deallocatePartialLikelihoods();
             in_mcmc_mode = false;
         }
 
@@ -1957,7 +1971,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::executeMethod(con
         if ( delete_partial_likelihoods == true )
         {
             // free the partial likelihoods
-            allocatePartialLikelihoods();
+            deallocatePartialLikelihoods();
             in_mcmc_mode = false;
         }
 
@@ -2068,7 +2082,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::executeMethod(con
         if ( delete_partial_likelihoods == true )
         {
             // free the partial likelihoods
-            allocatePartialLikelihoods();
+            deallocatePartialLikelihoods();
             in_mcmc_mode = false;
         }
 
@@ -2116,7 +2130,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::executeMethod(con
         if ( delete_partial_likelihoods == true )
         {
             // free the partial likelihoods
-            allocatePartialLikelihoods();
+            deallocatePartialLikelihoods();
             in_mcmc_mode = false;
         }
 
@@ -3310,21 +3324,18 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setClockRate(cons
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setMcmcMode(bool tf)
 {
-
-    // free old memory
-    if ( in_mcmc_mode == true )
-    {
-        allocatePartialLikelihoods();
-    }
-
     // set our internal flag
     in_mcmc_mode = tf;
-
-    if ( in_mcmc_mode == true )
+    
+    // free old memory
+    if ( not in_mcmc_mode )
+    {
+        deallocatePartialLikelihoods();
+    }
+    else
     {
         resizeLikelihoodVectors();
     }
-
 }
 
 
