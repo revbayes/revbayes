@@ -1,0 +1,96 @@
+################################################################################
+#
+# RevBayes benchmark.
+#
+# Model: Sequences evolve under the Jukes-Cantor model or the LG model
+#        on a Uniform topology with Exponential branch lengths.
+#
+################################################################################
+
+seed(12345)
+
+#######################
+# Reading in the Data #
+#######################
+
+filename = args[1]
+alphabet = args[2]
+gen = int(args[3])
+        
+###### This just defines a single model for all sites #######
+
+### Read in sequence data for both genes
+
+data <- readDiscreteCharacterData(filename)
+
+# Get some useful variables from the data. We need these later on.
+taxa <- data.taxa()
+
+# set my move index
+moves    = VectorMoves()
+
+
+
+######################
+# Substitution Model #
+######################
+
+
+if (alphabet == "DNA" || alphabet == "RNA")
+{
+    Q := fnJC(4)
+} else if (alphabet == "AA")
+{                
+    pi ~ dnDirichlet(rep(20,20))
+    moves.append(mvBetaSimplex(pi, weight=4))
+
+    Q := fnLG(pi)
+} else
+{
+    print("Error:  Data type '" + alphabet + "' is not one of the recognized types 'DNA', 'RNA', or 'AA'")
+    q()
+}
+
+
+
+##############
+# Tree model #
+##############
+
+num_branches = 2 * taxa.size() - 3
+for(i in 1:num_branches) {
+    bl[i] ~ dnExponential(1)
+    moves.append ( mvScale(bl[i], weight=0.1) )
+}
+
+topology ~ dnUniformTopology(taxa=taxa)
+moves.append( mvNNI(topology, weight=1.0) )
+moves.append (mvSPR(topology, weight=3.0) )
+
+psi := fnTreeAssembly(topology, bl)
+
+###################
+# PhyloCTMC Model #
+###################
+
+# the sequence evolution model
+seq ~ dnPhyloCTMC(tree=psi, Q=Q, type=alphabet)
+
+# attach the data
+seq.clamp(data)
+
+#############
+# THE Model #
+#############
+
+# We define our model.
+# We can use any node of our model as a handle, here we chose to use the rate matrix.
+mymodel = model(seq)
+
+mymodel.graph("model.dot")        
+
+monitors[1] = mnStochasticVariable(filename="output/bench-unrooted.out",printgen=100, separator = TAB)
+
+mymcmc = mcmc(mymodel, monitors, moves, moveschedule="single")
+
+mymcmc.run(generations=gen)

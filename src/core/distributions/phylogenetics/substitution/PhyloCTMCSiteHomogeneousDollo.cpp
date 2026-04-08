@@ -84,29 +84,16 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::resizeLikelihoodVectors( void 
     survival = std::vector<double>(this->num_site_mixtures, 0.0);
 
     // set the offsets for easier iteration through the likelihood vector
-    siteOffset                  =  dim + 2;
-    mixtureOffset               =  pattern_block_size*siteOffset;
-    nodeOffset                  =  num_site_mixtures*mixtureOffset;
-    activeLikelihoodOffset      =  num_nodes*nodeOffset;
-
-    // only do this if we are in MCMC mode. This will safe memory
-    if ( in_mcmc_mode == true )
-    {
-        // we resize the partial likelihood vectors to the new dimensions
-        delete [] partialLikelihoods;
-
-        partialLikelihoods = new double[2*activeLikelihoodOffset];
-
-        // reinitialize likelihood vectors
-        for (size_t i = 0; i < 2*activeLikelihoodOffset; i++)
-        {
-            partialLikelihoods[i] = 0.0;
-        }
-    }
+    assert(siteOffset ==  dim + 2);
+    assert(mixtureOffset ==  pattern_block_size*siteOffset);
+    assert(nodeOffset ==  num_site_mixtures*mixtureOffset);
+    assert(activeLikelihoodOffset ==  num_nodes*nodeOffset);
 }
 
-void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::updateTransitionProbabilities(size_t node_idx)
+void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::updateTransitionProbabilityMatrix(size_t node_idx)
 {
+    vector<TransitionProbabilityMatrix> transition_prob_matrices(this->num_site_mixtures, TransitionProbabilityMatrix(this->num_chars));
+
     // first, get the clock rate for the branch
     double rate = 1.0;
     if ( this->branch_heterogeneous_clock_rates == true )
@@ -198,27 +185,27 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::updateTransitionProbabilities(
 
                 if (rm != NULL)
                 {
-                    rm->calculateTransitionProbabilities( startAge, endAge,  r * beta, this->transition_prob_matrices[matrix_index] );
+                    rm->calculateTransitionProbabilities( startAge, endAge,  r * beta, transition_prob_matrices[matrix_index] );
 
                     for (size_t a = 0; a < dim; a++)
                     {
                         for (size_t b = 0; b < dim; b++)
                         {
-                            this->transition_prob_matrices[matrix_index][a][b] *= survival[i];
+                            transition_prob_matrices[matrix_index][a][b] *= survival[i];
                         }
 
-                        this->transition_prob_matrices[matrix_index][a][dim] = 1.0 - survival[i];
-                        this->transition_prob_matrices[matrix_index][dim][a] = 0.0;
+                        transition_prob_matrices[matrix_index][a][dim] = 1.0 - survival[i];
+                        transition_prob_matrices[matrix_index][dim][a] = 0.0;
                     }
 
-                    this->transition_prob_matrices[matrix_index][dim][dim] = 1.0;
+                    transition_prob_matrices[matrix_index][dim][dim] = 1.0;
                 }
                 else
                 {
-                    this->transition_prob_matrices[matrix_index][1][1] = 1.0;
-                    this->transition_prob_matrices[matrix_index][1][0] = 0.0;
-                    this->transition_prob_matrices[matrix_index][0][1] = 1.0 - survival[i];
-                    this->transition_prob_matrices[matrix_index][0][0] = survival[i];
+                    transition_prob_matrices[matrix_index][1][1] = 1.0;
+                    transition_prob_matrices[matrix_index][1][0] = 0.0;
+                    transition_prob_matrices[matrix_index][0][1] = 1.0 - survival[i];
+                    transition_prob_matrices[matrix_index][0][0] = survival[i];
                 }
             }
         }
@@ -228,7 +215,8 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::updateTransitionProbabilities(
     TransitionProbabilityMatrix m3 = transition_prob_matrices[2];
     TransitionProbabilityMatrix m4 = transition_prob_matrices[3];
 
-    return;
+
+    pmatrices.init_for_writing(node_idx) = std::move(transition_prob_matrices);
 }
 
 
@@ -315,16 +303,20 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::setDeathRate(const TypedDagNod
 void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeRootLikelihood( size_t root, size_t left, size_t right)
 {
     // compute the transition probability matrix
-    updateTransitionProbabilities( root );
+    updateTransitionProbabilityMatrix( root );
 
     // get the root frequencies
     std::vector<std::vector<double> > ff;
     this->getStationaryFrequencies(ff);
 
     // get the pointers to the partial likelihoods of the left and right subtree
-          double* p        = partialLikelihoods + activeLikelihood[root]  * activeLikelihoodOffset + root  * nodeOffset;
-    const double* p_left   = partialLikelihoods + activeLikelihood[left]  * activeLikelihoodOffset + left  * nodeOffset;
-    const double* p_right  = partialLikelihoods + activeLikelihood[right] * activeLikelihoodOffset + right * nodeOffset;
+    auto& pl_left = getPartialLikelihoodsForNode(left);
+    auto& pl_right = getPartialLikelihoodsForNode(right);
+    const double* p_left = pl_left.likelihoods.data();
+    const double* p_right = pl_right.likelihoods.data();
+    assert(pl_left.dims() == pl_right.dims());
+
+    double* p        = this->createEmptyPartialLikelihoodsForNode(root, pl_left.dims()).likelihoods.data();
 
     // get pointers the likelihood for both subtrees
           double*   p_mixture          = p;
@@ -379,17 +371,22 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeRootLikelihood( size_t 
 void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeRootLikelihood( size_t root, size_t left, size_t right, size_t middle)
 {
     // compute the transition probability matrix
-    updateTransitionProbabilities( root );
+    updateTransitionProbabilityMatrix( root );
 
     // get the root frequencies
     std::vector<std::vector<double> > ff;
     this->getRootFrequencies(ff);
 
     // get the pointers to the partial likelihoods of the left and right subtree
-          double* p        = partialLikelihoods + activeLikelihood[root]   * activeLikelihoodOffset + root   * nodeOffset;
-    const double* p_left   = partialLikelihoods + activeLikelihood[left]   * activeLikelihoodOffset + left   * nodeOffset;
-    const double* p_right  = partialLikelihoods + activeLikelihood[right]  * activeLikelihoodOffset + right  * nodeOffset;
-    const double* p_middle = partialLikelihoods + activeLikelihood[middle] * activeLikelihoodOffset + middle * nodeOffset;
+    auto& pl_left = getPartialLikelihoodsForNode(left);
+    auto& pl_right = getPartialLikelihoodsForNode(right);
+    auto& pl_middle = getPartialLikelihoodsForNode(middle);
+    const double* p_right  = pl_left.likelihoods.data();
+    const double* p_middle = pl_middle.likelihoods.data();
+    const double* p_left   = pl_right.likelihoods.data();
+    assert(pl_left.dims() == pl_right.dims());
+
+    double* p        = this->createEmptyPartialLikelihoodsForNode(root, pl_left.dims()).likelihoods.data();
 
     // get pointers the likelihood for both subtrees
           double*   p_mixture          = p;
@@ -448,16 +445,20 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeRootLikelihood( size_t 
 void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeInternalNodeLikelihood(const TopologyNode &node, size_t node_index, size_t left, size_t right)
 {
     // compute the transition probability matrix
-    updateTransitionProbabilities( node_index );
+    updateTransitionProbabilityMatrix( node_index );
 
     // get the root frequencies
     std::vector<std::vector<double> > ff;
     getStationaryFrequencies(ff);
 
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
-    const double*   p_left  = partialLikelihoods + activeLikelihood[left]*activeLikelihoodOffset + left*nodeOffset;
-    const double*   p_right = partialLikelihoods + activeLikelihood[right]*activeLikelihoodOffset + right*nodeOffset;
-    double*         p_node  = partialLikelihoods + activeLikelihood[node_index]*activeLikelihoodOffset + node_index*nodeOffset;
+    auto& pl_left  = getPartialLikelihoodsForNode(left);
+    auto& pl_right = getPartialLikelihoodsForNode(right);
+    const double*   p_left  = pl_left.likelihoods.data();
+    const double*   p_right = pl_right.likelihoods.data();
+    assert(pl_left.dims() == pl_right.dims());
+
+    double*         p_node  = this->createEmptyPartialLikelihoodsForNode(node_index, pl_left.dims()).likelihoods.data();
 
     // iterate over all mixture categories
     for (size_t mixture = 0; mixture < num_site_mixtures; ++mixture)
@@ -466,7 +467,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeInternalNodeLikelihood(
         const std::vector<double> &f = branch_heterogeneous_substitution_matrices ? ff[node_index % ff.size()] : ff[mixture % ff.size()];
 
         // the transition probability matrix for this mixture category
-        const TransitionProbabilityMatrix&    pij = this->transition_prob_matrices[mixture];
+        const TransitionProbabilityMatrix&    pij = this->pmatrices[node_index][mixture];
 
         // get the pointers to the likelihood for this mixture category
         double*          p_site_mixture          = p_node;
@@ -517,19 +518,24 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeInternalNodeLikelihood(
 
 void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeInternalNodeLikelihood(const TopologyNode &node, size_t node_index, size_t left, size_t right, size_t middle)
 {
-
     // compute the transition probability matrix
-    updateTransitionProbabilities( node_index );
+    updateTransitionProbabilityMatrix( node_index );
 
     // get the root frequencies
     std::vector<std::vector<double> > ff;
     getStationaryFrequencies(ff);
 
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
-    const double*   p_left      = partialLikelihoods + activeLikelihood[left]*activeLikelihoodOffset + left*nodeOffset;
-    const double*   p_middle    = partialLikelihoods + activeLikelihood[middle]*activeLikelihoodOffset + middle*nodeOffset;
-    const double*   p_right     = partialLikelihoods + activeLikelihood[right]*activeLikelihoodOffset + right*nodeOffset;
-    double*         p_node      = partialLikelihoods + activeLikelihood[node_index]*activeLikelihoodOffset + node_index*nodeOffset;
+    auto& pl_left   = getPartialLikelihoodsForNode(left);
+    auto& pl_middle = getPartialLikelihoodsForNode(middle);
+    auto& pl_right  = getPartialLikelihoodsForNode(right);
+    const double*   p_left      = pl_left.likelihoods.data();
+    const double*   p_middle    = pl_middle.likelihoods.data();
+    const double*   p_right     = pl_right.likelihoods.data();
+    assert(pl_left.dims() == pl_right.dims());
+    assert(pl_left.dims() == pl_middle.dims());
+
+    double*         p_node      = createEmptyPartialLikelihoodsForNode(node_index, pl_left.dims()).likelihoods.data();
 
     // iterate over all mixture categories
     for (size_t mixture = 0; mixture < num_site_mixtures; ++mixture)
@@ -538,7 +544,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeInternalNodeLikelihood(
         const std::vector<double> &f = branch_heterogeneous_substitution_matrices ? ff[node_index % ff.size()] : ff[mixture % ff.size()];
 
         // the transition probability matrix for this mixture category
-        const TransitionProbabilityMatrix&    pij = this->transition_prob_matrices[mixture];
+        const TransitionProbabilityMatrix&    pij = this->pmatrices[node_index][mixture];
 
         // get the pointers to the likelihood for this mixture category
         double*          p_site_mixture          = p_node;
@@ -593,8 +599,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeInternalNodeLikelihood(
 void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeTipLikelihood(const TopologyNode &node, size_t node_index)
 {
 
-    double* p_node = partialLikelihoods + activeLikelihood[node_index]*activeLikelihoodOffset + node_index*nodeOffset;
-
+    double* p_node = this->createEmptyPartialLikelihoodsForNode(node_index, {num_site_mixtures, pattern_block_size, num_chars}).likelihoods.data();
     
     size_t data_tip_index = this->taxon_name_2_tip_index_map[ node.getName() ];
     const std::vector<bool> &gap_node = this->gap_matrix[data_tip_index];
@@ -602,7 +607,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeTipLikelihood(const Top
     const std::vector<RbBitSet> &amb_char_node = this->ambiguous_char_matrix[data_tip_index];
     
     // compute the transition probabilities
-    updateTransitionProbabilities( node_index );
+    updateTransitionProbabilityMatrix( node_index );
 
     // get the root frequencies
     std::vector<std::vector<double> > ff;
@@ -617,7 +622,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeTipLikelihood(const Top
         const std::vector<double> &f = branch_heterogeneous_substitution_matrices ? ff[node_index % ff.size()] : ff[mixture % ff.size()];
 
         // the transition probability matrix for this mixture category
-        const TransitionProbabilityMatrix&    pij = this->transition_prob_matrices[mixture];
+        const TransitionProbabilityMatrix&    pij = this->pmatrices[node_index][mixture];
 
         // get the pointer to the likelihoods for this site and mixture category
         double*     p_site_mixture      = p_mixture;
@@ -709,7 +714,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeTipLikelihood(const Top
 
 void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeTipCorrection(const TopologyNode &node, size_t node_index)
 {
-    std::vector<double>::iterator p_node = correctionLikelihoods.begin() + this->activeLikelihood[node_index]*this->activeCorrectionOffset + node_index*correctionNodeOffset;
+    std::vector<double>::iterator p_node = this->getMutableCorrectionLikelihoodsForNode(node_index);
     std::vector<double>::iterator c_node = perMaskMixtureCorrections.begin() + this->activeLikelihood[node_index]*activeMassOffset + node_index*massNodeOffset;
 
     std::vector<std::vector<std::vector<double> > > partialNodeCorrections = std::vector<std::vector<std::vector<double> > >(dim + 1, std::vector<std::vector<double> >(dim + 1, std::vector<double>(numCorrectionPatterns, 0.0)));
@@ -730,7 +735,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeTipCorrection(const Top
         // iterate over all mixture categories
         for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
         {
-            const TransitionProbabilityMatrix&    pij = this->transition_prob_matrices[mixture];
+            const TransitionProbabilityMatrix&    pij = this->pmatrices[node_index][mixture];
 
             // iterate over ancestral (non-autapomorphic) states
             for (size_t a = 0; a < dim + 1; a++)
@@ -792,10 +797,10 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeTipCorrection(const Top
 void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeInternalNodeCorrection(const TopologyNode &node, size_t node_index, size_t left, size_t right, size_t middle)
 {
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
-    std::vector<double>::const_iterator   p_left   = correctionLikelihoods.begin() + this->activeLikelihood[left]*activeCorrectionOffset + left*correctionNodeOffset;
-    std::vector<double>::const_iterator   p_right  = correctionLikelihoods.begin() + this->activeLikelihood[right]*activeCorrectionOffset + right*correctionNodeOffset;
-    std::vector<double>::const_iterator   p_middle = correctionLikelihoods.begin() + this->activeLikelihood[middle]*activeCorrectionOffset + middle*correctionNodeOffset;
-    std::vector<double>::iterator         p_node   = correctionLikelihoods.begin() + this->activeLikelihood[node_index]*activeCorrectionOffset + node_index*correctionNodeOffset;
+    std::vector<double>::const_iterator   p_left   = this->getCorrectionLikelihoodsForNode(left);
+    std::vector<double>::const_iterator   p_right  = this->getCorrectionLikelihoodsForNode(right);
+    std::vector<double>::const_iterator   p_middle = this->getCorrectionLikelihoodsForNode(middle);
+    std::vector<double>::iterator         p_node   = this->getMutableCorrectionLikelihoodsForNode(node_index);
 
     std::vector<double>::iterator c_node   = perMaskMixtureCorrections.begin() + this->activeLikelihood[node_index]*activeMassOffset + node_index*massNodeOffset;
 
@@ -815,7 +820,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeInternalNodeCorrection(
         // iterate over all mixture categories
         for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
         {
-            const TransitionProbabilityMatrix&    pij = this->transition_prob_matrices[mixture];
+            const TransitionProbabilityMatrix&    pij = this->pmatrices[node_index][mixture];
 
             // iterate over ancestral (non-autapomorphic) states
             for (size_t a = 0; a < dim + 1; a++)
@@ -880,9 +885,9 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeInternalNodeCorrection(
 void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeInternalNodeCorrection(const TopologyNode &node, size_t node_index, size_t left, size_t right)
 {
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
-    std::vector<double>::const_iterator   p_left   = correctionLikelihoods.begin() + this->activeLikelihood[left]*activeCorrectionOffset + left*correctionNodeOffset;
-    std::vector<double>::const_iterator   p_right  = correctionLikelihoods.begin() + this->activeLikelihood[right]*activeCorrectionOffset + right*correctionNodeOffset;
-    std::vector<double>::iterator         p_node   = correctionLikelihoods.begin() + this->activeLikelihood[node_index]*activeCorrectionOffset + node_index*correctionNodeOffset;
+    std::vector<double>::const_iterator   p_left   = this->getCorrectionLikelihoodsForNode(left);
+    std::vector<double>::const_iterator   p_right  = this->getCorrectionLikelihoodsForNode(right);
+    std::vector<double>::iterator         p_node   = this->getMutableCorrectionLikelihoodsForNode(node_index);
 
     std::vector<double>::iterator c_node   = perMaskMixtureCorrections.begin() + this->activeLikelihood[node_index]*activeMassOffset + node_index*massNodeOffset;
 
@@ -902,7 +907,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeInternalNodeCorrection(
         // iterate over all mixture categories
         for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
         {
-            const TransitionProbabilityMatrix&    pij = this->transition_prob_matrices[mixture];
+            const TransitionProbabilityMatrix&    pij = this->pmatrices[node_index][mixture];
 
             // iterate over ancestral (non-autapomorphic) states
             for (size_t a = 0; a < dim + 1; a++)
@@ -956,10 +961,10 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeInternalNodeCorrection(
 void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeRootCorrection( size_t root, size_t left, size_t right, size_t middle)
 {
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
-    std::vector<double>::iterator         p_node   = correctionLikelihoods.begin() + this->activeLikelihood[root]*activeCorrectionOffset + root*correctionNodeOffset;
-    std::vector<double>::const_iterator   p_left   = correctionLikelihoods.begin() + this->activeLikelihood[left]*activeCorrectionOffset + left*correctionNodeOffset;
-    std::vector<double>::const_iterator   p_right  = correctionLikelihoods.begin() + this->activeLikelihood[right]*activeCorrectionOffset + right*correctionNodeOffset;
-    std::vector<double>::const_iterator   p_middle = correctionLikelihoods.begin() + this->activeLikelihood[middle]*activeCorrectionOffset + middle*correctionNodeOffset;
+    std::vector<double>::iterator         p_node   = this->getMutableCorrectionLikelihoodsForNode(root);
+    std::vector<double>::const_iterator   p_left   = this->getCorrectionLikelihoodsForNode(left);
+    std::vector<double>::const_iterator   p_right  = this->getCorrectionLikelihoodsForNode(right);
+    std::vector<double>::const_iterator   p_middle = this->getCorrectionLikelihoodsForNode(middle);
 
     std::vector<double>::iterator c_node   = perMaskMixtureCorrections.begin() + this->activeLikelihood[root]*activeMassOffset + root*massNodeOffset;
 
@@ -1040,9 +1045,9 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeRootCorrection( size_t 
 void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::computeRootCorrection( size_t root, size_t left, size_t right)
 {
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
-    std::vector<double>::iterator         p_node   = correctionLikelihoods.begin() + this->activeLikelihood[root]*activeCorrectionOffset + root*correctionNodeOffset;
-    std::vector<double>::const_iterator   p_left   = correctionLikelihoods.begin() + this->activeLikelihood[left]*activeCorrectionOffset + left*correctionNodeOffset;
-    std::vector<double>::const_iterator   p_right  = correctionLikelihoods.begin() + this->activeLikelihood[right]*activeCorrectionOffset + right*correctionNodeOffset;
+    std::vector<double>::iterator         p_node   = this->getMutableCorrectionLikelihoodsForNode(root);
+    std::vector<double>::const_iterator   p_left   = this->getCorrectionLikelihoodsForNode(left);
+    std::vector<double>::const_iterator   p_right  = this->getCorrectionLikelihoodsForNode(right);
 
     std::vector<double>::iterator c_node   = perMaskMixtureCorrections.begin() + this->activeLikelihood[root]*activeMassOffset + root*massNodeOffset;
 
@@ -1191,7 +1196,7 @@ double RevBayesCore::PhyloCTMCSiteHomogeneousDollo::sumRootLikelihood( void )
     // get the index of the root node
     size_t root_index = root.getIndex();
 
-    const double*   p_root  = this->partialLikelihoods + this->activeLikelihood[root_index] * this->activeLikelihoodOffset + root_index*nodeOffset;
+    const double*   p_root  = getPartialLikelihoodsForNode(root_index).likelihoods.data();
 
     // create a vector for the per mixture likelihoods
     // we need this vector to sum over the different mixture likelihoods
@@ -1325,9 +1330,9 @@ double RevBayesCore::PhyloCTMCSiteHomogeneousDollo::getScaledNodeWeights(const T
 
     size_t node_index = node.getIndex();
 
-    const double* p_node  = partialLikelihoods + activeLikelihood[node_index] * activeLikelihoodOffset  + node_index*nodeOffset + pattern*siteOffset;
+    const double* p_node  = getPartialLikelihoodsForNode(node_index).likelihoods.data();
 
-    double logScalingFactor = perNodeSiteLogScalingFactors[activeLikelihood[node_index]][node_index][pattern];
+    double logScalingFactor = getPartialLikelihoodsForNode(node_index).log_scale[pattern];
 
     //otherwise, it is an ancestral node so we add the integrated likelihood
     for (size_t mixture = 0; mixture < num_site_mixtures; ++mixture)
@@ -1352,7 +1357,7 @@ double RevBayesCore::PhyloCTMCSiteHomogeneousDollo::getScaledNodeWeights(const T
     for (size_t i = 0; i < children.size(); i++)
     {
         size_t child_index = children[i]->getIndex();
-        const double* p_child  = partialLikelihoods + activeLikelihood[child_index]  * activeLikelihoodOffset + child_index*nodeOffset  + pattern*siteOffset;
+        const double* p_child  = this->getPartialLikelihoodsForNode(child_index).likelihoods.data();
 
         // does this child have descendants?
         if (p_child[dim] == 0)
@@ -1373,7 +1378,8 @@ double RevBayesCore::PhyloCTMCSiteHomogeneousDollo::getScaledNodeWeights(const T
 
 void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::scale( size_t node_index)
 {
-    double* p_node = this->partialLikelihoods + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
+    double* p_node = getMutablePartialLikelihoodsForNode(node_index).likelihoods.data();
+    auto& log_scale_node = getMutablePartialLikelihoodsForNode(node_index).log_scale;
 
     if ( RbSettings::userSettings().getUseScaling() == true && node_index % RbSettings::userSettings().getScalingDensity() == 0 )
     {
@@ -1402,7 +1408,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::scale( size_t node_index)
 
             }
 
-            this->perNodeSiteLogScalingFactors[this->activeLikelihood[node_index]][node_index][site] = -log(max);
+            log_scale_node[site] = -log(max);
 
 
             // compute the per site probabilities
@@ -1427,7 +1433,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::scale( size_t node_index)
         // iterate over all mixture categories
         for (size_t site = 0; site < this->pattern_block_size ; ++site)
         {
-            this->perNodeSiteLogScalingFactors[this->activeLikelihood[node_index]][node_index][site] = 0;
+            log_scale_node[site] = 0;
         }
 
     }
@@ -1436,7 +1442,10 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::scale( size_t node_index)
 
 void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::scale( size_t node_index, size_t left, size_t right )
 {
-    double* p_node = this->partialLikelihoods + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
+    double* p_node = getMutablePartialLikelihoodsForNode(node_index).likelihoods.data();
+    auto& log_scale_node = getMutablePartialLikelihoodsForNode(node_index).log_scale;
+    auto& log_scale_left = getPartialLikelihoodsForNode(left).log_scale;
+    auto& log_scale_right = getPartialLikelihoodsForNode(right).log_scale;
 
     if ( RbSettings::userSettings().getUseScaling() == true && node_index % RbSettings::userSettings().getScalingDensity() == 0 && node_index < num_nodes -1)
     {
@@ -1465,7 +1474,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::scale( size_t node_index, size
 
             }
 
-            this->perNodeSiteLogScalingFactors[this->activeLikelihood[node_index]][node_index][site] = this->perNodeSiteLogScalingFactors[this->activeLikelihood[left]][left][site] + this->perNodeSiteLogScalingFactors[this->activeLikelihood[right]][right][site] - log(max);
+            log_scale_node[site] = log_scale_left[site] + log_scale_right[site] - log(max);
 
 
             // compute the per site probabilities
@@ -1490,7 +1499,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::scale( size_t node_index, size
         // iterate over all mixture categories
         for (size_t site = 0; site < this->pattern_block_size ; ++site)
         {
-            this->perNodeSiteLogScalingFactors[this->activeLikelihood[node_index]][node_index][site] = this->perNodeSiteLogScalingFactors[this->activeLikelihood[left]][left][site] + this->perNodeSiteLogScalingFactors[this->activeLikelihood[right]][right][site];
+            log_scale_node[site] = log_scale_left[site] + log_scale_right[site];
         }
 
     }
@@ -1498,7 +1507,11 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::scale( size_t node_index, size
 
 void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::scale( size_t node_index, size_t left, size_t right, size_t middle )
 {
-    double* p_node   = this->partialLikelihoods + this->activeLikelihood[node_index]*this->activeLikelihoodOffset + node_index*this->nodeOffset;
+    double* p_node   = this->getMutablePartialLikelihoodsForNode(node_index).likelihoods.data();
+    auto& log_scale_node = getMutablePartialLikelihoodsForNode(node_index).log_scale;
+    auto& log_scale_left = getPartialLikelihoodsForNode(left).log_scale;
+    auto& log_scale_right = getPartialLikelihoodsForNode(right).log_scale;
+    auto& log_scale_middle = getPartialLikelihoodsForNode(middle).log_scale;
 
     if ( RbSettings::userSettings().getUseScaling() == true && node_index % RbSettings::userSettings().getScalingDensity() == 0 && node_index < num_nodes -1)
     {
@@ -1527,7 +1540,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::scale( size_t node_index, size
 
             }
 
-            this->perNodeSiteLogScalingFactors[this->activeLikelihood[node_index]][node_index][site] = this->perNodeSiteLogScalingFactors[this->activeLikelihood[left]][left][site] + this->perNodeSiteLogScalingFactors[this->activeLikelihood[right]][right][site] + this->perNodeSiteLogScalingFactors[this->activeLikelihood[middle]][middle][site] - log(max);
+            log_scale_node[site] = log_scale_left[site] + log_scale_right[site] + log_scale_middle[site] - log(max);
 
 
             // compute the per site probabilities
@@ -1552,7 +1565,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::scale( size_t node_index, size
         // iterate over all mixture categories
         for (size_t site = 0; site < this->pattern_block_size ; ++site)
         {
-            this->perNodeSiteLogScalingFactors[this->activeLikelihood[node_index]][node_index][site] = this->perNodeSiteLogScalingFactors[this->activeLikelihood[left]][left][site] + this->perNodeSiteLogScalingFactors[this->activeLikelihood[right]][right][site] + this->perNodeSiteLogScalingFactors[this->activeLikelihood[middle]][middle][site];
+            log_scale_node[site] = log_scale_left[site] + log_scale_right[site] + log_scale_middle[site];
         }
 
     }
@@ -1698,10 +1711,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::redrawValue( void ) {
     // compress the data and initialize internal variables
     this->reInitialized();
 
-    for (std::vector<bool>::iterator it = this->dirty_nodes.begin(); it != this->dirty_nodes.end(); ++it)
-    {
-        (*it) = true;
-    }
+    this->markAllPartialLikelihoodsDirty();
 
     // flip the active likelihood pointers
     for (size_t index = 0; index < this->changed_nodes.size(); ++index)
@@ -1731,7 +1741,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::simulateDollo( const TopologyN
         const TopologyNode &child = *(*it);
 
         // update the transition probability matrix
-        this->updateTransitionProbabilities( child.getIndex() );
+        this->updateTransitionProbabilityMatrix( child.getIndex() );
 
         double u = rng->uniform01();
 
@@ -1739,7 +1749,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousDollo::simulateDollo( const TopologyN
         {
             std::uint64_t cp = parentState.getStateIndex() - 1;
 
-            double *freqs = this->transition_prob_matrices[ rateIndex ][ cp ];
+            const double *freqs = this->pmatrices[ child.getIndex() ][ rateIndex ][ cp ];
 
             // create the character
             StandardState &c = data[ child.getIndex() ];
