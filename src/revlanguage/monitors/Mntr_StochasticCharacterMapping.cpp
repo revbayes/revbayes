@@ -11,14 +11,8 @@
 #include <cstddef>
 #include <string>
 
-#include "AminoAcidState.h"
 #include "ArgumentRule.h"
-#include "BinaryState.h"
-#include "DnaState.h"
 #include "IntegerPos.h"
-#include "NaturalNumbersState.h"
-#include "PoMoState.h"
-#include "StandardState.h"
 #include "RbException.h"
 #include "RevObject.h"
 #include "RlAbstractHomologousDiscreteCharacterData.h"
