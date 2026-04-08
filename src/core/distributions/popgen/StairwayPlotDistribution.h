@@ -38,6 +38,7 @@ template <class valueType> class TypedDagNode;
         StairwayPlotDistribution*                           clone(void) const;                                                          //!< Create an independent clone
         double                                              computeLnProbability(void);
         void                                                redrawValue(void);
+        void                                                setValue(RbVector<double> *v, bool force=false) override;                   //!< Refresh cached factorials when the SFS (e.g. clamp) changes
         
     protected:
         // Parameter management functions

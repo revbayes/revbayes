@@ -1,6 +1,8 @@
 #include "StairwayPlotDistribution.h"
 
 #include <stddef.h>
+#include <cmath>
+#include <numeric>
 
 #include "DistributionMultinomial.h"
 #include "DistributionPoisson.h"
@@ -43,6 +45,16 @@ StairwayPlotDistribution::~StairwayPlotDistribution( void )
 {
     // We don't delete the parameters, because they might be used somewhere else too.
     // The model needs to do that!
+}
+
+
+void StairwayPlotDistribution::setValue( RbVector<double> *v, bool force )
+{
+    
+    TypedDistribution< RbVector<double> >::setValue( v, force );
+    
+    // need an extra call to initialize() here to refresh the cached 'ln_factorial_num_sites' value after clamping
+    initialize();
 }
 
 
@@ -302,6 +314,10 @@ void StairwayPlotDistribution::redrawValue( void )
 {
     // compute the expected SFS, i.e., the expected frequency of observing a site with frequency i
     bool success = calculateExpectedSFS();
+    if ( success == false )
+    {
+        return;
+    }
 
     size_t max_freq = num_individuals;
     if ( folded == true )
@@ -309,7 +325,8 @@ void StairwayPlotDistribution::redrawValue( void )
         max_freq = floor( num_individuals / 2.0 ) + 1;
     }
 
-    std::vector<double> bin_probs = std::vector<double>(max_freq+1, 0.0);
+    // One probability per entry in *value (same layout as computeLnProbability).
+    std::vector<double> bin_probs( max_freq, 0.0 );
 
     // check for the coding
     // only add the monomorphic probability of we use the coding "all"
@@ -357,8 +374,18 @@ void StairwayPlotDistribution::redrawValue( void )
         }
     }
 
-    // draw the new SFS
-    std::vector<std::int64_t> tmp = RbStatistics::Multinomial::rv(expected_SFS, num_sites, *GLOBAL_RNG);
+    double p_sum = std::accumulate( bin_probs.begin(), bin_probs.end(), 0.0 );
+    if ( p_sum <= 0.0 || not std::isfinite( p_sum ) )
+    {
+        return;
+    }
+    for ( double &b : bin_probs )
+    {
+        b /= p_sum;
+    }
+
+    // draw the new SFS (category count must match value->size())
+    std::vector<std::int64_t> tmp = RbStatistics::Multinomial::rv( bin_probs, static_cast<size_t>( num_sites ), *GLOBAL_RNG );
 
     // make sure that we have a memory slot for the value
     if ( value == NULL )
@@ -368,11 +395,14 @@ void StairwayPlotDistribution::redrawValue( void )
     // make sure the sizes match (might happen if the value was allocated before)
     if ( tmp.size() != value->size() )
     {
-        
+        delete value;
+        value = new RbVector<double>( tmp.size(), 0.0 );
     }
     // now copy to convert the data type
     std::copy(tmp.begin(), tmp.end(), value->begin());
 
+    // need an extra call to initialize() here to refresh the cached 'ln_factorial_num_sites' value after redrawing
+    initialize();
 }
 
 
