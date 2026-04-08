@@ -6,8 +6,8 @@ if [ -z "$1" ] ; then
     printf "Examples:\n"
     printf '  ./run_integration_tests.sh "$(readlink -f ../projects/cmake/build/rb)"\n'
     printf '  ./run_integration_tests.sh "$PWD/../projects/cmake/build/rb"\n'
-    printf '  ./run_integration_tests.sh  -mpi true "$PWD/../projects/cmake/build-mpi/rb-mpi"\n'
-#    printf '  ./run_integration_tests.sh mpirun -np 4 "$(readlink -f ../projects/cmake/rb)"\n'
+    printf '  ./run_integration_tests.sh -mpi true "$PWD/../projects/cmake/build-mpi/rb-mpi"\n'
+    printf '  ./run_integration_tests.sh -t basics Mk "$PWD/../projects/cmake/build/rb"\n'
     exit 101
 fi
 
@@ -25,48 +25,73 @@ CLEAR2=$'\033[0m'
 
 
 mpi="false"
+windows="false"
 
-# parse command line arguments
-while echo $1 | grep ^- > /dev/null; do
-    # intercept help while parsing "-key value" pairs
-    if [ "$1" = "--help" ] || [ "$1" = "-h" ]
-    then
-        echo "USAGE: $0 [options] rb [args] [--tests test1 ...]
-
-Command line options are:
--h, --help                              : print this help and exit.
--t, --tests test1 [test2 ...]           : only run these tests
--mpi BOOLEAN                            : run with mpi (currently disabled)
--windows BOOLEAN                        : run under windows
-"
-        exit
-    fi
-
-    # parse pairs
-    eval $( echo $1 | sed 's/-//g' | tr -d '\012')=$2
-    shift
-    shift
-done
-
+# First pass: extract options from anywhere in the argument list
 rb_exec=()
 only_tests=()
 found_tests=0
 
 for arg in "$@" ; do
-    if [[ "$found_tests" = 0 && "$arg" = "--tests" ]] ; then
+    # intercept help
+    if [ "$arg" = "--help" ] || [ "$arg" = "-h" ]
+    then
+        echo "USAGE: $0 [options] rb [rb's args]"
+        echo "       $0 rb [rb's args] [options]
+
+Command-line options are:
+-h, --help                              : print this help and exit.
+-t, --tests test1 [test2 ...]           : only run these tests
+-mpi BOOLEAN                            : run with MPI
+-windows BOOLEAN                        : run under Windows
+"
+        exit
+    fi
+done
+
+# Second pass: parse options and collect non-option arguments
+i=1
+while [ $i -le $# ]; do
+    arg="${!i}"
+    next_i=$((i+1))
+    next_arg="${!next_i:-}"
+    
+    # Handle --tests or -t
+    if [[ ("$arg" = "--tests" || "$arg" = "-t") ]] ; then
         found_tests=1
+        i=$((i+1))
+    # Parse option-value pairs (like -mpi true)
+    elif echo "$arg" | grep ^- > /dev/null && [ -n "$next_arg" ] && ! echo "$next_arg" | grep ^- > /dev/null; then
+        eval $( echo "$arg" | sed 's/-//g' | tr -d '\012')="$next_arg"
+        i=$((i+2))  # Skip both the option and its value
     elif [[ "$found_tests" -eq 1 ]]; then
-        only_tests+=("test_$arg")
+        # This is a test name (unless it's another option or looks like a file path)
+        if echo "$arg" | grep ^- > /dev/null; then
+            # Next option found, stop collecting tests and process this arg
+            found_tests=0
+            # Don't increment i, will process in next iteration
+        elif [ -f "$arg" ] || [ -x "$arg" ] || echo "$arg" | grep -E '^/|^\.\.?/' > /dev/null; then
+            # This looks like a file path (executable), stop collecting tests
+            found_tests=0
+            rb_exec+=("$arg")
+            i=$((i+1))
+        else
+            # This is a test name
+            only_tests+=("test_$arg")
+            i=$((i+1))
+        fi
     else
+        # Regular argument (rb executable or its args)
         rb_exec+=("$arg")
+        i=$((i+1))
     fi
 done
 
 
-# if [ $mpi = "true" ]; then
-#    rb_exec="mpirun --oversubscribe -np 4 ${rb_exec}"
-#    rb_exec="mpirun -np 4 ${rb_exec}"
-# fi
+if [ "$mpi" = "true" ]; then
+   rb_exec=("mpirun" "--oversubscribe" "-np" "4" "${rb_exec[@]}")
+   # rb_exec=("mpirun" "-np" "4" "${rb_exec[@]}")
+fi
 
 if [ "$windows" = "true" ] ; then
     OUTPUT="$(${rb_exec[@]} -e '1+2' 2>/dev/null | dos2unix)"
