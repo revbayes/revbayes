@@ -5,7 +5,6 @@
 #include <fstream>
 #include <iostream>
 #include <map>
-#include <ranges>
 #include <string>
 #include <unordered_set>
 #include <vector>
