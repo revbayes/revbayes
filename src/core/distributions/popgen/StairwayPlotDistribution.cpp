@@ -18,10 +18,10 @@ using namespace RevBayesCore;
 
 /*StairwayPlot Distribution Constructor
  * @param p A simplex of the the probabilities for each category
- * @param n A long for the number of trials
+ * @param n An integer for the number of trials
  */
 
-StairwayPlotDistribution::StairwayPlotDistribution(const TypedDagNode< RbVector<double> > *th, long n, long n_ind, bool f, MONOMORPHIC_PROBABILITY m, CODING c) : TypedDistribution< RbVector<double> >( new RbVector<double>( f ? (n_ind/2)+1 : n_ind, 1 ) ),
+StairwayPlotDistribution::StairwayPlotDistribution(const TypedDagNode< RbVector<double> > *th, std::int64_t n, std::int64_t n_ind, bool f, MONOMORPHIC_PROBABILITY m, CODING c) : TypedDistribution< RbVector<double> >( new RbVector<double>( f ? (n_ind/2)+1 : n_ind, 1 ) ),
     theta( th ),
     num_sites( n ),
     folded( f ),

@@ -31,7 +31,7 @@ template <class valueType> class TypedDagNode;
         enum CODING { ALL, NO_MONOMORPHIC, NO_SINGLETONS };
         enum MONOMORPHIC_PROBABILITY { REST, TREE_LENGTH };
         
-        StairwayPlotDistribution(const TypedDagNode< RbVector<double> > *th, long n, long n_ind, bool f=false, MONOMORPHIC_PROBABILITY mono=REST, CODING cod=ALL);
+        StairwayPlotDistribution(const TypedDagNode< RbVector<double> > *th, std::int64_t n, std::int64_t n_ind, bool f=false, MONOMORPHIC_PROBABILITY mono=REST, CODING cod=ALL);
         virtual                                            ~StairwayPlotDistribution(void);                                                //!< Virtual destructor
         
         // public member functions
@@ -52,9 +52,9 @@ template <class valueType> class TypedDagNode;
         
         // members
         const TypedDagNode< RbVector<double> >*             theta;
-        long                                                num_sites;
+        std::int64_t                                        num_sites;
         bool                                                folded;
-        long                                                num_individuals;
+        std::int64_t                                        num_individuals;
         mutable std::vector<double>                         expected_SFS;
         mutable std::vector< std::vector<double> >          prob_k;
         double                                              ln_factorial_num_sites_all;
