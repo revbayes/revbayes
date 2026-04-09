@@ -43,13 +43,36 @@ first_char_hist = char_hist[1])");
 	help_strings[string("CladogeneticProbabilityMatrix")][string("name")] = string(R"(CladogeneticProbabilityMatrix)");
 	help_strings[string("CladogeneticSpeciationRateMatrix")][string("name")] = string(R"(CladogeneticSpeciationRateMatrix)");
 	help_arrays[string("ConditionalPosteriorOrdinate")][string("authors")].push_back(string(R"(Sebastian Höhna)"));
-	help_strings[string("ConditionalPosteriorOrdinate")][string("description")] = string(R"(Model selection via leave one out cross-validation. Cross-­ validation assesses the fit of a model by using a subset of the data to estimate parameters (i.e., train the model) and the remaining observations to evaluate the predictive fitness. In the most extreme case of leave-­one-­out cross-­validation, we use all but one observation to estimate the parameters, P(𝜃| X(−i)), then compute the probability of observing the removed observed, P(Xi| 𝜃) , integrate over all parameters, P(Xi| X(−i)) = ∫ p(Xi| 𝜃)p(𝜃| X(−i))d𝜃, and repeat this process for all data points.)");
-	help_strings[string("ConditionalPosteriorOrdinate")][string("details")] = string(R"(A cross-validation analysis assumes that one has a trace of samples of the probabilities for each data point (e.g., site or column) from your data stored in a file. Each data point probability is important for the computation of the leave-one-out cross-validation probability. We read in this trace using the function `ConditionalPosteriorOrdinate`. This "constructor" function requires the `filename` as an argument.
+	help_strings[string("ConditionalPosteriorOrdinate")][string("description")] = string(R"(Model selection via leave-one-out cross-validation. Cross-validation assesses
+the fit of a model by using a subset of the data to estimate parameters (i.e.,
+train the model) and the remaining observations to evaluate the predictive
+fitness. In the most extreme case of leave-­one-­out cross-­validation, we use all
+but one observation to estimate the parameters, P(\theta | X(−i)), then compute
+the probability of observing the removed data point, P(Xi | \theta), integrate
+over all parameters:
+    P(Xi | X(−i)) = \int p(Xi | \theta) p(\theta | X(−i)) d\theta
+    
+and repeat this process for all data points.)");
+	help_strings[string("ConditionalPosteriorOrdinate")][string("details")] = string(R"(A cross-validation analysis assumes that one has a trace of samples of the
+probabilities for each data point (e.g., site or column) from one's data stored
+in a file. Each data point probability is important for the computation of the
+leave-one-out cross-validation probability. We read in this trace using the
+function `ConditionalPosteriorOrdinate`. This "constructor" function requires
+the `filename` as an argument.
 
-Then, you can calculate the leave-one-out cross-validation probability using the member method `.predictiveProbability()`. In the current implementation, the member method `.predictiveProbability()` requires two argument, the `counts` which are a vector of observations as real numbers, `log` which tells if the probabilities in the trace are log-transformed . The result of this function is the leave-one-out cross-validation probability.)");
-	help_strings[string("ConditionalPosteriorOrdinate")][string("example")] = string(R"(obs_sfs = [ 305082, 44248, 32223, 28733, 28220, 26205, 27477, 26618, 27533, 26945, 28736, 28671, 31277, 31250, 34352, 34859, 38331 ]
+Then, you can calculate the leave-one-out cross-validation probability using
+the member method `.predictiveProbability()`. In the current implementation,
+the member method `.predictiveProbability()` requires two arguments:
+the `counts`, which are a vector of observations as real numbers; and `log`,
+which indicates whether the probabilities in the trace are log-transformed.
+The method returns the leave-one-out cross-validation probability.)");
+	help_strings[string("ConditionalPosteriorOrdinate")][string("example")] = string(R"(# Create a vector of observations (e.g., site frequency spectrum)
+obs_sfs = [ 305082, 44248, 32223, 28733, 28220, 26205, 27477, 26618, 27533, 26945, 28736, 28671, 31277, 31250, 34352, 34859, 38331 ]
 
+# Read a pre-existing trace and construct the analysis object
 cpo = ConditionalPosteriorOrdinate( filename="output/StairwayPlot_esfs.log" )
+
+# Calculate the leave-one-out cross-validation probability
 cpo.predictiveProbability( obs_sfs, log=FALSE ))");
 	help_strings[string("ConditionalPosteriorOrdinate")][string("name")] = string(R"(ConditionalPosteriorOrdinate)");
 	help_references[string("ConditionalPosteriorOrdinate")].push_back(RbHelpReference(R"(Lewis PO, Xie W, Chen M-H, Fan Y, Kuo L (2014). Posterior predictive Bayesian phylogenetic model selection. Systematic Biology, 63(3):309-321.)",R"(10.1093/sysbio/syt068)",R"(https://pmc.ncbi.nlm.nih.gov/articles/PMC3985471/pdf/syt068.pdf )"));
@@ -1716,36 +1739,56 @@ mymcmc.run(generations=200000))");
 	help_arrays[string("dnSoftBoundUniformNormal")][string("see_also")].push_back(string(R"(dnUniform)"));
 	help_strings[string("dnSoftBoundUniformNormal")][string("title")] = string(R"(Softbound Uniform Distribution with Normal distributed tails.)");
 	help_arrays[string("dnStairwayPlot")][string("authors")].push_back(string(R"(Sebastian Höhna)"));
-	help_strings[string("dnStairwayPlot")][string("description")] = string(R"(Bayesian StairwayPlot for Inferring Single Population Demographic Histories From Site Frequency Spectra)");
-	help_strings[string("dnStairwayPlot")][string("details")] = string(R"(The ``StairwayPlot Distribution`` specifies a distribution on the site frequency spectrum of a single panmictic population. The site frequency spectrum varies depending on the demographic history, that is, the vector of effective population size. You can pass in a vector of effective population sizes, which are assumed to change exactly at the expected coalescent events (see the publications for the description of the theory). The name of the distribution comes from the stepwise function, looking like a stairway, of the effective population sizes.
+	help_strings[string("dnStairwayPlot")][string("description")] = string(R"(Bayesian StairwayPlot for inferring single population demographic histories
+from site frequency spectra.)");
+	help_strings[string("dnStairwayPlot")][string("details")] = string(R"(The `StairwayPlot Distribution` specifies a distribution on the site frequency
+spectrum of a single panmictic population. The site frequency spectrum varies
+depending on the demographic history, that is, changes in the effective
+population size. You can pass in a vector of effective population sizes, which
+are assumed to change exactly at the expected coalescent events (see the
+references for the description of the theory). The name of the distribution
+comes from the stairway-like stepwise function of the effective population
+sizes.
 
 The most important arguments are:
-``theta``: the vector of effective population sizes in units of 4 * Ne * mu. This vector must be of sizes N-1, where N is the number of individuals.
-``numSites``: The number of sites used. This should be the same as summing the SFS, but is required for simulation/initialization.
-``numIndividuals``: The number of individuals, which corresponds to the number of bins in the SFS. The fixed sites are not considered. This should be the same as in the observed SFS, but is required for simulation/initialization.
-``folded``: Whether the likelihood is computed based on a folded SFS or not.
-``monomorphicProbability``: How should we compute the probability of monomorphic sites. See publication for details.
-``coding``: Are we conditioning on not including monomorphic sites ("no-monomorphic"), not including singletons ("no-singletons"), or do we have "all" sites.)");
+`theta`: The vector of effective population sizes in units of 4 * Ne * mu. This
+    vector must be of size N-1, where N is the number of individuals.
+`numSites`: The number of sites used. This should be the same as summing the
+    SFS, but is required for simulation/initialization.
+`numIndividuals`: The number of individuals, which corresponds to the number
+    of bins in the SFS. The fixed sites are not considered. This should be the
+    same as in the observed SFS, but is required for simulation/initialization.
+`folded`: Whether the likelihood is computed based on a folded SFS or not.
+`monomorphicProbability`: How we should compute the probability of monomorphic
+    sites. See the references for details.
+`coding`: Whether we are conditioning on not including monomorphic sites
+    ("no-monomorphic"), not including singletons ("no-singletons"), or whether
+    we have "all" sites.)");
 	help_strings[string("dnStairwayPlot")][string("example")] = string(R"(# let's assume we have some SFS "observed"
-obs_sfs = [ 305082, 44248, 32223, 28733, 28220, 26205, 27477, 26618, 27533, 26945, 28736, 28671, 31277, 31250, 34352, 34859, 38331, 40005, 45666, 48986, 65829, 64363, 70895, 74114, 82705, 88226, 102194, 114566, 130176, 143775, 169216, 191624, 230016, 276489, 333069, 394810, 501961, 653809, 890077, 1349350, 50296796 ]
+obs_sfs = [ 305082, 44248, 32223, 28733, 28220, 26205, 27477, 26618, 27533,
+        26945, 28736, 28671, 31277, 31250, 34352, 34859, 38331, 40005,
+        45666, 48986, 65829, 64363, 70895, 74114, 82705, 88226, 102194,
+        114566, 130176, 143775, 169216, 191624, 230016, 276489, 333069,
+        394810, 501961, 653809, 890077, 1349350, 50296796 ]
 
 # we need to remove the fixed sites
 obs_sfs[obs_sfs.size()] <- 0
 
-# obtain the number of individuals and the number of sites
+# get the number of individuals and the number of sites
 N_IND   = abs(obs_sfs.size()-1)
 N_SITES = round(sum(obs_sfs))
 
 # now specify a different theta per interval
 for (i in 1:(N_IND-1)) {
-  theta[i] ~ dnLognormal( ln_theta_mean, theta_sd )
+  theta[i] ~ dnUnif(0.0, 0.1)
 }
 
-sfs ~ dnStairwayPlot( theta, numSites=N_SITES, numIndividuals=N_IND, folded=USE_FOLDED, monomorphicProbability="rest", coding="all" )
+sfs ~ dnStairwayPlot( theta, numSites=N_SITES, numIndividuals=N_IND, folded=TRUE,
+                  monomorphicProbability="rest", coding="all" )
 sfs.clamp( obs_sfs ))");
 	help_strings[string("dnStairwayPlot")][string("name")] = string(R"(dnStairwayPlot)");
-	help_references[string("dnStairwayPlot")].push_back(RbHelpReference(R"(Liu & Fu (2015). Exploring population size changes using SNP frequency spectra. Nature Genetics, 555--559.)",R"(10.1038/ng.3254)",R"(https://pmc.ncbi.nlm.nih.gov/articles/PMC4414822/pdf/nihms-668186.pdf )"));
-	help_references[string("dnStairwayPlot")].push_back(RbHelpReference(R"(Höhna & Catalán (2025). Bayesian StairwayPlot for Inferring Single Population Demographic Histories From Site Frequency Spectra. Molecular Ecology Resources, 25:e14087.)",R"(10.1111/1755-0998.14087)",R"(https://onlinelibrary.wiley.com/doi/pdf/10.1111/1755-0998.14087 )"));
+	help_references[string("dnStairwayPlot")].push_back(RbHelpReference(R"(Liu X, Fu Y-X (2015). Exploring population size changes using SNP frequency spectra. Nature Genetics, 47:555--559.)",R"(10.1038/ng.3254)",R"(https://pmc.ncbi.nlm.nih.gov/articles/PMC4414822/pdf/nihms-668186.pdf )"));
+	help_references[string("dnStairwayPlot")].push_back(RbHelpReference(R"(Höhna S, Catalán A (2025). Bayesian StairwayPlot for inferring single population demographic histories from site frequency spectra. Molecular Ecology Resources, 25:e14087.)",R"(10.1111/1755-0998.14087)",R"(https://onlinelibrary.wiley.com/doi/pdf/10.1111/1755-0998.14087 )"));
 	help_strings[string("dnStairwayPlot")][string("title")] = string(R"(StairwayPlot Distribution)");
 	help_arrays[string("dnStudentT")][string("authors")].push_back(string(R"(Wade Dismukes and Kevin Quinteros)"));
 	help_strings[string("dnStudentT")][string("description")] = string(R"(The student's t probability distribution.)");
@@ -1857,14 +1900,25 @@ floor(y) # returns -3)");
 	help_strings[string("floor")][string("title")] = string(R"(The floor function.)");
 	help_strings[string("fnAdjacentRateModifier")][string("name")] = string(R"(fnAdjacentRateModifier)");
 	help_arrays[string("fnBSPInterval")][string("authors")].push_back(string(R"(Sebastian Höhna)"));
-	help_strings[string("fnBSPInterval")][string("description")] = string(R"(A Bayesian skyline approach, as suggested by Drummond et al. (2005; https://doi.org/10.1093/molbev/msi103) and Billenstein and Höhna (2024; https://doi.org/10.1093/molbev/msae073), requires as an input a vector of values. These values can be the same for several consecutive entries. For example, if the total number of intervals is 4, and we have the two values 0.2 and 0.5, where the first value is used once and the second used three times, we could create a Bayesian skyline vector as `[0.2,0.5,0.5,0.5]`. To construct such a vector, we use the function `fnBSPInterval`.)");
-	help_strings[string("fnBSPInterval")][string("details")] = string(R"(The function `fnBSPInterval` takes in two arguments: `x` which are the values, and `n` which are how often each value is replicated. Currently, this function assumes that all values are positive real numbers, as the `fnBSPInterval` is used for population sizes in coalescent methods.)");
-	help_strings[string("fnBSPInterval")][string("example")] = string(R"(a <- [0.1,0.2,0.3]
-b <- [2,1,4]
+	help_strings[string("fnBSPInterval")][string("description")] = string(R"(A Bayesian skyline approach, as suggested by Drummond et al. (2005) and
+Billenstein & Höhna (2024), requires as an input a vector of values. These
+values can be the same for several consecutive entries. For example, if the
+total number of intervals is 4, and we have the two values, 0.2 and 0.5, where
+the first value is used once and the second used three times, we could create
+a Bayesian skyline vector as `[0.2, 0.5, 0.5, 0.5]`. To construct such
+a vector, we use the function `fnBSPInterval`.)");
+	help_strings[string("fnBSPInterval")][string("details")] = string(R"(The function `fnBSPInterval` takes in two arguments: `x`, the values; and `n`,
+the number of times each value is replicated. Currently, the function assumes
+that all values are positive real numbers, as `fnBSPInterval` is used for
+population sizes in coalescent methods.)");
+	help_strings[string("fnBSPInterval")][string("example")] = string(R"(a <- [0.1, 0.2, 0.3]
+b <- [2, 1, 4]
 fnBSPInterval( a, b ))");
 	help_strings[string("fnBSPInterval")][string("name")] = string(R"(fnBSPInterval)");
+	help_references[string("fnBSPInterval")].push_back(RbHelpReference(R"(Billenstein RJ, Höhna S (2024). Comparison of Bayesian coalescent skyline plot models for inferring demographic histories. Molecular Biology and Evolution, 41(5):msae073.)",R"(10.1093/molbev/msae073)",R"(https://academic.oup.com/mbe/article/41/5/msae073/7648822 )"));
+	help_references[string("fnBSPInterval")].push_back(RbHelpReference(R"(Drummond AJ, Rambaut A, Shapiro B, Pybus OG (2005). Bayesian coalescent inference of past population dynamics from molecular sequences. Molecular Biology and Evolution, 22(5):1185--1192.)",R"(10.1093/molbev/msi103)",R"(https://academic.oup.com/mbe/article/22/5/1185/1066885 )"));
 	help_arrays[string("fnBSPInterval")][string("see_also")].push_back(string(R"(dnCoalescent)"));
-	help_strings[string("fnBSPInterval")][string("title")] = string(R"(Expand value vector for Bayesian skyline method input)");
+	help_strings[string("fnBSPInterval")][string("title")] = string(R"(Expand a vector of values for Bayesian skyline method input)");
 	help_strings[string("fnBetaBrokenStick")][string("name")] = string(R"(fnBetaBrokenStick)");
 	help_strings[string("fnBinaryMutationCoalescentRateMatrix")][string("name")] = string(R"(fnBinaryMutationCoalescentRateMatrix)");
 	help_strings[string("fnBiogeoDE")][string("name")] = string(R"(fnBiogeoDE)");
@@ -3261,19 +3315,29 @@ Non-simplex-valued vector random variables are untransformed.
 Add random variables to the move directly (e.g. branch_rates[1], not branch_rates).WARNING: Disabling tuning disables both tuning of proposal variance and learning of empirical covariance matrix.)");
 	help_strings[string("mvAVMVN")][string("name")] = string(R"(mvAVMVN)");
 	help_arrays[string("mvAdaptiveRJSwitch")][string("authors")].push_back(string(R"(Sebastian Höhna)"));
-	help_strings[string("mvAdaptiveRJSwitch")][string("description")] = string(R"(A move that performs a reversible-jump between a fixed value and a value drawn from a distribution. The standard approach is that the value is drawn from the prior distribution. As this can be inefficient for broad priors, we learn here the proposal distribution. Currently, we only support a normal distribution. Thus, we learn the mean and variance of this normal distribution during the learning phase before actually applying it.)");
-	help_strings[string("mvAdaptiveRJSwitch")][string("example")] = string(R"(
-theta ~ dnReversibleJumpMixture(0.01,
-                        dnUnif( 0.0, 0.1 ),
-                        0.5)
+	help_strings[string("mvAdaptiveRJSwitch")][string("description")] = string(R"(A move that performs a reversible-jump between a fixed value and a value drawn
+from a distribution. The standard approach is that the value is drawn from the
+prior distribution. As this can be inefficient for broad priors, we learn here
+the proposal distribution. Currently, we only support a normal distribution.
+Thus, we learn the mean and variance of this normal distribution during the
+learning phase before actually applying it.)");
+	help_strings[string("mvAdaptiveRJSwitch")][string("example")] = string(R"(# create a vector of moves
+moves = VectorMoves()
 
-moves.append( mvAdaptiveRJSwitch(theta, waitBeforeLearning=100,
-                                        waitBeforeUsing=1000,
-                                        updateEvery=10,
-                                        weight=10.0) ))");
+# draw a variable from an RJ mixture
+theta ~ dnReversibleJumpMixture(0.01,
+                                dnUnif( 0.0, 0.1 ),
+                                0.5)
+
+# place a move on the variable
+moves.append( mvAdaptiveRJSwitch(theta,
+                                 waitBeforeLearning=100,
+                                 waitBeforeUsing=1000,
+                                 updateEvery=10,
+                                 weight=10.0) ))");
 	help_strings[string("mvAdaptiveRJSwitch")][string("name")] = string(R"(mvAdaptiveRJSwitch)");
 	help_arrays[string("mvAdaptiveRJSwitch")][string("see_also")].push_back(string(R"(mvRJSwitch)"));
-	help_strings[string("mvAdaptiveRJSwitch")][string("title")] = string(R"(Adaptive Reversible-Jump (RJ) move)");
+	help_strings[string("mvAdaptiveRJSwitch")][string("title")] = string(R"(Adaptive reversible-jump (RJ) move)");
 	help_strings[string("mvBetaProbability")][string("name")] = string(R"(mvBetaProbability)");
 	help_strings[string("mvBetaSimplex")][string("description")] = string(R"(The Beta Simplex move selects one element of the a vector and proposes a new value for it drawn from a Beta distribution. A usage example can be found at https://revbayes.github.io/tutorials/chromo/#root)");
 	help_strings[string("mvBetaSimplex")][string("name")] = string(R"(mvBetaSimplex)");
@@ -3710,17 +3774,27 @@ moves.append( mvNNI(tree=timetree, weight=taxa.size()) ))");
 	help_strings[string("mvNodeTimeSlideUniformAgeConstrained")][string("name")] = string(R"(mvNodeTimeSlideUniformAgeConstrained)");
 	help_strings[string("mvRJSwitch")][string("name")] = string(R"(mvRJSwitch)");
 	help_arrays[string("mvRandomCategoryWalk")][string("authors")].push_back(string(R"(Sebastian Höhna)"));
-	help_strings[string("mvRandomCategoryWalk")][string("description")] = string(R"(This random walk proposal picks a random index of a vector. Then, it picks a random neighbor, either one index left or one index right. Then it decreases the current value at the chosen index by one, and increases the value of the neighbor by one.
+	help_strings[string("mvRandomCategoryWalk")][string("description")] = string(R"(This random walk proposal picks a random index of a vector. Then, it picks
+a random neighbor, either one index left or one index right. Then it decreases
+the current value at the chosen index by one, and increases the value of the
+neighbor by one.
 
-Such a move is important for a value from a multinomial distribution because it keeps the total equal.)");
-	help_strings[string("mvRandomCategoryWalk")][string("example")] = string(R"(num_e_prior <- simplex(rep(1, 6))
+Such a move is useful for values drawn from a multinomial distribution because
+it keeps the total constant.)");
+	help_strings[string("mvRandomCategoryWalk")][string("example")] = string(R"(# create a vector of moves
+moves = VectorMoves()
+
+# draw from a multinomial distribution
+num_e_prior <- simplex(rep(1, 6))
 number_events_pi ~ dnMultinomial(p=num_e_prior, size=20)
 
+# place a move on the draw
 moves.append( mvRandomCategoryWalk(x=number_events_pi, weight=5) ))");
 	help_strings[string("mvRandomCategoryWalk")][string("name")] = string(R"(mvRandomCategoryWalk)");
 	help_arrays[string("mvRandomCategoryWalk")][string("see_also")].push_back(string(R"(mvRandomGeometricWalk)"));
 	help_arrays[string("mvRandomCategoryWalk")][string("see_also")].push_back(string(R"(dnMultinomial)"));
-	help_strings[string("mvRandomCategoryWalk")][string("title")] = string(R"(Random walk on vector of naturals (e.g., from multinomial distribution) keeping the sum.)");
+	help_strings[string("mvRandomCategoryWalk")][string("title")] = string(R"(Random walk on vector of naturals (e.g., from multinomial distribution) keeping
+the sum of the vector constant.)");
 	help_strings[string("mvRandomDive")][string("description")] = string(R"(The multiplicative proposal of Dutta 2012, allows for long-distance moves.
 
 Useful for fat-tailed distributions, possibly for bimoodal distributions.
