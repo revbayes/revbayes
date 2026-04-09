@@ -10,7 +10,11 @@
 namespace RevBayesCore {
     
     /**
-     * The adaptive reversible jump proposal to switch between two elements of an RJ-Mixture.
+     * The adaptive reversible jump (RJ) proposal to switch between two elements of an RJ mixture.
+     * The proposal updates or "learns" two of its member variables, sampled_mean and sampled_var
+     * (representing the mean and variance of the normal proposal distribution), based on
+     * previously collected samples. These values should stabilize as more samples are collected,
+     * following the same logic as other adaptive moves (e.g., AVMVNProposal).
      *
      * @copyright Copyright 2009-
      * @author The RevBayes Development Core Team (Sebastian Hoehna)
