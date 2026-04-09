@@ -28,7 +28,7 @@ namespace RevBayesCore {
     public:
         PowerPosteriorAnalysis(MonteCarloSampler *m, const path &fn, size_t k);
         PowerPosteriorAnalysis(const PowerPosteriorAnalysis &a);
-        virtual                                ~PowerPosteriorAnalysis(void);                               //!< Virtual destructor
+        virtual                                ~PowerPosteriorAnalysis(void);                //!< Virtual destructor
         
         PowerPosteriorAnalysis&                 operator=(const PowerPosteriorAnalysis &a);
         
@@ -37,9 +37,10 @@ namespace RevBayesCore {
         void                                    burnin(size_t g, size_t ti);
         void                                    checkpoint(size_t stone_idx, const path &bcp_file, size_t planned_burnin) const;
         std::vector<double>                     getPowers(void) const;
+        size_t                                  getStepNumber(void) const;                   //!< What is the largest number of stones to be executed by the same worker (i.e., a process or a group of processors_per_likelihood processes)?
         void                                    initializeFromCheckpoint(const path &bcp_file, const std::vector<size_t> &stone_indices); //!< Makes sure checkpoint files exist but does not load the sampler
         void                                    initializeFromCheckpoint(const path &bcp_file, const std::vector<std::vector<size_t>> &stone_sequences_per_worker); //!< Records stone sequence per worker; only first stone per sequence needs a checkpoint
-        void                                    printStoneAssignmentToWorkers(void); //!< Prints a table showing which stones are assigned to which (groups of) processes
+        void                                    printStoneAssignmentToWorkers(void);         //!< Prints a table showing which stones are assigned to which worker
         void                                    runAll(size_t g, double burn_frac, size_t preburn_gen, size_t tune_int, const path &cp_file, size_t ci = 0);
         void                                    runStone(size_t idx, size_t g, double burn_frac, size_t preburn_gen, size_t tune_int, bool one_only, const path &cp_file, size_t ci = 0);
         void                                    summarizeStones(void);
@@ -57,9 +58,9 @@ namespace RevBayesCore {
         size_t                                  sampleFreq;
         size_t                                  processors_per_likelihood;
         
-        bool                                    resume_from_checkpoint;                                     //!< Set true by initializeFromCheckpoint()
-        std::map<size_t, path>                  ckp_stone_file;                                             //!< Checkpoint file paths for stones that have one (all listed stones for flat init; first-of-sequence only for nested init)
-        std::vector<std::vector<size_t>>        resume_stone_sequences;                                     //!< If empty, assign stones by the usual block formula; if not, one inner vector per full MPI group (num_processes / processors_per_likelihood)
+        bool                                    resume_from_checkpoint;                      //!< Set true by initializeFromCheckpoint()
+        std::map<size_t, path>                  ckp_stone_file;                              //!< Checkpoint file paths for stones that have one (all listed stones for flat init; first-of-sequence only for nested init)
+        std::vector<std::vector<size_t>>        resume_stone_sequences;                      //!< If empty, assign stones by the usual block formula; if not, one inner vector per MPI worker
     };
     
 }

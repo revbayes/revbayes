@@ -201,6 +201,33 @@ std::vector<double> PowerPosteriorAnalysis::getPowers( void ) const
 }
 
 
+size_t PowerPosteriorAnalysis::getStepNumber( void ) const
+{
+    size_t step_count;
+    size_t worker_count = size_t( floor( double(num_processes) / processors_per_likelihood ) );
+    
+    if ( resume_from_checkpoint and !resume_stone_sequences.empty() )
+    {
+        // Step count is the length of the largest of the inner vectors
+        step_count = 1;
+        for (size_t i = 0; i < resume_stone_sequences.size(); ++i)
+        {
+            step_count = std::max( step_count, resume_stone_sequences[i].size() );
+        }
+    }
+    else if ( resume_from_checkpoint and resume_stone_sequences.empty() )
+    {
+        step_count = ceil( ckp_stone_file.size() / double(worker_count) );
+    }
+    else
+    {
+        step_count = ceil( powers.size() / double(worker_count) );
+    }
+    
+    return step_count;
+}
+
+
 /**
  * Initialize the analysis from checkpoint files. Note that this function is much "lighter" than the equivalent functions of the
  * Mcmc and Mcmcmc classes, as it does not itself load the sampler state: we need to leave that up to runStone() / runAll().
@@ -317,25 +344,7 @@ void PowerPosteriorAnalysis::initMPI( void )
 void PowerPosteriorAnalysis::printStoneAssignmentToWorkers( void )
 {
     size_t worker_count = size_t( floor( double(num_processes) / processors_per_likelihood ) );
-    size_t step_count;
-    
-    if ( resume_from_checkpoint and !resume_stone_sequences.empty() )
-    {
-        // Step count is the length of the largest of the inner vectors
-        step_count = 1;
-        for (size_t i = 0; i < resume_stone_sequences.size(); ++i)
-        {
-            step_count = std::max( step_count, resume_stone_sequences[i].size() );
-        }
-    }
-    else if ( resume_from_checkpoint and resume_stone_sequences.empty() )
-    {
-        step_count = ceil( ckp_stone_file.size() / double(worker_count) );
-    }
-    else
-    {
-        step_count = ceil( powers.size() / double(worker_count) );
-    }
+    size_t step_count = getStepNumber();
     
     if ( process_active )
     {
@@ -616,22 +625,57 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
     
     /* Print output for users.
      * First, we will find the smallest PID such that the number of stones assigned to the corresponding process is equal to
-     * ceil( powers.size() / num_processes ) rather than floor( powers.size() / num_processes ). This will be the process
-     * that gets to print its status to the standard output. Note that process_active has a PID of 0, and does not always
-     * satisfy this condition.
+     * getStepNumber(). This will be the process that gets to print its status to the standard output. Note that process_active
+     * has a PID of 0, and does not always satisfy this condition.
      */
-    std::vector<size_t> start(num_processes);
-    std::vector<size_t> end(num_processes);
+    size_t worker_count = size_t( floor( double(num_processes) / processors_per_likelihood ) );
+    std::vector< std::vector<size_t> > stone_sequences( worker_count );
     std::vector<size_t> ceil_pids;
     
-    for (size_t i = 0; i < num_processes; ++i)
+    for (size_t i = 0; i < worker_count; ++i)
     {
-        // see PowerPosteriorAnalysis::runAll()
-        start[i] = floor( ( floor( i / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * powers.size() );
-        end[i]   = floor( ( ceil((i+1)/double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * powers.size() );
-        if (end[i] - start[i] == ceil((double)powers.size() / num_processes))
+        if ( resume_from_checkpoint and !resume_stone_sequences.empty() )
         {
-            ceil_pids.push_back(i);
+            stone_sequences[i] = resume_stone_sequences[i];
+        }
+        else if ( resume_from_checkpoint and resume_stone_sequences.empty() )
+        {
+            std::vector<size_t> resurrection_indices;
+            for (auto& [k, v] : ckp_stone_file) resurrection_indices.push_back(k);
+            
+            size_t m = resurrection_indices.size();
+            
+            size_t bs = size_t( floor( ( floor(i / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * m ) );
+            size_t be = size_t( floor( ( ceil((i + 1) / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * m ) );
+            std::vector<size_t> tmp;
+            
+            for (size_t j = bs; j < be; ++j)
+            {
+                tmp.push_back( resurrection_indices[j] );
+            }
+            
+            stone_sequences[i] = tmp;
+        }
+        else
+        {
+            size_t bs = size_t( floor( ( floor(i / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * powers.size() ) );
+            size_t be = size_t( floor( ( ceil((i + 1) / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * powers.size() ) );
+            std::vector<size_t> tmp;
+            
+            for (size_t j = bs; j < be; ++j)
+            {
+                tmp.push_back( j );
+            }
+            
+            stone_sequences[i] = tmp;
+        }
+    }
+    
+    for (size_t i = 0; i < worker_count; ++i)
+    {
+        if ( stone_sequences[i].size() == getStepNumber() )
+        {
+            ceil_pids.push_back( i );
         }
     }
     
@@ -642,56 +686,19 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
     
     if (pid == pid_to_print)
     {
-        // Get the width of a given number in characters
-        auto width = [&](size_t x) { return size_t( ceil( log10(x + 0.1) ) ); };
+        // We need to figure out where within our current stone sequence we are
+        auto it = std::find(stone_sequences[pid_to_print].begin(), stone_sequences[pid_to_print].end(), idx);
+        size_t step = std::distance(stone_sequences[pid_to_print].begin(), it);
         
-        // Flat resume uses the single-line "Step n" style; nested resume matches the fresh MPI layout.
-        if ( num_processes == 1 or one_only == true or ( stone_resumes_from_checkpoint && resume_stone_sequences.empty() ) )
+        // Figure out how much whitespace the lines should be padded out with to keep everything neatly aligned
+        size_t digits = std::to_string( getStepNumber() ).size();
+            
+        std::cout << "Step ";
+        for (size_t d = std::to_string(step + 1).size(); d < digits; d++)
         {
-            // Figure out how much whitespace the lines should be padded out with to keep everything neatly aligned
-            size_t digits = width( powers.size() );
-            
-            std::cout << "Step ";
-            for (size_t d = width(idx + 1); d < digits; d++)
-            {
-                std::cout << " ";
-            }
-            std::cout << (idx + 1);
+            std::cout << " ";
         }
-        else
-        {
-            // Get the values to print
-            size_t step = idx + 1 - start[pid_to_print]; // make sure step counter starts from 1
-            size_t lower_bound = (step - 1) * num_processes + 1;
-            size_t upper_bound = std::min( step * num_processes, powers.size() );
-            
-            // Figure out how much whitespace the lines should be padded out with to keep everything neatly aligned
-            size_t tmp = powers.size() - ceil((double)powers.size() / num_processes) + floor((double)powers.size() / num_processes);
-            size_t max_upper_bound = (powers.size() % num_processes == 1) ? end[ end.size() - 2 ] : end[ end.size() - 1 ];
-            size_t max_lower_bound = (powers.size() <= num_processes) ? 1 : ((powers.size() % num_processes > 1) ? tmp : start[ start.size() - 1 ]);
-            size_t offset = width(max_lower_bound) + width(max_upper_bound) + 2; // add 2 for the "--"
-            
-            if (lower_bound != upper_bound)
-            {
-                std::cout << "Steps ";
-                for (size_t d = width(lower_bound) + width(upper_bound) + 2; d < offset; d++)
-                {
-                    std::cout << " ";
-                }
-                std::cout << lower_bound << "--" << upper_bound;
-            }
-            else
-            {
-                std::cout << "Step ";
-                for (size_t d = width(lower_bound); d < offset + 1; d++) // add 1 to account for "Step" vs "Steps"
-                {
-                    std::cout << " ";
-                }
-                std::cout << lower_bound;
-            }
-        }
-    
-        std::cout << " / " << powers.size() << "\t\t";
+        std::cout << (step + 1) << " / " << getStepNumber() << "\t\t";
         std::cout.flush();
     }
     
