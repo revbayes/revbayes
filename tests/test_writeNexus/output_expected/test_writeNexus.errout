@@ -1,0 +1,5 @@
+   Successfully read one character matrix from file 'test_noConcat.nex'
+   Successfully read one character matrix from file 'test_sameStateConcat.nex'
+   Successfully read one character matrix from file 'test_differentStateConcat.nex'
+   Successfully read one character matrix from file 'test_multipleConcat.nex'
+Test passed: Concatenated matrices were written and read properly.
