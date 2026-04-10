@@ -59,19 +59,23 @@ void StairwayPlotDistribution::setValue( RbVector<double> *v, bool force )
     // However, we do not require them to remove the extraneous entry. See the integration tests for an example.
     if ( v != NULL )
     {
-        bool ok = false;
-        if ( folded )
+        if ( folded and (v->size() == n or v->size() == n + 1) )
         {
-            ok = ( v->size() == n / 2 + 1 );
+            throw RbException() << "dnStairwayPlot was set to use a folded site frequency spectrum,\n"
+                                << "but the supplied spectrum appears to be unfolded (" << v->size() << " entries for "
+                                << num_individuals << " individuals).\n"
+                                << "You may want to fold it using the fnFoldSFS() function.";
         }
-        else
+        else if ( not folded and v->size() == n / 2 + 1 )
         {
-            ok = ( v->size() == n || v->size() == n + 1 );
+            throw RbException() << "dnStairwayPlot was set to use an unfolded site frequency spectrum,\n"
+                                << "but the supplied spectrum appears to be folded (" << v->size() << " entries for "
+                                << num_individuals << " individuals).\n"
+                                << "You may want to set folded=TRUE.";
         }
-
-        if ( !ok )
+        else if ( v->size() != n and v->size() != n + 1 and v->size() != n / 2 + 1 )
         {
-            throw RbException() << "The site frequency spectrum has " << v->size() << " entries, but dnStairwayPlot expects "
+            throw RbException() << "The site frequency spectrum has " << v->size() << " entries, but dnStairwayPlot expects\n"
                                 << (folded ? std::to_string(n / 2 + 1) : std::to_string(n) + " or " + std::to_string(n + 1))
                                 << " (numIndividuals=" << num_individuals
                                 << ", folded=" << (folded ? "TRUE" : "FALSE") << ").";
