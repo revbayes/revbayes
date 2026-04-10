@@ -1,0 +1,19 @@
+#NEXUS
+[R-package APE, Fri Feb 13 11:30:17 2026]
+
+BEGIN TAXA;
+	DIMENSIONS NTAX = 3;
+	TAXLABELS
+		Dsuz
+		Dana
+		Dimm
+	;
+END;
+BEGIN TREES;
+	TRANSLATE
+		1	Dsuz,
+		2	Dana,
+		3	Dimm
+	;
+	TREE * UNTITLED = [&R] ((1:27.930627,2:27.930627):19.455281,3:47.385908):0;
+END;

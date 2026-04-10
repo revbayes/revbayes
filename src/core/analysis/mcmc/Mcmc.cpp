@@ -858,7 +858,7 @@ void Mcmc::initializeSamplerFromCheckpoint( void )
         {
             AbstractFileMonitor* m = dynamic_cast< AbstractFileMonitor *>( &monitors[j] );
             std::ifstream monitorFile( m->getMonitorFileName().string() );
-            
+
             // if there is no file yet at the location specified by the monitor, create one and write the header to it
             if ( !monitorFile )
             {
@@ -866,7 +866,18 @@ void Mcmc::initializeSamplerFromCheckpoint( void )
                 monitors[j].printHeader();
                 monitors[j].closeStream();
             }
-            
+            else
+            {
+                monitorFile.close();
+
+                if ( last_generation == 0 )
+                {
+                    throw RbException() << "Failed to read iteration number from checkpoint file '" << mcmc_checkpoint_file_name << "'. The file may be empty or corrupted.";
+                }
+
+                m->truncateAfterGeneration(last_generation);
+            }
+
             // set file monitors to append
             m->setAppend(true);
         }

@@ -1,0 +1,83 @@
+################################################################################
+#
+# RevBayes Validation Test: Brownian motion model 
+# 
+# This test verifies that two datasets,
+#
+# i) a six-species phylogeny, with 3 missing data and 3 observations
+#
+# ii) a three-species phylogeny with 3 observations
+#
+# give the same likelihood score given the same parameter values.
+#            
+#
+# authors: Haoqing Du + BTK
+#
+################################################################################
+
+seed(12345)
+
+#######################
+# Reading in the Data #
+#######################
+
+data <- readContinuousCharacterData("data/Drosophila_tpm_species.nex")
+data_pruned <- readContinuousCharacterData("data/Drosophila_tpm_species_pruned.nex")
+
+# Get some useful variables from the data. We need these later on.
+
+# Tree
+psi <- readTrees( "data/Drosophila.tre" )[1]
+psi_pruned <- readTrees( "data/Drosophila_pruned.tre" )[1]
+root_age := psi.rootAge()
+
+moves = VectorMoves()
+
+# BM-Model
+sigma ~ dnExponential( 1.0 )
+sigma.setValue(0.01)
+moves.append( mvScale(sigma) )
+
+
+###################
+# PhyloCTMC Model #
+###################
+traits ~ dnPhyloBrownianREML(psi, branchRates=1.0, siteRates=sigma, nSites=1)
+traits_pruned ~ dnPhyloBrownianREML(psi_pruned, branchRates=1.0, siteRates=sigma, nSites=1)
+
+# attach the data
+traits.clamp(data)
+traits_pruned.clamp(data_pruned)
+
+# check if the two distributions 
+# give the same likelihood.
+lp1 = traits.lnProbability()
+#lp1 = 0.0
+lp2 = traits_pruned.lnProbability()
+#lp2 = 0.0
+
+treshold <- 0.0001
+
+print("lp1 = " + lp1)
+print("lp2 = " + lp2)
+
+if (abs(lp1 - lp2) < treshold){
+    print("likelihoods in BM distribution (REML) equal, test passed")
+}else{
+    print("likelihoods in BM distributions (REML) not equal, test failed")
+}
+
+# We can use any node of our model as a handle, here we chose to use the rate matrix.
+mymodel = model(traits)
+
+mni = 0
+monitors[++mni] = mnModel(filename="output/BM_missing_data.log",printgen=10, separator = TAB)
+
+mymcmc = mcmc(mymodel, monitors, moves)
+mymcmc.burnin(generations=50,tuningInterval=5)
+mymcmc.run(generations=100)
+
+
+# you may want to quit RevBayes now
+q()
+
