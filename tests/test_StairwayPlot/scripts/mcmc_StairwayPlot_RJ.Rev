@@ -33,16 +33,7 @@ N_SITES = round( sum(obs_sfs) )
 print("Number of individuals:\t" + N_IND)
 
 if (USE_FOLDED == TRUE) {
-    NUM_IND = abs(obs_sfs.size() - 1)
-    tmp_sfs[1] <- obs_sfs[1] + obs_sfs[NUM_IND+1]
-    for (i in 1:ceil(NUM_IND/2)) {
-        if (i != NUM_IND/2) {
-            tmp_sfs[i+1] <- obs_sfs[i+1] + obs_sfs[NUM_IND-i+1]
-	} else {
-            tmp_sfs[i+1] <- obs_sfs[i+1]
-	}
-    }
-    obs_sfs <- tmp_sfs
+    obs_sfs = fnFoldSFS(obs_sfs)
 }
 
 obs_sfs
