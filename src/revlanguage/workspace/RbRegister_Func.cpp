@@ -202,6 +202,7 @@
 #include "Func_wag.h"
 
 /* Functions related to evolution (in folder "functions/popgen") */
+#include "Func_foldSFS.h"
 #include "Func_PattersonsD.h"
 #include "Func_SegregatingSites.h"
 #include "Func_TajimasD.h"
@@ -483,6 +484,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_UPGMA()                                           );
 
         /* Population genetics functions (in folder "functions/popgen") */
+        addFunction( new Func_foldSFS()          );
         addFunction( new Func_PattersonsD()      );
         addFunction( new Func_SegregatingSites() );
         addFunction( new Func_TajimasD()         );
