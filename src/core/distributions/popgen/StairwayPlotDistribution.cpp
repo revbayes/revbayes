@@ -3,6 +3,7 @@
 #include <stddef.h>
 #include <cmath>
 #include <numeric>
+#include <string>
 
 #include "DistributionMultinomial.h"
 #include "DistributionPoisson.h"
@@ -50,7 +51,33 @@ StairwayPlotDistribution::~StairwayPlotDistribution( void )
 
 void StairwayPlotDistribution::setValue( RbVector<double> *v, bool force )
 {
-    
+    size_t n = static_cast<size_t>(num_individuals);
+    // For legacy reasons, we allow the unfolded SFS for n individuals to have either n entries or n+1 entries: in the
+    // latter case, we split the monomorphic sites into those where all the sampled alleles carry the ancestral state
+    // (first element) and those where all the alleles carry the derived state (last element). These two cases are
+    // treated identically by the model, so the user should add the counts before passing the SFS to the distribution.
+    // However, we do not require them to remove the extraneous entry. See the integration tests for an example.
+    if ( v != NULL )
+    {
+        bool ok = false;
+        if ( folded )
+        {
+            ok = ( v->size() == n / 2 + 1 );
+        }
+        else
+        {
+            ok = ( v->size() == n || v->size() == n + 1 );
+        }
+
+        if ( !ok )
+        {
+            throw RbException() << "The site frequency spectrum has " << v->size() << " entries, but dnStairwayPlot expects "
+                                << (folded ? std::to_string(n / 2 + 1) : std::to_string(n) + " or " + std::to_string(n + 1))
+                                << " (numIndividuals=" << num_individuals
+                                << ", folded=" << (folded ? "TRUE" : "FALSE") << ").";
+        }
+    }
+
     TypedDistribution< RbVector<double> >::setValue( v, force );
     
     // need an extra call to initialize() here to refresh the cached 'ln_factorial_num_sites' value after clamping
