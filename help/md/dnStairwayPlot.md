@@ -7,8 +7,8 @@ Bayesian StairwayPlot for inferring single population demographic histories
 from site frequency spectra.
 ## details
 The `StairwayPlot Distribution` specifies a distribution on the site frequency
-spectrum of a single panmictic population. The site frequency spectrum varies
-depending on the demographic history, that is, changes in the effective
+spectrum (SFS) of a single panmictic population. The site frequency spectrum
+varies depending on the demographic history, that is, changes in the effective
 population size. You can pass in a vector of effective population sizes, which
 are assumed to change exactly at the expected coalescent events (see the
 references for the description of the theory). The name of the distribution
@@ -40,14 +40,17 @@ Sebastian Höhna
                 45666, 48986, 65829, 64363, 70895, 74114, 82705, 88226, 102194,
                 114566, 130176, 143775, 169216, 191624, 230016, 276489, 333069,
                 394810, 501961, 653809, 890077, 1349350, 50296796 ]
+    TOTAL_NUM_SITES <- sum(obs_sfs)
 
-	# we need to remove the fixed sites
-	obs_sfs[obs_sfs.size()] <- 0
-
-	# get the number of individuals and the number of sites
+	# get the total number of fixed sites
+	obs_sfs[1] <- 0
+    obs_sfs[obs_sfs.size()] <- 0
+    obs_sfs[1] <- TOTAL_NUM_SITES - sum(obs_sfs)
+    
+    # get the number of individuals and the number of sites
 	N_IND   = abs(obs_sfs.size()-1)
 	N_SITES = round(sum(obs_sfs))
-
+    
 	# now specify a different theta per interval
 	for (i in 1:(N_IND-1)) {
 	  theta[i] ~ dnUnif(0.0, 0.1)
@@ -55,7 +58,7 @@ Sebastian Höhna
 
 	sfs ~ dnStairwayPlot( theta, numSites=N_SITES, numIndividuals=N_IND, folded=TRUE,
                           monomorphicProbability="rest", coding="all" )
-	sfs.clamp( obs_sfs )
+	sfs.clamp( fnFoldSFS(obs_sfs) )
 
 ## references
 - citation: Liu X, Fu Y-X (2015). Exploring population size changes using SNP frequency spectra. Nature Genetics, 47:555--559.
