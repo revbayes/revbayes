@@ -14,8 +14,9 @@ A move that performs random walk on a natural number variable. The displacement 
 Sebastian Hoehna
 
 ## see_also
-mvRandomIntegerWalk
+mvRandomCategoryWalk
 mvRandomGeometricWalk
+mvRandomIntegerWalk
 
 ## example
 
