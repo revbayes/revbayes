@@ -34,32 +34,32 @@ The most important arguments are:
 Sebastian Höhna
 ## see_also
 ## example
-	# let's assume we have some SFS "observed"
-	obs_sfs = [ 305082, 44248, 32223, 28733, 28220, 26205, 27477, 26618, 27533,
+    # let's assume we have some SFS "observed"
+    obs_sfs = [ 305082, 44248, 32223, 28733, 28220, 26205, 27477, 26618, 27533,
                 26945, 28736, 28671, 31277, 31250, 34352, 34859, 38331, 40005,
                 45666, 48986, 65829, 64363, 70895, 74114, 82705, 88226, 102194,
                 114566, 130176, 143775, 169216, 191624, 230016, 276489, 333069,
                 394810, 501961, 653809, 890077, 1349350, 50296796 ]
     TOTAL_NUM_SITES <- sum(obs_sfs)
-
-	# get the total number of fixed sites
-	obs_sfs[1] <- 0
+    
+    # get the total number of fixed sites
+    obs_sfs[1] <- 0
     obs_sfs[obs_sfs.size()] <- 0
     obs_sfs[1] <- TOTAL_NUM_SITES - sum(obs_sfs)
     
     # get the number of individuals and the number of sites
-	N_IND   = abs(obs_sfs.size()-1)
-	N_SITES = round(sum(obs_sfs))
+    N_IND   = abs(obs_sfs.size()-1)
+    N_SITES = round(sum(obs_sfs))
     
-	# now specify a different theta per interval
-	for (i in 1:(N_IND-1)) {
-	  theta[i] ~ dnUnif(0.0, 0.1)
-	}
-
-	sfs ~ dnStairwayPlot( theta, numSites=N_SITES, numIndividuals=N_IND, folded=TRUE,
+    # now specify a different theta per interval
+    for (i in 1:(N_IND-1)) {
+      theta[i] ~ dnUnif(0.0, 0.1)
+    }
+    
+    sfs ~ dnStairwayPlot( theta, numSites=N_SITES, numIndividuals=N_IND, folded=TRUE,
                           monomorphicProbability="rest", coding="all" )
-	sfs.clamp( fnFoldSFS(obs_sfs) )
-
+    sfs.clamp( fnFoldSFS(obs_sfs) )
+    
 ## references
 - citation: Liu X, Fu Y-X (2015). Exploring population size changes using SNP frequency spectra. Nature Genetics, 47:555--559.
   doi: 10.1038/ng.3254
