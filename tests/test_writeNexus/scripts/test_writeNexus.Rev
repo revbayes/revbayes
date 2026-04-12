@@ -36,16 +36,16 @@ if (PHY2.getStateDescriptions().size()  != 6) { print("FAIL: PHY2 (4+6) should h
 if (PHY3.getStateDescriptions().size()  != 6) { print("FAIL: PHY3 (4+4+6) should have 6 state descriptions"); q() }
 
 # write the nexus files
-writeNexus("test_noConcat.nex", phy_1)
-writeNexus("test_sameStateConcat.nex", PHY)
-writeNexus("test_differentStateConcat.nex", PHY2)
-writeNexus("test_multipleConcat.nex", PHY3)
+writeNexus("output/test_noConcat.nex", phy_1)
+writeNexus("output/test_sameStateConcat.nex", PHY)
+writeNexus("output/test_differentStateConcat.nex", PHY2)
+writeNexus("output/test_multipleConcat.nex", PHY3)
 
 # read in the nexus files back
-r <- readDiscreteCharacterData("test_noConcat.nex")
-r1 <- readDiscreteCharacterData("test_sameStateConcat.nex")
-r2 <- readDiscreteCharacterData("test_differentStateConcat.nex")
-r3 <- readDiscreteCharacterData("test_multipleConcat.nex")
+r <- readDiscreteCharacterData("output/test_noConcat.nex")
+r1 <- readDiscreteCharacterData("output/test_sameStateConcat.nex")
+r2 <- readDiscreteCharacterData("output/test_differentStateConcat.nex")
+r3 <- readDiscreteCharacterData("output/test_multipleConcat.nex")
 
 # make sure number of characters is correct
 if (r.nchar() != 100) { print("FAIL: r should have 100 characters"); q() }
