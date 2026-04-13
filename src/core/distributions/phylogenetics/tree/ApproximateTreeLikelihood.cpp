@@ -58,17 +58,8 @@ ApproximateTreeLikelihood* ApproximateTreeLikelihood::clone( void ) const
 
 bool ApproximateTreeLikelihood::checkTopologyMatch( void ) const
 {
-    // Check that the topologies are identical
 
-    // make the time tree unrooted
-    const Tree &time_tree_copy = time_tree->getValue();
-    Tree* time_tree_unrooted = time_tree_copy.clone();
-    time_tree_unrooted->unroot();
-        
-    std::string newick_time_tree = time_tree_unrooted->getPlainNewickRepresentation();
-    std::string newick_branch_length_tree = value->getPlainNewickRepresentation();
-
-    return newick_time_tree == newick_branch_length_tree;
+    return time_tree->getValue().hasSameTopology( *value );
 }
 
 

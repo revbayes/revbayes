@@ -91,6 +91,7 @@ namespace RevBayesCore {
         const TopologyNode&                                 getNode(size_t idx) const;                                                                          //!< Get the node at index
         const std::vector<TopologyNode*>&                   getNodes(void) const;                                                                               //!< Get a pointer to the nodes in the Tree
         std::vector<RbBitSet>*                              getNodesAsBitset(void) const;                                                                       //!< Get a vector of bitset representations of nodes
+        std::vector<RbBitSet>                                getCanonicalSplits(void) const;                                                                    //!< Get a sorted vector of canonicalized bipartitions (rooting-invariant)
         std::vector<std::int64_t>                           getNodeIndices(void) const;                                                                         //!< Get a vector of node indices
         size_t                                              getNumberOfInteriorNodes(void) const;                                                               //!< Get the number of non-root internal nodes in the Tree
         size_t                                              getNumberOfNodes(void) const;                                                                       //!< Get the number of nodes in the Tree

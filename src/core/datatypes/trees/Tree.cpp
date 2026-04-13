@@ -794,6 +794,38 @@ std::vector<RbBitSet>* Tree::getNodesAsBitset(void) const
 }
 
 
+std::vector<RbBitSet> Tree::getCanonicalSplits(void) const
+{
+    // Unroot a copy of the tree so that the number of internal nodes
+    // is the same regardless of whether the original tree was rooted.
+    Tree* unrooted = clone();
+    unrooted->unroot();
+
+    std::vector<RbBitSet>* raw = unrooted->getNodesAsBitset();
+
+    // For each split, pick the lexicographically smaller of the bitset
+    // and its complement. This makes the representation invariant to
+    // which side of the split is "above" vs "below" the root.
+    for (size_t i = 0; i < raw->size(); ++i)
+    {
+        RbBitSet flipped = (*raw)[i];
+        flipped.flip();
+        if ( flipped < (*raw)[i] )
+        {
+            (*raw)[i] = flipped;
+        }
+    }
+
+    std::sort(raw->begin(), raw->end());
+
+    std::vector<RbBitSet> result = *raw;
+    delete raw;
+    delete unrooted;
+
+    return result;
+}
+
+
 std::map<RbBitSet, TopologyNode*> Tree::getBitsetToNodeMap(void) const
 {
 
@@ -1241,10 +1273,7 @@ double Tree::getTreeLength( void ) const
 bool Tree::hasSameTopology(const Tree &t) const
 {
 
-    std::string a = getPlainNewickRepresentation();
-    std::string b = t.getPlainNewickRepresentation();
-
-    return a == b;
+    return getCanonicalSplits() == t.getCanonicalSplits();
 }
 
 
