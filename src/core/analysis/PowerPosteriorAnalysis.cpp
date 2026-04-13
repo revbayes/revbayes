@@ -365,7 +365,24 @@ void PowerPosteriorAnalysis::printStoneAssignmentToWorkers( void )
             worker_name = " groups of processes";
         }
         
-        std::cout << "The " << powers.size() << " requested stones will be executed in " << step_count << (step_count > 1 ? " steps" : " step");
+        size_t stone_count = 0;
+        if ( resume_from_checkpoint and !resume_stone_sequences.empty() )
+        {
+            for (size_t i = 0; i < resume_stone_sequences.size(); ++i)
+            {
+                stone_count += resume_stone_sequences[i].size();
+            }
+        }
+        else if ( resume_from_checkpoint and resume_stone_sequences.empty() )
+        {
+            stone_count = ckp_stone_file.size();
+        }
+        else
+        {
+            stone_count = powers.size();
+        }
+        
+        std::cout << "The " << stone_count << " requested stones will be executed in " << step_count << (step_count > 1 ? " steps" : " step");
         std::cout << " using " << worker_count << worker_name;
         if (processors_per_likelihood > 1)
         {
