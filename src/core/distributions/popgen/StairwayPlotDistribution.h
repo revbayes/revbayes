@@ -32,18 +32,18 @@ template <class valueType> class TypedDagNode;
         enum MONOMORPHIC_PROBABILITY { REST, TREE_LENGTH };
         
         StairwayPlotDistribution(const TypedDagNode< RbVector<double> > *th, std::int64_t n, std::int64_t n_ind, bool f=false, MONOMORPHIC_PROBABILITY mono=REST, CODING cod=ALL);
-        virtual                                            ~StairwayPlotDistribution(void);                                                //!< Virtual destructor
+        virtual                                            ~StairwayPlotDistribution(void);                                             //!< Virtual destructor
         
         // public member functions
-        StairwayPlotDistribution*                           clone(void) const;                                                          //!< Create an independent clone
-        double                                              computeLnProbability(void);
-        void                                                redrawValue(void);
+        StairwayPlotDistribution*                           clone(void) const override;                                                 //!< Create an independent clone
+        double                                              computeLnProbability(void) override;
+        void                                                redrawValue(void) override;
         void                                                setValue(RbVector<double> *v, bool force=false) override;                   //!< Refresh cached factorials when the SFS (e.g. clamp) changes
         
     protected:
         // Parameter management functions
-        void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);            //!< Swap a parameter
-        void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const;
+        void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP) override;   //!< Swap a parameter
+        void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const override;
 
     private:
         bool                                                calculateExpectedSFS(void) const;

@@ -37,32 +37,32 @@ template <class valueType> class TypedDagNode;
 
         PhyloCTMCSiteHomogeneousDollo(const PhyloCTMCSiteHomogeneousDollo&);
         // public member functions
-        PhyloCTMCSiteHomogeneousDollo*                          clone(void) const;
+        PhyloCTMCSiteHomogeneousDollo*                          clone(void) const override;
 
-        virtual void                                            redrawValue(void);
+        virtual void                                            redrawValue(void) override;
         void                                                    setDeathRate(const TypedDagNode< double > *r);
 
         protected:
 
-            void                                                computeRootLikelihood(size_t root, size_t l, size_t r);
-            void                                                computeRootLikelihood(size_t root, size_t l, size_t r, size_t m);
-            void                                                computeInternalNodeLikelihood(const TopologyNode &n, size_t nIdx, size_t l, size_t r);
-            void                                                computeInternalNodeLikelihood(const TopologyNode &n, size_t nIdx, size_t l, size_t r, size_t m);
-            void                                                computeTipLikelihood(const TopologyNode &node, size_t nIdx);
+            void                                                computeRootLikelihood(size_t root, size_t l, size_t r) override;
+            void                                                computeRootLikelihood(size_t root, size_t l, size_t r, size_t m) override;
+            void                                                computeInternalNodeLikelihood(const TopologyNode &n, size_t nIdx, size_t l, size_t r) override;
+            void                                                computeInternalNodeLikelihood(const TopologyNode &n, size_t nIdx, size_t l, size_t r, size_t m) override;
+            void                                                computeTipLikelihood(const TopologyNode &node, size_t nIdx) override;
 
-            void                                                computeRootCorrection(size_t root, size_t l, size_t r);
-            void                                                computeRootCorrection(size_t root, size_t l, size_t r, size_t m);
-            void                                                computeInternalNodeCorrection(const TopologyNode &n, size_t nIdx, size_t l, size_t r);
-            void                                                computeInternalNodeCorrection(const TopologyNode &n, size_t nIdx, size_t l, size_t r, size_t m);
-            void                                                computeTipCorrection(const TopologyNode &node, size_t nIdx);
+            void                                                computeRootCorrection(size_t root, size_t l, size_t r) override;
+            void                                                computeRootCorrection(size_t root, size_t l, size_t r, size_t m) override;
+            void                                                computeInternalNodeCorrection(const TopologyNode &n, size_t nIdx, size_t l, size_t r) override;
+            void                                                computeInternalNodeCorrection(const TopologyNode &n, size_t nIdx, size_t l, size_t r, size_t m) override;
+            void                                                computeTipCorrection(const TopologyNode &node, size_t nIdx) override;
 
-            double                                              sumRootLikelihood( void );
-            void                                                resizeLikelihoodVectors(void);
+            double                                              sumRootLikelihood( void ) override;
+            void                                                resizeLikelihoodVectors(void) override;
             void                                                updateTransitionProbabilityMatrix(size_t node_idx) override;
             void                                                getStationaryFrequencies( std::vector<std::vector<double> >& ) const;
 
             virtual double                                      computeIntegratedNodeCorrection(const std::vector<std::vector<std::vector<double> > >& partials, size_t nodeIndex, size_t mask, size_t mixture, const std::vector<double> &f);
-            virtual void                                        swapParameterInternal(const DagNode *oldP, const DagNode *newP);
+            virtual void                                        swapParameterInternal(const DagNode *oldP, const DagNode *newP) override;
 
             size_t                                              dim;
             std::vector<double>                                 integrationFactors;
@@ -76,11 +76,11 @@ template <class valueType> class TypedDagNode;
 
         private:
             double                                              getScaledNodeWeights(const TopologyNode &node, size_t pattern, std::vector<double>& weights);
-            void                                                scale(size_t i);
-            void                                                scale(size_t i, size_t l, size_t r);
-            void                                                scale(size_t i, size_t l, size_t r, size_t m);
+            void                                                scale(size_t i) override;
+            void                                                scale(size_t i, size_t l, size_t r) override;
+            void                                                scale(size_t i, size_t l, size_t r, size_t m) override;
             virtual void                                        simulateDollo( const TopologyNode &node, std::vector<StandardState> &taxa, size_t rateIndex, std::map<size_t, size_t>& charCounts);
-            void                                                updateTransitionProbabilityMatrices(void);
+            void                                                updateTransitionProbabilityMatrices(void) override;
         };
 
 }
