@@ -2779,7 +2779,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t nod
 {
 
     double* p_node = getMutablePartialLikelihoodsForNode(node_index).likelihoods.data();
-    auto& log_scale_node = getMutablePartialLikelihoodsForNode(node_index).log_scale;
+    auto& scale_node = getMutablePartialLikelihoodsForNode(node_index).scale;
 
     if ( RbSettings::userSettings().getUseScaling() == true && node_index % RbSettings::userSettings().getScalingDensity() == 0 )
     {
@@ -2787,8 +2787,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t nod
         for (size_t site = 0; site < this->pattern_block_size ; ++site)
         {
 
-            // the max probability
-            double max = 0.0;
+            bool need_scale = true;
 
             // compute the per site probabilities
             for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
@@ -2800,20 +2799,17 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t nod
 
                 for ( size_t i=0; i<this->num_chars; ++i)
                 {
-                    if ( p_site_mixture[i] > max )
-                    {
-                        max = p_site_mixture[i];
-                    }
+                    if ( p_site_mixture[i] >= scale_min )
+                        need_scale = false;
                 }
 
             }
 
-            log_scale_node[site] = 0;
+            scale_node[site] = 0;
 
-            // Avoid dividing by zero or NaN
-            if (max > 0)
+            if (need_scale)
             {
-                log_scale_node[site] -= log(max);
+                scale_node[site]++;
 
                 // compute the per site probabilities
                 for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
@@ -2824,7 +2820,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t nod
                     double* p_site_mixture = p_node + offset;
 
                     for ( size_t i=0; i<this->num_chars; ++i)
-                        p_site_mixture[i] /= max;
+                        p_site_mixture[i] *= scale_factor;
                 }
             }
         }
@@ -2835,7 +2831,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t nod
         // iterate over all sites
         for (size_t site = 0; site < this->pattern_block_size ; ++site)
         {
-            log_scale_node[site] = 0;
+            scale_node[site] = 0;
         }
 
     }
@@ -2848,9 +2844,9 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t nod
 {
 
     double* p_node = getMutablePartialLikelihoodsForNode(node_index).likelihoods.data();
-    auto& log_scale_node = getMutablePartialLikelihoodsForNode(node_index).log_scale;
-    auto& log_scale_left = getPartialLikelihoodsForNode(left).log_scale;
-    auto& log_scale_right = getPartialLikelihoodsForNode(right).log_scale;
+    auto& scale_node = getMutablePartialLikelihoodsForNode(node_index).scale;
+    auto& scale_left = getPartialLikelihoodsForNode(left).scale;
+    auto& scale_right = getPartialLikelihoodsForNode(right).scale;
 
     if ( RbSettings::userSettings().getUseScaling() == true && node_index % RbSettings::userSettings().getScalingDensity() == 0 )
     {
@@ -2858,8 +2854,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t nod
         for (size_t site = 0; site < this->pattern_block_size ; ++site)
         {
 
-            // the max probability
-            double max = 0.0;
+            bool need_scale = true;
 
             // compute the per site probabilities
             for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
@@ -2871,20 +2866,17 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t nod
 
                 for ( size_t i=0; i<this->num_chars; ++i)
                 {
-                    if ( p_site_mixture[i] > max )
-                    {
-                        max = p_site_mixture[i];
-                    }
+                    if ( p_site_mixture[i] >= scale_min )
+                        need_scale = false;
                 }
 
             }
 
-            log_scale_node[site] = log_scale_left[site] + log_scale_right[site];
+            scale_node[site] = scale_left[site] + scale_right[site];
 
-            // Avoid dividing by zero or NaN
-            if (max > 0)
+            if (need_scale)
             {
-                log_scale_node[site] -= log(max);
+                scale_node[site]++;
 
                 // compute the per site probabilities
                 for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
@@ -2895,7 +2887,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t nod
                     double* p_site_mixture = p_node + offset;
 
                     for ( size_t i=0; i<this->num_chars; ++i)
-                        p_site_mixture[i] /= max;
+                        p_site_mixture[i] *= scale_factor;
                 }
             }
         }
@@ -2906,7 +2898,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t nod
         // iterate over all mixture categories
         for (size_t site = 0; site < this->pattern_block_size ; ++site)
         {
-            log_scale_node[site] = log_scale_left[site] + log_scale_right[site];
+            scale_node[site] = scale_left[site] + scale_right[site];
         }
 
     }
@@ -2919,10 +2911,10 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t nod
 {
 
     double* p_node = getMutablePartialLikelihoodsForNode(node_index).likelihoods.data();
-    auto& log_scale_node = getMutablePartialLikelihoodsForNode(node_index).log_scale;
-    auto& log_scale_left = getPartialLikelihoodsForNode(left).log_scale;
-    auto& log_scale_right = getPartialLikelihoodsForNode(right).log_scale;
-    auto& log_scale_middle = getPartialLikelihoodsForNode(middle).log_scale;
+    auto& scale_node = getMutablePartialLikelihoodsForNode(node_index).scale;
+    auto& scale_left = getPartialLikelihoodsForNode(left).scale;
+    auto& scale_right = getPartialLikelihoodsForNode(right).scale;
+    auto& scale_middle = getPartialLikelihoodsForNode(middle).scale;
 
     if ( RbSettings::userSettings().getUseScaling() == true && node_index % RbSettings::userSettings().getScalingDensity() == 0 )
     {
@@ -2930,8 +2922,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t nod
         for (size_t site = 0; site < this->pattern_block_size ; ++site)
         {
 
-            // the max probability
-            double max = 0.0;
+            bool need_scale = true;
 
             // compute the per site probabilities
             for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
@@ -2943,20 +2934,17 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t nod
 
                 for ( size_t i=0; i<this->num_chars; ++i)
                 {
-                    if ( p_site_mixture[i] > max )
-                    {
-                        max = p_site_mixture[i];
-                    }
+                    if ( p_site_mixture[i] >= scale_min )
+                        need_scale = false;
                 }
 
             }
 
-            log_scale_node[site] = log_scale_left[site] + log_scale_right[site] + log_scale_middle[site];
+            scale_node[site] = scale_left[site] + scale_right[site] + scale_middle[site];
 
-            // Avoid dividing by zero or NaN
-            if (max > 0)
+            if (need_scale)
             {
-                log_scale_node[site] -= log(max);
+                scale_node[site]++;
 
                 // compute the per site probabilities
                 for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
@@ -2967,7 +2955,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t nod
                     double* p_site_mixture = p_node + offset;
 
                     for ( size_t i=0; i<this->num_chars; ++i)
-                        p_site_mixture[i] /= max;
+                        p_site_mixture[i] *= scale_factor;
                 }
             }
         }
@@ -2978,7 +2966,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::scale( size_t nod
         // iterate over all mixture categories
         for (size_t site = 0; site < this->pattern_block_size ; ++site)
         {
-            log_scale_node[site] = log_scale_left[site] + log_scale_right[site] + log_scale_middle[site];
+            scale_node[site] = scale_left[site] + scale_right[site] + scale_middle[site];
         }
 
     }
@@ -3652,7 +3640,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
 
     // get the pointers to the partial likelihoods of the left and right subtree
     const double*   p_node  = getPartialLikelihoodsForNode(node_index).likelihoods.data();
-    auto& log_scale_node = getPartialLikelihoodsForNode(node_index).log_scale;
+    auto& scale_node = getPartialLikelihoodsForNode(node_index).scale;
 
     // create a vector for the per mixture likelihoods
     // we need this vector to sum over the different mixture likelihoods
@@ -3750,12 +3738,12 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
                         ftotal += f[this->invariant_site_index[site][c]];
                     }
 
-                    rv[site] = log( prob_invariant * ftotal + oneMinusPInv * per_mixture_Likelihoods[site] / exp(log_scale_node[site]) ) * *patterns;
+                    rv[site] = log( prob_invariant * ftotal + oneMinusPInv * per_mixture_Likelihoods[site] / exp(scale_node[site] * log_scale_factor) ) * *patterns;
                 }
                 else
                 {
                     rv[site] = log( oneMinusPInv * per_mixture_Likelihoods[site] ) * *patterns;
-                    rv[site] -= log_scale_node[site] * *patterns;
+                    rv[site] -= scale_node[site] * log_scale_factor * *patterns;
                 }
 
             }
@@ -3791,7 +3779,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
 
             if ( RbSettings::userSettings().getUseScaling() == true )
             {
-                rv[site] -= log_scale_node[site] * *patterns;
+                rv[site] -= scale_node[site] * log_scale_factor * *patterns;
             }
 
         }
@@ -3812,7 +3800,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
 
     // get the pointers to the partial likelihoods of the left and right subtree
     const double*  p_node  = getPartialLikelihoodsForNode(node_index).likelihoods.data();
-    auto& log_scale_node = getPartialLikelihoodsForNode(node_index).log_scale;
+    auto& scale_node = getPartialLikelihoodsForNode(node_index).scale;
 
     // create a vector for the per mixture likelihoods
     // we need this vector to sum over the different mixture likelihoods
@@ -3911,7 +3899,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
 
                     if ( RbSettings::userSettings().getUseScaling() == true )
                     {
-                        rv[site][site_rate_index * num_site_matrices + matrix] -= log_scale_node[site] * *patterns;
+                        rv[site][site_rate_index * num_site_matrices + matrix] -= scale_node[site] * log_scale_factor * *patterns;
                     }
 
                 }
@@ -3932,7 +3920,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
 
                 if ( RbSettings::userSettings().getUseScaling() == true )
                 {
-                    rv[site][mixture] -= log_scale_node[site] * *patterns;
+                    rv[site][mixture] -= scale_node[site] * log_scale_factor * *patterns;
                 }
             }
 
@@ -3954,7 +3942,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
 
     // get the pointers to the partial likelihoods of the left and right subtree
     const double* p_node  = getPartialLikelihoodsForNode(node_index).likelihoods.data();
-    auto& log_scale_node = getPartialLikelihoodsForNode(node_index).log_scale;
+    auto& scale_node = getPartialLikelihoodsForNode(node_index).scale;
 
     size_t num_site_matrices = num_site_mixtures/num_site_rates;
 
@@ -4067,7 +4055,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
 
                 if ( RbSettings::userSettings().getUseScaling() == true )
                 {
-                    rv[site][site_rate_index] -= log_scale_node[site] * *patterns;
+                    rv[site][site_rate_index] -= scale_node[site] * log_scale_factor * *patterns;
                 }
 
             }
@@ -4086,7 +4074,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
 
                 if ( RbSettings::userSettings().getUseScaling() == true )
                 {
-                    rv[site][site_rate_index] -= log_scale_node[site] * *patterns;
+                    rv[site][site_rate_index] -= scale_node[site] * log_scale_factor * *patterns;
                 }
             }
 
