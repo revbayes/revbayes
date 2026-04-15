@@ -237,7 +237,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
     auto& pl_right = this->getPartialLikelihoodsForNode(right);
     const double*   p_left  = pl_left.likelihoods.data();
     const double*   p_right = pl_right.likelihoods.data();
-    assert(pl_left.dims() = pl_right.dims());
+    assert(pl_left.dims() == pl_right.dims());
 
     double*         p_node  = this->createEmptyPartialLikelihoodsForNode(node_index, pl_left.dims()).likelihoods.data();
 
