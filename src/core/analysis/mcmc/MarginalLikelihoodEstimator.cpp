@@ -131,7 +131,7 @@ MarginalLikelihoodEstimator::MarginalLikelihoodEstimator(const path &fn, const s
                 l = std::stod(tmp);
             } catch (std::invalid_argument&) {
                 throw RbException() << "Please check format of file " << filename << ", non-numeric input in likelihood column";
-}
+            }
             likelihoodSamples[index-1].push_back( l );
 
         }
