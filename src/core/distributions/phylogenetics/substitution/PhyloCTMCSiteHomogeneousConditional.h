@@ -36,7 +36,6 @@ namespace RevBayesCore {
         virtual void                                        computeRootLikelihood(size_t root, size_t l, size_t r);
         virtual void                                        computeRootLikelihood(size_t root, size_t l, size_t r, size_t m);
         virtual void                                        computeInternalNodeLikelihood(const TopologyNode &n, size_t nIdx, size_t l, size_t r);
-        virtual void                                        computeInternalNodeLikelihood(const TopologyNode &n, size_t nIdx, size_t l, size_t r, size_t m);
         virtual void                                        computeTipLikelihood(const TopologyNode &node, size_t nIdx);
 
         virtual void                                        computeRootCorrection(size_t root, size_t l, size_t r);
@@ -455,21 +454,6 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeInterna
         computeInternalNodeCorrection(node, node_index, left, right);
     }
 }
-
-
-template<class charType>
-void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::computeInternalNodeLikelihood(const TopologyNode &node, size_t node_index, size_t left, size_t right, size_t middle)
-{
-
-    PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikelihood(node, node_index, left, right, middle);
-
-    if (coding != AscertainmentBias::ALL)
-    {
-        computeInternalNodeCorrection(node, node_index, left, right, middle);
-    }
-}
-
-
 
 
 template<class charType>
