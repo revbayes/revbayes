@@ -289,7 +289,6 @@ namespace RevBayesCore {
 
         // pure virtual methods
         virtual void                                                        computeInternalNodeLikelihood(const TopologyNode &n, size_t nIdx, size_t l, size_t r) = 0;
-        virtual void                                                        computeInternalNodeLikelihood(const TopologyNode &n, size_t nIdx, size_t l, size_t r, size_t m) = 0;
         virtual void                                                        computeTipLikelihood(const TopologyNode &node, size_t nIdx) = 0;
         virtual void                                                        computeRootLikelihood( size_t root, size_t left, size_t right) = 0;
         virtual void                                                        computeRootLikelihood( size_t root, size_t left, size_t right, size_t middle) = 0;
