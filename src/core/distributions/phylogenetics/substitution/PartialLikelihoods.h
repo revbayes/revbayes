@@ -3,6 +3,10 @@
 
 #include <vector>
 
+constexpr double scale_factor = 115792089237316195423570985008687907853269984665640564039457584007913129639936e0;
+constexpr double scale_min = 1.0/scale_factor;
+constexpr double log_scale_factor = 177.445678223345999210811423093293201427328034396225345054e0;
+
 template <typename T>
 struct no_init_allocator {
     using value_type = T;
@@ -71,7 +75,7 @@ public:
     double  likelihood(int m, int p, int s) const {return likelihoods[s + dims_.num_states*(p + dims_.num_patterns*m)];}
 
     no_init_vector<double> likelihoods; // per mixture * pattern * state
-    no_init_vector<double> log_scale; // per site
+    no_init_vector<int> scale; // per site
 
     PartialLikelihoods& operator=(const PartialLikelihoods&) = default;
     PartialLikelihoods& operator=(PartialLikelihoods&&) noexcept = default;
@@ -85,8 +89,8 @@ PartialLikelihoods()
 
 PartialLikelihoods(const Dims& d)
     :dims_(d),
-        likelihoods(dims_.size()),
-        log_scale(dims_.num_patterns)
+     likelihoods(dims_.size()),
+     scale(dims_.num_patterns)
     {
     }
 };

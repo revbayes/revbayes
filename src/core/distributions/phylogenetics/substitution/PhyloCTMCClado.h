@@ -1394,7 +1394,7 @@ double RevBayesCore::PhyloCTMCClado<charType>::sumRootLikelihood( void )
     
     // get the pointers to the partial likelihoods of the left and right subtree
     const double* p_node  = this->getPartialLikelihoodsForNode(node_index).likelihoods.data();
-    auto& log_scale_node = this->getPartialLikelihoodsForNode(node_index).log_scale;
+    auto& scale_node = this->getPartialLikelihoodsForNode(node_index).scale;
     
     // create a vector for the per mixture likelihoods
     // we need this vector to sum over the different mixture likelihoods
@@ -1461,13 +1461,13 @@ double RevBayesCore::PhyloCTMCClado<charType>::sumRootLikelihood( void )
                         ftotal += f[this->invariant_site_index[site][c]];
                     }
 
-                    sumPartialProbs += log( p_inv * ftotal * exp(log_scale_node[site]) + oneMinusPInv * per_mixture_Likelihoods[site] / this->num_site_rates ) * *patterns;
+                    sumPartialProbs += log( p_inv * ftotal * exp(scale_node[site] * log_scale_factor) + oneMinusPInv * per_mixture_Likelihoods[site] / this->num_site_rates ) * *patterns;
                 }
                 else
                 {
                     sumPartialProbs += log( oneMinusPInv * per_mixture_Likelihoods[site] / this->num_site_rates ) * *patterns;
                 }
-                sumPartialProbs -= log_scale_node[site] * *patterns;
+                sumPartialProbs -= scale_node[site] * log_scale_factor * *patterns;
                 
             }
             else // no scaling
@@ -1502,7 +1502,7 @@ double RevBayesCore::PhyloCTMCClado<charType>::sumRootLikelihood( void )
             if ( RbSettings::userSettings().getUseScaling() == true )
             {
                 
-                sumPartialProbs -= log_scale_node[site] * *patterns;
+                sumPartialProbs -= scale_node[site] * log_scale_factor * *patterns;
             }
 
         }
