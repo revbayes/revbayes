@@ -131,7 +131,8 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLike
         p_mixture+=this->mixtureOffset; p_mixture_left+=this->mixtureOffset; p_mixture_right+=this->mixtureOffset;
         
     } // end-for over all mixtures (=rate categories)
-    
+
+    this->scale( root, left, right );
 }
 
 template<class charType>
@@ -191,6 +192,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLike
         
     } // end-for over all mixtures (=rate categories)
     
+    this->scale( root, left, right, middle );
 }
 
 
@@ -398,6 +400,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
     delete[] tmp_gt;
 # endif
     
+    this->scale( node_index, left, right );
 }
 
 
@@ -695,7 +698,8 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeTipLikel
         p_mixture+=this->mixtureOffset;
         
     } // end-for over all mixture categories
-    
+
+    this->scale( node_index );
 }
 
 

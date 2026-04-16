@@ -323,7 +323,7 @@ void RevBayesCore::PhyloCTMCClado<charType>::computeRootLikelihood( size_t root,
         
     } // end-for over all mixtures (=rate-categories)
     
-    return;
+    this->scale( root, left, right );
 }
 
 template<class charType>
@@ -436,6 +436,8 @@ void RevBayesCore::PhyloCTMCClado<charType>::computeInternalNodeLikelihood(const
         } // end-for over all sites (=patterns)
 
     } // end-for over all mixtures (=rate-categories)
+
+    this->scale( node_index, left, right );
 }
 
 
@@ -730,7 +732,8 @@ void RevBayesCore::PhyloCTMCClado<charType>::computeTipLikelihood(const Topology
         p_mixture+=this->mixtureOffset;
         
     } // end-for over all mixture categories
-    
+
+    this->scale( node_index );
 }
 
 

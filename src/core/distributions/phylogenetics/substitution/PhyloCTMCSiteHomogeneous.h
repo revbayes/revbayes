@@ -143,7 +143,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihood( si
 
     } // end-for over all mixtures (=rate categories)
 
-
+    this->scale(root, left, right);
 }
 
 
@@ -222,6 +222,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeRootLikelihood( si
 
     } // end-for over all mixtures (=rate categories)
 
+    this->scale(root, left, right);
 }
 
 
@@ -289,6 +290,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeInternalNodeLikeli
 
     } // end-for over all mixtures (=rate-categories)
 
+    this->scale( node_index, left, right );
 }
 
 
@@ -482,6 +484,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneous<charType>::computeTipLikelihood(cons
 
     } // end-for over all mixture categories
 
+    this->scale( node_index );
 }
 
 
