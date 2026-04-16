@@ -197,33 +197,36 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLike
 
 template<class charType>
 void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternalNodeLikelihood(const TopologyNode &node, size_t node_index, size_t left, size_t right) 
-{   
-    
+{
+    std::vector<char> site_needs_scaling(this->pattern_block_size,1);
+
     // update the transition probability matrix
     this->updateTransitionProbabilityMatrix( node_index );
-    
+
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
     auto& pl_left = this->getPartialLikelihoodsForNode(left);
     auto& pl_right = this->getPartialLikelihoodsForNode(right);
-    const double* p_left   = pl_left.likelihoods.data();
-    const double* p_right  = pl_right.likelihoods.data();
     assert(pl_left.dims() == pl_right.dims());
 
-    double* p_node   = this->createEmptyPartialLikelihoodsForNode(node_index, pl_left.dims()).likelihoods.data();
+    const double* p_left   = pl_left.likelihoods.data();
+    const double* p_right  = pl_right.likelihoods.data();
+    auto& scale_left = pl_left.scale;
+    auto& scale_right = pl_right.scale;
+
+    auto& pl_node = this->createEmptyPartialLikelihoodsForNode(node_index, pl_left.dims());
+    double* p_node   = pl_node.likelihoods.data();
+    auto& scale_node = pl_node.scale;
 
 #   if defined(__AVX__)
-
+    const __m256d scale_min_v = _mm256_set1_pd(scale_min);
 #   elif defined(__SSE2__) || defined(_M_X64) || (defined(_M_IX86_FP) && _M_IX86_FP >= 2)
-    
-#   else
-
+    const __m128d scale_min_v = _mm_set1_pd(scale_min);
 #   endif
-    
+
     // iterate over all mixture categories
     for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
     {
         // the transition probability matrix for this mixture category
-//         const double* tp_begin = this->transition_prob_matrices[mixture].theMatrix;
         const double* tp_begin = this->pmatrices[node_index][mixture].theMatrix;
         
         // get the pointers to the likelihood for this mixture category
@@ -232,7 +235,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
         double*          p_site_mixture          = p_node + offset;
         const double*    p_site_mixture_left     = p_left + offset;
         const double*    p_site_mixture_right    = p_right + offset;
-        
+
 #       if defined(__AVX__)
         
         __m256d tp_a = _mm256_loadu_pd(tp_begin);
@@ -251,8 +254,6 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
         __m128d tp_t_ac = _mm_load_pd(tp_begin+12);
         __m128d tp_t_gt = _mm_load_pd(tp_begin+14);
         
-#       else
-
 #       endif
 
         // compute the per site probabilities
@@ -272,12 +273,16 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
             
             __m256d ac   = _mm256_hadd_pd(a_acgt,c_acgt);
             __m256d gt   = _mm256_hadd_pd(g_acgt,t_acgt);
-            
 
             __m256d lo  = _mm256_permute2f128_pd(ac, gt, 0x20);
             __m256d hi  = _mm256_permute2f128_pd(ac, gt, 0x31);
             __m256d sum = _mm256_add_pd(lo, hi);
+
             _mm256_storeu_pd(p_site_mixture, sum);
+
+            __m256d cmp = _mm256_cmp_pd(sum, scale_min_v, _CMP_GE_OQ);
+            int mask = _mm256_movemask_pd(cmp);
+            site_needs_scaling[site] &= (mask == 0);
 
 #           elif defined(__SSE2__) || defined(_M_X64) || (defined(_M_IX86_FP) && _M_IX86_FP >= 2)
             
@@ -293,7 +298,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
             __m128d a_ac = _mm_mul_pd(p01, tp_a_ac   );
             __m128d a_gt = _mm_mul_pd(p23, tp_a_gt );
             __m128d a_acgt = _mm_hadd_pd(a_ac,a_gt);
-            
+
             __m128d c_ac = _mm_mul_pd(p01, tp_c_ac );
             __m128d c_gt = _mm_mul_pd(p23, tp_c_gt );
             __m128d c_acgt = _mm_hadd_pd(c_ac,c_gt);
@@ -312,7 +317,12 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
             
             __m128d gt = _mm_hadd_pd(g_acgt,t_acgt);
             _mm_store_pd(p_site_mixture+2,gt);
- 
+
+            __m128d max_acgt = _mm_max_pd(ac, gt);
+            __m128d cmp = _mm_cmpge_pd(max_acgt, scale_min_v);
+            int mask = _mm_movemask_pd(cmp);
+            site_needs_scaling[site] &= (mask == 0);
+
 #           else
 
             double p0 = p_site_mixture_left[0] * p_site_mixture_right[0];
@@ -348,6 +358,10 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
             
             p_site_mixture[3] = sum;
 
+            double m = std::max(std::max(p_site_mixture[0], p_site_mixture[1]),
+                                std::max(p_site_mixture[2], p_site_mixture[3]));
+            site_needs_scaling[site] &= (m < scale_min);
+
 #           endif
             
             // increment the pointers to the next site
@@ -358,7 +372,38 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
         
     } // end-for over all mixtures (=rate-categories)
 
-    this->scale( node_index, left, right );
+    // Rescale the sites, but only if (i) rescaling is enabled and (ii) they need it.
+    if ( RbSettings::userSettings().getUseScaling() == true && node_index % RbSettings::userSettings().getScalingDensity() == 0 )
+    {
+        // iterate over all mixture categories
+        for (size_t site = 0; site < this->pattern_block_size ; ++site)
+        {
+            scale_node[site] = scale_left[site] + scale_right[site];
+            if (site_needs_scaling[site])
+                scale_node[site]++;
+        }
+
+        for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
+        {
+            for (size_t site = 0; site < this->pattern_block_size ; ++site)
+            {
+                if (site_needs_scaling[site])
+                {
+                    // get the pointers to the likelihood for this mixture category
+                    double* p_site_mixture = p_node + mixture*this->mixtureOffset + site*this->siteOffset;
+                    
+                    for ( size_t i=0; i<4; ++i)
+                        p_site_mixture[i] *= scale_factor;
+                }
+            }
+        }
+    }
+    else if (RbSettings::userSettings().getUseScaling() == true)
+    {
+        // iterate over all mixture categories
+        for (size_t site = 0; site < this->pattern_block_size ; ++site)
+            scale_node[site] = scale_left[site] + scale_right[site];
+    }
 }
 
 
