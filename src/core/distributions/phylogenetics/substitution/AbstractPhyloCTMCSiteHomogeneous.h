@@ -395,14 +395,17 @@ namespace RevBayesCore {
         size_t                                                              sampled_site_rate_component = 0;
         size_t                                                              sampled_site_matrix_component = 0;
 
+    protected:
+
+        void                                                                scale(size_t i);
+        void                                                                scale(size_t i, size_t l, size_t r);
+        void                                                                scale(size_t i, size_t l, size_t r, size_t m);
+
     private:
 
         // private methods
         void                                                                fillLikelihoodVector(const TopologyNode &n, size_t nIdx);
         void                                                                recursiveMarginalLikelihoodComputation(size_t nIdx);
-        virtual void                                                        scale(size_t i);
-        virtual void                                                        scale(size_t i, size_t l, size_t r);
-        virtual void                                                        scale(size_t i, size_t l, size_t r, size_t m);
         virtual void                                                        simulate(const TopologyNode& node, std::vector< DiscreteTaxonData< charType > > &t, const std::vector<bool> &inv, const std::vector<size_t> &perSiteRates);
         
         
@@ -1094,7 +1097,6 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
             fillLikelihoodVector( right, right_index );
 
             computeRootLikelihood( root_index, left_index, right_index );
-            scale(root_index, left_index, right_index);
         }
         else if ( root.getNumberOfChildren() == 3 ) // unrooted trees have three children for the root
         {
@@ -1109,7 +1111,6 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
             fillLikelihoodVector( middle, middleIndex );
 
             computeRootLikelihood( root_index, left_index, right_index, middleIndex );
-            scale(root_index, left_index, right_index, middleIndex);
         }
         else
         {
@@ -2263,9 +2264,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::fillLikelihoodVec
             // this is a tip node
             // compute the likelihood for the tip and we are done
             computeTipLikelihood(node, node_index);
-
-            // rescale likelihood vector
-            scale(node_index);
         }
         else
         {
@@ -2279,9 +2277,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::fillLikelihoodVec
 
             // now compute the likelihoods of this internal node
             computeInternalNodeLikelihood(node,node_index,left_index,right_index);
-
-            // rescale likelihood vector
-            scale(node_index,left_index,right_index);
         }
     }
 
