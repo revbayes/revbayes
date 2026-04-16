@@ -1572,7 +1572,6 @@ x.lnProbability())");
 	help_arrays[string("dnPhyloCTMCDASiteIID")][string("see_also")].push_back(string(R"(mvCharacterHistory)"));
 	help_strings[string("dnPhyloCTMCDASiteIID")][string("title")] = string(R"(Data augmentation-based phylogenetic continuous-time Markov chain distribution
 with independent and identically distributed sites)");
-	help_strings[string("dnPhyloCTMCDollo")][string("name")] = string(R"(dnPhyloCTMCDollo)");
 	help_strings[string("dnPhyloDistanceGamma")][string("name")] = string(R"(dnPhyloDistanceGamma)");
 	help_strings[string("dnPhyloMultiSampleOrnsteinUhlenbeck")][string("name")] = string(R"(dnPhyloMultiSampleOrnsteinUhlenbeck)");
 	help_strings[string("dnPhyloMultiSampleOrnsteinUhlenbeckREML")][string("name")] = string(R"(dnPhyloMultiSampleOrnsteinUhlenbeckREML)");
