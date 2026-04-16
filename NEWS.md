@@ -79,7 +79,7 @@
       - Report 95% HPD intervals for the ages of sampled ancestors (#810).
       - Fix majority-rule consensus trees with sampled ancestors (#859).
   * MCMC
-      - Do not print confusing messages about tip age adjustments on initialiation (#821).
+      - Do not print confusing messages about tip age adjustments on initialization (#821).
       - Allow specifying `tuningInterval = 0` in `mcmc.burnin( )` (#843) and `powerPosterior.burnin( )` (#878).
       - Make sure `mnModel` extracts the right nodes from the model graph (#900).
   * Moves
@@ -101,13 +101,15 @@
 
 ## Documentation improvements
   * Expand documentation for `mvSlice` (#614).
+  * Expand documentation for `TraceTree` (#819).
   * `args` (#830, #851).
   * `dnPhyloCTMC`
       - Add a description of the `coding` argument (#832).
       - Expand the provided example to show how to simulate characters (#868).
       - Formatting fixes (#867, #871).
+      - Add a description of the new `observationErrorProbability` and `observationErrorFrequencies` arguments (#901).
   * `mvFNPR` (#839).
-  * Typo fix in `write` (#852).
+  * Minor fixes to `write` (#852) and `dnBeta` (#900).
   * Corrections to `srGeweke` and multispecies coalescent distributions (#871).
   * Add a description of the `burninMethod` argument of convergence rules (#871).
   * Miscellaneous formatting fixes (#871).

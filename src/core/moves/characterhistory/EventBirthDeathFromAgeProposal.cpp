@@ -106,14 +106,12 @@ double EventBirthDeathFromAgeProposal::doProposal( void )
     double u = rng->uniform01();
     
     double p_birth = 1.0;
-    double p_death = 0.0;
     
     size_t num_events = history.getNumberEvents();
     
     if ( num_events > 0 )
     {
         p_birth = 0.5;
-        p_death = 0.5;
     }
     
     double proposal_prob = 0.0;

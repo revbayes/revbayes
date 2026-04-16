@@ -19,11 +19,11 @@ namespace RevBayesCore {
     public:
         // Note, we need the size of the alignment in the constructor to correctly simulate an initial state
         CTMCProcess(size_t nc, size_t ns );
-        virtual                                                            ~CTMCProcess(void);                                                     //!< Virtual destructor
+        virtual                                                            ~CTMCProcess(void);                                                                           //!< Virtual destructor
 
         // public member functions
         // pure virtual
-        virtual CTMCProcess*                                                clone(void) const;                                                                      //!< Create an independent clone
+        virtual CTMCProcess*                                                clone(void) const;                                                                           //!< Create an independent clone
 
         // non-virtual
         virtual double                                                      computeLnProbability(void);
@@ -39,7 +39,7 @@ namespace RevBayesCore {
         void                                                                setSiteMatricesProbs(const TypedDagNode< Simplex > *rp);
         void                                                                setSiteRates(const TypedDagNode< RbVector< double > > *r);
         void                                                                setSiteRatesProbs(const TypedDagNode< Simplex > *rp);
-        void                                                                setValue(charType *v, bool f=false);                         //!< Set the current value, e.g. attach an observation (clamp)
+        void                                                                setValue(AbstractDiscreteTaxonData *v, bool f=false);                                        //!< Set the current value, e.g. attach an observation (clamp)
 
 
     protected:
@@ -1086,30 +1086,33 @@ void RevBayesCore::CTMCProcess<charType>::setActivePIDSpecialized(size_t a, size
 
 
 template<class charType>
-void RevBayesCore::CTMCProcess<charType>::setValue(charType *v, bool force)
+void RevBayesCore::CTMCProcess<charType>::setValue(AbstractDiscreteTaxonData *v, bool force)
 {
 
-    if ( v->getMaxObservedStateIndex() > this->num_chars - 1)
+    for (size_t i = 0; i < v->getNumberOfCharacters(); ++i)
     {
-        // We might use different sized matrices for different partitions depending on the observed number of states.
-        std::stringstream ss;
-        ss << "The number of observed states (" << v->getMaxObservedStateIndex() + 1 << ") is greater than the dimension of the Q matrix (" << this->num_chars << ")" << std::endl;
-        throw RbException(ss.str());
+        if ( v->getCharacter(i).getStateIndex() > this->num_chars - 1 )
+        {
+            // We might use different sized matrices for different partitions depending on the observed number of states.
+            std::stringstream ss;
+            ss << "The number of observed states (" << v->getCharacter(i).getStateIndex() + 1 << ") for character " << i << " is greater than the dimension of the Q matrix (" << this->num_chars << ")." << std::endl;
+            throw RbException(ss.str());
+        }
     }
 
-    if (v->getDataType() != this->template_state.getDataType() )
+    if ( v->getCharacter(0).getDataType() != this->template_state.getDataType() )
     {
-      // There is a mismatch between the data type of the data matrix and the data type of the CTMC.
-      std::stringstream ss;
-      ss << "The data type of the data matrix ("<< v->getDataType() <<") differs from that of the CTMC object ("<< this->template_state.getDataType() <<")." << std::endl;
-      throw RbException(ss.str());
+        // There is a mismatch between the data type of the data matrix and the data type of the CTMC.
+        std::stringstream ss;
+        ss << "The data type of the data matrix (" << v->getCharacter(0).getDataType() << ") differs from that of the CTMC object (" << this->template_state.getDataType() << ")." << std::endl;
+        throw RbException(ss.str());
     }
 
     // delegate to the parent class
     TypedDistribution< AbstractDiscreteTaxonData >::setValue(v, force);
 
     // reset the number of sites
-    this->num_sites = v->getNumberOfIncludedCharacters();
+    this->num_sites = v->getNumberOfCharacters();
 
     site_pattern.clear();
     site_pattern.resize(num_sites);

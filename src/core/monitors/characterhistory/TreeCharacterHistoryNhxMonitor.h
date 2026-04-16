@@ -436,16 +436,16 @@ std::int64_t RevBayesCore::TreeCharacterHistoryNhxMonitor<charType>::getNumSampl
 template<class charType>
 void RevBayesCore::TreeCharacterHistoryNhxMonitor<charType>::swapNode(DagNode *oldN, DagNode *newN) {
     
-    bool found = false;
+    // bool found = false;
     if ( oldN == tree )
     {
         tree = static_cast< TypedDagNode<Tree> *>(newN);
-        found = true;
+        // found = true;
     }
     else if ( oldN == variable )
     {
         variable = static_cast<StochasticNode<AbstractHomologousDiscreteCharacterData>* >(newN);
-        found = true;
+        // found = true;
     }
     
 //    for (size_t i = 0; i < branchHistories.size(); i++)
@@ -456,19 +456,19 @@ void RevBayesCore::TreeCharacterHistoryNhxMonitor<charType>::swapNode(DagNode *o
 //            found = true;
 //        }
 //    }
-//    
-//    /*
-//     if (found == false)
-//     {
-//     // error catching
-//     if ( nodeVariables.find(oldN) == nodeVariables.end() ) {
-//     throw RbException("Cannot replace DAG node in this monitor because the monitor doesn't hold this DAG node.");
-//     }
-//     
-//     nodeVariables.erase( oldN );
-//     nodeVariables.insert( newN );
-//     }
-//     */
+    
+    /*
+     if (found == false)
+     {
+         // error catching
+         if ( nodeVariables.find(oldN) == nodeVariables.end() ) {
+             throw RbException("Cannot replace DAG node in this monitor because the monitor doesn't hold this DAG node.");
+         }
+     
+         nodeVariables.erase( oldN );
+         nodeVariables.insert( newN );
+     }
+     */
     
     // delegate to base class
     Monitor::swapNode(oldN, newN);

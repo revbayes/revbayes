@@ -4,11 +4,9 @@
 #include "AbstractHomologousDiscreteCharacterData.h"
 #include "ConstantNode.h"
 #include "DiscreteTaxonData.h"
-#include "DnaState.h"
 #include "MatrixReal.h"
 #include "MemberObject.h"
 #include "RbConstants.h"
-#include "RbMathLogic.h"
 #include "RbSettings.h"
 #include "RbVector.h"
 #include "RateGenerator.h"
@@ -2297,13 +2295,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::tipDrawJointCondi
 
             // sum to sample
             double sum = 0.0;
-
-            // if the matrix is compressed use the pattern for this site
-            size_t pattern = i;
-            if ( compressed == true )
-            {
-                pattern = site_pattern[i];
-            }
 
             // get the ambiguous character's bitset for the tip taxon
             RbBitSet bs = RbBitSet(this->num_chars);

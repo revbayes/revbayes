@@ -142,7 +142,6 @@
 #include "Dist_phyloCTMCDASequence.h"
 #include "Dist_phyloCTMCDASiteIID.h"
 #include "Dist_phyloCTMCClado.h"
-#include "Dist_phyloCTMCDollo.h"
 
 /* Branch rate priors (in folder "distributions/phylogenetics/tree") */
 
@@ -359,7 +358,6 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         addDistribution( new Dist_phyloCTMCDASequence() );
         addDistribution( new Dist_phyloCTMCDASiteIID() );
         addDistribution( new Dist_phyloCTMCClado() );
-        addDistribution( new Dist_phyloCTMCDollo() );
 
         /* Tree distributions (in folder "distributions/phylogenetics/tree") */
 
