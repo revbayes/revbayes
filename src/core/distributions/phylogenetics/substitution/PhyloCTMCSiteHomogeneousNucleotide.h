@@ -203,8 +203,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
     // update the transition probability matrix
     this->updateTransitionProbabilityMatrix( node_index );
     
-#   if defined ( AVX_ENABLED )
-
+    // get the pointers to the partial likelihoods for this node and the two descendant subtrees
     auto& pl_left = this->getPartialLikelihoodsForNode(left);
     auto& pl_right = this->getPartialLikelihoodsForNode(right);
     const double* p_left   = pl_left.likelihoods.data();
@@ -212,6 +211,8 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
     assert(pl_left.dims() == pl_right.dims());
 
     double* p_node   = this->createEmptyPartialLikelihoodsForNode(node_index, pl_left.dims()).likelihoods.data();
+
+#   if defined ( AVX_ENABLED )
 
     double* tmp_ac = new double[4];
     double* tmp_gt = new double[4];
@@ -221,27 +222,11 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
     
 #   elif defined ( SSE_ENABLED )
     
-    auto& pl_left = this->getPartialLikelihoodsForNode(left);
-    auto& pl_right = this->getPartialLikelihoodsForNode(right);
-    const double* p_left   = pl_left.likelihoods.data();
-    const double* p_right  = pl_right.likelihoods.data();
-    assert(pl_left.dims() == pl_right.dims());
-
-    double* p_node   = this->createEmptyPartialLikelihoodsForNode(node_index, pl_left.dims()).likelihoods.data();
     //    __m128d* p_left   = (__m128d *) this->getPartialLikelihoodsForNode(left);
     //    __m128d* p_right  = (__m128d *) this->getPartialLikelihoodsForNode(right);
     //    __m128d* p_node   = (__m128d *) this->getPartialLikelihoodsForNode(node_index);
     
 #   else
-
-    // get the pointers to the partial likelihoods for this node and the two descendant subtrees
-    auto& pl_left = this->getPartialLikelihoodsForNode(left);
-    auto& pl_right = this->getPartialLikelihoodsForNode(right);
-    const double*   p_left  = pl_left.likelihoods.data();
-    const double*   p_right = pl_right.likelihoods.data();
-    assert(pl_left.dims() == pl_right.dims());
-
-    double*         p_node  = this->createEmptyPartialLikelihoodsForNode(node_index, pl_left.dims()).likelihoods.data();
 
 #   endif
     
@@ -255,11 +240,11 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
         // get the pointers to the likelihood for this mixture category
         size_t offset = mixture*this->mixtureOffset;
         
-#       if defined ( AVX_ENABLED )
-        
         double*          p_site_mixture          = p_node + offset;
         const double*    p_site_mixture_left     = p_left + offset;
         const double*    p_site_mixture_right    = p_right + offset;
+        
+#       if defined ( AVX_ENABLED )
         
         __m256d tp_a = _mm256_load_pd(tp_begin);
         __m256d tp_c = _mm256_load_pd(tp_begin+4);
@@ -267,10 +252,6 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
         __m256d tp_t = _mm256_load_pd(tp_begin+12);
         
 #       elif defined ( SSE_ENABLED )
-        
-        double*          p_site_mixture          = p_node + offset;
-        const double*    p_site_mixture_left     = p_left + offset;
-        const double*    p_site_mixture_right    = p_right + offset;
         
         __m128d tp_a_ac = _mm_load_pd(tp_begin);
         __m128d tp_a_gt = _mm_load_pd(tp_begin+2);
@@ -282,10 +263,6 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
         __m128d tp_t_gt = _mm_load_pd(tp_begin+14);
         
 #       else
-
-        double*          p_site_mixture          = p_node + offset;
-        const double*    p_site_mixture_left     = p_left + offset;
-        const double*    p_site_mixture_right    = p_right + offset;
 
 #       endif
 
@@ -422,7 +399,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
     assert(pl_left.dims() == pl_right.dims());
     
     double*         p_node      = this->createEmptyPartialLikelihoodsForNode(node_index, pl_left.dims()).likelihoods.data();
-    
+
     // iterate over all mixture categories
     for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
     {
@@ -433,11 +410,12 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
         // get the pointers to the likelihood for this mixture category
         size_t offset = mixture*this->mixtureOffset;
         
-#       if defined ( AVX_ENABLED )
-        
         double*          p_site_mixture          = p_node + offset;
         const double*    p_site_mixture_left     = p_left + offset;
+        const double*    p_site_mixture_middle   = p_middle + offset;
         const double*    p_site_mixture_right    = p_right + offset;
+        
+#       if defined ( AVX_ENABLED )
         
         __m256d tp_a = _mm256_load_pd(tp_begin);
         __m256d tp_c = _mm256_load_pd(tp_begin+4);
@@ -445,11 +423,6 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
         __m256d tp_t = _mm256_load_pd(tp_begin+12);
         
 #       elif defined ( SSE_ENABLED )
-        
-        double*          p_site_mixture          = p_node + offset;
-        const double*    p_site_mixture_left     = p_left + offset;
-        const double*    p_site_mixture_middle   = p_middle + offset;
-        const double*    p_site_mixture_right    = p_right + offset;
         
         __m128d tp_a_ac = _mm_load_pd(tp_begin);
         __m128d tp_a_gt = _mm_load_pd(tp_begin+2);
@@ -462,10 +435,6 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
         
 #       else
         
-        double*          p_site_mixture          = p_node + offset;
-        const double*    p_site_mixture_left     = p_left + offset;
-        const double*    p_site_mixture_middle   = p_middle + offset;
-        const double*    p_site_mixture_right    = p_right + offset;
         
 #       endif
         
