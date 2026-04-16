@@ -1,62 +1,87 @@
-# RevBayes 1.4.0 (unreleased)
-
-## New Contributors
-* @HaoqingDu made their first contribution in https://github.com/revbayes/revbayes/pull/905
+# RevBayes 1.4.1 (unreleased)
 
 ## Backwards-incompatible changes
 
-## Release highlights
-* Stairwayplot method by @hoehna in https://github.com/revbayes/revbayes/pull/460
-* state-dependent Ornstein-Uhlenbeck model by @prilau in https://github.com/revbayes/revbayes/pull/904
-* Fix multi-sample BM and OU processes by @HaoqingDu in https://github.com/revbayes/revbayes/pull/905
-* Newick escaping by @raymondcast18 in https://github.com/revbayes/revbayes/pull/799
-
 ## Features
-* implementing usual datatypes for mnStochasticCharacterMap by @mikeryanmay in https://github.com/revbayes/revbayes/pull/994
-* Correct reasoning about return types for numeric vector functions by @davidcerny in https://github.com/revbayes/revbayes/pull/938
-* Allowing ln() and log() to take a vector of RealPos numbers by @prilau in https://github.com/revbayes/revbayes/pull/948
-* Make `mrcaIndex()`/`getMRCA()` work with `BranchLengthTree`s by @davidcerny in https://github.com/revbayes/revbayes/pull/952
-* Ensure we start the interactive loop with -i is given by @bredelings in https://github.com/revbayes/revbayes/pull/977
-* Add -p flag to print commands from -e expression or script by @bredelings in https://github.com/revbayes/revbayes/pull/978
-* Add proper trace/checkpoint serialization support for `MatrixReal` by @curiosusJR in https://github.com/revbayes/revbayes/pull/983
 
 ## Bug fixes
-* Tree::reroot() must call setRoot() to rebuild nodes[], not assign root pointer directly by @ms609 in https://github.com/revbayes/revbayes/pull/966
-* Don't drop MPI argument if -boost_root is given by @bredelings in https://github.com/revbayes/revbayes/pull/951
-* Move tuning fixes and cleanup by @davidcerny in https://github.com/revbayes/revbayes/pull/947
-* Fix tutorial test and fix rate age proposal by @bredelings in https://github.com/revbayes/revbayes/pull/940
-* Fixing `mvRateAgeProposal` for sampled ancestors by @hoehna in https://github.com/revbayes/revbayes/pull/908
-* Remove the per-line fields parser in `VariableMonitor::combineReplicates()` by @curiosusJR in https://github.com/revbayes/revbayes/pull/981
-* Fix state lables in NexusWriter by @basantakhakurel in https://github.com/revbayes/revbayes/pull/975
-* Treat unrooted trees as such when generating summaries by @davidcerny in https://github.com/revbayes/revbayes/pull/932
-* Fix #931: truncate monitor files to checkpoint generation on resume by @curiosusJR in https://github.com/revbayes/revbayes/pull/970
-* Fix hidden virtual functions by @bredelings in https://github.com/revbayes/revbayes/pull/976
-* Fix hidden virtual functions by @bredelings in https://github.com/revbayes/revbayes/pull/984
-* Fix compiler warnings by @davidcerny in https://github.com/revbayes/revbayes/pull/998
-* Disable `dnUPP` temporarily by @davidcerny in https://github.com/revbayes/revbayes/pull/999
 
 ## Documentation improvements
-* SSE error message by @bredelings in https://github.com/revbayes/revbayes/pull/974
 
 ## Infrastructure
-* Switch from c++17 to c++23 by @bredelings in https://github.com/revbayes/revbayes/pull/927
-* Update build.sh for setting boost location with modern cmake by @bredelings in https://github.com/revbayes/revbayes/pull/925
-* Allow tests that require TensorPhylo by @bredelings in https://github.com/revbayes/revbayes/pull/941
-* Use temp checkpoint file and atomically rename in mcmc.  by @curiosusJR in https://github.com/revbayes/revbayes/pull/935
-* Fix CI on mac where boost 1.90 is broken by @bredelings in https://github.com/revbayes/revbayes/pull/924
-* Clean up caching in phyloCTMC by @bredelings in https://github.com/revbayes/revbayes/pull/816
-* Add getNode( ) assertion checks by @bredelings in https://github.com/revbayes/revbayes/pull/972
-* Make meson always build rb-help2yml by @bredelings in https://github.com/revbayes/revbayes/pull/990
-* exclude burnin in pps and edit on tests by @curiosusJR in https://github.com/revbayes/revbayes/pull/923
-* Fix `rb-mpi-help2yml` by @davidcerny in https://github.com/revbayes/revbayes/pull/937
-* writeNexus expected output by @basantakhakurel in https://github.com/revbayes/revbayes/pull/995
 
-## Remove
-* Remove RbHelpDatabase.cpp lines from generated help files by @bredelings in https://github.com/revbayes/revbayes/pull/989
-* Fix ccache misses by @bredelings in https://github.com/revbayes/revbayes/pull/959
-* Implement nested comments by @bredelings in https://github.com/revbayes/revbayes/pull/946
-* Fix typo in `assert()`-ing equality by @davidcerny in https://github.com/revbayes/revbayes/pull/1001
-* Brief follow-up to v1.3.2 release by @davidcerny in https://github.com/revbayes/revbayes/pull/919
+# RevBayes 1.4.0 (Apr 17, 2026)
+
+## Backwards-incompatible changes
+  * Remove the `tuneTarget` argument from those moves that are not capable of being tuned (#947).
+  * Remove `dnPhyloCTMCDollo` (#997).
+  * Temporarily disable the uniform partitioning distribution (`dnUPP`) (#999).
+
+## Speed & memory
+  * Slight speedup in analyses employing `dnPhyloCTMC` when `useScaling=TRUE` (#816).
+  * Much faster merging of log files with `mcmc(..., combine="mixed")` (#981).
+
+## New models/analyses
+  * Model selection via leave-one-out cross-validation (#460).
+  * StairwayPlot method for inferring demographic histories from site frequency spectra (#460).
+  * State-dependent Brownian motion (BM) and Ornstein-Uhlenbeck (OU) processes (#904).
+
+## Features
+  * Add functions for folding site frequency spectra and creating StairwayPlot vectors (#460).
+  * Add function for reading stochastic character maps (#904).
+  * Allow vector input to `ln( )` and `log( )` (#948).
+  * Add an `.isRooted( )` method to `Tree` (#952).
+  * Add `-p` flag to print commands from `-e` expression or script (#978).
+  * Make stochastic mapping and ancestral state monitors work for all types of discrete characters (#994).
+
+## Bug fixes
+  * Tree handling
+      - Fix handling of quoted labels and tree-level comments when reading Newick trees (#799).
+      - Treat unrooted trees as such when generating summaries (#932).
+      - Fix parsing of nested comments in Newick trees (#946).
+      - Make sure the `mrcaIndex( )` function and `.unroot( )` method work on rooted nonclock trees (#952).
+      - Refactor the `.reroot( )` method of `Tree` objects (#966).
+  * Moves
+      - Fixes to `mvRateAgeProposal` and `mvRateAgeSubtreeProposal` (#908, #940).
+      - Make sure the `tuneTarget` argument is honored when present (#947).
+  * Checkpointing
+      - Prevent checkpoint file corruption by partial overwrites (#935).
+      - Prevent duplicated iterations when resuming from a checkpoint (#970).
+      - Add serialization support to `MatrixReal` for checkpoint use (#983).
+  * Crash / NaN
+      - Fix a segfault in the help2yml executable built with MPI (#937).
+  * Misc
+      - Fix issues with missing values in multisample BM and OU processes (#905).
+      - Fix handling of the `burnin` argument in posterior predictive simulations (#923).
+      - Correct reasoning about return types for `max( )`, `median( )`, `min( )`, `sum( )` (#938).
+      - Check for mismatches in the number of states between an SSE model and underlying data (#974).
+      - Make sure `writeNexus( )` keeps all state labels when concatenating character matrices (#975, #995).
+      - Make sure we start the interactive loop when `-i` is given even if there is an error (#977).
+  * Non-user-facing
+      - Clean up partial likelihood caching in `dnPhyloCTMC` (#816).
+      - Switch from C++17 to C++23, supporting those features that are available in GCC 12 (#927).
+      - Add assertion checks to `Tree::getNode( )` (#972).
+      - Fix hidden virtual functions (#976, #984).
+      - Fix various compiler warnings (#998).
+
+## Documentation improvements
+  * `ConditionalPosteriorOrdinate`, `dnStairwayPlot`, `fnBSPInterval`, `fnFoldSFS`, `mvAdaptiveRJSwitch`, `mvRandomCategoryWalk` (#460).
+  * Expand documentation for `dnMultinomial`, `mvRandomGeometricWalk`, `mvRandomIntegerWalk`, `mvRandomNaturalWalk` (#460).
+  * `CharacterHistory`, `dnPhyloBrownianProcessStateDependent`, `dnPhyloCTMCDASiteIID`, `dnPhyloOrnsteinUhlenbeckStateDependent`, `mvCharacterHistory`, `readCharacterHistory` (#904).
+  * `mrcaIndex` (#952).
+
+## Infrastructure
+  * Fix continuous-integration (CI) tests on macOS where boost 1.90 is broken (#924).
+  * Update `build.sh` for setting boost location with modern CMake (#925).
+  * Make sure the CI test script fails when tutorial tests fail (#940).
+  * Allow tests that require TensorPhylo (#941).
+  * Make sure the CMake build script does not drop extra arguments if `-boost_root` is given (#951).
+  * Fix compile cache misses (#959).
+  * Help database cleanup (#989).
+  * Make meson always build the help2yml executable (#990).
+
+## New contributors
+  * @HaoqingDu made their first contribution in #905.
 
 # RevBayes 1.3.2 (Dec 11, 2025)
 
