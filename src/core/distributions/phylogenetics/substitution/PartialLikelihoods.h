@@ -7,22 +7,30 @@ constexpr double scale_factor = 115792089237316195423570985008687907853269984665
 constexpr double scale_min = 1.0/scale_factor;
 constexpr double log_scale_factor = 177.445678223345999210811423093293201427328034396225345054e0;
 
-template <typename T>
+template <typename T, std::size_t Alignment = alignof(T)>
 struct no_init_allocator {
     using value_type = T;
+
+    static constexpr std::align_val_t alignment{
+        std::max(Alignment, alignof(T))
+    };
 
     no_init_allocator() = default;
 
     template <class U>
-    no_init_allocator(const no_init_allocator<U>&) noexcept {}
+    no_init_allocator(const no_init_allocator<U, Alignment>&) noexcept {}
 
-    bool operator==(const no_init_allocator<T>&) const = default;
+    template <class U>
+    bool operator==(const no_init_allocator<U, Alignment>&) const noexcept { return true; }
 
     T* allocate(std::size_t n) {
-        return std::allocator<T>{}.allocate(n);
+        if (n > std::numeric_limits<std::size_t>::max() / sizeof(T))
+            throw std::bad_array_new_length();
+        return static_cast<T*>(::operator new(n * sizeof(T), alignment));
     }
-    void deallocate(T* p, std::size_t n) {
-        std::allocator<T>{}.deallocate(p, n);
+
+    void deallocate(T* p, std::size_t n) noexcept {
+        ::operator delete(p, alignment);
     }
 
     // Called with no args during value-init → skip zeroing
@@ -33,13 +41,19 @@ struct no_init_allocator {
 
     // All other construct calls (copy, move, etc.) behave normally
     template <typename U, typename... Args>
-        void construct(U* p, Args&&... args) {
+    void construct(U* p, Args&&... args) {
         ::new (static_cast<void*>(p)) U(std::forward<Args>(args)...);
     }
+
+    // Required for allocator rebinding
+    template <class U>
+    struct rebind {
+        using other = no_init_allocator<U, Alignment>;
+    };
 };
 
-template <typename T>
-using no_init_vector = std::vector<T, no_init_allocator<T>>;
+template <typename T, std::size_t Alignment = alignof(T)>
+using no_init_vector = std::vector<T, no_init_allocator<T, Alignment>>;
 
 class PartialLikelihoods
 {
@@ -86,7 +100,7 @@ public:
         return likelihoods[s + dims_.num_states*(p + dims_.num_patterns*m)];
     }
 
-    no_init_vector<double> likelihoods; // per mixture * pattern * state
+    no_init_vector<double,32> likelihoods; // per mixture * pattern * state
     no_init_vector<int> scale; // per site
 
     PartialLikelihoods& operator=(const PartialLikelihoods&) = delete;
