@@ -1,14 +1,62 @@
 # RevBayes 1.4.0 (unreleased)
 
+## New Contributors
+* @HaoqingDu made their first contribution in https://github.com/revbayes/revbayes/pull/905
+
 ## Backwards-incompatible changes
 
+## Release highlights
+* Stairwayplot method by @hoehna in https://github.com/revbayes/revbayes/pull/460
+* state-dependent Ornstein-Uhlenbeck model by @prilau in https://github.com/revbayes/revbayes/pull/904
+* Fix multi-sample BM and OU processes by @HaoqingDu in https://github.com/revbayes/revbayes/pull/905
+* Newick escaping by @raymondcast18 in https://github.com/revbayes/revbayes/pull/799
+
 ## Features
+* implementing usual datatypes for mnStochasticCharacterMap by @mikeryanmay in https://github.com/revbayes/revbayes/pull/994
+* Correct reasoning about return types for numeric vector functions by @davidcerny in https://github.com/revbayes/revbayes/pull/938
+* Allowing ln() and log() to take a vector of RealPos numbers by @prilau in https://github.com/revbayes/revbayes/pull/948
+* Make `mrcaIndex()`/`getMRCA()` work with `BranchLengthTree`s by @davidcerny in https://github.com/revbayes/revbayes/pull/952
+* Ensure we start the interactive loop with -i is given by @bredelings in https://github.com/revbayes/revbayes/pull/977
+* Add -p flag to print commands from -e expression or script by @bredelings in https://github.com/revbayes/revbayes/pull/978
+* Add proper trace/checkpoint serialization support for `MatrixReal` by @curiosusJR in https://github.com/revbayes/revbayes/pull/983
 
 ## Bug fixes
+* Tree::reroot() must call setRoot() to rebuild nodes[], not assign root pointer directly by @ms609 in https://github.com/revbayes/revbayes/pull/966
+* Don't drop MPI argument if -boost_root is given by @bredelings in https://github.com/revbayes/revbayes/pull/951
+* Move tuning fixes and cleanup by @davidcerny in https://github.com/revbayes/revbayes/pull/947
+* Fix tutorial test and fix rate age proposal by @bredelings in https://github.com/revbayes/revbayes/pull/940
+* Fixing `mvRateAgeProposal` for sampled ancestors by @hoehna in https://github.com/revbayes/revbayes/pull/908
+* Remove the per-line fields parser in `VariableMonitor::combineReplicates()` by @curiosusJR in https://github.com/revbayes/revbayes/pull/981
+* Fix state lables in NexusWriter by @basantakhakurel in https://github.com/revbayes/revbayes/pull/975
+* Treat unrooted trees as such when generating summaries by @davidcerny in https://github.com/revbayes/revbayes/pull/932
+* Fix #931: truncate monitor files to checkpoint generation on resume by @curiosusJR in https://github.com/revbayes/revbayes/pull/970
+* Fix hidden virtual functions by @bredelings in https://github.com/revbayes/revbayes/pull/976
+* Fix hidden virtual functions by @bredelings in https://github.com/revbayes/revbayes/pull/984
+* Fix compiler warnings by @davidcerny in https://github.com/revbayes/revbayes/pull/998
+* Disable `dnUPP` temporarily by @davidcerny in https://github.com/revbayes/revbayes/pull/999
 
 ## Documentation improvements
+* SSE error message by @bredelings in https://github.com/revbayes/revbayes/pull/974
 
 ## Infrastructure
+* Switch from c++17 to c++23 by @bredelings in https://github.com/revbayes/revbayes/pull/927
+* Update build.sh for setting boost location with modern cmake by @bredelings in https://github.com/revbayes/revbayes/pull/925
+* Allow tests that require TensorPhylo by @bredelings in https://github.com/revbayes/revbayes/pull/941
+* Use temp checkpoint file and atomically rename in mcmc.  by @curiosusJR in https://github.com/revbayes/revbayes/pull/935
+* Fix CI on mac where boost 1.90 is broken by @bredelings in https://github.com/revbayes/revbayes/pull/924
+* Clean up caching in phyloCTMC by @bredelings in https://github.com/revbayes/revbayes/pull/816
+* Add getNode( ) assertion checks by @bredelings in https://github.com/revbayes/revbayes/pull/972
+* Make meson always build rb-help2yml by @bredelings in https://github.com/revbayes/revbayes/pull/990
+* exclude burnin in pps and edit on tests by @curiosusJR in https://github.com/revbayes/revbayes/pull/923
+* Fix `rb-mpi-help2yml` by @davidcerny in https://github.com/revbayes/revbayes/pull/937
+* writeNexus expected output by @basantakhakurel in https://github.com/revbayes/revbayes/pull/995
+
+## Remove
+* Remove RbHelpDatabase.cpp lines from generated help files by @bredelings in https://github.com/revbayes/revbayes/pull/989
+* Fix ccache misses by @bredelings in https://github.com/revbayes/revbayes/pull/959
+* Implement nested comments by @bredelings in https://github.com/revbayes/revbayes/pull/946
+* Fix typo in `assert()`-ing equality by @davidcerny in https://github.com/revbayes/revbayes/pull/1001
+* Brief follow-up to v1.3.2 release by @davidcerny in https://github.com/revbayes/revbayes/pull/919
 
 # RevBayes 1.3.2 (Dec 11, 2025)
 
