@@ -45,15 +45,15 @@ namespace RevBayesCore {
 
 #include <cmath>
 #include <cstring>
-#if defined ( SSE_ENABLED )
-#include <xmmintrin.h>
-#include <emmintrin.h>
-#include <pmmintrin.h>
-#elif defined ( AVX_ENABLED )
+#if defined ( AVX_ENABLED )
 #include <xmmintrin.h>
 #include <emmintrin.h>
 #include <pmmintrin.h>
 #include <immintrin.h>
+#elif defined ( SSE_ENABLED )
+#include <xmmintrin.h>
+#include <emmintrin.h>
+#include <pmmintrin.h>
 #endif
 
 template<class charType>
@@ -203,20 +203,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
     // update the transition probability matrix
     this->updateTransitionProbabilityMatrix( node_index );
     
-#   if defined ( SSE_ENABLED )
-    
-    auto& pl_left = this->getPartialLikelihoodsForNode(left);
-    auto& pl_right = this->getPartialLikelihoodsForNode(right);
-    const double* p_left   = pl_left.likelihoods.data();
-    const double* p_right  = pl_right.likelihoods.data();
-    assert(pl_left.dims() == pl_right.dims());
-
-    double* p_node   = this->createEmptyPartialLikelihoodsForNode(node_index, pl_left.dims()).likelihoods.data();
-    //    __m128d* p_left   = (__m128d *) this->getPartialLikelihoodsForNode(left);
-    //    __m128d* p_right  = (__m128d *) this->getPartialLikelihoodsForNode(right);
-    //    __m128d* p_node   = (__m128d *) this->getPartialLikelihoodsForNode(node_index);
-    
-#   elif defined ( AVX_ENABLED )
+#   if defined ( AVX_ENABLED )
 
     auto& pl_left = this->getPartialLikelihoodsForNode(left);
     auto& pl_right = this->getPartialLikelihoodsForNode(right);
@@ -231,6 +218,19 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
 //    double tmp_ac[4];
 //    double tmp_gt[4];
     
+    
+#   elif defined ( SSE_ENABLED )
+    
+    auto& pl_left = this->getPartialLikelihoodsForNode(left);
+    auto& pl_right = this->getPartialLikelihoodsForNode(right);
+    const double* p_left   = pl_left.likelihoods.data();
+    const double* p_right  = pl_right.likelihoods.data();
+    assert(pl_left.dims() == pl_right.dims());
+
+    double* p_node   = this->createEmptyPartialLikelihoodsForNode(node_index, pl_left.dims()).likelihoods.data();
+    //    __m128d* p_left   = (__m128d *) this->getPartialLikelihoodsForNode(left);
+    //    __m128d* p_right  = (__m128d *) this->getPartialLikelihoodsForNode(right);
+    //    __m128d* p_node   = (__m128d *) this->getPartialLikelihoodsForNode(node_index);
     
 #   else
 
@@ -255,7 +255,18 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
         // get the pointers to the likelihood for this mixture category
         size_t offset = mixture*this->mixtureOffset;
         
-#       if defined ( SSE_ENABLED )
+#       if defined ( AVX_ENABLED )
+        
+        double*          p_site_mixture          = p_node + offset;
+        const double*    p_site_mixture_left     = p_left + offset;
+        const double*    p_site_mixture_right    = p_right + offset;
+        
+        __m256d tp_a = _mm256_load_pd(tp_begin);
+        __m256d tp_c = _mm256_load_pd(tp_begin+4);
+        __m256d tp_g = _mm256_load_pd(tp_begin+8);
+        __m256d tp_t = _mm256_load_pd(tp_begin+12);
+        
+#       elif defined ( SSE_ENABLED )
         
         double*          p_site_mixture          = p_node + offset;
         const double*    p_site_mixture_left     = p_left + offset;
@@ -270,17 +281,6 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
         __m128d tp_t_ac = _mm_load_pd(tp_begin+12);
         __m128d tp_t_gt = _mm_load_pd(tp_begin+14);
         
-#       elif defined ( AVX_ENABLED )
-        
-        double*          p_site_mixture          = p_node + offset;
-        const double*    p_site_mixture_left     = p_left + offset;
-        const double*    p_site_mixture_right    = p_right + offset;
-        
-        __m256d tp_a = _mm256_load_pd(tp_begin);
-        __m256d tp_c = _mm256_load_pd(tp_begin+4);
-        __m256d tp_g = _mm256_load_pd(tp_begin+8);
-        __m256d tp_t = _mm256_load_pd(tp_begin+12);
-        
 #       else
 
         double*          p_site_mixture          = p_node + offset;
@@ -293,7 +293,30 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
         for (size_t site = 0; site < this->pattern_block_size ; ++site)
         {
             
-#           if defined ( SSE_ENABLED )
+#           if defined ( AVX_ENABLED )
+ 
+            __m256d a = _mm256_load_pd(p_site_mixture_left);
+            __m256d b = _mm256_load_pd(p_site_mixture_right);
+            __m256d p = _mm256_mul_pd(a,b);
+            
+            __m256d a_acgt = _mm256_mul_pd(p, tp_a );
+            __m256d c_acgt = _mm256_mul_pd(p, tp_c );
+            __m256d g_acgt = _mm256_mul_pd(p, tp_g );
+            __m256d t_acgt = _mm256_mul_pd(p, tp_t );
+            
+            __m256d ac   = _mm256_hadd_pd(a_acgt,c_acgt);
+            __m256d gt   = _mm256_hadd_pd(g_acgt,t_acgt);
+            
+            
+            _mm256_store_pd(tmp_ac,ac);
+            _mm256_store_pd(tmp_gt,gt);
+            
+            p_site_mixture[0] = tmp_ac[0] + tmp_ac[2];
+            p_site_mixture[1] = tmp_ac[1] + tmp_ac[3];
+            p_site_mixture[2] = tmp_gt[0] + tmp_gt[2];
+            p_site_mixture[3] = tmp_gt[1] + tmp_gt[3];
+
+#           elif defined ( SSE_ENABLED )
             
             __m128d a01 = _mm_load_pd(p_site_mixture_left);
             __m128d a23 = _mm_load_pd(p_site_mixture_left+2);
@@ -327,29 +350,6 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
             __m128d gt = _mm_hadd_pd(g_acgt,t_acgt);
             _mm_store_pd(p_site_mixture+2,gt);
  
-#           elif defined ( AVX_ENABLED )
- 
-            __m256d a = _mm256_load_pd(p_site_mixture_left);
-            __m256d b = _mm256_load_pd(p_site_mixture_right);
-            __m256d p = _mm256_mul_pd(a,b);
-            
-            __m256d a_acgt = _mm256_mul_pd(p, tp_a );
-            __m256d c_acgt = _mm256_mul_pd(p, tp_c );
-            __m256d g_acgt = _mm256_mul_pd(p, tp_g );
-            __m256d t_acgt = _mm256_mul_pd(p, tp_t );
-            
-            __m256d ac   = _mm256_hadd_pd(a_acgt,c_acgt);
-            __m256d gt   = _mm256_hadd_pd(g_acgt,t_acgt);
-            
-            
-            _mm256_store_pd(tmp_ac,ac);
-            _mm256_store_pd(tmp_gt,gt);
-            
-            p_site_mixture[0] = tmp_ac[0] + tmp_ac[2];
-            p_site_mixture[1] = tmp_ac[1] + tmp_ac[3];
-            p_site_mixture[2] = tmp_gt[0] + tmp_gt[2];
-            p_site_mixture[3] = tmp_gt[1] + tmp_gt[3];
-
 #           else
 
             double p0 = p_site_mixture_left[0] * p_site_mixture_right[0];
@@ -433,7 +433,18 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
         // get the pointers to the likelihood for this mixture category
         size_t offset = mixture*this->mixtureOffset;
         
-#       if defined ( SSE_ENABLED )
+#       if defined ( AVX_ENABLED )
+        
+        double*          p_site_mixture          = p_node + offset;
+        const double*    p_site_mixture_left     = p_left + offset;
+        const double*    p_site_mixture_right    = p_right + offset;
+        
+        __m256d tp_a = _mm256_load_pd(tp_begin);
+        __m256d tp_c = _mm256_load_pd(tp_begin+4);
+        __m256d tp_g = _mm256_load_pd(tp_begin+8);
+        __m256d tp_t = _mm256_load_pd(tp_begin+12);
+        
+#       elif defined ( SSE_ENABLED )
         
         double*          p_site_mixture          = p_node + offset;
         const double*    p_site_mixture_left     = p_left + offset;
@@ -449,17 +460,6 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
         __m128d tp_t_ac = _mm_load_pd(tp_begin+12);
         __m128d tp_t_gt = _mm_load_pd(tp_begin+14);
         
-#       elif defined ( AVX_ENABLED )
-        
-        double*          p_site_mixture          = p_node + offset;
-        const double*    p_site_mixture_left     = p_left + offset;
-        const double*    p_site_mixture_right    = p_right + offset;
-        
-        __m256d tp_a = _mm256_load_pd(tp_begin);
-        __m256d tp_c = _mm256_load_pd(tp_begin+4);
-        __m256d tp_g = _mm256_load_pd(tp_begin+8);
-        __m256d tp_t = _mm256_load_pd(tp_begin+12);
-        
 #       else
         
         double*          p_site_mixture          = p_node + offset;
@@ -473,7 +473,25 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
         for (size_t site = 0; site < this->pattern_block_size ; ++site)
         {
             
-#           if defined ( SSE_ENABLED )
+#           if defined ( AVX_ENABLED )
+            
+            __m256d a = _mm256_load_pd(p_site_mixture_left);
+            __m256d b = _mm256_load_pd(p_site_mixture_right);
+            __m256d p = _mm_mul_pd(a,b);
+            
+            __m256d a_acgt = _mm256_mul_pd(p, tp_a );
+            __m256d c_acgt = _mm256_mul_pd(p, tp_c );
+            __m256d g_acgt = _mm256_mul_pd(p, tp_g );
+            __m256d t_acgt = _mm256_mul_pd(p, tp_t );
+            
+            __m256d ac   = _mm256_hadd_pd(a_acgt,c_acgt);
+            __m256d gt   = _mm256_hadd_pd(g_acgt,t_acgt)
+            
+            __m256d acgt = _mm256_hadd_pd(ac,gt);
+            
+            _mm256_store_pd(p_site_mixture,acgt);
+            
+#           elif defined ( SSE_ENABLED )
             
             __m128d a01 = _mm_load_pd(p_site_mixture_left);
             __m128d a23 = _mm_load_pd(p_site_mixture_left+2);
@@ -514,24 +532,6 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
             //            p_site_mixture[2] = _mm_hadd_pd(g_acgt,t_acgt);
             __m128d gt = _mm_hadd_pd(g_acgt,t_acgt);
             _mm_store_pd(p_site_mixture+2,gt);
-            
-#           elif defined ( AVX_ENABLED )
-            
-            __m256d a = _mm256_load_pd(p_site_mixture_left);
-            __m256d b = _mm256_load_pd(p_site_mixture_right);
-            __m256d p = _mm_mul_pd(a,b);
-            
-            __m256d a_acgt = _mm256_mul_pd(p, tp_a );
-            __m256d c_acgt = _mm256_mul_pd(p, tp_c );
-            __m256d g_acgt = _mm256_mul_pd(p, tp_g );
-            __m256d t_acgt = _mm256_mul_pd(p, tp_t );
-            
-            __m256d ac   = _mm256_hadd_pd(a_acgt,c_acgt);
-            __m256d gt   = _mm256_hadd_pd(g_acgt,t_acgt)
-            
-            __m256d acgt = _mm256_hadd_pd(ac,gt);
-            
-            _mm256_store_pd(p_site_mixture,acgt);
             
 #           else
             
