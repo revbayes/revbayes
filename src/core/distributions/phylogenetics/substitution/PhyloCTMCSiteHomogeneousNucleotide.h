@@ -396,14 +396,14 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
         const double*    p_site_mixture_middle   = p_middle + offset;
         const double*    p_site_mixture_right    = p_right + offset;
         
-#       if defined ( AVX_ENABLED )
+#       if defined(__AVX__)
         
         __m256d tp_a = _mm256_loadu_pd(tp_begin);
         __m256d tp_c = _mm256_loadu_pd(tp_begin+4);
         __m256d tp_g = _mm256_loadu_pd(tp_begin+8);
         __m256d tp_t = _mm256_loadu_pd(tp_begin+12);
         
-#       elif defined ( SSE_ENABLED )
+#       elif defined(__SSE2__) || defined(_M_X64) || (defined(_M_IX86_FP) && _M_IX86_FP >= 2)
         
         __m128d tp_a_ac = _mm_load_pd(tp_begin);
         __m128d tp_a_gt = _mm_load_pd(tp_begin+2);
@@ -423,25 +423,35 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
         for (size_t site = 0; site < this->pattern_block_size ; ++site)
         {
             
-#           if defined ( AVX_ENABLED )
+#           if defined (__AVX__)
             
             __m256d a = _mm256_loadu_pd(p_site_mixture_left);
-            __m256d b = _mm256_loadu_pd(p_site_mixture_right);
-            __m256d p = _mm_mul_pd(a,b);
+            __m256d b = _mm256_loadu_pd(p_site_mixture_middle);
+            __m256d c = _mm256_loadu_pd(p_site_mixture_right);
+            __m256d p = _mm256_mul_pd(_mm256_mul_pd(a, b), c);
+
+            __m256d a_acgt = _mm256_mul_pd(p, tp_a);
+            __m256d c_acgt = _mm256_mul_pd(p, tp_c);
+            __m256d g_acgt = _mm256_mul_pd(p, tp_g);
+            __m256d t_acgt = _mm256_mul_pd(p, tp_t);
+
+            // First-level reduction: pair-sum within each 128-bit lane.
+            // ac = [a0+a1, c0+c1, a2+a3, c2+c3]
+            // gt = [g0+g1, t0+t1, g2+g3, t2+t3]
+            __m256d ac = _mm256_hadd_pd(a_acgt, c_acgt);
+            __m256d gt = _mm256_hadd_pd(g_acgt, t_acgt);
+
+            // Second-level reduction: cross the 128-bit lane boundary.
+            // lo  = [a0+a1, c0+c1, g0+g1, t0+t1]
+            // hi  = [a2+a3, c2+c3, g2+g3, t2+t3]
+            // sum = [a0..3,  c0..3,  g0..3,  t0..3]
+            __m256d lo  = _mm256_permute2f128_pd(ac, gt, 0x20);
+            __m256d hi  = _mm256_permute2f128_pd(ac, gt, 0x31);
+            __m256d sum = _mm256_add_pd(lo, hi);
+
+            _mm256_storeu_pd(p_site_mixture, sum);
             
-            __m256d a_acgt = _mm256_mul_pd(p, tp_a );
-            __m256d c_acgt = _mm256_mul_pd(p, tp_c );
-            __m256d g_acgt = _mm256_mul_pd(p, tp_g );
-            __m256d t_acgt = _mm256_mul_pd(p, tp_t );
-            
-            __m256d ac   = _mm256_hadd_pd(a_acgt,c_acgt);
-            __m256d gt   = _mm256_hadd_pd(g_acgt,t_acgt)
-            
-            __m256d acgt = _mm256_hadd_pd(ac,gt);
-            
-            _mm256_storeu_pd(p_site_mixture,acgt);
-            
-#           elif defined ( SSE_ENABLED )
+#           elif defined(__SSE2__) || defined(_M_X64) || (defined(_M_IX86_FP) && _M_IX86_FP >= 2)
             
             __m128d a01 = _mm_load_pd(p_site_mixture_left);
             __m128d a23 = _mm_load_pd(p_site_mixture_left+2);
