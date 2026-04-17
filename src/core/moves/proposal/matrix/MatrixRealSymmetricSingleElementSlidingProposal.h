@@ -29,7 +29,7 @@ template <class variableType> class StochasticNode;
     class MatrixRealSymmetricSingleElementSlidingProposal : public Proposal {
         
     public:
-        MatrixRealSymmetricSingleElementSlidingProposal( StochasticNode<MatrixReal> *n, double l);                                                                      //!<  constructor
+        MatrixRealSymmetricSingleElementSlidingProposal( StochasticNode<MatrixReal> *n, double l);                                                                      //!< Constructor
         
         // Basic utility functions
         void                                                cleanProposal(void);                                                                //!< Clean up proposal
@@ -44,18 +44,18 @@ template <class variableType> class StochasticNode;
         void                                                undoProposal(void);                                                                 //!< Reject the proposal
         
     protected:
-        void                                                swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes on which the Proposal is working on
+        void                                                swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes the Proposal is working on
         
     private:
         // parameters
         
         StochasticNode<MatrixReal >*                        variable;
         
-        double                                              delta;                                                                             //!< The Sliding parameter of the move (larger delta -> larger proposals).
+        double                                              delta;                                                                              //!< The Sliding parameter of the move (larger delta -> larger proposals).
         //!< The two indices of the last modified element.
         size_t                                              indexa;
         size_t                                              indexb;
-        double                                              storedValue;                                                                          //!< The value we propose.
+        double                                              storedValue;                                                                        //!< The value we propose.
 
     };
     

@@ -51,6 +51,7 @@
 namespace RevBayesCore {
     
     class Tree;
+    class CharacterHistory;
     
     class TopologyNode  {
 
@@ -74,11 +75,13 @@ namespace RevBayesCore {
         void                                        addChild(TopologyNode* c, size_t pos = 0);                                          //!< Adds a child node
 
         void                                        addBranchParameter(const std::string &n, double p);
+        void                                        addBranchParameter_(const std::string &chunk);
         void                                        addBranchParameter(const std::string &n, const std::string &p);
         void                                        addBranchParameters(const std::string &n, const std::vector<double> &p, bool io);
         void                                        addBranchParameters(const std::string &n, const std::vector<std::string> &p, bool io);
 
         void                                        addNodeParameter(const std::string &n, double p);
+        void                                        addNodeParameter_(const std::string &chunk);
         void                                        addNodeParameter(const std::string &n, const std::string &p);
         void                                        addNodeParameter_(const std::string &n, const std::string &p);
         void                                        addNodeParameters(const std::string &n, const std::vector<double> &p, bool io);
@@ -88,7 +91,7 @@ namespace RevBayesCore {
         bool                                        setNodeParameter(const std::string& name, const std::string& value);                //!< Adds OR REPLACES a node parmaeter, returning true if it was already present.
         std::optional<std::string>                  getNodeParameter(const std::string& name) const;                                    //!< Gets the value of a node parameter if present.
         std::optional<std::string>                  eraseNodeParameter(const std::string& name);                                        //!< Erases a node parameter if present, returning the value.
-
+        //add comment member function?
 
         void                                        clearParameters(void);                                                              //!< Clear the node and branch parameters
         void                                        clearBranchParameters(void);
@@ -96,6 +99,7 @@ namespace RevBayesCore {
         virtual std::string                         computeNewick(bool round = true);                                                   //!< Compute the newick string for this clade
         std::string                                 computePlainNewick(void) const;                                                     //!< Compute the newick string for this clade as a plain string without branch length
         std::string                                 computeSimmapNewick(bool round = true);                                             //!< Compute the newick string compatible with SIMMAP and phytools
+        std::string                                 computeSimmapNewick(const CharacterHistory& h, bool round = true) const;            //!< Compute the newick string compatible with SIMMAP and phytools
         bool                                        containsClade(const TopologyNode* c, bool strict) const;
         bool                                        containsClade(const Clade &c, bool strict) const;
         bool                                        containsClade(const RbBitSet &c, bool strict) const;
@@ -196,6 +200,7 @@ namespace RevBayesCore {
 
         // helper methods
         std::ostream&                               buildNewick(std::ostream&, bool simmap);                                            //!< compute the newick string for a tree rooting at this node
+        std::ostream&                               buildNewickSimmap(std::ostream&, const CharacterHistory& h) const;                  //!< compute the newick string for a tree rooting at this node
         std::string                                 buildNewickString(bool simmap, bool round);                                         //!< compute the newick string for a tree rooting at this node
 
         // protected members

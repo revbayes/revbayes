@@ -42,7 +42,7 @@ namespace RevBayesCore {
     class NarrowExchangeCharacterHistoryProposal : public Proposal {
 
     public:
-        NarrowExchangeCharacterHistoryProposal( StochasticNode<Tree> *t, StochasticNode<AbstractHomologousDiscreteCharacterData>* c);                                               //!<  constructor
+        NarrowExchangeCharacterHistoryProposal( StochasticNode<Tree> *t, StochasticNode<AbstractHomologousDiscreteCharacterData>* c);                                               //!< Constructor
 
         // Basic utility functions
         void                                                        cleanProposal(void);                                            //!< Clean up proposal
@@ -53,18 +53,16 @@ namespace RevBayesCore {
         const std::string&                                          getProposalName(void) const;                                    //!< Get the name of the proposal for summary printing
         double                                                      getProposalTuningParameter(void) const;
         void                                                        prepareProposal(void);                                          //!< Prepare the proposal
-        void                                                        printParameterSummary(std::ostream &o, bool name_only) const;                   //!< Print the parameter summary
+        void                                                        printParameterSummary(std::ostream &o, bool name_only) const;   //!< Print the parameter summary
         void                                                        sampleNodeCharacters(TopologyNode* node);                       //!< Sample the characters at the node
         void                                                        sampleNodeCharactersJoint(TopologyNode* parent);                                         //!< Sample the characters at the node
         void                                                        setRateGenerator(const TypedDagNode<RateGenerator> *d);
         void                                                        setRateGenerator(const TypedDagNode<RateGeneratorSequence> *d);
-        void                                                        setProposalTuningParameter(double tp);
-        void                                                        tune(double r);                                                 //!< Tune the proposal to achieve a better acceptance/rejection ratio
         void                                                        undoProposal(void);                                             //!< Reject the proposal
 
     protected:
 
-        void                                                        swapNodeInternal(DagNode *oldN, DagNode *newN);                 //!< Swap the DAG nodes on which the Proposal is working on
+        void                                                        swapNodeInternal(DagNode *oldN, DagNode *newN);                 //!< Swap the DAG nodes the Proposal is working on
 
     private:
 
@@ -626,12 +624,12 @@ void RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType>::undoProposa
             throw RbException("Failed cast.");
         }
         size_t num_sites = p->getNumberOfSites();
-        const std::vector<BranchHistory*>& histories = p->getHistories();
+        CharacterHistoryDiscrete& histories = p->getHistories();
         
         // restore the parent states
-        std::vector<CharacterEvent*>& parentState     = histories[parent.getIndex()]->getChildCharacters();
-        std::vector<CharacterEvent*>& leftChildState  = histories[parent.getChild(0).getIndex()]->getParentCharacters();
-        std::vector<CharacterEvent*>& rightChildState = histories[parent.getChild(1).getIndex()]->getParentCharacters();
+        std::vector<CharacterEvent*>& parentState     = histories[parent.getIndex()].getChildCharacters();
+        std::vector<CharacterEvent*>& leftChildState  = histories[parent.getChild(0).getIndex()].getParentCharacters();
+        std::vector<CharacterEvent*>& rightChildState = histories[parent.getChild(1).getIndex()].getParentCharacters();
         for (size_t site_index = 0; site_index < num_sites; ++site_index)
         {
             size_t s = stored_parent_node_states[site_index];
@@ -641,9 +639,9 @@ void RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType>::undoProposa
         }
         
         // restore the grandparent states
-        std::vector<CharacterEvent*>& grandparentState           = histories[grandparent.getIndex()]->getChildCharacters();
-        std::vector<CharacterEvent*>& leftGrandparentChildState  = histories[grandparent.getChild(0).getIndex()]->getParentCharacters();
-        std::vector<CharacterEvent*>& rightGrandparentChildState = histories[grandparent.getChild(1).getIndex()]->getParentCharacters();
+        std::vector<CharacterEvent*>& grandparentState           = histories[grandparent.getIndex()].getChildCharacters();
+        std::vector<CharacterEvent*>& leftGrandparentChildState  = histories[grandparent.getChild(0).getIndex()].getParentCharacters();
+        std::vector<CharacterEvent*>& rightGrandparentChildState = histories[grandparent.getChild(1).getIndex()].getParentCharacters();
         for (size_t site_index = 0; site_index < num_sites; ++site_index)
         {
             size_t s = stored_grandparent_node_states[site_index];
@@ -674,7 +672,7 @@ void RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType>::sampleNodeC
         throw RbException("Failed cast.");
     }
     size_t num_sites = c->getNumberOfSites();
-    const std::vector<BranchHistory*>& histories = c->getHistories();
+    CharacterHistoryDiscrete& histories = c->getHistories();
     
     // get all the nodes
     TopologyNode& grandparent = parent->getParent();
@@ -688,17 +686,17 @@ void RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType>::sampleNodeC
     TopologyNode* brother = &parent->getChild( 1 );
 
     // states to update
-    std::vector<CharacterEvent*>& nodeParentState        = histories[node->getIndex()]->getParentCharacters();
-    std::vector<CharacterEvent*>& brotherParentState     = histories[brother->getIndex()]->getParentCharacters();
-    std::vector<CharacterEvent*>& uncleParentState       = histories[uncle->getIndex()]->getParentCharacters();
-    std::vector<CharacterEvent*>& parentChildState       = histories[parent->getIndex()]->getChildCharacters();
-    std::vector<CharacterEvent*>& parentParentState      = histories[parent->getIndex()]->getParentCharacters();
-    std::vector<CharacterEvent*>& grandparentChildState  = histories[grandparent.getIndex()]->getChildCharacters();
+    std::vector<CharacterEvent*>& nodeParentState        = histories[node->getIndex()].getParentCharacters();
+    std::vector<CharacterEvent*>& brotherParentState     = histories[brother->getIndex()].getParentCharacters();
+    std::vector<CharacterEvent*>& uncleParentState       = histories[uncle->getIndex()].getParentCharacters();
+    std::vector<CharacterEvent*>& parentChildState       = histories[parent->getIndex()].getChildCharacters();
+    std::vector<CharacterEvent*>& parentParentState      = histories[parent->getIndex()].getParentCharacters();
+    std::vector<CharacterEvent*>& grandparentChildState  = histories[grandparent.getIndex()].getChildCharacters();
     
     // states for conditional sampling probs
-    const std::vector<CharacterEvent*>& nodeChildState    = histories[node->getIndex()]->getChildCharacters();
-    const std::vector<CharacterEvent*>& brotherChildState = histories[brother->getIndex()]->getChildCharacters();
-    const std::vector<CharacterEvent*>& uncleChildState   = histories[uncle->getIndex()]->getChildCharacters();
+    const std::vector<CharacterEvent*>& nodeChildState    = histories[node->getIndex()].getChildCharacters();
+    const std::vector<CharacterEvent*>& brotherChildState = histories[brother->getIndex()].getChildCharacters();
+    const std::vector<CharacterEvent*>& uncleChildState   = histories[uncle->getIndex()].getChildCharacters();
     
     // update the transition probs
     const RateGenerator& rm = rate_generator->getValue();
@@ -714,7 +712,7 @@ void RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType>::sampleNodeC
         rm.calculateTransitionProbabilities(grandparent.getParent().getAge(), grandparent.getAge(),  c->getBranchRate( grandparent.getIndex() ), grandparent_tp_matrix);
         
         // get the state of the great-grandparent
-        const std::vector<CharacterEvent*>& greatGrandparentState = histories[grandparent.getIndex()]->getParentCharacters();
+        const std::vector<CharacterEvent*>& greatGrandparentState = histories[grandparent.getIndex()].getParentCharacters();
 
         // for each site...
         for (size_t site_index = 0; site_index < num_sites; ++site_index)
@@ -1049,29 +1047,6 @@ void RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType>::swapNodeInt
     uncle_proposal->swapNodeInternal(oldN, newN);
     brother_proposal->swapNodeInternal(oldN, newN);
     grandparent_proposal->swapNodeInternal(oldN, newN);
-    
-}
-
-
-template<class charType>
-void RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType>::setProposalTuningParameter(double tp)
-{
-    // this proposal has no tuning parameter: nothing to do
-}
-
-
-/**
- * Tune the Proposal to accept the desired acceptance ratio.
- *
- * The acceptance ratio for this Proposal should be around 0.44.
- * If it is too large, then we increase the proposal size,
- * and if it is too small, then we decrease the proposal size.
- */
-template<class charType>
-void RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType>::tune( double rate )
-{
-    
-    // nothing to tune
     
 }
 

@@ -8,6 +8,7 @@
 #include "Move_NodeTimeSlidePathTruncatedNormal.h"
 #include "NodeTimeSlidePathTruncatedNormalProposal.h"
 #include "RlBoolean.h"
+#include "Probability.h"
 #include "RealPos.h"
 #include "RevObject.h"
 #include "RlTimeTree.h"
@@ -55,15 +56,15 @@ void Move_NodeTimeSlidePathTruncatedNormal::constructInternalObject( void )
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *tau = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
 
     double s = static_cast<const RealPos &>( sigma->getRevObject() ).getValue();
-    
     bool a = static_cast<const RlBoolean &>( scaleByAge->getRevObject() ).getValue();
-
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
 
-    RevBayesCore::Proposal *p = new RevBayesCore::NodeTimeSlidePathTruncatedNormalProposal( tau, s, a );
-    value = new RevBayesCore::MetropolisHastingsMove(p,w,t);
+    RevBayesCore::Proposal *p = new RevBayesCore::NodeTimeSlidePathTruncatedNormalProposal(tau, s, a);
+    p->setTargetAcceptanceRate(tt);
+    
+    value = new RevBayesCore::MetropolisHastingsMove(p, w, t);
 }
 
 

@@ -14,12 +14,9 @@ namespace RevBayesCore {
     public:
 
         BranchHistoryContinuous(size_t nc, size_t idx);
-        BranchHistoryContinuous(size_t nc, size_t idx, std::set<int> sc);
-        BranchHistoryContinuous(const BranchHistoryContinuous& m);
         ~BranchHistoryContinuous(void);
         
         // overloaded operators
-        BranchHistoryContinuous& operator=(const BranchHistoryContinuous& bh);
         bool operator<(const BranchHistoryContinuous&) const;
         
         

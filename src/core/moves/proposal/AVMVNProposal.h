@@ -31,24 +31,24 @@ template <class valueType> class StochasticNode;
     class AVMVNProposal : public Proposal {
 
     public:
-        AVMVNProposal( double s, double e, double n0, double c0, double m );                                 //!< Constructor
+        AVMVNProposal( double s, double e, size_t n0, size_t c0, size_t m );                                                            //!< Constructor
 
-        void                                        addUntransformedScalar(StochasticNode<double> *v);                                    //!< Add an up-scaling variable
-        void                                        addLogScalar(StochasticNode<double> *v);                                    //!< Add an up-scaling variable
-        void                                        addLogitScalar(ContinuousStochasticNode *v);                                    //!< Add an up-scaling variable
-        void                                        addUntransformedVector(StochasticNode<RbVector<double> > *v);                         //!< Add an up-scaling variable
+        void                                        addUntransformedScalar(StochasticNode<double> *v);                                  //!< Add an up-scaling variable
+        void                                        addLogScalar(StochasticNode<double> *v);                                            //!< Add an up-scaling variable
+        void                                        addLogitScalar(ContinuousStochasticNode *v);                                        //!< Add an up-scaling variable
+        void                                        addUntransformedVector(StochasticNode<RbVector<double> > *v);                       //!< Add an up-scaling variable
         void                                        addLogConstrainedSumVector(RevBayesCore::StochasticNode<RevBayesCore::Simplex> *v);                         //!< Add an up-scaling variable
         void                                        cleanProposal(void);                                                                //!< Clean up proposal
         AVMVNProposal*                              clone(void) const;                                                                  //!< Clone object
         double                                      doProposal(void);                                                                   //!< Perform proposal
         const std::string&                          getProposalName(void) const;                                                        //!< Get the name of the proposal for summary printing
         double                                      getProposalTuningParameter(void) const;
-        void                                        printParameterSummary(std::ostream &o, bool name_only) const;                                       //!< Print the parameter summary
+        void                                        printParameterSummary(std::ostream &o, bool name_only) const;                       //!< Print the parameter summary
         void                                        prepareProposal(void);                                                              //!< Prepare the proposal
-        void                                        removeUntransformedScalar(StochasticNode<double> *v);                                    //!< Add an up-scaling variable
-        void                                        removeLogScalar(StochasticNode<double> *v);                                    //!< Add an up-scaling variable
-        void                                        removeLogitScalar(ContinuousStochasticNode *v);                                    //!< Add an up-scaling variable
-        void                                        removeUntransformedVector(StochasticNode<RbVector<double> > *v);                         //!< Add an up-scaling variable
+        void                                        removeUntransformedScalar(StochasticNode<double> *v);                               //!< Add an up-scaling variable
+        void                                        removeLogScalar(StochasticNode<double> *v);                                         //!< Add an up-scaling variable
+        void                                        removeLogitScalar(ContinuousStochasticNode *v);                                     //!< Add an up-scaling variable
+        void                                        removeUntransformedVector(StochasticNode<RbVector<double> > *v);                    //!< Add an up-scaling variable
         void                                        removeLogConstrainedSumVector(RevBayesCore::StochasticNode<RevBayesCore::Simplex> *v);                         //!< Add an up-scaling variable
         void                                        setProposalTuningParameter(double tp);
         void                                        tune(double r);                                                                     //!< Tune the proposal to achieve a better acceptance/rejection ratio
@@ -56,7 +56,7 @@ template <class valueType> class StochasticNode;
 
     protected:
 
-        void                                        swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes on which the Proposal is working on
+        void                                        swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes the Proposal is working on
 
 
     private:
@@ -68,14 +68,14 @@ template <class valueType> class StochasticNode;
         std::vector<StochasticNode<RbVector<double> > *>    noTransformVectorVariables;
         std::vector<StochasticNode<Simplex> *>              logConstrainedSumTransformVectorVariables;
 
-        MatrixReal                                          C_emp;                                                   //!< The empirical covariance matrix of the samples
+        MatrixReal                                          C_emp;                                                  //!< The empirical covariance matrix of the samples
         MatrixReal                                          AVMVN_cholesky_L;                                       //!< Lower diagonal of Cholesky decomposition of
 
-        size_t                                              waitBeforeLearning;                                      //!< How std::int64_t to wait before tracking empirical covariances
-        size_t                                              waitBeforeUsing;                                         //!< How std::int64_t to wait before using the empirical covariances
-        size_t                                              nTried;                                                  //!< How many times has this move been used?
-        size_t                                              updates;                                                 //!< How many updates have been tried?
-        size_t                                              maxUpdates;                                              //!< How many updates until we stop monitoring the covariances?
+        size_t                                              waitBeforeLearning;                                     //!< How long to wait before tracking empirical covariances
+        size_t                                              waitBeforeUsing;                                        //!< How long to wait before using the empirical covariances
+        size_t                                              nTried;                                                 //!< How many times has this move been used?
+        size_t                                              updates;                                                //!< How many updates have been tried?
+        size_t                                              maxUpdates;                                             //!< How many updates until we stop monitoring the covariances?
 
         double                                              sigma;                                                  //!< Variance of pre-learned (independent) normal proposal, also scales the MVN (proportional to variance, not SD)
         double                                              epsilon;                                                //!< Controls the weighting of the learned VCV and an Identity matrix ( eps * I + (1-eps) * empirical)

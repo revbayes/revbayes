@@ -31,13 +31,11 @@ namespace RevBayesCore {
         double                                      getProposalTuningParameter(void) const;
         void                                        prepareProposal(void);                                                          //!< Prepare the proposal
         void                                        printParameterSummary(std::ostream &o, bool name_only) const;                   //!< Print the parameter summary
-        void                                        setProposalTuningParameter(double tp);
-        void                                        tune(double r);                                                                 //!< Tune the proposal to achieve a better acceptance/rejection ratio
         void                                        undoProposal(void);                                                             //!< Reject the proposal
         
     protected:
         
-        void                                        swapNodeInternal(DagNode *oldN, DagNode *newN);                                 //!< Swap the DAG nodes on which the Proposal is working on
+        void                                        swapNodeInternal(DagNode *oldN, DagNode *newN);                                 //!< Swap the DAG nodes the Proposal is working on
         
         
     private:
@@ -245,29 +243,6 @@ void RevBayesCore::VectorElementSwapProposal<valueType>::swapNodeInternal(DagNod
     }
     
 }
-
-
-template <class valueType>
-void RevBayesCore::VectorElementSwapProposal<valueType>::setProposalTuningParameter(double tp)
-{
-    // this proposal has no tuning parameter: nothing to do
-}
-
-
-/**
- * Tune the Proposal to accept the desired acceptance ratio.
- *
- * The acceptance ratio for this Proposal should be around 0.44.
- * If it is too large, then we increase the proposal size,
- * and if it is too small, then we decrease the proposal size.
- */
-template <class valueType>
-void RevBayesCore::VectorElementSwapProposal<valueType>::tune( double rate )
-{
-    // nothing to do here.
-    
-}
-
 
 
 #endif

@@ -1,0 +1,95 @@
+#NEXUS
+[Data written by write.nexus.data.R, Fri Sep 12 15:20:49 2025]
+BEGIN DATA;
+  DIMENSIONS NTAX=82 NCHAR=1;
+  FORMAT DATATYPE=CONTINUOUS MISSING=? GAP=- INTERLEAVE=NO;
+  MATRIX
+    Hyemoschus_aquaticus          1.3
+    Moschus_moschiferus           1.98
+    Okapia_johnstoni              1.18
+    Giraffa_camelopardalis        1.2
+    Rucervus_duvauceli            2.85
+    Rangifer_tarandus             1.52
+    Pudu_puda                     1.62
+    Pudu_mephistophiles           1.61
+    Ozotoceros_bezoarcticus       2.12
+    Odocoileus_virginianus        1.23
+    Odocoileus_hemionus           1.59
+    Muntiacus_muntjak             1.81
+    Hydropotes_inermis            1.84
+    Hippocamelus_antisensis       1.94
+    Elaphurus_davidianus          2.35
+    Elaphodus_cephalophus         1.69
+    Dama_dama                     2.01
+    Cervus_nippon                 2.79
+    Cervus_elaphus                2.11
+    Capreolus_capreolus           1.49
+    Blastocerus_dichotomus        1.49
+    Axis_porcinus                 2.53
+    Axis_axis                     2.81
+    Alces_alces                   1.34
+    Tragelaphus_strepsiceros      2.29
+    Tragelaphus_spekii            2.9
+    Tragelaphus_scriptus          2.54
+    Tragelaphus_imberbis          2.18
+    Tragelaphus_eurycerus         1.92
+    Tragelaphus_angasii           2.52
+    Tetracerus_quadricornis       3.77
+    Tragelaphus_oryx              2.91
+    Syncerus_caffer               3.82
+    Sylvicapra_grimmia            2.97
+    Saiga_tatarica                5.29
+    Rupicapra_rupicapra           4.19
+    Redunca_fulvorufula           3.79
+    Redunca_arundinum             3.59
+    Rahicerus_campestris          3.44
+    Pseudois_nayaur               5.3
+    Procapra_gutturosa            3.9
+    Philantomba_monticola         1.9
+    Pelea_capreolus               4.56
+    Pantholops_hodgsonii          4.56
+    Ovibos_moschatus              3.69
+    Ourebia_ourebi                3.8
+    Oryx_gazella                  3.37
+    Oreotragus_oreotragus         3.82
+    Oreamnos_americanus           4.95
+    Nesotragus_moschatus          3.51
+    Nanger_granti                 3.45
+    Litocranius_walleri           1.32
+    Kobus_leche                   3.63
+    Kobus_ellipsiprymnus          3.47
+    Hippotragus_niger             3.77
+    Hippotragus_equinus           4.28
+    Hemitragus_jemlahicus         4.95
+    Eudorcas_rufifrons            3.77
+    Dorcatragus_megalotis         2.93
+    Damaliscus_pygargus           4.76
+    Connochaetes_taurinus         4.94
+    Connochaetes_gnou             4.75
+    Madoqua_kirkii                2.63
+    Cephalophus_spadix            1.95
+    Cephalophus_silvicultor       2.23
+    Cephalophus_dorsalis          1.15
+    Capra_ibex                    4.71
+    Budorcas_taxicolor            3.42
+    Bubalus_depressicornis        4.43
+    Bubalus_bubalis               3.85
+    Boselaphus_tragocamelus       3.03
+    Bos_taurus                    4.43
+    Bos_javanicus                 5.04
+    Bos_gaurus                    3.69
+    Bison_bison                   4.87
+    Antilope_cervicapra           5.14
+    Antidorcas_marsupialis        4.89
+    Ammotragus_lervia             4.45
+    Alcelaphus_buselaphus         5.23
+    Aepyceros_melampus            4.89
+    Addax_nasomaculatus           4.09
+    Antilocapra_americana         4.61
+  ;
+END;
+
+
+[
+  artiodactyla hypsodonty data from Toljagic et al. (2018); ruminants.txt
+]

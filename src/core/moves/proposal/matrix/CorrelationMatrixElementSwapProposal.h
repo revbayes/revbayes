@@ -29,7 +29,7 @@ template <class variableType> class StochasticNode;
     class CorrelationMatrixElementSwapProposal : public Proposal {
         
     public:
-        CorrelationMatrixElementSwapProposal( StochasticNode<MatrixReal> *n );                                                                      //!<  constructor
+        CorrelationMatrixElementSwapProposal( StochasticNode<MatrixReal> *n );                                                       //!< Constructor
         
         // Basic utility functions
         void                                     cleanProposal(void);                                                                //!< Clean up proposal
@@ -37,14 +37,12 @@ template <class variableType> class StochasticNode;
         double                                   doProposal(void);                                                                   //!< Perform proposal
         const std::string&                       getProposalName(void) const;                                                        //!< Get the name of the proposal for summary printing
         double                                   getProposalTuningParameter(void) const;
-        void                                     printParameterSummary(std::ostream &o, bool name_only) const;                                       //!< Print the parameter summary
+        void                                     printParameterSummary(std::ostream &o, bool name_only) const;                       //!< Print the parameter summary
         void                                     prepareProposal(void);                                                              //!< Prepare the proposal
-        void                                     setProposalTuningParameter(double tp);
-        void                                     tune(double r);                                                                     //!< Tune the proposal to achieve a better acceptance/rejection ratio
         void                                     undoProposal(void);                                                                 //!< Reject the proposal
         
     protected:
-        void                                     swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes on which the Proposal is working on
+        void                                     swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes the Proposal is working on
         
     private:
         // parameters
@@ -54,11 +52,11 @@ template <class variableType> class StochasticNode;
         //!< The indices of the last modified element.
         size_t                                   indexa_1;
         size_t                                   indexb_1;
-        double                                   storedValue_1;                                                                          //!< The value we propose.
+        double                                   storedValue_1;                                                                      //!< The value we propose.
 
         size_t                                   indexa_2;
         size_t                                   indexb_2;
-        double                                   storedValue_2;                                                                          //!< The value we propose.
+        double                                   storedValue_2;                                                                      //!< The value we propose.
         
     };
     

@@ -1,8 +1,8 @@
 project('RevBayes', ['cpp', 'c'],
-        version: '1.3.2',
+        version: '1.4.0',
         default_options: [
           'buildtype=release',
-          'cpp_std=c++17',
+          'cpp_std=c++23',
           'b_ndebug=if-release'
         ],
         meson_version: '>= 1.0',

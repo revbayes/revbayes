@@ -1,0 +1,17 @@
+#NEXUS
+
+	Begin taxa;
+	Dimensions ntax=6;
+	Taxlabels
+		Dana
+		Dimm
+		Dmel
+		Dsim
+		Dsub
+		Dsuz
+		;
+End;
+
+Begin trees;
+tree TREE1 = [&R](((((Dmel[&index=2]:2.449176,Dsim[&index=3]:2.449176)[&index=7,posterior=1.000000,age_95%_HPD={1.40921,3.77514}]:10.275351,Dsuz[&index=1]:12.724526)[&index=8,posterior=1.000000,age_95%_HPD={7.1252,19.3633}]:15.206101,Dana[&index=4]:27.930627)[&index=9,posterior=1.000000,age_95%_HPD={15.4046,42.5844}]:12.561523,Dsub[&index=5]:40.492150)[&index=10,posterior=1.000000,age_95%_HPD={22.9154,61.7238}]:6.893758,Dimm[&index=6]:47.385908)[&index=11,posterior=1.000000,age_95%_HPD={26.1705,72.0344}]:0.000000;
+End;

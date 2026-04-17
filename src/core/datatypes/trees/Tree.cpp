@@ -41,7 +41,8 @@ Tree::Tree(const Tree& t) :
     is_negative_constraint( t.is_negative_constraint ),
     num_tips( t.num_tips ),
     num_nodes( t.num_nodes ),
-    taxon_bitset_map( t.taxon_bitset_map )
+    taxon_bitset_map( t.taxon_bitset_map ),
+    tree_comments( t.tree_comments )
 {
 
     // need to perform a deep copy of the BranchLengthTree nodes
@@ -101,6 +102,7 @@ Tree& Tree::operator=(const Tree &t)
         num_nodes              = t.num_nodes;
         rooted                 = t.rooted;
         is_negative_constraint = t.is_negative_constraint;
+        tree_comments          = t.tree_comments;
 
         TopologyNode* newRoot = t.root->clone();
 
@@ -134,6 +136,7 @@ Tree& Tree::operator=(Tree&& t)
         std::swap( root                  , t.root                  );
         std::swap( nodes                 , t.nodes                 );
         std::swap( taxon_bitset_map      , t.taxon_bitset_map      );
+        std::swap( tree_comments         , t.tree_comments         );
 
         // This loop is maybe a reason to NOT record a tree pointer on the nodes...
         for(auto& node: nodes)
@@ -666,9 +669,12 @@ const TopologyNode& Tree::getInteriorNode( size_t indx ) const
     size_t n = getNumberOfTips();
     if ( indx > (n-2) )
     {
-        throw RbException() << "Cannot acces interior node '" << StringUtilities::to_string(indx) << "' for a tree with " << StringUtilities::to_string(n) << " tips.";
+        throw RbException() << "Cannot access interior node '" << StringUtilities::to_string(indx) << "' for a tree with " << StringUtilities::to_string(n) << " tips.";
     }
-    return *nodes[ indx + n ];
+
+    auto& node = getNode( indx + n );
+    assert(node.isInternal());
+    return node;
 }
 
 
@@ -708,7 +714,23 @@ std::string Tree::getNewickRepresentation(bool round ) const
     }
     else
     {
-        return root->computeNewick( round );
+        std::ostringstream o;
+        if ( tree_comments.size() > 0 )
+        {
+            o << "[&";
+            for (size_t i = 0; i < tree_comments.size(); ++i)
+            {
+                if ( i > 0 )
+                {
+                    o << ",";
+                }
+                o << tree_comments[i];
+            }
+            o << "] ";
+        }
+
+        
+        return o.str() + root->computeNewick( round );
     }
 
 }
@@ -717,25 +739,31 @@ std::string Tree::getNewickRepresentation(bool round ) const
 
 TopologyNode& Tree::getNode(size_t idx)
 {
-
     if ( idx >= nodes.size() )
     {
         throw RbException("Index out of bounds in getNode.");
     }
 
-    return *nodes[idx];
+    auto& node = *nodes[idx];
+
+    assert(node.index == idx);
+    
+    return node;
 }
 
 
 const TopologyNode& Tree::getNode(size_t idx) const
 {
-
     if ( idx >= nodes.size() )
     {
         throw RbException("Index out of bounds in getNode.");
     }
 
-    return *nodes[idx];
+    auto& node = *nodes[idx];
+
+    assert(node.index == idx);
+    
+    return node;
 }
 
 
@@ -884,7 +912,7 @@ size_t Tree::getNumberOfSampledAncestors( void ) const
 std::string Tree::getPlainNewickRepresentation() const
 {
 
-    return root->computePlainNewick();
+    return root->computePlainNewick() + ";";
 }
 
 
@@ -1078,7 +1106,11 @@ TopologyNode& Tree::getTipNode( size_t index )
 //        throw RbException("Node at index is not a tip but should have been!");
 //    }
 
-    return *nodes[ index ];
+    auto& node = getNode(index);
+
+    assert(node.isTip());
+
+    return node;
 }
 
 
@@ -2000,11 +2032,16 @@ void Tree::reroot(const std::string &outgroup, bool make_bifurcating, bool reind
 
 void Tree::reroot(TopologyNode &n, bool make_bifurcating, bool reindex)
 {
-    // reset parent/child relationships
+    // Reset parent/child relationships
     reverseParentChild( n.getParent() );
 
-    // set the root
-    root = &n.getParent();
+    // Given that the same index refers BOTH to the node AND to its parent branch
+    //   we cannot preserve both when we reroot.
+    // The current code preserves the mapping between index <=> branch, and therefore
+    //   the mapping from index <==> node get altered. 
+    // So use setRoot() to rebuild the index <==> node mapping instead of just setting
+    //   the raw root pointer.
+    setRoot( &n.getParent(), reindex );
     
     // do we want to make the tree bifurcating?
     if ( make_bifurcating == true )
@@ -2323,7 +2360,7 @@ void Tree::suppressOutdegreeOneNodes(bool replace)
 
 void Tree::unroot( void )
 {
-
+    
     if ( isRooted() == true )
     {
 
@@ -2332,29 +2369,35 @@ void Tree::unroot( void )
 
         // make the tree use branch lengths instead of ages
         old_root->setUseAges(false, true);
-
-        size_t child_index = 0;
-        if ( old_root->getChild(child_index).isTip() == true )
+        
+        // if the root has more than two children, we are done: we will just mark the tree as unrooted but not change it otherwise
+        const size_t num_children = old_root->getNumberOfChildren();
+        if (num_children <= 2)
         {
-            child_index = 1;
+            size_t child_index = 0;
+            if ( old_root->getChild(child_index).isTip() == true )
+            {
+                child_index = 1;
+            }
+            TopologyNode *new_root = &old_root->getChild( child_index );
+            TopologyNode *second_child = &old_root->getChild( (child_index == 0 ? 1 : 0) );
+            
+            double bl_first = new_root->getBranchLength();
+            double bl_second = second_child->getBranchLength();
+            
+            old_root->removeChild( new_root );
+            old_root->removeChild( second_child );
+            new_root->setParent( NULL );
+            new_root->addChild( second_child );
+            second_child->setParent( new_root );
+            
+            second_child->setBranchLength( bl_first + bl_second );
+            
+            // finally we need to set the new root
+            setRoot( new_root, true);
         }
-        TopologyNode *new_root = &old_root->getChild( child_index );
-        TopologyNode *second_child = &old_root->getChild( (child_index == 0 ? 1 : 0) );
-
-        double bl_first = new_root->getBranchLength();
-        double bl_second = second_child->getBranchLength();
-
-        old_root->removeChild( new_root );
-        old_root->removeChild( second_child );
-        new_root->setParent( NULL );
-        new_root->addChild( second_child );
-        second_child->setParent( new_root );
-
-        second_child->setBranchLength( bl_first + bl_second );
-
-        // finally we need to set the new root to our tree copy
+        
         setRooted( false );
-        setRoot( new_root, true);
 
     }
 
@@ -2383,6 +2426,99 @@ void Tree::writeToFile( const path &dir, const std::string &fn ) const
     }
 }
 
+void Tree::addTreeParameter_(const std::string& chunk)
+{
+    tree_comments.push_back( chunk );
+}
+
+void Tree::addTreeParameter(const std::string& key, const std::optional<std::string>& value)
+{
+    assert(not key.contains('='));
+    if (value)
+        tree_comments.push_back(key + '=' + *value);
+    else
+        tree_comments.push_back(key);
+}
+
+std::optional<std::string> getValueFromChunk(const std::string& key, const std::string& chunk)
+{
+    if (chunk.size() > key.size())
+    {
+        assert(chunk.starts_with(key +'='));
+        return chunk.substr(key.size()+1);
+    }
+    else
+    {
+        assert(chunk == key);
+        return {};
+    }
+}
+
+std::optional<int> getParameterIndex(const std::vector<std::string>& comments, const std::string& key)
+{
+    assert(not key.contains('='));
+
+    std::optional<int> found_index;
+    auto key_equals = key+'=';
+    for(int i=0;i<comments.size();i++)
+    {
+        auto& comment = comments[i];
+        if (comment == key or comment.starts_with(key_equals))
+        {
+            found_index = i;
+            break;
+        }
+    }
+
+    return found_index;
+}
+
+std::optional<std::optional<std::string>> getParameter(const std::vector<std::string>& comments, const std::string& key)
+{
+    if (auto found_index = getParameterIndex(comments, key))
+        return getValueFromChunk( key, comments[*found_index] );
+    else
+        return {};
+}
+
+// The outer optional says if the key exists.
+// The inner optional has no value if the comment chunk is just 'key', but
+//   has a value of the empty string if the comment is 'key='.
+std::optional<std::optional<std::string>> Tree::getTreeParameter(const std::string& key) const
+{
+    return getParameter(tree_comments, key);
+}
+
+std::optional<std::optional<std::string>> eraseParameter(std::vector<std::string>& comments, const std::string& key)
+{
+    if (auto found_index = getParameterIndex(comments, key))
+    {
+        // 1. Extract the value from the chunk
+        auto value = getValueFromChunk( key, comments[*found_index] );
+
+        // 2. Move the comment to the end of the array and pop it.
+        if (*found_index < comments.size()-1)
+        {
+            std::swap(comments[*found_index], comments.back());
+        }
+        comments.pop_back();
+
+        // 3. Return the value
+        return value;
+    }
+    else
+        return {};
+}
+
+std::optional<std::optional<std::string>> Tree::eraseTreeParameter(const std::string& key)
+{
+    return eraseParameter(tree_comments, key);
+}
+
+const std::vector<std::string>&  Tree::getTreeParameters(void) const
+{
+    return tree_comments;
+}
 
 std::ostream& RevBayesCore::operator<<(std::ostream& o, const Tree& x)
 {

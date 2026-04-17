@@ -20,7 +20,9 @@
 
 #include "Cloneable.h"
 #include "MemberObject.h"
+#include "Printable.h"
 #include "RbVector.h"
+#include "Serializable.h"
 
 #include <cstddef>
 #include <iostream>
@@ -31,7 +33,7 @@ namespace RevBayesCore {
     class EigenSystem;
     class CholeskyDecomposition;
     
-    class MatrixReal : public Cloneable, public MemberObject<RbVector<double> >, public MemberObject<MatrixReal> {
+    class MatrixReal : public Cloneable, public Printable, public Serializable, public MemberObject<RbVector<double> >, public MemberObject<MatrixReal> {
         
     public:
         MatrixReal(void);                       //!< Default constructor required by revlanguage use of this class
@@ -109,6 +111,12 @@ namespace RevBayesCore {
         bool                                    isSymmetric(void) const;
         bool                                    isUsingCholesky(void) const { return use_cholesky_decomp; }
         void                                    setCholesky(bool c) const;
+        void                                    initFromString(const std::string &s);
+        json                                    toJSON() const;
+        void                                    printForUser(std::ostream &o, const std::string &sep, int l, bool left) const;
+        void                                    printForSimpleStoring(std::ostream &o, const std::string &sep, int l, bool left, bool flatten = true) const;
+        void                                    printForComplexStoring(std::ostream &o, const std::string &sep, int l, bool left, bool flatten = true) const;
+        void                                    writeToFile(const path &dir, const std::string &fn) const;
 
         size_t                                  size(void) const;
         void                                    resize(size_t r, size_t c);
@@ -139,4 +147,3 @@ namespace RevBayesCore {
 }
 
 #endif
-

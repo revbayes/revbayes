@@ -49,6 +49,7 @@ namespace RevLanguage {
         
         RevPtr<const RevVariable>                   tree;
         RevPtr<const RevVariable>                   lambda;
+        RevPtr<const RevVariable>                   tune;                                                                                   //!< If autotuning should be used.
         
     };
     

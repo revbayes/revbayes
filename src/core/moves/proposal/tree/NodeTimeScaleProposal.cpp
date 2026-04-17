@@ -206,18 +206,28 @@ void NodeTimeScaleProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 
 void NodeTimeScaleProposal::setProposalTuningParameter(double tp)
 {
-    // this proposal has no tuning parameter: nothing to do
+    lambda = tp;
 }
 
 
 /**
- * Tune the Proposal to accept the desired acceptance ratio.
+ * Tune the Proposal to accept at the desired acceptance ratio.
  *
- * The acceptance ratio for this Proposal should be around 0.44.
+ * The acceptance ratio for this Proposal should be around 0.234.
  * If it is too large, then we increase the proposal size,
  * and if it is too small, then we decrease the proposal size.
  */
 void NodeTimeScaleProposal::tune( double rate )
 {
+    
+    double p = this->targetAcceptanceRate;
+    if ( rate > p )
+    {
+        lambda *= (1.0 + ((rate - p)/(1.0 - p)) );
+    }
+    else
+    {
+        lambda /= (2.0 - rate/p);
+    }
     
 }

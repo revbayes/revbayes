@@ -86,7 +86,7 @@ namespace RevBayesCore {
         {
             if ( i >= std::vector<valueType>::size() )
             {
-                throw(RbException("Vector index out of range: "+StringUtilities::to_string(i)+" of "+StringUtilities::to_string(std::vector<valueType>::size())));
+                throw RbException("Vector index out of range: "+StringUtilities::to_string(i)+" of "+StringUtilities::to_string(std::vector<valueType>::size()));
             }
             return std::vector<valueType>::operator [](i);
         }
