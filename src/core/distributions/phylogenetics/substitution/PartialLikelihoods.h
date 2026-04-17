@@ -71,16 +71,28 @@ public:
     const Dims& dims() const {return dims_;}
 
     // This shows how the entries are laid out inside the linear array.
-    double& likelihood(int m, int p, int s)       {return likelihoods[s + dims_.num_states*(p + dims_.num_patterns*m)];}
-    double  likelihood(int m, int p, int s) const {return likelihoods[s + dims_.num_states*(p + dims_.num_patterns*m)];}
+    double& likelihood(int m, int p, int s)
+    {
+        assert(0 <= m and m < dims_.num_site_mixtures);
+        assert(0 <= p and p < dims_.num_patterns);
+        assert(0 <= s and s < dims_.num_states);
+        return likelihoods[s + dims_.num_states*(p + dims_.num_patterns*m)];
+    }
+    double  likelihood(int m, int p, int s) const
+    {
+        assert(0 <= m and m < dims_.num_site_mixtures);
+        assert(0 <= p and p < dims_.num_patterns);
+        assert(0 <= s and s < dims_.num_states);
+        return likelihoods[s + dims_.num_states*(p + dims_.num_patterns*m)];
+    }
 
     no_init_vector<double> likelihoods; // per mixture * pattern * state
     no_init_vector<int> scale; // per site
 
-    PartialLikelihoods& operator=(const PartialLikelihoods&) = default;
+    PartialLikelihoods& operator=(const PartialLikelihoods&) = delete;
     PartialLikelihoods& operator=(PartialLikelihoods&&) noexcept = default;
 
-    PartialLikelihoods(const PartialLikelihoods&) = default;
+    PartialLikelihoods(const PartialLikelihoods&) = delete;
     PartialLikelihoods(PartialLikelihoods&&) noexcept = default;
 
 PartialLikelihoods()

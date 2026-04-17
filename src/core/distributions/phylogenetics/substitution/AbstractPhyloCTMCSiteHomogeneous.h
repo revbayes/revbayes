@@ -83,9 +83,9 @@ namespace RevBayesCore {
         }
 
     public:
-        IndexedCache(size_t n, const T& init = T{})
+        IndexedCache(size_t n)
             : num_items(n),
-              slots(2 * n, init),
+              slots(2 * n),
               current_state(n, {0, 1})   // all start as slot 0, dirty
             {}
 
@@ -178,10 +178,10 @@ namespace RevBayesCore {
         }
 
         // For resize after tree topology changes, etc.
-        void resize(size_t n, const T& init = T{})
+        void resize(size_t n)
         {
             num_items = n;
-            slots.assign(2 * n, init);
+            slots.resize(2*n);
             current_state.assign(n, {0, 1});
 
             // if we change the number of nodes, how would we restore?
@@ -499,7 +499,7 @@ num_site_mixtures( n.num_site_mixtures ),
 num_matrices( n.num_matrices ),
 tau( n.tau ),
 pmatrices( n.pmatrices ),
-partialLikelihoods( n.partialLikelihoods ),
+partialLikelihoods( n.partialLikelihoods.size() ),
 activeLikelihood( n.activeLikelihood ),
 marginalLikelihoods( n.marginalLikelihoods ),
 ambiguous_char_matrix( n.ambiguous_char_matrix ),
@@ -557,6 +557,9 @@ sampled_site_matrix_component( n.sampled_site_matrix_component )
     rate_variation_across_sites                    = n.rate_variation_across_sites;
 
     tau->getValue().getTreeChangeEventHandler().addListener( this );
+
+    // scratch buffers cannot be copied
+    resizeLikelihoodVectors();
 }
 
 template<class charType>
@@ -711,8 +714,7 @@ inline bool has_weighted_characters(AbstractHomologousDiscreteCharacterData& dat
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::allocatePartialLikelihoods() const
 {
-    PartialLikelihoods::Dims dims(num_site_mixtures, pattern_block_size, num_chars);
-    partialLikelihoods.resize(num_nodes, dims);
+    partialLikelihoods.resize(num_nodes);
 }
 
 template<class charType>
