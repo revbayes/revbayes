@@ -146,8 +146,9 @@ RevPtr<RevVariable> TraceTree::executeMethod(std::string const &name, const std:
         
         const RevBayesCore::Clade &c = static_cast<const Clade &>( args[0].getVariable()->getRevObject() ).getValue();
         bool verbose = static_cast<const RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
+        bool differentiateMRCAs = static_cast<const RlBoolean &>( args[2].getVariable()->getRevObject() ).getValue();
         
-        double p = this->value->cladeProbability( c, verbose );
+        double p = differentiateMRCAs ? this->value->cladeWithMRCAProbability( c, verbose ) : this->value->cladeProbability( c, verbose );
         
         return new RevVariable( new Probability( p ) );
         
@@ -504,6 +505,7 @@ void TraceTree::initMethods( void )
     ArgumentRules* cladeProbArgRules = new ArgumentRules();
     cladeProbArgRules->push_back( new ArgumentRule("clade", Clade::getClassTypeSpec(), "The clade whose probability is to be computed.", ArgumentRule::BY_VALUE, ArgumentRule::ANY) );
     cladeProbArgRules->push_back( new ArgumentRule("verbose", RlBoolean::getClassTypeSpec(), "Printing verbose output.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true)) );
+    cladeProbArgRules->push_back( new ArgumentRule("differentiateMRCAs", RlBoolean::getClassTypeSpec(), "Report probability of clade AND sampled-ancestor status at the MRCA node.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false)) );
     this->methods.addFunction( new MemberProcedure( "cladeProbability", Probability::getClassTypeSpec(), cladeProbArgRules) );
     
     ArgumentRules* jointCladeProbArgRules = new ArgumentRules();

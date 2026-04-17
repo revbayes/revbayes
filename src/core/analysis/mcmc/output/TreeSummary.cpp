@@ -92,7 +92,7 @@ TreeSummary* TreeSummary::clone(void) const
 }
 
 
-void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbose )
+void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbose, bool differentiate_SAs )
 {
     summarize( verbose );
 
@@ -135,9 +135,15 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
 
         delete tmp_tree;
 
-        if ( tree_clade_ages.find(newick) == tree_clade_ages.end() )
+        if ( tree_clade_with_mrca_ages.find(newick) == tree_clade_with_mrca_ages.end() )
         {
+            assert(tree_clade_ages.find(newick) == tree_clade_ages.end());
             throw(RbException("Could not find input tree in tree sample"));
+        }
+        else
+        {
+            // The newick string should be present in both tree_clade_ages/tree_clade_with_mrca_ages, or absent from both.
+            assert(tree_clade_ages.find(newick) != tree_clade_ages.end());
         }
     }
 
@@ -150,10 +156,15 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
         TopologyNode* n = nodes[i];
 
         Clade clade = n->getClade();
-        Split split( clade.getBitRepresentation(), clade.getMrca(), rooted);
 
         // annotate clade posterior prob
         if ( ( !n->isTip() || ( n->isRoot() && !clade.getMrca().empty() ) ) && report.clade_probs )
+        {
+            double pp = cladeWithMRCAProbability( clade, false );
+            n->addBranchParameter("posterior_mrca",pp);
+        }
+
+        if (!n->isTip())
         {
             double pp = cladeProbability( clade, false );
             n->addBranchParameter("posterior",pp);
@@ -174,30 +185,58 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
         // annotate conditional clade probs and get node ages
         std::vector<double> node_ages;
 
+        Split split( clade.getBitRepresentation(), rooted);
+        SplitWithMRCA split_with_mrca( clade.getBitRepresentation(), clade.getMrca(), rooted);
+
         if ( !n->isRoot() )
         {
+            // FIXME: do we need to remap the bits here?
             Clade parent_clade = n->getParent().getClade();
-            Split parent_split = Split( parent_clade.getBitRepresentation(), parent_clade.getMrca(), rooted);
 
-            std::map<Split, std::vector<double> >& condCladeAges = conditional_clade_ages[parent_split];
-            node_ages = report.conditional_clade_ages ? condCladeAges[split] : clade_ages[split];
-
-            // annotate CCPs
-            if ( !n->isTip() && report.conditional_clade_probs )
+            if (differentiate_SAs)
             {
-                double parentCladeFreq = splitCount( parent_split );
-                double ccp = condCladeAges[split].size() / parentCladeFreq;
-                n->addNodeParameter("ccp",ccp);
+                //----------- Splits-with-MRCA ------------/
+                SplitWithMRCA parent_split_with_mrca = SplitWithMRCA( parent_clade.getBitRepresentation(), parent_clade.getMrca(), rooted);
+
+                std::map<SplitWithMRCA, std::vector<double> >& condCladeWithMrcaAges = conditional_clade_with_mrca_ages.at(parent_split_with_mrca);
+                node_ages = report.conditional_clade_with_mrca_ages ? condCladeWithMrcaAges.at(split_with_mrca) : clade_with_mrca_ages.at(split_with_mrca);
+
+                // annotate CCPs
+                if ( !n->isTip() && report.conditional_clade_with_mrca_probs )
+                {
+                    double parentCladeFreq = splitWithMRCACount( parent_split_with_mrca );
+                    double ccp = condCladeWithMrcaAges.at(split_with_mrca).size() / parentCladeFreq;
+                    n->addNodeParameter("ccp_mrca",ccp);
+                }
+            }
+            else
+            {
+                //----------- Splits ------------/
+                Split parent_split= Split( parent_clade.getBitRepresentation(), rooted);
+
+                std::map<Split, std::vector<double> >& condCladeAges = conditional_clade_ages.at(parent_split);
+                node_ages = report.conditional_clade_ages ? condCladeAges.at(split) : clade_ages.at(split);
+
+                // annotate CCPs
+                if ( !n->isTip() && report.conditional_clade_probs )
+                {
+                    double parentCladeFreq = splitCount( parent_split );
+                    double ccp = condCladeAges.at(split).size() / parentCladeFreq;
+                    n->addNodeParameter("ccp",ccp);
+                }
             }
         }
         else
         {
-            node_ages = clade_ages[split];
+            node_ages = differentiate_SAs ? clade_with_mrca_ages.at(split_with_mrca) : clade_ages.at(split);
         }
 
         if ( report.conditional_tree_ages )
         {
-            node_ages = tree_clade_ages[newick][split];
+            if (differentiate_SAs)
+                node_ages = tree_clade_with_mrca_ages.at(newick).at(split_with_mrca);
+            else
+                node_ages = tree_clade_ages.at(newick).at(split);
         }
 
         // Verify that we have age data for this node
@@ -319,6 +358,16 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
 }
 
 
+double TreeSummary::cladeWithMRCAProbability( const Clade &c, bool verbose )
+{
+    summarize( verbose );
+
+    Clade tmp = c;
+    tmp.resetTaxonBitset( traces.front()->objectAt(0).getTaxonBitSetMap() );
+
+    return splitWithMRCAFrequency( SplitWithMRCA( tmp.getBitRepresentation(), tmp.getMrca(), rooted) );
+}
+
 double TreeSummary::cladeProbability( const Clade &c, bool verbose )
 {
     summarize( verbose );
@@ -326,7 +375,7 @@ double TreeSummary::cladeProbability( const Clade &c, bool verbose )
     Clade tmp = c;
     tmp.resetTaxonBitset( traces.front()->objectAt(0).getTaxonBitSetMap() );
 
-    return splitFrequency( Split( tmp.getBitRepresentation(), tmp.getMrca(), rooted) );
+    return splitFrequency( Split( tmp.getBitRepresentation(), rooted) );
 }
 
 
@@ -561,7 +610,7 @@ std::vector<Clade> TreeSummary::getUniqueClades( double min_clade_probability, b
         progress.start();
     }
 
-    for (auto& [clade, count]: clade_samples | views::reverse)
+    for (auto& [clade, count]: clade_with_mrca_samples | views::reverse)
     {
         if (verbose) progress.update(counter);
         counter++;
@@ -754,34 +803,34 @@ double TreeSummary::maxdiff( bool verbose )
         throw RbException("At least 2 traces are required to compute maxdiff");
     }
 
-    std::set<Sample<Split> > splits_union;
+    std::set<Sample<SplitWithMRCA> > split_with_mrcas_union;
 
     for (auto& trace: traces)
     {
         trace->summarize(verbose);
 
-        splits_union.insert(trace->clade_samples.begin(), trace->clade_samples.end());
+        split_with_mrcas_union.insert(trace->clade_with_mrca_samples.begin(), trace->clade_with_mrca_samples.end());
     }
 
 
     double maxdiff = 0;
 
-    for (auto& [split, count]: splits_union)
+    for (auto& [split_with_mrca, count]: split_with_mrcas_union)
     {
-        std::vector<double> split_freqs;
+        std::vector<double> split_with_mrca_freqs;
 
         for(auto& trace: traces)
         {
-            double freq = trace->splitFrequency(split);
+            double freq = trace->splitWithMRCAFrequency(split_with_mrca);
 
-            split_freqs.push_back(freq);
+            split_with_mrca_freqs.push_back(freq);
         }
 
-        for(size_t i = 0; i < split_freqs.size(); i++)
+        for(size_t i = 0; i < split_with_mrca_freqs.size(); i++)
         {
-            for(size_t j = i+1; j < split_freqs.size(); j++)
+            for(size_t j = i+1; j < split_with_mrca_freqs.size(); j++)
             {
-                double diff = abs(split_freqs[i] - split_freqs[j]);
+                double diff = abs(split_with_mrca_freqs[i] - split_with_mrca_freqs[j]);
 
                 if(diff > maxdiff)
                 {
@@ -795,7 +844,7 @@ double TreeSummary::maxdiff( bool verbose )
 }
 
 
-Tree* TreeSummary::mapTree( AnnotationReport report, bool verbose )
+Tree* TreeSummary::mapTree( AnnotationReport report, bool verbose, bool differentiate_SAs )
 {
     std::stringstream ss;
     ss << "Compiling maximum a posteriori tree from " << sampleSize(true) << " trees.\n";
@@ -827,13 +876,13 @@ Tree* TreeSummary::mapTree( AnnotationReport report, bool verbose )
 
     report.MAP_parameters = true;
     report.node_ages      = true;
-    annotateTree(*tmp_tree, report, false);
+    annotateTree(*tmp_tree, report, false, differentiate_SAs);
 
     return tmp_tree;
 }
 
 
-Tree* TreeSummary::mccTree( AnnotationReport report, bool verbose )
+Tree* TreeSummary::mccTree( AnnotationReport report, bool verbose, bool differentiate_SAs )
 {
     std::stringstream ss;
     ss << "Compiling maximum clade credibility tree from " << sampleSize(true) << " trees.\n";
@@ -847,11 +896,41 @@ Tree* TreeSummary::mccTree( AnnotationReport report, bool verbose )
     // find the clade credibility score for each tree
     for (const auto& [newick, count]: tree_samples)
     {
-        // find the product of the clade frequencies
+        // find the score of the tree (i.e. either the product of clade-with-MRCA probabilities,
+        // or the product of clade probabilities and SA probabilities)
         double cc = 0;
-        for (auto& [clade, age]: tree_clade_ages.at(newick))
-            cc += log( splitFrequency(clade) );
 
+        // get tree from newick
+        NewickConverter converter;
+        Tree* sampled_tree = converter.convertFromNewick( newick );
+
+        // check if we want to differentiate clades on whether 
+        // their MRCA is an SA or speciation node
+        if (differentiate_SAs) {
+            // iterate through clades in this tree
+            for (auto& [clade, age]: tree_clade_with_mrca_ages.at(newick))
+                cc += log( splitWithMRCAFrequency(clade) );
+        } else {
+            // iterate through clades in this tree
+            for (auto& [clade, age]: tree_clade_ages.at(newick))
+                cc += log( splitFrequency(clade) );
+
+            // when differentiate_SAs is false, we need to set the sampled ancestor flags
+            if (!sampled_ancestor_counts.empty()) {
+                for (auto& t : sampled_tree->getTipNames()) {
+                    // get SA frequency
+                    double sa_freq = sampled_ancestor_counts[t] / sampleSize(true);
+
+                    // check if it is an SA
+                    bool is_SA = sampled_tree->getTipNodeWithName(t).isSampledAncestorTip();
+
+                    // add to cc based on that
+                    cc += log( is_SA ? sa_freq : 1 - sa_freq );
+                }
+            }
+        }
+
+        // if this tree is better than our best tree, make it the best tree
         if (not max_cc or cc > *max_cc)
         {
             max_cc = cc;
@@ -878,13 +957,13 @@ Tree* TreeSummary::mccTree( AnnotationReport report, bool verbose )
     }
 
     report.node_ages = true;
-    annotateTree(*best_tree, report, false);
+    annotateTree(*best_tree, report, false, differentiate_SAs);
 
     return best_tree;
 }
 
 
-Tree* TreeSummary::mrTree(AnnotationReport report, double cutoff, bool verbose)
+Tree* TreeSummary::mrTree(AnnotationReport report, double cutoff, bool verbose, bool differentiate_SAs)
 {
     if (cutoff < 0.0 || cutoff > 1.0) cutoff = 0.5;
 
@@ -918,94 +997,144 @@ Tree* TreeSummary::mrTree(AnnotationReport report, double cutoff, bool verbose)
 
     double totalSamples = sampleSize(true);
 
-    for (const auto& [clade, count]: clade_samples | views::reverse)
-    {
-        float cladeFreq = count / totalSamples;
-        if (cladeFreq < cutoff)  break;
-
-        //make sure we have an internal node
-        size_t clade_size = clade.first.count();
-        if (clade_size == 1 || clade_size == tipNames.size())  continue;
-
-        //find parent node
-        std::vector<TopologyNode*> children;
-        RbBitSet tmp(tipNames.size());
-        TopologyNode* parentNode = findParentNode(*root, clade, children, tmp );
-
-        //skip this clade if it is not compatible
-        if (not parentNode) continue;
-
-        // find the mrca child(ren) if they exist
-        std::vector<TopologyNode*> mrca;
-        if ( not clade.second.empty() )
+    if (differentiate_SAs) {
+        for (const auto& [clade, count]: clade_with_mrca_samples | views::reverse)
         {
-            for (auto& child: children)
+            float cladeFreq = count / totalSamples;
+            if (cladeFreq < cutoff)  break;
+
+            //make sure we have an internal node
+            size_t clade_size = clade.first.count();
+            if (clade_size == 1 || clade_size == tipNames.size())  continue;
+
+            //find parent node
+            std::vector<TopologyNode*> children;
+            RbBitSet tmp(tipNames.size());
+            TopologyNode* parentNode = findParentNode(*root, clade.first, children, tmp );
+
+            //skip this clade if it is not compatible
+            if (not parentNode) continue;
+
+            // find the mrca child(ren) if they exist
+            std::vector<TopologyNode*> mrca;
+            if ( not clade.second.empty() )
             {
-                // Add the child to the mrca if it's a tip and its taxon is in clade.second
-                if ( child->isTip() && std::find(clade.second.begin(), clade.second.end(), child->getTaxon() ) != clade.second.end() )
-                    mrca.push_back(child);
+                for (auto& child: children)
+                {
+                    // Add the child to the mrca if it's a tip and its taxon is in clade.second
+                    if ( child->isTip() && std::find(clade.second.begin(), clade.second.end(), child->getTaxon() ) != clade.second.end() )
+                        mrca.push_back(child);
+                }
+
+                // if we couldn't find all the mrcas, then this clade is not compatible
+                if ( mrca.size() != clade.second.size() )
+                {
+                    continue;
+                }
+                else
+                {
+                    for (auto& mrca_node: mrca)
+                        mrca_node->setSampledAncestor(true);
+                }
             }
 
-            // if we couldn't find all the mrcas, then this clade is not compatible
-            if ( mrca.size() != clade.second.size() )
-            {
-                continue;
-            }
-            else
-            {
-                for (auto& mrca_node: mrca)
-                    mrca_node->setSampledAncestor(true);
-            }
-        }
-
-        // avoid creating a new child if we've already found a clade compatible with it
-        if ( children.size() == parentNode->getNumberOfChildren() ) continue;
-
-        nIndex++;   //increment node index
-        TopologyNode* intNode = new TopologyNode(nIndex); //Topology node constructor, with proper node index
-
-        // move the children to a new internal node
-        for (size_t i = 0; i < children.size(); i++)
-        {
-            parentNode->removeChild(children[i]);
-            intNode->addChild(children[i]);
-            children[i]->setParent(intNode);
-        }
-
-        intNode->setParent(parentNode);
-        parentNode->addChild(intNode);
-
-        // add a mrca child if it exists and there is more than one non-mrca taxa
-        if ( mrca.empty() == false && children.size() > 2 )
-        {
-            TopologyNode* old_parent = parentNode;
+            // avoid creating a new child if we've already found a clade compatible with it
+            if ( children.size() == parentNode->getNumberOfChildren() ) continue;
 
             nIndex++;   //increment node index
-            parentNode = new TopologyNode(nIndex); //Topology node constructor, with proper node index
+            TopologyNode* intNode = new TopologyNode(nIndex); //Topology node constructor, with proper node index
 
-            intNode->removeChild(mrca[0]);
-            parentNode->addChild(mrca[0]);
-            mrca[0]->setParent(parentNode);
+            // move the children to a new internal node
+            for (size_t i = 0; i < children.size(); i++)
+            {
+                parentNode->removeChild(children[i]);
+                intNode->addChild(children[i]);
+                children[i]->setParent(intNode);
+            }
 
-            old_parent->removeChild(intNode);
-            old_parent->addChild(parentNode);
-            parentNode->setParent(old_parent);
-
-            parentNode->addChild(intNode);
             intNode->setParent(parentNode);
+            parentNode->addChild(intNode);
+
+            // add a mrca child if it exists and there is more than one non-mrca taxa
+            if ( mrca.empty() == false && children.size() > 2 )
+            {
+                TopologyNode* old_parent = parentNode;
+
+                nIndex++;   //increment node index
+                parentNode = new TopologyNode(nIndex); //Topology node constructor, with proper node index
+
+                intNode->removeChild(mrca[0]);
+                parentNode->addChild(mrca[0]);
+                mrca[0]->setParent(parentNode);
+
+                old_parent->removeChild(intNode);
+                old_parent->addChild(parentNode);
+                parentNode->setParent(old_parent);
+
+                parentNode->addChild(intNode);
+                intNode->setParent(parentNode);
+            }
+
+            root->setTree(consensusTree);
+        }
+    } else {
+        for (const auto& [clade, count]: clade_samples | views::reverse)
+        {
+            float cladeFreq = count / totalSamples;
+            if (cladeFreq < cutoff)  break;
+
+            //make sure we have an internal node
+            size_t clade_size = clade.include.count();
+            if (clade_size == 1 || clade_size == tipNames.size())  continue;
+
+            //find parent node
+            std::vector<TopologyNode*> children;
+            RbBitSet tmp(tipNames.size());
+            TopologyNode* parentNode = findParentNode(*root, clade.include, children, tmp );
+
+            //skip this clade if it is not compatible
+            if (not parentNode) continue;
+
+            // avoid creating a new child if we've already found a clade compatible with it
+            if ( children.size() == parentNode->getNumberOfChildren() ) continue;
+
+            nIndex++;   //increment node index
+            TopologyNode* intNode = new TopologyNode(nIndex); //Topology node constructor, with proper node index
+
+            // move the children to a new internal node
+            for (size_t i = 0; i < children.size(); i++)
+            {
+                parentNode->removeChild(children[i]);
+                intNode->addChild(children[i]);
+                children[i]->setParent(intNode);
+            }
+
+            intNode->setParent(parentNode);
+            parentNode->addChild(intNode);
+
+            root->setTree(consensusTree);
         }
 
-        root->setTree(consensusTree);
+        // when differentiate_SAs is false, we need to set the sampled ancestor flags
+        if (!sampled_ancestor_counts.empty()) {
+            for (auto& n : consensusTree->getNodes()) {
+                // if it's a tip and it's a sampled ancestor more than cutoff% of the time, make it an SA here
+                if (n->isTip() && sampled_ancestor_counts[n->getTaxon()] / sampleSize(true) >= cutoff) {
+                    n->setSampledAncestor(true);
+                }
+            }
+    }
+
     }
 
     //now put the tree together
     consensusTree->setRoot(root, true);
 
-    report.conditional_clade_ages  = false;
-    report.conditional_clade_probs = false;
+    report.conditional_clade_with_mrca_ages  = false;
+    report.conditional_clade_with_mrca_probs = false;
     report.conditional_tree_ages   = false;
     report.node_ages               = true;
-    annotateTree(*consensusTree, report, false);
+    annotateTree(*consensusTree, report, false, differentiate_SAs);
 
     return consensusTree;
 }
@@ -1046,7 +1175,7 @@ void TreeSummary::printCladeSummary(std::ostream &o, double min_clade_probabilit
     std::vector<Taxon> ordered_taxa = traces.front()->objectAt(0).getTaxa();
     VectorUtilities::sort( ordered_taxa );
 
-    for (auto& [clade, count]: clade_samples | views::reverse)
+    for (auto& [clade, count]: clade_with_mrca_samples | views::reverse)
     {
         Clade c(clade.first, ordered_taxa);
         c.setMrca(clade.second);
@@ -1204,11 +1333,17 @@ void TreeSummary::setOutgroup(const RevBayesCore::Clade &c)
 }
 
 
-TreeSummary::Split TreeSummary::collectTreeSample(const TopologyNode& n, RbBitSet& intaxa, std::string newick, std::map<Split, std::int64_t>& cladeCountMap)
+// Maybe we need to merge this with collectdTreeSampleWithMRCA
+// Take two cladecountmaps, return a pair of Split, SplitWithMRCA
+std::pair<TreeSummary::Split, TreeSummary::SplitWithMRCA>
+TreeSummary::collectTreeSample(const TopologyNode& n, RbBitSet& intaxa, std::string newick,
+                               std::map<Split, std::int64_t>& cladeCountMap,
+                               std::map<SplitWithMRCA, std::int64_t>& cladeCountMapWithMRCA)
 {
     double age = (clock ? n.getAge() : n.getBranchLength() );
 
     std::vector<Split> child_splits;
+    std::vector<SplitWithMRCA> child_split_with_mrcas;
 
     RbBitSet taxa(intaxa.size());
     std::set<Taxon> mrca;
@@ -1219,6 +1354,7 @@ TreeSummary::Split TreeSummary::collectTreeSample(const TopologyNode& n, RbBitSe
 
         if ( rooted && n.isSampledAncestorTip() )
         {
+            // We don't want to do this twice!  So maybe merge with the MRCA version.
             sampled_ancestor_counts[n.getTaxon()]++;
 
             mrca.insert( n.getTaxon() );
@@ -1230,7 +1366,10 @@ TreeSummary::Split TreeSummary::collectTreeSample(const TopologyNode& n, RbBitSe
         {
             const TopologyNode &child_node = n.getChild(i);
 
-            child_splits.push_back( collectTreeSample(child_node, taxa, newick, cladeCountMap) );
+            auto [split, split_with_mrca] = collectTreeSample(child_node, taxa, newick, cladeCountMap, cladeCountMapWithMRCA);
+
+            child_splits.push_back( split );
+            child_split_with_mrcas.push_back( split_with_mrca );
 
             if ( rooted && child_node.isSampledAncestorTip() )
             {
@@ -1241,15 +1380,18 @@ TreeSummary::Split TreeSummary::collectTreeSample(const TopologyNode& n, RbBitSe
 
     intaxa |= taxa;
 
-    Split parent_split(taxa, mrca, rooted);
+    Split parent_split(taxa, rooted);
+    SplitWithMRCA parent_split_with_mrca(taxa, mrca, rooted);
 
     if ( taxa.size() > 0 )
     {
         // store the age for this split
         clade_ages[parent_split].push_back( age );
+        clade_with_mrca_ages[parent_split_with_mrca].push_back( age );
 
         // increment split count
         cladeCountMap[parent_split]++;
+        cladeCountMapWithMRCA[parent_split_with_mrca]++;
 
         // add conditional clade ages
         for (auto& child_split: child_splits)
@@ -1258,11 +1400,19 @@ TreeSummary::Split TreeSummary::collectTreeSample(const TopologyNode& n, RbBitSe
             conditional_clade_ages[parent_split][child_split].push_back( clade_ages[child_split].back() );
         }
 
+        // add conditional clade ages
+        for (auto& child_split_with_mrca: child_split_with_mrcas)
+        {
+            // inserts new entries if doesn't already exist
+            conditional_clade_with_mrca_ages[parent_split_with_mrca][child_split_with_mrca].push_back( clade_with_mrca_ages[child_split_with_mrca].back() );
+        }
+
         // store the age for this split, conditional on the tree topology
         tree_clade_ages[newick][parent_split].push_back( age );
+        tree_clade_with_mrca_ages[newick][parent_split_with_mrca].push_back( age );
     }
 
-    return parent_split;
+    return {parent_split, parent_split_with_mrca};
 }
 
 
@@ -1282,22 +1432,20 @@ void TreeSummary::enforceNonnegativeBranchLengths(TopologyNode& node) const
 }
 
 
-TopologyNode* TreeSummary::findParentNode(TopologyNode& n, const Split& split, std::vector<TopologyNode*>& children, RbBitSet& child_b ) const
+TopologyNode* TreeSummary::findParentNode(TopologyNode& n, const RbBitSet& clade, std::vector<TopologyNode*>& children, RbBitSet& child_b ) const
 {
     size_t num_taxa = child_b.size();
 
     RbBitSet node( num_taxa );
     n.getTaxa(node);
 
-    RbBitSet clade = split.first;
-
     RbBitSet mask  = node | clade;
 
     bool compatible = (mask == node);
     bool ischild      = (mask == clade);
 
-    Split c = split;
-    // check if the flipped unrooted split is compatible
+    RbBitSet c = clade;
+    // check if the flipped unrooted split_with_mrca is compatible
     if ( !rooted && !compatible && !ischild)
     {
         RbBitSet clade_flip = ~clade;
@@ -1307,7 +1455,7 @@ TopologyNode* TreeSummary::findParentNode(TopologyNode& n, const Split& split, s
 
         if ( compatible )
         {
-            c.first = clade_flip;
+            c = clade_flip;
         }
     }
 
@@ -1342,7 +1490,7 @@ TopologyNode* TreeSummary::findParentNode(TopologyNode& n, const Split& split, s
         children = std::move(new_children);
 
         // check that we found all the children
-        if ( parent == &n && child_mask != c.first && !n.isTip())
+        if ( parent == &n && child_mask != c && !n.isTip())
         {
             parent = NULL;
         }
@@ -1924,6 +2072,23 @@ double TreeSummary::splitFrequency(const Split &n) const
 }
 
 
+std::int64_t TreeSummary::splitWithMRCACount(const SplitWithMRCA &n) const
+{
+    auto iter = clade_with_mrca_counts.find(n);
+
+    if (iter == clade_with_mrca_counts.end())
+        return 0;
+    else
+        return iter->second;
+}
+
+
+double TreeSummary::splitWithMRCAFrequency(const SplitWithMRCA &n) const
+{
+    return double(splitWithMRCACount(n))/sampleSize(true);
+}
+
+
 void TreeSummary::summarize( bool verbose )
 {
     if ( not isDirty() )
@@ -1938,16 +2103,16 @@ void TreeSummary::summarize( bool verbose )
 
     rooted = traces.front()->objectAt(0).isRooted();
 
-    clade_samples.clear();
+    clade_with_mrca_samples.clear();
     tree_samples.clear();
 
     sampled_ancestor_counts.clear();
 
-    clade_ages.clear();
-    conditional_clade_ages.clear();
-    tree_clade_ages.clear();
+    clade_with_mrca_ages.clear();
+    conditional_clade_with_mrca_ages.clear();
+    tree_clade_with_mrca_ages.clear();
 
-    clade_counts.clear();
+    clade_with_mrca_counts.clear();
     tree_counts.clear();
 
     ProgressBar progress = ProgressBar(sampleSize(true));
@@ -1992,7 +2157,7 @@ void TreeSummary::summarize( bool verbose )
             const std::map<std::string, size_t>& taxon_map = tree.getTaxonBitSetMap();
             size_t bitset_size = taxon_map.size();
             RbBitSet b( bitset_size, false );
-            collectTreeSample(tree.getRoot(), b, newick, clade_counts);
+            collectTreeSample(tree.getRoot(), b, newick, clade_counts, clade_with_mrca_counts);
         }
     }
 
@@ -2003,16 +2168,16 @@ void TreeSummary::summarize( bool verbose )
     // FIXME: Storing a second copy of everything just to know the order  wastes memory.
     //
     //        Possibly store the clades (and trees) in a vector, and then make
-    //        clade_counts/clade_samples (and tree_counts/tree_samples) just refer to the
+    //        clade_with_mrca_counts/clade_with_mrca_samples (and tree_counts/tree_samples) just refer to the
     //        index in the vector.
     
     // sort the clade samples in ascending frequency
-    for (auto& [clade, count]: clade_counts)
+    for (auto& [clade, count]: clade_with_mrca_counts)
     {
 //        if ( it->first.first.count() > 0 )
 //        if ( it->first.first.count() > 0 && it->first.first.count() < (num_taxa-1) )
         {
-            clade_samples.insert( Sample<Split>(clade, count) );
+            clade_with_mrca_samples.insert( Sample<SplitWithMRCA>(clade, count) );
         }
 
     }

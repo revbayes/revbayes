@@ -15,4 +15,4 @@ Progress:
 
    Annotating tree ...
   
-   ((C[&index=2]:1.000000[&brlen_95%_HPD={1,1}],D[&index=1]:1.000000[&brlen_95%_HPD={1,1}])[&index=5]:2.000000[&posterior=0.571429,brlen_95%_HPD={2,2}],A[&index=4]:1.000000[&brlen_95%_HPD={1,1}],B[&index=3]:1.000000[&brlen_95%_HPD={1,1}])[&index=6]:0.000000[&posterior=1.000000];
+   ((C[&index=2]:1.000000[&brlen_95%_HPD={1,1}],D[&index=1]:1.000000[&brlen_95%_HPD={1,1}])[&index=5]:2.000000[&posterior_mrca=0.571429,posterior=0.571429,brlen_95%_HPD={2,2}],A[&index=4]:1.000000[&brlen_95%_HPD={1,1}],B[&index=3]:1.000000[&brlen_95%_HPD={1,1}])[&index=6]:0.000000[&posterior_mrca=1.000000,posterior=1.000000];
