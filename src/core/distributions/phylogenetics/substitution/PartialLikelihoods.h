@@ -29,7 +29,7 @@ struct no_init_allocator {
         return static_cast<T*>(::operator new(n * sizeof(T), alignment));
     }
 
-    void deallocate(T* p, std::size_t n) noexcept {
+    void deallocate(T* p, std::size_t /*n*/) noexcept {
         ::operator delete(p, alignment);
     }
 
