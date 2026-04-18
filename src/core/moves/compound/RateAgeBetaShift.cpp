@@ -313,6 +313,9 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
     // 8. Determine whether to accept or reject
     bool rejected = false;
 
+    // ALWAYS draw a random number.  Otherwise very small differences can make platforms diverge.
+    double u = GLOBAL_RNG->uniform01();
+
     if (ln_acceptance_ratio >= 0.0)
     {
     }
@@ -324,7 +327,6 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
     {
         double r = exp(ln_acceptance_ratio);
         // Accept or reject the move
-        double u = GLOBAL_RNG->uniform01();
         if (u < r)
         {
         }
