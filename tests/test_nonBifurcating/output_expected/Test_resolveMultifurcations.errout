@@ -29,13 +29,28 @@ Resolving multifurcations in a branch length tree
    Tree type: BranchLengthTree
    The tree has 10 tips and 5 internal nodes.
    Is the tree binary? FALSE
+   Tree length: 14
 
-Resolving all multifurcations...
+Resolving all multifurcations; allowing zero-length branches...
 
    The modified tree has 10 tips and 9 internal nodes.
    Is the modified tree binary? TRUE
+   Tree length: 14
 
-Resolving multifurcations except at the root...
+Resolving multifurcations except at the root; allowing zero-length branches...
 
    The modified tree has 10 tips and 8 internal nodes.
    Is the modified tree binary? FALSE
+   Tree length: 14
+
+Resolving all multifurcations; eliminating zero-length branches...
+
+   The modified tree has 10 tips and 9 internal nodes.
+   Is the modified tree binary? TRUE
+   Tree length: 14
+
+Resolving multifurcations except at the root; eliminating zero-length branches...
+
+   The modified tree has 10 tips and 8 internal nodes.
+   Is the modified tree binary? FALSE
+   Tree length: 14

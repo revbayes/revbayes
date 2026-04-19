@@ -15,6 +15,7 @@ print("========================================\n")
 
 tt <- readTrees("data/multifurcating_time_tree.tre")[1]
 tt_copy <- tt
+
 print( "\n   Tree type: " + type(tt) )
 print( "   The tree has " + tt.ntips() + " tips and " + (tt.nnodes() - tt.ntips()) + " internal nodes." )
 print( "   Is the tree binary? " + ifelse( tt.isBinary(), "TRUE", "FALSE") + "\n" )
@@ -36,22 +37,42 @@ print("Resolving multifurcations in a branch length tree")
 print("=================================================\n")
 
 blt <- readTrees("data/multifurcating_branch_length_tree.tre", treetype="non-clock")[1]
-blt_copy <- blt
+blt_1 <- blt
+blt_2 <- blt
+blt_3 <- blt
+
 print( "\n   Tree type: " + type(blt) )
 print( "   The tree has " + blt.ntips() + " tips and " + (blt.nnodes() - blt.ntips()) + " internal nodes." )
-print( "   Is the tree binary? " + ifelse( blt.isBinary(), "TRUE", "FALSE") + "\n" )
+print( "   Is the tree binary? " + ifelse( blt.isBinary(), "TRUE", "FALSE") )
+print( "   Tree length: " + blt.treeLength() + "\n" )
 
-print( "Resolving all multifurcations...\n" )
-blt.resolveMultifurcations(resolveRoot=TRUE)
+print( "Resolving all multifurcations; allowing zero-length branches...\n" )
+blt.resolveMultifurcations(resolveRoot=TRUE, nonzeroBranchLengths=FALSE)
 print( "   The modified tree has " + blt.ntips() + " tips and " + (blt.nnodes() - blt.ntips()) + " internal nodes." )
-print( "   Is the modified tree binary? " + ifelse( blt.isBinary(), "TRUE", "FALSE") + "\n" )
-writeNexus(filename="output/branch_length_tree_all_resolved.nex", blt)
+print( "   Is the modified tree binary? " + ifelse( blt.isBinary(), "TRUE", "FALSE") )
+print( "   Tree length: " + blt.treeLength() + "\n" )
+writeNexus(filename="output/branch_length_tree_all_resolved_zero_length.nex", blt)
 
-print( "Resolving multifurcations except at the root...\n" )
-blt_copy.resolveMultifurcations(resolveRoot=FALSE)
-print( "   The modified tree has " + blt_copy.ntips() + " tips and " + (blt_copy.nnodes() - blt_copy.ntips()) + " internal nodes." )
-print( "   Is the modified tree binary? " + ifelse( blt_copy.isBinary(), "TRUE", "FALSE") )
-writeNexus(filename="output/branch_length_tree_all_but_root_resolved.nex", blt_copy)
+print( "Resolving multifurcations except at the root; allowing zero-length branches...\n" )
+blt_1.resolveMultifurcations(resolveRoot=FALSE, nonzeroBranchLengths=FALSE)
+print( "   The modified tree has " + blt_1.ntips() + " tips and " + (blt_1.nnodes() - blt_1.ntips()) + " internal nodes." )
+print( "   Is the modified tree binary? " + ifelse( blt_1.isBinary(), "TRUE", "FALSE") )
+print( "   Tree length: " + blt_1.treeLength() + "\n" )
+writeNexus(filename="output/branch_length_tree_all_but_root_resolved_zero_length.nex", blt_1)
+
+print( "Resolving all multifurcations; eliminating zero-length branches...\n" )
+blt_2.resolveMultifurcations(resolveRoot=TRUE, nonzeroBranchLengths=TRUE)
+print( "   The modified tree has " + blt_2.ntips() + " tips and " + (blt_2.nnodes() - blt_2.ntips()) + " internal nodes." )
+print( "   Is the modified tree binary? " + ifelse( blt_2.isBinary(), "TRUE", "FALSE") )
+print( "   Tree length: " + blt_2.treeLength() + "\n" )
+writeNexus(filename="output/branch_length_tree_all_resolved_nonzero_length.nex", blt_2)
+
+print( "Resolving multifurcations except at the root; eliminating zero-length branches...\n" )
+blt_3.resolveMultifurcations(resolveRoot=FALSE, nonzeroBranchLengths=TRUE)
+print( "   The modified tree has " + blt_3.ntips() + " tips and " + (blt_3.nnodes() - blt_3.ntips()) + " internal nodes." )
+print( "   Is the modified tree binary? " + ifelse( blt_3.isBinary(), "TRUE", "FALSE") )
+print( "   Tree length: " + blt_3.treeLength() )
+writeNexus(filename="output/branch_length_tree_all_but_root_resolved_nonzero_length.nex", blt_3)
 
 clear()
 
