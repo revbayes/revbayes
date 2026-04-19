@@ -2084,7 +2084,7 @@ void Tree::resetTaxonBitSetMap( void )
 }
 
 
-void Tree::resolveMultifurcations( bool resolve_root )
+void Tree::resolveMultifurcations( bool resolve_root, bool halve_branch_length )
 {
     // Collect the multifurcation nodes.
     std::vector<TopologyNode*> multifurcating_nodes;
@@ -2097,7 +2097,7 @@ void Tree::resolveMultifurcations( bool resolve_root )
 
     // Resolve the multifurcations.
     for(auto node: multifurcating_nodes)
-        node->resolveMultifurcation( resolve_root );
+        node->resolveMultifurcation( resolve_root, halve_branch_length );
 
     // We need to reindex nodes because we added new ones
     reindexNodes();

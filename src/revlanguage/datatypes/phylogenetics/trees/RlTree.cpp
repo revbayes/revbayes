@@ -341,8 +341,9 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
         found = true;
         
         bool resolve_root = static_cast<RlBoolean &>( args[0].getVariable()->getRevObject() ).getValue();
+        bool halve_branch_length = static_cast<RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
         RevBayesCore::Tree &tree = dag_node->getValue();
-        tree.resolveMultifurcations( resolve_root );
+        tree.resolveMultifurcations( resolve_root, halve_branch_length );
         
         return NULL;
     }
@@ -613,6 +614,7 @@ void Tree::initMethods( void )
     
     ArgumentRules* resolveMultiArgRules = new ArgumentRules();
     resolveMultiArgRules->push_back( new ArgumentRule( "resolveRoot", RlBoolean::getClassTypeSpec(), "Do we want a bifurcation at the root as well?", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    resolveMultiArgRules->push_back( new ArgumentRule( "nonzeroBranchLengths", RlBoolean::getClassTypeSpec(), "In branch-length trees, should we reapportion existing branch lengths to avoid creating zero-length branches?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
     methods.addFunction( new MemberProcedure( "resolveMultifurcations", RlUtils::Void, resolveMultiArgRules ) );
 
     ArgumentRules* getDescendantTaxaArgRules = new ArgumentRules();

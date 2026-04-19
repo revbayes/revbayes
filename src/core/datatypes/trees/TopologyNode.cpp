@@ -1904,7 +1904,7 @@ void TopologyNode::renameNodeParameter(const std::string &old_name, const std::s
 }
 
 
-void TopologyNode::resolveMultifurcation(bool resolve_root)
+void TopologyNode::resolveMultifurcation(bool resolve_root, bool halve_branch_length)
 {
     if (children.size() < 3) return;
 
@@ -2050,12 +2050,39 @@ void TopologyNode::resolveMultifurcation(bool resolve_root)
 
             // create a parent for the two
             TopologyNode* prnt = new TopologyNode(); // leave the new node without index
-            
-            if (not std::isnan(branch_length))
+
+            // halve_branch_length: get a nonzero length for the new edge this->prnt; snapshot branch_length
+            // as b_in before setBranchLength (it mutates this node's member).
+            if ( halve_branch_length )
+            {
+                const double b_in = branch_length;
+                double pl = leftChild->getBranchLength();
+                double pr = rightChild->getBranchLength();
+                if ( std::isnan(pl) ) pl = 0.0;
+                if ( std::isnan(pr) ) pr = 0.0;
+
+                // (1) If this polytomy has a positive-length subtending branch, split it with this->prnt.
+                // (2) Otherwise (root, or zero/NaN length of the subtending branch): take length from the
+                //     two merged child branches (same as a trifurcating root in makeRootBifurcating).
+                const bool subtending_ok = ( not std::isnan(b_in) && b_in > 0.0 );
+
+                if ( subtending_ok )
+                {
+                    setBranchLength(0.5 * b_in);
+                    prnt->setBranchLength(0.5 * b_in);
+                }
+                else if ( pl > 0.0 || pr > 0.0 )
+                {
+                    prnt->setBranchLength( 0.5 * (pl + pr) );
+                    leftChild->setBranchLength( 0.5 * pl );
+                    rightChild->setBranchLength( 0.5 * pr );
+                }
+            }
+            else if ( not std::isnan(branch_length) )
             {
                 prnt->setBranchLength(0.0);          // set the length of the branch subtending it to zero
             }
-            
+
             prnt->addChild( leftChild );
             prnt->addChild( rightChild );
             leftChild->setParent( prnt );
