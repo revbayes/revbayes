@@ -40,6 +40,7 @@ class DagNode;
         // helper functions
         bool                                                checkTopologyMatch(void) const;
         std::vector<double>                                 computeBranchLengths(void);
+        void                                                initializeMapping(void);                                                //!< Map each time-tree branch by split to indices in mle_branch_lengths / gradients / Hessian
         void                                                simulateTree(void);
         void                                                transformBranchLengths(std::vector<double>& bl);
         
@@ -56,7 +57,8 @@ class DagNode;
         TRANSFORMATION                                      transform;
         bool                                                topology_match_checked;
         std::vector<double>                                 mle_branch_lengths;
-        std::map<RbBitSet, size_t>                          split_to_index;
+        bool                                                mle_preorder;                                                           //!< Are the nodes of the MLE tree indexed by preorder traversal? True for setValue(), false for simulateTree()
+        std::vector<size_t>                                 internal_to_mle_index;                                                  //!< A mapping vector: indices give the non-root nodes of the proposed (internal) time tree; values give the corresponding node indices in the unrooted MLE tree
 
     };
 

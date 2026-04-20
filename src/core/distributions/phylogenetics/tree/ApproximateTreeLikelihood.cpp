@@ -4,12 +4,14 @@
 #include <cmath>
 #include <cstddef>
 #include <iosfwd>
+#include <limits>
 #include <map>
 #include <string>
 
 #include "DistributionMultivariateNormal.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
+#include "RbBitSet.h"
 #include "RbConstants.h"
 #include "RbException.h"
 #include "StochasticNode.h"
@@ -27,7 +29,8 @@ ApproximateTreeLikelihood::ApproximateTreeLikelihood(const TypedDagNode<Tree>* t
     gradients( gr ),
     hessian( h ),
     transform( tr ),
-    topology_match_checked( false )
+    topology_match_checked( false ),
+    mle_preorder( false )
 {
 
     // add the parameters to our set (in the base class)
@@ -63,6 +66,88 @@ bool ApproximateTreeLikelihood::checkTopologyMatch( void ) const
 }
 
 
+/**
+ * Fill internal_to_mle_index so thatcomputeBranchLengths() can add each proposed branch length into branch_lengths[j]
+ * with j = internal_to_mle_index[i], matching the indexing of mle_branch_lengths[j], gradients[j], and Hessian entries
+ * that use j. This mapping step is necessary because the order of time_tree.getNodes() is not the same as the order
+ * used to build mle_branch_lengths. Matching is done by tip bipartition (split): each non-root node defines the split
+ * across the branch above it.
+ *
+ * Steps:
+ *   (1) split_to_mle: bipartition -> index j in mle_branch_lengths.
+ *   (2) For each non-root time-tree node i in getNodes() order, internal_to_mle_index[i] = split_to_mle[split].
+ *
+ * Both orientations of each split are inserted because getTaxa() may return either side of the bipartition.
+ */
+void ApproximateTreeLikelihood::initializeMapping( void )
+{
+    const Tree &tt = time_tree->getValue();
+    const std::vector<TopologyNode*> &time_tree_nodes = tt.getNodes();
+    const size_t num_tips = tt.getNumberOfTips();
+
+    // We clear the mapping vector and re-initialize it with one slot per time-tree node index (same order as getNodes()).
+    // We fill it with max() values to make a clear distinction between unset (unused) and set entries: this value cannot
+    // be a valid branch index. The root gets to keep this value, since there is no branch above the root to map.
+    internal_to_mle_index.clear();
+    internal_to_mle_index.resize(time_tree_nodes.size(), std::numeric_limits<size_t>::max());
+
+    std::map<RbBitSet, size_t> split_to_mle;
+
+    // Step 1: find j such that j is the entry in `mle_branch_lengths` for the branch that carries the split defined by one
+    // branch of `value`. Build `split_to_mle` to store this mapping.
+    if ( mle_preorder == true )
+    {
+        // Matches setValue(): same preorder layout after reorderPreorder. Node index k runs 1, ..., N-1 (N = total nodes);
+        // k-1 indexes mle_branch_lengths. k == 0 is the root and is omitted because only branches with a parent edge
+        // appear in mle_branch_lengths. Therefore, the vector has length N-1 and indices 0, ..., N-2.
+        Tree *v_copy = value->clone();
+        TreeUtilities::reorderPreorder( *v_copy );
+        for (size_t k = 1; k < v_copy->getNumberOfNodes(); ++k)
+        {
+            RbBitSet split = RbBitSet(num_tips);
+            v_copy->getNode(k).getTaxa(split);
+            RbBitSet split_rev = split;
+            split_rev.flip();
+            split_to_mle[split] = k - 1;
+            split_to_mle[split_rev] = k - 1;
+        }
+        delete v_copy;
+    }
+    else
+    {
+        // Matches simulateTree(): MLE slots follow value->getNodes() order after unroot().
+        const std::vector<TopologyNode*> &bl_nodes = value->getNodes();
+        for (size_t i = 0; i < bl_nodes.size(); ++i)
+        {
+            RbBitSet split = RbBitSet(num_tips);
+            bl_nodes[i]->getTaxa(split);
+            RbBitSet split_rev = split;
+            split_rev.flip();
+            split_to_mle[split] = i;
+            split_to_mle[split_rev] = i;
+        }
+    }
+
+    // Step (2): for each non-root time-tree node i, record which mle_branch_lengths index j matches its split.
+    for (size_t i = 0; i < time_tree_nodes.size(); ++i)
+    {
+        if ( time_tree_nodes[i]->isRoot() == true )
+        {
+            continue;
+        }
+
+        RbBitSet split = RbBitSet(num_tips);
+        time_tree_nodes[i]->getTaxa(split);
+        const auto it = split_to_mle.find(split);
+        if ( it == split_to_mle.end() )
+        {
+            throw RbException("Could not match an internal branch to a corresponding branch in the MLE tree.");
+        }
+        internal_to_mle_index[i] = it->second;
+    }
+}
+
+
 double ApproximateTreeLikelihood::computeLnProbability( void )
 {
 
@@ -75,6 +160,7 @@ double ApproximateTreeLikelihood::computeLnProbability( void )
             return RbConstants::Double::neginf;
         }
         topology_match_checked = true;
+        initializeMapping();
     }
     
     // get the current branch lengths from the MCMC state
@@ -105,8 +191,8 @@ std::vector<double> ApproximateTreeLikelihood::computeBranchLengths( void )
     
     // get time tree nodes
     const std::vector<TopologyNode*> &time_tree_nodes = time_tree->getValue().getNodes();
-    size_t num_tips = time_tree->getValue().getNumberOfTips();
     
+    // initialize the branch length vector: need one fewer nodes than there are in the (rooted) time tree
     std::vector<double> branch_lengths(time_tree_nodes.size()-1, 0.0);
 
     // loop through time tree nodes and draw new rates to get new branch lengths
@@ -116,28 +202,24 @@ std::vector<double> ApproximateTreeLikelihood::computeBranchLengths( void )
         
         if ( the_node->isRoot() == false )
         {
-            
             // get the branch time
             double branch_time = the_node->getBranchLength();
-            
+
             // get branch rate
             double new_branch_rate = branch_rates->getValue()[i];
             
             // get new branch length
             double new_branch_length = new_branch_rate * branch_time;
-            
-            // get the matching index to be sorted correctly
-            RbBitSet split = RbBitSet(num_tips);
-            the_node->getTaxa(split);
-            
-            size_t index = split_to_index[split];
-            
-            // we use the plus because the two root branches need to be added
+
+            // find the index of the corresponding branch in the MLE tree
+            const size_t mle_index = internal_to_mle_index[i];
+
+            // we use the plus because the two root branches of the MLE tree are merged into one in the time tree
             // otherwise the plus actually never does anything
-            branch_lengths[index] += new_branch_length;
+            branch_lengths[mle_index] += new_branch_length;
         }
     }
-    
+
     return branch_lengths;
 }
 
@@ -162,7 +244,6 @@ void ApproximateTreeLikelihood::transformBranchLengths( std::vector<double>& bra
         }
     }
 }
-
 
 
 void ApproximateTreeLikelihood::fireTreeChangeEvent(const TopologyNode &n, const unsigned& m)
@@ -190,7 +271,6 @@ void ApproximateTreeLikelihood::redrawValue( void )
 
 void ApproximateTreeLikelihood::setValue(RevBayesCore::Tree *v, bool force)
 {
-
     // delegate to super class
     TypedDistribution<Tree>::setValue( v, force );
 
@@ -206,25 +286,14 @@ void ApproximateTreeLikelihood::setValue(RevBayesCore::Tree *v, bool force)
         bl_tree_nodes.push_back( &v_copy->getNode(i) );
     }
     
-    size_t num_tips = value->getNumberOfTips();
-    split_to_index.clear();
-    
-    // loop through tree nodes and draw new rates to get new branch lengths
+    mle_preorder = true;
+    mle_branch_lengths.resize( bl_tree_nodes.size() );
+
+    // loop through the branch-length tree nodes and store the new branch lengths
     for (size_t i=0; i<bl_tree_nodes.size(); ++i)
     {
         TopologyNode* the_node = bl_tree_nodes[i];
         // std::cerr << "The branch length of the " << i << "-th node is " << the_node->getBranchLength() << std::endl;
-                
-        RbBitSet split = RbBitSet(num_tips);
-        the_node->getTaxa(split);
-        
-        RbBitSet split_rev = split;
-        split_rev.flip();
-        
-        split_to_index[split] = i;
-        split_to_index[split_rev] = i;
-
-        // get the branch time
         mle_branch_lengths[i] = the_node->getBranchLength();
     }
     
@@ -254,8 +323,11 @@ void ApproximateTreeLikelihood::simulateTree( void )
     size_t num_tips = time_tree->getValue().getNumberOfTips();
     
     RandomNumberGenerator *rng = GLOBAL_RNG;
-    
-    // simulate displacement around the MLE
+
+    // With approximate likelihood, we assume that the branch-length trees we are in effect sampling (by sampling
+    // time trees and branch rates) are displaced around the MLE tree by a multivariate normal distribution. Here,
+    // we assume by symmetry that we can simulate "MLE" trees using multivariate normal displacements around the
+    // current proposed tree.
     std::vector<double> displacements = RbStatistics::MultivariateNormal::rvCovariance(static_cast<const std::vector<double>&>(*gradients), *hessian, *rng);
 
     // loop through time tree nodes and draw new rates to get new branch lengths
@@ -293,23 +365,12 @@ void ApproximateTreeLikelihood::simulateTree( void )
     
     const std::vector<TopologyNode*> &bl_tree_nodes = value->getNodes();
     mle_branch_lengths = std::vector<double>(bl_tree_nodes.size(), 0.0);
-    split_to_index.clear();
-    
-    // loop through tree nodes and draw new rates to get new branch lengths
+    mle_preorder = false;
+
+    // loop through the branch-length tree nodes and store the new branch lengths
     for (size_t i=0; i<bl_tree_nodes.size(); ++i)
     {
         TopologyNode* the_node = bl_tree_nodes[i];
-        
-        RbBitSet split = RbBitSet(num_tips);
-        the_node->getTaxa(split);
-        
-        RbBitSet split_rev = split;
-        split_rev.flip();
-        
-        split_to_index[split] = i;
-        split_to_index[split_rev] = i;
-
-        // get the branch time
         mle_branch_lengths[i] = the_node->getBranchLength();
     }
     
@@ -319,11 +380,11 @@ void ApproximateTreeLikelihood::simulateTree( void )
 
 }
 
+
 void ApproximateTreeLikelihood::restoreSpecialization(const DagNode *restorer)
 {
     
 }
-
 
 
 /** Swap a parameter of the distribution */
