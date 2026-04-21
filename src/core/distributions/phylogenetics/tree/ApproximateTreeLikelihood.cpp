@@ -169,16 +169,20 @@ double ApproximateTreeLikelihood::computeLnProbability( void )
 
     // second-order Taylor expansion of ln L around the MLE branch lengths:
     // ln L(b) ≈ const + g'(b - b_mle) + 1/2 (b - b_mle)' H (b - b_mle)
+    std::vector<double> delta(num_branches);
     double ln_prob = 0.0;
-    for (size_t i=0; i<num_branches; ++i)
+
+    for (size_t i = 0; i < num_branches; ++i)
     {
-        double delta_i = branch_lengths[i] - mle_branch_lengths[i];
-        ln_prob += delta_i * (*gradients)[i];
-        ln_prob += delta_i * delta_i * (*hessian)[i][i] / 2.0;
-        for (size_t j=0; j<i; ++j)
+        const RbVector<double> &hessian_i = (*hessian)[i];
+        delta[i] = branch_lengths[i] - mle_branch_lengths[i];
+
+        ln_prob += delta[i] * (*gradients)[i];
+        ln_prob += delta[i] * delta[i] * hessian_i[i] / 2.0;
+        
+        for (size_t j = 0; j < i; ++j)
         {
-            double delta_j = branch_lengths[j] - mle_branch_lengths[j];
-            ln_prob += delta_i * delta_j * (*hessian)[i][j];
+            ln_prob += delta[i] * delta[j] * hessian_i[j];
         }
     }
     
