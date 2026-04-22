@@ -125,7 +125,15 @@ monitors.append( mnJointConditionalAncestralState(tree=phylogeny,
                                                   printgen=1,
                                                   withTips=true,
                                                   withStartStates=false) )
-# 4. add an stochastic character map monitor
+
+# 4. add a marginal ancestral state monitor        
+monitors.append( mnAncestralState(tree=phylogeny,
+                                  ctmc=phyMorpho,
+                                  filename="output/"+CHARACTER_A+"_"+CHARACTER_B+"_corr.marg_states.txt",
+                                  type="NaturalNumbers",
+                                  printgen=1 ) )
+
+# 5. add an stochastic character map monitor
 monitors.append( mnStochasticCharacterMap(ctmc=phyMorpho,
                                           filename="output/"+CHARACTER_A+"_"+CHARACTER_B+"_corr_stoch_char_map.log",
                                           printgen=1,

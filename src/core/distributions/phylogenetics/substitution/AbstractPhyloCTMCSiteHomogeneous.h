@@ -231,7 +231,6 @@ namespace RevBayesCore {
         void                                                                setRootFrequencies(const TypedDagNode< Simplex > *f);
         void                                                                setSiteRates(const TypedDagNode< RbVector< double > > *r);
         void                                                                setSiteRatesProbs(const TypedDagNode< Simplex > *rp);
-        void                                                                setUseMarginalLikelihoods(bool tf);
         void                                                                setUseSiteMatrices(bool sm, const TypedDagNode< Simplex > *s = NULL);
         void                                                                swap_taxon_name_2_tip_index(std::string tip1, std::string tip2);
 
@@ -263,6 +262,7 @@ namespace RevBayesCore {
         PartialLikelihoods&                                                 getMutablePartialLikelihoodsForNode(int node) const;
         void                                                                allocatePartialLikelihoods() const;
         void                                                                deallocatePartialLikelihoods() const;
+
         const double*                                                       getMarginalLikelihoodsForNode(int node) const;
               double*                                                       getMutableMarginalLikelihoodsForNode(int node);
 
@@ -283,6 +283,7 @@ namespace RevBayesCore {
 
         // virtual methods that you may want to overwrite
         virtual void                                                        compress(void);
+        virtual void                                                        allocateMarginalLikelihoods();
         virtual void                                                        computeMarginalNodeLikelihood(size_t node_idx, size_t parentIdx);
         virtual void                                                        computeMarginalRootLikelihood();
         virtual std::vector< std::vector< double > >                        sumMarginalLikelihoods(size_t node_index);
@@ -344,7 +345,6 @@ namespace RevBayesCore {
         bool                                                                using_weighted_characters;
         bool                                                                using_observation_error;
 
-        bool                                                                useMarginalLikelihoods = false;
         mutable bool                                                        in_mcmc_mode = false;
 
         // members
@@ -508,7 +508,6 @@ treatUnknownAsGap( n.treatUnknownAsGap ),
 treatAmbiguousAsGaps( n.treatAmbiguousAsGaps ),
 using_weighted_characters( n.using_weighted_characters ),
 using_observation_error( n.using_observation_error ),
-useMarginalLikelihoods( n.useMarginalLikelihoods ),
 in_mcmc_mode( n.in_mcmc_mode ),
 pattern_block_start( n.pattern_block_start ),
 pattern_block_end( n.pattern_block_end ),
@@ -758,6 +757,12 @@ template<class charType>
 inline PartialLikelihoods& RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::getMutablePartialLikelihoodsForNode(int node_index) const
 {
     return partialLikelihoods.get_mutable_item(node_index);
+}
+
+template<class charType>
+void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::allocateMarginalLikelihoods()
+{
+    this->marginalLikelihoods.resize( activeLikelihoodOffset );
 }
 
 template<class charType>
@@ -1199,6 +1204,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeMarginalNo
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeMarginalRootLikelihood( void )
 {
+    marginalLikelihoods.resize( activeLikelihoodOffset );
+    
     // get the root node
     const TopologyNode &root = tau->getValue().getRoot();
 
@@ -2713,21 +2720,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::resizeLikelihoodV
         allocatePartialLikelihoods();
     }
 
-    if ( useMarginalLikelihoods == true )
-    {
-        // we resize the partial likelihood vectors to the new dimensions
-        marginalLikelihoods.clear();
-
-        marginalLikelihoods.resize(activeLikelihoodOffset);
-
-        // reinitialize likelihood vectors
-        for (size_t i = 0; i < activeLikelihoodOffset; i++)
-        {
-            marginalLikelihoods[i] = 0.0;
-        }
-
-    }
-
     pmatrices.resize(num_nodes);
 }
 
@@ -3515,16 +3507,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setSiteRatesProbs
     }
 }
 
-
-template<class charType>
-void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setUseMarginalLikelihoods(bool tf)
-{
-
-    this->useMarginalLikelihoods = tf;
-    this->resizeLikelihoodVectors();
-
-}
-
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setUseSiteMatrices(bool use_sm, const TypedDagNode< Simplex > *s)
 {
@@ -4310,6 +4292,9 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::touchSpecializati
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateMarginalNodeLikelihoods( void )
 {
+    // allocate memory for computing these, in case it hasn't been allocated.
+    this->allocateMarginalLikelihoods();
+
     // calculate the root marginal likelihood, then start the recursive call down the tree
     this->computeMarginalRootLikelihood();
 

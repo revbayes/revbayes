@@ -89,7 +89,6 @@ AncestralStateMonitor<characterType>::AncestralStateMonitor(TypedDagNode<Tree> *
     // tell the ctmc to use marginal likelihoods
     StochasticNode<PhyloCTMCSiteHomogeneous<characterType> > *char_stoch = (StochasticNode<PhyloCTMCSiteHomogeneous<characterType> >*) ctmc;
     PhyloCTMCSiteHomogeneous<characterType> *dist = (PhyloCTMCSiteHomogeneous<characterType>*) &char_stoch->getDistribution();
-    dist->setUseMarginalLikelihoods( true );
 
 }
 

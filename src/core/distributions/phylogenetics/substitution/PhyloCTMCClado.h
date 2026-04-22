@@ -54,6 +54,7 @@ namespace RevBayesCore {
         void                                                computeTipLikelihood(const TopologyNode &node, size_t nIdx);
         void                                                updateTransitionProbabilities(size_t node_idx);
 
+        virtual void                                        allocateMarginalLikelihoods();
         virtual void                                        computeMarginalNodeLikelihood(size_t node_idx, size_t parentIdx);
         virtual void                                        computeMarginalRootLikelihood();
         virtual std::vector< std::vector< double > >        sumMarginalLikelihoods(size_t node_index);
@@ -543,6 +544,15 @@ void RevBayesCore::PhyloCTMCClado<charType>::computeMarginalNodeLikelihood( size
 
 }
 
+template<class charType>
+void RevBayesCore::PhyloCTMCClado<charType>::allocateMarginalLikelihoods()
+{
+    RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::allocateMarginalLikelihoods();
+
+    size_t n = this->num_nodes*this->num_site_rates*this->num_patterns*this->num_chars*this->num_chars;
+
+    cladoMarginalLikelihoods.resize( n );
+}
 
 
 template<class charType>
@@ -1091,21 +1101,6 @@ void RevBayesCore::PhyloCTMCClado<charType>::resizeLikelihoodVectors( void )
         
     }
     
-    if ( this->useMarginalLikelihoods == true )
-    {
-        // we resize the partial likelihood vectors to the new dimensions
-        cladoMarginalLikelihoods.clear();
-        
-        cladoMarginalLikelihoods.resize(n);
-        
-        // reinitialize likelihood vectors
-        for (size_t i = 0; i < n; i++)
-        {
-            cladoMarginalLikelihoods[i] = 0.0;
-        }
-        
-    }
-	
     // set the offsets for easier iteration through the likelihood vector
     cladoActiveLikelihoodOffset      =  this->num_nodes*this->num_site_rates*this->num_patterns*this->num_chars*this->num_chars;
     cladoNodeOffset                  =                  this->num_site_rates*this->num_patterns*this->num_chars*this->num_chars;
