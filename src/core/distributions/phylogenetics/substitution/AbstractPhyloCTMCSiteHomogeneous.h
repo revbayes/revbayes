@@ -297,7 +297,7 @@ namespace RevBayesCore {
         virtual void                                                        compress(void);
         virtual void                                                        computeMarginalNodeLikelihood(size_t node_idx, size_t parentIdx);
         virtual void                                                        computeMarginalRootLikelihood();
-        virtual std::vector< std::vector< double > >*                       sumMarginalLikelihoods(size_t node_index);
+        virtual std::vector< std::vector< double > >                        sumMarginalLikelihoods(size_t node_index);
         virtual void                                                        computeRootLikelihoods( std::vector< double > &rv ) const;
         virtual void                                                        computeRootLikelihoodsPerSiteMixture( MatrixReal &rv ) const;
         virtual void                                                        computeRootLikelihoodsPerSiteRate( MatrixReal &rv ) const;
@@ -1282,7 +1282,7 @@ std::vector<charType> RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::
     size_t node_index = node.getIndex();
 
     // get the marginal likelihoods
-    std::vector< std::vector<double> >* marginals = sumMarginalLikelihoods(node_index);
+    const auto marginals = sumMarginalLikelihoods(node_index);
 
     RandomNumberGenerator* rng = GLOBAL_RNG;
     std::vector< charType > ancestralSeq = std::vector<charType>();
@@ -1301,7 +1301,7 @@ std::vector<charType> RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::
         c.setToFirstState();
 
         // sum the likelihoods for each character state
-        const std::vector<double> siteMarginals = (*marginals)[pattern];
+        auto& siteMarginals = marginals[pattern];
         double sumMarginals = 0.0;
         for (int j = 0; j < siteMarginals.size(); j++)
         {
@@ -1354,9 +1354,6 @@ std::vector<charType> RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::
         // add the character to the sequence
         ancestralSeq.push_back( c );
     }
-
-    // we need to free the vector
-    delete marginals;
 
     return ancestralSeq;
 }
@@ -3577,10 +3574,10 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setUseSiteMatrice
 
 
 template<class charType>
-std::vector< std::vector<double> >* RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::sumMarginalLikelihoods( size_t node_index )
+std::vector< std::vector<double> > RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::sumMarginalLikelihoods( size_t node_index )
 {
 
-    std::vector< std::vector<double> >* per_mixture_Likelihoods = new std::vector< std::vector<double> >(this->pattern_block_size, std::vector<double>(num_chars, 0.0) );
+    std::vector< std::vector<double> > per_mixture_Likelihoods(this->pattern_block_size, std::vector<double>(num_chars, 0.0) );
 
     std::vector<double> mixture_probs = getMixtureProbs();
 
@@ -3604,7 +3601,7 @@ std::vector< std::vector<double> >* RevBayesCore::AbstractPhyloCTMCSiteHomogeneo
             for (size_t j=0; j<num_chars; ++j)
             {
                 // add the probability of being in this state
-                (*per_mixture_Likelihoods)[site][j] += *p_site_marginal_j * mixture_probs[mixture];
+                per_mixture_Likelihoods[site][j] += *p_site_marginal_j * mixture_probs[mixture];
 
                 // increment pointers
                 ++p_site_marginal_j;

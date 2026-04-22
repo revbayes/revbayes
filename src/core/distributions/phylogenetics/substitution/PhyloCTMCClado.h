@@ -56,7 +56,7 @@ namespace RevBayesCore {
 
         virtual void                                        computeMarginalNodeLikelihood(size_t node_idx, size_t parentIdx);
         virtual void                                        computeMarginalRootLikelihood();
-        virtual std::vector< std::vector< double > >*       sumMarginalLikelihoods(size_t node_index);
+        virtual std::vector< std::vector< double > >        sumMarginalLikelihoods(size_t node_index);
         
         virtual void                                        swapParameterInternal(const DagNode *oldP, const DagNode *newP);            //!< Swap a parameter
 
@@ -745,85 +745,82 @@ template<class charType>
 std::vector<charType> RevBayesCore::PhyloCTMCClado<charType>::drawAncestralStatesForNode(const TopologyNode &node)
 {
 	
-	size_t node_index = node.getIndex();
+    size_t node_index = node.getIndex();
 	
-	// get the marginal likelihoods
-    std::vector< std::vector<double> >* marginals = sumMarginalLikelihoods(node_index);
+    // get the marginal likelihoods
+    const auto marginals = sumMarginalLikelihoods(node_index);
     
-	RandomNumberGenerator* rng = GLOBAL_RNG;
-	std::vector< charType > ancestralSeq = std::vector<charType>();
+    RandomNumberGenerator* rng = GLOBAL_RNG;
+    std::vector< charType > ancestralSeq = std::vector<charType>();
 	
     for ( size_t i = 0; i < this->num_sites; ++i )
     {
-		size_t pattern = i;
-		// if the matrix is compressed use the pattern for this site
-		if (this->compressed)
+        size_t pattern = i;
+        // if the matrix is compressed use the pattern for this site
+        if (this->compressed)
         {
-			pattern = this->site_pattern[i];
-		}
+            pattern = this->site_pattern[i];
+        }
 
         // create the character
         charType c = charType( this->template_state );
         
-		// sum the likelihoods for each character state
-		const std::vector<double> siteMarginals = (*marginals)[pattern];
-		double sumMarginals = 0.0;
-		for (int j = 0; j < siteMarginals.size(); j++)
+        // sum the likelihoods for each character state
+        auto& siteMarginals = marginals[pattern];
+        double sumMarginals = 0.0;
+        for (int j = 0; j < siteMarginals.size(); j++)
         {
-			sumMarginals += siteMarginals[j];
-		}
+            sumMarginals += siteMarginals[j];
+        }
 
-		double u = rng->uniform01();
-		if (sumMarginals == 0.0)
+        double u = rng->uniform01();
+        if (sumMarginals == 0.0)
         {
 
-			// randomly draw state if all states have 0 probability
-			c.setStateByIndex((size_t)(u*c.getNumberOfStates()));
+            // randomly draw state if all states have 0 probability
+            c.setStateByIndex((size_t)(u*c.getNumberOfStates()));
 
-		}
+        }
         else
         {
 
-			// the marginals don't add up to 1, so rescale u
-			u *= sumMarginals;
+            // the marginals don't add up to 1, so rescale u
+            u *= sumMarginals;
 
-			// draw the character state
-			size_t stateIndex = 0;
-			while ( true )
+            // draw the character state
+            size_t stateIndex = 0;
+            while ( true )
             {
 
-				u -= siteMarginals[stateIndex];
+                u -= siteMarginals[stateIndex];
 
-				if ( u > 0.0 )
+                if ( u > 0.0 )
                 {
-					stateIndex++;
+                    stateIndex++;
 
-					if ( stateIndex == c.getNumberOfStates() )
+                    if ( stateIndex == c.getNumberOfStates() )
                     {
-						stateIndex = 0;
-						c.setToFirstState();
-					}
+                        stateIndex = 0;
+                        c.setToFirstState();
+                    }
 
                     else
                     {
                         c++;
                     }
-				}
+                }
                 else
                 {
-					break;
-				}
-			}
-		}
+                    break;
+                }
+            }
+        }
 
         // add the character to the sequence
         ancestralSeq.push_back( c );
     }
 
-    // we need to free the vector
-    delete marginals;
-
-	return ancestralSeq;
+    return ancestralSeq;
 }
 
 
@@ -1341,10 +1338,10 @@ void RevBayesCore::PhyloCTMCClado<charType>::simulateClado( const TopologyNode &
 }
 
 template<class charType>
-std::vector< std::vector<double> >* RevBayesCore::PhyloCTMCClado<charType>::sumMarginalLikelihoods( size_t node_index )
+std::vector< std::vector<double> > RevBayesCore::PhyloCTMCClado<charType>::sumMarginalLikelihoods( size_t node_index )
 {
     
-    std::vector< std::vector<double> >* per_mixture_Likelihoods = new std::vector< std::vector<double> >(this->num_patterns, std::vector<double>(this->num_chars, 0.0) );
+    std::vector< std::vector<double> > per_mixture_Likelihoods(this->num_patterns, std::vector<double>(this->num_chars, 0.0) );
     
     // get the pointers to the partial likelihoods and the marginal likelihoods
     const double* p_node_marginal = this->getMarginalLikelihoodsForNode(node_index);
@@ -1366,7 +1363,7 @@ std::vector< std::vector<double> >* RevBayesCore::PhyloCTMCClado<charType>::sumM
             for (size_t j=0; j<this->num_chars; ++j)
             {
                 // add the probability of being in this state
-                (*per_mixture_Likelihoods)[site][j] += *p_site_marginal_j;
+                per_mixture_Likelihoods[site][j] += *p_site_marginal_j;
 
                 // increment pointers
                 ++p_site_marginal_j;
