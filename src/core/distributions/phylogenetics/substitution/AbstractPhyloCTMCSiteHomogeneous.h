@@ -52,18 +52,6 @@ namespace RevBayesCore {
      * for each internal node.
      * This gives us a speed improvement during MCMC proposal in the order of a factor 2.
      *
-     * The transition probability matrices are stored in a c-style array called pmatrices. The dimensions are
-     * pmatrices[active][node_index][siteMixtureIndex], however, since this is a one-dimensional c-style array,
-     * you have to access the pmatrices via
-     * pmatrices[active * num_nodes * num_site_mixtures +
-     *                    node_index * num_site_mixtures +
-     *                    site_mixture_index]
-     * Since this is a bit complex, we have some offset variables for convenience:
-     * activePmatrixOffset         =  num_nodes * num_site_mixtures;
-     * nodeOffset                  =  num_site_mixtures;
-     * This gives the more convenient access via
-     * pmatrices[active * activePmatrixOffset + node_index * nodeOffset + site_mixture_index]
-     *
      */
 
     template <typename T>
