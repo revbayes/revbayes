@@ -1191,71 +1191,58 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeMarginalNo
     }
 }
 
+
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeMarginalRootLikelihood( void )
 {
-    marginalLikelihoods.resize( activeLikelihoodOffset );
-    
-    // get the root node
-    const TopologyNode &root = tau->getValue().getRoot();
-
-    // get root frequencies
-    std::vector<std::vector<double> >   ff;
+    std::vector<std::vector<double> > ff;
     getRootFrequencies(ff);
+    assert(not ff.empty());
 
-    // get the index of the root node
-    size_t node_index = root.getIndex();
+    const size_t node_index = tau->getValue().getRoot().getIndex();
 
-    // get the pointers to the partial likelihoods and the marginal likelihoods
-    const double*   p_node           = getPartialLikelihoodsForNode(node_index).likelihoods.data();
-    double*         p_node_marginal  = getMutableMarginalLikelihoodsForNode(node_index);
-
-    // get pointers the likelihood for both subtrees
-    const double*   p_mixture           = p_node;
-    double*         p_mixture_marginal  = p_node_marginal;
-
-    // iterate over all mixture categories
-    for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
     {
-        // get root frequencies
-        const std::vector<double>&          f           = ff[mixture % ff.size()];
-        assert(f.size() == num_chars);
-        std::vector<double>::const_iterator f_end       = f.end();
-        std::vector<double>::const_iterator f_begin     = f.begin();
+        const auto& pl_dims = getPartialLikelihoodsForNode(node_index).dims();
+        assert(pl_dims.num_states        == num_chars);
+        assert(pl_dims.num_site_mixtures == num_site_mixtures);
+        assert(pl_dims.num_patterns      == pattern_block_size);
+    }
+    assert(siteOffset    == num_chars);
+    assert(mixtureOffset == pattern_block_size * num_chars);
 
-        // get pointers to the likelihood for this mixture category
-        const double*   p_site_mixture          = p_mixture;
-        double*         p_site_mixture_marginal = p_mixture_marginal;
-        // iterate over all sites
-        for (size_t site = 0; site < this->pattern_block_size; ++site)
+    // Cache dimensions as signed stack locals.
+    const std::ptrdiff_t C = static_cast<std::ptrdiff_t>(num_chars);
+    const std::ptrdiff_t M = static_cast<std::ptrdiff_t>(num_site_mixtures);
+    const std::ptrdiff_t P = static_cast<std::ptrdiff_t>(pattern_block_size);
+    const std::ptrdiff_t site_stride    = static_cast<std::ptrdiff_t>(siteOffset);
+    const std::ptrdiff_t mixture_stride = static_cast<std::ptrdiff_t>(mixtureOffset);
+
+    // The two top-level buffers come from distinct allocations.
+    const double* __restrict__ p_node_partial = getPartialLikelihoodsForNode(node_index).likelihoods.data();
+    double*       __restrict__ p_node_marginal = getMutableMarginalLikelihoodsForNode(node_index);
+
+    for (std::ptrdiff_t m = 0; m < M; ++m)
+    {
+        const std::vector<double>& f = ff[m % ff.size()];
+        assert(static_cast<std::ptrdiff_t>(f.size()) == C);
+        const double* __restrict__ f_data = f.data();
+
+        const double* p_mix_partial  = p_node_partial  + m * mixture_stride;
+        double*       p_mix_marginal = p_node_marginal + m * mixture_stride;
+
+        for (std::ptrdiff_t p = 0; p < P; ++p)
         {
-            // get the pointer to the stationary frequencies
-            std::vector<double>::const_iterator f_j             = f_begin;
-            // get the pointers to the likelihoods for this site and mixture category
-            const double*   p_site_j            = p_site_mixture;
-            double*         p_site_marginal_j   = p_site_mixture_marginal;
-            // iterate over all starting states
-            for (; f_j != f_end; ++f_j)
+            const double* partial  = p_mix_partial  + p * site_stride;   // read
+            double*       marginal = p_mix_marginal + p * site_stride;   // write
+
+            // marginal[j] = partial[j] * f[j]  for each state j.
+            for (std::ptrdiff_t j = 0; j < C; ++j)
             {
-                // add the probability of starting from this state
-                *p_site_marginal_j = *p_site_j * *f_j;
-
-                // increment pointers
-                ++p_site_j; ++p_site_marginal_j;
+                marginal[j] = partial[j] * f_data[j];
             }
-
-            // increment the pointers to the next site
-            p_site_mixture+=this->siteOffset; p_site_mixture_marginal+=this->siteOffset;
-
-        } // end-for over all sites (=patterns)
-
-        // increment the pointers to the next mixture category
-        p_mixture+=this->mixtureOffset; p_mixture_marginal+=this->mixtureOffset;
-
-    } // end-for over all mixtures (=rate categories)
-
+        }
+    }
 }
-
 
 /**
  * Draw a vector of ancestral states from the marginal distribution (non-conditional of the other ancestral states).
