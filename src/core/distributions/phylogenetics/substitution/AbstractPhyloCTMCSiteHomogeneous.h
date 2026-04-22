@@ -459,7 +459,8 @@ pattern_block_size( num_patterns ),
 store_internal_nodes( internal ),
 gap_match_clamped( gapmatch )
 {
-
+    assert(tau);
+    
     tau->getValue().getTreeChangeEventHandler().addListener( this );
 
     siteOffset                  =  num_chars;
