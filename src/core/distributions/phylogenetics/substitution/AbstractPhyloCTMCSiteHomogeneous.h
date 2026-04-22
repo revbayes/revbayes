@@ -1130,76 +1130,66 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
     return this->lnProb;
 }
 
-
 template<class charType>
-void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeMarginalNodeLikelihood( size_t node_index, size_t parentnode_index )
+void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeMarginalNodeLikelihood( size_t node_index, size_t parent_index )
 {
-
-    // compute the transition probability matrix
+    // Compute the transition probability matrix along the branch above this node.
     this->updateTransitionProbabilityMatrix( node_index );
 
-    // get the pointers to the partial likelihoods and the marginal likelihoods
-    const double*   p_node                  = getPartialLikelihoodsForNode(node_index).likelihoods.data();
-    double*         p_node_marginal         = getMutableMarginalLikelihoodsForNode(node_index);
-    const double*   p_parent_node_marginal  = getMarginalLikelihoodsForNode(parentnode_index);
-
-    // get pointers the likelihood for both subtrees
-    const double*   p_mixture                   = p_node;
-    double*         p_mixture_marginal          = p_node_marginal;
-    const double*   p_parent_mixture_marginal   = p_parent_node_marginal;
-
-    // iterate over all mixture categories
-    for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
     {
-        // the transition probability matrix for this mixture category
-        const double*    tp_begin                = this->pmatrices[node_index][mixture].theMatrix;
+        const auto& pl_dims = getPartialLikelihoodsForNode(node_index).dims();
+        assert(pl_dims.num_states        == num_chars);
+        assert(pl_dims.num_site_mixtures == num_site_mixtures);
+        assert(pl_dims.num_patterns      == pattern_block_size);
+    }
+    assert(siteOffset    == num_chars);
+    assert(mixtureOffset == pattern_block_size * num_chars);
 
-        // get pointers to the likelihood for this mixture category
-        const double*   p_site_mixture                  = p_mixture;
-        double*         p_site_mixture_marginal         = p_mixture_marginal;
-        const double*   p_parent_site_mixture_marginal  = p_parent_mixture_marginal;
-        // iterate over all sites
-        for (size_t site = 0; site < this->pattern_block_size; ++site)
+    // Cache dimensions as signed stack locals for clean indexing.
+    const std::ptrdiff_t C = static_cast<std::ptrdiff_t>(num_chars);
+    const std::ptrdiff_t M = static_cast<std::ptrdiff_t>(num_site_mixtures);
+    const std::ptrdiff_t P = static_cast<std::ptrdiff_t>(pattern_block_size);
+    const std::ptrdiff_t site_stride    = static_cast<std::ptrdiff_t>(siteOffset);
+    const std::ptrdiff_t mixture_stride = static_cast<std::ptrdiff_t>(mixtureOffset);
+
+    const double* __restrict__ p_node_partial    = getPartialLikelihoodsForNode(node_index).likelihoods.data();
+          double* __restrict__ p_node_marginal   = getMutableMarginalLikelihoodsForNode(node_index);
+    const double* __restrict__ p_parent_marginal = getMarginalLikelihoodsForNode(parent_index);
+
+    // Iterate over mixture categories.
+    for (std::ptrdiff_t m = 0; m < M; ++m)
+    {
+        // Transition probability matrix for this mixture: tp[from * C + to].
+        const double* __restrict__ tp = pmatrices[node_index][m].getElements();
+
+        const double* p_mix_partial  = p_node_partial    + m * mixture_stride;
+        double*       p_mix_marginal = p_node_marginal   + m * mixture_stride;
+        const double* p_par_mix_marg = p_parent_marginal + m * mixture_stride;
+
+        // Iterate over sites (patterns) held by this MPI process.
+        for (std::ptrdiff_t p = 0; p < P; ++p)
         {
-            // get the pointers to the likelihoods for this site and mixture category
-            const double*   p_site_j                    = p_site_mixture;
-            double*         p_site_marginal_j           = p_site_mixture_marginal;
-            // iterate over all end states
-            for (size_t j=0; j<num_chars; ++j)
+            const double* partial  = p_mix_partial  + p * site_stride;
+            double*       marginal = p_mix_marginal + p * site_stride;
+            const double* par_marg = p_par_mix_marg + p * site_stride;
+
+            // For each end state j at this site:
+            //
+            //     marginal[j] = (sum_k par_marg[k] * tp(k -> j)) * partial[j]
+            //
+
+            for (std::ptrdiff_t j = 0; j < C; ++j)
             {
-                const double*   p_parent_site_marginal_k    = p_parent_site_mixture_marginal;
-                double sum = 0;
-
-                // iterator over all start states
-                for (size_t k=0; k<num_chars; ++k)
+                double transition_sum = 0.0;
+                for (std::ptrdiff_t k = 0; k < C; ++k)
                 {
-                    // transition probability for k->j
-                    const double tp_kj = *p_parent_site_marginal_k * tp_begin[ k * num_chars + j ];
-
-                    // add the probability of starting from this state
-                    sum += *p_site_j * tp_kj;
-
-                    // next parent state
-                    ++p_parent_site_marginal_k;
+                    transition_sum += par_marg[k] * tp[k * C + j];
                 }
-                *p_site_marginal_j = sum;
-
-                // increment pointers
-                ++p_site_j; ++p_site_marginal_j;
+                marginal[j] = partial[j] * transition_sum;
             }
-
-            // increment the pointers to the next site
-            p_site_mixture+=this->siteOffset; p_site_mixture_marginal+=this->siteOffset; p_parent_site_mixture_marginal+=this->siteOffset;
-
-        } // end-for over all sites (=patterns)
-
-        // increment the pointers to the next mixture category
-        p_mixture+=this->mixtureOffset; p_mixture_marginal+=this->mixtureOffset; p_parent_mixture_marginal+=this->mixtureOffset;
-
-    } // end-for over all mixtures (=rate categories)
-
+        }
+    }
 }
-
 
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeMarginalRootLikelihood( void )
