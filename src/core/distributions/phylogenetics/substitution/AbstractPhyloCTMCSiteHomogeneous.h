@@ -1336,135 +1336,135 @@ std::vector<charType> RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::
  * Draw a vector of ancestral states from the joint-conditional distribution of states.
  */
 template<class charType>
-void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::drawJointConditionalAncestralStates(std::vector<std::vector<charType> >& startStates, std::vector<std::vector<charType> >& endStates)
+void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::drawJointConditionalAncestralStates(
+    std::vector<std::vector<charType> >& startStates,
+    std::vector<std::vector<charType> >& endStates)
 {
-
-	// if we already have ancestral states, don't make new ones
-    
-    // MJL 181028: Disabling this flag to allow multiple monitors to work for same dnPhyloCTMC (e.g. ancestral states + stochastic mapping)
-//	if ( has_ancestral_states == true )
+    // if we already have ancestral states, don't make new ones
+    //
+    // MJL 181028: Disabling this flag to allow multiple monitors to work for the same
+    // dnPhyloCTMC (e.g. ancestral states + stochastic mapping)
+//    if ( has_ancestral_states == true )
 //    {
-//		return;
+//        return;
 //    }
-    
+
     RandomNumberGenerator* rng = GLOBAL_RNG;
 
-    // get working variables
-    std::vector<double> siteProbVector = getMixtureProbs();
+    const std::vector<double> siteProbVector = getMixtureProbs();
+    assert(siteProbVector.size() == num_site_mixtures);
 
-    const TopologyNode &root = tau->getValue().getRoot();
-    size_t node_index = root.getIndex();
+    const TopologyNode& root = tau->getValue().getRoot();
+    const size_t node_index  = root.getIndex();
 
-    // get the pointers to the partial likelihoods and the marginal likelihoods
-    const double*   p_node  = getPartialLikelihoodsForNode(node_index).likelihoods.data();
+    {
+        const auto& pl_dims = getPartialLikelihoodsForNode(node_index).dims();
+        assert(pl_dims.num_states        == num_chars);
+        assert(pl_dims.num_site_mixtures == num_site_mixtures);
+        assert(pl_dims.num_patterns      == pattern_block_size);
+    }
+    assert(siteOffset    == num_chars);
+    assert(mixtureOffset == pattern_block_size * num_chars);
 
-    // get pointers the likelihood for both subtrees
-    const double*   p_site           = p_node;
 
-    // sample root states
-    std::vector<double> p( this->num_site_mixtures*this->num_chars, 0.0);
+    const std::ptrdiff_t C = static_cast<std::ptrdiff_t>(num_chars);
+    const std::ptrdiff_t M = static_cast<std::ptrdiff_t>(num_site_mixtures);
+    const std::ptrdiff_t site_stride    = static_cast<std::ptrdiff_t>(siteOffset);
+    const std::ptrdiff_t mixture_stride = static_cast<std::ptrdiff_t>(mixtureOffset);
 
-    // clear the container for sampling the site-rates
+    const double* __restrict__ p_node = getPartialLikelihoodsForNode(node_index).likelihoods.data();
+
+    // Working buffer for the categorical distribution over (mixture, state),
+    // with p_flat[m * C + state] = partial[state at mixture m] * mixture_prob[m].
+    std::vector<double> p_flat(static_cast<std::size_t>(M * C));
+
+    // Container for the sampled mixture component of each site.
     sampled_site_mixtures.resize(this->num_sites);
-    
+
+    // MPI inconsistency!  Are we going from pattern_block_start to pattern_block_end, or not?
+    assert(pattern_block_start == 0);
+
     for (size_t i = 0; i < this->num_sites; ++i)
 //    for (size_t i = pattern_block_start; i < this->pattern_block_end; ++i)
     {
-
-        // create the character
-        charType c = charType( template_state );
-
-        // sum to sample
-        double sum = 0.0;
-
-        // if the matrix is compressed use the pattern for this site
+        // Determine which stored pattern index corresponds to site i.
         size_t pattern = i - pattern_block_start;
-        if ( compressed == true )
+        if (compressed)
         {
             pattern = site_pattern[i - pattern_block_start];
         }
 
-        // get ptr to first mixture cat for site
-        p_site          = p_node  + pattern * this->siteOffset;
+        // Build the flat (mixture, state) probability array for this site.
+        const double* p_site = p_node + static_cast<std::ptrdiff_t>(pattern) * site_stride;
 
-        // iterate over all mixture categories
-        for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
+        double sum = 0.0;
+        for (std::ptrdiff_t m = 0; m < M; ++m)
         {
+            const double mix_prob = siteProbVector[m];
+            const double* partial = p_site + m * mixture_stride;
+            double* p_mix         = p_flat.data() + m * C;
 
-            // get pointers to the likelihood for this mixture category
-            const double* p_site_mixture_j       = p_site;
-
-            // iterate over all starting states
-            for (size_t state = 0; state < this->num_chars; ++state)
+            for (std::ptrdiff_t s = 0; s < C; ++s)
             {
-                size_t k = this->num_chars*mixture + state;
-                p[k] = *p_site_mixture_j * siteProbVector[mixture];
-                sum += p[k];
-
-                // increment the pointers to the next state for (site,rate)
-                p_site_mixture_j++;
+                const double v = partial[s] * mix_prob;
+                p_mix[s] = v;
+                sum += v;
             }
-
-            // increment the pointers to the next mixture category for given site
-            p_site       += this->mixtureOffset;
-
-        } // end-for over all mixtures (=rate categories)
-
-        // sample char from p
-        bool stop = false;
-        double u = rng->uniform01() * sum;
-        for (size_t mixture = 0; mixture < this->num_site_mixtures; mixture++)
-        {
-            c.setToFirstState();
-            for (size_t state = 0; state < this->num_chars; state++)
-            {
-                size_t k = this->num_chars * mixture + state;
-                u -= p[k];
-                if (u < 0.0)
-                {
-                    startStates[root.getIndex()][i] = c;
-                    sampled_site_mixtures[i] = mixture;
-                    stop = true;
-                    break;
-                }
-                if (c.getStateIndex() + 1 >= c.getNumberOfStates())
-                {
-                    c.setToFirstState();
-                }
-                else
-                {
-                    c++;
-                }
-            }
-            if (stop) break;
         }
 
-        endStates[node_index][i] = startStates[node_index][i];
+        // Categorical sample over (mixture, state).
+        double u = rng->uniform01() * sum;
+
+        std::ptrdiff_t chosen_mixture = -1;
+        std::ptrdiff_t chosen_state   = -1;
+        for (std::ptrdiff_t m = 0; m < M && chosen_mixture < 0; ++m)
+        {
+            const double* p_mix = p_flat.data() + m * C;
+            for (std::ptrdiff_t s = 0; s < C; ++s)
+            {
+                u -= p_mix[s];
+                if (u < 0.0)
+                {
+                    chosen_mixture = m;
+                    chosen_state   = s;
+                    break;
+                }
+            }
+        }
+
+        assert(chosen_mixture >= 0 && chosen_state >= 0);
+
+        // Build the character at the chosen state index.
+        charType c = charType(template_state);
+        assert(static_cast<std::ptrdiff_t>(c.getNumberOfStates()) >= C);
+        c.setStateByIndex(static_cast<size_t>(chosen_state));
+
+        startStates[node_index][i]  = c;
+        endStates[node_index][i]    = c;
+        sampled_site_mixtures[i]    = static_cast<size_t>(chosen_mixture);
     }
 
-    // recurse
-    std::vector<TopologyNode*> children = root.getChildren();
-    for (size_t i = 0; i < children.size(); i++)
+    // Recurse to children.
+    const std::vector<TopologyNode*> children = root.getChildren();
+    for (TopologyNode* child : children)
     {
-        // daughters identically inherit ancestral state
-        startStates[ children[i]->getIndex() ] = endStates[ root.getIndex() ];
+        // Daughters inherit the root's sampled state as their start state.
+        startStates[child->getIndex()] = endStates[node_index];
 
-        // recurse towards tips
-        if ( children[i]->isTip() == false )
+        if (child->isTip())
         {
-            recursivelyDrawJointConditionalAncestralStates(*children[i], startStates, endStates, sampled_site_mixtures);
+            tipDrawJointConditionalAncestralStates(*child, startStates, endStates, sampled_site_mixtures);
         }
         else
         {
-            tipDrawJointConditionalAncestralStates(*children[i], startStates, endStates, sampled_site_mixtures);
+            recursivelyDrawJointConditionalAncestralStates(*child, startStates, endStates, sampled_site_mixtures);
         }
-
     }
 
-    // flag the ancestral states as sampled
     has_ancestral_states = true;
-
 }
+
+
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::drawSiteMixtureAllocations()
 {
