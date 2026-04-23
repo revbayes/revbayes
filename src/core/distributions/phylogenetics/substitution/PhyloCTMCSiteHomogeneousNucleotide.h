@@ -72,67 +72,145 @@ RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>* RevBayesCore::PhyloC
     return new PhyloCTMCSiteHomogeneousNucleotide<charType>( *this );
 }
 
-
-
-
 template<class charType>
-void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLikelihood( size_t root, size_t left, size_t right, size_t middle)
+void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLikelihood(
+    size_t root, size_t left, size_t right)
 {
-    
-    // reset the likelihood
+    // This is the 4-state (nucleotide) specialization.
+    assert(this->num_chars == 4);
+    assert(this->siteOffset == 4);
+
+    // Reset the log-likelihood; scale() at the end will accumulate into it.
     this->lnProb = 0.0;
-    
-    // get the root frequencies
+
+    // Root frequencies: ff[mixture % ff.size()] gives the per-state stationary
+    // distribution for this mixture.
     std::vector<std::vector<double> > ff;
     this->getRootFrequencies(ff);
-    
-    // get the pointers to the partial likelihoods of the left and right subtree
-    auto& pl_left = this->getPartialLikelihoodsForNode(left);
-    auto& pl_right = this->getPartialLikelihoodsForNode(right);
-    auto& pl_middle = this->getPartialLikelihoodsForNode(middle);
-    const double* p_left   = pl_left.likelihoods.data();
-    const double* p_right  = pl_right.likelihoods.data();
-    const double* p_middle = pl_middle.likelihoods.data();
+    assert(not ff.empty());
+
+    // Fetch child partial likelihoods and allocate the root's.
+    const auto& pl_left  = this->getPartialLikelihoodsForNode(left);
+    const auto& pl_right = this->getPartialLikelihoodsForNode(right);
+    assert(pl_left.dims() == pl_right.dims());
+    assert(pl_left.dims().num_states        == 4);
+    assert(pl_left.dims().num_site_mixtures == this->num_site_mixtures);
+    assert(pl_left.dims().num_patterns      == this->pattern_block_size);
+    assert(this->mixtureOffset == this->pattern_block_size * 4);
+
+    const double* __restrict__ p_left =
+        pl_left.likelihoods.data();
+    const double* __restrict__ p_right =
+        pl_right.likelihoods.data();
+    double* __restrict__ p_root =
+        this->createEmptyPartialLikelihoodsForNode(root, pl_left.dims()).likelihoods.data();
+
+    const size_t M = this->num_site_mixtures;
+    const size_t P = this->pattern_block_size;
+    const size_t site_stride    = this->siteOffset;
+    const size_t mixture_stride = this->mixtureOffset;
+
+    for (size_t m = 0; m < M; ++m)
+    {
+        const std::vector<double>& f = ff[m % ff.size()];
+        assert(f.size() == 4);
+
+        // Cache frequencies as 4 scalars; the compiler will keep them in
+        // registers across the pattern loop.
+        const double f0 = f[0];
+        const double f1 = f[1];
+        const double f2 = f[2];
+        const double f3 = f[3];
+
+        const double* p_mix_left  = p_left  + m * mixture_stride;
+        const double* p_mix_right = p_right + m * mixture_stride;
+        double*       p_mix_root  = p_root  + m * mixture_stride;
+
+        for (size_t p = 0; p < P; ++p)
+        {
+            const double* pl = p_mix_left  + p * site_stride;
+            const double* pr = p_mix_right + p * site_stride;
+            double*       pc = p_mix_root  + p * site_stride;
+
+            pc[0] = pl[0] * pr[0] * f0;
+            pc[1] = pl[1] * pr[1] * f1;
+            pc[2] = pl[2] * pr[2] * f2;
+            pc[3] = pl[3] * pr[3] * f3;
+        }
+    }
+
+    this->scale(root, left, right);
+}
+
+template<class charType>
+void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLikelihood(
+    size_t root, size_t left, size_t right, size_t middle)
+{
+    // 4-state (nucleotide) specialization, 3-child root variant.
+    assert(this->num_chars == 4);
+    assert(this->siteOffset == 4);
+
+    // Reset the log-likelihood; scale() at the end will accumulate into it.
+    this->lnProb = 0.0;
+
+    std::vector<std::vector<double> > ff;
+    this->getRootFrequencies(ff);
+    assert(not ff.empty());
+
+    const auto& pl_left   = this->getPartialLikelihoodsForNode(left);
+    const auto& pl_right  = this->getPartialLikelihoodsForNode(right);
+    const auto& pl_middle = this->getPartialLikelihoodsForNode(middle);
     assert(pl_left.dims() == pl_right.dims());
     assert(pl_left.dims() == pl_middle.dims());
+    assert(pl_left.dims().num_states        == 4);
+    assert(pl_left.dims().num_site_mixtures == this->num_site_mixtures);
+    assert(pl_left.dims().num_patterns      == this->pattern_block_size);
+    assert(this->mixtureOffset == this->pattern_block_size * 4);
 
-    double* p        = this->createEmptyPartialLikelihoodsForNode(root, pl_left.dims()).likelihoods.data();
-    
-    // get pointers the likelihood for both subtrees
-          double*   p_mixture          = p;
-    const double*   p_mixture_left     = p_left;
-    const double*   p_mixture_right    = p_right;
-    const double*   p_mixture_middle   = p_middle;
-    // iterate over all mixture categories
-    for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
+    const double* __restrict__ p_left =
+        pl_left.likelihoods.data();
+    const double* __restrict__ p_right =
+        pl_right.likelihoods.data();
+    const double* __restrict__ p_middle =
+        pl_middle.likelihoods.data();
+    double* __restrict__ p_root =
+        this->createEmptyPartialLikelihoodsForNode(root, pl_left.dims()).likelihoods.data();
+
+    const size_t M = this->num_site_mixtures;
+    const size_t P = this->pattern_block_size;
+    const size_t site_stride    = this->siteOffset;
+    const size_t mixture_stride = this->mixtureOffset;
+
+    for (size_t m = 0; m < M; ++m)
     {
-        // get the root frequencies
-        const std::vector<double> &f = ff[mixture % ff.size()];
+        const std::vector<double>& f = ff[m % ff.size()];
+        assert(f.size() == 4);
 
-        // get pointers to the likelihood for this mixture category
-              double*   p_site_mixture          = p_mixture;
-        const double*   p_site_mixture_left     = p_mixture_left;
-        const double*   p_site_mixture_right    = p_mixture_right;
-        const double*   p_site_mixture_middle   = p_mixture_middle;
-        // iterate over all sites
-        for (size_t site = 0; site < this->pattern_block_size; ++site)
-        {   
-            p_site_mixture[0] = p_site_mixture_left[0] * p_site_mixture_right[0] * p_site_mixture_middle[0] * f[0];
-            p_site_mixture[1] = p_site_mixture_left[1] * p_site_mixture_right[1] * p_site_mixture_middle[1] * f[1];
-            p_site_mixture[2] = p_site_mixture_left[2] * p_site_mixture_right[2] * p_site_mixture_middle[2] * f[2];
-            p_site_mixture[3] = p_site_mixture_left[3] * p_site_mixture_right[3] * p_site_mixture_middle[3] * f[3];
-            
-            // increment the pointers to the next site
-            p_site_mixture+=this->siteOffset; p_site_mixture_left+=this->siteOffset; p_site_mixture_right+=this->siteOffset; p_site_mixture_middle+=this->siteOffset;
-            
-        } // end-for over all sites (=patterns)
-        
-        // increment the pointers to the next mixture category
-        p_mixture+=this->mixtureOffset; p_mixture_left+=this->mixtureOffset; p_mixture_right+=this->mixtureOffset; p_mixture_middle+=this->mixtureOffset;
-        
-    } // end-for over all mixtures (=rate categories)
-    
-    this->scale( root, left, right, middle );
+        const double f0 = f[0];
+        const double f1 = f[1];
+        const double f2 = f[2];
+        const double f3 = f[3];
+
+        const double* p_mix_left   = p_left   + m * mixture_stride;
+        const double* p_mix_right  = p_right  + m * mixture_stride;
+        const double* p_mix_middle = p_middle + m * mixture_stride;
+        double*       p_mix_root   = p_root   + m * mixture_stride;
+
+        for (size_t p = 0; p < P; ++p)
+        {
+            const double* pl = p_mix_left   + p * site_stride;
+            const double* pr = p_mix_right  + p * site_stride;
+            const double* pm = p_mix_middle + p * site_stride;
+            double*       pc = p_mix_root   + p * site_stride;
+
+            pc[0] = pl[0] * pr[0] * pm[0] * f0;
+            pc[1] = pl[1] * pr[1] * pm[1] * f1;
+            pc[2] = pl[2] * pr[2] * pm[2] * f2;
+            pc[3] = pl[3] * pr[3] * pm[3] * f3;
+        }
+    }
+
+    this->scale(root, left, right, middle);
 }
 
 template <bool do_scaling, bool scale_this_branch>
@@ -154,13 +232,13 @@ void computeInternalNodeLikelihood4(PartialLikelihoods& pl_node, const PartialLi
     // get the pointers to the partial likelihoods for this node and the two descendant subtrees
     assert(pl_left.dims() == pl_right.dims());
 
-    const double* p_left   = pl_left.likelihoods.data();
-    const double* p_right  = pl_right.likelihoods.data();
-    auto& scale_left = pl_left.scale;
-    auto& scale_right = pl_right.scale;
+    const double*  __restrict__ p_left   = pl_left.likelihoods.data();
+    const double*  __restrict__ p_right  = pl_right.likelihoods.data();
+          double*  __restrict__ p_node   = pl_node.likelihoods.data();
 
-    double* p_node   = pl_node.likelihoods.data();
-    auto& scale_node = pl_node.scale;
+    auto& scale_left  = pl_left.scale;
+    auto& scale_right = pl_right.scale;
+    auto& scale_node  = pl_node.scale;
 
 #   if defined(__AVX__)
     const __m256d scale_min_v = _mm256_set1_pd(scale_min);
@@ -170,15 +248,11 @@ void computeInternalNodeLikelihood4(PartialLikelihoods& pl_node, const PartialLi
     for (size_t mixture = 0; mixture < num_site_mixtures; ++mixture)
     {
         // the transition probability matrix for this mixture category
-        const double* tp_begin = pmatrices[mixture].theMatrix;
+        const double* __restrict__ tp_begin = pmatrices[mixture].theMatrix;
         
         // get the pointers to the likelihood for this mixture category
         size_t offset = mixture*mixtureOffset;
         
-        double*          p_site_mixture          = p_node + offset;
-        const double*    p_site_mixture_left     = p_left + offset;
-        const double*    p_site_mixture_right    = p_right + offset;
-
 #       if defined(__AVX__)
         
         __m256d tp_a = _mm256_loadu_pd(tp_begin);
@@ -192,10 +266,14 @@ void computeInternalNodeLikelihood4(PartialLikelihoods& pl_node, const PartialLi
         for (size_t site = 0; site < pattern_block_size ; ++site)
         {
             
+            double*          __restrict__ p_site          = p_node  + offset + site*siteOffset;
+            const double*    __restrict__ p_site_left     = p_left  + offset + site*siteOffset;
+            const double*    __restrict__ p_site_right    = p_right + offset + site*siteOffset;
+
 #           if defined(__AVX__)
  
-            __m256d a = _mm256_loadu_pd(p_site_mixture_left);
-            __m256d b = _mm256_loadu_pd(p_site_mixture_right);
+            __m256d a = _mm256_loadu_pd(p_site_left);
+            __m256d b = _mm256_loadu_pd(p_site_right);
             __m256d p = _mm256_mul_pd(a,b);
             
             __m256d a_acgt = _mm256_mul_pd(p, tp_a );
@@ -210,7 +288,7 @@ void computeInternalNodeLikelihood4(PartialLikelihoods& pl_node, const PartialLi
             __m256d hi  = _mm256_permute2f128_pd(ac, gt, 0x31);
             __m256d sum = _mm256_add_pd(lo, hi);
 
-            _mm256_storeu_pd(p_site_mixture, sum);
+            _mm256_storeu_pd(p_site, sum);
 
             if constexpr (do_scaling and scale_this_branch)
             {
@@ -221,50 +299,46 @@ void computeInternalNodeLikelihood4(PartialLikelihoods& pl_node, const PartialLi
 
 #           else
 
-            double p0 = p_site_mixture_left[0] * p_site_mixture_right[0];
-            double p1 = p_site_mixture_left[1] * p_site_mixture_right[1];
-            double p2 = p_site_mixture_left[2] * p_site_mixture_right[2];
-            double p3 = p_site_mixture_left[3] * p_site_mixture_right[3];
+            double p0 = p_site_left[0] * p_site_right[0];
+            double p1 = p_site_left[1] * p_site_right[1];
+            double p2 = p_site_left[2] * p_site_right[2];
+            double p3 = p_site_left[3] * p_site_right[3];
             
             double sum = p0 * tp_begin[0];
             sum += p1 * tp_begin[1];
             sum += p2 * tp_begin[2];
             sum += p3 * tp_begin[3];
             
-            p_site_mixture[0] = sum;
+            p_site[0] = sum;
             
             sum = p0 * tp_begin[4];
             sum += p1 * tp_begin[5];
             sum += p2 * tp_begin[6];
             sum += p3 * tp_begin[7];
             
-            p_site_mixture[1] = sum;
+            p_site[1] = sum;
             
             sum = p0 * tp_begin[8];
             sum += p1 * tp_begin[9];
             sum += p2 * tp_begin[10];
             sum += p3 * tp_begin[11];
             
-            p_site_mixture[2] = sum;
+            p_site[2] = sum;
             
             sum = p0 * tp_begin[12];
             sum += p1 * tp_begin[13];
             sum += p2 * tp_begin[14];
             sum += p3 * tp_begin[15];
             
-            p_site_mixture[3] = sum;
+            p_site[3] = sum;
 
             if constexpr (do_scaling and scale_this_branch)
             {
-                bool mixture_needs_scaling = (p_site_mixture[0] < scale_min) && (p_site_mixture[1] < scale_min) && (p_site_mixture[2] < scale_min) && (p_site_mixture[3] < scale_min);
-                site_needs_scaling[site] &= mixture_needs_scaling;
+                bool mixture_needs_scaling = (p_site[0] < scale_min) && (p_site[1] < scale_min) && (p_site[2] < scale_min) && (p_site[3] < scale_min);
+                site_needs_scaling[site] &= (char)mixture_needs_scaling;
             }
 
 #           endif
-            
-            // increment the pointers to the next site
-            p_site_mixture_left+=siteOffset; p_site_mixture_right+=siteOffset; p_site_mixture+=siteOffset;
-
                         
         } // end-for over all sites (=patterns)
         
@@ -288,10 +362,10 @@ void computeInternalNodeLikelihood4(PartialLikelihoods& pl_node, const PartialLi
                 if (site_needs_scaling[site])
                 {
                     // get the pointers to the likelihood for this mixture category
-                    double* p_site_mixture = p_node + mixture*mixtureOffset + site*siteOffset;
+                    double* p_site = p_node + mixture*mixtureOffset + site*siteOffset;
                     
                     for ( size_t i=0; i<4; ++i)
-                        p_site_mixture[i] *= scale_factor;
+                        p_site[i] *= scale_factor;
                 }
             }
         }

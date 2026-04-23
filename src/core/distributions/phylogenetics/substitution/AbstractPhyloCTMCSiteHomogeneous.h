@@ -1131,7 +1131,7 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
 }
 
 template<class charType>
-void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeMarginalNodeLikelihood( size_t node_index, size_t parent_index )
+void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeMarginalNodeLikelihood(size_t node_index, size_t parent_index )
 {
     // Compute the transition probability matrix along the branch above this node.
     this->updateTransitionProbabilityMatrix( node_index );
@@ -1145,19 +1145,19 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeMarginalNo
     assert(siteOffset    == num_chars);
     assert(mixtureOffset == pattern_block_size * num_chars);
 
-    // Cache dimensions as signed stack locals for clean indexing.
-    const std::ptrdiff_t C = static_cast<std::ptrdiff_t>(num_chars);
-    const std::ptrdiff_t M = static_cast<std::ptrdiff_t>(num_site_mixtures);
-    const std::ptrdiff_t P = static_cast<std::ptrdiff_t>(pattern_block_size);
-    const std::ptrdiff_t site_stride    = static_cast<std::ptrdiff_t>(siteOffset);
-    const std::ptrdiff_t mixture_stride = static_cast<std::ptrdiff_t>(mixtureOffset);
+    // Cache dimensions and strides as stack locals for clean indexing.
+    const size_t C = num_chars;
+    const size_t M = num_site_mixtures;
+    const size_t P = pattern_block_size;
+    const size_t site_stride    = siteOffset;
+    const size_t mixture_stride = mixtureOffset;
 
     const double* __restrict__ p_node_partial    = getPartialLikelihoodsForNode(node_index).likelihoods.data();
-          double* __restrict__ p_node_marginal   = getMutableMarginalLikelihoodsForNode(node_index);
+    double*       __restrict__ p_node_marginal   = getMutableMarginalLikelihoodsForNode(node_index);
     const double* __restrict__ p_parent_marginal = getMarginalLikelihoodsForNode(parent_index);
 
     // Iterate over mixture categories.
-    for (std::ptrdiff_t m = 0; m < M; ++m)
+    for (size_t m = 0; m < M; ++m)
     {
         // Transition probability matrix for this mixture: tp[from * C + to].
         const double* __restrict__ tp = pmatrices[node_index][m].getElements();
@@ -1167,21 +1167,19 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeMarginalNo
         const double* p_par_mix_marg = p_parent_marginal + m * mixture_stride;
 
         // Iterate over sites (patterns) held by this MPI process.
-        for (std::ptrdiff_t p = 0; p < P; ++p)
+        for (size_t p = 0; p < P; ++p)
         {
-            const double* partial  = p_mix_partial  + p * site_stride;
-            double*       marginal = p_mix_marginal + p * site_stride;
-            const double* par_marg = p_par_mix_marg + p * site_stride;
+            const double* partial  = p_mix_partial  + p * site_stride;   // read
+            double*       marginal = p_mix_marginal + p * site_stride;   // write
+            const double* par_marg = p_par_mix_marg + p * site_stride;   // read
 
             // For each end state j at this site:
             //
-            //     marginal[j] = (sum_k par_marg[k] * tp(k -> j)) * partial[j]
-            //
-
-            for (std::ptrdiff_t j = 0; j < C; ++j)
+            //     marginal[j] = partial[j] * sum_k par_marg[k] * tp(k -> j)
+            for (size_t j = 0; j < C; ++j)
             {
                 double transition_sum = 0.0;
-                for (std::ptrdiff_t k = 0; k < C; ++k)
+                for (size_t k = 0; k < C; ++k)
                 {
                     transition_sum += par_marg[k] * tp[k * C + j];
                 }
@@ -1191,10 +1189,11 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeMarginalNo
     }
 }
 
-
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeMarginalRootLikelihood( void )
 {
+    marginalLikelihoods.resize( activeLikelihoodOffset );
+
     std::vector<std::vector<double> > ff;
     getRootFrequencies(ff);
     assert(not ff.empty());
@@ -1210,33 +1209,35 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeMarginalRo
     assert(siteOffset    == num_chars);
     assert(mixtureOffset == pattern_block_size * num_chars);
 
-    // Cache dimensions as signed stack locals.
-    const std::ptrdiff_t C = static_cast<std::ptrdiff_t>(num_chars);
-    const std::ptrdiff_t M = static_cast<std::ptrdiff_t>(num_site_mixtures);
-    const std::ptrdiff_t P = static_cast<std::ptrdiff_t>(pattern_block_size);
-    const std::ptrdiff_t site_stride    = static_cast<std::ptrdiff_t>(siteOffset);
-    const std::ptrdiff_t mixture_stride = static_cast<std::ptrdiff_t>(mixtureOffset);
+    // Cache dimensions as stack locals.
+    const size_t C = num_chars;
+    const size_t M = num_site_mixtures;
+    const size_t P = pattern_block_size;
+    const size_t site_stride    = siteOffset;
+    const size_t mixture_stride = mixtureOffset;
 
     // The two top-level buffers come from distinct allocations.
-    const double* __restrict__ p_node_partial = getPartialLikelihoodsForNode(node_index).likelihoods.data();
-    double*       __restrict__ p_node_marginal = getMutableMarginalLikelihoodsForNode(node_index);
+    const double* __restrict__ p_node_partial =
+        getPartialLikelihoodsForNode(node_index).likelihoods.data();
+    double*       __restrict__ p_node_marginal =
+        getMutableMarginalLikelihoodsForNode(node_index);
 
-    for (std::ptrdiff_t m = 0; m < M; ++m)
+    for (size_t m = 0; m < M; ++m)
     {
         const std::vector<double>& f = ff[m % ff.size()];
-        assert(static_cast<std::ptrdiff_t>(f.size()) == C);
+        assert(f.size() == C);
         const double* __restrict__ f_data = f.data();
 
         const double* p_mix_partial  = p_node_partial  + m * mixture_stride;
         double*       p_mix_marginal = p_node_marginal + m * mixture_stride;
 
-        for (std::ptrdiff_t p = 0; p < P; ++p)
+        for (size_t p = 0; p < P; ++p)
         {
             const double* partial  = p_mix_partial  + p * site_stride;   // read
             double*       marginal = p_mix_marginal + p * site_stride;   // write
 
             // marginal[j] = partial[j] * f[j]  for each state j.
-            for (std::ptrdiff_t j = 0; j < C; ++j)
+            for (size_t j = 0; j < C; ++j)
             {
                 marginal[j] = partial[j] * f_data[j];
             }
@@ -1331,7 +1332,6 @@ std::vector<charType> RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::
     return ancestralSeq;
 }
 
-
 /**
  * Draw a vector of ancestral states from the joint-conditional distribution of states.
  */
@@ -1367,16 +1367,17 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::drawJointConditio
     assert(mixtureOffset == pattern_block_size * num_chars);
 
 
-    const std::ptrdiff_t C = static_cast<std::ptrdiff_t>(num_chars);
-    const std::ptrdiff_t M = static_cast<std::ptrdiff_t>(num_site_mixtures);
-    const std::ptrdiff_t site_stride    = static_cast<std::ptrdiff_t>(siteOffset);
-    const std::ptrdiff_t mixture_stride = static_cast<std::ptrdiff_t>(mixtureOffset);
+    const size_t C = num_chars;
+    const size_t M = num_site_mixtures;
+    const size_t site_stride    = siteOffset;
+    const size_t mixture_stride = mixtureOffset;
 
-    const double* __restrict__ p_node = getPartialLikelihoodsForNode(node_index).likelihoods.data();
+    const double* __restrict__ p_node =
+        getPartialLikelihoodsForNode(node_index).likelihoods.data();
 
     // Working buffer for the categorical distribution over (mixture, state),
     // with p_flat[m * C + state] = partial[state at mixture m] * mixture_prob[m].
-    std::vector<double> p_flat(static_cast<std::size_t>(M * C));
+    std::vector<double> p_flat(M * C);
 
     // Container for the sampled mixture component of each site.
     sampled_site_mixtures.resize(this->num_sites);
@@ -1395,16 +1396,16 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::drawJointConditio
         }
 
         // Build the flat (mixture, state) probability array for this site.
-        const double* p_site = p_node + static_cast<std::ptrdiff_t>(pattern) * site_stride;
+        const double* p_site = p_node + pattern * site_stride;
 
         double sum = 0.0;
-        for (std::ptrdiff_t m = 0; m < M; ++m)
+        for (size_t m = 0; m < M; ++m)
         {
             const double mix_prob = siteProbVector[m];
             const double* partial = p_site + m * mixture_stride;
             double* p_mix         = p_flat.data() + m * C;
 
-            for (std::ptrdiff_t s = 0; s < C; ++s)
+            for (size_t s = 0; s < C; ++s)
             {
                 const double v = partial[s] * mix_prob;
                 p_mix[s] = v;
@@ -1415,33 +1416,35 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::drawJointConditio
         // Categorical sample over (mixture, state).
         double u = rng->uniform01() * sum;
 
-        std::ptrdiff_t chosen_mixture = -1;
-        std::ptrdiff_t chosen_state   = -1;
-        for (std::ptrdiff_t m = 0; m < M && chosen_mixture < 0; ++m)
+        bool   found          = false;
+        size_t chosen_mixture = 0;
+        size_t chosen_state   = 0;
+        for (size_t m = 0; m < M && !found; ++m)
         {
             const double* p_mix = p_flat.data() + m * C;
-            for (std::ptrdiff_t s = 0; s < C; ++s)
+            for (size_t s = 0; s < C; ++s)
             {
                 u -= p_mix[s];
                 if (u < 0.0)
                 {
                     chosen_mixture = m;
                     chosen_state   = s;
+                    found          = true;
                     break;
                 }
             }
         }
 
-        assert(chosen_mixture >= 0 && chosen_state >= 0);
+        assert(found);
 
         // Build the character at the chosen state index.
         charType c = charType(template_state);
-        assert(static_cast<std::ptrdiff_t>(c.getNumberOfStates()) >= C);
-        c.setStateByIndex(static_cast<size_t>(chosen_state));
+        assert(c.getNumberOfStates() >= C);
+        c.setStateByIndex(chosen_state);
 
         startStates[node_index][i]  = c;
         endStates[node_index][i]    = c;
-        sampled_site_mixtures[i]    = static_cast<size_t>(chosen_mixture);
+        sampled_site_mixtures[i]    = chosen_mixture;
     }
 
     // Recurse to children.
@@ -1463,7 +1466,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::drawJointConditio
 
     has_ancestral_states = true;
 }
-
 
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::drawSiteMixtureAllocations()
