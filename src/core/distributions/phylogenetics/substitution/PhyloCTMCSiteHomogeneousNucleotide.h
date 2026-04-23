@@ -74,61 +74,6 @@ RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>* RevBayesCore::PhyloC
 
 
 
-template<class charType>
-void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLikelihood( size_t root, size_t left, size_t right)
-{
-    
-    // reset the likelihood
-    this->lnProb = 0.0;
-    
-    // get the root frequencies
-    std::vector<std::vector<double> > ff;
-    this->getRootFrequencies(ff);
-    
-    // get the pointers to the partial likelihoods of the left and right subtree
-    auto& pl_left = this->getPartialLikelihoodsForNode(left);
-    auto& pl_right= this->getPartialLikelihoodsForNode(right);
-    const double* p_left   = pl_left.likelihoods.data();
-    const double* p_right  = pl_right.likelihoods.data();
-    assert(pl_left.dims() == pl_right.dims());
-    
-    double* p        = this->createEmptyPartialLikelihoodsForNode(root, pl_left.dims()).likelihoods.data();
-    
-    // get pointers the likelihood for both subtrees
-          double*   p_mixture          = p;
-    const double*   p_mixture_left     = p_left;
-    const double*   p_mixture_right    = p_right;
-    // iterate over all mixture categories
-    for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
-    {
-        // get the root frequencies
-        const std::vector<double> &f = ff[mixture % ff.size()];
-
-        // get pointers to the likelihood for this mixture category
-              double*   p_site_mixture          = p_mixture;
-        const double*   p_site_mixture_left     = p_mixture_left;
-        const double*   p_site_mixture_right    = p_mixture_right;
-        // iterate over all sites
-        for (size_t site = 0; site < this->pattern_block_size; ++site)
-        {
-            
-            p_site_mixture[0] = p_site_mixture_left[0] * p_site_mixture_right[0] * f[0];
-            p_site_mixture[1] = p_site_mixture_left[1] * p_site_mixture_right[1] * f[1];
-            p_site_mixture[2] = p_site_mixture_left[2] * p_site_mixture_right[2] * f[2];
-            p_site_mixture[3] = p_site_mixture_left[3] * p_site_mixture_right[3] * f[3];
-            
-            // increment the pointers to the next site
-            p_site_mixture+=this->siteOffset; p_site_mixture_left+=this->siteOffset; p_site_mixture_right+=this->siteOffset;
-            
-        } // end-for over all sites (=patterns)
-        
-        // increment the pointers to the next mixture category
-        p_mixture+=this->mixtureOffset; p_mixture_left+=this->mixtureOffset; p_mixture_right+=this->mixtureOffset;
-        
-    } // end-for over all mixtures (=rate categories)
-
-    this->scale( root, left, right );
-}
 
 template<class charType>
 void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLikelihood( size_t root, size_t left, size_t right, size_t middle)
