@@ -43,8 +43,8 @@ generation = 0    proposal = 3/102    RJ-Switch(alpha)
     FINAL:    alpha:  -19.113827925
     FINAL:    seq:  -25210.794648
 
-    log(posterior_ratio) = -18.4206348  log(likelihood_ratio) = 4.5943648729e-05   log(prior_ratio) = -18.420680744
-    log(acceptance_ratio) = 4.5943648729e-05  log(hastings_ratio) = 18.420680744
+    log(posterior_ratio) = -18.4206348  log(likelihood_ratio) = 4.5943645091e-05   log(prior_ratio) = -18.420680744
+    log(acceptance_ratio) = 4.5943645091e-05  log(hastings_ratio) = 18.420680744
   The move was ACCEPTED.
 
 generation = 0    proposal = 4/102    Scaling(alpha)
@@ -57,7 +57,7 @@ generation = 0    proposal = 4/102    Scaling(alpha)
     FINAL:    alpha:  -19.113827925
     FINAL:    seq:  -25210.794648
 
-    log(posterior_ratio) = -inf  log(likelihood_ratio) = -5.2517341828e-05   log(prior_ratio) = -inf
+    log(posterior_ratio) = -inf  log(likelihood_ratio) = -5.2517345466e-05   log(prior_ratio) = -inf
     log(acceptance_ratio) = -inf  log(hastings_ratio) = 0.47645946522
   The move was REJECTED.
 
@@ -71,8 +71,8 @@ generation = 0    proposal = 5/102    Scaling(br_lens[34])
     FINAL:    br_lens[34]:  1.3427395664
     FINAL:    seq:  -25210.791929
 
-    log(posterior_ratio) = -0.0064747441877  log(likelihood_ratio) = 0.0027188537351   log(prior_ratio) = -0.0091935979228
-    log(acceptance_ratio) = 0.0031496275831  log(hastings_ratio) = 0.0096243717708
+    log(posterior_ratio) = -0.0064747441913  log(likelihood_ratio) = 0.0027188537315   log(prior_ratio) = -0.0091935979228
+    log(acceptance_ratio) = 0.0031496275795  log(hastings_ratio) = 0.0096243717708
   The move was ACCEPTED.
 
 generation = 0    proposal = 6/102    NNI(topology)
@@ -183,8 +183,8 @@ generation = 0    proposal = 13/102    Scaling(br_lens[39])
     FINAL:    br_lens[39]:  1.2795659716
     FINAL:    seq:  -25103.479297
 
-    log(posterior_ratio) = -0.17775522651  log(likelihood_ratio) = -0.15369341239   log(prior_ratio) = -0.024061814121
-    log(acceptance_ratio) = -0.15450717359  log(hastings_ratio) = 0.023248052923
+    log(posterior_ratio) = -0.1777552265  log(likelihood_ratio) = -0.15369341238   log(prior_ratio) = -0.024061814121
+    log(acceptance_ratio) = -0.15450717357  log(hastings_ratio) = 0.023248052923
   The move was REJECTED.
 
 generation = 0    proposal = 14/102    NNI(topology)
@@ -239,8 +239,8 @@ generation = 0    proposal = 17/102    RJ-Switch(alpha)
     FINAL:    alpha:  -0.69314718056
     FINAL:    seq:  -25103.479345
 
-    log(posterior_ratio) = 18.420632565  log(likelihood_ratio) = -4.8178859288e-05   log(prior_ratio) = 18.420680744
-    log(acceptance_ratio) = -4.8178859288e-05  log(hastings_ratio) = -18.420680744
+    log(posterior_ratio) = 18.420632565  log(likelihood_ratio) = -4.817885565e-05   log(prior_ratio) = 18.420680744
+    log(acceptance_ratio) = -4.817885565e-05  log(hastings_ratio) = -18.420680744
   The move was ACCEPTED.
 
 generation = 0    proposal = 18/102    Scaling(br_lens[14])
@@ -365,8 +365,8 @@ generation = 0    proposal = 26/102    RJ-Switch(alpha)
     FINAL:    alpha:  -19.113827925
     FINAL:    seq:  -25009.901875
 
-    log(posterior_ratio) = -18.420675886  log(likelihood_ratio) = 4.8583169701e-06   log(prior_ratio) = -18.420680744
-    log(acceptance_ratio) = 4.8583169701e-06  log(hastings_ratio) = 18.420680744
+    log(posterior_ratio) = -18.420675886  log(likelihood_ratio) = 4.8583060561e-06   log(prior_ratio) = -18.420680744
+    log(acceptance_ratio) = 4.8583060561e-06  log(hastings_ratio) = 18.420680744
   The move was ACCEPTED.
 
 generation = 0    proposal = 27/102    Scaling(br_lens[32])
@@ -463,7 +463,7 @@ generation = 0    proposal = 33/102    Scaling(alpha)
     FINAL:    alpha:  -0.69314718056
     FINAL:    seq:  -24986.744202
 
-    log(posterior_ratio) = -inf  log(likelihood_ratio) = -1.6964822862e-05   log(prior_ratio) = -inf
+    log(posterior_ratio) = -inf  log(likelihood_ratio) = -1.6964819224e-05   log(prior_ratio) = -inf
     log(acceptance_ratio) = -inf  log(hastings_ratio) = 0.19253159151
   The move was REJECTED.
 
@@ -519,8 +519,8 @@ generation = 0    proposal = 37/102    Scaling(kappa)
     FINAL:    kappa:  -3.2450615426
     FINAL:    seq:  -24969.131303
 
-    log(posterior_ratio) = 0.70748646086  log(likelihood_ratio) = 0.62489652389   log(prior_ratio) = 0.082589936963
-    log(acceptance_ratio) = 0.68235398241  log(hastings_ratio) = -0.025132478448
+    log(posterior_ratio) = 0.70748646085  log(likelihood_ratio) = 0.62489652389   log(prior_ratio) = 0.082589936963
+    log(acceptance_ratio) = 0.6823539824  log(hastings_ratio) = -0.025132478448
   The move was ACCEPTED.
 
 generation = 0    proposal = 38/102    Scaling(br_lens[35])
@@ -617,7 +617,7 @@ generation = 0    proposal = 44/102    Scaling(br_lens[31])
     FINAL:    br_lens[31]:  1.9311273607
     FINAL:    seq:  -20122.996105
 
-    log(posterior_ratio) = 0.40093719281  log(likelihood_ratio) = 0.2815283257   log(prior_ratio) = 0.11940886711
+    log(posterior_ratio) = 0.40093719281  log(likelihood_ratio) = 0.28152832571   log(prior_ratio) = 0.11940886711
     log(acceptance_ratio) = 0.12219987551  log(hastings_ratio) = -0.27873731731
   The move was ACCEPTED.
 
@@ -701,7 +701,7 @@ generation = 0    proposal = 50/102    Scaling(alpha)
     FINAL:    alpha:  -0.69314718056
     FINAL:    seq:  -20087.249764
 
-    log(posterior_ratio) = -inf  log(likelihood_ratio) = -2.2038009774e-05   log(prior_ratio) = -inf
+    log(posterior_ratio) = -inf  log(likelihood_ratio) = -2.2038013412e-05   log(prior_ratio) = -inf
     log(acceptance_ratio) = -inf  log(hastings_ratio) = 0.34114012984
   The move was REJECTED.
 
@@ -715,7 +715,7 @@ generation = 0    proposal = 51/102    Scaling(alpha)
     FINAL:    alpha:  -0.69314718056
     FINAL:    seq:  -20087.249764
 
-    log(posterior_ratio) = -inf  log(likelihood_ratio) = -2.3477226932e-05   log(prior_ratio) = -inf
+    log(posterior_ratio) = -inf  log(likelihood_ratio) = -2.3477223294e-05   log(prior_ratio) = -inf
     log(acceptance_ratio) = -inf  log(hastings_ratio) = 0.36812606058
   The move was REJECTED.
 
@@ -799,7 +799,7 @@ generation = 0    proposal = 57/102    Scaling(alpha)
     FINAL:    alpha:  -19.113827925
     FINAL:    seq:  -20074.619189
 
-    log(posterior_ratio) = -inf  log(likelihood_ratio) = -1.5810008335e-05   log(prior_ratio) = -inf
+    log(posterior_ratio) = -inf  log(likelihood_ratio) = -1.5810004697e-05   log(prior_ratio) = -inf
     log(acceptance_ratio) = -inf  log(hastings_ratio) = 0.19742877246
   The move was REJECTED.
 
@@ -897,8 +897,8 @@ generation = 0    proposal = 64/102    Scaling(br_lens[7])
     FINAL:    br_lens[7]:  0.75323004198
     FINAL:    seq:  -20073.796776
 
-    log(posterior_ratio) = -2.2269778959  log(likelihood_ratio) = -2.8123705745   log(prior_ratio) = 0.5853926785
-    log(acceptance_ratio) = -2.547487628  log(hastings_ratio) = -0.320509732
+    log(posterior_ratio) = -2.2269778959  log(likelihood_ratio) = -2.8123705744   log(prior_ratio) = 0.5853926785
+    log(acceptance_ratio) = -2.5474876279  log(hastings_ratio) = -0.320509732
   The move was ACCEPTED.
 
 generation = 0    proposal = 65/102    Scaling(br_lens[4])
@@ -1135,7 +1135,7 @@ generation = 0    proposal = 81/102    Scaling(alpha)
     FINAL:    alpha:  -0.69314718056
     FINAL:    seq:  -19971.388496
 
-    log(posterior_ratio) = -inf  log(likelihood_ratio) = 1.0323965398e-05   log(prior_ratio) = -inf
+    log(posterior_ratio) = -inf  log(likelihood_ratio) = 1.032396176e-05   log(prior_ratio) = -inf
     log(acceptance_ratio) = -inf  log(hastings_ratio) = -0.12224816275
   The move was REJECTED.
 
@@ -1682,7 +1682,7 @@ generation = 1    proposal = 18/102    Scaling(br_lens[39])
     FINAL:    seq:  -19911.332071
 
     log(posterior_ratio) = 0.46786512463  log(likelihood_ratio) = 0.45326703407   log(prior_ratio) = 0.014598090563
-    log(acceptance_ratio) = 0.4534927181  log(hastings_ratio) = -0.014372406527
+    log(acceptance_ratio) = 0.45349271811  log(hastings_ratio) = -0.014372406527
   The move was ACCEPTED.
 
 generation = 1    proposal = 19/102    Scaling(alpha)
@@ -1695,7 +1695,7 @@ generation = 1    proposal = 19/102    Scaling(alpha)
     FINAL:    alpha:  -0.69314718056
     FINAL:    seq:  -19911.332071
 
-    log(posterior_ratio) = -inf  log(likelihood_ratio) = -1.9676412194e-05   log(prior_ratio) = -inf
+    log(posterior_ratio) = -inf  log(likelihood_ratio) = -1.9676415832e-05   log(prior_ratio) = -inf
     log(acceptance_ratio) = -inf  log(hastings_ratio) = 0.28754215338
   The move was REJECTED.
 
@@ -1723,7 +1723,7 @@ generation = 1    proposal = 21/102    Scaling(alpha)
     FINAL:    alpha:  -0.69314718056
     FINAL:    seq:  -19911.332071
 
-    log(posterior_ratio) = -inf  log(likelihood_ratio) = 3.6550300138e-06   log(prior_ratio) = -inf
+    log(posterior_ratio) = -inf  log(likelihood_ratio) = 3.6550263758e-06   log(prior_ratio) = -inf
     log(acceptance_ratio) = -inf  log(hastings_ratio) = -0.044831182808
   The move was REJECTED.
 
@@ -1737,8 +1737,8 @@ generation = 1    proposal = 22/102    RJ-Switch(alpha)
     FINAL:    alpha:  -19.113827925
     FINAL:    seq:  -19911.332067
 
-    log(posterior_ratio) = -18.42067632  log(likelihood_ratio) = 4.4237021939e-06   log(prior_ratio) = -18.420680744
-    log(acceptance_ratio) = 4.4237021939e-06  log(hastings_ratio) = 18.420680744
+    log(posterior_ratio) = -18.42067632  log(likelihood_ratio) = 4.4236985559e-06   log(prior_ratio) = -18.420680744
+    log(acceptance_ratio) = 4.4236985559e-06  log(hastings_ratio) = 18.420680744
   The move was ACCEPTED.
 
 generation = 1    proposal = 23/102    Scaling(alpha)
@@ -1779,8 +1779,8 @@ generation = 1    proposal = 25/102    RJ-Switch(alpha)
     FINAL:    alpha:  -0.69314718056
     FINAL:    seq:  -19911.332071
 
-    log(posterior_ratio) = 18.42067632  log(likelihood_ratio) = -4.4237021939e-06   log(prior_ratio) = 18.420680744
-    log(acceptance_ratio) = -4.4237021939e-06  log(hastings_ratio) = -18.420680744
+    log(posterior_ratio) = 18.42067632  log(likelihood_ratio) = -4.4236985559e-06   log(prior_ratio) = 18.420680744
+    log(acceptance_ratio) = -4.4236985559e-06  log(hastings_ratio) = -18.420680744
   The move was ACCEPTED.
 
 generation = 1    proposal = 26/102    Scaling(br_lens[17])
@@ -1919,7 +1919,7 @@ generation = 1    proposal = 35/102    Scaling(alpha)
     FINAL:    alpha:  -0.69314718056
     FINAL:    seq:  -19898.151143
 
-    log(posterior_ratio) = -inf  log(likelihood_ratio) = 3.7858968426e-05   log(prior_ratio) = -inf
+    log(posterior_ratio) = -inf  log(likelihood_ratio) = 3.7858972064e-05   log(prior_ratio) = -inf
     log(acceptance_ratio) = -inf  log(hastings_ratio) = -0.40215551388
   The move was REJECTED.
 
@@ -1933,8 +1933,8 @@ generation = 1    proposal = 36/102    RJ-Switch(alpha)
     FINAL:    alpha:  -19.113827925
     FINAL:    seq:  -19898.151085
 
-    log(posterior_ratio) = -18.420622803  log(likelihood_ratio) = 5.7941408159e-05   log(prior_ratio) = -18.420680744
-    log(acceptance_ratio) = 5.7941408159e-05  log(hastings_ratio) = 18.420680744
+    log(posterior_ratio) = -18.420622803  log(likelihood_ratio) = 5.7941415434e-05   log(prior_ratio) = -18.420680744
+    log(acceptance_ratio) = 5.7941415434e-05  log(hastings_ratio) = 18.420680744
   The move was ACCEPTED.
 
 generation = 1    proposal = 37/102    Scaling(br_lens[22])
@@ -1961,8 +1961,8 @@ generation = 1    proposal = 38/102    Scaling(alpha)
     FINAL:    alpha:  -19.113827925
     FINAL:    seq:  -19861.421236
 
-    log(posterior_ratio) = 1.2238742784e-05  log(likelihood_ratio) = 1.2238742784e-05   log(prior_ratio) = 0
-    log(acceptance_ratio) = -0.088615346001  log(hastings_ratio) = -0.088627584744
+    log(posterior_ratio) = 1.2238739146e-05  log(likelihood_ratio) = 1.2238739146e-05   log(prior_ratio) = 0
+    log(acceptance_ratio) = -0.088615346005  log(hastings_ratio) = -0.088627584744
   The move was ACCEPTED.
 
 generation = 1    proposal = 39/102    Scaling(br_lens[23])
@@ -2003,8 +2003,8 @@ generation = 1    proposal = 41/102    Scaling(alpha)
     FINAL:    alpha:  -19.113827925
     FINAL:    seq:  -19861.421171
 
-    log(posterior_ratio) = 6.5298911068e-05  log(likelihood_ratio) = 6.5298911068e-05   log(prior_ratio) = 0
-    log(acceptance_ratio) = -0.36744706806  log(hastings_ratio) = -0.36751236697
+    log(posterior_ratio) = 6.5298918344e-05  log(likelihood_ratio) = 6.5298918344e-05   log(prior_ratio) = 0
+    log(acceptance_ratio) = -0.36744706805  log(hastings_ratio) = -0.36751236697
   The move was ACCEPTED.
 
 generation = 1    proposal = 42/102    NNI(topology)
@@ -2059,8 +2059,8 @@ generation = 1    proposal = 45/102    RJ-Switch(alpha)
     FINAL:    alpha:  -0.69314718056
     FINAL:    seq:  -19861.421307
 
-    log(posterior_ratio) = 18.420545402  log(likelihood_ratio) = -0.00013534204118   log(prior_ratio) = 18.420680744
-    log(acceptance_ratio) = -0.00013534204118  log(hastings_ratio) = -18.420680744
+    log(posterior_ratio) = 18.420545402  log(likelihood_ratio) = -0.00013534204481   log(prior_ratio) = 18.420680744
+    log(acceptance_ratio) = -0.00013534204481  log(hastings_ratio) = -18.420680744
   The move was ACCEPTED.
 
 generation = 1    proposal = 46/102    Scaling(br_lens[31])
@@ -2199,8 +2199,8 @@ generation = 1    proposal = 55/102    Scaling(br_lens[5])
     FINAL:    br_lens[5]:  2.041617862
     FINAL:    seq:  -19859.455515
 
-    log(posterior_ratio) = 0.7015786873  log(likelihood_ratio) = 0.70400530787   log(prior_ratio) = -0.002426620565
-    log(acceptance_ratio) = 0.71092075308  log(hastings_ratio) = 0.0093420657795
+    log(posterior_ratio) = 0.70157868731  log(likelihood_ratio) = 0.70400530787   log(prior_ratio) = -0.002426620565
+    log(acceptance_ratio) = 0.71092075309  log(hastings_ratio) = 0.0093420657795
   The move was ACCEPTED.
 
 generation = 1    proposal = 56/102    NNI(topology)
@@ -2437,7 +2437,7 @@ generation = 1    proposal = 72/102    Scaling(alpha)
     FINAL:    alpha:  -0.69314718056
     FINAL:    seq:  -19766.811526
 
-    log(posterior_ratio) = -inf  log(likelihood_ratio) = -5.583930033e-06   log(prior_ratio) = -inf
+    log(posterior_ratio) = -inf  log(likelihood_ratio) = -5.583926395e-06   log(prior_ratio) = -inf
     log(acceptance_ratio) = -inf  log(hastings_ratio) = 0.078922387445
   The move was REJECTED.
 
@@ -2465,7 +2465,7 @@ generation = 1    proposal = 74/102    Scaling(br_lens[33])
     FINAL:    br_lens[33]:  1.7263031461
     FINAL:    seq:  -19719.375647
 
-    log(posterior_ratio) = -0.089543421687  log(likelihood_ratio) = 0.059979899823   log(prior_ratio) = -0.14952332151
+    log(posterior_ratio) = -0.089543421691  log(likelihood_ratio) = 0.059979899819   log(prior_ratio) = -0.14952332151
     log(acceptance_ratio) = 0.21083503712  log(hastings_ratio) = 0.30037845881
   The move was ACCEPTED.
 
@@ -2479,8 +2479,8 @@ generation = 1    proposal = 75/102    RJ-Switch(alpha)
     FINAL:    alpha:  -19.113827925
     FINAL:    seq:  -19719.375533
 
-    log(posterior_ratio) = -18.420566539  log(likelihood_ratio) = 0.00011420508235   log(prior_ratio) = -18.420680744
-    log(acceptance_ratio) = 0.00011420508235  log(hastings_ratio) = 18.420680744
+    log(posterior_ratio) = -18.420566539  log(likelihood_ratio) = 0.00011420508963   log(prior_ratio) = -18.420680744
+    log(acceptance_ratio) = 0.00011420508963  log(hastings_ratio) = 18.420680744
   The move was ACCEPTED.
 
 generation = 1    proposal = 76/102    Scaling(alpha)
@@ -2493,8 +2493,8 @@ generation = 1    proposal = 76/102    Scaling(alpha)
     FINAL:    alpha:  -19.113827925
     FINAL:    seq:  -19719.375519
 
-    log(posterior_ratio) = 1.4489822206e-05  log(likelihood_ratio) = 1.4489822206e-05   log(prior_ratio) = 0
-    log(acceptance_ratio) = -0.073679632202  log(hastings_ratio) = -0.073694122024
+    log(posterior_ratio) = 1.4489818568e-05  log(likelihood_ratio) = 1.4489818568e-05   log(prior_ratio) = 0
+    log(acceptance_ratio) = -0.073679632205  log(hastings_ratio) = -0.073694122024
   The move was ACCEPTED.
 
 generation = 1    proposal = 77/102    Scaling(br_lens[35])
@@ -2507,7 +2507,7 @@ generation = 1    proposal = 77/102    Scaling(br_lens[35])
     FINAL:    br_lens[35]:  2.2318974581
     FINAL:    seq:  -19719.124723
 
-    log(posterior_ratio) = 0.23800416532  log(likelihood_ratio) = 0.25079578234   log(prior_ratio) = -0.012791617022
+    log(posterior_ratio) = 0.23800416531  log(likelihood_ratio) = 0.25079578234   log(prior_ratio) = -0.012791617022
     log(acceptance_ratio) = 0.4376262213  log(hastings_ratio) = 0.19962205598
   The move was ACCEPTED.
 
@@ -2577,8 +2577,8 @@ generation = 1    proposal = 82/102    Scaling(br_lens[33])
     FINAL:    br_lens[33]:  1.7243245933
     FINAL:    seq:  -19701.280357
 
-    log(posterior_ratio) = -0.01930722817  log(likelihood_ratio) = -0.017328675382   log(prior_ratio) = -0.0019785527882
-    log(acceptance_ratio) = -0.015879801606  log(hastings_ratio) = 0.0034274265636
+    log(posterior_ratio) = -0.019307228166  log(likelihood_ratio) = -0.017328675378   log(prior_ratio) = -0.0019785527882
+    log(acceptance_ratio) = -0.015879801603  log(hastings_ratio) = 0.0034274265636
   The move was ACCEPTED.
 
 generation = 1    proposal = 83/102    Scaling(alpha)
@@ -2591,7 +2591,7 @@ generation = 1    proposal = 83/102    Scaling(alpha)
     FINAL:    alpha:  -19.113827925
     FINAL:    seq:  -19701.280418
 
-    log(posterior_ratio) = -6.1537361034e-05  log(likelihood_ratio) = -6.1537361034e-05   log(prior_ratio) = 0
+    log(posterior_ratio) = -6.1537364672e-05  log(likelihood_ratio) = -6.1537364672e-05   log(prior_ratio) = 0
     log(acceptance_ratio) = 0.35766110617  log(hastings_ratio) = 0.35772264353
   The move was ACCEPTED.
 
@@ -2605,8 +2605,8 @@ generation = 1    proposal = 84/102    Scaling(br_lens[33])
     FINAL:    br_lens[33]:  1.7243245933
     FINAL:    seq:  -19701.280418
 
-    log(posterior_ratio) = 0.13900048624  log(likelihood_ratio) = -0.052620354607   log(prior_ratio) = 0.19162084084
-    log(acceptance_ratio) = -0.26353082724  log(hastings_ratio) = -0.40253131348
+    log(posterior_ratio) = 0.13900048624  log(likelihood_ratio) = -0.0526203546   log(prior_ratio) = 0.19162084084
+    log(acceptance_ratio) = -0.26353082723  log(hastings_ratio) = -0.40253131348
   The move was REJECTED.
 
 generation = 1    proposal = 85/102    BetaSimplex(pi)
@@ -2675,8 +2675,8 @@ generation = 1    proposal = 89/102    Scaling(alpha)
     FINAL:    alpha:  -19.113827925
     FINAL:    seq:  -19701.280467
 
-    log(posterior_ratio) = 7.0450078056e-06  log(likelihood_ratio) = 7.0450078056e-06   log(prior_ratio) = 0
-    log(acceptance_ratio) = -0.075960703176  log(hastings_ratio) = -0.075967748184
+    log(posterior_ratio) = 7.0450114436e-06  log(likelihood_ratio) = 7.0450114436e-06   log(prior_ratio) = 0
+    log(acceptance_ratio) = -0.075960703172  log(hastings_ratio) = -0.075967748184
   The move was ACCEPTED.
 
 generation = 1    proposal = 90/102    Scaling(br_lens[13])
@@ -2857,8 +2857,8 @@ generation = 1    proposal = 102/102    Scaling(br_lens[42])
     FINAL:    br_lens[42]:  2.2224044198
     FINAL:    seq:  -19471.972474
 
-    log(posterior_ratio) = 0.28965399302  log(likelihood_ratio) = 0.26708028294   log(prior_ratio) = 0.022573710079
-    log(acceptance_ratio) = 0.041594984048  log(hastings_ratio) = -0.24805900897
+    log(posterior_ratio) = 0.28965399301  log(likelihood_ratio) = 0.26708028293   log(prior_ratio) = 0.022573710079
+    log(acceptance_ratio) = 0.041594984045  log(hastings_ratio) = -0.24805900897
   The move was ACCEPTED.
 
 generation = 2    proposal = 1/102    Scaling(br_lens[9])
@@ -2872,7 +2872,7 @@ generation = 2    proposal = 1/102    Scaling(br_lens[9])
     FINAL:    seq:  -19471.264932
 
     log(posterior_ratio) = 0.59808478362  log(likelihood_ratio) = 0.70754204406   log(prior_ratio) = -0.10945726044
-    log(acceptance_ratio) = 0.67823650313  log(hastings_ratio) = 0.080151719507
+    log(acceptance_ratio) = 0.67823650312  log(hastings_ratio) = 0.080151719507
   The move was ACCEPTED.
 
 generation = 2    proposal = 2/102    RandomGeometricWalk(model_indicator)
@@ -2899,7 +2899,7 @@ generation = 2    proposal = 3/102    Scaling(br_lens[37])
     FINAL:    br_lens[37]:  1.9195959442
     FINAL:    seq:  -19471.264932
 
-    log(posterior_ratio) = -0.66705281217  log(likelihood_ratio) = -0.78931051119   log(prior_ratio) = 0.12225769902
+    log(posterior_ratio) = -0.66705281217  log(likelihood_ratio) = -0.78931051118   log(prior_ratio) = 0.12225769902
     log(acceptance_ratio) = -1.0515685193  log(hastings_ratio) = -0.38451570715
   The move was REJECTED.
 
@@ -3081,7 +3081,7 @@ generation = 2    proposal = 16/102    Scaling(alpha)
     FINAL:    alpha:  -0.69314718056
     FINAL:    seq:  -19396.335093
 
-    log(posterior_ratio) = -inf  log(likelihood_ratio) = 7.6946162153e-06   log(prior_ratio) = -inf
+    log(posterior_ratio) = -inf  log(likelihood_ratio) = 7.6946089393e-06   log(prior_ratio) = -inf
     log(acceptance_ratio) = -inf  log(hastings_ratio) = -0.10246650176
   The move was REJECTED.
 
@@ -3963,8 +3963,8 @@ generation = 2    proposal = 79/102    RJ-Switch(alpha)
     FINAL:    alpha:  -19.113827925
     FINAL:    seq:  -19276.203873
 
-    log(posterior_ratio) = -18.420671338  log(likelihood_ratio) = 9.4061506388e-06   log(prior_ratio) = -18.420680744
-    log(acceptance_ratio) = 9.4061506388e-06  log(hastings_ratio) = 18.420680744
+    log(posterior_ratio) = -18.420671338  log(likelihood_ratio) = 9.4061470008e-06   log(prior_ratio) = -18.420680744
+    log(acceptance_ratio) = 9.4061470008e-06  log(hastings_ratio) = 18.420680744
   The move was ACCEPTED.
 
 generation = 2    proposal = 80/102    Scaling(br_lens[20])
@@ -4019,8 +4019,8 @@ generation = 2    proposal = 83/102    Scaling(br_lens[42])
     FINAL:    br_lens[42]:  2.2405005821
     FINAL:    seq:  -19271.868831
 
-    log(posterior_ratio) = 0.40650172912  log(likelihood_ratio) = 0.37788444251   log(prior_ratio) = 0.028617286611
-    log(acceptance_ratio) = 0.027421090134  log(hastings_ratio) = -0.37908063899
+    log(posterior_ratio) = 0.40650172913  log(likelihood_ratio) = 0.37788444251   log(prior_ratio) = 0.028617286611
+    log(acceptance_ratio) = 0.027421090138  log(hastings_ratio) = -0.37908063899
   The move was ACCEPTED.
 
 generation = 2    proposal = 84/102    BetaSimplex(er)
@@ -4369,7 +4369,7 @@ generation = 3    proposal = 6/102    Scaling(alpha)
     FINAL:    alpha:  -0.69314718056
     FINAL:    seq:  -19228.040718
 
-    log(posterior_ratio) = -inf  log(likelihood_ratio) = -6.0701640905e-06   log(prior_ratio) = -inf
+    log(posterior_ratio) = -inf  log(likelihood_ratio) = -6.0701604525e-06   log(prior_ratio) = -inf
     log(acceptance_ratio) = -inf  log(hastings_ratio) = 0.092780271778
   The move was REJECTED.
 
@@ -4411,8 +4411,8 @@ generation = 3    proposal = 9/102    RJ-Switch(alpha)
     FINAL:    alpha:  -19.113827925
     FINAL:    seq:  -19218.768201
 
-    log(posterior_ratio) = -18.420645397  log(likelihood_ratio) = 3.5347005905e-05   log(prior_ratio) = -18.420680744
-    log(acceptance_ratio) = 3.5347005905e-05  log(hastings_ratio) = 18.420680744
+    log(posterior_ratio) = -18.420645397  log(likelihood_ratio) = 3.5347002267e-05   log(prior_ratio) = -18.420680744
+    log(acceptance_ratio) = 3.5347002267e-05  log(hastings_ratio) = 18.420680744
   The move was ACCEPTED.
 
 generation = 3    proposal = 10/102    Scaling(br_lens[27])
@@ -4439,8 +4439,8 @@ generation = 3    proposal = 11/102    Scaling(alpha)
     FINAL:    alpha:  -19.113827925
     FINAL:    seq:  -19187.353335
 
-    log(posterior_ratio) = 1.6850815882e-05  log(likelihood_ratio) = 1.6850815882e-05   log(prior_ratio) = 0
-    log(acceptance_ratio) = -0.14809015074  log(hastings_ratio) = -0.14810700156
+    log(posterior_ratio) = 1.6850808606e-05  log(likelihood_ratio) = 1.6850808606e-05   log(prior_ratio) = 0
+    log(acceptance_ratio) = -0.14809015075  log(hastings_ratio) = -0.14810700156
   The move was ACCEPTED.
 
 generation = 3    proposal = 12/102    RandomGeometricWalk(model_indicator)
@@ -4495,7 +4495,7 @@ generation = 3    proposal = 15/102    Scaling(alpha)
     FINAL:    alpha:  -0.69314718056
     FINAL:    seq:  -18952.725037
 
-    log(posterior_ratio) = -inf  log(likelihood_ratio) = -1.5926751075e-05   log(prior_ratio) = -inf
+    log(posterior_ratio) = -inf  log(likelihood_ratio) = -1.5926754713e-05   log(prior_ratio) = -inf
     log(acceptance_ratio) = -inf  log(hastings_ratio) = 0.264561977
   The move was REJECTED.
 
@@ -4607,7 +4607,7 @@ generation = 3    proposal = 23/102    Scaling(alpha)
     FINAL:    alpha:  -0.69314718056
     FINAL:    seq:  -18753.504018
 
-    log(posterior_ratio) = -inf  log(likelihood_ratio) = -2.0098137611e-05   log(prior_ratio) = -inf
+    log(posterior_ratio) = -inf  log(likelihood_ratio) = -2.0098133973e-05   log(prior_ratio) = -inf
     log(acceptance_ratio) = -inf  log(hastings_ratio) = 0.34815038368
   The move was REJECTED.
 
@@ -4621,7 +4621,7 @@ generation = 3    proposal = 24/102    Scaling(alpha)
     FINAL:    alpha:  -0.69314718056
     FINAL:    seq:  -18753.504018
 
-    log(posterior_ratio) = -inf  log(likelihood_ratio) = -5.8569312387e-06   log(prior_ratio) = -inf
+    log(posterior_ratio) = -inf  log(likelihood_ratio) = -5.8569239627e-06   log(prior_ratio) = -inf
     log(acceptance_ratio) = -inf  log(hastings_ratio) = 0.096211118158
   The move was REJECTED.
 
@@ -4635,8 +4635,8 @@ generation = 3    proposal = 25/102    RJ-Switch(alpha)
     FINAL:    alpha:  -19.113827925
     FINAL:    seq:  -18753.503914
 
-    log(posterior_ratio) = -18.420577398  log(likelihood_ratio) = 0.00010334645049   log(prior_ratio) = -18.420680744
-    log(acceptance_ratio) = 0.00010334645049  log(hastings_ratio) = 18.420680744
+    log(posterior_ratio) = -18.420577397  log(likelihood_ratio) = 0.00010334645413   log(prior_ratio) = -18.420680744
+    log(acceptance_ratio) = 0.00010334645413  log(hastings_ratio) = 18.420680744
   The move was ACCEPTED.
 
 generation = 3    proposal = 26/102    Scaling(br_lens[25])
@@ -4677,8 +4677,8 @@ generation = 3    proposal = 28/102    RJ-Switch(alpha)
     FINAL:    alpha:  -0.69314718056
     FINAL:    seq:  -18747.456378
 
-    log(posterior_ratio) = 18.420577404  log(likelihood_ratio) = -0.0001033403787   log(prior_ratio) = 18.420680744
-    log(acceptance_ratio) = -0.0001033403787  log(hastings_ratio) = -18.420680744
+    log(posterior_ratio) = 18.420577404  log(likelihood_ratio) = -0.00010334038234   log(prior_ratio) = 18.420680744
+    log(acceptance_ratio) = -0.00010334038234  log(hastings_ratio) = -18.420680744
   The move was ACCEPTED.
 
 generation = 3    proposal = 29/102    NNI(topology)
@@ -4761,7 +4761,7 @@ generation = 3    proposal = 34/102    Scaling(alpha)
     FINAL:    alpha:  -0.69314718056
     FINAL:    seq:  -18588.486566
 
-    log(posterior_ratio) = -inf  log(likelihood_ratio) = -2.5298089895e-05   log(prior_ratio) = -inf
+    log(posterior_ratio) = -inf  log(likelihood_ratio) = -2.5298097171e-05   log(prior_ratio) = -inf
     log(acceptance_ratio) = -inf  log(hastings_ratio) = 0.46725930576
   The move was REJECTED.
 
@@ -4831,7 +4831,7 @@ generation = 3    proposal = 39/102    Scaling(br_lens[27])
     FINAL:    br_lens[27]:  1.2979276289
     FINAL:    seq:  -18587.000921
 
-    log(posterior_ratio) = -6.301927842  log(likelihood_ratio) = -6.1518934081   log(prior_ratio) = -0.1500344339
+    log(posterior_ratio) = -6.3019278419  log(likelihood_ratio) = -6.151893408   log(prior_ratio) = -0.1500344339
     log(acceptance_ratio) = -6.1627409402  log(hastings_ratio) = 0.13918690174
   The move was REJECTED.
 
@@ -5182,7 +5182,7 @@ generation = 3    proposal = 64/102    Scaling(br_lens[31])
     FINAL:    seq:  -18242.613461
 
     log(posterior_ratio) = -0.33468433609  log(likelihood_ratio) = -0.36085419149   log(prior_ratio) = 0.026169855401
-    log(acceptance_ratio) = -0.4077409231  log(hastings_ratio) = -0.073056587018
+    log(acceptance_ratio) = -0.40774092311  log(hastings_ratio) = -0.073056587018
   The move was ACCEPTED.
 
 generation = 3    proposal = 65/102    Scaling(br_lens[17])
@@ -5223,7 +5223,7 @@ generation = 3    proposal = 67/102    Scaling(alpha)
     FINAL:    alpha:  -0.69314718056
     FINAL:    seq:  -18244.005626
 
-    log(posterior_ratio) = -inf  log(likelihood_ratio) = 2.6168694603e-05   log(prior_ratio) = -inf
+    log(posterior_ratio) = -inf  log(likelihood_ratio) = 2.6168698241e-05   log(prior_ratio) = -inf
     log(acceptance_ratio) = -inf  log(hastings_ratio) = -0.33960645739
   The move was REJECTED.
 
@@ -5503,7 +5503,7 @@ generation = 3    proposal = 87/102    Scaling(alpha)
     FINAL:    alpha:  -19.113827925
     FINAL:    seq:  -18213.532039
 
-    log(posterior_ratio) = 3.4291442716e-05  log(likelihood_ratio) = 3.4291442716e-05   log(prior_ratio) = 0
+    log(posterior_ratio) = 3.4291439079e-05  log(likelihood_ratio) = 3.4291439079e-05   log(prior_ratio) = 0
     log(acceptance_ratio) = -0.23275867556  log(hastings_ratio) = -0.232792967
   The move was ACCEPTED.
 
@@ -5517,8 +5517,8 @@ generation = 3    proposal = 88/102    RJ-Switch(alpha)
     FINAL:    alpha:  -0.69314718056
     FINAL:    seq:  -18213.532137
 
-    log(posterior_ratio) = 18.420581901  log(likelihood_ratio) = -9.884330575e-05   log(prior_ratio) = 18.420680744
-    log(acceptance_ratio) = -9.884330575e-05  log(hastings_ratio) = -18.420680744
+    log(posterior_ratio) = 18.420581901  log(likelihood_ratio) = -9.8843302112e-05   log(prior_ratio) = 18.420680744
+    log(acceptance_ratio) = -9.8843302112e-05  log(hastings_ratio) = -18.420680744
   The move was ACCEPTED.
 
 generation = 3    proposal = 89/102    Scaling(br_lens[25])
@@ -5559,8 +5559,8 @@ generation = 3    proposal = 91/102    RJ-Switch(alpha)
     FINAL:    alpha:  -19.113827925
     FINAL:    seq:  -18213.559333
 
-    log(posterior_ratio) = -18.420644428  log(likelihood_ratio) = 3.6316236219e-05   log(prior_ratio) = -18.420680744
-    log(acceptance_ratio) = 3.6316236219e-05  log(hastings_ratio) = 18.420680744
+    log(posterior_ratio) = -18.420644428  log(likelihood_ratio) = 3.6316239857e-05   log(prior_ratio) = -18.420680744
+    log(acceptance_ratio) = 3.6316239857e-05  log(hastings_ratio) = 18.420680744
   The move was ACCEPTED.
 
 generation = 3    proposal = 92/102    Scaling(br_lens[24])
@@ -5657,7 +5657,7 @@ generation = 3    proposal = 98/102    Scaling(br_lens[9])
     FINAL:    br_lens[9]:  0.4353551874
     FINAL:    seq:  -18206.667899
 
-    log(posterior_ratio) = 0.36136871611  log(likelihood_ratio) = 0.80751311624   log(prior_ratio) = -0.44614440014
+    log(posterior_ratio) = 0.36136871611  log(likelihood_ratio) = 0.80751311625   log(prior_ratio) = -0.44614440014
     log(acceptance_ratio) = 0.63440369477  log(hastings_ratio) = 0.27303497866
   The move was ACCEPTED.
 
@@ -5685,8 +5685,8 @@ generation = 3    proposal = 100/102    Scaling(br_lens[36])
     FINAL:    br_lens[36]:  2.2382162839
     FINAL:    seq:  -18206.53871
 
-    log(posterior_ratio) = 0.13228015099  log(likelihood_ratio) = 0.12918895289   log(prior_ratio) = 0.0030911981012
-    log(acceptance_ratio) = 0.085374399649  log(hastings_ratio) = -0.04690575134
+    log(posterior_ratio) = 0.13228015099  log(likelihood_ratio) = 0.12918895288   log(prior_ratio) = 0.0030911981012
+    log(acceptance_ratio) = 0.085374399645  log(hastings_ratio) = -0.04690575134
   The move was ACCEPTED.
 
 generation = 3    proposal = 101/102    Scaling(br_lens[37])
@@ -5741,7 +5741,7 @@ generation = 4    proposal = 2/102    Scaling(br_lens[17])
     FINAL:    br_lens[17]:  0.9257995001
     FINAL:    seq:  -18140.86068
 
-    log(posterior_ratio) = 0.31703117201  log(likelihood_ratio) = 0.71665531553   log(prior_ratio) = -0.39962414353
+    log(posterior_ratio) = 0.317031172  log(likelihood_ratio) = 0.71665531553   log(prior_ratio) = -0.39962414353
     log(acceptance_ratio) = 0.65988606414  log(hastings_ratio) = 0.34285489214
   The move was ACCEPTED.
 
@@ -5755,8 +5755,8 @@ generation = 4    proposal = 3/102    RJ-Switch(alpha)
     FINAL:    alpha:  -0.69314718056
     FINAL:    seq:  -18140.860716
 
-    log(posterior_ratio) = 18.420644467  log(likelihood_ratio) = -3.6276767787e-05   log(prior_ratio) = 18.420680744
-    log(acceptance_ratio) = -3.6276767787e-05  log(hastings_ratio) = -18.420680744
+    log(posterior_ratio) = 18.420644467  log(likelihood_ratio) = -3.6276764149e-05   log(prior_ratio) = 18.420680744
+    log(acceptance_ratio) = -3.6276764149e-05  log(hastings_ratio) = -18.420680744
   The move was ACCEPTED.
 
 generation = 4    proposal = 4/102    NNI(topology)
@@ -5797,8 +5797,8 @@ generation = 4    proposal = 6/102    RJ-Switch(alpha)
     FINAL:    alpha:  -19.113827925
     FINAL:    seq:  -18131.303129
 
-    log(posterior_ratio) = -18.420630792  log(likelihood_ratio) = 4.9952410336e-05   log(prior_ratio) = -18.420680744
-    log(acceptance_ratio) = 4.9952410336e-05  log(hastings_ratio) = 18.420680744
+    log(posterior_ratio) = -18.420630792  log(likelihood_ratio) = 4.9952413974e-05   log(prior_ratio) = -18.420680744
+    log(acceptance_ratio) = 4.9952413974e-05  log(hastings_ratio) = 18.420680744
   The move was ACCEPTED.
 
 generation = 4    proposal = 7/102    Scaling(br_lens[12])
@@ -5825,7 +5825,7 @@ generation = 4    proposal = 8/102    Scaling(alpha)
     FINAL:    alpha:  -19.113827925
     FINAL:    seq:  -18131.303129
 
-    log(posterior_ratio) = 5.3525982366e-05  log(likelihood_ratio) = 5.3525982366e-05   log(prior_ratio) = 0
+    log(posterior_ratio) = 5.3525978728e-05  log(likelihood_ratio) = 5.3525978728e-05   log(prior_ratio) = 0
     log(acceptance_ratio) = -0.38242083012  log(hastings_ratio) = -0.3824743561
   The move was REJECTED.
 
@@ -5839,8 +5839,8 @@ generation = 4    proposal = 9/102    Scaling(alpha)
     FINAL:    alpha:  -19.113827925
     FINAL:    seq:  -18131.303141
 
-    log(posterior_ratio) = -1.206118759e-05  log(likelihood_ratio) = -1.206118759e-05   log(prior_ratio) = 0
-    log(acceptance_ratio) = 0.11097444678  log(hastings_ratio) = 0.11098650796
+    log(posterior_ratio) = -1.2061191228e-05  log(likelihood_ratio) = -1.2061191228e-05   log(prior_ratio) = 0
+    log(acceptance_ratio) = 0.11097444677  log(hastings_ratio) = 0.11098650796
   The move was ACCEPTED.
 
 generation = 4    proposal = 10/102    NNI(topology)
@@ -5923,8 +5923,8 @@ generation = 4    proposal = 15/102    Scaling(alpha)
     FINAL:    alpha:  -19.113827925
     FINAL:    seq:  -18129.616459
 
-    log(posterior_ratio) = 4.4933003664e-06  log(likelihood_ratio) = 4.4933003664e-06   log(prior_ratio) = 0
-    log(acceptance_ratio) = -0.044416946923  log(hastings_ratio) = -0.044421440223
+    log(posterior_ratio) = 4.4932967285e-06  log(likelihood_ratio) = 4.4932967285e-06   log(prior_ratio) = 0
+    log(acceptance_ratio) = -0.044416946927  log(hastings_ratio) = -0.044421440223
   The move was ACCEPTED.
 
 generation = 4    proposal = 16/102    Scaling(kappa)
@@ -6077,7 +6077,7 @@ generation = 4    proposal = 26/102    Scaling(alpha)
     FINAL:    alpha:  -19.113827925
     FINAL:    seq:  -18116.054605
 
-    log(posterior_ratio) = 5.4572308727e-05  log(likelihood_ratio) = 5.4572308727e-05   log(prior_ratio) = 0
+    log(posterior_ratio) = 5.4572305089e-05  log(likelihood_ratio) = 5.4572305089e-05   log(prior_ratio) = 0
     log(acceptance_ratio) = -0.41169718786  log(hastings_ratio) = -0.41175176017
   The move was ACCEPTED.
 
@@ -6329,8 +6329,8 @@ generation = 4    proposal = 44/102    RJ-Switch(alpha)
     FINAL:    alpha:  -19.113827925
     FINAL:    seq:  -18085.798151
 
-    log(posterior_ratio) = -18.420611754  log(likelihood_ratio) = 6.8989891588e-05   log(prior_ratio) = -18.420680744
-    log(acceptance_ratio) = 6.8989891588e-05  log(hastings_ratio) = 18.420680744
+    log(posterior_ratio) = -18.420611754  log(likelihood_ratio) = 6.898988795e-05   log(prior_ratio) = -18.420680744
+    log(acceptance_ratio) = 6.898988795e-05  log(hastings_ratio) = 18.420680744
   The move was ACCEPTED.
 
 generation = 4    proposal = 45/102    Scaling(br_lens[1])
@@ -6428,7 +6428,7 @@ generation = 4    proposal = 51/102    Scaling(br_lens[37])
     FINAL:    seq:  -18077.079422
 
     log(posterior_ratio) = -4.5204839922  log(likelihood_ratio) = -4.4307144363   log(prior_ratio) = -0.089769555933
-    log(acceptance_ratio) = -4.2597404283  log(hastings_ratio) = 0.26074356399
+    log(acceptance_ratio) = -4.2597404282  log(hastings_ratio) = 0.26074356399
   The move was REJECTED.
 
 generation = 4    proposal = 52/102    Scaling(br_lens[23])
@@ -6469,8 +6469,8 @@ generation = 4    proposal = 54/102    RJ-Switch(alpha)
     FINAL:    alpha:  -0.69314718056
     FINAL:    seq:  -18077.079491
 
-    log(posterior_ratio) = 18.420611807  log(likelihood_ratio) = -6.8936704338e-05   log(prior_ratio) = 18.420680744
-    log(acceptance_ratio) = -6.8936704338e-05  log(hastings_ratio) = -18.420680744
+    log(posterior_ratio) = 18.420611807  log(likelihood_ratio) = -6.89367007e-05   log(prior_ratio) = 18.420680744
+    log(acceptance_ratio) = -6.89367007e-05  log(hastings_ratio) = -18.420680744
   The move was ACCEPTED.
 
 generation = 4    proposal = 55/102    Scaling(br_lens[7])
@@ -6483,7 +6483,7 @@ generation = 4    proposal = 55/102    Scaling(br_lens[7])
     FINAL:    br_lens[7]:  0.44444006395
     FINAL:    seq:  -18077.079491
 
-    log(posterior_ratio) = -0.88518317697  log(likelihood_ratio) = -0.981317414   log(prior_ratio) = 0.096134237033
+    log(posterior_ratio) = -0.88518317696  log(likelihood_ratio) = -0.981317414   log(prior_ratio) = 0.096134237033
     log(acceptance_ratio) = -0.93830621849  log(hastings_ratio) = -0.053123041522
   The move was REJECTED.
 
@@ -6665,7 +6665,7 @@ generation = 4    proposal = 68/102    Scaling(alpha)
     FINAL:    alpha:  -0.69314718056
     FINAL:    seq:  -18015.697546
 
-    log(posterior_ratio) = -inf  log(likelihood_ratio) = -7.6477153925e-06   log(prior_ratio) = -inf
+    log(posterior_ratio) = -inf  log(likelihood_ratio) = -7.6477190305e-06   log(prior_ratio) = -inf
     log(acceptance_ratio) = -inf  log(hastings_ratio) = 0.12773475447
   The move was REJECTED.
 
@@ -6707,8 +6707,8 @@ generation = 4    proposal = 71/102    Scaling(br_lens[22])
     FINAL:    br_lens[22]:  1.2655013305
     FINAL:    seq:  -18016.917345
 
-    log(posterior_ratio) = -0.43059540673  log(likelihood_ratio) = -0.46931606387   log(prior_ratio) = 0.038720657137
-    log(acceptance_ratio) = -0.46725138596  log(hastings_ratio) = -0.036655979231
+    log(posterior_ratio) = -0.43059540674  log(likelihood_ratio) = -0.46931606387   log(prior_ratio) = 0.038720657137
+    log(acceptance_ratio) = -0.46725138597  log(hastings_ratio) = -0.036655979231
   The move was ACCEPTED.
 
 generation = 4    proposal = 72/102    Scaling(br_lens[14])
@@ -6749,7 +6749,7 @@ generation = 4    proposal = 74/102    Scaling(alpha)
     FINAL:    alpha:  -0.69314718056
     FINAL:    seq:  -18016.91736
 
-    log(posterior_ratio) = -inf  log(likelihood_ratio) = -1.3890017726e-05   log(prior_ratio) = -inf
+    log(posterior_ratio) = -inf  log(likelihood_ratio) = -1.3890014088e-05   log(prior_ratio) = -inf
     log(acceptance_ratio) = -inf  log(hastings_ratio) = 0.24123166734
   The move was REJECTED.
 
@@ -6763,7 +6763,7 @@ generation = 4    proposal = 75/102    Scaling(alpha)
     FINAL:    alpha:  -0.69314718056
     FINAL:    seq:  -18016.91736
 
-    log(posterior_ratio) = -inf  log(likelihood_ratio) = 1.152488403e-05   log(prior_ratio) = -inf
+    log(posterior_ratio) = -inf  log(likelihood_ratio) = 1.1524887668e-05   log(prior_ratio) = -inf
     log(acceptance_ratio) = -inf  log(hastings_ratio) = -0.16552626155
   The move was REJECTED.
 
@@ -6847,8 +6847,8 @@ generation = 4    proposal = 81/102    Scaling(br_lens[18])
     FINAL:    br_lens[18]:  0.93206746673
     FINAL:    seq:  -17982.209822
 
-    log(posterior_ratio) = -0.27911630895  log(likelihood_ratio) = -0.4790170423   log(prior_ratio) = 0.19990073335
-    log(acceptance_ratio) = -0.43677393806  log(hastings_ratio) = -0.15765762911
+    log(posterior_ratio) = -0.27911630894  log(likelihood_ratio) = -0.47901704229   log(prior_ratio) = 0.19990073335
+    log(acceptance_ratio) = -0.43677393805  log(hastings_ratio) = -0.15765762911
   The move was REJECTED.
 
 generation = 4    proposal = 82/102    RandomGeometricWalk(model_indicator)
@@ -6945,8 +6945,8 @@ generation = 4    proposal = 88/102    Scaling(alpha)
     FINAL:    alpha:  -19.113827925
     FINAL:    seq:  -17982.20981
 
-    log(posterior_ratio) = -1.2120326573e-05  log(likelihood_ratio) = -1.2120326573e-05   log(prior_ratio) = 0
-    log(acceptance_ratio) = 0.14440816515  log(hastings_ratio) = 0.14442028548
+    log(posterior_ratio) = -1.2120333849e-05  log(likelihood_ratio) = -1.2120333849e-05   log(prior_ratio) = 0
+    log(acceptance_ratio) = 0.14440816514  log(hastings_ratio) = 0.14442028548
   The move was ACCEPTED.
 
 generation = 4    proposal = 89/102    Scaling(br_lens[21])
@@ -7127,8 +7127,8 @@ generation = 4    proposal = 101/102    Scaling(alpha)
     FINAL:    alpha:  -19.113827925
     FINAL:    seq:  -17893.276097
 
-    log(posterior_ratio) = 3.0584575143e-05  log(likelihood_ratio) = 3.0584575143e-05   log(prior_ratio) = 0
-    log(acceptance_ratio) = -0.33761147113  log(hastings_ratio) = -0.3376420557
+    log(posterior_ratio) = 3.0584578781e-05  log(likelihood_ratio) = 3.0584578781e-05   log(prior_ratio) = 0
+    log(acceptance_ratio) = -0.33761147112  log(hastings_ratio) = -0.3376420557
   The move was REJECTED.
 
 generation = 4    proposal = 102/102    Scaling(br_lens[16])
