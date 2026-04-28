@@ -85,6 +85,21 @@ const TypeSpec& Move_WeightedSubtreePruneAndRegraft::getClassTypeSpec(void)
 
 
 /**
+ * Get the alternative Rev names (aliases) for the constructor function.
+ *
+ * \return Rev aliases of constructor function.
+ */
+std::vector<std::string> Move_WeightedSubtreePruneAndRegraft::getMoveAliases( void ) const
+{
+    // create alternative constructor function names variable that is the same for all instance of this class
+    std::vector<std::string> a_names;
+    a_names.push_back( "WeightedSubtreePruneAndRegraft" );
+
+    return a_names;
+}
+
+
+/**
  * Get the Rev name for the constructor function.
  *
  * \return Rev name of constructor function.
@@ -92,7 +107,7 @@ const TypeSpec& Move_WeightedSubtreePruneAndRegraft::getClassTypeSpec(void)
 std::string Move_WeightedSubtreePruneAndRegraft::getMoveName( void ) const
 {
     // create a constructor function name variable that is the same for all instance of this class
-    std::string c_name = "WeightedSubtreePruneAndRegraft";
+    std::string c_name = "WeightedSPR";
     
     return c_name;
 }

@@ -12,7 +12,7 @@ The basic idea of the `mvWeightedSubtreePruneAndRegraft` is to propose new trees
 Sebastian Höhna
 ## see_also
 mvWeightedBranchLengthScale
-mvGibbsSubtreePruneAndRegraft
+mvGibbsSPR
 ## example
     taxa <- v(taxon("A"), taxon("B"), taxon("C"), taxon("D"), taxon("E"), taxon("F"))
     moves = VectorMoves()

@@ -11,7 +11,7 @@ This move can be efficient to reach quicker the stationary distribution, but is 
 ## authors
 Sebastian Höhna
 ## see_also
-mvGPR
+mvGibbsFNPR
 ## example
     taxa <- v(taxon("A"), taxon("B"), taxon("C"), taxon("D"), taxon("E"), taxon("F"))
     moves = VectorMoves()
