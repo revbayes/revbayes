@@ -74,6 +74,7 @@
 /* Argument rules (in folder "functions/argumentrules") */
 
 /* Basic functions (in folder "functions/basic"). */
+#include "Func_BSPInterval.h"
 
 /* These are core functions for the Rev environment, providing user help
    and other essential services. */
@@ -202,6 +203,7 @@
 #include "Func_wag.h"
 
 /* Functions related to evolution (in folder "functions/popgen") */
+#include "Func_foldSFS.h"
 #include "Func_PattersonsD.h"
 #include "Func_SegregatingSites.h"
 #include "Func_TajimasD.h"
@@ -486,6 +488,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_UPGMA()                                           );
 
         /* Population genetics functions (in folder "functions/popgen") */
+        addFunction( new Func_foldSFS()          );
         addFunction( new Func_PattersonsD()      );
         addFunction( new Func_SegregatingSites() );
         addFunction( new Func_TajimasD()         );
@@ -689,6 +692,8 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_varianceCovarianceMatrix( )           );
         addFunction( new Func_decomposedVarianceCovarianceMatrix( ) );
         addFunction( new Func_partialToCorrelationMatrix( )         );
+        
+        addFunction( new Func_BSPInterval<RealPos>()          );
 
 
         // Type conversion

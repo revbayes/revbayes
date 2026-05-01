@@ -396,6 +396,9 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
 
     bool rejected = false;
 
+    // ALWAYS draw a random number.  Otherwise very small differences can make platforms diverge.
+    double u = GLOBAL_RNG->uniform01();
+
     if ( fail_probability )
     {
         // Reject moves where the posterior ratio is -Inf, +Inf, or NaN.
@@ -412,9 +415,8 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
         rejected = true;
     else
     {
-        double r = exp(ln_acceptance_ratio);
         // Accept or reject the move
-        double u = GLOBAL_RNG->uniform01();
+        double r = exp(ln_acceptance_ratio);
         if (u < r)
             ;
         else

@@ -101,7 +101,7 @@ RevBayesCore::TopologyConstrainedTreeDistribution* Dist_ConstrainedUnrootedTopol
     // create the internal distribution object
     RevBayesCore::TopologyConstrainedTreeDistribution* dist = new RevBayesCore::TopologyConstrainedTreeDistribution(base, c, init, pr); // , bb);
     
-    if (backbone == NULL && backbone->getRevObject() != RevNullObject::getInstance())
+    if ( backbone == NULL || backbone->getRevObject() == RevNullObject::getInstance() )
     {
         ; // do nothing
     }

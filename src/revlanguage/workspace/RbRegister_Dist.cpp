@@ -142,7 +142,6 @@
 #include "Dist_phyloCTMCDASequence.h"
 #include "Dist_phyloCTMCDASiteIID.h"
 #include "Dist_phyloCTMCClado.h"
-#include "Dist_phyloCTMCDollo.h"
 
 /* Branch rate priors (in folder "distributions/phylogenetics/tree") */
 
@@ -207,6 +206,9 @@
 #include "Dist_uniformSerialSampledTimeTree.h"
 #include "Dist_uniformTopology.h"
 #include "Dist_uniformTopologyBranchLength.h"
+
+/* Branch rate priors (in folder "distributions/popgen") */
+#include "Dist_StairwayPlot.h"
 
 /* Distributions on simple variables (in folder "distributions/math") */
 #include "Dist_bernoulli.h"
@@ -357,7 +359,6 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         addDistribution( new Dist_phyloCTMCDASequence() );
         addDistribution( new Dist_phyloCTMCDASiteIID() );
         addDistribution( new Dist_phyloCTMCClado() );
-        addDistribution( new Dist_phyloCTMCDollo() );
 
         /* Tree distributions (in folder "distributions/phylogenetics/tree") */
 
@@ -453,8 +454,15 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         // branch rate tree distributions
         AddDistribution< BranchLengthTree           >( new Dist_BranchRateTree() );
 
-        // Distance Matrix Gamma distribution
-        AddDistribution< DistanceMatrix             >( new Dist_phyloDistanceGamma() );
+		// Distance Matrix Gamma distribution
+		AddDistribution< DistanceMatrix             >( new Dist_phyloDistanceGamma() );
+        
+        
+                
+        /* Popgen distributions (in folder "distributions/popgen") */
+
+        AddDistribution< ModelVector<RealPos>       >( new Dist_StairwayPlot()       );
+
 
 
         /* Statistical distributions on simple variables (in folder "distributions/math") */
