@@ -9,6 +9,11 @@ Progress:
 0---------------25---------------50---------------75--------------100
 ********************************************************************
 
+The 10 requested stones will be executed in 10 steps using 1 process as follows:
+
+Process | Step 1 | Step 2 | Step 3 | Step 4 | Step 5 | Step 6 | Step 7 | Step 8 | Step 9 | Step 10
+--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|---------
+      1 |      1 |      2 |      3 |      4 |      5 |      6 |      7 |      8 |      9 |      10
 
 Running power posterior analysis ...
 Stone pre-burnin: -, burnin: +, sampling phase: *
@@ -22,16 +27,34 @@ Step  7 / 10		----------+++*******
 Step  8 / 10		----------+++*******
 Step  9 / 10		----------+++*******
 Step 10 / 10		----------+++*******
+The 10 requested stones will be executed in 10 steps using 1 process as follows:
+
+Process | Step 1 | Step 2 | Step 3 | Step 4 | Step 5 | Step 6 | Step 7 | Step 8 | Step 9 | Step 10
+--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|---------
+      1 |      1 |      2 |      3 |      4 |      5 |      6 |      7 |      8 |      9 |      10
+
+Running power posterior analysis ...
+Stone pre-burnin: -, burnin: +, sampling phase: *
+Step  1 / 10		**********
+Step  2 / 10		**********
+Step  3 / 10		**********
+Step  4 / 10		**********
+Step  5 / 10		**********
+Step  6 / 10		**********
+Step  7 / 10		**********
+Step  8 / 10		**********
+Step  9 / 10		**********
+Step 10 / 10		**********
 
 Marginal likelihood estimates when running the stones all at once:
 
-Stepping-stone estimate: 	-21442.64	
+Stepping-stone estimate: 	-21446.96	
 
    Warning: Standard error approximation unreliable as var(r_k)/r_k^2 > 0.1 for the following powers:
    0.554929, 0.284628, 0.131687, 0.0529221, 0.0173415, 0.00411523, 0.000541923, 1.69351e-05.
    Try setting bootstrap=TRUE.
    
-Stepping-stone standard error: 	2.355953	
+Stepping-stone standard error: 	2.166571	
 
-Path-sampling estimate: 	-21400.8
-Path-sampling standard error: 	4.563449
+Path-sampling estimate: 	-21409.66
+Path-sampling standard error: 	4.135947

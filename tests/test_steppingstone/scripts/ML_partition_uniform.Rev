@@ -108,9 +108,13 @@ mymodel = model(psi)
 monitors[++mni] = mnFile(psi, filename="output/model_uniform_run_all.trees", printgen=10)
 monitors[++mni] = mnModel(filename="output/model_uniform_run_all.log", printgen=10)
 
-# run the analysis
+# run the analysis with checkpointing
 pow_p = powerPosterior(mymodel, moves, monitors, "output/model_uniform_run_all.out", cats=10, sampleFreq=1)
 pow_p.burnin(generations=100,tuningInterval=200)
+pow_p.run(generations=10, checkpointFile="output/model_uniform_run_all.ckp", checkpointInterval=1)
+
+# resume from checkpoint to extend all the 10 stones we have just run by an additional 10 generations
+pow_p.initializeFromCheckpoint( "output/model_uniform_run_all.ckp", 1:10 )
 pow_p.run(generations=10)
 
 ss = steppingStoneSampler(file="output/model_uniform_run_all.out", powerColumnName="power",
