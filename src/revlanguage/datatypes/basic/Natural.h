@@ -13,7 +13,7 @@ namespace RevLanguage {
     class RealPos;
 
     /**
-     * Primitive type for Natural numbers (including 0).
+     * Primitive type for Natural numbers (positive integers including 0).
      *
      * Note that we derive this from Integer. To make
      * sure inheritance is safe, we restrict the range

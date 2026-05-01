@@ -1,6 +1,6 @@
 #include "PhyloMultivariateBrownianProcess.h"
 
-#include <math.h>
+#include <cmath>
 #include <set>
 
 #include "DistributionMultivariateNormal.h"

@@ -1,6 +1,6 @@
 #include "DPPGibbsConcentrationMove.h"
 
-#include <math.h>
+#include <cmath>
 #include <vector>
 
 #include "DistributionDirichlet.h"

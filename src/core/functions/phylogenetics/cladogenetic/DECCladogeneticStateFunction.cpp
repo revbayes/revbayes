@@ -4,7 +4,7 @@
 
 #include <algorithm>
 #include <cstddef>
-#include <math.h>
+#include <cmath>
 #include <map>
 #include <sstream>
 #include <utility>

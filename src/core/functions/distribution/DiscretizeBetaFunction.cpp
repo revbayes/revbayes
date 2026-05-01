@@ -78,12 +78,12 @@ void RevBayesCore::DiscretizeBetaFunction::update( void ) {
     {
         /* the mean value for each category is used to represent all of the values
          in that category */
-        /* calculate the points in the gamma distribution */
-        for (int i=0; i<nCats-1; i++)
+        for (int i=0; i<nCats-1; i++) {
+            /* calculate the points in the gamma distribution */
             (*value)[i] = RbStatistics::Beta::quantile(a, b, (i+1)/double (nCats));
-        /* calculate the cumulative values */
-        for (int i=0; i<nCats-1; i++)
+            /* calculate the cumulative values */
             (*value)[i] = RbMath::incompleteBeta(a+1, b, (*value)[i]);
+        }
         (*value)[nCats-1] = 1.0;
         /* calculate the relative values and rescale */
         for (int i=nCats-1; i>0; i--){

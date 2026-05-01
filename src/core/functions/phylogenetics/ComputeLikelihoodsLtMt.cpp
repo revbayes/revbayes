@@ -78,13 +78,13 @@ std::vector<Event> RevBayesCore::PoolEvents(    const double &start_age,
          2. Set brl = 0
          */
 
-        if ( n.isFossil() && n.isSampledAncestor() )  //isFossil is optional (all sampled ancestors are fossils)
+        if ( n.isFossil() && n.isSampledAncestorTip() )  //isFossil is optional (all sampled ancestors are fossils)
         {
             // node is sampled ancestor
             events.push_back(Event(n.getAge(), "sampled ancestor")) ;
 
         }
-        else if ( n.isFossil() && !n.isSampledAncestor() )
+        else if ( n.isFossil() && !n.isSampledAncestorTip() )
         {
             // node is fossil leaf
             // @todo add fossil-removed/non-removed (we assume there is no information/labels on removal)
@@ -95,7 +95,7 @@ std::vector<Event> RevBayesCore::PoolEvents(    const double &start_age,
             // node is extant leaf : only their number is necessary to compute Lt and Mt
             nb_extant++;
         }
-        else if ( n.isInternal() && !n.getChild(0).isSampledAncestor() && !n.getChild(1).isSampledAncestor() )
+        else if ( n.isInternal() && !n.getChild(0).isSampledAncestorTip() && !n.getChild(1).isSampledAncestorTip() )
         {
             // node is a "true" bifurcation event
             events.push_back(Event(n.getAge(),"branching time")) ;

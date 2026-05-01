@@ -9,10 +9,10 @@ class TraceNumeric;
     /**
      * @brief ESS test statistic for assessing convergence.
      *
-     * The ESS test statistic computes the effective sample size (ESS) for the given chain.
-     * We detect failure of convergence if the ESS is lower than k (usually 200).
-     *
-     *
+     * The ESS test statistic computes the effective sample size (ESS) for a given chain.
+     * We detect failure of convergence if the ESS is lower than k (often 200, but 625 may
+     * be more appropriate: see Guimaraes Fabreti & Hoehna 2022, Methods Ecol. Evol.
+     * 13(1): 77--90).
      *
      * @copyright Copyright 2009-
      * @author The RevBayes Development Core Team (Sebastian Hoehna)
@@ -24,7 +24,8 @@ class TraceNumeric;
     public:
         EssTest(double k=200);
         
-        // implementen functions from convergence diagnostic
+        // implement functions from convergence diagnostic
+        double      getStatistic(const TraceNumeric& trace);
         bool        assessConvergence(const TraceNumeric& trace);
         
     private:

@@ -1,0 +1,24 @@
+   Successfully read one character matrix from file 'data/primates_and_galeopterus_cox2.nex'
+   Successfully read one character matrix from file 'data/primates_and_galeopterus_cytb.nex'
+
+Running burn-in phase of Power Posterior sampler for 100 iterations.
+The simulator uses 50 different moves in a random move schedule with 60 moves per iteration
+
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+Step  1 / 11		**********
+Step  2 / 11		**********
+Step  3 / 11		**********
+Step  4 / 11		**********
+Step  5 / 11		**********
+Step  6 / 11		**********
+Step  7 / 11		**********
+Step  8 / 11		**********
+Step  9 / 11		**********
+Step 10 / 11		**********
+Step 11 / 11		**********
+   -21425.96
+   -21394.97

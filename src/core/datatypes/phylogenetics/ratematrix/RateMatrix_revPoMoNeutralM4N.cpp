@@ -78,23 +78,6 @@ RateMatrix_revPoMoNeutralM4N& RateMatrix_revPoMoNeutralM4N::operator=(const Rate
 }
 
 
-RateMatrix_revPoMoNeutralM4N& RateMatrix_revPoMoNeutralM4N::assign(const Assignable &m)
-{
-    
-    const RateMatrix_revPoMoNeutralM4N *rm = dynamic_cast<const RateMatrix_revPoMoNeutralM4N*>(&m);
-    if ( rm != NULL )
-    {
-        return operator=(*rm);
-    }
-    else
-    {
-        throw RbException("Could not assign rate matrix.");
-    }
-    
-}
-
-
-
 /** Do precalculations on eigenvectors */
 void RateMatrix_revPoMoNeutralM4N::calculateCijk(void)
 {

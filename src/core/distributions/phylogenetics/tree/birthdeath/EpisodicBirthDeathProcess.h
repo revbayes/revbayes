@@ -26,22 +26,22 @@ namespace RevBayesCore {
                                   Tree *t);
         
         // public member functions
-        EpisodicBirthDeathProcess*                          clone(void) const;                                                              //!< Create an independent clone
+        EpisodicBirthDeathProcess*                          clone(void) const  override;                                                      //!< Create an independent clone
         
         
     protected:
         // Parameter management functions
-        void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);                //!< Swap a parameter
+        void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP) override;                //!< Swap a parameter
         void                                                prepareProbComputation(void) const override;
         
         void                                                prepareRateIntegral(double end);                                                        //!< Compute the rate integral.
         void                                                prepareSurvivalProbability(double end, double r);                                       //!< Compute the rate integral.
 
         // helper functions
-        double                                              lnSpeciationRate(double t) const;
-        double                                              rateIntegral(double t_low, double t_high) const;
-        double                                              computeProbabilitySurvival(double start, double end) const;
-        double                                              simulateDivergenceTime(double origin, double present) const;                            //!< Simulate a speciation event.
+        double                                              lnSpeciationRate(double t) const override;
+        double                                              rateIntegral(double t_low, double t_high) const override;
+        double                                              computeProbabilitySurvival(double start, double end) const override;
+        double                                              simulateDivergenceTime(double origin, double present) const override;                            //!< Simulate a speciation event.
 
     private:
         

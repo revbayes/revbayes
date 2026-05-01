@@ -113,50 +113,28 @@ Integer* RevLanguage::Integer::clone(void) const
 
 
 /** 
- * Convert to type. The caller manages the returned object. 
+ * Convert to type. The caller manages the returned object.
+ * Calls the templated convertTo<> function based on the type to return.
  */
 RevObject* Integer::convertTo( const TypeSpec& type ) const
-{
+{   
+    if ( type == RlBoolean::getClassTypeSpec() ) return RlUtils::RlTypeConverter::convertTo<Integer,RlBoolean>(this);
+    if ( type == Real::getClassTypeSpec() ) return RlUtils::RlTypeConverter::convertTo<Integer,Real>(this);
 
-    if ( type == RlBoolean::getClassTypeSpec() )
-    {
-        return new RlBoolean( dag_node->getValue() == 0 );
-    }
-    
-    if ( type == Real::getClassTypeSpec() )
-    {
-        return new Real( dag_node->getValue() );
-    }
-    
-    if ( type == RlString::getClassTypeSpec() ) 
-    {
+    if ( type == RlString::getClassTypeSpec() ) {
         std::ostringstream o;
         printValue( o, true );
         return new RlString( o.str() );
     }
 
-    if ( type == RealPos::getClassTypeSpec() && dag_node->getValue() > 0 )
-    {
-        return new RealPos( double(dag_node->getValue()) );
-    }
-    if ( type == IntegerPos::getClassTypeSpec() && dag_node->getValue() > 0)
-    {
-        return new IntegerPos( dag_node->getValue() );
-    }
-
-    if ( type == Natural::getClassTypeSpec() && dag_node->getValue() >= 0)
-    {
-        return new Natural( dag_node->getValue() );
-    }
+    if ( type == RealPos::getClassTypeSpec() && dag_node->getValue() >= 0 ) return RlUtils::RlTypeConverter::convertTo<Integer,RealPos>(this);
+    if ( type == IntegerPos::getClassTypeSpec() && dag_node->getValue() > 0) return RlUtils::RlTypeConverter::convertTo<Integer,IntegerPos>(this);
+    if ( type == Natural::getClassTypeSpec() && dag_node->getValue() >= 0) return RlUtils::RlTypeConverter::convertTo<Integer,Natural>(this);
     
-    if ( type == Probability::getClassTypeSpec() )
-    {
-        return new Probability( dag_node->getValue() );
-    }
+    if ( type == Probability::getClassTypeSpec() ) return RlUtils::RlTypeConverter::convertTo<Integer,Probability>(this);
     
     return RevObject::convertTo( type );
 }
-
 
 /**
   * Specialized decrement operation.

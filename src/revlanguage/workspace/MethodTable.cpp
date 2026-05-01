@@ -22,15 +22,7 @@ void MethodTable::insertInheritedMethods( const MethodTable& inheritedMethods )
     {
         Function* the_function = (*it).second->clone();
 
-        try
-        {
-            addFunction( the_function );
-        }
-        catch (RbException &)
-        {
-            
-        }
-        
+	addFunction( the_function, true );
     }
     
 }

@@ -218,7 +218,7 @@ RevPtr<RevVariable> Move_UpDownSlideBactrian::executeMethod(const std::string& n
         }
         else
         {
-            throw RbException("A problem occured when trying to add " + args[0].getVariable()->getName() + " to the move.");
+            throw RbException() << "A problem occured when trying to add " << args[0].getVariable()->getName() << " to the move.";
         }
         
         return NULL;
@@ -306,7 +306,7 @@ RevPtr<RevVariable> Move_UpDownSlideBactrian::executeMethod(const std::string& n
         }
         else
         {
-            throw RbException("A problem occured when trying to add " + args[0].getVariable()->getName() + " to the move.");
+            throw RbException() << "A problem occured when trying to add " << args[0].getVariable()->getName() << " to the move.";
         }
         
         return NULL;

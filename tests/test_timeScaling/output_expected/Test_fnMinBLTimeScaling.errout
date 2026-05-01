@@ -1,0 +1,12 @@
+   Attempting to read the contents of file "bears_tree.tre"
+   Successfully read file
+   Tree type: TimeTree
+
+   Attempting to read the contents of file "bears_tree.tre"
+   Successfully read file
+   Tree type: BranchLengthTree
+
+Checking the identity of both time-scaled trees...
+Same topology? TRUE
+Same root age? TRUE
+Same tree length? TRUE

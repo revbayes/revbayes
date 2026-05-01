@@ -142,7 +142,7 @@ double LinearDemographicFunction::getIntegral(double start, double finish) const
 
 /**
  * @param[in]   time    Current time in coalescent simulation process
- * @param[in]   lambda  
+ * @param[in]   lambda
  *
  * @return Waiting Time until next coalescent event
  */

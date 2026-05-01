@@ -28,7 +28,7 @@ using po::variables_map;
 
 std::string usage()
 {
-    return "Usage: rb [OPTIONS]\n       rb [OPTIONS] <file1> [<file2> ...]";
+    return "Usage: rb [OPTIONS]\n       rb [OPTIONS] <file1> [<file2> ...]\n";
     // Other usages not mentioned
 }
 
@@ -41,7 +41,6 @@ std::string short_description()
 //
 variables_map parse_cmd_line(int argc, char* argv[])
 {
-    
     using namespace po;
 
     // Put all options in one group for now.
@@ -51,18 +50,18 @@ variables_map parse_cmd_line(int argc, char* argv[])
 	("version,v","Show version and exit.")
 
 	// implicit_value(1) means that -V => -V1
-//      RevBayes doesn't use a global verbose_logging flag.
-//	("verbose,V",value<int>()->implicit_value(1),"Log extra information for debugging.")
+    // RevBayes doesn't use a global verbose_logging flag.
+    // ("verbose,V",value<int>()->implicit_value(1),"Log extra information for debugging.")
 
 	("batch,b","Run in batch mode.")
-        ("jupyter,j","Run in jupyter mode.")
-        // multitoken means that `--args a1 a2 a3` works the same as `--args a1 --args a2 --args a3`
-        ("args",value<std::vector<std::string> >()->multitoken(),"Command line arguments to initialize RevBayes variables.")
-        // multitoken means that `--args a1 a2 a3` works the same as `--args a1 --args a2 --args a3`
-        ("cmd",value<std::vector<std::string> >()->multitoken(),"Script and command line arguments to initialize RevBayes variables.")
+    ("jupyter,j","Run in jupyter mode.")
+    // multitoken means that `--args a1 a2 a3` works the same as `--args a1 --args a2 --args a3`
+    ("args",value<std::vector<std::string> >()->multitoken(),"Command line arguments to initialize RevBayes variables.")
+    // multitoken means that `--args a1 a2 a3` works the same as `--args a1 --args a2 --args a3`
+    ("cmd",value<std::vector<std::string> >()->multitoken(),"Script and command line arguments to initialize RevBayes variables.")
 	// composing means that --file can occur multiple times
-        ("file",value<std::vector<std::string> >()->composing(),"File(s) to source.")
-        ("setOption",value<std::vector<std::string> >()->composing(),"Set an option key=value.")
+    ("file",value<std::vector<std::string> >()->composing(),"File(s) to source.")
+    ("setOption",value<std::vector<std::string> >()->composing(),"Set an option key=value. See ?setOption for the list of available keys and their associated values.")
 	;
 
     // Treat all positional options as "file" options.
@@ -111,11 +110,11 @@ variables_map parse_cmd_line(int argc, char* argv[])
 #endif
         if (rank == 0)
         {
-            std::cout<< usage() << std::endl;
-            std::cout<< short_description() << std::endl;
+            std::cout << usage() << std::endl;
+            std::cout << short_description() << std::endl;
             std::cout << std::endl;
-            std::cout<< general << std::endl;
-            std::cout<< "See http://revbayes.github.io for more information." << std::endl;
+            std::cout << general << std::endl;
+            std::cout << "See http://revbayes.github.io for more information." << std::endl;
         }
 #ifdef RB_MPI
         MPI_Finalize();
@@ -164,11 +163,6 @@ int main(int argc, char* argv[]) {
         exit(0);
     }
 
-    if ( args.count("verbose") > 0 )
-    {
-        int verbosity = args["verbose"].as<int>();
-    }
-
     if ( args.count("setOption") > 0 )
     {
         std::vector<std::string> options = args["setOption"].as<std::vector<std::string> >();
@@ -178,7 +172,7 @@ int main(int argc, char* argv[]) {
             StringUtilities::stringSplit(options[i], "=", tokens);
             if (tokens.size() != 2)
             {
-                throw RbException("Option '"+options[i]+"' must have the form key=value");
+                throw RbException() << "Option '" << options[i] << "' must have the form key=value"; 
             }
             else
             {
@@ -197,7 +191,8 @@ int main(int argc, char* argv[]) {
     {
         source_files = args["file"].as<std::vector<std::string> >();
     }
-    
+
+
     if ( args.count("args") && args.count("cmd"))
     {
         throw RbException("command line: received both --args and --cmd");

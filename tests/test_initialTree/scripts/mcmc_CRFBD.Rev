@@ -1,0 +1,123 @@
+################################################################################
+#
+# RevBayes Test-Script: (Specimen-level) Fossilized Birth-Death process with an
+# initial tree. Unlike the other test script included in this directory
+# ("bdstp_with_initialTree.rev"), this test (1) uses dnFBDP rather than
+# dnBDSTP and (2) explicitly sets the "ageCheckPrecision" argument to 6 (it is
+# set to 4 by default). It will not work if it is set to a value of 8 or higher
+# (see the commented out function call).
+#
+#
+# authors: David Cerny
+#
+################################################################################
+
+seed(12345)
+
+# This test script is modified from the Mass Extinction Estimation tutorial
+# (https://revbayes.github.io/tutorials/divrate/efbdp_me.html), which in turn
+# uses data from Magee and Hoehna (2021), bioRxiv doi:10.1101/2021.01.14.426715
+
+#######################
+# Reading in the Data #
+#######################
+
+# read in the "observed" tree
+T <- readTrees("data/crocs_T1.tre")[1]
+
+# Get tip ages from a taxon data file. These are the ages we will be checking
+# our initial tree ("T") against.
+
+taxa <- readTaxonData("data/crocs_taxa.txt", delim = TAB)
+
+# create some vector for the moves and monitors of this analysis
+moves    = VectorMoves()
+monitors = VectorMonitors()
+
+##########
+# Priors #
+##########
+
+speciation_rate ~ dnHalfCauchy(0.0,0.1)
+moves.append( mvScaleBactrian(speciation_rate,weight=7.5) )
+moves.append( mvRandomDive(speciation_rate,weight=2.5) )
+
+extinction_rate ~ dnHalfCauchy(0.0,0.1)
+moves.append( mvScaleBactrian(extinction_rate,weight=7.5) )
+moves.append( mvRandomDive(extinction_rate,weight=2.5) )
+
+fossilization_rate ~ dnHalfCauchy(0.0,0.1)
+moves.append( mvScaleBactrian(fossilization_rate,weight=7.5) )
+moves.append( mvRandomDive(fossilization_rate,weight=2.5) )
+
+joint_move = mvAVMVN(weight=10.0)
+joint_move.addVariable(speciation_rate)
+joint_move.addVariable(extinction_rate)
+joint_move.addVariable(fossilization_rate)
+moves.append( joint_move )
+
+# This is the probability of sampling extant species at the present.
+# Fix this to 14/23, since there are ~23 described species of extant
+# Crocodylomorphs and we have sampled 14
+
+sampling_at_present <- 14/23
+
+##################################################################################################
+#
+# NOTE: IF WE WERE TO USE THE FOLLOWING FUNCTION CALL INSTEAD, WITH "ageCheckPrecision"
+# SET TO 8:
+#
+# timetree ~ dnFBDP(
+#                   rootAge                                          = T.rootAge(),
+#                   lambda                                           = speciation_rate,
+#                   mu                                               = extinction_rate,
+#                   phi                                              = fossilization_rate,
+#                   rho                                              = sampling_at_present,
+#                   condition                                        = "time",
+#                   taxa                                             = taxa,
+#                   initialTree                                      = T,
+#                   ageCheckPrecision                                = 8)
+#
+# THE SCRIPT SHOULD THROW THE FOLLOWING ERROR MESSAGE:
+#
+# "   Error:	The age of tip 'Almadasuchus' in the initial tree is outside of specified bounds."
+#
+##################################################################################################
+
+timetree ~ dnFBDP(
+                  rootAge                                          = T.rootAge(),
+                  lambda                                           = speciation_rate,
+                  mu                                               = extinction_rate,
+                  phi                                              = fossilization_rate,
+                  rho                                              = sampling_at_present,
+                  condition                                        = "time",
+                  taxa                                             = taxa,
+                  initialTree                                      = T,
+                  ageCheckPrecision                                = 6)
+
+# clamp the model with the "observed" tree
+timetree.clamp(T)
+
+#############
+# The Model #
+#############
+
+# workspace model wrapper
+mymodel = model(sampling_at_present)
+
+# set up the monitors that will output parameter values to file and screen
+monitors.append( mnModel(filename="output/crocs_CRFBD.log", printgen=10, separator = TAB) )
+
+################
+# The Analysis #
+################
+
+# workspace MCMC
+mymcmc = mcmc(mymodel, monitors, moves)
+
+# run the MCMC
+mymcmc.run(generations=100)
+
+# clear and quit
+clear()
+q()

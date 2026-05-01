@@ -1,4 +1,4 @@
-#include <math.h>
+#include <cmath>
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -33,7 +33,7 @@ namespace RevBayesCore { class ContinuousDistribution; }
 
 using namespace RevLanguage;
 
-Dist_beta::Dist_beta() : TypedDistribution<Probability>()
+Dist_beta::Dist_beta() : ProbabilityContinuousDistribution()
 {
     
     setGuiDistributionName("Beta");
@@ -85,16 +85,16 @@ const std::string& Dist_beta::getClassType(void)
     
     static std::string rev_type = "Dist_beta";
     
-	return rev_type; 
+    return rev_type;
 }
 
 /* Get class type spec describing type of object */
 const TypeSpec& Dist_beta::getClassTypeSpec(void)
 {
     
-    static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( TypedDistribution<Probability>::getClassTypeSpec() ) );
+    static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( ProbabilityContinuousDistribution::getClassTypeSpec() ) );
     
-	return rev_type_spec; 
+    return rev_type_spec;
 }
 
 
@@ -121,7 +121,7 @@ const MemberRules& Dist_beta::getParameterRules(void) const
     static MemberRules distUnifMemberRules;
     static bool rules_set = false;
     
-    if ( !rules_set ) 
+    if ( !rules_set )
     {
         distUnifMemberRules.push_back( new ArgumentRule( "alpha", RealPos::getClassTypeSpec(), "The alpha shape parameter.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         distUnifMemberRules.push_back( new ArgumentRule( "beta" , RealPos::getClassTypeSpec(), "The beta shape parameter.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
@@ -171,16 +171,16 @@ void Dist_beta::printValue(std::ostream& o) const
 /** Set a member variable */
 void Dist_beta::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var) {
         
-    if ( name == "alpha" ) 
+    if ( name == "alpha" )
     {
         alpha = var;
     }
-    else if ( name == "beta" ) 
+    else if ( name == "beta" )
     {
         beta = var;
     }
     else
     {
-        TypedDistribution<Probability>::setConstParameter(name, var);
+        ProbabilityContinuousDistribution::setConstParameter(name, var);
     }
 }

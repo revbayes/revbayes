@@ -106,6 +106,7 @@ namespace RevBayesCore {
         std::vector<std::string>                            getSpeciesNames() const;                                                                            //!< Get all the species represented in the tree
         std::vector<Taxon>                                  getTaxa() const;                                                                                    //!< Get all the taxa in the tree
 
+        void                                                checkTaxonAges(bool forceAdjust = true);
         const std::map<std::string, size_t>&                getTaxonBitSetMap(void) const;                                                                      //!< Returns a map that holds the BitSet index for each taxon
         size_t                                              getTipIndex(const std::string &name) const;
         std::vector<std::string>                            getTipNames() const;
@@ -125,11 +126,10 @@ namespace RevBayesCore {
         bool                                                isNegativeConstraint(void) const;                                                                   //!< Is this tree used as a negative constraint?
         bool                                                isRooted(void) const;                                                                               //!< Is the Tree rooted
         bool                                                isTimeTree(void) const;                                                                             //!< Is this a time tree?
-        void                                                makeInternalNodesBifurcating(bool reindex, bool fossils_only);                                                         //!< Make all the internal nodes bifurcating.
-        void                                                makeRootBifurcating(const Clade& o, bool reindex);                                                         //!< Make all the internal nodes bifurcating.
+        void                                                makeRootBifurcating(const Clade& o);                                                              //!< Make the root bifurcating.
         void                                                orderNodesByIndex();
         json                                                toJSON() const;             //!< Prints tree for user
-        void                                                printForUser(std::ostream &o, const std::string &sep, int l, bool left) const;             //!< Prints tree for user
+        void                                                printForUser(std::ostream &o, const std::string &sep, int l, bool left) const;                   //!< Prints tree for user
         void                                                printForSimpleStoring(std::ostream &o, const std::string &sep, int l, bool left, bool flatten = true) const; //!< Prints tree for storing without rounding
         void                                                printForComplexStoring(std::ostream &o, const std::string &sep, int l, bool left, bool flatten = true) const; //!< Prints tree for storing with rounding (mainly checkpointing) 
         void                                                pruneTaxa(const RbBitSet& bs);
@@ -145,6 +145,7 @@ namespace RevBayesCore {
         bool                                                removeRootIfDegree2();
         void                                                renameNodeParameter(const std::string &old_name, const std::string &new_name);
         void                                                resetTaxonBitSetMap(void);                                                                          //!< Resets the map that holds the BitSet index for each taxon
+        void                                                resolveMultifurcations(bool resolve_root);                                                           //!< Make sure the tree is fully bifurcating
         TopologyNode&                                       reverseParentChild(TopologyNode &n);                                                                //!< Reverse the parent child relationship.
         void                                                setNegativeConstraint(bool);
         void                                                setRoot(TopologyNode* r, bool reindex);                                                             //!< Set the root and bootstrap the Tree from it
@@ -152,6 +153,7 @@ namespace RevBayesCore {
         void                                                setTaxonIndices(const TaxonMap &tm);                                                                //!< Set the indices of the taxa from the taxon map
         void                                                setTaxonName(const std::string& currentName, const std::string& newName);                           //!< Change the name of a taxon
         void                                                setTaxonObject(const std::string& currentName, const Taxon &newName);                               //!< Change the name of a taxon
+        void                                                suppressOutdegreeOneNodes(bool replace);                                                            //!< Suppress all internal nodes of outdegree 1
         void                                                unroot(void);                                                                                       //!< Unroot the tree, if it was previously rooted.
 
     protected:

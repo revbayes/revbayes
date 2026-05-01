@@ -61,7 +61,8 @@ double BernoulliDistribution::computeLnProbability( void )
 }
 
 
-void BernoulliDistribution::redrawValue( void ) {
+void BernoulliDistribution::redrawValue( void )
+{
     
     double u = GLOBAL_RNG->uniform01();
     *value = u > p->getValue() ? 0 : 1;
@@ -70,7 +71,8 @@ void BernoulliDistribution::redrawValue( void ) {
 
 
 /** Swap a parameter of the distribution */
-void BernoulliDistribution::swapParameterInternal(const DagNode *oldP, const DagNode *newP) {
+void BernoulliDistribution::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
+{
     
     if (oldP == p) 
     {

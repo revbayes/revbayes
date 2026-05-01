@@ -1,10 +1,8 @@
 #include "RateMatrix_JC.h"
 
-#include <math.h>
+#include <cmath>
 
 #include "TransitionProbabilityMatrix.h"
-#include "Assignable.h"
-#include "Cloneable.h"
 #include "RbException.h"
 
 
@@ -38,29 +36,6 @@ RateMatrix_JC::~RateMatrix_JC(void)
 {
     
 }
-
-
-/**
- * Assign the value of m to this instance. This function is our mechanism to call the assignment operator.
- *
- *
- */
-RateMatrix_JC& RateMatrix_JC::assign(const Assignable &m)
-{
-    
-    const RateMatrix_JC *rm = dynamic_cast<const RateMatrix_JC*>(&m);
-    if ( rm != NULL )
-    {
-        return operator=(*rm);
-    }
-    else
-    {
-        throw RbException("Could not assign rate matrix.");
-    }
-    
-}
-
-
 
 /** Calculate the transition probabilities */
 void RateMatrix_JC::calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const

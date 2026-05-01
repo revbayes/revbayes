@@ -1,0 +1,9 @@
+   Successfully read one character matrix from file 'data/discrete.nex'
+   NOTE: getNumStatesVector() partitions by the maximum observed state, not the total number of observed states.
+   WARNING: There are 6 characters incompatible with the specified coding bias. These characters will be excluded.
+   WARNING: There are 1 characters incompatible with the specified coding bias. These characters will be excluded.
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 101 different moves in a random move schedule with 101 moves per iteration
+   

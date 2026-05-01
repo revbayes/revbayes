@@ -94,8 +94,8 @@ Mcmcmc::Mcmcmc(const Model& m, const RbVector<Move> &mv, const RbVector<Monitor>
     heat_ranks.resize(num_chains, 0);
     heat_temps.resize(num_chains, 0.0);
     
-    num_attempted_swaps = std::vector< std::vector<unsigned long> > (num_chains, std::vector<unsigned long> (num_chains, 0));
-    num_accepted_swaps = std::vector< std::vector<unsigned long> > (num_chains, std::vector<unsigned long> (num_chains, 0));
+    num_attempted_swaps = std::vector< std::vector<size_t> > (num_chains, std::vector<size_t> (num_chains, 0));
+    num_accepted_swaps = std::vector< std::vector<size_t> > (num_chains, std::vector<size_t> (num_chains, 0));
     
     chain_moves_tuningInfo = std::vector< std::vector<Mcmc::tuningInfo> > (num_chains);
     
@@ -214,19 +214,19 @@ void Mcmcmc::addMonitor(const Monitor &m)
     
 }
 
-int Mcmcmc::chainForHeatIndex(int i) const
+size_t Mcmcmc::chainForHeatIndex(size_t i) const
 {
     return std::find(chain_heats.begin(), chain_heats.end(), heatForIndex(i)) - chain_heats.begin();
 /*
     // 1. Start with [0 .. num_chains-1]
-    std::vector<int> tmp_heat_ranks;
-    for(int i=0;i<num_chains;i++)
+    std::vector<size_t> tmp_heat_ranks;
+    for(size_t i=0;i<num_chains;i++)
         tmp_heat_ranks.push_back(i);
 
     // 2. Chains with greater heat come first.
     sort(tmp_heat_ranks.begin(),
          tmp_heat_ranks.end(),
-         [&](int j, int k) { return chain_heats[j] > chain_heats[k];} );
+         [&](size_t j, size_t k) { return chain_heats[j] > chain_heats[k];} );
 
     // 3. Get the chain index for heat index i;
     return tmp_heat_ranks[i];
@@ -370,7 +370,7 @@ std::string Mcmcmc::getStrategyDescription( void ) const
     return description;
 }
 
-double Mcmcmc::heatForIndex(int i) const
+double Mcmcmc::heatForIndex(size_t i) const
 {
     // Can we just maintain a sorted list of chain heats that is always valid?
     std::vector<double> tmp_chain_heats = chain_heats;
@@ -378,12 +378,12 @@ double Mcmcmc::heatForIndex(int i) const
     return tmp_chain_heats[i];
 }
 
-double Mcmcmc::heatForChain(int i) const
+double Mcmcmc::heatForChain(size_t i) const
 {
     return chain_heats[i];
 }
 
-int Mcmcmc::heatIndexForChain(int j) const
+size_t Mcmcmc::heatIndexForChain(size_t j) const
 {
     std::vector<double> tmp_chain_heats = chain_heats;
     std::sort(tmp_chain_heats.begin(), tmp_chain_heats.end(), std::greater<double>());
@@ -391,7 +391,7 @@ int Mcmcmc::heatIndexForChain(int j) const
     return std::find(tmp_chain_heats.begin(), tmp_chain_heats.end(), chain_heats[j]) - tmp_chain_heats.begin();
 }
 
-bool Mcmcmc::isColdChain(int i) const
+bool Mcmcmc::isColdChain(size_t i) const
 {
     return heatForChain(i) == 1.0;
 }
@@ -451,7 +451,7 @@ void Mcmcmc::initializeChains(void)
 }
 
 
-void Mcmcmc::initializeSampler( bool priorOnly )
+void Mcmcmc::initializeSampler()
 {
     
     // initialize each chain
@@ -460,7 +460,7 @@ void Mcmcmc::initializeSampler( bool priorOnly )
         
         if ( chains[i] != NULL )
         {
-            chains[i]->initializeSampler( priorOnly );
+            chains[i]->initializeSampler();
         }
     }
     
@@ -476,7 +476,8 @@ void Mcmcmc::initializeSamplerFromCheckpoint( void )
             
         if ( chains[i] != NULL )
         {
-            chains[i]->checkpoint();
+            chains[i]->initializeSamplerFromCheckpoint();
+            setCurrentGeneration(chains[i]->getCurrentGeneration());
         }
         
     }
@@ -512,7 +513,7 @@ void Mcmcmc::nextCycle(bool advanceCycle)
             // This part should be done on several threads if possible
             // Sebastian: this call is very slow; a lot of work happens in nextCycle()
 
-            // advance chain j by a single cycle
+            // advance chain i by a single cycle
             chains[i]->nextCycle( advanceCycle );
         }
         
@@ -612,14 +613,16 @@ void Mcmcmc::nextCycle(bool advanceCycle)
         }
     }
     
-    for(int i=0;i<num_chains;i++)
+    for(size_t i=0;i<num_chains;i++)
     {
-        int heat_rank = heatIndexForChain(i);
+        size_t heat_rank = heatIndexForChain(i);
         if (chain_prev_boundary[i] == boundary::coldest)
             heat_visitors[heat_rank].first++;
         if (chain_prev_boundary[i] == boundary::hottest)
             heat_visitors[heat_rank].second++;
     }
+    
+    setCurrentGeneration(current_generation);
 }
 
 
@@ -631,7 +634,7 @@ void Mcmcmc::nextCycle(bool advanceCycle)
  *
  * \param[in]     o     The stream to which we print the summary.
  */
-void Mcmcmc::printMoveSummary(std::ostream &o, size_t chainId, size_t moveId, Move &mv) const
+void Mcmcmc::printMoveSummary(std::ostream &o, size_t chainId, size_t moveId, Move &mv, bool current_period) const
 {
     
     std::streamsize previousPrecision = o.precision();
@@ -673,30 +676,47 @@ void Mcmcmc::printMoveSummary(std::ostream &o, size_t chainId, size_t moveId, Mo
     
     // print the number of tries
     int t_length = 9;
-    const size_t num_tried_current_period       = chain_moves_tuningInfo[chainId][moveId].num_tried_current_period;
-    if (num_tried_current_period > 0) t_length -= (int)log10(num_tried_current_period);
+    size_t num_tried = chain_moves_tuningInfo[chainId][moveId].num_tried_total;
+    if (current_period == true)
+    {
+        num_tried = chain_moves_tuningInfo[chainId][moveId].num_tried_current_period;
+    }
+    
+    if (num_tried > 0) t_length -= (int)log10(num_tried);
     for (int i = 0; i < t_length; ++i)
     {
         o << " ";
     }
-    o << num_tried_current_period;
+    o << num_tried;
     o << " ";
     
     // print the number of accepted
     int a_length = 9;
-    const size_t num_accepted_current_period        = chain_moves_tuningInfo[chainId][moveId].num_accepted_current_period;
-    if (num_accepted_current_period > 0) a_length -= (int)log10(num_accepted_current_period);
+    size_t num_accepted = chain_moves_tuningInfo[chainId][moveId].num_accepted_total;
+    if (current_period == true)
+    {
+        num_accepted = chain_moves_tuningInfo[chainId][moveId].num_accepted_current_period;
+    }
+    
+    if (num_accepted > 0) a_length -= (int)log10(num_accepted);
     
     for (int i = 0; i < a_length; ++i)
     {
         o << " ";
     }
-    o << num_accepted_current_period;
+    o << num_accepted;
     o << " ";
     
     // print the acceptance ratio
-    double ratio = num_accepted_current_period / (double)num_tried_current_period;
-    if (num_tried_current_period == 0) ratio = 0;
+    double ratio;
+    if (num_tried == 0)
+    {
+        ratio = 0;
+    }
+    else
+    {
+        ratio = num_accepted / (double)num_tried;
+    }
     int r_length = 5;
     
     for (int i = 0; i < r_length; ++i)
@@ -762,7 +782,7 @@ void Mcmcmc::printOperatorSummary(bool current_period)
             
             for (size_t j = 0; j < chain_moves_tuningInfo[0].size(); ++j)
             {
-                printMoveSummary(std::cout, chainIdx, j, base_moves[j]);
+                printMoveSummary(std::cout, chainIdx, j, base_moves[j], current_period);
             }
             
             std::cout << std::endl;
@@ -812,7 +832,7 @@ void Mcmcmc::printTripSummary(std::ostream &o) const
     {
         // i -> c -> h -> c  -> 2/2 = 1
         // i -> h -> c -> h  -> 1/2 = 0
-        int round_trips = chain_half_trips[i];
+        size_t round_trips = chain_half_trips[i];
         if (chain_prev_boundary[i] == boundary::hottest)
             round_trips--;
         round_trips /= 2;
@@ -839,8 +859,8 @@ void Mcmcmc::printHeatSummary(std::ostream &o) const
 
     for (size_t i = 0; i < num_chains; ++i)
     {
-        int c = heat_visitors[i].first;
-        int h = heat_visitors[i].second;
+        size_t c = heat_visitors[i].first;
+        size_t h = heat_visitors[i].second;
         double B = heatForIndex(i);
         double T = 1.0/B;
         if (c + h > 0)
@@ -1116,14 +1136,14 @@ void Mcmcmc::setHeatsInitial(const std::vector<double>& ht)
         throw RbException()<<"Heat vector contains "<<ht.size()<<" heats, but there are "<<num_chains<<" chains.";
 
     // 2. Check that the heats are non-zero
-    for(int i=0; i<int(ht.size()); i++)
+    for(size_t i=0; i<ht.size(); i++)
     {
         if (not (ht[i] > 0.0))
             throw RbException()<<"Heat "<<i+1<<" is "<<ht[i]<<", but should be > 0";
     }
 
     // 3. Check that the heats are sorted with the largest heat first (== smallest temperature first).
-    for(int i=0;i<int(ht.size())-1;i++)
+    for(size_t i=0; i+1 < ht.size(); i++)
         if (ht[i] < ht[i+1])
             throw RbException()<<"Heat "<<i+1<<" ("<<ht[i]<<") should be greater than heat "<<i+2<<" ("<<ht[i+1]<<")";
 
@@ -1292,7 +1312,7 @@ void Mcmcmc::synchronizeValues( bool likelihood_only )
         {
             if ( pid == pid_per_chain[i] )
             {
-                MPI_Send(&results[i], 1, MPI_DOUBLE, (int)active_PID, 0, MPI_COMM_WORLD);
+                MPI_Send(&results[i], 1, MPI_DOUBLE, active_PID, 0, MPI_COMM_WORLD);
             }
             
         }
@@ -1311,7 +1331,7 @@ void Mcmcmc::synchronizeValues( bool likelihood_only )
             if (pid != pid_per_chain[j])
             {
                 MPI_Status status;
-                MPI_Recv(&results[j], 1, MPI_DOUBLE, int(pid_per_chain[j]), 0, MPI_COMM_WORLD, &status);
+                MPI_Recv(&results[j], 1, MPI_DOUBLE, pid_per_chain[j], 0, MPI_COMM_WORLD, &status);
             }
             
         }
@@ -1329,7 +1349,7 @@ void Mcmcmc::synchronizeValues( bool likelihood_only )
         {
             for (size_t j=0; j<num_chains; ++j)
             {
-                MPI_Send(&chain_values[j], 1, MPI_DOUBLE, int(active_PID+i), 0, MPI_COMM_WORLD);
+                MPI_Send(&chain_values[j], 1, MPI_DOUBLE, active_PID+i, 0, MPI_COMM_WORLD);
             }
         }
     }
@@ -1338,7 +1358,7 @@ void Mcmcmc::synchronizeValues( bool likelihood_only )
         for (size_t i=0; i<num_chains; ++i)
         {
             MPI_Status status;
-            MPI_Recv(&chain_values[i], 1, MPI_DOUBLE, int(active_PID), 0, MPI_COMM_WORLD, &status);
+            MPI_Recv(&chain_values[i], 1, MPI_DOUBLE, active_PID, 0, MPI_COMM_WORLD, &status);
         }
         
     }
@@ -1371,7 +1391,7 @@ void Mcmcmc::synchronizeHeats(void)
         {
             if ( pid == pid_per_chain[i] )
             {
-                MPI_Send(&heats[i], 1, MPI_DOUBLE, int(active_PID), 0, MPI_COMM_WORLD);
+                MPI_Send(&heats[i], 1, MPI_DOUBLE, active_PID, 0, MPI_COMM_WORLD);
             }
             
         }
@@ -1389,7 +1409,7 @@ void Mcmcmc::synchronizeHeats(void)
             if (pid != pid_per_chain[j])
             {
                 MPI_Status status;
-                MPI_Recv(&heats[j], 1, MPI_DOUBLE, int(pid_per_chain[j]), 0, MPI_COMM_WORLD, &status);
+                MPI_Recv(&heats[j], 1, MPI_DOUBLE, pid_per_chain[j], 0, MPI_COMM_WORLD, &status);
             }
             
         }
@@ -1408,7 +1428,7 @@ void Mcmcmc::synchronizeHeats(void)
             
             for (size_t j = 0; j < num_chains; ++j)
             {
-                MPI_Send(&chain_heats[j], 1, MPI_DOUBLE, int(active_PID+i), 0, MPI_COMM_WORLD);
+                MPI_Send(&chain_heats[j], 1, MPI_DOUBLE, active_PID+i, 0, MPI_COMM_WORLD);
             }
         }
     }
@@ -1417,7 +1437,7 @@ void Mcmcmc::synchronizeHeats(void)
         for (size_t i=0; i<num_chains; ++i)
         {
             MPI_Status status;
-            MPI_Recv(&chain_heats[i], 1, MPI_DOUBLE, int(active_PID), 0, MPI_COMM_WORLD, &status);
+            MPI_Recv(&chain_heats[i], 1, MPI_DOUBLE, active_PID, 0, MPI_COMM_WORLD, &status);
         }
         
     }
@@ -1472,7 +1492,7 @@ void Mcmcmc::synchronizeTuningInfo(void)
         {
             if ( pid == pid_per_chain[i] )
             {
-                MPI_Send(&chain_mvs_ti[i].front(), chain_mvs_ti[i].size(), mvs_ti_types, int(active_PID), 0, MPI_COMM_WORLD);
+                MPI_Send(&chain_mvs_ti[i].front(), chain_mvs_ti[i].size(), mvs_ti_types, active_PID, 0, MPI_COMM_WORLD);
             }
             
         }
@@ -1490,7 +1510,7 @@ void Mcmcmc::synchronizeTuningInfo(void)
             if (pid != pid_per_chain[j])
             {
                 MPI_Status status;
-                MPI_Recv(&chain_mvs_ti[j].front(), chain_mvs_ti[j].size(), mvs_ti_types, int(pid_per_chain[j]), 0, MPI_COMM_WORLD, &status);
+                MPI_Recv(&chain_mvs_ti[j].front(), chain_mvs_ti[j].size(), mvs_ti_types, pid_per_chain[j], 0, MPI_COMM_WORLD, &status);
             }
             
         }
@@ -1510,7 +1530,7 @@ void Mcmcmc::synchronizeTuningInfo(void)
             
             for (size_t j = 0; j < num_chains; ++j)
             {
-                MPI_Send(&chain_moves_tuningInfo[j].front(), chain_moves_tuningInfo[j].size(), mvs_ti_types, int(active_PID+i), 0, MPI_COMM_WORLD);
+                MPI_Send(&chain_moves_tuningInfo[j].front(), chain_moves_tuningInfo[j].size(), mvs_ti_types, active_PID+i, 0, MPI_COMM_WORLD);
             }
         }
     }
@@ -1519,7 +1539,7 @@ void Mcmcmc::synchronizeTuningInfo(void)
         for (size_t i=0; i<num_chains; ++i)
         {
             MPI_Status status;
-            MPI_Recv(&chain_moves_tuningInfo[i].front(), chain_moves_tuningInfo[i].size(), mvs_ti_types, int(active_PID), 0, MPI_COMM_WORLD, &status);
+            MPI_Recv(&chain_moves_tuningInfo[i].front(), chain_moves_tuningInfo[i].size(), mvs_ti_types, active_PID, 0, MPI_COMM_WORLD, &status);
         }
         
     }
@@ -1611,7 +1631,7 @@ void Mcmcmc::swapMovesTuningInfo(RbVector<Move> &mvsj, RbVector<Move> &mvsk)
     
     if (itk != mvsk.end())
     {
-        throw RbException( "The two moves objetcs whose tuning information is attempted to be swapped have different number of moves." );
+        throw RbException( "The two moves objects whose tuning information is attempted to be swapped have different number of moves." );
     }
     
 }
@@ -1631,8 +1651,8 @@ void Mcmcmc::swapNeighborChains(void)
     if ( GLOBAL_RNG->uniform01() >= 0.5)
         std::swap( heat_rankj, heat_rankk );
     
-    int j = chainForHeatIndex(heat_rankj);
-    int k = chainForHeatIndex(heat_rankk);
+    size_t j = chainForHeatIndex( heat_rankj );
+    size_t k = chainForHeatIndex( heat_rankk );
 
     swapGivenChains(j, k);
 }
@@ -1642,17 +1662,17 @@ void Mcmcmc::swapNeighborChains(void)
 void Mcmcmc::swapRandomChains(void)
 {
     // randomly pick the indices of two chains
-    int j = 0;
-    int k = 0;
+    size_t j = 0;
+    size_t k = 0;
     
     // swap?
     bool accept = false;
     
-    j = int(GLOBAL_RNG->uniform01() * num_chains);
+    j = size_t(GLOBAL_RNG->uniform01() * num_chains);
     if (num_chains > 1)
     {
         do {
-            k = int(GLOBAL_RNG->uniform01() * num_chains);
+            k = size_t(GLOBAL_RNG->uniform01() * num_chains);
         }
         while(j == k);
     }
@@ -1660,7 +1680,7 @@ void Mcmcmc::swapRandomChains(void)
     swapGivenChains(j, k);
 }
 
-void Mcmcmc::updateTrips(int j)
+void Mcmcmc::updateTrips(size_t j)
 {
     // I think this code assumes that there is only one coldest chain and one hottest chain.
     // For example, there are not two chains with heat == 1.0.
@@ -1685,7 +1705,7 @@ void Mcmcmc::updateTrips(int j)
     }
 }
 
-void Mcmcmc::swapGivenChains(int j, int k, double lnProposalRatio)
+void Mcmcmc::swapGivenChains(size_t j, size_t k, double lnProposalRatio)
 {
     size_t heat_rankj = heatIndexForChain(j);
     size_t heat_rankk = heatIndexForChain(k);
@@ -1726,17 +1746,17 @@ void Mcmcmc::swapGivenChains(int j, int k, double lnProposalRatio)
     {
         for (size_t i = 1; i < num_processes; ++i)
         {
-            MPI_Send(&j, 1, MPI_INT, int(active_PID+i), 0, MPI_COMM_WORLD);
-            MPI_Send(&k, 1, MPI_INT, int(active_PID+i), 0, MPI_COMM_WORLD);
-            MPI_Send(&accept, 1, MPI_C_BOOL, int(active_PID+i), 0, MPI_COMM_WORLD);
+            MPI_Send(&j, 1, MPI_INT, active_PID+i, 0, MPI_COMM_WORLD);
+            MPI_Send(&k, 1, MPI_INT, active_PID+i, 0, MPI_COMM_WORLD);
+            MPI_Send(&accept, 1, MPI_C_BOOL, active_PID+i, 0, MPI_COMM_WORLD);
         }
     }
     else
     {
         MPI_Status status;
-        MPI_Recv(&j, 1, MPI_INT, int(active_PID), 0, MPI_COMM_WORLD, &status);
-        MPI_Recv(&k, 1, MPI_INT, int(active_PID), 0, MPI_COMM_WORLD, &status);
-        MPI_Recv(&accept, 1, MPI_C_BOOL, int(active_PID), 0, MPI_COMM_WORLD, &status);
+        MPI_Recv(&j, 1, MPI_INT, active_PID, 0, MPI_COMM_WORLD, &status);
+        MPI_Recv(&k, 1, MPI_INT, active_PID, 0, MPI_COMM_WORLD, &status);
+        MPI_Recv(&accept, 1, MPI_C_BOOL, active_PID, 0, MPI_COMM_WORLD, &status);
     }
 #endif
 
@@ -1844,22 +1864,62 @@ void Mcmcmc::tune( void )
             }
 //            std::cout << "chain_heats[" << hotterChainIdx << "]=" << chain_heats[hotterChainIdx] << std::endl;
         }
-        
-        // if the heat of a given hot chain is smaller than the minimum bound
-        // interpolate this heat and the heats of all the hotter chains
-        // to fall between the lowest heat that is greater than the minimum bound and the minimum bound
-        if (j < num_chains)
+
+
+        /* NOTE: Some of the hot chains may be assigned a heat that is below heatMinBound!
+         *       Let's handle this via linear interpolation of the chain heats on the log scale.
+         *
+         * We define heat(k) as a notational shortcut for chain_heats[ chainForHeatIndex(k) ].
+         * We define m to the largest index where heat(m) < heatMinBound.
+         *
+         * We then want to interpolate the log heat between the two points:
+         *  ( k=m,          log(heat(m)) )
+         *  ( k=num_chains, log(heatMinBound) )
+         * This way the heat will not get all the way down to heatMinBound, since the highest chain
+         * index is actually (num_chains-1).
+         *
+         * The formula for linearly interpolating between (k1,y1) and (k2,y2) is
+         *
+         *     y(x) = y1 + (y2 - y1)*[ (k-k1)/(k2-k1) ].
+         *
+         * Thus we want:
+         *
+         *   log(heat(k)) = log(heat(m)) + (log(heatMinBound) - log(heat(m))) * [(k - m) / (num_chains - m)]
+         *   log(heat(k)) = log(heat(m)) + (log(heatMinBound/heat(m))) * [(k - m) / (num_chains - m)]
+         *
+         * And so (by exponentiating) we get:
+         *
+         *   heat(k) = heat(m) * pow(heatMinBound/heat(m), (k - m)/(num_chains - m) )
+         *
+         */
+
+        // Make a lambda function to access the kth chain heat as heat(k).
+        auto heat = [&](size_t k) -> auto& { return chain_heats[ chainForHeatIndex(k) ]; };
+        assert(heat(0) == 1.0);
+
+        // Find the largest heat index m such that heat(m) > heatMinBound.
+        size_t m = 0;
+        for (size_t k = 1; k < num_chains; ++k)
         {
-            double rho = pow(chain_heats[colderChainIdx] / heatMinBound, 1.0 / (num_chains - j));
-            size_t k = j;
-            
-            for (; k < num_chains; ++k)
-            {
-                chain_heats[hotterChainIdx] = chain_heats[colderChainIdx] / pow(rho, k + 1 - j);
-//                std::cout << "chain_heats[k" << hotterChainIdx << "]=" << chain_heats[hotterChainIdx] << std::endl;
-            }
+            // Check that heat(k) is non-increasing in k.
+            assert( heat(k-1) >= heat(k) );
+
+            // Record the last good heat index.
+            if ( heat(k) > heatMinBound)
+                m = k;
         }
-        
+
+        // Define the ratio phi so we can check it before (possible) use.
+        double phi = heatMinBound/heat(m);
+        assert(0 < phi and phi < 1);
+
+        // If there are any chain heats that are below heatMinBound, then redefine them by linear interpolation on the log scale.
+        for (size_t k = m + 1; k < num_chains; ++k)
+        {
+            // std::cout << "Attempting to set the heat of chain " << k << " to " << heat(m) * pow(phi, double(k - m)/(num_chains-m)) << std::endl;
+            heat(k) = heat(m) * pow(phi, double(k - m)/(num_chains-m));
+        }
+
         resetCounters();
     }
 
@@ -1887,13 +1947,13 @@ void Mcmcmc::updateChainState(size_t j)
     {
         for (size_t i = 1; i < num_processes; ++i)
         {
-            MPI_Send(&chain_heats[j], 1, MPI_DOUBLE, int(active_PID+i), 0, MPI_COMM_WORLD);
+            MPI_Send(&chain_heats[j], 1, MPI_DOUBLE, active_PID+i, 0, MPI_COMM_WORLD);
         }
     }
     else
     {
         MPI_Status status;
-        MPI_Recv(&chain_heats[j], 1, MPI_DOUBLE, int(active_PID), 0, MPI_COMM_WORLD, &status);
+        MPI_Recv(&chain_heats[j], 1, MPI_DOUBLE, active_PID, 0, MPI_COMM_WORLD, &status);
     }
 #endif
     

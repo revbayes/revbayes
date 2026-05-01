@@ -17,8 +17,8 @@ class TopologyConstrainedSSEDistribution: public TopologyConstrainedTreeDistribu
 
 public:
 
-	TopologyConstrainedSSEDistribution(TypedDistribution<Tree>* base_dist, const std::vector<Clade> &c, Tree *t);
-	TopologyConstrainedSSEDistribution(const TopologyConstrainedSSEDistribution &d);
+        TopologyConstrainedSSEDistribution(TypedDistribution<Tree>* base_dist, const std::vector<Clade> &c, Tree *t, long age_check_precision);
+        TopologyConstrainedSSEDistribution(const TopologyConstrainedSSEDistribution &d);
 
 	virtual ~TopologyConstrainedSSEDistribution();
 

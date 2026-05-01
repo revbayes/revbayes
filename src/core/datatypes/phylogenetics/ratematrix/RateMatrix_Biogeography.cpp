@@ -24,7 +24,6 @@
 #include "RbException.h"
 #include "RbVector.h"
 #include "TransitionProbabilityMatrix.h"
-#include "Assignable.h"
 #include "GeneralRateMatrix.h"
 #include "RbVectorImpl.h"
 
@@ -147,20 +146,6 @@ RateMatrix_Biogeography& RateMatrix_Biogeography::operator=(const RateMatrix_Bio
     }
     
     return *this;
-}
-
-RateMatrix_Biogeography& RateMatrix_Biogeography::assign(const Assignable &m)
-{
-    const RateMatrix_Biogeography *rm = dynamic_cast<const RateMatrix_Biogeography*>(&m);
-    if ( rm != NULL )
-    {
-        return operator=(*rm);
-    }
-    else
-    {
-        throw RbException("Could not assign rate matrix.");
-    }
-
 }
 
 double RateMatrix_Biogeography::averageRate(void) const

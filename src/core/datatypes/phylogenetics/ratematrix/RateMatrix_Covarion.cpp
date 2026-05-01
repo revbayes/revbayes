@@ -17,7 +17,6 @@
 #include "RateMatrix_Covarion.h"
 #include "RbException.h"
 #include "TransitionProbabilityMatrix.h"
-#include "Assignable.h"
 #include "GeneralRateMatrix.h"
 #include "RbVector.h"
 #include "RbVectorImpl.h"
@@ -115,20 +114,6 @@ RateMatrix_Covarion& RateMatrix_Covarion::operator=(const RateMatrix_Covarion &r
     return *this;
 }
 
-
-RateMatrix_Covarion& RateMatrix_Covarion::assign(const Assignable &m)
-{
-    const RateMatrix_Covarion *rm = dynamic_cast<const RateMatrix_Covarion*>(&m);
-    if ( rm != NULL )
-    {
-        return operator=(*rm);
-    }
-    else
-    {
-        throw RbException("Could not assign rate matrix.");
-    }
-    
-}
 
 std::vector<int> RateMatrix_Covarion::get_emitted_letters() const
 {

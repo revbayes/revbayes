@@ -259,11 +259,11 @@ double ConditionedBirthDeathShiftProcessContinuous::computeLnProbability( void )
         if ( the_node.isRoot() == false )
         {
             
-            if ( (the_node.getAge() - (*it)->getParent().getAge()) > 0 && the_node.isSampledAncestor() == false )
+            if ( (the_node.getAge() - (*it)->getParent().getAge()) > 0 && the_node.isSampledAncestorTip() == false )
             {
                 return RbConstants::Double::neginf;
             }
-            else if ( (the_node.getAge() - (*it)->getParent().getAge()) > 1E-6 && the_node.isSampledAncestor() == true )
+            else if ( (the_node.getAge() - (*it)->getParent().getAge()) > 1E-6 && the_node.isSampledAncestorTip() == true )
             {
                 return RbConstants::Double::neginf;
             }
@@ -277,7 +277,7 @@ double ConditionedBirthDeathShiftProcessContinuous::computeLnProbability( void )
     {
         
         const TopologyNode &the_node = *(*it);
-        if ( the_node.isSampledAncestor() == true )
+        if ( the_node.isSampledAncestorTip() == true )
         {
             
             if ( the_node.isFossil() == false )
@@ -534,7 +534,7 @@ void ConditionedBirthDeathShiftProcessContinuous::executeMethod(const std::strin
     }
     else
     {
-        throw RbException("The birth-death-shift process does not have a member method called '" + n + "'.");
+        throw RbException() << "The birth-death-shift process does not have a member method called '" << n << "'.";
     }
     
 }
@@ -697,7 +697,7 @@ void ConditionedBirthDeathShiftProcessContinuous::executeMethod(const std::strin
     }
     else
     {
-        throw RbException("The heterogeneous rate birth-death process does not have a member method called '" + n + "'.");
+        throw RbException() << "The heterogeneous rate birth-death process does not have a member method called '" << n << "'.";
     }
     
 }

@@ -45,7 +45,7 @@ namespace RevBayesCore {
 
 #include <cmath>
 #include <cstring>
-#if defined (SSE_ENABLED)
+#if defined ( SSE_ENABLED )
 #include <xmmintrin.h>
 #include <emmintrin.h>
 #include <pmmintrin.h>

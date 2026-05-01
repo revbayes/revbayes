@@ -119,7 +119,7 @@ void DemographicFunction::swapNode(const DagNode *old_node, const DagNode *new_n
     
     if (it == variables.end())
     {
-        throw RbException("Cannot replace DAG node with name\"" + old_node->getName() + "\" in this demographic function because the demographic function doesn't hold this DAG node.");
+        throw RbException() << "Cannot replace DAG node with name\"" << old_node->getName() << "\" in this demographic function because the demographic function doesn't hold this DAG node.";
     }
         
     // increment and decrement the reference counts

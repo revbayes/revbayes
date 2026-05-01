@@ -1,0 +1,49 @@
+################################################################################
+#
+# RevBayes Test-Script: MCMC stopping rule based on Geweke's convergence
+# diagnostic
+#
+#
+# authors: David Cerny
+#
+################################################################################
+
+seed(12345)
+
+
+# Binomial example: estimate success probability given 7 successes out of 20 trials
+
+# We place this rather unusual prior on p instead of the more logical dnUnif(0, 1)
+# because with the latter, the log prior density would be 0 for all proposed
+# values, and therefore, for all logged iterations. This would give us zero variance,
+# making the calculation of convergence statistics problematic.
+
+r ~ dnExp(10)
+p := Probability(ifelse(r < 1, r, 1))
+n <- 20
+k ~ dnBinomial(n, p)
+k.clamp(7)
+mymodel = model(k)
+
+moves = VectorMoves()
+moves.append( mvSlide(r, delta=0.1, weight=1) )
+
+monitors = VectorMonitors()
+monitors.append( mnModel(filename = "output/Geweke_test.log", printgen = 100, p) )
+
+# Create the MCMC object with 4 independent runs. Note that Geweke's diagnostic can
+# be calculated from a single run, so multiple runs are not strictly necessary here.
+
+mymcmc = mcmc(mymodel, monitors, moves, nruns = 4)
+
+# After every 1000 iterations, calculate Geweke's diagnostic for every variable within
+# each of the 4 runs, and stop when the resulting values all become significant at
+# alpha = 0.001:
+
+stopping_rules[1] = srGeweke(0.001, file = "output/Geweke_test.log", freq = 1000)
+
+# Start the MCMC run
+mymcmc.run(rules = stopping_rules, verbose = 2)
+
+clear()
+q()

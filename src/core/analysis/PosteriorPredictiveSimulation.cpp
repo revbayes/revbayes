@@ -132,7 +132,8 @@ void RevBayesCore::PosteriorPredictiveSimulation::run( int thinning )
             if ( the_node->isClamped() == true )
             {
                 // check if the PP simulation must condition on sampled tip states
-                if (condition_on_tips == true && typeid(the_node->getDistribution()) == typeid(StateDependentSpeciationExtinctionProcess))
+                auto& ptr = the_node->getDistribution();
+                if (condition_on_tips == true && typeid( &ptr ) == typeid(StateDependentSpeciationExtinctionProcess))
                 {
                     // set the tip states to the values sampled during this iteration
                     AncestralStateTrace* tip_state_trace;

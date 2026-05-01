@@ -13,9 +13,9 @@ namespace RevLanguage {
     class RealPos;
 
     /**
-     * Primitive type for positive integer numbers (same as Natural without 0).
+     * Primitive type for strictly positive integer numbers (same as Natural without 0).
      *
-     * Note that we derive this from Ntaural. To make
+     * Note that we derive this from Natural. To make
      * sure inheritance is safe, we restrict the range
      * of positive integers numbers from 1 to INT_MAX
      */

@@ -1,0 +1,42 @@
+################################################################################
+#
+# RevBayes Test-Script: Run Metropolis-coupled MCMC (also known as MCMCMC,
+#                       MC^3, or parallel tempering) and check that the
+#                       operator summaries are correct when moves are subject
+#                       to tuning.
+#
+# authors: David Cerny
+#
+################################################################################
+
+seed(12345)
+
+################################################################################
+# Simple binomial example: estimate success probability given 7 successes
+# out of 20 trials
+################################################################################
+
+p ~ dnUniform(0, 1)
+n <- 20
+k ~ dnBinomial(n, p)
+k.clamp(7)
+mymodel = model(k)
+
+moves = VectorMoves()
+moves.append( mvSlide(p, delta=0.1, tune=TRUE, weight=1) )
+
+monitors = VectorMonitors()
+monitors.append( mnScreen(printgen=20) )
+monitors.append( mnModel(filename="output/MC3.log", printgen=20) )
+
+# Create an mcmcmc object
+myMcmcmc = mcmcmc(mymodel, monitors, moves, nchains=4, deltaHeat=5)
+
+# Run a short analysis
+myMcmcmc.run(generations=500, tuningInterval=50)
+myMcmcmc.operatorSummary()
+
+clear()
+
+# Quit RevBayes
+q()

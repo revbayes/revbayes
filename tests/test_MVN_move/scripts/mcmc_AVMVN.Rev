@@ -22,8 +22,7 @@ moves[1] = avmvn
 
 mymodel = model(Q)
 
-monitors[1] = mnScreen(printgen=1000)
-monitors[2] = mnModel(printgen=10,file="output/AVMVN.log")
+monitors[1] = mnModel(printgen=10,file="output/AVMVN.log")
 
 mymcmc = mcmc(mymodel,monitors,moves)
 
