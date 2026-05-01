@@ -47,10 +47,11 @@ namespace RevBayesCore {
         void                                    finishMonitors(size_t n, MonteCarloAnalysisOptions::TraceCombinationTypes ct);  //!< Finish the monitors
         const Model&                            getModel(void) const;
         double                                  getModelLnProbability(bool likelihood_only);
-        RbVector<Monitor>&                      getMonitors( void );
+        RbVector<Monitor>&                      getMonitors(void);
+        RbVector<Move>&                         getMoves(void);
         std::string                             getStrategyDescription(void) const;                                             //!< Get the discription of the strategy used for this sampler.
         void                                    initializeSampler();                                                            //!< Initialize objects for mcmc sampling
-        void                                    initializeSamplerFromCheckpoint( void );                                        //!< Initialize the MCMCMC sampler form the checkpoint file.
+        void                                    initializeSamplerFromCheckpoint(void);                                          //!< Initialize the MCMCMC sampler form the checkpoint file.
         void                                    monitor(std::uint64_t g);
         void                                    nextCycle(bool advanceCycle);
         void                                    printMoveSummary(std::ostream &o, size_t chainId, size_t moveId, Move &mv, bool current_period) const;

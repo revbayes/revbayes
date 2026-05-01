@@ -50,7 +50,8 @@ namespace RevBayesCore {
         virtual void                            finishMonitors(size_t n, MonteCarloAnalysisOptions::TraceCombinationTypes ct) = 0; //!< Finish the monitors
         virtual const Model&                    getModel(void) const = 0;
         virtual double                          getModelLnProbability(bool like_only) = 0;
-        virtual RbVector<Monitor>&              getMonitors() = 0;
+        virtual RbVector<Monitor>&              getMonitors(void) = 0;
+        virtual RbVector<Move>&                 getMoves(void) = 0;
         virtual std::string                     getStrategyDescription(void) const = 0;                     //!< Get the discription of the strategy used for this sampler.
         virtual void                            initializeSamplerFromCheckpoint(void) = 0;                  //!< Initialize the values from the checkpoint file
         virtual void                            initializeSampler() = 0;                                    //!< Initialize objects for mcmc sampling
@@ -62,16 +63,16 @@ namespace RevBayesCore {
         virtual void                            reset(void) = 0;                                            //!< Reset the sampler for a new run.
         virtual void                            setCheckpointFile(const path &f) = 0;
         virtual void                            setLikelihoodHeat(double v) = 0;                            //!< Set the heating temparature of the likelihood of the chain
-//        virtual void                            setMasterSampler(bool tf) = 0;                            //!< Set whether this one is the master.
+//        virtual void                            setMasterSampler(bool tf) = 0;                              //!< Set whether this one is the master.
         virtual void                            setModel(Model *m, bool redraw) = 0;
         virtual void                            startMonitors(size_t numCycles, bool reopen) = 0;           //!< Start the monitors
         virtual void                            tune(void) = 0;                                             //!< Tune the sampler and its moves.
-        virtual void                            writeMonitorHeaders(bool screen_only) = 0;                              //!< Write the headers of the monitors
+        virtual void                            writeMonitorHeaders(bool screen_only) = 0;                  //!< Write the headers of the monitors
 
         // public methods
         size_t                                  getCurrentGeneration(void) const;                           //!< Get the current generations number
         void                                    setCurrentGeneration(size_t g);
-        //        void                                    initializeMonitors(void);                         //!< Assign model and mcmc ptrs to monitors
+//        void                                    initializeMonitors(void);                                   //!< Assign model and mcmc ptrs to monitors
 //        void                                    redrawChainState(void);
         
     protected:
@@ -82,7 +83,7 @@ namespace RevBayesCore {
     };
 
     // Global functions using the class
-    std::ostream&                               operator<<(std::ostream& o, const MonteCarloSampler& x);                                //!< Overloaded output operator
+    std::ostream&                               operator<<(std::ostream& o, const MonteCarloSampler& x);    //!< Overloaded output operator
 
 }
 

@@ -390,6 +390,24 @@ RbVector<Monitor>& Mcmcmc::getMonitors( void )
 }
 
 
+RbVector<Move>& Mcmcmc::getMoves( void )
+{
+    RbVector<Move> *moves = new RbVector<Move>();
+    for (size_t i = 0; i < num_chains; ++i)
+    {
+        if ( chains[i] != NULL )
+        {
+            RbVector<Move>& m = chains[i]->getMoves();
+            for (size_t j = 0; j < m.size(); ++j)
+            {
+                moves->push_back( m[j] );
+            }
+        }
+    }
+    return *moves;
+}
+
+
 std::string Mcmcmc::getStrategyDescription( void ) const
 {
     std::string description = "";
