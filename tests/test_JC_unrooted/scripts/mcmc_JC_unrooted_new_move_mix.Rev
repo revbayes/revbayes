@@ -1,0 +1,78 @@
+################################################################################
+#
+# RevBayes script: Estimating an unrooted tree from nucleotide data under the
+#                  JC69 model using new variants of the SPR, subtree swap, and
+#                  branch length scale moves.
+#
+# authors: David Cerny, Sebastian Hoehna
+#
+################################################################################
+
+seed(12345)
+
+#######################
+# Reading in the data #
+#######################
+
+###### This just defines a single model for all sites #######
+
+### Read in sequence data for both genes
+
+data <- readDiscreteCharacterData("data/primates_cytb_small.nex")
+
+# Get some useful variables from the data. We need these later on.
+taxa <- data.taxa()
+
+# set my move index
+mvi = 0
+
+
+######################
+# Substitution model #
+######################
+
+#### specify the Jukes-Cantor substitution model applied uniformly to all sites ###
+Q <- fnJC(4)
+
+
+##############
+# Tree model #
+##############
+
+num_branches = 2 * taxa.size() - 3
+psi ~ dnUniformTopologyBranchLength(taxa, branchLengthDistribution=dnExponential(1.0))
+
+moves[++mvi] = mvGibbsSPR(psi, weight=2.0)
+moves[++mvi] = mvGibbsSubtreeSwap(psi, weight=2.0)
+# moves[++mvi] = mvWeightedSPR(psi, weight=2.0)
+# moves[++mvi] = mvWeightedSubtreeSwap(psi, weight=2.0)
+moves[++mvi] = mvWeightedBranchLengthScale(psi, weight=num_branches)
+
+
+###################
+# PhyloCTMC model #
+###################
+
+# the sequence evolution model
+seq ~ dnPhyloCTMC(tree=psi, Q=Q, type="DNA")
+
+# attach the data
+seq.clamp(data)
+
+
+#############
+# THE model #
+#############
+
+# We define our model.
+# We can use any node of our model as a handle, here we chose to use the rate matrix.
+mymodel = model(Q)
+
+monitors[1] = mnModel(filename="output/mcmc_JC_unrooted_new_move_mix.log", printgen=20)
+monitors[2] = mnFile(filename="output/mcmc_JC_unrooted_new_move_mix.trees", printgen=20, psi)
+
+mymcmc = mcmc(mymodel, monitors, moves, moveschedule="single")
+mymcmc.run(generations=1000)
+
+# you may want to quit RevBayes now
+q()
