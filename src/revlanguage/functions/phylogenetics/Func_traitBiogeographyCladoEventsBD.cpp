@@ -75,7 +75,7 @@ RevBayesCore::TypedFunction< RevBayesCore::CladogeneticSpeciationRateMatrix >* F
     // get dimension information
     
     int num_traits = (int)m_w->getValue().size();
-    int num_regions = (int)m_w->getValue()[0].size();
+    int num_regions = (int)m_w->getValue()[0][0].size();
     
     // maximum range size (default == N)
     int mrs = 0;

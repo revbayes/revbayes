@@ -45,7 +45,7 @@ rho_b( rb ),
 m_w( mw ),
 m_b( mb ),
 numTraits( (unsigned)m_w->getValue().size() ),
-numRegions( (unsigned)m_w->getValue()[0].size() ),
+numRegions( (unsigned)m_w->getValue()[0][0].size() ),
 numTraitValues( rho_w->getValue()[0].size() ),
 numIntStates( 0 ),
 maxRangeSize(mrs),
@@ -305,6 +305,7 @@ void TraitBiogeographyCladogeneticBirthDeathFunction::buildStateSpace( void )
     // create inverse look-up table
     for (size_t i = 0; i < statesToRangeBitsByNumOn.size(); i++)
     {
+        
         CompositeBits p1( statesToRangeBitsByNumOn[i], statesToTraitBitsByNumOn[i] );
         compositeBitsToStatesByNumOn[p1] = (unsigned)i;
         statesToCompositeBitsByNumOn[i] = p1;
@@ -908,7 +909,7 @@ void TraitBiogeographyCladogeneticBirthDeathFunction::update( void )
         const RangeBits& rb = statesToRangeBitsByNumOn[ idx[0] ];
         const TraitBits& tb = statesToTraitBitsByNumOn[ idx[0] ];
         unsigned event_type = it->second;
-        double speciation_rate = 0.0;
+        double speciation_rate = 1.0;
         
         // divide by two if asymmetric event (right-left vs. left-right)
         double f_asymm = ( idx[1] == idx[2] ? 1.0 : 0.5 );
@@ -933,9 +934,10 @@ void TraitBiogeographyCladogeneticBirthDeathFunction::update( void )
             
             // compute the cladogenetic event rate
             double clado_rate = base_rate * rel_rate * f_asymm;
-            speciation_rate += clado_rate;
+            speciation_rate *= clado_rate;
 //            speciation_rate += speciation_rate_part * f_asymm * c_weight;
         }
+        speciation_rate = std::pow(speciation_rate, 1/tb.size());
         
         // save the rate in the event map
         eventMap[ idx ] = speciation_rate;
