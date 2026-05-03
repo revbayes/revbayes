@@ -1060,19 +1060,33 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
     
     if (pid == pid_to_print)
     {
-        // We need to figure out where within our current stone sequence we are
-        auto it = std::find(stone_sequences[pid_to_print].begin(), stone_sequences[pid_to_print].end(), idx);
-        size_t step = std::distance(stone_sequences[pid_to_print].begin(), it);
-        
-        // Figure out how much whitespace the lines should be padded out with to keep everything neatly aligned
-        size_t digits = std::to_string( getStepNumber() ).size();
-            
-        std::cout << "Step ";
-        for (size_t d = std::to_string(step + 1).size(); d < digits; d++)
+        if ( one_only )
         {
-            std::cout << " ";
+            const size_t digits = std::to_string( powers.size() ).size();
+
+            std::cout << "Stone ";
+            for (size_t d = std::to_string( idx + 1 ).size(); d < digits; d++)
+            {
+                std::cout << " ";
+            }
+            std::cout << (idx + 1) << " / " << powers.size() << "\t\t";
         }
-        std::cout << (step + 1) << " / " << getStepNumber() << "\t\t";
+        else
+        {
+            // We need to figure out where within our current stone sequence we are
+            auto it = std::find(stone_sequences[pid_to_print].begin(), stone_sequences[pid_to_print].end(), idx);
+            size_t step = std::distance(stone_sequences[pid_to_print].begin(), it);
+
+            // Figure out how much whitespace the lines should be padded out with to keep everything neatly aligned
+            size_t digits = std::to_string( getStepNumber() ).size();
+
+            std::cout << "Step ";
+            for (size_t d = std::to_string(step + 1).size(); d < digits; d++)
+            {
+                std::cout << " ";
+            }
+            std::cout << (step + 1) << " / " << getStepNumber() << "\t\t";
+        }
         std::cout.flush();
     }
     
