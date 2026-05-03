@@ -9,16 +9,17 @@
 #include <unordered_set>
 #include <vector>
 
+#include "Cloneable.h"
+#include "DagNode.h"
+#include "MonteCarloAnalysisOptions.h"
 #include "MonteCarloSampler.h"
 #include "MoveSchedule.h"
 #include "MpiUtilities.h"
+#include "Parallelizable.h"
 #include "PowerPosteriorAnalysis.h"
 #include "ProgressBar.h"
 #include "RbException.h"
 #include "RbFileManager.h"
-#include "Cloneable.h"
-#include "MonteCarloAnalysisOptions.h"
-#include "Parallelizable.h"
 #include "RlUserInterface.h"
 #include "StringUtilities.h"
 
@@ -97,13 +98,172 @@ PowerPosteriorAnalysis& PowerPosteriorAnalysis::operator=(const PowerPosteriorAn
 
 
 /** Run burnin and autotune */
-void PowerPosteriorAnalysis::burnin(size_t generations, size_t tuningInterval)
+void PowerPosteriorAnalysis::burnin(size_t generations, size_t tuningInterval, const path &checkpoint_file, size_t checkpoint_interval)
 {
     
 //    initMPI();
     
-    // Initialize objects needed by chain
-    sampler->initializeSampler();
+    if (!resume_from_checkpoint)
+    {
+        // Initialize objects needed by chain
+        sampler->initializeSampler();
+    }
+    else
+    {
+        /* We do not simply delegate to Mcmc::initializeSamplerFromCheckpoint() here, because we have no monitors to
+         * restart during the burnin stage, and we do not want to create new ones, either. As a result, the code below
+         * is largely copied from the Mcmc implementation, except for the parts dealing with monitors and with the
+         * parsing of the *_mcmc checkpoint file. We do not expect to have this file, and if we do have one, we ignore it.
+         * Since we have no monitors, the generation counter stored in it is of no use to us.
+         */
+        
+        // Open file
+        std::ifstream inFile( ckp_burnin_file.string() );
+        
+        if ( !inFile )
+        {
+            throw RbException() << "Could not open file " << ckp_burnin_file;
+        }
+        
+        // Initialize
+        std::string commandLine;
+        std::string delimiter = "\t";
+        std::vector<std::string> parameter_names;
+        std::vector<std::string> parameter_values;
+        
+        // our variable to store the current line of the file
+        std::string line;
+        
+        // Command-processing loop
+        while ( inFile.good() )
+        {
+            // Read a line
+            safeGetline( inFile, line );
+            
+            // skip empty lines
+            if (line.length() == 0)
+            {
+                continue;
+            }
+            
+            // removing comments
+            if (line[0] == '#')
+            {
+                continue;
+            }
+            
+            break;
+        }
+        
+        // we assume the parameter names at the first line of the file
+        StringUtilities::stringSplit(line, delimiter, parameter_names);
+        
+        // Read a line
+        safeGetline( inFile, line );
+        
+        // we assume the parameter values at the second line of the file
+        StringUtilities::stringSplit(line, delimiter, parameter_values);
+        
+        // clean up
+        inFile.close();
+        
+        size_t n_parameters = parameter_names.size();
+        std::vector<DagNode*> nodes = sampler->getModel().getDagNodes();
+        
+        for ( size_t i = 0; i < n_parameters; ++i )
+        {
+            std::string parameter_name = parameter_names[i];
+            
+            // iterate over all DAG nodes (variables)
+            for ( size_t j = 0; j < nodes.size(); ++j )
+            {
+                if ( nodes[j]->getName() == parameter_name )
+                {
+                    // set the value for the variable with the last sample in the trace
+                    nodes[j]->setValueFromString( parameter_values[i] );
+                    nodes[j]->keep();
+                    break;
+                }
+            }
+        }
+
+        // We need to touch these so that their probabilities get recomputed.
+        for (auto& node: nodes)
+        {
+            node->touch();
+        }
+        
+        // Next we also parse the information stored in the *_moves checkpoint file
+        path moves_checkpoint_file_name = appendToStem( ckp_burnin_file, "_moves" );
+        
+        // Open file
+        std::ifstream in_file_moves( moves_checkpoint_file_name.string() );
+        
+        std::string line_moves;
+        std::vector<std::string> stored_move_info;
+        
+        // Command-processing loop
+        while ( in_file_moves.good() )
+        {
+            // Read a line
+            safeGetline( in_file_moves, line_moves );
+            
+            if ( line_moves != "" )
+            {
+                stored_move_info.push_back( line_moves );
+            }
+        }
+        
+        if ( sampler->getMoves().size() != stored_move_info.size() )
+        {
+            throw RbException("The number of stored moves from the checkpoint file doesn't match the number of moves for this MCMC analysis.");
+        }
+        
+        for (size_t i = 0; i < sampler->getMoves().size(); ++i)
+        {
+            std::vector<std::string> tokens;
+            StringUtilities::stringSplit( stored_move_info[i], "(", tokens);
+            
+            if ( sampler->getMoves()[i].getMoveName() != tokens[0] )
+            {
+                throw RbException("The order of the moves from the checkpoint file does not match.");
+            }
+            
+            std::string tmp_values = tokens[1].substr(0,tokens[1].size()-1);
+            std::vector<std::string> values;
+            StringUtilities::stringSplit( tmp_values, ",", values);
+            
+            std::vector<std::string> key_value;
+            StringUtilities::stringSplit( values[0], "=", key_value);
+            if ( sampler->getMoves()[i].getDagNodes()[0]->getName() != key_value[1] )
+            {
+                throw RbException() << "The order of the moves from the checkpoint file does not match. A move working on node '" << sampler->getMoves()[i].getDagNodes()[0]->getName() << "' received a stored counterpart working on node '" << values[0] << "'.";
+            }
+            
+            key_value.clear();
+            StringUtilities::stringSplit( values[1], "=", key_value);
+            sampler->getMoves()[i].setNumberTriedCurrentPeriod( StringUtilities::asIntegerNumber(key_value[1]) );
+            
+            key_value.clear();
+            StringUtilities::stringSplit( values[2], "=", key_value);
+            sampler->getMoves()[i].setNumberTriedTotal( StringUtilities::asIntegerNumber(key_value[1]) );
+            
+            key_value.clear();
+            StringUtilities::stringSplit( values[3], "=", key_value);
+            sampler->getMoves()[i].setNumberAcceptedCurrentPeriod( StringUtilities::asIntegerNumber(key_value[1]) );
+            
+            key_value.clear();
+            StringUtilities::stringSplit( values[4], "=", key_value);
+            sampler->getMoves()[i].setNumberAcceptedTotal( StringUtilities::asIntegerNumber(key_value[1]) );
+            
+            key_value.clear();
+            StringUtilities::stringSplit( values[5], "=", key_value);
+            sampler->getMoves()[i].setMoveTuningParameter( atof(key_value[1].c_str()) );
+        }
+
+        // clean up
+        in_file_moves.close();
+    }
     
     
     // reset the counters for the move schedules
@@ -141,6 +301,12 @@ void PowerPosteriorAnalysis::burnin(size_t generations, size_t tuningInterval)
         {
             sampler->tune();
         }
+        
+        // periodically checkpoint
+        if ( checkpoint_interval != 0 && (k % checkpoint_interval) == 0 )
+        {
+            checkpoint(checkpoint_file);
+        }
     }
     
     
@@ -149,6 +315,154 @@ void PowerPosteriorAnalysis::burnin(size_t generations, size_t tuningInterval)
         progress.finish();
     }
     
+    // make sure to reset this so that runStone() / runAll() knows to start from scratch
+    resume_from_checkpoint = false;
+    
+}
+
+
+/**
+ * This overload serves to checkpoint the global pre-burnin stage of the sampler, handled by PowerPosteriorAnalysis::burnin()
+ * (see above). It mostly does the same work as Mcmc::checkpoint(), but it cannot delegate to the latter, because we do not want
+ * to write out the *_mcmc checkpoint file. Since we have no monitors to restart, and since the length of the pre-burnin stage
+ * is reset upon resumption -- i.e., it is determined by whatever we specify in the call to .burnin() that we perform after having
+ * called initializeFromCheckpoint() -- we do not really care about the generation counter.
+ */
+void PowerPosteriorAnalysis::checkpoint(const path &base_checkpoint_file_name) const
+{
+    // initialize variables
+    std::string separator = "\t";
+    bool flatten = false;
+    
+    createDirectoryForFile( base_checkpoint_file_name );
+    path tmp_checkpoint_file_name = base_checkpoint_file_name.parent_path() / ("." + base_checkpoint_file_name.filename().string() + ".tmp");
+    // open the stream to the file
+    std::ofstream out_stream( tmp_checkpoint_file_name.string() );
+
+    // first, we find the variables
+    std::set<std::string> var_names;
+    std::vector<DagNode*> variable_nodes;
+    const std::vector<DagNode*> &n = sampler->getModel().getDagNodes();
+    for (auto& node: n)
+    {
+        if ( !node->isClamped() )
+        {
+            if ( node->isStochastic() && !node->isHidden() )
+            {
+                const std::string &name = node->getName();
+                if ( var_names.find( name ) == var_names.end() )
+                {
+                    variable_nodes.push_back( node );
+                    var_names.insert( name );
+                }
+            }
+        }
+    }
+    
+    // we write the names of the variables
+    for (std::vector<DagNode *>::const_iterator it=variable_nodes.begin(); it!=variable_nodes.end(); ++it)
+    {
+        // add a separator before every new element
+        if ( it != variable_nodes.begin() )
+        {
+            out_stream << separator;
+        }
+        
+        const DagNode* the_node = *it;
+        
+        // print the header
+        if (the_node->getName() != "")
+        {
+            the_node->printName(out_stream,separator, -1, true, flatten);
+        }
+        else
+        {
+            out_stream << "Unnamed";
+        }
+        
+    }
+    out_stream << std::endl;
+    
+    // second, we write the values of the variables
+    for (std::vector<DagNode*>::const_iterator it = variable_nodes.begin(); it != variable_nodes.end(); ++it)
+    {
+        // add a separator before every new element
+        if ( it != variable_nodes.begin() )
+        {
+            out_stream << separator;
+        }
+        
+        // get the node
+        DagNode *node = *it;
+        
+        // print the value
+        node->printValue(out_stream, separator, -1, false, false, false, flatten);
+    }
+    
+    // clean up
+    out_stream.close();
+    const bool ok = out_stream.good();
+    if ( !ok )
+    {
+        RBOUT( "Warning: failed to write checkpoint file \"" + base_checkpoint_file_name.string() + "\"; keeping existing file." );
+        std::error_code ec;
+        std::filesystem::remove(tmp_checkpoint_file_name, ec);
+    }
+    else
+#ifdef _WIN32
+    if ( MoveFileExW(tmp_checkpoint_file_name.wstring().c_str(), base_checkpoint_file_name.wstring().c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH) == 0 )
+    {
+        throw RbException() << "Could not replace checkpoint file " << base_checkpoint_file_name;
+    }
+#else
+    std::filesystem::rename(tmp_checkpoint_file_name, base_checkpoint_file_name);
+#endif
+    
+    
+    /////////
+    // Next we also write the moves information into a file
+    /////////
+    
+    // assemble the new filename
+    path moves_checkpoint_file_name = appendToStem(base_checkpoint_file_name, "_moves");
+    
+    path tmp_moves_checkpoint_file_name = moves_checkpoint_file_name.parent_path() / ("." + moves_checkpoint_file_name.filename().string() + ".tmp");
+    // open the stream to the file
+    std::ofstream out_stream_moves( tmp_moves_checkpoint_file_name.string() );
+    
+    // get the moves
+    RbVector<Move>& moves = sampler->getMoves();
+    
+    for (size_t i = 0; i < moves.size(); ++i)
+    {
+        out_stream_moves << moves[i].getMoveName();
+        out_stream_moves << "(variable="                << moves[i].getDagNodes()[0]->getName();
+        out_stream_moves << ",num_tried_current="       << moves[i].getNumberTriedCurrentPeriod();
+        out_stream_moves << ",num_tried_total="         << moves[i].getNumberTriedTotal();
+        out_stream_moves << ",num_accepted_current="    << moves[i].getNumberAcceptedCurrentPeriod();
+        out_stream_moves << ",num_accepted_total="      << moves[i].getNumberAcceptedTotal();
+        out_stream_moves << ",tuning_value="            << moves[i].getMoveTuningParameter();
+        out_stream_moves << ")" << std::endl;
+    }
+    
+    // clean up
+    out_stream_moves.close();
+    const bool ok_moves = out_stream_moves.good();
+    if ( !ok_moves )
+    {
+        RBOUT( "Warning: failed to write checkpoint file \"" + moves_checkpoint_file_name.string() + "\"; keeping existing file." );
+        std::error_code ec;
+        std::filesystem::remove(tmp_moves_checkpoint_file_name, ec);
+    }
+    else
+#ifdef _WIN32
+    if ( MoveFileExW(tmp_moves_checkpoint_file_name.wstring().c_str(), moves_checkpoint_file_name.wstring().c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH) == 0 )
+    {
+        throw RbException() << "Could not replace checkpoint file " << moves_checkpoint_file_name;
+    }
+#else
+    std::filesystem::rename(tmp_moves_checkpoint_file_name, moves_checkpoint_file_name);
+#endif
 }
 
 
@@ -228,9 +542,33 @@ size_t PowerPosteriorAnalysis::getStepNumber( void ) const
 
 
 /**
- * Initialize the analysis from checkpoint files. Note that this function is much "lighter" than the equivalent functions of the
+ * Initialize the analysis from checkpoint files. This overload allows resuming the global pre-burnin stage of the analysis, i.e.,
+ * the one performed by PowerPosteriorAnalysis::burnin(). Note that this function is much "lighter" than the equivalent functions
+ * of the Mcmc and Mcmcmc classes, since the actual work is done by the burnin() function itself. We *could* delegate this work to
+ * some other function, but then we would still need a mechanism to tell burnin() when to initialize the sampler from scratch,
+ * and when to call that other function instead to initialize it from checkpoint. Here, we instead use initializeFromCheckpoint()
+ * to tell burnin() which initialization mode to use, while leaving the implementation of those modes to burnin() itself.
+ */
+void PowerPosteriorAnalysis::initializeFromCheckpoint(const path &base_checkpoint_file_name)
+{
+    ckp_burnin_file.clear();
+    
+    if ( !is_regular_file( base_checkpoint_file_name ) )
+    {
+        std::string errorStr = "";
+        formatError( base_checkpoint_file_name, errorStr );
+        throw RbException(errorStr);
+    }
+    
+    ckp_burnin_file = base_checkpoint_file_name;
+    resume_from_checkpoint = true;
+}
+
+
+/**
+ * Initialize the analysis from checkpoint files. Again, this function does much less work than the equivalent functions of the
  * Mcmc and Mcmcmc classes, as it does not itself load the sampler state: we need to leave that up to runStone() / runAll().
- * This is because PowerPosteriorAnalysis only has one MonteCarloSampler* for all stones, unlike the previous two classes that
+ * This is because PowerPosteriorAnalysis only has one MonteCarloSampler for all stones, unlike the previous two classes that
  * have a different one for each run / chain. We therefore have no place to hold the full state of each stone. Iterating over
  * stone_indices would just load the sampler state for each stone, overwriting the previous one. Instead, this function just
  * (1) checks that we can find the checkpoint files for the requested stones, (2) records their full paths for runStone() / runAll()
@@ -240,13 +578,8 @@ size_t PowerPosteriorAnalysis::getStepNumber( void ) const
  * @param base_checkpoint_file_name The base name of the checkpoint files.
  * @param stone_indices The 0-based indices of the stones to restore from checkpoint.
  */
-void PowerPosteriorAnalysis::initializeFromCheckpoint(const path &base_checkpoint_file_name, const std::vector<size_t> &stone_indices )
+void PowerPosteriorAnalysis::initializeFromCheckpoint(const path &base_checkpoint_file_name, const std::vector<size_t> &stone_indices)
 {
-    if ( stone_indices.empty() )
-    {
-        throw RbException() << "Specify which stones or stone sequences should be restored from checkpoint.";
-    }
-
     resume_stone_sequences.clear();
     
     // sort the indices and check for duplicates
@@ -284,7 +617,7 @@ void PowerPosteriorAnalysis::initializeFromCheckpoint(const path &base_checkpoin
  * sequence must have a checkpoint file on disk; that stone is recorded in ckp_stone_file. Later stones in the same inner vector
  * are still listed in resume_stone_sequences but are not in ckp_stone_file and runStone() treats them as fresh starts.
  */
-void PowerPosteriorAnalysis::initializeFromCheckpoint(const path &base_checkpoint_file_name, const std::vector<std::vector<size_t>> &stone_sequences_per_worker )
+void PowerPosteriorAnalysis::initializeFromCheckpoint(const path &base_checkpoint_file_name, const std::vector<std::vector<size_t>> &stone_sequences_per_worker)
 {
     if ( stone_sequences_per_worker.empty() )
     {
