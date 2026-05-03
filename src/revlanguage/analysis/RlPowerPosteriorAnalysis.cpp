@@ -63,6 +63,8 @@ PowerPosteriorAnalysis::PowerPosteriorAnalysis() : WorkspaceToCoreWrapperObject<
     ArgumentRules* burnin_arg_rules = new ArgumentRules();
     burnin_arg_rules->push_back( new ArgumentRule("generations"   , Natural::getClassTypeSpec(), "The number of generations to run.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     burnin_arg_rules->push_back( new ArgumentRule("tuningInterval", Natural::getClassTypeSpec(), "The frequency at which the moves are tuned (usually between 50 and 1000).", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    burnin_arg_rules->push_back( new ArgumentRule("checkpointFile", RlString::getClassTypeSpec(), "The filename for the checkpoint file.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("") ) );
+    burnin_arg_rules->push_back( new ArgumentRule("checkpointInterval", Natural::getClassTypeSpec(), "The interval when to write parameters values to a file for checkpointing.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0) ) );
     methods.addFunction( new MemberProcedure( "burnin", RlUtils::Void, burnin_arg_rules) );
 
     ArgumentRules* init_from_ckp_rules = new ArgumentRules();
@@ -71,7 +73,7 @@ PowerPosteriorAnalysis::PowerPosteriorAnalysis() : WorkspaceToCoreWrapperObject<
     index_types.push_back( ModelVector<Natural>::getClassTypeSpec() );
     index_types.push_back( ModelVector< ModelVector<Natural> >::getClassTypeSpec() );
     init_from_ckp_rules->push_back( new ArgumentRule("checkpointFile", RlString::getClassTypeSpec(), "The checkpoint file base name.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-    init_from_ckp_rules->push_back( new ArgumentRule("stones", index_types, "1-based index, vector, or nested vector; for nested layouts only the first index in each inner vector requires a checkpoint file.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    init_from_ckp_rules->push_back( new ArgumentRule("stones", index_types, "1-based index, vector, or nested vector; for nested layouts only the first index in each inner vector requires a checkpoint file. Not required when resuming the pre-burnin.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
     methods.addFunction( new MemberProcedure( "initializeFromCheckpoint", RlUtils::Void, init_from_ckp_rules ) );
 
 }
@@ -203,7 +205,10 @@ RevPtr<RevVariable> PowerPosteriorAnalysis::executeMethod(std::string const &nam
         // get the member with give index
         int gen = (int)static_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue();
         int tuningInterval = (int)static_cast<const Natural &>( args[1].getVariable()->getRevObject() ).getValue();
-        value->burnin( size_t(gen), size_t(tuningInterval) );
+        const std::string ckp_file = static_cast<const RlString &>( args[2].getVariable()->getRevObject() ).getValue();
+        size_t ckp_int = static_cast<const Natural &>( args[3].getVariable()->getRevObject() ).getValue();
+        
+        value->burnin( size_t(gen), size_t(tuningInterval), ckp_file, ckp_int );
 
         return NULL;
     }
@@ -213,7 +218,11 @@ RevPtr<RevVariable> PowerPosteriorAnalysis::executeMethod(std::string const &nam
         
         const std::string &checkpoint_filename = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
         
-        if ( args[1].getVariable()->getRevObject().isType( ModelVector< ModelVector<Natural> >::getClassTypeSpec() ) )
+        if ( args[1].getVariable()->getRevObject() == RevNullObject::getInstance() )
+        {
+            value->initializeFromCheckpoint( checkpoint_filename ); // first overloaad
+        }
+        else if ( args[1].getVariable()->getRevObject().isType( ModelVector< ModelVector<Natural> >::getClassTypeSpec() ) )
         {
             RevBayesCore::RbVector<RevBayesCore::RbVector<std::int64_t>> nmv;
             nmv = static_cast<const ModelVector< ModelVector<Natural> > &>( args[1].getVariable()->getRevObject() ).getValue();
@@ -235,7 +244,7 @@ RevPtr<RevVariable> PowerPosteriorAnalysis::executeMethod(std::string const &nam
                 stone_sequences.push_back( inner );
             }
                 
-            value->initializeFromCheckpoint( checkpoint_filename, stone_sequences );
+            value->initializeFromCheckpoint( checkpoint_filename, stone_sequences ); // second overload
         }
         else
         {
@@ -262,7 +271,7 @@ RevPtr<RevVariable> PowerPosteriorAnalysis::executeMethod(std::string const &nam
                 }
             }
             
-            value->initializeFromCheckpoint( checkpoint_filename, stone_indices ); // different overload than above
+            value->initializeFromCheckpoint( checkpoint_filename, stone_indices ); // third overload
         }
         
         return NULL;
