@@ -277,7 +277,16 @@ void PowerPosteriorAnalysis::burnin(size_t generations, size_t tuningInterval, c
         // Let user know what we are doing
         std::stringstream ss;
         ss << "\n";
-        ss << "Running burn-in phase of Power Posterior sampler for " << generations << " iterations.\n";
+        
+        if (!resume_from_checkpoint)
+        {
+            ss << "Running global pre-burnin phase of power posterior sampler for " << generations << " iterations.\n";
+        }
+        else
+        {
+            ss << "Extending global pre-burnin phase of previous power posterior sampler by " << generations << " iterations.\n";
+        }
+        
         ss << sampler->getStrategyDescription();
         std::cout << ss.str() << std::endl;
     
@@ -736,7 +745,8 @@ void PowerPosteriorAnalysis::printStoneAssignmentToWorkers( void )
             std::cout << "--------|--------|" << std::string(tmp0, '-') << "|" << std::string( std::to_string(step_count - 1).size() + 7, '-' );
             std::cout << "|" << std::string( std::to_string(step_count).size() + 7, '-' ) << std::endl;
         }
-        else {
+        else
+        {
             for (size_t i = 0; i < step_count - 1; ++i)
             {
                 std::cout << " Step " << (i + 1) << " |";
@@ -851,7 +861,14 @@ void PowerPosteriorAnalysis::printStoneAssignmentToWorkers( void )
     if ( process_active )
     {
         std::cout << std::endl;
-        std::cout << "Running power posterior analysis ..." << std::endl;
+        if (!resume_from_checkpoint)
+        {
+            std::cout << "Running power posterior analysis ..." << std::endl;
+        }
+        else
+        {
+            std::cout << "Appending to previous power posterior analysis ..." << std::endl;
+        }
         std::cout << "Stone pre-burnin: -, burnin: +, sampling phase: *" << std::endl;
     }
 }
@@ -932,6 +949,11 @@ void PowerPosteriorAnalysis::runAll(size_t gen, double burnin_fraction, size_t p
         for (size_t i = stone_block_start; i < stone_block_end; ++i)
         {
             runStone( i, gen, burnin_fraction, pre_burnin_generations, tuning_interval, false, checkpoint_file, checkpoint_interval );
+        }
+        
+        if ( process_active )
+        {
+            std::cout << std::endl;
         }
     }
     
