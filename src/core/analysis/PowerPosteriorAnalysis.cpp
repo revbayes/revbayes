@@ -339,139 +339,142 @@ void PowerPosteriorAnalysis::burnin(size_t generations, size_t tuningInterval, c
  */
 void PowerPosteriorAnalysis::checkpoint(const path &base_checkpoint_file_name) const
 {
-    // initialize variables
-    std::string separator = "\t";
-    bool flatten = false;
-    
-    createDirectoryForFile( base_checkpoint_file_name );
-    path tmp_checkpoint_file_name = base_checkpoint_file_name.parent_path() / ("." + base_checkpoint_file_name.filename().string() + ".tmp");
-    // open the stream to the file
-    std::ofstream out_stream( tmp_checkpoint_file_name.string() );
-
-    // first, we find the variables
-    std::set<std::string> var_names;
-    std::vector<DagNode*> variable_nodes;
-    const std::vector<DagNode*> &n = sampler->getModel().getDagNodes();
-    for (auto& node: n)
+    if ( process_active == true )
     {
-        if ( !node->isClamped() )
+        // initialize variables
+        std::string separator = "\t";
+        bool flatten = false;
+        
+        createDirectoryForFile( base_checkpoint_file_name );
+        path tmp_checkpoint_file_name = base_checkpoint_file_name.parent_path() / ("." + base_checkpoint_file_name.filename().string() + ".tmp");
+        // open the stream to the file
+        std::ofstream out_stream( tmp_checkpoint_file_name.string() );
+        
+        // first, we find the variables
+        std::set<std::string> var_names;
+        std::vector<DagNode*> variable_nodes;
+        const std::vector<DagNode*> &n = sampler->getModel().getDagNodes();
+        for (auto& node: n)
         {
-            if ( node->isStochastic() && !node->isHidden() )
+            if ( !node->isClamped() )
             {
-                const std::string &name = node->getName();
-                if ( var_names.find( name ) == var_names.end() )
+                if ( node->isStochastic() && !node->isHidden() )
                 {
-                    variable_nodes.push_back( node );
-                    var_names.insert( name );
+                    const std::string &name = node->getName();
+                    if ( var_names.find( name ) == var_names.end() )
+                    {
+                        variable_nodes.push_back( node );
+                        var_names.insert( name );
+                    }
                 }
             }
         }
-    }
-    
-    // we write the names of the variables
-    for (std::vector<DagNode *>::const_iterator it=variable_nodes.begin(); it!=variable_nodes.end(); ++it)
-    {
-        // add a separator before every new element
-        if ( it != variable_nodes.begin() )
+        
+        // we write the names of the variables
+        for (std::vector<DagNode *>::const_iterator it=variable_nodes.begin(); it!=variable_nodes.end(); ++it)
         {
-            out_stream << separator;
+            // add a separator before every new element
+            if ( it != variable_nodes.begin() )
+            {
+                out_stream << separator;
+            }
+            
+            const DagNode* the_node = *it;
+            
+            // print the header
+            if (the_node->getName() != "")
+            {
+                the_node->printName(out_stream,separator, -1, true, flatten);
+            }
+            else
+            {
+                out_stream << "Unnamed";
+            }
+            
+        }
+        out_stream << std::endl;
+        
+        // second, we write the values of the variables
+        for (std::vector<DagNode*>::const_iterator it = variable_nodes.begin(); it != variable_nodes.end(); ++it)
+        {
+            // add a separator before every new element
+            if ( it != variable_nodes.begin() )
+            {
+                out_stream << separator;
+            }
+            
+            // get the node
+            DagNode *node = *it;
+            
+            // print the value
+            node->printValue(out_stream, separator, -1, false, false, false, flatten);
         }
         
-        const DagNode* the_node = *it;
-        
-        // print the header
-        if (the_node->getName() != "")
+        // clean up
+        out_stream.close();
+        const bool ok = out_stream.good();
+        if ( !ok )
         {
-            the_node->printName(out_stream,separator, -1, true, flatten);
+            RBOUT( "Warning: failed to write checkpoint file \"" + base_checkpoint_file_name.string() + "\"; keeping existing file." );
+            std::error_code ec;
+            std::filesystem::remove(tmp_checkpoint_file_name, ec);
         }
         else
+#ifdef _WIN32
+            if ( MoveFileExW(tmp_checkpoint_file_name.wstring().c_str(), base_checkpoint_file_name.wstring().c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH) == 0 )
+            {
+                throw RbException() << "Could not replace checkpoint file " << base_checkpoint_file_name;
+            }
+#else
+        std::filesystem::rename(tmp_checkpoint_file_name, base_checkpoint_file_name);
+#endif
+        
+        
+        /////////
+        // Next we also write the moves information into a file
+        /////////
+        
+        // assemble the new filename
+        path moves_checkpoint_file_name = appendToStem(base_checkpoint_file_name, "_moves");
+        
+        path tmp_moves_checkpoint_file_name = moves_checkpoint_file_name.parent_path() / ("." + moves_checkpoint_file_name.filename().string() + ".tmp");
+        // open the stream to the file
+        std::ofstream out_stream_moves( tmp_moves_checkpoint_file_name.string() );
+        
+        // get the moves
+        RbVector<Move>& moves = sampler->getMoves();
+        
+        for (size_t i = 0; i < moves.size(); ++i)
         {
-            out_stream << "Unnamed";
+            out_stream_moves << moves[i].getMoveName();
+            out_stream_moves << "(variable="                << moves[i].getDagNodes()[0]->getName();
+            out_stream_moves << ",num_tried_current="       << moves[i].getNumberTriedCurrentPeriod();
+            out_stream_moves << ",num_tried_total="         << moves[i].getNumberTriedTotal();
+            out_stream_moves << ",num_accepted_current="    << moves[i].getNumberAcceptedCurrentPeriod();
+            out_stream_moves << ",num_accepted_total="      << moves[i].getNumberAcceptedTotal();
+            out_stream_moves << ",tuning_value="            << moves[i].getMoveTuningParameter();
+            out_stream_moves << ")" << std::endl;
         }
         
-    }
-    out_stream << std::endl;
-    
-    // second, we write the values of the variables
-    for (std::vector<DagNode*>::const_iterator it = variable_nodes.begin(); it != variable_nodes.end(); ++it)
-    {
-        // add a separator before every new element
-        if ( it != variable_nodes.begin() )
+        // clean up
+        out_stream_moves.close();
+        const bool ok_moves = out_stream_moves.good();
+        if ( !ok_moves )
         {
-            out_stream << separator;
+            RBOUT( "Warning: failed to write checkpoint file \"" + moves_checkpoint_file_name.string() + "\"; keeping existing file." );
+            std::error_code ec;
+            std::filesystem::remove(tmp_moves_checkpoint_file_name, ec);
         }
-        
-        // get the node
-        DagNode *node = *it;
-        
-        // print the value
-        node->printValue(out_stream, separator, -1, false, false, false, flatten);
-    }
-    
-    // clean up
-    out_stream.close();
-    const bool ok = out_stream.good();
-    if ( !ok )
-    {
-        RBOUT( "Warning: failed to write checkpoint file \"" + base_checkpoint_file_name.string() + "\"; keeping existing file." );
-        std::error_code ec;
-        std::filesystem::remove(tmp_checkpoint_file_name, ec);
-    }
-    else
+        else
 #ifdef _WIN32
-    if ( MoveFileExW(tmp_checkpoint_file_name.wstring().c_str(), base_checkpoint_file_name.wstring().c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH) == 0 )
-    {
-        throw RbException() << "Could not replace checkpoint file " << base_checkpoint_file_name;
-    }
+            if ( MoveFileExW(tmp_moves_checkpoint_file_name.wstring().c_str(), moves_checkpoint_file_name.wstring().c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH) == 0 )
+            {
+                throw RbException() << "Could not replace checkpoint file " << moves_checkpoint_file_name;
+            }
 #else
-    std::filesystem::rename(tmp_checkpoint_file_name, base_checkpoint_file_name);
+        std::filesystem::rename(tmp_moves_checkpoint_file_name, moves_checkpoint_file_name);
 #endif
-    
-    
-    /////////
-    // Next we also write the moves information into a file
-    /////////
-    
-    // assemble the new filename
-    path moves_checkpoint_file_name = appendToStem(base_checkpoint_file_name, "_moves");
-    
-    path tmp_moves_checkpoint_file_name = moves_checkpoint_file_name.parent_path() / ("." + moves_checkpoint_file_name.filename().string() + ".tmp");
-    // open the stream to the file
-    std::ofstream out_stream_moves( tmp_moves_checkpoint_file_name.string() );
-    
-    // get the moves
-    RbVector<Move>& moves = sampler->getMoves();
-    
-    for (size_t i = 0; i < moves.size(); ++i)
-    {
-        out_stream_moves << moves[i].getMoveName();
-        out_stream_moves << "(variable="                << moves[i].getDagNodes()[0]->getName();
-        out_stream_moves << ",num_tried_current="       << moves[i].getNumberTriedCurrentPeriod();
-        out_stream_moves << ",num_tried_total="         << moves[i].getNumberTriedTotal();
-        out_stream_moves << ",num_accepted_current="    << moves[i].getNumberAcceptedCurrentPeriod();
-        out_stream_moves << ",num_accepted_total="      << moves[i].getNumberAcceptedTotal();
-        out_stream_moves << ",tuning_value="            << moves[i].getMoveTuningParameter();
-        out_stream_moves << ")" << std::endl;
     }
-    
-    // clean up
-    out_stream_moves.close();
-    const bool ok_moves = out_stream_moves.good();
-    if ( !ok_moves )
-    {
-        RBOUT( "Warning: failed to write checkpoint file \"" + moves_checkpoint_file_name.string() + "\"; keeping existing file." );
-        std::error_code ec;
-        std::filesystem::remove(tmp_moves_checkpoint_file_name, ec);
-    }
-    else
-#ifdef _WIN32
-    if ( MoveFileExW(tmp_moves_checkpoint_file_name.wstring().c_str(), moves_checkpoint_file_name.wstring().c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH) == 0 )
-    {
-        throw RbException() << "Could not replace checkpoint file " << moves_checkpoint_file_name;
-    }
-#else
-    std::filesystem::rename(tmp_moves_checkpoint_file_name, moves_checkpoint_file_name);
-#endif
 }
 
 
