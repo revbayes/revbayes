@@ -45,7 +45,6 @@ namespace RevBayesCore {
         virtual void                            addMonitor(const Monitor &m) = 0;
         virtual void                            disableScreenMonitor(bool all, size_t rep) = 0;             //!< Disable/remove all screen monitors
         virtual MonteCarloSampler*              clone(void) const = 0;
-        virtual void                            checkpoint(void) const = 0;                                 //!< Perform checkpointing by writing the current values to a file.
 //        virtual void                            run(size_t g) = 0;
         virtual void                            finishMonitors(size_t n, MonteCarloAnalysisOptions::TraceCombinationTypes ct) = 0; //!< Finish the monitors
         virtual const Model&                    getModel(void) const = 0;
@@ -53,7 +52,6 @@ namespace RevBayesCore {
         virtual RbVector<Monitor>&              getMonitors(void) = 0;
         virtual RbVector<Move>&                 getMoves(void) = 0;
         virtual std::string                     getStrategyDescription(void) const = 0;                     //!< Get the discription of the strategy used for this sampler.
-        virtual void                            initializeSamplerFromCheckpoint(void) = 0;                  //!< Initialize the values from the checkpoint file
         virtual void                            initializeSampler() = 0;                                    //!< Initialize objects for mcmc sampling
         virtual void                            monitor(std::uint64_t g) = 0;
         virtual void                            nextCycle(bool advanceCycle) = 0;
@@ -74,10 +72,17 @@ namespace RevBayesCore {
         void                                    setCurrentGeneration(size_t g);
 //        void                                    initializeMonitors(void);                                   //!< Assign model and mcmc ptrs to monitors
 //        void                                    redrawChainState(void);
+        void                                    checkpoint(void);                                           //!< Perform checkpointing by writing the current values to a file.
+        void                                    initializeSamplerFromCheckpoint(void);                      //!< Initialize the values from the checkpoint file
         
     protected:
+        
+        // derived classes override this to add their extra work
+        virtual void                            fullCheckpoint(void) = 0;
+        virtual void                            fullInitializeSamplerFromCheckpoint(void) = 0;
                 
         // members
+        path                                    checkpoint_file_name;
         std::uint64_t                           generation;
         
     };

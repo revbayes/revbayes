@@ -42,7 +42,6 @@ namespace RevBayesCore {
         void                                                addMonitor(const Monitor &m);
         void                                                disableScreenMonitor(bool all, size_t rep);                                             //!< Disable/remove all screen monitors
         Mcmc*                                               clone(void) const;
-        void                                                checkpoint(void) const;
         void                                                finishMonitors(size_t n, MonteCarloAnalysisOptions::TraceCombinationTypes ct);          //!< Finish the monitors
         double                                              getChainLikelihoodHeat(void) const;                                                     //!< Get the heat for this chain
         double                                              getChainPosteriorHeat(void) const;                                                      //!< Get the heat for this chain
@@ -52,14 +51,13 @@ namespace RevBayesCore {
         const Model&                                        getModel(void) const;
         double                                              getModelLnProbability(bool like_only);
         RbVector<Monitor>&                                  getMonitors(void);
-        RbVector<Move>&                                     getMoves(void);
+        RbVector<Move>&                                     getMoves(void) override;
         std::vector<tuningInfo>                             getMovesTuningInfo(void);
         MoveSchedule&                                       getSchedule(void);
         const MoveSchedule&                                 getSchedule(void) const;
         const std::string&                                  getScheduleType(void) const;
         std::string                                         getStrategyDescription(void) const;                                                     //!< Get the description of the strategy used here.
         void                                                initializeSampler();                                                                    //!< Initialize objects for mcmc sampling
-        void                                                initializeSamplerFromCheckpoint( void );                                                //!< Initialize the MCMC sampler form the checkpoint file.
         void                                                monitor(std::uint64_t g);
         void                                                nextCycle(bool advanceCycle);
         bool                                                isChainActive(void);
@@ -84,7 +82,9 @@ namespace RevBayesCore {
         
         
     protected:
-        void                                                resetVariableDagNodes(void);                                                //!< Extract the variable to be monitored again.
+        void                                                fullCheckpoint(void) override;
+        void                                                fullInitializeSamplerFromCheckpoint( void ) override;                                   //!< Initialize the MCMC sampler form the checkpoint file.
+        void                                                resetVariableDagNodes(void);                                                            //!< Extract the variable to be monitored again.
         void                                                initializeMonitors(void);                                                               //!< Assign model and mcmc ptrs to monitors
         void                                                replaceDag(const RbVector<Move> &mvs, const RbVector<Monitor> &mons);
         void                                                setActivePIDSpecialized(size_t a, size_t n);                                            //!< Set the number of processes for this class.
@@ -95,7 +95,6 @@ namespace RevBayesCore {
         double                                              chain_posterior_heat;
         double                                              chain_prior_heat;
         size_t                                              chain_idx;
-        path                                                checkpoint_file_name;
         Model*                                              model;
         RbVector<Monitor>                                   monitors;
         RbVector<Move>                                      moves;

@@ -43,15 +43,13 @@ namespace RevBayesCore {
         void                                    addMonitor(const Monitor &m);
         void                                    disableScreenMonitor(bool all, size_t rep);                                     //!< Disable/remove all screen monitors
         Mcmcmc*                                 clone(void) const;
-        void                                    checkpoint(void) const;
         void                                    finishMonitors(size_t n, MonteCarloAnalysisOptions::TraceCombinationTypes ct);  //!< Finish the monitors
         const Model&                            getModel(void) const;
         double                                  getModelLnProbability(bool likelihood_only);
         RbVector<Monitor>&                      getMonitors(void);
-        RbVector<Move>&                         getMoves(void);
+        RbVector<Move>&                         getMoves(void) override;
         std::string                             getStrategyDescription(void) const;                                             //!< Get the discription of the strategy used for this sampler.
         void                                    initializeSampler();                                                            //!< Initialize objects for mcmc sampling
-        void                                    initializeSamplerFromCheckpoint(void);                                          //!< Initialize the MCMCMC sampler form the checkpoint file.
         void                                    monitor(std::uint64_t g);
         void                                    nextCycle(bool advanceCycle);
         void                                    printMoveSummary(std::ostream &o, size_t chainId, size_t moveId, Move &mv, bool current_period) const;
@@ -71,10 +69,12 @@ namespace RevBayesCore {
         void                                    setModel(Model *m, bool redraw);
         void                                    startMonitors(size_t numCycles, bool reopen);                                   //!< Start the monitors
         void                                    tune(void);                                                                     //!< Tune the sampler and its moves.
-        void                                    writeMonitorHeaders(bool screen_only);                                                      //!< Write the headers of the monitors.
+        void                                    writeMonitorHeaders(bool screen_only);                                          //!< Write the headers of the monitors.
 
         
     protected:
+        void                                    fullCheckpoint(void) override;
+        void                                    fullInitializeSamplerFromCheckpoint(void) override;                             //!< Initialize the MCMCMC sampler form the checkpoint file.
         void                                    setActivePIDSpecialized(size_t i, size_t n);                                    //!< Set the number of processes for this class.
 
         
@@ -124,8 +124,6 @@ namespace RevBayesCore {
         std::string                             swap_mode;                                          // whether making a single attempt per swap interval or attempt multiple (= nchains or nchains^2 for neighbor or random swaps, respectively) times.
         
         Mcmc*                                   base_chain;
-        path                                    base_checkpoint_file_name;
-        
         size_t                                  generation;
         std::vector< std::vector<size_t> >      num_attempted_swaps;
         std::vector< std::vector<size_t> >      num_accepted_swaps;
