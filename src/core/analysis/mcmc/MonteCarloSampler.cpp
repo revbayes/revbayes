@@ -88,25 +88,22 @@ void MonteCarloSampler::checkpoint( void )
         // first, we find the variables -- see Mcmc::resetVariableDagNodes() for reference
         std::vector<DagNode*> variable_nodes;
         
-        if ( &getModel() != NULL )
-        {
-            // we only want to have each nodes once
-            // this should by default happen by here we check again
-            std::set<std::string> var_names;
-            const std::vector<DagNode*> &n = getModel().getDagNodes();
+        // we only want to have each nodes once
+        // this should by default happen by here we check again
+        std::set<std::string> var_names;
+        const std::vector<DagNode*> &n = getModel().getDagNodes();
             
-            for (auto& node: n)
+        for (auto& node: n)
+        {
+            if ( !node->isClamped() )
             {
-                if ( !node->isClamped() )
+                if ( node->isStochastic() && !node->isHidden() )
                 {
-                    if ( node->isStochastic() && !node->isHidden() )
+                    const std::string &name = node->getName();
+                    if ( var_names.find( name ) == var_names.end() )
                     {
-                        const std::string &name = node->getName();
-                        if ( var_names.find( name ) == var_names.end() )
-                        {
-                            variable_nodes.push_back( node );
-                            var_names.insert( name );
-                        }
+                        variable_nodes.push_back( node );
+                        var_names.insert( name );
                     }
                 }
             }
