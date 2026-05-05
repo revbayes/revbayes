@@ -82,7 +82,7 @@ double ElementScaleProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double ElementScaleProposal::doProposal( void )
+LogDensity ElementScaleProposal::doProposal( void )
 {
     
     // Get random number generator

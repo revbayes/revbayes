@@ -89,7 +89,7 @@ double EventBranchTimeBetaProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double EventBranchTimeBetaProposal::doProposal( void )
+LogDensity EventBranchTimeBetaProposal::doProposal( void )
 {
     
     CharacterHistory &history = distribution->getCharacterHistory();

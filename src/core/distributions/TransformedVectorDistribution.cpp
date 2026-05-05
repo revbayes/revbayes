@@ -111,7 +111,7 @@ TransformedVectorDistribution* TransformedVectorDistribution::clone( void ) cons
  * 
  */
 
-double TransformedVectorDistribution::computeLnProbability( void )
+LogDensity TransformedVectorDistribution::computeLnProbability( void )
 {
     // 1. Get value
     RbVector<double> y = *value;
@@ -123,7 +123,7 @@ double TransformedVectorDistribution::computeLnProbability( void )
 
 	// If x = f_inverse(y) is defined, then log_f_prime(*x) should be defined.
 
-	double ln_pdf = base_dist->computeLnProbability() - log_f_prime( transform_params, base_dist->getValue() ).value();
+	LogDensity ln_pdf = base_dist->computeLnProbability() - log_f_prime( transform_params, base_dist->getValue() ).value();
 
 	// 3. Return value
 	return ln_pdf;

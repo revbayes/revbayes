@@ -75,7 +75,7 @@ TransformedDistribution* TransformedDistribution::clone( void ) const
  * 
  */
 
-double TransformedDistribution::computeLnProbability( void )
+LogDensity TransformedDistribution::computeLnProbability( void )
 {
     // 1. Get value
     double y = *value;
@@ -87,7 +87,7 @@ double TransformedDistribution::computeLnProbability( void )
 
         // If x = f_inverse(y) is defined, then log_f_prime(*x) should be defined.
 
-        double ln_pdf = base_dist->computeLnProbability();
+        LogDensity ln_pdf = base_dist->computeLnProbability();
 
         double J = log_f_prime(transform_params, *x).value();
 

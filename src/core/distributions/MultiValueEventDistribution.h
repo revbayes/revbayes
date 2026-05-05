@@ -39,7 +39,7 @@ template <class valueType> class RbVector;
 
         // public member functions
         MultiValueEventDistribution*                        clone(void) const;                                                                                  //!< Create an independent clone
-        double                                              computeLnProbability(void);
+        LogDensity                                          computeLnProbability(void);
         void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const;     //!< Map the member methods to internal function calls
         void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, std::int64_t &rv) const;     //!< Map the member methods to internal function calls
         const std::vector< std::int64_t >&                          getMinimumNumberOfEvents(void) const;

@@ -106,7 +106,7 @@ double GraphFlipCliqueProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double GraphFlipCliqueProposal::doProposal( void )
+LogDensity GraphFlipCliqueProposal::doProposal( void )
 {
     
     // to be returned

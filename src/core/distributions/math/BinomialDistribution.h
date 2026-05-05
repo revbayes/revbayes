@@ -24,7 +24,7 @@ template <class valueType> class TypedDagNode;
         
         // public member functions
         BinomialDistribution*                               clone(void) const;                                                      //!< Create an independent clone
-        double                                              computeLnProbability(void);
+        LogDensity                                          computeLnProbability(void);
         void                                                redrawValue(void);
 
     protected:

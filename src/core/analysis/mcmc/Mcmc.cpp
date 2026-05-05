@@ -452,9 +452,9 @@ const Model& Mcmc::getModel( void ) const
  * Get the joint posterior probability of the current state for this model.
  * Note that the joint posterior is the true, unscaled and unheated value.
  */
-double Mcmc::getModelLnProbability(bool likelihood_only)
+LogDensity Mcmc::getModelLnProbability(bool likelihood_only)
 {
-    double pp = 0.0;
+    LogDensity pp = 0.0;
     
     const std::vector<DagNode*> &n = model->getDagNodes();
     for (std::vector<DagNode*>::const_iterator it = n.begin(); it != n.end(); ++it)
@@ -620,7 +620,7 @@ void Mcmc::initializeSampler()
 
 
     int num_tries     = 0;
-    double ln_probability = 0.0;
+    LogDensity ln_probability = 0.0;
     for ( ; num_tries < num_init_attempts; ++num_tries )
     {
         // a flag if we failed to find a valid starting value
@@ -632,9 +632,9 @@ void Mcmc::initializeSampler()
 
         for (auto the_node: dag_nodes)
         {
-            double ln_prob = the_node->getLnProbability();
+            auto ln_prob = the_node->getLnProbability();
 
-            if ( RbMath::isAComputableNumber(ln_prob) == false )
+            if ( not ln_prob.isfinite() )
             {
                 std::stringstream ss;
                 ss << "Could not compute lnProb for node '" << the_node->getName() << "': lnProb = "<< ln_prob << std::endl;

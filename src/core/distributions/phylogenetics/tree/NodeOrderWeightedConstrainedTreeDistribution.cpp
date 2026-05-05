@@ -130,7 +130,7 @@ NodeOrderWeightedConstrainedTreeDistribution* NodeOrderWeightedConstrainedTreeDi
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-double NodeOrderWeightedConstrainedTreeDistribution::computeLnProbability( void )
+LogDensity NodeOrderWeightedConstrainedTreeDistribution::computeLnProbability( void )
 {
 
     // since we and the base distribution own the same value,
@@ -140,7 +140,7 @@ double NodeOrderWeightedConstrainedTreeDistribution::computeLnProbability( void 
         base_distribution->setValue( value->clone() );
     }
 
-    double lnProb = base_distribution->computeLnProbability() + computeConstraintScore();
+    LogDensity lnProb = base_distribution->computeLnProbability() + computeConstraintScore();
 
     return lnProb;
 }

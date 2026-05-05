@@ -34,7 +34,7 @@ template <class valueType> class TypedDagNode;
         
         // public member functions
         CategoricalDistribution*                            clone(void) const;                                                          //!< Create an independent clone
-        double                                              computeLnProbability(void);                                                 //!< Compute probability of current value
+        LogDensity                                          computeLnProbability(void);                                                 //!< Compute probability of current value
         void                                                redrawValue(void);                                                          //!< Draw new value from prior
         
     protected:

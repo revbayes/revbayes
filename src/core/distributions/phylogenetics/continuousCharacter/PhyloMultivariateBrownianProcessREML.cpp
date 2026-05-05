@@ -88,7 +88,7 @@ PhyloMultivariateBrownianProcessREML* PhyloMultivariateBrownianProcessREML::clon
 }
 
 
-double PhyloMultivariateBrownianProcessREML::computeLnProbability( void )
+LogDensity PhyloMultivariateBrownianProcessREML::computeLnProbability( void )
 {
     
     // we need to check here if we still are listining to this tree for change events

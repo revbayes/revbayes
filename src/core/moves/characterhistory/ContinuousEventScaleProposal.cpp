@@ -92,7 +92,7 @@ double ContinuousEventScaleProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double ContinuousEventScaleProposal::doProposal( void )
+LogDensity ContinuousEventScaleProposal::doProposal( void )
 {
     
     // define the Hastings ratio

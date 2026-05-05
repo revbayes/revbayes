@@ -166,7 +166,7 @@ void MetropolisHastingsMove::performHillClimbingMove( double lHeat, double pHeat
 
     // Propose a new value
     proposal->prepareProposal();
-    double ln_hastings_ratio = proposal->doProposal();
+    LogDensity ln_hastings_ratio = proposal->doProposal();
 
 
     const RbOrderedSet<DagNode*> &affectedNodes = getAffectedNodes();
@@ -181,8 +181,8 @@ void MetropolisHastingsMove::performHillClimbingMove( double lHeat, double pHeat
         the_node->touch();
     }
 
-    double lnPriorRatio = 0.0;
-    double lnLikelihoodRatio = 0.0;
+    LogDensity lnPriorRatio = 0.0;
+    LogDensity lnLikelihoodRatio = 0.0;
 
 
     // compute the probability of the current value for each node
@@ -191,7 +191,7 @@ void MetropolisHastingsMove::performHillClimbingMove( double lHeat, double pHeat
         // get the pointer to the current node
         DagNode* the_node = nodes[i];
 
-        if ( RbMath::isAComputableNumber(lnPriorRatio) && RbMath::isAComputableNumber(lnLikelihoodRatio) && RbMath::isAComputableNumber(ln_hastings_ratio) )
+        if ( lnPriorRatio.isfinite() && lnLikelihoodRatio.isfinite() && ln_hastings_ratio.isfinite() )
         {
             if ( the_node->isClamped() )
             {
@@ -211,7 +211,7 @@ void MetropolisHastingsMove::performHillClimbingMove( double lHeat, double pHeat
     {
         DagNode *the_node = *it;
 
-        if ( RbMath::isAComputableNumber(lnPriorRatio) && RbMath::isAComputableNumber(lnLikelihoodRatio) && RbMath::isAComputableNumber(ln_hastings_ratio) )
+        if ( lnPriorRatio.isfinite() && lnLikelihoodRatio.isfinite() && ln_hastings_ratio.isfinite() )
         {
             if ( the_node->isClamped() )
             {
@@ -226,9 +226,9 @@ void MetropolisHastingsMove::performHillClimbingMove( double lHeat, double pHeat
     }
 
     // exponentiate with the chain heat
-    double ln_posterior_ratio = pHeat * (lHeat * lnLikelihoodRatio + lnPriorRatio);
+    LogDensity ln_posterior_ratio = pHeat * (lHeat * lnLikelihoodRatio + lnPriorRatio);
 
-    if ( RbMath::isAComputableNumber(ln_posterior_ratio) == false || ln_posterior_ratio < 0.0 )
+    if ( not ln_posterior_ratio.isfinite() or ln_posterior_ratio < 0.0 )
     {
 
         proposal->undoProposal();
@@ -314,7 +314,7 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
 
     // Propose a new value
     proposal->prepareProposal();
-    double ln_hastings_ratio = RbConstants::Double::neginf;
+    LogDensity ln_hastings_ratio = RbConstants::Double::neginf;
     try {
         ln_hastings_ratio = proposal->doProposal();
     }
@@ -334,10 +334,10 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     for (auto node: touched_nodes)
         node->touch();
 
-    bool fail_probability = not std::isfinite(ln_hastings_ratio);
+    bool fail_probability = not ln_hastings_ratio.isfinite();
 
-    double ln_prior_ratio = 0.0;
-    double ln_likelihood_ratio = 0.0;
+    LogDensity ln_prior_ratio = 0.0;
+    LogDensity ln_likelihood_ratio = 0.0;
 
     bool zero_or_nan_to_finite = false;
 
@@ -346,14 +346,14 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     {
         if (not node->isStochastic()) continue;
 
-        double ratio = 0;
+        LogDensity ratio = 0;
         try {
             // There should be a previous lnProbability because the nodes have been touched.
-            double prev = node->getPrevLnProbability();
+            LogDensity prev = node->getPrevLnProbability();
             // Compute the current lnProbability.
-            double current = node->getLnProbability();
+            LogDensity current = node->getLnProbability();
 
-            if (std::isfinite(current) and (std::isnan(prev) or prev == RbConstants::Double::neginf))
+            if (current.isfinite() and (prev.isnan() or prev == RbConstants::Double::neginf))
             {
                 // If the log-probability changes from NaN or -Inf to something finite,
                 // the ratio would be NaN or +Inf, and the move would be rejected.
@@ -375,7 +375,7 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
         else
             ln_prior_ratio += ratio;
 
-        if ( not std::isfinite(ratio)) fail_probability = true;
+        if ( not ratio.isfinite() ) fail_probability = true;
     }
 
     if (logMCMC >= 3)
@@ -390,9 +390,9 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     }
 
     // exponentiate with the chain heat
-    double ln_posterior_ratio = pHeat * (lHeat * ln_likelihood_ratio + prHeat * ln_prior_ratio);
+    LogDensity ln_posterior_ratio = pHeat * (lHeat * ln_likelihood_ratio + prHeat * ln_prior_ratio);
 
-    double ln_acceptance_ratio = ln_posterior_ratio + ln_hastings_ratio;
+    LogDensity ln_acceptance_ratio = ln_posterior_ratio + ln_hastings_ratio;
 
     bool rejected = false;
 

@@ -75,7 +75,7 @@ void ExponentialErrorDistribution::swapParameterInternal(const DagNode *oldP, co
     
 }
 
-double ExponentialErrorDistribution::computeLnProbability(void)
+LogDensity ExponentialErrorDistribution::computeLnProbability(void)
 {
     
     double ret = 0;

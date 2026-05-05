@@ -20,7 +20,7 @@ namespace RevBayesCore {
         
         // public member functions
         AbstractCharacterHistoryBirthDeathProcess*          clone(void) const = 0;                                          //!< Create an independent clone
-        virtual double                                      computeLnProbability(void) = 0;                                 //!< Compute ln prob of current value
+        virtual LogDensity                                  computeLnProbability(void) = 0;                                 //!< Compute ln prob of current value
         virtual CharacterHistory&                           getCharacterHistory(void) = 0;                                  //!< Get the character histories
         virtual const CharacterHistory&                     getCharacterHistory(void) const = 0;                            //!< Get the character histories
         virtual void                                        redrawValue(void) = 0;                                          //!< Draw a new random value from distribution

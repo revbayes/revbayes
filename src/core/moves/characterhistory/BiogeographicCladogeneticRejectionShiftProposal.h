@@ -46,7 +46,7 @@ namespace RevBayesCore {
         void                                                        assignSiteIndexSet(const std::set<size_t>& s);
         BiogeographicCladogeneticRejectionShiftProposal*            clone(void) const;                                              //!< Clone object
         void                                                        cleanProposal(void);
-        double                                                      doProposal(void);                                               //!< Perform proposal
+        LogDensity                                                  doProposal(void);                                               //!< Perform proposal
         const std::string&                                          getProposalName(void) const;                                    //!< Get the name of the proposal for summary printing
         void                                                        printParameterSummary(std::ostream &o, bool name_only) const;   //!< Print the parameter summary
         void                                                        prepareProposal(void);                                          //!< Prepare the proposal
@@ -99,8 +99,8 @@ namespace RevBayesCore {
         std::string                                                 proposedCladogeneticEvent;
         
         TopologyNode*                                               node;
-        double                                                      storedLnProb;
-        double                                                      proposedLnProb;
+        LogDensity                                                  storedLnProb;
+        LogDensity                                                  proposedLnProb;
         
         PathRejectionSampleProposal<charType>*                      nodeProposal;
         PathRejectionSampleProposal<charType>*                      leftProposal;
@@ -844,12 +844,12 @@ void RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<charType>::co
  * \return The hastings ratio.
  */
 template<class charType>
-double RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<charType>::doProposal( void )
+LogDensity RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<charType>::doProposal( void )
 {
 //    std::cout << "BEFORE\n";
 //    printCladogeneticState();
     
-    double proposedLnProbRatio = 0.0;
+    LogDensity proposedLnProbRatio = 0.0;
     
     // compute expand-contract move probability
     // (carried over from prepareProposal()

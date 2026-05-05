@@ -91,7 +91,7 @@ double CollapseExpandFossilBranchProposal::getProposalTuningParameter( void ) co
  *
  * \return The hastings ratio.
  */
-double CollapseExpandFossilBranchProposal::doProposal( void )
+LogDensity CollapseExpandFossilBranchProposal::doProposal( void )
 {
     
     failed = false;

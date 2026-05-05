@@ -101,7 +101,7 @@ double GraphFlipEdgeProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double GraphFlipEdgeProposal::doProposal( void )
+LogDensity GraphFlipEdgeProposal::doProposal( void )
 {
     
     // Get random number generator

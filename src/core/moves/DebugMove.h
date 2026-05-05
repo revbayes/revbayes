@@ -12,11 +12,11 @@
 constexpr double rel_err_threshhold = 1.0e-11;
 constexpr int err_precision = 11;
 
-struct ProbOrError: public std::variant<double, std::string>
+struct ProbOrError: public std::variant<LogDensity, std::string>
 {
-    const double* is_prob() const;
+    const LogDensity* is_prob() const;
     const std::string* is_error() const;
-    double is_prob_or(double d) const;
+    LogDensity is_prob_or(LogDensity d) const;
 
     using variant::variant;
     ProbOrError() = delete;

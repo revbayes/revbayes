@@ -7,8 +7,6 @@
 #include <vector>
 #include <tuple>
 
-#include <boost/optional.hpp>
-
 #include "DagNode.h"
 #include "SliceSamplingMove.h"
 #include "RandomNumberFactory.h"
@@ -18,11 +16,10 @@
 #include "StochasticNode.h"
 #include "RbSettings.h" // for debugMCMC setting
 
-using boost::optional;
+using std::optional;
 
 using namespace RevBayesCore;
 
-const double log_0 = RbConstants::Double::neginf;
 
 /** 
  * Constructor
@@ -125,10 +122,10 @@ namespace  {
 
         int get_num_evals() const {return num_evals;}
 
-        double operator()()
+        optional<LogDensity> operator()()
             {
-                double lnPrior = 0.0;
-                double lnLikelihood = 0.0;
+                LogDensity lnPrior = 0.0;
+                LogDensity lnLikelihood = 0.0;
 
                 // 1. compute the probability of the current value for each node
                 lnPrior += variable->getLnProbability();
@@ -143,12 +140,12 @@ namespace  {
                 }
 
                 // 3. exponentiate with the chain heat
-                double lnPosterior = pHeat * (lHeat * lnLikelihood + prHeat * lnPrior);
+                LogDensity lnPosterior = pHeat * (lHeat * lnLikelihood + prHeat * lnPrior);
 
                 return lnPosterior;
             }
 
-        double operator()(double x)
+        optional<LogDensity> operator()(double x)
             {
                 assert( not variable->isClamped() );
 
@@ -156,7 +153,7 @@ namespace  {
 
                 // Don't set the variable to out-of-bounds values.
                 if (below_lower_bound(x) or above_upper_bound(x))
-                    return RbConstants::Double::neginf;
+                    return {};
 
 		// NOTE: We could call variable->setValue(new double(x)),
 		//       which calls distribution->setValue(x,true) and
@@ -166,7 +163,7 @@ namespace  {
                 // touch all the nodes to set flags for recomputation
                 variable->touch();
 
-                double Pr_ = (*this)();
+                auto Pr_ = (*this)();
 
                 // call accept for each node  --  automatically includes affected nodes
                 variable->keep();
@@ -174,9 +171,9 @@ namespace  {
                 return Pr_;
             }
 
-        std::map<const DagNode*, double> getNodePrs()
+        std::map<const DagNode*, LogDensity> getNodePrs()
         {
-            std::map<const DagNode*, double> Prs;
+            std::map<const DagNode*, LogDensity> Prs;
             Prs.insert({variable, variable->getLnProbability()});
             for(auto affectedNode: affectedNodes)
                 Prs.insert({affectedNode, affectedNode->getLnProbability()});
@@ -186,18 +183,18 @@ namespace  {
         void checkPrs()
         {
             double x = current_value();
-            double Pr = operator()();
+            double Pr = (double)*operator()();
             auto Prs = getNodePrs();
-            double Prx = operator()(x);
+            double Prx = (double)*operator()(x);
             auto Prsx = getNodePrs();
-            if (std::abs(Pr - Prx)/std::abs(Prx) > 1.0e-11)
+            if (std::abs(Pr - Prx)/(1+std::abs(Prx)) > 1.0e-11)
             {
                 std::cerr<<std::setprecision(11)<<std::endl;
                 std::cerr<<"mvSlice for "<<variable->getName()<<": probability is "<<Pr<<" but should be "<<Prx<<":  delta = "<<Pr - Prx<<"\n";
                 for(auto& [n,pr1]: Prs)
                 {
-                    double pr2 = Prsx.at(n);
-                    if (std::abs(pr1-pr2)/std::abs(pr2) > 1.0e-11)
+                    auto pr2 = Prsx.at(n);
+                    if (std::abs(double(pr1)-double(pr2))/(1+std::abs(double(pr2))) > 1.0e-11)
                         std::cerr<<"         cause: probability for "<<n->getName()<<" is "<<pr1<<" but should be "<<pr2<<":  delta = "<<pr1-pr2<<"\n";
                 }
                 std::abort();
@@ -226,7 +223,7 @@ namespace  {
 }
 
 std::pair<double,double> 
-find_slice_boundaries_stepping_out(double x0,slice_function& g,double logy, double w,int m)
+find_slice_boundaries_stepping_out(double x0,slice_function& g, const LogDensity& logy, double w,int m)
 {
     int logMCMC = RbSettings::userSettings().getLogMCMC();
 
@@ -239,7 +236,7 @@ find_slice_boundaries_stepping_out(double x0,slice_function& g,double logy, doub
     assert(L < x0);
     assert(x0 < R);
 
-    if (logMCMC >= 4) std::cerr<<"    L = "<<L<<"  x0 = "<<x0<<"   R0 = "<<R<<"\n";
+    if (logMCMC >= 4) std::cerr<<"stepping:     L = "<<L<<"  x0 = "<<x0<<"   R0 = "<<R<<"\n";
 
     // Expand the interval until its ends are outside the slice, or until
     // the limit on steps is reached.
@@ -276,8 +273,17 @@ find_slice_boundaries_stepping_out(double x0,slice_function& g,double logy, doub
     return {L,R};
 }
 
-std::tuple<double,double,optional<double>,optional<double>>
-find_slice_boundaries_doubling(double x0,slice_function& g,double logy, double w, int K)
+std::ostream& operator<<(std::ostream& o, optional<LogDensity> l)
+{
+    if (not l)
+        o<<"OOB";
+    else
+        o<<l.value();
+    return o;
+}
+
+std::tuple<double,double,optional<optional<LogDensity>>,optional<optional<LogDensity>>>
+find_slice_boundaries_doubling(double x0,slice_function& g, const LogDensity& logy, double w, int K)
 {
     int logMCMC = RbSettings::userSettings().getLogMCMC();
     assert(x0 + w > x0);
@@ -289,14 +295,14 @@ find_slice_boundaries_doubling(double x0,slice_function& g,double logy, double w
     assert(L < x0);
     assert(x0 < R);
 
-    optional<double> gL_cached;
+    optional<optional<LogDensity>> gL_cached;
     auto gL = [&]() {
         if (not gL_cached)
             gL_cached = g(L);
         return *gL_cached;
     };
 
-    optional<double> gR_cached;
+    optional<optional<LogDensity>> gR_cached;
     auto gR = [&]() {
         if (not gR_cached)
             gR_cached = g(R);
@@ -315,7 +321,7 @@ find_slice_boundaries_doubling(double x0,slice_function& g,double logy, double w
     while ( K > 0 and (gL() > logy or gR() > logy))
     {
         if (logMCMC >= 4)
-            std::cerr<<"!!    L0 = "<<L<<" (g(L) = "<<gL()<<")  x0 = "<<x0<<"   R0 = "<<R<<" (g(R) = "<<gR()<<")\n";
+            std::cerr<<"doubling:    L0 = "<<L<<" (g(L) = "<<gL()<<")  x0 = "<<x0<<"   R0 = "<<R<<" (g(R) = "<<gR()<<")\n";
 
         double W2 = (R-L);
         if (uniform() < 0.5)
@@ -342,12 +348,12 @@ find_slice_boundaries_doubling(double x0,slice_function& g,double logy, double w
     assert( L < (L+R)/2 and (L+R)/2 < R);
 
     if (logMCMC >= 1)
-        std::cerr<<"      L0 = "<<L<<" (g(L) = "<<gL()<<")  x0 = "<<x0<<"   R0 = "<<R<<" (g(R) = "<<gR()<<")\n";
+        std::cerr<<"doubling:    L0 = "<<L<<" (g(L) = "<<gL()<<")  x0 = "<<x0<<"   R0 = "<<R<<" (g(R) = "<<gR()<<")\n";
 
     return {L,R,gL_cached,gR_cached};
 }
 
-double search_interval(double x0,double& L, double& R, slice_function& g,double logy)
+double search_interval(double x0,double& L, double& R, slice_function& g,const LogDensity& logy)
 {
     int logMCMC = RbSettings::userSettings().getLogMCMC();
     int debugMCMC = RbSettings::userSettings().getDebugMCMC();
@@ -355,7 +361,10 @@ double search_interval(double x0,double& L, double& R, slice_function& g,double 
     if (debugMCMC >= 1)
 	g.checkPrs();
 
-    //  assert(g(x0) > g(L) and g(x0) > g(R));
+//    Don't compute g(L) or g(R) because they might not be in the domain.
+//    Arguably they should return Pr=0 and that would be fine.
+//    But right now we have some asserts that trigger.
+//    assert(g(x0) > g(L) and g(x0) > g(R));
     assert(g(x0) >= logy);
     assert(L < R);
     assert(L <= x0 and x0 <= R);
@@ -366,12 +375,17 @@ double search_interval(double x0,double& L, double& R, slice_function& g,double 
     {
         double x1 = L + uniform()*(R-L);
 
-        double gx1 = g(x1);
+        auto gx1 = g(x1);
 
         if (logMCMC >= 4)
-	    std::cerr<<"    L0 = "<<L<<"  x1 = "<<x1<<" g(x1) = "<<gx1<<"  R0 = "<<R<<"\n";
+	    std::cerr<<"search:    L0 = "<<L<<"  x1 = "<<x1<<" g(x1) = "<<gx1<<"  R0 = "<<R<<"\n";
 
-        if (gx1 >= logy) return x1;
+        if (gx1 and *gx1 >= logy)
+        {
+            assert(g.in_range(x1));
+            return x1;
+        }
+                
 
         if (x1 > x0) 
             R = x1;
@@ -381,6 +395,7 @@ double search_interval(double x0,double& L, double& R, slice_function& g,double 
 
     std::abort();
 
+    assert(g.in_range(x0));
     return x0;
 }
 
@@ -401,7 +416,7 @@ bool pre_slice_sampling_check_OK(double x0, slice_function& g)
     }
 }
 
-bool can_propose_same_interval_doubling(double x0, double x1, double w, double L, double R, optional<double> gL_cached, optional<double> gR_cached, slice_function& g, double log_y)
+bool can_propose_same_interval_doubling(double x0, double x1, double w, double L, double R, optional<optional<LogDensity>> gL_cached, optional<optional<LogDensity>> gR_cached, slice_function& g, const LogDensity& log_y)
 {
     bool D = false;
 
@@ -459,11 +474,14 @@ double slice_sample_stepping_out(double x0, slice_function& g,double w, int m)
 {
     assert(g.in_range(x0));
 
-    double gx0 = g();
+    auto gx0 = g();
+
+    if (not gx0)
+        throw RbException()<<"slice_sampling_stepping_out: x0 is out of bounds!";
 
     // Determine the slice level, in log terms.
 
-    double logy = gx0 + log(uniform()); // - exponential(1.0);
+    auto logy = *gx0 + log(uniform()); // - exponential(1.0);
 
     int debugMCMC = RbSettings::userSettings().getDebugMCMC();
     int logMCMC = RbSettings::userSettings().getLogMCMC();
@@ -490,9 +508,12 @@ double slice_sample_doubling(double x0, slice_function& g, double w, int m)
         return x0;
 
     // 1. Determine the slice level, in log terms.
-    double gx0 = g();
+    auto gx0 = g();
 
-    double logy = gx0 + log(uniform()); // - exponential(1);
+    if (not gx0)
+        throw RbException()<<"slice_sampling_stepping_out: x0 is out of bounds!";
+
+    LogDensity logy = *gx0 + log(uniform()); // - exponential(1);
 
     int debugMCMC = RbSettings::userSettings().getDebugMCMC();
     int logMCMC = RbSettings::userSettings().getLogMCMC();

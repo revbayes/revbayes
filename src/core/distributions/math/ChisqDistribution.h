@@ -22,7 +22,7 @@ template <class valueType> class TypedDagNode;
             virtual                        ~ChisqDistribution(void);                                            //!< Virtual destructor
             double                          cdf(void) const;                                                    //!< Cumulative density function
             ChisqDistribution*              clone(void) const;                                                  //!< Create an independent clone
-            double                          computeLnProbability(void);                                         //!< Natural log of the probability density
+            LogDensity                      computeLnProbability(void);                                         //!< Natural log of the probability density
             double                          getMax(void) const;                                                 //!< Maximum value (@f$\infty@f$)
             double                          getMin(void) const;                                                 //!< Minimum value (0)
             double                          quantile(double p) const;                                           //!< Quantile function

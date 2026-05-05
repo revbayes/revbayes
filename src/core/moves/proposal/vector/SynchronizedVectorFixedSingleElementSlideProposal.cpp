@@ -89,7 +89,7 @@ double SynchronizedVectorFixedSingleElementSlideProposal::getProposalTuningParam
  *
  * \return The hastings ratio.
  */
-double SynchronizedVectorFixedSingleElementSlideProposal::doProposal( void )
+LogDensity SynchronizedVectorFixedSingleElementSlideProposal::doProposal( void )
 {
     
     // Get random number generator

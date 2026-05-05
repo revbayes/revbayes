@@ -31,7 +31,7 @@ namespace RevBayesCore {
 
         // public member functions
         IidDistribution*                                    clone(void) const;                                                                                  //!< Create an independent clone
-        double                                              computeLnProbability(void);
+        LogDensity                                          computeLnProbability(void);
         void                                                redrawValue(void);
         
     protected:
@@ -105,10 +105,10 @@ RevBayesCore::IidDistribution<valueType>* RevBayesCore::IidDistribution<valueTyp
 
 
 template <class valueType>
-double RevBayesCore::IidDistribution<valueType>::computeLnProbability( void )
+LogDensity RevBayesCore::IidDistribution<valueType>::computeLnProbability( void )
 {
     
-    double ln_prob = 0.0;
+    LogDensity ln_prob = 0.0;
     
     for (int i = 0; i < n_samples; ++i)
     {

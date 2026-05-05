@@ -344,7 +344,7 @@ const Model& Mcmcmc::getModel( void ) const
 }
 
 
-double Mcmcmc::getModelLnProbability( bool likelihood_only )
+LogDensity Mcmcmc::getModelLnProbability( bool likelihood_only )
 {
     // we need to make sure that the vector chain_values is propagated properly
     // usualy we store the posteriors in there
@@ -1364,7 +1364,7 @@ void Mcmcmc::synchronizeValues( bool likelihood_only )
         
         if ( chains[j] != NULL )
         {
-            results[j] = chains[j]->getModelLnProbability(likelihood_only);
+            results[j] = (double)chains[j]->getModelLnProbability(likelihood_only);
 //            std::cout << "results[" << j << "]=" << results[j] << ", ";
         }
         

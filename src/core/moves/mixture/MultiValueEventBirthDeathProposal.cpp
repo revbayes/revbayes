@@ -90,10 +90,10 @@ double MultiValueEventBirthDeathProposal::getProposalTuningParameter( void ) con
  *
  * \return The hastings ratio.
  */
-double MultiValueEventBirthDeathProposal::doProposal( void )
+LogDensity MultiValueEventBirthDeathProposal::doProposal( void )
 {
     
-    double hr = 0.0;
+    LogDensity hr = 0.0;
     
     const MultiValueEventDistribution* dist_mve = dynamic_cast< const MultiValueEventDistribution*>( &event_var->getDistribution() );
     if ( dist_mve != NULL )
@@ -111,7 +111,7 @@ double MultiValueEventBirthDeathProposal::doProposal( void )
 }
 
 
-double MultiValueEventBirthDeathProposal::doAutocorrelatedProposal(const AutocorrelatedEventDistribution *d)
+LogDensity MultiValueEventBirthDeathProposal::doAutocorrelatedProposal(const AutocorrelatedEventDistribution *d)
 {
     const AutocorrelatedEventDistribution& dist_mve = *d;
     
@@ -121,7 +121,7 @@ double MultiValueEventBirthDeathProposal::doAutocorrelatedProposal(const Autocor
     MultiValueEvent &mve = event_var->getValue();
     std::int64_t n_events = mve.getNumberOfEvents();
     
-    double hr = 0.0;
+    LogDensity hr = 0.0;
 
     // We need to randomly pick a birth or death move
     // Otherwise we might give birth and die every time
@@ -268,7 +268,7 @@ double MultiValueEventBirthDeathProposal::doAutocorrelatedProposal(const Autocor
 }
 
 
-double MultiValueEventBirthDeathProposal::doUncorrelatedProposal(const MultiValueEventDistribution *d)
+LogDensity MultiValueEventBirthDeathProposal::doUncorrelatedProposal(const MultiValueEventDistribution *d)
 {
     const MultiValueEventDistribution& dist_mve = *d;
     
@@ -278,7 +278,7 @@ double MultiValueEventBirthDeathProposal::doUncorrelatedProposal(const MultiValu
     MultiValueEvent &mve = event_var->getValue();
     std::int64_t n_events = mve.getNumberOfEvents();
     
-    double hr = 0.0;
+    LogDensity hr = 0.0;
 
     // We need to randomly pick a birth or death move
     // Otherwise we might give birth and die every time

@@ -214,7 +214,7 @@ namespace RevBayesCore {
 
         // non-virtual
         void                                                                bootstrap(void);
-        virtual double                                                      computeLnProbability(void);
+        virtual LogDensity                                                  computeLnProbability(void);
         virtual std::vector<charType>                                       drawAncestralStatesForNode(const TopologyNode &n);
         virtual void                                                        drawJointConditionalAncestralStates(std::vector<std::vector<charType> >& startStates, std::vector<std::vector<charType> >& endStates); //!< Simulate ancestral states for each node and each site
         virtual void                                                        drawSiteMixtureAllocations(); //!< For site mixture models (rates and/or matrices), sample the allocation of each site among the mixture categories
@@ -1053,7 +1053,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
 
 
 template<class charType>
-double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbability( void )
+LogDensity RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbability( void )
 {
     // @todo: #thread
     // This part should be done on several threads if possible

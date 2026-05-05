@@ -34,7 +34,7 @@ namespace RevBayesCore {
 
         // public member functions
         PhyloCTMCClado*                                     clone(void) const;                                                                          //!< Create an independent clone
-        virtual double                                      computeLnProbability(void);
+        virtual LogDensity                                  computeLnProbability(void);
         virtual std::vector<charType>						drawAncestralStatesForNode(const TopologyNode &n);
         virtual void                                        drawJointConditionalAncestralStates(std::vector<std::vector<charType> >& startStates, std::vector<std::vector<charType> >& endStates);
         virtual void                                        recursivelyDrawJointConditionalAncestralStates(const TopologyNode &node, std::vector<std::vector<charType> >& startStates, std::vector<std::vector<charType> >& endStates, const std::vector<size_t>& sampledSiteRates);
@@ -217,7 +217,7 @@ RevBayesCore::PhyloCTMCClado<charType>* RevBayesCore::PhyloCTMCClado<charType>::
 }
 
 template<class charType>
-double RevBayesCore::PhyloCTMCClado<charType>::computeLnProbability( void )
+LogDensity RevBayesCore::PhyloCTMCClado<charType>::computeLnProbability( void )
 {
 
     
@@ -227,7 +227,7 @@ double RevBayesCore::PhyloCTMCClado<charType>::computeLnProbability( void )
         cladoPartialLikelihoods.resize(2*this->num_nodes*this->num_site_rates*this->num_sites*this->num_chars*this->num_chars);
     }
     
-    double lnL = RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbability();
+    LogDensity lnL = RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbability();
     
     // if we are not in MCMC mode, then we need to (temporarily) free memory
     if ( this->in_mcmc_mode == false )

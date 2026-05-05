@@ -12,6 +12,7 @@
 #include "RbOrderedSet.h"
 #include "SimulationConditions.h"
 #include "RbFileManager.h"
+#include "LogDensity.h"
 #include "json.h"
 
 namespace RevBayesCore {
@@ -45,8 +46,8 @@ template <class valueType> class RbOrderedSet;
         virtual DagNode*                                            cloneDAG(DagNodeMap &nodesMap, std::map<std::string, const DagNode* > &names) const = 0;    //!< Clone the entire DAG which is connected to this node
         virtual AbstractTrace*                                      createTraceObject(void) const = 0;                                                          //!< Create an empty trace object of the right trace type
         virtual void                                                getIntegratedParents(RbOrderedSet<DagNode *>& ip) const = 0;
-        virtual double                                              getLnProbability(void) = 0;
-        virtual double                                              getLnProbabilityRatio(void) = 0;
+        virtual LogDensity                                          getLnProbability(void) = 0;
+        virtual LogDensity                                          getLnProbabilityRatio(void) = 0;
         virtual size_t                                              getNumberOfElements(void) const = 0;                                                        //!< Get the number of elements for this value
         virtual std::string                                         getValueAsString(void) const = 0;                                                           //!< Get value as a string.
         virtual json                                                getValueAsJSON(void) const = 0;                                                             //!< Get value as a string.
@@ -89,7 +90,7 @@ template <class valueType> class RbOrderedSet;
         size_t                                                      getNumberOfChildren(void) const;                                                            //!< Get the number of children for this node
         virtual size_t                                              getNumberOfMixtureElements(void) const;                                                     //!< Get the number of elements for this value
         virtual std::vector<const DagNode*>                         getParents(void) const;                                                                     //!< Get the set of parents (empty set here)
-        virtual double                                              getPrevLnProbability(void) const;
+        virtual LogDensity                                          getPrevLnProbability(void) const;
         size_t                                                      getReferenceCount(void) const;                                                              //!< Get the reference count for reference counting in smart pointers
         std::size_t                                                 getTopologicalOrder(void) const;                                                            //!< Return this node's pseudo-topological level. Equal levels are allowed.
         const std::set<size_t>&                                     getTouchedElementIndices(void) const;                                                       //!< Get the indices of the touches elements. If the set is empty, then all elements might have changed.

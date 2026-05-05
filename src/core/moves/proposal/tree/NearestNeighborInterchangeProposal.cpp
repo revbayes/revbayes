@@ -85,7 +85,7 @@ double NearestNeighborInterchangeProposal::getProposalTuningParameter( void ) co
  *
  * \return The hastings ratio.
  */
-double NearestNeighborInterchangeProposal::doProposal( void )
+LogDensity NearestNeighborInterchangeProposal::doProposal( void )
 {
     
     // reset flag

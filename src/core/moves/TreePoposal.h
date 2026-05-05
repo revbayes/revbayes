@@ -28,7 +28,7 @@ namespace RevBayesCore {
         
         // pure virtual public methods
         virtual Proposal*                                       clone(void) const = 0;                                                                  //!< Make a deep copy
-        virtual double                                          doProposal(void) = 0;                                                                   //!< Actually do the proposal.
+        virtual LogDensity                                      doProposal(void) = 0;                                                                   //!< Actually do the proposal.
         virtual std::vector<TopologyNode*>                      getChosenTopologyNodes(void) const = 0;                                                 //!< Get the vector of chosen topology nodes that will be pruned.
         virtual const std::vector<DagNode*>&                    getNodes(void) const = 0;                                                               //!< Get the vector of nodes for which the proposal is drawing new values.
         virtual const std::string&                              getProposalName(void) const = 0;                                                        //!< Get the name of this proposal used for printing out info.

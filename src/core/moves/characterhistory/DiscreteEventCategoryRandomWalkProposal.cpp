@@ -89,7 +89,7 @@ double DiscreteEventCategoryRandomWalkProposal::getProposalTuningParameter( void
  *
  * \return The hastings ratio.
  */
-double DiscreteEventCategoryRandomWalkProposal::doProposal( void )
+LogDensity DiscreteEventCategoryRandomWalkProposal::doProposal( void )
 {
     
     CharacterHistoryDiscrete &history = distribution->getCharacterHistory();

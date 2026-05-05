@@ -234,7 +234,7 @@ TopologyConstrainedTreeDistribution* TopologyConstrainedTreeDistribution::clone(
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-double TopologyConstrainedTreeDistribution::computeLnProbability( void )
+LogDensity TopologyConstrainedTreeDistribution::computeLnProbability( void )
 {
     using namespace RbConstants;
 
@@ -251,9 +251,7 @@ double TopologyConstrainedTreeDistribution::computeLnProbability( void )
         return withReason(Double::neginf)<<"Pr(tree)=0: backbone constraints do not match";
     }
     
-    double lnProb = base_distribution->computeLnProbability();
-    
-    return lnProb;
+    return base_distribution->computeLnProbability();
 }
 
 

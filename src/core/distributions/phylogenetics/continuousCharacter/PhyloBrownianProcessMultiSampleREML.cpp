@@ -80,7 +80,7 @@ PhyloBrownianProcessMultiSampleREML* PhyloBrownianProcessMultiSampleREML::clone(
 }
 
 
-double PhyloBrownianProcessMultiSampleREML::computeLnProbability( void )
+LogDensity PhyloBrownianProcessMultiSampleREML::computeLnProbability( void )
 {
     // we need to check here if we still are listining to this tree for change events
     // the tree could have been replaced without telling us

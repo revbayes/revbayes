@@ -112,7 +112,7 @@ PhyloBrownianProcessMVN* PhyloBrownianProcessMVN::clone( void ) const
 }
 
 
-double PhyloBrownianProcessMVN::computeLnProbability( void )
+LogDensity PhyloBrownianProcessMVN::computeLnProbability( void )
 {
     
     // compute the ln probability by recursively calling the probability calculation for each node

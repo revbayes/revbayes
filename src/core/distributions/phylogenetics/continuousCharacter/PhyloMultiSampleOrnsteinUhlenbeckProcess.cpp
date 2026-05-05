@@ -329,7 +329,7 @@ void PhyloMultiSampleOrnsteinUhlenbeckProcess::computeVarianceRecursive(const To
 
 
 
-double PhyloMultiSampleOrnsteinUhlenbeckProcess::computeLnProbability( void )
+LogDensity PhyloMultiSampleOrnsteinUhlenbeckProcess::computeLnProbability( void )
 {
     
     // first, compute the expectations for all tips and the variance-covariance matrix

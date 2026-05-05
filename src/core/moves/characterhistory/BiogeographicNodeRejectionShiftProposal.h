@@ -47,7 +47,7 @@ namespace RevBayesCore {
         void                                                        assignSiteIndexSet(const std::set<size_t>& s);
         BiogeographicNodeRejectionShiftProposal*                    clone(void) const;                                              //!< Clone object
         void                                                        cleanProposal(void);
-        double                                                      doProposal(void);                                               //!< Perform proposal
+        LogDensity                                                  doProposal(void);                                               //!< Perform proposal
         const std::string&                                          getProposalName(void) const;                                    //!< Get the name of the proposal for summary printing
         double                                                      getProposalTuningParameter(void) const;
         void                                                        printParameterSummary(std::ostream &o, bool name_only) const;   //!< Print the parameter summary
@@ -87,8 +87,8 @@ namespace RevBayesCore {
         std::string                                                 storedCladogeneticEvent;
         
         TopologyNode*                                               node;
-        double                                                      storedLnProb;
-        double                                                      proposedLnProb;
+        LogDensity                                                  storedLnProb;
+        LogDensity                                                  proposedLnProb;
         
         PathRejectionSampleProposal<charType>*                      nodeProposal;
         PathRejectionSampleProposal<charType>*                      leftProposal;
@@ -545,7 +545,7 @@ double RevBayesCore::BiogeographicNodeRejectionShiftProposal<charType>::computeN
  * \return The hastings ratio.
  */
 template<class charType>
-double RevBayesCore::BiogeographicNodeRejectionShiftProposal<charType>::doProposal( void )
+LogDensity RevBayesCore::BiogeographicNodeRejectionShiftProposal<charType>::doProposal( void )
 {
     
 //    if (storedCladogeneticEvent == "sympatry_copy" || storedCladogeneticEvent == "null_copy") {
@@ -570,7 +570,7 @@ double RevBayesCore::BiogeographicNodeRejectionShiftProposal<charType>::doPropos
     double p_ana_cond_bwd = computeAnagenesisConditionLnProposal();
     
     // this is the hastings ratio
-    double proposedLnProbRatio = 0.0;
+    LogDensity proposedLnProbRatio = 0.0;
     
     // update ancestral node state
     double p_node_fwd = sampleNodeCharacters();

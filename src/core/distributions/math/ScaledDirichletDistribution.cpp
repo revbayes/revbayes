@@ -36,7 +36,7 @@ ScaledDirichletDistribution* ScaledDirichletDistribution::clone( void ) const
 }
 
 
-double ScaledDirichletDistribution::computeLnProbability( void )
+LogDensity ScaledDirichletDistribution::computeLnProbability( void )
 {
     return RbStatistics::ScaledDirichlet::lnPdf(alpha->getValue(), beta->getValue(), *value);
 }

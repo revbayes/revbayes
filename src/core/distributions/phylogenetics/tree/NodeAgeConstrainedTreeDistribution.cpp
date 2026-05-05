@@ -93,7 +93,7 @@ NodeAgeConstrainedTreeDistribution* NodeAgeConstrainedTreeDistribution::clone( v
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-double NodeAgeConstrainedTreeDistribution::computeLnProbability( void )
+LogDensity NodeAgeConstrainedTreeDistribution::computeLnProbability( void )
 {
     
     // first check if the current tree matches the clade constraints
@@ -102,9 +102,7 @@ double NodeAgeConstrainedTreeDistribution::computeLnProbability( void )
         return RbConstants::Double::neginf;
     }
     
-    double ln_prob = base_distribution->computeLnProbability();
-    
-    return ln_prob;
+    return base_distribution->computeLnProbability();
 }
 
 

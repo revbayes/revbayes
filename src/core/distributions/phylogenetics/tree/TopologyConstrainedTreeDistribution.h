@@ -28,7 +28,7 @@ namespace RevBayesCore {
         
         
         // public member functions you may want to override
-        double                                              computeLnProbability(void);                                                                         //!< Compute the log-transformed probability of the current value.
+        LogDensity                                          computeLnProbability(void);                                                                         //!< Compute the log-transformed probability of the current value.
         void                                                fireTreeChangeEvent(const TopologyNode &n, const unsigned& m=0);                                    //!< The tree has changed and we want to know which part.
         virtual void                                        redrawValue(SimulationCondition c);                                                                 //!< Draw a new random value from the distribution
         virtual void                                        redrawValue(void);                                                                                  //!< Draw a new random value from the distribution

@@ -49,7 +49,7 @@ namespace RevBayesCore {
         void                                            updateStartEndTimes();
 
         // Parameter management functions
-        double                                          computeLnProbability(void);                                         //!< Compute the log-transformed probability of the current value.
+        LogDensity                                      computeLnProbability(void);                                         //!< Compute the log-transformed probability of the current value.
         double                                          computeLnProbabilityBDS(void);                                      //!< Compute the log probability assuming complete lineage sampling.
 
         // Parameter management functions

@@ -82,7 +82,7 @@ double CorrelationMatrixRandomWalkProposal::getProposalTuningParameter( void ) c
  *
  * \return The hastings ratio.
  */
-double CorrelationMatrixRandomWalkProposal::doProposal( void )
+LogDensity CorrelationMatrixRandomWalkProposal::doProposal( void )
 {
     
     stored_matrix = variable->getValue();

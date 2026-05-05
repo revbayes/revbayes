@@ -43,7 +43,7 @@ template <class valueType> class TypedDagNode;
         MatrixReal                                                      computeContrasts(void);
         RevLanguage::RevPtr<RevLanguage::RevVariable>                   executeProcedure(const std::string &n, const std::vector<DagNode*> args, bool &f);  //!< execute the procedure
         void                                                            clampAt(size_t i, double v);
-        double                                                          computeLnProbability(void);
+        LogDensity                                                      computeLnProbability(void);
         void                                                            redrawValue(void);
 
     protected:

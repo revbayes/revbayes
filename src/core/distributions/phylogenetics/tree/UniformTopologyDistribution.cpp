@@ -111,7 +111,7 @@ UniformTopologyDistribution* UniformTopologyDistribution::clone( void ) const
 }
 
 
-double UniformTopologyDistribution::computeLnProbability( void )
+LogDensity UniformTopologyDistribution::computeLnProbability( void )
 {
     
 	// first check if the current tree matches the clade constraints
