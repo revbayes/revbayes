@@ -57,7 +57,7 @@ double SingleElementScaleProposal::getProposalTuningParameter( void ) const
  *
  * \return The log hastings ratio.
  */
-double SingleElementScaleProposal::doProposal( void )
+LogDensity SingleElementScaleProposal::doProposal( void )
 {
     
     // Get random number generator

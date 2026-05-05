@@ -27,7 +27,7 @@ namespace RevBayesCore {
 		virtual ~MarkovTimesDistribution();
 
 		MarkovTimesDistribution*                            clone(void) const;                                                                                  //!< Create an independent clone
-        double                                              computeLnProbability(void);
+        LogDensity                                          computeLnProbability(void);
         void                                                redrawValue(void);
 
         // exposed methods

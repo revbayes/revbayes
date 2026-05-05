@@ -95,7 +95,7 @@ double NodeTimeSlideWeightedProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double NodeTimeSlideWeightedProposal::doProposal( void )
+LogDensity NodeTimeSlideWeightedProposal::doProposal( void )
 {
     int logMCMC = RbSettings::userSettings().getLogMCMC();
     int debugMCMC = RbSettings::userSettings().getDebugMCMC();
@@ -139,20 +139,20 @@ double NodeTimeSlideWeightedProposal::doProposal( void )
     RbOrderedSet<DagNode*> affected;
     variable->initiateGetAffectedNodes( affected );
     double f = (parent_age - child_Age);
-    double marginal = 0.0;
+    LogDensity marginal = 0.0;
     double prev_x = 0.0;
-    double pre_lnl = 0.0;
+    LogDensity pre_lnl = 0.0;
     for (size_t i = 0; i < blocks; ++i)
     {
         double newAge = interval[i] * f + child_Age;
         tau.getNode(node->getIndex()).setAge( newAge );
         
-        double lnLikelihood = variable->getLnProbability();
+        LogDensity lnLikelihood = variable->getLnProbability();
         for (RbOrderedSet<DagNode*>::iterator it = affected.begin(); it != affected.end(); ++it)
         {
             lnLikelihood += (*it)->getLnProbability();
         }
-        lnl.push_back( lnLikelihood );
+        lnl.push_back( (double)lnLikelihood );
         
         // compute the integral (marginal likelihood)
         marginal += (pre_lnl+lnLikelihood)/2.0 * (interval[i] - prev_x);
@@ -164,7 +164,7 @@ double NodeTimeSlideWeightedProposal::doProposal( void )
     marginal += pre_lnl/2.0 * (1.0 - prev_x);
     // normalize the likelihoods
     for (size_t i = 0; i < (blocks+2); ++i) {
-        lnl[i] /= marginal;
+        lnl[i] /= (double)marginal;
     }
     
     // randomly draw a new age (using the cdf of the weight function)
@@ -203,12 +203,12 @@ double NodeTimeSlideWeightedProposal::doProposal( void )
         if ( !foundForward && interval[i] > proposed_x)
         {
             foundForward = true;
-            weight_new = pre_lnl + (proposed_x-prev_x)/(interval[i]-prev_x)*(lnl[i+1]-pre_lnl);
+            weight_new = double(pre_lnl + (proposed_x-prev_x)/(interval[i]-prev_x)*(lnl[i+1]-pre_lnl));
         }
         if ( !foundBackward && interval[i] > old_x)
         {
             foundBackward = true;
-            weight_old = pre_lnl + (old_x-prev_x)/(interval[i]-prev_x)*(lnl[i+1]-pre_lnl);
+            weight_old = double(pre_lnl + (old_x-prev_x)/(interval[i]-prev_x)*(lnl[i+1]-pre_lnl));
         }
         if ( foundForward && foundBackward )
         {

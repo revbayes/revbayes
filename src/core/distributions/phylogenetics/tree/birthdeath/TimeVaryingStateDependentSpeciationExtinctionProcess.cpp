@@ -215,7 +215,7 @@ std::vector<double> TimeVaryingStateDependentSpeciationExtinctionProcess::calcul
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-double TimeVaryingStateDependentSpeciationExtinctionProcess::computeLnProbability( void )
+LogDensity TimeVaryingStateDependentSpeciationExtinctionProcess::computeLnProbability( void )
 {
     
     // check that the ages are in correct chronological order

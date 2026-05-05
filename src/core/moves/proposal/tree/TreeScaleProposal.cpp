@@ -84,7 +84,7 @@ double TreeScaleProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double TreeScaleProposal::doProposal( void )
+LogDensity TreeScaleProposal::doProposal( void )
 {
     
     

@@ -48,7 +48,7 @@ BetaDistribution* BetaDistribution::clone( void ) const
 }
 
 
-double BetaDistribution::computeLnProbability( void )
+LogDensity BetaDistribution::computeLnProbability( void )
 {
     
     // check that the value is inside the boundaries

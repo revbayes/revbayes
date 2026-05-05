@@ -37,8 +37,8 @@ namespace RevLanguage {
         UserFunctionNode<rlType>*               clone(void) const;                                                  //!< Type-safe clone
         RevBayesCore::DagNode*                  cloneDAG(RevBayesCore::DagNodeMap &nodesMap, std::map<std::string, const RevBayesCore::DagNode* > &names) const;   //!< Clone the entire DAG connected to this node
         void                                    getIntegratedParents(RevBayesCore::RbOrderedSet<RevBayesCore::DagNode *>& ip) const;
-        double                                  getLnProbability(void) { return 0.0; }                              //!< Get ln prob
-        double                                  getLnProbabilityRatio(void) { return 0.0; }                         //!< Get ln prob ratio
+        LogDensity                              getLnProbability(void) { return 0.0; }                              //!< Get ln prob
+        LogDensity                              getLnProbabilityRatio(void) { return 0.0; }                         //!< Get ln prob ratio
         typename rlType::valueType&             getValue(void);                                                     //!< Get the value
         const typename rlType::valueType&       getValue(void) const;                                               //!< Get the value (const)
         bool                                    isConstant(void) const;                                             //!< Is this DAG node constant?

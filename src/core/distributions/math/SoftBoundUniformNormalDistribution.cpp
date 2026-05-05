@@ -89,7 +89,7 @@ SoftBoundUniformNormalDistribution* SoftBoundUniformNormalDistribution::clone( v
  *
  * \return   The log-transformed probability density.
  */
-double SoftBoundUniformNormalDistribution::computeLnProbability( void )
+LogDensity SoftBoundUniformNormalDistribution::computeLnProbability( void )
 {
     if ( *value < min->getValue() )
     {

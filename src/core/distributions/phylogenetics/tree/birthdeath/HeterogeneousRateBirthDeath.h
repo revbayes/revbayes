@@ -29,7 +29,7 @@ namespace RevBayesCore {
         
         // public member functions
         HeterogeneousRateBirthDeath*                        clone(void) const;                                          //!< Create an independent clone
-        double                                              computeLnProbability(void);                                 //!< Compute ln prob of current value
+        LogDensity                                          computeLnProbability(void);                                 //!< Compute ln prob of current value
         void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<std::int64_t> &rv) const;     //!< Map the member methods to internal function calls
         void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const;     //!< Map the member methods to internal function calls
         CharacterHistoryDiscrete&                           getCharacterHistory(void);                                  //!< Get the character histories

@@ -52,7 +52,7 @@ namespace RevBayesCore {
         virtual TimeVaryingStateDependentSpeciationExtinctionProcess*   clone(void) const;
         virtual                                                         ~TimeVaryingStateDependentSpeciationExtinctionProcess(void);                                                              //!< Virtual destructor
         
-        double                                                          computeLnProbability(void);
+        LogDensity                                                      computeLnProbability(void);
         void                                                            fireTreeChangeEvent(const TopologyNode &n, const unsigned& m=0);                                                 //!< The tree has changed and we want to know which part.
         const AbstractHomologousDiscreteCharacterData&                  getCharacterData() const;
         double                                                          getOriginAge(void) const;

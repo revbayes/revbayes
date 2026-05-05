@@ -91,7 +91,7 @@ void WishartDistribution::swapParameterInternal(const DagNode *oldP, const DagNo
 }
 
 
-double WishartDistribution::computeLnProbability(void)
+LogDensity WishartDistribution::computeLnProbability(void)
 {
     
     double ret = 0;

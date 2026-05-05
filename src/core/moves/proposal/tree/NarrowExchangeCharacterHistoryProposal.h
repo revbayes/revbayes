@@ -49,7 +49,7 @@ namespace RevBayesCore {
         NarrowExchangeCharacterHistoryProposal*                     clone(void) const;                                              //!< Clone object
         double                                                      computeLnProposal( TopologyNode* node );
         double                                                      computeNodeStateProbability( TopologyNode* parent);
-        double                                                      doProposal(void);                                               //!< Perform proposal
+        LogDensity                                                  doProposal(void);                                               //!< Perform proposal
         const std::string&                                          getProposalName(void) const;                                    //!< Get the name of the proposal for summary printing
         double                                                      getProposalTuningParameter(void) const;
         void                                                        prepareProposal(void);                                          //!< Prepare the proposal
@@ -435,7 +435,7 @@ double RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType>::getPropos
  * \return The hastings ratio.
  */
 template<class charType>
-double RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType>::doProposal( void )
+LogDensity RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType>::doProposal( void )
 {
     
     // Get random number generator
@@ -482,7 +482,7 @@ double RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType>::doProposa
         }
         size_t num_sites = p->getNumberOfSites();
 
-//        double before = p->computeLnProbability();
+//        LogDensity before = p->computeLnProbability();
         
         // step 1: store all the necessary values
         stored_chosen_node = node;
@@ -532,14 +532,14 @@ double RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType>::doProposa
         sampleNodeCharactersJoint( &parent );
 
         // step 6: sample new branch histories
-        double ln_proposal_probability = 0.0;
+        LogDensity ln_proposal_probability = 0.0;
         ln_proposal_probability += node_proposal->doProposal();
         ln_proposal_probability += parent_proposal->doProposal();
         ln_proposal_probability += brother_proposal->doProposal();
         ln_proposal_probability += uncle_proposal->doProposal();
         ln_proposal_probability += grandparent_proposal->doProposal();
         
-//        double after = p->computeLnProbability();
+//        LogDensity after = p->computeLnProbability();
         
         // step 7: return the hastings ratio
         return 0.0;

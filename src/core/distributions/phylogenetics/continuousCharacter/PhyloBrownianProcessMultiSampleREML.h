@@ -24,7 +24,7 @@ namespace RevBayesCore {
         
         // public member functions
         virtual PhyloBrownianProcessMultiSampleREML*                        clone(void) const;                                                                                              //!< Create an independent clone
-        double                                                              computeLnProbability(void);
+        LogDensity                                                          computeLnProbability(void);
         void                                                                fireTreeChangeEvent(const TopologyNode &n, const unsigned& m=0);                                                //!< The tree has changed and we want to know which part.
         void                                                                redrawValue(void);
         

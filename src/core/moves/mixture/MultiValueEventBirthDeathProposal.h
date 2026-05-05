@@ -35,7 +35,7 @@ template <class variableType> class StochasticNode;
         // Basic utility functions
         void                                    cleanProposal(void);                                          //!< Clean up proposal
         MultiValueEventBirthDeathProposal*      clone(void) const;                                            //!< Clone object
-        double                                  doProposal(void);                                             //!< Perform proposal
+        LogDensity                              doProposal(void);                                             //!< Perform proposal
         const std::string&                      getProposalName(void) const;                                  //!< Get the name of the proposal for summary printing
         double                                  getProposalTuningParameter(void) const;
         void                                    prepareProposal(void);                                        //!< Prepare the proposal
@@ -48,8 +48,8 @@ template <class variableType> class StochasticNode;
         
     private:
         
-        double                                  doUncorrelatedProposal(const MultiValueEventDistribution* d); //!< Perform proposal
-        double                                  doAutocorrelatedProposal(const AutocorrelatedEventDistribution* d);
+        LogDensity                              doUncorrelatedProposal(const MultiValueEventDistribution* d); //!< Perform proposal
+        LogDensity                              doAutocorrelatedProposal(const AutocorrelatedEventDistribution* d);
         
         // parameters
         StochasticNode<MultiValueEvent>*        event_var;                                                    //!< The variable the Proposal is working on

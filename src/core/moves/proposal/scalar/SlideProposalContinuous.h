@@ -30,7 +30,7 @@ class DagNode;
         // Basic utility functions
         void                                    cleanProposal(void);                                                                //!< Clean up proposal
         SlideProposalContinuous*                clone(void) const;                                                                  //!< Clone object
-        double                                  doProposal(void);                                                                   //!< Perform proposal
+        LogDensity                              doProposal(void);                                                                   //!< Perform proposal
         const std::string&                      getProposalName(void) const;                                                        //!< Get the name of the proposal for summary printing
         double                                  getProposalTuningParameter(void) const;
         void                                    printParameterSummary(std::ostream &o, bool name_only) const;                                       //!< Print the parameter summary

@@ -17,7 +17,7 @@ namespace RevBayesCore {
         virtual                                            ~DuplicationLossProcess(void);                                                                       //!< Virtual destructor
         
         // public member functions
-        double                                              computeLnProbability(void);
+        LogDensity                                          computeLnProbability(void);
         void                                                redrawValue(void);
         void                                                setDuplicationRate(TypedDagNode<RbVector<double> >* d);
         void                                                setDuplicationRate(TypedDagNode<double>* d);

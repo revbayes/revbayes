@@ -108,7 +108,7 @@ double FixedNodeheightPruneAndRegraftProposal::getProposalTuningParameter( void 
  *
  * \return The hastings ratio.
  */
-double FixedNodeheightPruneAndRegraftProposal::doProposal( void )
+LogDensity FixedNodeheightPruneAndRegraftProposal::doProposal( void )
 {
     
     // reset flags

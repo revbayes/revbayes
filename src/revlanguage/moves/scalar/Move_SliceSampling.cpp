@@ -2,7 +2,7 @@
 #include <ostream>
 #include <string>
 
-#include <boost/optional.hpp>
+#include <optional>
 
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
@@ -22,7 +22,7 @@
 #include "RlMove.h"
 #include "RlString.h"
 
-using boost::optional;
+using std::optional;
 
 namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
@@ -72,8 +72,8 @@ void Move_SliceSampling::constructInternalObject( void )
     double window_ = static_cast<const RealPos &>( window->getRevObject() ).getValue();
     double weight_ = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
 
-    boost::optional<double> lower_bound_;
-    boost::optional<double> upper_bound_;
+    optional<double> lower_bound_;
+    optional<double> upper_bound_;
     // If the x variable is a RealPos, the lower bound needs to be at least zero.
     if (dynamic_cast<const RealPos *>( & x->getRevObject() ))
     {

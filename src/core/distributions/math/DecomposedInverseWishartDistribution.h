@@ -33,7 +33,7 @@ template <class valueType> class RbVector;
                                                     DecomposedInverseWishartDistribution(const TypedDagNode<std::int64_t>* indim, const TypedDagNode<double> *inkappa, const TypedDagNode<std::int64_t>* indf);
         virtual                                    ~DecomposedInverseWishartDistribution(void) {}
         DecomposedInverseWishartDistribution*       clone(void) const;                                                          //!< Create an independent clone
-        double                                      computeLnProbability(void);
+        LogDensity                                  computeLnProbability(void);
         void                                        redrawValue(void);
         std::int64_t                                        getDF(void) const {return df->getValue();}
         

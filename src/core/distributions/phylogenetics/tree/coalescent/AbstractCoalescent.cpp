@@ -236,7 +236,7 @@ void AbstractCoalescent::buildHeterochronousRandomBinaryTree(Tree *psi, std::vec
  * @return double for the log-transformed probability
  *
  */
-double AbstractCoalescent::computeLnProbability( void )
+LogDensity AbstractCoalescent::computeLnProbability( void )
 {
     
     // variable declarations and initialization

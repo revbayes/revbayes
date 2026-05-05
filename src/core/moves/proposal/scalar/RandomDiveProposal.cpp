@@ -82,7 +82,7 @@ double RandomDiveProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double RandomDiveProposal::doProposal( void )
+LogDensity RandomDiveProposal::doProposal( void )
 {
     
     // Get random number generator

@@ -43,7 +43,7 @@ PhyloBrownianProcess* PhyloBrownianProcess::clone(void) const
 }
 
 
-double PhyloBrownianProcess::computeLnProbability(void)
+LogDensity PhyloBrownianProcess::computeLnProbability(void)
 {
     
     double ret = recursiveLnProb(tau->getValue().getRoot());

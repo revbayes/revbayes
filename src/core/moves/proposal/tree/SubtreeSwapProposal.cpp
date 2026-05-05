@@ -95,7 +95,7 @@ bool SubtreeSwapProposal::isDescendant(const TopologyNode &n, const TopologyNode
  *
  * \return The hastings ratio.
  */
-double SubtreeSwapProposal::doProposal( void )
+LogDensity SubtreeSwapProposal::doProposal( void )
 {
     // reset flag
     failed = false;

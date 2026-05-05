@@ -36,7 +36,7 @@ PoissonDistribution* PoissonDistribution::clone( void ) const {
 }
 
 
-double PoissonDistribution::computeLnProbability( void )
+LogDensity PoissonDistribution::computeLnProbability( void )
 {
     
     double v = *value;

@@ -87,7 +87,7 @@ double NodeTimeSlidePathTruncatedNormalProposal::getProposalTuningParameter( voi
  *
  * \return The hastings ratio.
  */
-double NodeTimeSlidePathTruncatedNormalProposal::doProposal( void )
+LogDensity NodeTimeSlidePathTruncatedNormalProposal::doProposal( void )
 {
     
     // Get random number generator

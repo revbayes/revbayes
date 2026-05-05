@@ -164,7 +164,7 @@ double PhyloDistanceGamma::computeLogLikelihood( void )
 }
 
 
-double PhyloDistanceGamma::computeLnProbability( void )
+LogDensity PhyloDistanceGamma::computeLnProbability( void )
 {
     
     // sum the partials up

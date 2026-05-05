@@ -95,7 +95,7 @@ double DirichletSimplexProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double DirichletSimplexProposal::doProposal( void )
+LogDensity DirichletSimplexProposal::doProposal( void )
 {
     
     // Get random number generator

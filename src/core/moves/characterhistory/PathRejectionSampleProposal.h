@@ -55,7 +55,7 @@ namespace RevBayesCore {
         virtual double                                              computeLnProposal(const TopologyNode& nd, const BranchHistory& bh);
         void                                                        cleanProposal(void);
         PathRejectionSampleProposal*                                clone(void) const;                                                              //!< Clone object
-        double                                                      doProposal(void);                                                               //!< Perform proposal
+        LogDensity                                                  doProposal(void);                                                               //!< Perform proposal
         virtual const std::string&                                  getProposalName(void) const;                                                    //!< Get the name of the proposal for summary printing
         double                                                      getProposalTuningParameter(void) const;
         const double                                                getRootBranchLength(void);                                     //!< get the length of the root branch
@@ -84,8 +84,8 @@ namespace RevBayesCore {
 
         const TopologyNode*                                         node;
 
-        double                                                      storedLnProb;
-        double                                                      proposedLnProb;
+        LogDensity                                                  storedLnProb;
+        LogDensity                                                  proposedLnProb;
 
         size_t                                                      numStates;
         size_t                                                      numCharacters;
@@ -285,7 +285,7 @@ double RevBayesCore::PathRejectionSampleProposal<charType>::getProposalTuningPar
  * \return The hastings ratio.
  */
 template<class charType>
-double RevBayesCore::PathRejectionSampleProposal<charType>::doProposal( void )
+LogDensity RevBayesCore::PathRejectionSampleProposal<charType>::doProposal( void )
 {
 
     TreeHistoryCtmc<charType>* p = dynamic_cast< TreeHistoryCtmc<charType>* >( &ctmc->getDistribution() );

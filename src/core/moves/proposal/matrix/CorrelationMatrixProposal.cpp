@@ -84,7 +84,7 @@ double CorrelationMatrixProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double CorrelationMatrixProposal::doProposal( void ) {
+LogDensity CorrelationMatrixProposal::doProposal( void ) {
     
     // Get a pointer to the random number generator
     RandomNumberGenerator* rng = GLOBAL_RNG;

@@ -235,7 +235,7 @@ double ConditionedBirthDeathShiftProcessContinuous::computeBranchProbability(dou
 
 
 /* Compute probability */
-double ConditionedBirthDeathShiftProcessContinuous::computeLnProbability( void )
+LogDensity ConditionedBirthDeathShiftProcessContinuous::computeLnProbability( void )
 {
     
     // Variable declarations and initialization
@@ -362,7 +362,7 @@ double ConditionedBirthDeathShiftProcessContinuous::computeNodeProbability(const
             else
             {
                 base_distribution_speciation->setValue( new double(current_value_birth) );
-                ln_prob_node += base_distribution_speciation->computeLnProbability();
+                ln_prob_node += (double)base_distribution_speciation->computeLnProbability();
             }
             
             if ( base_distribution_extinction == NULL )
@@ -375,7 +375,7 @@ double ConditionedBirthDeathShiftProcessContinuous::computeNodeProbability(const
             else
             {
                 base_distribution_extinction->setValue( new double(current_value_death) );
-                ln_prob_node += base_distribution_extinction->computeLnProbability();
+                ln_prob_node += (double)base_distribution_extinction->computeLnProbability();
             }
             
             CharacterEvent* event = *it;

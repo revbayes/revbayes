@@ -36,7 +36,7 @@ template <class valueType> class RbVector;
         // public member functions
 
         InverseWishartDistribution*                         clone(void) const;                                                          //!< Create an independent clone
-        double                                              computeLnProbability(void);
+        LogDensity                                          computeLnProbability(void);
         void                                                redrawValue(void);
         
         int                                                 getDF() const {return (int)df->getValue();}

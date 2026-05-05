@@ -42,7 +42,7 @@ template <class valueType> class TypedDagNode;
         virtual PhyloOrnsteinUhlenbeckProcessEVE*                           clone(void) const;                                                                      //!< Create an independent clone
         
         // non-virtual
-        double                                                              computeLnProbability(void);
+        LogDensity                                                          computeLnProbability(void);
         void                                                                setAlpha(const TypedDagNode< double >* a);
         void                                                                setAlpha(const TypedDagNode< RbVector< double > >* a);
         void                                                                setRootState(const TypedDagNode< double >* s);

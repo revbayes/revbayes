@@ -89,7 +89,7 @@ double MultiValueEventScaleProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double MultiValueEventScaleProposal::doProposal( void )
+LogDensity MultiValueEventScaleProposal::doProposal( void )
 {
     
     // Get random number generator

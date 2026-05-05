@@ -165,7 +165,7 @@ void AbstractMultispeciesCoalescentGenewise::buildRandomBinaryTree(std::vector< 
 
 
 
-double AbstractMultispeciesCoalescentGenewise::computeLnProbability( void )
+LogDensity AbstractMultispeciesCoalescentGenewise::computeLnProbability( void )
 {
     resetTipAllocations();
 

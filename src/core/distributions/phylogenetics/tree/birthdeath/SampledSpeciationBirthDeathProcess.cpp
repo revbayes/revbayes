@@ -164,7 +164,7 @@ SampledSpeciationBirthDeathProcess* SampledSpeciationBirthDeathProcess::clone( v
 
 
 /* Compute probability */
-double SampledSpeciationBirthDeathProcess::computeLnProbability( void )
+LogDensity SampledSpeciationBirthDeathProcess::computeLnProbability( void )
 {
     // for now
     totalScaling = 0;

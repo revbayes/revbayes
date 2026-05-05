@@ -26,7 +26,7 @@ class DagNode;
         // public member functions
         void                                                assignBranchLengths(Tree &psi);                                         //!< Draw lengths for branches with missing values
         UniformTopologyBranchLengthDistribution*            clone(void) const;                                                      //!< Create an independent clone
-        double                                              computeLnProbability(void);
+        LogDensity                                          computeLnProbability(void);
         virtual void                                        fireTreeChangeEvent(const TopologyNode &n, const unsigned& m=0);        //!< This node was changed in the tree
         const std::vector<Taxon>&                           getTaxa(void) const;
         void                                                redrawValue(void);

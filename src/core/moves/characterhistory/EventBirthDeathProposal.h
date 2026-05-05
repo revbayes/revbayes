@@ -30,7 +30,7 @@ namespace RevBayesCore {
         // Basic utility functions
         bool                                    allowClamped() const override { return true; }                                      //!< Proposal doesn't change the tree, but changes parameters describing the process that generates the tree. See #600
         void                                    cleanProposal(void) override;                                                       //!< Clean up proposal
-        double                                  doProposal(void) override;                                                          //!< Perform proposal
+        LogDensity                              doProposal(void) override;                                                          //!< Perform proposal
         virtual void                            initialize();                                                                       //!< Initialize the proposal
         double                                  getProposalTuningParameter(void) const override;
         void                                    printParameterSummary(std::ostream &o, bool name_only) const override;              //!< Print the parameter summary

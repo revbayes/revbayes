@@ -86,7 +86,7 @@ double NodeTimeSlideUniformProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double NodeTimeSlideUniformProposal::doProposal( void )
+LogDensity NodeTimeSlideUniformProposal::doProposal( void )
 {
     // Get random number generator
     RandomNumberGenerator* rng     = GLOBAL_RNG;

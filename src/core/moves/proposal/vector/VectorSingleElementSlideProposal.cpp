@@ -81,7 +81,7 @@ double VectorSingleElementSlideProposal::getProposalTuningParameter( void ) cons
  *
  * \return The hastings ratio.
  */
-double VectorSingleElementSlideProposal::doProposal( void )
+LogDensity VectorSingleElementSlideProposal::doProposal( void )
 {
     
     // Get random number generator

@@ -151,7 +151,7 @@ double RevBayesCore::AdaptiveReversibleJumpProposal::getProposalTuningParameter(
  *
  * \return The hastings ratio.
  */
-double RevBayesCore::AdaptiveReversibleJumpProposal::doProposal( void )
+LogDensity RevBayesCore::AdaptiveReversibleJumpProposal::doProposal( void )
 {
     
     
@@ -205,7 +205,7 @@ double RevBayesCore::AdaptiveReversibleJumpProposal::doProposal( void )
     
     
     
-    double ln_Hastings_ratio = 0.0;
+    LogDensity ln_Hastings_ratio = 0.0;
     
     if ( stored_index == 0 )
     {

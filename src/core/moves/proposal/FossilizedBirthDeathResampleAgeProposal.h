@@ -30,7 +30,7 @@ namespace RevBayesCore {
         // Basic utility functions
         void                                     		  cleanProposal(void);                                          //!< Clean up proposal
         FossilizedBirthDeathResampleAgeProposal<valType>* clone(void) const;                                            //!< Clone object
-        double                                   		  doProposal(void);                                             //!< Perform proposal
+        LogDensity                               		  doProposal(void);                                             //!< Perform proposal
         const std::string&                       		  getProposalName(void) const;                                  //!< Get the name of the proposal for summary printing
         double                                   		  getProposalTuningParameter(void) const;
         void                                     		  prepareProposal(void);                                        //!< Prepare the proposal
@@ -128,7 +128,7 @@ double RevBayesCore::FossilizedBirthDeathResampleAgeProposal<valType>::getPropos
  * \return The hastings ratio.
  */
 template<class valType>
-double RevBayesCore::FossilizedBirthDeathResampleAgeProposal<valType>::doProposal( void )
+LogDensity RevBayesCore::FossilizedBirthDeathResampleAgeProposal<valType>::doProposal( void )
 {
 
     // Get random number generator

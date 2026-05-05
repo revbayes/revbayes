@@ -68,7 +68,7 @@ namespace RevBayesCore {
 
         // public member functions
         UltrametricTreeDistribution*                        clone(void) const;                                          //!< Create an independent clone
-        double                                              computeLnProbability(void);                                 //!< Compute ln prob of current value
+        LogDensity                                          computeLnProbability(void);                                 //!< Compute ln prob of current value
         void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const;     //!< Map the member methods to internal function calls
         void                                                redrawValue(void);                                          //!< Draw a new random value from distribution
         
@@ -89,7 +89,7 @@ namespace RevBayesCore {
         void                                                buildRandomBinaryHistory(std::vector<TopologyNode *> &tips);
         Split                                               collectTreeSample(const TopologyNode& n, RbBitSet& in, std::map<Split, double>& bl);
         Split                                               collectSplits(const TopologyNode& n, RbBitSet& in, std::vector<Split>& s) const;
-        double                                              computeBranchRateLnProbability(const Tree &x, const std::string &newick, const std::vector<Split> &s, size_t index) const;
+        LogDensity                                          computeBranchRateLnProbability(const Tree &x, const std::string &newick, const std::vector<Split> &s, size_t index) const;
         void                                                computeBranchRates(const Tree &x, const std::string &newick, const std::vector<Split> &s, size_t index, std::vector<double> &rates) const;
         void                                                prepareTreeSamples(const std::vector<Tree>& trees);
         void                                                simulateTree(void);

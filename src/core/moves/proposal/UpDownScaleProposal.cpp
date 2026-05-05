@@ -156,7 +156,7 @@ double UpDownScaleProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double UpDownScaleProposal::doProposal( void )
+LogDensity UpDownScaleProposal::doProposal( void )
 {
     
     // Get random number generator

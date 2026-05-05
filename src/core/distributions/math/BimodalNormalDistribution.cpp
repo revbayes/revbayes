@@ -82,7 +82,7 @@ BimodalNormalDistribution* BimodalNormalDistribution::clone( void ) const
  *
  * \return   The log-transformed probability density.
  */
-double BimodalNormalDistribution::computeLnProbability( void )
+LogDensity BimodalNormalDistribution::computeLnProbability( void )
 {
     return log(p->getValue() * RbStatistics::Normal::pdf( mean1->getValue(), stDev1->getValue(), *value) + (1.0 - p->getValue()) * RbStatistics::Normal::pdf( mean2->getValue(), stDev2->getValue(), *value) );
 }

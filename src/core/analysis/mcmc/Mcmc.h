@@ -50,7 +50,7 @@ namespace RevBayesCore {
         size_t                                              getChainIndex(void) const;                                                              //!< Get the index of this chain
         path                                                getCheckpointFile(void) const;
         const Model&                                        getModel(void) const;
-        double                                              getModelLnProbability(bool like_only);
+        LogDensity                                          getModelLnProbability(bool like_only);
         RbVector<Monitor>&                                  getMonitors(void);
         RbVector<Move>&                                     getMoves(void);
         std::vector<tuningInfo>                             getMovesTuningInfo(void);

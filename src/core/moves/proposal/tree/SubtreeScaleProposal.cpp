@@ -114,7 +114,7 @@ std::pair<double,double> getOldestTipAgeAndScalingFactor(TopologyNode& n)
  *
  * \return The hastings ratio.
  */
-double SubtreeScaleProposal::doProposal( void )
+LogDensity SubtreeScaleProposal::doProposal( void )
 {
     // Get random number generator
     RandomNumberGenerator* rng     = GLOBAL_RNG;

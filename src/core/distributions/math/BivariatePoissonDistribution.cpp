@@ -40,7 +40,7 @@ BivariatePoissonDistribution* BivariatePoissonDistribution::clone( void ) const 
 }
 
 
-double BivariatePoissonDistribution::computeLnProbability( void )
+LogDensity BivariatePoissonDistribution::computeLnProbability( void )
 {
 
   std::vector<std::int64_t> v = *value;

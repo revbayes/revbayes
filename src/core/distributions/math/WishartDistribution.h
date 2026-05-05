@@ -37,7 +37,7 @@ class DagNode;
         // public member functions
 
         WishartDistribution*                                clone(void) const;                                                          //!< Create an independent clone
-        double                                              computeLnProbability(void);
+        LogDensity                                          computeLnProbability(void);
         void                                                redrawValue(void);
         
         std::int64_t                                                getDF() const {return df->getValue();}

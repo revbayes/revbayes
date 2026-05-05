@@ -48,7 +48,7 @@ PointMassDistribution* PointMassDistribution::clone( void ) const
 }
 
 
-double PointMassDistribution::computeLnProbability( void )
+LogDensity PointMassDistribution::computeLnProbability( void )
 {
     
     return log(*value == val->getValue());

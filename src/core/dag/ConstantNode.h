@@ -19,8 +19,8 @@ namespace RevBayesCore {
         virtual ConstantNode<valueType>*                    clone(void) const;                                                          //!< Create a clone of this node.
         DagNode*                                            cloneDAG(DagNodeMap &nodesMap, std::map<std::string, const DagNode* > &names) const; //!< Clone the entire DAG which is connected to this node
         void                                                getIntegratedParents(RbOrderedSet<DagNode *>& ip) const;
-        double                                              getLnProbability(void);
-        double                                              getLnProbabilityRatio(void);
+        LogDensity                                          getLnProbability(void);
+        LogDensity                                          getLnProbabilityRatio(void);
         valueType&                                          getValue(void);
         const valueType&                                    getValue(void) const;
         bool                                                isConstant(void) const;                                                     //!< Is this DAG node constant?
@@ -164,7 +164,7 @@ void RevBayesCore::ConstantNode<valueType>::getIntegratedParents(RbOrderedSet<Da
 
 
 template<class valueType>
-double RevBayesCore::ConstantNode<valueType>::getLnProbability( void )
+LogDensity RevBayesCore::ConstantNode<valueType>::getLnProbability( void )
 {
     
     return 0.0;
@@ -172,7 +172,7 @@ double RevBayesCore::ConstantNode<valueType>::getLnProbability( void )
 
 
 template<class valueType>
-double RevBayesCore::ConstantNode<valueType>::getLnProbabilityRatio( void )
+LogDensity RevBayesCore::ConstantNode<valueType>::getLnProbabilityRatio( void )
 {
     
     return 0.0;

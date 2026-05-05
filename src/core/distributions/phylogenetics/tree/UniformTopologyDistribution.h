@@ -21,7 +21,7 @@ class TopologyNode;
         
         // public member functions
         UniformTopologyDistribution*                        clone(void) const;                                                                                  //!< Create an independent clone
-        double                                              computeLnProbability(void);
+        LogDensity                                          computeLnProbability(void);
         void                                                redrawValue(void);
         virtual void                                        setValue(Tree *v, bool f=false);                                    //!< Set the current value, e.g. attach an observation (clamp)
 

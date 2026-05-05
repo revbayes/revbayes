@@ -80,7 +80,7 @@ double ElementSlideProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double ElementSlideProposal::doProposal( void )
+LogDensity ElementSlideProposal::doProposal( void )
 {
     
     // Get random number generator

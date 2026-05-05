@@ -91,7 +91,7 @@ double EventTimeSlideProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double EventTimeSlideProposal::doProposal( void )
+LogDensity EventTimeSlideProposal::doProposal( void )
 {
     // reset flags
     failed = true;

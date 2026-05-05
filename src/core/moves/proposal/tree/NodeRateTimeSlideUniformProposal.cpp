@@ -107,7 +107,7 @@ double NodeRateTimeSlideUniformProposal::getProposalTuningParameter( void ) cons
  *
  * \return The hastings ratio.
  */
-double NodeRateTimeSlideUniformProposal::doProposal( void )
+LogDensity NodeRateTimeSlideUniformProposal::doProposal( void )
 {
     int logMCMC = RbSettings::userSettings().getLogMCMC();
     int debugMCMC = RbSettings::userSettings().getDebugMCMC();

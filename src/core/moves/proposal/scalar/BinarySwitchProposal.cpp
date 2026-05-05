@@ -72,7 +72,7 @@ double BinarySwitchProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double BinarySwitchProposal::doProposal( void )
+LogDensity BinarySwitchProposal::doProposal( void )
 {
     
     std::int64_t &val = variable->getValue();

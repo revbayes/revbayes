@@ -170,7 +170,7 @@ void AbstractRootedTreeDistribution::buildRandomBinaryTree(std::vector<TopologyN
 
 
 
-double AbstractRootedTreeDistribution::computeLnProbability( void )
+LogDensity AbstractRootedTreeDistribution::computeLnProbability( void )
 {
     using namespace RbConstants;
 

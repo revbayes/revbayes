@@ -43,7 +43,7 @@ NegativeBinomialDistribution* NegativeBinomialDistribution::clone( void ) const 
 }
 
 
-double NegativeBinomialDistribution::computeLnProbability( void )
+LogDensity NegativeBinomialDistribution::computeLnProbability( void )
 {
     
     // check that the value is inside the boundaries

@@ -32,7 +32,7 @@ namespace RevBayesCore {
         
         // public member functions
         MixtureDistribution*                                clone(void) const override;                                                             //!< Create an independent clone
-        double                                              computeLnProbability(void) override;
+        LogDensity                                          computeLnProbability(void) override;
         void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, std::int64_t &rv) const override;     //!< Map the member methods to internal function calls
         const RevBayesCore::RbVector<mixtureType>&          getParameterValues(void) const override;
         size_t                                              getCurrentIndex(void) const;
@@ -100,7 +100,7 @@ RevBayesCore::MixtureDistribution<mixtureType>* RevBayesCore::MixtureDistributio
 
 
 template <class mixtureType>
-double RevBayesCore::MixtureDistribution<mixtureType>::computeLnProbability( void )
+LogDensity RevBayesCore::MixtureDistribution<mixtureType>::computeLnProbability( void )
 {
     
     return log(probabilities->getValue()[index]);

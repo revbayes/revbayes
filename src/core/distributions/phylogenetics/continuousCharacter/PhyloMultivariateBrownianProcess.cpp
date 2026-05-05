@@ -39,7 +39,7 @@ PhyloMultivariateBrownianProcess* PhyloMultivariateBrownianProcess::clone(void) 
 
 
 
-double PhyloMultivariateBrownianProcess::computeLnProbability(void)
+LogDensity PhyloMultivariateBrownianProcess::computeLnProbability(void)
 {
     
     double lnProb = 0;

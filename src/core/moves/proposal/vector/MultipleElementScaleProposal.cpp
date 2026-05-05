@@ -101,7 +101,7 @@ double MultipleElementScaleProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double MultipleElementScaleProposal::doProposal( void )
+LogDensity MultipleElementScaleProposal::doProposal( void )
 {
     
     // Get random number generator

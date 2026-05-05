@@ -48,7 +48,7 @@ GammaDistribution* GammaDistribution::clone( void ) const
 }
 
 
-double GammaDistribution::computeLnProbability( void )
+LogDensity GammaDistribution::computeLnProbability( void )
 {
     
     double v = *value;

@@ -104,7 +104,7 @@ double FossilTipTimeSlideUniformProposal::getProposalTuningParameter( void ) con
  *
  * \return The hastings ratio.
  */
-double FossilTipTimeSlideUniformProposal::doProposal( void )
+LogDensity FossilTipTimeSlideUniformProposal::doProposal( void )
 {
     
     // Get random number generator

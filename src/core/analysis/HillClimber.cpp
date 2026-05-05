@@ -224,10 +224,10 @@ const Model& HillClimber::getModel( void ) const
  * Get the joint posterior probability of the current state for this model.
  * Note that the joint posterior is the true, unscaled and unheated value.
  */
-double HillClimber::getModelLnProbability(bool likelihood_only)
+LogDensity HillClimber::getModelLnProbability(bool likelihood_only)
 {
     const std::vector<DagNode*> &n = model->getDagNodes();
-    double pp = 0.0;
+    LogDensity pp = 0.0;
     for (std::vector<DagNode*>::const_iterator it = n.begin(); it != n.end(); ++it)
     {
         DagNode *the_node = *it;
@@ -358,7 +358,7 @@ void HillClimber::initializeSampler( void )
 
     int numTries    = 0;
     int maxNumTries = 100;
-    double lnProbability = 0.0;
+    LogDensity lnProbability = 0.0;
     for ( ; numTries < maxNumTries; numTries ++ )
     {
         // a flag if we failed to find a valid starting value
@@ -370,9 +370,9 @@ void HillClimber::initializeSampler( void )
             DagNode* node = (*i);
             node->touch();
 
-            double lnProb = node->getLnProbability();
+            LogDensity lnProb = node->getLnProbability();
 
-            if ( !RbMath::isAComputableNumber(lnProb) )
+            if ( not lnProb.isfinite() )
             {
                 std::stringstream ss;
                 ss << "Could not compute lnProb for node " << node->getName() << "." << std::endl;

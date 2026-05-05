@@ -240,10 +240,10 @@ RbBitSet BranchRateTreeDistribution::collectTreeSample(const TopologyNode& n, Rb
 }
 
 
-double BranchRateTreeDistribution::computeLnProbability( void )
+LogDensity BranchRateTreeDistribution::computeLnProbability( void )
 {
 
-    double ln_prob = 0.0;
+    LogDensity ln_prob = 0.0;
 
     // make the time tree unrooted
     const Tree &time_tree_copy = time_tree->getValue();
@@ -359,7 +359,7 @@ double BranchRateTreeDistribution::computeLnProbability( void )
             // there is a Jacobian term because we use the root branch (i.e., the sum of the two branches subtending the root) as a single variable
             // however, the probability density is defined on the two branches subtending the root.
             // the Jacobian is J = root_branch = (left_branch + right_branch)
-            ln_prob += log( branch_exp_num_events ) / 2.0; // we need to divide by 2 because we will go twice into this if statement
+            ln_prob += logDensity( branch_exp_num_events ) / 2.0; // we need to divide by 2 because we will go twice into this if statement
 
             // do something with the root branch, i.e., use a root branch fraction
             double frac = 1.0;

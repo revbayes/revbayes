@@ -18,7 +18,7 @@ namespace RevBayesCore {
         virtual                                            ~MultispeciesCoalescentMigration(void);                                                                       //!< Virtual destructor
         
         // public member functions
-        double                                              computeLnProbability(void);
+        LogDensity                                          computeLnProbability(void);
         void                                                redrawValue(void);
         virtual void                                        setValue(Tree *v, bool f=false);                                                                    //!< Set the current value, e.g. attach an observation (clamp)
         

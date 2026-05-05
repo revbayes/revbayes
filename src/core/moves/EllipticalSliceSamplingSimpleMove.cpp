@@ -127,8 +127,8 @@ public:
     double operator()()
     {
 
-        double lnPrior = 0.0;
-        double lnLikelihood = 0.0;
+        LogDensity lnPrior = 0.0;
+        LogDensity lnLikelihood = 0.0;
 
 
         // Under Murray's sampler, we're drawing new values from this prior, and we don't need to compute their probability
@@ -142,9 +142,9 @@ public:
         }
 
         // 3. exponentiate with the chain heat
-        double lnPosterior = lHeat * lnLikelihood + lnPrior;
+        LogDensity lnPosterior = lHeat * lnLikelihood + lnPrior;
 
-        return lnPosterior;
+        return (double)lnPosterior;
     }
 
 

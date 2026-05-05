@@ -55,7 +55,7 @@ RandomCategoryWalkProposal* RandomCategoryWalkProposal::clone( void ) const
  *
  * \return The hastings ratio.
  */
-double RandomCategoryWalkProposal::doProposal( void )
+LogDensity RandomCategoryWalkProposal::doProposal( void )
 {
     
     // reset the failed flag

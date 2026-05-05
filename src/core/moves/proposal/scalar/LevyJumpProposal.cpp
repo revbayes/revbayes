@@ -75,7 +75,7 @@ double LevyJumpProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double LevyJumpProposal::doProposal( void )
+LogDensity LevyJumpProposal::doProposal( void )
 {
     
     // Gottardo and Rafferty 2009

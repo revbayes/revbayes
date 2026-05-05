@@ -49,7 +49,7 @@ VarianceGammaDistribution* VarianceGammaDistribution::clone( void ) const {
 }
 
 
-double VarianceGammaDistribution::computeLnProbability( void ) {
+LogDensity VarianceGammaDistribution::computeLnProbability( void ) {
     
     return RbStatistics::VarianceGamma::lnPdf(mu->getValue(), kappa->getValue(), tau->getValue(), time->getValue(), *value);
     
