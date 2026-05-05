@@ -10,7 +10,6 @@
 #include <vector>
 
 #include "Cloneable.h"
-#include "DagNode.h"
 #include "MonteCarloAnalysisOptions.h"
 #include "MonteCarloSampler.h"
 #include "MoveSchedule.h"
@@ -112,12 +111,12 @@ void PowerPosteriorAnalysis::burnin(size_t generations, size_t tuningInterval, c
     {
         sampler->setCheckpointFile(ckp_burnin_file);
         /**
-         * We deliberately use the base-class implementation here, which does not include monitor handling or parsing the *_mcmc
-         * checkpoint file. We do not expect to have this file, and if we do have one, we ignore it, since the generation counter
-         * stored in it is of no use to us. Similarly, during the burnin stage, we have no monitors to restart, and we do not want
-         * to create new ones, either.
+         * We deliberately use the base step only here, which does not include monitor handling or parsing the *_mcmc checkpoint
+         * file. We do not expect to have this file, and if we do have one, we ignore it, since the generation counter stored in
+         * it is of no use to us. Similarly, during the burnin stage, we have no monitors to restart, and we do not want to
+         * create new ones, either.
          */
-        sampler->MonteCarloSampler::initializeSamplerFromCheckpoint();
+        sampler->baseInitializeSamplerFromCheckpoint();
     }
     
     
@@ -170,12 +169,23 @@ void PowerPosteriorAnalysis::burnin(size_t generations, size_t tuningInterval, c
         if ( checkpoint_interval != 0 && (k % checkpoint_interval) == 0 )
         {
             sampler->setCheckpointFile(checkpoint_file);
-            /** Again using the base-class implementation here, because we do not want to write out the *_mcmc checkpoint file.
-             * Since we have no monitors to restart, and since the length of the pre-burnin stage is reset upon resumption
-             * -- i.e., it is determined by whatever we specify in the call to .burnin() that we perform after having called
-             * initializeFromCheckpoint() -- we do not really care about the generation counter.
+            
+            /** Single-writer gate (analysis-level process_active): under MPI with processors_per_likelihood == 1, initMPI()
+             * sets the sampler's process_active true on every rank, so an unguarded baseCheckpoint() call would let every
+             * rank race on the same .tmp -> rename for the burnin checkpoint files.
              */
-            sampler->MonteCarloSampler::checkpoint();
+            if ( process_active == true )
+            {
+                /** Again using the base step only here, because we do not want to write out the *_mcmc checkpoint file. We have no
+                 * monitors to restart, and the length of the pre-burnin stage is reset upon resumption -- i.e., it is determined
+                 * by whatever we specify in the call to .burnin() that we perform after having called initializeFromCheckpoint()
+                 * -- so we do not really care about the generation counter.
+                 */
+                sampler->baseCheckpoint();
+            }
+#ifdef RB_MPI
+            MPI_Barrier( MPI_COMM_WORLD );
+#endif
         }
     }
     
@@ -186,42 +196,57 @@ void PowerPosteriorAnalysis::burnin(size_t generations, size_t tuningInterval, c
     }
     
     // make sure to reset this so that runStone() / runAll() knows to start from scratch
-    resume_from_checkpoint = false;
+    setResumeFromCheckpoint( false );
     
 }
 
 
-void PowerPosteriorAnalysis::checkpoint( size_t stone_idx, const path &base_checkpoint_file_name, size_t planned_burnin )
+void PowerPosteriorAnalysis::checkpoint( size_t stone_idx, const path &base_checkpoint_file_name, size_t planned_burnin, bool one_only )
 {
     path stone_file_name = appendToStem( base_checkpoint_file_name, "_stone_" + std::to_string(stone_idx + 1) );
     
     sampler->setCheckpointFile( stone_file_name );
-    sampler->checkpoint();
+    // runOneStone: every MPI rank shares the same stone index, but initMPI() marks every rank sampler-active when
+    // processors_per_likelihood == 1, so MonteCarloSampler::checkpoint() would otherwise all write/rename the same paths.
+    // runAll: each rank runs a disjoint stone block and checkpoints distinct files; keep per-rank sampler checkpointing.
+    if ( ( not one_only ) || process_active )
+    {
+        sampler->checkpoint();
+    }
     
-    // save the power and planned burnin for this stone
-    path stone_info_file_name = appendToStem( stone_file_name, "_stone_info" );
-
-    path tmp_stone_info_file_name = stone_info_file_name.parent_path() / ("." + stone_info_file_name.filename().string() + ".tmp");
-    std::ofstream out_stream_mcmc( tmp_stone_info_file_name.string() );
-    out_stream_mcmc << "power = " << powers[stone_idx] << std::endl;
-    out_stream_mcmc << "planned_burnin = " << planned_burnin << std::endl;
-
-    out_stream_mcmc.close();
-    const bool ok = out_stream_mcmc.good();
-    if ( !ok )
+    // save the power and planned burnin for this stone; avoid MPI races on one file
+    if ( process_active == true )
     {
-        RBOUT( "Warning: failed to write \"" + stone_info_file_name.string() + "\"; keeping existing file." );
-        std::error_code ec;
-        std::filesystem::remove( tmp_stone_info_file_name, ec );
-    }
-    else
+        path stone_info_file_name = appendToStem( stone_file_name, "_stone_info" );
+
+        path tmp_stone_info_file_name = stone_info_file_name.parent_path() / ("." + stone_info_file_name.filename().string() + ".tmp");
+        std::ofstream out_stream_mcmc( tmp_stone_info_file_name.string() );
+        out_stream_mcmc << "power = " << powers[stone_idx] << std::endl;
+        out_stream_mcmc << "planned_burnin = " << planned_burnin << std::endl;
+
+        out_stream_mcmc.close();
+        const bool ok = out_stream_mcmc.good();
+        if ( !ok )
+        {
+            RBOUT( "Warning: failed to write \"" + stone_info_file_name.string() + "\"; keeping existing file." );
+            std::error_code ec;
+            std::filesystem::remove( tmp_stone_info_file_name, ec );
+        }
+        else
 #ifdef _WIN32
-    if ( MoveFileExW( tmp_stone_info_file_name.wstring().c_str(), stone_info_file_name.wstring().c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH ) == 0 )
-    {
-        throw RbException() << "Could not replace checkpoint file " << stone_info_file_name;
-    }
+        if ( MoveFileExW( tmp_stone_info_file_name.wstring().c_str(), stone_info_file_name.wstring().c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH ) == 0 )
+        {
+            throw RbException() << "Could not replace checkpoint file " << stone_info_file_name;
+        }
 #else
-    std::filesystem::rename(tmp_stone_info_file_name, stone_info_file_name);
+        std::filesystem::rename(tmp_stone_info_file_name, stone_info_file_name);
+#endif
+    }
+#ifdef RB_MPI
+    if ( one_only )
+    {
+        MPI_Barrier( MPI_COMM_WORLD );
+    }
 #endif
 }
 
@@ -683,10 +708,7 @@ void PowerPosteriorAnalysis::runAll(size_t gen, double burnin_fraction, size_t p
     MpiUtilities::synchronizeRNG(  );
 #endif
     
-    if ( process_active == true )
-    {
-        summarizeStones();
-    }
+    summarizeStones();
     
 }
 
@@ -768,10 +790,18 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
     
     size_t pid_to_print = *std::min_element(ceil_pids.begin(), ceil_pids.end());
 
+    // runAll(): every rank runs its own unique set of stones; pid_to_print is used for printing the console progress.
+    // runOneStone(): every rank executes the same stone; process_active is used for checkpoint and sampler file I/O.
+    // Flat initializeFromCheckpoint(single stone) can make pid_to_print != active rank (the stone "belongs" to one worker slot in
+    // stone_sequences). Monitors, the per-stone likelihood table, and console progress must then follow process_active; otherwise
+    // the likelihood file is written by a different process than wrote the checkpoint, which breaks resumption.
+    const bool writer_rank_one_stone = ( not one_only ) || process_active;
+    const bool stone_console = one_only ? process_active : ( pid == pid_to_print );
+
     auto ckp_it = ckp_stone_file.find( idx );
     const bool stone_resumes_from_checkpoint = ( ckp_it != ckp_stone_file.end() );
     
-    if (pid == pid_to_print)
+    if ( stone_console )
     {
         if ( one_only )
         {
@@ -855,7 +885,7 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
         
         k_start = sampler->getCurrentGeneration();
 
-        if (pid == pid_to_print and k_start < burnin)
+        if ( stone_console and k_start < burnin )
         {
             RBOUT( "   Finishing a previously scheduled and interrupted burnin stage; burninFraction of the current run() is ignored." );
         }
@@ -877,7 +907,7 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
         // Let's do a stone-specific pre-burnin: this is different from the pre-burnin performed by .burnin(), which is global.
         for (size_t k=1; k<=pre_burnin_generations; k++)
         {
-            if (pid == pid_to_print)
+            if ( stone_console )
             {
                 if (k % preburninPrintInterval == 0)
                 {
@@ -902,7 +932,7 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
     const size_t k_final = k_start + gen;
     
     // Monitor. Note that if we are running just one stone at a time, only one process is allowed to write the monitors.
-    if (not one_only or (one_only and pid == pid_to_print))
+    if ( writer_rank_one_stone )
     {
         sampler->startMonitors( gen, stone_resumes_from_checkpoint );
         if ( not stone_resumes_from_checkpoint )
@@ -916,18 +946,21 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
         }
     }
     
-    // Open the output file: append if resuming, overwrite if starting fresh.
+    // Open the output file: append if resuming, overwrite if starting fresh. (MPI + runOneStone: one writer only.)
     std::ofstream outStream;
-    if ( stone_resumes_from_checkpoint )
+    if ( writer_rank_one_stone )
     {
-        // Match AbstractFileMonitor resume behavior: drop rows with generation > checkpoint
-        truncateMonitorFileAfterGeneration( stoneFileName, static_cast<std::uint64_t>( k_start ) );
-        outStream.open( stoneFileName.string(), std::ios::app );
-    }
-    else
-    {
-        outStream.open( stoneFileName.string() );
-        outStream << "state\t" << "power\t" << "likelihood" << std::endl;
+        if ( stone_resumes_from_checkpoint )
+        {
+            // Match AbstractFileMonitor resume behavior: drop rows with generation > checkpoint
+            truncateMonitorFileAfterGeneration( stoneFileName, static_cast<std::uint64_t>( k_start ) );
+            outStream.open( stoneFileName.string(), std::ios::app );
+        }
+        else
+        {
+            outStream.open( stoneFileName.string() );
+            outStream << "state\t" << "power\t" << "likelihood" << std::endl;
+        }
     }
     
     double p = powers[idx];
@@ -941,7 +974,7 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
     for (size_t k = k_start + 1; k <= k_final; ++k)
     {
         
-        if (pid == pid_to_print)
+        if ( stone_console )
         {
             if (k % printInterval == 0)
             {
@@ -961,13 +994,13 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
         sampler->nextCycle( true );
 
         // monitor
-        if (not one_only or (one_only and pid == pid_to_print))
+        if ( writer_rank_one_stone )
         {
             sampler->monitor(k);
         }
         
         // sample the likelihood
-        if ( k > burnin && k % sampleFreq == 0 )
+        if ( writer_rank_one_stone && k > burnin && k % sampleFreq == 0 )
         {
             // compute the joint likelihood
             double likelihood = sampler->getModelLnProbability(true);
@@ -977,68 +1010,76 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
         // periodically checkpoint (including during burnin)
         if ( checkpoint_interval != 0 && (k % checkpoint_interval) == 0 )
         {
-            checkpoint( idx, checkpoint_file, burnin );
+            checkpoint( idx, checkpoint_file, burnin, one_only );
         }
             
     }
     
-    if (pid == pid_to_print)
+    if ( stone_console )
     {
         std::cout << std::endl;
     }
     
-    outStream.close();
+    if ( outStream.is_open() )
+    {
+        outStream.flush();
+        outStream.close();
+    }
     
     // Monitor
-    sampler->finishMonitors( 1, MonteCarloAnalysisOptions::NONE );
+    if ( writer_rank_one_stone )
+    {
+        sampler->finishMonitors( 1, MonteCarloAnalysisOptions::NONE );
+    }
     
 }
 
 
 void PowerPosteriorAnalysis::summarizeStones( void )
 {
-    // create the directory if necessary
-    createDirectoryForFile( filename );
-    
-    std::ofstream outStream( filename.string() );
-    outStream << "state\t" << "power\t" << "likelihood" << std::endl;
-
-    // Append each stone
-    for (size_t idx = 0; idx < powers.size(); ++idx)
+    if ( process_active == true )
     {
-        std::string stone_tag = "_stone_" + std::to_string(idx + 1); // number the stones from 1 to n, not from 0 to (n - 1)
-        path stoneFileName = appendToStem( filename, stone_tag );
+        // create the directory if necessary
+        createDirectoryForFile( filename );
+        
+        std::ofstream outStream( filename.string() );
+        outStream << "state\t" << "power\t" << "likelihood" << std::endl;
 
-        // read the i-th stone
-        std::ifstream inStream( stoneFileName.string() );
-        if (inStream.is_open())
+        // Append each stone
+        for (size_t idx = 0; idx < powers.size(); ++idx)
         {
-            bool header = true;
-            std::string line = "";
-            while ( std::getline(inStream,line) )
+            std::string stone_tag = "_stone_" + std::to_string(idx + 1); // number the stones from 1 to n, not from 0 to (n - 1)
+            path stoneFileName = appendToStem( filename, stone_tag );
+
+            // read the i-th stone
+            std::ifstream inStream( stoneFileName.string() );
+            if (inStream.is_open())
             {
-                // we need to skip the header line
-                if ( header == true )
+                bool header = true;
+                std::string line = "";
+                while ( std::getline(inStream,line) )
                 {
-                    header  = false;
+                    // we need to skip the header line
+                    if ( header == true )
+                    {
+                        header  = false;
+                    }
+                    else
+                    {
+                        outStream << line << std::endl;
+                    }
                 }
-                else
-                {
-                    outStream << line << std::endl;
-                }
+                inStream.close();
             }
-            inStream.close();
+            else
+            {
+                std::cerr << "Problem reading stone " << idx+1 << " from file " << stoneFileName << "." << std::endl;
+            }
         }
-        else
-        {
-            std::cerr << "Problem reading stone " << idx+1 << " from file " << stoneFileName << "." << std::endl;
-        }
-
-    }
     
-    // closing the file stream
-    outStream.close();
-
+        // closing the file stream
+        outStream.close();
+    }
 }
 
 
@@ -1051,6 +1092,13 @@ void PowerPosteriorAnalysis::setPowers(const std::vector<double> &p)
 void PowerPosteriorAnalysis::setResumeFromCheckpoint(bool tf)
 {
     resume_from_checkpoint = tf;
+    if ( tf == false )
+    {
+        // Otherwise ckp_stone_file / resume_stone_sequences stay populated while resume_from_checkpoint is false, and a later
+        // runStone() can still find an index in ckp_stone_file.
+        ckp_stone_file.clear();
+        resume_stone_sequences.clear();
+    }
 }
 
 

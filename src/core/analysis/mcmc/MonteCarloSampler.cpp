@@ -67,12 +67,25 @@ void MonteCarloSampler::setCurrentGeneration( size_t g )
 
 
 /**
- * This base implementation performs only that work which is always needed. This includes writing the variable names and values to
- * a base checkpoint file, as well as the information about the moves to a *_moves file. However, it does not include writing out
- * an *_mcmc file recording the generation counter, since this is not needed in all cases (e.g., when resuming burnin, where there
- * are no monitors to restart).
+ * Public non-virtual interface entry point: does the basic work of writing out the base checkpoint file and the *_moves file, and
+ * dispatches to fullCheckpoint() so the derived class can write out additional files (e.g., Mcmc::fullCheckpoint writes *_mcmc).
  */
 void MonteCarloSampler::checkpoint( void )
+{
+    baseCheckpoint();
+    
+    // dispatch to the derived class
+    fullCheckpoint();
+}
+
+
+/**
+ * Performs only the work that is always needed: writing the variable names and values to a base checkpoint file, and the
+ * information about the moves to a *_moves file. It intentionally does *not* call fullCheckpoint(), so callers (e.g.
+ * PowerPosteriorAnalysis::burnin()) that do not want derived-class functionality (such as an *_mcmc file recording the
+ * generation counter) can opt into the base step alone.
+ */
+void MonteCarloSampler::baseCheckpoint( void )
 {
     if ( process_active == true )
     {
@@ -213,17 +226,28 @@ void MonteCarloSampler::checkpoint( void )
         std::filesystem::rename(tmp_moves_checkpoint_file_name, moves_checkpoint_file_name);
 #endif
     }
-    
-    // dispatch to the derived class
-    fullCheckpoint();
 }
 
 
 /**
- * Again, we perform only that work which is always needed, which does not include restarting monitors or parsing
- * the *_mcmc checkpoint file.
+ * Public non-virtual interface entry point: does the basic work of loading the base checkpoint file and information about
+ * the moves, and dispatches to fullInitializeSamplerFromCheckpoint() so the derived class can load additional files (e.g.,
+ * Mcmc::fullInitializeSamplerFromCheckpoint() reads *_mcmc and restarts file monitors).
  */
 void MonteCarloSampler::initializeSamplerFromCheckpoint( void )
+{
+    baseInitializeSamplerFromCheckpoint();
+    
+    fullInitializeSamplerFromCheckpoint();
+}
+
+
+/**
+ * Performs only the work that is always needed: parsing the base checkpoint and *_moves files. It intentionally does *not*
+ * call fullInitializeSamplerFromCheckpoint(), so callers (e.g. PowerPosteriorAnalysis::burnin()) that have no monitors to
+ * restart and no *_mcmc file to parse can opt into the base step alone.
+ */
+void MonteCarloSampler::baseInitializeSamplerFromCheckpoint( void )
 {
     // Open file
     std::ifstream inFile( checkpoint_file_name.string() );
@@ -371,8 +395,6 @@ void MonteCarloSampler::initializeSamplerFromCheckpoint( void )
 
     // clean up
     in_file_moves.close();
-
-    fullInitializeSamplerFromCheckpoint();
 }
 
 

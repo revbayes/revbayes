@@ -58,13 +58,13 @@ Step 1 / 1		**********
 
 Marginal likelihood estimates when running the stones all at once:
 
-Stepping-stone estimate: 	-21413.39	
+Stepping-stone estimate: 	-21425	
 
    Warning: Standard error approximation unreliable as var(r_k)/r_k^2 > 0.1 for the following powers:
    0.554929, 0.284628, 0.131687, 0.0529221, 0.0173415, 0.00411523, 0.000541923.
    Try setting bootstrap=TRUE.
    
-Stepping-stone standard error: 	1.912665	
+Stepping-stone standard error: 	2.0904	
 
-Path-sampling estimate: 	-21386.24
-Path-sampling standard error: 	3.890654
+Path-sampling estimate: 	-23791.35
+Path-sampling standard error: 	770.8564

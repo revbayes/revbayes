@@ -72,8 +72,10 @@ namespace RevBayesCore {
         void                                    setCurrentGeneration(size_t g);
 //        void                                    initializeMonitors(void);                                   //!< Assign model and mcmc ptrs to monitors
 //        void                                    redrawChainState(void);
-        void                                    checkpoint(void);                                           //!< Perform checkpointing by writing the current values to a file.
-        void                                    initializeSamplerFromCheckpoint(void);                      //!< Initialize the values from the checkpoint file
+        void                                    checkpoint(void);                                           //!< Perform checkpointing: base files + derived-class supplementary files (e.g. *_mcmc).
+        void                                    baseCheckpoint(void);                                       //!< Base portion only: write variable values and *_moves; no derived-class dispatch (e.g. burnin avoids *_mcmc/monitors).
+        void                                    initializeSamplerFromCheckpoint(void);                      //!< Restore from checkpoint: base files + derived-class supplementary files.
+        void                                    baseInitializeSamplerFromCheckpoint(void);                  //!< Base portion only: load variables and *_moves; no derived-class dispatch (e.g. burnin avoids *_mcmc/monitors).
         
     protected:
         

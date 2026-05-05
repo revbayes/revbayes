@@ -35,7 +35,7 @@ namespace RevBayesCore {
         // public methods
         PowerPosteriorAnalysis*                 clone(void) const;
         void                                    burnin(size_t g, size_t ti, const path &cp_file, size_t ci = 0);
-        void                                    checkpoint(size_t stone_idx, const path &bcp_file, size_t planned_burnin);
+        void                                    checkpoint(size_t stone_idx, const path &bcp_file, size_t planned_burnin, bool one_only);
         std::vector<double>                     getPowers(void) const;
         size_t                                  getStepNumber(void) const;                      //!< What is the largest number of stones to be executed by the same worker (i.e., a process or a group of processors_per_likelihood processes)?
         void                                    initializeFromCheckpoint(const path &bcp_file); //!< Makes sure checkpoint file exists but does not load the sampler
