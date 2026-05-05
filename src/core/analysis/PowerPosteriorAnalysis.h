@@ -46,6 +46,7 @@ namespace RevBayesCore {
         void                                    runStone(size_t idx, size_t g, double burn_frac, size_t preburn_gen, size_t tune_int, bool one_only, const path &cp_file, size_t ci = 0);
         void                                    summarizeStones(void);
         void                                    setPowers(const std::vector<double> &p);
+        void                                    setResumeFromCheckpoint(bool tf);
         void                                    setSampleFreq(size_t sf);
         
     private:

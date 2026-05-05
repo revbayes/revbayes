@@ -187,6 +187,7 @@ RevPtr<RevVariable> PowerPosteriorAnalysis::executeMethod(std::string const &nam
         size_t ckp_int = static_cast<const Natural &>( args[6].getVariable()->getRevObject() ).getValue();
         
         value->runStone( ind, size_t(gen), burn_frac, preburn_gen, tune_int, true, ckp_file, ckp_int );
+        value->setResumeFromCheckpoint( false );
         
         return NULL;
     }

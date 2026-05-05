@@ -1048,6 +1048,12 @@ void PowerPosteriorAnalysis::setPowers(const std::vector<double> &p)
 }
 
 
+void PowerPosteriorAnalysis::setResumeFromCheckpoint(bool tf)
+{
+    resume_from_checkpoint = tf;
+}
+
+
 void PowerPosteriorAnalysis::setSampleFreq(size_t sf)
 {
     sampleFreq = sf;
