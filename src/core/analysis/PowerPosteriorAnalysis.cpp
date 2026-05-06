@@ -206,17 +206,15 @@ void PowerPosteriorAnalysis::checkpoint( size_t stone_idx, const path &base_chec
     path stone_file_name = appendToStem( base_checkpoint_file_name, "_stone_" + std::to_string(stone_idx + 1) );
     
     sampler->setCheckpointFile( stone_file_name );
-    // runOneStone: every MPI rank shares the same stone index, but initMPI() marks every rank sampler-active when
-    // processors_per_likelihood == 1, so MonteCarloSampler::checkpoint() would otherwise all write/rename the same paths.
-    // runAll: each rank runs a disjoint stone block and checkpoints distinct files; keep per-rank sampler checkpointing.
+    // runOneStone (one_only=true): every MPI rank shares the same stone index, so only the active rank writes; an unguarded
+    // call would let every rank race on the same .tmp -> rename for the sampler files (.ckp, _moves, _mcmc) and the
+    // _stone_info file. runAll (one_only=false): each rank runs a disjoint stone block, so each rank must write its own
+    // stone's files (a different filename per rank); _stone_info is per-stone and would otherwise be missing for every stone
+    // not owned by the active rank, leaving its power/planned_burnin unrecoverable on resume.
     if ( ( not one_only ) || process_active )
     {
         sampler->checkpoint();
-    }
-    
-    // save the power and planned burnin for this stone; avoid MPI races on one file
-    if ( process_active == true )
-    {
+
         path stone_info_file_name = appendToStem( stone_file_name, "_stone_info" );
 
         path tmp_stone_info_file_name = stone_info_file_name.parent_path() / ("." + stone_info_file_name.filename().string() + ".tmp");
