@@ -112,7 +112,7 @@ pow_p = powerPosterior(mymodel, moves, monitors, "output/model_uniform_run_all.o
 pow_p.burnin(generations=50, tuningInterval=200, checkpointFile="output/model_uniform_run_all_burnin.ckp",
              checkpointInterval=10)
 
-# step 2: resume from checkpoint to extend the global pre-burnin by an additional 50 generations
+# step 2: resume from checkpoint to extend the global pre-burnin by an additional 40 generations
 pow_p.initializeFromCheckpoint( "output/model_uniform_run_all_burnin.ckp" )
 pow_p.burnin(generations=40, tuningInterval=200)
 
