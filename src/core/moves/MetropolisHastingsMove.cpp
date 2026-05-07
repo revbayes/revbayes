@@ -174,55 +174,23 @@ void MetropolisHastingsMove::performHillClimbingMove( double lHeat, double pHeat
 
     // first we touch all the nodes
     // that will set the flags for recomputation
-    for (size_t i = 0; i < nodes.size(); ++i)
-    {
-        // get the pointer to the current node
-        DagNode* the_node = nodes[i];
+    for (auto the_node: nodes)
         the_node->touch();
-    }
 
     LogDensity lnPriorRatio = 0.0;
     LogDensity lnLikelihoodRatio = 0.0;
 
-
     // compute the probability of the current value for each node
-    for (size_t i = 0; i < nodes.size(); ++i)
+    for(auto& the_node: views::concat(nodes,affectedNodes))
     {
-        // get the pointer to the current node
-        DagNode* the_node = nodes[i];
-
-        if ( lnPriorRatio.isfinite() && lnLikelihoodRatio.isfinite() && ln_hastings_ratio.isfinite() )
+        if ( the_node->isClamped() )
         {
-            if ( the_node->isClamped() )
-            {
-                lnLikelihoodRatio += the_node->getLnProbabilityRatio();
-            }
-            else
-            {
-                lnPriorRatio += the_node->getLnProbabilityRatio();
-            }
-
+            lnLikelihoodRatio += the_node->getLnProbabilityRatio();
         }
-
-    }
-
-    // then we recompute the probability for all the affected nodes
-    for (RbOrderedSet<DagNode*>::const_iterator it = affectedNodes.begin(); it != affectedNodes.end(); ++it)
-    {
-        DagNode *the_node = *it;
-
-        if ( lnPriorRatio.isfinite() && lnLikelihoodRatio.isfinite() && ln_hastings_ratio.isfinite() )
+        else
         {
-            if ( the_node->isClamped() )
-            {
-                lnLikelihoodRatio += the_node->getLnProbabilityRatio();
-            }
-            else
-            {
-                lnPriorRatio += the_node->getLnProbabilityRatio();
-            }
+            lnPriorRatio += the_node->getLnProbabilityRatio();
         }
-
     }
 
     // exponentiate with the chain heat
@@ -234,12 +202,8 @@ void MetropolisHastingsMove::performHillClimbingMove( double lHeat, double pHeat
         proposal->undoProposal();
 
         // call restore for each node
-        for (size_t i = 0; i < nodes.size(); ++i)
-        {
-            // get the pointer to the current node
-            DagNode* the_node = nodes[i];
+        for (auto the_node: nodes)
             the_node->restore();
-        }
     }
     else
     {
@@ -248,13 +212,8 @@ void MetropolisHastingsMove::performHillClimbingMove( double lHeat, double pHeat
         num_accepted_current_period++;
 
         // call accept for each node
-        for (size_t i = 0; i < nodes.size(); ++i)
-        {
-            // get the pointer to the current node
-            DagNode* the_node = nodes[i];
+        for (auto the_node: nodes)
             the_node->keep();
-        }
-
     }
 
 }
@@ -334,12 +293,8 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     for (auto node: touched_nodes)
         node->touch();
 
-    bool fail_probability = not ln_hastings_ratio.isfinite();
-
     LogDensity ln_prior_ratio = 0.0;
     LogDensity ln_likelihood_ratio = 0.0;
-
-    bool zero_or_nan_to_finite = false;
 
     // compute the probability of the current value for each node
     for (auto node: views::concat(touched_nodes, affected_nodes))
@@ -347,20 +302,14 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
         if (not node->isStochastic()) continue;
 
         LogDensity ratio = 0;
+        // There should be a previous lnProbability because the nodes have been touched.
+        LogDensity prev = node->getPrevLnProbability();
+
         try {
-            // There should be a previous lnProbability because the nodes have been touched.
-            LogDensity prev = node->getPrevLnProbability();
             // Compute the current lnProbability.
             LogDensity current = node->getLnProbability();
 
-            if (current.isfinite() and (prev.isnan() or prev == RbConstants::Double::neginf))
-            {
-                // If the log-probability changes from NaN or -Inf to something finite,
-                // the ratio would be NaN or +Inf, and the move would be rejected.
-                zero_or_nan_to_finite = true;
-            }
-            else
-                ratio = current - prev;
+            ratio = current - prev;
         }
         catch (const RbException &e)
         {
@@ -374,8 +323,6 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
             ln_likelihood_ratio += ratio;
         else
             ln_prior_ratio += ratio;
-
-        if ( not ratio.isfinite() ) fail_probability = true;
     }
 
     if (logMCMC >= 3)
@@ -399,29 +346,26 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     // ALWAYS draw a random number.  Otherwise very small differences can make platforms diverge.
     double u = GLOBAL_RNG->uniform01();
 
-    if ( fail_probability )
+    if ( not ln_hastings_ratio.isfinite() )
     {
         // Reject moves where the posterior ratio is -Inf, +Inf, or NaN.
         // (Terms where the previous log-pdf is NaN or -Inf and the current log-pdf is finite are not included.)
         rejected = true;
     }
-    else if (zero_or_nan_to_finite)
+    else if ( ln_acceptance_ratio.nans() != 0 )
     {
-        // If we get here and any term changed from NaN or -Inf -> finite then accept the move.
+        rejected = ln_acceptance_ratio.nans() > 0;
     }
-    else if (ln_acceptance_ratio >= 0.0)
-        ;
-    else if (ln_acceptance_ratio < -300.0)
-        rejected = true;
+    else if ( ln_acceptance_ratio.infs() != 0 )
+    {
+        rejected = ln_acceptance_ratio.infs() > 0;
+    }
+    else if ( ln_acceptance_ratio.neginfs() != 0)
+    {
+        rejected = ln_acceptance_ratio.neginfs() > 0;
+    }
     else
-    {
-        // Accept or reject the move
-        double r = exp(ln_acceptance_ratio);
-        if (u < r)
-            ;
-        else
-            rejected = true;
-    }
+        rejected = u > exp(ln_acceptance_ratio);
 
     if ( rejected )
     {
