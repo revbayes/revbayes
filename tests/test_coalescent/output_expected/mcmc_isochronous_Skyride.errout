@@ -70,7 +70,7 @@
       'ln_pop_size[33]': lnProb = -inf    value = 12.14153
       'ln_pop_size[34]': lnProb = -inf    value = 12.14153
       'ln_pop_size[35]': lnProb = -inf    value = 12.14153
-      'obs_root_age': lnProb = -inf    value = 375000
+      'obs_root_age': lnProb = -inf + -37819.9    value = 375000
    Drawing new initial states ... 
    
    Running MCMC simulation

@@ -1,23 +1,23 @@
    Successfully read one character matrix from file 'data/horses_isochronous_sequences.fasta'
-      'obs_root_age': lnProb = -inf    value = 375000
+      'obs_root_age': lnProb = -inf + -97328.2    value = 375000
    Drawing new initial states ... 
-      'obs_root_age': lnProb = -inf    value = 375000
+      'obs_root_age': lnProb = -inf + -102277    value = 375000
    Drawing new initial states ... 
-      'obs_root_age': lnProb = -inf    value = 375000
+      'obs_root_age': lnProb = -inf + -162673    value = 375000
    Drawing new initial states ... 
-      'obs_root_age': lnProb = -inf    value = 375000
+      'obs_root_age': lnProb = -inf + -17432    value = 375000
    Drawing new initial states ... 
-      'obs_root_age': lnProb = -inf    value = 375000
+      'obs_root_age': lnProb = -inf + -196159    value = 375000
    Drawing new initial states ... 
-      'obs_root_age': lnProb = -inf    value = 375000
+      'obs_root_age': lnProb = -inf + -48079.3    value = 375000
    Drawing new initial states ... 
-      'obs_root_age': lnProb = -inf    value = 375000
+      'obs_root_age': lnProb = -inf + -119136    value = 375000
    Drawing new initial states ... 
-      'obs_root_age': lnProb = -inf    value = 375000
+      'obs_root_age': lnProb = -inf + -137732    value = 375000
    Drawing new initial states ... 
-      'obs_root_age': lnProb = -inf    value = 375000
+      'obs_root_age': lnProb = -inf + -141733    value = 375000
    Drawing new initial states ... 
-      'obs_root_age': lnProb = -inf    value = 375000
+      'obs_root_age': lnProb = -inf + -118269    value = 375000
    Drawing new initial states ... 
    
    Running MCMC simulation
