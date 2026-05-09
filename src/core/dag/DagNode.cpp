@@ -5,6 +5,8 @@
 #include <cstddef>
 #include <ostream>
 #include <string>
+#include <unordered_set>
+#include <vector>
 
 #include "Monitor.h"
 #include "Move.h"
@@ -12,6 +14,45 @@
 #include "RbOrderedSet.h"
 
 using namespace RevBayesCore;
+
+
+/**
+ * Online cycle detection via Pearce-Kelly topological-order maintenance: see
+ *
+ * Pearce DJ, Kelly PHJ. 2007. A dynamic topological sort algorithm for directed acyclic graphs. Journal of Experimental
+ * Algorithmics (JEA). 11:1.7--es. doi:10.1145/1187436.121059.
+ *
+ * Each `DagNode` stores an ordinal value `topo_ord` (its rank in the current topological order). The defining invariant is:
+ *
+ *     for every edge (parent -> child) in the DAG,
+ *         parent->topo_ord < child->topo_ord.
+ *
+ * Ordinals are assigned monotonically by the static counter `next_topo_ord`: each constructor (default and copy) grabs the
+ * current value and increments. Since every existing node has a strictly smaller ordinal than the value a brand-new node
+ * receives, the invariant automatically holds for every edge of the form "existing parent -> brand-new child". The only
+ * operation that can violate the invariant is reattaching a previously existing node above another previously existing node.
+ * When `addChild()` notices `topo_ord >= child->topo_ord`, it delegates to `pkAddEdge()`, which:
+ *
+ *   1. Runs a forward depth-first search from `child`, restricted to nodes whose ordinal is <= ord(parent). This is the
+ *      "forward delta", deltaF, of nodes that need to be promoted so they end up above `parent` in the new order. Reaching
+ *      `parent` during this search would mean the new edge closes a cycle, so we throw without mutating any ordinal.
+ *   2. Runs a backward depth-first search from `parent`, restricted to nodes whose ordinal is >= ord(child). This is the
+ *      "backward delta", deltaB, of nodes that need to be demoted so they end up below `child`.
+ *   3. Reassigns the original ordinals of the union of deltaB and deltaF so that every node in deltaB precedes every node
+ *      in deltaF in the new ordering. The original ordinals are recycled in place, so the ordinal space stays compact within
+ *      the affected band.
+ *
+ * `dependsOn(node, target)` then becomes cheap: an ancestor must have a strictly smaller ordinal than its descendant,
+ * so `ord(target) >= ord(node)` answers "no" in O(1). Otherwise we walk up the parents of `node`, but pruned to the band
+ * `ord >= ord(target)`, which keeps the search inside a small region of the DAG instead of the whole upward cone.
+ *
+ * Edge removal by `removeChild()` preserves the invariant trivially (it can only widen the set of valid topological orderings),
+ * so it needs no maintenance.
+ */
+
+// Graph mutation in RevBayes is single-threaded; the global counter is therefore a plain size_t (no need for atomics).
+std::size_t DagNode::next_topo_ord = 0;
+
 
 /**
  * Construct an empty DAG node, potentially
@@ -25,6 +66,7 @@ DagNode::DagNode( const std::string &n ) : Parallelizable(),
     moves(),
     name( n ),
     touched_elements(),
+    topo_ord( next_topo_ord++ ),
     ref_count( 0 ),
     visit_flags( std::vector<bool>(5, false) )
 {
@@ -48,6 +90,7 @@ DagNode::DagNode( const DagNode &n ) : Parallelizable( n ),
     moves( ),
     name( n.name ),
     touched_elements( n.touched_elements ),
+    topo_ord( next_topo_ord++ ),
     ref_count( 0 ),
     visit_flags( n.visit_flags )
 {
@@ -99,8 +142,11 @@ DagNode& DagNode::operator=(const DagNode &d)
 
 
 /**
- * Add a new child node to this node.
- * Since we store the children in a set we don't need to worry about duplicates.
+ * Add a new child node to this node. Since we store the children in a set, we don't need to worry about duplicates.
+ *
+ * If the new edge violates the Pearce-Kelly topological-order invariant (when `this` was created after `child` and is now being
+ * attached above it, e.g., through `swapParent()`), we delegate to `pkAddEdge` to repair it. If `pkAddEdge` detects that the
+ * new edge would close a cycle, it throws; we then roll the children vector back so that the DAG is left untouched.
  *
  * Note, the caller also needs to increment the reference count to this node.
  */
@@ -108,16 +154,34 @@ void DagNode::addChild(DagNode *child) const
 {
 
     // only if the child is not NULL and isn't in our vector yet
-    if ( child != NULL )
+    if ( child == NULL )
     {
-        std::vector<DagNode*>::const_iterator pos = std::find(children.begin(), children.end(), child);
-        if ( pos == children.end() )
-        {
-            children.push_back( child );
-        }
-
+        return;
     }
 
+    std::vector<DagNode*>::const_iterator pos = std::find(children.begin(), children.end(), child);
+    if ( pos != children.end() )
+    {
+        return;
+    }
+
+    children.push_back( child );
+
+    // Repair the topological ordering if the new edge violates the invariant.
+    if ( topo_ord >= child->topo_ord )
+    {
+        try
+        {
+            pkAddEdge( this, child );
+        }
+        catch ( ... )
+        {
+            // Roll back the edge so the graph state matches what the caller saw
+            // before the failed insertion.
+            children.pop_back();
+            throw;
+        }
+    }
 }
 
 
@@ -239,6 +303,57 @@ size_t DagNode::decrementReferenceCount( void ) const
 
     return ref_count;
 }
+
+
+/**
+ * Find out whether `node`, or any of its ancestors, equals `target`.
+ *
+ * The DAG keeps a topological order via the Pearce-Kelly machinery, so if `target` is an ancestor of `node`, then
+ * ord(target) < ord(node). The contrapositive lets us reject no-cycle case in O(1): if ord(target) >= ord(node),
+ * `target` cannot be an ancestor.
+ *
+ * In the slow path, we walk upward from `node` along parent edges, but only visit nodes whose ordinal lies in
+ * [ord(target), ord(node)]. This keeps the search confined to the affected band of the DAG instead of traversing
+ * the entire upward cone, which would exhibit quadratic total cost.
+ */
+ bool DagNode::dependsOn(const DagNode* node, const DagNode* target)
+ {
+     // Fast path: an ancestor must have a strictly smaller ordinal than its descendant, so anything at or above `node`
+     // in the ordering cannot possibly be an ancestor of `node`.
+     if ( target->topo_ord >= node->topo_ord )
+     {
+         return false;
+     }
+ 
+     const std::size_t lb = target->topo_ord;
+ 
+     std::unordered_set<const DagNode*> visited;
+     std::vector<const DagNode*> stack;
+     stack.push_back( node );
+ 
+     while ( not stack.empty() )
+     {
+         const DagNode* current = stack.back();
+         stack.pop_back();
+ 
+         if ( visited.count( current ) ) continue;
+         visited.insert( current );
+ 
+         if ( current == target ) return true;
+ 
+         // Only follow parents that could conceivably still reach `target`. Any parent with ord < lb is too far up the order
+         // to be `target` or to have `target` among its own ancestors.
+         for ( const DagNode* parent : current->getParents() )
+         {
+             if ( parent->topo_ord >= lb && visited.count( parent ) == 0 )
+             {
+                 stack.push_back( parent );
+             }
+         }
+     }
+ 
+     return false;
+ }
 
 
 void DagNode::executeMethod(const std::string &n, const std::vector<const DagNode*> &args, double &rv) const
@@ -538,6 +653,16 @@ size_t DagNode::getReferenceCount( void ) const
 }
 
 
+/**
+ * Get the position of this node in the maintained topological ordering of the DAG. The Pearce-Kelly invariant guarantees that
+ * for every edge `parent -> child`, `parent->getTopologicalOrder() < child->getTopologicalOrder()`.
+ */
+ std::size_t DagNode::getTopologicalOrder( void ) const
+ {
+     return topo_ord;
+ }
+
+
 /* Get the indices of all touched elements */
 const std::set<size_t>& DagNode::getTouchedElementIndices( void ) const
 {
@@ -703,6 +828,97 @@ void DagNode::keepAffected()
     }
 
 }
+
+
+/**
+ * Pearce-Kelly online edge insertion: repair the topological-order invariant after the edge `parent -> child` has been added
+ * with `ord(parent) >= ord(child)`, or throw if the new edge would close a cycle.
+ *
+ *     deltaF (forward)  = nodes reachable from `child` via children with ord <= ord(parent)
+ *     deltaB (backward) = nodes reachable from `parent` via parents with ord >= ord(child)
+ *
+ * The forward search doubles as cycle detection: if it ever reaches `parent`, the new edge would close a cycle, and we throw
+ * without mutating any ordinal.
+ */
+ void DagNode::pkAddEdge( const DagNode* parent, DagNode* child )
+ {
+     const std::size_t lb = child->topo_ord;
+     const std::size_t ub = parent->topo_ord;
+ 
+     // Forward depth-first search from child along children. Visit nodes with ordinal <= ub. Reaching `parent` <=> closing a cycle.
+     std::vector<DagNode*> deltaF;
+     std::unordered_set<DagNode*> visitedF;
+     {
+         std::vector<DagNode*> stack;
+         stack.push_back( child );
+         while ( not stack.empty() )
+         {
+             DagNode* z = stack.back();
+             stack.pop_back();
+             if ( visitedF.count( z ) ) continue;
+             visitedF.insert( z );
+ 
+             if ( z == parent )
+             {
+                 throw RbException( "Cannot add this edge to the DAG: it would create a cycle." );
+             }
+ 
+             deltaF.push_back( z );
+ 
+             for ( DagNode* d : z->getChildren() )
+             {
+                 if ( d->topo_ord <= ub && visitedF.count( d ) == 0 )
+                 {
+                     stack.push_back( d );
+                 }
+             }
+         }
+     }
+ 
+     // Backward depth-first search from parent along parents. Visit nodes with ordinal >= lb.
+     std::vector<DagNode*> deltaB;
+     std::unordered_set<DagNode*> visitedB;
+     {
+         std::vector<DagNode*> stack;
+         stack.push_back( const_cast<DagNode*>( parent ) );
+         while ( not stack.empty() )
+         {
+             DagNode* z = stack.back();
+             stack.pop_back();
+             if ( visitedB.count( z ) ) continue;
+             visitedB.insert( z );
+             deltaB.push_back( z );
+ 
+             for ( const DagNode* p : z->getParents() )
+             {
+                 DagNode* pm = const_cast<DagNode*>( p );
+                 if ( pm->topo_ord >= lb && visitedB.count( pm ) == 0 )
+                 {
+                     stack.push_back( pm );
+                 }
+             }
+         }
+     }
+ 
+     // Sort each delta by its current ordinal. Because the existing ordinals are a valid topological ordering, sorting a subset
+     // by ordinal yields a valid topological order on that subset. After reassignment, every deltaB node will precede every deltaF
+     // node, repairing the invariant for the newly added (parent -> child) edge as well as for every edge within the two deltas.
+     auto by_ord = []( DagNode* a, DagNode* b ) { return a->topo_ord < b->topo_ord; };
+     std::sort( deltaF.begin(), deltaF.end(), by_ord );
+     std::sort( deltaB.begin(), deltaB.end(), by_ord );
+ 
+     // Pool of original ordinals from both deltas, sorted ascending.
+     std::vector<std::size_t> pool;
+     pool.reserve( deltaF.size() + deltaB.size() );
+     for ( DagNode* z : deltaF ) pool.push_back( z->topo_ord );
+     for ( DagNode* z : deltaB ) pool.push_back( z->topo_ord );
+     std::sort( pool.begin(), pool.end() );
+ 
+     // Reassign: backward delta first (lower ordinals), then forward delta.
+     std::size_t i = 0;
+     for ( DagNode* z : deltaB ) z->topo_ord = pool[i++];
+     for ( DagNode* z : deltaF ) z->topo_ord = pool[i++];
+ }
 
 
 /** Print children. We assume indent is from line 2 (hanging indent). Line length is lineLen. */
@@ -954,60 +1170,6 @@ void DagNode::removeMove(Move *m)
 
     }
 
-}
-
-
-/**
- * Find out if `node`, or any of its ancestors, equals `target`.
- *
- * Strategy: Iteratively check a list of nodes and schedule their parents
- *              to be checked next.
- *           It is important that we never schedule a node to be checked twice, as this
- *              can lead to exponential blowup.
- *           A node can be scheduled twice if there are multiple paths to reach it from
- *              a descendant.
- *           For example, if y is the parent x, and z is the parent of y and x then
- *              we can find z through the path z->x and the path z->y->x.
- *           If z also has an ancestor w that can be reached in two ways, then we check 
- *              z twice, w four times, etc.
- */
-bool DagNode::dependsOn(const DagNode* node, const DagNode* target)
-{
-//    std::cerr<<"dependsOn("<<target->getName()<<"):\n";
-
-    // The set of nodes we have already started checking -- to avoid (exponential!) duplicate work.
-    std::set<const DagNode*> scheduled_nodes;
-
-    // The set of nodes to check in the next iteration.
-    std::vector<const DagNode*> check_next = {node};
-
-    // If the next batch is empty then we are done.
-    while(not check_next.empty())
-    {
-        auto check_now = std::move(check_next);
-        check_next.clear();
-
-        for(auto node_to_check: check_now)
-        {
-            // We have already started checking this, don't start checking it (and its ancestors) again!
-            if (not scheduled_nodes.contains(node_to_check))
-            {
-//                std::cerr<<"    checking("<<node_to_check->getName()<<")\n";
-
-                // We have started checking this node, so mark it as scheduled to avoid walking it again.
-                scheduled_nodes.insert(node_to_check);
-            
-                // Check the node.
-                if (node_to_check == target) return true;
-
-                // Check the ancestors of the node.
-                for(auto parent: node_to_check->getParents())
-                    check_next.push_back(parent);
-            }
-        }
-    }
-
-    return false;
 }
 
 
