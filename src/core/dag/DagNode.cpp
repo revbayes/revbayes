@@ -6,6 +6,7 @@
 #include <ostream>
 #include <string>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 #include "Monitor.h"
@@ -40,7 +41,8 @@ using namespace RevBayesCore;
  *      "backward delta", deltaB, of nodes that need to be demoted so they end up below `child`.
  *   3. Reassigns the original ordinals of the union of deltaB and deltaF so that every node in deltaB precedes every node
  *      in deltaF in the new ordering. The original ordinals are recycled in place, so the ordinal space stays compact within
- *      the affected band.
+ *      the affected band. Each delta is collected in ascending ordinal order via a post-order depth-first walk with neighbors
+ *      sorted at each step, and the multiset of ordinals is merged using std::merge in O(|deltaB| + |deltaF|).
  *
  * `dependsOn(node, target)` then becomes cheap: an ancestor must have a strictly smaller ordinal than its descendant,
  * so `ord(target) >= ord(node)` answers "no" in O(1). Otherwise we walk up the parents of `node`, but pruned to the band
@@ -839,86 +841,122 @@ void DagNode::keepAffected()
  *
  * The forward search doubles as cycle detection: if it ever reaches `parent`, the new edge would close a cycle, and we throw
  * without mutating any ordinal.
+ *
+ * Each delta must be listed in ascending ordinal order before reassignment. We avoid sorting the whole delta by doing an
+ * explicit post-order traversal and, at each node, sorting only that node's filtered neighbors by ordinal before recursing (so
+ * the smallest-ordinal child branches finish first). The forward walk records finishes in descending ordinal order, so we
+ * reverse once; the backward walk's finish order is already ascending. The pooled ordinals are then merged in linear time.
  */
- void DagNode::pkAddEdge( const DagNode* parent, DagNode* child )
- {
-     const std::size_t lb = child->topo_ord;
-     const std::size_t ub = parent->topo_ord;
- 
-     // Forward depth-first search from child along children. Visit nodes with ordinal <= ub. Reaching `parent` <=> closing a cycle.
-     std::vector<DagNode*> deltaF;
-     std::unordered_set<DagNode*> visitedF;
-     {
-         std::vector<DagNode*> stack;
-         stack.push_back( child );
-         while ( not stack.empty() )
-         {
-             DagNode* z = stack.back();
-             stack.pop_back();
-             if ( visitedF.count( z ) ) continue;
-             visitedF.insert( z );
- 
-             if ( z == parent )
-             {
-                 throw RbException( "Cannot add this edge to the DAG: it would create a cycle." );
-             }
- 
-             deltaF.push_back( z );
- 
-             for ( DagNode* d : z->getChildren() )
-             {
-                 if ( d->topo_ord <= ub && visitedF.count( d ) == 0 )
-                 {
-                     stack.push_back( d );
-                 }
-             }
-         }
-     }
- 
-     // Backward depth-first search from parent along parents. Visit nodes with ordinal >= lb.
-     std::vector<DagNode*> deltaB;
-     std::unordered_set<DagNode*> visitedB;
-     {
-         std::vector<DagNode*> stack;
-         stack.push_back( const_cast<DagNode*>( parent ) );
-         while ( not stack.empty() )
-         {
-             DagNode* z = stack.back();
-             stack.pop_back();
-             if ( visitedB.count( z ) ) continue;
-             visitedB.insert( z );
-             deltaB.push_back( z );
- 
-             for ( const DagNode* p : z->getParents() )
-             {
-                 DagNode* pm = const_cast<DagNode*>( p );
-                 if ( pm->topo_ord >= lb && visitedB.count( pm ) == 0 )
-                 {
-                     stack.push_back( pm );
-                 }
-             }
-         }
-     }
- 
-     // Sort each delta by its current ordinal. Because the existing ordinals are a valid topological ordering, sorting a subset
-     // by ordinal yields a valid topological order on that subset. After reassignment, every deltaB node will precede every deltaF
-     // node, repairing the invariant for the newly added (parent -> child) edge as well as for every edge within the two deltas.
-     auto by_ord = []( DagNode* a, DagNode* b ) { return a->topo_ord < b->topo_ord; };
-     std::sort( deltaF.begin(), deltaF.end(), by_ord );
-     std::sort( deltaB.begin(), deltaB.end(), by_ord );
- 
-     // Pool of original ordinals from both deltas, sorted ascending.
-     std::vector<std::size_t> pool;
-     pool.reserve( deltaF.size() + deltaB.size() );
-     for ( DagNode* z : deltaF ) pool.push_back( z->topo_ord );
-     for ( DagNode* z : deltaB ) pool.push_back( z->topo_ord );
-     std::sort( pool.begin(), pool.end() );
- 
-     // Reassign: backward delta first (lower ordinals), then forward delta.
-     std::size_t i = 0;
-     for ( DagNode* z : deltaB ) z->topo_ord = pool[i++];
-     for ( DagNode* z : deltaF ) z->topo_ord = pool[i++];
- }
+void DagNode::pkAddEdge( const DagNode* parent, DagNode* child )
+{
+    const std::size_t lb = child->topo_ord;
+    const std::size_t ub = parent->topo_ord;
+
+    auto by_ord = []( DagNode* a, DagNode* b ) { return a->topo_ord < b->topo_ord; };
+
+    // Forward post-order from child along children (ord <= ub). Entering `parent` <=> cycle.
+    std::vector<DagNode*> deltaF;
+    std::unordered_set<DagNode*> visitedF;
+    {
+        std::vector<std::pair<DagNode*, bool> > stack;
+        stack.push_back( std::make_pair( child, false ) );
+        std::vector<DagNode*> next_children;
+        while ( not stack.empty() )
+        {
+            std::pair<DagNode*, bool> frame = stack.back();
+            stack.pop_back();
+            DagNode* z = frame.first;
+            const bool is_exit = frame.second;
+
+            if ( is_exit )
+            {
+                deltaF.push_back( z );
+                continue;
+            }
+
+            if ( visitedF.count( z ) ) continue;
+
+            if ( z == parent )
+            {
+                throw RbException( "Cannot add this edge to the DAG: it would create a cycle." );
+            }
+
+            visitedF.insert( z );
+            stack.push_back( std::make_pair( z, true ) );
+
+            next_children.clear();
+            for ( DagNode* d : z->getChildren() )
+            {
+                if ( d->topo_ord <= ub )
+                {
+                    next_children.push_back( d );
+                }
+            }
+            std::sort( next_children.begin(), next_children.end(), by_ord );
+            for ( std::vector<DagNode*>::reverse_iterator it = next_children.rbegin(); it != next_children.rend(); ++it )
+            {
+                stack.push_back( std::make_pair( *it, false ) );
+            }
+        }
+        std::reverse( deltaF.begin(), deltaF.end() );
+    }
+
+    // Backward post-order from parent along parents (ord >= lb). Finish order is ascending ordinal.
+    std::vector<DagNode*> deltaB;
+    std::unordered_set<DagNode*> visitedB;
+    {
+        std::vector<std::pair<DagNode*, bool> > stack;
+        stack.push_back( std::make_pair( const_cast<DagNode*>( parent ), false ) );
+        std::vector<DagNode*> next_parents;
+        while ( not stack.empty() )
+        {
+            std::pair<DagNode*, bool> frame = stack.back();
+            stack.pop_back();
+            DagNode* z = frame.first;
+            const bool is_exit = frame.second;
+
+            if ( is_exit )
+            {
+                deltaB.push_back( z );
+                continue;
+            }
+
+            if ( visitedB.count( z ) ) continue;
+
+            visitedB.insert( z );
+            stack.push_back( std::make_pair( z, true ) );
+
+            next_parents.clear();
+            for ( const DagNode* p : z->getParents() )
+            {
+                DagNode* pm = const_cast<DagNode*>( p );
+                if ( pm->topo_ord >= lb )
+                {
+                    next_parents.push_back( pm );
+                }
+            }
+            std::sort( next_parents.begin(), next_parents.end(), by_ord );
+            for ( std::vector<DagNode*>::reverse_iterator it = next_parents.rbegin(); it != next_parents.rend(); ++it )
+            {
+                stack.push_back( std::make_pair( *it, false ) );
+            }
+        }
+    }
+
+    std::vector<std::size_t> ordsB;
+    std::vector<std::size_t> ordsF;
+    ordsB.reserve( deltaB.size() );
+    ordsF.reserve( deltaF.size() );
+    for ( DagNode* z : deltaB ) ordsB.push_back( z->topo_ord );
+    for ( DagNode* z : deltaF ) ordsF.push_back( z->topo_ord );
+
+    std::vector<std::size_t> pool( deltaB.size() + deltaF.size() );
+    std::merge( ordsB.begin(), ordsB.end(), ordsF.begin(), ordsF.end(), pool.begin() );
+
+    std::size_t i = 0;
+    for ( DagNode* z : deltaB ) z->topo_ord = pool[i++];
+    for ( DagNode* z : deltaF ) z->topo_ord = pool[i++];
+}
 
 
 /** Print children. We assume indent is from line 2 (hanging indent). Line length is lineLen. */
