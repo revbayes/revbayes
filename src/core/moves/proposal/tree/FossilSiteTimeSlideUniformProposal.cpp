@@ -2,6 +2,7 @@
 #include <iostream>
 #include <cstddef>
 #include <vector>
+#include <algorithm>
 
 #include "DistributionUniform.h"
 #include "FossilSiteTimeSlideUniformProposal.h"
@@ -117,7 +118,7 @@ double FossilSiteTimeSlideUniformProposal::doProposal( void )
     // proposal is the only reliable way to get rid of this problem, so we just do that and eat the extra computational cost.
 
 
-    // get node index HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // change this to node_indices
     node_index = tree->getValue().getTipIndex( clade.getTaxonName(0) );
 
 
@@ -136,7 +137,9 @@ double FossilSiteTimeSlideUniformProposal::doProposal( void )
     {
         // adjust min age given taxon data
         Taxon& taxon = node.getTaxon();
-        min_age = taxon.getMinAge();
+
+        // min_age should be the same for all fossils at a site
+        min_age = taxon.getMinAge(); 
     }
     else
     {
@@ -146,6 +149,7 @@ double FossilSiteTimeSlideUniformProposal::doProposal( void )
     if ( max == NULL )
     {
         // adjust max age given taxon data
+        // since it uses the taxon data the same value works for all species of one site
         Taxon& taxon = node.getTaxon();
         double taxon_max_age = taxon.getMaxAge();
         max_age = taxon_max_age;
@@ -157,41 +161,59 @@ double FossilSiteTimeSlideUniformProposal::doProposal( void )
         max_age = provided_max_age;
     }
 
-    if ( node.isSampledAncestorTip() == true )
-    {
-        TopologyNode *sibling = &parent.getChild( 0 );
-        if ( sibling == &node )
-        {
-            sibling = &parent.getChild( 1 );
-        }
+    double max_ages[clade.size()];
 
-        double sib_age = sibling->getAge();
-        min_age = fmax(min_age, sib_age);
+    for (int i = 0; i < clade.size(); i++) {
 
-        if ( parent.isRoot() )
+        node_index = tree->getValue().getTipIndex( clade.getTaxonName(i) );
+
+        TopologyNode& node = tau.getNode(node_index);
+        TopologyNode& parent = node.getParent();
+
+        parent_age   = parent.getAge();
+        my_age       = node.getAge();    
+        
+
+        if ( node.isSampledAncestorTip() == true )
         {
-            if (origin == NULL)
+            TopologyNode *sibling = &parent.getChild( 0 );
+            if ( sibling == &node )
             {
-                throw RbException("Attempting to move root sampled ancestor, but no origin time provided.");
+                sibling = &parent.getChild( 1 );
             }
-            
-            double origin_age = origin->getValue();
-            
-            // set the max age either to the boundary or the parent max age
-            max_age = fmin(max_age, origin_age);
-        }
-        else
-        {
-            TopologyNode& grandParent = parent.getParent();
 
-            double grandparent_age = grandParent.getAge();
-            
-            // set the max age either to the boundary or the parent max age
-            max_age = fmin(max_age, grandparent_age);
+            double sib_age = sibling->getAge();
+            min_age = fmax(min_age, sib_age);
+
+            if ( parent.isRoot() )
+            {
+                if (origin == NULL)
+                {
+                    throw RbException("Attempting to move root sampled ancestor, but no origin time provided.");
+                }
+                
+                double origin_age = origin->getValue();
+                
+                // set the max age either to the boundary or the parent max age
+                max_age = fmin(max_age, origin_age);
+            }
+            else
+            {
+                TopologyNode& grandParent = parent.getParent();
+
+                double grandparent_age = grandParent.getAge();
+                
+                // set the max age either to the boundary or the parent max age
+                max_age = fmin(max_age, grandparent_age);
+            }
+        } else {
+            max_age = fmin(max_age, parent_age);
         }
-    } else {
-        max_age = fmin(max_age, parent_age);
+
+        max_ages[i] = max_age;
     }
+
+    max_age = *min_element(max_ages, max_ages + clade.size());
     
     // now we store all necessary values
     stored_age = my_age;
@@ -220,8 +242,15 @@ double FossilSiteTimeSlideUniformProposal::doProposal( void )
         }
     } while ( new_age < min_age || new_age > max_age );
     
-    // set the age
-    node.setAge( new_age );
+    // set the ages to all tips from site
+    for (int i = 0; i < clade.size(); i++) {
+        
+        node_index = tree->getValue().getTipIndex( clade.getTaxonName(i) );
+        TopologyNode& node = tau.getNode(node_index);
+
+        node.setAge( new_age );
+
+    }
     
     
     // this is a symmetric proposal so the hasting ratio is 0.0
