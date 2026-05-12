@@ -11,4 +11,3 @@ for (i in 1:10) {
         stop("Target reached, stopping...")
     }
 }
-# print("This line should never be printed!")
