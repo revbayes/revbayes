@@ -1,4 +1,3 @@
 X is less than Y.
 Testing the other way around now!
-   Stop:        X is not greater than Y
-   Error:       Problem processing line 21 in file "tests/test_stop/scripts/testIfStop.Rev"
+   Stop:	X is not greater than Y

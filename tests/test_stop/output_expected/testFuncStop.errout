@@ -1,4 +1,0 @@
-Calling function...
-Inside function...calling stop.
-   Stop:        Stopping inside a function.
-   Error:       Problem processing line 18 in file "tests/test_stop/scripts/testFuncStop.Rev"
