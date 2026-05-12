@@ -1,0 +1,23 @@
+################################################################################
+# RevBayes Test-Script: Test for stop() function.
+# authors: Basanta Khakurel
+################################################################################
+x <- 10
+y <- 20
+
+if (x < y) {
+    print("X is less than Y.")
+} else {
+    stop()
+}
+
+print("Testing the other way around now!")
+
+
+if (x > y) {
+    print("X is less than Y, as expected.")
+} else {
+    stop("X is not greater than Y")
+}
+
+

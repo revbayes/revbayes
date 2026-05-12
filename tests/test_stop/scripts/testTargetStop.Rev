@@ -1,0 +1,13 @@
+################################################################################
+# RevBayes Test-Script: Test for stop() function.
+# authors: Basanta Khakurel
+################################################################################
+
+print("Test in a for loop...")
+for (i in 1:10) {
+    print("Step: " + i)
+    if (i == 3) {
+        stop("Target reached, stopping...")
+    }
+}
+print("This line should never be printed!")

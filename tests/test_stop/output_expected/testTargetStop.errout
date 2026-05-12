@@ -1,0 +1,6 @@
+Test in a for loop...
+Step: 1
+Step: 2
+Step: 3
+   Stop:        Target reached, stopping...
+   Error:       Problem processing line 12 in file "tests/test_stop/scripts/testTargetStop.Rev"
