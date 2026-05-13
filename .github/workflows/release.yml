@@ -320,6 +320,8 @@ jobs:
         if [ ${{ matrix.arch }} = "win64" ] ; then
            rm -f test_coalescent/output_expected/horses_iso_EBSP_*
            rm -f test_coalescent/output_expected/mcmc_isochronous_EBSP.errout
+
+           rm -f test_pseudo/output_expected/and.errout
         fi
 
         ./run_integration_tests.sh -mpi ${USE_MPI} -windows ${IS_WINDOWS} rb

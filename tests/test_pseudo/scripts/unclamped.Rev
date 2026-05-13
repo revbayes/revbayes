@@ -1,0 +1,5 @@
+x ~ dnNormal(0,1)
+f ~ dnPseudo(pdBetween(x,0,1))
+
+mymodel = model(x)
+mymcmc = mcmc(mymodel, VectorMoves(), VectorMonitors())

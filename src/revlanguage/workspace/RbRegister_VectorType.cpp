@@ -64,6 +64,7 @@
 #include "RlDeterministicNode.h"
 #include "RlDistribution.h"
 #include "RlSiteMixtureModel.h"
+#include "RlPseudoObservation.h"
 #include "RlTypedDistribution.h"
 #include "RlTree.h"
 #include "RlTypedFunction.h"
@@ -124,7 +125,7 @@
 /** Initialize global workspace */
 void RevLanguage::Workspace::initializeVectorTypeGlobalWorkspace(void)
 {
-    
+
     try
     {
         AddWorkspaceVectorType<Taxon,4>::addTypeToWorkspace( *this, new Taxon() );
@@ -148,6 +149,7 @@ void RevLanguage::Workspace::initializeVectorTypeGlobalWorkspace(void)
         AddWorkspaceVectorType<Tree,3>::addTypeToWorkspace( *this, new Tree() );
         AddWorkspaceVectorType<Clade,3>::addTypeToWorkspace( *this, new Clade() );
         AddWorkspaceVectorType<SiteMixtureModel,3>::addTypeToWorkspace( *this, new SiteMixtureModel() );
+        AddWorkspaceVectorType<PseudoObservation,3>::addTypeToWorkspace( *this, new PseudoObservation() );
 //        AddWorkspaceVectorType<RlRegionalFeatures,3>::addTypeToWorkspace( *this, new RlRegionalFeatures() );
         AddWorkspaceVectorType<RlRegionalFeatureLayer,3>::addTypeToWorkspace( *this, new RlRegionalFeatureLayer() );
         //        AddWorkspaceVectorType<Dist_bdp,3>::addTypeToWorkspace( *this, new Dist_bdp() );
