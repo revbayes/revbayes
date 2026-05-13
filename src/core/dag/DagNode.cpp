@@ -3,10 +3,12 @@
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
+#include <limits>
 #include <ostream>
 #include <string>
 #include <unordered_set>
 #include <utility>
+#include <ranges>
 #include <vector>
 
 #include "Monitor.h"
@@ -15,45 +17,6 @@
 #include "RbOrderedSet.h"
 
 using namespace RevBayesCore;
-
-
-/**
- * Online cycle detection via Pearce-Kelly topological-order maintenance: see
- *
- * Pearce DJ, Kelly PHJ. 2007. A dynamic topological sort algorithm for directed acyclic graphs. Journal of Experimental
- * Algorithmics (JEA). 11:1.7--es. doi:10.1145/1187436.121059.
- *
- * Each `DagNode` stores an ordinal value `topo_ord` (its rank in the current topological order). The defining invariant is:
- *
- *     for every edge (parent -> child) in the DAG,
- *         parent->topo_ord < child->topo_ord.
- *
- * Ordinals are assigned monotonically by the static counter `next_topo_ord`: each constructor (default and copy) grabs the
- * current value and increments. Since every existing node has a strictly smaller ordinal than the value a brand-new node
- * receives, the invariant automatically holds for every edge of the form "existing parent -> brand-new child". The only
- * operation that can violate the invariant is reattaching a previously existing node above another previously existing node.
- * When `addChild()` notices `topo_ord >= child->topo_ord`, it delegates to `pkAddEdge()`, which:
- *
- *   1. Runs a forward depth-first search from `child`, restricted to nodes whose ordinal is <= ord(parent). This is the
- *      "forward delta", deltaF, of nodes that need to be promoted so they end up above `parent` in the new order. Reaching
- *      `parent` during this search would mean the new edge closes a cycle, so we throw without mutating any ordinal.
- *   2. Runs a backward depth-first search from `parent`, restricted to nodes whose ordinal is >= ord(child). This is the
- *      "backward delta", deltaB, of nodes that need to be demoted so they end up below `child`.
- *   3. Reassigns the original ordinals of the union of deltaB and deltaF so that every node in deltaB precedes every node
- *      in deltaF in the new ordering. The original ordinals are recycled in place, so the ordinal space stays compact within
- *      the affected band. Each delta is collected in ascending ordinal order via a post-order depth-first walk with neighbors
- *      sorted at each step, and the multiset of ordinals is merged using std::merge in O(|deltaB| + |deltaF|).
- *
- * `dependsOn(node, target)` then becomes cheap: an ancestor must have a strictly smaller ordinal than its descendant,
- * so `ord(target) >= ord(node)` answers "no" in O(1). Otherwise we walk up the parents of `node`, but pruned to the band
- * `ord >= ord(target)`, which keeps the search inside a small region of the DAG instead of the whole upward cone.
- *
- * Edge removal by `removeChild()` preserves the invariant trivially (it can only widen the set of valid topological orderings),
- * so it needs no maintenance.
- */
-
-// Graph mutation in RevBayes is single-threaded; the global counter is therefore a plain size_t (no need for atomics).
-std::size_t DagNode::next_topo_ord = 0;
 
 
 /**
@@ -68,7 +31,7 @@ DagNode::DagNode( const std::string &n ) : Parallelizable(),
     moves(),
     name( n ),
     touched_elements(),
-    topo_ord( next_topo_ord++ ),
+    topo_level( 1 ),
     ref_count( 0 ),
     visit_flags( std::vector<bool>(5, false) )
 {
@@ -92,7 +55,7 @@ DagNode::DagNode( const DagNode &n ) : Parallelizable( n ),
     moves( ),
     name( n.name ),
     touched_elements( n.touched_elements ),
-    topo_ord( next_topo_ord++ ),
+    topo_level( 1 ),
     ref_count( 0 ),
     visit_flags( n.visit_flags )
 {
@@ -169,17 +132,28 @@ void DagNode::addChild(DagNode *child) const
 
     children.push_back( child );
 
-    // Repair the topological ordering if the new edge violates the invariant.
-    if ( topo_ord >= child->topo_ord )
+
+    /*
+     * BFGT pseudo-topological invariant:
+     *
+     *     for every edge parent -> child,
+     *         parent->topo_level <= child->topo_level.
+     *
+     * If this edge strictly increases the level, it is definitely safe: there
+     * cannot already be a path child ~> parent, because levels never decrease
+     * along existing edges.
+     *
+     * If parent->topo_level >= child->topo_level, we must do the BFGT-style
+     * online check/repair.
+     */
+    if ( topo_level >= child->topo_level )
     {
         try
         {
-            pkAddEdge( this, child );
+            bfgtAddEdge( this, child );
         }
         catch ( ... )
         {
-            // Roll back the edge so the graph state matches what the caller saw
-            // before the failed insertion.
             children.pop_back();
             throw;
         }
@@ -310,51 +284,64 @@ size_t DagNode::decrementReferenceCount( void ) const
 /**
  * Find out whether `node`, or any of its ancestors, equals `target`.
  *
- * The DAG keeps a topological order via the Pearce-Kelly machinery, so if `target` is an ancestor of `node`, then
- * ord(target) < ord(node). The contrapositive lets us reject no-cycle case in O(1): if ord(target) >= ord(node),
- * `target` cannot be an ancestor.
- *
- * In the slow path, we walk upward from `node` along parent edges, but only visit nodes whose ordinal lies in
- * [ord(target), ord(node)]. This keeps the search confined to the affected band of the DAG instead of traversing
- * the entire upward cone, which would exhibit quadratic total cost.
  */
  bool DagNode::dependsOn(const DagNode* node, const DagNode* target)
  {
-     // Fast path: an ancestor must have a strictly smaller ordinal than its descendant, so anything at or above `node`
-     // in the ordering cannot possibly be an ancestor of `node`.
-     if ( target->topo_ord >= node->topo_ord )
-     {
-         return false;
-     }
- 
-     const std::size_t lb = target->topo_ord;
- 
-     std::unordered_set<const DagNode*> visited;
-     std::vector<const DagNode*> stack;
-     stack.push_back( node );
- 
-     while ( not stack.empty() )
-     {
-         const DagNode* current = stack.back();
-         stack.pop_back();
- 
-         if ( visited.count( current ) ) continue;
-         visited.insert( current );
- 
-         if ( current == target ) return true;
- 
-         // Only follow parents that could conceivably still reach `target`. Any parent with ord < lb is too far up the order
-         // to be `target` or to have `target` among its own ancestors.
-         for ( const DagNode* parent : current->getParents() )
-         {
-             if ( parent->topo_ord >= lb && visited.count( parent ) == 0 )
-             {
-                 stack.push_back( parent );
-             }
-         }
-     }
- 
-     return false;
+    if ( node == NULL || target == NULL )
+    {
+        return false;
+    }
+
+    /*
+     * If target is an ancestor of node, then the pseudo-topological invariant
+     * implies
+     *
+     *     target->topo_level <= node->topo_level.
+     *
+     * Therefore target->topo_level > node->topo_level is an immediate "no".
+     * Equality is not enough to reject, because equal-level edges are allowed.
+     */
+    if ( target->topo_level > node->topo_level )
+    {
+        return false;
+    }
+
+    const std::size_t lb = target->topo_level;
+
+    std::unordered_set<const DagNode*> visited;
+    std::vector<const DagNode*> stack;
+    stack.push_back( node );
+
+    while ( not stack.empty() )
+    {
+        const DagNode* current = stack.back();
+        stack.pop_back();
+
+        if ( visited.count( current ) )
+        {
+            continue;
+        }
+        visited.insert( current );
+
+        if ( current == target )
+        {
+            return true;
+        }
+
+        for ( const DagNode* parent : current->getParents() )
+        {
+            /*
+             * If parent->topo_level < target->topo_level, then target cannot be an
+             * ancestor of parent, because levels cannot decrease downstream.
+             */
+            if ( parent->topo_level >= lb && visited.count( parent ) == 0 )
+            {
+                stack.push_back( parent );
+            }
+        }
+    }
+
+    return false;
  }
 
 
@@ -654,14 +641,18 @@ size_t DagNode::getReferenceCount( void ) const
     return ref_count;
 }
 
-
 /**
- * Get the position of this node in the maintained topological ordering of the DAG. The Pearce-Kelly invariant guarantees that
- * for every edge `parent -> child`, `parent->getTopologicalOrder() < child->getTopologicalOrder()`.
+ * Return this node's BFGT pseudo-topological level.
+ *
+ * This is not a strict topological order. Equal levels are allowed. The maintained
+ * invariant is:
+ *
+ *     for every edge parent -> child,
+ *         parent->topo_level <= child->topo_level.
  */
  std::size_t DagNode::getTopologicalOrder( void ) const
  {
-     return topo_ord;
+     return topo_level;
  }
 
 
@@ -833,129 +824,214 @@ void DagNode::keepAffected()
 
 
 /**
- * Pearce-Kelly online edge insertion: repair the topological-order invariant after the edge `parent -> child` has been added
- * with `ord(parent) >= ord(child)`, or throw if the new edge would close a cycle.
+ * BFGT-style online edge insertion for pseudo-topological levels.
  *
- *     deltaF (forward)  = nodes reachable from `child` via children with ord <= ord(parent)
- *     deltaB (backward) = nodes reachable from `parent` via parents with ord >= ord(child)
+ * The edge parent -> child has already been added to parent->children.
  *
- * The forward search doubles as cycle detection: if it ever reaches `parent`, the new edge would close a cycle, and we throw
- * without mutating any ordinal.
+ * Maintained invariant:
  *
- * Each delta must be listed in ascending ordinal order before reassignment. We avoid sorting the whole delta by doing an
- * explicit post-order traversal and, at each node, sorting only that node's filtered neighbors by ordinal before recursing (so
- * the smallest-ordinal child branches finish first). The forward walk records finishes in descending ordinal order, so we
- * reverse once; the backward walk's finish order is already ascending. The pooled ordinals are then merged in linear time.
+ *     for every edge u -> v,
+ *         u->topo_level <= v->topo_level.
+ *
+ * If parent->topo_level < child->topo_level, the insertion is immediately safe and
+ * this function need not be called.
+ *
+ * Otherwise we:
+ *
+ *   1. Search backward from parent through same-level incoming edges.
+ *   2. If child is reached, the new edge closes a cycle.
+ *   3. If the backward search completes and child has the same level as parent,
+ *      no level repair is needed.
+ *   4. Otherwise, raise child to parent's level, or to parent's level + 1 if
+ *      the backward search was interrupted, and propagate that level forward.
+ *
+ * This version stores only ordinary parent edges and filters for same-level
+ * incoming edges during the backward search. That is simpler than maintaining
+ * explicit horizontal-incoming edge lists, though it may not achieve the
+ * published BFGT time bound on adversarial graphs.
  */
-void DagNode::pkAddEdge( const DagNode* parent, DagNode* child )
+void DagNode::bfgtAddEdge( const DagNode* parent, const DagNode* child )
 {
-    const std::size_t lb = child->topo_ord;
-    const std::size_t ub = parent->topo_ord;
+    assert(parent);
+    assert(child);
 
-    auto by_ord = []( DagNode* a, DagNode* b ) { return a->topo_ord < b->topo_ord; };
-
-    // Forward post-order from child along children (ord <= ub). Entering `parent` <=> cycle.
-    std::vector<DagNode*> deltaF;
-    std::unordered_set<DagNode*> visitedF;
+    if ( parent->topo_level < child->topo_level )
     {
-        std::vector<std::pair<DagNode*, bool> > stack;
-        stack.push_back( std::make_pair( child, false ) );
-        std::vector<DagNode*> next_children;
-        while ( not stack.empty() )
-        {
-            std::pair<DagNode*, bool> frame = stack.back();
-            stack.pop_back();
-            DagNode* z = frame.first;
-            const bool is_exit = frame.second;
+        return;
+    }
 
-            if ( is_exit )
+    const std::size_t source_level = parent->topo_level;
+
+    /*
+     * Backward search from parent, but only along incoming edges whose source
+     * is at source_level. This computes a same-level backward region B, or a
+     * prefix of it if the search is interrupted.
+     *
+     * The fully-online variant uses fuel = source_level.
+     */
+    std::unordered_set<const DagNode*> backward_visited;
+    std::vector<const DagNode*> backward_stack;
+
+    backward_stack.push_back( parent );
+
+    // How many backward edges will be look at before giving up?
+    const std::size_t fuel = std::max<std::size_t>(source_level, 8);
+    std::size_t horizontal_edges_seen = 0;
+    bool interrupted = false;
+    while ( not backward_stack.empty() && not interrupted )
+    {
+        const DagNode* current_node = backward_stack.back();
+        backward_stack.pop_back();
+
+        if ( backward_visited.count( current_node ) )
+        {
+            continue;
+        }
+
+        backward_visited.insert( current_node );
+
+        if ( current_node == child )
+        {
+            throw RbException( "Cannot add this edge to the DAG: it would create a cycle." );
+        }
+
+        for ( const DagNode* parent_node : current_node->getParents() )
+        {
+            /*
+             * Only horizontal incoming edges are part of the BFGT backward
+             * search. With this simple representation, we discover them by
+             * filtering ordinary parent edges.
+             */
+            if ( parent_node->topo_level == source_level )
             {
-                deltaF.push_back( z );
+                ++horizontal_edges_seen;
+
+                if ( horizontal_edges_seen >= fuel )
+                {
+                    interrupted = true;
+                    break;
+                }
+
+                if ( backward_visited.count( parent_node ) == 0 )
+                {
+                    backward_stack.push_back( parent_node );
+                }
+            }
+        }
+    }
+
+    /*
+     * If the same-level backward search completed and child was already at the
+     * same level as parent, then the new same-level edge is safe and the pseudo-
+     * topological invariant already holds.
+     */
+    if ( not interrupted && child->topo_level == source_level )
+    {
+        return;
+    }
+
+    if ( interrupted && source_level == std::numeric_limits<std::size_t>::max() )
+    {
+        throw RbException( "Cannot maintain DAG pseudo-topological levels: level overflow." );
+    }
+
+    const std::size_t new_child_level = interrupted ? source_level + 1 : source_level;
+
+    /*
+     * Forward promotion phase.
+     *
+     * We raise child, then walk forward along edges that are now horizontal or
+     * downward relative to the promoted node. Edges to strictly higher-level
+     * nodes do not need to be explored: levels cannot later decrease back down
+     * to the backward region.
+     *
+     * If the forward search reaches any node in backward_visited, then there is
+     * an old path
+     *
+     *     child ~> backward_node ~> parent
+     *
+     * and the newly added edge parent -> child closes a cycle.
+     *
+     * Because addChild() has already inserted the edge, and because we may
+     * discover the cycle during promotion, we record changed levels and roll
+     * them back before throwing.
+     */
+    std::vector<std::pair<const DagNode*, std::size_t> > changed_levels;
+    std::unordered_set<const DagNode*> forward_visited;
+    std::vector<const DagNode*> forward_stack;
+
+    try
+    {
+        if ( backward_visited.count( child ) )
+        {
+            throw RbException( "Cannot add this edge to the DAG: it would create a cycle." );
+        }
+
+        if ( child->topo_level < new_child_level )
+        {
+            changed_levels.push_back( std::make_pair( child, child->topo_level ) );
+            child->topo_level = new_child_level;
+        }
+
+        forward_stack.push_back( child );
+
+        while ( not forward_stack.empty() )
+        {
+            const DagNode* current_node = forward_stack.back();
+            forward_stack.pop_back();
+
+            if ( forward_visited.count( current_node ) )
+            {
                 continue;
             }
 
-            if ( visitedF.count( z ) ) continue;
+            forward_visited.insert( current_node );
 
-            if ( z == parent )
+            if ( backward_visited.count( current_node ) )
             {
                 throw RbException( "Cannot add this edge to the DAG: it would create a cycle." );
             }
 
-            visitedF.insert( z );
-            stack.push_back( std::make_pair( z, true ) );
-
-            next_children.clear();
-            for ( DagNode* d : z->getChildren() )
+            for ( const DagNode* d: current_node->children )
             {
-                if ( d->topo_ord <= ub )
+                /*
+                 * After current_node has been promoted, any child with level <= current_node's level
+                 * is in the affected forward region. If d has lower level, raise
+                 * it. If d has equal level, still traverse it, because an equal-
+                 * level path may reach the backward region and reveal a cycle.
+                 */
+                if ( d->topo_level <= current_node->topo_level )
                 {
-                    next_children.push_back( d );
+                    if ( backward_visited.count( d ) )
+                    {
+                        throw RbException( "Cannot add this edge to the DAG: it would create a cycle." );
+                    }
+
+                    if ( d->topo_level < current_node->topo_level )
+                    {
+                        changed_levels.push_back( std::make_pair( d, d->topo_level ) );
+                        d->topo_level = current_node->topo_level;
+                    }
+
+                    if ( forward_visited.count( d ) == 0 )
+                    {
+                        forward_stack.push_back( d );
+                    }
                 }
             }
-            std::sort( next_children.begin(), next_children.end(), by_ord );
-            for ( std::vector<DagNode*>::reverse_iterator it = next_children.rbegin(); it != next_children.rend(); ++it )
-            {
-                stack.push_back( std::make_pair( *it, false ) );
-            }
         }
-        std::reverse( deltaF.begin(), deltaF.end() );
     }
-
-    // Backward post-order from parent along parents (ord >= lb). Finish order is ascending ordinal.
-    std::vector<DagNode*> deltaB;
-    std::unordered_set<DagNode*> visitedB;
+    catch ( ... )
     {
-        std::vector<std::pair<DagNode*, bool> > stack;
-        stack.push_back( std::make_pair( const_cast<DagNode*>( parent ), false ) );
-        std::vector<DagNode*> next_parents;
-        while ( not stack.empty() )
+        // Roll back level changes in reverse mutation order, so this remains correct
+        // even if a node is recorded more than once in the undo log.
+        for ( const auto& [node, old_level] : changed_levels | std::views::reverse )
         {
-            std::pair<DagNode*, bool> frame = stack.back();
-            stack.pop_back();
-            DagNode* z = frame.first;
-            const bool is_exit = frame.second;
-
-            if ( is_exit )
-            {
-                deltaB.push_back( z );
-                continue;
-            }
-
-            if ( visitedB.count( z ) ) continue;
-
-            visitedB.insert( z );
-            stack.push_back( std::make_pair( z, true ) );
-
-            next_parents.clear();
-            for ( const DagNode* p : z->getParents() )
-            {
-                DagNode* pm = const_cast<DagNode*>( p );
-                if ( pm->topo_ord >= lb )
-                {
-                    next_parents.push_back( pm );
-                }
-            }
-            std::sort( next_parents.begin(), next_parents.end(), by_ord );
-            for ( std::vector<DagNode*>::reverse_iterator it = next_parents.rbegin(); it != next_parents.rend(); ++it )
-            {
-                stack.push_back( std::make_pair( *it, false ) );
-            }
+            node->topo_level = old_level;
         }
+
+        throw;
     }
-
-    std::vector<std::size_t> ordsB;
-    std::vector<std::size_t> ordsF;
-    ordsB.reserve( deltaB.size() );
-    ordsF.reserve( deltaF.size() );
-    for ( DagNode* z : deltaB ) ordsB.push_back( z->topo_ord );
-    for ( DagNode* z : deltaF ) ordsF.push_back( z->topo_ord );
-
-    std::vector<std::size_t> pool( deltaB.size() + deltaF.size() );
-    std::merge( ordsB.begin(), ordsB.end(), ordsF.begin(), ordsF.end(), pool.begin() );
-
-    std::size_t i = 0;
-    for ( DagNode* z : deltaB ) z->topo_ord = pool[i++];
-    for ( DagNode* z : deltaF ) z->topo_ord = pool[i++];
 }
 
 

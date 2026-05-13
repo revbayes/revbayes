@@ -91,7 +91,7 @@ template <class valueType> class RbOrderedSet;
         virtual std::vector<const DagNode*>                         getParents(void) const;                                                                     //!< Get the set of parents (empty set here)
         virtual double                                              getPrevLnProbability(void) const;
         size_t                                                      getReferenceCount(void) const;                                                              //!< Get the reference count for reference counting in smart pointers
-        std::size_t                                                 getTopologicalOrder(void) const;                                                            //!< Get this node's position in the maintained topological ordering of the DAG (Pearce-Kelly).
+        std::size_t                                                 getTopologicalOrder(void) const;                                                            //!< Return this node's pseudo-topological level. Equal levels are allowed.
         const std::set<size_t>&                                     getTouchedElementIndices(void) const;                                                       //!< Get the indices of the touches elements. If the set is empty, then all elements might have changed.
         bool                                                        getVisitFlag(const size_t flagType) const;
         void                                                        incrementReferenceCount(void) const;                                                        //!< Increment the reference count for reference counting in smart pointers
@@ -161,10 +161,9 @@ template <class valueType> class RbOrderedSet;
 
     private:
 
-        static std::size_t                                          next_topo_ord;                                                                              //!< Static counter incremented in the constructor / copy constructor; guarantees each node starts with a strictly larger ordinal (rank) than any previously created node, maintaining the invariant parent->topo_ord < child->topo_ord.
-        static void                                                 pkAddEdge(const DagNode* parent, DagNode* child);                                           //!< Pearce-Kelly online edge insertion: repair the topological order or throw if the new edge would close a cycle.
+        static void                                                 bfgtAddEdge(const DagNode* parent, const DagNode* child);                                           //!< BGFT online edge insertion: repair the topological pseudo-order or throw if the new edge would close a cycle.
 
-        mutable std::size_t                                         topo_ord;                                                                                   //!< This node's ordinal (rank in the topological ordering of the DAG).
+        mutable std::size_t                                         topo_level;                                                                                   //!< This node's level (rank in the topological pseudo-ordering of the DAG).
         mutable size_t                                              ref_count;
         mutable std::vector<bool>                                   visit_flags;                                                                                //!< In order: affected, find, keep, reinitialize, restore
     };
