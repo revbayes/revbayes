@@ -18,6 +18,17 @@
 
 using namespace RevBayesCore;
 
+/**
+ * Online cycle detection via the Bender-Fineman-Gilbert-Tarjan (BFGT) algorithm: see
+ *
+ * Bender MA, Fineman JT, Gilbert S, Tarjan RE. 2015. A new approach to incremental cycle detection and related problems.
+ * ACM Transactions on Algorithms (TALG) 12(2): 14. doi:10.1145/2756553.
+ *
+ * Each `DagNode` stores an identifier `topo_level` so that every edge satisfies parent->topo_level <= child->topo_level.
+ * This represents a pseudo-topological numbering of the nodes -- a relaxation of a strict topological ordering that
+ * permits ties (equal levels). When `addChild()` notices that a newly inserted edge would violate the invariant, it
+ * delegates to `bfgtAddEdge()` to repair it. See the comments on `bfgtAddEdge()` for the repair procedure.
+ */
 
 /**
  * Construct an empty DAG node, potentially
@@ -283,7 +294,6 @@ size_t DagNode::decrementReferenceCount( void ) const
 
 /**
  * Find out whether `node`, or any of its ancestors, equals `target`.
- *
  */
  bool DagNode::dependsOn(const DagNode* node, const DagNode* target)
  {
@@ -833,15 +843,16 @@ void DagNode::keepAffected()
  *     for every edge u -> v,
  *         u->topo_level <= v->topo_level.
  *
- * If parent->topo_level < child->topo_level, the insertion is immediately safe and
- * this function need not be called.
+ * If parent->topo_level < child->topo_level, the insertion is immediately safe
+ * and this function need not be called.
  *
  * Otherwise we:
  *
- *   1. Search backward from parent through same-level incoming edges.
+ *   1. Search backward from parent through same-level incoming edges for
+ *      a limited number of steps.
  *   2. If child is reached, the new edge closes a cycle.
  *   3. If the backward search completes and child has the same level as parent,
- *      no level repair is needed.
+ *      the new edge closes a cycle, but no level repair is needed.
  *   4. Otherwise, raise child to parent's level, or to parent's level + 1 if
  *      the backward search was interrupted, and propagate that level forward.
  *
