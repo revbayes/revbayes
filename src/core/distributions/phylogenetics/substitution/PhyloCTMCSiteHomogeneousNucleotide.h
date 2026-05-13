@@ -94,10 +94,6 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLike
     
     double* p        = this->createEmptyPartialLikelihoodsForNode(root, pl_left.dims()).likelihoods.data();
     
-    // get pointers the likelihood for both subtrees
-          double*   p_mixture          = p;
-    const double*   p_mixture_left     = p_left;
-    const double*   p_mixture_right    = p_right;
     // iterate over all mixture categories
     for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
     {
@@ -105,25 +101,24 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLike
         const std::vector<double> &f = ff[mixture % ff.size()];
 
         // get pointers to the likelihood for this mixture category
-              double*   p_site_mixture          = p_mixture;
-        const double*   p_site_mixture_left     = p_mixture_left;
-        const double*   p_site_mixture_right    = p_mixture_right;
+              double*   p_mixture          = p       + mixture * this->mixtureOffset;
+        const double*   p_mixture_left     = p_left  + mixture * this->mixtureOffset;
+        const double*   p_mixture_right    = p_right + mixture * this->mixtureOffset;
+
         // iterate over all sites
         for (size_t site = 0; site < this->pattern_block_size; ++site)
         {
+            // get pointers to the likelihood for this site and mixture category
+                  double*   p_site_mixture          = p_mixture       + site * this->siteOffset;
+            const double*   p_site_mixture_left     = p_mixture_left  + site * this->siteOffset;
+            const double*   p_site_mixture_right    = p_mixture_right + site * this->siteOffset;
             
             p_site_mixture[0] = p_site_mixture_left[0] * p_site_mixture_right[0] * f[0];
             p_site_mixture[1] = p_site_mixture_left[1] * p_site_mixture_right[1] * f[1];
             p_site_mixture[2] = p_site_mixture_left[2] * p_site_mixture_right[2] * f[2];
             p_site_mixture[3] = p_site_mixture_left[3] * p_site_mixture_right[3] * f[3];
             
-            // increment the pointers to the next site
-            p_site_mixture+=this->siteOffset; p_site_mixture_left+=this->siteOffset; p_site_mixture_right+=this->siteOffset;
-            
         } // end-for over all sites (=patterns)
-        
-        // increment the pointers to the next mixture category
-        p_mixture+=this->mixtureOffset; p_mixture_left+=this->mixtureOffset; p_mixture_right+=this->mixtureOffset;
         
     } // end-for over all mixtures (=rate categories)
 
@@ -153,11 +148,6 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLike
 
     double* p        = this->createEmptyPartialLikelihoodsForNode(root, pl_left.dims()).likelihoods.data();
     
-    // get pointers the likelihood for both subtrees
-          double*   p_mixture          = p;
-    const double*   p_mixture_left     = p_left;
-    const double*   p_mixture_right    = p_right;
-    const double*   p_mixture_middle   = p_middle;
     // iterate over all mixture categories
     for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
     {
@@ -165,25 +155,26 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeRootLike
         const std::vector<double> &f = ff[mixture % ff.size()];
 
         // get pointers to the likelihood for this mixture category
-              double*   p_site_mixture          = p_mixture;
-        const double*   p_site_mixture_left     = p_mixture_left;
-        const double*   p_site_mixture_right    = p_mixture_right;
-        const double*   p_site_mixture_middle   = p_mixture_middle;
+              double*   p_mixture          = p        + mixture * this->mixtureOffset;
+        const double*   p_mixture_left     = p_left   + mixture * this->mixtureOffset;
+        const double*   p_mixture_right    = p_right  + mixture * this->mixtureOffset;
+        const double*   p_mixture_middle   = p_middle + mixture * this->mixtureOffset;
+
         // iterate over all sites
         for (size_t site = 0; site < this->pattern_block_size; ++site)
-        {   
+        {
+            // get pointers to the likelihood for this site and mixture category
+                  double*   p_site_mixture          = p_mixture        + site * this->siteOffset;
+            const double*   p_site_mixture_left     = p_mixture_left   + site * this->siteOffset;
+            const double*   p_site_mixture_right    = p_mixture_right  + site * this->siteOffset;
+            const double*   p_site_mixture_middle   = p_mixture_middle + site * this->siteOffset;
+
             p_site_mixture[0] = p_site_mixture_left[0] * p_site_mixture_right[0] * p_site_mixture_middle[0] * f[0];
             p_site_mixture[1] = p_site_mixture_left[1] * p_site_mixture_right[1] * p_site_mixture_middle[1] * f[1];
             p_site_mixture[2] = p_site_mixture_left[2] * p_site_mixture_right[2] * p_site_mixture_middle[2] * f[2];
             p_site_mixture[3] = p_site_mixture_left[3] * p_site_mixture_right[3] * p_site_mixture_middle[3] * f[3];
             
-            // increment the pointers to the next site
-            p_site_mixture+=this->siteOffset; p_site_mixture_left+=this->siteOffset; p_site_mixture_right+=this->siteOffset; p_site_mixture_middle+=this->siteOffset;
-            
         } // end-for over all sites (=patterns)
-        
-        // increment the pointers to the next mixture category
-        p_mixture+=this->mixtureOffset; p_mixture_left+=this->mixtureOffset; p_mixture_right+=this->mixtureOffset; p_mixture_middle+=this->mixtureOffset;
         
     } // end-for over all mixtures (=rate categories)
     
@@ -227,13 +218,9 @@ void computeInternalNodeLikelihood4(PartialLikelihoods& pl_node, const PartialLi
         // the transition probability matrix for this mixture category
         const double* tp_begin = pmatrices[mixture].theMatrix;
         
-        // get the pointers to the likelihood for this mixture category
+        // get the offset for this mixture category
         size_t offset = mixture*mixtureOffset;
         
-        double*          p_site_mixture          = p_node + offset;
-        const double*    p_site_mixture_left     = p_left + offset;
-        const double*    p_site_mixture_right    = p_right + offset;
-
 #       if defined(__AVX__)
         
         __m256d tp_a = _mm256_loadu_pd(tp_begin);
@@ -246,6 +233,12 @@ void computeInternalNodeLikelihood4(PartialLikelihoods& pl_node, const PartialLi
         // compute the per site probabilities
         for (size_t site = 0; site < pattern_block_size ; ++site)
         {
+            // get the pointers to the likelihood for this site and mixture category
+            size_t site_offset = offset + site*siteOffset;
+
+            double*          p_site_mixture          = p_node  + site_offset;
+            const double*    p_site_mixture_left     = p_left  + site_offset;
+            const double*    p_site_mixture_right    = p_right + site_offset;
             
 #           if defined(__AVX__)
  
@@ -317,10 +310,6 @@ void computeInternalNodeLikelihood4(PartialLikelihoods& pl_node, const PartialLi
 
 #           endif
             
-            // increment the pointers to the next site
-            p_site_mixture_left+=siteOffset; p_site_mixture_right+=siteOffset; p_site_mixture+=siteOffset;
-
-                        
         } // end-for over all sites (=patterns)
         
     } // end-for over all mixtures (=rate-categories)
@@ -412,13 +401,8 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
 //         const double* tp_begin = this->transition_prob_matrices[mixture].theMatrix;
         const double* tp_begin = this->pmatrices[node_index][mixture].theMatrix;
         
-        // get the pointers to the likelihood for this mixture category
+        // get the offset for this mixture category
         size_t offset = mixture*this->mixtureOffset;
-        
-        double*          p_site_mixture          = p_node + offset;
-        const double*    p_site_mixture_left     = p_left + offset;
-        const double*    p_site_mixture_middle   = p_middle + offset;
-        const double*    p_site_mixture_right    = p_right + offset;
         
 #       if defined(__AVX__)
         
@@ -432,6 +416,13 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
         // compute the per site probabilities
         for (size_t site = 0; site < this->pattern_block_size ; ++site)
         {
+            // get the pointers to the likelihood for this site and mixture category
+            size_t site_offset = offset + site*this->siteOffset;
+
+            double*          p_site_mixture          = p_node   + site_offset;
+            const double*    p_site_mixture_left     = p_left   + site_offset;
+            const double*    p_site_mixture_middle   = p_middle + site_offset;
+            const double*    p_site_mixture_right    = p_right  + site_offset;
             
 #           if defined (__AVX__)
             
@@ -498,10 +489,6 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeInternal
             
 #           endif
             
-            // increment the pointers to the next site
-            p_site_mixture_left+=this->siteOffset; p_site_mixture_middle+=this->siteOffset; p_site_mixture_right+=this->siteOffset; p_site_mixture+=this->siteOffset;
-            
-            
         } // end-for over all sites (=patterns)
         
     } // end-for over all mixtures (=rate-categories)
@@ -523,8 +510,6 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeTipLikel
     // update the transition probabilities
     this->updateTransitionProbabilityMatrix( node_index );
     
-    double*   p_mixture      = p_node;
-    
     // iterate over all mixture categories
     for (size_t mixture = 0; mixture < this->num_site_mixtures; ++mixture)
     {
@@ -532,12 +517,14 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeTipLikel
 //         const double*       tp_begin    = this->transition_prob_matrices[mixture].theMatrix;
         const double*       tp_begin    = this->pmatrices[node_index][mixture].theMatrix;
         
-        // get the pointer to the likelihoods for this site and mixture category
-        double*     p_site_mixture      = p_mixture;
+        // get the pointer to the likelihoods for this mixture category
+        double*     p_mixture      = p_node + mixture * this->mixtureOffset;
         
         // iterate over all sites
         for (size_t site = 0; site < this->pattern_block_size; ++site)
         {
+            // get the pointer to the likelihoods for this site and mixture category
+            double*     p_site_mixture      = p_mixture + site * this->siteOffset;
             
             // is this site a gap?
             if ( gap_node[site] ) 
@@ -616,14 +603,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousNucleotide<charType>::computeTipLikel
                 
             } // end-if a gap state
             
-            
-            // increment the pointers to next site
-            p_site_mixture+=this->siteOffset; 
-            
         } // end-for over all sites/patterns in the sequence
-        
-        // increment the pointers to next mixture category
-        p_mixture+=this->mixtureOffset;
         
     } // end-for over all mixture categories
 
