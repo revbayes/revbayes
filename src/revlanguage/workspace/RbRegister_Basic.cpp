@@ -144,6 +144,7 @@
 #include "Func_printSeed.h"
 #include "Func_profile.h"
 #include "Func_quit.h"
+#include "Func_stop.h"
 #include "Func_range.h"
 #include "Func_replicate.h"
 #include "Func_reverse.h"
@@ -335,6 +336,7 @@ void RevLanguage::Workspace::initializeBasicGlobalWorkspace(void)
         addFunction( new Func_printSeed()                   );
         addFunction( new Func_profile()                     );
         addFunction( new Func_quit()                        );
+        addFunction( new Func_stop()                        );
         addFunction( new Func_replicate<Integer>()          );
         addFunction( new Func_replicate<Real>()             );
         addFunction( new Func_replicate<Natural>()          );
