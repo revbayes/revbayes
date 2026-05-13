@@ -1,0 +1,24 @@
+# Regression test for bounded natural random walk proposals.
+
+seed(1)
+
+x ~ dnGeometric(0.5)
+x.setValue(0)
+
+moves = VectorMoves()
+moves.append(mvRandomNaturalWalk(x, weight=1.0))
+
+mymodel = model(x)
+
+monitors = VectorMonitors()
+
+mymcmc = mcmc(mymodel, monitors, moves)
+mymcmc.run(generations=50)
+
+if (x < 0) {
+	print("bounded_natural_walk failed: final x < 0")
+	x_bad := v(1)[2]
+}
+
+print("bounded_natural_walk passed")
+q()

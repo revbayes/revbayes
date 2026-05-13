@@ -3,6 +3,7 @@
 
 #include <iosfwd>
 #include <cstdint>
+#include <limits>
 
 #include "Proposal.h"
 
@@ -25,7 +26,7 @@ template <class variableType> class StochasticNode;
     class RandomIntegerWalkProposal : public Proposal {
         
     public:
-        RandomIntegerWalkProposal( StochasticNode<std::int64_t> *n);                                                            //!< Constructor
+        RandomIntegerWalkProposal( StochasticNode<std::int64_t> *n, std::int64_t lowerBound = std::numeric_limits<std::int64_t>::min() ); //!< Constructor
         
         // Basic utility functions
         void                                cleanProposal(void);                                                                //!< Clean up proposal
@@ -47,6 +48,7 @@ template <class variableType> class StochasticNode;
         
         StochasticNode<std::int64_t>*       variable;                                                                           //!< The variable the Proposal is working on
         std::int64_t                        stored_value;                                                                       //!< The stored value of the Proposal used for rejections.
+        std::int64_t                        lower_bound;                                                                        //!< Lower bound for reflection (default no lower bound).
     };
     
 }

@@ -69,7 +69,7 @@ void Move_RandomNaturalWalk::constructInternalObject( void )
     RevBayesCore::StochasticNode<std::int64_t> *n = static_cast<RevBayesCore::StochasticNode<std::int64_t> *>( tmp );
     
     // finally create the internal move object
-    RevBayesCore::Proposal *prop = new RevBayesCore::RandomIntegerWalkProposal(n);
+    RevBayesCore::Proposal *prop = new RevBayesCore::RandomIntegerWalkProposal(n, 0);
     value = new RevBayesCore::MetropolisHastingsMove(prop,w);
     
 }
