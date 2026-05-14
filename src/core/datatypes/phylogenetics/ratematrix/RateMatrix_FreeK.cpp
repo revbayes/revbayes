@@ -239,7 +239,7 @@ void RateMatrix_FreeK::calculateTransitionProbabilities(double startAge, double 
             if (P[i][j] < -1.0e-6)
                 std::cerr<<my_method<<" exp(M)["<<i<<","<<j<<"] = "<<P[i][j]<<"\n";
 #endif
-            P[i][j] = std::max(0.0, P[i][j]);
+            P[i][j] = std::abs(P[i][j]);
             total += P[i][j];
         }
 #ifdef DEBUG_MATRIX_EXPONENTIAL
@@ -481,7 +481,7 @@ void RateMatrix_FreeK::tiProbsEigens(double t, TransitionProbabilityMatrix& P) c
             for (int s=0; s<num_states; s++)
                 sum += (*ptr++) * eigValExp[s];
             
-            p[j] = (sum < 0.0) ? 0.0 : sum;
+            p[j] = std::abs(sum);
         }
 
         p += num_states;
@@ -521,7 +521,7 @@ void RateMatrix_FreeK::tiProbsComplexEigens(double t, TransitionProbabilityMatri
                 sum += (*ptr++) * ceigValExp[s];
             }
 
-            P[i][j] = (sum.real() < 0.0) ? 0.0 : sum.real();
+            P[i][j] = std::abs(sum.real());
         }
     }
     
