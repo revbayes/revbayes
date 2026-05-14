@@ -244,12 +244,12 @@ LogDensity TopologyConstrainedTreeDistribution::computeLnProbability( void )
 
     // first check if the current tree matches the clade constraints
     auto [n_fail_constraint, constraint_error] = constraintMismatches();
-    auto constraint_pr = LogDensity(n_fail_constraint + constraint_error/N, 0);
+    auto constraint_pr = LogDensity(double(n_fail_constraint) + double(constraint_error)/N, 0);
     if (n_fail_constraint)
         constraint_pr = withReason(constraint_pr)<<"Pr(tree)=0: clade constraints do not match";
 
     auto [n_fail_backbone, backbone_error] = backboneMismatches();
-    auto backbone_pr = LogDensity(n_fail_backbone + backbone_error/N, 0);
+    auto backbone_pr = LogDensity(double(n_fail_backbone) + double(backbone_error)/N, 0);
     if (n_fail_backbone)
         backbone_pr = withReason(backbone_pr)<<"Pr(tree)=0: backbone constraints do not match";
     
