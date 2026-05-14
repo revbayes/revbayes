@@ -156,14 +156,6 @@ int RevLanguage::Parser::execute(SyntaxElement* root, const std::shared_ptr<Envi
     {
         result = root->evaluateContent(env);
     }
-    catch (RbQuitException& q)
-    {
-        delete( root);
-            
-        RevClient::shutdown();
-
-        exit(q.status);
-    }
     catch (RbMissingVariableError& v)
     {
         // Catch a missing variable exception that might be interpreted as a request for usage help on a function
@@ -187,35 +179,17 @@ int RevLanguage::Parser::execute(SyntaxElement* root, const std::shared_ptr<Envi
                 return 0;
             }
         }
-
+        
         // If it was NOT a request for help.
-        std::ostringstream msg;
-        msg<<"Error: variable '"<<v.name<<"' does not exist!";
-        RBOUT(msg.str());
-
-        // Return signal indicating problem
-        return 2;
+        delete root;
+        Signals::getSignals().clearFlags();
+        throw;
     }
-    catch (RbException& rbException)
+    catch (...)
     {
-        std::ostringstream msg;
-        // All other exceptions
-        rbException.print(msg);
-        RBOUT(msg.str());
-
-        // Return signal indicating problem
-        return 2;
-    }
-    // Also handle non-Rb exceptions (such as file-not-found).
-    catch (std::exception& e)
-    {
-        std::ostringstream msg;
-        msg<<"Error: ";
-        msg<<e.what();
-        RBOUT(msg.str());
-
-        // Return signal indicating problem
-        return 2;
+        delete root;
+        Signals::getSignals().clearFlags();
+        throw;
     }
 
     // Print result if the root is not an assign expression
@@ -455,15 +429,36 @@ int RevLanguage::Parser::processCommand(std::string& command, const std::shared_
             RevClient::shutdown();
             exit(q.status);
         }
+        catch (RbMissingVariableError& v)
+        {
+            std::ostringstream msg;
+            msg<<"Error: variable '"<<v.name<<"' does not exist!";
+            RBOUT(msg.str());
+
+            // Return signal indicating problem
+            command = "";
+            return 2;
+        }
         catch (RbException& rbException)
         {
-            // All other uncaught exceptions
+            std::ostringstream msg;
+            // All other exceptions
+            rbException.print(msg);
+            RBOUT(msg.str());
 
-            rbException.print(std::cerr);
-            std::cerr << std::endl;
-            
-            // We exit immediately, discarding any remaining buffer content
-            // We return 2 to signal a problem, which the caller may choose to ignore or act upon
+            // Return signal indicating problem
+            command = "";
+            return 2;
+        }
+        // Also handle non-Rb exceptions (such as file-not-found).
+        catch (std::exception& e)
+        {
+            std::ostringstream msg;
+            msg<<"Error: ";
+            msg<<e.what();
+            RBOUT(msg.str());
+
+            // Return signal indicating problem
             command = "";
             return 2;
         }
