@@ -1,0 +1,418 @@
+seed(1)
+setOption("logZeroPr",2)
+
+n_max_states = 4
+n_partitions = 4
+
+# Import the age data
+taxa <- readTaxonData("data/tipages.tsv")
+
+# Import the character matrix
+morpho <- readDiscreteCharacterData("data/chardata_no_outgroups.nex")
+
+# Delete characters that have become constant/invariant after deleting the four outgroups
+
+inv_ix = morpho.getInvariantSiteIndices(excludeAmbiguous=TRUE)
+morpho.excludeCharacter( inv_ix )
+
+# Run this to get the indices of included characters
+# morpho.getIncludedCharacterIndices()
+
+morpho.removeExcludedCharacters()
+
+# The original indices of ordered characters were:
+#              [29, 30, 34, 116, 118, 141, 159, 170, 174, 185, 191, 204, 207, 222]
+
+# After the change in indexing caused by removing the invariant characters, they are:
+ordered_vect = [28, 29, 33, 100, 102, 123, 139, 148, 152, 160, 166, 177, 180, 192]
+
+part1_ind = 1:82                                     # originally 1:95
+part2_ind = vectorFlatten( [83:132, 202:212] )       # originally 96:150, 235:245
+part3_ind = 133:154                                  # originally 151:178
+part4_ind = 155:201                                  # originally 179:234
+
+species <- morpho.taxa()
+n_taxa <- morpho.ntaxa()
+
+moves = VectorMoves()
+monitors = VectorMonitors()
+
+##########################################################################################
+# Joint Fossilized Birth-Death Process prior on the topology and fossil occurrence times #
+##########################################################################################
+
+# Define priors on the net diversification rate, turnover, and the probability of fossil
+# observation prior to species extinction:
+
+diversification ~ dnExponential(10.0)
+turnover ~ dnBeta(2.0, 1.0)           # speciation and extinction approximately equal
+fossil_prob ~ dnUniform(0.0, 1.0)
+
+# Specify a scale move on the diversification parameter
+# This move will be applied with 3 different tuning values (lambda) to help improve mixing
+moves.append( mvScale(diversification, lambda=0.01, weight=5) )
+moves.append( mvScale(diversification, lambda=0.1,  weight=3) )
+moves.append( mvScale(diversification, lambda=1.0,  weight=1) )
+
+# Specify a sliding-window move on the turnover parameter
+# This move will be applied with 3 different window widths (delta) to help improve mixing
+moves.append( mvSlide(turnover, delta=0.01, weight=5) )
+moves.append( mvSlide(turnover, delta=0.1,  weight=3) )
+moves.append( mvSlide(turnover, delta=1,    weight=1) )
+
+# Specify a sliding-window move on the fossil_prob parameter
+# This move will be applied with 3 different window widths (delta) to help improve mixing
+moves.append( mvSlide(fossil_prob, delta=0.01, weight=5) )
+moves.append( mvSlide(fossil_prob, delta=0.1,  weight=3) )
+moves.append( mvSlide(fossil_prob, delta=1,    weight=1) )
+
+# Create deterministic nodes for the speciation (lambda), extinction (mu), and fossil
+# recovery (psi) rates that we are going to need to specify the FBD distribution. See
+# http://phyloworks.org/workshops/DivTime_BEAST2_tutorial_FBD.pdf for how to go about
+# the reparameterization:
+
+speciation := diversification / abs(1.0 - turnover)
+extinction := (turnover * diversification) / abs(1.0 - turnover)
+recovery := (fossil_prob / abs(1.0 - fossil_prob)) * extinction
+
+# No extant species in our sample
+
+rho <- 0
+
+# The FBD is conditioned on a root age, here drawn from an offset exponential hyperprior:
+# the lower bound is based on the minimum age of Saltriovenator (the oldest currently known
+# ceratosaur) according to Dal Sasso et al. (2018, PeerJ 6: e5976); the upper bound is based
+# on the maximum age of the Hayden Quarry within the Petrified Forest Member of the Chinle 
+# Formation according to Irmis et al. (2011, Earth Planet. Sci. Lett. 309: 258–267).
+
+origin_time ~ dnExponential(lambda=1/(212.6 - 197.5), offset=197.5)
+
+# Specify a sliding-window move on the origin_time parameter
+# This move will be applied with 3 different window widths (delta) to help improve mixing
+moves.append( mvSlide(origin_time, delta=0.01, weight=5) )
+moves.append( mvSlide(origin_time, delta=0.1,  weight=3) )
+moves.append( mvSlide(origin_time, delta=1,    weight=1) )
+
+# Draw a time tree from the specimen-level fossilized birth-death process
+fbd_tree ~ dnFBDP(rootAge=origin_time, lambda=speciation, mu=extinction, psi=recovery, rho=rho,
+                  taxa=taxa)
+
+# Specify moves on the tree topology; allow sampled ancestors
+moves.append( mvFNPR(fbd_tree, weight=15.0) )
+moves.append( mvCollapseExpandFossilBranch(fbd_tree, origin_time, weight=6.0) )
+
+# These moves on the node ages, including the root node age
+moves.append( mvNodeTimeSlideUniform(fbd_tree, weight=40.0) )
+moves.append( mvRootTimeSlideUniform(fbd_tree, origin_time, weight=5.0) )
+
+# Sample fossil ages from uniform priors
+fossils = fbd_tree.getFossils()
+for(i in 1:fossils.size())
+{
+    t[i] := tmrca(fbd_tree, clade(fossils[i]))
+
+    a[i] = fossils[i].getMinAge()
+    b[i] = fossils[i].getMaxAge()
+
+    F[i] ~ dnUniform(t[i] - b[i], t[i] - a[i])
+    F[i].clamp( 0 )
+
+    # Specify a move on the fossil age
+    moves.append( mvFossilTimeSlideUniform(fbd_tree, origin_time, fossils[i], weight = 1.0) )
+}
+
+# Monitor the number of sampled ancestors in the tree
+num_samp_anc := fbd_tree.numSampledAncestors()
+
+###############################################################
+# Unlinked white-noise clock models for individual partitions #
+###############################################################
+
+# Get the number of branches in the tree
+n_branches <- 2 * n_taxa - 2
+
+# Place a diffuse lognormal prior on the base rate of the clock. The mean of the lognormal
+# distribution is based on the slope obtained from regressing nonclock branch lengths (in
+# expected substitutions per character) onto strict-clock branch lengths (in millions of
+# years). The sigma is chosen to ensure that the 95% highest prior density interval spans
+# two orders of magnitude.
+
+sigma_ln <- 1.17481
+clock_mean <- 0.000750
+mu := ln(clock_mean) - (0.5 * sigma_ln^2)
+global_rate_mean ~ dnLognormal(mean=mu, sd=sigma_ln)
+
+# Specify a scale move on the base clock rate parameter
+moves.append( mvScaleBactrian(global_rate_mean, lambda=0.5, weight=10.0) )
+
+# Draw as many clock variances from an exponential prior as there are partitions. The rate
+# of the exponential prior is based on the slope obtained by regressing (1) the squared
+# difference of branch lengths between the nonclock tree and a rescaled strict-clock tree
+# (whose branch lengths were multiplied by the clock rate to convert them into units of
+# expected substitutions per character) onto (2) the branch lengths of the rescaled
+# strict-clock tree.
+
+# See https://boussau.github.io/tutorials/relative_time_constraints/ for how to implement
+# an uncorrelated gamma model with gamma-distributed *relative* rates in RevBayes
+
+for (i in 1:n_partitions) {
+    sigma[i] ~ dnExponential( 3.24339 )
+    moves.append( mvScaleBactrian(sigma[i], lambda=0.5, weight=4.0) )
+
+    for (j in n_branches:1) {
+        # Get branch duration in calendar time units
+        times[j] = fbd_tree.branchLength(j)
+
+        # Relative branch-wise rates: these serve as multipliers to the global_rate_mean (c).
+        # Each relative rate r_{i,j} is gamma distributed with mean = 1.0 and variance equal
+        # to sigma_j/(t_i * c). Since dnGamma() is parameterized using shape and rate in
+        # RevBayes, this corresponds to a shape of (t_i * c)/sigma_j and a rate equal to the
+        # shape.
+        
+        gamma_param[i][j] := (times[j] * global_rate_mean)/sigma[i]
+        rel_branch_rates[i][j] ~ dnGamma(gamma_param[i][j], gamma_param[i][j])
+        moves.append( mvScale(rel_branch_rates[i][j], lambda=0.5, weight=1.0, tune=true))
+        moves.append( mvSlide(rel_branch_rates[i][j], delta=0.5, weight=1.0, tune=true))
+
+        # The actual branch rate is the product of the global_rate_mean and the relative rate.
+        branch_rates[i][j] := global_rate_mean * rel_branch_rates[i][j]
+    }
+}
+
+############################################
+# Among-character rate heterogeneity model #
+############################################
+
+# Discretized gamma distribution of rates across sites. Following the advice of 
+# Alessio Capobianco and Sebastian Hoehna, we will place a broad uniform prior on the
+# shape parameter of the gamma distribution, but to prevent it from getting stuck
+# at very large values, we will initialize it to a small value.
+
+alpha ~ dnUniform(0.0, 1E6)
+alpha.setValue(1.0)
+moves.append( mvScale(alpha, lambda=0.01, weight=5.0) )
+moves.append( mvScale(alpha, lambda=0.1,  weight=3.0) )
+moves.append( mvScale(alpha, lambda=1,    weight=1.0) )
+char_rates := fnDiscretizeGamma(alpha, alpha, 4)
+
+########################
+# Partition 1: cranial #
+########################
+
+unord_part1 <- morpho
+unord_part1.excludeCharacter( 1:morpho.nchar() )
+unord_part1.includeCharacter( part1_ind )
+unord_part1.excludeCharacter( ordered_vect )
+
+ord_part1 <- morpho
+ord_part1.excludeCharacter( 1:morpho.nchar() ) 
+ord_part1.includeCharacter( ordered_vect )
+ord_part1.excludeCharacter( part2_ind )
+ord_part1.excludeCharacter( part3_ind )
+ord_part1.excludeCharacter( part4_ind )
+
+idx = 1
+
+for (i in 2:n_max_states) {
+    # Make a temporary copy of the data
+    unordered_part1[i - 1] <- unord_part1
+    # Only keep those characters who state space size equals i
+    unordered_part1[i - 1].setNumStatesPartition(i)
+    # Get the number of characters with i states
+    nc = unordered_part1[i - 1].nchar()
+    # If this number is greater than zero, create the appropriate Q matrix
+    if (nc > 0) {
+        print("There are "+nc+" unordered characters with "+i+" states in the cranial partition.")
+        Qu1[idx] <- fnJC(i)
+
+        unord_part1_ctmc[idx] ~ dnPhyloCTMC(tree=fbd_tree, Q=Qu1[idx], branchRates=branch_rates[1],
+                                            siteRates=char_rates, type="Standard", coding="variable")
+
+        # Clamp to the data
+        unord_part1_ctmc[idx].clamp( unordered_part1[i - 1] )
+        
+        # Increment counter
+        idx = idx + 1
+    }
+}
+
+# Ordered characters. Credit: April Wright,
+# http://groups.google.com/g/revbayes-users/c/3izTHmnR7dE/m/5xK9tGs4CwAJ
+
+ix = 1
+
+for (i in 3:n_max_states) {
+    ordered_part1[i - 2] <- ord_part1
+    ordered_part1[i - 2].setNumStatesPartition(i)
+    nco = ordered_part1[i - 2].nchar()
+    if (nco > 0) {
+        print("There are "+nco+" ordered characters with "+i+" states in the cranial partition.")
+        Qo1[ix] <- fnOrderedRateMatrix(i, lambda=1, mu=1, matrixExponentialMethod="eigen")
+        order_part1_ctmc[ix] ~ dnPhyloCTMC(tree=fbd_tree, Q=Qo1[ix], branchRates=branch_rates[1],
+                                           siteRates=char_rates, type="Standard", coding="variable")
+        order_part1_ctmc[ix].clamp( ordered_part1[i - 2] )
+        ix = ix + 1
+    }
+}
+
+######################
+# Partition 2: axial #
+######################
+
+unord_part2 <- morpho
+unord_part2.excludeCharacter( 1:morpho.nchar() )
+unord_part2.includeCharacter( part2_ind )
+unord_part2.excludeCharacter( ordered_vect )
+
+ord_part2 <- morpho
+ord_part2.excludeCharacter( 1:morpho.nchar() ) 
+ord_part2.includeCharacter( ordered_vect )
+ord_part2.excludeCharacter( part1_ind )
+ord_part2.excludeCharacter( part3_ind )
+ord_part2.excludeCharacter( part4_ind )
+
+idx = 1
+
+for (i in 2:n_max_states) {
+    unordered_part2[i - 1] <- unord_part2
+    unordered_part2[i - 1].setNumStatesPartition(i)
+    nc = unordered_part2[i - 1].nchar()
+    if (nc > 0) {
+        print("There are "+nc+" unordered characters with "+i+" states in the axial partition.")
+        Qu2[idx] <- fnJC(i)
+        unord_part2_ctmc[idx] ~ dnPhyloCTMC(tree=fbd_tree, Q=Qu2[idx], branchRates=branch_rates[2],
+                                            siteRates=char_rates, type="Standard", coding="variable")
+        unord_part2_ctmc[idx].clamp( unordered_part2[i - 1] )
+        idx = idx + 1
+    }
+}
+
+ix = 1
+
+for (i in 3:n_max_states) {
+    ordered_part2[i - 2] <- ord_part2
+    ordered_part2[i - 2].setNumStatesPartition(i)
+    nco = ordered_part2[i - 2].nchar()
+    if (nco > 0) {
+        print("There are "+nco+" ordered characters with "+i+" states in the axial partition.")
+        Qo2[ix] <- fnOrderedRateMatrix(i, lambda=1, mu=1, matrixExponentialMethod="eigen")
+        order_part2_ctmc[ix] ~ dnPhyloCTMC(tree=fbd_tree, Q=Qo2[ix], branchRates=branch_rates[2],
+                                           siteRates=char_rates, type="Standard", coding="variable")
+        order_part2_ctmc[ix].clamp( ordered_part2[i - 2] )
+        ix = ix + 1
+    }
+}
+
+#########################
+# Partition 3: forelimb #
+#########################
+
+unord_part3 <- morpho
+unord_part3.excludeCharacter( 1:morpho.nchar() )
+unord_part3.includeCharacter( part3_ind )
+unord_part3.excludeCharacter( ordered_vect )
+
+ord_part3 <- morpho
+ord_part3.excludeCharacter( 1:morpho.nchar() ) 
+ord_part3.includeCharacter( ordered_vect )
+ord_part3.excludeCharacter( part1_ind )
+ord_part3.excludeCharacter( part2_ind )
+ord_part3.excludeCharacter( part4_ind )
+
+idx = 1
+
+for (i in 2:n_max_states) {
+    unordered_part3[i - 1] <- unord_part3
+    unordered_part3[i - 1].setNumStatesPartition(i)
+    nc = unordered_part3[i - 1].nchar()
+    if (nc > 0) {
+        print("There are "+nc+" unordered characters with "+i+" states in the forelimb partition.")
+        Qu3[idx] <- fnJC(i)
+        unord_part3_ctmc[idx] ~ dnPhyloCTMC(tree=fbd_tree, Q=Qu3[idx], branchRates=branch_rates[3],
+                                            siteRates=char_rates, type="Standard", coding="variable")
+        unord_part3_ctmc[idx].clamp( unordered_part3[i - 1] )
+        idx = idx + 1
+    }
+}
+
+ix = 1
+
+for (i in 3:n_max_states) {
+    ordered_part3[i - 2] <- ord_part3
+    ordered_part3[i - 2].setNumStatesPartition(i)
+    nco = ordered_part3[i - 2].nchar()
+    if (nco > 0) {
+        print("There are "+nco+" ordered characters with "+i+" states in the forelimb partition.")
+        Qo3[ix] <- fnOrderedRateMatrix(i, lambda=1, mu=1, matrixExponentialMethod="eigen")
+        order_part3_ctmc[ix] ~ dnPhyloCTMC(tree=fbd_tree, Q=Qo3[ix], branchRates=branch_rates[3],
+                                           siteRates=char_rates, type="Standard", coding="variable")
+        order_part3_ctmc[ix].clamp( ordered_part3[i - 2] )
+        ix = ix + 1
+    }
+}
+
+#########################
+# Partition 4: hindlimb #
+#########################
+
+unord_part4 <- morpho
+unord_part4.excludeCharacter( 1:morpho.nchar() )
+unord_part4.includeCharacter( part4_ind )
+unord_part4.excludeCharacter( ordered_vect )
+
+ord_part4 <- morpho
+ord_part4.excludeCharacter( 1:morpho.nchar() ) 
+ord_part4.includeCharacter( ordered_vect )
+ord_part4.excludeCharacter( part1_ind )
+ord_part4.excludeCharacter( part2_ind )
+ord_part4.excludeCharacter( part3_ind )
+
+idx = 1
+
+for (i in 2:n_max_states) {
+    unordered_part4[i - 1] <- unord_part4
+    unordered_part4[i - 1].setNumStatesPartition(i)
+    nc = unordered_part4[i - 1].nchar()
+    if (nc > 0) {
+        print("There are "+nc+" unordered characters with "+i+" states in the hindlimb partition.")
+        Qu4[idx] <- fnJC(i)
+        unord_part4_ctmc[idx] ~ dnPhyloCTMC(tree=fbd_tree, Q=Qu4[idx], branchRates=branch_rates[4],
+                                            siteRates=char_rates, type="Standard", coding="variable")
+        unord_part4_ctmc[idx].clamp( unordered_part4[i - 1] )
+        idx = idx + 1
+    }
+}
+
+ix = 1
+
+for (i in 3:n_max_states) {
+    ordered_part4[i - 2] <- ord_part4
+    ordered_part4[i - 2].setNumStatesPartition(i)
+    nco = ordered_part4[i - 2].nchar()
+    if (nco > 0) {
+        print("There are "+nco+" ordered characters with "+i+" states in the hindlimb partition.")
+        Qo4[ix] <- fnOrderedRateMatrix(i, lambda=1, mu=1, matrixExponentialMethod="eigen")
+        order_part4_ctmc[ix] ~ dnPhyloCTMC(tree=fbd_tree, Q=Qo4[ix], branchRates=branch_rates[4],
+                                           siteRates=char_rates, type="Standard", coding="variable")
+        order_part4_ctmc[ix].clamp( ordered_part4[i - 2] )
+        ix = ix + 1
+    }
+}
+  
+############
+# Analysis #
+############
+
+# Initialize the model object
+mymodel = model(fbd_tree)
+
+# Create a vector of monitors
+monitors = VectorMonitors()
+monitors.append( mnModel(filename="output/Abelisauridae_relaxed_clocks.log", printgen=1) )
+
+# Initialize the MCMC object
+mymcmc = mcmc(mymodel, monitors, moves, nruns=2, ntries=1, nsearch=100)
+
+# Run the MCMC
+mymcmc.burnin(generations=2, tuningInterval=1)
+mymcmc.run(generations=2)
