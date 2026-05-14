@@ -66,6 +66,12 @@ int RbSettings::getLogMCMC( void ) const
     return logMCMC;
 }
 
+int RbSettings::getLogZeroPr( void ) const
+{
+    // return the internal value
+    return logZeroPr;
+}
+
 std::string bool_to_string(bool b)
 {
     return b ? "TRUE" : "FALSE";
@@ -108,6 +114,10 @@ std::string RbSettings::getOption(const std::string &key) const
     else if ( key == "logMCMC" )
     {
         return std::to_string(logMCMC);
+    }
+    else if ( key == "logZeroPr" )
+    {
+        return std::to_string(logZeroPr);
     }
     else
     {
@@ -179,6 +189,7 @@ void RbSettings::listOptions() const
     std::cout << "scalingDensity = " << scalingDensity << std::endl;
     std::cout << "debugMCMC = " << debugMCMC << std::endl;
     std::cout << "logMCMC = " << logMCMC << std::endl;
+    std::cout << "logZeroPr = " << logZeroPr << std::endl;
 }
 
 
@@ -243,6 +254,15 @@ void RbSettings::setLogMCMC(int d)
     writeUserSettings();
 }
 
+void RbSettings::setLogZeroPr(int d)
+{
+    // replace the internal value with this new value
+    logZeroPr = d;
+
+    // save the current settings for the future.
+    writeUserSettings();
+}
+
 std::optional<bool> string_to_bool(const std::string& option)
 {
     if (option == "TRUE" or option == "true")
@@ -301,6 +321,10 @@ void RbSettings::setOption(const std::string &key, const std::string &v, bool wr
     else if ( key == "logMCMC" )
     {
         logMCMC = boost::lexical_cast<int>(value);
+    }
+    else if ( key == "logZeroPr" )
+    {
+        logZeroPr = boost::lexical_cast<int>(value);
     }
     else
     {
@@ -363,8 +387,8 @@ void RbSettings::writeUserSettings( void )
     writeStream.close();
 }
 
-void showDebug(const std::string& s, int level)
+void showDebugZero(const std::string& s, int level)
 {
-    if (RbSettings::userSettings().getLogMCMC() >= level)
+    if (RbSettings::userSettings().getLogZeroPr() >= level)
 	std::cerr<<s<<"\n";
 }

@@ -33,6 +33,7 @@ public:
     bool                        getUseScaling(void) const;                          //!< Retrieve the flag whether we should scale the likelihood in CTMC models
     int                         getDebugMCMC(void) const;                           //!< How much work should we perform to check MCMC?
     int                         getLogMCMC(void) const;                             //!< How much logging should we perform to check MCMC?
+    int                         getLogZeroPr(void) const;                           //!< How much work should we perform to check MCMC?
 
     // setters
     void                        setLineWidth(size_t w);                             //!< Set the line width that will be used for the screen width when printing
@@ -45,6 +46,7 @@ public:
     void                        setUseScaling(bool s);                              //!< Set the flag whether we should scale the likelihood in CTMC models
     void                        setDebugMCMC(int d);                                //!< How much work should we perform to check MCMC?
     void                        setLogMCMC(int d);                                  //!< How much logging should we perform to check MCMC?
+    void                        setLogZeroPr(int d);                                //!< How much logging should we perform to check MCMC?
     
 private:
     RbSettings(void);                                   //!< Default constructor
@@ -62,9 +64,10 @@ private:
     bool                        useScaling=true;
     int                         debugMCMC = 0;
     int                         logMCMC = 0;
+    int                         logZeroPr = 0;
 };
 
-void showDebug(const std::string& s, int level=1);
+void showDebugZero(const std::string& s, int level=1);
 
 class withReason
 {
@@ -76,7 +79,7 @@ public:
     template <typename T>
     withReason& operator<<(const T& t) {reason<<t; return *this;}
 
-    operator LogDensity() const {showDebug(reason.str(), level); return value;}
+    operator LogDensity() const {showDebugZero(reason.str(), level); return value;}
 
     withReason(LogDensity d):value(d) {}
     withReason(LogDensity d, int l):value(d), level(l) {}
