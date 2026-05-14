@@ -160,7 +160,7 @@ void RateMatrix_GTR::tiProbsEigens(double t, TransitionProbabilityMatrix& P) con
                 sum += (*ptr++) * eigValExp[s];
             }
             
-            sum = (sum < 0.0) ? 0.0 : sum;
+            sum = std::abs(sum);
             rowsum += sum;
             (*p) = sum;
         }
@@ -248,7 +248,7 @@ void RateMatrix_GTR::tiProbsComplexEigens(double t, TransitionProbabilityMatrix&
             for (size_t s=0; s<num_states; s++)
                 sum += (*ptr++) * ceigValExp[s];
 
-            double real_sum = (sum.real() < 0.0) ? 0.0 : sum.real();
+            double real_sum = std::abs( sum.real() );
             P[i][j] = real_sum;
             rowsum += real_sum;
         }

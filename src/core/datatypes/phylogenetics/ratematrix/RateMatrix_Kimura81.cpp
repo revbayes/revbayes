@@ -172,8 +172,8 @@ void RateMatrix_Kimura81::tiProbsEigens(double t, TransitionProbabilityMatrix& P
                 sum += (*ptr++) * eigValExp[s];
             }
             
-            //			P[i][j] = (sum < 0.0) ? 0.0 : sum;
-            (*p) = (sum < 0.0) ? 0.0 : sum;
+            //			P[i][j] = std::abs(sum);
+            (*p) = std::abs(sum);
         }
         
     }
@@ -206,7 +206,7 @@ void RateMatrix_Kimura81::tiProbsComplexEigens(double t, TransitionProbabilityMa
             std::complex<double> sum = std::complex<double>(0.0, 0.0);
             for (size_t s=0; s<num_states; s++)
                 sum += (*ptr++) * ceigValExp[s];
-            P[i][j] = (sum.real() < 0.0) ? 0.0 : sum.real();
+            P[i][j] = std::abs(sum.real());
         }
         
     }

@@ -77,7 +77,6 @@ There are 14 ordered characters with 3 states in the cranial partition.
       'rel_branch_rates[67]': lnProb = inf    value = 0
       'rel_branch_rates[76]': lnProb = inf    value = 0
       'unord_ctmc[2]': lnProb = -inf    value = Standard character matrix with 43 taxa and 212 charac
-      'order_ctmc[1]': lnProb = -inf    value = Standard character matrix with 43 taxa and 212 charac
    Drawing new initial states ... 
       'unord_ctmc[1]': lnProb = -inf    value = Standard character matrix with 43 taxa and 212 charac
       'rel_branch_rates[45]': lnProb = inf    value = 0
@@ -94,7 +93,6 @@ There are 14 ordered characters with 3 states in the cranial partition.
       'rel_branch_rates[76]': lnProb = inf    value = 0
       'unord_ctmc[2]': lnProb = -inf    value = Standard character matrix with 43 taxa and 212 charac
       'unord_ctmc[3]': lnProb = -inf    value = Standard character matrix with 43 taxa and 212 charac
-      'order_ctmc[1]': lnProb = -inf    value = Standard character matrix with 43 taxa and 212 charac
    Drawing new initial states ... 
       'unord_ctmc[1]': lnProb = nan    value = Standard character matrix with 43 taxa and 212 charac
       'rel_branch_rates[14]': lnProb = inf    value = 0
@@ -197,7 +195,6 @@ There are 14 ordered characters with 3 states in the cranial partition.
       'rel_branch_rates[76]': lnProb = inf    value = 0
       'unord_ctmc[2]': lnProb = -inf    value = Standard character matrix with 43 taxa and 212 charac
       'unord_ctmc[3]': lnProb = -inf    value = Standard character matrix with 43 taxa and 212 charac
-      'order_ctmc[1]': lnProb = -inf    value = Standard character matrix with 43 taxa and 212 charac
    Drawing new initial states ... 
       'unord_ctmc[1]': lnProb = -inf    value = Standard character matrix with 43 taxa and 212 charac
       'rel_branch_rates[44]': lnProb = inf    value = 0
@@ -231,7 +228,6 @@ There are 14 ordered characters with 3 states in the cranial partition.
       'rel_branch_rates[76]': lnProb = inf    value = 0
       'unord_ctmc[2]': lnProb = -inf    value = Standard character matrix with 43 taxa and 212 charac
       'unord_ctmc[3]': lnProb = -inf    value = Standard character matrix with 43 taxa and 212 charac
-      'order_ctmc[1]': lnProb = -inf    value = Standard character matrix with 43 taxa and 212 charac
    Drawing new initial states ... 
       'unord_ctmc[1]': lnProb = nan    value = Standard character matrix with 43 taxa and 212 charac
       'rel_branch_rates[2]': lnProb = inf    value = 0
@@ -462,7 +458,6 @@ There are 14 ordered characters with 3 states in the cranial partition.
       'rel_branch_rates[70]': lnProb = inf    value = 0
       'rel_branch_rates[76]': lnProb = inf    value = 0
       'unord_ctmc[2]': lnProb = -inf    value = Standard character matrix with 43 taxa and 212 charac
-      'order_ctmc[1]': lnProb = -inf    value = Standard character matrix with 43 taxa and 212 charac
    Drawing new initial states ... 
       'unord_ctmc[1]': lnProb = nan    value = Standard character matrix with 43 taxa and 212 charac
       'rel_branch_rates[13]': lnProb = inf    value = 0
@@ -1203,7 +1198,6 @@ There are 14 ordered characters with 3 states in the cranial partition.
       'rel_branch_rates[56]': lnProb = inf    value = 0
       'rel_branch_rates[59]': lnProb = inf    value = 0
       'rel_branch_rates[76]': lnProb = inf    value = 0
-      'order_ctmc[1]': lnProb = -inf    value = Standard character matrix with 43 taxa and 212 charac
    Drawing new initial states ... 
       'unord_ctmc[1]': lnProb = -inf    value = Standard character matrix with 43 taxa and 212 charac
       'rel_branch_rates[6]': lnProb = inf    value = 0
@@ -1347,7 +1341,6 @@ There are 14 ordered characters with 3 states in the cranial partition.
       'rel_branch_rates[76]': lnProb = inf    value = 0
       'unord_ctmc[2]': lnProb = -inf    value = Standard character matrix with 43 taxa and 212 charac
       'unord_ctmc[3]': lnProb = -inf    value = Standard character matrix with 43 taxa and 212 charac
-      'order_ctmc[1]': lnProb = -inf    value = Standard character matrix with 43 taxa and 212 charac
    Drawing new initial states ... 
       'unord_ctmc[1]': lnProb = -inf    value = Standard character matrix with 43 taxa and 212 charac
       'rel_branch_rates[6]': lnProb = inf    value = 0
@@ -1416,7 +1409,6 @@ There are 14 ordered characters with 3 states in the cranial partition.
       'rel_branch_rates[67]': lnProb = inf    value = 0
       'rel_branch_rates[76]': lnProb = inf    value = 0
       'unord_ctmc[2]': lnProb = -inf    value = Standard character matrix with 43 taxa and 212 charac
-      'order_ctmc[1]': lnProb = -inf    value = Standard character matrix with 43 taxa and 212 charac
    Drawing new initial states ... 
       'unord_ctmc[1]': lnProb = -inf    value = Standard character matrix with 43 taxa and 212 charac
       'rel_branch_rates[44]': lnProb = inf    value = 0
@@ -1522,7 +1514,6 @@ There are 14 ordered characters with 3 states in the cranial partition.
       'rel_branch_rates[76]': lnProb = inf    value = 0
       'rel_branch_rates[77]': lnProb = inf    value = 0
       'unord_ctmc[2]': lnProb = -inf    value = Standard character matrix with 43 taxa and 212 charac
-      'order_ctmc[1]': lnProb = -inf    value = Standard character matrix with 43 taxa and 212 charac
    Drawing new initial states ... 
       'unord_ctmc[1]': lnProb = -inf    value = Standard character matrix with 43 taxa and 212 charac
       'rel_branch_rates[3]': lnProb = inf    value = 0
@@ -2207,7 +2198,6 @@ There are 14 ordered characters with 3 states in the cranial partition.
       'rel_branch_rates[69]': lnProb = inf    value = 0
       'rel_branch_rates[76]': lnProb = inf    value = 0
       'unord_ctmc[2]': lnProb = -inf    value = Standard character matrix with 43 taxa and 212 charac
-      'order_ctmc[1]': lnProb = -inf    value = Standard character matrix with 43 taxa and 212 charac
    Drawing new initial states ... 
       'unord_ctmc[1]': lnProb = -inf    value = Standard character matrix with 43 taxa and 212 charac
       'rel_branch_rates[44]': lnProb = inf    value = 0
@@ -2803,7 +2793,6 @@ There are 14 ordered characters with 3 states in the cranial partition.
       'rel_branch_rates[68]': lnProb = inf    value = 0
       'rel_branch_rates[76]': lnProb = inf    value = 0
       'unord_ctmc[2]': lnProb = -inf    value = Standard character matrix with 43 taxa and 212 charac
-      'order_ctmc[1]': lnProb = -inf    value = Standard character matrix with 43 taxa and 212 charac
    Drawing new initial states ... 
       'unord_ctmc[1]': lnProb = -inf    value = Standard character matrix with 43 taxa and 212 charac
       'rel_branch_rates[44]': lnProb = inf    value = 0
@@ -2874,7 +2863,6 @@ There are 14 ordered characters with 3 states in the cranial partition.
       'rel_branch_rates[59]': lnProb = inf    value = 0
       'rel_branch_rates[76]': lnProb = inf    value = 0
       'unord_ctmc[2]': lnProb = -inf    value = Standard character matrix with 43 taxa and 212 charac
-      'order_ctmc[1]': lnProb = -inf    value = Standard character matrix with 43 taxa and 212 charac
    Drawing new initial states ... 
       'unord_ctmc[1]': lnProb = -inf    value = Standard character matrix with 43 taxa and 212 charac
       'rel_branch_rates[20]': lnProb = inf    value = 0
@@ -3077,7 +3065,6 @@ There are 14 ordered characters with 3 states in the cranial partition.
       'rel_branch_rates[76]': lnProb = inf    value = 0
       'unord_ctmc[2]': lnProb = -inf    value = Standard character matrix with 43 taxa and 212 charac
       'unord_ctmc[3]': lnProb = -inf    value = Standard character matrix with 43 taxa and 212 charac
-      'order_ctmc[1]': lnProb = -inf    value = Standard character matrix with 43 taxa and 212 charac
    Drawing new initial states ... 
       'unord_ctmc[1]': lnProb = -inf    value = Standard character matrix with 43 taxa and 212 charac
       'rel_branch_rates[22]': lnProb = inf    value = 0
