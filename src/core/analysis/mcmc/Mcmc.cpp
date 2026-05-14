@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "DagNode.h"
+#include "Distribution.h"
 #include "Mcmc.h"
 #include "MoveSchedule.h"
 #include "RandomMoveSchedule.h"
@@ -254,10 +255,21 @@ void Mcmc::checkpoint( void ) const
             {
                 out_stream << separator;
             }
-            
+
             // get the node
             DagNode *node = *it;
-            
+
+            if (node->isStochastic())
+            {
+                std::string hidden = node->getDistribution().getHiddenStateString();
+                if (!hidden.empty())
+                {
+                    // write hidden state as quoted string to distinguish from numeric values
+                    out_stream << "'" << hidden << "'";
+                    continue;
+                }
+            }
+
             // print the value
             node->printValue(out_stream, separator, -1, false, false, false, flatten);
         }

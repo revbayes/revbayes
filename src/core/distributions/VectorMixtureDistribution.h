@@ -256,7 +256,7 @@ void RevBayesCore::VectorMixtureDistribution<mixtureType>::redrawValue( void )
         u -= probs[index];
         ++index;
     }
-    
+
     TypedDistribution<mixtureType> *selected_base_dist = base_distributions[index];
     for (size_t i=0; i<num_values; ++i)
     {

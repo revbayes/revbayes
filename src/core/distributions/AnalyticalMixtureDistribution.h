@@ -250,7 +250,7 @@ void RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::redrawValue( void
         u -= probs[index];
         ++index;
     }
-    
+
     TypedDistribution<mixtureType> *selected_base_dist = base_distributions[index];
     selected_base_dist->redrawValue();
     if constexpr (std::is_base_of_v<Cloneable, mixtureType>)

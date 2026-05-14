@@ -36,7 +36,10 @@ class Model;
         
         // basic methods
         StochasticVariableMonitor*          clone(void) const;                                                  //!< Clone the object
-        
+
+        // monitor methods
+        void                                monitorVariables(std::uint64_t gen) override;
+
         // getters and setters
         void                                setModel(Model* m);
         

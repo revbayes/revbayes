@@ -857,12 +857,17 @@ void RevBayesCore::StochasticNode<valueType>::setValueFromFile(const RevBayesCor
 template<class valueType>
 void RevBayesCore::StochasticNode<valueType>::setValueFromString(const std::string &v)
 {
-    
-    Serializer<valueType, IsDerivedFrom<valueType, RevBayesCore::Serializable>::Is >::ressurectFromString( &getValue(), v );
-    
-    // delegate to the standard function of setting the value
-    this->setValue( &this->getValue() );
-    
+    if ( v.size() >= 2 && v.front() == '\'' && v.back() == '\'' )
+    {
+        // quoted string — this is a hidden state (e.g. allocation index)
+        distribution->setHiddenStateFromString(v.substr(1, v.size() - 2));
+        this->touch();
+    }
+    else
+    {
+        Serializer<valueType, IsDerivedFrom<valueType, RevBayesCore::Serializable>::Is >::ressurectFromString( &getValue(), v );
+        this->setValue( &this->getValue() );
+    }
 }
 
 

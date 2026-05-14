@@ -7,6 +7,8 @@
 #include "TypedDagNode.h"
 #include "TypedDistribution.h"
 
+#include <iostream>
+
 namespace RevBayesCore {
     
     
@@ -36,6 +38,8 @@ namespace RevBayesCore {
         void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, std::int64_t &rv) const;     //!< Map the member methods to internal function calls
         const RevBayesCore::RbVector<mixtureType>&          getParameterValues(void) const;
         size_t                                              getCurrentIndex(void) const;
+        std::string                                         getHiddenStateString(void) const override;
+        void                                                setHiddenStateFromString(const std::string &s) override;
         std::vector<double>                                 getMixtureProbabilities(void) const;
         size_t                                              getNumberOfMixtureElements(void) const;                                                        //!< Get the number of elements for this value
         void                                                redrawValue(void);
@@ -142,6 +146,20 @@ size_t RevBayesCore::MixtureDistribution<mixtureType>::getCurrentIndex( void ) c
 
 
 template <class mixtureType>
+std::string RevBayesCore::MixtureDistribution<mixtureType>::getHiddenStateString( void ) const
+{
+    return std::to_string( getCurrentIndex() );
+}
+
+
+template <class mixtureType>
+void RevBayesCore::MixtureDistribution<mixtureType>::setHiddenStateFromString( const std::string &s )
+{
+    setCurrentIndex( std::stoul(s) );
+}
+
+
+template <class mixtureType>
 std::vector<double> RevBayesCore::MixtureDistribution<mixtureType>::getMixtureProbabilities( void ) const
 {
 
@@ -189,7 +207,7 @@ const mixtureType& RevBayesCore::MixtureDistribution<mixtureType>::simulate()
         u -= probs[index];
         ++index;
     }
-    
+
     return parameter_values->getValue()[index];
 }
 
@@ -277,7 +295,13 @@ void RevBayesCore::MixtureDistribution<mixtureType>::setValue(mixtureType *v, bo
             break;
         }
     }
-    
+
+    if ( index >= vals.size() )
+    {
+        std::cerr << "Warning: mixture allocation index could not be reconstructed from value. Hidden state not restored." << std::endl;
+        index = 0;
+    }
+
     // delegate class
     TypedDistribution<mixtureType>::setValue( v, force );
 }
