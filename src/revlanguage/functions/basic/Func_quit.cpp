@@ -7,6 +7,7 @@
 #include "RlUtils.h"
 #include "TypeSpec.h"
 #include "ArgumentRules.h"
+#include "Natural.h"
 #include "Procedure.h"
 #include "RbHelpReference.h"
 #include "RevPtr.h"
@@ -38,8 +39,13 @@ Func_quit* Func_quit::clone( void ) const
 /** Execute function */
 RevPtr<RevVariable> Func_quit::execute( void )
 {
-    
-    throw RbException( RbException::QUIT );
+    // We could in theory just call std::exit(status) here.
+    // Throwing an exception provides a way to notify our callers.
+    // The best way to quit is really to return the exit code from main.
+
+    unsigned int status = (unsigned int)static_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue();
+
+    throw RbQuitException(status);
     
     return NULL;
 }
@@ -50,6 +56,14 @@ const ArgumentRules& Func_quit::getArgumentRules( void ) const
 {
     
     static ArgumentRules argumentRules = ArgumentRules();
+    static bool          rules_set = false;
+    
+    if ( !rules_set )
+    {
+        
+        argumentRules.push_back( new ArgumentRule( "status", Natural::getClassTypeSpec(), "The exit code used to quit.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, 0 ) );
+        rules_set = true;
+    }
     
     return argumentRules;
 }

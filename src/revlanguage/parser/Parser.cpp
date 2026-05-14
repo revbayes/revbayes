@@ -156,20 +156,17 @@ int RevLanguage::Parser::execute(SyntaxElement* root, const std::shared_ptr<Envi
     {
         result = root->evaluateContent(env);
     }
+    catch (RbQuitException& q)
+    {
+        delete( root);
+            
+        RevClient::shutdown();
+
+        exit(q.status);
+    }
     catch (RbException& rbException)
     {
-
         std::ostringstream msg;
-
-        // Catch a quit request
-        if (rbException.getExceptionType() == RbException::QUIT)
-        {
-            delete( root);
-            
-            RevClient::shutdown();
-
-            exit(0);
-        }
 
         // Catch a missing variable exception that might be interpreted as a request for
         // usage help on a function
@@ -445,17 +442,15 @@ int RevLanguage::Parser::processCommand(std::string& command, const std::shared_
         {
             result = yyparse();
         }
+        catch (RbQuitException &q)
+        {
+            RevClient::shutdown();
+            exit(q.status);
+        }
         catch (RbException& rbException)
         {
-
-            // Catch a quit request in case it was not caught before
-            if (rbException.getExceptionType() == RbException::QUIT)
-            {
-                RevClient::shutdown();
-                exit(0);
-            }
             // All other uncaught exceptions
-            
+
             rbException.print(std::cerr);
             std::cerr << std::endl;
             
@@ -603,7 +598,6 @@ ParserInfo Parser::checkCommand(std::string& command, const std::shared_ptr<Envi
         pi.argument_label = argument_label;
         pi.result = 0;
 
-
         /* prepare globals for call to parser */
         rrcommand.str((*i));
         rrcommand.clear();
@@ -613,15 +607,28 @@ ParserInfo Parser::checkCommand(std::string& command, const std::shared_ptr<Envi
 
         pi.message.append("\n\rCalling bison with rrcommand:\n\r").append(rrcommand.str()).append("\n\r");
 
-        int result;
+        int result = 2;
         try {
             result = yyparse();
-        }        catch (RbException& rbException) {
+        }
+        catch (RbQuitException&)
+        {
             pi.message.append("Caught an exception calling yyparse\n\r");
+
             // Catch a quit request in case it was not caught before
-            if (rbException.getExceptionType() == RbException::QUIT) {
-                pi.message.append("ignoring QUIT request");
-            }
+            pi.message.append("ignoring QUIT request");
+
+            // All other uncaught exceptions
+            pi.message.append("Abnormal exception during parsing or execution of statement; discarding any remaining command buffer\n\r");
+
+            // try parsing next line
+            pi.result = 2;
+            continue;
+        }
+        catch (RbException& rbException)
+        {
+            pi.message.append("Caught an exception calling yyparse\n\r");
+
             // All other uncaught exceptions
             pi.message.append("Abnormal exception during parsing or execution of statement; discarding any remaining command buffer\n\r");
 

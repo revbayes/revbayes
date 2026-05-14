@@ -60,9 +60,6 @@ void RbException::print(std::ostream &o) const
         case MISSING_VARIABLE:
             error_type = "Missing Variable";
             break;
-        case QUIT:
-            error_type = "Quit";
-            break;
         case STOP:
             error_type = "Stop";
             break;
