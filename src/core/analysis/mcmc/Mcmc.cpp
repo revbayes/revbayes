@@ -590,9 +590,43 @@ std::string Mcmc::getStrategyDescription( void ) const
     return description;
 }
 
+std::vector<const DagNode*> upstreamStochastic(const DagNode* node)
+{
+    std::set<const DagNode*> seen;
+
+    // The parents are not necessarily unique.
+    auto upstream = node->getParents();
+    std::vector<const DagNode*> stochastic;
+
+    for(int i=0; i < upstream.size(); i++)
+    {
+        auto u = upstream[i];
+        if (seen.contains(u)) continue;
+
+        seen.insert(u);
+
+        if (u->isStochastic())
+            stochastic.push_back(u);
+        else
+        {
+
+            for(auto& p: u->getParents())
+            {
+                if (not seen.contains(p))
+                    upstream.push_back(p);
+            }
+        }
+    }
+
+    return stochastic;
+}
+
 
 void Mcmc::initializeSampler()
 {
+    int logMCMC = RbSettings::userSettings().getLogMCMC();
+    int logZero = RbSettings::userSettings().getLogZeroPr();
+
     std::vector<DagNode *> &dag_nodes = model->getDagNodes();
     std::vector<DagNode *> ordered_stoch_nodes = model->getOrderedStochasticNodes(  );
 
@@ -652,7 +686,7 @@ void Mcmc::initializeSampler()
 
             for (auto the_node: dag_nodes)
             {
-            auto ln_prob = the_node->getLnProbability();
+                auto ln_prob = the_node->getLnProbability();
 
                 if ( not ln_prob.isfinite() )
                 {
@@ -667,6 +701,18 @@ void Mcmc::initializeSampler()
                     the_node->printValue( o1, "," );
                     ss << StringUtilities::oneLiner( o1.str(), 54 );
                     RBOUT( ss.str() );
+                    if (logZero >= 2)
+                    {
+                        for(auto u: upstreamStochastic(the_node))
+                        {
+                            std::stringstream ss2;
+                            ss2<<"       '"<<u->getName()<<"':    value = ";
+                            std::ostringstream o2;
+                            u->printValue( o2, "," );
+                            ss2 << StringUtilities::oneLiner( o2.str(), 54 );
+                            RBOUT( ss2.str() );
+                        }
+                    }
                 }
                 ln_probability += ln_prob;
             }
