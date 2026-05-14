@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <exception>
 
 class RbException {
 
@@ -13,7 +14,6 @@ class RbException {
                                                     BUG,
                                                     MATH_ERROR,
                                                     SKIP_PROPOSAL,
-                                                    MISSING_VARIABLE,
                                                     STOP };         //!< Exception types
 
                                     RbException(void) = default;                            //!< Default constructor
@@ -47,6 +47,13 @@ RbException& RbException::operator<<(const T& t) {
 struct RbQuitException
 {
     int status = 0;
+};
+
+struct RbMissingVariableError
+{
+    std::string name;
+
+    RbMissingVariableError(const std::string& s):name(s) {};
 };
 
 

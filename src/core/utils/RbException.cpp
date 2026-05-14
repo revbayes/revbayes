@@ -57,9 +57,6 @@ void RbException::print(std::ostream &o) const
         case MATH_ERROR:
             error_type = "Mathematical Error";
             break;
-        case MISSING_VARIABLE:
-            error_type = "Missing Variable";
-            break;
         case STOP:
             error_type = "Stop";
             break;

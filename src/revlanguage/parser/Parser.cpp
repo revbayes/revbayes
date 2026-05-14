@@ -164,25 +164,19 @@ int RevLanguage::Parser::execute(SyntaxElement* root, const std::shared_ptr<Envi
 
         exit(q.status);
     }
-    catch (RbException& rbException)
+    catch (RbMissingVariableError& v)
     {
-        std::ostringstream msg;
-
-        // Catch a missing variable exception that might be interpreted as a request for
-        // usage help on a function
-        SyntaxVariable* rootPtr = dynamic_cast<SyntaxVariable*> ((SyntaxElement*) root);
-        SyntaxVariable* theVariable = rootPtr;
-        if (rbException.getExceptionType() == RbException::MISSING_VARIABLE && theVariable != NULL)
+        // Catch a missing variable exception that might be interpreted as a request for usage help on a function
+        if (auto theVariable = dynamic_cast<SyntaxVariable*> ((SyntaxElement*) root))
         {
-
             const std::string& fxnName = theVariable->getIdentifier();
             const std::vector<Function*>& functions = Workspace::userWorkspace().getFunctionTable().findFunctions(fxnName);
             if (functions.size() != 0)
             {
-                for (std::vector<Function*>::const_iterator i = functions.begin(); i != functions.end(); i++)
+                for (auto& f: functions)
                 {
                     std::ostringstream s;
-                    (*i)->printValue(s,true);
+                    f->printValue(s,true);
                     RBOUT(s.str());
 
                     // Uncommenting this as the function callSignature() does not produce the call signature despite its name
@@ -192,9 +186,19 @@ int RevLanguage::Parser::execute(SyntaxElement* root, const std::shared_ptr<Envi
                 
                 return 0;
             }
-            
         }
 
+        // If it was NOT a request for help.
+        std::ostringstream msg;
+        msg<<"Error: variable '"<<v.name<<"' does not exist!";
+        RBOUT(msg.str());
+
+        // Return signal indicating problem
+        return 2;
+    }
+    catch (RbException& rbException)
+    {
+        std::ostringstream msg;
         // All other exceptions
         rbException.print(msg);
         RBOUT(msg.str());
@@ -202,10 +206,14 @@ int RevLanguage::Parser::execute(SyntaxElement* root, const std::shared_ptr<Envi
         // Return signal indicating problem
         return 2;
     }
-    // Don't crash the intepreter for non-Rb exceptions such as file-not-found.
+    // Also handle non-Rb exceptions (such as file-not-found).
     catch (std::exception& e)
     {
-        RBOUT(e.what());
+        std::ostringstream msg;
+        msg<<"Error: ";
+        msg<<e.what();
+        RBOUT(msg.str());
+
         // Return signal indicating problem
         return 2;
     }
