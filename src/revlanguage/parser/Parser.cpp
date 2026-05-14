@@ -367,7 +367,7 @@ void RevLanguage::Parser::setParserMode(ParserMode mode)
  *       signal is set to 2. Any remaining part of the command buffer
  *       is discarded.
  */
-int RevLanguage::Parser::processCommand(std::string& command, const std::shared_ptr<Environment>& env)
+int RevLanguage::Parser::processCommand(std::string& command, const std::shared_ptr<Environment>& env, const std::optional<LocInfo>& locinfo)
 {
 
     // make sure mode is not checking
@@ -433,6 +433,8 @@ int RevLanguage::Parser::processCommand(std::string& command, const std::shared_
         {
             std::ostringstream msg;
             msg<<"Error: variable '"<<v.name<<"' does not exist!";
+            if (locinfo)
+                msg<<"\n   Note: at line "<<locinfo->line<<" in file '"<<locinfo->filename<<"'";
             RBOUT(msg.str());
 
             // Return signal indicating problem
@@ -445,7 +447,8 @@ int RevLanguage::Parser::processCommand(std::string& command, const std::shared_
             // All other exceptions
             rbException.print(msg);
             RBOUT(msg.str());
-
+            if (locinfo)
+                msg<<"\n   Note: at line "<<locinfo->line<<" in file '"<<locinfo->filename<<"'";
             // Return signal indicating problem
             command = "";
             return 2;
@@ -456,6 +459,8 @@ int RevLanguage::Parser::processCommand(std::string& command, const std::shared_
             std::ostringstream msg;
             msg<<"Error: ";
             msg<<e.what();
+            if (locinfo)
+                msg<<"\n   Note: at line "<<locinfo->line<<" in file '"<<locinfo->filename<<"'";
             RBOUT(msg.str());
 
             // Return signal indicating problem
