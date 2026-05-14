@@ -3,6 +3,7 @@
 #include <set>
 
 #include "RbException.h"
+#include "RevNullObject.h"
 #include "SyntaxAssignment.h"
 #include "Environment.h"
 #include "RevObject.h"
@@ -80,23 +81,24 @@ RevPtr<RevVariable> SyntaxAssignment::evaluateContent( const std::shared_ptr<Env
     // Get variable slot from lhs
     RevPtr<RevVariable> the_slot = lhsExpression->evaluateLHSContent( env, the_variable->getRevObject().getType() );
     
-//    // let us remove all potential indexed variables
-//    removeElementVariables(env, the_slot);
-    
+    // Remember whether the slot already held a value before the assignment.
+    // If it did, a failed assignment should leave it intact rather than erasing it.
+    bool slot_was_occupied = ( &the_slot->getRevObject() != &RevNullObject::getInstance() );
+
     try
     {
         // now we delegate to the derived class
         assign(the_slot, the_variable);
-        
-//        if ( the_slot->isElementVariable() == true )
-//        {
-//            static_cast< SyntaxIndexOperation *>( lhsExpression )->updateVariable( env, the_slot->getName() );
-//        }
     }
     catch (RbException &e)
     {
-        // we need to remove the variable
-        env->eraseVariable( the_slot->getName() );
+        // Only erase the variable if it was a freshly created (empty) slot.
+        // Pre-existing variables must be preserved so the old value remains
+        // accessible after a failed assignment (e.g. cycle detection).
+        if ( !slot_was_occupied )
+        {
+            env->eraseVariable( the_slot->getName() );
+        }
         throw e;
     }
     

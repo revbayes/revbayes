@@ -3,8 +3,13 @@
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
+#include <limits>
 #include <ostream>
 #include <string>
+#include <unordered_set>
+#include <utility>
+#include <ranges>
+#include <vector>
 
 #include "Monitor.h"
 #include "Move.h"
@@ -12,6 +17,18 @@
 #include "RbOrderedSet.h"
 
 using namespace RevBayesCore;
+
+/**
+ * Online cycle detection via the Bender-Fineman-Gilbert-Tarjan (BFGT) algorithm: see
+ *
+ * Bender MA, Fineman JT, Gilbert S, Tarjan RE. 2015. A new approach to incremental cycle detection and related problems.
+ * ACM Transactions on Algorithms (TALG) 12(2): 14. doi:10.1145/2756553.
+ *
+ * Each `DagNode` stores an identifier `topo_level` so that every edge satisfies parent->topo_level <= child->topo_level.
+ * This represents a pseudo-topological numbering of the nodes -- a relaxation of a strict topological ordering that
+ * permits ties (equal levels). When `addChild()` notices that a newly inserted edge would violate the invariant, it
+ * delegates to `bfgtAddEdge()` to repair it. See the comments on `bfgtAddEdge()` for the repair procedure.
+ */
 
 /**
  * Construct an empty DAG node, potentially
@@ -25,6 +42,7 @@ DagNode::DagNode( const std::string &n ) : Parallelizable(),
     moves(),
     name( n ),
     touched_elements(),
+    topo_level( 1 ),
     ref_count( 0 ),
     visit_flags( std::vector<bool>(5, false) )
 {
@@ -48,6 +66,7 @@ DagNode::DagNode( const DagNode &n ) : Parallelizable( n ),
     moves( ),
     name( n.name ),
     touched_elements( n.touched_elements ),
+    topo_level( 1 ),
     ref_count( 0 ),
     visit_flags( n.visit_flags )
 {
@@ -99,8 +118,11 @@ DagNode& DagNode::operator=(const DagNode &d)
 
 
 /**
- * Add a new child node to this node.
- * Since we store the children in a set we don't need to worry about duplicates.
+ * Add a new child node to this node. Since we store the children in a set, we don't need to worry about duplicates.
+ *
+ * If the new edge violates the Pearce-Kelly topological-order invariant (when `this` was created after `child` and is now being
+ * attached above it, e.g., through `swapParent()`), we delegate to `pkAddEdge` to repair it. If `pkAddEdge` detects that the
+ * new edge would close a cycle, it throws; we then roll the children vector back so that the DAG is left untouched.
  *
  * Note, the caller also needs to increment the reference count to this node.
  */
@@ -108,16 +130,45 @@ void DagNode::addChild(DagNode *child) const
 {
 
     // only if the child is not NULL and isn't in our vector yet
-    if ( child != NULL )
+    if ( child == NULL )
     {
-        std::vector<DagNode*>::const_iterator pos = std::find(children.begin(), children.end(), child);
-        if ( pos == children.end() )
-        {
-            children.push_back( child );
-        }
-
+        return;
     }
 
+    std::vector<DagNode*>::const_iterator pos = std::find(children.begin(), children.end(), child);
+    if ( pos != children.end() )
+    {
+        return;
+    }
+
+    children.push_back( child );
+
+
+    /*
+     * BFGT pseudo-topological invariant:
+     *
+     *     for every edge parent -> child,
+     *         parent->topo_level <= child->topo_level.
+     *
+     * If this edge strictly increases the level, it is definitely safe: there
+     * cannot already be a path child ~> parent, because levels never decrease
+     * along existing edges.
+     *
+     * If parent->topo_level >= child->topo_level, we must do the BFGT-style
+     * online check/repair.
+     */
+    if ( topo_level >= child->topo_level )
+    {
+        try
+        {
+            bfgtAddEdge( this, child );
+        }
+        catch ( ... )
+        {
+            children.pop_back();
+            throw;
+        }
+    }
 }
 
 
@@ -239,6 +290,69 @@ size_t DagNode::decrementReferenceCount( void ) const
 
     return ref_count;
 }
+
+
+/**
+ * Find out whether `node`, or any of its ancestors, equals `target`.
+ */
+ bool DagNode::dependsOn(const DagNode* node, const DagNode* target)
+ {
+    if ( node == NULL || target == NULL )
+    {
+        return false;
+    }
+
+    /*
+     * If target is an ancestor of node, then the pseudo-topological invariant
+     * implies
+     *
+     *     target->topo_level <= node->topo_level.
+     *
+     * Therefore target->topo_level > node->topo_level is an immediate "no".
+     * Equality is not enough to reject, because equal-level edges are allowed.
+     */
+    if ( target->topo_level > node->topo_level )
+    {
+        return false;
+    }
+
+    const std::size_t lb = target->topo_level;
+
+    std::unordered_set<const DagNode*> visited;
+    std::vector<const DagNode*> stack;
+    stack.push_back( node );
+
+    while ( not stack.empty() )
+    {
+        const DagNode* current = stack.back();
+        stack.pop_back();
+
+        if ( visited.count( current ) )
+        {
+            continue;
+        }
+        visited.insert( current );
+
+        if ( current == target )
+        {
+            return true;
+        }
+
+        for ( const DagNode* parent : current->getParents() )
+        {
+            /*
+             * If parent->topo_level < target->topo_level, then target cannot be an
+             * ancestor of parent, because levels cannot decrease downstream.
+             */
+            if ( parent->topo_level >= lb && visited.count( parent ) == 0 )
+            {
+                stack.push_back( parent );
+            }
+        }
+    }
+
+    return false;
+ }
 
 
 void DagNode::executeMethod(const std::string &n, const std::vector<const DagNode*> &args, double &rv) const
@@ -380,7 +494,6 @@ std::vector<double> DagNode::getMixtureProbabilities(void) const
 }
 
 
-
 /**
  * Get a const reference to our local monitor set.
  */
@@ -412,6 +525,24 @@ const std::string& DagNode::getName( void ) const
 
 
 /**
+ * Get a name we can display when throwing a warning that a cycle has been detected.
+ */
+std::string DagNode::getNodeDisplayName(const DagNode* n)
+{
+    if ( n == nullptr ) return "<null>";
+    const std::string& nm = n->getName();
+    if ( !nm.empty() ) return nm;
+    switch ( n->getDagNodeType() )
+    {
+        case DagNode::CONSTANT:      return "<unnamed> (constant node)";
+        case DagNode::DETERMINISTIC: return "<unnamed> (deterministic node)";
+        case DagNode::STOCHASTIC:    return "<unnamed> (stochastic node)";
+    }
+    return "<unnamed>";
+}
+
+
+/**
  * Get the number of children for this DAG node.
  */
 size_t DagNode::getNumberOfChildren( void ) const
@@ -435,6 +566,12 @@ std::vector<const DagNode*> DagNode::getParents( void ) const
 {
 
     return std::vector<const DagNode*>();
+}
+
+
+double DagNode::getPrevLnProbability(void) const
+{
+    throw RbException()<<"getPrevLnProbability: not a stochastic node!";
 }
 
 
@@ -469,7 +606,6 @@ void DagNode::getPrintableChildren(std::vector<DagNode *> &c) const
     }
 
 }
-
 
 
 /**
@@ -515,6 +651,20 @@ size_t DagNode::getReferenceCount( void ) const
     return ref_count;
 }
 
+/**
+ * Return this node's BFGT pseudo-topological level.
+ *
+ * This is not a strict topological order. Equal levels are allowed. The maintained
+ * invariant is:
+ *
+ *     for every edge parent -> child,
+ *         parent->topo_level <= child->topo_level.
+ */
+ std::size_t DagNode::getTopologicalOrder( void ) const
+ {
+     return topo_level;
+ }
+
 
 /* Get the indices of all touched elements */
 const std::set<size_t>& DagNode::getTouchedElementIndices( void ) const
@@ -522,6 +672,7 @@ const std::set<size_t>& DagNode::getTouchedElementIndices( void ) const
 
     return touched_elements;
 }
+
 
 bool DagNode::getVisitFlag( const size_t flagType ) const
 {
@@ -679,6 +830,219 @@ void DagNode::keepAffected()
         }
     }
 
+}
+
+
+/**
+ * BFGT-style online edge insertion for pseudo-topological levels.
+ *
+ * The edge parent -> child has already been added to parent->children.
+ *
+ * Maintained invariant:
+ *
+ *     for every edge u -> v,
+ *         u->topo_level <= v->topo_level.
+ *
+ * If parent->topo_level < child->topo_level, the insertion is immediately safe
+ * and this function need not be called.
+ *
+ * Otherwise we:
+ *
+ *   1. Search backward from parent through same-level incoming edges for
+ *      a limited number of steps.
+ *   2. If child is reached, the new edge closes a cycle.
+ *   3. If the backward search completes and child has the same level as parent,
+ *      the new edge closes a cycle, but no level repair is needed.
+ *   4. Otherwise, raise child to parent's level, or to parent's level + 1 if
+ *      the backward search was interrupted, and propagate that level forward.
+ *
+ * This version stores only ordinary parent edges and filters for same-level
+ * incoming edges during the backward search. That is simpler than maintaining
+ * explicit horizontal-incoming edge lists, though it may not achieve the
+ * published BFGT time bound on adversarial graphs.
+ */
+void DagNode::bfgtAddEdge( const DagNode* parent, const DagNode* child )
+{
+    assert(parent);
+    assert(child);
+
+    if ( parent->topo_level < child->topo_level )
+    {
+        return;
+    }
+
+    const std::size_t source_level = parent->topo_level;
+
+    /*
+     * Backward search from parent, but only along incoming edges whose source
+     * is at source_level. This computes a same-level backward region B, or a
+     * prefix of it if the search is interrupted.
+     *
+     * The fully-online variant uses fuel = source_level.
+     */
+    std::unordered_set<const DagNode*> backward_visited;
+    std::vector<const DagNode*> backward_stack;
+
+    backward_stack.push_back( parent );
+
+    // How many backward edges will be look at before giving up?
+    const std::size_t fuel = std::max<std::size_t>(source_level, 8);
+    std::size_t horizontal_edges_seen = 0;
+    bool interrupted = false;
+    while ( not backward_stack.empty() && not interrupted )
+    {
+        const DagNode* current_node = backward_stack.back();
+        backward_stack.pop_back();
+
+        if ( backward_visited.count( current_node ) )
+        {
+            continue;
+        }
+
+        backward_visited.insert( current_node );
+
+        if ( current_node == child )
+        {
+            throw RbException( "Cannot add this edge to the DAG: it would create a cycle." );
+        }
+
+        for ( const DagNode* parent_node : current_node->getParents() )
+        {
+            /*
+             * Only horizontal incoming edges are part of the BFGT backward
+             * search. With this simple representation, we discover them by
+             * filtering ordinary parent edges.
+             */
+            if ( parent_node->topo_level == source_level )
+            {
+                ++horizontal_edges_seen;
+
+                if ( horizontal_edges_seen >= fuel )
+                {
+                    interrupted = true;
+                    break;
+                }
+
+                if ( backward_visited.count( parent_node ) == 0 )
+                {
+                    backward_stack.push_back( parent_node );
+                }
+            }
+        }
+    }
+
+    /*
+     * If the same-level backward search completed and child was already at the
+     * same level as parent, then the new same-level edge is safe and the pseudo-
+     * topological invariant already holds.
+     */
+    if ( not interrupted && child->topo_level == source_level )
+    {
+        return;
+    }
+
+    if ( interrupted && source_level == std::numeric_limits<std::size_t>::max() )
+    {
+        throw RbException( "Cannot maintain DAG pseudo-topological levels: level overflow." );
+    }
+
+    const std::size_t new_child_level = interrupted ? source_level + 1 : source_level;
+
+    /*
+     * Forward promotion phase.
+     *
+     * We raise child, then walk forward along edges that are now horizontal or
+     * downward relative to the promoted node. Edges to strictly higher-level
+     * nodes do not need to be explored: levels cannot later decrease back down
+     * to the backward region.
+     *
+     * If the forward search reaches any node in backward_visited, then there is
+     * an old path
+     *
+     *     child ~> backward_node ~> parent
+     *
+     * and the newly added edge parent -> child closes a cycle.
+     *
+     * Because addChild() has already inserted the edge, and because we may
+     * discover the cycle during promotion, we record changed levels and roll
+     * them back before throwing.
+     */
+    std::vector<std::pair<const DagNode*, std::size_t> > changed_levels;
+    std::unordered_set<const DagNode*> forward_visited;
+    std::vector<const DagNode*> forward_stack;
+
+    try
+    {
+        if ( backward_visited.count( child ) )
+        {
+            throw RbException( "Cannot add this edge to the DAG: it would create a cycle." );
+        }
+
+        if ( child->topo_level < new_child_level )
+        {
+            changed_levels.push_back( std::make_pair( child, child->topo_level ) );
+            child->topo_level = new_child_level;
+        }
+
+        forward_stack.push_back( child );
+
+        while ( not forward_stack.empty() )
+        {
+            const DagNode* current_node = forward_stack.back();
+            forward_stack.pop_back();
+
+            if ( forward_visited.count( current_node ) )
+            {
+                continue;
+            }
+
+            forward_visited.insert( current_node );
+
+            if ( backward_visited.count( current_node ) )
+            {
+                throw RbException( "Cannot add this edge to the DAG: it would create a cycle." );
+            }
+
+            for ( const DagNode* d: current_node->children )
+            {
+                /*
+                 * After current_node has been promoted, any child with level <= current_node's level
+                 * is in the affected forward region. If d has lower level, raise
+                 * it. If d has equal level, still traverse it, because an equal-
+                 * level path may reach the backward region and reveal a cycle.
+                 */
+                if ( d->topo_level <= current_node->topo_level )
+                {
+                    if ( backward_visited.count( d ) )
+                    {
+                        throw RbException( "Cannot add this edge to the DAG: it would create a cycle." );
+                    }
+
+                    if ( d->topo_level < current_node->topo_level )
+                    {
+                        changed_levels.push_back( std::make_pair( d, d->topo_level ) );
+                        d->topo_level = current_node->topo_level;
+                    }
+
+                    if ( forward_visited.count( d ) == 0 )
+                    {
+                        forward_stack.push_back( d );
+                    }
+                }
+            }
+        }
+    }
+    catch ( ... )
+    {
+        // Roll back level changes in reverse mutation order, so this remains correct
+        // even if a node is recorded more than once in the undo log.
+        for ( const auto& [node, old_level] : changed_levels | std::views::reverse )
+        {
+            node->topo_level = old_level;
+        }
+
+        throw;
+    }
 }
 
 
@@ -892,9 +1256,6 @@ void DagNode::removeChild(DagNode *child) const
 }
 
 
-
-
-
 /**
  * Remove the monitor from our set of monitors.
  *
@@ -943,6 +1304,15 @@ void DagNode::removeMove(Move *m)
  */
 void DagNode::replace( DagNode *n )
 {
+
+    // Before modifying anything, verify the replacement would not create a cycle.
+    // After replacement, all of this node's children become n's children.
+    // If n already depends (transitively) on this node, that dependency chain
+    // would close into a loop.
+    if ( n != NULL && dependsOn(n, this) )
+    {
+        throw RbException( "Cannot complete this assignment: '" + getNodeDisplayName( n ) + "' depends on '" + getNodeDisplayName( this ) + "', so replacing one with the other would create a circular dependency." );
+    }
 
     // replace myself for all my monitor
     while ( monitors.empty() == false )
@@ -1104,14 +1474,9 @@ void DagNode::touch(bool touchAll)
 void DagNode::touchAffected(bool touchAll)
 {
     // touch all my children
-    for (std::vector<DagNode*>::const_iterator it=children.begin(); it!=children.end(); ++it)
+    for (DagNode* child: children)
     {
-        DagNode *child = *it;
         child->touchMe( this, touchAll );
     }
 }
 
-double DagNode::getPrevLnProbability(void) const
-{
-    throw RbException()<<"getPrevLnProbability: not a stochastic node!";
-}
