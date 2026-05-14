@@ -1,0 +1,45 @@
+i = 3   pr(dx) = -0.939858
+i = 4   pr(dx) = -1.01085
+i = 5   pr(dx) = -1.77107
+i = 6   pr(dx) = -1.12855
+i = 7   pr(dx) = -1.63204
+i = 8   pr(dx) = -2.43356
+i = 9   pr(dx) = -0.952923
+i = 10   pr(dx) = -0.954804
+i = 11   pr(dx) = -0.968248
+i = 12   pr(dx) = -0.919505
+i = 13   pr(dx) = -1.10792
+i = 14   pr(dx) = -1.62904
+i = 15   pr(dx) = -2.90565
+i = 16   pr(dx) = -1.09985
+i = 17   pr(dx) = -1.12336
+i = 18   pr(dx) = -1.1008
+i = 19   pr(dx) = -0.935733
+i = 20   pr(dx) = -0.982068
+Calculating log-probability of x[1]
+-0.9658789
+i = 3   pr(dx) = -0.923931
+i = 4   pr(dx) = -1.90057
+i = 5   pr(dx) = -1.53366
+i = 6   pr(dx) = -1.26117
+i = 7   pr(dx) = -1.4604
+i = 8   pr(dx) = -0.966074
+i = 9   pr(dx) = -1.1489
+i = 10   pr(dx) = -1.27441
+i = 11   pr(dx) = -1.00907
+i = 12   pr(dx) = -1.13043
+i = 13   pr(dx) = -2.01053
+i = 14   pr(dx) = -1.07505
+i = 15   pr(dx) = -1.12896
+i = 16   pr(dx) = -0.921613
+i = 17   pr(dx) = -1.08344
+i = 18   pr(dx) = -1.32723
+i = 19   pr(dx) = -4.43232
+i = 20   pr(dx) = -0.92329
+Calculating log-probability of x[1]
+-0.938593
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 1 different moves in a random move schedule with 1 moves per iteration
+   

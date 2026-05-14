@@ -1,0 +1,22 @@
+## continue-on-error
+
+################################################################################
+#
+# RevBayes Test Script: Checking that RevBayes does not segfault when the model
+#                       graph contains a cycle
+#
+#
+# authors: David Cerny
+#
+################################################################################
+
+seed(12345)
+
+a ~ dnUnif(0, 10)
+b := ln(a)
+a := b + 3.0
+
+# After the failure of the last line above, we should still keep b and the original a
+
+a
+b

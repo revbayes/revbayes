@@ -72,11 +72,14 @@ mymodel = model(psi)
 
 mni = 0
 monitors[++mni] = mnModel(filename="output/primates_mvBM.log",printgen=10, separator = TAB)
+monitors[++mni] = mnStochasticVariable(filename="output/primates_mvBM.var", printgen=10, append=TRUE)
 
 mymcmc = mcmc(mymodel, monitors, moves)
 mymcmc.burnin(generations=5000,tuningInterval=250)
-mymcmc.run(generations=5000)
+mymcmc.run(generations=2500, checkpointFile="output/primates_mvBM.ckp", checkpointInterval=500)
 
+mymcmc.initializeFromCheckpoint("output/primates_mvBM.ckp")
+mymcmc.run(generations=2500)
 
 # you may want to quit RevBayes now
 q()

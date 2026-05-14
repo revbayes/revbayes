@@ -41,6 +41,7 @@ doxygen/DoxygenWarningLog.txt
 .settings/
 .vscode
 .zed
+.cache
 *.tlog
 *.filters
 *.vcxproj

@@ -110,7 +110,17 @@ double BetaSimplexProposal::propose( Simplex &value )
     // set the value
     value[chosen_index] = new_value;
 
-    double scaling_factor_other_values = (1.0 - new_value) / (1.0 - current_value);
+    // We don't want to use 1 - current_value, because sometimes
+    //   current_value == 1 and other_values == 1.0e-18 (for example),
+    //   which causes us to divide by zero.
+    double other_values = 0;
+    for(int i=0; i < cats ; i++)
+        if (i != chosen_index)
+            other_values += value[i];
+
+    double scaling_factor_other_values = (1.0 - new_value) / other_values;
+    assert( std::isfinite( new_value ) );
+    assert( std::isfinite( scaling_factor_other_values ) );
     
     double sum = 0.0;
     double ln_Hastings_ratio = 0.0;
@@ -152,7 +162,7 @@ double BetaSimplexProposal::propose( Simplex &value )
         // include the Jacobian for the scaling of the other values
         ln_Hastings_ratio += (cats - 2) * log(scaling_factor_other_values) - (cats - 1) * log(sum);
     }
-	catch (RbException &e)
+    catch (RbException &e)
     {
         ln_Hastings_ratio = RbConstants::Double::neginf;
     }

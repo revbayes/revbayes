@@ -1,20 +1,69 @@
 #include <cmath>
 #include <cstring>
+#include <fstream>
 #include <iomanip>
+#include <limits>
 #include <ostream>
+#include <sstream>
 #include <string>
 #include <vector>
 
 #include "CholeskyDecomposition.h"
 #include "EigenSystem.h"
 #include "MatrixReal.h"
+#include "RbFileManager.h"
 #include "RbException.h"
 #include "RbVector.h"
 #include "RbConstants.h"
 #include "TypedDagNode.h"
 #include "RbVectorImpl.h"
+#include "Serializer.h"
+#include "StringUtilities.h"
 
 using namespace RevBayesCore;
+
+namespace {
+
+void printFlattenedMatrix(std::ostream &o, const MatrixReal &matrix, const std::string &sep)
+{
+    for (size_t i = 0; i < matrix.getNumberOfRows(); ++i)
+    {
+        for (size_t j = 0; j < matrix.getNumberOfColumns(); ++j)
+        {
+            if (i != 0 || j != 0)
+            {
+                o << sep;
+            }
+            o << matrix[i][j];
+        }
+    }
+}
+
+void printStoredMatrix(std::ostream &o, const MatrixReal &matrix)
+{
+    o << "[";
+    for (size_t i = 0; i < matrix.getNumberOfRows(); ++i)
+    {
+        if (i > 0)
+        {
+            o << ",";
+        }
+
+        o << "[";
+        for (size_t j = 0; j < matrix.getNumberOfColumns(); ++j)
+        {
+            if (j > 0)
+            {
+                o << ",";
+            }
+            o << matrix[i][j];
+        }
+        o << "]";
+    }
+    o << "]";
+}
+
+} // namespace
 
 
 MatrixReal::MatrixReal( void )
@@ -138,6 +187,8 @@ void MatrixReal::clear( void )
     cholesky_needs_update = true;
     
     elements.clear();
+    n_rows = 0;
+    n_cols = 0;
 }
 
 
@@ -577,7 +628,7 @@ void MatrixReal::resize(size_t r, size_t c)
     elements = RbVector<RbVector<double> >(r, RbVector<double>(c,0.0) );
     
     n_rows = r;
-    n_rows = c;
+    n_cols = c;
     
     eigen_needs_update = true;
     cholesky_needs_update = true;
@@ -600,6 +651,150 @@ void MatrixReal::setCholesky(bool c) const
 size_t MatrixReal::size( void ) const
 {
     return n_rows;
+}
+
+
+void MatrixReal::initFromString(const std::string &s)
+{
+    clear();
+
+    json j = json::parse(s);
+
+    if (!j.is_array() || j.empty())
+    {
+        return;
+    }
+
+    size_t nr = j.size();
+    size_t nc = j[0].size();
+    resize(nr, nc);
+
+    for (size_t i = 0; i < nr; ++i)
+    {
+        for (size_t j2 = 0; j2 < nc; ++j2)
+        {
+            elements[i][j2] = j[i][j2].get<double>();
+        }
+    }
+}
+
+
+json MatrixReal::toJSON() const
+{
+    json matrix = json::array();
+    for (size_t i = 0; i < n_rows; ++i)
+    {
+        json row = json::array();
+        for (size_t j = 0; j < n_cols; ++j)
+        {
+            row.push_back(elements[i][j]);
+        }
+        matrix.push_back(row);
+    }
+
+    return matrix;
+}
+
+
+void MatrixReal::printForUser(std::ostream &o, const std::string & /*sep*/, int l, bool left) const
+{
+    std::stringstream ss;
+    if (n_rows == 0 || n_cols == 0)
+    {
+        ss << "[ ]";
+    }
+    else
+    {
+    ss << "[ ";
+    ss << std::fixed;
+    ss << std::setprecision(4);
+
+    for (size_t i = 0; i < n_rows; ++i)
+    {
+        if (i == 0)
+        {
+            ss << "[ ";
+        }
+        else
+        {
+            ss << "  [ ";
+        }
+
+        for (size_t j = 0; j < n_cols; ++j)
+        {
+            if (j != 0)
+            {
+                ss << ", ";
+            }
+            ss << elements[i][j];
+        }
+        ss << " ]";
+
+        if (i == n_rows - 1)
+        {
+            ss << " ]";
+        }
+        else
+        {
+            ss << " ,\n";
+        }
+    }
+    }
+
+    std::string s = ss.str();
+    if (l > 0)
+    {
+        StringUtilities::fillWithSpaces(s, l, left);
+    }
+
+    o << s;
+}
+
+
+void MatrixReal::printForSimpleStoring(std::ostream &o, const std::string &sep, int l, bool left, bool flatten) const
+{
+    if (flatten)
+    {
+        printFlattenedMatrix(o, *this, sep);
+    }
+    else
+    {
+        printStoredMatrix(o, *this);
+    }
+}
+
+
+void MatrixReal::printForComplexStoring(std::ostream &o, const std::string &sep, int l, bool left, bool flatten) const
+{
+    std::streamsize previous_precision = o.precision();
+    std::ios_base::fmtflags previous_flags = o.flags();
+    
+    o.precision( std::numeric_limits<double>::digits10 );
+    o.setf( std::ios::fmtflags(0), std::ios::floatfield );
+    
+    if (flatten)
+    {
+        printFlattenedMatrix(o, *this, sep);
+    }
+    else
+    {
+        printStoredMatrix(o, *this);
+    }
+    
+    o.setf( previous_flags );
+    o.precision( previous_precision );
+}
+
+
+void MatrixReal::writeToFile(const path &dir, const std::string &fn) const
+{
+    path filename = dir / (fn + ".out");
+    createDirectoryForFile(filename);
+
+    std::ofstream outStream(filename.string());
+    printForComplexStoring(outStream, "\t", -1, true, false);
+    outStream << std::endl;
+    outStream.close();
 }
 
 
@@ -1271,41 +1466,6 @@ RbVector<double> RevBayesCore::operator*(const RbVector<double> &a, const Matrix
 
 std::ostream& RevBayesCore::operator<<(std::ostream& o, const MatrixReal& x)
 {
-    
-    std::streamsize previousPrecision = o.precision();
-    std::ios_base::fmtflags previousFlags = o.flags();
-    
-    o << "[ ";
-    o << std::fixed;
-    o << std::setprecision(4);
-    
-    // print the RbMatrix with each column of equal width and each column centered on the decimal
-    for (size_t i=0; i < x.getNumberOfRows(); i++) 
-    {
-        if (i == 0)
-            o << "[ ";
-        else
-            o << "  [ ";
-            
-        for (size_t j = 0; j < x.getNumberOfColumns(); ++j) 
-        {
-            if (j != 0)
-                o << ", ";
-            o << x[i][j];
-        }
-        o <<  " ]";
-        
-        if (i == x.size()-1)
-            o << " ]";
-        else 
-            o << " ,\n";
-        
-    }
-    
-    o.setf(previousFlags);
-    o.precision(previousPrecision);
-    
+    x.printForUser(o, "\t", -1, true);
     return o;
 }
-
-

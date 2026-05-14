@@ -23,7 +23,7 @@ using namespace RevBayesCore;
  *
  * Here we simply allocate and initialize the Proposal object.
  */
-AVMVNProposal::AVMVNProposal( double s, double e, double n0, double c0, double m ) : Proposal(),
+AVMVNProposal::AVMVNProposal( double s, double e, size_t n0, size_t c0, size_t m ) : Proposal(),
     noTransformScalarVariables(  ),
     logTransformScalarVariables(  ),
     logitTransformScalarVariables(  ),

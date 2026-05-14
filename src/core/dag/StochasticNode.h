@@ -930,4 +930,3 @@ void RevBayesCore::StochasticNode<valueType>::touchMe( const DagNode *toucher, b
 }
 
 #endif
-

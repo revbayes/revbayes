@@ -10,7 +10,6 @@
 namespace RevBayesCore {
 
     class TransitionProbabilityMatrix;
-class Assignable;
 
 
     class RateMatrix : public RateGenerator {

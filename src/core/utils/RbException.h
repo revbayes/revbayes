@@ -14,7 +14,8 @@ class RbException {
                                                     MATH_ERROR,
                                                     SKIP_PROPOSAL,
                                                     MISSING_VARIABLE,
-                                                    QUIT };         //!< Exception types
+                                                    QUIT,
+                                                    STOP };         //!< Exception types
 
                                     RbException(void) = default;                            //!< Default constructor
                                     RbException(const std::string& msg);                    //!< Default with message 

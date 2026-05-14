@@ -63,7 +63,10 @@ void RbException::print(std::ostream &o) const
         case QUIT:
             error_type = "Quit";
             break;
-            
+        case STOP:
+            error_type = "Stop";
+            break;
+
         default:
             error_type = "Error";
     }

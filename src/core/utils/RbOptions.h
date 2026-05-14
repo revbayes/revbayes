@@ -14,12 +14,6 @@
 
 //#define TESTING
 
-/* Feature enabling switches */
-#ifndef RB_ARM
-#define SSE_ENABLED
-#endif
-//#define AVX_ENABLED
-
 
 /* Test whether we should use linenoise */
 #if !defined (NO_LINENOISE)

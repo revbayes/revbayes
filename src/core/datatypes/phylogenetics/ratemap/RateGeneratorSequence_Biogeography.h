@@ -28,8 +28,8 @@ namespace RevBayesCore {
         double                                      getRate(size_t from, size_t to, double age=0.0, double rate=1.0) const;
         double                                      getSiteRate(CharacterEventDiscrete* from, CharacterEventDiscrete* to, double age=0.0, double rate=1.0) const;
         double                                      getSiteRate(size_t from, size_t to, size_t charIdx=0, double age=0.0, double rate=1.0) const;
-        double                                      getSumOfRates(std::vector<CharacterEvent*> from, double age=0.0, double rate=1.0) const;
-        double                                      getSumOfRates(std::vector<CharacterEvent*> from, std::vector<size_t> counts, double age=0.0, double rate=1.0) const;
+        double                                      getSumOfRates(const std::vector<CharacterEvent*>& from, double age=0.0, double rate=1.0) const;
+        double                                      getSumOfRates(const std::vector<CharacterEvent*>& from, const std::vector<size_t>& counts, double age=0.0, double rate=1.0) const;
         double                                      getUnnormalizedSumOfRates(std::vector<CharacterEvent*> from, std::vector<size_t> counts, double age=0.0, double rate=1.0) const;
         const bool                                  isAreaAvailable(size_t charIdx, double age=0.0) const;
         const bool                                  areAreasAdjacent(size_t fromCharIdx, size_t toCharIdx, double age=0.0) const;

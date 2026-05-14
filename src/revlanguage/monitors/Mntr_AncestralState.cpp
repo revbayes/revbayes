@@ -18,6 +18,7 @@
 #include "RlTree.h"
 #include "StandardState.h"
 #include "TypedDistribution.h"
+#include "CharTypeApply.h" // for apply_to_character_type( )
 
 namespace RevBayesCore { class DagNode; }
 namespace RevBayesCore { class Tree; }
@@ -53,44 +54,18 @@ void Mntr_AncestralState::constructInternalObject( void )
     RevBayesCore::DagNode*				ch		= ctmc->getRevObject().getDagNode();
     bool                                ap      = static_cast<const RlBoolean &>( append->getRevObject() ).getValue();
     bool                                wv      = static_cast<const RlBoolean &>( version->getRevObject() ).getValue();
-    std::string							character = static_cast<const RlString &>( monitorType->getRevObject() ).getValue();
+    std::string                         character_type = static_cast<const RlString &>( monitorType->getRevObject() ).getValue();
     
-    delete value;
-    if (character == "NaturalNumbers")
+    auto make_monitor = [&]<typename T>()
     {
-        
-        RevBayesCore::AncestralStateMonitor<RevBayesCore::NaturalNumbersState> *m = new RevBayesCore::AncestralStateMonitor<RevBayesCore::NaturalNumbersState>(t, ch, (std::uint64_t)g, fn, sep);
+        delete value;
+        auto m = new RevBayesCore::AncestralStateMonitor<T>(t, ch, (std::uint64_t)g, fn, sep);
         m->setAppend( ap );
         m->setPrintVersion( wv );
         value = m;
-        
-    }
-    else if (character == "DNA")
-    {
-        
-        RevBayesCore::AncestralStateMonitor<RevBayesCore::DnaState> *m = new RevBayesCore::AncestralStateMonitor<RevBayesCore::DnaState>(t, ch, (std::uint64_t)g, fn, sep);
-        m->setAppend( ap );
-        m->setPrintVersion( wv );
-        value = m;
-        
-    }
-    else if (character == "StandardState")
-    {
-        
-        RevBayesCore::AncestralStateMonitor<RevBayesCore::StandardState> *m = new RevBayesCore::AncestralStateMonitor<RevBayesCore::StandardState>(t, ch, (std::uint64_t)g, fn, sep);
-        m->setAppend( ap );
-        m->setPrintVersion( wv );
-        value = m;
-        
-    }
-    else
-    {
-        throw RbException( "Incorrect character type specified. Valid options are: NaturalNumbers, DNA" );
-    }
-    
-    
-    
-    
+    };
+
+    apply_to_character_type(make_monitor, character_type);
 }
 
 
