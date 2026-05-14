@@ -61,7 +61,7 @@ const ArgumentRules& Func_quit::getArgumentRules( void ) const
     if ( !rules_set )
     {
         
-        argumentRules.push_back( new ArgumentRule( "status", Natural::getClassTypeSpec(), "The exit code used to quit.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, 0 ) );
+        argumentRules.push_back( new ArgumentRule( "status", Natural::getClassTypeSpec(), "The exit code used to quit.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0) ) );
         rules_set = true;
     }
     

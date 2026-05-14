@@ -25,7 +25,7 @@ RbException::RbException(const RbException& E)
     message.flags(E.message.flags());
     message.precision(E.message.precision());
     message.width(E.message.width());
-    // We haven't copies the locate.
+    // We haven't copied the locale.
 }
 
 RbException::ExceptionType RbException::getExceptionType(void) const
