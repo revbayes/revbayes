@@ -300,26 +300,14 @@ jobs:
         fi
 
         if [ ${{ matrix.arch }} = "mac-arm64" ] || [ ${{ matrix.arch }} = "mac-intel64" ] || [ ${{ matrix.arch }} = "win64" ] ; then
-           rm -f test_MC3/output_expected/*tuning_and_checkpointing*
-           rm -rf test_FBD/output_expected/
-           rm -rf test_BDSTP/output_expected/
+           rm -rf test_FBD/output_expected/mvFossilTimeSlideUniform_multiple_runs.errout
+
+           rm -rf test_zero_prob/output_expected/initialization_test_1.errout
+           rm -rf test_zero_prob/output_expected/Abelisauridae_relaxed_clocks_run_1.log
+           rm -rf test_zero_prob/output_expected/Abelisauridae_relaxed_clocks_run_2.log
 
            # There are some differences on the order of 1.0e-5 in the substitution likelihood between Linux/Intel and Mac/ARM
            rm -rf test_propose_bad_index/output_expected/
-        fi
-
-        if [ ${{ matrix.arch }} = "mac-arm64" ] ; then
-           rm -f test_coalescent/output_expected/horses_het_BSP*
-           rm -f test_coalescent/output_expected/horses_het_GMRF_treebased*
-           rm -f test_coalescent/output_expected/mcmc_heterochronous_BSP.errout
-           rm -f test_coalescent/output_expected/mcmc_heterochronous_GMRF_treebased.errout
-
-           rm -rf test_OU_pruning/output_expected/OU_missing_data.log
-        fi
-
-        if [ ${{ matrix.arch }} = "win64" ] ; then
-           rm -f test_coalescent/output_expected/horses_iso_EBSP_*
-           rm -f test_coalescent/output_expected/mcmc_isochronous_EBSP.errout
         fi
 
         ./run_integration_tests.sh -mpi ${USE_MPI} -windows ${IS_WINDOWS} rb
