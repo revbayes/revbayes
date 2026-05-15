@@ -90,6 +90,7 @@ namespace RevBayesCore {
         // Parent DAG nodes management functions
         std::vector<const DagNode*>                         getParents(void) const;                                                     //!< Get the set of parents
         void                                                swapParent(const DagNode *oldP, const DagNode *newP);                       //!< Exchange the parent (distribution parameter)
+        virtual bool                                        isTouched() const override;
         
     protected:
         
@@ -139,6 +140,10 @@ RevBayesCore::StochasticNode<valueType>::StochasticNode( const std::string &n, T
         (*it)->incrementReferenceCount();
     }
     
+    // Since we start out touched, we must have an old value...
+    if (this->touched)
+        stored_ln_prob = std::optional<LogDensity>();
+
     // Set us as the DAG node of the distribution
     distribution->setStochasticNode( this );
 }
@@ -167,6 +172,10 @@ RevBayesCore::StochasticNode<valueType>::StochasticNode( const StochasticNode<va
         (*it)->incrementReferenceCount();
     }
     
+    // Since we start out touched, we must have an old value...
+    if (this->touched)
+        stored_ln_prob = std::optional<LogDensity>();
+
     // Set us as the DAG node of the distribution
     distribution->setStochasticNode( this );
 }
@@ -624,7 +633,7 @@ template<class valueType>
 void RevBayesCore::StochasticNode<valueType>::keepMe( const DagNode* affecter )
 {
     
-    if ( this->touched == true )
+    if ( isTouched() )
     {
         stored_ln_prob = {};
 
@@ -733,7 +742,7 @@ template<class valueType>
 void RevBayesCore::StochasticNode<valueType>::restoreMe( const DagNode *restorer )
 {
     
-    if ( this->touched == true )
+    if ( isTouched() )
     {
         lnProb              = stored_ln_prob.value();
         stored_ln_prob      = {};    // An almost impossible value for the density
@@ -901,17 +910,28 @@ void RevBayesCore::StochasticNode<valueType>::swapParent( const RevBayesCore::Da
     this->touch();
 }
 
+template<class valueType>
+bool RevBayesCore::StochasticNode<valueType>::isTouched() const
+{
+    if (this->touched)
+    {
+        assert(stored_ln_prob);
+        return true;
+    }
+    else
+    {
+        assert(not stored_ln_prob);
+        return false;
+    }
+}
 
 /** touch this node for recalculation */
 template<class valueType>
 void RevBayesCore::StochasticNode<valueType>::touchMe( const DagNode *toucher, bool touchAll )
 {
     
-    if ( this->touched == false )
-    {
-        assert(not stored_ln_prob);
+    if ( not isTouched() )
         stored_ln_prob = lnProb;
-    }
     
     lnProb = {};
     

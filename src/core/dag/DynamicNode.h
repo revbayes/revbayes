@@ -24,7 +24,9 @@ namespace RevBayesCore {
         
         // this function provided for derived classes used in the language layer, which need to override it
         virtual const std::string&                          getRevTypeOfValue(void);                                                        //!< Get Rev language type of value
-        
+
+        virtual bool                                        isTouched() const override;                                                     //!< Check if touched flag is set.
+
     protected:
         virtual void                                        keepMe(const DagNode* affecter);                                                //!< Keep value of this and affected nodes
         virtual void                                        restoreMe(const DagNode *restorer);                                             //!< Restore value of this node
@@ -197,6 +199,11 @@ void RevBayesCore::DynamicNode<valueType>::touchMe( const DagNode * /*toucher*/,
 }
 
 
+template<class valueType>
+bool RevBayesCore::DynamicNode<valueType>::isTouched() const
+{
+    return touched;
+}
 
 #endif
 

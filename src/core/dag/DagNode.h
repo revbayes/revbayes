@@ -131,6 +131,7 @@ template <class valueType> class RbOrderedSet;
         virtual void                                                swapParent(const DagNode *oldP, const DagNode *newP);                                       //!< Exchange the parent node which includes setting myself as a child of the new parent and removing myself from my old parents children list
         void                                                        touch(bool touchAll=false);
         void                                                        touchAffected(bool touchAll=false);                                                         //!< Touch affected nodes (flag for recalculation)
+        virtual bool                                                isTouched() const;                                                                          //!< Check if a node has been touched.
 
     protected:
                                                                     DagNode(const std::string &n);                                                              //!< Constructor

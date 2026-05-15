@@ -1480,3 +1480,7 @@ void DagNode::touchAffected(bool touchAll)
     }
 }
 
+bool DagNode::isTouched() const
+{
+    return false;
+}
