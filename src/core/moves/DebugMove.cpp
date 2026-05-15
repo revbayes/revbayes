@@ -31,6 +31,11 @@ LogDensity ProbOrError::is_prob_or(LogDensity d) const
         return d;
 }
 
+LogDensity ProbOrError::is_prob_or_nan() const
+{
+    return is_prob_or( std::nan("1") );
+}
+
 std::ostream& operator<<(std::ostream& o, const ProbOrError& pe)
 {
     if (auto d = pe.is_prob())
@@ -112,3 +117,49 @@ void compareNodePrs(const std::string& name, const NodePrMap& pdfs1, const NodeP
     if (err) throw E;
 }
 
+void showNodePrs(const std::string& stage, const NodePrMap& pdfs)
+{
+    for(auto& [node, pr]: pdfs)
+    {
+        std::cerr<<"    "<<stage<<": "<<node->getName()<<":  "<<pr<<"\n";
+    }
+    std::cerr<<"\n";
+}
+
+void showNodePrs(const std::string& stage, const NodePrMap& pdfs, const std::vector<const RevBayesCore::DagNode*>& nodes)
+{
+    // This version tries to print the nodes that we modify first, and the affected nodes second.
+    std::set<const RevBayesCore::DagNode*> nodes_set;
+
+    // First print the PDFS for the nodes that were directly modified.
+    for(auto node: nodes)
+    {
+        auto pr = pdfs.at(node);
+        std::cerr<<"    "<<stage<<": "<<node->getName()<<":  "<<pr<<"\n";
+
+        nodes_set.insert(node);
+    }
+
+    // These are the pdfs that are NOT in nodes -- presumably the affectedNodes
+    for(auto& [node, pr]: pdfs)
+    {
+        if (not nodes_set.contains(node))
+            std::cerr<<"    "<<stage<<": "<<node->getName()<<":  "<<pr<<"\n";
+    }
+
+    std::cerr<<"\n";
+}
+
+void checkNotTouched(const std::vector<RevBayesCore::DagNode*>& nodes, const RevBayesCore::RbOrderedSet<RevBayesCore::DagNode*>& affected_nodes)
+{
+    bool ok = true;
+    for(auto node: views::concat(nodes, affected_nodes))
+    {
+        if (node->isTouched())
+        {
+            std::cerr<<"  node "<<node->getName()<<" is already touched!\n";
+            ok = false;
+        }
+    }
+    if (not ok) std::abort();
+}
