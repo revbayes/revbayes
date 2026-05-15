@@ -156,36 +156,19 @@ int RevLanguage::Parser::execute(SyntaxElement* root, const std::shared_ptr<Envi
     {
         result = root->evaluateContent(env);
     }
-    catch (RbException& rbException)
+    catch (RbMissingVariableError& v)
     {
-
-        std::ostringstream msg;
-
-        // Catch a quit request
-        if (rbException.getExceptionType() == RbException::QUIT)
+        // Catch a missing variable exception that might be interpreted as a request for usage help on a function
+        if (auto theVariable = dynamic_cast<SyntaxVariable*> ((SyntaxElement*) root))
         {
-            delete( root);
-            
-            RevClient::shutdown();
-
-            exit(0);
-        }
-
-        // Catch a missing variable exception that might be interpreted as a request for
-        // usage help on a function
-        SyntaxVariable* rootPtr = dynamic_cast<SyntaxVariable*> ((SyntaxElement*) root);
-        SyntaxVariable* theVariable = rootPtr;
-        if (rbException.getExceptionType() == RbException::MISSING_VARIABLE && theVariable != NULL)
-        {
-
             const std::string& fxnName = theVariable->getIdentifier();
             const std::vector<Function*>& functions = Workspace::userWorkspace().getFunctionTable().findFunctions(fxnName);
             if (functions.size() != 0)
             {
-                for (std::vector<Function*>::const_iterator i = functions.begin(); i != functions.end(); i++)
+                for (auto& f: functions)
                 {
                     std::ostringstream s;
-                    (*i)->printValue(s,true);
+                    f->printValue(s,true);
                     RBOUT(s.str());
 
                     // Uncommenting this as the function callSignature() does not produce the call signature despite its name
@@ -195,22 +178,18 @@ int RevLanguage::Parser::execute(SyntaxElement* root, const std::shared_ptr<Envi
                 
                 return 0;
             }
-            
         }
-
-        // All other exceptions
-        rbException.print(msg);
-        RBOUT(msg.str());
-
-        // Return signal indicating problem
-        return 2;
+        
+        // If it was NOT a request for help.
+        delete root;
+        Signals::getSignals().clearFlags();
+        throw;
     }
-    // Don't crash the intepreter for non-Rb exceptions such as file-not-found.
-    catch (std::exception& e)
+    catch (...)
     {
-        RBOUT(e.what());
-        // Return signal indicating problem
-        return 2;
+        delete root;
+        Signals::getSignals().clearFlags();
+        throw;
     }
 
     // Print result if the root is not an assign expression
@@ -388,7 +367,7 @@ void RevLanguage::Parser::setParserMode(ParserMode mode)
  *       signal is set to 2. Any remaining part of the command buffer
  *       is discarded.
  */
-int RevLanguage::Parser::processCommand(std::string& command, const std::shared_ptr<Environment>& env)
+int RevLanguage::Parser::processCommand(std::string& command, const std::shared_ptr<Environment>& env, const std::optional<LocInfo>& locinfo)
 {
 
     // make sure mode is not checking
@@ -445,22 +424,46 @@ int RevLanguage::Parser::processCommand(std::string& command, const std::shared_
         {
             result = yyparse();
         }
+        catch (RbQuitException &q)
+        {
+            RevClient::shutdown();
+            exit(q.status);
+        }
+        catch (RbMissingVariableError& v)
+        {
+            std::ostringstream msg;
+            msg<<"Error: variable '"<<v.name<<"' does not exist!";
+            if (locinfo)
+                msg<<"\n   Note: at line "<<locinfo->line<<" in file '"<<locinfo->filename<<"'";
+            RBOUT(msg.str());
+
+            // Return signal indicating problem
+            command = "";
+            return 2;
+        }
         catch (RbException& rbException)
         {
+            std::ostringstream msg;
+            // All other exceptions
+            rbException.print(msg);
+            RBOUT(msg.str());
+            if (locinfo)
+                msg<<"\n   Note: at line "<<locinfo->line<<" in file '"<<locinfo->filename<<"'";
+            // Return signal indicating problem
+            command = "";
+            return 2;
+        }
+        // Also handle non-Rb exceptions (such as file-not-found).
+        catch (std::exception& e)
+        {
+            std::ostringstream msg;
+            msg<<"Error: ";
+            msg<<e.what();
+            if (locinfo)
+                msg<<"\n   Note: at line "<<locinfo->line<<" in file '"<<locinfo->filename<<"'";
+            RBOUT(msg.str());
 
-            // Catch a quit request in case it was not caught before
-            if (rbException.getExceptionType() == RbException::QUIT)
-            {
-                RevClient::shutdown();
-                exit(0);
-            }
-            // All other uncaught exceptions
-            
-            rbException.print(std::cerr);
-            std::cerr << std::endl;
-            
-            // We exit immediately, discarding any remaining buffer content
-            // We return 2 to signal a problem, which the caller may choose to ignore or act upon
+            // Return signal indicating problem
             command = "";
             return 2;
         }
@@ -603,7 +606,6 @@ ParserInfo Parser::checkCommand(std::string& command, const std::shared_ptr<Envi
         pi.argument_label = argument_label;
         pi.result = 0;
 
-
         /* prepare globals for call to parser */
         rrcommand.str((*i));
         rrcommand.clear();
@@ -613,15 +615,28 @@ ParserInfo Parser::checkCommand(std::string& command, const std::shared_ptr<Envi
 
         pi.message.append("\n\rCalling bison with rrcommand:\n\r").append(rrcommand.str()).append("\n\r");
 
-        int result;
+        int result = 2;
         try {
             result = yyparse();
-        }        catch (RbException& rbException) {
+        }
+        catch (RbQuitException&)
+        {
             pi.message.append("Caught an exception calling yyparse\n\r");
+
             // Catch a quit request in case it was not caught before
-            if (rbException.getExceptionType() == RbException::QUIT) {
-                pi.message.append("ignoring QUIT request");
-            }
+            pi.message.append("ignoring QUIT request");
+
+            // All other uncaught exceptions
+            pi.message.append("Abnormal exception during parsing or execution of statement; discarding any remaining command buffer\n\r");
+
+            // try parsing next line
+            pi.result = 2;
+            continue;
+        }
+        catch (RbException& rbException)
+        {
+            pi.message.append("Caught an exception calling yyparse\n\r");
+
             // All other uncaught exceptions
             pi.message.append("Abnormal exception during parsing or execution of statement; discarding any remaining command buffer\n\r");
 
