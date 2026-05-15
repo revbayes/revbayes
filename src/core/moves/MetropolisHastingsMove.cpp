@@ -22,8 +22,6 @@ namespace views = ranges::views;
 
 using namespace RevBayesCore;
 
-
-
 /**
  * Constructor
  *
@@ -228,6 +226,10 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     // 0. Initial checks and debug logging.
     int logMCMC = RbSettings::userSettings().getLogMCMC();
     int debugMCMC = RbSettings::userSettings().getDebugMCMC();
+
+    // It is very important that none of the nodes is touched before we touch it!
+    if (debugMCMC >=1 or debug_build)
+        checkNotTouched(nodes, affected_nodes);
 
     // Compute PDFs for nodes and affected nodes if we are going to use them.
     NodePrMap initialPdfs;

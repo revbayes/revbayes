@@ -213,6 +213,7 @@ namespace  {
              num_evals(0)
             {
                 variable->initiateGetAffectedNodes( affectedNodes );
+                checkNotTouched({variable}, affectedNodes);
             }
     };
 
