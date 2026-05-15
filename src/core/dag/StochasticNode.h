@@ -724,7 +724,8 @@ void RevBayesCore::StochasticNode<valueType>::redraw( SimulationCondition c )
     
     // touch this node for probability recalculation
     this->touch();
-    
+    // but clear the touched flag so that MCMC works correctly.
+    this->keep();
 }
 
 
