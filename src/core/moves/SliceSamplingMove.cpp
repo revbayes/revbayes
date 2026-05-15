@@ -8,6 +8,7 @@
 #include <tuple>
 
 #include "DagNode.h"
+#include "DebugMove.h"
 #include "SliceSamplingMove.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
@@ -15,6 +16,9 @@
 #include "RbOrderedSet.h"
 #include "StochasticNode.h"
 #include "RbSettings.h" // for debugMCMC setting
+#include <range/v3/all.hpp> // for ranges::views
+
+namespace views = ranges::views;
 
 using std::optional;
 
@@ -171,34 +175,26 @@ namespace  {
                 return Pr_;
             }
 
-        std::map<const DagNode*, LogDensity> getNodePrs()
+        NodePrMap getNodePrs()
         {
-            std::map<const DagNode*, LogDensity> Prs;
-            Prs.insert({variable, variable->getLnProbability()});
-            for(auto affectedNode: affectedNodes)
-                Prs.insert({affectedNode, affectedNode->getLnProbability()});
-            return Prs;
+            return ::getNodePrs({variable}, affectedNodes);
+        }
+
+        void showNodePrs(const std::string& stage, const NodePrMap& pdfs) const
+        {
+            std::vector<const RevBayesCore::DagNode*> nodes;
+            nodes.push_back(variable);
+            ::showNodePrs(stage, pdfs, nodes);
         }
 
         void checkPrs()
         {
             double x = current_value();
-            double Pr = (double)*operator()();
             auto Prs = getNodePrs();
-            double Prx = (double)*operator()(x);
+            auto Pr = operator()();
+            auto Prx = operator()(x);
             auto Prsx = getNodePrs();
-            if (std::abs(Pr - Prx)/(1+std::abs(Prx)) > 1.0e-11)
-            {
-                std::cerr<<std::setprecision(11)<<std::endl;
-                std::cerr<<"mvSlice for "<<variable->getName()<<": probability is "<<Pr<<" but should be "<<Prx<<":  delta = "<<Pr - Prx<<"\n";
-                for(auto& [n,pr1]: Prs)
-                {
-                    auto pr2 = Prsx.at(n);
-                    if (std::abs(double(pr1)-double(pr2))/(1+std::abs(double(pr2))) > 1.0e-11)
-                        std::cerr<<"         cause: probability for "<<n->getName()<<" is "<<pr1<<" but should be "<<pr2<<":  delta = "<<pr1-pr2<<"\n";
-                }
-                std::abort();
-            }
+            compareNodePrs("SliceSampling(" + variable->getName() + ")", Prs, Prsx, "initial check");
         }
 
         double current_value() const
@@ -474,28 +470,46 @@ double slice_sample_stepping_out(double x0, slice_function& g,double w, int m)
 {
     assert(g.in_range(x0));
 
+    int logMCMC = RbSettings::userSettings().getLogMCMC();
+    int debugMCMC = RbSettings::userSettings().getDebugMCMC();
+
+    NodePrMap initialPdfs;
+    if (logMCMC >= 4)
+    	initialPdfs = g.getNodePrs();
+    if (logMCMC >= 4)
+        g.showNodePrs("BEFORE", initialPdfs);
+
+    // 1. Determine the slice level, in log terms.
     auto gx0 = g();
 
     if (not gx0)
         throw RbException()<<"slice_sampling_stepping_out: x0 is out of bounds!";
 
     // Determine the slice level, in log terms.
-
     auto logy = *gx0 + log(uniform()); // - exponential(1.0);
 
-    int debugMCMC = RbSettings::userSettings().getDebugMCMC();
-    int logMCMC = RbSettings::userSettings().getLogMCMC();
     if (logMCMC >= 1)
 	std::cerr<<"mvSlice("<<g.name()<<", stepping_out):  x0 = "<<x0<<"  g(x0) = "<<gx0<<"   logy = "<<logy<<"\n";
 
-    if (debugMCMC >= 1) g.checkPrs();
+    // Check that g() and g(x) don't give different PDFs!
+    if (debugMCMC >= 1 or debug_build)
+        g.checkPrs();
 
-    // Find the initial interval to sample from.
+    assert(*g(x0) > logy);
+
+    // 2. Find the initial interval to sample from.
     auto [L, R] = find_slice_boundaries_stepping_out(x0,g,logy,w,m);
 
-    // Sample from the interval, shrinking it on each rejection
+    // 3. Sample from the interval, shrinking it on each rejection
+    double x = search_interval(x0,L,R,g,logy);
 
-    return search_interval(x0,L,R,g,logy);
+    NodePrMap finalPdfs;
+    if (logMCMC >= 4)
+	finalPdfs = g.getNodePrs();
+    if (logMCMC >= 4)
+        g.showNodePrs("FINAL", finalPdfs);
+
+    return x;
 }
 
 
@@ -507,19 +521,30 @@ double slice_sample_doubling(double x0, slice_function& g, double w, int m)
     if (not pre_slice_sampling_check_OK(x0, g))
         return x0;
 
+    int logMCMC = RbSettings::userSettings().getLogMCMC();
+    int debugMCMC = RbSettings::userSettings().getDebugMCMC();
+
+    NodePrMap initialPdfs;
+    if (logMCMC >= 3 or debugMCMC >= 1)
+    	initialPdfs = g.getNodePrs();
+    if (logMCMC >= 3)
+        g.showNodePrs("BEFORE", initialPdfs);
+
     // 1. Determine the slice level, in log terms.
     auto gx0 = g();
 
     if (not gx0)
         throw RbException()<<"slice_sampling_stepping_out: x0 is out of bounds!";
 
+    // Determine the slice level, in log terms.
     LogDensity logy = *gx0 + log(uniform()); // - exponential(1);
 
-    int debugMCMC = RbSettings::userSettings().getDebugMCMC();
-    int logMCMC = RbSettings::userSettings().getLogMCMC();
     if (logMCMC >= 1) std::cerr<<"mvSlice("<<g.name()<<", doubling):  x0 = "<<x0<<"  g(x0) = "<<gx0<<"   logy = "<<logy<<"\n";
 
-    if (debugMCMC >= 1) g.checkPrs();
+    // Check that g() and g(x) don't give different PDFs!
+    if (debugMCMC >= 1 or debug_build)
+        g.checkPrs();
+    assert(*g(x0) > logy);
 
     // 2. Find the initial interval to sample from.
     auto [L, R, gL_cached, gR_cached]  = find_slice_boundaries_doubling(x0,g,logy,w,m);
@@ -529,10 +554,16 @@ double slice_sample_doubling(double x0, slice_function& g, double w, int m)
 
     // 4. Check that we can propose the same interval from x2
     // We need to SET the value INSIDE this routine if we recompute g().
-    if (can_propose_same_interval_doubling(x0, x1, w, L, R, gL_cached, gR_cached, g, logy))
-        return x1;
-    else
-        return x0;
+    if (not can_propose_same_interval_doubling(x0, x1, w, L, R, gL_cached, gR_cached, g, logy))
+        x1 = x0;
+
+    NodePrMap finalPdfs;
+    if (logMCMC >=4)
+	finalPdfs = g.getNodePrs();
+    if (logMCMC >= 4)
+        g.showNodePrs("FINAL", finalPdfs);
+
+    return x1;
 }
 
 void SliceSamplingMove::performMcmcMove( double prHeat, double lHeat, double pHeat )
