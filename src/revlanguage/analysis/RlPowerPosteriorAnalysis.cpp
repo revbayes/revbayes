@@ -48,14 +48,13 @@ PowerPosteriorAnalysis::PowerPosteriorAnalysis() : WorkspaceToCoreWrapperObject<
     run_arg_rules->push_back( new ArgumentRule("burninFraction", Probability::getClassTypeSpec(), "The fraction of samples to discard.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.25) ) );
     run_arg_rules->push_back( new ArgumentRule("preburninGenerations", Natural::getClassTypeSpec(), "The number of generations to run as pre-burnin when parameter tuning is done.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
     run_arg_rules->push_back( new ArgumentRule("tuningInterval", Natural::getClassTypeSpec(), "The number of generations to run.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(100) ) );
+    run_arg_rules->push_back( new ArgumentRule("checkpointFile", RlString::getClassTypeSpec(), "The filename for the checkpoint file.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("") ) );
+    run_arg_rules->push_back( new ArgumentRule("checkpointInterval", Natural::getClassTypeSpec(), "The interval when to write parameters values to a file for checkpointing.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0) ) );
     methods.addFunction( new MemberProcedure( "run", RlUtils::Void, run_arg_rules) );
     
     ArgumentRules* run_one_stone_arg_rules = new ArgumentRules();
     run_one_stone_arg_rules->push_back( new ArgumentRule("index", Natural::getClassTypeSpec(), "Index of the stone/power to run.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-    run_one_stone_arg_rules->push_back( new ArgumentRule("generations", Natural::getClassTypeSpec(), "The number of generations to run.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-    run_one_stone_arg_rules->push_back( new ArgumentRule("burninFraction", Probability::getClassTypeSpec(), "The fraction of samples to discard.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.25) ) );
-    run_one_stone_arg_rules->push_back( new ArgumentRule("preburninGenerations", Natural::getClassTypeSpec(), "The number of generations to run as pre-burnin when parameter tuning is done.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
-    run_one_stone_arg_rules->push_back( new ArgumentRule("tuningInterval", Natural::getClassTypeSpec(), "The number of generations to run.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(100) ) );
+    run_one_stone_arg_rules->insert( run_one_stone_arg_rules->end(), run_arg_rules->begin(), run_arg_rules->end() );
     methods.addFunction( new MemberProcedure( "runOneStone", RlUtils::Void, run_one_stone_arg_rules) );
     
     ArgumentRules* summarize_arg_rules = new ArgumentRules();
@@ -64,7 +63,18 @@ PowerPosteriorAnalysis::PowerPosteriorAnalysis() : WorkspaceToCoreWrapperObject<
     ArgumentRules* burnin_arg_rules = new ArgumentRules();
     burnin_arg_rules->push_back( new ArgumentRule("generations"   , Natural::getClassTypeSpec(), "The number of generations to run.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     burnin_arg_rules->push_back( new ArgumentRule("tuningInterval", Natural::getClassTypeSpec(), "The frequency at which the moves are tuned (usually between 50 and 1000).", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    burnin_arg_rules->push_back( new ArgumentRule("checkpointFile", RlString::getClassTypeSpec(), "The filename for the checkpoint file.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("") ) );
+    burnin_arg_rules->push_back( new ArgumentRule("checkpointInterval", Natural::getClassTypeSpec(), "The interval when to write parameters values to a file for checkpointing.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0) ) );
     methods.addFunction( new MemberProcedure( "burnin", RlUtils::Void, burnin_arg_rules) );
+
+    ArgumentRules* init_from_ckp_rules = new ArgumentRules();
+    std::vector<TypeSpec> index_types;
+    index_types.push_back( Natural::getClassTypeSpec() );
+    index_types.push_back( ModelVector<Natural>::getClassTypeSpec() );
+    index_types.push_back( ModelVector< ModelVector<Natural> >::getClassTypeSpec() );
+    init_from_ckp_rules->push_back( new ArgumentRule("checkpointFile", RlString::getClassTypeSpec(), "The checkpoint file base name.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    init_from_ckp_rules->push_back( new ArgumentRule("stones", index_types, "1-based index, vector, or nested vector; for nested layouts only the first index in each inner vector requires a checkpoint file. Not required when resuming the pre-burnin.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
+    methods.addFunction( new MemberProcedure( "initializeFromCheckpoint", RlUtils::Void, init_from_ckp_rules ) );
 
 }
 
@@ -148,7 +158,10 @@ RevPtr<RevVariable> PowerPosteriorAnalysis::executeMethod(std::string const &nam
             preburn_gen = static_cast<const Natural &>( args[2].getVariable()->getRevObject() ).getValue();
         }
         size_t tune_int = static_cast<const Natural &>( args[3].getVariable()->getRevObject() ).getValue();
-        value->runAll( size_t(gen), burn_frac, preburn_gen, tune_int );
+        const std::string ckp_file = static_cast<const RlString &>( args[4].getVariable()->getRevObject() ).getValue();
+        size_t ckp_int = static_cast<const Natural &>( args[5].getVariable()->getRevObject() ).getValue();
+        
+        value->runAll( size_t(gen), burn_frac, preburn_gen, tune_int, ckp_file, ckp_int );
 
         return NULL;
     }
@@ -160,7 +173,7 @@ RevPtr<RevVariable> PowerPosteriorAnalysis::executeMethod(std::string const &nam
         size_t ind = static_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue() - 1;
         if (ind < 0 or ind > value->getPowers().size() - 1)
         {
-            throw RbException() << "Index cannot be smaller than 1 or larger than " << value->getPowers().size();
+            throw RbException() << "Index cannot be smaller than 1 or larger than " << value->getPowers().size() << ".";
         }
         std::int64_t gen = static_cast<const Natural &>( args[1].getVariable()->getRevObject() ).getValue();
         double burn_frac = static_cast<const Probability &>( args[2].getVariable()->getRevObject() ).getValue();
@@ -170,7 +183,11 @@ RevPtr<RevVariable> PowerPosteriorAnalysis::executeMethod(std::string const &nam
             preburn_gen = static_cast<const Natural &>( args[3].getVariable()->getRevObject() ).getValue();
         }
         size_t tune_int = static_cast<const Natural &>( args[4].getVariable()->getRevObject() ).getValue();
-        value->runStone( ind, size_t(gen), burn_frac, preburn_gen, tune_int, true );
+        const std::string ckp_file = static_cast<const RlString &>( args[5].getVariable()->getRevObject() ).getValue();
+        size_t ckp_int = static_cast<const Natural &>( args[6].getVariable()->getRevObject() ).getValue();
+        
+        value->runStone( ind, size_t(gen), burn_frac, preburn_gen, tune_int, true, ckp_file, ckp_int );
+        value->setResumeFromCheckpoint( false );
         
         return NULL;
     }
@@ -189,8 +206,75 @@ RevPtr<RevVariable> PowerPosteriorAnalysis::executeMethod(std::string const &nam
         // get the member with give index
         int gen = (int)static_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue();
         int tuningInterval = (int)static_cast<const Natural &>( args[1].getVariable()->getRevObject() ).getValue();
-        value->burnin( size_t(gen), size_t(tuningInterval) );
+        const std::string ckp_file = static_cast<const RlString &>( args[2].getVariable()->getRevObject() ).getValue();
+        size_t ckp_int = static_cast<const Natural &>( args[3].getVariable()->getRevObject() ).getValue();
+        
+        value->burnin( size_t(gen), size_t(tuningInterval), ckp_file, ckp_int );
 
+        return NULL;
+    }
+    else if ( name == "initializeFromCheckpoint")
+    {
+        found = true;
+        
+        const std::string &checkpoint_filename = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
+        
+        if ( args[1].getVariable()->getRevObject() == RevNullObject::getInstance() )
+        {
+            value->initializeFromCheckpoint( checkpoint_filename ); // first overloaad
+        }
+        else if ( args[1].getVariable()->getRevObject().isType( ModelVector< ModelVector<Natural> >::getClassTypeSpec() ) )
+        {
+            RevBayesCore::RbVector<RevBayesCore::RbVector<std::int64_t>> nmv;
+            nmv = static_cast<const ModelVector< ModelVector<Natural> > &>( args[1].getVariable()->getRevObject() ).getValue();
+
+            std::vector<std::vector<size_t>> stone_sequences;
+            for (size_t i = 0; i < nmv.size(); ++i)
+            {
+                std::vector<size_t> inner( nmv[i].size() );
+                std::transform(nmv[i].begin(), nmv[i].end(), inner.begin(), [](std::int64_t x) { return (size_t)(x - 1); });
+                
+                for (size_t j = 0; j < inner.size(); ++j)
+                {
+                    if ( inner[j] < 0 or inner[j] > value->getPowers().size() - 1 )
+                    {
+                        throw RbException() << "Index cannot be smaller than 1 or larger than " << value->getPowers().size() << ".";
+                    }
+                }
+                
+                stone_sequences.push_back( inner );
+            }
+                
+            value->initializeFromCheckpoint( checkpoint_filename, stone_sequences ); // second overload
+        }
+        else
+        {
+            std::vector<std::int64_t> mv;
+            if ( args[1].getVariable()->getRevObject().isType( ModelVector<Natural>::getClassTypeSpec() ) )
+            {
+                mv = static_cast<const ModelVector<Natural> &>( args[1].getVariable()->getRevObject() ).getValue();
+            }
+            else
+            {
+                std::int64_t index = static_cast<const Natural &>( args[1].getVariable()->getRevObject() ).getValue();
+                mv.push_back( index );
+            }
+            
+            // subtract 1 to account for the difference between (user-facing / Rev) 1-based indexing and (internal / C++) 0-based indexing
+            std::vector<size_t> stone_indices( mv.size() );
+            std::transform(mv.begin(), mv.end(), stone_indices.begin(), [](std::int64_t x) { return (size_t)(x - 1); });
+            
+            for (size_t i = 0; i < stone_indices.size(); ++i)
+            {
+                if ( stone_indices[i] < 0 or stone_indices[i] > value->getPowers().size() - 1 )
+                {
+                    throw RbException() << "Index cannot be smaller than 1 or larger than " << value->getPowers().size() << ".";
+                }
+            }
+            
+            value->initializeFromCheckpoint( checkpoint_filename, stone_indices ); // third overload
+        }
+        
         return NULL;
     }
 

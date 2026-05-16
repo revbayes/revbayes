@@ -1,9 +1,11 @@
 ################################################################################
 #
-# RevBayes Example: Bayesian inference of phylogeny using a GTR+Gamma+Inv
-#                   substitution model for a single, uniform partition model.
+# RevBayes example: Power posterior analysis with checkpointed pre-burnin and
+#                   run phases, followed by marginal likelihood estimation using
+#                   the path-sampling and stepping-stone methods.
 #
-# authors: Michael Landis, Sebastian Hoehna, Tracy A. Heath and Brian R. Moore
+# authors: Michael Landis, Sebastian Hoehna, Tracy A. Heath, Brian R. Moore,
+#          and David Cerny
 #
 ################################################################################
 
@@ -63,7 +65,6 @@ moves[++mvi] = mvScale(pinvar, lambda=0.1, tune=true, weight=2.0)
 moves[++mvi] = mvSlide(pinvar, delta=10.0, tune=true, weight=2.0)
 
 
-
 ##############
 # Tree model #
 ##############
@@ -83,8 +84,6 @@ for (i in 1:n_branches) {
 TL := sum(bl)
 
 psi := treeAssembly(topology, bl)
-
-
 
 
 ###################
@@ -108,10 +107,26 @@ mymodel = model(psi)
 monitors[++mni] = mnFile(psi, filename="output/model_uniform_run_all.trees", printgen=10)
 monitors[++mni] = mnModel(filename="output/model_uniform_run_all.log", printgen=10)
 
-# run the analysis
+# step 1: run the global pre-burnin stage with checkpointing
 pow_p = powerPosterior(mymodel, moves, monitors, "output/model_uniform_run_all.out", cats=10, sampleFreq=1)
-pow_p.burnin(generations=100,tuningInterval=200)
+pow_p.burnin(generations=50, tuningInterval=200, checkpointFile="output/model_uniform_run_all_burnin.ckp",
+             checkpointInterval=10)
+
+# step 2: resume from checkpoint to extend the global pre-burnin by an additional 40 generations
+pow_p.initializeFromCheckpoint( "output/model_uniform_run_all_burnin.ckp" )
+pow_p.burnin(generations=40, tuningInterval=200)
+
+# step 3: run 10 stones for with checkpointing
+pow_p.run(generations=10, checkpointFile="output/model_uniform_run_all.ckp", checkpointInterval=1)
+
+# step 4: resume from checkpoint to extend all the 10 stones we have just run by an additional 10 generations
+pow_p.initializeFromCheckpoint( "output/model_uniform_run_all.ckp", 1:10 )
 pow_p.run(generations=10)
+
+
+###########
+# Summary #
+###########
 
 ss = steppingStoneSampler(file="output/model_uniform_run_all.out", powerColumnName="power",
                           likelihoodColumnName="likelihood")

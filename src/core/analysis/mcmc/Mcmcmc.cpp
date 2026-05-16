@@ -238,52 +238,6 @@ size_t Mcmcmc::chainForHeatIndex(size_t i) const
 */
 }
 
-void Mcmcmc::checkpoint( void ) const
-{
-    
-    for (size_t i = 0; i < num_chains; ++i)
-    {
-        
-        if ( chains[i] != NULL )
-        {
-            // get the checkpoint file name for the current chain by appending to the base checkpoint file name
-            path chain_file_name = appendToStem( base_checkpoint_file_name, "_chain_" + std::to_string(i) );
-            
-            chains[i]->setCheckpointFile( chain_file_name );
-            chains[i]->checkpoint();
-            
-            // assemble the new filename
-            path heat_checkpoint_file_name = appendToStem(chain_file_name, "_heat");
-            
-            // open the stream to the file
-            path tmp_heat_checkpoint_file_name = heat_checkpoint_file_name.parent_path() / ("." + heat_checkpoint_file_name.filename().string() + ".tmp");
-            std::ofstream out_stream_mcmc( tmp_heat_checkpoint_file_name.string() );
-            out_stream_mcmc << "heat = " << chains[i]->getChainPosteriorHeat() << std::endl;
-            
-            // clean up
-            out_stream_mcmc.close();
-            const bool ok = out_stream_mcmc.good();
-            if ( !ok )
-            {
-                RBOUT( "Warning: failed to write checkpoint file \"" + heat_checkpoint_file_name.string() + "\"; keeping existing file." );
-                std::error_code ec;
-                std::filesystem::remove(tmp_heat_checkpoint_file_name, ec);
-            }
-            else
-#ifdef _WIN32
-            if ( MoveFileExW(tmp_heat_checkpoint_file_name.wstring().c_str(), heat_checkpoint_file_name.wstring().c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH) == 0 )
-            {
-                throw RbException() << "Could not replace checkpoint file " << heat_checkpoint_file_name;
-            }
-#else
-            std::filesystem::rename(tmp_heat_checkpoint_file_name, heat_checkpoint_file_name);
-#endif
-        }
-        
-    }
-    
-}
-
 
 Mcmcmc* Mcmcmc::clone(void) const
 {
@@ -329,6 +283,111 @@ void Mcmcmc::finishMonitors( size_t n_reps, MonteCarloAnalysisOptions::TraceComb
         {
             chains[i]->finishMonitors( n_reps, tc );
         }
+    }
+    
+}
+
+
+void Mcmcmc::fullCheckpoint( void )
+{
+    
+    for (size_t i = 0; i < num_chains; ++i)
+    {
+        
+        if ( chains[i] != NULL )
+        {
+            // get the checkpoint file name for the current chain by appending to the base checkpoint file name
+            path chain_file_name = appendToStem( checkpoint_file_name, "_chain_" + std::to_string(i) );
+            
+            chains[i]->setCheckpointFile( chain_file_name );
+            chains[i]->checkpoint();
+            
+            // assemble the new filename
+            path heat_checkpoint_file_name = appendToStem(chain_file_name, "_heat");
+            
+            // open the stream to the file
+            path tmp_heat_checkpoint_file_name = heat_checkpoint_file_name.parent_path() / ("." + heat_checkpoint_file_name.filename().string() + ".tmp");
+            std::ofstream out_stream_mcmc( tmp_heat_checkpoint_file_name.string() );
+            out_stream_mcmc << "heat = " << chains[i]->getChainPosteriorHeat() << std::endl;
+            
+            // clean up
+            out_stream_mcmc.close();
+            const bool ok = out_stream_mcmc.good();
+            if ( !ok )
+            {
+                RBOUT( "Warning: failed to write checkpoint file \"" + heat_checkpoint_file_name.string() + "\"; keeping existing file." );
+                std::error_code ec;
+                std::filesystem::remove(tmp_heat_checkpoint_file_name, ec);
+            }
+            else
+#ifdef _WIN32
+            if ( MoveFileExW(tmp_heat_checkpoint_file_name.wstring().c_str(), heat_checkpoint_file_name.wstring().c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH) == 0 )
+            {
+                throw RbException() << "Could not replace checkpoint file " << heat_checkpoint_file_name;
+            }
+#else
+            std::filesystem::rename(tmp_heat_checkpoint_file_name, heat_checkpoint_file_name);
+#endif
+        }
+        
+    }
+    
+}
+
+
+void Mcmcmc::fullInitializeSamplerFromCheckpoint( void )
+{
+    
+    for (size_t i = 0; i < num_chains; ++i)
+    {
+            
+        if ( chains[i] != NULL )
+        {
+            // get the full name of the checkpoint file for this chain
+            path chain_file_name = appendToStem( checkpoint_file_name, "_chain_" + std::to_string(i) );
+            chains[i]->setCheckpointFile( chain_file_name );
+            
+            // restore from checkpoint
+            chains[i]->initializeSamplerFromCheckpoint();
+            setCurrentGeneration(chains[i]->getCurrentGeneration());
+            
+            // give the chain back its correct heat
+            double chain_heat;
+            
+            // assemble the new filename
+            path heat_checkpoint_file_name = appendToStem( chain_file_name, "_heat");
+
+            // open file and initialize variables for parsing
+            std::ifstream in_file_heat( heat_checkpoint_file_name.string() );
+            std::string line_heat;
+            std::map<std::string, std::string> heat_pars;
+            
+            // command-processing loop
+            while ( in_file_heat.good() )
+            {
+                // read a line
+                safeGetline( in_file_heat, line_heat );
+                
+                if ( line_heat != "" )
+                {
+                    std::vector<std::string> key_value;
+                    StringUtilities::stringSplit(line_heat, " = ", key_value);
+                    heat_pars.insert( std::pair<std::string, std::string>(key_value[0], key_value[1]) );
+                }
+                
+            }
+            
+            chain_heat = StringUtilities::asDoubleNumber( heat_pars["heat"] );
+            
+            // clean up
+            in_file_heat.close();
+            
+            chains[i]->setChainPosteriorHeat(chain_heat);
+            
+            // make sure it worked
+            // std::cout << "Chain initialized from file " << chains[i]->getCheckpointFile() << " has a posterior heat of " << chains[i]->getChainPosteriorHeat() << std::endl;
+        }
+        
     }
     
 }
@@ -387,6 +446,24 @@ RbVector<Monitor>& Mcmcmc::getMonitors( void )
         }
     }
     return *monitors;
+}
+
+
+RbVector<Move>& Mcmcmc::getMoves( void )
+{
+    RbVector<Move> *moves = new RbVector<Move>();
+    for (size_t i = 0; i < num_chains; ++i)
+    {
+        if ( chains[i] != NULL )
+        {
+            RbVector<Move>& m = chains[i]->getMoves();
+            for (size_t j = 0; j < m.size(); ++j)
+            {
+                moves->push_back( m[j] );
+            }
+        }
+    }
+    return *moves;
 }
 
 
@@ -497,65 +574,6 @@ void Mcmcmc::initializeSampler()
         {
             chains[i]->initializeSampler();
         }
-    }
-    
-}
-
-
-
-void Mcmcmc::initializeSamplerFromCheckpoint( void )
-{
-    
-    for (size_t i = 0; i < num_chains; ++i)
-    {
-            
-        if ( chains[i] != NULL )
-        {
-            // get the full name of the checkpoint file for this chain
-            path chain_file_name = appendToStem( base_checkpoint_file_name, "_chain_" + std::to_string(i) );
-            chains[i]->setCheckpointFile( chain_file_name );
-            
-            // restore from checkpoint
-            chains[i]->initializeSamplerFromCheckpoint();
-            setCurrentGeneration(chains[i]->getCurrentGeneration());
-            
-            // give the chain back its correct heat
-            double chain_heat;
-            
-            // assemble the new filename
-            path heat_checkpoint_file_name = appendToStem( chain_file_name, "_heat");
-
-            // open file and initialize variables for parsing
-            std::ifstream in_file_heat( heat_checkpoint_file_name.string() );
-            std::string line_heat;
-            std::map<std::string, std::string> heat_pars;
-            
-            // command-processing loop
-            while ( in_file_heat.good() )
-            {
-                // read a line
-                safeGetline( in_file_heat, line_heat );
-                
-                if ( line_heat != "" )
-                {
-                    std::vector<std::string> key_value;
-                    StringUtilities::stringSplit(line_heat, " = ", key_value);
-                    heat_pars.insert( std::pair<std::string, std::string>(key_value[0], key_value[1]) );
-                }
-                
-            }
-            
-            chain_heat = StringUtilities::asDoubleNumber( heat_pars["heat"] );
-            
-            // clean up
-            in_file_heat.close();
-            
-            chains[i]->setChainPosteriorHeat(chain_heat);
-            
-            // make sure it worked
-            // std::cout << "Chain initialized from file " << chains[i]->getCheckpointFile() << " has a posterior heat of " << chains[i]->getChainPosteriorHeat() << std::endl;
-        }
-        
     }
     
 }
@@ -1346,7 +1364,7 @@ void Mcmcmc::startMonitors(size_t num_cycles, bool reopen)
 
 void Mcmcmc::setCheckpointFile(const path &f)
 {
-    base_checkpoint_file_name = f;
+    checkpoint_file_name = f;
 }
 
 

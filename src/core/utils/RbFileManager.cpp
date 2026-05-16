@@ -1,4 +1,5 @@
 #include <sys/stat.h>
+#include <cctype>
 #include <cstdio>
 #include <sys/types.h> // IWYU pragma: keep
 #include <iostream>
@@ -8,6 +9,7 @@
 #include <algorithm>
 #include <vector>
 
+#include "nlohmann-json.h"
 #include "RbFileManager.h"
 #include "RbSettings.h"
 #include "RbException.h"
@@ -263,6 +265,66 @@ std::stringstream readFileAsStringStream(const path& fname)
 std::string readFileAsString(const path& fname)
 {
     return readFileAsStringStream(fname).str();
+}
+
+void truncateMonitorFileAfterGeneration(const path& file_name, std::uint64_t lastGen)
+{
+    std::ifstream infile( file_name.string(), std::ios::binary );
+    if ( !infile.good() ) return;
+
+    std::string line;
+
+    // detect format from the first data line
+    bool is_json = false;
+    std::streampos data_start;
+    while ( true )
+    {
+        data_start = infile.tellg();
+        if ( !safeGetline(infile, line) ) return;
+        if ( line.empty() ) continue;
+        if ( std::isdigit(static_cast<unsigned char>(line[0])) ) { is_json = false; break; }
+        if ( line[0] == '{' )                                     { is_json = true;  break; }
+        // otherwise a header/comment line — keep scanning
+    }
+    infile.seekg(data_start);
+
+    while ( true )
+    {
+        std::streampos pos = infile.tellg();
+        if ( !safeGetline(infile, line) ) break;
+        if ( line.empty() ) continue;
+
+        if ( is_json )
+        {
+            try
+            {
+                auto j = nlohmann::json::parse(line);
+                if ( j.contains("Iteration") && j["Iteration"].is_number_unsigned() )
+                {
+                    std::uint64_t gen = j["Iteration"].get<std::uint64_t>();
+                    if ( gen > lastGen )
+                    {
+                        infile.close();
+                        fs::resize_file( file_name, pos );
+                        return;
+                    }
+                }
+            }
+            catch ( const nlohmann::json::exception& ) { }
+        }
+        else
+        {
+            char *end_ptr = NULL;
+            std::uint64_t gen = static_cast<std::uint64_t>( std::strtoull(line.c_str(), &end_ptr, 10) );
+            if ( end_ptr != line.c_str() && gen > lastGen )
+            {
+                infile.close();
+                fs::resize_file( file_name, pos );
+                return;
+            }
+        }
+    }
+
 }
 
 

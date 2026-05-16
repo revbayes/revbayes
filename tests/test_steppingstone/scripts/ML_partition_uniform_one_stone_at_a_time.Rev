@@ -1,9 +1,11 @@
 ################################################################################
 #
-# RevBayes Example: Bayesian inference of phylogeny using a GTR+Gamma+Inv
-#                   substitution model for a single, uniform partition model.
+# RevBayes example: Power posterior analysis with individual powers executed
+#                   independently and one at a time (rather than sequentially or
+#                   in parallel), followed by marginal likelihood estimation.
 #
-# authors: Michael Landis, Sebastian Hoehna, Tracy A. Heath and Brian R. Moore
+# authors: Michael Landis, Sebastian Hoehna, Tracy A. Heath, Brian R. Moore,
+#          and David Cerny
 #
 ################################################################################
 
@@ -109,15 +111,26 @@ monitors[++mni] = mnFile(psi, filename="output/model_uniform_run_one_stone_at_a_
 monitors[++mni] = mnModel(filename="output/model_uniform_run_one_stone_at_a_time.log", printgen=10)
 
 # run the analysis
-pow_p = powerPosterior(mymodel, moves, monitors, "output/model_uniform_run_one_stone_at_a_time.out", cats=10,
-                       sampleFreq=1)
+pow_p = powerPosterior(mymodel, moves, monitors,
+                       "output/model_uniform_run_one_stone_at_a_time.out", cats=10, sampleFreq=1)
 pow_p.burnin(generations=100,tuningInterval=200)
 pow_p.runOneStone(index=1,  generations=10)
 pow_p.runOneStone(index=2,  generations=10)
 pow_p.runOneStone(index=3,  generations=10)
 pow_p.runOneStone(index=4,  generations=10)
-pow_p.runOneStone(index=5,  generations=10)
-pow_p.runOneStone(index=6,  generations=10)
+
+pow_p.runOneStone(index=5,  generations=5,
+                  checkpointFile="output/model_uniform_run_one_stone_at_a_time.ckp",
+                  checkpointInterval=1)
+pow_p.initializeFromCheckpoint("output/model_uniform_run_one_stone_at_a_time.ckp", 5)
+pow_p.runOneStone(index=5,  generations=5)
+
+pow_p.runOneStone(index=6,  generations=5,
+                  checkpointFile="output/model_uniform_run_one_stone_at_a_time.ckp",
+                  checkpointInterval=1)
+pow_p.initializeFromCheckpoint("output/model_uniform_run_one_stone_at_a_time.ckp", 6)
+pow_p.runOneStone(index=6,  generations=5)
+
 pow_p.runOneStone(index=7,  generations=10)
 pow_p.runOneStone(index=8,  generations=10)
 pow_p.runOneStone(index=9,  generations=10)

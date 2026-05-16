@@ -8,6 +8,8 @@ term raised to a power between 0 and 1. Such distributions are often used to
 estimate marginal likelihoods for model selection or hypothesis testing via
 Bayes factors (Gelman & Meng 1998; Friel & Pettitt 2008).
 ## details
+Description
+
 A power posterior analysis samples from a series of importance distributions of
 the form:
     f_beta(theta | Y) = f(theta) x f(Y | theta)^beta
@@ -37,36 +39,168 @@ file with the suffix "_stone_<K>" will contain samples from the prior. For
 reasons of numerical stability, the beta of this final stone is not set exactly
 to 0 but to an extremely small positive number (~ 1.2e-302).
 
-The RevBayes implementation of power posterior analysis is fully parallelized
-(Hoehna et al. 2021). In general, after a common pre-burnin stage that should
-allow the sampler to converge to the posterior (see the `.burnin()` method),
-the `.run()` method will distribute the K stones among M available CPUs in such
-a way that each CPU handles floor(K/M) or ceiling(K/M) consecutive powers. This
-has the advantage of allowing the last sample for one power to be used as the
-starting state for the subsequent power. However, to account for the transition
-from one power to the next, each power posterior should still include a small
-burnin fraction (set to 0.25 by default and specified by the `burninFraction`
-argument to the `.run()` method). For example, with K = 50, M = 8, and a single
-CPU used for each likelihood computation (`procPerLikelihood=1`, by default),
-the individual power posteriors will be distributed among the CPUs as follows:
+Implementation
 
-    -----------------------------------------------------------------
-                        Filename suffix (= K - i)
-    -----------------------------------------------------------------
-    | CPU 1 | CPU 2 | CPU 3 | CPU 4 | CPU 5 | CPU 6 | CPU 7 | CPU 8 |
-    |-------|-------|-------|-------|-------|-------|-------|-------|
-    |   1   |   7   |   13  |   19  |   26  |   32  |   38  |   44  |
-    |   2   |   8   |   14  |   20  |   27  |   33  |   39  |   45  |
-    |  ...  |  ...  |  ...  |  ...  |  ...  |  ...  |  ...  |  ...  |
-    |   6   |   12  |   18  |   24  |   31  |   37  |   43  |   49  |
-    |       |       |       |   25  |       |       |       |   50  |
+A power posterior analysis consists of up to four distinct stages:
 
-More flexible strategies are enabled by the `.runOneStone()` method, which
-allows the user to execute a separate analysis for each power posterior.
+    1. Global pre-burnin
+    2. Stone-specific pre-burnin
+    3. Stone-specific burnin
+    4. Stone-specific sampling phase
+
+The global pre-burnin (1) is executed using the `.burnin()` method and is meant
+to allow the sampler to converge to the posterior. No samples are collected, 
+and a separate generation counter is used, much like with `mcmc.burnin()`. This
+stage is executed using a single worker, which corresponds either to a single
+process, or to a group of `procPerLikelihood` processes if this argument
+(controlling the number of processes used for each likelihood computation) is
+set to a value other than 1 (default).
+
+In contrast, the remaining three stages are executed using the `.run()` method
+and fully parallelized (see Höhna et al. 2021, though note that the current
+implementation diverges somewhat from that described therein). The K stones are
+distributed among M available workers in such a way that each worker handles
+floor(K/M) or ceiling(K/M) consecutive powers. This allows the last sample for
+one power to be used as the starting state for the next power. The assignment
+of stones to available workers is summarized in a table printed at the start of
+every analysis. For example, with K = 50, M = 8, and `procPerLikelihood=1`, the
+individual power posteriors will be distributed among processes as follows:
+
+    Process | Step 1 | Step 2 | Step 3 | Step 4 | Step 5 | Step 6 | Step 7
+    --------|--------|--------|--------|--------|--------|--------|--------
+          1 |      1 |      2 |      3 |      4 |      5 |      6 |
+          2 |      7 |      8 |      9 |     10 |     11 |     12 |
+          3 |     13 |     14 |     15 |     16 |     17 |     18 |
+          4 |     19 |     20 |     21 |     22 |     23 |     24 |     25
+          5 |     26 |     27 |     28 |     29 |     30 |     31 |
+          6 |     32 |     33 |     34 |     35 |     36 |     37 |
+          7 |     38 |     39 |     40 |     41 |     42 |     43 |
+          8 |     44 |     45 |     46 |     47 |     48 |     49 |     50
+
+To facilitate the transitions from one power to the next, which may require
+additional move tuning (since moves should become bolder for powers closer to
+0), a stone-specific pre-burnin (2) is performed. No samples are collected
+during this stage, and another separate generation counter is used. By default,
+this pre-burnin doubles the specified stone length, so if the user specifies
+`.run(generations=1000)`, it will consist of 1000 generations for each stone.
+This value can be changed by setting the `preburninGenerations` argument of the
+`.run()` method.
+
+Additionally, samples collected during the transition from one likelihood power
+to another can be discarded as a stone-specific burnin (3), which is set to 25%
+of the specified stone length by default. This value can be changed by setting
+the `burninFraction` argument of the `.run()` method. The burnin phase shares
+its generation counter with the sampling phase, so in the example above, the
+first logged iteration would actually be 250 (with iterations 0--240 discarded
+as burnin).
+
+Finally, during the stone-specific sampling phase (4), samples are drawn from
+a given power posterior. Its length is jointly determined by the `generations`
+and `burninFraction` arguments of the `.run()` method, so in the example above,
+it would consist of 750 generations for each stone (1000 specified generations
+minus the 25% reserved for burnin).
+
+In addition to the `.run()` method, which distributes stones among workers 
+automatically, `powerPosterior` also supports more flexible parallelization
+strategies via the `.runOneStone()` method, which allows the user to execute
+a separate analysis for each power posterior. This increased flexibility comes
+at the cost of lower-quality starting values: as `.runOneStone(index=<x>, ...)`
+is not guaranteed to have been called before `.runOneStone(index=<x+1>, ...)`, 
+the latter cannot be initialized with the output of the former, and will simply 
+start from whatever state the sampler happens to currently hold.
+
+Checkpointing
+
+Stages 1 (global pre-burnin), 3 (stone-specific burnin), and 4 (stone-specific
+sampling phase) can be checkpointed and resumed from a checkpoint. For highly
+parallelized analyses where each stone is assigned to a separate worker, the
+amount of time spent in stages 2--4 may be negligible compared to the amount
+of time required to converge to the posterior. In such a case, it may be useful
+to checkpoint and resume the global pre-burnin as follows:
+
+    pow_p.burnin(generations=10000, tuningInterval=100,
+                 checkpointFile="pow_p_burnin.ckp", checkpointInterval=100)
+    pow_p.initializeFromCheckpoint("pow_p_burnin.ckp")
+    pow_p.burnin(generations=10000, tuningInterval=100)
+
+Note that the necessary checkpoint files can also be produced by regular MCMC
+or MCMCMC analyses, so the `powerPosterior` sampler makes it possible to re-use
+the output of such analyses without requiring a lengthy global pre-burnin stage
+of its own.
+
+Individual stones can also be checkpointed and resumed from a checkpoint. To do
+so, the `.initializeFromCheckpoint()` method takes a `stones` argument that
+allows the user to specify exactly which power posteriors should be restarted.
+This can be a single index or a vector thereof. Following on the example above,
+if the original analysis was interrupted during the very last step (step 7), we
+may resume it as follows:
+
+    pow_p.run(generations=1000, checkpointFile="analysis.ckp",
+              checkpointInterval=100)
+    pow_p.initializeFromCheckpoint("analysis.ckp", [25, 50])
+    pow_p.run(generations=800)
+    
+When applied to individual stones, the checkpointing mechanism also records the
+planned burnin length. Therefore, if the original analysis was interrupted
+at generation 200 (i.e., still within the 250-generation-long burnin stage),
+the commands above will cause the resumed analysis to complete the remaining 50
+generations of burnin, followed by sampling for 750 generations (numbered 250
+through 1000) -- exactly as though no interruption had occurred in the first
+place. The `burninFraction` argument of the `.run()` call (which would normally
+cause the first 0.25 times 800 = 200 generations to be discarded as burnin) is
+ignored in this case, and a warning is printed to this effect.
+
+If the analysis was interrupted at an earlier step, we may have to resurrect
+entire sequences of stones. In this case, a nested vector (vector of vectors)
+of stone indices is passed to `.initializeFromCheckpoint()` via its `stones`
+argument. Each inner vector then corresponds to a sequence of stones to be
+executed by one parallel worker. Only the first stone from each sequence needs
+to have a checkpoint associated with it, as each subsequent stone will instead
+use the output of the previous stone as its starting state. For example, if the
+original analysis was interrupted during step 2, we could resume it as follows:
+
+    pow_p.initializeFromCheckpoint("analysis.ckp",
+              [ 2:6, 8:12, 14:18, 20:25, 27:31, 33:37, 39:43, 45:50 ])
+    pow_p.run(generations=800)
+    
+Or as follows if it was interrupted during step 6:
+
+    pow_p.initializeFromCheckpoint("analysis.ckp",
+              [ [6], [12], [18], 24:25, [31], [37], [43], 49:50 ])
+
+Note that in this case, the `.run()` call honors the assignment of stones to
+workers specified in `.initializeFromCheckpoint()`, instead of automatically
+generating an assignment of its own. An exception is thrown if the length of
+the outer vector (i.e., the number of parallel workers requested by the user
+for the resumed analysis) exceeds the number of workers available. Note also
+that when the `stones` argument is specified using the range-based notation,
+it makes a difference whether the range is enclosed in square brackets. The
+following:
+
+    pow_p.initializeFromCheckpoint( "analysis.ckp", 1:5 )
+    
+means "resurrect stones 1 through 5, and leave it up to the `.run()` method to
+decide how to assign them to available workers". Checkpoint files must be
+available for all 5 specified stones. In contrast,
+
+    pow_p.initializeFromCheckpoint( "analysis.ckp", [1:5] )
+    
+means "resurrect stone 1, and then run stones 2 through 5 on the same parallel
+worker, using the last sample from the previous stone as the starting point for
+the next". In this case, we only require checkpoint files for stone 1.
+
+Finally, checkpointing is also available for the `.runOneStone()` method:
+
+    pow_p.runOneStone(index=16, generations=500, checkpointFile="analysis.ckp",
+                      checkpointInterval=50)
+    pow_p.initializeFromCheckpoint("analysis.ckp", 16)
+    pow_p.runOneStone(index=16, generations=500)
+
 ## authors
 Sebastian Hoehna
 Michael Landis
 John Huelsenbeck
+David Černý
 ## see_also
 pathSampler
 steppingStoneSampler

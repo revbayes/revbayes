@@ -38,56 +38,56 @@ namespace RevBayesCore {
         };
         
         // public methods
-        void                                                addFileMonitorExtension(const std::string &s, bool dir);
-        void                                                addMonitor(const Monitor &m);
-        void                                                disableScreenMonitor(bool all, size_t rep);                                             //!< Disable/remove all screen monitors
-        Mcmc*                                               clone(void) const;
-        void                                                checkpoint(void) const;
-        void                                                finishMonitors(size_t n, MonteCarloAnalysisOptions::TraceCombinationTypes ct);          //!< Finish the monitors
-        double                                              getChainLikelihoodHeat(void) const;                                                     //!< Get the heat for this chain
-        double                                              getChainPosteriorHeat(void) const;                                                      //!< Get the heat for this chain
+        void                                                addFileMonitorExtension(const std::string &s, bool dir) override;
+        void                                                addMonitor(const Monitor &m) override;
+        void                                                disableScreenMonitor(bool all, size_t rep) override;                                    //!< Disable/remove all screen monitors
+        Mcmc*                                               clone(void) const override;
+        void                                                finishMonitors(size_t n, MonteCarloAnalysisOptions::TraceCombinationTypes ct) override; //!< Finish the monitors
+        double                                              getChainLikelihoodHeat(void) const;                                                     //!< Get the likelihood heat for this chain
+        double                                              getChainPosteriorHeat(void) const;                                                      //!< Get the posterior heat for this chain
         double                                              getChainPriorHeat(void) const;
         size_t                                              getChainIndex(void) const;                                                              //!< Get the index of this chain
         path                                                getCheckpointFile(void) const;
-        const Model&                                        getModel(void) const;
-        double                                              getModelLnProbability(bool like_only);
-        RbVector<Monitor>&                                  getMonitors(void);
-        RbVector<Move>&                                     getMoves(void);
+        const Model&                                        getModel(void) const override;
+        double                                              getModelLnProbability(bool like_only) override;
+        RbVector<Monitor>&                                  getMonitors(void) override;
+        RbVector<Move>&                                     getMoves(void) override;
         std::vector<tuningInfo>                             getMovesTuningInfo(void);
         MoveSchedule&                                       getSchedule(void);
         const MoveSchedule&                                 getSchedule(void) const;
         const std::string&                                  getScheduleType(void) const;
-        std::string                                         getStrategyDescription(void) const;                                                     //!< Get the description of the strategy used here.
-        void                                                initializeSampler();                                                                    //!< Initialize objects for mcmc sampling
-        void                                                initializeSamplerFromCheckpoint( void );                                                //!< Initialize the MCMC sampler form the checkpoint file.
-        void                                                monitor(std::uint64_t g);
-        void                                                nextCycle(bool advanceCycle);
+        std::string                                         getStrategyDescription(void) const override;                                            //!< Get the description of the strategy used here.
+        void                                                initializeSampler() override;                                                           //!< Initialize objects for mcmc sampling
+        void                                                monitor(std::uint64_t g) override;
+        void                                                nextCycle(bool advanceCycle) override;
         bool                                                isChainActive(void);
-        void                                                printOperatorSummary(bool current_period);
-        void                                                redrawStartingValues(void);                                                             //!< Redraw the starting values.
-        void                                                removeMonitors(void);
-        void                                                reset(void);                                                                            //!< Reset the sampler and set all the counters back to 0.
+        void                                                printOperatorSummary(bool current_period) override;
+        void                                                redrawStartingValues(void) override;                                                    //!< Redraw the starting values.
+        void                                                removeMonitors(void) override;
+        void                                                reset(void) override;                                                                   //!< Reset the sampler and set all the counters back to 0.
         void                                                setChainActive(bool tf);
         void                                                setChainLikelihoodHeat(double v);                                                       //!< Set the heating temparature of the likelihood of the chain
         void                                                setChainPosteriorHeat(double v);                                                        //!< Set the heating temparature of the posterior of the chain
         void                                                setChainPriorHeat(double v);
         void                                                setChainIndex(size_t idx);                                                              //!< Set the index of the chain
-        void                                                setCheckpointFile(const path &f);
-        void                                                setLikelihoodHeat(double v);                                                            //!< Set the heating temparature of the likelihood of the chain
-        void                                                setModel(Model *m, bool redraw);
+        void                                                setCheckpointFile(const path &f) override;
+        void                                                setLikelihoodHeat(double v) override;                                                   //!< Set the heating temparature of the likelihood
+        void                                                setModel(Model *m, bool redraw) override;
         void                                                setMoves(const RbVector<Move> &mvs);
         void                                                setMovesTuningInfo(const std::vector<tuningInfo> &mvs_ti);
         void                                                setScheduleType(const std::string &s);                                                  //!< Set the type of the move schedule
-        void                                                startMonitors(size_t numCycles, bool reopen);                                           //!< Start the monitors
-        void                                                tune(void);                                                                             //!< Tune the sampler and its moves.
-        void                                                writeMonitorHeaders(bool screen_only);                                                              //!< Write the headers of the monitors
+        void                                                startMonitors(size_t numCycles, bool reopen) override;                                  //!< Start the monitors
+        void                                                tune(void) override;                                                                    //!< Tune the sampler and its moves.
+        void                                                writeMonitorHeaders(bool screen_only) override;                                         //!< Write the headers of the monitors
         
         
     protected:
-        void                                                resetVariableDagNodes(void);                                                //!< Extract the variable to be monitored again.
+        void                                                fullCheckpoint(void) override;
+        void                                                fullInitializeSamplerFromCheckpoint( void ) override;                                   //!< Initialize the MCMC sampler from the checkpoint file.
+        void                                                resetVariableDagNodes(void);                                                            //!< Extract the variable to be monitored again.
         void                                                initializeMonitors(void);                                                               //!< Assign model and mcmc ptrs to monitors
         void                                                replaceDag(const RbVector<Move> &mvs, const RbVector<Monitor> &mons);
-        void                                                setActivePIDSpecialized(size_t a, size_t n);                                            //!< Set the number of processes for this class.
+        void                                                setActivePIDSpecialized(size_t a, size_t n) override;                                   //!< Set the number of processes for this class.
 
         
         bool                                                chain_active;
@@ -95,7 +95,6 @@ namespace RevBayesCore {
         double                                              chain_posterior_heat;
         double                                              chain_prior_heat;
         size_t                                              chain_idx;
-        path                                                checkpoint_file_name;
         Model*                                              model;
         RbVector<Monitor>                                   monitors;
         RbVector<Move>                                      moves;
