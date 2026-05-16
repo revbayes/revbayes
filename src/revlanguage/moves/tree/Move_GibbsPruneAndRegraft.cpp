@@ -26,7 +26,7 @@ using namespace RevLanguage;
 
 Move_GibbsPruneAndRegraft::Move_GibbsPruneAndRegraft() : Move()
 {
-    
+
 }
 
 
@@ -38,7 +38,7 @@ Move_GibbsPruneAndRegraft::Move_GibbsPruneAndRegraft() : Move()
  */
 Move_GibbsPruneAndRegraft* Move_GibbsPruneAndRegraft::clone(void) const
 {
-    
+
     return new Move_GibbsPruneAndRegraft(*this);
 }
 
@@ -47,32 +47,47 @@ void Move_GibbsPruneAndRegraft::constructInternalObject( void )
 {
     // we free the memory first
     delete value;
-    
+
     // now allocate a new sliding move
     RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
-    
+
     RevBayesCore::Proposal *p = new RevBayesCore::GibbsPruneAndRegraftProposal(t);
     value = new RevBayesCore::MetropolisHastingsMove(p,w);
-    
+
 }
 
 
 /** Get Rev type of object */
 const std::string& Move_GibbsPruneAndRegraft::getClassType(void) {
-    
+
     static std::string rev_type = "Move_GibbsPruneAndRegraft";
-    
+
     return rev_type;
 }
 
 /** Get class type spec describing type of object */
 const TypeSpec& Move_GibbsPruneAndRegraft::getClassTypeSpec(void) {
-    
+
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( Move::getClassTypeSpec() ) );
-    
+
     return rev_type_spec;
+}
+
+
+/**
+ * Get the alternative Rev names (aliases) for the constructor function.
+ *
+ * \return Rev aliases of constructor function.
+ */
+std::vector<std::string> Move_GibbsPruneAndRegraft::getMoveAliases( void ) const
+{
+    // create alternative constructor function names variable that is the same for all instance of this class
+    std::vector<std::string> a_names;
+    a_names.push_back( "GPR" );
+
+    return a_names;
 }
 
 
@@ -84,8 +99,8 @@ const TypeSpec& Move_GibbsPruneAndRegraft::getClassTypeSpec(void) {
 std::string Move_GibbsPruneAndRegraft::getMoveName( void ) const
 {
     // create a constructor function name variable that is the same for all instance of this class
-    std::string c_name = "GPR";
-    
+    std::string c_name = "GibbsFNPR";
+
     return c_name;
 }
 
@@ -93,15 +108,15 @@ std::string Move_GibbsPruneAndRegraft::getMoveName( void ) const
 /** Return member rules (no members) */
 const MemberRules& Move_GibbsPruneAndRegraft::getParameterRules(void) const
 {
-    
+
     static MemberRules memberRules;
     static bool rules_set = false;
-    
+
     if ( !rules_set )
     {
-        
+
         memberRules.push_back( new ArgumentRule( "tree", TimeTree::getClassTypeSpec(), "The tree variable on which this move operates.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
-        
+
         /* Inherit weight (but not tuneTarget!) from Move and put it after the arguments created above */
         const MemberRules& inheritedRules = Move::getParameterRules();
         for (size_t i = 0; i < inheritedRules.size(); ++i)
@@ -111,18 +126,18 @@ const MemberRules& Move_GibbsPruneAndRegraft::getParameterRules(void) const
                 memberRules.push_back( inheritedRules[i].clone() );
             }
         }
-        
+
         rules_set = true;
     }
-    
+
     return memberRules;
 }
 
 /** Get type spec */
 const TypeSpec& Move_GibbsPruneAndRegraft::getTypeSpec( void ) const {
-    
+
     static TypeSpec type_spec = getClassTypeSpec();
-    
+
     return type_spec;
 }
 
@@ -130,8 +145,8 @@ const TypeSpec& Move_GibbsPruneAndRegraft::getTypeSpec( void ) const {
 
 /** Get type spec */
 void Move_GibbsPruneAndRegraft::printValue(std::ostream &o) const {
-    
-    o << "GibbsPruneAndRegraft(";
+
+    o << "GibbsFNPR(";
     if (tree != NULL) {
         o << tree->getName();
     }
@@ -144,7 +159,7 @@ void Move_GibbsPruneAndRegraft::printValue(std::ostream &o) const {
 
 /** Set a NearestNeighborInterchange variable */
 void Move_GibbsPruneAndRegraft::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var) {
-    
+
     if ( name == "tree" ) {
         tree = var;
     }

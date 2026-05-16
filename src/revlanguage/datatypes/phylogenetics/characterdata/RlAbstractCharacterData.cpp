@@ -25,6 +25,7 @@
 #include "RbVectorImpl.h"
 #include "RevObject.h"
 #include "RevVariable.h"
+#include "RlAbstractDiscreteTaxonData.h"
 #include "RlConstantNode.h"
 #include "RlUtils.h"
 #include "Taxon.h"
@@ -47,11 +48,13 @@ MethodTable AbstractCharacterData::getCharacterDataMethods( void ) const
     
     MethodTable methods = MethodTable();
     
-    ArgumentRules* addTaxonArgRules             = new ArgumentRules();
+    ArgumentRules* addMissingTaxaArgRules       = new ArgumentRules();
+    ArgumentRules* addTaxaArgRules              = new ArgumentRules();
     ArgumentRules* namesArgRules                = new ArgumentRules();
     ArgumentRules* excludeTaxaArgRules          = new ArgumentRules();
     ArgumentRules* excludeTaxaArgRules2         = new ArgumentRules();
     ArgumentRules* filenameArgRules             = new ArgumentRules();
+    ArgumentRules* getTaxonDataArgRules         = new ArgumentRules();
     ArgumentRules* includeTaxaArgRules          = new ArgumentRules();
     ArgumentRules* includeTaxaArgRules2         = new ArgumentRules();
     ArgumentRules* isSequenceMissingArgRules    = new ArgumentRules();
@@ -71,7 +74,11 @@ MethodTable AbstractCharacterData::getCharacterDataMethods( void ) const
     taxon_types.push_back( Taxon::getClassTypeSpec() );
     taxon_types.push_back( ModelVector<RlString>::getClassTypeSpec() );
     taxon_types.push_back( ModelVector<Taxon>::getClassTypeSpec() );
-    addTaxonArgRules->push_back(            new ArgumentRule("taxon" , taxon_types, "The name(s) of the taxon.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    addMissingTaxaArgRules->push_back(      new ArgumentRule("taxon" , taxon_types, "The name(s) of the taxon.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    std::vector<TypeSpec> taxon_data_types;
+    taxon_data_types.push_back( AbstractDiscreteTaxonData::getClassTypeSpec() );
+    taxon_data_types.push_back( ModelVector<AbstractDiscreteTaxonData>::getClassTypeSpec() );
+    addTaxaArgRules->push_back(             new ArgumentRule("taxon" , taxon_data_types, "The taxon data.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     std::vector<TypeSpec> exclude_taxa_types;
     exclude_taxa_types.push_back( RlString::getClassTypeSpec() );
     exclude_taxa_types.push_back( Taxon::getClassTypeSpec() );
@@ -80,6 +87,10 @@ MethodTable AbstractCharacterData::getCharacterDataMethods( void ) const
     exclude_taxa_types_2.push_back( ModelVector<RlString>::getClassTypeSpec() );
     exclude_taxa_types_2.push_back( ModelVector<Taxon>::getClassTypeSpec() );
     excludeTaxaArgRules2->push_back(        new ArgumentRule("taxa" , exclude_taxa_types_2, "The name(s) of the taxon.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    std::vector<TypeSpec> get_taxa_types;
+    get_taxa_types.push_back( RlString::getClassTypeSpec() );
+    get_taxa_types.push_back( Taxon::getClassTypeSpec() );
+    getTaxonDataArgRules->push_back(        new ArgumentRule("taxon" , get_taxa_types, "The name of the taxon.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     includeTaxaArgRules->push_back(         new ArgumentRule("name" , RlString::getClassTypeSpec(), "The name of the taxon.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     includeTaxaArgRules2->push_back(        new ArgumentRule("names" , ModelVector<RlString>::getClassTypeSpec(), "The names of the taxa.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     isSequenceMissingArgRules->push_back(   new ArgumentRule("name" , RlString::getClassTypeSpec(), "The name of the taxon.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
@@ -94,10 +105,12 @@ MethodTable AbstractCharacterData::getCharacterDataMethods( void ) const
     setTaxonObjectArgRules->push_back(      new ArgumentRule("new"        , Taxon::getClassTypeSpec(), "The new name.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     taxonIndexArgRules->push_back(          new ArgumentRule("name"       , RlString::getClassTypeSpec(), "he name of the taxon.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
 
-    methods.addFunction( new MemberProcedure( "addMissingTaxa",  RlUtils::Void, addTaxonArgRules ) );
+    methods.addFunction( new MemberProcedure( "addMissingTaxa",  RlUtils::Void, addMissingTaxaArgRules ) );
+    methods.addFunction( new MemberProcedure( "addTaxa",  RlUtils::Void, addTaxaArgRules ) );
     methods.addFunction( new MemberProcedure( "excludeTaxa",  RlUtils::Void, excludeTaxaArgRules ) );
     methods.addFunction( new MemberProcedure( "excludeTaxa", RlUtils::Void, excludeTaxaArgRules2 ) );
     methods.addFunction( new MemberProcedure( "filename", RlString::getClassTypeSpec(), filenameArgRules ) );
+    methods.addFunction( new MemberProcedure( "getTaxon", AbstractDiscreteTaxonData::getClassTypeSpec(), getTaxonDataArgRules ) );
     methods.addFunction( new MemberProcedure( "includeTaxa", RlUtils::Void, includeTaxaArgRules ) );
     methods.addFunction( new MemberProcedure( "includeTaxa", RlUtils::Void, includeTaxaArgRules2 ) );
     methods.addFunction( new MemberProcedure( "isSequenceMissing", RlBoolean::getClassTypeSpec(), isSequenceMissingArgRules ) );
@@ -157,33 +170,33 @@ RevPtr<RevVariable> AbstractCharacterData::executeCharacterDataMethod(std::strin
         }
         
         return NULL;
-    }
+    } 
+    else if (name == "addTaxa")
+        {
+            found = true;
+            
+            const RevObject& argument = args[0].getVariable()->getRevObject();
+            if ( argument.isType( AbstractDiscreteTaxonData::getClassTypeSpec() ) )
+            {
+                const RevBayesCore::AbstractDiscreteTaxonData &d = static_cast<const AbstractDiscreteTaxonData&>( argument ).getValue();
+                charDataObject->addTaxonData( d );
+            }
+            else if ( argument.isType( ModelVector<AbstractDiscreteTaxonData>::getClassTypeSpec() ) )
+            {
+                const ModelVector<AbstractDiscreteTaxonData>& v = static_cast<const ModelVector<AbstractDiscreteTaxonData>&>( argument );
+                for ( size_t i=0; i<v.size(); ++i )
+                {
+                    charDataObject->addTaxonData( v[i] );
+                }
+            }
+            
+            return NULL;
+        }
     else if (name == "chartype")
     {
         found = true;
         
         return new RevVariable( new RlString( charDataObject->getDataType() ) );
-    }
-    else if ( name == "removeTaxa" )
-    {
-        found = true;
-        
-        const RevObject& argument = args[0].getVariable()->getRevObject();
-        if ( argument.isType( RlString::getClassTypeSpec() ) )
-        {
-            const std::string &n = static_cast<const RlString&>( argument ).getValue();
-            charDataObject->deleteTaxon( n );
-        }
-        else if ( argument.isType( ModelVector<RlString>::getClassTypeSpec() ) )
-        {
-            const ModelVector<RlString>& x = static_cast<const ModelVector<RlString>&>( argument );
-            RevBayesCore::AbstractCharacterData &v = *charDataObject;
-            for ( size_t i=0; i<x.size(); i++ )
-            {
-                v.deleteTaxon( x[i] );
-            }
-        }
-        return NULL;
     }
     else if (name == "excludeTaxa" )
     {
@@ -251,6 +264,25 @@ RevPtr<RevVariable> AbstractCharacterData::executeCharacterDataMethod(std::strin
         
         return new RevVariable( new RlString(n) );
     }
+    else if (name == "getTaxon")
+    {
+        found = true;
+        
+        const RevObject& argument = args[0].getVariable()->getRevObject();
+        std::string taxon_name = "";
+        if ( argument.isType( RlString::getClassTypeSpec() ) )
+        {
+            taxon_name = static_cast<const RlString&>( argument ).getValue();
+        }
+        else if ( argument.isType( Taxon::getClassTypeSpec() ) )
+        {
+            taxon_name = static_cast<const Taxon&>( argument ).getValue().getSpeciesName();
+
+        }
+        RevBayesCore::AbstractDiscreteTaxonData& intern_tax_data =  static_cast<RevBayesCore::AbstractDiscreteTaxonData &>( charDataObject->getTaxonData( taxon_name ) );
+
+        return new RevVariable( new AbstractDiscreteTaxonData( intern_tax_data ) );
+    }
     else if (name == "isSequenceMissing")
     {
         found = true;
@@ -293,7 +325,28 @@ RevPtr<RevVariable> AbstractCharacterData::executeCharacterDataMethod(std::strin
         
         return new RevVariable( new Probability(p) );
     }
-    else if (name == "size") 
+    else if ( name == "removeTaxa" )
+    {
+        found = true;
+        
+        const RevObject& argument = args[0].getVariable()->getRevObject();
+        if ( argument.isType( RlString::getClassTypeSpec() ) )
+        {
+            const std::string &n = static_cast<const RlString&>( argument ).getValue();
+            charDataObject->deleteTaxon( n );
+        }
+        else if ( argument.isType( ModelVector<RlString>::getClassTypeSpec() ) )
+        {
+            const ModelVector<RlString>& x = static_cast<const ModelVector<RlString>&>( argument );
+            RevBayesCore::AbstractCharacterData &v = *charDataObject;
+            for ( size_t i=0; i<x.size(); i++ )
+            {
+                v.deleteTaxon( x[i] );
+            }
+        }
+        return NULL;
+    }
+    else if (name == "size")
     {
         found = true;
         

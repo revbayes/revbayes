@@ -64,10 +64,10 @@ namespace RevBayesCore {
         size_t                                              getNumberOfInvariantSites(bool excl) const;                                 //!< Number of invariant sites
         size_t                                              getNumberOfSegregatingSites(bool excl) const;                               //!< Compute the number of segregating sites
         size_t                                              getNumberOfStates(void) const;                                              //!< Get the number of states for the characters in this matrix
-        double                                              getAveragePairwiseSequenceDifference(bool excl) const;                       //!< Get the average pairwise sequence distance.
-        size_t                                              getMaxPairwiseSequenceDifference(bool excl) const;                           //!< Get the average pairwise sequence distance.
-        size_t                                              getMinPairwiseSequenceDifference(bool excl) const;                           //!< Get the average pairwise sequence distance.
-        DistanceMatrix                                      getPairwiseSequenceDifference(bool excl) const;                              //!< Get the average pairwise sequence distance.
+        double                                              getAveragePairwiseSequenceDifference(bool excl) const;                      //!< Get the average pairwise sequence distance.
+        size_t                                              getMaxPairwiseSequenceDifference(bool excl) const;                          //!< Get the average pairwise sequence distance.
+        size_t                                              getMinPairwiseSequenceDifference(bool excl) const;                          //!< Get the average pairwise sequence distance.
+        DistanceMatrix                                      getPairwiseSequenceDifference(bool excl, bool rel=true) const;                   //!< Get the average pairwise sequence distance.
         DiscreteTaxonData<charType>&                        getTaxonData(size_t tn);                                                    //!< Return a reference to a sequence in the character matrix
         const DiscreteTaxonData<charType>&                  getTaxonData(size_t tn) const;                                              //!< Return a reference to a sequence in the character matrix
         DiscreteTaxonData<charType>&                        getTaxonData(const std::string &tn);                                        //!< Return a reference to a sequence in the character matrix
@@ -1294,7 +1294,7 @@ size_t RevBayesCore::HomologousDiscreteCharacterData<charType>::getMinPairwiseSe
  * \return    The min pairwise distance.
  */
 template<class charType>
-RevBayesCore::DistanceMatrix RevBayesCore::HomologousDiscreteCharacterData<charType>::getPairwiseSequenceDifference( bool include_missing ) const
+RevBayesCore::DistanceMatrix RevBayesCore::HomologousDiscreteCharacterData<charType>::getPairwiseSequenceDifference( bool include_missing, bool relative ) const
 {
     size_t n_taxa_included = this->getNumberOfIncludedTaxa();
     size_t n_taxa_total    = this->getNumberOfTaxa();
@@ -1320,7 +1320,7 @@ RevBayesCore::DistanceMatrix RevBayesCore::HomologousDiscreteCharacterData<charT
                 continue;
             
             const AbstractDiscreteTaxonData& secondTaxonData = this->getTaxonData(index_total_j);
-            size_t pd = 0.0;
+            double pd = 0.0;
             
             for (size_t k=0; k<nc; k++)
             {
@@ -1334,6 +1334,12 @@ RevBayesCore::DistanceMatrix RevBayesCore::HomologousDiscreteCharacterData<charT
                     }
                 }
                 
+            }
+            
+            if ( relative == true )
+            {
+                size_t num_char_incl = firstTaxonData.getNumberOfCharacters();
+                pd /= double(num_char_incl);
             }
             
             distances[index_included_i][index_included_j] = pd;

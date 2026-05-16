@@ -6,7 +6,7 @@
 namespace RevLanguage {
     
     /**
-     * @brief Rev function to construct a UPGMA tree..
+     * @brief Rev function to construct a UPGMA tree.
      *
      * This procedure builds a tree using the UPGMA algorithm.
      *

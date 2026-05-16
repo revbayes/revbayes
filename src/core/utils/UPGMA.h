@@ -24,8 +24,6 @@ class Tree;
         
     public:
         
-//        enum SIM_CONDITION { TIME, SURVIVAL, ROOT };
-        
         UPGMA();
         
         Tree*                   constructTree( const DistanceMatrix& d ) const;

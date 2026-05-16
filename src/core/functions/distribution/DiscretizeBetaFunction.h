@@ -34,7 +34,7 @@ template <class valueType> class TypedDagNode;
     private:
         const TypedDagNode<double>*         alpha;
         const TypedDagNode<double>*         beta;
-        const TypedDagNode<std::int64_t>*            numCats;
+        const TypedDagNode<std::int64_t>*   numCats;
         bool                                median;
     };
 }
