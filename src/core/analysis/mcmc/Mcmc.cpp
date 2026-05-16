@@ -650,12 +650,14 @@ void Mcmc::initializeSampler()
     }
 
     // Get initial ln_probability of model
+    for (auto the_node: dag_nodes)
+        the_node->setMcmcMode( true );
 
-    // first we touch all nodes so that the likelihood is dirty
+    // first we touch all nodes so that the likelihood is uncomputed
     for (auto the_node: dag_nodes)
     {
-        the_node->setMcmcMode( true );
         the_node->touch();
+        the_node->keep();
     }
 
     if ( chain_active == false )
@@ -674,6 +676,7 @@ void Mcmc::initializeSampler()
             {
                 // make sure that the clamped node also recompute their probabilities
                 the_node->touch();
+                the_node->keep();
             }
     
         }
@@ -692,7 +695,6 @@ void Mcmc::initializeSampler()
                 {
                     if (ln_prob > 0)
                     {
-                        the_node->touch();
                         ln_prob = the_node->getLnProbability();
                     }
                     std::stringstream ss;
@@ -941,6 +943,7 @@ void Mcmc::initializeSamplerFromCheckpoint( void )
     for(auto& node: nodes)
     {
         node->touch();
+        node->keep();
     }
 
     // assemble the new filename
@@ -1264,12 +1267,10 @@ void Mcmc::replaceDag(const RbVector<Move> &mvs, const RbVector<Monitor> &mons)
 
 void Mcmc::redrawStartingValues( void )
 {
-    
     std::vector<DagNode *> ordered_stoch_nodes = model->getOrderedStochasticNodes(  );
-    for (std::vector<DagNode *>::iterator i=ordered_stoch_nodes.begin(); i!=ordered_stoch_nodes.end(); ++i)
+
+    for (DagNode* the_node: ordered_stoch_nodes)
     {
-        DagNode *the_node = (*i);
-        
         if ( the_node->isClamped() == false && the_node->isStochastic() == true )
         {
 
@@ -1282,12 +1283,9 @@ void Mcmc::redrawStartingValues( void )
         
     }
     
-    for (std::vector<DagNode *>::iterator i=ordered_stoch_nodes.begin(); i!=ordered_stoch_nodes.end(); ++i)
+    for (DagNode* the_node: ordered_stoch_nodes)
     {
-        
-        DagNode *the_node = (*i);
         the_node->keep();
-        
     }
     
 }
@@ -1310,12 +1308,10 @@ void Mcmc::reset( void )
 {
     
     double moves_per_iteration = 0.0;
-    for (RbIterator<Move> it = moves.begin(); it != moves.end(); ++it)
+    for (Move& m: moves)
     {
-
-        it->resetCounters();
-        moves_per_iteration += it->getUpdateWeight();
-        
+        m.resetCounters();
+        moves_per_iteration += m.getUpdateWeight();
     }
 
 }
@@ -1337,12 +1333,8 @@ void Mcmc::resetVariableDagNodes( void )
         // this should by default happen by here we check again
         std::set<std::string> var_names;
         
-        const std::vector<DagNode*> &n = model->getDagNodes();
-        for (std::vector<DagNode*>::const_iterator it = n.begin(); it != n.end(); ++it)
+        for (DagNode* the_node: model->getDagNodes())
         {
-            
-            DagNode *the_node = *it;
-            
             // only non clamped variables
             if ( the_node->isClamped() == false )
             {
