@@ -19,7 +19,7 @@ namespace RevBayesCore {
         
         // public member functions
         PhyloDistanceGamma*                                                 clone(void) const;                                                                          //!< Create an independent clone
-		double                                                              computeLnProbability(void);
+		LogDensity                                                          computeLnProbability(void);
 		//void                                                                fireTreeChangeEvent(const TopologyNode &n);                                                 //!< The tree has changed and we want to know which part.
 		void                                                                redrawValue(void);
 		void                                                                reInitialized(void);

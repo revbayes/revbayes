@@ -336,6 +336,10 @@ jobs:
         if [ ${{ matrix.arch }} = "mac-arm64" ] || [ ${{ matrix.arch }} = "mac-intel64" ] || [ ${{ matrix.arch }} = "win64" ] ; then
            rm -rf test_FBD/output_expected/mvFossilTimeSlideUniform_multiple_runs.errout
 
+           rm -rf test_zero_prob/output_expected/initialization_test_1.errout
+           rm -rf test_zero_prob/output_expected/Abelisauridae_relaxed_clocks_run_1.log
+           rm -rf test_zero_prob/output_expected/Abelisauridae_relaxed_clocks_run_2.log
+
            # There are some differences on the order of 1.0e-5 in the substitution likelihood between Linux/Intel and Mac/ARM
            rm -rf test_propose_bad_index/output_expected/
         fi

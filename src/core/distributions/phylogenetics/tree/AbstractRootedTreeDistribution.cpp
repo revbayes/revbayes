@@ -170,11 +170,13 @@ void AbstractRootedTreeDistribution::buildRandomBinaryTree(std::vector<TopologyN
 
 
 
-double AbstractRootedTreeDistribution::computeLnProbability( void )
+LogDensity AbstractRootedTreeDistribution::computeLnProbability( void )
 {
+    LogDensity ln_prob = 0;
+
     using namespace RbConstants;
 
-    // proceed as std::int64_t as derived classes validate a non-zero likeilhood
+    // proceed as long as derived classes validate a non-zero likeilhood
     if ( isLnProbabilityNonZero() == false )
     {
         return Double::neginf;
@@ -195,15 +197,15 @@ double AbstractRootedTreeDistribution::computeLnProbability( void )
                 {
                     if ( the_node.getAge() - the_node.getParent().getAge() != 0 )
                     {
-                        return withReason(Double::neginf)<<"Pr(tree)=0: sampled ancestor "<<the_node.getTaxon().getName()<<" tip age "<<the_node.getAge()<<" differs from parent age "<<the_node.getParent().getAge();
+                        ln_prob += withReason(logNan())<<"Pr(tree)=nan: sampled ancestor "<<the_node.getTaxon().getName()<<" tip age "<<the_node.getAge()<<" differs from parent age "<<the_node.getParent().getAge();
                     }
                     else if ( the_node.isFossil() == false )
                     {
-                        return withReason(Double::neginf)<<"Pr(tree)=0: sampled ancestor tip "<<the_node.getTaxon().getName()<<" is not a fossil";
+                        ln_prob += withReason(logNan())<<"Pr(tree)=nan: sampled ancestor tip "<<the_node.getTaxon().getName()<<" is not a fossil";
                     }
                     else if ( the_node.getBranchLength() != 0 )
                     {
-                        return withReason(Double::neginf)<<"Pr(tree)=0: sampled ancestor tip "<<the_node.getTaxon().getName()<<" has non-zero branch length "<<the_node.getBranchLength();
+                        ln_prob += withReason(logNan())<<"Pr(tree)=nan: sampled ancestor tip "<<the_node.getTaxon().getName()<<" has non-zero branch length "<<the_node.getBranchLength();
                     }
 
                 }
@@ -212,26 +214,30 @@ double AbstractRootedTreeDistribution::computeLnProbability( void )
                 {
                     if(the_node.getAge() < taxon.getMinAge() || the_node.getAge() > taxon.getMaxAge())
                     {
+                        double error = std::max(taxon.getMinAge() - the_node.getAge(), the_node.getAge() - taxon.getMaxAge());
                         std::cerr << "Age of taxon " << taxon.getName() << " incompatible with age range";
-                        return withReason(Double::neginf)<< "Pr(tree)=0: taxon " << taxon.getName() <<" has age "<<the_node.getAge()
-                                                         <<" outside of age range ["<<taxon.getMinAge()<<", "<<taxon.getMaxAge()<<"]";
+                        ln_prob += withReason(logZeroWithError(error))<< "Pr(tree)=0: taxon " << taxon.getName() <<" has age "<<the_node.getAge()
+                                                                   <<" outside of age range ["<<taxon.getMinAge()<<", "<<taxon.getMaxAge()<<"]";
                     }
                 }
             }
             if( the_node.getAge() - the_node.getParent().getAge() > 0 )
             {
-                return withReason(Double::neginf)<<"Pr(tree)=0: node age "<<the_node.getAge()<<" greater than parent age "<<the_node.getParent().getAge();
+                double error = the_node.getAge() - the_node.getParent().getAge();
+                ln_prob += withReason(logZeroWithError(error))<<"Pr(tree)=0: node age "<<the_node.getAge()<<" greater than parent age "<<the_node.getParent().getAge();
             }
             
         }
         else if ( the_node.getAge() > getOriginAge() )
         {
-            return withReason(Double::neginf)<<"Pr(tree)=0: node age "<<the_node.getAge()<<" greater than origin age "<<getOriginAge();
+            double error =  the_node.getAge() - getOriginAge();
+            ln_prob += withReason(logZeroWithError(error))<<"Pr(tree)=0: node age "<<the_node.getAge()<<" greater than origin age "<<getOriginAge();
         }
         
         if ( the_node.getBranchLength() < 0 )
         {
-	    return withReason(Double::neginf)<<"Pr(tree)=0: branch length "<<the_node.getBranchLength()<<" < 0";
+            double error = std::abs(the_node.getBranchLength());
+	    ln_prob += withReason(logZeroWithError(error))<<"Pr(tree)=0: branch length "<<the_node.getBranchLength()<<" < 0";
         }
 
     }
@@ -241,12 +247,13 @@ double AbstractRootedTreeDistribution::computeLnProbability( void )
     
     if ( ra > getOriginAge())
     {
-        return withReason(Double::neginf)<<"Pr(tree)=0: root age ("<<ra<<") > origin age ("<<getOriginAge()<<")";
+        double error = ra - getOriginAge();
+        ln_prob += withReason(logZeroWithError(error))<<"Pr(tree)=0: root age ("<<ra<<") > origin age ("<<getOriginAge()<<")";
     }
 
     if ( ra != getRootAge() )
     {
-        return withReason(Double::neginf)<<"Pr(tree)=0: root age ("<<ra<<") != getRootAge() ("<<getRootAge()<<")";
+        ln_prob += withReason(logZero())<<"Pr(tree)=0: root age ("<<ra<<") != getRootAge() ("<<getRootAge()<<")";
     }
         
     const std::vector<TopologyNode*> &c = value->getRoot().getChildren();
@@ -255,19 +262,17 @@ double AbstractRootedTreeDistribution::computeLnProbability( void )
     {
         if ( ra < child->getAge() )
         {
-            return withReason(Double::neginf)<<"Pr(tree)=0: node age ("<<child->getAge()<<") greater than root age ("<<ra<<")";
+            double error = child->getAge() - ra;
+            ln_prob += withReason(logZeroWithError(error))<<"Pr(tree)=0: node age ("<<child->getAge()<<") greater than root age ("<<ra<<")";
         }
     }
     
-    // variable declarations and initialization
-    double lnProbTimes = 0;
-
     // multiply the probability of a descendant of the initial species
-    lnProbTimes += computeLnProbabilityDivergenceTimes();
-    double ln_prob_tree_shape = lnProbTreeShape();
-    double ln_total_prob = lnProbTimes + ln_prob_tree_shape;
-        
-    return ln_total_prob;
+    LogDensity lnProbTimes = computeLnProbabilityDivergenceTimes();
+    LogDensity ln_prob_tree_shape = lnProbTreeShape();
+    ln_prob += lnProbTimes + ln_prob_tree_shape;
+
+    return ln_prob;
 }
 
 

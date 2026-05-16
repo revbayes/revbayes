@@ -38,7 +38,7 @@ template <class valueType> class TypedDagNode;
             virtual                        ~NormalDistribution(void);                                           //!< Virtual destructor
             double                          cdf(void) const;                                                    //!< Cumulative density function
             NormalDistribution*             clone(void) const;                                                  //!< Create an independent clone
-            double                          computeLnProbability(void);                                         //!< Natural log of the probability density
+            LogDensity                      computeLnProbability(void);                                         //!< Natural log of the probability density
             double                          getMax(void) const;                                                 //!< Maximum value (can be set by user)
             double                          getMin(void) const;                                                 //!< Minimum value (can be set by user)
             double                          quantile(double p) const;                                           //!< Quantile function

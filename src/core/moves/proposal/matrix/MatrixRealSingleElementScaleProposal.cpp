@@ -108,7 +108,7 @@ double MatrixRealSingleElementScaleProposal::getProposalTuningParameter( void ) 
  *
  * \return The hastings ratio.
  */
-double MatrixRealSingleElementScaleProposal::doProposal( void )
+LogDensity MatrixRealSingleElementScaleProposal::doProposal( void )
 {
     
     // Get random number generator

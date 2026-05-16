@@ -129,12 +129,12 @@ void AbstractMultispeciesCoalescent::buildRandomBinaryTree(std::vector<TopologyN
 }
 
 
-double AbstractMultispeciesCoalescent::computeLnProbability( void )
+LogDensity AbstractMultispeciesCoalescent::computeLnProbability( void )
 {
     resetTipAllocations();
 
     // variable declarations and initialization
-    double ln_prob_coal = 0;
+    LogDensity ln_prob_coal = 0;
 
     const Tree &sp = species_tree->getValue();
 
@@ -152,10 +152,10 @@ double AbstractMultispeciesCoalescent::drawNe( size_t index )
 }
 
 
-double AbstractMultispeciesCoalescent::recursivelyComputeLnProbability( const RevBayesCore::TopologyNode &species_node )
+LogDensity AbstractMultispeciesCoalescent::recursivelyComputeLnProbability( const RevBayesCore::TopologyNode &species_node )
 {
 
-    double ln_prob_coal = 0;
+    LogDensity ln_prob_coal = 0;
 
     if ( species_node.isTip() == false )
     {
@@ -215,7 +215,7 @@ double AbstractMultispeciesCoalescent::recursivelyComputeLnProbability( const Re
             if ( remaining_individuals.find( left ) == remaining_individuals.end() || remaining_individuals.find( right ) == remaining_individuals.end() )
             {
                 // one of the children does not belong to this species tree branch
-                return RbConstants::Double::neginf;
+                return ln_prob_coal + RbConstants::Double::neginf;
             }
 
             //We remove the coalescent event and the coalesced lineages

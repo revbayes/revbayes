@@ -31,7 +31,7 @@ namespace RevBayesCore {
 
 
         // public member functions you may want to override
-        double                                                  computeLnProbability(void);                                                                         //!< Compute the log-transformed probability of the current value.
+        LogDensity                                              computeLnProbability(void);                                                                         //!< Compute the log-transformed probability of the current value.
         virtual void                                            redrawValue(void);                                                                                  //!< Draw a new random value from the distribution
         virtual void                                            setStochasticNode(StochasticNode<Tree> *n);                                                         //!< Set the stochastic node holding this distribution
         virtual void                                            setValue(Tree *v, bool f=false);                                                                    //!< Set the current value, e.g. attach an observation (clamp)
@@ -50,7 +50,7 @@ namespace RevBayesCore {
 
 
         // helper functions
-        bool                                                    matchesConstraints(void);
+        LogDensity                                              constraintLikelihood(void);
         void                                                    updateMapOfNodeAges();
         void                                                    updateSetOfConstrainedNodes();
 

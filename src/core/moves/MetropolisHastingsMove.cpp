@@ -22,8 +22,6 @@ namespace views = ranges::views;
 
 using namespace RevBayesCore;
 
-
-
 /**
  * Constructor
  *
@@ -166,7 +164,7 @@ void MetropolisHastingsMove::performHillClimbingMove( double lHeat, double pHeat
 
     // Propose a new value
     proposal->prepareProposal();
-    double ln_hastings_ratio = proposal->doProposal();
+    LogDensity ln_hastings_ratio = proposal->doProposal();
 
 
     const RbOrderedSet<DagNode*> &affectedNodes = getAffectedNodes();
@@ -174,72 +172,36 @@ void MetropolisHastingsMove::performHillClimbingMove( double lHeat, double pHeat
 
     // first we touch all the nodes
     // that will set the flags for recomputation
-    for (size_t i = 0; i < nodes.size(); ++i)
-    {
-        // get the pointer to the current node
-        DagNode* the_node = nodes[i];
+    for (auto the_node: nodes)
         the_node->touch();
-    }
 
-    double lnPriorRatio = 0.0;
-    double lnLikelihoodRatio = 0.0;
-
+    LogDensity lnPriorRatio = 0.0;
+    LogDensity lnLikelihoodRatio = 0.0;
 
     // compute the probability of the current value for each node
-    for (size_t i = 0; i < nodes.size(); ++i)
+    for(auto& the_node: views::concat(nodes,affectedNodes))
     {
-        // get the pointer to the current node
-        DagNode* the_node = nodes[i];
-
-        if ( RbMath::isAComputableNumber(lnPriorRatio) && RbMath::isAComputableNumber(lnLikelihoodRatio) && RbMath::isAComputableNumber(ln_hastings_ratio) )
+        if ( the_node->isClamped() )
         {
-            if ( the_node->isClamped() )
-            {
-                lnLikelihoodRatio += the_node->getLnProbabilityRatio();
-            }
-            else
-            {
-                lnPriorRatio += the_node->getLnProbabilityRatio();
-            }
-
+            lnLikelihoodRatio += the_node->getLnProbabilityRatio();
         }
-
-    }
-
-    // then we recompute the probability for all the affected nodes
-    for (RbOrderedSet<DagNode*>::const_iterator it = affectedNodes.begin(); it != affectedNodes.end(); ++it)
-    {
-        DagNode *the_node = *it;
-
-        if ( RbMath::isAComputableNumber(lnPriorRatio) && RbMath::isAComputableNumber(lnLikelihoodRatio) && RbMath::isAComputableNumber(ln_hastings_ratio) )
+        else
         {
-            if ( the_node->isClamped() )
-            {
-                lnLikelihoodRatio += the_node->getLnProbabilityRatio();
-            }
-            else
-            {
-                lnPriorRatio += the_node->getLnProbabilityRatio();
-            }
+            lnPriorRatio += the_node->getLnProbabilityRatio();
         }
-
     }
 
     // exponentiate with the chain heat
-    double ln_posterior_ratio = pHeat * (lHeat * lnLikelihoodRatio + lnPriorRatio);
+    LogDensity ln_posterior_ratio = pHeat * (lHeat * lnLikelihoodRatio + lnPriorRatio);
 
-    if ( RbMath::isAComputableNumber(ln_posterior_ratio) == false || ln_posterior_ratio < 0.0 )
+    if ( not ln_posterior_ratio.isfinite() or ln_posterior_ratio < 0.0 )
     {
 
         proposal->undoProposal();
 
         // call restore for each node
-        for (size_t i = 0; i < nodes.size(); ++i)
-        {
-            // get the pointer to the current node
-            DagNode* the_node = nodes[i];
+        for (auto the_node: nodes)
             the_node->restore();
-        }
     }
     else
     {
@@ -248,13 +210,8 @@ void MetropolisHastingsMove::performHillClimbingMove( double lHeat, double pHeat
         num_accepted_current_period++;
 
         // call accept for each node
-        for (size_t i = 0; i < nodes.size(); ++i)
-        {
-            // get the pointer to the current node
-            DagNode* the_node = nodes[i];
+        for (auto the_node: nodes)
             the_node->keep();
-        }
-
     }
 
 }
@@ -269,6 +226,10 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     // 0. Initial checks and debug logging.
     int logMCMC = RbSettings::userSettings().getLogMCMC();
     int debugMCMC = RbSettings::userSettings().getDebugMCMC();
+
+    // It is very important that none of the nodes is touched before we touch it!
+    if (debugMCMC >=1 or debug_build)
+        checkNotTouched(nodes, affected_nodes);
 
     // Compute PDFs for nodes and affected nodes if we are going to use them.
     NodePrMap initialPdfs;
@@ -314,13 +275,18 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
 
     // Propose a new value
     proposal->prepareProposal();
-    double ln_hastings_ratio = RbConstants::Double::neginf;
+    LogDensity ln_hastings_ratio = 0;
     try {
         ln_hastings_ratio = proposal->doProposal();
     }
     catch (const RbException &e)
     {
-        if ( e.getExceptionType() != RbException::MATH_ERROR and e.getExceptionType() != RbException::SKIP_PROPOSAL)
+        ln_hastings_ratio = logZero(); // maybe this should be nan
+        if ( e.getExceptionType() == RbException::SKIP_PROPOSAL )
+        {
+            return;
+        }
+        else if ( e.getExceptionType() != RbException::MATH_ERROR )
         {
             throw e;
         }
@@ -334,33 +300,23 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     for (auto node: touched_nodes)
         node->touch();
 
-    bool fail_probability = not std::isfinite(ln_hastings_ratio);
-
-    double ln_prior_ratio = 0.0;
-    double ln_likelihood_ratio = 0.0;
-
-    bool zero_or_nan_to_finite = false;
+    LogDensity ln_prior_ratio = 0.0;
+    LogDensity ln_likelihood_ratio = 0.0;
 
     // compute the probability of the current value for each node
     for (auto node: views::concat(touched_nodes, affected_nodes))
     {
         if (not node->isStochastic()) continue;
 
-        double ratio = 0;
-        try {
-            // There should be a previous lnProbability because the nodes have been touched.
-            double prev = node->getPrevLnProbability();
-            // Compute the current lnProbability.
-            double current = node->getLnProbability();
+        LogDensity ratio = 0;
+        // There should be a previous lnProbability because the nodes have been touched.
+        LogDensity prev = node->getPrevLnProbability();
 
-            if (std::isfinite(current) and (std::isnan(prev) or prev == RbConstants::Double::neginf))
-            {
-                // If the log-probability changes from NaN or -Inf to something finite,
-                // the ratio would be NaN or +Inf, and the move would be rejected.
-                zero_or_nan_to_finite = true;
-            }
-            else
-                ratio = current - prev;
+        try {
+            // Compute the current lnProbability.
+            LogDensity current = node->getLnProbability();
+
+            ratio = current - prev;
         }
         catch (const RbException &e)
         {
@@ -374,8 +330,6 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
             ln_likelihood_ratio += ratio;
         else
             ln_prior_ratio += ratio;
-
-        if ( not std::isfinite(ratio)) fail_probability = true;
     }
 
     if (logMCMC >= 3)
@@ -390,38 +344,35 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     }
 
     // exponentiate with the chain heat
-    double ln_posterior_ratio = pHeat * (lHeat * ln_likelihood_ratio + prHeat * ln_prior_ratio);
+    LogDensity ln_posterior_ratio = pHeat * (lHeat * ln_likelihood_ratio + prHeat * ln_prior_ratio);
 
-    double ln_acceptance_ratio = ln_posterior_ratio + ln_hastings_ratio;
+    LogDensity ln_acceptance_ratio = ln_posterior_ratio + ln_hastings_ratio;
 
     bool rejected = false;
 
     // ALWAYS draw a random number.  Otherwise very small differences can make platforms diverge.
     double u = GLOBAL_RNG->uniform01();
 
-    if ( fail_probability )
+    if ( not ln_hastings_ratio.isfinite() )
     {
         // Reject moves where the posterior ratio is -Inf, +Inf, or NaN.
         // (Terms where the previous log-pdf is NaN or -Inf and the current log-pdf is finite are not included.)
         rejected = true;
     }
-    else if (zero_or_nan_to_finite)
+    else if ( ln_acceptance_ratio.nans() != 0 )
     {
-        // If we get here and any term changed from NaN or -Inf -> finite then accept the move.
+        rejected = ln_acceptance_ratio.nans() > 0;
     }
-    else if (ln_acceptance_ratio >= 0.0)
-        ;
-    else if (ln_acceptance_ratio < -300.0)
-        rejected = true;
+    else if ( ln_acceptance_ratio.infs() != 0 )
+    {
+        rejected = ln_acceptance_ratio.infs() > 0;
+    }
+    else if ( ln_acceptance_ratio.neginfs() != 0)
+    {
+        rejected = ln_acceptance_ratio.neginfs() > 0;
+    }
     else
-    {
-        // Accept or reject the move
-        double r = exp(ln_acceptance_ratio);
-        if (u < r)
-            ;
-        else
-            rejected = true;
-    }
+        rejected = u > exp(ln_acceptance_ratio);
 
     if ( rejected )
     {

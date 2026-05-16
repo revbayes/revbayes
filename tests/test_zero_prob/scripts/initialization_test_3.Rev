@@ -1,0 +1,58 @@
+seed(1)
+
+taxa <- readTaxonData("data/tipages3.tsv")
+bb <- readTrees("data/backbone3.tre")[1]
+
+moves = VectorMoves()
+monitors = VectorMonitors()
+
+diversification ~ dnExponential(100.0)
+turnover ~ dnBeta(2.0, 1.0)
+fossil_prob ~ dnUniform(0.0, 1.0)
+
+moves.append( mvScale(diversification, lambda=0.01, weight=5) )
+moves.append( mvSlide(turnover, delta=0.01, weight=5) )
+moves.append( mvSlide(fossil_prob, delta=0.01, weight=5) )
+
+speciation := diversification / abs(1.0 - turnover)
+extinction := (turnover * diversification) / abs(1.0 - turnover)
+recovery := (fossil_prob / abs(1.0 - fossil_prob)) * extinction
+
+rho <- 1
+root_age ~ dnUniform(175, 225)
+
+moves.append( mvSlide(root_age, delta=0.1, weight=5) )
+fbd_dist = dnFBDP(rootAge=root_age, lambda=speciation, mu=extinction, psi=recovery, rho=rho,
+                  taxa=taxa)
+
+fbd_tree ~ dnConstrainedTopology(fbd_dist, backbone=bb)
+
+moves.append( mvFNPR(fbd_tree, weight=15.0) )
+moves.append( mvCollapseExpandFossilBranch(fbd_tree, root_age, weight=6.0) )
+moves.append( mvNodeTimeSlideUniform(fbd_tree, weight=40.0) )
+
+# Sample fossil ages from uniform priors
+fossils = fbd_tree.getFossils()
+for(i in 1:fossils.size())
+{
+    print(fossils[i])
+
+    t[i] := tmrca(fbd_tree, clade(fossils[i]))
+
+    a[i] = fossils[i].getMinAge()
+    b[i] = fossils[i].getMaxAge()
+
+    F[i] ~ dnUniform(t[i] - b[i], t[i] - a[i])
+    F[i].clamp( 0 )
+
+    # Specify a move on the fossil age
+    moves.append( mvFossilTimeSlideUniform(fbd_tree, root_age, fossils[i], weight = 1.0) )
+}
+
+num_samp_anc := fbd_tree.numSampledAncestors()
+
+monitors.append( mnModel(filename="output/test3.log", printgen=1) )
+
+mymodel = model(fbd_tree)
+mymcmc = mcmc(mymodel, monitors, moves, ntries=2, nsearch=100)
+mymcmc.run(generations=1000)

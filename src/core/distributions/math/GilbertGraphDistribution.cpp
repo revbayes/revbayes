@@ -47,7 +47,7 @@ void GilbertGraphDistribution::swapParameterInternal(const DagNode *oldP, const 
 }
 
 
-double GilbertGraphDistribution::computeLnProbability(void)
+LogDensity GilbertGraphDistribution::computeLnProbability(void)
 {
     
     return RbStatistics::GilbertGraph::lnPdf(edge_probability->getValue(), getValue());;

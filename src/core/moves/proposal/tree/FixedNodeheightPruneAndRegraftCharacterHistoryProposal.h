@@ -46,7 +46,7 @@ namespace RevBayesCore {
         // Basic utility functions
         void                                                        cleanProposal(void);                                          //!< Clean up proposal
         FixedNodeheightPruneAndRegraftCharacterHistoryProposal*     clone(void) const;                                            //!< Clone object
-        double                                                      doProposal(void);                                             //!< Perform proposal
+        LogDensity                                                  doProposal(void);                                             //!< Perform proposal
         const std::string&                                          getProposalName(void) const;                                  //!< Get the name of the proposal for summary printing
         double                                                      getProposalTuningParameter(void) const;
         void                                                        prepareProposal(void);                                        //!< Prepare the proposal
@@ -242,7 +242,7 @@ double RevBayesCore::FixedNodeheightPruneAndRegraftCharacterHistoryProposal<char
  * \return The hastings ratio.
  */
 template<class charType>
-double RevBayesCore::FixedNodeheightPruneAndRegraftCharacterHistoryProposal<charType>::doProposal( void )
+LogDensity RevBayesCore::FixedNodeheightPruneAndRegraftCharacterHistoryProposal<charType>::doProposal( void )
 {
     
     // reset flags
@@ -423,7 +423,7 @@ double RevBayesCore::FixedNodeheightPruneAndRegraftCharacterHistoryProposal<char
 
     // step 5: sample new branch histories
 //    std::cout << "Proposing paths." << std::endl;
-    double ln_proposal_probability = 0.0;
+    LogDensity ln_proposal_probability = 0.0;
     ln_proposal_probability += node_proposal_one->doProposal();
     ln_proposal_probability += left_proposal_one->doProposal();
     ln_proposal_probability += right_proposal_one->doProposal();

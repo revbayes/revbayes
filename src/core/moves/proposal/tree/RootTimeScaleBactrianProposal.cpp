@@ -80,7 +80,7 @@ double RootTimeScaleBactrianProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double RootTimeScaleBactrianProposal::doProposal( void )
+LogDensity RootTimeScaleBactrianProposal::doProposal( void )
 {
     // Get random number generator
     RandomNumberGenerator* rng     = GLOBAL_RNG;

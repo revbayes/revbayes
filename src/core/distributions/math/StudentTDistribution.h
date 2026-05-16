@@ -39,7 +39,7 @@ namespace RevBayesCore {
         // public member functions
         double                                              cdf(void) const;                                                            //!< Cummulative density function
         StudentTDistribution*                                  clone(void) const;                                                          //!< Create an independent clone
-        double                                              computeLnProbability(void);
+        LogDensity                                          computeLnProbability(void);
         double                                              getMax(void) const;
         double                                              getMin(void) const;
         double                                              quantile(double p) const;                                                   //!< Qu

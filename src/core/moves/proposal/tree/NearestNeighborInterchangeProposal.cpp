@@ -85,7 +85,7 @@ double NearestNeighborInterchangeProposal::getProposalTuningParameter( void ) co
  *
  * \return The hastings ratio.
  */
-double NearestNeighborInterchangeProposal::doProposal( void )
+LogDensity NearestNeighborInterchangeProposal::doProposal( void )
 {
     
     // reset flag
@@ -99,7 +99,7 @@ double NearestNeighborInterchangeProposal::doProposal( void )
     if ( tau.getNumberOfTips() < 3)
     {
         failed = true;
-        return RbConstants::Double::neginf;
+        return logZero(); // fail proposal
     }
     
     // pick a random node which is not the root nor a direct descendant of the root
@@ -118,6 +118,20 @@ double NearestNeighborInterchangeProposal::doProposal( void )
         uncle = &grandparent.getChild( 1 );
     }
     
+    if (uncle->isSampledAncestorTip())
+    {
+        TopologyNode* brother = &parent.getChild(0);
+        if (node == brother)
+            brother = &parent.getChild(1);
+
+        if (brother->isSampledAncestorTip())
+        {
+            // Swapping uncle and node, will mean that parent has two sampled-ancestor children.
+            failed = true;
+            return logZero(); // fail proposal
+        }
+    }
+
     // we need to work with the times
     double gparent_age  = grandparent.getAge();
     double parent_age   = parent.getAge();
@@ -146,10 +160,16 @@ double NearestNeighborInterchangeProposal::doProposal( void )
     
     // node rescale and MH
     double my_new_age;
-    if ( node->isTip() )
+    if ( node->isSampledAncestorTip())
+    {
+        // If we are moving a sampled ancestor tip, then we are really moving the sampled ancestor.
+        // Set the sampled-ancestor-tip age to the age of the sampled-ancestor-parent.
+        node->setAge( grandparent.getAge() );
+    }
+    else if ( node->isTip() )
     {
         my_new_age = my_age;
-        lnHastingsratio = 0.0;
+        // We don't actually have to set anything here.
     }
     else
     {
@@ -163,14 +183,20 @@ double NearestNeighborInterchangeProposal::doProposal( void )
         // compute the Hastings ratio
         size_t nNodes = node->getNumberOfNodesInSubtree(false);
         lnHastingsratio += (nNodes > 1 ? log( scaling_factor ) * (nNodes-1) : 0.0 );
-
     }
 
     // uncle rescale and MH
     double uncles_new_age;
-    if ( uncle->isTip() )
+    if ( uncle->isSampledAncestorTip())
+    {
+        // If we are moving a sampled ancestor tip, then we are really moving the sampled ancestor.
+        // Set the sampled-ancestor-tip age to the age of the sampled-ancestor-parent.
+        uncle->setAge( parent.getAge() );
+    }
+    else if ( uncle->isTip() )
     {
         uncles_new_age = uncles_age;
+        // We don't actually have to set anything here.
     }
     else
     {
@@ -182,9 +208,11 @@ double NearestNeighborInterchangeProposal::doProposal( void )
 
         size_t nNodes = uncle->getNumberOfNodesInSubtree(false);
         lnHastingsratio += (nNodes > 1 ? log( scaling_factor ) * (nNodes-1) : 0.0 );
-        
     }
     
+    assert(not grandparent.getChild(0).isSampledAncestorTip() or not grandparent.getChild(1).isSampledAncestorTip());
+    assert(not parent.getChild(0).isSampledAncestorTip() or not parent.getChild(1).isSampledAncestorTip());
+
     return lnHastingsratio;
     
 }
@@ -243,6 +271,18 @@ void NearestNeighborInterchangeProposal::undoProposal( void )
         // rescale to old ages
         TreeUtilities::setAges(*storedChosenNode, storedAges);
         TreeUtilities::setAges(*storedUncle, storedAges);
+
+        if (storedChosenNode->isSampledAncestorTip())
+        {
+            storedChosenNode->setAge(storedChosenNode->getParent().getAge());
+            assert(storedChosenNode->getAge() == storedChosenNode->getParent().getAge());
+        }
+
+        if (storedUncle->isSampledAncestorTip())
+        {
+            storedUncle->setAge(storedUncle->getParent().getAge());
+            assert(storedUncle->getAge() == storedUncle->getParent().getAge());
+        }
     }
     
 }

@@ -57,7 +57,7 @@ namespace RevBayesCore {
         
         // pure virtual public methods
         virtual Distribution*                                   clone(void) const = 0;                                                              //!< Clone the distribution
-        virtual double                                          computeLnProbability(void) = 0;                                                     //!< Compute the ln probability
+        virtual LogDensity                                      computeLnProbability(void) = 0;                                                     //!< Compute the ln probability
         virtual void                                            redrawValue(SimulationCondition c = SimulationCondition::MCMC) = 0;                 //!< Draw a new random value from the distribution
         
     protected:

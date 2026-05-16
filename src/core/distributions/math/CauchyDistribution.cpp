@@ -46,7 +46,7 @@ CauchyDistribution* CauchyDistribution::clone( void ) const {
 }
 
 
-double CauchyDistribution::computeLnProbability( void ) {
+LogDensity CauchyDistribution::computeLnProbability( void ) {
 
     double v = *value;
 

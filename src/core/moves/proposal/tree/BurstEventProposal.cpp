@@ -87,7 +87,7 @@ double BurstEventProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double BurstEventProposal::doProposal( void )
+LogDensity BurstEventProposal::doProposal( void )
 {
     
     failed = false;

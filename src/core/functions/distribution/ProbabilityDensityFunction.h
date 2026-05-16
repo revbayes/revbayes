@@ -131,11 +131,11 @@ void RevBayesCore::ProbabilityDensityFunction<valueType>::update( void )
     
     if ( useLog == true )
     {
-        *value = dist->computeLnProbability();
+        *value = double( dist->computeLnProbability() );
     }
     else
     {
-        *value = exp( dist->computeLnProbability() );
+        *value = exp( double( dist->computeLnProbability() ) );
     }
     
 }

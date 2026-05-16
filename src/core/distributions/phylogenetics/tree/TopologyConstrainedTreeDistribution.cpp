@@ -234,26 +234,26 @@ TopologyConstrainedTreeDistribution* TopologyConstrainedTreeDistribution::clone(
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-double TopologyConstrainedTreeDistribution::computeLnProbability( void )
+LogDensity TopologyConstrainedTreeDistribution::computeLnProbability( void )
 {
     using namespace RbConstants;
 
     recursivelyUpdateClades( value->getRoot() );
     
+    int N = base_distribution->getValue().getNumberOfNodes();
+
     // first check if the current tree matches the clade constraints
-    if ( matchesConstraints() == false )
-    {
-        return withReason(Double::neginf)<<"Pr(tree)=0: clade constraints do not match";
-    }
+    auto [n_fail_constraint, constraint_error] = constraintMismatches();
+    auto constraint_pr = LogDensity(double(n_fail_constraint) + double(constraint_error)/N, 0);
+    if (n_fail_constraint)
+        constraint_pr = withReason(constraint_pr)<<"Pr(tree)=0: clade constraints do not match";
+
+    auto [n_fail_backbone, backbone_error] = backboneMismatches();
+    auto backbone_pr = LogDensity(double(n_fail_backbone) + double(backbone_error)/N, 0);
+    if (n_fail_backbone)
+        backbone_pr = withReason(backbone_pr)<<"Pr(tree)=0: backbone constraints do not match";
     
-    if ( matchesBackbone() == false )
-    {
-        return withReason(Double::neginf)<<"Pr(tree)=0: backbone constraints do not match";
-    }
-    
-    double lnProb = base_distribution->computeLnProbability();
-    
-    return lnProb;
+    return constraint_pr + backbone_pr + base_distribution->computeLnProbability();
 }
 
 
@@ -354,15 +354,120 @@ void TopologyConstrainedTreeDistribution::getAffected(RbOrderedSet<DagNode *> &a
 }
 
 
+int closest_distance(const RbBitSet& target, const std::vector<RbBitSet>& candidates)
+{
+    int min_distance = target.size();
+
+    for (const auto& c : candidates) {
+        // assume all bitsets are same size
+        int d = (target ^ c).count();
+        if (not min_distance or d < min_distance) {
+            min_distance = d;
+        }
+    }
+
+    return min_distance;
+}
+
+using std::pair;
+using std::vector;
+using std::max;
+using std::abs;
+vector<int> hamming_distances(const RbBitSet& target, const std::vector<RbBitSet>& candidates)
+{
+    vector<int> D(candidates.size());
+
+    for (int i=0;i<D.size();i++)
+        D[i] = (target ^ candidates[i]).count();
+
+    return D;
+}
+
+
+// ----------------------- Hungarian (min-cost) -----------------------
+pair<int, vector<int>> hungarian_min_cost(const vector<vector<int>>& C) {
+
+    int m = C.size();
+    int n = (m ? C[0].size() : 0);
+    int k = max(m, n);
+    if (k == 0) return {0, {}};
+
+    int maxCost = 0;
+    for (int i = 0; i < m; ++i)
+        for (int j = 0; j < n; ++j)
+            maxCost = max(maxCost, abs(C[i][j]));
+    int padCost = (maxCost + 1) * k + 1;
+
+    vector<vector<int>> a(k+1, vector<int>(k+1, 0));
+    for (int i = 1; i <= k; ++i) {
+        for (int j = 1; j <= k; ++j) {
+            if (i <= m && j <= n) a[i][j] = C[i-1][j-1];
+            else a[i][j] = padCost;
+        }
+    }
+
+    vector<int> u(k+1, 0), v(k+1, 0);
+    vector<int> p(k+1, 0), way(k+1, 0);
+
+    for (int i = 1; i <= k; ++i) {
+        p[0] = i;
+        int j0 = 0;
+        vector<int> minv(k+1, INT_MAX);
+        vector<char> used(k+1, false);
+        do {
+            used[j0] = true;
+            int i0 = p[j0];
+            int delta = INT_MAX;
+            int j1 = 0;
+            for (int j = 1; j <= k; ++j) {
+                if (used[j]) continue;
+                int cur = a[i0][j] - u[i0] - v[j];
+                if (cur < minv[j]) { minv[j] = cur; way[j] = j0; }
+                if (minv[j] < delta) { delta = minv[j]; j1 = j; }
+            }
+            for (int j = 0; j <= k; ++j) {
+                if (used[j]) { u[p[j]] += delta; v[j] -= delta; }
+                else minv[j] -= delta;
+            }
+            j0 = j1;
+        } while (p[j0] != 0);
+        do {
+            int j1 = way[j0];
+            p[j0] = p[j1];
+            j0 = j1;
+        } while (j0 != 0);
+    }
+
+    vector<int> matchL(m, -1);
+    for (int j = 1; j <= k; ++j) {
+        if (p[j] <= m && j <= n) {
+            int i = p[j] - 1;
+            int col = j - 1;
+            matchL[i] = col;
+        }
+    }
+
+    int totalCost = 0;
+    for (int i = 0; i < m; ++i) {
+        if (matchL[i] >= 0) totalCost += C[i][matchL[i]];
+        else totalCost += padCost;
+    }
+    return {totalCost, matchL};
+}
+
+
 /**
  * We check here if all the constraints are satisfied.
  * These are hard constraints, that is, the clades must be monophyletic.
  *
  * \return     True if the constraints are matched, false otherwise.
  */
-bool TopologyConstrainedTreeDistribution::matchesBackbone( void )
+std::pair<int,int> TopologyConstrainedTreeDistribution::backboneMismatches( void )
 {
-    
+    int N = base_distribution->getValue().getNumberOfNodes();
+
+    std::pair<int,int> mismatches = {0,0};
+
     // ensure that each backbone constraint is found in the corresponding active_backbone_clades
     for (size_t i = 0; i < num_backbones; i++)
     {
@@ -375,7 +480,8 @@ bool TopologyConstrainedTreeDistribution::matchesBackbone( void )
         {
             is_negative_constraint = ( backbone_topologies->getValue() )[i].isNegativeConstraint();
         }
-        
+
+        vector<vector<int>> all_distances;
         std::vector<bool> negative_constraint_found( backbone_constraints[i].size(), false );
         for (size_t j = 0; j < backbone_constraints[i].size(); j++)
         {
@@ -385,7 +491,7 @@ bool TopologyConstrainedTreeDistribution::matchesBackbone( void )
             if (it == active_backbone_clades[i].end() && !is_negative_constraint )
             {
                 // match fails if positive constraint is not found
-                return false;
+                all_distances.push_back( hamming_distances(backbone_constraints[i][j], active_backbone_clades[i]) );
             }
             else if (it != active_backbone_clades[i].end() && is_negative_constraint )
             {
@@ -394,6 +500,9 @@ bool TopologyConstrainedTreeDistribution::matchesBackbone( void )
             }
         }
         
+        mismatches.first += all_distances.size();
+        mismatches.second += hungarian_min_cost(all_distances).first;
+
         // match fails if all negative backbone clades are found
         bool negative_constraint_failure = true;
         for (size_t j = 0; j < negative_constraint_found.size(); j++)
@@ -405,12 +514,13 @@ bool TopologyConstrainedTreeDistribution::matchesBackbone( void )
         }
         if (negative_constraint_failure)
         {
-            return false;
+            mismatches.first += 1;
+            mismatches.second += N;
         }
     }
     
     // if no search has failed, then the match succeeds
-    return true;
+    return mismatches;
 }
 
 
@@ -419,8 +529,12 @@ bool TopologyConstrainedTreeDistribution::matchesBackbone( void )
  *
  * \return     True if the constraints are matched, false otherwise.
  */
-bool TopologyConstrainedTreeDistribution::matchesConstraints( void )
+std::pair<int,int> TopologyConstrainedTreeDistribution::constraintMismatches( void )
 {
+    int N = base_distribution->getValue().getNumberOfNodes();
+
+    int n_mismatches = 0;
+    int mismatch_distance = 0;
     for (size_t i = 0; i < monophyly_constraints.size(); i++)
     {
         
@@ -434,40 +548,47 @@ bool TopologyConstrainedTreeDistribution::matchesConstraints( void )
             constraints.push_back(monophyly_constraints[i]);
         }
         
-        std::vector<bool> constraint_satisfied( constraints.size(), false );
+        std::vector<int> constraint_distance( constraints.size(), 2*N );
         for (size_t j = 0; j < constraints.size(); j++)
         {
-            
+
             std::vector<RbBitSet>::iterator it = std::find(active_clades.begin(), active_clades.end(), constraints[j].getBitRepresentation() );
+            bool found = it != active_clades.end();
             
-            if (it != active_clades.end() && constraints[j].isNegativeConstraint() == false )
+            if (constraints[j].isNegativeConstraint())
             {
-                constraint_satisfied[j] = true;
+                if (found)
+                {
+                    constraint_distance[j] = N;  // negative constraint UNsatisfied
+                    n_mismatches += 1;
+                }
+                else
+                    constraint_distance[j] = 0;    // negative constraint satisfied
             }
-            else if (it == active_clades.end() && constraints[j].isNegativeConstraint() )
+            else
             {
-                constraint_satisfied[j] = true;
+                if (found)
+                    constraint_distance[j] = 0;     // constraint satisfied
+                else
+                {
+                    constraint_distance[j] = closest_distance(constraints[j].getBitRepresentation(), active_clades);
+                    n_mismatches += 1;
+                }// constraint UNsatisfied.
             }
         }
-        
+
         // match fails if no optional positive or negative constraints satisfied
-        bool any_satisfied = false;
-        for (size_t j = 0; j < constraint_satisfied.size(); j++)
+        // (a constraint is satisfied if the minimum distance is 0.)
+        int min_distance = 2*N;
+        for (size_t j = 0; j < constraint_distance.size(); j++)
         {
-            if ( constraint_satisfied[j] == true )
-            {
-                any_satisfied = true;
-                break;
-            }
+            min_distance = std::min(min_distance, constraint_distance[j]);
         }
         
-        if ( any_satisfied == false )
-        {
-            return false;
-        }
+        mismatch_distance += min_distance;
     }
     
-    return true;
+    return {n_mismatches, mismatch_distance};
 }
 
 
@@ -689,7 +810,7 @@ void TopologyConstrainedTreeDistribution::setBackbone(const TypedDagNode<Tree> *
         // redraw the current value
         if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
         {
-            this->redrawValue();
+            this->redrawValue( SimulationCondition::MCMC );
         }
         
     }

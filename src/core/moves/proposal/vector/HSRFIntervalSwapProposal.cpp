@@ -91,7 +91,7 @@ double HSRFIntervalSwapProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double HSRFIntervalSwapProposal::doProposal( void )
+LogDensity HSRFIntervalSwapProposal::doProposal( void )
 {
 
     // Get random number generator

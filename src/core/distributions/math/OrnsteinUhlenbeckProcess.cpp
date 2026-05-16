@@ -80,7 +80,7 @@ OrnsteinUhlenbeckProcess* OrnsteinUhlenbeckProcess::clone( void ) const
  *
  * \return   The log-transformed probability density.
  */
-double OrnsteinUhlenbeckProcess::computeLnProbability( void )
+LogDensity OrnsteinUhlenbeckProcess::computeLnProbability( void )
 {
     double a = alpha->getValue();
     double t = time->getValue();

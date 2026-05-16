@@ -21,7 +21,7 @@ Progress:
 
    Annotating tree ...
   
-   (Tax3[&index=3]:0.410395,Tax2[&index=2,sampled_ancestor=0.458333,age_95%_HPD={0.25,0.250001}]:0.160395,Tax1[&index=1]:0.410395)[&index=4,age_95%_HPD={0.351362,0.483077}]:0.000000[&posterior=1.000000];
+   (Tax3[&index=3]:0.400741,(Tax2[&index=2,sampled_ancestor=0.625000,age_95%_HPD={0.25,0.25}]:0.000000,Tax1[&index=1]:0.250000)[&index=4,age_95%_HPD={0.25,0.25}]:0.150741[&posterior=0.625000])[&index=5,age_95%_HPD={0.35167,0.447773}]:0.000000[&posterior=1.000000];
    Compiling maximum a posteriori tree from 24 trees.
    
    Summarizing clades ...
@@ -33,7 +33,7 @@ Progress:
 
    Annotating tree ...
   
-   ((Tax1[&index=3]:0.250000,Tax2[&index=2,sampled_ancestor=0.458333,age_95%_HPD={0.25,0.25}]:0.000000)[&index=4,age_95%_HPD={0.25,0.25}]:0.171074[&posterior=0.458333],Tax3[&index=1]:0.421074)[&index=5,age_95%_HPD={0.351362,0.483077}]:0.000000[&posterior=1.000000];
+   ((Tax1[&index=3]:0.250000,Tax2[&index=2,sampled_ancestor=0.625000,age_95%_HPD={0.25,0.25}]:0.000000)[&index=4,age_95%_HPD={0.25,0.25}]:0.155235[&posterior=0.625000],Tax3[&index=1]:0.405235)[&index=5,age_95%_HPD={0.35167,0.447773}]:0.000000[&posterior=1.000000];
    Compiling maximum clade credibility tree from 24 trees.
    
    Summarizing clades ...
@@ -45,4 +45,4 @@ Progress:
 
    Annotating tree ...
   
-   ((Tax1[&index=3]:0.250000,Tax2[&index=2,sampled_ancestor=0.458333,age_95%_HPD={0.25,0.25}]:0.000000)[&index=4,age_95%_HPD={0.25,0.25}]:0.171074[&posterior=0.458333],Tax3[&index=1]:0.421074)[&index=5,age_95%_HPD={0.351362,0.483077}]:0.000000[&posterior=1.000000];
+   ((Tax1[&index=3]:0.250000,Tax2[&index=2,sampled_ancestor=0.625000,age_95%_HPD={0.25,0.25}]:0.000000)[&index=4,age_95%_HPD={0.25,0.25}]:0.155235[&posterior=0.625000],Tax3[&index=1]:0.405235)[&index=5,age_95%_HPD={0.35167,0.447773}]:0.000000[&posterior=1.000000];

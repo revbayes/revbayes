@@ -33,7 +33,7 @@ template <class variableType> class StochasticNode;
         bool                                    allowClamped() const override { return true; }                         //!< Proposal doesn't change the tree, but changes parameters describing the process that generates the tree. See #600
         void                                    cleanProposal(void) override;                                          //!< Clean up proposal
         MultiValueEventScaleProposal*           clone(void) const override;                                            //!< Clone object
-        double                                  doProposal(void) override;                                             //!< Perform proposal
+        LogDensity                              doProposal(void) override;                                             //!< Perform proposal
         const std::string&                      getProposalName(void) const override;                                  //!< Get the name of the proposal for summary printing
         double                                  getProposalTuningParameter(void) const override;
         void                                    prepareProposal(void) override;                                        //!< Prepare the proposal

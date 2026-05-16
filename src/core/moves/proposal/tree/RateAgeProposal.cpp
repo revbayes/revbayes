@@ -99,7 +99,7 @@ double RateAgeProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double RateAgeProposal::doProposal( void )
+LogDensity RateAgeProposal::doProposal( void )
 {
     int logMCMC = RbSettings::userSettings().getLogMCMC();
     int debugMCMC = RbSettings::userSettings().getDebugMCMC();

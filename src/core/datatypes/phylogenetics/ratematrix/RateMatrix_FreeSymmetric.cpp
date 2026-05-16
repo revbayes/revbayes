@@ -502,8 +502,8 @@ void RateMatrix_FreeSymmetric::tiProbsEigens(double t, TransitionProbabilityMatr
                 sum += (*ptr++) * eigValExp[s];
             }
             
-            //			P[i][j] = (sum < 0.0) ? 0.0 : sum;
-            (*p) = (sum < 0.0) ? 0.0 : sum;
+            //			P[i][j] = std::abs(sum);
+            (*p) = std::abs(sum);
         }
         
     }
@@ -542,7 +542,7 @@ void RateMatrix_FreeSymmetric::tiProbsComplexEigens(double t, TransitionProbabil
                 sum += (*ptr++) * ceigValExp[s];
             }
             
-            P[i][j] = (sum.real() < 0.0) ? 0.0 : sum.real();
+            P[i][j] = std::abs(sum.real());
         }
         
     }

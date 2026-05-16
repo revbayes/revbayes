@@ -103,7 +103,7 @@ MatrixReal MultivariateNormalDistribution::computeContrasts( void )
 }
 
 
-double MultivariateNormalDistribution::computeLnProbability( void )
+LogDensity MultivariateNormalDistribution::computeLnProbability( void )
 {
     size_t dim = observed.size();
     bool matchesObservations = true;

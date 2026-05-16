@@ -176,20 +176,20 @@ void CorrelationMatrixReparameterizationMove::performMcmcMove( double prHeat, do
     new_correlation_matrix.setCholesky(true);
 
     // compute the hastings ratio
-    double old_ln_lik = dist->computeLnProbability();
+    LogDensity old_ln_lik = dist->computeLnProbability();
     
-    double ln_hastings_ratio = ((num_traits + 1.0) / 2.0) * (new_correlation_matrix.getLogDet() - stored_matrix.getLogDet());
+    LogDensity ln_hastings_ratio = ((num_traits + 1.0) / 2.0) * (new_correlation_matrix.getLogDet() - stored_matrix.getLogDet());
     
     // update the parameters and compute the prior ratio
     correlation_matrix->setValue( new MatrixReal(new_correlation_matrix) );
-    double ln_prior_ratio = correlation_matrix->getLnProbabilityRatio();
+    LogDensity ln_prior_ratio = correlation_matrix->getLnProbabilityRatio();
     
-    double new_ln_lik = dist->computeLnProbability();
+    LogDensity new_ln_lik = dist->computeLnProbability();
 
     // compute the acceptance ratio
-    double ln_acceptance_ratio = pHeat * prHeat * ln_prior_ratio + ln_hastings_ratio;
+    LogDensity ln_acceptance_ratio = pHeat * prHeat * ln_prior_ratio + ln_hastings_ratio;
 //    ln_acceptance_ratio = -500.0;
-    double acceptance_ratio = exp(ln_acceptance_ratio);
+    LogDensity acceptance_ratio = exp(ln_acceptance_ratio);
     
 
     if (ln_acceptance_ratio > 0.0)
@@ -199,7 +199,7 @@ void CorrelationMatrixReparameterizationMove::performMcmcMove( double prHeat, do
         
         correlation_matrix->keep();
         mvbm->keep();
-        double lnp = dist->computeLnProbability();
+        LogDensity lnp = dist->computeLnProbability();
         std::cout << "reject " << acceptance_ratio << " -- " << old_ln_lik << " -- " << new_ln_lik << " -- " << lnp << std::endl;
     }
     else if (ln_acceptance_ratio < -300.0)
@@ -207,7 +207,7 @@ void CorrelationMatrixReparameterizationMove::performMcmcMove( double prHeat, do
         reject();
 //        correlation_matrix->restore();
 //        mvbm->restore();
-        double lnp = dist->computeLnProbability();
+        LogDensity lnp = dist->computeLnProbability();
         std::cout << "accept " << acceptance_ratio << " -- " << old_ln_lik << " -- " << new_ln_lik << " -- " << lnp << std::endl;
     }
     else
@@ -221,7 +221,7 @@ void CorrelationMatrixReparameterizationMove::performMcmcMove( double prHeat, do
             
             correlation_matrix->keep();
             mvbm->keep();
-            double lnp = dist->computeLnProbability();
+            LogDensity lnp = dist->computeLnProbability();
             std::cout << "reject " << acceptance_ratio << " -- " << old_ln_lik << " -- " << new_ln_lik << " -- " << lnp << std::endl;
         }
         else
@@ -229,7 +229,7 @@ void CorrelationMatrixReparameterizationMove::performMcmcMove( double prHeat, do
             reject();
             //        correlation_matrix->restore();
             //        mvbm->restore();
-            double lnp = dist->computeLnProbability();
+            LogDensity lnp = dist->computeLnProbability();
             std::cout << "accept " << acceptance_ratio << " -- " << old_ln_lik << " -- " << new_ln_lik << " -- " << lnp << std::endl;
         }
     }

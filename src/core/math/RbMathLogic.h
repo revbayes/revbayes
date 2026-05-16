@@ -19,6 +19,7 @@
 #define RbMathLogic_H
 
 #include <vector>
+#include "LogDensity.h"
 
 namespace RevBayesCore {
     
@@ -32,8 +33,8 @@ namespace RevBayesCore {
         bool                        compDefinitelyGreaterThan(double a, double b, double epsilon);                      //!< Tests whether one number is greater than another
         bool                        compDefinitelyLessThan(double a, double b);                                         //!< Tests whether one number is less than another
         bool                        compDefinitelyLessThan(double a, double b, double epsilon);                         //!< Tests whether one number is less than another
-        bool                        isAComputableNumber(double x);
         bool                        isFinite(double x);                                                                 //!< Tests whether a double is finite
+        bool                        isAComputableNumber(double x);
         //bool                        isFinite(size_t x); // size_t is always finite (WP)
         bool                        isInt(double x);                                                                    //!< Tests whether a double is actually an interger
         bool                        isNan(double x);                                                                    //!< Tests whether a double is NAN (not a number)
@@ -41,6 +42,11 @@ namespace RevBayesCore {
         double                      min(double a, double b);                                                            //!< Returns the min of two real numbers
         int                         min(int a, int b);                                                                  //!< Returns the min of two real numbers
         int                         sgn(double x);                                                                      //!< Returns the sign of a number
+
+
+        bool                        isFinite(const LogDensity& x);                                                      //!< Tests whether a LogDouble is finite
+        bool                        isNan(const LogDensity& x);                                                         //!< Tests whether a LogDouble is NaN
+
     }
     
 }

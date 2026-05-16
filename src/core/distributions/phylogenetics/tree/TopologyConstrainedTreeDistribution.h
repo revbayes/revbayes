@@ -28,7 +28,7 @@ namespace RevBayesCore {
         
         
         // public member functions you may want to override
-        double                                              computeLnProbability(void);                                                                         //!< Compute the log-transformed probability of the current value.
+        LogDensity                                          computeLnProbability(void);                                                                         //!< Compute the log-transformed probability of the current value.
         void                                                fireTreeChangeEvent(const TopologyNode &n, const unsigned& m=0);                                    //!< The tree has changed and we want to know which part.
         virtual void                                        redrawValue(SimulationCondition c);                                                                 //!< Draw a new random value from the distribution
         virtual void                                        redrawValue(void);                                                                                  //!< Draw a new random value from the distribution
@@ -50,8 +50,8 @@ namespace RevBayesCore {
         virtual void                                        swapParameterInternal(const DagNode *oldP, const DagNode *newP);                                    //!< Swap a parameter
         
         // helper functions
-        bool                                                matchesBackbone(void);
-        bool                                                matchesConstraints(void);
+        std::pair<int,int>                                  backboneMismatches(void);
+        std::pair<int,int>                                  constraintMismatches(void);
         RbBitSet                                            recursivelyAddBackboneConstraints(const TopologyNode& node, size_t backbone_idx);
         void                                                recursivelyFlagNodesDirty(const TopologyNode& n);
         RbBitSet                                            recursivelyUpdateClades(const TopologyNode& node);

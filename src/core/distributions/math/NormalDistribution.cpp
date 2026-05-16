@@ -60,7 +60,7 @@ NormalDistribution* NormalDistribution::clone( void ) const
 }
 
 
-double NormalDistribution::computeLnProbability( void )
+LogDensity NormalDistribution::computeLnProbability( void )
 {
     return RbStatistics::Normal::lnPdf(mean->getValue(), stDev->getValue(), *value, getMin(), getMax());
 

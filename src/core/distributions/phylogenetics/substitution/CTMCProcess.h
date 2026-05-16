@@ -26,7 +26,7 @@ namespace RevBayesCore {
         virtual CTMCProcess*                                                clone(void) const;                                                                           //!< Create an independent clone
 
         // non-virtual
-        virtual double                                                      computeLnProbability(void);
+        virtual LogDensity                                                  computeLnProbability(void);
         void                                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const;     //!< Map the member methods to internal function calls
         void                                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, MatrixReal &rv) const;     //!< Map the member methods to internal function calls
         virtual void                                                        redrawValue(void);
@@ -203,7 +203,7 @@ RevBayesCore::CTMCProcess<charType>* RevBayesCore::CTMCProcess<charType>::clone(
 
 
 template<class charType>
-double RevBayesCore::CTMCProcess<charType>::computeLnProbability( void )
+LogDensity RevBayesCore::CTMCProcess<charType>::computeLnProbability( void )
 {
     // @todo: #thread
     // This part should be done on several threads if possible

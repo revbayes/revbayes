@@ -2,6 +2,7 @@
 #define MaximumLikelihoodEstimation_H
 
 #include "Cloneable.h"
+#include "LogDensity.h"
 #include "Model.h"
 #include "Monitor.h"
 #include "Move.h"
@@ -46,7 +47,7 @@ namespace RevBayesCore {
         virtual void                            finishMonitors(void) = 0;                           //!< Finish the monitors
         virtual Model&                          getModel(void) = 0;
         virtual const Model&                    getModel(void) const = 0;
-        virtual double                          getModelLnProbability(bool likelihood_only) = 0;
+        virtual LogDensity                      getModelLnProbability(bool likelihood_only) = 0;
         virtual std::string                     getStrategyDescription(void) const = 0;             //!< Get the discription of the strategy used for this sampler.
         virtual bool                            hasConverged(double m) = 0;                         //!< Has the estimator converged to the maximum likelihood value
         virtual void                            initializeSampler(void) = 0;                        //!< Initialize objects for mcmc sampling

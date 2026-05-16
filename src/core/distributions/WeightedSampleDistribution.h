@@ -35,7 +35,7 @@ namespace RevBayesCore {
         
         // public member functions
         WeightedSampleDistribution*                         clone(void) const;                                                                      //!< Create an independent clone
-        double                                              computeLnProbability(void);
+        LogDensity                                          computeLnProbability(void);
         RevLanguage::RevPtr<RevLanguage::RevVariable>       executeProcedure(const std::string &name, const std::vector<DagNode *> args, bool &found);
         void                                                redrawValue(void);
         void                                                setValue(RbVector<valueType> *v, bool f=false);
@@ -245,7 +245,7 @@ RevBayesCore::WeightedSampleDistribution<valueType>* RevBayesCore::WeightedSampl
 
 
 template <class valueType>
-double RevBayesCore::WeightedSampleDistribution<valueType>::computeLnProbability( void )
+LogDensity RevBayesCore::WeightedSampleDistribution<valueType>::computeLnProbability( void )
 {
     
     double ln_prob = 0;
@@ -259,7 +259,7 @@ double RevBayesCore::WeightedSampleDistribution<valueType>::computeLnProbability
     {
         if ( i >= sample_block_start && i < sample_block_end )
         {
-            ln_probs[i] = base_distribution_instances[i]->computeLnProbability();
+            ln_probs[i] = (double)base_distribution_instances[i]->computeLnProbability();
         }
         
     }

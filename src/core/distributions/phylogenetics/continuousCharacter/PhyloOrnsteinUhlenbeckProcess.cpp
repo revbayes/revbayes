@@ -54,7 +54,7 @@ PhyloOrnsteinUhlenbeckProcess* PhyloOrnsteinUhlenbeckProcess::clone(void) const
 }
 
 
-double PhyloOrnsteinUhlenbeckProcess::computeLnProbability(void)
+LogDensity PhyloOrnsteinUhlenbeckProcess::computeLnProbability(void)
 {
     
     double ret = recursiveLnProb(tau->getValue().getRoot());

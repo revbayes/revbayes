@@ -31,7 +31,7 @@ template <class variableType> class StochasticNode;
         
         void                                        cleanProposal(void);                                                                //!< Clean up proposal
         VectorBinarySwitchProposal*                 clone(void) const;                                                                  //!< Clone object
-        double                                      doProposal(void);                                                                   //!< Perform proposal
+        LogDensity                                  doProposal(void);                                                                   //!< Perform proposal
         const std::string&                          getProposalName(void) const;                                                        //!< Get the name of the proposal for summary printing
         double                                      getProposalTuningParameter(void) const;
         std::vector<DagNode*>                       identifyNodesToTouch(void);

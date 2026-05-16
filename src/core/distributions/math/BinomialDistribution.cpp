@@ -43,7 +43,7 @@ BinomialDistribution* BinomialDistribution::clone( void ) const
 }
 
 
-double BinomialDistribution::computeLnProbability( void )
+LogDensity BinomialDistribution::computeLnProbability( void )
 {
     
     // check that the value is inside the boundaries

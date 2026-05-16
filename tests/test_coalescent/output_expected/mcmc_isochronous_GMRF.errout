@@ -1,83 +1,35 @@
    Successfully read one character matrix from file 'data/horses_isochronous_sequences.fasta'
-   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
-   375000
-   
-   
+      'obs_root_age': lnProb = -inf + -87969.8    value = 375000
    Drawing new initial states ... 
-   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
-   375000
-   
-   
+      'obs_root_age': lnProb = -inf + -149327    value = 375000
    Drawing new initial states ... 
-   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
-   375000
-   
-   
+      'obs_root_age': lnProb = -inf + -140289    value = 375000
    Drawing new initial states ... 
-   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
-   375000
-   
-   
+      'obs_root_age': lnProb = -inf + -45507.9    value = 375000
    Drawing new initial states ... 
-   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
-   375000
-   
-   
+      'obs_root_age': lnProb = -inf + -93469.5    value = 375000
    Drawing new initial states ... 
-   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
-   375000
-   
-   
+      'obs_root_age': lnProb = -inf + -117269    value = 375000
    Drawing new initial states ... 
-   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
-   375000
-   
-   
+      'obs_root_age': lnProb = -inf + -75091.9    value = 375000
    Drawing new initial states ... 
-   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
-   375000
-   
-   
+      'obs_root_age': lnProb = -inf + -65139.2    value = 375000
    Drawing new initial states ... 
-   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
-   375000
-   
-   
+      'obs_root_age': lnProb = -inf + -11097.1    value = 375000
    Drawing new initial states ... 
-   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
-   375000
-   
-   
+      'obs_root_age': lnProb = -inf + -165714    value = 375000
    Drawing new initial states ... 
-   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
-   375000
-   
-   
+      'obs_root_age': lnProb = -inf + -162372    value = 375000
    Drawing new initial states ... 
-   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
-   375000
-   
-   
+      'obs_root_age': lnProb = -inf + -77611.7    value = 375000
    Drawing new initial states ... 
-   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
-   375000
-   
-   
+      'obs_root_age': lnProb = -inf + -87422.1    value = 375000
    Drawing new initial states ... 
-   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
-   375000
-   
-   
+      'obs_root_age': lnProb = -inf + -111820    value = 375000
    Drawing new initial states ... 
-   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
-   375000
-   
-   
+      'obs_root_age': lnProb = -inf + -72667.3    value = 375000
    Drawing new initial states ... 
-   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
-   375000
-   
-   
+      'obs_root_age': lnProb = -inf + -105760    value = 375000
    Drawing new initial states ... 
    
    Running MCMC simulation

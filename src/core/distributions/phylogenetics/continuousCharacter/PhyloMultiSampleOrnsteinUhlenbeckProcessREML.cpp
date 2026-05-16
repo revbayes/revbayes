@@ -208,7 +208,7 @@ double PhyloMultiSampleOrnsteinUhlenbeckProcessREML::computeRootState( void ) co
 }
 
 
-double PhyloMultiSampleOrnsteinUhlenbeckProcessREML::computeLnProbability( void )
+LogDensity PhyloMultiSampleOrnsteinUhlenbeckProcessREML::computeLnProbability( void )
 {
     
     // we need to check here if we still are listining to this tree for change events

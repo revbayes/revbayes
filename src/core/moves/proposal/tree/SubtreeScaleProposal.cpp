@@ -72,6 +72,35 @@ double SubtreeScaleProposal::getProposalTuningParameter( void ) const
     return RbConstants::Double::nan;
 }
 
+std::pair<double,double> getOldestTipAgeAndScalingFactor(TopologyNode& n)
+{
+    double min_scaling_factor = 0;
+    double max_tip_age = n.getAge();
+
+    if ( not n.isTip() )
+    {
+
+        // assertion that we have binary trees
+#ifdef ASSERTIONS_TREE
+        if ( n->getNumberOfChildren() != 2 )
+        {
+            throw RbException("Oldest tip is only implemented for binary trees!");
+        }
+#endif
+
+        auto [left_scale,  max_left_tip_age ] = getOldestTipAgeAndScalingFactor( n.getChild(0) );
+        auto [right_scale, max_right_tip_age] = getOldestTipAgeAndScalingFactor( n.getChild(1) );
+
+        max_tip_age = std::max(max_left_tip_age, max_right_tip_age);
+
+        min_scaling_factor = max_tip_age / n.getAge();
+        min_scaling_factor = std::max(min_scaling_factor, left_scale);
+        min_scaling_factor = std::max(min_scaling_factor, right_scale);
+    }
+
+    return {min_scaling_factor, max_tip_age};
+}
+
 
 /**
  * Perform the proposal.
@@ -85,13 +114,20 @@ double SubtreeScaleProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double SubtreeScaleProposal::doProposal( void )
+LogDensity SubtreeScaleProposal::doProposal( void )
 {
     // Get random number generator
     RandomNumberGenerator* rng     = GLOBAL_RNG;
     
     Tree& tau = variable->getValue();
     
+    for (size_t i = 0; i < tau.getNumberOfNodes(); i++)
+    {
+        auto& node = tau.getNode(i);
+
+        assert(node.isRoot() or node.getAge() <= node.getParent().getAge());
+    }
+
     // pick a random node which is not the root or a tip
     TopologyNode* node;
     do {
@@ -112,9 +148,12 @@ double SubtreeScaleProposal::doProposal( void )
     TreeUtilities::getAges(*node, storedAges);
 
     // lower bound
-    double min_age = TreeUtilities::getOldestTipAge(*node);
+    auto [min_scaling_factor, max_tip_age] = getOldestTipAgeAndScalingFactor(*node);
     
     // draw new ages and compute the hastings ratio at the same time
+    double min_age = max_tip_age;
+    min_age = std::max(max_tip_age, min_scaling_factor * node->getAge());
+
     double my_new_age = min_age + (parent_age - min_age) * rng->uniform01();
     
     double scaling_factor = my_new_age / my_age;
@@ -134,6 +173,13 @@ double SubtreeScaleProposal::doProposal( void )
         }
     }
     
+    for (size_t i = 0; i < tau.getNumberOfNodes(); i++)
+    {
+        auto& node = tau.getNode(i);
+
+        assert(node.isRoot() or node.getAge() <= node.getParent().getAge());
+    }
+
     // compute the Hastings ratio
     double lnHastingsratio = (nNodes > 1 ? log( scaling_factor ) * (nNodes-1) : 0.0 );
     

@@ -1,47 +1,14 @@
-   Could not compute lnProb for node 'y[6]': lnProb = -inf
-   1
-   
-   
-   Could not compute lnProb for node 'y[9]': lnProb = -inf
-   1
-   
-   
-   Could not compute lnProb for node 'y[12]': lnProb = -inf
-   1
-   
-   
-   Could not compute lnProb for node 'y[15]': lnProb = -inf
-   1
-   
-   
-   Could not compute lnProb for node 'y[16]': lnProb = -inf
-   1
-   
-   
-   Could not compute lnProb for node 'y[29]': lnProb = -inf
-   1
-   
-   
-   Could not compute lnProb for node 'y[43]': lnProb = -inf
-   1
-   
-   
-   Could not compute lnProb for node 'y[60]': lnProb = -inf
-   1
-   
-   
-   Could not compute lnProb for node 'y[66]': lnProb = -inf
-   1
-   
-   
-   Could not compute lnProb for node 'y[94]': lnProb = -inf
-   1
-   
-   
-   Could not compute lnProb for node 'y[99]': lnProb = -inf
-   1
-   
-   
+      'y[6]': lnProb = -inf    value = 1
+      'y[9]': lnProb = -inf    value = 1
+      'y[12]': lnProb = -inf    value = 1
+      'y[15]': lnProb = -inf    value = 1
+      'y[16]': lnProb = -inf    value = 1
+      'y[29]': lnProb = -inf    value = 1
+      'y[43]': lnProb = -inf    value = 1
+      'y[60]': lnProb = -inf    value = 1
+      'y[66]': lnProb = -inf    value = 1
+      'y[94]': lnProb = -inf    value = 1
+      'y[99]': lnProb = -inf    value = 1
    Drawing new initial states ... 
    
    Running MCMC simulation

@@ -1,0 +1,632 @@
+seed(1)
+
+#######################
+# Reading in the Data #
+#######################
+
+# Create the full list of taxa (including all fossils and extant species
+taxa <- readTaxonData("data/zhang_et_wang_19_tipdates.tsv")
+
+# Import the morphological character matrix
+morpho <- readDiscreteCharacterData("data/zhang_et_wang_19_chardata.nex")
+
+# Helper variables
+n_taxa <- taxa.size()
+moves = VectorMoves()
+
+
+##########################################################################################
+# Joint fossilized birth-death Process prior on the topology and fossil occurrence times #
+##########################################################################################
+
+# Define priors on the net diversification rate (d), turnover (r), and the probability
+# of fossil observation prior to species extinction (s) following Zhang & Wang (2019):
+
+diversification ~ dnExponential(100)
+turnover ~ dnBeta(1.0, 1.0)
+fossil_prob ~ dnBeta(1.0, 1.0)
+
+# Specify a slice move on the net diversification rate parameter
+moves.append( mvSlice(diversification, weight=5) )
+
+# Specify sliding-window moves on the "turnover" (= extinction fraction) parameter
+moves.append( mvSlide(turnover, delta=0.01, weight=5) )
+moves.append( mvSlide(turnover, delta=0.1,  weight=3) )
+moves.append( mvSlide(turnover, delta=1,    weight=1) )
+
+# Specify sliding-window moves on the fossilization probability parameter
+moves.append( mvSlide(fossil_prob, delta=0.01, weight=5) )
+moves.append( mvSlide(fossil_prob, delta=0.1,  weight=3) )
+moves.append( mvSlide(fossil_prob, delta=1,    weight=1) )
+
+# Create deterministic nodes for the speciation (lambda), extinction (mu), and fossil
+# recovery (psi) rates that we are going to need to specify the FBD distribution. See
+# http://phyloworks.org/workshops/DivTime_BEAST2_tutorial_FBD.pdf for how to go about
+# the reparameterization:
+
+speciation := diversification / abs(1.0 - turnover)
+extinction := (turnover * diversification) / abs(1.0 - turnover)
+recovery := (fossil_prob / abs(1.0 - fossil_prob)) * extinction
+
+# Fix the extant sampling probability (rho) to 0.0002 following Zhang & Wang (2019)
+# (2 sampled vs. ~10,000 total extant species of birds)
+
+rho <- 0.0002
+
+# The FBD is conditioned on an origin time, here drawn from an offset exponential hyperprior
+# following Zhang & Wang (2019): offset = 153 Ma, mean = 169 Ma
+
+origin_time ~ dnExponential(lambda=1/(169 - 153), offset=153)
+moves.append( mvSlice(origin_time, weight=5.0) )
+
+# Define the tree-prior distribution as the fossilized birth-death process
+fbd_dist = dnFBDP(originAge=origin_time, lambda=speciation, mu=extinction, psi=recovery, rho=rho, taxa=taxa)
+
+# Define topological constraints as per Zhang & Wang (2019):
+
+Aves_ind = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68]
+Pygo_ind = [1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68]
+Ornies_ind = [1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 14, 17, 19, 20, 21, 22, 23, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 56, 57, 58, 59, 60, 61, 62, 63, 64, 66, 67, 68]
+Enanti_ind = [9, 10, 11, 14, 17, 19, 20, 22, 23, 25, 26, 27, 30, 37, 39, 40, 41, 42, 43, 44, 48, 50, 51, 52, 53, 54, 57, 58, 60, 63, 68]
+Orniha_ind = [1, 2, 4, 5, 6, 7, 8, 21, 28, 29, 31, 32, 33, 34, 36, 38, 45, 46, 47, 49, 56, 59, 61, 62, 64, 66, 67]
+AG_ind = [1, 28]
+
+for (i in 1:Aves_ind.size()) { ix = Aves_ind[i]; Aves_taxa[i] <- taxa[ix] }
+for (i in 1:Pygo_ind.size()) { ix = Pygo_ind[i]; Pygostylia_taxa[i] <- taxa[ix] }
+for (i in 1:Ornies_ind.size()) { ix = Ornies_ind[i]; Ornithothoraces_taxa[i] <- taxa[ix] }
+for (i in 1:Enanti_ind.size()) { ix = Enanti_ind[i]; Enantiornithes_taxa[i] <- taxa[ix] }
+for (i in 1:Orniha_ind.size()) { ix = Orniha_ind[i]; Ornithuromorpha_taxa[i] <- taxa[ix] }
+for (i in 1:AG_ind.size()) { ix = AG_ind[i]; AnasGallus_taxa[i] <- taxa[ix] }
+
+Aves = clade(Aves_taxa)
+Pygostylia = clade(Pygostylia_taxa)
+Ornithothoraces = clade(Ornithothoraces_taxa)
+Enantiornithes = clade(Enantiornithes_taxa)
+Ornithuromorpha = clade(Ornithuromorpha_taxa)
+AnasGallus = clade(AnasGallus_taxa)
+
+constraints = v(Aves, Pygostylia, Ornithothoraces, Enantiornithes, Ornithuromorpha, AnasGallus)
+
+for(i in 1:constraints.size()) {
+    print(constraints[i])
+    print("")
+}
+
+# Draw a time tree from the specified distribution.
+fbd_tree ~ dnConstrainedTopology(fbd_dist, constraints=constraints)
+
+# Specify moves on the tree topology; allow sampled ancestors
+moves.append( mvFNPR(fbd_tree, weight=15.0) )
+moves.append( mvCollapseExpandFossilBranch(fbd_tree, origin_time, weight=6.0) )
+
+# These moves operate on the node ages, including the root node age
+moves.append( mvNodeTimeSlideUniform(fbd_tree, weight=40.0) )
+moves.append( mvRootTimeSlideUniform(fbd_tree, origin_time, weight=5.0) )
+
+# Sample fossil ages from uniform priors
+fossils = fbd_tree.getFossils()
+for(i in 1:fossils.size())
+{
+    t[i] := tmrca(fbd_tree, clade(fossils[i]))
+
+    a[i] = fossils[i].getMinAge()
+    b[i] = fossils[i].getMaxAge()
+
+    F[i] ~ dnUniform(t[i] - b[i], t[i] - a[i])
+    F[i].clamp( 0 )
+
+    # Specify a move on the fossil age
+    moves.append( mvFossilTimeSlideUniform(fbd_tree, origin_time, fossils[i], weight = 1.0) )
+}
+
+# Monitor the number of sampled ancestors in the tree
+num_samp_anc := fbd_tree.numSampledAncestors()
+
+
+#######################################################################
+# Unlinked white-noise relaxed-clock models for individual partitions #
+#######################################################################
+
+# Get the number of branches in the tree
+n_branches <- 2 * n_taxa - 2
+
+# Specify a prior on the base rate of the clock following Zhang & Wang (2019):
+global_rate_mean ~ dnGamma( 2.0, 200.0 )
+moves.append( mvScaleBactrian(global_rate_mean, lambda=0.5, weight=10.0) )
+
+# See https://boussau.github.io/tutorials/relative_time_constraints/ for how to implement
+# an uncorrelated gamma model with gamma-distributed *relative* rates in RevBayes
+
+for (j in 1:6) {
+    # Draw partition-specific clock rate variances from an exponential hyperprior following
+    # Zhang & Wang (2019), and put moves on them.
+
+    sigma[j] ~ dnExponential( 10.0 )
+    moves.append( mvScaleBactrian(sigma[j], lambda=0.5, weight=4.0) )
+
+    for (i in n_branches:1) {
+        # Get branch duration in calendar time units
+        times[i] = fbd_tree.branchLength(i)
+    
+        # Relative branch-wise rates: these serve as multipliers to the global_rate_mean (c).
+        # Each relative rate r_{i,j} is gamma distributed with mean = 1.0 and variance equal
+        # to sigma_j/(t_i * c). Since dnGamma() is parameterized using shape and rate in
+        # RevBayes, this corresponds to a shape of (t_i * c)/sigma_j and a rate equal to the
+        # shape.
+        
+        gamma_param[j][i] := (times[i] * global_rate_mean)/sigma[j]
+        rel_branch_rates[j][i] ~ dnGamma(gamma_param[j][i], gamma_param[j][i])
+        moves.append( mvScale(rel_branch_rates[j][i], lambda=0.5, weight=1.0, tune=true))
+        moves.append( mvSlide(rel_branch_rates[j][i], delta=0.5, weight=1.0, tune=true))
+
+        # The actual branch rate is the product of the global_rate_mean and the relative rate.
+
+        branch_rates[j][i] := global_rate_mean * rel_branch_rates[j][i]
+    }
+}
+
+
+##############################################################
+# Substitution and among-character rate heterogeneity models #
+##############################################################
+
+# Discretized gamma distribution of rates across sites
+alpha ~ dnExponential( 1.0 )
+char_rates := fnDiscretizeGamma(alpha, alpha, 4)
+
+# Specify a slice move on the alpha parameter
+moves.append( mvSlice(alpha, weight=5) )
+
+# Predefined rate matrices for unordered characters
+s2 <- fnJC(2)
+s3_u <- fnJC(3)
+s4_u <- fnJC(4)
+s5_u <- fnJC(5)
+s6_u <- fnJC(6)
+
+# Predefined rate matrices for ordered characters
+s3_o <- fnOrderedRateMatrix(3, lambda=1, mu=1)
+s4_o <- fnOrderedRateMatrix(4, lambda=1, mu=1)
+s5_o <- fnOrderedRateMatrix(5, lambda=1, mu=1)
+s6_o <- fnOrderedRateMatrix(6, lambda=1, mu=1)
+
+
+###############
+# Partition 1 #
+###############
+
+### UNORDERED ###
+
+# 2 states
+
+p1_s2_ind <- [ 2, 5, 6, 7, 9, 10, 11, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 29, 30, 32, 33, 34, 35, 36, 37, 39, 40, 41, 42, 44, 45, 46, 47, 48, 263, 267, 268, 275 ]
+p1_s2 <- morpho
+p1_s2.excludeCharacter(1:morpho.nchar())
+p1_s2.includeCharacter(p1_s2_ind)
+m1_s2 ~ dnPhyloCTMC(tree=fbd_tree, Q=s2, branchRates=branch_rates[1], siteRates=char_rates, type="Standard", coding="variable")
+m1_s2.clamp( p1_s2 )
+
+# 3 states
+
+p1_s3_u_ind <- [ 12, 38, 262 ]
+p1_s3_u <- morpho
+p1_s3_u.excludeCharacter(1:morpho.nchar())
+p1_s3_u.includeCharacter(p1_s3_u_ind)
+m1_s3_u ~ dnPhyloCTMC(tree=fbd_tree, Q=s3_u, branchRates=branch_rates[1], siteRates=char_rates, type="Standard", coding="variable")
+m1_s3_u.clamp( p1_s3_u )
+
+# 4 states
+
+p1_s4_u_ind <- [ 4 ]
+p1_s4_u <- morpho
+p1_s4_u.excludeCharacter(1:morpho.nchar())
+p1_s4_u.includeCharacter(p1_s4_u_ind)
+m1_s4_u ~ dnPhyloCTMC(tree=fbd_tree, Q=s4_u, branchRates=branch_rates[1], siteRates=char_rates, type="Standard", coding="variable")
+m1_s4_u.clamp( p1_s4_u )
+
+# 5 states
+
+# EMPTY
+
+# 6 states
+
+# EMPTY
+
+### ORDERED ###
+
+# 3 states
+
+p1_s3_o_ind <- [ 1, 3, 28, 31, 43 ]
+p1_s3_o <- morpho
+p1_s3_o.excludeCharacter(1:morpho.nchar())
+p1_s3_o.includeCharacter(p1_s3_o_ind)
+m1_s3_o ~ dnPhyloCTMC(tree=fbd_tree, Q=s3_o, branchRates=branch_rates[1], siteRates=char_rates, type="Standard", coding="variable")
+m1_s3_o.clamp( p1_s3_o )
+
+# 4 states
+
+p1_s4_o_ind <- [ 8 ]
+p1_s4_o <- morpho
+p1_s4_o.excludeCharacter(1:morpho.nchar())
+p1_s4_o.includeCharacter(p1_s4_o_ind)
+m1_s4_o ~ dnPhyloCTMC(tree=fbd_tree, Q=s4_o, branchRates=branch_rates[1], siteRates=char_rates, type="Standard", coding="variable")
+m1_s4_o.clamp( p1_s4_o )
+
+# 5 states
+
+# EMPTY
+
+# 6 states
+
+# EMPTY
+
+###############
+# Partition 2 #
+###############
+
+### UNORDERED ###
+
+# 2 states
+
+p2_s2_ind <- [ 49, 50, 52, 53, 54, 55, 57, 58, 59, 60, 62, 63, 65, 66, 68, 71, 73, 75, 76, 77, 78, 80, 81, 269 ]
+p2_s2 <- morpho
+p2_s2.excludeCharacter(1:morpho.nchar())
+p2_s2.includeCharacter(p2_s2_ind)
+m2_s2 ~ dnPhyloCTMC(tree=fbd_tree, Q=s2, branchRates=branch_rates[1], siteRates=char_rates, type="Standard", coding="variable")
+m2_s2.clamp( p2_s2 )
+
+# 3 states
+
+p2_s3_u_ind <- [ 61, 79, 245 ]
+p2_s3_u <- morpho
+p2_s3_u.excludeCharacter(1:morpho.nchar())
+p2_s3_u.includeCharacter(p2_s3_u_ind)
+m2_s3_u ~ dnPhyloCTMC(tree=fbd_tree, Q=s3_u, branchRates=branch_rates[1], siteRates=char_rates, type="Standard", coding="variable")
+m2_s3_u.clamp( p2_s3_u )
+
+# 4 states
+
+# EMPTY
+
+# 5 states
+
+# EMPTY
+
+# 6 states
+
+# EMPTY
+
+### ORDERED ###
+
+# 3 states
+
+p2_s3_o_ind <- [ 51, 56, 67, 69, 72, 74, 270 ]
+p2_s3_o <- morpho
+p2_s3_o.excludeCharacter(1:morpho.nchar())
+p2_s3_o.includeCharacter(p2_s3_o_ind)
+m2_s3_o ~ dnPhyloCTMC(tree=fbd_tree, Q=s3_o, branchRates=branch_rates[1], siteRates=char_rates, type="Standard", coding="variable")
+m2_s3_o.clamp( p2_s3_o )
+
+# 4 states
+
+# EMPTY
+
+# 5 states
+
+p2_s5_o_ind <- [ 70 ]
+p2_s5_o <- morpho
+p2_s5_o.excludeCharacter(1:morpho.nchar())
+p2_s5_o.includeCharacter(p2_s5_o_ind)
+m2_s5_o ~ dnPhyloCTMC(tree=fbd_tree, Q=s5_o, branchRates=branch_rates[1], siteRates=char_rates, type="Standard", coding="variable")
+m2_s5_o.clamp( p2_s5_o )
+
+# 6 states
+
+p2_s6_o_ind <- [ 64 ]
+p2_s6_o <- morpho
+p2_s6_o.excludeCharacter(1:morpho.nchar())
+p2_s6_o.includeCharacter(p2_s6_o_ind)
+m2_s6_o ~ dnPhyloCTMC(tree=fbd_tree, Q=s6_o, branchRates=branch_rates[1], siteRates=char_rates, type="Standard", coding="variable")
+m2_s6_o.clamp( p2_s6_o )
+
+###############
+# Partition 3 #
+###############
+
+### UNORDERED ###
+
+# 2 states
+
+p3_s2_ind <- [ 82, 84, 85, 86, 87, 88, 89, 93, 94, 97, 98, 99, 102, 103, 105, 106, 110, 114, 116, 119, 120, 246, 247, 248, 271, 274, 276 ]
+p3_s2 <- morpho
+p3_s2.excludeCharacter(1:morpho.nchar())
+p3_s2.includeCharacter(p3_s2_ind)
+m3_s2 ~ dnPhyloCTMC(tree=fbd_tree, Q=s2, branchRates=branch_rates[1], siteRates=char_rates, type="Standard", coding="variable")
+m3_s2.clamp( p3_s2 )
+
+# 3 states
+
+p3_s3_u_ind <- [ 83, 90, 91, 96, 100, 104, 108, 112, 115, 251, 252 ]
+p3_s3_u <- morpho
+p3_s3_u.excludeCharacter(1:morpho.nchar())
+p3_s3_u.includeCharacter(p3_s3_u_ind)
+m3_s3_u ~ dnPhyloCTMC(tree=fbd_tree, Q=s3_u, branchRates=branch_rates[1], siteRates=char_rates, type="Standard", coding="variable")
+m3_s3_u.clamp( p3_s3_u )
+
+# 4 states
+
+p3_s4_u_ind <- [ 95, 109, 111 ]
+p3_s4_u <- morpho
+p3_s4_u.excludeCharacter(1:morpho.nchar())
+p3_s4_u.includeCharacter(p3_s4_u_ind)
+m3_s4_u ~ dnPhyloCTMC(tree=fbd_tree, Q=s4_u, branchRates=branch_rates[1], siteRates=char_rates, type="Standard", coding="variable")
+m3_s4_u.clamp( p3_s4_u )
+
+# 5 states
+
+p3_s5_u_ind <- [ 113 ]
+p3_s5_u <- morpho
+p3_s5_u.excludeCharacter(1:morpho.nchar())
+p3_s5_u.includeCharacter(p3_s5_u_ind)
+m3_s5_u ~ dnPhyloCTMC(tree=fbd_tree, Q=s5_u, branchRates=branch_rates[1], siteRates=char_rates, type="Standard", coding="variable")
+m3_s5_u.clamp( p3_s5_u )
+
+# 6 states
+
+p3_s6_u_ind <- [ 118 ]
+p3_s6_u <- morpho
+p3_s6_u.excludeCharacter(1:morpho.nchar())
+p3_s6_u.includeCharacter(p3_s6_u_ind)
+m3_s6_u ~ dnPhyloCTMC(tree=fbd_tree, Q=s6_u, branchRates=branch_rates[1], siteRates=char_rates, type="Standard", coding="variable")
+m3_s6_u.clamp( p3_s6_u )
+
+### ORDERED ###
+
+# 3 states
+
+p3_s3_o_ind <- [ 92 ]
+p3_s3_o <- morpho
+p3_s3_o.excludeCharacter(1:morpho.nchar())
+p3_s3_o.includeCharacter(p3_s3_o_ind)
+m3_s3_o ~ dnPhyloCTMC(tree=fbd_tree, Q=s3_o, branchRates=branch_rates[1], siteRates=char_rates, type="Standard", coding="variable")
+m3_s3_o.clamp( p3_s3_o )
+
+# 4 states
+
+p3_s4_o_ind <- [ 107, 249 ]
+p3_s4_o <- morpho
+p3_s4_o.excludeCharacter(1:morpho.nchar())
+p3_s4_o.includeCharacter(p3_s4_o_ind)
+m3_s4_o ~ dnPhyloCTMC(tree=fbd_tree, Q=s4_o, branchRates=branch_rates[1], siteRates=char_rates, type="Standard", coding="variable")
+m3_s4_o.clamp( p3_s4_o )
+
+# 5 states
+
+# EMPTY
+
+# 6 states
+
+p3_s6_o_ind <- [ 117 ]
+p3_s6_o <- morpho
+p3_s6_o.excludeCharacter(1:morpho.nchar())
+p3_s6_o.includeCharacter(p3_s6_o_ind)
+m3_s6_o ~ dnPhyloCTMC(tree=fbd_tree, Q=s6_o, branchRates=branch_rates[1], siteRates=char_rates, type="Standard", coding="variable")
+m3_s6_o.clamp( p3_s6_o )
+
+###############
+# Partition 4 #
+###############
+
+### UNORDERED ###
+
+# 2 states
+
+p4_s2_ind <- [ 121, 122, 123, 124, 125, 126, 127, 128, 130, 133, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 149, 150, 151, 152, 155, 157, 158, 161, 162, 164, 165, 166, 167, 169, 170, 171, 172, 174, 175, 244, 250, 253, 277, 278, 279, 280 ]
+p4_s2 <- morpho
+p4_s2.excludeCharacter(1:morpho.nchar())
+p4_s2.includeCharacter(p4_s2_ind)
+m4_s2 ~ dnPhyloCTMC(tree=fbd_tree, Q=s2, branchRates=branch_rates[1], siteRates=char_rates, type="Standard", coding="variable")
+m4_s2.clamp( p4_s2 )
+
+# 3 states
+
+p4_s3_u_ind <- [ 129, 131, 134, 148, 153, 156, 160, 163, 173 ]
+p4_s3_u <- morpho
+p4_s3_u.excludeCharacter(1:morpho.nchar())
+p4_s3_u.includeCharacter(p4_s3_u_ind)
+m4_s3_u ~ dnPhyloCTMC(tree=fbd_tree, Q=s3_u, branchRates=branch_rates[1], siteRates=char_rates, type="Standard", coding="variable")
+m4_s3_u.clamp( p4_s3_u )
+
+# 4 states
+
+p4_s4_u_ind <- [ 132, 154, 177 ]
+p4_s4_u <- morpho
+p4_s4_u.excludeCharacter(1:morpho.nchar())
+p4_s4_u.includeCharacter(p4_s4_u_ind)
+m4_s4_u ~ dnPhyloCTMC(tree=fbd_tree, Q=s4_u, branchRates=branch_rates[1], siteRates=char_rates, type="Standard", coding="variable")
+m4_s4_u.clamp( p4_s4_u )
+
+# 5 states
+
+# EMPTY
+
+# 6 states
+
+# EMPTY
+
+### ORDERED ###
+
+# 3 states
+
+p4_s3_o_ind <- [ 176, 265 ]
+p4_s3_o <- morpho
+p4_s3_o.excludeCharacter(1:morpho.nchar())
+p4_s3_o.includeCharacter(p4_s3_o_ind)
+m4_s3_o ~ dnPhyloCTMC(tree=fbd_tree, Q=s3_o, branchRates=branch_rates[1], siteRates=char_rates, type="Standard", coding="variable")
+m4_s3_o.clamp( p4_s3_o )
+
+# 4 states
+
+p4_s4_o_ind <- [ 159, 168 ]
+p4_s4_o <- morpho
+p4_s4_o.excludeCharacter(1:morpho.nchar())
+p4_s4_o.includeCharacter(p4_s4_o_ind)
+m4_s4_o ~ dnPhyloCTMC(tree=fbd_tree, Q=s4_o, branchRates=branch_rates[1], siteRates=char_rates, type="Standard", coding="variable")
+m4_s4_o.clamp( p4_s4_o )
+
+# 5 states
+
+# EMPTY
+
+# 6 states
+
+# EMPTY
+
+###############
+# Partition 5 #
+###############
+
+### UNORDERED ###
+
+# 2 states
+
+# Exclude char. 194 since it is constant
+p5_s2_ind <- [ 178, 179, 180, 181, 182, 184, 185, 186, 187, 188, 189, 190, 191, 192, 195, 196, 197, 272, 273 ]
+p5_s2 <- morpho
+p5_s2.excludeCharacter(1:morpho.nchar())
+p5_s2.includeCharacter(p5_s2_ind)
+m5_s2 ~ dnPhyloCTMC(tree=fbd_tree, Q=s2, branchRates=branch_rates[1], siteRates=char_rates, type="Standard", coding="variable")
+m5_s2.clamp( p5_s2 )
+
+# 3 states
+
+# EMPTY
+
+# 4 states
+
+p5_s4_u_ind <- [ 198 ]
+p5_s4_u <- morpho
+p5_s4_u.excludeCharacter(1:morpho.nchar())
+p5_s4_u.includeCharacter(p5_s4_u_ind)
+m5_s4_u ~ dnPhyloCTMC(tree=fbd_tree, Q=s4_u, branchRates=branch_rates[1], siteRates=char_rates, type="Standard", coding="variable")
+m5_s4_u.clamp( p5_s4_u )
+
+# 5 states
+
+# EMPTY
+
+# 6 states
+
+# EMPTY
+
+### ORDERED ###
+
+# 3 states
+
+p5_s3_o_ind <- [ 183, 193 ]
+p5_s3_o <- morpho
+p5_s3_o.excludeCharacter(1:morpho.nchar())
+p5_s3_o.includeCharacter(p5_s3_o_ind)
+m5_s3_o ~ dnPhyloCTMC(tree=fbd_tree, Q=s3_o, branchRates=branch_rates[1], siteRates=char_rates, type="Standard", coding="variable")
+m5_s3_o.clamp( p5_s3_o )
+
+# 4 states
+
+# EMPTY
+
+# 5 states
+
+# EMPTY
+
+# 6 states
+
+# EMPTY
+
+###############
+# Partition 6 #
+###############
+
+### UNORDERED ###
+
+# 2 states
+
+p6_s2_ind <- [ 199, 200, 206, 207, 208, 209, 210, 211, 215, 217, 218, 220, 221, 223, 224, 225, 230, 231, 238, 239, 240, 242, 254, 256, 258, 259, 264 ]
+p6_s2 <- morpho
+p6_s2.excludeCharacter(1:morpho.nchar())
+p6_s2.includeCharacter(p6_s2_ind)
+m6_s2 ~ dnPhyloCTMC(tree=fbd_tree, Q=s2, branchRates=branch_rates[1], siteRates=char_rates, type="Standard", coding="variable")
+m6_s2.clamp( p6_s2 )
+
+# 3 states
+
+p6_s3_u_ind <- [ 201, 202, 203, 204, 212, 226, 227, 228, 236, 237, 241, 243, 255, 257, 260 ]
+p6_s3_u <- morpho
+p6_s3_u.excludeCharacter(1:morpho.nchar())
+p6_s3_u.includeCharacter(p6_s3_u_ind)
+m6_s3_u ~ dnPhyloCTMC(tree=fbd_tree, Q=s3_u, branchRates=branch_rates[1], siteRates=char_rates, type="Standard", coding="variable")
+m6_s3_u.clamp( p6_s3_u )
+
+# 4 states
+
+p6_s4_u_ind <- [ 232, 235, 266 ]
+p6_s4_u <- morpho
+p6_s4_u.excludeCharacter(1:morpho.nchar())
+p6_s4_u.includeCharacter(p6_s4_u_ind)
+m6_s4_u ~ dnPhyloCTMC(tree=fbd_tree, Q=s4_u, branchRates=branch_rates[1], siteRates=char_rates, type="Standard", coding="variable")
+m6_s4_u.clamp( p6_s4_u )
+
+# 5 states
+
+# EMPTY
+
+# 6 states
+
+# EMPTY
+
+### ORDERED ###
+
+# 3 states
+
+p6_s3_o_ind <- [ 205, 213, 214, 216, 219, 222, 233, 234, 261 ]
+p6_s3_o <- morpho
+p6_s3_o.excludeCharacter(1:morpho.nchar())
+p6_s3_o.includeCharacter(p6_s3_o_ind)
+m6_s3_o ~ dnPhyloCTMC(tree=fbd_tree, Q=s3_o, branchRates=branch_rates[1], siteRates=char_rates, type="Standard", coding="variable")
+m6_s3_o.clamp( p6_s3_o )
+
+# 4 states
+
+p6_s4_o_ind <- [ 229 ]
+p6_s4_o <- morpho
+p6_s4_o.excludeCharacter(1:morpho.nchar())
+p6_s4_o.includeCharacter(p6_s4_o_ind)
+m6_s4_o ~ dnPhyloCTMC(tree=fbd_tree, Q=s4_o, branchRates=branch_rates[1], siteRates=char_rates, type="Standard", coding="variable")
+m6_s4_o.clamp( p6_s4_o )
+
+# 5 states
+
+# EMPTY
+
+# 6 states
+
+# EMPTY
+
+
+########
+# MCMC #
+########
+
+# Initialize the model object
+mymodel = model(fbd_tree)
+
+# Create a vector of monitors
+monitors = VectorMonitors()
+monitors.append( mnModel(filename="output/test2.log", printgen=1) )
+
+# Initialize the MCMC object
+mymcmc = mcmc(mymodel, monitors, moves, nruns=2, combine="mixed", ntries=2, nsearch=200)
+
+# Run the MCMC
+mymcmc.burnin(generations=2, tuningInterval=1)
+mymcmc.run(generations=2)
+

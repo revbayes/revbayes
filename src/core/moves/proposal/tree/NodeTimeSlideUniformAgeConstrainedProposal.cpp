@@ -90,7 +90,7 @@ double NodeTimeSlideUniformAgeConstrainedProposal::getProposalTuningParameter( v
  *
  * \return The hastings ratio.
  */
-double NodeTimeSlideUniformAgeConstrainedProposal::doProposal( void )
+LogDensity NodeTimeSlideUniformAgeConstrainedProposal::doProposal( void )
 {
     
     // Get random number generator

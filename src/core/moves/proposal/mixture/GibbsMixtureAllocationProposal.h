@@ -26,7 +26,7 @@ namespace RevBayesCore {
         // Basic utility functions
         void                                    cleanProposal(void);                                                                //!< Clean up proposal
         GibbsMixtureAllocationProposal*         clone(void) const;                                                                  //!< Clone object
-        double                                  doProposal(void);                                                                   //!< Perform proposal
+        LogDensity                              doProposal(void);                                                                   //!< Perform proposal
         const std::string&                      getProposalName(void) const;                                                        //!< Get the name of the proposal for summary printing
         double                                  getProposalTuningParameter(void) const;
         void                                    prepareProposal(void);                                                              //!< Prepare the proposal
@@ -134,7 +134,7 @@ double RevBayesCore::GibbsMixtureAllocationProposal<mixtureType>::getProposalTun
  * \return The hastings ratio.
  */
 template <class mixtureType>
-double RevBayesCore::GibbsMixtureAllocationProposal<mixtureType>::doProposal( void )
+LogDensity RevBayesCore::GibbsMixtureAllocationProposal<mixtureType>::doProposal( void )
 {
     
     // potential affected nodes for likelihood computation
@@ -166,13 +166,13 @@ double RevBayesCore::GibbsMixtureAllocationProposal<mixtureType>::doProposal( vo
         variable->touch();
         
         // compute the likelihood of the new value
-        double prior_ratio = variable->getLnProbability();
-        double likelihood_ratio = 0.0;
+        LogDensity prior_ratio = variable->getLnProbability();
+        LogDensity likelihood_ratio = 0.0;
         for (RbOrderedSet<DagNode*>::const_iterator it = affected.begin(); it != affected.end(); ++it)
         {
             likelihood_ratio += (*it)->getLnProbability();
         }
-        weights[i] = prior_ratio + likelihood_ratio;
+        weights[i] = double(prior_ratio + likelihood_ratio);
         
         if (max_weight < weights[i])
         {

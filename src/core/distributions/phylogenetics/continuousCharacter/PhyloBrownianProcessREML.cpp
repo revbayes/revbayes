@@ -69,7 +69,7 @@ PhyloBrownianProcessREML* PhyloBrownianProcessREML::clone( void ) const
 }
 
 
-double PhyloBrownianProcessREML::computeLnProbability( void )
+LogDensity PhyloBrownianProcessREML::computeLnProbability( void )
 {
     // we need to check here if we still are listining to this tree for change events
     // the tree could have been replaced without telling us

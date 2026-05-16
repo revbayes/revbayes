@@ -30,7 +30,7 @@ namespace RevBayesCore {
         // Basic utility functions
         void                                cleanProposal(void);                                                                //!< Clean up proposal
         ReversibleJumpMixtureProposal*      clone(void) const;                                                                  //!< Clone object
-        double                              doProposal(void);                                                                   //!< Perform proposal
+        LogDensity                          doProposal(void);                                                                   //!< Perform proposal
         const std::string&                  getProposalName(void) const;                                                        //!< Get the name of the proposal for summary printing
         double                              getProposalTuningParameter(void) const;
         void                                prepareProposal(void);                                                              //!< Prepare the proposal
@@ -202,7 +202,7 @@ double RevBayesCore::ReversibleJumpMixtureProposal<mixtureType>::getProposalTuni
  * \return The hastings ratio.
  */
 template <class mixtureType>
-double RevBayesCore::ReversibleJumpMixtureProposal<mixtureType>::doProposal( void )
+LogDensity RevBayesCore::ReversibleJumpMixtureProposal<mixtureType>::doProposal( void )
 {
     
     
@@ -213,7 +213,7 @@ double RevBayesCore::ReversibleJumpMixtureProposal<mixtureType>::doProposal( voi
     stored_value = Cloner<mixtureType, IsDerivedFrom<mixtureType, Cloneable>::Is >::createClone( v );
     stored_index = d.getCurrentIndex();
     
-    double lnHastingsratio = 0.0;
+    LogDensity lnHastingsratio = 0.0;
     
     if ( stored_index == 0 )
     {

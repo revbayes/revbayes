@@ -501,11 +501,11 @@ void RevBayesCore::TreeCharacterHistoryNodeMonitor<charType>::monitor(std::uint6
             outStream << separator;
 
             const std::vector<DagNode*> &n = model->getDagNodes();
-            double pp = 0.0;
+            LogDensity pp = 0.0;
             for (std::vector<DagNode*>::const_iterator it = n.begin(); it != n.end(); ++it) {
                 pp += (*it)->getLnProbability();
             }
-            outStream << pp;
+            outStream << (double)pp;
         }
 
         if ( likelihood ) {
@@ -513,13 +513,13 @@ void RevBayesCore::TreeCharacterHistoryNodeMonitor<charType>::monitor(std::uint6
             outStream << separator;
 
             const std::vector<DagNode*> &n = model->getDagNodes();
-            double pp = 0.0;
+            LogDensity pp = 0.0;
             for (std::vector<DagNode*>::const_iterator it = n.begin(); it != n.end(); ++it) {
                 if ( (*it)->isClamped() ) {
                     pp += (*it)->getLnProbability();
                 }
             }
-            outStream << pp;
+            outStream << (double)pp;
         }
 
         if ( prior ) {
@@ -527,13 +527,13 @@ void RevBayesCore::TreeCharacterHistoryNodeMonitor<charType>::monitor(std::uint6
             outStream << separator;
 
             const std::vector<DagNode*> &n = model->getDagNodes();
-            double pp = 0.0;
+            LogDensity pp = 0.0;
             for (std::vector<DagNode*>::const_iterator it = n.begin(); it != n.end(); ++it) {
                 if ( !(*it)->isClamped() ) {
                     pp += (*it)->getLnProbability();
                 }
             }
-            outStream << pp;
+            outStream << (double)pp;
         }
 
         if (showNumEvents)

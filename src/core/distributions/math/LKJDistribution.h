@@ -22,7 +22,7 @@ template <class valueType> class TypedDagNode;
         // public member functions
 
         LKJDistribution*                                    clone(void) const;                                                          //!< Create an independent clone
-        double                                              computeLnProbability(void);
+        LogDensity                                          computeLnProbability(void);
         void                                                redrawValue(void);
         
         

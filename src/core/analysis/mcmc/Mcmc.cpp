@@ -55,7 +55,8 @@ using namespace RevBayesCore;
  * \param[in]    mvs  The vector of moves.
  * \param[in]    mons The vector of monitors.
  */
-Mcmc::Mcmc(const Model& m, const RbVector<Move> &mvs, const RbVector<Monitor> &mons, size_t ntries) : MonteCarloSampler(),
+Mcmc::Mcmc(const Model& m, const RbVector<Move> &mvs, const RbVector<Monitor> &mons, size_t ntries, size_t nsearch)
+  : MonteCarloSampler(),
     chain_active( true ),
     chain_likelihood_heat( 1.0 ),
     chain_posterior_heat( 1.0 ),
@@ -65,6 +66,7 @@ Mcmc::Mcmc(const Model& m, const RbVector<Move> &mvs, const RbVector<Monitor> &m
     monitors( mons ),
     moves( mvs ),
     num_init_attempts(ntries),
+    num_search_gens(nsearch),
     schedule(NULL),
     schedule_type("random")
 {
@@ -99,7 +101,8 @@ Mcmc::Mcmc(const Model& m, const RbVector<Move> &mvs, const RbVector<Monitor> &m
   *
   * \param[in]    m    The MonteCarloSampler object to copy.
   */
-Mcmc::Mcmc(const Mcmc &m) : MonteCarloSampler(m),
+Mcmc::Mcmc(const Mcmc &m)
+  : MonteCarloSampler(m),
     chain_active( m.chain_active ),
     chain_likelihood_heat( m.chain_likelihood_heat ),
     chain_posterior_heat( m.chain_posterior_heat ),
@@ -109,6 +112,7 @@ Mcmc::Mcmc(const Mcmc &m) : MonteCarloSampler(m),
     monitors( m.monitors ),
     moves( m.moves ),
     num_init_attempts( m.num_init_attempts ),
+    num_search_gens( m.num_search_gens ),
     schedule( NULL ),
     schedule_type( m.schedule_type )
 {
@@ -452,9 +456,9 @@ const Model& Mcmc::getModel( void ) const
  * Get the joint posterior probability of the current state for this model.
  * Note that the joint posterior is the true, unscaled and unheated value.
  */
-double Mcmc::getModelLnProbability(bool likelihood_only)
+LogDensity Mcmc::getModelLnProbability(bool likelihood_only)
 {
-    double pp = 0.0;
+    LogDensity pp = 0.0;
     
     const std::vector<DagNode*> &n = model->getDagNodes();
     for (std::vector<DagNode*>::const_iterator it = n.begin(); it != n.end(); ++it)
@@ -574,9 +578,43 @@ std::string Mcmc::getStrategyDescription( void ) const
     return description;
 }
 
+std::vector<const DagNode*> upstreamStochastic(const DagNode* node)
+{
+    std::set<const DagNode*> seen;
+
+    // The parents are not necessarily unique.
+    auto upstream = node->getParents();
+    std::vector<const DagNode*> stochastic;
+
+    for(int i=0; i < upstream.size(); i++)
+    {
+        auto u = upstream[i];
+        if (seen.contains(u)) continue;
+
+        seen.insert(u);
+
+        if (u->isStochastic())
+            stochastic.push_back(u);
+        else
+        {
+
+            for(auto& p: u->getParents())
+            {
+                if (not seen.contains(p))
+                    upstream.push_back(p);
+            }
+        }
+    }
+
+    return stochastic;
+}
+
 
 void Mcmc::initializeSampler()
 {
+    int logMCMC = RbSettings::userSettings().getLogMCMC();
+    int logZero = RbSettings::userSettings().getLogZeroPr();
+
     std::vector<DagNode *> &dag_nodes = model->getDagNodes();
     std::vector<DagNode *> ordered_stoch_nodes = model->getOrderedStochasticNodes(  );
 
@@ -585,15 +623,29 @@ void Mcmc::initializeSampler()
     {
         delete schedule;
     }
-    schedule = NULL;
+    // Create the move scheduler
+    if ( schedule_type == "sequential" )
+    {
+        schedule = new SequentialMoveSchedule( &moves );
+    }
+    else if ( schedule_type == "single" )
+    {
+        schedule = new SingleRandomMoveSchedule( &moves );
+    }
+    else
+    {
+        schedule = new RandomMoveSchedule( &moves );
+    }
 
     // Get initial ln_probability of model
+    for (auto the_node: dag_nodes)
+        the_node->setMcmcMode( true );
 
-    // first we touch all nodes so that the likelihood is dirty
+    // first we touch all nodes so that the likelihood is uncomputed
     for (auto the_node: dag_nodes)
     {
-        the_node->setMcmcMode( true );
         the_node->touch();
+        the_node->keep();
     }
 
     if ( chain_active == false )
@@ -612,52 +664,78 @@ void Mcmc::initializeSampler()
             {
                 // make sure that the clamped node also recompute their probabilities
                 the_node->touch();
+                the_node->keep();
             }
     
         }
         
     }
 
+    auto Pr = [&]()
+        {
+            LogDensity ln_probability = 0;
 
+            for (auto the_node: dag_nodes)
+            {
+                auto ln_prob = the_node->getLnProbability();
+
+                if ( not ln_prob.isfinite() )
+                {
+                    if (ln_prob > 0)
+                    {
+                        ln_prob = the_node->getLnProbability();
+                    }
+                    std::stringstream ss;
+                    ss << "   '" << the_node->getName() << "': lnProb = "<< ln_prob << "    value = ";
+                    std::ostringstream o1;
+                    the_node->printValue( o1, "," );
+                    ss << StringUtilities::oneLiner( o1.str(), 54 );
+                    RBOUT( ss.str() );
+                    if (logZero >= 2)
+                    {
+                        for(auto u: upstreamStochastic(the_node))
+                        {
+                            std::stringstream ss2;
+                            ss2<<"       '"<<u->getName()<<"':    value = ";
+                            std::ostringstream o2;
+                            u->printValue( o2, "," );
+                            ss2 << StringUtilities::oneLiner( o2.str(), 54 );
+                            RBOUT( ss2.str() );
+                        }
+                    }
+                }
+                ln_probability += ln_prob;
+            }
+
+            return ln_probability;
+        };
+                      
+    
+    auto TouchedPr = [&]()
+        {
+            for (auto the_node: dag_nodes)
+                the_node->touch();
+
+            LogDensity ln_probability = Pr();
+
+            // now we keep all nodes so that the likelihood is stored
+            for (auto the_node: dag_nodes)
+            {
+                the_node->keep();
+            }
+
+            return ln_probability;
+        };
+                      
+    
     int num_tries     = 0;
-    double ln_probability = 0.0;
+    LogDensity ln_probability = 0.0;
     for ( ; num_tries < num_init_attempts; ++num_tries )
     {
         // a flag if we failed to find a valid starting value
-        bool failed = false;
-
-        ln_probability = 0.0;
-        for (auto the_node: dag_nodes)
-            the_node->touch();
-
-        for (auto the_node: dag_nodes)
-        {
-            double ln_prob = the_node->getLnProbability();
-
-            if ( RbMath::isAComputableNumber(ln_prob) == false )
-            {
-                std::stringstream ss;
-                ss << "Could not compute lnProb for node '" << the_node->getName() << "': lnProb = "<< ln_prob << std::endl;
-                std::ostringstream o1;
-                the_node->printValue( o1, "," );
-                ss << StringUtilities::oneLiner( o1.str(), 54 ) << std::endl;
-
-                ss << std::endl;
-                RBOUT( ss.str() );
-
-                // set the flag
-                failed = true;
-            }
-            ln_probability += ln_prob;
-        }
-
-        // now we keep all nodes so that the likelihood is stored
-        for (auto the_node: dag_nodes)
-        {
-            the_node->keep();
-        }
-
-        if ( failed == true )
+        ln_probability = TouchedPr();
+        
+        if ( not isfinite(ln_probability) )
         {
             RBOUT( "Drawing new initial states ... " );
             for (auto the_node: ordered_stoch_nodes)
@@ -687,31 +765,68 @@ void Mcmc::initializeSampler()
 
     }
     
-    if ( num_tries == num_init_attempts )
+    if ( not isfinite(ln_probability) )
     {
         std::stringstream msg;
         msg << "Unable to find a starting state with computable probability";
         if ( num_tries > 1 )
         {
-            msg << " after " << num_tries << " tries";
+            msg << " after resampling " << num_tries << " times";
         }
-        throw RbException( msg.str() );
-        
+
+        if (num_search_gens <= 0)
+            throw RbException(msg.str());
+        else
+            RBOUT(msg.str());
+    }
+
+    if ( not isfinite(ln_probability) and num_search_gens > 0)
+    {
+        RBOUT("Searching for non-zero probability via MCMC moves.");
+        RBOUT("Search will stop if no improvment seen for " + std::to_string(num_search_gens) + " generations");
+
+        LogDensity last_improved_pr = ln_probability;
+        int last_improved_iter = 0;
+        std::cerr<<"    SEARCH: iter = 0    Pr = "<<ln_probability<<"\n";
+        for(int search_iter=1; not isfinite(ln_probability) and (search_iter - last_improved_iter < num_search_gens); search_iter++)
+        {
+            nextCycle(false);
+
+            auto next_pr = TouchedPr();
+            std::cerr<<"    SEARCH: iter = "<<search_iter<<"    Pr = "<<next_pr<<"\n";
+
+            if (next_pr.nans() < ln_probability.nans())
+            {
+                last_improved_pr = next_pr;
+                last_improved_iter = search_iter;
+            }
+            else if (next_pr.nans() > ln_probability.nans())
+            {
+            }
+            else if (next_pr.infs() < ln_probability.infs())
+            {
+                last_improved_pr = next_pr;
+                last_improved_iter = search_iter;
+            }
+            else if (next_pr.infs() > ln_probability.infs())
+            {
+            }
+            else if (next_pr.neginfs() < ln_probability.infs())
+            {
+                last_improved_pr = next_pr;
+                last_improved_iter = search_iter;
+            }
+
+            ln_probability = next_pr;
+        }
+    }
+
+    if ( not isfinite(ln_probability) )
+    {
+        throw RbException()<< "Unable to find a starting state with computable probability";
+
     }
     
-    // Create the move scheduler
-    if ( schedule_type == "sequential" )
-    {
-        schedule = new SequentialMoveSchedule( &moves );
-    }
-    else if ( schedule_type == "single" )
-    {
-        schedule = new SingleRandomMoveSchedule( &moves );
-    }
-    else
-    {
-        schedule = new RandomMoveSchedule( &moves );
-    }
     
     generation = 0;
     
@@ -816,6 +931,7 @@ void Mcmc::initializeSamplerFromCheckpoint( void )
     for(auto& node: nodes)
     {
         node->touch();
+        node->keep();
     }
 
     // assemble the new filename
@@ -1139,12 +1255,10 @@ void Mcmc::replaceDag(const RbVector<Move> &mvs, const RbVector<Monitor> &mons)
 
 void Mcmc::redrawStartingValues( void )
 {
-    
     std::vector<DagNode *> ordered_stoch_nodes = model->getOrderedStochasticNodes(  );
-    for (std::vector<DagNode *>::iterator i=ordered_stoch_nodes.begin(); i!=ordered_stoch_nodes.end(); ++i)
+
+    for (DagNode* the_node: ordered_stoch_nodes)
     {
-        DagNode *the_node = (*i);
-        
         if ( the_node->isClamped() == false && the_node->isStochastic() == true )
         {
 
@@ -1157,12 +1271,9 @@ void Mcmc::redrawStartingValues( void )
         
     }
     
-    for (std::vector<DagNode *>::iterator i=ordered_stoch_nodes.begin(); i!=ordered_stoch_nodes.end(); ++i)
+    for (DagNode* the_node: ordered_stoch_nodes)
     {
-        
-        DagNode *the_node = (*i);
         the_node->keep();
-        
     }
     
 }
@@ -1185,12 +1296,10 @@ void Mcmc::reset( void )
 {
     
     double moves_per_iteration = 0.0;
-    for (RbIterator<Move> it = moves.begin(); it != moves.end(); ++it)
+    for (Move& m: moves)
     {
-
-        it->resetCounters();
-        moves_per_iteration += it->getUpdateWeight();
-        
+        m.resetCounters();
+        moves_per_iteration += m.getUpdateWeight();
     }
 
 }
@@ -1212,12 +1321,8 @@ void Mcmc::resetVariableDagNodes( void )
         // this should by default happen by here we check again
         std::set<std::string> var_names;
         
-        const std::vector<DagNode*> &n = model->getDagNodes();
-        for (std::vector<DagNode*>::const_iterator it = n.begin(); it != n.end(); ++it)
+        for (DagNode* the_node: model->getDagNodes())
         {
-            
-            DagNode *the_node = *it;
-            
             // only non clamped variables
             if ( the_node->isClamped() == false )
             {

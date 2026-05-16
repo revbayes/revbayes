@@ -55,7 +55,7 @@ void LKJPartialDistribution::swapParameterInternal(const DagNode *oldP, const Da
 }
 
 
-double LKJPartialDistribution::computeLnProbability(void)
+LogDensity LKJPartialDistribution::computeLnProbability(void)
 {
     
     return RbStatistics::LKJ::lnPdfPartial(eta->getValue(), getValue());;

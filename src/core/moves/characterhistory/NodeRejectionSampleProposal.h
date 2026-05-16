@@ -51,7 +51,7 @@ namespace RevBayesCore {
         NodeRejectionSampleProposal*                                clone(void) const;                                              //!< Clone object
         void                                                        cleanProposal(void);
 //        virtual double                                              computeLnProposal();
-        double                                                      doProposal(void);                                               //!< Perform proposal
+        LogDensity                                                  doProposal(void);                                               //!< Perform proposal
         size_t                                                      getNodeStateIndex(TopologyNode* nd);                            // get the index of the node state of the first character                                    //!< Get the name of the proposal for summary printing
         const std::string&                                          getProposalName(void) const;                                    //!< Get the name of the proposal for summary printing
         double                                                      getProposalTuningParameter(void) const;
@@ -86,8 +86,8 @@ namespace RevBayesCore {
         std::vector<size_t>                                         storedSubrootState;
 
         TopologyNode*                                               node;
-        double                                                      storedLnProb;
-        double                                                      proposedLnProb;
+        LogDensity                                                  storedLnProb;
+        LogDensity                                                  proposedLnProb;
 
         PathRejectionSampleProposal<charType>*                      nodeProposal;
         PathRejectionSampleProposal<charType>*                      leftProposal;
@@ -304,11 +304,11 @@ RevBayesCore::NodeRejectionSampleProposal<charType>* RevBayesCore::NodeRejection
  * \return The hastings ratio.
  */
 template<class charType>
-double RevBayesCore::NodeRejectionSampleProposal<charType>::doProposal( void )
+LogDensity RevBayesCore::NodeRejectionSampleProposal<charType>::doProposal( void )
 {
     proposedLnProb = 0.0;
 
-    double proposedLnProbRatio = 0.0;
+    LogDensity proposedLnProbRatio = 0.0;
 
     // backward proposal probability
     //    proposedLnProbRatio += computeLnProposal();

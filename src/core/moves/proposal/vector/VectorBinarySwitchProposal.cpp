@@ -70,7 +70,7 @@ VectorBinarySwitchProposal* VectorBinarySwitchProposal::clone( void ) const
  *
  * \return The hastings ratio.
  */
-double VectorBinarySwitchProposal::doProposal( void )
+LogDensity VectorBinarySwitchProposal::doProposal( void )
 {
     
     // Get random number generator

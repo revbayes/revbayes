@@ -204,14 +204,12 @@ double RevBayesCore::DPPAllocateAuxGibbsMove<valueType>::getLnProbabilityForMove
     
     RbOrderedSet<DagNode*> affected;
     variable->initiateGetAffectedNodes( affected );
-    double ln_probs = 0.0;
+    LogDensity ln_probs = 0.0;
     for (RbOrderedSet<DagNode*>::iterator it = affected.begin(); it != affected.end(); ++it)
     {
-        DagNode *the_node = *it;
-        double lp = the_node->getLnProbability();
-        ln_probs += lp;
+        ln_probs += (*it)->getLnProbability();
     }
-    return ln_probs;
+    return (double)ln_probs;
 }
 
 

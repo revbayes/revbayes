@@ -52,7 +52,7 @@ namespace RevBayesCore {
         virtual bool                                                        samplePathHistory(const TopologyNode& node) = 0;
 
         // non-virtual
-        double                                                              computeLnProbability(void);
+        LogDensity                                                          computeLnProbability(void);
         void                                                                fireTreeChangeEvent(const TopologyNode &n, const unsigned& m=0);                         //!< The tree has changed and we want to know which part.
         BranchHistory&                                                      getHistory(const TopologyNode& nd);
         const BranchHistory&                                                getHistory(const TopologyNode& nd) const;
@@ -268,7 +268,7 @@ double RevBayesCore::TreeHistoryCtmc<charType>::computeBranchRate(size_t index)
 }
 
 template<class charType>
-double RevBayesCore::TreeHistoryCtmc<charType>::computeLnProbability( void )
+LogDensity RevBayesCore::TreeHistoryCtmc<charType>::computeLnProbability( void )
 {
 
     // we need to check here if we still are listining to this tree for change events

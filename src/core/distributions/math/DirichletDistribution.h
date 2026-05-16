@@ -25,7 +25,7 @@ template <class valueType> class TypedDagNode;
                                                         DirichletDistribution(const TypedDagNode< RbVector<double> > *l);
             virtual                                    ~DirichletDistribution(void);                                                //!< Virtual destructor
             DirichletDistribution*                      clone(void) const;                                                          //!< Create an independent clone
-            double                                      computeLnProbability(void);                                                 //!< Natural log of the probability density
+            LogDensity                                  computeLnProbability(void);                                                 //!< Natural log of the probability density
             void                                        redrawValue(void);
             
         protected:

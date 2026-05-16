@@ -44,7 +44,7 @@ UniformIntegerDistribution* UniformIntegerDistribution::clone( void ) const
 }
 
 
-double UniformIntegerDistribution::computeLnProbability( void )
+LogDensity UniformIntegerDistribution::computeLnProbability( void )
 {
     
     if ( *value >= min->getValue() && *value <= max->getValue() )

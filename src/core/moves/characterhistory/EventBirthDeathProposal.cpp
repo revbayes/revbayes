@@ -76,7 +76,7 @@ double EventBirthDeathProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double EventBirthDeathProposal::doProposal( void )
+LogDensity EventBirthDeathProposal::doProposal( void )
 {
 
     CharacterHistory &history = distribution->getCharacterHistory();

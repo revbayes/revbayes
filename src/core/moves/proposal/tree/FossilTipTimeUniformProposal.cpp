@@ -103,7 +103,7 @@ double FossilTipTimeUniformProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double FossilTipTimeUniformProposal::doProposal( void )
+LogDensity FossilTipTimeUniformProposal::doProposal( void )
 {
     
     // Get random number generator
@@ -211,6 +211,10 @@ double FossilTipTimeUniformProposal::doProposal( void )
         max_age = fmin(max_age, parent_age);
     }
     
+    // Abort the move if we don't have a valid interval
+    if (not (min_age < max_age))
+        throw RbException(RbException::SKIP_PROPOSAL);
+
     assert(max_age >= min_age); //sanity check
 
     // now we store all necessary values

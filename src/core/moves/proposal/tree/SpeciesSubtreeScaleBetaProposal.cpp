@@ -108,7 +108,7 @@ double SpeciesSubtreeScaleBetaProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double SpeciesSubtreeScaleBetaProposal::doProposal( void )
+LogDensity SpeciesSubtreeScaleBetaProposal::doProposal( void )
 {
 
     // Get random number generator

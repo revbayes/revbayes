@@ -51,7 +51,7 @@ ExponentialDistribution* ExponentialDistribution::clone( void ) const
 }
 
 
-double ExponentialDistribution::computeLnProbability( void )
+LogDensity ExponentialDistribution::computeLnProbability( void )
 {
     assert( lambda->getValue() >= 0.0 );
     

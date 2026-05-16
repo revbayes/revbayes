@@ -43,7 +43,7 @@ RevBayesCore::MultivariateLogDistribution* RevBayesCore::MultivariateLogDistribu
 
 
 
-double RevBayesCore::MultivariateLogDistribution::computeLnProbability( void )
+LogDensity RevBayesCore::MultivariateLogDistribution::computeLnProbability( void )
 {
     // 1. Get value
     RbVector<double> xs = *value;
@@ -59,7 +59,7 @@ double RevBayesCore::MultivariateLogDistribution::computeLnProbability( void )
 	sum_log_xs += x;
     }
 
-    double ln_pdf = dist->computeLnProbability() - sum_log_xs;
+    auto ln_pdf = dist->computeLnProbability() - sum_log_xs;
 
     // 3. Set the log-transformed value on the child distribution
     dist->setValue( new RbVector<double>(xs) );
