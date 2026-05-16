@@ -19,6 +19,14 @@
 // *  (-inf)   - (-inf)   = 0         (not nan)
 // *  (-inf*3) - (-inf*2) = -inf      (not nan)
 
+// Zero-probability or infinite-density factors can cancel in log-density differences.
+//
+// NaNs are different: they represent failed/undefined factor evaluations.
+//  They can cancel under direct subtraction of corresponding LogDensity values,
+//  but scalar multiplication does not give them algebraic sign or magnitude.
+//
+// So x - y = x + (-y) .... unless y contains nans.
+
 // TODO: Change LogDensity -> LogDensityOver<T>, LogDensity = LogDensityOver<double>.
 //       Then we try setting LogDensity = LogDensityOver<__float128> to see what happens.
 //       We would need to move operators into the class as inline friends to make type conversion work.
@@ -29,7 +37,7 @@ class LogDensity
     double neginfs_ = 0;
 
     // Should be finite
-    double ones_ = 0;
+    double finite_part_ = 0;
 
     // Should be finite
     double infs_ = 0;
@@ -41,7 +49,7 @@ public:
 
     double neginfs() const {return neginfs_;}
 
-    double ones() const {return ones_;}
+    double finitePart() const {return finite_part_;}
 
     double infs() const {return infs_;}
 
@@ -50,7 +58,7 @@ public:
     // This is kind of a super-nan.  If not valid, we would treat this as a nan.  But it should be valid.
     bool isvalid() const
     {
-        return std::isfinite(neginfs_) and std::isfinite(ones_) and std::isfinite(infs_);
+        return std::isfinite(neginfs_) and std::isfinite(finite_part_) and std::isfinite(infs_);
     }
 
     void check() const {
@@ -74,7 +82,7 @@ public:
 
     bool isfinite() const
     {
-        return neginfs_ == 0 and infs_ == 0 and nans_ == 0 and std::isfinite(ones_);
+        return neginfs_ == 0 and infs_ == 0 and nans_ == 0 and std::isfinite(finite_part_);
     }
 
     LogDensity& operator *=(double y)
@@ -83,9 +91,9 @@ public:
 	assert(not std::isinf(y));
 
 	// 0^0 == 1
-	neginfs_ *= y; // fractional neginfs
-	ones_    *= y;
-        infs_    *= y;
+	neginfs_      *= y; // fractional neginfs
+	finite_part_  *= y;
+        infs_         *= y;
 
 	return *this;
     }
@@ -95,19 +103,19 @@ public:
 	// No zeroth roots
 	assert(y != 0);
 
-	neginfs_ /= y;  // fractional neginfs
-	ones_    /= y;
-        infs_    /= y;
+	neginfs_        /= y;  // fractional neginfs
+	finite_part_    /= y;
+        infs_           /= y;
 
 	return *this;
     }
 
     LogDensity& operator +=(const LogDensity y)
     {
-	neginfs_ += y.neginfs_;
-	ones_    += y.ones_;
-        infs_    += y.infs_;
-        nans_    += y.nans_;
+	neginfs_      += y.neginfs_;
+	finite_part_  += y.finite_part_;
+        infs_         += y.infs_;
+        nans_         += y.nans_;
 
 	return *this;
     }
@@ -115,7 +123,7 @@ public:
     LogDensity& operator -=(const LogDensity y)
     {
 	neginfs_ -= y.neginfs_;
-	ones_    -= y.ones_;
+	finite_part_    -= y.finite_part_;
         infs_    -= y.infs_;
         nans_    -= y.nans_;
 
@@ -125,10 +133,10 @@ public:
     LogDensity operator -() const
     {
         LogDensity ld = *this;
-	ld.neginfs_  = -ld.neginfs_;
-        ld.ones_     = -ld.ones_;
-        ld.infs_     = -ld.infs_;
-        ld.nans_     = -ld.nans_;
+        ld.neginfs_         = -ld.neginfs_;
+        ld.finite_part_     = -ld.finite_part_;
+        ld.infs_            = -ld.infs_;
+        ld.nans_            = -ld.nans_;
 
 	return ld;
     }
@@ -137,7 +145,7 @@ public:
     {
 	if (isnan() or y.isnan()) return false;
 
-	return neginfs_ == y.neginfs_ and ones_ == y.ones_ and infs_ == y.infs_;
+	return neginfs_ == y.neginfs_ and finite_part_ == y.finite_part_ and infs_ == y.infs_;
     }
 
     // x <=> y  iff x and y are not NaN AND (x - y) <=> 0
@@ -155,7 +163,7 @@ public:
         else if (z.neginfs() < 0 or z.infs() > 0)
             return std::partial_ordering::greater;
         else
-            return z.ones() <=> 0;
+            return z.finitePart() <=> 0;
     }
 
     explicit operator double() const
@@ -168,7 +176,7 @@ public:
             return -std::numeric_limits<double>::infinity();
         else if (neginfs_ < 0 or infs_ > 0)
             return std::numeric_limits<double>::infinity();
-        return ones_;
+        return finite_part_;
     }
 
     double exp() const
@@ -182,7 +190,7 @@ public:
         else if (neginfs_ < 0 or infs_ > 0)
             return std::numeric_limits<double>::infinity();
         else
-            return std::exp(ones_);
+            return std::exp(finite_part_);
     }
 
     constexpr LogDensity() = default;
@@ -199,11 +207,11 @@ public:
                 infs_ = 1;
         }
 	else
-	    ones_ = y;
+	    finite_part_ = y;
     }
 
     constexpr explicit LogDensity(double x, double y, double z=0, int n =0)
-	:neginfs_(x), ones_(y), infs_(z), nans_(n)
+	:neginfs_(x), finite_part_(y), infs_(z), nans_(n)
     { }
 };
 
@@ -277,10 +285,10 @@ inline std::ostream& operator<<(std::ostream& o, const LogDensity& x)
 
     // If we have emitted nothing, we should emit something even if its a zero.
     if (show_plus == false)
-        o<<x.ones();
+        o<<x.finitePart();
     // If we have emitted something, then only emit the ones if they are not zero.
-    else if (x.ones() != 0)
-        o<<" + "<<x.ones();
+    else if (x.finitePart() != 0)
+        o<<" + "<<x.finitePart();
 
     return o;
 }
