@@ -34,7 +34,7 @@ namespace RevBayesCore {
         
         
         // members
-        bool                                                touched;
+        bool                                                touched = false;
         
     };
     
@@ -44,16 +44,14 @@ namespace RevBayesCore {
 #include "RbOptions.h"
 
 template<class valueType>
-RevBayesCore::DynamicNode<valueType>::DynamicNode( const std::string &n ) : TypedDagNode<valueType>( n ),
-    touched( true )
+RevBayesCore::DynamicNode<valueType>::DynamicNode( const std::string &n ) : TypedDagNode<valueType>( n )
 {
     // nothing to do here
 }
 
 
 template<class valueType>
-RevBayesCore::DynamicNode<valueType>::DynamicNode( const DynamicNode<valueType> &n ) : TypedDagNode<valueType>( n ),
-    touched( true )
+RevBayesCore::DynamicNode<valueType>::DynamicNode( const DynamicNode<valueType> &n ) : TypedDagNode<valueType>( n )
 {
     // nothing to do here
 }
