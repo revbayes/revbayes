@@ -5,9 +5,11 @@
 
 [![Release](https://img.shields.io/github/v/release/revbayes/revbayes.svg?style=plastic)](https://github.com/revbayes/revbayes/releases/tag/v1.4.0)
 [![Release date](https://img.shields.io/github/release-date/revbayes/revbayes.svg?style=plastic&color=orange)](https://github.com/revbayes/revbayes/releases/tag/v1.4.0)
-[![New commits](https://img.shields.io/github/commits-since/revbayes/revbayes/v1.3.2.svg?style=plastic&color=yellow)](https://github.com/revbayes/revbayes/commits/master)
+[![New commits in last release](https://img.shields.io/badge/dynamic/json?url=https://api.github.com/repos/revbayes/revbayes/compare/v1.3.2...v1.4.0&query=$.ahead_by&label=commits%20v1.3.2–v1.4.0&color=yellow&style=plastic)](https://github.com/revbayes/revbayes/commits/master)
 [![Code size](https://img.shields.io/github/languages/code-size/revbayes/revbayes.svg?style=plastic&color=green)](https://github.com/revbayes/revbayes/archive/master.zip)
 [![Downloads](https://img.shields.io/github/downloads/revbayes/revbayes/v1.4.0/total.svg?style=plastic&color=darkgreen)](https://github.com/revbayes/revbayes/releases/tag/v1.4.0)
+
+[![New commits since last release](https://img.shields.io/github/commits-since/revbayes/revbayes/v1.4.0.svg?style=plastic&color=134EA2)](https://github.com/revbayes/revbayes/commits/development)
 
 [![Language](https://img.shields.io/badge/Language-C++-blue.svg)](https://en.cppreference.com)
 [![License](https://img.shields.io/badge/License-GPL%20v3-orange.svg)](https://www.gnu.org/licenses/gpl-3.0.html)
