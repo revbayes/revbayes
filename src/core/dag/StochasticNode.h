@@ -140,10 +140,6 @@ RevBayesCore::StochasticNode<valueType>::StochasticNode( const std::string &n, T
         (*it)->incrementReferenceCount();
     }
     
-    // Since we start out touched, we must have an old value...
-    if (this->touched)
-        stored_ln_prob = std::optional<LogDensity>();
-
     // Set us as the DAG node of the distribution
     distribution->setStochasticNode( this );
 }
@@ -172,10 +168,6 @@ RevBayesCore::StochasticNode<valueType>::StochasticNode( const StochasticNode<va
         (*it)->incrementReferenceCount();
     }
     
-    // Since we start out touched, we must have an old value...
-    if (this->touched)
-        stored_ln_prob = std::optional<LogDensity>();
-
     // Set us as the DAG node of the distribution
     distribution->setStochasticNode( this );
 }
