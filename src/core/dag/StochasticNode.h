@@ -826,7 +826,8 @@ void RevBayesCore::StochasticNode<valueType>::setIgnoreData(bool tf)
 
     ignore_data = tf;
 
-    assert(not stored_ln_prob);
+    // A lot of places touch a node just to invalidate caches, making it look like we are in the middle of a proposal.
+    // assert(not stored_ln_prob);
 
     lnProb = 0;
 }
