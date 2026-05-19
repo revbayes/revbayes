@@ -1,4 +1,4 @@
-#include "ComputeEmpiricalWithinSpeciesVariancesFunction.h"
+#include "ComputeTipErrorOrVarianceFunction.h"
 
 #include <cmath>
 #include <cstddef>
@@ -16,10 +16,11 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
-ComputeEmpiricalWithinSpeciesVariancesFunction::ComputeEmpiricalWithinSpeciesVariancesFunction(const TypedDagNode<ContinuousCharacterData> *d, const TypedDagNode<std::int64_t> *s, const std::vector<Taxon> &ta, MISSING_TREATMENT mtr ) : TypedFunction< RbVector<double> >( new RbVector<double>() ),
+ComputeTipErrorOrVarianceFunction::ComputeTipErrorOrVarianceFunction(const TypedDagNode<ContinuousCharacterData> *d, const TypedDagNode<std::int64_t> *s, const std::vector<Taxon> &ta, MISSING_TREATMENT mtr, bool err ) : TypedFunction< RbVector<double> >( new RbVector<double>() ),
     data( d ),
     site( s ),
-    taxa( ta )
+    taxa( ta ),
+    compute_SEM( err )
 {
     missing_var_treatment = mtr;
 
@@ -27,25 +28,25 @@ ComputeEmpiricalWithinSpeciesVariancesFunction::ComputeEmpiricalWithinSpeciesVar
     addParameter( data );
     addParameter( site );
 
-    resetWithinSpeciesVariances();
+    reset();
     update();
 }
 
 
-ComputeEmpiricalWithinSpeciesVariancesFunction::~ComputeEmpiricalWithinSpeciesVariancesFunction( void )
+ComputeTipErrorOrVarianceFunction::~ComputeTipErrorOrVarianceFunction( void )
 {
     // We don't delete the parameters, because they might be used somewhere else too. The model needs to do that!
 }
 
 
 
-ComputeEmpiricalWithinSpeciesVariancesFunction* ComputeEmpiricalWithinSpeciesVariancesFunction::clone( void ) const
+ComputeTipErrorOrVarianceFunction* ComputeTipErrorOrVarianceFunction::clone( void ) const
 {
-    return new ComputeEmpiricalWithinSpeciesVariancesFunction( *this );
+    return new ComputeTipErrorOrVarianceFunction( *this );
 }
 
 
-double ComputeEmpiricalWithinSpeciesVariancesFunction::computeMeanForSpecies(const std::string &name, size_t index)
+double ComputeTipErrorOrVarianceFunction::computeMeanForSpecies(const std::string &name, size_t index)
 {
 
     double mean = 0.0;
@@ -74,7 +75,7 @@ double ComputeEmpiricalWithinSpeciesVariancesFunction::computeMeanForSpecies(con
 }
 
 
-double ComputeEmpiricalWithinSpeciesVariancesFunction::computeWithinSpeciesVariance(const std::string &name, size_t index)
+double ComputeTipErrorOrVarianceFunction::computeTipErrorOrVarianceForSpecies(const std::string &name, size_t index)
 {
 
     double num_samples = getNumberOfSamplesForSpecies(name);
@@ -102,17 +103,24 @@ double ComputeEmpiricalWithinSpeciesVariancesFunction::computeWithinSpeciesVaria
         // normalize
         var /= num_samples;
 
+        // if standard error of mean trait is desired
+        if ( compute_SEM )
+        {
+            var /= num_samples;
+        }
+
+
     }
     else
     {
         // change here with options MISSING_TREATMENT
         if ( missing_var_treatment == MEAN )
         {
-            var = computeMeanWithinSpeciesVariance();
+            var = computeMeanErrorOrVarianceAcrossSpecies();
         }
         else if ( missing_var_treatment == MEDIAN )
         {
-            var = computeMedianWithinSpeciesVariance();
+            var = computeMedianErrorOrVarianceAcrossSpecies();
         }
         else if ( missing_var_treatment == NONE )
         {
@@ -129,7 +137,7 @@ double ComputeEmpiricalWithinSpeciesVariancesFunction::computeWithinSpeciesVaria
 }
 
 
-double ComputeEmpiricalWithinSpeciesVariancesFunction::getNumberOfSamplesForSpecies(const std::string &name)
+double ComputeTipErrorOrVarianceFunction::getNumberOfSamplesForSpecies(const std::string &name)
 {
 
     double num_samples = 0.0;
@@ -149,7 +157,7 @@ double ComputeEmpiricalWithinSpeciesVariancesFunction::getNumberOfSamplesForSpec
 }
 
 
-std::vector<std::string> ComputeEmpiricalWithinSpeciesVariancesFunction::getAlphabeticalSpeciesNames(void)
+std::vector<std::string> ComputeTipErrorOrVarianceFunction::getAlphabeticalSpeciesNames(void)
 {
 
     std::vector<std::string> species_names;
@@ -162,21 +170,21 @@ std::vector<std::string> ComputeEmpiricalWithinSpeciesVariancesFunction::getAlph
 
     }
 
-    species_names.erase(std::unique(species_names.begin(), species_names.end()), species_names.end());
+    species_names.erase(unique(species_names.begin(), species_names.end()), species_names.end());
     sort( species_names.begin(), species_names.end() );
 
     return species_names;
 }
 
 
-double ComputeEmpiricalWithinSpeciesVariancesFunction::computeMeanWithinSpeciesVariance( void )
+double ComputeTipErrorOrVarianceFunction::computeMeanErrorOrVarianceAcrossSpecies( void )
 {
 
     // some of the sites may have been excluded
     size_t site_index = site->getValue()-1;
 
     double mean_var              = 0.0;
-    double num_taxa_multi_sample = 0.0;
+    double num_species_multi_sample = 0.0;
 
     std::vector<std::string> species_names = getAlphabeticalSpeciesNames();
     size_t num_species = species_names.size();
@@ -189,17 +197,17 @@ double ComputeEmpiricalWithinSpeciesVariancesFunction::computeMeanWithinSpeciesV
 
         if ( num_samples > 1 )
         {
-            mean_var += computeWithinSpeciesVariance(name,site_index);
-            num_taxa_multi_sample++;
+            mean_var += computeTipErrorOrVarianceForSpecies(name,site_index);
+            num_species_multi_sample++;
         }
 
     }
 
-    mean_var /= num_taxa_multi_sample;
+    mean_var /= num_species_multi_sample;
     return mean_var;
 }
 
-double ComputeEmpiricalWithinSpeciesVariancesFunction::computeMedianWithinSpeciesVariance( void )
+double ComputeTipErrorOrVarianceFunction::computeMedianErrorOrVarianceAcrossSpecies( void )
 {
     size_t site_index = site->getValue()-1;
 
@@ -216,7 +224,7 @@ double ComputeEmpiricalWithinSpeciesVariancesFunction::computeMedianWithinSpecie
 
         if ( num_samples > 1 )
         {
-            double var = computeWithinSpeciesVariance(name,site_index);
+            double var = computeTipErrorOrVarianceForSpecies(name,site_index);
             vars.push_back(var);
         }
 
@@ -238,7 +246,7 @@ double ComputeEmpiricalWithinSpeciesVariancesFunction::computeMedianWithinSpecie
 }
 
 
-void ComputeEmpiricalWithinSpeciesVariancesFunction::resetWithinSpeciesVariances( void )
+void ComputeTipErrorOrVarianceFunction::reset( void )
 {
 
     std::vector<std::string> species_names = getAlphabeticalSpeciesNames();
@@ -254,13 +262,13 @@ void ComputeEmpiricalWithinSpeciesVariancesFunction::resetWithinSpeciesVariances
     {
 
         std::string name = species_names[i];
-        within_species_variance[i] = computeWithinSpeciesVariance(name,site_index);
+        within_species_variance[i] = computeTipErrorOrVarianceForSpecies(name,site_index);
 
     }
 
 }
 
-void ComputeEmpiricalWithinSpeciesVariancesFunction::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
+void ComputeTipErrorOrVarianceFunction::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
 {
 
     if (oldP == data)
@@ -275,7 +283,7 @@ void ComputeEmpiricalWithinSpeciesVariancesFunction::swapParameterInternal(const
 }
 
 
-void ComputeEmpiricalWithinSpeciesVariancesFunction::update( void )
+void ComputeTipErrorOrVarianceFunction::update( void )
 {
     RbVector<double> &v = *value;
 

@@ -60,34 +60,34 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
     RevBayesCore::TypedDagNode<RevBayesCore::CharacterHistoryDiscrete>* char_hist   =  rl_char_hist.getDagNode();
     size_t number_states = char_hist->getValue().getNumberOfStates();
 
-    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal>* va  = static_cast<const MatrixReal&>( within_species_variances_per_site->getRevObject() ).getDagNode();
-    if (va->getValue().size() != n)
-    {
+
+    //    set the root treatment
+     const std::string& rt = static_cast<const RlString &>( root_treatment->getRevObject() ).getValue();
+     RevBayesCore::PhyloMultiSampleOrnsteinUhlenbeckStateDependent::ROOT_TREATMENT rtr;
+     if (rt == "optimum")
+     {
+         rtr = RevBayesCore::PhyloMultiSampleOrnsteinUhlenbeckStateDependent::ROOT_TREATMENT::OPTIMUM;
+     }
+     else if (rt == "equilibrium")
+     {
+         rtr = RevBayesCore::PhyloMultiSampleOrnsteinUhlenbeckStateDependent::ROOT_TREATMENT::EQUILIBRIUM;
+     }
+     else if (rt == "parameter")
+     {
+         rtr = RevBayesCore::PhyloMultiSampleOrnsteinUhlenbeckStateDependent::ROOT_TREATMENT::PARAMETER;
+     }
+     else
+     {
+         throw RbException("argument rootTreatment must be one of \"optimum\", \"equilibrium\" or \"parameter\"");
+     }
+
+     const std::vector<RevBayesCore::Taxon> &ta = static_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
+
+     RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal>* va  = static_cast<const MatrixReal&>( within_species_variances->getRevObject() ).getDagNode();
+     if (va->getValue().size() != n)
+     {
         throw RbException()<< "The number of sites (" << n << ") specified doesn't match the size of the within-species variance matrix (" << va->getValue().size() << ")";
-    }
-
-
-   //    set the root treatment
-    const std::string& rt = static_cast<const RlString &>( root_treatment->getRevObject() ).getValue();
-    RevBayesCore::PhyloMultiSampleOrnsteinUhlenbeckStateDependent::ROOT_TREATMENT rtr;
-    if (rt == "optimum")
-    {
-        rtr = RevBayesCore::PhyloMultiSampleOrnsteinUhlenbeckStateDependent::ROOT_TREATMENT::OPTIMUM;
-    }
-    else if (rt == "equilibrium")
-    {
-        rtr = RevBayesCore::PhyloMultiSampleOrnsteinUhlenbeckStateDependent::ROOT_TREATMENT::EQUILIBRIUM;
-    }
-    else if (rt == "parameter")
-    {
-        rtr = RevBayesCore::PhyloMultiSampleOrnsteinUhlenbeckStateDependent::ROOT_TREATMENT::PARAMETER;
-    }
-    else
-    {
-        throw RbException("argument rootTreatment must be one of \"optimum\", \"equilibrium\" or \"parameter\"");
-    }
-
-    const std::vector<RevBayesCore::Taxon> &ta = static_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
+     }
 
 
     RevBayesCore::PhyloMultiSampleOrnsteinUhlenbeckStateDependent *dist = new RevBayesCore::PhyloMultiSampleOrnsteinUhlenbeckStateDependent(char_hist, n, rtr, ta, va);
@@ -170,6 +170,43 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
         }
     }
 
+    if ( species_means->getRevObject() != RevNullObject::getInstance() )
+    {
+        if ( species_SEM->getRevObject() != RevNullObject::getInstance() )
+        {
+            throw RbException()<< "If you want to estimate the species means, you should not specify the standard error for the species means.";
+        }
+        else
+        {
+            RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal>* sp_mean  = static_cast<const MatrixReal&>( species_means->getRevObject() ).getDagNode();
+            if (sp_mean->getValue().size() != n)
+            {
+                throw RbException()<< "The number of sites (" << n << ") specified doesn't match the size of the species mean matrix (" << sp_mean->getValue().size() << ")";
+            }
+
+            dist->setWithinSpeciesMeans( sp_mean );
+
+        }
+    }
+    else
+    {
+        if ( species_SEM->getRevObject() == RevNullObject::getInstance() )
+        {
+            throw RbException()<< "By not specifying the species means, you assume that the true species means equal the empirical species means. For that you need to also specify the standard error for the species means.";
+        }
+        else
+        {
+
+            RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal>* sp_err  = static_cast<const MatrixReal&>( species_SEM->getRevObject() ).getDagNode();
+            if (sp_err->getValue().size() != n)
+            {
+                throw RbException()<< "The number of sites (" << n << ") specified doesn't match the size of the species mean matrix (" << sp_err->getValue().size() << ")";
+            }
+
+            dist->setWithinSpeciesSEMs( sp_err );
+
+        }
+    }
 
     return dist;
 }
@@ -264,8 +301,10 @@ const MemberRules& Dist_PhyloMultiSampleOrnsteinUhlenbeckStateDependent::getPara
         rootTreatmentTypes.push_back( "parameter" );
         dist_member_rules.push_back( new OptionRule ("rootTreatment", new RlString("optimum"), rootTreatmentTypes, "Whether the root value should be assumed to be equal to the optimum at the root (the default), assumed to be a random variable distributed according to the equilibrium state of the OU process, or whether to estimate the ancestral value as an independent parameter.") );
 
-//        dist_member_rules.push_back( new ArgumentRule( "useEmpiricalSpeciesMeans",     RlBoolean::getClassTypeSpec(), "Should the species means assumed to be equal to the empirical species mean or should we estimate them?",                        ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
-        dist_member_rules.push_back( new ArgumentRule( "withinSpeciesVariances" , MatrixReal::getClassTypeSpec(), "The within-species variance for each species for each site in log scale.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        dist_member_rules.push_back( new ArgumentRule( "speciesMeans" , MatrixReal::getClassTypeSpec(), "The mean value for each species for each site.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        dist_member_rules.push_back( new ArgumentRule( "speciesSEM" , MatrixReal::getClassTypeSpec(), "The standard error of mean value for each species for each site.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        dist_member_rules.push_back( new ArgumentRule( "withinSpeciesVariances" , MatrixReal::getClassTypeSpec(), "The within-species variance for each species for each site in log scale.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+
         dist_member_rules.push_back( new ArgumentRule( "taxa"  , ModelVector<Taxon>::getClassTypeSpec(), "The vector of taxa which have species and individual names.",      ArgumentRule::BY_VALUE,              ArgumentRule::ANY ) );
 
         dist_member_rules.push_back( new ArgumentRule( "nSites",  Natural::getClassTypeSpec(), "The number of sites which is used for the initialized (random draw) from this distribution.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1) ) );
@@ -344,9 +383,25 @@ void Dist_PhyloMultiSampleOrnsteinUhlenbeckStateDependent::printValue(std::ostre
     {
         o << "?";
     }
-    if ( within_species_variances_per_site != NULL )
+    if ( within_species_variances != NULL )
     {
-        o << within_species_variances_per_site->getName();
+        o << within_species_variances->getName();
+    }
+    else
+    {
+        o << "?";
+    }
+    if ( species_means != NULL )
+    {
+        o << species_means->getName();
+    }
+    else
+    {
+        o << "?";
+    }
+    if ( species_SEM != NULL )
+    {
+        o << species_SEM->getName();
     }
     else
     {
@@ -390,7 +445,15 @@ void Dist_PhyloMultiSampleOrnsteinUhlenbeckStateDependent::setConstParameter(con
     }
     else if ( name == "withinSpeciesVariances" )
     {
-        within_species_variances_per_site = var;
+        within_species_variances = var;
+    }
+    else if ( name == "speciesMeans" )
+    {
+        species_means = var;
+    }
+    else if ( name == "speciesSEM" )
+    {
+        species_SEM = var;
     }
     else if ( name == "taxa" )
     {

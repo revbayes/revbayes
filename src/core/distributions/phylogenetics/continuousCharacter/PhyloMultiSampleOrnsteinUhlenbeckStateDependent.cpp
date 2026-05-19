@@ -34,7 +34,7 @@ namespace RevBayesCore { class RandomNumberGenerator; }
 
 using namespace RevBayesCore;
 
-PhyloMultiSampleOrnsteinUhlenbeckStateDependent::PhyloMultiSampleOrnsteinUhlenbeckStateDependent(const TypedDagNode<CharacterHistoryDiscrete> *ch, size_t ns, ROOT_TREATMENT rt, const std::vector<Taxon> &ta, const TypedDagNode< MatrixReal >* va) : TypedDistribution< ContinuousCharacterData > ( new ContinuousCharacterData() ),
+PhyloMultiSampleOrnsteinUhlenbeckStateDependent::PhyloMultiSampleOrnsteinUhlenbeckStateDependent(const TypedDagNode<CharacterHistoryDiscrete> *ch, size_t ns, ROOT_TREATMENT rt, const std::vector<Taxon> &ta, TypedDagNode<MatrixReal>* va) : TypedDistribution< ContinuousCharacterData > ( new ContinuousCharacterData() ),
     num_nodes( ch->getValue().getNumberBranches()+1 ),
     num_sites( ns ),
     site_indices( std::vector<size_t>(this->num_sites,0) ),
@@ -48,7 +48,7 @@ PhyloMultiSampleOrnsteinUhlenbeckStateDependent::PhyloMultiSampleOrnsteinUhlenbe
     num_species( ch->getValue().getTree().getNumberOfTips() ),
     num_individuals( ta.size() ),
     taxa( ta ),
-    within_species_variances_per_site( va )
+    within_species_variances( va )
 {
     // initialize default parameters
     root_value                           = new ConstantNode<double>("", new double(0.0) );
@@ -66,7 +66,16 @@ PhyloMultiSampleOrnsteinUhlenbeckStateDependent::PhyloMultiSampleOrnsteinUhlenbe
     addParameter( homogeneous_sigma );
     addParameter( homogeneous_theta );
     addParameter( character_histories );
-    addParameter( within_species_variances_per_site );
+    addParameter( species_means );
+    addParameter( species_SEM );
+
+    num_individuals_per_species = std::vector<size_t>(num_species,0);
+    const std::vector<TopologyNode *> &nodes = character_histories->getValue().getTree().getNodes();
+    for (size_t i=0; i<num_species; ++i)
+    {
+        const std::string &species_name = nodes[i]->getSpeciesName();
+        num_individuals_per_species[i] = getNumberOfSamplesForSpecies( species_name );
+    }
 
     // now we need to reset the value
     this->redrawValue();
@@ -93,32 +102,68 @@ PhyloMultiSampleOrnsteinUhlenbeckStateDependent* PhyloMultiSampleOrnsteinUhlenbe
     return new PhyloMultiSampleOrnsteinUhlenbeckStateDependent( *this );
 }
 
+// two cases: species_means is supplied or not
 double PhyloMultiSampleOrnsteinUhlenbeckStateDependent::computeMeanForSpecies(const std::string &name, size_t index)
 {
 
     double mean = 0.0;
-    double num_samples = 0.0;
 
-    for (size_t i=0; i<this->taxa.size(); ++i)
+    if ( this->species_means != NULL )
     {
+        const Tree& tau = character_histories->getValue().getTree();
 
-        const Taxon &t = this->taxa[i];
-        if ( name == t.getSpeciesName() )
+        std::vector<std::string> tip_names = tau.getSpeciesNames();
+        sort(tip_names.begin(), tip_names.end());
+
+        size_t tip_index = 0;
+        bool found = false;
+        while(tip_index < tip_names.size() && found == false)
         {
-            ContinuousTaxonData& taxon = this->value->getTaxonData( t.getName() );
-            bool resolved = taxon.isCharacterResolved( index );
-
-            if ( taxon.isCharacterResolved( index ) == true )
+            if ( tip_names[tip_index] == name )
             {
-                mean += taxon.getCharacter(index);
-
-                ++num_samples;
+                found = true;
+            }
+            else
+            {
+                tip_index++;
             }
         }
 
-    }
+        if (found == false)
+        {
+            throw RbException( "Cannot find this tip in species means." );
+        }
 
-    mean /= num_samples;
+        // get the selection rate for the branch
+        mean = species_means->getValue()[index][tip_index];
+
+    }
+    else
+    {
+        double num_samples = 0.0;
+        size_t site_index = site_indices[index];
+
+        for (size_t i=0; i<this->taxa.size(); ++i)
+        {
+
+            const Taxon &t = this->taxa[i];
+            if ( name == t.getSpeciesName() )
+            {
+                ContinuousTaxonData& taxon = this->value->getTaxonData( t.getName() );
+                bool resolved = taxon.isCharacterResolved( site_index );
+
+                if ( taxon.isCharacterResolved( site_index ) == true )
+                {
+                    mean += taxon.getCharacter(site_index);
+
+                    ++num_samples;
+                }
+            }
+
+        }
+
+        mean /= num_samples;
+    }
 
     return mean;
 }
@@ -177,8 +222,8 @@ double PhyloMultiSampleOrnsteinUhlenbeckStateDependent::computeStateDependentThe
     return t;
 }
 
-
-double PhyloMultiSampleOrnsteinUhlenbeckStateDependent::computeWithinSpeciesVariance(const std::string &name, size_t site_index) const
+// two cases: species_means is supplied or not
+double PhyloMultiSampleOrnsteinUhlenbeckStateDependent::getWithinSpeciesVariance(const std::string &name, size_t site_index) const
 {
     const Tree& tau = character_histories->getValue().getTree();
 
@@ -206,16 +251,58 @@ double PhyloMultiSampleOrnsteinUhlenbeckStateDependent::computeWithinSpeciesVari
 
     // get the selection rate for the branch
     double v     = 0.0;
-    if ( this->within_species_variances_per_site != NULL )
+    if ( this->within_species_variances != NULL )
     {
-        v = within_species_variances_per_site->getValue()[site_index][tip_index];
+        v = within_species_variances->getValue()[site_index][tip_index];
     }
     else
     {
-        throw RbException( "Cannot find within-species variance per site." );
+        throw RbException( "Cannot find within-species variances." );
     }
 
     return v;
+}
+
+
+// two cases: species_means is supplied or not
+double PhyloMultiSampleOrnsteinUhlenbeckStateDependent::getWithinSpeciesSEM(const std::string &name, size_t site_index) const
+{
+    const Tree& tau = character_histories->getValue().getTree();
+
+    std::vector<std::string> tip_names = tau.getSpeciesNames();
+    sort(tip_names.begin(), tip_names.end());
+
+    size_t tip_index = 0;
+    bool found = false;
+    while(tip_index < tip_names.size() && found == false)
+    {
+        if ( tip_names[tip_index] == name )
+        {
+            found = true;
+        }
+        else
+        {
+            tip_index++;
+        }
+    }
+
+    if (found == false)
+    {
+        throw RbException( "Cannot find this tip." );
+    }
+
+    // get the selection rate for the branch
+    double sem     = 0.0;
+    if ( this->species_SEM != NULL )
+    {
+        sem = species_SEM->getValue()[site_index][tip_index];
+    }
+    else
+    {
+        sem = 0;
+    }
+
+    return sem;
 }
 
 
@@ -248,6 +335,25 @@ double PhyloMultiSampleOrnsteinUhlenbeckStateDependent::computeLnProbability( vo
     return this->ln_prob;
 }
 
+
+double PhyloMultiSampleOrnsteinUhlenbeckStateDependent::getNumberOfSamplesForSpecies(const std::string &name)
+{
+
+    double num_samples = 0.0;
+
+    for (size_t i=0; i<taxa.size(); ++i)
+    {
+
+        const Taxon &t = taxa[i];
+        if ( name == t.getSpeciesName() )
+        {
+            ++num_samples;
+        }
+
+    }
+
+    return num_samples;
+}
 
 
 void PhyloMultiSampleOrnsteinUhlenbeckStateDependent::keepSpecialization( const DagNode* affecter )
@@ -471,10 +577,56 @@ void PhyloMultiSampleOrnsteinUhlenbeckStateDependent::recursiveComputeLnProbabil
 
         for (size_t i=0; i<this->num_sites; i++)
         {
-            size_t site_index = site_indices[i];
-            mu_node[i] = computeMeanForSpecies(name, site_index);
-            v_node[i] = computeWithinSpeciesVariance(name, i);
-            p_node[i] = 0;
+            mu_node[i] = computeMeanForSpecies(name, i);
+            v_node[i]  = getWithinSpeciesSEM(name, i);
+            p_node[i]  = 0;
+        }
+
+        double num_samples = num_individuals_per_species[node_index];
+        for (size_t i=0; i<taxa.size(); ++i)
+        {
+
+            const Taxon &t = taxa[i];
+            if ( name == t.getSpeciesName() )
+            {
+                for (int j=0; j<this->num_sites; ++j)
+                {
+                    size_t site_index = site_indices[j];
+                    ContinuousTaxonData& taxon = this->value->getTaxonData( t.getName() );
+                    if ( taxon.isCharacterResolved( site_indices[j] ) )
+                    {
+                        double x = taxon.getCharacter( site_indices[j] );
+
+                        if ( std::isfinite(x) ){
+
+                            double this_var = getWithinSpeciesVariance(name, site_index);
+
+                            double standDev = sqrt(this_var);
+
+                            // compute the means for this site and node
+                            double contrast = mu_node[j] - x;
+
+                            // compute the probability for the means at this node
+                            double lnl_node = RbStatistics::Normal::lnPdf(0, standDev, contrast);
+
+                            if ( RbMath::isFinite(lnl_node) == false )
+                            {
+                                std::cerr << "Issue. Please make sure within-species variance is not zero." << std::endl;
+                            }
+
+                            // sum up the probabilities of the means
+                            p_node[j] += lnl_node;
+
+                            // ++num_samples;
+                        }
+
+                    } // end if is character resolved
+
+                } // end for-loop over all sites
+
+
+            }
+
         }
 
     }
@@ -595,7 +747,7 @@ void PhyloMultiSampleOrnsteinUhlenbeckStateDependent::resetValue( void )
                 size_t site_index = site_indices[site];
 
                 double c = computeMeanForSpecies(name, site_index);
-                double v = computeWithinSpeciesVariance(name, site);
+                double v = getWithinSpeciesSEM(name, site);
                 means[0][(*it)->getIndex()][site] = c;
                 means[1][(*it)->getIndex()][site] = c;
                 variances[0][(*it)->getIndex()][site] = v;
@@ -852,18 +1004,62 @@ void PhyloMultiSampleOrnsteinUhlenbeckStateDependent::setTheta(const TypedDagNod
 }
 
 
+void PhyloMultiSampleOrnsteinUhlenbeckStateDependent::setWithinSpeciesMeans(const TypedDagNode< MatrixReal >* sp_means)
+{
+
+    // remove the old parameter first
+    this->removeParameter( species_means );
+    species_means   = NULL;
+
+    // set the value
+    species_means   = sp_means;
+
+    // add the new parameter
+    this->addParameter( species_means );
+
+    // redraw the current value
+    if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
+    {
+        this->redrawValue();
+    }
+
+}
+
+
+void PhyloMultiSampleOrnsteinUhlenbeckStateDependent::setWithinSpeciesSEMs(const TypedDagNode< MatrixReal >* sp_sem)
+{
+
+    // remove the old parameter first
+    this->removeParameter( species_SEM );
+    species_SEM   = NULL;
+
+    // set the value
+    species_SEM   = sp_sem;
+
+    // add the new parameter
+    this->addParameter( species_SEM );
+
+    // redraw the current value
+    if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
+    {
+        this->redrawValue();
+    }
+
+}
+
+
 void PhyloMultiSampleOrnsteinUhlenbeckStateDependent::setWithinSpeciesVariances(const TypedDagNode< MatrixReal >* va)
 {
 
     // remove the old parameter first
-    this->removeParameter( within_species_variances_per_site );
-    within_species_variances_per_site       = NULL;
+    this->removeParameter( within_species_variances );
+    within_species_variances       = NULL;
 
     // set the value
-    within_species_variances_per_site   = va;
+    within_species_variances   = va;
 
     // add the new parameter
-    this->addParameter( within_species_variances_per_site );
+    this->addParameter( within_species_variances );
 
     // redraw the current value
     if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
@@ -1140,7 +1336,7 @@ void PhyloMultiSampleOrnsteinUhlenbeckStateDependent::simulateTipSamples( const 
                 for ( size_t k = 0; k < num_sites; ++k )
                 {
                     // compute the standard deviation for this site
-                    double stand_dev = sqrt( computeWithinSpeciesVariance( species_name, k ) );
+                    double stand_dev = sqrt( getWithinSpeciesVariance( species_name, k ) );
 
                     // get the mean trait value for this site
                     double mean_trait = species_data.getCharacter(k);
@@ -1253,9 +1449,9 @@ void PhyloMultiSampleOrnsteinUhlenbeckStateDependent::swapParameterInternal(cons
     {
         state_dependent_theta = static_cast<const TypedDagNode< RbVector< double > >* >( newP );
     }
-    else if (oldP == within_species_variances_per_site)
+    else if (oldP == within_species_variances)
     {
-        within_species_variances_per_site = static_cast<const TypedDagNode< MatrixReal >* >( newP );
+        within_species_variances = static_cast<const TypedDagNode< MatrixReal >* >( newP );
     }
     if (oldP == character_histories)
     {

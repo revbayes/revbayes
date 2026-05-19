@@ -3,9 +3,9 @@
 
 #include "Argument.h"
 #include "ArgumentRule.h"
-#include "Func_computeEmpiricalWithinSpeciesVariances.h"
+#include "Func_computeSESpeciesMean.h"
 #include "ModelVector.h"
-#include "ComputeEmpiricalWithinSpeciesVariancesFunction.h"
+#include "ComputeTipErrorOrVarianceFunction.h"
 #include "RlContinuousCharacterData.h"
 #include "RlTaxon.h"
 #include "RlTimeTree.h"
@@ -41,7 +41,7 @@ namespace RevBayesCore { class Tree; }
 using namespace RevLanguage;
 
 /** Default constructor */
-Func_computeEmpiricalWithinSpeciesVariances::Func_computeEmpiricalWithinSpeciesVariances( void ) : TypedFunction<ModelVector<Real> >()
+Func_computeSESpeciesMean::Func_computeSESpeciesMean( void ) : TypedFunction<ModelVector<Real> >()
 {
 
 }
@@ -53,14 +53,14 @@ Func_computeEmpiricalWithinSpeciesVariances::Func_computeEmpiricalWithinSpeciesV
  *
  * \return A new copy of the process.
  */
-Func_computeEmpiricalWithinSpeciesVariances* Func_computeEmpiricalWithinSpeciesVariances::clone( void ) const
+Func_computeSESpeciesMean* Func_computeSESpeciesMean::clone( void ) const
 {
 
-    return new Func_computeEmpiricalWithinSpeciesVariances( *this );
+    return new Func_computeSESpeciesMean( *this );
 }
 
 
-RevBayesCore::TypedFunction<RevBayesCore::RbVector<double> >* Func_computeEmpiricalWithinSpeciesVariances::createFunction( void ) const
+RevBayesCore::TypedFunction<RevBayesCore::RbVector<double> >* Func_computeSESpeciesMean::createFunction( void ) const
 {
     const RevBayesCore::TypedDagNode<RevBayesCore::ContinuousCharacterData>* data = static_cast<const ContinuousCharacterData &>( args[0].getVariable()->getRevObject() ).getDagNode();
     const RevBayesCore::TypedDagNode<std::int64_t>* site = static_cast<const Natural &>( args[1].getVariable()->getRevObject() ).getDagNode();
@@ -68,18 +68,19 @@ RevBayesCore::TypedFunction<RevBayesCore::RbVector<double> >* Func_computeEmpiri
 
     const std::string& tr = static_cast<const RlString &>( args[3].getVariable()->getRevObject() ).getValue();
 
-    RevBayesCore::ComputeEmpiricalWithinSpeciesVariancesFunction::MISSING_TREATMENT mtr;
+
+    RevBayesCore::ComputeTipErrorOrVarianceFunction::MISSING_TREATMENT mtr;
     if (tr == "mean")
     {
-        mtr = RevBayesCore::ComputeEmpiricalWithinSpeciesVariancesFunction::MISSING_TREATMENT::MEAN;
+        mtr = RevBayesCore::ComputeTipErrorOrVarianceFunction::MISSING_TREATMENT::MEAN;
     }
     else if (tr == "median")
     {
-        mtr = RevBayesCore::ComputeEmpiricalWithinSpeciesVariancesFunction::MISSING_TREATMENT::MEDIAN;
+        mtr = RevBayesCore::ComputeTipErrorOrVarianceFunction::MISSING_TREATMENT::MEDIAN;
     }
     else if (tr == "none")
     {
-        mtr = RevBayesCore::ComputeEmpiricalWithinSpeciesVariancesFunction::MISSING_TREATMENT::NONE;
+        mtr = RevBayesCore::ComputeTipErrorOrVarianceFunction::MISSING_TREATMENT::NONE;
     }
     else
     {
@@ -87,14 +88,14 @@ RevBayesCore::TypedFunction<RevBayesCore::RbVector<double> >* Func_computeEmpiri
     }
 
 
-    RevBayesCore::ComputeEmpiricalWithinSpeciesVariancesFunction* f = new RevBayesCore::ComputeEmpiricalWithinSpeciesVariancesFunction( data, site, taxa, mtr );
+    RevBayesCore::ComputeTipErrorOrVarianceFunction* f = new RevBayesCore::ComputeTipErrorOrVarianceFunction( data, site, taxa, mtr, true );
 
     return f;
 }
 
 
 /** Get argument rules */
-const ArgumentRules& Func_computeEmpiricalWithinSpeciesVariances::getArgumentRules( void ) const
+const ArgumentRules& Func_computeSESpeciesMean::getArgumentRules( void ) const
 {
 
     static ArgumentRules argument_rules = ArgumentRules();
@@ -113,6 +114,7 @@ const ArgumentRules& Func_computeEmpiricalWithinSpeciesVariances::getArgumentRul
         missingTreatmentTypes.push_back( "none" );
         argument_rules.push_back( new OptionRule ("missingVarianceTreatment", new RlString("none"), missingTreatmentTypes, "The within-species variance for species with only one sample. Options \"mean\" and \"median\" return the mean/median of within-species variance of all species with multiple samples. Option \"none\" returns -1 and requires the user to manually specify the within-species variance afterwards.") );
 
+
         rules_set = true;
     }
 
@@ -121,16 +123,16 @@ const ArgumentRules& Func_computeEmpiricalWithinSpeciesVariances::getArgumentRul
 
 
 /** Get Rev type of object */
-const std::string& Func_computeEmpiricalWithinSpeciesVariances::getClassType(void)
+const std::string& Func_computeSESpeciesMean::getClassType(void)
 {
 
-    static std::string rev_type = "Func_computeEmpiricalWithinSpeciesVariances";
+    static std::string rev_type = "Func_computeSESpeciesMean";
 
     return rev_type;
 }
 
 /** Get class type spec describing type of object */
-const TypeSpec& Func_computeEmpiricalWithinSpeciesVariances::getClassTypeSpec(void)
+const TypeSpec& Func_computeSESpeciesMean::getClassTypeSpec(void)
 {
 
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( Function::getClassTypeSpec() ) );
@@ -142,25 +144,25 @@ const TypeSpec& Func_computeEmpiricalWithinSpeciesVariances::getClassTypeSpec(vo
 /**
  * Get the primary Rev name for this function.
  */
-std::string Func_computeEmpiricalWithinSpeciesVariances::getFunctionName( void ) const
+std::string Func_computeSESpeciesMean::getFunctionName( void ) const
 {
     // create a name variable that is the same for all instance of this class
-    std::string f_name = "fnComputeEmpiricalWithinSpeciesVariances";
+    std::string f_name = "fnComputeStandardErrorOfSpeciesMean";
 
     return f_name;
 }
 
-std::vector<std::string> Func_computeEmpiricalWithinSpeciesVariances::getFunctionNameAliases( void ) const
+std::vector<std::string> Func_computeSESpeciesMean::getFunctionNameAliases( void ) const
 {
     // create alternative constructor function names variable that is the same for all instance of this class
     std::vector<std::string> a_names;
-    a_names.push_back( "fnComputeEmpSpVar" );
+    a_names.push_back( "fnSEMean" );
 
     return a_names;
 }
 
 /** Get type spec */
-const TypeSpec& Func_computeEmpiricalWithinSpeciesVariances::getTypeSpec( void ) const
+const TypeSpec& Func_computeSESpeciesMean::getTypeSpec( void ) const
 {
 
     static TypeSpec type_spec = getClassTypeSpec();

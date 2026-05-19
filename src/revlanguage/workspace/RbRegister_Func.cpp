@@ -87,7 +87,8 @@
 #include "Func_chronoToPhylo.h"
 #include "Func_computeWeightedNodeOrderConstraintsScore.h"
 #include "Func_combineCharacter.h"
-#include "Func_computeEmpiricalWithinSpeciesVariances.h"
+#include "Func_computeWithinSpeciesVariances.h"
+#include "Func_computeSESpeciesMean.h"
 #include "Func_concatenate.h"
 #include "Func_concatenateContinuousCharacterData.h"
 #include "Func_CladeSpecificHierarchicalBranchRate.h"
@@ -96,6 +97,8 @@
 #include "Func_earlyBurstRates.h"
 #include "Func_extantTree.h"
 #include "Func_formatDiscreteCharacterData.h"
+#include "Func_getWithinSpeciesVariances.h"
+#include "Func_getSESpeciesMean.h"
 #include "Func_inferAncestralPopSize.h"
 #include "Func_maximumTree.h"
 #include "Func_MinBLTimeScaling.h"
@@ -112,7 +115,6 @@
 #include "Func_simStartingTree.h"
 #include "Func_simTree.h"
 #include "Func_simCompleteTree.h"
-#include "Func_computeWithinSpeciesVarianceFromCharacterData.h"
 #include "Func_stitchTree.h"
 #include "Func_symmetricDifference.h"
 #include "Func_tmrca.h"
@@ -444,7 +446,8 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_branchScoreDistance()                             );
         addFunction( new Func_checkNodeOrderConstraints()                       );
         addFunction( new Func_chronoToPhylo()                                   );
-        addFunction( new Func_computeEmpiricalWithinSpeciesVariances()          );
+        addFunction( new Func_computeSESpeciesMean()                            );
+        addFunction( new Func_computeWithinSpeciesVariances()                   );
         addFunction( new Func_computeWeightedNodeOrderConstraintsScore()        );
         addFunction( new Func_combineCharacter()                                );
         addFunction( new Func_concatenate()                                     );
@@ -454,6 +457,8 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_formatDiscreteCharacterData()                     );
         addFunction( new Func_EarlyBurstRates()                                 );
         addFunction( new Func_extantTree()                                      );
+        addFunction( new Func_getSESpeciesMean()                                );
+        addFunction( new Func_getWithinSpeciesVariances()                       );
         addFunction( new Func_inferAncestralPopSize()                           );
         addFunction( new Func_maximumTree()                                     );
         addFunction( new Func_MinBLTimeScaling()                                );
@@ -475,7 +480,6 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_simStartingTree()                                 );
         addFunction( new Func_simTree()                                         );
         addFunction( new Func_simCompleteTree()                                 );
-        addFunction( new Func_computeWithinSpeciesVarianceFromCharacterData()        );
         addFunction( new Func_stitchTree()                                      );
         addFunction( new Func_symmetricDifference()                             );
         addFunction( new Func_tmrca()                                           );

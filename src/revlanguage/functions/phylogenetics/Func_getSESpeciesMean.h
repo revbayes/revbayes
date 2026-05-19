@@ -1,5 +1,5 @@
-#ifndef Func_computeEmpiricalWithinSpeciesVariances_H
-#define Func_computeEmpiricalWithinSpeciesVariances_H
+#ifndef Func_getSESpeciesMean_H
+#define Func_getSESpeciesMean_H
 
 #include "ModelVector.h"
 #include "RbVector.h"
@@ -11,13 +11,13 @@
 
 namespace RevLanguage {
 
-    class Func_computeEmpiricalWithinSpeciesVariances : public TypedFunction<ModelVector<Real> > {
+    class Func_getSESpeciesMean : public TypedFunction<ModelVector<Real> > {
 
     public:
-        Func_computeEmpiricalWithinSpeciesVariances( void );
+        Func_getSESpeciesMean( void );
 
         // Basic utility functions
-        Func_computeEmpiricalWithinSpeciesVariances*                        clone(void) const;                                          //!< Clone the object
+        Func_getSESpeciesMean*                 clone(void) const;                                          //!< Clone the object
         static const std::string&                                           getClassType(void);                                         //!< Get Rev type
         static const TypeSpec&                                              getClassTypeSpec(void);                                     //!< Get class type spec
         std::string                                                         getFunctionName(void) const;                                //!< Get the primary name of the function in Rev

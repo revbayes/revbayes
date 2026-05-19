@@ -1,5 +1,5 @@
-#ifndef Func_computeWithinSpeciesVarianceFromCharacterData_H
-#define Func_computeWithinSpeciesVarianceFromCharacterData_H
+#ifndef Func_getWithinSpeciesVariances_H
+#define Func_getWithinSpeciesVariances_H
 
 #include "ModelVector.h"
 #include "RbVector.h"
@@ -11,13 +11,13 @@
 
 namespace RevLanguage {
 
-    class Func_computeWithinSpeciesVarianceFromCharacterData : public TypedFunction<ModelVector<Real> > {
+    class Func_getWithinSpeciesVariances : public TypedFunction<ModelVector<Real> > {
 
     public:
-        Func_computeWithinSpeciesVarianceFromCharacterData( void );
+        Func_getWithinSpeciesVariances( void );
 
         // Basic utility functions
-        Func_computeWithinSpeciesVarianceFromCharacterData*                 clone(void) const;                                          //!< Clone the object
+        Func_getWithinSpeciesVariances*                 clone(void) const;                                          //!< Clone the object
         static const std::string&                                           getClassType(void);                                         //!< Get Rev type
         static const TypeSpec&                                              getClassTypeSpec(void);                                     //!< Get class type spec
         std::string                                                         getFunctionName(void) const;                                //!< Get the primary name of the function in Rev

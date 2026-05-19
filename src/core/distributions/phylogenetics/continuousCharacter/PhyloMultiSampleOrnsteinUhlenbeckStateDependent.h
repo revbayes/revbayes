@@ -21,7 +21,7 @@ namespace RevBayesCore {
     public:
         enum                                                                ROOT_TREATMENT { OPTIMUM, EQUILIBRIUM, PARAMETER };
         // Note, we need the size of the alignment in the constructor to correctly simulate an initial state
-        PhyloMultiSampleOrnsteinUhlenbeckStateDependent(const TypedDagNode<CharacterHistoryDiscrete> *bh, size_t n_sites, ROOT_TREATMENT rt, const std::vector<Taxon> &ta, const TypedDagNode< MatrixReal >* va);
+        PhyloMultiSampleOrnsteinUhlenbeckStateDependent(const TypedDagNode<CharacterHistoryDiscrete> *bh, size_t n_sites, ROOT_TREATMENT rt, const std::vector<Taxon> &ta, TypedDagNode<MatrixReal>* va);
         virtual                                                            ~PhyloMultiSampleOrnsteinUhlenbeckStateDependent(void);                                             //!< Virtual destructor
 
         // public member functions
@@ -35,6 +35,8 @@ namespace RevBayesCore {
         void                                                                    setSigma(const TypedDagNode< RbVector< double > >* s);
         void                                                                    setTheta(const TypedDagNode< double >* t);
         void                                                                    setTheta(const TypedDagNode< RbVector< double > >* t);
+        void                                                                    setWithinSpeciesMeans(const TypedDagNode< MatrixReal > *sp_mean);
+        void                                                                    setWithinSpeciesSEMs(const TypedDagNode< MatrixReal > *sp_err);
         void                                                                    setWithinSpeciesVariances(const TypedDagNode< MatrixReal > *va);
         void                                                                    setValue(ContinuousCharacterData *v, bool f=false);                                     //!< Set the current value, e.g. attach an observation (clamp)
         void                                                                    setRootTreatment(ROOT_TREATMENT rt);
@@ -46,8 +48,10 @@ namespace RevBayesCore {
     protected:
 
         // virtual methods that may be overwritten, but then the derived class should call this methods
-        double                                                                  computeWithinSpeciesVariance(const std::string &n, size_t site_idx) const;
-        virtual void                                                            keepSpecialization(const DagNode* affecter);
+        double                                                                  getWithinSpeciesVariance(const std::string &n, size_t site_idx) const;
+        double                                                                  getWithinSpeciesSEM(const std::string &n, size_t site_idx) const;
+        double                                                                  getNumberOfSamplesForSpecies(const std::string &n);
+       virtual void                                                             keepSpecialization(const DagNode* affecter);
         void                                                                    recursiveComputeLnProbability( const TopologyNode &node, size_t node_index );
         void                                                                    recursivelyFlagNodeDirty(const TopologyNode &node);
         void                                                                    resetValue( void );
@@ -96,10 +100,13 @@ namespace RevBayesCore {
         const TypedDagNode< RbVector< double > >*                               state_dependent_alpha;
         const TypedDagNode< RbVector< double > >*                               state_dependent_sigma;
         const TypedDagNode< RbVector< double > >*                               state_dependent_theta;
-        const TypedDagNode< MatrixReal >*                                       within_species_variances_per_site;
+        const TypedDagNode< MatrixReal >*                                       species_means;
+        const TypedDagNode< MatrixReal >*                                       species_SEM;
+        const TypedDagNode< MatrixReal >*                                       within_species_variances;
 
         size_t                                                                  num_species;
         size_t                                                                  num_individuals;
+        std::vector<size_t>                                                     num_individuals_per_species;
         std::vector<Taxon>                                                      taxa;
         std::vector<size_t>                                                     site_indices;
 

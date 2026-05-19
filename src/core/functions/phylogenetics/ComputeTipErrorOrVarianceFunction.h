@@ -1,5 +1,5 @@
-#ifndef ComputeEmpiricalWithinSpeciesVariancesFunction_H
-#define ComputeEmpiricalWithinSpeciesVariancesFunction_H
+#ifndef ComputeTipErrorOrVarianceFunction_H
+#define ComputeTipErrorOrVarianceFunction_H
 
 #include <cstddef>
 #include <vector>
@@ -16,26 +16,26 @@ class DagNode;
 class Tree;
 template <class valueType> class TypedDagNode;
 
-    class ComputeEmpiricalWithinSpeciesVariancesFunction : public TypedFunction< RbVector<double> > {
+    class ComputeTipErrorOrVarianceFunction : public TypedFunction< RbVector<double> > {
 
     public:
         enum                                                                MISSING_TREATMENT { MEAN, MEDIAN, NONE };
-        ComputeEmpiricalWithinSpeciesVariancesFunction(const TypedDagNode<ContinuousCharacterData> *d, const TypedDagNode<std::int64_t>* s, const std::vector<Taxon> &ta, MISSING_TREATMENT mtr );
-        virtual                                                ~ComputeEmpiricalWithinSpeciesVariancesFunction(void);                                                         //!< Virtual destructor
+        ComputeTipErrorOrVarianceFunction(const TypedDagNode<ContinuousCharacterData> *d, const TypedDagNode<std::int64_t>* s, const std::vector<Taxon> &ta, MISSING_TREATMENT mtr, bool err );
+        virtual                                                ~ComputeTipErrorOrVarianceFunction(void);                                                         //!< Virtual destructor
 
         // public member functions
-        ComputeEmpiricalWithinSpeciesVariancesFunction*                           clone(void) const;                                                                  //!< Create an independent clone
-        void                                                                      update(void);
+        ComputeTipErrorOrVarianceFunction*                              clone(void) const;                                                                  //!< Create an independent clone
+        void                                                                update(void);
 
     protected:
         double                                                              computeMeanForSpecies(const std::string &n, size_t i);
-        double                                                              computeWithinSpeciesVariance(const std::string &n, size_t i);
-        double                                                              computeMeanWithinSpeciesVariance(void);
-        double                                                              computeMedianWithinSpeciesVariance(void);
+        double                                                              computeTipErrorOrVarianceForSpecies(const std::string &n, size_t i);
+        double                                                              computeMeanErrorOrVarianceAcrossSpecies(void);
+        double                                                              computeMedianErrorOrVarianceAcrossSpecies(void);
         double                                                              getNumberOfSamplesForSpecies(const std::string &n);
         std::vector<std::string>                                            getAlphabeticalSpeciesNames(void);
         void                                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);                    //!< Implementation of swaping parameters
-        void                                                                resetWithinSpeciesVariances(void);
+        void                                                                reset(void);
 
     private:
 
@@ -46,7 +46,7 @@ template <class valueType> class TypedDagNode;
         MISSING_TREATMENT                                                   missing_var_treatment;
 
         std::vector<double>                                                 within_species_variance;
-
+        const bool                                                          compute_SEM;
     };
 
 }

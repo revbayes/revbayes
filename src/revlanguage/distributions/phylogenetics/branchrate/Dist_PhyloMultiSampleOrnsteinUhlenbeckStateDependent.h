@@ -57,11 +57,13 @@ class TypeSpec;
         RevPtr<const RevVariable>                       alpha;
         RevPtr<const RevVariable>                       theta;
         RevPtr<const RevVariable>                       sigma;
+        RevPtr<const RevVariable>                       species_means;
+        RevPtr<const RevVariable>                       species_SEM;
+        RevPtr<const RevVariable>                       within_species_variances;
         RevPtr<const RevVariable>                       root_value;
         RevPtr<const RevVariable>                       root_treatment;
         RevPtr<const RevVariable>                       character_history;
         RevPtr<const RevVariable>                       n_sites;
-        RevPtr<const RevVariable>                       within_species_variances_per_site;
         RevPtr<const RevVariable>                       taxa;                       //!< The individual samples
 
 

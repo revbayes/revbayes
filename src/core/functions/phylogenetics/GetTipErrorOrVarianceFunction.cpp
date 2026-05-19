@@ -1,4 +1,4 @@
-#include "ComputeWithinSpeciesVarianceFromCharacterDataFunction.h"
+#include "GetTipErrorOrVarianceFunction.h"
 
 #include <cmath>
 #include <cstddef>
@@ -16,10 +16,11 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
-ComputeWithinSpeciesVarianceFromCharacterDataFunction::ComputeWithinSpeciesVarianceFromCharacterDataFunction(const TypedDagNode<ContinuousCharacterData> *d, const TypedDagNode<std::int64_t> *vs, const TypedDagNode<std::int64_t> *ns, MISSING_TREATMENT mtr ) : TypedFunction< RbVector<double> >( new RbVector<double>() ),
+GetTipErrorOrVarianceFunction::GetTipErrorOrVarianceFunction(const TypedDagNode<ContinuousCharacterData> *d, const TypedDagNode<std::int64_t> *vs, const TypedDagNode<std::int64_t> *ns, MISSING_TREATMENT mtr, bool err ) : TypedFunction< RbVector<double> >( new RbVector<double>() ),
     data( d ),
     variance_site( vs ),
-    num_sample_site( ns )
+    num_sample_site( ns ),
+    compute_SEM( err )
 {
     missing_var_treatment = mtr;
 
@@ -28,25 +29,25 @@ ComputeWithinSpeciesVarianceFromCharacterDataFunction::ComputeWithinSpeciesVaria
     addParameter( variance_site );
     addParameter( num_sample_site );
 
-    resetWithinSpeciesVariances();
+    reset();
     update();
 }
 
 
-ComputeWithinSpeciesVarianceFromCharacterDataFunction::~ComputeWithinSpeciesVarianceFromCharacterDataFunction( void )
+GetTipErrorOrVarianceFunction::~GetTipErrorOrVarianceFunction( void )
 {
     // We don't delete the parameters, because they might be used somewhere else too. The model needs to do that!
 }
 
 
 
-ComputeWithinSpeciesVarianceFromCharacterDataFunction* ComputeWithinSpeciesVarianceFromCharacterDataFunction::clone( void ) const
+GetTipErrorOrVarianceFunction* GetTipErrorOrVarianceFunction::clone( void ) const
 {
-    return new ComputeWithinSpeciesVarianceFromCharacterDataFunction( *this );
+    return new GetTipErrorOrVarianceFunction( *this );
 }
 
 
-double ComputeWithinSpeciesVarianceFromCharacterDataFunction::computeWithinSpeciesVariance(const std::string &name, size_t v_site_index, size_t n_site_index)
+double GetTipErrorOrVarianceFunction::getTipErrorOrVariance(const std::string &name, size_t v_site_index, size_t n_site_index)
 {
 
     double num_samples = getNumberOfSamplesForSpecies(name, n_site_index);
@@ -62,17 +63,21 @@ double ComputeWithinSpeciesVarianceFromCharacterDataFunction::computeWithinSpeci
         // normalize
         var /= num_samples;
 
+        if ( compute_SEM )
+        {
+            var /= num_samples;
+        }
     }
     else
     {
         // change here with options MISSING_TREATMENT
         if ( missing_var_treatment == MEAN )
         {
-            var = computeMeanWithinSpeciesVariance();
+            var = computeMeanErrorOrVarianceAcrossSpecies();
         }
         else if ( missing_var_treatment == MEDIAN )
         {
-            var = computeMedianWithinSpeciesVariance();
+            var = computeMedianErrorOrVarianceAcrossSpecies();
         }
         else if ( missing_var_treatment == NONE )
         {
@@ -89,7 +94,7 @@ double ComputeWithinSpeciesVarianceFromCharacterDataFunction::computeWithinSpeci
 }
 
 
-double ComputeWithinSpeciesVarianceFromCharacterDataFunction::getNumberOfSamplesForSpecies(const std::string &name, size_t n_site_index)
+double GetTipErrorOrVarianceFunction::getNumberOfSamplesForSpecies(const std::string &name, size_t n_site_index)
 {
 
     const ContinuousCharacterData &d = data->getValue();
@@ -101,7 +106,7 @@ double ComputeWithinSpeciesVarianceFromCharacterDataFunction::getNumberOfSamples
 }
 
 
-std::vector<std::string> ComputeWithinSpeciesVarianceFromCharacterDataFunction::getAlphabeticalSpeciesNames(void)
+std::vector<std::string> GetTipErrorOrVarianceFunction::getAlphabeticalSpeciesNames(void)
 {
     const ContinuousCharacterData &d = data->getValue();
     const std::vector<Taxon> &taxa = d.getTaxa();
@@ -123,7 +128,7 @@ std::vector<std::string> ComputeWithinSpeciesVarianceFromCharacterDataFunction::
 }
 
 
-double ComputeWithinSpeciesVarianceFromCharacterDataFunction::computeMeanWithinSpeciesVariance( void )
+double GetTipErrorOrVarianceFunction::computeMeanErrorOrVarianceAcrossSpecies( void )
 {
 
     // some of the sites may have been excluded
@@ -144,7 +149,7 @@ double ComputeWithinSpeciesVarianceFromCharacterDataFunction::computeMeanWithinS
 
         if ( num_samples > 1 )
         {
-            mean_var += computeWithinSpeciesVariance(name, v_site_index, n_site_index);
+            mean_var += getTipErrorOrVariance(name, v_site_index, n_site_index);
             num_taxa_multi_sample++;
         }
 
@@ -154,7 +159,7 @@ double ComputeWithinSpeciesVarianceFromCharacterDataFunction::computeMeanWithinS
     return mean_var;
 }
 
-double ComputeWithinSpeciesVarianceFromCharacterDataFunction::computeMedianWithinSpeciesVariance( void )
+double GetTipErrorOrVarianceFunction::computeMedianErrorOrVarianceAcrossSpecies( void )
 {
     size_t v_site_index = variance_site->getValue()-1;
     size_t n_site_index = num_sample_site->getValue()-1;
@@ -172,7 +177,7 @@ double ComputeWithinSpeciesVarianceFromCharacterDataFunction::computeMedianWithi
 
         if ( num_samples > 1 )
         {
-            double var = computeWithinSpeciesVariance(name, v_site_index, n_site_index);
+            double var = getTipErrorOrVariance(name, v_site_index, n_site_index);
             vars.push_back(var);
         }
 
@@ -194,7 +199,7 @@ double ComputeWithinSpeciesVarianceFromCharacterDataFunction::computeMedianWithi
 }
 
 
-void ComputeWithinSpeciesVarianceFromCharacterDataFunction::resetWithinSpeciesVariances( void )
+void GetTipErrorOrVarianceFunction::reset( void )
 {
 
     std::vector<std::string> species_names = getAlphabeticalSpeciesNames();
@@ -211,13 +216,13 @@ void ComputeWithinSpeciesVarianceFromCharacterDataFunction::resetWithinSpeciesVa
     {
 
         std::string name = species_names[i];
-        within_species_variance[i] = computeWithinSpeciesVariance(name, v_site_index, n_site_index);
+        within_species_variance[i] = getTipErrorOrVariance(name, v_site_index, n_site_index);
 
     }
 
 }
 
-void ComputeWithinSpeciesVarianceFromCharacterDataFunction::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
+void GetTipErrorOrVarianceFunction::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
 {
 
     if (oldP == data)
@@ -236,7 +241,7 @@ void ComputeWithinSpeciesVarianceFromCharacterDataFunction::swapParameterInterna
 }
 
 
-void ComputeWithinSpeciesVarianceFromCharacterDataFunction::update( void )
+void GetTipErrorOrVarianceFunction::update( void )
 {
     RbVector<double> &v = *value;
 
