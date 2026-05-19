@@ -157,13 +157,13 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
         }
     }
 
-    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal>* sp_err  = static_cast<const MatrixReal&>( species_SEMs->getRevObject() ).getDagNode();
-    if (sp_err->getValue().size() != n)
+    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal>* se  = static_cast<const MatrixReal&>( species_SEMs->getRevObject() ).getDagNode();
+    if (se->getValue().size() != n)
     {
-        throw RbException()<< "The number of sites (" << n << ") specified doesn't match the size of the species mean matrix (" << sp_err->getValue().size() << ")";
+        throw RbException()<< "The number of sites (" << n << ") specified doesn't match the size of the species mean matrix (" << se->getValue().size() << ")";
     }
 
-    dist->setWithinSpeciesSEMs( sp_err );
+    dist->setWithinSpeciesSEMs( se );
 
 
     return dist;
@@ -258,8 +258,8 @@ const MemberRules& Dist_PhyloOrnsteinUhlenbeckStateDependent::getParameterRules(
         rootTreatmentTypes.push_back( "equilibrium" );
         rootTreatmentTypes.push_back( "parameter" );
         dist_member_rules.push_back( new OptionRule ("rootTreatment", new RlString("optimum"), rootTreatmentTypes, "Whether the root value should be assumed to be equal to the optimum at the root (the default), assumed to be a random variable distributed according to the equilibrium state of the OU process, or whether to estimate the ancestral value as an independent parameter.") );
-        // setting the default
-        //RevBayesCore::PhyloOrnsteinUhlenbeckStateDependent::ROOT_TREATMENT rtr = RevBayesCore::PhyloOrnsteinUhlenbeckStateDependent::ROOT_TREATMENT::OPTIMUM;
+
+        dist_member_rules.push_back( new ArgumentRule( "speciesSEMs" , MatrixReal::getClassTypeSpec(), "The standard error of mean value for each species for each site.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
         dist_member_rules.push_back( new ArgumentRule( "nSites",  Natural::getClassTypeSpec(), "The number of sites which is used for the initialized (random draw) from this distribution.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1) ) );
 
@@ -338,7 +338,15 @@ void Dist_PhyloOrnsteinUhlenbeckStateDependent::printValue(std::ostream& o) cons
         o << "?";
     }
     o << ")";
-
+    if ( species_SEMs != NULL )
+    {
+        o << species_SEMs->getName();
+    }
+    else
+    {
+        o << "?";
+    }
+    o << ")";
 }
 
 

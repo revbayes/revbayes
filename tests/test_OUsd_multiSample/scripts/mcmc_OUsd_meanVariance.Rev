@@ -27,7 +27,7 @@ disc.excludeAll()
 disc.includeCharacter(1)
 num_disc_states <- disc.getStateDescriptions().size()
 
-cont <- readContinuousCharacterData("data/rooted_4_tip_tree_multiSample_continuous.nex")
+cont <- readContinuousCharacterData("data/rooted_4_tip_tree_meanVariance_continuous.nex")
 cont.excludeAll()
 cont.includeCharacter(1)
 
@@ -55,18 +55,12 @@ for (i in 1:2){
   moves.append( mvSlide(theta[i], weight=1.0) )
 }
 
+taxon_map = readTaxonData("/Users/plau/Desktop/test/data/species_map_pseudo.txt")
 
 
-char_hist = readCharacterHistory( "/Users/plau/Desktop/test/data/n4_charhist.tre" )[1]
-taxon_map = readTaxonData("/Users/plau/Desktop/test/data/species_map.txt")
+y[1] <- fnGetSpVar(cont, 2, 3, "mean")
+x[1] <- fnGetSEMean(cont, 2, 3, "mean")
 
-
-x[1] <- fnSEMean(cont, 1, taxon_map, "mean")
-y[1] <- fnSpVar(cont, 1, taxon_map, "mean")
-
-
-#y[1] <- fnGetSpVar(cont, 2, 3, "mean")
-#x[1] <- fnGetSEMean(cont, 2, 3, "mean")
 sp_sems <- matrix(x)
 sp_vars <- matrix(y)
 sp_vars
@@ -80,7 +74,7 @@ Y.clamp(cont)
 
 mymodel = model(Y)
 
-monitors.append( mnModel(filename="output/OUsd_multiSample.log", printgen=100) )
+monitors.append( mnModel(filename="output/OUsd_meanVariance.log", printgen=100) )
 
 ### workspace mcmc ###
 mymcmc = mcmc(mymodel, monitors, moves, nruns=1, combine="none")

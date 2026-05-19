@@ -91,13 +91,21 @@ for (i in 1:num_disc_states){
 
 }
 
+num_tips = 82
+for ( i in 1:num_tips ){
 
+  sp_sems_site1[i] <- abs(0.1)
+
+}
+sp_sems_vec[1] <- sp_sems_site1
+
+sp_sems <- matrix(sp_sems_vec)
 
 ##########################
 # Specify the OU process #
 ##########################
 
-Y ~ dnPhyloOUSD(char_hist, theta=theta, rootTreatment="optimum", alpha=alpha, sigma=sigma2^0.5)
+Y ~ dnPhyloOUSD(characterHistory=char_hist, alpha=alpha, theta=theta, sigma=sigma2^0.5, speciesSEMs=sp_sems, nSites=1, rootTreatment = "optimum")
 Y.clamp(cont)
 
 #############

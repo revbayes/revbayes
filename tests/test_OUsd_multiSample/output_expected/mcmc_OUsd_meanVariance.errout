@@ -1,9 +1,9 @@
    Attempting to read the contents of file "rooted_4_tip_tree.tre"
    Successfully read file
    Successfully read one character matrix from file 'data/rooted_4_tip_tree_discrete.nex'
-   Successfully read one character matrix from file 'data/rooted_4_tip_tree_multiSample_continuous.nex'
-   [ [ 0.5552, 0.0016, 0.2356, 1.4284 ] ]
-   [ [ 0.1110, 0.0003, 0.0471, 0.2857 ] ]
+   Successfully read one character matrix from file 'data/rooted_4_tip_tree_meanVariance_continuous.nex'
+   [ [ 0.0030, 0.0633, 0.0038, 0.0234 ] ]
+   [ [ 0.0015, 0.0211, 0.0004, 0.0077 ] ]
    
    Running MCMC simulation
    This simulation runs 1 independent replicate.
