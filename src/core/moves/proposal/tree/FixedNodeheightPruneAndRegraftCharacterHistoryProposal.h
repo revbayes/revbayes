@@ -41,34 +41,32 @@ namespace RevBayesCore {
     class FixedNodeheightPruneAndRegraftCharacterHistoryProposal : public Proposal {
         
     public:
-        FixedNodeheightPruneAndRegraftCharacterHistoryProposal( StochasticNode<Tree> *t, StochasticNode<AbstractHomologousDiscreteCharacterData>* c );                                   //!<  constructor
+        FixedNodeheightPruneAndRegraftCharacterHistoryProposal( StochasticNode<Tree> *t, StochasticNode<AbstractHomologousDiscreteCharacterData>* c );                                   //!< Constructor
         
         // Basic utility functions
-        void                                                        cleanProposal(void);                                        //!< Clean up proposal
-        FixedNodeheightPruneAndRegraftCharacterHistoryProposal*     clone(void) const;                                          //!< Clone object
-        double                                                      doProposal(void);                                           //!< Perform proposal
-        const std::string&                                          getProposalName(void) const;                                //!< Get the name of the proposal for summary printing
+        void                                                        cleanProposal(void);                                          //!< Clean up proposal
+        FixedNodeheightPruneAndRegraftCharacterHistoryProposal*     clone(void) const;                                            //!< Clone object
+        double                                                      doProposal(void);                                             //!< Perform proposal
+        const std::string&                                          getProposalName(void) const;                                  //!< Get the name of the proposal for summary printing
         double                                                      getProposalTuningParameter(void) const;
-        void                                                        prepareProposal(void);                                      //!< Prepare the proposal
-        void                                                        printParameterSummary(std::ostream &o, bool name_only) const;               //!< Print the parameter summary
-        void                                                        sampleNodeCharacters(TopologyNode* node);                       //!< Sample the characters at the node
+        void                                                        prepareProposal(void);                                        //!< Prepare the proposal
+        void                                                        printParameterSummary(std::ostream &o, bool name_only) const; //!< Print the parameter summary
+        void                                                        sampleNodeCharacters(TopologyNode* node);                     //!< Sample the characters at the node
         void                                                        setRateGenerator(const TypedDagNode<RateGenerator> *d);
         void                                                        setRateGenerator(const TypedDagNode<RateGeneratorSequence> *d);
-        void                                                        setProposalTuningParameter(double tp);
-        void                                                        tune(double r);                                             //!< Tune the proposal to achieve a better acceptance/rejection ratio
-        void                                                        undoProposal(void);                                         //!< Reject the proposal
+        void                                                        undoProposal(void);                                           //!< Reject the proposal
         
     protected:
         
-        void                                                        swapNodeInternal(DagNode *oldN, DagNode *newN);             //!< Swap the DAG nodes on which the Proposal is working on
+        void                                                        swapNodeInternal(DagNode *oldN, DagNode *newN);               //!< Swap the DAG nodes the Proposal is working on
         
     private:
         // private helper methods
         void                                                        findNewBrothers(std::vector<TopologyNode*> &b, TopologyNode &p, TopologyNode *n);
 
         // parameters
-        StochasticNode<Tree>*                                       tree;                                                           //!< The tree the Proposal is working on
-        StochasticNode<AbstractHomologousDiscreteCharacterData>*    ctmc;                                                           //!< The character history the Proposal is working on
+        StochasticNode<Tree>*                                       tree;                                                         //!< The tree the Proposal is working on
+        StochasticNode<AbstractHomologousDiscreteCharacterData>*    ctmc;                                                         //!< The character history the Proposal is working on
         const TypedDagNode<RateGenerator>*                          rate_generator;
         const TypedDagNode<RateGeneratorSequence>*                  rate_generator_sequence;
 
@@ -862,28 +860,6 @@ void RevBayesCore::FixedNodeheightPruneAndRegraftCharacterHistoryProposal<charTy
 //    node_proposal_three->swapNodeInternal(oldN, newN);
     left_proposal_three->swapNodeInternal(oldN, newN);
     right_proposal_three->swapNodeInternal(oldN, newN);
-    
-}
-
-template<class charType>
-void RevBayesCore::FixedNodeheightPruneAndRegraftCharacterHistoryProposal<charType>::setProposalTuningParameter(double tp)
-{
-    // this proposal has no tuning parameter: nothing to do
-}
-
-
-/**
- * Tune the Proposal to accept the desired acceptance ratio.
- *
- * The acceptance ratio for this Proposal should be around 0.44.
- * If it is too large, then we increase the proposal size,
- * and if it is too small, then we decrease the proposal size.
- */
-template<class charType>
-void RevBayesCore::FixedNodeheightPruneAndRegraftCharacterHistoryProposal<charType>::tune( double rate )
-{
-    
-    // nothing to tune
     
 }
 

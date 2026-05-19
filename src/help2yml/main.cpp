@@ -11,10 +11,21 @@
 #include "YAMLHelpRenderer.h"
 #include "Workspace.h"
 
+#ifdef RB_MPI
+#include <mpi.h>
+#endif
+
 using namespace RevBayesCore;
 
 int main(int argc, const char * argv[])
 {
+#ifdef RB_MPI
+    // We have const char* argv[], but MPI_Init() requires non-const argv
+    int mpi_argc = argc;
+    char** mpi_argv = const_cast<char**>(argv);
+    MPI_Init(&mpi_argc, &mpi_argv);
+#endif
+
     path file = "help.yml";
 
     if( argc > 1 )
@@ -98,6 +109,10 @@ int main(int argc, const char * argv[])
     fs.close();
 
     std::cout << "\nHelp files are updated." << std::endl;
+
+#ifdef RB_MPI
+    MPI_Finalize();
+#endif
 
     return 0;
 }

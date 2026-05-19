@@ -46,12 +46,31 @@ void SyntaxDeterministicAssignment::assign(RevPtr<RevVariable> &lhs, RevPtr<RevV
         lhs->replaceRevObject( rhs->getRevObject().makeIndirectReference() );
     }
     else
-    {    
+    {
+        // Name the rhs's DAG node (already in the graph) so cycle errors can show the variable.
+        // The name is copied when the model clones the DAG.
+        if ( !lhs->getName().empty() )
+        {
+            RevBayesCore::DagNode* rhs_node = rhs->getRevObject().getDagNode();
+            if ( rhs_node != NULL )
+            {
+                rhs_node->setName( lhs->getName() );
+            }
+        }
+
         lhs->replaceRevObject( rhs->getRevObject().clone() );
-        
-        // make sure all the implicitly created variables got a correct name
+
+        // Ensure the DAG node is named after the variable (e.g. "a" in "a := exp(b)") so cycle errors can identify it.
         RevBayesCore::DagNode* the_node = lhs->getRevObject().getDagNode();
-        the_node->setParentNamePrefix( the_node->getName() );
+        if ( the_node != NULL )
+        {
+            if ( !lhs->getName().empty() )
+            {
+                the_node->setName( lhs->getName() );
+            }
+            
+            the_node->setParentNamePrefix( the_node->getName() );
+        }
     }
 
 }

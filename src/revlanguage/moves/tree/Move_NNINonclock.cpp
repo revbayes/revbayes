@@ -103,9 +103,15 @@ const MemberRules& Move_NNINonclock::getParameterRules(void) const
         
         memberRules.push_back( new ArgumentRule( "tree", BranchLengthTree::getClassTypeSpec(), "The topology on which this move is working on.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
         
-        /* Inherit weight from Move, put it after variable */
+        /* Inherit weight (but not tuneTarget!) from Move and put it after the arguments created above */
         const MemberRules& inheritedRules = Move::getParameterRules();
-        memberRules.insert( memberRules.end(), inheritedRules.begin(), inheritedRules.end() );
+        for (size_t i = 0; i < inheritedRules.size(); ++i)
+        {
+            if ( inheritedRules[i].getArgumentLabel() == "weight" )
+            {
+                memberRules.push_back( inheritedRules[i].clone() );
+            }
+        }
         
         rules_set = true;
     }

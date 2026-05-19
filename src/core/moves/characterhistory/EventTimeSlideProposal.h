@@ -40,7 +40,7 @@ namespace RevBayesCore {
         
     protected:
         
-        void                                            swapNodeInternal(DagNode *oldN, DagNode *newN) override;                            //!< Swap the DAG nodes on which the Proposal is working on
+        void                                            swapNodeInternal(DagNode *oldN, DagNode *newN) override;                            //!< Swap the DAG nodes the Proposal is working on
         
     private:
         // parameters

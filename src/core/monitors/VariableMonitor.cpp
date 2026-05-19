@@ -10,7 +10,6 @@
 #include "RbSettings.h"
 #include "RbVersion.h"
 #include "Cloneable.h"
-#include "StringUtilities.h"
 #include "nlohmann-json.h"
 
 using namespace RevBayesCore;
@@ -280,14 +279,9 @@ void VariableMonitor::combineReplicates( size_t n_reps, MonteCarloAnalysisOption
 
 	auto & separator = to<SeparatorFormat>(format)->separator;
 
-        std::fstream combined_output_stream;
+        std::ofstream combined_output_stream( filename.string() );
 
         int sample_number = 0;
-
-        // open the stream to the file
-        combined_output_stream.open( filename.string(), std::fstream::out);
-        combined_output_stream.close();
-        combined_output_stream.open( filename.string(), std::fstream::in | std::fstream::out);
 
         if ( tc == MonteCarloAnalysisOptions::SEQUENTIAL )
         {
@@ -314,67 +308,30 @@ void VariableMonitor::combineReplicates( size_t n_reps, MonteCarloAnalysisOption
                     if ( lines_skipped < lines_to_skip)
                     {
                         if ( i == 0 )
-                        {
-                            // write output
-                            combined_output_stream << read_line;
-
-                            // add a new line
-                            combined_output_stream << std::endl;
-                        }
+                            combined_output_stream << read_line << '\n';
                         continue;
                     }
                     else if ( lines_skipped == lines_to_skip )
                     {
-
                         if ( i == 0 )
                         {
-                            std::vector<std::string> fields;
-                            StringUtilities::stringSplit(read_line, separator, fields);
-
-                            // write output
-                            combined_output_stream << fields[0];
-
-                            // add a separator before every new element
-                            combined_output_stream << separator;
-                            combined_output_stream << "Replicate_ID";
-
-                            for (size_t j=1; j<fields.size(); ++j)
-                            {
-                                // add a separator before every new element
-                                combined_output_stream << separator;
-
-                                // write output
-                                combined_output_stream << fields[j];
-                            }
-
-                            // add a new line
-                            combined_output_stream << std::endl;
+                            // insert Replicate_ID after the first column header
+                            auto pos = read_line.find(separator);
+                            combined_output_stream << read_line.substr(0, pos)
+                                                   << separator << "Replicate_ID"
+                                                   << read_line.substr(pos) << '\n';
                         }
                         continue;
-
                     }
 
-                    std::vector<std::string> fields;
-                    StringUtilities::stringSplit(read_line, separator, fields);
-
-                    // add the current sample number
-                    combined_output_stream << sample_number;
-
-                    // add a separator before every new element
-                    combined_output_stream << separator;
-                    combined_output_stream << i;
-
+                    // replace the iteration counter, insert Replicate_ID,
+                    // and copy the rest of the line verbatim
+                    auto pos = read_line.find(separator);
+                    combined_output_stream << sample_number << separator << i;
+                    combined_output_stream.write(read_line.data() + pos,
+                                                 (std::streamsize)(read_line.size() - pos));
+                    combined_output_stream << '\n';
                     ++sample_number;
-                    for (size_t j=1; j<fields.size(); ++j)
-                    {
-                        // add a separator before every new element
-                        combined_output_stream << separator;
-
-                        // write output
-                        combined_output_stream << fields[j];
-                    }
-                    // add a new line
-                    combined_output_stream << std::endl;
 
                 }
 
@@ -421,66 +378,29 @@ void VariableMonitor::combineReplicates( size_t n_reps, MonteCarloAnalysisOption
                 ++lines_skipped;
                 if ( lines_skipped < lines_to_skip)
                 {
-                    // write output
-                    combined_output_stream << read_lines[0];
-
-                    // add a new line
-                    combined_output_stream << std::endl;
+                    combined_output_stream << read_lines[0] << '\n';
                     continue;
                 }
                 else if ( lines_skipped == lines_to_skip )
                 {
-                    std::vector<std::string> fields;
-                    StringUtilities::stringSplit(read_lines[0], separator, fields);
-
-                    // write output
-                    combined_output_stream << fields[0];
-
-                    // add a separator before every new element
-                    combined_output_stream << separator;
-                    combined_output_stream << "Replicate_ID";
-
-                    for (size_t j=1; j<fields.size(); ++j)
-                    {
-                        // add a separator before every new element
-                        combined_output_stream << separator;
-
-                        // write output
-                        combined_output_stream << fields[j];
-                    }
-
-                    // add a new line
-                    combined_output_stream << std::endl;
+                    // insert Replicate_ID after the first column header
+                    auto pos = read_lines[0].find(separator);
+                    combined_output_stream << read_lines[0].substr(0, pos)
+                                           << separator << "Replicate_ID"
+                                           << read_lines[0].substr(pos) << '\n';
                     continue;
-
                 }
-
 
                 for (size_t i=0; i<n_reps; ++i)
                 {
-                    std::vector<std::string> fields;
-                    StringUtilities::stringSplit(read_lines[i], separator, fields);
-
-                    // add the current sample number
-                    combined_output_stream << sample_number;
-
-                    // add a separator before every new element
-                    combined_output_stream << separator;
-                    combined_output_stream << i;
-
+                    // replace the iteration counter, insert Replicate_ID,
+                    // and copy the rest of the line verbatim
+                    auto pos = read_lines[i].find(separator);
+                    combined_output_stream << sample_number << separator << i;
+                    combined_output_stream.write(read_lines[i].data() + pos,
+                                                 (std::streamsize)(read_lines[i].size() - pos));
+                    combined_output_stream << '\n';
                     ++sample_number;
-                    for (size_t j=1; j<fields.size(); ++j)
-                    {
-                        // add a separator before every new element
-                        combined_output_stream << separator;
-
-                        // write output
-                        combined_output_stream << fields[j];
-                    }
-
-                    // add a new line
-                    combined_output_stream << std::endl;
-
                 }
 
             }

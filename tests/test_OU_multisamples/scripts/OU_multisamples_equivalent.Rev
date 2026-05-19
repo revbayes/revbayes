@@ -1,0 +1,99 @@
+################################################################################
+#
+# RevBayes Validation Test: Ornstein-Uhlenbeck model with multiple samples
+# 
+# Model: Continuous character(s) evolve under OU model.
+#            
+#
+# authors: Haoqing Du + BTK
+#
+################################################################################
+
+seed(12345)
+
+#######################
+# Reading in the Data #
+#######################
+
+data <- readContinuousCharacterData("data/Drosophila_tpm.nex")
+data_pruned <- readContinuousCharacterData("data/Drosophila_tpm_pruned.nex")
+
+# Get some useful variables from the data. We need these later on.
+taxa <- data.taxa()
+
+# Tree
+psi <- readTrees( "data/Drosophila.tre" )[1]
+psi_pruned <- readTrees( "data/Drosophila_pruned.tre" )[1]
+root_age := psi.rootAge()
+
+moves = VectorMoves()
+
+# OU-Model
+sigma ~ dnExponential( 10.0 )
+sigma.setValue(0.1)
+moves.append( mvScale(sigma) )
+
+optimum ~ dnUniform( -10 , 10 )
+optimum.setValue(-1.0)
+moves.append( mvSlide(optimum) )
+
+attraction ~ dnExponential( abs(root_age / 2.0 / ln(2.0)) )
+attraction.setValue(0.1)
+moves.append( mvScale(attraction) )
+
+### Within-species taxon indices
+taxon_map = readTaxonData("data/Drosophila_species_map.txt")
+taxon_map_pruned = readTaxonData("data/Drosophila_species_map_pruned.txt")
+
+# Assume one variance parameter per species
+for (i in 1:psi.ntips()) {
+    species_sd[i] ~ dnExp(1.0)
+    species_sd[i].setValue(0.05)
+    moves.append( mvScale(species_sd[i]) )
+
+    species_var[i] := species_sd[i] * species_sd[i]
+}
+
+###################
+# PhyloCTMC Model #
+###################
+
+traits ~ dnPhyloMultiSampleOrnsteinUhlenbeckREML(psi, sigma=sigma, alpha=attraction, theta=optimum, withinSpeciesVariances=species_var, rootState=optimum, nSites=1, taxa = taxon_map)
+traits_pruned ~ dnPhyloMultiSampleOrnsteinUhlenbeckREML(psi_pruned, sigma=sigma, alpha=attraction, theta=optimum, withinSpeciesVariances=species_var, rootState=optimum, nSites=1, taxa = taxon_map_pruned)
+
+
+# attach the data
+traits.clamp(data)
+traits_pruned.clamp(data_pruned)
+
+# check if the two distributions 
+# give the same likelihood.
+lp1 = traits.lnProbability()
+lp2 = traits_pruned.lnProbability()
+
+treshold <- 0.001
+
+print("lp1 = " + lp1)
+print("lp2 = " + lp2)
+
+if (abs(lp1 - lp2) < treshold){
+    print("likelihoods in OU multi-sample distributions equal, test passed")
+}else{
+    print("likelihoods in OU multi-sample distributions not equal, test failed")
+}
+
+# We can use any node of our model as a handle, here we chose to use the rate matrix.
+mymodel = model(psi)
+
+mni = 0
+monitors[++mni] = mnModel(filename="output/OU_multisamples_equivalent.log",printgen=10, separator = TAB)
+
+mymcmc = mcmc(mymodel, monitors, moves)
+mymcmc.burnin(generations=20,tuningInterval=5)
+mymcmc.run(generations=50)
+
+
+
+# you may want to quit RevBayes now
+q()
+

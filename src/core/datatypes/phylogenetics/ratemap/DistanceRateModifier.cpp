@@ -602,7 +602,6 @@ unsigned DistanceRateModifier::getNumAvailableAreas( std::vector<CharacterEvent*
     for (it_a = absent.begin(); it_a != absent.end(); it_a++)
     {
         size_t idx_a = (*it_a)->getSiteIndex();
-        bool found = false;
         for (it_p = present.begin(); it_p != present.end(); it_p++)
         {
             size_t idx_p = (*it_p)->getSiteIndex();
@@ -611,7 +610,6 @@ unsigned DistanceRateModifier::getNumAvailableAreas( std::vector<CharacterEvent*
             double v = adjacentAreaVector[idx_e];
             if (useAreaAdjacency && v > eps)
             {
-                found = true;
                 gainableAreas.insert(idx_a);
                 break;
             }
@@ -651,7 +649,6 @@ unsigned DistanceRateModifier::getNumEmigratableAreas( std::vector<CharacterEven
     for (it_p = present.begin(); it_p != present.end(); it_p++)
     {
         size_t idx_p = (*it_p)->getSiteIndex();
-        bool found = false;
         for (it_a = absent.begin(); it_a != absent.end(); it_a++)
         {
             size_t idx_a = (*it_a)->getSiteIndex();
@@ -660,7 +657,6 @@ unsigned DistanceRateModifier::getNumEmigratableAreas( std::vector<CharacterEven
             double v = adjacentAreaVector[idx_e];
             if (useAreaAdjacency && v > eps)
             {
-                found = true;
                 emigratableAreas.insert(idx_p);
                 break;
             }

@@ -190,7 +190,7 @@ namespace  {
             auto Prs = getNodePrs();
             double Prx = operator()(x);
             auto Prsx = getNodePrs();
-            if (std::abs(Pr - Prx)/abs(Prx) > 1.0e-11)
+            if (std::abs(Pr - Prx)/std::abs(Prx) > 1.0e-11)
             {
                 std::cerr<<std::setprecision(11)<<std::endl;
                 std::cerr<<"mvSlice for "<<variable->getName()<<": probability is "<<Pr<<" but should be "<<Prx<<":  delta = "<<Pr - Prx<<"\n";

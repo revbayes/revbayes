@@ -139,13 +139,14 @@ void SingleElementScaleProposal::setProposalTuningParameter(double tp)
 void SingleElementScaleProposal::tune( double rate )
 {
     
-    if ( rate > 0.44 )
+    double p = this->targetAcceptanceRate;
+    if ( rate > p )
     {
-        lambda *= (1.0 + ((rate-0.44)/0.56) );
+        lambda *= (1.0 + ((rate - p)/(1.0 - p)) );
     }
     else
     {
-        lambda /= (2.0 - rate/0.44 );
+        lambda /= (2.0 - rate/p);
     }
     
 }

@@ -103,7 +103,8 @@ RevBayesCore::TopologyConstrainedTreeDistribution* Dist_ConstrainedTopology::cre
     // create the internal distribution object
     RevBayesCore::TopologyConstrainedTreeDistribution* dist = new RevBayesCore::TopologyConstrainedTreeDistribution(base, c, init, pr); // , bb);
     
-    if (backbone == NULL && backbone->getRevObject() != RevNullObject::getInstance()) {
+    if ( backbone == NULL || backbone->getRevObject() == RevNullObject::getInstance() )
+    {
         ; // do nothing
     }
     else if ( backbone->getRevObject().isType( ModelVector<TimeTree>::getClassTypeSpec() ) )

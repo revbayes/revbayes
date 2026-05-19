@@ -25,7 +25,7 @@ class DagNode;
     class ScaleProposalContinuous : public Proposal {
         
     public:
-        ScaleProposalContinuous( ContinuousStochasticNode *n, double l, double p=0.44);                                                                    //!<  constructor
+        ScaleProposalContinuous( ContinuousStochasticNode *n, double l, double p=0.44);                                                                    //!< Constructor
         
         // Basic utility functions
         void                                cleanProposal(void);                                                                //!< Clean up proposal
@@ -41,7 +41,7 @@ class DagNode;
         
     protected:
         
-        void                                swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes on which the Proposal is working on
+        void                                swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes the Proposal is working on
         
         
     private:

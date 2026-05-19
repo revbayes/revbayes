@@ -1,0 +1,7 @@
+## continue-on-error
+t = readTrees(text="(a:1.0:1.0);")
+t = readTrees(text="(averylongtaxonnamethatmightmakethelineoverflow,a:1.0:1.0,averylongtaxonnamethatmightmakethelineoverflow);")
+t = readTrees(text="(a:1.0)")
+t = readTrees(text="(a:1.0")
+t = readTrees("data/bad_trees1.tre")[1]
+

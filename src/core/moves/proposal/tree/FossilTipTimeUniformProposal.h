@@ -25,7 +25,7 @@ namespace RevBayesCore {
     class FossilTipTimeUniformProposal : public Proposal {
         
     public:
-        FossilTipTimeUniformProposal( StochasticNode<Tree> *n, TypedDagNode<double>* o, TypedDagNode<double>* ma, TypedDagNode<double>* mi, const std::string& t);   //!<  constructor
+        FossilTipTimeUniformProposal( StochasticNode<Tree> *n, TypedDagNode<double>* o, TypedDagNode<double>* ma, TypedDagNode<double>* mi, const std::string& t);   //!< Constructor
         
         // Basic utility functions
         void                                    cleanProposal(void);                                            //!< Clean up proposal
@@ -35,13 +35,11 @@ namespace RevBayesCore {
         double                                  getProposalTuningParameter(void) const;
         void                                    prepareProposal(void);                                          //!< Prepare the proposal
         void                                    printParameterSummary(std::ostream &o, bool name_only) const;   //!< Print the parameter summary
-        void                                    setProposalTuningParameter(double tp);
-        void                                    tune(double r);                                                 //!< Tune the proposal to achieve a better acceptance/rejection ratio
         void                                    undoProposal(void);                                             //!< Reject the proposal
 
     protected:
         
-        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);                 //!< Swap the DAG nodes on which the Proposal is working on
+        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);                 //!< Swap the DAG nodes the Proposal is working on
         
         
     private:

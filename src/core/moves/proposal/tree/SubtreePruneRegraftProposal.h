@@ -25,23 +25,21 @@ template <class variableType> class StochasticNode;
     class SubtreePruneRegraftProposal : public Proposal {
         
     public:
-        SubtreePruneRegraftProposal( StochasticNode<Tree> *n);                                               //!<  constructor
+        SubtreePruneRegraftProposal( StochasticNode<Tree> *n);                                                //!< Constructor
         
         // Basic utility functions
-        void                                    cleanProposal(void);                                        //!< Clean up proposal
-        SubtreePruneRegraftProposal*            clone(void) const;                                          //!< Clone object
-        double                                  doProposal(void);                                           //!< Perform proposal
-        const std::string&                      getProposalName(void) const;                                //!< Get the name of the proposal for summary printing
+        void                                    cleanProposal(void);                                          //!< Clean up proposal
+        SubtreePruneRegraftProposal*            clone(void) const;                                            //!< Clone object
+        double                                  doProposal(void);                                             //!< Perform proposal
+        const std::string&                      getProposalName(void) const;                                  //!< Get the name of the proposal for summary printing
         double                                  getProposalTuningParameter(void) const;
-        void                                    prepareProposal(void);                                      //!< Prepare the proposal
-        void                                    printParameterSummary(std::ostream &o, bool name_only) const;               //!< Print the parameter summary
-        void                                    setProposalTuningParameter(double tp);
-        void                                    tune(double r);                                             //!< Tune the proposal to achieve a better acceptance/rejection ratio
-        void                                    undoProposal(void);                                         //!< Reject the proposal
+        void                                    prepareProposal(void);                                        //!< Prepare the proposal
+        void                                    printParameterSummary(std::ostream &o, bool name_only) const; //!< Print the parameter summary
+        void                                    undoProposal(void);                                           //!< Reject the proposal
         
     protected:
         
-        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);             //!< Swap the DAG nodes on which the Proposal is working on
+        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);               //!< Swap the DAG nodes the Proposal is working on
         
         
     private:
@@ -49,7 +47,7 @@ template <class variableType> class StochasticNode;
         bool                                    isDescendant(const TopologyNode &n, const TopologyNode &p);
 
         // parameters
-        StochasticNode<Tree>*                   tree;                                                   //!< The variable the Proposal is working on
+        StochasticNode<Tree>*                   tree;                                                         //!< The variable the Proposal is working on
         
         // stored objects to undo proposal
         bool                                    failed;

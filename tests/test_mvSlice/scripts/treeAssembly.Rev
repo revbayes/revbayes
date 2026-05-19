@@ -15,8 +15,8 @@ nTaxa <- chars.size()
 nEdge <- 2 * nTaxa - 3
 
 topology ~ dnUniformTopology(taxa, outgroup = outgroup)
-moves.append( mvNNI(topology, weight = nEdge/2.0, tuneTarget = 0.26) )
-moves.append( mvSPR(topology, weight = nEdge/10.0, tuneTarget = 0.26) )
+moves.append( mvNNI(topology, weight = nEdge/2.0) )
+moves.append( mvSPR(topology, weight = nEdge/10.0) )
 tree_length ~ dnGamma(shape = 2, rate = 1)
 moves.append( mvScale(tree_length) )
 moves.append( mvSlice(tree_length) )

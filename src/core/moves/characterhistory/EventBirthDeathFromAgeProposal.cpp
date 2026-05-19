@@ -106,14 +106,12 @@ double EventBirthDeathFromAgeProposal::doProposal( void )
     double u = rng->uniform01();
     
     double p_birth = 1.0;
-    double p_death = 0.0;
     
     size_t num_events = history.getNumberEvents();
     
     if ( num_events > 0 )
     {
         p_birth = 0.5;
-        p_death = 0.5;
     }
     
     double proposal_prob = 0.0;
@@ -266,32 +264,3 @@ void EventBirthDeathFromAgeProposal::swapNodeInternal(DagNode *oldN, DagNode *ne
         throw RbException("Wrong type of variable for BirthDeathEvent move.");
     }
 }
-
-
-void EventBirthDeathFromAgeProposal::setProposalTuningParameter(double tp)
-{
-    // this proposal has no tuning parameter: nothing to do
-}
-
-
-/**
- * Tune the Proposal to accept the desired acceptance ratio.
- *
- * The acceptance ratio for this Proposal should be around 0.44.
- * If it is too large, then we increase the proposal size,
- * and if it is too small, then we decrease the proposal size.
- */
-void EventBirthDeathFromAgeProposal::tune( double rate )
-{
-    
-    //    if ( rate > 0.44 )
-    //    {
-    //        delta *= (1.0 + ((rate-0.44)/0.56) );
-    //    }
-    //    else
-    //    {
-    //        delta /= (2.0 - rate/0.44 );
-    //    }
-    
-}
-

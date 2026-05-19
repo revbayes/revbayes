@@ -30,23 +30,23 @@ template <class variableType> class StochasticNode;
     class MatrixRealSingleElementScaleProposal : public Proposal {
         
     public:
-        MatrixRealSingleElementScaleProposal( StochasticNode<MatrixReal> *n, double l, bool s = false);                                                                      //!<  constructor
-        MatrixRealSingleElementScaleProposal( StochasticNode<RbVector<RbVector<double> > > *n, double l, bool s = false);                                                                      //!<  constructor
+        MatrixRealSingleElementScaleProposal( StochasticNode<MatrixReal> *n, double l, bool s = false);                                                                      //!< Constructor
+        MatrixRealSingleElementScaleProposal( StochasticNode<RbVector<RbVector<double> > > *n, double l, bool s = false);                                                                      //!< Constructor
 
         // Basic utility functions
         void                                    cleanProposal(void);                                                                //!< Clean up proposal
-        MatrixRealSingleElementScaleProposal* clone(void) const;                                                                  //!< Clone object
+        MatrixRealSingleElementScaleProposal*   clone(void) const;                                                                  //!< Clone object
         double                                  doProposal(void);                                                                   //!< Perform proposal
         const std::string&                      getProposalName(void) const;                                                        //!< Get the name of the proposal for summary printing
         double                                  getProposalTuningParameter(void) const;
-        void                                    printParameterSummary(std::ostream &o, bool name_only) const;                                       //!< Print the parameter summary
+        void                                    printParameterSummary(std::ostream &o, bool name_only) const;                       //!< Print the parameter summary
         void                                    prepareProposal(void);                                                              //!< Prepare the proposal
         void                                    setProposalTuningParameter(double tp);
         void                                    tune(double r);                                                                     //!< Tune the proposal to achieve a better acceptance/rejection ratio
         void                                    undoProposal(void);                                                                 //!< Reject the proposal
         
     protected:
-        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes on which the Proposal is working on
+        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes the Proposal is working on
         
     private:
         // parameters

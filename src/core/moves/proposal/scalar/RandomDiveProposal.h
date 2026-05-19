@@ -25,7 +25,7 @@ namespace RevBayesCore {
     class RandomDiveProposal : public Proposal {
         
     public:
-        RandomDiveProposal( StochasticNode<double> *n, double l, double p=0.44);                                                                      //!<  constructor
+        RandomDiveProposal( StochasticNode<double> *n, double l, double p=0.44);                                                                      //!< Constructor
         
         // Basic utility functions
         void                                    cleanProposal(void);                                                                //!< Clean up proposal
@@ -40,7 +40,7 @@ namespace RevBayesCore {
         void                                    undoProposal(void);                                                                 //!< Reject the proposal
         
     protected:
-        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes on which the Proposal is working on
+        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes the Proposal is working on
         
     private:
         // parameters

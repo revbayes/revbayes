@@ -259,7 +259,7 @@ std::vector<double> DemographyCoalescent::simulateCoalescentAges( size_t n ) con
 
     // Put sampling times and demographic function changes into a single vector of event times
     std::vector<double> combined_event_ages;
-    std::vector<double> combined_event_types;
+    std::vector<EVENT_TYPE> combined_event_types;
     if (num_taxa_at_present < num_taxa)
     {
         // sort the vector of serial sampling times in ascending order
@@ -309,12 +309,13 @@ std::vector<double> DemographyCoalescent::simulateCoalescentAges( size_t n ) con
     else
     {
         combined_event_ages = change_ages;
-        combined_event_types = std::vector<double>(change_ages.size(),DEMOGRAPHIC_MODEL_CHANGE);
+        combined_event_types = std::vector<EVENT_TYPE>(change_ages.size(), DEMOGRAPHIC_MODEL_CHANGE);
     }
  
-    // cap vector with an event at t=infinity
+    // cap vector with an event at t=infinity (the choice of COALESCENT as the event in question here
+    // is arbitrary: we just need something that will yield 'false' when compared to DEMOGRAPHIC_MODEL_CHANGE)
     combined_event_ages.push_back(RbConstants::Double::inf);
-    combined_event_types.push_back(RbConstants::Double::inf);
+    combined_event_types.push_back(COALESCENT);
 
     
     // now simulate the ages

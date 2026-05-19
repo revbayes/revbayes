@@ -752,6 +752,24 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
                 }             
             }           
         }
+
+#ifdef RB_MPI
+        // Convergence rules re-read trace files; ensure all ranks finished this generation's
+        // monitor output before any rank reads (also matches verbose>1 printing paths).
+        bool any_convergence_check_this_gen = false;
+        for (size_t ri = 0; ri < rules.size(); ++ri)
+        {
+            if ( rules[ri].isConvergenceRule() && rules[ri].checkAtIteration(gen) )
+            {
+                any_convergence_check_this_gen = true;
+                break;
+            }
+        }
+        if ( any_convergence_check_this_gen )
+        {
+            MPI_Barrier( analysis_comm );
+        }
+#endif
         
         converged = true;
         size_t numConvergenceRules = 0;

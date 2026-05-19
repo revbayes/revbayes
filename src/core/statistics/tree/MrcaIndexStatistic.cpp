@@ -6,7 +6,6 @@
 #include <vector>
 
 #include "RbException.h"
-#include "RbBitSet.h"
 #include "TopologyNode.h"
 #include "Tree.h"
 #include "TypedDagNode.h"
@@ -54,63 +53,23 @@ void MrcaIndexStatistic::initialize( void )
 
 void MrcaIndexStatistic::update( void )
 {
-    
-    const std::vector<TopologyNode*> &n = tree->getValue().getNodes();
-    size_t min_clade_size = n.size() + 2;
-    
-    bool found = false;
-    if ( index != -1 )
+    if ( not tree->getValue().isRooted() )
     {
-        
-        TopologyNode *node = n[index];
-        size_t cladeSize = size_t( (node->getNumberOfNodesInSubtree(true) + 1) / 2);
-        if ( node->containsClade( clade, false ) == true )
-        {
-            
-            if ( taxa_count == cladeSize )
-            {
-                found = true;
-            }
-            else
-            {
-                min_clade_size = cladeSize;
-            }
-            
-        }
-        
+        throw RbException("Most recent common ancestor is undefined for unrooted trees.");
     }
-    
-    
-    if ( found == false )
-    {
-        
-        for (size_t i = tree->getValue().getNumberOfTips(); i < n.size(); ++i)
-        {
-            
-            TopologyNode *node = n[i];
-            size_t clade_size = size_t( (node->getNumberOfNodesInSubtree(true) + 1) / 2);
-            if ( clade_size < min_clade_size && clade_size >= taxa_count && node->containsClade( clade, false ) )
-            {
-                
-                index = (int)node->getIndex();
-                min_clade_size = clade_size;
-                if ( taxa_count == clade_size )
-                {
-                    break;
-                }
-                
-            }
-            
-        }
-        
-    }
-    
-    if ( index == -1 )
+
+    const Tree& t = tree->getValue();
+    const TopologyNode& root = t.getRoot();
+    const TopologyNode* node = root.getMrca( clade );
+
+    if ( node == NULL )
     {
         throw RbException("MrcaIndex-Statistics can only be applied if clade is present.");
     }
-    
-    *value = index;
+
+    index = static_cast<int>( node->getIndex() );
+    // Return 1-based index so that .getDescendantTaxa() and other Tree methods expecting 1-based node indices work
+    *value = index + 1;
 }
 
 

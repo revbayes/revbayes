@@ -164,9 +164,15 @@ const MemberRules& Move_HSRFHyperpriorsGibbs::getParameterRules(void) const
         move_member_rules.push_back( new ArgumentRule( "propGlobalOnly", Probability::getClassTypeSpec()  ,        "The proportion of all of these moves that only move the global scale.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new Probability(0.0) ) );
         move_member_rules.push_back( new ArgumentRule( "order"         , Natural::getClassTypeSpec()  ,            "The order of this HSRF model, first (1) or second (2). Defaults to first order.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new Natural(1) ) );
 
-        /* Inherit weight from Move, put it after variable */
+        /* Inherit weight (but not tuneTarget!) from Move and put it after the arguments created above */
         const MemberRules& inheritedRules = Move::getParameterRules();
-        move_member_rules.insert( move_member_rules.end(), inheritedRules.begin(), inheritedRules.end() );
+        for (size_t i = 0; i < inheritedRules.size(); ++i)
+        {
+            if ( inheritedRules[i].getArgumentLabel() == "weight" )
+            {
+                move_member_rules.push_back( inheritedRules[i].clone() );
+            }
+        }
 
         rules_set = true;
     }

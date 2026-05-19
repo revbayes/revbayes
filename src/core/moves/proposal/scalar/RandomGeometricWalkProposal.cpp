@@ -168,7 +168,7 @@ void RandomGeometricWalkProposal::setProposalTuningParameter(double tp)
 
 
 /**
- * Tune the Proposal to accept the desired acceptance ratio.
+ * Tune the Proposal to accept at the desired acceptance ratio.
  *
  * The acceptance ratio for this Proposal should be around 0.44.
  * If it is too large, then we increase the proposal size,
@@ -177,13 +177,14 @@ void RandomGeometricWalkProposal::setProposalTuningParameter(double tp)
 void RandomGeometricWalkProposal::tune( double rate )
 {
     
-    if ( rate > 0.44 )
+    double p = this->targetAcceptanceRate;
+    if ( rate > p )
     {
-        alpha -= ( alpha/2.0 * ((rate-0.44)/0.56) );
+        alpha -= ( alpha/2.0 * ((rate - p)/(1.0 - p)) );
     }
     else
     {
-        alpha += ( (1.0-alpha)/2.0 * rate/0.45 );
+        alpha += ( (1.0 - alpha)/2.0 * rate/p );
     }
     
 }

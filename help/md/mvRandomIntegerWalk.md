@@ -14,6 +14,7 @@ A move that performs random walk on an integer variable. The displacement of the
 Sebastian Hoehna
 
 ## see_also
+mvRandomCategoryWalk
 mvRandomNaturalWalk
 mvRandomGeometricWalk
 

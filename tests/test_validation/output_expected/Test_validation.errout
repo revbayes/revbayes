@@ -30,7 +30,7 @@ Coverage frequencies of parameters in validation analysis:
 ==========================================================
 pi                  		1
 psi                 		0
-root                		0.8
+root                		0.9
 
 
 Summarizing analysis ...
@@ -41,7 +41,7 @@ Coverage frequencies should be between 0.2 and 0.8 in 95% of the simulations.
 
 Coverage frequencies of parameters in validation analysis:
 ==========================================================
-pi                  		0.5
+pi                  		0.6
 psi                 		0
-root                		0.6
+root                		0.7
 

@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <iostream>
+#include <set>
 
 #include "RlAbstractDiscreteTaxonData.h"
 #include "RlDistanceMatrix.h"
@@ -262,7 +263,26 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
     {
         found = true;
 
-        std::vector<std::string> descriptions = this->dag_node->getValue().getTaxonData(0).getCharacter(0).getStateDescriptions();
+        std::vector<std::string> descriptions;
+        const RevBayesCore::AbstractHomologousDiscreteCharacterData& v = this->dag_node->getValue();
+        if ( v.getNumberOfTaxa() > 0 )
+        {
+            size_t nChars = v.getNumberOfCharacters();
+            const RevBayesCore::AbstractDiscreteTaxonData& td = v.getTaxonData(0);
+            
+            // get a union set of all state descriptions across all characters
+            std::set<std::string> unique_descriptions;
+            
+            for ( size_t i = 0; i < nChars; ++i )
+            {
+                std::vector<std::string> char_desc = td.getCharacter(i).getStateDescriptions();
+                for ( const std::string& s : char_desc )
+                {
+                    unique_descriptions.insert(s);
+                }
+            }
+            descriptions.assign(unique_descriptions.begin(), unique_descriptions.end());
+        }
 
         return new RevVariable( new ModelVector<RlString>(descriptions) );
     }

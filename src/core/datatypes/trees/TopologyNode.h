@@ -75,11 +75,13 @@ namespace RevBayesCore {
         void                                        addChild(TopologyNode* c, size_t pos = 0);                                          //!< Adds a child node
 
         void                                        addBranchParameter(const std::string &n, double p);
+        void                                        addBranchParameter_(const std::string &chunk);
         void                                        addBranchParameter(const std::string &n, const std::string &p);
         void                                        addBranchParameters(const std::string &n, const std::vector<double> &p, bool io);
         void                                        addBranchParameters(const std::string &n, const std::vector<std::string> &p, bool io);
 
         void                                        addNodeParameter(const std::string &n, double p);
+        void                                        addNodeParameter_(const std::string &chunk);
         void                                        addNodeParameter(const std::string &n, const std::string &p);
         void                                        addNodeParameter_(const std::string &n, const std::string &p);
         void                                        addNodeParameters(const std::string &n, const std::vector<double> &p, bool io);
@@ -89,7 +91,7 @@ namespace RevBayesCore {
         bool                                        setNodeParameter(const std::string& name, const std::string& value);                //!< Adds OR REPLACES a node parmaeter, returning true if it was already present.
         std::optional<std::string>                  getNodeParameter(const std::string& name) const;                                    //!< Gets the value of a node parameter if present.
         std::optional<std::string>                  eraseNodeParameter(const std::string& name);                                        //!< Erases a node parameter if present, returning the value.
-
+        //add comment member function?
 
         void                                        clearParameters(void);                                                              //!< Clear the node and branch parameters
         void                                        clearBranchParameters(void);

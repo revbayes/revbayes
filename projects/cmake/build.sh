@@ -136,7 +136,7 @@ if [ -n "${boost_root}" ] ; then
         exit 1
     fi
 
-    cmake_args="-DCMAKE_PREFIX_PATH=${boost_root}"
+    cmake_args="-DCMAKE_PREFIX_PATH=${boost_root} $cmake_args"
 fi
 
 if [ "$boost_verbose" = "true" ] ; then

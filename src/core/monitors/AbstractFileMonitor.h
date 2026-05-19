@@ -38,6 +38,7 @@ class DagNode;
         void                                openStream(bool reopen);
         void                                setAppend(bool tf);   //!< Set if the monitor should append to an existing file
         void                                setPrintVersion(bool tf);  //!< Set flag whether to print the version
+        virtual void                        truncateAfterGeneration(std::uint64_t lastGen);  //!< Remove samples written after the given generation
 
         // functions you may want to overwrite
         virtual void                        closeStream(void);

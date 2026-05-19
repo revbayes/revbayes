@@ -267,31 +267,31 @@ void CharacterHistoryPosteriorPredictiveMonitor::printHeader() {
 void CharacterHistoryPosteriorPredictiveMonitor::swapNode(DagNode *oldN, DagNode *newN)
 {
     
-    bool found = false;
+    // bool found = false;
     if ( oldN == tree )
     {
         tree = static_cast< TypedDagNode< Tree > *>( newN );
-        found = true;
+        // found = true;
     }
     for (size_t i = 0; i < branchHistories.size(); i++)
     {
         if (oldN == branchHistories[i])
         {
             branchHistories[i] = static_cast<StochasticNode<BranchHistory>* >(newN);
-            found = true;
+            // found = true;
         }
     }
     
     /*
      if (found == false)
      {
-     // error catching
-     if ( nodeVariables.find(oldN) == nodeVariables.end() ) {
-     throw RbException("Cannot replace DAG node in this monitor because the monitor doesn't hold this DAG node.");
-     }
+         // error catching
+         if ( nodeVariables.find(oldN) == nodeVariables.end() ) {
+             throw RbException("Cannot replace DAG node in this monitor because the monitor doesn't hold this DAG node.");
+         }
      
-     nodeVariables.erase( oldN );
-     nodeVariables.insert( newN );
+         nodeVariables.erase( oldN );
+         nodeVariables.insert( newN );
      }
      */
     

@@ -1,13 +1,5 @@
-//
-//  CladogeneticProbabilityMatrix_Epoch_Epoch.h
-//  revbayes-proj
-//
-//  Created by Michael Landis on 10/23/16.
-//  Copyright © 2016 Michael Landis. All rights reserved.
-//
-
-#ifndef CladogeneticProbabilityMatrix_Epoch_Epoch_h
-#define CladogeneticProbabilityMatrix_Epoch_Epoch_h
+#ifndef CladogeneticProbabilityMatrix_Epoch_h
+#define CladogeneticProbabilityMatrix_Epoch_h
 
 #include <cstddef>
 #include <iosfwd>
@@ -19,7 +11,6 @@
 #include "RbVectorImpl.h"
 
 namespace RevBayesCore {
-class Assignable;
     
     //    class TransitionProbabilityMatrix;
     
@@ -64,4 +55,4 @@ class Assignable;
     };
     
 };
-#endif /* CladogeneticProbabilityMatrix_Epoch_Epoch_h */
+#endif /* CladogeneticProbabilityMatrix_Epoch_h */

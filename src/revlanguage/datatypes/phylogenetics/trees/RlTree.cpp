@@ -257,6 +257,13 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
         bool tf = this->dag_node->getValue().getNode((size_t)index).isInternal();
         return new RevVariable( new RlBoolean( tf ) );
     }
+    else if (name == "isRooted")
+    {
+        found = true;
+        
+        bool tf = this->dag_node->getValue().isRooted();
+        return new RevVariable( new RlBoolean( tf ) );
+    }
     else if (name == "names" || name == "taxa")
     {
         found = true;
@@ -471,6 +478,9 @@ void Tree::initMethods( void )
     ArgumentRules* isInternalArgRules = new ArgumentRules();
     isInternalArgRules->push_back( new ArgumentRule( "node", Natural::getClassTypeSpec(), "The index of the node.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
     methods.addFunction( new MemberProcedure( "isInternal", RlBoolean::getClassTypeSpec(), isInternalArgRules ) );
+    
+    ArgumentRules* isRootedArgRules = new ArgumentRules();
+    methods.addFunction( new MemberProcedure( "isRooted", RlBoolean::getClassTypeSpec(), isRootedArgRules ) );
 
     ArgumentRules* same_topology_arg_rules = new ArgumentRules();
     same_topology_arg_rules->push_back(        new ArgumentRule("tree"    , Tree::getClassTypeSpec(), "The reference tree.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );

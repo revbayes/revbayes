@@ -1,7 +1,10 @@
+> ## continue-on-error
+> ## print-commands
 > x[0]
    Missing Variable:	Variable x does not exist
 > x[1]
    Missing Variable:	Variable x does not exist
+> 
 > x[-1] = -1
    Error:	Index -1 not allowed in 'x[-1]'.  The first element should be 'x[1]'
 > x[0] = 0
@@ -10,6 +13,7 @@
 > x[2] = -2
 > print(x)
 1,-2
+> 
 > x[1.5]
    Error:	Argument or label mismatch for function call.
    Arguments which could not be matched (we stopped after the first mismatch):

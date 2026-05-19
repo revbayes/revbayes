@@ -217,7 +217,7 @@ void EllipticalSliceSamplingSimpleMove::performMcmcMove( double prHeat, double l
 {
     if ( prHeat != 1 || pHeat != 1)
     {
-        throw(RbException("Elliptical slice sampling moves are invalid with heated priors or posteriors."));
+        throw RbException("Elliptical slice sampling moves are invalid with heated priors or posteriors.");
     }
 
     slice_function lnL(variables, lHeat);
@@ -273,7 +273,8 @@ void EllipticalSliceSamplingSimpleMove::performMcmcMove( double prHeat, double l
         }
 
         // steps 7-9 (10 being loop again)
-        if (theta > 0.0) {
+        if (theta > 0.0)
+        {
             R = theta;
         }
         else {

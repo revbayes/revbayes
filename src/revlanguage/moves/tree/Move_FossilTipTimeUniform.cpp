@@ -154,10 +154,16 @@ const MemberRules& Move_FossilTipTimeUniform::getParameterRules(void) const
         tip_index_arg_types.push_back( RlString::getClassTypeSpec() );
         tip_index_arg_types.push_back( Taxon::getClassTypeSpec() );
         move_member_rules.push_back( new ArgumentRule( "tip", tip_index_arg_types, "The name of a specific tip/taxon.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RlString("") ) );
-
-        /* Inherit weight from Move, put it after variable */
+        
+        /* Inherit weight (but not tuneTarget!) from Move and put it after the arguments created above */
         const MemberRules& inheritedRules = Move::getParameterRules();
-        move_member_rules.insert( move_member_rules.end(), inheritedRules.begin(), inheritedRules.end() );
+        for (size_t i = 0; i < inheritedRules.size(); ++i)
+        {
+            if ( inheritedRules[i].getArgumentLabel() == "weight" )
+            {
+                move_member_rules.push_back( inheritedRules[i].clone() );
+            }
+        }
         
         rules_set = true;
     }

@@ -30,23 +30,23 @@ template <class variableType> class StochasticNode;
     class MatrixRealSingleElementSlideProposal : public Proposal {
         
     public:
-        MatrixRealSingleElementSlideProposal( StochasticNode<MatrixReal> *n, double l, bool s = false);                                                                      //!<  constructor
+        MatrixRealSingleElementSlideProposal( StochasticNode<MatrixReal> *n, double l, bool s = false);                                                                      //!< Constructor
         MatrixRealSingleElementSlideProposal( StochasticNode<RbVector<RbVector<double> > > *n, double l, bool s = false);
         
         // Basic utility functions
         void                                    cleanProposal(void);                                                                //!< Clean up proposal
-        MatrixRealSingleElementSlideProposal* clone(void) const;                                                                  //!< Clone object
+        MatrixRealSingleElementSlideProposal*   clone(void) const;                                                                  //!< Clone object
         double                                  doProposal(void);                                                                   //!< Perform proposal
         const std::string&                      getProposalName(void) const;                                                        //!< Get the name of the proposal for summary printing
         double                                  getProposalTuningParameter(void) const;
-        void                                    printParameterSummary(std::ostream &o, bool name_only) const;                                       //!< Print the parameter summary
+        void                                    printParameterSummary(std::ostream &o, bool name_only) const;                       //!< Print the parameter summary
         void                                    prepareProposal(void);                                                              //!< Prepare the proposal
         void                                    setProposalTuningParameter(double tp);
         void                                    tune(double r);                                                                     //!< Tune the proposal to achieve a better acceptance/rejection ratio
         void                                    undoProposal(void);                                                                 //!< Reject the proposal
         
     protected:
-        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes on which the Proposal is working on
+        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes the Proposal is working on
         
     private:
         // parameters
@@ -54,7 +54,7 @@ template <class variableType> class StochasticNode;
         StochasticNode<RbVector<RbVector<double> > >* array;
         StochasticNode<MatrixReal>*                   matrix;
         
-        double                                  delta;                                                                             //!< The Sliding parameter of the move (larger lambda -> larger proposals).
+        double                                  delta;                                                                             //!< The Sliding parameter of the move (larger delta -> larger proposals).
         //!< The two indices of the last modified element.
         size_t                                  indexa;
         size_t                                  indexb;

@@ -7,10 +7,9 @@
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 //#include "BiogeographicTreeHistoryCtmc.h"
-#include "BiogeographyNodeRejectionSampleProposal.h"
-#include "BiogeographyCladogeneticRejectionShiftProposal.h"
-#include "BiogeographyCladogeneticRejectionSampleProposal.h"
-//#include "BiogeographyPathRejectionSampleProposal.h"
+#include "BiogeographicNodeRejectionSampleProposal.h"
+#include "BiogeographicCladogeneticRejectionShiftProposal.h"
+#include "BiogeographicCladogeneticRejectionSampleProposal.h"
 #include "NodeRejectionSampleProposal.h"
 #include "MetropolisHastingsMove.h"
 #include "Move_CharacterHistory.h"
@@ -39,6 +38,7 @@
 #include "RnaState.h" // IWYU pragma: keep
 #include "AminoAcidState.h" // IWYU pragma: keep
 #include "StandardState.h" // IWYU pragma: keep
+#include "CharTypeApply.h" // for apply_to_character_type( )
 
 namespace RevBayesCore { class DnaState; }
 namespace RevBayesCore { class Proposal; }
@@ -120,18 +120,17 @@ void RevLanguage::Move_CharacterHistory::constructInternalObject( void )
 
 
     // get data type
-    std::string mt  = ctmc_tdn->getValue().getDataType();
+    std::string mt = ctmc_tdn->getValue().getDataType();
 
     // create the proposal
     RevBayesCore::Proposal *p = NULL;
 
-    if (mt == "DNA")
+    auto get_proposal = [&]<typename T>()
     {
         if (gt == "node" && pt == "rejection")
         {
-            RevBayesCore::NodeRejectionSampleProposal<RevBayesCore::DnaState> *tmp_p = new RevBayesCore::NodeRejectionSampleProposal<RevBayesCore::DnaState>(ctmc_sn, l, r);
+            auto tmp_p = new RevBayesCore::NodeRejectionSampleProposal<T>(ctmc_sn, l, r);
 
-            //            tmp_p->setRateGenerator( qmap_tdn );
             if (use_site)
             {
                 tmp_p->setRateGenerator( qmap_site_tdn );
@@ -144,164 +143,7 @@ void RevLanguage::Move_CharacterHistory::constructInternalObject( void )
         }
         else if (gt == "branch" && pt == "rejection")
         {
-            RevBayesCore::PathRejectionSampleProposal<RevBayesCore::DnaState> *tmp_p = new RevBayesCore::PathRejectionSampleProposal<RevBayesCore::DnaState>(ctmc_sn, l, r);
-            //            tmp_p->setRateGenerator( qmap_tdn );
-            if (use_site)
-            {
-                tmp_p->setRateGenerator( qmap_site_tdn );
-            }
-            else if (use_seq)
-            {
-                tmp_p->setRateGenerator( qmap_seq_tdn );
-            }
-            p = tmp_p;
-        }
-        else if (gt == "tip" && pt == "rejection")
-        {
-            RevBayesCore::TipRejectionSampleProposal<RevBayesCore::DnaState> *tmp_p = new RevBayesCore::TipRejectionSampleProposal<RevBayesCore::DnaState>(ctmc_sn, l, r);
-            if (use_site)
-            {
-                tmp_p->setRateGenerator( qmap_site_tdn );
-            }
-            else if (use_seq)
-            {
-                tmp_p->setRateGenerator( qmap_seq_tdn );
-            }
-            p = tmp_p;
-        }
-        else if (gt == "root" && pt == "rejection")
-        {
-            RevBayesCore::RootRejectionSampleProposal<RevBayesCore::DnaState> *tmp_p = new RevBayesCore::RootRejectionSampleProposal<RevBayesCore::DnaState>(ctmc_sn, l, r);
-            if (use_site)
-            {
-                tmp_p->setRateGenerator( qmap_site_tdn );
-            }
-            else if (use_seq)
-            {
-                tmp_p->setRateGenerator( qmap_seq_tdn );
-            }
-            p = tmp_p;
-        }
-    }
-    else if (mt == "RNA")
-    {
-        if (gt == "node" && pt == "rejection")
-        {
-            RevBayesCore::NodeRejectionSampleProposal<RevBayesCore::RnaState> *tmp_p = new RevBayesCore::NodeRejectionSampleProposal<RevBayesCore::RnaState>(ctmc_sn, l, r);
-            //            tmp_p->setRateGenerator( qmap_tdn );
-            if (use_site)
-            {
-                tmp_p->setRateGenerator( qmap_site_tdn );
-            }
-            else if (use_seq)
-            {
-                tmp_p->setRateGenerator( qmap_seq_tdn );
-            }
-            p = tmp_p;
-        }
-        else if (gt == "branch" && pt == "rejection")
-        {
-            RevBayesCore::PathRejectionSampleProposal<RevBayesCore::RnaState> *tmp_p = new RevBayesCore::PathRejectionSampleProposal<RevBayesCore::RnaState>(ctmc_sn, l, r);
-            //            tmp_p->setRateGenerator( qmap_tdn );
-            if (use_site)
-            {
-                tmp_p->setRateGenerator( qmap_site_tdn );
-            }
-            else if (use_seq)
-            {
-                tmp_p->setRateGenerator( qmap_seq_tdn );
-            }
-            p = tmp_p;
-        }
-        else if (gt == "tip" && pt == "rejection")
-        {
-            RevBayesCore::TipRejectionSampleProposal<RevBayesCore::RnaState> *tmp_p = new RevBayesCore::TipRejectionSampleProposal<RevBayesCore::RnaState>(ctmc_sn, l, r);
-            if (use_site)
-            {
-                tmp_p->setRateGenerator( qmap_site_tdn );
-            }
-            else if (use_seq)
-            {
-                tmp_p->setRateGenerator( qmap_seq_tdn );
-            }
-            p = tmp_p;
-        }
-        else if (gt == "root" && pt == "rejection")
-        {
-            RevBayesCore::RootRejectionSampleProposal<RevBayesCore::RnaState> *tmp_p = new RevBayesCore::RootRejectionSampleProposal<RevBayesCore::RnaState>(ctmc_sn, l, r);
-            if (use_site)
-            {
-                tmp_p->setRateGenerator( qmap_site_tdn );
-            }
-            else if (use_seq)
-            {
-                tmp_p->setRateGenerator( qmap_seq_tdn );
-            }
-            p = tmp_p;
-        }
-    }
-    else if (mt == "AA" || mt == "Protein")
-    {
-        if (gt == "node" && pt == "rejection")
-        {
-            RevBayesCore::NodeRejectionSampleProposal<RevBayesCore::AminoAcidState> *tmp_p = new RevBayesCore::NodeRejectionSampleProposal<RevBayesCore::AminoAcidState>(ctmc_sn, l, r);
-            //            tmp_p->setRateGenerator( qmap_tdn );
-            if (use_site)
-            {
-                tmp_p->setRateGenerator( qmap_site_tdn );
-            }
-            else if (use_seq)
-            {
-                tmp_p->setRateGenerator( qmap_seq_tdn );
-            }
-            p = tmp_p;
-        }
-        else if (gt == "branch" && pt == "rejection")
-        {
-            RevBayesCore::PathRejectionSampleProposal<RevBayesCore::AminoAcidState> *tmp_p = new RevBayesCore::PathRejectionSampleProposal<RevBayesCore::AminoAcidState>(ctmc_sn, l, r);
-            //            tmp_p->setRateGenerator( qmap_tdn );
-            if (use_site)
-            {
-                tmp_p->setRateGenerator( qmap_site_tdn);
-            }
-            else if (use_seq)
-            {
-                tmp_p->setRateGenerator( qmap_seq_tdn );
-            }
-            p = tmp_p;
-        }
-        else if (gt == "tip" && pt == "rejection")
-        {
-            RevBayesCore::TipRejectionSampleProposal<RevBayesCore::AminoAcidState> *tmp_p = new RevBayesCore::TipRejectionSampleProposal<RevBayesCore::AminoAcidState>(ctmc_sn, l, r);
-            if (use_site)
-            {
-                tmp_p->setRateGenerator( qmap_site_tdn );
-            }
-            else if (use_seq)
-            {
-                tmp_p->setRateGenerator( qmap_seq_tdn );
-            }
-            p = tmp_p;
-        }
-        else if (gt == "root" && pt == "rejection")
-        {
-            RevBayesCore::RootRejectionSampleProposal<RevBayesCore::AminoAcidState> *tmp_p = new RevBayesCore::RootRejectionSampleProposal<RevBayesCore::AminoAcidState>(ctmc_sn, l, r);
-            if (use_site)
-            {
-                tmp_p->setRateGenerator( qmap_site_tdn );
-            }
-            else if (use_seq)
-            {
-                tmp_p->setRateGenerator( qmap_seq_tdn );
-            }
-            p = tmp_p;
-        }
-    }
-    else if (mt == "Standard")
-    {
-        if (gt == "node" && pt == "rejection")
-        {
-            RevBayesCore::NodeRejectionSampleProposal<RevBayesCore::StandardState> *tmp_p = new RevBayesCore::NodeRejectionSampleProposal<RevBayesCore::StandardState>(ctmc_sn, l, r);
+            auto tmp_p = new RevBayesCore::PathRejectionSampleProposal<T>(ctmc_sn, l, r);
 
             if (use_site)
             {
@@ -315,7 +157,7 @@ void RevLanguage::Move_CharacterHistory::constructInternalObject( void )
         }
         else if (gt == "cladogenetic" && pt == "rejection")
         {
-            RevBayesCore::BiogeographicCladogeneticRejectionSampleProposal<RevBayesCore::StandardState> *tmp_p = new RevBayesCore::BiogeographicCladogeneticRejectionSampleProposal<RevBayesCore::StandardState>(ctmc_sn, l, r);
+            auto tmp_p = new RevBayesCore::BiogeographicCladogeneticRejectionSampleProposal<T>(ctmc_sn, l, r);
 
             if (use_site)
             {
@@ -329,8 +171,8 @@ void RevLanguage::Move_CharacterHistory::constructInternalObject( void )
         }
         else if (gt == "cladogenetic2" && pt == "rejection")
         {
-            RevBayesCore::BiogeographicNodeRejectionSampleProposal<RevBayesCore::StandardState> *tmp_p = new RevBayesCore::BiogeographicNodeRejectionSampleProposal<RevBayesCore::StandardState>(ctmc_sn, l, r);
-            //            tmp_p->setRateGenerator( qmap_tdn );
+            auto tmp_p = new RevBayesCore::BiogeographicNodeRejectionSampleProposal<T>(ctmc_sn, l, r);
+
             if (use_site)
             {
                 tmp_p->setRateGenerator( qmap_site_tdn );
@@ -343,22 +185,8 @@ void RevLanguage::Move_CharacterHistory::constructInternalObject( void )
         }
         else if (gt == "cladogenetic" && pt == "rejection_shift")
         {
-            RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<RevBayesCore::StandardState> *tmp_p = new RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<RevBayesCore::StandardState>(ctmc_sn, l, r);
+            auto tmp_p = new RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<T>(ctmc_sn);
             //            tmp_p->setRateGenerator( qmap_tdn );
-            if (use_site)
-            {
-                tmp_p->setRateGenerator( qmap_site_tdn );
-            }
-            else if (use_seq)
-            {
-                tmp_p->setRateGenerator( qmap_seq_tdn );
-            }
-            p = tmp_p;
-        }
-        else if (gt == "branch" && pt == "rejection")
-        {
-            RevBayesCore::PathRejectionSampleProposal<RevBayesCore::StandardState> *tmp_p = new RevBayesCore::PathRejectionSampleProposal<RevBayesCore::StandardState>(ctmc_sn, l, r);
-
             if (use_site)
             {
                 tmp_p->setRateGenerator( qmap_site_tdn );
@@ -371,7 +199,7 @@ void RevLanguage::Move_CharacterHistory::constructInternalObject( void )
         }
         else if (gt == "tip" && pt == "rejection")
         {
-            RevBayesCore::TipRejectionSampleProposal<RevBayesCore::StandardState> *tmp_p = new RevBayesCore::TipRejectionSampleProposal<RevBayesCore::StandardState>(ctmc_sn, l, r);
+            auto tmp_p = new RevBayesCore::TipRejectionSampleProposal<T>(ctmc_sn, l, r);
             if (use_site)
             {
                 tmp_p->setRateGenerator( qmap_site_tdn );
@@ -384,7 +212,7 @@ void RevLanguage::Move_CharacterHistory::constructInternalObject( void )
         }
         else if (gt == "root" && pt == "rejection")
         {
-            RevBayesCore::RootRejectionSampleProposal<RevBayesCore::StandardState> *tmp_p = new RevBayesCore::RootRejectionSampleProposal<RevBayesCore::StandardState>(ctmc_sn, l, r);
+            auto tmp_p = new RevBayesCore::RootRejectionSampleProposal<T>(ctmc_sn, l, r);
             if (use_site)
             {
                 tmp_p->setRateGenerator( qmap_site_tdn );
@@ -395,108 +223,10 @@ void RevLanguage::Move_CharacterHistory::constructInternalObject( void )
             }
             p = tmp_p;
         }
-    }
-    else if (mt == "NaturalNumbers")
-    {
-        if (gt == "node" && pt == "rejection")
-        {
-            RevBayesCore::NodeRejectionSampleProposal<RevBayesCore::NaturalNumbersState> *tmp_p = new RevBayesCore::NodeRejectionSampleProposal<RevBayesCore::NaturalNumbersState>(ctmc_sn, l, r);
 
-            if (use_site)
-            {
-                tmp_p->setRateGenerator( qmap_site_tdn );
-            }
-            else if (use_seq)
-            {
-                tmp_p->setRateGenerator( qmap_seq_tdn );
-            }
-            p = tmp_p;
-        }
-        else if (gt == "cladogenetic" && pt == "rejection")
-        {
-            RevBayesCore::BiogeographicCladogeneticRejectionSampleProposal<RevBayesCore::NaturalNumbersState> *tmp_p = new RevBayesCore::BiogeographicCladogeneticRejectionSampleProposal<RevBayesCore::NaturalNumbersState>(ctmc_sn, l, r);
-
-            if (use_site)
-            {
-                tmp_p->setRateGenerator( qmap_site_tdn );
-            }
-            else if (use_seq)
-            {
-                tmp_p->setRateGenerator( qmap_seq_tdn );
-            }
-            p = tmp_p;
-        }
-        else if (gt == "cladogenetic2" && pt == "rejection")
-        {
-            RevBayesCore::BiogeographicNodeRejectionSampleProposal<RevBayesCore::NaturalNumbersState> *tmp_p = new RevBayesCore::BiogeographicNodeRejectionSampleProposal<RevBayesCore::NaturalNumbersState>(ctmc_sn, l, r);
-            //            tmp_p->setRateGenerator( qmap_tdn );
-            if (use_site)
-            {
-                tmp_p->setRateGenerator( qmap_site_tdn );
-            }
-            else if (use_seq)
-            {
-                tmp_p->setRateGenerator( qmap_seq_tdn );
-            }
-            p = tmp_p;
-        }
-        else if (gt == "cladogenetic" && pt == "rejection_shift")
-        {
-            RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<RevBayesCore::NaturalNumbersState> *tmp_p = new RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<RevBayesCore::NaturalNumbersState>(ctmc_sn, l, r);
-            //            tmp_p->setRateGenerator( qmap_tdn );
-            if (use_site)
-            {
-                tmp_p->setRateGenerator( qmap_site_tdn );
-            }
-            else if (use_seq)
-            {
-                tmp_p->setRateGenerator( qmap_seq_tdn );
-            }
-            p = tmp_p;
-        }
-        else if (gt == "branch" && pt == "rejection")
-        {
-            RevBayesCore::PathRejectionSampleProposal<RevBayesCore::NaturalNumbersState> *tmp_p = new RevBayesCore::PathRejectionSampleProposal<RevBayesCore::NaturalNumbersState>(ctmc_sn, l, r);
-
-            if (use_site)
-            {
-                tmp_p->setRateGenerator( qmap_site_tdn );
-            }
-            else if (use_seq)
-            {
-                tmp_p->setRateGenerator( qmap_seq_tdn );
-            }
-            p = tmp_p;
-        }
-        else if (gt == "tip" && pt == "rejection")
-        {
-            RevBayesCore::TipRejectionSampleProposal<RevBayesCore::NaturalNumbersState> *tmp_p = new RevBayesCore::TipRejectionSampleProposal<RevBayesCore::NaturalNumbersState>(ctmc_sn, l, r);
-            if (use_site)
-            {
-                tmp_p->setRateGenerator( qmap_site_tdn );
-            }
-            else if (use_seq)
-            {
-                tmp_p->setRateGenerator( qmap_seq_tdn );
-            }
-            p = tmp_p;
-        }
-        else if (gt == "root" && pt == "rejection")
-        {
-            RevBayesCore::RootRejectionSampleProposal<RevBayesCore::NaturalNumbersState> *tmp_p = new RevBayesCore::RootRejectionSampleProposal<RevBayesCore::NaturalNumbersState>(ctmc_sn, l, r);
-            if (use_site)
-            {
-                tmp_p->setRateGenerator( qmap_site_tdn );
-            }
-            else if (use_seq)
-            {
-                tmp_p->setRateGenerator( qmap_seq_tdn );
-            }
-            p = tmp_p;
-        }
-    }
-
-
+    };
+    
+    apply_to_character_type(get_proposal, mt);
 
     value = new RevBayesCore::MetropolisHastingsMove(p,w,false);
 }
@@ -564,9 +294,9 @@ const MemberRules& RevLanguage::Move_CharacterHistory::getParameterRules(void) c
     {
 
         nodeChrsMoveMemberRules.push_back( new ArgumentRule( "ctmc", AbstractHomologousDiscreteCharacterData::getClassTypeSpec(), "The PhyloCTMC variable.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
-        nodeChrsMoveMemberRules.push_back( new ArgumentRule( "qmap_site", RateGenerator::getClassTypeSpec(),         "Per-site rate generator.",     ArgumentRule::BY_REFERENCE, ArgumentRule::ANY, NULL ) );
+        nodeChrsMoveMemberRules.push_back( new ArgumentRule( "qmap_site", RateGenerator::getClassTypeSpec(), "Per-site rate generator.", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY, NULL ) );
         nodeChrsMoveMemberRules.push_back( new ArgumentRule( "qmap_seq",  RateGeneratorSequence::getClassTypeSpec(), "Per-sequence rate generator.", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY, NULL ) );
-        nodeChrsMoveMemberRules.push_back( new ArgumentRule( "lambda", Probability::getClassTypeSpec(), "Tuning probability to propose new site history.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new Probability(1.0) ) );
+        nodeChrsMoveMemberRules.push_back( new ArgumentRule( "lambda", Probability::getClassTypeSpec(), "Tuning probability to propose new site history (has no effect if graph=\"cladogenetic\" and proposal=\"rejection_shift\").", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(1.0) ) );
 
         std::vector<std::string> optionsGraph;
         optionsGraph.push_back( "node" );
@@ -583,9 +313,18 @@ const MemberRules& RevLanguage::Move_CharacterHistory::getParameterRules(void) c
         optionsProposal.push_back( "uniformization" );
         nodeChrsMoveMemberRules.push_back( new OptionRule( "proposal", new RlString("rejection"), optionsProposal, "The type of sampler" ) );
 
-        /* Inherit weight from Move, put it after variable */
+        /* Inherit weight (but not tuneTarget!) from Move and put it after the arguments created above */
         const MemberRules& inheritedRules = Move::getParameterRules();
-        nodeChrsMoveMemberRules.insert( nodeChrsMoveMemberRules.end(), inheritedRules.begin(), inheritedRules.end() );
+        for (size_t i = 0; i < inheritedRules.size(); ++i)
+        {
+            if ( inheritedRules[i].getArgumentLabel() == "weight" )
+            {
+                nodeChrsMoveMemberRules.push_back( inheritedRules[i].clone() );
+            }
+        }
+                
+        /* Provide our own argument description for tuneTarget */
+        nodeChrsMoveMemberRules.push_back( new ArgumentRule( "tuneTarget", Probability::getClassTypeSpec(), "The acceptance probability targeted by auto-tuning (has no effect if graph=\"cladogenetic\" and proposal=\"rejection_shift\").", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability( 0.44 ) ) );
 
         rulesSet = true;
     }

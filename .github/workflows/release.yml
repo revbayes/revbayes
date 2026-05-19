@@ -14,7 +14,7 @@ jobs:
   build_singularity_and_upload:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     - uses: eWaterCycle/setup-apptainer@v2
     - uses: actions/setup-python@v5
       with:
@@ -151,9 +151,11 @@ jobs:
     - name: ccache
       uses: hendrikmuhs/ccache-action@v1.2
       with:
-         key: ${{ matrix.name }}
+         key: ${{ matrix.name }}-${{ github.ref_name }}
          restore-keys: |
+           ${{ matrix.name }}-${{ github.ref_name }}
            ${{ matrix.name }}
+         save: ${{ github.event_name == 'push' }}
 
     - name: Compile static BOOST libs (Linux & Mac)
       if: matrix.name != 'windows'
@@ -181,6 +183,27 @@ jobs:
         ${GITHUB_WORKSPACE}/projects/make_winroot.sh -ccache true -gtk true
         ( cd ${GITHUB_WORKSPACE}/projects/meson/ ; ./generate.sh )
         
+    - name: Clone and build Tensorphylo
+      run: |
+        if [ "${{ matrix.name }}" = "windows" ] ; then
+            meson_args=--cross-file=win64-cross.txt
+        fi
+        git clone https://bredelings@bitbucket.org/mrmay/tensorphylo.git
+        meson setup tpbuild tensorphylo --prefix=$HOME/local ${meson_args}
+        meson install -C tpbuild
+        if [ "${{ matrix.name }}" = "windows" ] ; then
+            # Get the user profile dir for windows, then find where it is as a Linux path
+            USERPROFILE=$(winepath -u $(wine cmd /c echo %USERPROFILE% | tr -d '\r'))
+            mkdir $USERPROFILE/.plugins
+            cp tpbuild/src/libTensorPhylo.dll $USERPROFILE/.plugins
+        elif [ "${{ runner.os }}" = macOS ] ; then
+            mkdir ~/.plugins
+            cp tpbuild/src/libTensorPhylo.dylib ~/.plugins
+        else
+            mkdir ~/.plugins
+            cp tpbuild/src/libTensorPhylo.so ~/.plugins
+        fi
+
     - name: Configure and build
       if: matrix.name != 'windows'
       env:
@@ -215,7 +238,7 @@ jobs:
         else
            (
               cd projects/cmake
-              BUILD_DIR=build exec_name=rb ./build.sh -help2yml true -DCMAKE_INSTALL_PREFIX=$HOME/local -mpi ${{ matrix.mpi }}
+              BUILD_DIR=build exec_name=rb ./build.sh -help2yml true -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_INSTALL_PREFIX=$HOME/local -mpi ${{ matrix.mpi }}
               cmake --install build
            )
         fi
@@ -239,6 +262,7 @@ jobs:
         cp $($CXX --print-file-name libstdc++-6.dll)      $PREFIX/bin
         cp $($CXX --print-file-name libssp-0.dll)         $PREFIX/bin
         cp $($CXX --print-file-name libwinpthread-1.dll)  $PREFIX/bin
+        cp $($CXX --print-file-name libgomp-1.dll)        $PREFIX/bin
         # Copy all DLLs to get the graphics DLLs.
         cp $WINROOT/mingw64/bin/*.dll                     $PREFIX/bin
 
@@ -289,6 +313,8 @@ jobs:
            rm -f test_coalescent/output_expected/horses_het_GMRF_treebased*
            rm -f test_coalescent/output_expected/mcmc_heterochronous_BSP.errout
            rm -f test_coalescent/output_expected/mcmc_heterochronous_GMRF_treebased.errout
+
+           rm -rf test_OU_pruning/output_expected/OU_missing_data.log
         fi
 
         if [ ${{ matrix.arch }} = "win64" ] ; then

@@ -107,7 +107,7 @@ jobs:
     container:
       image: ${{ matrix.image || '' }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     - uses: actions/setup-python@v5
       with:
         python-version: 3.12
@@ -185,9 +185,11 @@ jobs:
     - name: ccache
       uses: hendrikmuhs/ccache-action@v1.2
       with:
-         key: ${{ matrix.name }}
+         key: ${{ matrix.name }}-${{ github.ref_name }}
          restore-keys: |
+           ${{ matrix.name }}-${{ github.ref_name }}
            ${{ matrix.name }}
+         save: ${{ github.event_name == 'push' }}
 
     - name: Install BOOST (Linux)
       if: runner.os == 'Linux' && matrix.name != 'windows'
@@ -213,6 +215,27 @@ jobs:
         ${GITHUB_WORKSPACE}/projects/make_winroot.sh -ccache true -gtk true
         ( cd ${GITHUB_WORKSPACE}/projects/meson/ ; ./generate.sh )
         
+    - name: Clone and build Tensorphylo
+      run: |
+        if [ "${{ matrix.name }}" = "windows" ] ; then
+            meson_args=--cross-file=win64-cross.txt
+        fi
+        git clone https://bredelings@bitbucket.org/mrmay/tensorphylo.git
+        meson setup tpbuild tensorphylo --prefix=$HOME/local ${meson_args}
+        meson install -C tpbuild
+        if [ "${{ matrix.name }}" = "windows" ] ; then
+            # Get the user profile dir for windows, then find where it is as a Linux path
+            USERPROFILE=$(winepath -u $(wine cmd /c echo %USERPROFILE% | tr -d '\r'))
+            mkdir $USERPROFILE/.plugins
+            cp tpbuild/src/libTensorPhylo.dll $USERPROFILE/.plugins
+        elif [ "${{ runner.os }}" = macOS ] ; then
+            mkdir ~/.plugins
+            cp tpbuild/src/libTensorPhylo.dylib ~/.plugins
+        else
+            mkdir ~/.plugins
+            cp tpbuild/src/libTensorPhylo.so ~/.plugins
+        fi
+
     - name: Configure and build
       if: matrix.name != 'windows'
       env:
@@ -249,7 +272,7 @@ jobs:
         else
            (
               cd projects/cmake
-              BUILD_DIR=build exec_name=rb ./build.sh -help2yml true -DCMAKE_INSTALL_PREFIX=$HOME/local -mpi ${{ matrix.mpi }}
+              BUILD_DIR=build exec_name=rb ./build.sh -help2yml true -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_INSTALL_PREFIX=$HOME/local -mpi ${{ matrix.mpi }}
               cmake --install build
            )
         fi
@@ -273,6 +296,7 @@ jobs:
         cp $($CXX --print-file-name libstdc++-6.dll)      $PREFIX/bin
         cp $($CXX --print-file-name libssp-0.dll)         $PREFIX/bin
         cp $($CXX --print-file-name libwinpthread-1.dll)  $PREFIX/bin
+        cp $($CXX --print-file-name libgomp-1.dll)        $PREFIX/bin
         # Copy all DLLs to get the graphics DLLs.
         cp $WINROOT/mingw64/bin/*.dll                     $PREFIX/bin
 
@@ -310,24 +334,10 @@ jobs:
         fi
 
         if [ ${{ matrix.arch }} = "mac-arm64" ] || [ ${{ matrix.arch }} = "mac-intel64" ] || [ ${{ matrix.arch }} = "win64" ] ; then
-           rm -f test_MC3/output_expected/*tuning_and_checkpointing*
-           rm -rf test_FBD/output_expected/
-           rm -rf test_BDSTP/output_expected/
+           rm -rf test_FBD/output_expected/mvFossilTimeSlideUniform_multiple_runs.errout
 
            # There are some differences on the order of 1.0e-5 in the substitution likelihood between Linux/Intel and Mac/ARM
            rm -rf test_propose_bad_index/output_expected/
-        fi
-
-        if [ ${{ matrix.arch }} = "mac-arm64" ] ; then
-           rm -f test_coalescent/output_expected/horses_het_BSP*
-           rm -f test_coalescent/output_expected/horses_het_GMRF_treebased*
-           rm -f test_coalescent/output_expected/mcmc_heterochronous_BSP.errout
-           rm -f test_coalescent/output_expected/mcmc_heterochronous_GMRF_treebased.errout
-        fi
-
-        if [ ${{ matrix.arch }} = "win64" ] ; then
-           rm -f test_coalescent/output_expected/horses_iso_EBSP_*
-           rm -f test_coalescent/output_expected/mcmc_isochronous_EBSP.errout
         fi
 
         ./run_integration_tests.sh -mpi ${USE_MPI} -windows ${IS_WINDOWS} rb

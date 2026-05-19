@@ -38,8 +38,8 @@ namespace RevBayesCore {
     class TipRejectionSampleProposal : public Proposal {
 
     public:
-        TipRejectionSampleProposal( StochasticNode<AbstractHomologousDiscreteCharacterData> *n, double l=1.0, double r=0.234 );                                  //!<  constructor
-        TipRejectionSampleProposal( const TipRejectionSampleProposal& p );                                                        //!<  constructor
+        TipRejectionSampleProposal( StochasticNode<AbstractHomologousDiscreteCharacterData> *n, double l=1.0, double r=0.234 );                                  //!< Constructor
+        TipRejectionSampleProposal( const TipRejectionSampleProposal& p );                                                        //!< Constructor
         virtual                                                    ~TipRejectionSampleProposal(void);                              //!< Destructor
 
         TipRejectionSampleProposal&                                 operator=(const TipRejectionSampleProposal& p);
@@ -67,7 +67,7 @@ namespace RevBayesCore {
 
     protected:
 
-        void                                                        swapNodeInternal(DagNode *oldN, DagNode *newN);                 //!< Swap the DAG nodes on which the Proposal is working on
+        void                                                        swapNodeInternal(DagNode *oldN, DagNode *newN);                 //!< Swap the DAG nodes the Proposal is working on
 
         // parameters
         StochasticNode<AbstractHomologousDiscreteCharacterData>*    ctmc;
@@ -378,10 +378,10 @@ void RevBayesCore::TipRejectionSampleProposal<charType>::prepareProposal( void )
 template<class charType>
 void RevBayesCore::TipRejectionSampleProposal<charType>::printParameterSummary(std::ostream &o, bool name_only) const
 {
-    o << "lambda = ";
-    if (name_only == false)
+    o << "lambda";
+    if (not name_only)
     {
-        o << lambda;
+        o << " = " << lambda;
     }
 }
 
@@ -526,7 +526,7 @@ void RevBayesCore::TipRejectionSampleProposal<charType>::setProposalTuningParame
 
 
 /**
- * Tune the Proposal to accept the desired acceptance ratio.
+ * Tune the Proposal to accept at the desired acceptance ratio.
  */
 template<class charType>
 void RevBayesCore::TipRejectionSampleProposal<charType>::tune( double rate )

@@ -131,9 +131,15 @@ const MemberRules& Move_GMRFUnevenGridHyperpriorGibbs::getParameterRules(void) c
         move_member_rules.push_back( new ArgumentRule( "grid"     , ModelVector<RealPos>::getClassTypeSpec(), "The space between i and i-1.", ArgumentRule::BY_REFERENCE, ArgumentRule::DETERMINISTIC ) );
         move_member_rules.push_back( new ArgumentRule( "zeta", RealPos::getClassTypeSpec()  , "The value controlling the shrinkage of the field, a scale by which x is multiplied, effectively making x ~ halfCauchy(0,zeta).", ArgumentRule::BY_VALUE    , ArgumentRule::ANY ) );
 
-        /* Inherit weight from Move, put it after variable */
+        /* Inherit weight (but not tuneTarget!) from Move and put it after the arguments created above */
         const MemberRules& inheritedRules = Move::getParameterRules();
-        move_member_rules.insert( move_member_rules.end(), inheritedRules.begin(), inheritedRules.end() );
+        for (size_t i = 0; i < inheritedRules.size(); ++i)
+        {
+            if ( inheritedRules[i].getArgumentLabel() == "weight" )
+            {
+                move_member_rules.push_back( inheritedRules[i].clone() );
+            }
+        }
         
         rules_set = true;
     }

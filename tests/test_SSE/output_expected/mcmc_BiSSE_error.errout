@@ -1,0 +1,4 @@
+   Attempting to read the contents of file "primates_tree.nex"
+   Successfully read file
+   Successfully read one character matrix from file 'data/primates_mating_system.nex'
+   Error:	SSE model has 2 states, but observed data set has 4 states!

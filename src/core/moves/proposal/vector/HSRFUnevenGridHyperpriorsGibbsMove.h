@@ -13,16 +13,16 @@ namespace RevBayesCore {
     class HSRFUnevenGridHyperpriorsGibbsMove : public AbstractGibbsMove {
         
     public:
-        HSRFUnevenGridHyperpriorsGibbsMove( StochasticNode<double> *g, std::vector< StochasticNode<double> *> l, std::vector< StochasticNode<double> *> n, TypedDagNode< RbVector<double> > *u, double z, double w);                                                         //!<  constructor
-        virtual                                ~HSRFUnevenGridHyperpriorsGibbsMove(void);                                                             //!< Destructor
+        HSRFUnevenGridHyperpriorsGibbsMove( StochasticNode<double> *g, std::vector< StochasticNode<double> *> l, std::vector< StochasticNode<double> *> n, TypedDagNode< RbVector<double> > *u, double z, double w);                                                         //!< Constructor
+        virtual                                ~HSRFUnevenGridHyperpriorsGibbsMove(void);              //!< Destructor
         
         // Basic utility functions
-        HSRFUnevenGridHyperpriorsGibbsMove*            clone(void) const;                                                                  //!< Clone object
-        const std::string&                      getMoveName(void) const;                                                            //!< Get the name of the move for summary printing
+        HSRFUnevenGridHyperpriorsGibbsMove*     clone(void) const;                                     //!< Clone object
+        const std::string&                      getMoveName(void) const;                               //!< Get the name of the move for summary printing
         
     protected:
-        void                                    performGibbsMove(void);                                 //!< Perform move
-        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);                                             //!< Swap the pointers to the variable on which the move works on.
+        void                                    performGibbsMove(void);                                //!< Perform move
+        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);        //!< Swap the pointers to the variable the move works on.
         
     private:
         

@@ -122,11 +122,15 @@ void Move_AVMVN::constructInternalObject( void )
     int m    = static_cast<const Natural &>( maxUpdates->getRevObject() ).getValue();
 
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
 
     // finally create the internal move object
     RevBayesCore::AVMVNProposal *prop = new RevBayesCore::AVMVNProposal(s, e, n0, c0, m);
+    
+    // set the target acceptance rate after construction
+    prop->setTargetAcceptanceRate(tt);
 
-    value = new RevBayesCore::MetropolisHastingsMove(prop,w,t);
+    value = new RevBayesCore::MetropolisHastingsMove(prop, w, t);
 
 }
 
@@ -366,9 +370,18 @@ const MemberRules& Move_AVMVN::getParameterRules(void) const
         member_rules.push_back( new ArgumentRule( "maxUpdates"          , Natural::getClassTypeSpec()  , "The maximum number of updates to the empirical covariance matrix (matrix is only updated when MCMC tunes).", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(10000) ) );
         member_rules.push_back( new ArgumentRule( "tune"                , RlBoolean::getClassTypeSpec(), "Should we tune the scaling factor during burnin?", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new RlBoolean( true ) ) );
 
-        /* Inherit weight from Move, put it after variable */
+        /* Inherit weight (but not tuneTarget!) from Move and put it after the arguments created above */
         const MemberRules& inherited_rules = Move::getParameterRules();
-        member_rules.insert( member_rules.end(), inherited_rules.begin(), inherited_rules.end() );
+        for (size_t i = 0; i < inherited_rules.size(); ++i)
+        {
+            if ( inherited_rules[i].getArgumentLabel() == "weight" )
+            {
+                member_rules.push_back( inherited_rules[i].clone() );
+            }
+        }
+        
+        /* Provide our own default value for tuneTarget */
+        member_rules.push_back( new ArgumentRule( "tuneTarget", Probability::getClassTypeSpec(), "The acceptance probability targeted by auto-tuning.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability( 0.234 ) ) );
 
         rules_set = true;
     }

@@ -74,6 +74,7 @@
 /* Argument rules (in folder "functions/argumentrules") */
 
 /* Basic functions (in folder "functions/basic"). */
+#include "Func_BSPInterval.h"
 
 /* These are core functions for the Rev environment, providing user help
    and other essential services. */
@@ -205,6 +206,7 @@
 #include "Func_wag.h"
 
 /* Functions related to evolution (in folder "functions/popgen") */
+#include "Func_foldSFS.h"
 #include "Func_PattersonsD.h"
 #include "Func_SegregatingSites.h"
 #include "Func_TajimasD.h"
@@ -264,16 +266,20 @@
 #include "Func_hyperbolicTangent.h"
 #include "Func_hyperbolicSine.h"
 #include "Func_ln.h"
+#include "Func_lnVector.h"
 #include "Func_log.h"
+#include "Func_logVector.h"
 #include "Func_logit.h"
 #include "Func_logistic.h"
 #include "Func_matrix.h"
 #include "Func_max.h"
+#include "Func_maxMatrix.h"
 #include "Func_mean.h"
 #include "Func_meanPositive.h"
 #include "Func_meanSimplex.h"
 #include "Func_median.h"
 #include "Func_min.h"
+#include "Func_minMatrix.h"
 #include "Func_normalize.h"
 #include "Func_posteriorPredictiveProbability.h"
 //#include "Func_power.h"
@@ -285,9 +291,7 @@
 #include "Func_SmoothTimeLine.h"
 #include "Func_sort.h"
 #include "Func_sum.h"
-#include "Func_sumPositive.h"
-#include "Func_sumInteger.h"
-#include "Func_sumNatural.h"
+#include "Func_sumMatrix.h"
 #include "Func_standardDeviation.h"
 #include "Func_sqrt.h"
 #include "Func_sin.h"
@@ -490,6 +494,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_UPGMA()                                           );
 
         /* Population genetics functions (in folder "functions/popgen") */
+        addFunction( new Func_foldSFS()          );
         addFunction( new Func_PattersonsD()      );
         addFunction( new Func_SegregatingSites() );
         addFunction( new Func_TajimasD()         );
@@ -540,9 +545,11 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
 
         // natural log function
         addFunction( new Func_ln()  );
+        addFunction( new Func_lnVector()  );
 
         // log function
         addFunction( new Func_log()  );
+        addFunction( new Func_logVector()  );
 
         // logit function
         addFunction( new Func_logit()  );
@@ -551,7 +558,13 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_matrix() );
 
         // max function
-        addFunction( new Func_max()  );
+        addFunction( new Func_maxMatrix()  ); // Non-templated version for MatrixReal
+        addFunction( new Func_max<Integer,Integer>()  );
+        addFunction( new Func_max<IntegerPos,IntegerPos>()  );
+        addFunction( new Func_max<Natural,Natural>()  );
+        addFunction( new Func_max<Probability,Probability>()  );
+        addFunction( new Func_max<RealPos,RealPos>()  );
+        addFunction( new Func_max<Real,Real>()  );
 
         // mean function
         addFunction( new Func_mean()  );
@@ -559,10 +572,21 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_meanSimplex()  );
 
         // median function
-        addFunction( new Func_median()  );
+        addFunction( new Func_median<Integer,Real>()  );
+        addFunction( new Func_median<IntegerPos,RealPos>()  );
+        addFunction( new Func_median<Natural,RealPos>()  );
+        addFunction( new Func_median<Probability,Probability>()  );
+        addFunction( new Func_median<Real,Real>()  );
+        addFunction( new Func_median<RealPos,RealPos>()  );
 
         // min function
-		addFunction( new Func_min()  );
+        addFunction( new Func_minMatrix()  ); // Non-templated version for MatrixReal
+		addFunction( new Func_min<Integer,Integer>()  );
+        addFunction( new Func_min<IntegerPos,IntegerPos>()  );
+        addFunction( new Func_min<Natural,Natural>()  );
+        addFunction( new Func_min<Probability,Probability>()  );
+        addFunction( new Func_min<RealPos,RealPos>()  );
+        addFunction( new Func_min<Real,Real>()  );
 
         // normalize vector function
 		addFunction( new Func_normalize()  );
@@ -586,10 +610,13 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_sqrt()  );
 
         // sum function
-        addFunction( new Func_sum()  );
-        addFunction( new Func_sumPositive()  );
-        addFunction( new Func_sumInteger()  );
-        addFunction( new Func_sumNatural()  );
+        addFunction( new Func_sumMatrix()  ); // Non-templated version for MatrixReal
+        addFunction( new Func_sum<Integer,Integer>()  );
+        addFunction( new Func_sum<IntegerPos,IntegerPos>()  );
+        addFunction( new Func_sum<Natural,Natural>()  );
+        addFunction( new Func_sum<Probability,RealPos>()  );
+        addFunction( new Func_sum<RealPos,RealPos>()  );
+        addFunction( new Func_sum<Real,Real>()  );
 
         // standard deviation function
         addFunction( new Func_standardDeviation()  );
@@ -599,7 +626,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_shortestDistance() );
 
         // trigonometric functions
-        addFunction( new Func_sin());
+        addFunction( new Func_sin()  );
         addFunction( new Func_cos()  );
 
         // hyperbolic tangent function
@@ -671,6 +698,8 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_varianceCovarianceMatrix( )           );
         addFunction( new Func_decomposedVarianceCovarianceMatrix( ) );
         addFunction( new Func_partialToCorrelationMatrix( )         );
+        
+        addFunction( new Func_BSPInterval<RealPos>()          );
 
 
         // Type conversion

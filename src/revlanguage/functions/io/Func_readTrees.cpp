@@ -93,6 +93,10 @@ RevPtr<RevVariable> Func_readTrees::execute( void )
                         tree->removeRootIfDegree2();
                         tree->setRooted(false);
                     }
+                    else
+                    {
+                        tree->setRooted(true);
+                    }
 
                     trees->push_back( BranchLengthTree(*tree) );
                 }
@@ -143,6 +147,10 @@ RevPtr<RevVariable> Func_readTrees::execute( void )
                 {
                     blTree->removeRootIfDegree2();
                     blTree->setRooted(false);
+                }
+                else
+                {
+                    blTree->setRooted(true);
                 }
 
                 trees->push_back( BranchLengthTree(*blTree) );

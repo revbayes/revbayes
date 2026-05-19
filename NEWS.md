@@ -1,4 +1,4 @@
-# RevBayes 1.4.0 (unreleased)
+# RevBayes 1.4.1 (unreleased)
 
 ## Backwards-incompatible changes
 
@@ -9,6 +9,79 @@
 ## Documentation improvements
 
 ## Infrastructure
+
+# RevBayes 1.4.0 (Apr 17, 2026)
+
+## Backwards-incompatible changes
+  * Remove the `tuneTarget` argument from those moves that are not capable of being tuned (#947).
+  * Remove `dnPhyloCTMCDollo` (#997).
+  * Temporarily disable the uniform partitioning distribution (`dnUPP`) (#999).
+
+## Speed & memory
+  * Slight speedup in analyses employing `dnPhyloCTMC` when `useScaling=TRUE` (#816).
+  * Much faster merging of log files with `mcmc(..., combine="mixed")` (#981).
+
+## New models/analyses
+  * Model selection via leave-one-out cross-validation (#460).
+  * StairwayPlot method for inferring demographic histories from site frequency spectra (#460).
+  * State-dependent Brownian motion (BM) and Ornstein-Uhlenbeck (OU) processes (#904).
+
+## Features
+  * Add functions for folding site frequency spectra and creating StairwayPlot vectors (#460).
+  * Add function for reading stochastic character maps (#904).
+  * Allow vector input to `ln( )` and `log( )` (#948).
+  * Add an `.isRooted( )` method to `Tree` (#952).
+  * Add `-p` flag to print commands from `-e` expression or script (#978).
+  * Make stochastic mapping and ancestral state monitors work for all types of discrete characters (#994).
+
+## Bug fixes
+  * Tree handling
+      - Fix handling of quoted labels and tree-level comments when reading Newick trees (#799).
+      - Treat unrooted trees as such when generating summaries (#932).
+      - Fix parsing of nested comments in Newick trees (#946).
+      - Make sure the `mrcaIndex( )` function and `.unroot( )` method work on rooted nonclock trees (#952).
+      - Refactor the `.reroot( )` method of `Tree` objects (#966).
+  * Moves
+      - Fixes to `mvRateAgeProposal` and `mvRateAgeSubtreeProposal` (#908, #940).
+      - Make sure the `tuneTarget` argument is honored when present (#947).
+  * Checkpointing
+      - Prevent checkpoint file corruption by partial overwrites (#935).
+      - Prevent duplicated iterations when resuming from a checkpoint (#970).
+      - Add serialization support to `MatrixReal` for checkpoint use (#983).
+  * Crash / NaN
+      - Fix a segfault in the help2yml executable built with MPI (#937).
+  * Misc
+      - Fix issues with missing values in multisample BM and OU processes (#905).
+      - Fix handling of the `burnin` argument in posterior predictive simulations (#923).
+      - Correct reasoning about return types for `max( )`, `median( )`, `min( )`, `sum( )` (#938).
+      - Check for mismatches in the number of states between an SSE model and underlying data (#974).
+      - Make sure `writeNexus( )` keeps all state labels when concatenating character matrices (#975, #995).
+      - Make sure we start the interactive loop when `-i` is given even if there is an error (#977).
+  * Non-user-facing
+      - Clean up partial likelihood caching in `dnPhyloCTMC` (#816).
+      - Switch from C++17 to C++23, supporting those features that are available in GCC 12 (#927).
+      - Add assertion checks to `Tree::getNode( )` (#972).
+      - Fix hidden virtual functions (#976, #984).
+      - Fix various compiler warnings (#998).
+
+## Documentation improvements
+  * `ConditionalPosteriorOrdinate`, `dnStairwayPlot`, `fnBSPInterval`, `fnFoldSFS`, `mvAdaptiveRJSwitch`, `mvRandomCategoryWalk` (#460).
+  * Expand documentation for `dnMultinomial`, `mvRandomGeometricWalk`, `mvRandomIntegerWalk`, `mvRandomNaturalWalk` (#460).
+  * `CharacterHistory`, `dnPhyloBrownianProcessStateDependent`, `dnPhyloCTMCDASiteIID`, `dnPhyloOrnsteinUhlenbeckStateDependent`, `mvCharacterHistory`, `readCharacterHistory` (#904).
+  * `mrcaIndex` (#952).
+
+## Infrastructure
+  * Fix continuous-integration (CI) tests on macOS where boost 1.90 is broken (#924).
+  * Update `build.sh` for setting boost location with modern CMake (#925).
+  * Make sure the CI test script fails when tutorial tests fail (#940).
+  * Allow tests that require TensorPhylo (#941).
+  * Make sure the CMake build script does not drop extra arguments if `-boost_root` is given (#951).
+  * Fix compile cache misses (#959).
+  * Help database cleanup (#989).
+  * Make meson always build the help2yml executable (#990).
+
+## New contributors
+  * @HaoqingDu made their first contribution in #905.
 
 # RevBayes 1.3.2 (Dec 11, 2025)
 
@@ -31,7 +104,7 @@
       - Report 95% HPD intervals for the ages of sampled ancestors (#810).
       - Fix majority-rule consensus trees with sampled ancestors (#859).
   * MCMC
-      - Do not print confusing messages about tip age adjustments on initialiation (#821).
+      - Do not print confusing messages about tip age adjustments on initialization (#821).
       - Allow specifying `tuningInterval = 0` in `mcmc.burnin( )` (#843) and `powerPosterior.burnin( )` (#878).
       - Make sure `mnModel` extracts the right nodes from the model graph (#900).
   * Moves
@@ -53,13 +126,15 @@
 
 ## Documentation improvements
   * Expand documentation for `mvSlice` (#614).
+  * Expand documentation for `TraceTree` (#819).
   * `args` (#830, #851).
   * `dnPhyloCTMC`
       - Add a description of the `coding` argument (#832).
       - Expand the provided example to show how to simulate characters (#868).
       - Formatting fixes (#867, #871).
+      - Add a description of the new `observationErrorProbability` and `observationErrorFrequencies` arguments (#901).
   * `mvFNPR` (#839).
-  * Typo fix in `write` (#852).
+  * Minor fixes to `write` (#852) and `dnBeta` (#900).
   * Corrections to `srGeweke` and multispecies coalescent distributions (#871).
   * Add a description of the `burninMethod` argument of convergence rules (#871).
   * Miscellaneous formatting fixes (#871).
