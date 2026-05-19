@@ -222,7 +222,7 @@ double PhyloMultiSampleOrnsteinUhlenbeckStateDependent::computeStateDependentThe
     return t;
 }
 
-// two cases: species_means is supplied or not
+
 double PhyloMultiSampleOrnsteinUhlenbeckStateDependent::getWithinSpeciesVariance(const std::string &name, size_t site_index) const
 {
     const Tree& tau = character_histories->getValue().getTree();
@@ -264,7 +264,7 @@ double PhyloMultiSampleOrnsteinUhlenbeckStateDependent::getWithinSpeciesVariance
 }
 
 
-// two cases: species_means is supplied or not
+
 double PhyloMultiSampleOrnsteinUhlenbeckStateDependent::getWithinSpeciesSEM(const std::string &name, size_t site_index) const
 {
     const Tree& tau = character_histories->getValue().getTree();

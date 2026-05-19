@@ -507,10 +507,11 @@ void PhyloOrnsteinUhlenbeckStateDependent::resetValue( void )
             {
                 ContinuousTaxonData& taxon = this->value->getTaxonData( (*it)->getName() );
                 double &c = taxon.getCharacter(site_indices[site]);
+                double v = getWithinSpeciesSEM((*it)->getName(), site);
                 means[0][(*it)->getIndex()][site] = c;
                 means[1][(*it)->getIndex()][site] = c;
-                variances[0][(*it)->getIndex()] = 0;
-                variances[1][(*it)->getIndex()] = 0;
+                variances[0][(*it)->getIndex()]   = v;
+                variances[1][(*it)->getIndex()]   = v;
             }
         }
     }
@@ -705,6 +706,70 @@ void PhyloOrnsteinUhlenbeckStateDependent::setSigma(const TypedDagNode<RbVector<
         this->redrawValue();
     }
 
+}
+
+
+void PhyloOrnsteinUhlenbeckStateDependent::setWithinSpeciesSEMs(const TypedDagNode< MatrixReal >* sp_sem)
+{
+
+    // remove the old parameter first
+    this->removeParameter( species_SEMs );
+    species_SEMs   = NULL;
+
+    // set the value
+    species_SEMs   = sp_sem;
+
+    // add the new parameter
+    this->addParameter( species_SEMs );
+
+    // redraw the current value
+    if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
+    {
+        this->redrawValue();
+    }
+
+}
+
+
+
+double PhyloMultiSampleOrnsteinUhlenbeckStateDependent::getWithinSpeciesSEM(const std::string &name, size_t site_index) const
+{
+    const Tree& tau = character_histories->getValue().getTree();
+
+    std::vector<std::string> tip_names = tau.getSpeciesNames();
+    sort(tip_names.begin(), tip_names.end());
+
+    size_t tip_index = 0;
+    bool found = false;
+    while(tip_index < tip_names.size() && found == false)
+    {
+        if ( tip_names[tip_index] == name )
+        {
+            found = true;
+        }
+        else
+        {
+            tip_index++;
+        }
+    }
+
+    if (found == false)
+    {
+        throw RbException( "Cannot find this tip." );
+    }
+
+    // get the selection rate for the branch
+    double sem     = 0.0;
+    if ( this->species_SEM != NULL )
+    {
+        sem = species_SEM->getValue()[site_index][tip_index];
+    }
+    else
+    {
+        sem = 0;
+    }
+
+    return sem;
 }
 
 

@@ -155,6 +155,15 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
         }
     }
 
+    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal>* sp_err  = static_cast<const MatrixReal&>( species_SEMs->getRevObject() ).getDagNode();
+    if (sp_err->getValue().size() != n)
+    {
+        throw RbException()<< "The number of sites (" << n << ") specified doesn't match the size of the species mean matrix (" << sp_err->getValue().size() << ")";
+    }
+
+    dist->setWithinSpeciesSEMs( sp_err );
+
+
     return dist;
 }
 
@@ -362,6 +371,10 @@ void Dist_PhyloOrnsteinUhlenbeckStateDependent::setConstParameter(const std::str
     else if ( name == "rootTreatment" )
     {
         root_treatment = var;
+    }
+    else if ( name == "speciesSEMs" )
+    {
+        species_SEMs = var;
     }
     else
     {
