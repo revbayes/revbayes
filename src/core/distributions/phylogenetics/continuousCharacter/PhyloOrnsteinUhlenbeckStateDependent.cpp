@@ -732,7 +732,7 @@ void PhyloOrnsteinUhlenbeckStateDependent::setWithinSpeciesSEMs(const TypedDagNo
 
 
 
-double PhyloMultiSampleOrnsteinUhlenbeckStateDependent::getWithinSpeciesSEM(const std::string &name, size_t site_index) const
+double PhyloOrnsteinUhlenbeckStateDependent::getWithinSpeciesSEM(const std::string &name, size_t site_index) const
 {
     const Tree& tau = character_histories->getValue().getTree();
 
@@ -760,9 +760,9 @@ double PhyloMultiSampleOrnsteinUhlenbeckStateDependent::getWithinSpeciesSEM(cons
 
     // get the selection rate for the branch
     double sem     = 0.0;
-    if ( this->species_SEM != NULL )
+    if ( this->species_SEMs != NULL )
     {
-        sem = species_SEM->getValue()[site_index][tip_index];
+        sem = species_SEMs->getValue()[site_index][tip_index];
     }
     else
     {
