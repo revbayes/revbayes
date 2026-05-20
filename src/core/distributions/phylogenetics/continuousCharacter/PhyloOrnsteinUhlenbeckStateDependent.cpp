@@ -18,6 +18,7 @@
 #include "ContinuousCharacterData.h"
 #include "ContinuousTaxonData.h"
 #include "RbConstants.h"
+#include "MatrixReal.h"
 #include "RbVector.h"
 #include "RbVectorImpl.h"
 #include "StandardState.h"
@@ -61,6 +62,7 @@ PhyloOrnsteinUhlenbeckStateDependent::PhyloOrnsteinUhlenbeckStateDependent(const
     addParameter( homogeneous_theta );
     addParameter( character_histories );
     addParameter( root_value );
+    addParameter( species_SEMs );
 
     // now we need to reset the value
     this->redrawValue();
@@ -393,7 +395,33 @@ void PhyloOrnsteinUhlenbeckStateDependent::recursiveComputeLnProbability( const 
         } // end for-loop over all children
 
     } // end if we need to compute something for this node.
+    else
+    {
+        dirty_nodes[node_index] = false;
 
+        //std::vector<double> &mu_node  = this->means[this->active_likelihood[node_index]][node_index];
+        double &v_node                = this->variances[this->active_likelihood[node_index]][node_index];
+        std::vector<double> &p_node   = this->partial_likelihoods[this->active_likelihood[node_index]][node_index];
+
+        const Tree& tau = character_histories->getValue().getTree();
+        const std::string &name = tau.getNode( node_index ).getName();
+
+        for (size_t i=0; i<this->num_sites; i++)
+        {
+            //mu_node[i] = computeMeanForSpecies(name, i);
+            v_node = getWithinSpeciesSEM(name, i);
+
+            if ( v_node != 0 )
+            {
+                double standDev = sqrt(v_node);
+
+                double lnl_node = RbStatistics::Normal::lnPdf(0, standDev, 0);
+
+                p_node[i]  += lnl_node;
+            }
+
+        }
+    }
 }
 
 
@@ -760,7 +788,9 @@ double PhyloOrnsteinUhlenbeckStateDependent::getWithinSpeciesSEM(const std::stri
 
     // get the selection rate for the branch
     double sem     = 0.0;
-    if ( this->species_SEMs != NULL )
+    const size_t& num_tips = character_histories->getValue().getTree().getNumberOfTips();
+
+    if ( this->species_SEMs != NULL && this->species_SEMs->getValue().getNumberOfColumns() == num_tips )
     {
         sem = species_SEMs->getValue()[site_index][tip_index];
     }

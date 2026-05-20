@@ -157,14 +157,20 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
         }
     }
 
-    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal>* se  = static_cast<const MatrixReal&>( species_SEMs->getRevObject() ).getDagNode();
-    if (se->getValue().size() != n)
+    if ( species_SEMs->getRevObject() != RevNullObject::getInstance() )
     {
-        throw RbException()<< "The number of sites (" << n << ") specified doesn't match the size of the species mean matrix (" << se->getValue().size() << ")";
+        RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal>* sp_err  = static_cast<const MatrixReal&>( species_SEMs->getRevObject() ).getDagNode();
+
+        if (sp_err->getValue().size() != n)
+        {
+            throw RbException()<< "The number of sites (" << n << ") specified doesn't match the size of the species mean matrix (" << sp_err->getValue().size() << ")";
+        }
+        else
+        {
+            dist->setWithinSpeciesSEMs( sp_err );
+        }
+
     }
-
-    dist->setWithinSpeciesSEMs( se );
-
 
     return dist;
 }
