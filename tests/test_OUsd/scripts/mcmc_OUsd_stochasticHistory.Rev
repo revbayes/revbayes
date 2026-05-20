@@ -45,7 +45,6 @@ monitors = VectorMonitors()
 ########################################
 
 # make the Q matrix
-# make the Q matrix
 
 rates ~ dnDirichlet(rep(1, 6)*10)
 moves.append( mvBetaSimplex( rates, weight=2 ) )

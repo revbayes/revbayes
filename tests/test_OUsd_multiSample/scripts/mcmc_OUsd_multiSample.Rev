@@ -56,17 +56,9 @@ for (i in 1:2){
 }
 
 
-
-char_hist = readCharacterHistory( "/Users/plau/Desktop/test/data/n4_charhist.tre" )[1]
-taxon_map = readTaxonData("/Users/plau/Desktop/test/data/species_map.txt")
-
-
 x[1] <- fnSEMean(cont, 1, taxon_map, "mean")
 y[1] <- fnSpVar(cont, 1, taxon_map, "mean")
 
-
-#y[1] <- fnGetSpVar(cont, 2, 3, "mean")
-#x[1] <- fnGetSEMean(cont, 2, 3, "mean")
 sp_sems <- matrix(x)
 sp_vars <- matrix(y)
 sp_vars

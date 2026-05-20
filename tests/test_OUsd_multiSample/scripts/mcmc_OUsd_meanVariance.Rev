@@ -31,7 +31,7 @@ cont <- readContinuousCharacterData("data/rooted_4_tip_tree_meanVariance_continu
 cont.excludeAll()
 cont.includeCharacter(1)
 
-taxon_map = readTaxonData("data/rooted_4_tip_tree_taxon_map.txt")
+taxon_map = readTaxonData("data/rooted_4_tip_tree_taxon_map_pseudo.txt")
 
 ########################
 # Setting up the Model #
@@ -55,7 +55,6 @@ for (i in 1:2){
   moves.append( mvSlide(theta[i], weight=1.0) )
 }
 
-taxon_map = readTaxonData("/Users/plau/Desktop/test/data/species_map_pseudo.txt")
 
 
 y[1] <- fnGetSpVar(cont, 2, 3, "mean")
