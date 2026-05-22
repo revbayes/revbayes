@@ -193,7 +193,13 @@ int main(int argc, char* argv[])
     int num_processes = 0;
     try
     {
+#ifdef _OPENMP
+        int mpi_thread_provided;
+        MPI_Init_thread(&argc, &argv, MPI_THREAD_FUNNELED, &mpi_thread_provided);
+        // MPI_THREAD_FUNNELED: only master thread makes MPI calls — sufficient for OMP+MPI
+#else
         MPI_Init(&argc, &argv);
+#endif
         MPI_Comm_rank(MPI_COMM_WORLD, &process_id);
         MPI_Comm_size(MPI_COMM_WORLD, &num_processes);
 

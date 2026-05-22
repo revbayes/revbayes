@@ -32,6 +32,7 @@ all_args="$@"
 # set default values
 debug="false"
 mpi="false"
+omp="false"
 cmd="false"
 boost_root=""
 boost_verbose=""
@@ -49,6 +50,7 @@ while echo $1 | grep ^- > /dev/null; do
 -debug          <true|false>    : set to true to build in debug mode. Defaults to false.
 -ninja          <true|false>    : set to true to build with ninja instead of make
 -mpi            <true|false>    : set to true if you want to build the MPI version. Defaults to false.
+-omp            <true|false>    : set to true to enable OpenMP shared-memory parallelism. Defaults to false.
 -cmd            <true|false>    : set to true if you want to build RevStudio with GTK2+. Defaults to false.
 -boost_root     string          : specify directory containing Boost headers and libraries (e.g. `/usr/`). Defaults to unset.
 -boost_verbose  <true|false>    : log some info about finding Boost
@@ -109,6 +111,10 @@ fi
 
 if [ "$mpi" = "true" ] ; then
     cmake_args="-DMPI=ON $cmake_args"
+fi
+
+if [ "$omp" = "true" ] ; then
+    cmake_args="-DOPENMP=ON $cmake_args"
 fi
 
 if [ "$cmd" = "true" ] ; then

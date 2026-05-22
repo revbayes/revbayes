@@ -1,10 +1,14 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdlib>
+#include <exception>
 #include <ostream>
 #include <string>
 #include <type_traits>
 #include <vector>
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
@@ -720,38 +724,73 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
         
     }
     
+    // Per-replicate RNGs for OpenMP: pre-seed from GLOBAL_RNG before entering parallel region
+    // so each replicate gets a deterministic, independent RNG sequence.
+#ifdef _OPENMP
+    std::vector<RandomNumberGenerator> replicate_rngs( replicates );
+    {
+        RandomNumberGenerator* master_rng = GLOBAL_RNG;
+        for (size_t i = 0; i < replicates; ++i)
+            replicate_rngs[i].setSeed( master_rng->getNewSeed() );
+    }
+#endif
+
     // Run the chain
     bool finished = false;
     bool converged = false;
     do {
-        
+
         ++gen;
+
+#ifdef _OPENMP
+        std::exception_ptr parallel_exception = nullptr;
+#pragma omp parallel for schedule(dynamic,1) shared(parallel_exception)
+#endif
         for (size_t i=0; i<replicates; ++i)
-        {            
+        {
+#ifdef _OPENMP
+#pragma omp cancellation point for
+            if (parallel_exception) continue;
+            RandomNumberFactory::setThreadLocalRNG( &replicate_rngs[i] );
+#endif
             if ( runs[i] != NULL )
             {
-                
-                // @todo: #thread
-                // This part should be done on several threads if possible
-                // Sebastian: this call is very slow; a lot of work happens in nextCycle()
-                runs[i]->nextCycle(true);
-                
-                // Monitor
-                runs[i]->monitor(gen);
-                
-                // check for autotuning
-                if ( tuning_interval != 0 && (gen % tuning_interval) == 0 )
-                {                   
-                    runs[i]->tune();                   
+                try
+                {
+                    runs[i]->nextCycle(true);
+
+                    // Monitor
+                    runs[i]->monitor(gen);
+
+                    // check for autotuning
+                    if ( tuning_interval != 0 && (gen % tuning_interval) == 0 )
+                    {
+                        runs[i]->tune();
+                    }
+
+                    // check for checkpointing
+                    if ( checkpoint_interval != 0 && (gen % checkpoint_interval) == 0 )
+                    {
+                        runs[i]->checkpoint();
+                    }
                 }
-                
-                // check for checkpointing
-                if ( checkpoint_interval != 0 && (gen % checkpoint_interval) == 0 )
-                {                    
-                    runs[i]->checkpoint();                    
-                }             
-            }           
+                catch (...)
+                {
+#ifdef _OPENMP
+#pragma omp critical
+                    { if (!parallel_exception) parallel_exception = std::current_exception(); }
+#else
+                    throw;
+#endif
+                }
+            }
+#ifdef _OPENMP
+            RandomNumberFactory::setThreadLocalRNG( nullptr );
+#endif
         }
+#ifdef _OPENMP
+        if (parallel_exception) std::rethrow_exception(parallel_exception);
+#endif
 
 #ifdef RB_MPI
         // Convergence rules re-read trace files; ensure all ranks finished this generation's

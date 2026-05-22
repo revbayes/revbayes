@@ -6,6 +6,10 @@
 
 using namespace RevBayesCore;
 
+#ifdef _OPENMP
+thread_local RandomNumberGenerator* RandomNumberFactory::threadLocalRNG = nullptr;
+#endif
+
 /** Default constructor */
 RandomNumberFactory::RandomNumberFactory(void)
 {

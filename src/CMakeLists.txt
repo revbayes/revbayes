@@ -86,6 +86,16 @@ if ("${MPI}" STREQUAL "ON")
    set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} ${MPI_LINK_FLAGS}")
 endif()
 
+if ("${OPENMP}" STREQUAL "ON")
+   find_package(OpenMP)
+   if (OpenMP_CXX_FOUND)
+      add_definitions(-DRB_OPENMP)
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+   else()
+      message(WARNING "OpenMP requested (-DOPENMP=ON) but not found; building without it")
+   endif()
+endif()
+
 ## Prevent the error "Could NOT find Threads" when we search for BOOST.
 IF(APPLE)
     set(CMAKE_THREAD_LIBS_INIT "-lpthread")
@@ -256,6 +266,7 @@ target_link_libraries(${RB_EXEC_NAME}
   ${CMAKE_DL_LIBS}
   ${GTK_LIBRARIES}
   ${MPI_LIBRARIES}
+  $<$<BOOL:${OpenMP_CXX_FOUND}>:OpenMP::OpenMP_CXX>
 )
 
 install(TARGETS ${RB_EXEC_NAME} DESTINATION bin)

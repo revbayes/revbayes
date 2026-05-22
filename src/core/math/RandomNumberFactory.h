@@ -30,15 +30,30 @@ namespace RevBayesCore {
                                                         return singleRandomNumberFactory;
                                                     }
 		void                                        deleteRandomNumberGenerator(RandomNumberGenerator* r);                                 //!< Return a random number object to the pool
-		RandomNumberGenerator*                      getGlobalRandomNumberGenerator(void) { return seedGenerator; }                         //!< Return a pointer to the global random number object
+		RandomNumberGenerator*                      getGlobalRandomNumberGenerator(void)                                                    //!< Per-thread RNG when inside OMP region, else global singleton
+                                                    {
+#ifdef _OPENMP
+                                                        if (threadLocalRNG != nullptr) return threadLocalRNG;
+#endif
+                                                        return seedGenerator;
+                                                    }
+        static void                                 setThreadLocalRNG(RandomNumberGenerator* rng)                                          //!< Bind/unbind per-thread RNG (call from OMP parallel body)
+                                                    {
+#ifdef _OPENMP
+                                                        threadLocalRNG = rng;
+#endif
+                                                    }
 
 	private:
                                                     RandomNumberFactory(void);                                                             //!< Default constructor
                                                     RandomNumberFactory(const RandomNumberFactory&);                                       //!< Copy constructor
                                                     RandomNumberFactory& operator=(const RandomNumberFactory&);                            //!< Assignment operator
                                                    ~RandomNumberFactory(void);                                                             //!< Destructor
-		RandomNumberGenerator*                      seedGenerator;                                                                         //!< A random number object that generates seeds
+		RandomNumberGenerator*                      seedGenerator;                                                                         //!< Global (main-thread) RNG
 		std::set<RandomNumberGenerator*>            allocatedRandomNumbers;                                                                //!< The pool of random number objects
+#ifdef _OPENMP
+        static thread_local RandomNumberGenerator*  threadLocalRNG;                                                                        //!< Per-thread RNG (null = use seedGenerator)
+#endif
     };
 }
 
