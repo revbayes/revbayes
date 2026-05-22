@@ -35,7 +35,7 @@ namespace RevBayesCore {
         void                                                                setSigma(const TypedDagNode< RbVector< double > >* s);
         void                                                                setTheta(const TypedDagNode< double >* t);
         void                                                                setTheta(const TypedDagNode< RbVector< double > >* t);
-        void                                                                setWithinSpeciesSEMs(const TypedDagNode< MatrixReal > *sp_err);
+        void                                                                setVarianceOfSpeciesMean(const TypedDagNode< MatrixReal > *sp_err);
         void                                                                setValue(ContinuousCharacterData *v, bool f=false);                                     //!< Set the current value, e.g. attach an observation (clamp)
         void                                                                setRootTreatment(ROOT_TREATMENT rt);
         ROOT_TREATMENT                                                      getRootTreatment() const { return root_treatment; }
@@ -98,7 +98,7 @@ namespace RevBayesCore {
         const TypedDagNode< RbVector< double > >*                           state_dependent_alpha;
         const TypedDagNode< RbVector< double > >*                           state_dependent_sigma;
         const TypedDagNode< RbVector< double > >*                           state_dependent_theta;
-        const TypedDagNode< MatrixReal >*                                   species_SEMs;
+        const TypedDagNode< MatrixReal >*                                   species_VarOfMean;
 
     };
 

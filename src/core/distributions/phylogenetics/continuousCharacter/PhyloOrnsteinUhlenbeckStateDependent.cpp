@@ -51,7 +51,7 @@ PhyloOrnsteinUhlenbeckStateDependent::PhyloOrnsteinUhlenbeckStateDependent(const
     homogeneous_alpha           = new ConstantNode<double>("", new double(0.0) );
     homogeneous_sigma           = new ConstantNode<double>("", new double(1.0) );
     homogeneous_theta           = new ConstantNode<double>("", new double(0.0) );
-    species_SEMs                = new ConstantNode<MatrixReal>("", new MatrixReal( num_sites, character_histories->getValue().getTree().getNumberOfTips() ) );
+    species_VarOfMean                = new ConstantNode<MatrixReal>("", new MatrixReal( num_sites, character_histories->getValue().getTree().getNumberOfTips() ) );
 
     state_dependent_alpha       = NULL;
     state_dependent_sigma       = NULL;
@@ -64,7 +64,7 @@ PhyloOrnsteinUhlenbeckStateDependent::PhyloOrnsteinUhlenbeckStateDependent(const
     addParameter( homogeneous_theta );
     addParameter( character_histories );
     addParameter( root_value );
-    addParameter( species_SEMs );
+    addParameter( species_VarOfMean );
 
     alphabetical_species_names = character_histories->getValue().getTree().getSpeciesNames();
     sort(alphabetical_species_names.begin(), alphabetical_species_names.end());
@@ -718,18 +718,18 @@ void PhyloOrnsteinUhlenbeckStateDependent::setSigma(const TypedDagNode<RbVector<
 }
 
 
-void PhyloOrnsteinUhlenbeckStateDependent::setWithinSpeciesSEMs(const TypedDagNode< MatrixReal >* sp_sem)
+void PhyloOrnsteinUhlenbeckStateDependent::setVarianceOfSpeciesMean(const TypedDagNode< MatrixReal >* sp_sem)
 {
 
     // remove the old parameter first
-    this->removeParameter( species_SEMs );
-    species_SEMs   = NULL;
+    this->removeParameter( species_VarOfMean );
+    species_VarOfMean   = NULL;
 
     // set the value
-    species_SEMs   = sp_sem;
+    species_VarOfMean   = sp_sem;
 
     // add the new parameter
-    this->addParameter( species_SEMs );
+    this->addParameter( species_VarOfMean );
 
     // redraw the current value
     if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
@@ -766,9 +766,9 @@ double PhyloOrnsteinUhlenbeckStateDependent::getWithinSpeciesSEM(const std::stri
     // get the selection rate for the branch
     double sem     = 0.0;
 
-    if ( this->species_SEMs != NULL )
+    if ( this->species_VarOfMean != NULL )
     {
-        sem = species_SEMs->getValue()[site_index][tip_index];
+        sem = species_VarOfMean->getValue()[site_index][tip_index];
     }
     else
     {
