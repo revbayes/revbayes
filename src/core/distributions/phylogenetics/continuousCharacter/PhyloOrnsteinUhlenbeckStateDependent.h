@@ -65,11 +65,13 @@ namespace RevBayesCore {
         double                                                              ln_prob;
         size_t                                                              num_nodes;
         size_t                                                              num_sites;
+        std::vector< std::string >                                          alphabetical_species_names;
 
         // the likelihoods
         std::vector<std::vector<std::vector<double> > >                     partial_likelihoods;
         std::vector<std::vector<std::vector<double> > >                     means;
-        std::vector<std::vector<double> >                                   variances;
+//        std::vector<std::vector<double> >                                   variances;
+        std::vector<std::vector<std::vector<double> > >                     variances;
         std::vector<size_t>                                                 active_likelihood;
 
         // convenience variables available for derived classes too
@@ -97,7 +99,6 @@ namespace RevBayesCore {
         const TypedDagNode< RbVector< double > >*                           state_dependent_sigma;
         const TypedDagNode< RbVector< double > >*                           state_dependent_theta;
         const TypedDagNode< MatrixReal >*                                   species_SEMs;
-
 
     };
 
