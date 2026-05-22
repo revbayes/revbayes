@@ -51,6 +51,8 @@ PhyloOrnsteinUhlenbeckStateDependent::PhyloOrnsteinUhlenbeckStateDependent(const
     homogeneous_alpha           = new ConstantNode<double>("", new double(0.0) );
     homogeneous_sigma           = new ConstantNode<double>("", new double(1.0) );
     homogeneous_theta           = new ConstantNode<double>("", new double(0.0) );
+    species_SEMs                = new ConstantNode<MatrixReal>("", new MatrixReal( num_sites, character_histories->getValue().getTree().getNumberOfTips() ) );
+
     state_dependent_alpha       = NULL;
     state_dependent_sigma       = NULL;
     state_dependent_theta       = NULL;
