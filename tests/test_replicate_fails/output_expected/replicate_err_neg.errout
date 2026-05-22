@@ -6,6 +6,8 @@
         Natural<any> n)
    rep (Natural<any> x,
         Natural<any> n)
+   rep (Probability<any> x,
+        Natural<any> n)
    rep (RealPos<any> x,
         Natural<any> n)
    rep (String<any> x,
