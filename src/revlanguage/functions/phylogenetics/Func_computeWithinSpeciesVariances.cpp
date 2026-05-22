@@ -5,7 +5,7 @@
 #include "ArgumentRule.h"
 #include "Func_computeWithinSpeciesVariances.h"
 #include "ModelVector.h"
-#include "ComputeTipErrorOrVarianceFunction.h"
+#include "ComputeSpeciesVarianceFunction.h"
 #include "RlContinuousCharacterData.h"
 #include "RlTaxon.h"
 #include "RlTimeTree.h"
@@ -69,18 +69,18 @@ RevBayesCore::TypedFunction<RevBayesCore::RbVector<double> >* Func_computeWithin
     const std::string& tr = static_cast<const RlString &>( args[3].getVariable()->getRevObject() ).getValue();
 
 
-    RevBayesCore::ComputeTipErrorOrVarianceFunction::MISSING_TREATMENT mtr;
+    RevBayesCore::ComputeSpeciesVarianceFunction::MISSING_TREATMENT mtr;
     if (tr == "mean")
     {
-        mtr = RevBayesCore::ComputeTipErrorOrVarianceFunction::MISSING_TREATMENT::MEAN;
+        mtr = RevBayesCore::ComputeSpeciesVarianceFunction::MISSING_TREATMENT::MEAN;
     }
     else if (tr == "median")
     {
-        mtr = RevBayesCore::ComputeTipErrorOrVarianceFunction::MISSING_TREATMENT::MEDIAN;
+        mtr = RevBayesCore::ComputeSpeciesVarianceFunction::MISSING_TREATMENT::MEDIAN;
     }
     else if (tr == "none")
     {
-        mtr = RevBayesCore::ComputeTipErrorOrVarianceFunction::MISSING_TREATMENT::NONE;
+        mtr = RevBayesCore::ComputeSpeciesVarianceFunction::MISSING_TREATMENT::NONE;
     }
     else
     {
@@ -88,7 +88,7 @@ RevBayesCore::TypedFunction<RevBayesCore::RbVector<double> >* Func_computeWithin
     }
 
 
-    RevBayesCore::ComputeTipErrorOrVarianceFunction* f = new RevBayesCore::ComputeTipErrorOrVarianceFunction( data, site, taxa, mtr, false );
+    RevBayesCore::ComputeSpeciesVarianceFunction* f = new RevBayesCore::ComputeSpeciesVarianceFunction( data, site, taxa, mtr, false );
 
     return f;
 }

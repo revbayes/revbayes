@@ -1,4 +1,4 @@
-#include "ComputeTipErrorOrVarianceFunction.h"
+#include "ComputeSpeciesVarianceFunction.h"
 
 #include <cmath>
 #include <cstddef>
@@ -16,11 +16,11 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
-ComputeTipErrorOrVarianceFunction::ComputeTipErrorOrVarianceFunction(const TypedDagNode<ContinuousCharacterData> *d, const TypedDagNode<std::int64_t> *s, const std::vector<Taxon> &ta, MISSING_TREATMENT mtr, bool err ) : TypedFunction< RbVector<double> >( new RbVector<double>() ),
+ComputeSpeciesVarianceFunction::ComputeSpeciesVarianceFunction(const TypedDagNode<ContinuousCharacterData> *d, const TypedDagNode<std::int64_t> *s, const std::vector<Taxon> &ta, MISSING_TREATMENT mtr, bool bool_vom ) : TypedFunction< RbVector<double> >( new RbVector<double>() ),
     data( d ),
     site( s ),
     taxa( ta ),
-    compute_SEM( err )
+    compute_VarOfMean( bool_vom )
 {
     missing_var_treatment = mtr;
 
@@ -33,20 +33,20 @@ ComputeTipErrorOrVarianceFunction::ComputeTipErrorOrVarianceFunction(const Typed
 }
 
 
-ComputeTipErrorOrVarianceFunction::~ComputeTipErrorOrVarianceFunction( void )
+ComputeSpeciesVarianceFunction::~ComputeSpeciesVarianceFunction( void )
 {
     // We don't delete the parameters, because they might be used somewhere else too. The model needs to do that!
 }
 
 
 
-ComputeTipErrorOrVarianceFunction* ComputeTipErrorOrVarianceFunction::clone( void ) const
+ComputeSpeciesVarianceFunction* ComputeSpeciesVarianceFunction::clone( void ) const
 {
-    return new ComputeTipErrorOrVarianceFunction( *this );
+    return new ComputeSpeciesVarianceFunction( *this );
 }
 
 
-double ComputeTipErrorOrVarianceFunction::computeMeanForSpecies(const std::string &name, size_t index)
+double ComputeSpeciesVarianceFunction::computeMeanForSpecies(const std::string &name, size_t index)
 {
 
     double mean = 0.0;
@@ -75,7 +75,7 @@ double ComputeTipErrorOrVarianceFunction::computeMeanForSpecies(const std::strin
 }
 
 
-double ComputeTipErrorOrVarianceFunction::computeTipErrorOrVarianceForSpecies(const std::string &name, size_t index)
+double ComputeSpeciesVarianceFunction::computeTipErrorOrVarianceForSpecies(const std::string &name, size_t index)
 {
 
     double num_samples = getNumberOfSamplesForSpecies(name);
@@ -101,10 +101,10 @@ double ComputeTipErrorOrVarianceFunction::computeTipErrorOrVarianceForSpecies(co
         }
 
         // normalize
-        var /= num_samples;
+        var /= ( num_samples - 1 );
 
         // if standard error of mean trait is desired
-        if ( compute_SEM )
+        if ( compute_VarOfMean )
         {
             var /= num_samples;
         }
@@ -137,7 +137,7 @@ double ComputeTipErrorOrVarianceFunction::computeTipErrorOrVarianceForSpecies(co
 }
 
 
-double ComputeTipErrorOrVarianceFunction::getNumberOfSamplesForSpecies(const std::string &name)
+double ComputeSpeciesVarianceFunction::getNumberOfSamplesForSpecies(const std::string &name)
 {
 
     double num_samples = 0.0;
@@ -157,7 +157,7 @@ double ComputeTipErrorOrVarianceFunction::getNumberOfSamplesForSpecies(const std
 }
 
 
-std::vector<std::string> ComputeTipErrorOrVarianceFunction::getAlphabeticalSpeciesNames(void)
+std::vector<std::string> ComputeSpeciesVarianceFunction::getAlphabeticalSpeciesNames(void)
 {
 
     std::vector<std::string> species_names;
@@ -177,7 +177,7 @@ std::vector<std::string> ComputeTipErrorOrVarianceFunction::getAlphabeticalSpeci
 }
 
 
-double ComputeTipErrorOrVarianceFunction::computeMeanErrorOrVarianceAcrossSpecies( void )
+double ComputeSpeciesVarianceFunction::computeMeanErrorOrVarianceAcrossSpecies( void )
 {
 
     // some of the sites may have been excluded
@@ -207,7 +207,7 @@ double ComputeTipErrorOrVarianceFunction::computeMeanErrorOrVarianceAcrossSpecie
     return mean_var;
 }
 
-double ComputeTipErrorOrVarianceFunction::computeMedianErrorOrVarianceAcrossSpecies( void )
+double ComputeSpeciesVarianceFunction::computeMedianErrorOrVarianceAcrossSpecies( void )
 {
     size_t site_index = site->getValue()-1;
 
@@ -246,7 +246,7 @@ double ComputeTipErrorOrVarianceFunction::computeMedianErrorOrVarianceAcrossSpec
 }
 
 
-void ComputeTipErrorOrVarianceFunction::reset( void )
+void ComputeSpeciesVarianceFunction::reset( void )
 {
 
     std::vector<std::string> species_names = getAlphabeticalSpeciesNames();
@@ -268,7 +268,7 @@ void ComputeTipErrorOrVarianceFunction::reset( void )
 
 }
 
-void ComputeTipErrorOrVarianceFunction::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
+void ComputeSpeciesVarianceFunction::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
 {
 
     if (oldP == data)
@@ -283,7 +283,7 @@ void ComputeTipErrorOrVarianceFunction::swapParameterInternal(const DagNode *old
 }
 
 
-void ComputeTipErrorOrVarianceFunction::update( void )
+void ComputeSpeciesVarianceFunction::update( void )
 {
     RbVector<double> &v = *value;
 

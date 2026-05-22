@@ -1,5 +1,5 @@
-#ifndef Func_computeSESpeciesMean_H
-#define Func_computeSESpeciesMean_H
+#ifndef Func_computeVarianceOfSpeciesMean_H
+#define Func_computeVarianceOfSpeciesMean_H
 
 #include "ModelVector.h"
 #include "RbVector.h"
@@ -11,13 +11,13 @@
 
 namespace RevLanguage {
 
-    class Func_computeSESpeciesMean : public TypedFunction<ModelVector<Real> > {
+    class Func_computeVarianceOfSpeciesMean : public TypedFunction<ModelVector<Real> > {
 
     public:
-        Func_computeSESpeciesMean( void );
+        Func_computeVarianceOfSpeciesMean( void );
 
         // Basic utility functions
-        Func_computeSESpeciesMean*                        clone(void) const;                                          //!< Clone the object
+        Func_computeVarianceOfSpeciesMean*                        clone(void) const;                                          //!< Clone the object
         static const std::string&                                           getClassType(void);                                         //!< Get Rev type
         static const TypeSpec&                                              getClassTypeSpec(void);                                     //!< Get class type spec
         std::string                                                         getFunctionName(void) const;                                //!< Get the primary name of the function in Rev

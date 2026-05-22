@@ -1,5 +1,5 @@
-#ifndef ComputeTipErrorOrVarianceFunction_H
-#define ComputeTipErrorOrVarianceFunction_H
+#ifndef ComputeSpeciesVarianceFunction_H
+#define ComputeSpeciesVarianceFunction_H
 
 #include <cstddef>
 #include <vector>
@@ -16,15 +16,15 @@ class DagNode;
 class Tree;
 template <class valueType> class TypedDagNode;
 
-    class ComputeTipErrorOrVarianceFunction : public TypedFunction< RbVector<double> > {
+    class ComputeSpeciesVarianceFunction : public TypedFunction< RbVector<double> > {
 
     public:
         enum                                                                MISSING_TREATMENT { MEAN, MEDIAN, NONE };
-        ComputeTipErrorOrVarianceFunction(const TypedDagNode<ContinuousCharacterData> *d, const TypedDagNode<std::int64_t>* s, const std::vector<Taxon> &ta, MISSING_TREATMENT mtr, bool err );
-        virtual                                                ~ComputeTipErrorOrVarianceFunction(void);                                                         //!< Virtual destructor
+        ComputeSpeciesVarianceFunction(const TypedDagNode<ContinuousCharacterData> *d, const TypedDagNode<std::int64_t>* s, const std::vector<Taxon> &ta, MISSING_TREATMENT mtr, bool err );
+        virtual                                                ~ComputeSpeciesVarianceFunction(void);                                                         //!< Virtual destructor
 
         // public member functions
-        ComputeTipErrorOrVarianceFunction*                              clone(void) const;                                                                  //!< Create an independent clone
+        ComputeSpeciesVarianceFunction*                              clone(void) const;                                                                  //!< Create an independent clone
         void                                                                update(void);
 
     protected:
@@ -46,7 +46,7 @@ template <class valueType> class TypedDagNode;
         MISSING_TREATMENT                                                   missing_var_treatment;
 
         std::vector<double>                                                 within_species_variance;
-        const bool                                                          compute_SEM;
+        const bool                                                          compute_VarOfMean;
     };
 
 }

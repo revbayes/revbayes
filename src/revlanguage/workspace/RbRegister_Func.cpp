@@ -89,7 +89,7 @@
 #include "Func_computeWeightedNodeOrderConstraintsScore.h"
 #include "Func_combineCharacter.h"
 #include "Func_computeWithinSpeciesVariances.h"
-#include "Func_computeSESpeciesMean.h"
+#include "Func_computeVarianceOfSpeciesMean.h"
 #include "Func_concatenate.h"
 #include "Func_concatenateContinuousCharacterData.h"
 #include "Func_CladeSpecificHierarchicalBranchRate.h"
@@ -450,7 +450,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_branchScoreDistance()                             );
         addFunction( new Func_checkNodeOrderConstraints()                       );
         addFunction( new Func_chronoToPhylo()                                   );
-        addFunction( new Func_computeSESpeciesMean()                            );
+        addFunction( new Func_computeVarianceOfSpeciesMean()                            );
         addFunction( new Func_computeWithinSpeciesVariances()                   );
         addFunction( new Func_computeWeightedNodeOrderConstraintsScore()        );
         addFunction( new Func_combineCharacter()                                );
@@ -698,7 +698,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_varianceCovarianceMatrix( )           );
         addFunction( new Func_decomposedVarianceCovarianceMatrix( ) );
         addFunction( new Func_partialToCorrelationMatrix( )         );
-        
+
         addFunction( new Func_BSPInterval<RealPos>()          );
 
 
