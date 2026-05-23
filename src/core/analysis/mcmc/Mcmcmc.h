@@ -6,6 +6,7 @@
 #include "Monitor.h"
 #include "MonteCarloSampler.h"
 #include "Move.h"
+#include "RandomNumberGenerator.h"
 
 #include <vector>
 
@@ -130,6 +131,8 @@ namespace RevBayesCore {
         std::vector< std::vector<size_t> >      num_accepted_swaps;
         
         std::vector< std::vector<Mcmc::tuningInfo> >  chain_moves_tuningInfo;
+
+        std::vector<RandomNumberGenerator>            chain_rngs;                                     //!< Per-chain RNGs for OpenMP thread-local use
     };
     
 }

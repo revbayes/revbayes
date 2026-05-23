@@ -744,7 +744,7 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
 
 #ifdef _OPENMP
         std::exception_ptr parallel_exception = nullptr;
-#pragma omp parallel for schedule(dynamic,1) shared(parallel_exception)
+#pragma omp parallel for schedule(dynamic,1) if(replicates > 1) shared(parallel_exception)
 #endif
         for (size_t i=0; i<replicates; ++i)
         {

@@ -38,6 +38,12 @@
 #include <mpi.h>
 #endif
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
+#include <exception>
+
 /*
  * Round trip statistics are inspired by the paper https://arxiv.org/pdf/cond-mat/0602085.pdf
  *
@@ -124,9 +130,17 @@ Mcmcmc::Mcmcmc(const Model& m, const RbVector<Move> &mv, const RbVector<Monitor>
     // assign chains to processors, instantiate Mcmc objects
     base_chain = new Mcmc(m, mv, mn, ntries);
     base_chain->setActivePID(this->pid, 1);
-    
+
     // initialize the individual chains
     initializeChains();
+
+#ifdef _OPENMP
+    // seed one RNG per chain slot from the master RNG before any parallel work
+    chain_rngs.resize(num_chains);
+    RandomNumberGenerator* master_rng = GLOBAL_RNG;
+    for (size_t i = 0; i < num_chains; ++i)
+        chain_rngs[i].setSeed( master_rng->getNewSeed() );
+#endif
 }
 
 
@@ -171,7 +185,8 @@ Mcmcmc::Mcmcmc(const Mcmcmc &m) : MonteCarloSampler(m)
     chain_half_trips        = m.chain_half_trips;
     heat_visitors           = m.heat_visitors;
     chain_moves_tuningInfo  = m.chain_moves_tuningInfo;
-    
+    chain_rngs              = m.chain_rngs;
+
     burnin_generation       = m.burnin_generation;
     current_generation      = m.current_generation;
     base_chain              = m.base_chain->clone();
@@ -580,20 +595,43 @@ void Mcmcmc::nextCycle(bool advanceCycle)
 {
     
     // run each chain for this process
+    // Only activate thread-level chain parallelism when NOT already inside a parallel region
+    // (e.g., the outer replicate loop in MonteCarloAnalysis). This avoids nested-parallelism
+    // oversubscription while still exploiting all cores for single-replicate MC3 runs.
+#ifdef _OPENMP
+    std::exception_ptr parallel_exception = nullptr;
+#pragma omp parallel for schedule(dynamic,1) if(!omp_in_parallel()) shared(parallel_exception)
+#endif
     for (size_t i = 0; i < num_chains; ++i)
     {
-        
-        if ( chains[i] != NULL )
+#ifdef _OPENMP
+#pragma omp cancellation point for
+        if (parallel_exception) continue;
+        RandomNumberFactory::setThreadLocalRNG( &chain_rngs[i] );
+#endif
+        try
         {
-            // @todo: #thread
-            // This part should be done on several threads if possible
-            // Sebastian: this call is very slow; a lot of work happens in nextCycle()
-
-            // advance chain i by a single cycle
-            chains[i]->nextCycle( advanceCycle );
+            if ( chains[i] != NULL )
+            {
+                chains[i]->nextCycle( advanceCycle );
+            }
         }
-        
+        catch (...)
+        {
+#ifdef _OPENMP
+#pragma omp critical
+            { if (!parallel_exception) parallel_exception = std::current_exception(); }
+#else
+            throw;
+#endif
+        }
+#ifdef _OPENMP
+        RandomNumberFactory::setThreadLocalRNG( nullptr );
+#endif
     } // loop over chains for this process
+#ifdef _OPENMP
+    if (parallel_exception) std::rethrow_exception(parallel_exception);
+#endif
     
     if ( advanceCycle == true )
     {
@@ -1319,8 +1357,15 @@ void Mcmcmc::setActivePIDSpecialized(size_t i, size_t n)
     heat_ranks.resize(num_chains, 0);
     
     chain_moves_tuningInfo = std::vector< std::vector<Mcmc::tuningInfo> > (num_chains);
-    
+
     initializeChains();
+
+#ifdef _OPENMP
+    chain_rngs.resize(num_chains);
+    RandomNumberGenerator* master_rng = GLOBAL_RNG;
+    for (size_t i = 0; i < num_chains; ++i)
+        chain_rngs[i].setSeed( master_rng->getNewSeed() );
+#endif
 }
 
 
