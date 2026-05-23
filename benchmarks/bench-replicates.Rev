@@ -1,0 +1,73 @@
+################################################################################
+#
+# RevBayes benchmark: parallel replicates (Phase 1 OpenMP target)
+#
+# Usage:
+#   time rb bench-replicates.Rev <data.nex> <alphabet> <ngens> <nruns>
+#
+# Example:
+#   time rb bench-replicates.Rev ../tests/data/primates_and_galeopterus_cytb.nex DNA 10000 4
+#
+# Measures wall time for <ngens> MCMC generations across <nruns> independent
+# replicate analyses.  With -omp true builds, all replicates run in parallel.
+# Compare serial (nruns=1) vs parallel (nruns=N) to measure speedup.
+#
+################################################################################
+
+filename  = args[1]
+alphabet  = args[2]
+gen       = int(args[3])
+nruns     = int(args[4])
+
+print("bench-replicates: " + filename + "  " + alphabet + "  gen=" + gen + "  nruns=" + nruns)
+
+#### Read data
+data <- readDiscreteCharacterData(filename)
+
+taxa  <- data.taxa()
+ntaxa <- taxa.size()
+
+print("ntaxa=" + ntaxa)
+
+#### Substitution model
+if (alphabet == "DNA" || alphabet == "RNA") {
+    Q := fnJC(4)
+} else if (alphabet == "AA") {
+    pi ~ dnDirichlet(rep(20, 20))
+    moves.append(mvBetaSimplex(pi, weight=4))
+    Q := fnLG(pi)
+} else {
+    print("Error: unrecognised alphabet '" + alphabet + "'")
+    q()
+}
+
+#### Tree model
+num_branches = 2 * ntaxa - 3
+moves = VectorMoves()
+for (i in 1:num_branches) {
+    bl[i] ~ dnExponential(1.0)
+    moves.append(mvScale(bl[i], weight=0.1))
+}
+
+topology ~ dnUniformTopology(taxa=taxa)
+moves.append(mvNNI(topology, weight=1.0))
+moves.append(mvSPR(topology, weight=3.0))
+
+psi := fnTreeAssembly(topology, bl)
+
+#### PhyloCTMC
+seq ~ dnPhyloCTMC(tree=psi, Q=Q, type=alphabet)
+seq.clamp(data)
+
+#### Model & monitors
+mymodel = model(seq)
+
+monitors = VectorMonitors()
+monitors.append(mnScreen(printgen=gen))
+
+#### Analysis — nruns replicates (parallelised with OpenMP Phase 1)
+mymcmc = mcmc(mymodel, monitors, moves, nruns=nruns, moveschedule="single")
+mymcmc.run(generations=gen)
+
+print("Done.")
+q()

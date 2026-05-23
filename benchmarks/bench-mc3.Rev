@@ -1,0 +1,73 @@
+################################################################################
+#
+# RevBayes benchmark: MC³ parallel chains (Phase 2 OpenMP target)
+#
+# Usage:
+#   time rb bench-mc3.Rev <data.nex> <alphabet> <ngens> <nchains>
+#
+# Example:
+#   time rb bench-mc3.Rev ../tests/data/primates_and_galeopterus_cytb.nex DNA 10000 4
+#
+# Measures wall time for <ngens> MCMCMC generations with <nchains> chains.
+# With Phase 2 OpenMP, all chains run in parallel per generation.
+# Compare nchains=1 vs nchains=N to measure chain-level speedup.
+#
+################################################################################
+
+filename  = args[1]
+alphabet  = args[2]
+gen       = int(args[3])
+nchains   = int(args[4])
+
+print("bench-mc3: " + filename + "  " + alphabet + "  gen=" + gen + "  nchains=" + nchains)
+
+#### Read data
+data <- readDiscreteCharacterData(filename)
+
+taxa  <- data.taxa()
+ntaxa <- taxa.size()
+
+print("ntaxa=" + ntaxa)
+
+#### Substitution model
+if (alphabet == "DNA" || alphabet == "RNA") {
+    Q := fnJC(4)
+} else if (alphabet == "AA") {
+    pi ~ dnDirichlet(rep(20, 20))
+    moves.append(mvBetaSimplex(pi, weight=4))
+    Q := fnLG(pi)
+} else {
+    print("Error: unrecognised alphabet '" + alphabet + "'")
+    q()
+}
+
+#### Tree model
+num_branches = 2 * ntaxa - 3
+moves = VectorMoves()
+for (i in 1:num_branches) {
+    bl[i] ~ dnExponential(1.0)
+    moves.append(mvScale(bl[i], weight=0.1))
+}
+
+topology ~ dnUniformTopology(taxa=taxa)
+moves.append(mvNNI(topology, weight=1.0))
+moves.append(mvSPR(topology, weight=3.0))
+
+psi := fnTreeAssembly(topology, bl)
+
+#### PhyloCTMC
+seq ~ dnPhyloCTMC(tree=psi, Q=Q, type=alphabet)
+seq.clamp(data)
+
+#### Model & monitors
+mymodel = model(seq)
+
+monitors = VectorMonitors()
+monitors.append(mnScreen(printgen=gen))
+
+#### Analysis — MC³ with nchains (parallelised with OpenMP Phase 2)
+mymcmcmc = mcmcmc(mymodel, monitors, moves, nchains=nchains, deltaHeat=0.2, moveschedule="single")
+mymcmcmc.run(generations=gen)
+
+print("Done.")
+q()
