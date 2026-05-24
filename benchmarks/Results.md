@@ -1,5 +1,36 @@
 # Benchmark results
 
+## Phase 3 — site-pattern likelihood parallelisation | sriramv | 2026-05-23
+
+### bench-site-likelihoods.Rev — primates_cytb (23 taxa, 1141 sites, gamma+4-rates, 20k gens)
+
+```
+OMP_NUM_THREADS=1   4.87 s   1.00x
+OMP_NUM_THREADS=4   9.29 s   0.52x  ← overhead dominates
+OMP_NUM_THREADS=8  17.18 s   0.28x  ← overhead dominates
+```
+
+**Initial threshold N>64 — regression observed:**
+```
+OMP_NUM_THREADS=1   4.87 s   1.00x
+OMP_NUM_THREADS=4   9.29 s   0.52x  ← fork/join overhead dominates
+OMP_NUM_THREADS=8  17.18 s   0.28x  ← fork/join overhead dominates
+```
+
+**After raising threshold to N>2048 — regression eliminated:**
+```
+OMP_NUM_THREADS=1   4.49 s   1.00x
+OMP_NUM_THREADS=4   4.24 s   1.06x  ✅ no regression
+OMP_NUM_THREADS=8   4.62 s   0.97x  ✅ no regression
+```
+
+**Analysis:** Dataset has ~500 compressed unique patterns < 2048 threshold, so the guard
+correctly falls through to serial. Fork/join cost (~20 µs per spawn) exceeds per-call
+computation at this size. Parallel path activates on large phylogenomic datasets
+(≥2048 unique site patterns, many taxa) where work dominates synchronisation overhead.
+
+
+
 This is an unofficial place to collect results.
 The results are not official.
 

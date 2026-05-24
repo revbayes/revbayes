@@ -37,7 +37,7 @@ cmd="false"
 boost_root=""
 boost_verbose=""
 static_boost="false"
-j=4
+j=15
 
 cmake_args=""
 # parse command line arguments

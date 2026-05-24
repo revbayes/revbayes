@@ -1606,7 +1606,3 @@ ${PROJECT_SOURCE_DIR}/core/distributions/MultiValueEventDistribution.h
 ${PROJECT_SOURCE_DIR}/core/distributions/Distribution.h
 )
 add_library(rb-core ${core_FILES})
-
-# Boost 1.87+ dynamic_bitset operator- accesses protected members; GCC 15 hard-errors on this.
-# Scoped to rb-core only (the only target using boost/dynamic_bitset).
-target_compile_options(rb-core PRIVATE -fno-access-control)

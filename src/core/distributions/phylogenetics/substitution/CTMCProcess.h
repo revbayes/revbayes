@@ -5,6 +5,9 @@
 #include "RateGenerator.h"
 #include "TransitionProbabilityMatrix.h"
 #include "TypedDistribution.h"
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 namespace RevBayesCore {
 
@@ -247,10 +250,13 @@ void RevBayesCore::CTMCProcess<charType>::computeSiteLikelihoods( std::vector< d
     }
     
     // iterate over the number of sites
+#ifdef _OPENMP
+    #pragma omp parallel for schedule(static) if(!omp_in_parallel() && (int)num_patterns > 2048)
+#endif
     for (size_t site_index=0; site_index<num_patterns; ++site_index)
     {
         double site_likelihood = 0;
-        
+
         // iterate over the site matrices
         for (size_t matrix_index=0; matrix_index<num_site_matrices; ++matrix_index)
         {
@@ -363,6 +369,9 @@ void RevBayesCore::CTMCProcess<charType>::computeSiteLikelihoodsPerSiteRateAndMa
             const double* tp_begin = this->transition_prob_matrices[matrix_index][rate_index].theMatrix;
 
             // iterate over the number of sites
+#ifdef _OPENMP
+            #pragma omp parallel for schedule(static) if(!omp_in_parallel() && (int)num_patterns > 2048)
+#endif
             for (size_t site_index=0; site_index<num_patterns; ++site_index)
             {
                 

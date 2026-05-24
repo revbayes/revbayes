@@ -21,6 +21,9 @@
 
 #include <memory>
 #include <new>
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 namespace RevBayesCore {
 
@@ -3579,6 +3582,9 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeRootLikeli
         const double*   p_mixture = p_node + mixture * this->mixtureOffset;
 
         // iterate over all sites
+#ifdef _OPENMP
+        #pragma omp parallel for schedule(static) if(!omp_in_parallel() && (int)pattern_block_size > 2048)
+#endif
         for (size_t site = 0; site < pattern_block_size; ++site)
         {
             // temporary variable storing the likelihood

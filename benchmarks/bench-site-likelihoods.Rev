@@ -1,0 +1,82 @@
+################################################################################
+#
+# RevBayes benchmark: parallel site-pattern likelihoods (Phase 3 OpenMP target)
+#
+# Usage:
+#   time rb bench-site-likelihoods.Rev <data.nex> <alphabet> <ngens>
+#
+# Example:
+#   OMP_NUM_THREADS=1 time rb bench-site-likelihoods.Rev \
+#       ../tests/data/primates_and_galeopterus_cytb.nex DNA 5000
+#
+# Measures wall time for <ngens> MCMC generations with a single chain.
+# The site-likelihood computation (computeRootLikelihoods / computeSiteLikelihoods)
+# is parallelised across site patterns when OMP_NUM_THREADS > 1.
+#
+# Run at OMP_NUM_THREADS=1 vs N to measure speedup from Phase 3.
+#
+################################################################################
+
+filename  = args[1]
+alphabet  = args[2]
+gen       = int(args[3])
+
+print("bench-site-likelihoods: " + filename + "  " + alphabet + "  gen=" + gen)
+
+#### Read data
+data <- readDiscreteCharacterData(filename)
+
+taxa   <- data.taxa()
+ntaxa  <- taxa.size()
+nsites <- data.nchar()
+
+print("ntaxa=" + ntaxa + "  nsites=" + nsites)
+
+#### Substitution model with site-rate variation (stresses per-site computation)
+if (alphabet == "DNA" || alphabet == "RNA") {
+    Q := fnJC(4)
+} else if (alphabet == "AA") {
+    pi ~ dnDirichlet(rep(20, 20))
+    moves.append(mvBetaSimplex(pi, weight=4))
+    Q := fnLG(pi)
+} else {
+    print("Error: unrecognised alphabet '" + alphabet + "'")
+    q()
+}
+
+# Gamma site-rate variation: 4 categories
+# This forces computeSiteLikelihoodsPerSiteRateAndMatrix across 4 rate x 1 matrix combos
+alpha ~ dnExponential(1.0)
+moves = VectorMoves()
+moves.append(mvScale(alpha, weight=1.0))
+site_rates := fnDiscretizeGamma(alpha, alpha, 4)
+
+#### Tree model
+num_branches = 2 * ntaxa - 3
+for (i in 1:num_branches) {
+    bl[i] ~ dnExponential(1.0)
+    moves.append(mvScale(bl[i], weight=0.1))
+}
+
+topology ~ dnUniformTopology(taxa=taxa)
+moves.append(mvNNI(topology, weight=1.0))
+moves.append(mvSPR(topology, weight=3.0))
+
+psi := fnTreeAssembly(topology, bl)
+
+#### PhyloCTMC with site rates
+seq ~ dnPhyloCTMC(tree=psi, Q=Q, siteRates=site_rates, type=alphabet)
+seq.clamp(data)
+
+#### Model & monitors — single chain (nruns=1), no file I/O
+mymodel = model(seq)
+
+monitors = VectorMonitors()
+monitors.append(mnScreen(printgen=gen))
+
+#### Single-chain MCMC — only within-chain site computation is parallelised (Phase 3)
+mymcmc = mcmc(mymodel, monitors, moves, nruns=1, moveschedule="single")
+mymcmc.run(generations=gen)
+
+print("Done.")
+q()
