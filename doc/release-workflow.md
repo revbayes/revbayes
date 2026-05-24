@@ -13,7 +13,12 @@ Neither the [master](https://github.com/revbayes/revbayes/tree/master) branch no
     3. Update the version number
         * modify `meson.build`
         * modify `src/revlanguage/utils/RbVersion.cpp`
-        * modify `flake.nix`
+        * modify `flake.nix` — update `version = "X.Y.Z"` in the `mkRevBayes` derivation
+          (applies to both `packages.default` and `packages.revbayes-omp`; no other changes needed)
+          Verify both outputs evaluate cleanly:
+          ```
+          nix --extra-experimental-features "nix-command flakes" flake check
+          ```
     4. Update `NEWS.md` file
     5. Make sure the release workflow (`release.yml`) is in sync with the build workflow (`build.yml`)
 

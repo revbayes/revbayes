@@ -10,50 +10,61 @@
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
-      in {
-        packages.default = pkgs.stdenv.mkDerivation {
-          pname = "revbayes";
-          version = "1.4.0";
 
-          src = ./.;
+        mkRevBayes = { withOpenMP ? false }:
+          pkgs.stdenv.mkDerivation {
+            pname = if withOpenMP then "revbayes-omp" else "revbayes";
+            version = "1.4.0";
 
-          nativeBuildInputs = with pkgs; [ cmake ninja ];
-          buildInputs = with pkgs; [ boost zlib ];
+            src = ./.;
 
-          # CMakeLists.txt lives in src/, not the repo root
-          cmakeDir = "../src";
+            nativeBuildInputs = with pkgs; [ cmake ninja ];
+            buildInputs = with pkgs; [ boost zlib ]
+              ++ pkgs.lib.optionals withOpenMP [ pkgs.llvmPackages.openmp ];
 
-          preConfigure = ''
-            # Generate GitVersion.cpp — git is not available in the Nix sandbox
-            {
-              echo '#include "GitVersion.h"'
-              echo 'const char *build_git_sha = "1.4.0";'
-              echo 'const char *build_date = "unknown";'
-              echo 'const char *build_git_branch = "unknown";'
-            } > src/revlanguage/utils/GitVersion.cpp
+            cmakeDir = "../src";
+            cmakeFlags = pkgs.lib.optionals withOpenMP [ "-DOPENMP=ON" ];
 
-            # Generate generated_include_dirs.cmake and per-subdir CMakeLists.txt
-            # (normally done by build.sh before invoking cmake)
-            (cd projects/cmake && bash regenerate.sh)
-          '';
+            preConfigure = ''
+              # Generate GitVersion.cpp — git is not available in the Nix sandbox
+              {
+                echo '#include "GitVersion.h"'
+                echo 'const char *build_git_sha = "1.4.0";'
+                echo 'const char *build_date = "unknown";'
+                echo 'const char *build_git_branch = "unknown";'
+              } > src/revlanguage/utils/GitVersion.cpp
 
-          # CMake reads these when BOOST_INCLUDEDIR/BOOST_LIBRARYDIR are present
-          BOOST_INCLUDEDIR = "${pkgs.lib.getDev pkgs.boost}/include";
-          BOOST_LIBRARYDIR = "${pkgs.lib.getLib pkgs.boost}/lib";
+              # Generate generated_include_dirs.cmake and per-subdir CMakeLists.txt
+              # (normally done by build.sh before invoking cmake)
+              (cd projects/cmake && bash regenerate.sh)
+            '';
 
-          meta = with pkgs.lib; {
-            description = "Bayesian phylogenetic inference using probabilistic graphical models";
-            homepage = "https://revbayes.com";
-            license = licenses.gpl2Only;
-            mainProgram = "rb";
-            platforms = platforms.unix;
+            BOOST_INCLUDEDIR = "${pkgs.lib.getDev pkgs.boost}/include";
+            BOOST_LIBRARYDIR = "${pkgs.lib.getLib pkgs.boost}/lib";
+
+            meta = with pkgs.lib; {
+              description = "Bayesian phylogenetic inference using probabilistic graphical models";
+              homepage = "https://revbayes.com";
+              license = licenses.gpl2Only;
+              mainProgram = "rb";
+              platforms = platforms.unix;
+            };
           };
-        };
+
+      in {
+        packages.default     = mkRevBayes {};
+        packages.revbayes-omp = mkRevBayes { withOpenMP = true; };
 
         devShells.default = pkgs.mkShell {
           nativeBuildInputs = with pkgs; [ cmake ninja ];
           buildInputs = with pkgs; [ boost zlib ];
+          BOOST_INCLUDEDIR = "${pkgs.lib.getDev pkgs.boost}/include";
+          BOOST_LIBRARYDIR = "${pkgs.lib.getLib pkgs.boost}/lib";
+        };
 
+        devShells.omp = pkgs.mkShell {
+          nativeBuildInputs = with pkgs; [ cmake ninja ];
+          buildInputs = with pkgs; [ boost zlib pkgs.llvmPackages.openmp ];
           BOOST_INCLUDEDIR = "${pkgs.lib.getDev pkgs.boost}/include";
           BOOST_LIBRARYDIR = "${pkgs.lib.getLib pkgs.boost}/lib";
         };
