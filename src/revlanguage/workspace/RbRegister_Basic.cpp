@@ -340,6 +340,7 @@ void RevLanguage::Workspace::initializeBasicGlobalWorkspace(void)
         addFunction( new Func_replicate<Integer>()          );
         addFunction( new Func_replicate<Real>()             );
         addFunction( new Func_replicate<Natural>()          );
+        addFunction( new Func_replicate<Probability>()      );
         addFunction( new Func_replicate<RealPos>()          );
         addFunction( new Func_replicate<RlString>()         );
         addFunction( new Func_replicate<RlBoolean>()        );
