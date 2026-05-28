@@ -297,8 +297,12 @@ d <- ln([1,2.5])		# logarithmic function of a vector with natural base
 print(filename = "output/Test_basic.txt", append = TRUE, d)
 print(filename = "output/Test_basic.txt", append = TRUE, "\n")
 
-e <- log(1, 10)			# logarithmic function with base 10
-print(filename = "output/Test_basic.txt", append = TRUE, e)
+e1 <- log(1)			# logarithmic function with default base 10
+print(filename = "output/Test_basic.txt", append = TRUE, e1)
+print(filename = "output/Test_basic.txt", append = TRUE, "\n")
+
+e2 <- log(1, 10)			# logarithmic function with base 10 specified
+print(filename = "output/Test_basic.txt", append = TRUE, e2)
 print(filename = "output/Test_basic.txt", append = TRUE, "\n")
 
 f <- log([1,2.5], 10)	# logarithmic function of a vector with base 10

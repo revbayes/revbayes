@@ -74,7 +74,7 @@ const ArgumentRules& Func_logVector::getArgumentRules( void ) const
     {
 
         argumentRules.push_back( new ArgumentRule( "x", ModelVector<RealPos>::getClassTypeSpec(), "A vector of numbers.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "base", RealPos::getClassTypeSpec(), "The base of the logarithm.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "base", RealPos::getClassTypeSpec(), "The base of the logarithm.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(10.0) ) );
 
         rules_set = true;
     }
