@@ -266,11 +266,17 @@ double FossilizedBirthDeathRangeProcess::computeLnProbabilityBDS()
                         Psi[i] += log(RbMath::incompleteGamma(psi_y_o, count, true, true));
                     }
                 }
-                // only one fossil age
+                // only one fossil age (degenerate range, first == last). The
+                // incomplete-sampling kappa term vanishes (zero-width observed
+                // range), so this is the complete first-last form: include the
+                // instantaneous sampling density, the count factorial, and the
+                // Poisson normalization over the lineage range.
                 else
                 {
-                    // include instantaneous sampling density
-                    Psi[i] = ages.begin()->second * log(fossil[findIndex(min_age)]);
+                    double count = ages.begin()->second;
+                    Psi[i]  = count * log(fossil[findIndex(min_age)]);
+                    Psi[i] -= RbMath::lnFactorial(count);
+                    Psi[i] -= psi_b_d;
                 }
             }
 
