@@ -94,6 +94,9 @@ double FossilizedBirthDeathRangeProcess::computeLnProbability( void )
     // prepare the probability computation
     if ( bds == true )
     {
+        // BDS (Silvestro et al. 2019) treats lineages as independent: no coexistence
+        // (gamma) factor. gamma_i is not refreshed here either, so adding one would
+        // inject a stale, seed-dependent term.
         lnProb = computeLnProbabilityBDS();
     }
     else
@@ -101,12 +104,12 @@ double FossilizedBirthDeathRangeProcess::computeLnProbability( void )
         updateGamma();
 
         lnProb = computeLnProbabilityRanges();
-    }
 
-    for( size_t i = 0; i < taxa.size(); i++ )
-    {
-        // multiply by the number of possible birth locations
-        lnProb += log( gamma_i[i] == 0 ? 1 : gamma_i[i] );
+        for( size_t i = 0; i < taxa.size(); i++ )
+        {
+            // multiply by the number of possible birth locations
+            lnProb += log( gamma_i[i] == 0 ? 1 : gamma_i[i] );
+        }
     }
 
     return lnProb;
