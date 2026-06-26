@@ -6,6 +6,7 @@
 #include <ostream>
 #include <vector>
 
+
 #include "DagNode.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
@@ -357,11 +358,36 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
                     }
                     else
                     {
-                        // compute poisson density for count + kappa, kappa >= 0
-                        Psi[i] -= log(count);
-                        Psi[i] += psi_y_o;
-                        Psi[i] -= (count-1)*log(psi_y_o);
-                        Psi[i] += count > 1 ? log(RbMath::incompleteGamma(psi_y_o, count-1, true, true)) : 0.0;
+                        // compute poisson density for count + kappa, kappa >= 0.
+                        // The exact marginal over the unknown number kappa of
+                        // unobserved specimens is Term1 (oldest occurrence labeled)
+                        // + Term2 (oldest occurrence unlabeled). Conditional on the
+                        // oldest age the two share the same series:
+                        //   S1 = sum_{k>=0} psi_y_o^k / (count+k-1)!   (Term1 factor = S1/count!)
+                        //   S2 = sum_{k>=1} psi_y_o^(k-1) / (k (count+k-1)!)
+                        //   Term2/Term1 = count * S2 / (S1 * recip)
+                        // Both are summed directly (running term f normalized by
+                        // (count-1)!, which cancels in the S2/S1 ratio): machine
+                        // precision and overflow-free for all counts. The closed
+                        // forms (incomplete gamma for S1, exponential integral for
+                        // S2) compute the same quantities but suffer catastrophic
+                        // cancellation and factorial overflow for large counts, so
+                        // they are not used.
+                        double S1 = 0.0, S2 = 0.0, f = 1.0;
+                        for ( size_t kap = 0; kap < 200; kap++ )
+                        {
+                            S1 += f;
+                            if ( kap >= 1 && psi_y_o > 0.0 ) S2 += f / (psi_y_o * kap);
+                            f *= psi_y_o / double(count + kap);
+                            if ( f < 1e-16 * S1 ) break;
+                        }
+                        // Term1 (oldest occurrence labeled)
+                        Psi[i] += log(S1) - RbMath::lnFactorial(count);
+                        // Term2 (oldest occurrence unlabeled)
+                        if ( psi_y_o > 0.0 && recip > 0.0 )
+                        {
+                            Psi[i] += log( 1.0 + count * S2 / (S1 * recip) );
+                        }
                     }
                 }
                 // only one fossil age
