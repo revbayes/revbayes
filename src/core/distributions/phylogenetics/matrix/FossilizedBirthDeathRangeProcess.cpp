@@ -439,7 +439,7 @@ void FossilizedBirthDeathRangeProcess::touchSpecialization(const DagNode *touche
 
             for ( std::set<size_t>::iterator it = touched_indices.begin(); it != touched_indices.end(); it++)
             {
-                size_t i = (*it) / taxa.size();
+                size_t i = (*it) / 2; // (birth,death) matrix is N x 2, row-major: linear index / 2 = taxon
 
                 dirty_gamma[i] = true;
                 dirty_psi[i]   = true;
