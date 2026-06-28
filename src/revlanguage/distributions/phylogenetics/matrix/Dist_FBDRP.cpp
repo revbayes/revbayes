@@ -111,7 +111,14 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRP::createDistribution( 
     bool use_bds = static_cast<const RlBoolean &>( bds->getRevObject() ).getValue();
     bool re = static_cast<const RlBoolean &>( resample->getRevObject() ).getValue();
 
-    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, c, re, use_bds);
+    // optional origin time of the process
+    RevBayesCore::TypedDagNode<double>* og = NULL;
+    if ( origin->getRevObject() != RevNullObject::getInstance() )
+    {
+        og = static_cast<const RealPos &>( origin->getRevObject() ).getDagNode();
+    }
+
+    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, c, re, use_bds, og);
     
     return d;
 }
@@ -197,6 +204,8 @@ const MemberRules& Dist_FBDRP::getParameterRules(void) const
     {
         dist_member_rules.push_back( new ArgumentRule( "BDS", RlBoolean::getClassTypeSpec(), "Assume complete lineage sampling? (BDS model of Silvestro et al. 2019)", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false ) ) );
 
+        dist_member_rules.push_back( new ArgumentRule( "origin", RealPos::getClassTypeSpec(), "The origin time of the process (defaults to the oldest sampled birth).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+
         // add the rules from the base class
         const MemberRules &parentRules = FossilizedBirthDeathRangeProcess<MatrixReal>::getParameterRules();
         dist_member_rules.insert(dist_member_rules.end(), parentRules.begin(), parentRules.end());
@@ -238,6 +247,10 @@ void Dist_FBDRP::setConstParameter(const std::string& name, const RevPtr<const R
     if ( name == "BDS" )
     {
         bds = var;
+    }
+    else if ( name == "origin" )
+    {
+        origin = var;
     }
     else
     {

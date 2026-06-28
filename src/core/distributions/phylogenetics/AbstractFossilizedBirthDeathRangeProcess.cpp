@@ -45,11 +45,13 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
                                                                          const std::string &incondition,
                                                                          const std::vector<Taxon> &intaxa,
                                                                          bool c,
-                                                                         bool re) :
+                                                                         bool re,
+                                                                         const TypedDagNode<double> *inorigin) :
     taxa(intaxa),
     condition(incondition),
     homogeneous_rho(inrho),
     timeline( intimes ),
+    origin_age( inorigin ),
     origin(0.0),
     complete(c),
     resampled(false),
@@ -74,6 +76,7 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
 
     // add the parameters to the model
     range_parameters.push_back( timeline );
+    range_parameters.push_back( origin_age );
     range_parameters.push_back( homogeneous_rho );
     range_parameters.push_back( homogeneous_lambda );
     range_parameters.push_back( heterogeneous_lambda );
@@ -203,8 +206,20 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
 {
     // prepare the probability computation
     prepareProbComputation();
-    
+
     updateStartEndTimes();
+
+    // a supplied origin must be at least as old as every sampled birth
+    if ( origin_age != NULL )
+    {
+        for (size_t i = 0; i < taxa.size(); ++i)
+        {
+            if ( origin < b_i[i] )
+            {
+                return RbConstants::Double::neginf;
+            }
+        }
+    }
 
     // variable declarations and initialization
     double lnProb = 0.0;
@@ -425,8 +440,29 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
 
     size_t ori = findIndex(origin);
 
-    // the origin is not a speciation event
-    lnProb -= log( birth[ori] );
+    // when the origin is not supplied, the oldest sampled birth is the process
+    // origin and is not a speciation event
+    if ( origin_age == NULL )
+    {
+        lnProb -= log( birth[ori] );
+    }
+    else
+    {
+        double max_birth = 0.0;
+        for (size_t i = 0; i < taxa.size(); ++i)
+        {
+            max_birth = std::max(max_birth, b_i[i]);
+        }
+
+        size_t mbi = findIndex(max_birth);
+
+        lnProb += q(ori, origin) - q(mbi, max_birth);
+
+        for (size_t j = mbi; j < ori; ++j)
+        {
+            lnProb += q_i[j];
+        }
+    }
 
     // add the sampled extant tip age term
     if ( homogeneous_rho->getValue() > 0.0)
@@ -735,5 +771,9 @@ void AbstractFossilizedBirthDeathRangeProcess::swapParameterInternal(const DagNo
     else if (oldP == timeline)
     {
         timeline = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+    }
+    else if (oldP == origin_age)
+    {
+        origin_age = static_cast<const TypedDagNode<double>* >( newP );
     }
 }

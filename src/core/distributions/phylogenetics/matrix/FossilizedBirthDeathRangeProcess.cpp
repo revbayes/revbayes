@@ -51,9 +51,10 @@ FossilizedBirthDeathRangeProcess::FossilizedBirthDeathRangeProcess(const DagNode
                                                                      const std::vector<Taxon> &intaxa,
                                                                      bool complete,
                                                                      bool resample,
-                                                                     bool use_bds) :
+                                                                     bool use_bds,
+                                                                     const TypedDagNode<double> *inorigin) :
     TypedDistribution<MatrixReal>(new MatrixReal(intaxa.size(), 2)),
-    AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, complete, resample),
+    AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, complete, resample, inorigin),
     bds(use_bds)
 {
     dirty_gamma = std::vector<bool>(taxa.size(), true);
@@ -354,14 +355,23 @@ void FossilizedBirthDeathRangeProcess::updateGamma(bool force)
  */
 void FossilizedBirthDeathRangeProcess::updateStartEndTimes( void )
 {
-    origin = 0;
+    double max_birth = 0;
 
     for (size_t i = 0; i < taxa.size(); i++)
     {
         b_i[i] = (*this->value)[i][0];
         d_i[i] = (*this->value)[i][1];
 
-        origin = std::max(origin, b_i[i]);
+        max_birth = std::max(max_birth, b_i[i]);
+    }
+
+    if ( origin_age != NULL )
+    {
+        origin = origin_age->getValue();
+    }
+    else
+    {
+        origin = max_birth;
     }
 }
 
