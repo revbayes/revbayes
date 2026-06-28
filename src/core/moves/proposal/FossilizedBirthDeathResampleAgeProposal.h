@@ -144,7 +144,7 @@ double RevBayesCore::FossilizedBirthDeathResampleAgeProposal<valType>::doProposa
 
     size_t i = rng->uniform01() * dist->getAges().size();
 
-    dist->resampleAge(i);
+    dist->resampleFirstLast(i);
 
     variable->addTouchedElementIndex(i);
 

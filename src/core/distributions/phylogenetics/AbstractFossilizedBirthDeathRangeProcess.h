@@ -47,7 +47,7 @@ namespace RevBayesCore {
         virtual ~AbstractFossilizedBirthDeathRangeProcess(){};
 
         std::vector<double>&                            getAges();
-        void                                            resampleAge(size_t i);
+        void                                            resampleFirstLast(size_t i);
 
     protected:
         virtual void                                    updateStartEndTimes() = 0;
@@ -105,8 +105,10 @@ namespace RevBayesCore {
         std::vector<double>                             Psi;                                                    //!< Fossil sampling terms computed for each taxon
         std::vector<double>                             stored_Psi;                                             //!< Stored fossil sampling terms
                                 
-        std::vector<double>                             age;                                                    //!< Age of the oldest occurence for each taxon
-        std::vector<double>                             stored_age;                                             //!< Stored age of the oldest occurence for each taxon
+        std::vector<double>                             first;                                                  //!< Age of the oldest occurence for each taxon
+        std::vector<double>                             stored_first;                                           //!< Stored age of the oldest occurence for each taxon
+        std::vector<double>                             last;                                                   //!< Augmented age of the youngest occurrence for each taxon (first/last conditioning)
+        std::vector<double>                             stored_last;                                            //!< Stored augmented age of the youngest occurrence for each taxon
                                 
         std::vector<double>                             partial_likelihood;                                     //!< Partial likelihood for each taxon
         std::vector<double>                             stored_likelihood;                                      //!< Stored partial likelihood for each taxon

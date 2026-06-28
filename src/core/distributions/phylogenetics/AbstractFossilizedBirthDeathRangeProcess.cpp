@@ -161,7 +161,8 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
 
     partial_likelihood = std::vector<double>(taxa.size(), 0.0);
 
-    age         = std::vector<double>(taxa.size(), 0.0);
+    first         = std::vector<double>(taxa.size(), 0.0);
+    last   = std::vector<double>(taxa.size(), 0.0);
     Psi         = std::vector<double>(taxa.size(), 0.0 );
 
     dirty_taxa  = std::vector<bool>(taxa.size(), true);
@@ -181,13 +182,16 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
 
             max_present = std::min(max_present, y_i[i]);
         }
+        // default the augmented youngest age to the youngest maximum (only resampled,
+        // and only used, under first/last conditioning)
+        last[i] = y_i[i];
     }
 
     prepareProbComputation();
 
     if ( times.front() > max_present )
     {
-        throw(RbException("Timeline start time is older than youngest fossil age."));
+        throw(RbException("Timeline start time is older than youngest fossil first."));
     }
 }
 
@@ -214,7 +218,7 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
         double b = b_i[i];
         double d = d_i[i];
 
-        double o = age[i];
+        double o = first[i];
 
         double max_age = taxa[i].getMaxAge();
         double min_age = taxa[i].getMinAge();
@@ -286,7 +290,10 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
                 // if there is a range of fossil ages
                 if ( min_age != max_age )
                 {
-                    double psi_y_o = 0.0;
+                    double psi_int = 0.0;                            // interior sampling rate over (last, first)
+
+                    double y  = last[i];                             // youngest augmented age
+                    size_t yi = findIndex(y);
 
                     std::vector<double> psi(ages.size(), 0.0);
                     
@@ -303,9 +310,9 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
                             break;
                         }
 
-                        // increase incomplete sampling psi
-                        double dt = std::min(o, t_0) - std::max(std::max(min_age, d), times[j]);
-                        psi_y_o += fossil[j]*dt;
+                        // the kappa interior spans (last, first) only
+                        double dti = std::min(o, t_0) - std::max(y, times[j]);
+                        if ( dti > 0.0 ) psi_int += fossil[j]*dti;
 
                         size_t k = 0;
                         // increase running psi total for each observation
@@ -318,6 +325,8 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
                                 // only compute dt if this is a non-singleton
                                 if ( Fi->first.getMin() != Fi->first.getMax() )
                                 {
+                                    // observed occurrence sampling rate over its interval (below the oldest);
+                                    // the youngest only enters via the interior rate psi_int, not here
                                     dt = std::min(std::min(Fi->first.getMax(), o), t_0) - std::max(std::max(Fi->first.getMin(), d), times[j]);
                                 }
 
@@ -326,11 +335,15 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
                         }
                     }
 
-                    // include instantaneous sampling density
+                    // include instantaneous sampling density (oldest; the youngest is added
+                    // inside the count >= 2 branch below, so a single-occurrence taxon - which
+                    // skips that branch - never double-counts an instantaneous density)
                     Psi[i] = log(fossil[oi]);
 
                     int count = 0;
                     double recip = 0.0;
+                    double recip_young = 0.0;
+                    double diag = 0.0;
 
                     size_t k = 0;
                     // compute factors of the sum over each possible oldest/youngest observation
@@ -338,17 +351,32 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
                     {
                         count += Fi->second;
 
+                        bool eligible_oldest = ( Fi->first.getMax() >= o );
+                        bool eligible_youngest = ( Fi->first.getMin() <= y );
+
                         // compute sum of reciprocal oldest ranges
-                        if ( Fi->first.getMax() >= o )
+                        if ( eligible_oldest )
                         {
                             recip += Fi->second / psi[k];
+                        }
+
+                        // compute sum of reciprocal youngest ranges
+                        if ( eligible_youngest )
+                        {
+                            recip_young += Fi->second / psi[k];
+                        }
+
+                        // intervals that could supply both extremes contribute the diagonal term
+                        if ( eligible_oldest && eligible_youngest )
+                        {
+                            diag += Fi->second / (psi[k]*psi[k]);
                         }
 
                         // compute product of ranges
                         Psi[i] += log(psi[k]) * Fi->second;
                     }
 
-                    // sum over each possible oldest/youngest observation
+                    // sum over each possible oldest observation
                     Psi[i] += log(recip);
 
                     if ( complete == true )
@@ -356,39 +384,30 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
                         // compute poisson density for count
                         Psi[i] -= RbMath::lnFactorial(count);
                     }
-                    else
+                    else if ( count >= 2 )
                     {
-                        // compute poisson density for count + kappa, kappa >= 0.
-                        // The exact marginal over the unknown number kappa of
-                        // unobserved specimens is Term1 (oldest occurrence labeled)
-                        // + Term2 (oldest occurrence unlabeled). Conditional on the
-                        // oldest age the two share the same series:
-                        //   S1 = sum_{k>=0} psi_y_o^k / (count+k-1)!   (Term1 factor = S1/count!)
-                        //   S2 = sum_{k>=1} psi_y_o^(k-1) / (k (count+k-1)!)
-                        //   Term2/Term1 = count * S2 / (S1 * recip)
-                        // Both are summed directly (running term f normalized by
-                        // (count-1)!, which cancels in the S2/S1 ratio): machine
-                        // precision and overflow-free for all counts. The closed
-                        // forms (incomplete gamma for S1, exponential integral for
-                        // S2) compute the same quantities but suffer catastrophic
-                        // cancellation and factorial overflow for large counts, so
-                        // they are not used.
-                        double S1 = 0.0, S2 = 0.0, f = 1.0;
+                        // Condition on the oldest and youngest occurrences: sum over which
+                        // observation is the youngest (recip_young) and marginalize the
+                        // kappa >= 0 unobserved interior specimens in (last, first). Inside
+                        // the count >= 2 branch, so single-occurrence taxa ignore 'last'.
+                        if ( !( o >= last[i] && last[i] >= d && last[i] <= y_i[i] && last[i] >= min_age ) )
+                        {
+                            return RbConstants::Double::neginf;
+                        }
+                        // youngest instantaneous density + sum over which observation is the youngest,
+                        // excluding the diagonal where a single occurrence supplies both extremes
+                        Psi[i] += log(fossil[yi]) + log(recip_young - diag/recip);
+
+                        double S1 = 0.0, f = 1.0;
                         for ( size_t kap = 0; kap < 200; kap++ )
                         {
                             S1 += f;
-                            if ( kap >= 1 && psi_y_o > 0.0 ) S2 += f / (psi_y_o * kap);
-                            f *= psi_y_o / double(count + kap);
+                            f *= psi_int / double(count - 1 + kap);
                             if ( f < 1e-16 * S1 ) break;
                         }
-                        // Term1 (oldest occurrence labeled)
                         Psi[i] += log(S1) - RbMath::lnFactorial(count);
-                        // Term2 (oldest occurrence unlabeled)
-                        if ( psi_y_o > 0.0 && recip > 0.0 )
-                        {
-                            Psi[i] += log( 1.0 + count * S2 / (S1 * recip) );
-                        }
                     }
+                    // count == 1 (single occurrence, first == last): no interior term
                 }
                 // only one fossil age
                 else
@@ -517,7 +536,7 @@ double AbstractFossilizedBirthDeathRangeProcess::q( size_t i, double t, bool til
  */
 std::vector<double>& AbstractFossilizedBirthDeathRangeProcess::getAges(void)
 {
-    return age;
+    return first;
 }
 
 
@@ -525,12 +544,18 @@ std::vector<double>& AbstractFossilizedBirthDeathRangeProcess::getAges(void)
  *
  *
  */
-void AbstractFossilizedBirthDeathRangeProcess::resampleAge(size_t i)
+void AbstractFossilizedBirthDeathRangeProcess::resampleFirstLast(size_t i)
 {
-    stored_age = age;
+    stored_first = first;
+    stored_last = last;
     resampled = true;
 
-    age[i] = GLOBAL_RNG->uniform01()*(taxa[i].getMaxAge() - o_i[i]) + o_i[i];
+    first[i] = GLOBAL_RNG->uniform01()*(taxa[i].getMaxAge() - o_i[i]) + o_i[i];
+
+    // also augment the youngest occurrence age (single-occurrence taxa skip the
+    // count >= 2 likelihood branch, so 'last' is inert there and the value drawn
+    // here is simply unused)
+    last[i] = GLOBAL_RNG->uniform01()*(y_i[i] - taxa[i].getMinAge()) + taxa[i].getMinAge();
 }
 
 
@@ -551,7 +576,8 @@ void AbstractFossilizedBirthDeathRangeProcess::restoreSpecialization(const DagNo
 
     if ( resampled )
     {
-        age = stored_age;
+        first = stored_first;
+        last = stored_last;
     }
 
     dirty_psi  = std::vector<bool>(taxa.size(), false);

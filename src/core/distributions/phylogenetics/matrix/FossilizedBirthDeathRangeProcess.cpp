@@ -379,7 +379,7 @@ void FossilizedBirthDeathRangeProcess::redrawValue(void)
     RandomNumberGenerator* rng = GLOBAL_RNG;
     
     double max = 0;
-    // get the max first occurence
+    // get the max age
     for (size_t i = 0; i < taxa.size(); i++)
     {
         double o = taxa[i].getMaxAge();
@@ -399,12 +399,13 @@ void FossilizedBirthDeathRangeProcess::redrawValue(void)
     for (size_t i = 0; i < taxa.size(); i++)
     {
         // resample oldest occurrence
-        resampleAge(i);
+        resampleFirstLast(i);
 
         // death time is younger than oldest occurrence and youngest maximum
-        double d = taxa[i].isExtinct() ? rng->uniform01()*(std::min(y_i[i], age[i]) - present) + present : present;
+        // (the youngest augmented age bounds the death time)
+        double d = taxa[i].isExtinct() ? rng->uniform01()*(std::min(last[i], first[i]) - present) + present : present;
         // birth time is older than oldest occurrence
-        double b = age[i] + rng->uniform01()*(max - age[i]) + age[i];
+        double b = first[i] + rng->uniform01()*(max - first[i]);
 
         // set values
         (*this->value)[i][0] = b;
@@ -447,7 +448,7 @@ void FossilizedBirthDeathRangeProcess::touchSpecialization(const DagNode *touche
 
                 if ( resampling == true && resampled == false )
                 {
-                    resampleAge(i);
+                    resampleFirstLast(i);
                 }
             }
 

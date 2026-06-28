@@ -172,7 +172,7 @@ double FossilizedBirthDeathSpeciationProcess::getMaxTaxonAge( const TopologyNode
 {
     if( node.isTip() )
     {
-        return age[node.getIndex()];
+        return first[node.getIndex()];
     }
     else
     {
@@ -303,7 +303,7 @@ void FossilizedBirthDeathSpeciationProcess::simulateClade(std::vector<TopologyNo
             size_t j = find(taxa.begin(), taxa.end(), n[i]->getTaxon()) - taxa.begin();
 
             double minmax = std::max(o_i[i], n[i]->getAge());
-            this->age[j] = GLOBAL_RNG->uniform01()*(std::min(max_age, taxa[i].getMaxAge()) - minmax) + minmax;
+            this->first[j] = GLOBAL_RNG->uniform01()*(std::min(max_age, taxa[i].getMaxAge()) - minmax) + minmax;
         }
 
         double first_occurrence = getMaxTaxonAge( *n[i] );
@@ -595,7 +595,7 @@ int FossilizedBirthDeathSpeciationProcess::updateStartEndTimes( const TopologyNo
                 // resample augmented age
                 if ( resampling == true && resampled == false )
                 {
-                    resampleAge(i);
+                    resampleFirstLast(i);
                 }
             }
         }
@@ -614,7 +614,7 @@ int FossilizedBirthDeathSpeciationProcess::updateStartEndTimes( const TopologyNo
                 // resample augmented age
                 if ( resampling == true && resampled == false )
                 {
-                    resampleAge(i);
+                    resampleFirstLast(i);
                 }
             }
 
@@ -641,7 +641,7 @@ int FossilizedBirthDeathSpeciationProcess::updateStartEndTimes( const TopologyNo
                     // resample augmented age
                     if ( resampling == true && resampled == false )
                     {
-                        resampleAge(i);
+                        resampleFirstLast(i);
                     }
                 }
             }
