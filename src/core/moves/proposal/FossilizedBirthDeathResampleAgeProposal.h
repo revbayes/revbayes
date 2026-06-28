@@ -146,7 +146,13 @@ double RevBayesCore::FossilizedBirthDeathResampleAgeProposal<valType>::doProposa
 
     dist->resampleFirstLast(i);
 
-    variable->addTouchedElementIndex(i);
+    // Mark taxon i dirty. Both valType touchSpecializations decode touched
+    // element indices as N x 2 linear (birth,death) and recover the taxon as
+    // (*it)/2: see FossilizedBirthDeathRangeProcess (matrix) and
+    // FossilizedBirthDeathSpeciationProcess (tree). So taxon i is encoded 2*i;
+    // passing plain i would mark the wrong taxon (i/2) and reweight against the
+    // prior instead of the likelihood.
+    variable->addTouchedElementIndex(2 * i);
 
     return 0.0;
 
