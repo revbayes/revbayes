@@ -28,6 +28,7 @@ namespace RevBayesCore {
         FossilizedBirthDeathResampleAgeProposal( StochasticNode<valType> *n);                                               //!<  constructor
         
         // Basic utility functions
+        bool                                     		  allowClamped() const override { return true; }              //!< Resamples the internally augmented oldest/youngest occurrence ages, not the clamped birth/death matrix, so it is valid on a clamped node. See #600.
         void                                     		  cleanProposal(void);                                        //!< Clean up proposal
         FossilizedBirthDeathResampleAgeProposal<valType>* clone(void) const;                                          //!< Clone object
         double                                   		  doProposal(void);                                           //!< Perform proposal
