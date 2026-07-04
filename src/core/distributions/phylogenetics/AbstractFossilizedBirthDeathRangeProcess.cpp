@@ -375,7 +375,9 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
                         double bracket = Pk*recip_old + Pk - (double(count)/Lambda)*Pk1;
                         if ( bracket <= 0.0 ) return RbConstants::Double::neginf;
 
-                        Psi[i] += RbMath::lnFactorial(count) - count*log(Lambda) + log(bracket);
+                        // +Lambda: the q_tilde terms already carry e^{-Lambda}, which the
+                        // tails re-introduce.
+                        Psi[i] += RbMath::lnFactorial(count) - count*log(Lambda) + log(bracket) + Lambda;
                     }
                 }
 
