@@ -424,6 +424,26 @@ void FossilizedBirthDeathRangeProcess::updateStartEndTimes( void )
         max_birth = std::max(max_birth, b_i[i]);
     }
 
+    // Initialization guard for the augmented oldest age. first[i] is drawn at
+    // construction, before the clamped death is known, and is not re-drawn if the
+    // initial state is invalid -- so on a clamped matrix it can be stuck below the
+    // death time d_i (giving lnProb = -inf and an unstartable chain, esp. when the
+    // reported occurrences straddle d). Re-seed any first[i] that sits below the
+    // valid floor max(o_i, d_i) into the middle of its valid interval. During MCMC
+    // the resample move always proposes first[i] >= d, so this fires only at init.
+    for (size_t i = 0; i < taxa.size(); i++)
+    {
+        // valid oldest-age range is [max(o_i,d), b): clip the stratigraphic occurrence
+        // uncertainty to the birth/death boundaries. Re-seed any first[i] that starts
+        // below the death or at/above the birth into the middle of its valid interval.
+        double lo = std::max( o_i[i], d_i[i] );
+        double hi = std::min( taxa[i].getMaxAge(), b_i[i] );
+        if ( hi > lo && ( first[i] < lo || first[i] >= b_i[i] ) )
+        {
+            first[i] = 0.5 * ( lo + hi );
+        }
+    }
+
     if ( origin_age != NULL )
     {
         origin = origin_age->getValue();

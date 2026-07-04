@@ -542,8 +542,9 @@ void AbstractFossilizedBirthDeathRangeProcess::resampleFirstLast(size_t i)
     resampled = true;
 
     // exchangeable: the true oldest may exceed every observed occurrence -> augment up to the birth time
-    double _hi = std::max(taxa[i].getMaxAge(), b_i[i]);
-    first[i] = GLOBAL_RNG->uniform01()*(_hi - o_i[i]) + o_i[i];
+    double _lo = std::max(o_i[i], d_i[i]);
+    double _hi = ( b_i[i] > _lo ) ? b_i[i] : std::max(taxa[i].getMaxAge(), b_i[i]);
+    first[i] = GLOBAL_RNG->uniform01()*(_hi - _lo) + _lo;
 
     // also augment the youngest occurrence age (single-occurrence taxa skip the
     // count >= 2 likelihood branch, so 'last' is inert there and the value drawn
