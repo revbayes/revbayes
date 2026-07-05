@@ -1045,11 +1045,11 @@ void ConditionedBirthDeathShiftProcessContinuous::swapParameterInternal( const D
     
 }
 
-/**
- * Touch the current value and reset some internal flags.
- * If the root age variable has been restored, then we need to change the root age of the tree too.
+/*
+ * Synchronize root age and constant branch-history states after parent changes.
+ * This does not save rollback state.
  */
-void ConditionedBirthDeathShiftProcessContinuous::touchSpecialization(const DagNode *affecter, bool touchAll)
+void ConditionedBirthDeathShiftProcessContinuous::invalidateSpecialization(const DagNode *affecter, bool touchAll)
 {
     
     if ( affecter == root_age )
@@ -1058,6 +1058,7 @@ void ConditionedBirthDeathShiftProcessContinuous::touchSpecialization(const DagN
         
         if ( this->dag_node != NULL )
         {
+            // Compatibility: keep legacy downstream propagation until DagNode::invalidate() owns this notification.
             dag_node->touchAffected();
         }
         

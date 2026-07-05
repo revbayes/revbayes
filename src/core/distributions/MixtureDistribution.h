@@ -48,7 +48,7 @@ namespace RevBayesCore {
         void                                                getAffected(RbOrderedSet<DagNode *>& affected, const DagNode* affecter);                          //!< get affected nodes
         void                                                keepSpecialization(const DagNode* affecter);
         void                                                restoreSpecialization(const DagNode *restorer);
-        void                                                touchSpecialization(const DagNode *toucher, bool touchAll);
+        void                                                invalidateSpecialization(const DagNode *toucher, bool touchAll);
 
     protected:
         // Parameter management functions
@@ -307,8 +307,12 @@ void RevBayesCore::MixtureDistribution<mixtureType>::setValue(mixtureType *v, bo
 }
 
 
+/*
+ * Synchronize the active mixture value when the value vector changes.
+ * This does not save rollback state.
+ */
 template <class mixtureType>
-void RevBayesCore::MixtureDistribution<mixtureType>::touchSpecialization( const DagNode *toucher, bool touchAll )
+void RevBayesCore::MixtureDistribution<mixtureType>::invalidateSpecialization( const DagNode *toucher, bool touchAll )
 {
     // only do this when the toucher was our parameters
     if ( toucher == parameter_values )
@@ -324,6 +328,7 @@ void RevBayesCore::MixtureDistribution<mixtureType>::touchSpecialization( const 
 
         if ( this->dag_node != NULL )
         {
+            // Compatibility: keep legacy downstream propagation until DagNode::invalidate() owns this notification.
             this->dag_node->touchAffected();
         }
     }

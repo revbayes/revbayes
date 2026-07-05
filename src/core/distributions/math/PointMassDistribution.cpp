@@ -139,7 +139,11 @@ void PointMassDistribution::swapParameterInternal(const DagNode *oldP, const Dag
 }
 
 
-void PointMassDistribution::touchSpecialization( const DagNode *toucher, bool touchAll )
+/*
+ * Synchronize the point mass value when its parameter changes.
+ * This does not save rollback state.
+ */
+void PointMassDistribution::invalidateSpecialization( const DagNode *toucher, bool touchAll )
 {
     // only do this when the toucher was our parameters
     if ( toucher == val )
@@ -149,6 +153,7 @@ void PointMassDistribution::touchSpecialization( const DagNode *toucher, bool to
         
         if ( this->dag_node != NULL )
         {
+            // Compatibility: keep legacy downstream propagation until DagNode::invalidate() owns this notification.
             this->dag_node->touchAffected();
         }
         

@@ -52,7 +52,7 @@ namespace RevBayesCore {
         void                                                        getAffected(RbOrderedSet<DagNode *>& affected, const DagNode* affecter);                          //!< get affected nodes
         void                                                        keepSpecialization(const DagNode* affecter);
         void                                                        restoreSpecialization(const DagNode *restorer);
-        void                                                        touchSpecialization(const DagNode *toucher, bool touchAll);
+        void                                                        invalidateSpecialization(const DagNode *toucher, bool touchAll);
 
     protected:
         // Parameter management functions
@@ -410,8 +410,12 @@ void RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::setVa
 }
 
 
+/*
+ * Synchronize the constant category value when the constant parameter changes.
+ * This does not save rollback state.
+ */
 template <class mixtureType>
-void RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::touchSpecialization( const DagNode *toucher, bool touchAll )
+void RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::invalidateSpecialization( const DagNode *toucher, bool touchAll )
 {
     // only do this when the toucher was our constant value and this value was supposed to be equal to the constant value
     if ( toucher == const_value && index == 0 )
@@ -428,6 +432,7 @@ void RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::touch
         
         if ( this->dag_node != NULL )
         {
+            // Compatibility: keep legacy downstream propagation until DagNode::invalidate() owns this notification.
             this->dag_node->touchAffected();
         }
     }

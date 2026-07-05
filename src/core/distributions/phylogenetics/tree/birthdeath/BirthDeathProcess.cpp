@@ -428,11 +428,11 @@ void BirthDeathProcess::swapParameterInternal(const DagNode *oldP, const DagNode
 
 
 
-/**
- * Touch the current value and reset some internal flags.
- * If the root age variable has been restored, then we need to change the root age of the tree too.
+/*
+ * Refresh birth-death derived clade ages after tree invalidation.
+ * Root-age synchronization is delegated to AbstractRootedTreeDistribution.
  */
-void BirthDeathProcess::touchSpecialization(const DagNode *affecter, bool touchAll)
+void BirthDeathProcess::invalidateSpecialization(const DagNode *affecter, bool touchAll)
 {
     
     AbstractRootedTreeDistribution::invalidateSpecialization(affecter, touchAll);

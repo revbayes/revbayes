@@ -576,11 +576,11 @@ void BirthDeathBurstProcess::swapParameterInternal(const DagNode *oldP, const Da
 
 
 
-/**
- * Touch the current value and reset some internal flags.
- * If the root age variable has been restored, then we need to change the root age of the tree too.
+/*
+ * Synchronize burst-event node ages when the burst time changes.
+ * Rooted-tree invalidation is delegated to the base distribution.
  */
-void BirthDeathBurstProcess::touchSpecialization(const DagNode *affecter, bool touchAll)
+void BirthDeathBurstProcess::invalidateSpecialization(const DagNode *affecter, bool touchAll)
 {
     
     if ( affecter == time_burst )
@@ -600,6 +600,7 @@ void BirthDeathBurstProcess::touchSpecialization(const DagNode *affecter, bool t
         
         if ( dag_node != NULL )
         {
+            // Compatibility: keep legacy downstream propagation until DagNode::invalidate() owns this notification.
             dag_node->touchAffected();
         }
     }
@@ -608,4 +609,3 @@ void BirthDeathBurstProcess::touchSpecialization(const DagNode *affecter, bool t
     AbstractRootedTreeDistribution::invalidateSpecialization( affecter, touchAll );
     
 }
-
