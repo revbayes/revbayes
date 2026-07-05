@@ -41,7 +41,7 @@ namespace RevBayesCore {
                                             const TypedDagNode<RbVector<double> > *times,
                                             const std::string &condition,
                                             const std::vector<Taxon> &taxa,
-                                            bool complete,
+                                            const std::string &sampling,
                                             bool resampling,
                                             const TypedDagNode<double>* origin = NULL);  //!< Constructor
 
@@ -118,7 +118,7 @@ namespace RevBayesCore {
         std::vector<bool>                               dirty_psi;                                              //!< Indicates whether fossil sampling terms need updating
         std::vector<bool>                               dirty_taxa;                                             //!< Indicates whether partial likelihood needs updating
         
-        bool                                            complete;                                               //!< Indicates whether all fossil observations were included
+        std::string                                     sampling;                                               //!< Fossil sampling model: complete | firstlast | uniform
         bool                                            touched;                                                //!< Indicates whether any terms need updating
         bool                                            resampled;                                              //!< Indicates whether any oldest occurrence ages were resampled
         bool                                            resampling;                                             //!< Indicates whether we are resampling oldest occurrence ages

@@ -57,10 +57,10 @@ FossilizedBirthDeathSpeciationProcess::FossilizedBirthDeathSpeciationProcess(con
                                                            const TypedDagNode< RbVector<double> > *intimes,
                                                            const std::string &incondition,
                                                            const std::vector<Taxon> &intaxa,
-                                                           bool c,
+                                                           const std::string &s,
                                                            bool re) :
     AbstractBirthDeathProcess(ra, incondition, intaxa, true, NULL),
-    AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, c, re)
+    AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, s, re)
 {
     for(std::vector<const DagNode*>::iterator it = range_parameters.begin(); it != range_parameters.end(); it++)
     {

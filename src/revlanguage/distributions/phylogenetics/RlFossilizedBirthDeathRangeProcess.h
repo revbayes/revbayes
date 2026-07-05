@@ -46,7 +46,7 @@ namespace RevLanguage {
         RevPtr<const RevVariable>                           timeline;                                                                           //!< The interval times
         RevPtr<const RevVariable>                           taxa;                                                                               //!< The taxa
         RevPtr<const RevVariable>                           condition;                                                                          //!< The condition of the process
-        RevPtr<const RevVariable>                           complete;
+        RevPtr<const RevVariable>                           sampling;
         RevPtr<const RevVariable>                           resample;
 
     };
@@ -150,7 +150,11 @@ const MemberRules& RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::getPar
         memberRules.push_back( new OptionRule( "condition", new RlString("time"), optionsCondition, "The condition of the process." ) );
         memberRules.push_back( new ArgumentRule( "taxa"  , ModelVector<Taxon>::getClassTypeSpec(), "The taxa with fossil occurrence information.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
-        memberRules.push_back( new ArgumentRule( "complete", RlBoolean::getClassTypeSpec(), "Assume complete fossil sampling?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false ) ) );
+        std::vector<std::string> optionsSampling;
+        optionsSampling.push_back( "firstlast" );
+        optionsSampling.push_back( "uniform" );
+        optionsSampling.push_back( "complete" );
+        memberRules.push_back( new OptionRule( "sampling", new RlString("firstlast"), optionsSampling, "Fossil sampling model: firstlast (extreme occurrences), uniform (exchangeable subset), or complete." ) );
 
         memberRules.push_back( new ArgumentRule( "resample", RlBoolean::getClassTypeSpec(), "Resample augmented ages?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
 
@@ -203,9 +207,9 @@ void RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::setConstParameter(co
     {
         condition = var;
     }
-    else if ( name == "complete" )
+    else if ( name == "sampling" )
     {
-        complete = var;
+        sampling = var;
     }
     else if ( name == "resample" )
     {

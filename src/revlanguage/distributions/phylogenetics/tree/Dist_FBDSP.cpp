@@ -104,7 +104,7 @@ RevBayesCore::FossilizedBirthDeathSpeciationProcess* Dist_FBDSP::createDistribut
         rt = static_cast<const ModelVector<RealPos> &>( timeline->getRevObject() ).getDagNode();
     }
 
-    bool c  = static_cast<const RlBoolean &>( complete->getRevObject() ).getValue();
+    std::string c  = static_cast<const RlString &>( sampling->getRevObject() ).getValue();
     bool re = false; //static_cast<const RlBoolean &>( resample->getRevObject() ).getValue();
 
     RevBayesCore::FossilizedBirthDeathSpeciationProcess* d = new RevBayesCore::FossilizedBirthDeathSpeciationProcess(sa, l, m, p, r, la, b, rt, cond, t, c, re);

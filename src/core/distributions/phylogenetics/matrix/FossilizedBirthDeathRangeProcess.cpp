@@ -49,12 +49,12 @@ FossilizedBirthDeathRangeProcess::FossilizedBirthDeathRangeProcess(const DagNode
                                                                      const TypedDagNode< RbVector<double> > *intimes,
                                                                      const std::string &incondition,
                                                                      const std::vector<Taxon> &intaxa,
-                                                                     bool complete,
+                                                                     const std::string &sampling,
                                                                      bool resample,
                                                                      bool use_bds,
                                                                      const TypedDagNode<double> *inorigin) :
     TypedDistribution<MatrixReal>(new MatrixReal(intaxa.size(), 2)),
-    AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, complete, resample, inorigin),
+    AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, sampling, resample, inorigin),
     bds(use_bds)
 {
     dirty_gamma = std::vector<bool>(taxa.size(), true);
@@ -197,6 +197,68 @@ double FossilizedBirthDeathRangeProcess::computeLnProbabilityBDS()
                 // if there is a range of fossil ages
                 if ( min_age != max_age )
                 {
+                    if ( sampling == "uniform" )
+                    {
+                    // Truly-exchangeable (uniform subset): the true oldest (tau1 = first[i]) may
+                    // be unobserved up to the birth, and interior specimens in (d, tau1) have
+                    // their number and ages marginalized. +Lambda because the lineage-wide
+                    // e^{-psi_b_d} below already carries the Poisson normalization over [d,b].
+                    double o  = first[i];
+                    size_t oi = findIndex(o);
+                    double Lambda = 0.0;
+                    std::vector<double> psi(ages.size(), 0.0);
+
+                    for (size_t j = 0; j < num_intervals; j++)
+                    {
+                        double t_0 = ( j < num_intervals-1 ? times[j+1] : RbConstants::Double::inf );
+                        if ( t_0 <= std::max(d,min_age) ) continue;
+                        if ( times[j] >= o ) break;
+
+                        double dL = std::min(o, t_0) - std::max(d, times[j]);
+                        if ( dL > 0.0 ) Lambda += fossil[j]*dL;
+
+                        size_t k = 0;
+                        for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++,k++ )
+                        {
+                            if ( Fi->first.getMin() < t_0 && Fi->first.getMax() > times[j] )
+                            {
+                                double dt = 1.0;
+                                if ( Fi->first.getMin() != Fi->first.getMax() )
+                                {
+                                    dt = std::min(std::min(Fi->first.getMax(), o), t_0) - std::max(std::max(Fi->first.getMin(), d), times[j]);
+                                }
+                                psi[k] += fossil[j] * dt;
+                            }
+                        }
+                    }
+
+                    Psi[i] = log(fossil[oi]);
+                    int count = 0;
+                    double recip_old = 0.0;
+                    size_t k = 0;
+                    for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++,k++ )
+                    {
+                        count += Fi->second;
+                        if ( Fi->first.getMin() <= o && Fi->first.getMax() >= o ) recip_old += Fi->second / psi[k];
+                        Psi[i] += log(psi[k]) * Fi->second;
+                    }
+
+                    double Pk = 0.0;
+                    double pmf_count = exp( -Lambda + count*log(Lambda) - RbMath::lnFactorial(count) );
+                    double tt = pmf_count;
+                    for ( int n = count; n < count + 100000; n++ )
+                    {
+                        Pk += tt;
+                        tt *= Lambda / double(n+1);
+                        if ( tt < 1e-17 * Pk && n > (int)Lambda ) break;
+                    }
+                    double Pk1 = Pk - pmf_count;
+                    double bracket = Pk*recip_old + Pk - (double(count)/Lambda)*Pk1;
+                    if ( bracket <= 0.0 ) return RbConstants::Double::neginf;
+                    Psi[i] += RbMath::lnFactorial(count) - count*log(Lambda) + log(bracket) + Lambda;
+                    }
+                    else
+                    {
                     double psi_int = 0.0;                            // interior sampling rate over (last, first)
 
                     double o  = first[i];                            // oldest augmented age
@@ -285,7 +347,7 @@ double FossilizedBirthDeathRangeProcess::computeLnProbabilityBDS()
                     // sum over each possible oldest observation
                     Psi[i] += log(recip);
 
-                    if ( complete == true )
+                    if ( sampling == "complete" )
                     {
                         // compute poisson density for count
                         Psi[i] -= RbMath::lnFactorial(count);
@@ -314,6 +376,7 @@ double FossilizedBirthDeathRangeProcess::computeLnProbabilityBDS()
                         Psi[i] += log(S1) - RbMath::lnFactorial(count);
                     }
                     // count == 1 (single occurrence, first == last): no interior term
+                    }
 
                     // no other fossils over the lineage range [d, b]
                     Psi[i] -= psi_b_d;
