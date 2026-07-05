@@ -41,7 +41,7 @@ namespace RevBayesCore {
         void                                                    getAffected(RbOrderedSet<DagNode *>& affected, const DagNode* affecter);                          //!< get affected nodes
         void                                                    keepSpecialization(const DagNode* affecter);
         void                                                    restoreSpecialization(const DagNode *restorer);
-        void                                                    touchSpecialization(const DagNode *toucher, bool touchAll);
+        void                                                    invalidateSpecialization(const DagNode *toucher, bool touchAll);
         
     protected:
         // Parameter management functions
@@ -312,8 +312,12 @@ void RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::restoreSpecializa
 }
 
 
+/*
+ * Mark the cached analytical mixture likelihood as dirty after a parameter changes.
+ * The next likelihood evaluation recomputes the component probabilities.
+ */
 template <class mixtureType>
-void RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::touchSpecialization( const DagNode *toucher, bool touchAll )
+void RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::invalidateSpecialization( const DagNode *toucher, bool touchAll )
 {
     // only do this when the toucher was our parameters
     dirty = true;

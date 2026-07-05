@@ -613,11 +613,11 @@ void PiecewiseCoalescent::swapParameterInternal(const DagNode *old_p, const DagN
 
 
 
-/**
- * Touch the current value and reset some internal flags.
- * If the root age variable has been restored, then we need to change the root age of the tree too.
+/*
+ * Piecewise coalescent intervals are recomputed during probability evaluation.
+ * Invalidation currently has no additional eager work to perform.
  */
-void PiecewiseCoalescent::touchSpecialization(const DagNode *affecter, bool touchAll)
+void PiecewiseCoalescent::invalidateSpecialization(const DagNode *affecter, bool touchAll)
 {
     // Sebastian: This is currently redudant because we update the intervals each time when we compute the probability
     // just update the start times of the intervals

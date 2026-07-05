@@ -765,11 +765,11 @@ void HeterogeneousRateBirthDeath::swapParameterInternal( const DagNode *oldP, co
     
 }
 
-/**
- * Touch the current value and reset some internal flags.
- * If the root age variable has been restored, then we need to change the root age of the tree too.
+/*
+ * Synchronize the root node age when the root-age parameter changes.
+ * Affected child nodes are invalidated through the DAG node afterward.
  */
-void HeterogeneousRateBirthDeath::touchSpecialization(const DagNode *affecter, bool touchAll)
+void HeterogeneousRateBirthDeath::invalidateSpecialization(const DagNode *affecter, bool touchAll)
 {
     
     if ( affecter == root_age )
@@ -778,6 +778,7 @@ void HeterogeneousRateBirthDeath::touchSpecialization(const DagNode *affecter, b
         
         if ( this->dag_node != NULL )
         {
+            // Compatibility: keep legacy downstream propagation until DagNode::invalidate() owns this notification.
             dag_node->touchAffected();
         }
         
@@ -802,4 +803,3 @@ void HeterogeneousRateBirthDeath::updateBranchProbabilitiesNumerically(std::vect
     //    boost::numeric::odeint::integrate_adaptive( stepper, ode, state, begin_age, end_age, dt );
     
 }
-

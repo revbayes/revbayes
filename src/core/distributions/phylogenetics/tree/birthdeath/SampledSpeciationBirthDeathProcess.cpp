@@ -895,16 +895,17 @@ void SampledSpeciationBirthDeathProcess::swapParameterInternal( const DagNode *o
     
 }
 
-/**
- * Touch the current value and reset some internal flags.
- * If the root age variable has been restored, then we need to change the root age of the tree too.
+/*
+ * Synchronize the root node age when the root-age parameter changes.
+ * Affected child nodes are invalidated through the DAG node afterward.
  */
-void SampledSpeciationBirthDeathProcess::touchSpecialization(const DagNode *affecter, bool touchAll)
+void SampledSpeciationBirthDeathProcess::invalidateSpecialization(const DagNode *affecter, bool touchAll)
 {
     
     if ( affecter == root_age )
     {
         value->getNode( value->getRoot().getIndex() ).setAge( root_age->getValue() );
+        // Compatibility: keep legacy downstream propagation until DagNode::invalidate() owns this notification.
         dag_node->touchAffected();
     }
     

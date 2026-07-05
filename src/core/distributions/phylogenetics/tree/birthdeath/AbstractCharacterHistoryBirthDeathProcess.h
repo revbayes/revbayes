@@ -31,7 +31,6 @@ namespace RevBayesCore {
         virtual void                                        getAffected(RbOrderedSet<DagNode *>& affected, const DagNode* affecter) = 0;                                      //!< get affected nodes
         virtual void                                        keepSpecialization(const DagNode* affecter) = 0;
         virtual void                                        restoreSpecialization(const DagNode *restorer) = 0;
-        virtual void                                        touchSpecialization(const DagNode *toucher, bool touchAll) = 0;
         virtual void                                        swapParameterInternal(const DagNode *oldP, const DagNode *newP) = 0;            //!< Swap a
         
     private:

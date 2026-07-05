@@ -78,7 +78,11 @@ void PhyloDistanceGamma::keepSpecialization(const DagNode* affecter)
 }
 
 
-void PhyloDistanceGamma::touchSpecialization(const DagNode *toucher, bool touchAll)
+/*
+ * PhyloDistanceGamma has no specialized cache invalidation beyond recomputing on demand.
+ * The hook exists to override the legacy touch path with an explicit invalidation hook.
+ */
+void PhyloDistanceGamma::invalidateSpecialization(const DagNode *toucher, bool touchAll)
 {
     
     

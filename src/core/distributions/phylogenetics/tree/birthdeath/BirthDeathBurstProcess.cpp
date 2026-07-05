@@ -605,8 +605,7 @@ void BirthDeathBurstProcess::touchSpecialization(const DagNode *affecter, bool t
     }
     
     // delegate to base class
-    AbstractRootedTreeDistribution::touchSpecialization( affecter, touchAll );
+    AbstractRootedTreeDistribution::invalidateSpecialization( affecter, touchAll );
     
 }
-
 

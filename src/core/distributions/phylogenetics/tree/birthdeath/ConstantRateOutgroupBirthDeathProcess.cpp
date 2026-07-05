@@ -596,7 +596,7 @@ void ConstantRateOutgroupBirthDeathProcess::setValue(Tree *v, bool f )
 
 void ConstantRateOutgroupBirthDeathProcess::touchSpecialization(const DagNode *affecter, bool touchAll)
 {
-    AbstractRootedTreeDistribution::touchSpecialization(affecter, touchAll);
+    AbstractRootedTreeDistribution::invalidateSpecialization(affecter, touchAll);
     stored_clades = active_clades;
 }
 

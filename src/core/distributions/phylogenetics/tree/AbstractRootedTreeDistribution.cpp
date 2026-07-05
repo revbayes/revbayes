@@ -827,7 +827,11 @@ void AbstractRootedTreeDistribution::swapParameterInternal( const DagNode *oldP,
 }
 
 
-void AbstractRootedTreeDistribution::touchSpecialization(const DagNode *affecter, bool touchAll)
+/*
+ * Synchronize the tree root age when the process-age parameter changes.
+ * Descendant distributions can extend this for additional invalidation work.
+ */
+void AbstractRootedTreeDistribution::invalidateSpecialization(const DagNode *affecter, bool touchAll)
 {
     
     if ( affecter == process_age )
@@ -839,6 +843,7 @@ void AbstractRootedTreeDistribution::touchSpecialization(const DagNode *affecter
         
         if ( dag_node != NULL )
         {
+            // Compatibility: keep legacy downstream propagation until DagNode::invalidate() owns this notification.
             dag_node->touchAffected();
         }
         

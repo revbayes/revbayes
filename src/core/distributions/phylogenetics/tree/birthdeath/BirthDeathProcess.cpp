@@ -435,7 +435,7 @@ void BirthDeathProcess::swapParameterInternal(const DagNode *oldP, const DagNode
 void BirthDeathProcess::touchSpecialization(const DagNode *affecter, bool touchAll)
 {
     
-    AbstractRootedTreeDistribution::touchSpecialization(affecter, touchAll);
+    AbstractRootedTreeDistribution::invalidateSpecialization(affecter, touchAll);
     if ( affecter == this->dag_node )
     {
         incomplete_clade_ages.clear();

@@ -414,19 +414,20 @@ void UniformSerialSampledTimeTreeDistribution::swapParameterInternal( const DagN
     
 }
 
-/**
- * Touch the current value and reset some internal flags.
- * If the root age variable has been restored, then we need to change the root age of the tree too.
+/*
+ * Synchronize the root node age from the serial-sampling start age when needed.
+ * Affected child nodes are invalidated through the DAG node afterward.
  */
-void UniformSerialSampledTimeTreeDistribution::touchSpecialization(const DagNode *affecter, bool touchAll)
+void UniformSerialSampledTimeTreeDistribution::invalidateSpecialization(const DagNode *affecter, bool touchAll)
 {
     
     if ( affecter == start_age )
     {
     	if ( has_root_age == true )
-    	{
+	    	{
             value->getNode( value->getRoot().getIndex() ).setAge( start_age->getValue() );
-    	}
+	    	}
+        // Compatibility: keep legacy downstream propagation until DagNode::invalidate() owns this notification.
         dag_node->touchAffected();
     }
     
