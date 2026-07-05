@@ -154,6 +154,23 @@ const std::vector<const DagNode*>& Distribution::getParameters( void ) const
 
 
 /* Method stub: override for specialized treatment. */
+void Distribution::invalidate( const DagNode *toucher, bool touchAll )
+{
+    invalidateSpecialization( toucher, touchAll );
+}
+
+
+/*
+ * Compatibility bridge for distributions that still override touchSpecialization().
+ * Remove this after subclasses migrate to snapshot/invalidate hooks.
+ */
+void Distribution::invalidateSpecialization( const DagNode *toucher, bool touchAll )
+{
+    touchSpecialization( toucher, touchAll );
+}
+
+
+/* Method stub: override for specialized treatment. */
 void Distribution::keep( const DagNode* affecter )
 {
     // delegate to specialization
@@ -228,6 +245,20 @@ void Distribution::setMcmcMode(bool tf)
 }
 
 
+/* Method stub: override for specialized treatment. */
+void Distribution::snapshot( void )
+{
+    snapshotSpecialization();
+}
+
+
+/* Method stub: override for specialized treatment. */
+void Distribution::snapshotSpecialization( void )
+{
+    // do nothing
+}
+
+
 /**
  * Swap the old parameter with a new one.
  * This will be called for example when the entire model graph is cloned or
@@ -266,10 +297,8 @@ void Distribution::swapParameter(const DagNode *old_p, const DagNode *new_p)
 /* Method stub: override for specialized treatment. */
 void Distribution::touch( const DagNode *toucher, bool touchAll )
 {
-    // do some general stuff for all distributions ...
-    
-    // delegate to specialization
-    touchSpecialization( toucher, touchAll );
+    snapshot();
+    invalidate( toucher, touchAll );
 }
 
 
@@ -278,4 +307,3 @@ void Distribution::touchSpecialization( const DagNode *toucher, bool touchAll )
 {
     // do nothing
 }
-
