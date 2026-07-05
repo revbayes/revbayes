@@ -153,9 +153,10 @@ namespace RevBayesCore {
 
 
         // virtual methods that may be overwritten, but then the derived class should call this methods
+        virtual void                                                        invalidateSpecialization(const DagNode *toucher, bool touchAll);
         virtual void                                                        keepSpecialization(const DagNode* affecter);
         virtual void                                                        restoreSpecialization(const DagNode *restorer);
-        virtual void                                                        touchSpecialization(const DagNode *toucher, bool touchAll);
+        virtual void                                                        snapshotSpecialization(void);
 
         // pure virtual methods
         virtual void                                                        computeInternalNodeLikelihood(const TopologyNode &n, size_t nIdx, size_t l, size_t r) = 0;
@@ -209,7 +210,7 @@ namespace RevBayesCore {
         std::map<std::string,size_t>                                        taxon_name_2_tip_index_map;
 
         // flags for likelihood recomputation
-        bool                                                                touched = false;
+        bool                                                                has_snapshot = false;
         std::vector<bool>                                                   changed_nodes;
 
         // offsets for nodes
@@ -382,7 +383,7 @@ num_patterns( n.num_patterns ),
 compressed( n.compressed ),
 site_pattern( n.site_pattern ),
 taxon_name_2_tip_index_map( n.taxon_name_2_tip_index_map ),
-touched( false ),
+has_snapshot( false ),
 changed_nodes( n.changed_nodes ),
 using_ambiguous_characters( n.using_ambiguous_characters ),
 treatUnknownAsGap( n.treatUnknownAsGap ),
@@ -2254,8 +2255,8 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::getPInv( void )
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::keepSpecialization( const DagNode* affecter )
 {
-    // reset flags for likelihood computation
-    touched = false;
+    // reset proposal snapshot state
+    has_snapshot = false;
 
     // we don't have a previous state anymore.
     storedLnProb = {};
@@ -2557,8 +2558,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::resizeLikelihoodV
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::restoreSpecialization( const DagNode* affecter )
 {
-    // reset flags for likelihood computation
-    touched = false;
+    // reset proposal snapshot state
+    has_snapshot = false;
 
     // reset the flags
     lnProb = *storedLnProb;
@@ -3994,19 +3995,31 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::swapParameterInte
 
 }
 
+/*
+ * Snapshot proposal rollback state before invalidation changes active cache state.
+ * Invalidation remains responsible for choosing which likelihoods become dirty.
+ */
 template<class charType>
-void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::touchSpecialization( const DagNode* affecter, bool touch_all )
+void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::snapshotSpecialization( void )
 {
-    if ( touched == false )
+    if ( has_snapshot == false )
     {
-        touched = true;
+        has_snapshot = true;
         this->storedLnProb = this->lnProb;
 
         partialLikelihoods.snapshot();
         pmatrices.snapshot();
     }
+}
 
 
+/*
+ * Mark CTMC caches dirty according to the parameter that changed.
+ * Snapshotting is handled separately before this invalidation hook is called.
+ */
+template<class charType>
+void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::invalidateSpecialization( const DagNode* affecter, bool touch_all )
+{
     // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
     if ( affecter == heterogeneous_clock_rates )
     {
@@ -4091,7 +4104,6 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::touchSpecializati
         }
     }
 }
-
 
 
 template<class charType>
