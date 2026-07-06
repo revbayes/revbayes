@@ -1,5 +1,5 @@
-#ifndef StateDependentSpeciationExtinctionProcess_H
-#define StateDependentSpeciationExtinctionProcess_H
+#ifndef EpisodicStateDependentSpeciationExtinctionFossilizationProcess_H
+#define EpisodicStateDependentSpeciationExtinctionFossilizationProcess_H
 
 #include "AbstractHomologousDiscreteCharacterData.h"
 #include "TreeDiscreteCharacterData.h"
@@ -31,29 +31,27 @@ namespace RevBayesCore {
      * Will Freyman 6/22/16
      *
      */
-    class StateDependentSpeciationExtinctionProcess : public TypedDistribution<Tree>, public TreeChangeEventListener, public MemberObject< RbVector<std::int64_t> >, public MemberObject< RbVector<double> > {
+    class EpisodicStateDependentSpeciationExtinctionFossilizationProcess : public TypedDistribution<Tree>, public TreeChangeEventListener, public MemberObject< RbVector<std::int64_t> >, public MemberObject< RbVector<double> > {
         
     public:
-        StateDependentSpeciationExtinctionProcess(const TypedDagNode<double> *root,
-                                                  const TypedDagNode<RbVector<double> >* m,
-                                                  const TypedDagNode<RateGenerator>* q,
-                                                  const TypedDagNode<double>* r,
-                                                  const TypedDagNode<Simplex>* p,
-                                                  const std::string &cdt,
-                                                  bool uo,
-                                                  size_t min_num_lineages,
-                                                  size_t max_num_lineages,
-                                                  size_t exact_num_lineages,
-                                                  double max_t,
-                                                  bool prune,
-                                                  bool condition_on_tip_states,
-                                                  bool condition_on_num_tips,
-                                                  bool condition_on_tree,
-                                                  bool allow_shifts_extinct);
+        EpisodicStateDependentSpeciationExtinctionFossilizationProcess(const TypedDagNode<double> *root,
+                                                                       const TypedDagNode<double>* r,
+                                                                       const TypedDagNode<Simplex>* p,
+                                                                       const std::string &cdt,
+                                                                       bool uo,
+                                                                       size_t min_num_lineages,
+                                                                       size_t max_num_lineages,
+                                                                       size_t exact_num_lineages,
+                                                                       double max_t,
+                                                                       bool prune,
+                                                                       bool condition_on_tip_states,
+                                                                       bool condition_on_num_tips,
+                                                                       bool condition_on_tree,
+                                                                       bool allow_shifts_extinct);
         
         // pure virtual member functions
-        virtual StateDependentSpeciationExtinctionProcess*              clone(void) const;
-        virtual                                                         ~StateDependentSpeciationExtinctionProcess(void);                                                              //!< Virtual destructor
+        virtual EpisodicStateDependentSpeciationExtinctionFossilizationProcess*              clone(void) const;
+        virtual                                                         ~EpisodicStateDependentSpeciationExtinctionFossilizationProcess(void);                                                              //!< Virtual destructor
 
         double                                                          computeLnProbability(void);
         void                                                            fireTreeChangeEvent(const TopologyNode &n, const unsigned& m=0);                                                 //!< The tree has changed and we want to know which part.
@@ -66,11 +64,18 @@ namespace RevBayesCore {
         double                                                          getRootAge(void) const;
         virtual void                                                    redrawValue(void);
         void                                                            setCladogenesisMatrix(const TypedDagNode< CladogeneticSpeciationRateMatrix > *r);
+//        void                                                            setCladogenesisMatrix(const TypedDagNode< CladogeneticSpeciationRateMatrix > *r);
+        void                                                            setExtinctionRates(const TypedDagNode< RbVector<double> > *r);
+        void                                                            setExtinctionRates(const TypedDagNode< RbVector< RbVector<double> > > *r);
+        void                                                            setFossilizationRates(const TypedDagNode< RbVector<double> > *r);
+        void                                                            setFossilizationRates(const TypedDagNode< RbVector<RbVector<double> > > *r);
         void                                                            setSampleCharacterHistory(bool sample_history);                                                     //!< Set whether or not we are sampling the character history along branches.
         void                                                            setSamplingFraction(const TypedDagNode< double > *r);
         void                                                            setSamplingFraction(const TypedDagNode< RbVector<double> > *r);
-        void                                                            setSerialSamplingRates(const TypedDagNode< RbVector<double> > *r);
         void                                                            setSpeciationRates(const TypedDagNode< RbVector<double> > *r);
+        void                                                            setSpeciationRates(const TypedDagNode< RbVector< RbVector<double> > > *r);
+        void                                                            setTransitionRateMatrix(const TypedDagNode< RateGenerator > *m);
+        void                                                            setTransitionRateMatrix(const TypedDagNode< RbVector< RateGenerator > > *m);
         void                                                            setNumberOfTimeSlices(double n);                                                                    //!< Set the number of time slices for the numerical ODE.
         virtual void                                                    setValue(Tree *v, bool f=false);                                                                    //!< Set the current value, e.g. attach an observation (clamp)
         
@@ -80,11 +85,11 @@ namespace RevBayesCore {
         bool                                                            recursivelyDrawStochasticCharacterMap(const TopologyNode &node, size_t start_state, std::vector<std::string>& character_histories, bool set_amb_char_data, bool use_simmap_default);
         void                                                            numericallyIntegrateProcess(std::vector< double > &likelihoods, double begin_age, double end_age, bool use_backward, bool extinction_only) const; //!< Wrapper function for the ODE time stepper function.
         void                                                            resizeVectors(size_t num_nodes);
-        
+
     protected:
         
         double                                                          getEventRate(void) const;
-        const RateGenerator&                                            getEventRateMatrix(void) const;
+        const RateGenerator&                                            getEventRateMatrix(double a) const;
         std::vector<double>                                             getRootFrequencies(void) const;
 
         // virtual methods that may be overwritten, but then the derived class should call this methods
@@ -94,10 +99,10 @@ namespace RevBayesCore {
         virtual void                                                    touchSpecialization(const DagNode *toucher, bool touchAll);
         
         double                                                          lnProbTreeShape(void) const;
-
+        
         // Parameter management functions. You need to override both if you have additional parameters
         virtual void                                                    swapParameterInternal(const DagNode *oldP, const DagNode *newP);                                    //!< Swap a parameter
-        void                                                            executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const;  
+        void                                                            executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const;
         void                                                            executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<std::int64_t> &rv) const;     //!< Map the member methods to internal function calls
         RevLanguage::RevPtr<RevLanguage::RevVariable>                   executeProcedure(const std::string &name, const std::vector<DagNode *> args, bool &found);
         
@@ -109,11 +114,17 @@ namespace RevBayesCore {
         void                                                            recursivelyFlagNodeDirty(const TopologyNode& n);
         bool                                                            simulateTree(size_t attempts = 0);
         bool                                                            simulateTreeConditionedOnTips(size_t attempts = 0);
+        std::vector<double>                                             calculateExtinctionRatePerState(double a);
         std::vector<double>                                             calculateTotalAnageneticRatePerState(void) const;
-        std::vector<double>                                             calculateTotalSpeciationRatePerState(void) const;
+        std::vector<double>                                             calculateTotalSpeciationRatePerState(double a) const;
+        size_t                                                          computeEpochIndex(double a) const;
+        double                                                          computeEpochEnd(size_t i) const;
         void                                                            computeNodeProbability(const TopologyNode &n, size_t nIdx) const;
         double                                                          computeRootLikelihood() const;
-        
+        const RbVector<double>&                                         computeExtinctionRateAtTime(double a) const;
+        const RbVector<double>&                                         computeFossilizationRateAtTime(double a) const;
+        const RbVector<double>&                                         computeSpeciationRateAtTime(double a) const;
+
         // members
         std::string                                                     condition;                                                                                          //!< The condition of the process (none/survival/#taxa).
         double                                                          dt;                                                                                                 //!< The size of the time slices used by the ODE for numerical integration.
@@ -137,11 +148,17 @@ namespace RevBayesCore {
         // parameters
         const TypedDagNode< CladogeneticSpeciationRateMatrix >*         cladogenesis_matrix;
         const TypedDagNode<double>*                                     process_age;                                                                                           //!< Time since the origin.
-        const TypedDagNode<RbVector<double> >*                          mu;
-        const TypedDagNode<RbVector<double> >*                          lambda;
-        const TypedDagNode<RbVector<double> >*                          phi;
+//        const TypedDagNode<RbVector<double> >*                          mu;
+        const TypedDagNode<RbVector<RbVector<double> > >*               mu;
+//        const TypedDagNode<RbVector<double> >*                          lambda;
+        const TypedDagNode<RbVector<RbVector<double> > >*               lambda;
+//        const TypedDagNode<RbVector<double> >*                          phi;
+        const TypedDagNode<RbVector<RbVector<double> > >*               phi;
+        const TypedDagNode<RbVector<double> >*                          survival_probs;
+        const TypedDagNode<RbVector<double> >*                          epoch_times;
         const TypedDagNode<Simplex >*                                   pi;                                                                                                 //!< The root frequencies (probabilities of the root states).
-        const TypedDagNode<RateGenerator>*                              Q;
+//        const TypedDagNode<RateGenerator>*                              Q;
+        const TypedDagNode<RbVector<RateGenerator> >*                   Q;
         const TypedDagNode<double>*                                     rate;                                                                                               //!< Sampling probability of each species.
         const TypedDagNode<double>*                                     rho;                                                                                                //!< Sampling probability of each species.
         const TypedDagNode<RbVector<double> >*                          rho_per_state;                                                                                                //!< Sampling probability of each species.
@@ -157,6 +174,7 @@ namespace RevBayesCore {
         bool                                                            condition_on_num_tips;
         bool                                                            condition_on_tree;
         double                                                          NUM_TIME_SLICES;
+
     };
     
 }
