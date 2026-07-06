@@ -2,6 +2,7 @@
 #define PhyloMultivariateBrownianProcessREML_H
 
 #include "AbstractPhyloBrownianProcess.h"
+#include "IndexedCache.h"
 #include "TreeChangeEventListener.h"
 
 namespace RevBayesCore {
@@ -35,6 +36,8 @@ namespace RevBayesCore {
     protected:
         
         // virtual methods that may be overwritten, but then the derived class should call this methods
+        void                                                                invalidateBranchAndAncestors(const TopologyNode& n);
+        void                                                                invalidateInternalNodes(void);
         virtual void                                                        keepSpecialization(const DagNode* affecter);
         void                                                                recursiveComputeLnProbability( const TopologyNode &node, size_t node_index );
         void                                                                recursiveComputeContrasts( const TopologyNode &node, size_t node_index );
@@ -43,23 +46,23 @@ namespace RevBayesCore {
         virtual void                                                        restoreSpecialization(const DagNode *restorer);
         std::vector<double>                                                 simulateRootCharacters(size_t n);
         virtual void                                                        simulateRecursively(const TopologyNode& node, std::vector< ContinuousTaxonData > &t);
+        virtual void                                                        snapshotSpecialization(void);
         virtual void                                                        invalidateSpecialization(const DagNode *toucher, bool touchAll);
 
         // Parameter management functions.
         virtual void                                                        swapParameterInternal(const DagNode *oldP, const DagNode *newP);                         //!< Swap a parameter
 
-        // the likelihoods
-        std::vector<std::vector<double> >                                   partial_likelihoods;
-        std::vector<std::vector<std::vector<double> > >                     contrasts;
-        std::vector<std::vector<double> >                                   contrast_uncertainty;
-        std::vector<size_t>                                                 active_likelihood;
+        struct NodeCache
+        {
+            double                                                          partial_likelihood = 0.0;
+            std::vector<double>                                             contrasts;
+            double                                                          contrast_uncertainty = 0.0;
+        };
+
+        IndexedCache<NodeCache>                                             node_likelihoods;
         
         std::vector<std::vector<double> >                                   independent_contrasts;
         std::vector<double>                                                 independent_contrasts_sds;
-        
-        // convenience variables available for derived classes too
-        std::vector<bool>                                                   changed_nodes;
-        std::vector<bool>                                                   dirty_nodes;
 
     private:
         
