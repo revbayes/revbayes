@@ -133,10 +133,13 @@ void TransformedDistribution::redrawValue( void )
     simulate();
 }
 
-// Further investigation into this latter case may yield a better solution.
-void TransformedDistribution::touchSpecialization(const DagNode *affecter, bool touchAll)
+/*
+ * Forward invalidation to the wrapped distribution.
+ * This preserves the wrapper's existing delegation behavior.
+ */
+void TransformedDistribution::invalidateSpecialization(const DagNode *affecter, bool touchAll)
 {
-    base_dist->touch(affecter, touchAll);
+    base_dist->invalidate(affecter, touchAll);
 }
 
 void TransformedDistribution::restoreSpecialization( const DagNode *restorer )
@@ -147,6 +150,15 @@ void TransformedDistribution::restoreSpecialization( const DagNode *restorer )
 void TransformedDistribution::keepSpecialization( const DagNode* affecter )
 {
     base_dist->keep(affecter);
+}
+
+/*
+ * Forward rollback snapshotting to the wrapped distribution.
+ * This keeps proposal rollback state with the distribution that owns it.
+ */
+void TransformedDistribution::snapshotSpecialization(void)
+{
+    base_dist->snapshot();
 }
 
 void TransformedDistribution::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode* affecter)
@@ -166,5 +178,3 @@ void TransformedDistribution::swapParameterInternal( const DagNode *oldP, const 
 
     base_dist->swapParameter(oldP,newP);
 }
-
-

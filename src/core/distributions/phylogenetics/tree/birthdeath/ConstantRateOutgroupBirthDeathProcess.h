@@ -35,9 +35,10 @@ template <class valueType> class TypedDagNode;
         // Parameter management functions
         bool                                                isLnProbabilityNonZero(void);
         void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);                //!< Swap a parameter
+        virtual void                                        invalidateSpecialization(const DagNode *toucher, bool touchAll);
         virtual void                                        keepSpecialization(const DagNode* affecter);
         virtual void                                        restoreSpecialization(const DagNode *restorer);
-        virtual void                                        touchSpecialization(const DagNode *toucher, bool touchAll);
+        virtual void                                        snapshotSpecialization(void);
         void                                                recursivelyFlagNodesDirty(const TopologyNode& n);
         RbBitSet                                            recursivelyUpdateClades(const TopologyNode& node);
 

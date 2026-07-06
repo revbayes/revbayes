@@ -52,9 +52,10 @@ namespace RevBayesCore {
         // helper methods
         RbVector<valueType>*                                simulate();
         virtual void                                        keepSpecialization(const DagNode* affecter);
+        virtual void                                        invalidateSpecialization(const DagNode *toucher, bool touchAll);
         virtual void                                        restoreSpecialization(const DagNode *restorer);
         void                                                setInternalDistributions(void);
-        virtual void                                        touchSpecialization(const DagNode *toucher, bool touchAll);
+        virtual void                                        snapshotSpecialization(void);
         
         // private members
         TypedDistribution<valueType>*                       base_distribution;
@@ -523,16 +524,19 @@ void RevBayesCore::EmpiricalSampleDistribution<valueType>::setValue(RbVector<val
 }
 
 
+/*
+ * Forward invalidation to each local sample distribution in this process block.
+ * Rollback snapshotting is handled separately by snapshotSpecialization().
+ */
 template <class valueType>
-void RevBayesCore::EmpiricalSampleDistribution<valueType>::touchSpecialization(const DagNode *toucher, bool touchAll )
+void RevBayesCore::EmpiricalSampleDistribution<valueType>::invalidateSpecialization(const DagNode *toucher, bool touchAll )
 {
         
-    // call keep for each sample
     for (size_t i = 0; i < num_samples; ++i)
     {
         if ( i >= sample_block_start && i < sample_block_end )
         {
-            base_distribution_instances[i]->touch( toucher, touchAll );
+            base_distribution_instances[i]->invalidate( toucher, touchAll );
         }
         
     }
@@ -550,6 +554,25 @@ void RevBayesCore::EmpiricalSampleDistribution<valueType>::restoreSpecialization
         if ( i >= sample_block_start && i < sample_block_end )
         {
             base_distribution_instances[i]->restore( restorer );
+        }
+        
+    }
+    
+}
+
+/*
+ * Forward rollback snapshotting to each local sample distribution in this process block.
+ * This mirrors the existing per-sample keep/restore delegation.
+ */
+template <class valueType>
+void RevBayesCore::EmpiricalSampleDistribution<valueType>::snapshotSpecialization( void )
+{
+        
+    for (size_t i = 0; i < num_samples; ++i)
+    {
+        if ( i >= sample_block_start && i < sample_block_end )
+        {
+            base_distribution_instances[i]->snapshot();
         }
         
     }

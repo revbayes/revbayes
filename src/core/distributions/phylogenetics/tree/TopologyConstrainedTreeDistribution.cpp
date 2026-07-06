@@ -1289,17 +1289,13 @@ void TopologyConstrainedTreeDistribution::swapParameterInternal( const DagNode *
     
 }
 
-/**
- * Touch the current value and reset some internal flags.
- * If the root age variable has been restored, then we need to change the root age of the tree too.
+/*
+ * Invalidate the wrapped tree distribution after parent changes.
+ * Clade rollback state is saved separately by snapshotSpecialization().
  */
-void TopologyConstrainedTreeDistribution::touchSpecialization(const DagNode *affecter, bool touchAll)
+void TopologyConstrainedTreeDistribution::invalidateSpecialization(const DagNode *affecter, bool touchAll)
 {
-    stored_clades = active_clades;
-    stored_backbone_clades = active_backbone_clades;
-    
-    // if the root age wasn't the affecter, we'll set it in the base distribution here
-    base_distribution->touch(affecter, touchAll);
+    base_distribution->invalidate(affecter, touchAll);
 }
 
 void TopologyConstrainedTreeDistribution::keepSpecialization(const DagNode *affecter)
@@ -1317,4 +1313,16 @@ void TopologyConstrainedTreeDistribution::restoreSpecialization(const DagNode *r
     
     base_distribution->restore(restorer);
     
+}
+
+/*
+ * Save clade rollback state and delegate snapshotting to the wrapped tree distribution.
+ * The clade copies are restored by restoreSpecialization().
+ */
+void TopologyConstrainedTreeDistribution::snapshotSpecialization(void)
+{
+    stored_clades = active_clades;
+    stored_backbone_clades = active_backbone_clades;
+    
+    base_distribution->snapshot();
 }

@@ -594,10 +594,13 @@ void ConstantRateOutgroupBirthDeathProcess::setValue(Tree *v, bool f )
 
 
 
-void ConstantRateOutgroupBirthDeathProcess::touchSpecialization(const DagNode *affecter, bool touchAll)
+/*
+ * Synchronize inherited rooted-tree invalidation after parent changes.
+ * Clade rollback state is saved separately by snapshotSpecialization().
+ */
+void ConstantRateOutgroupBirthDeathProcess::invalidateSpecialization(const DagNode *affecter, bool touchAll)
 {
     AbstractRootedTreeDistribution::invalidateSpecialization(affecter, touchAll);
-    stored_clades = active_clades;
 }
 
 void ConstantRateOutgroupBirthDeathProcess::keepSpecialization(const DagNode *affecter)
@@ -608,4 +611,13 @@ void ConstantRateOutgroupBirthDeathProcess::keepSpecialization(const DagNode *af
 void ConstantRateOutgroupBirthDeathProcess::restoreSpecialization(const DagNode *restorer)
 {
     active_clades = stored_clades;
+}
+
+/*
+ * Save active outgroup clades so restoreSpecialization() can roll them back.
+ * This was formerly mixed into touchSpecialization().
+ */
+void ConstantRateOutgroupBirthDeathProcess::snapshotSpecialization(void)
+{
+    stored_clades = active_clades;
 }

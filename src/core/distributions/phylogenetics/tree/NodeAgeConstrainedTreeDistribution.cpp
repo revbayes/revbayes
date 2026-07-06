@@ -220,13 +220,13 @@ void NodeAgeConstrainedTreeDistribution::swapParameterInternal( const DagNode *o
     
 }
 
-/**
- * Touch the current value and reset some internal flags.
- * If the root age variable has been restored, then we need to change the root age of the tree too.
+/*
+ * Invalidate the wrapped tree distribution and mirror its root age locally.
+ * Rollback snapshotting is delegated separately.
  */
-void NodeAgeConstrainedTreeDistribution::touchSpecialization(const DagNode *affecter, bool touchAll)
+void NodeAgeConstrainedTreeDistribution::invalidateSpecialization(const DagNode *affecter, bool touchAll)
 {
-    base_distribution->touch(affecter, touchAll);
+    base_distribution->invalidate(affecter, touchAll);
     double a = base_distribution->getValue().getRoot().getAge();
     value->getRoot().setAge( a );
 }
@@ -244,4 +244,13 @@ void NodeAgeConstrainedTreeDistribution::restoreSpecialization(const DagNode *re
     double a = base_distribution->getValue().getRoot().getAge();
     value->getRoot().setAge( a );
     
+}
+
+/*
+ * Delegate rollback snapshotting to the wrapped tree distribution.
+ * The constrained wrapper has no additional rollback state here.
+ */
+void NodeAgeConstrainedTreeDistribution::snapshotSpecialization(void)
+{
+    base_distribution->snapshot();
 }

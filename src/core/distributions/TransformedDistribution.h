@@ -43,8 +43,9 @@ namespace RevBayesCore {
 
         // keep specialization for derived classes
         void                                                keepSpecialization(const DagNode* affecter) override;
+        void                                                invalidateSpecialization(const DagNode *toucher, bool touchAll) override;
         void                                                restoreSpecialization(const DagNode *restorer) override;
-        void                                                touchSpecialization(const DagNode *toucher, bool touchAll) override;
+        void                                                snapshotSpecialization(void) override;
 
     private:
 

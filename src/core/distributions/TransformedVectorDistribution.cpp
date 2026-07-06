@@ -167,10 +167,13 @@ void TransformedVectorDistribution::redrawValue( void )
 }
 
 
-// Further investigation into this latter case may yield a better solution.
-void TransformedVectorDistribution::touchSpecialization(const DagNode *affecter, bool touchAll)
+/*
+ * Forward invalidation to the wrapped vector distribution.
+ * This preserves the wrapper's existing delegation behavior.
+ */
+void TransformedVectorDistribution::invalidateSpecialization(const DagNode *affecter, bool touchAll)
 {
-    base_dist->touch(affecter, touchAll);
+    base_dist->invalidate(affecter, touchAll);
 }
 
 void TransformedVectorDistribution::restoreSpecialization( const DagNode *restorer )
@@ -181,6 +184,15 @@ void TransformedVectorDistribution::restoreSpecialization( const DagNode *restor
 void TransformedVectorDistribution::keepSpecialization( const DagNode* affecter )
 {
     base_dist->keep(affecter);
+}
+
+/*
+ * Forward rollback snapshotting to the wrapped vector distribution.
+ * This keeps proposal rollback state with the distribution that owns it.
+ */
+void TransformedVectorDistribution::snapshotSpecialization(void)
+{
+    base_dist->snapshot();
 }
 
 void TransformedVectorDistribution::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode* affecter)
@@ -200,5 +212,3 @@ void TransformedVectorDistribution::swapParameterInternal( const DagNode *oldP, 
 
     base_dist->swapParameter(oldP,newP);
 }
-
-
