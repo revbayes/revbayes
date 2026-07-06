@@ -4,6 +4,7 @@
 #include "AbstractHomologousDiscreteCharacterData.h"
 #include "ConstantNode.h"
 #include "DiscreteTaxonData.h"
+#include "IndexedCache.h"
 #include "MatrixReal.h"
 #include "MemberObject.h"
 #include "PartialLikelihoods.h"
@@ -21,6 +22,7 @@
 
 #include <memory>
 #include <new>
+#include <optional>
 
 namespace RevBayesCore {
 
@@ -65,138 +67,6 @@ namespace RevBayesCore {
      * pmatrices[active * activePmatrixOffset + node_index * nodeOffset + site_mixture_index]
      *
      */
-
-    template <typename T>
-    class IndexedCache {
-        struct ItemState {
-            unsigned active : 1;   // which slot: 0 or 1
-            unsigned dirty  : 1;   // does this slot need recomputation?
-        };
-
-        size_t num_items;
-        std::vector<T> slots;               // size = 2 * num_items
-        std::vector<ItemState> current_state;
-        std::optional<std::vector<ItemState>> prev_state;
-
-        T& slot(size_t item, unsigned s) {
-            return slots[s * num_items + item];
-        }
-
-    public:
-        IndexedCache(size_t n)
-            : num_items(n),
-              slots(2 * n),
-              current_state(n, {0, 1})   // all start as slot 0, dirty
-            {}
-
-        size_t size() const { return num_items;}
-
-        bool is_dirty(size_t item) const
-        {
-            assert( item >= 0 and item < num_items );
-
-            return current_state[item].dirty;
-        }
-
-        const T& operator[](size_t item) const
-        {
-            assert( not is_dirty(item) );
-
-            return slots[current_state[item].active * num_items + item];
-        }
-
-        // Read/Write access to the current_state value (must not be dirty)
-        T& get_mutable_item(size_t item)
-        {
-            assert( not is_dirty(item) );
-
-            return slots[current_state[item].active * num_items + item];
-        }
-
-        void mark_dirty(size_t item)
-        {
-            assert( item >= 0 and item < num_items );
-
-            // Should we assume that we only mark things dirty after touching?
-            // assert( is_touched() );
-
-            // Here is where we unshare with the previous state.
-            if (prev_state and not (*prev_state)[item].dirty and not is_dirty(item))
-            {
-                // If we mark something dirty multiple times, we don't want to flip the bit twice!
-                current_state[item].active = (*prev_state)[item].active ^ 1;
-            }
-
-            current_state[item].dirty = 1;
-        }
-
-        bool is_touched() const
-        {
-            return prev_state;
-        }
-
-        void mark_all_dirty()
-        {
-            for(size_t i = 0; i < num_items; i++)
-                mark_dirty(i);
-        }
-
-        // Get a mutable reference to dirty slot and mark it clean.
-        T& init_for_writing(size_t item)
-        {
-            // Don't over-write something that hasn't been invalidated.
-            assert(is_dirty(item));
-
-            // Mark the item clean.
-            current_state[item].dirty = 0;
-
-            // Access the now-clean item.
-            return get_mutable_item(item);
-        }
-
-        void keep()
-        {
-            // We should only call keep if we proposed a new state and are accepting it.
-            assert(prev_state);
-
-            prev_state.reset();
-        }
-
-        void restore()
-        {
-            // Moving back to the previous state makes no sense if there is no previous state.
-            assert(prev_state);
-
-            current_state = *prev_state;
-            prev_state.reset();
-        }
-
-        void touch()
-        {
-            if (not prev_state)
-                prev_state = current_state;
-        }
-
-        // For resize after tree topology changes, etc.
-        void resize(size_t n)
-        {
-            num_items = n;
-            slots.resize(2*n);
-            current_state.assign(n, {0, 1});
-
-            // if we change the number of nodes, how would we restore?
-            if (prev_state)
-                prev_state = current_state;
-        }
-
-        void clear()
-        {
-            slots.clear();
-            current_state.clear();
-            num_items = 0;
-            prev_state = current_state;
-        }
-    };
 
     template<class charType>
     class AbstractPhyloCTMCSiteHomogeneous : public TypedDistribution< AbstractHomologousDiscreteCharacterData >, public MemberObject< RbVector<double> >, public MemberObject < MatrixReal >, public TreeChangeEventListener {
