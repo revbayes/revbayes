@@ -208,7 +208,11 @@ void PhyloMultivariateBrownianProcess::flagNodes()
     }
 }
 
-void PhyloMultivariateBrownianProcess::touchSpecialization( const DagNode *toucher, bool touchAll )
+/*
+ * Mark multivariate Brownian process caches dirty after parent or value changes.
+ * This does not save rollback state.
+ */
+void PhyloMultivariateBrownianProcess::invalidateSpecialization( const DagNode *toucher, bool touchAll )
 {
     
     if ( toucher == sigma ) {

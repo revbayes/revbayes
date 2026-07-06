@@ -56,8 +56,9 @@ namespace RevBayesCore {
         void                                            swapParameterInternal(const DagNode *oldP, const DagNode *newP) override;  //!< Swap a parameter
 
         void                                            keepSpecialization(const DagNode *toucher) override;
+        void                                            invalidateSpecialization(const DagNode *toucher, bool touchAll) override;
         void                                            restoreSpecialization(const DagNode *toucher) override;
-        void                                            touchSpecialization(const DagNode *toucher, bool touchAll) override;
+        void                                            snapshotSpecialization(void) override;
 
     private:
         

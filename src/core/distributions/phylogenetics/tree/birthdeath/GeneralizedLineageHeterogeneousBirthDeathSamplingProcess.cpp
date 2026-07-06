@@ -1202,7 +1202,11 @@ std::vector<double> GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::si
     return ages;
 }
 
-void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::touchSpecialization(const DagNode *affecter, bool touchAll)
+/*
+ * Mark cached tree, likelihood, and parameter-specific TensorPhylo state dirty.
+ * This hook synchronizes root age but does not save rollback state.
+ */
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::invalidateSpecialization(const DagNode *affecter, bool touchAll)
 {
 
     if ( affecter == age )
@@ -1214,6 +1218,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::touchSpecializati
 
         if ( dag_node != NULL )
         {
+            // Compatibility: keep legacy downstream propagation until DagNode::invalidate() owns this notification.
             dag_node->touchAffected();
         }
 

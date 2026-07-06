@@ -710,33 +710,38 @@ void FossilizedBirthDeathSpeciationProcess::restoreSpecialization(const DagNode 
 }
 
 
-void FossilizedBirthDeathSpeciationProcess::touchSpecialization(const DagNode *toucher, bool touchAll)
+/*
+ * Mark tree FBD speciation components dirty after parent or value changes.
+ * Rollback state is saved separately by snapshotSpecialization().
+ */
+void FossilizedBirthDeathSpeciationProcess::invalidateSpecialization(const DagNode *toucher, bool touchAll)
 {
     if ( toucher == dag_node )
     {
-        if ( touched == false )
+        std::set<size_t> touched_indices = dag_node->getTouchedElementIndices();
+
+        for ( std::set<size_t>::iterator it = touched_indices.begin(); it != touched_indices.end(); it++)
         {
-            stored_likelihood = partial_likelihood;
-            stored_Psi = Psi;
+            size_t i = (*it) / taxa.size();
 
-            std::set<size_t> touched_indices = dag_node->getTouchedElementIndices();
-
-            for ( std::set<size_t>::iterator it = touched_indices.begin(); it != touched_indices.end(); it++)
-            {
-                size_t i = (*it) / taxa.size();
-
-                dirty_psi[i]  = true;
-                dirty_taxa[i] = true;
-            }
+            dirty_psi[i]  = true;
+            dirty_taxa[i] = true;
         }
-
-        touched = true;
     }
     else
     {
-        AbstractBirthDeathProcess::touchSpecialization(toucher, touchAll);
-        AbstractFossilizedBirthDeathRangeProcess::touchSpecialization(toucher, touchAll);
+        AbstractRootedTreeDistribution::invalidateSpecialization(toucher, touchAll);
+        AbstractFossilizedBirthDeathRangeProcess::invalidateSpecialization(toucher, touchAll);
     }
+}
+
+/*
+ * Save tree FBD speciation likelihood state for proposal rollback.
+ * The shared range helper owns the stored likelihood and Psi fields.
+ */
+void FossilizedBirthDeathSpeciationProcess::snapshotSpecialization(void)
+{
+    AbstractFossilizedBirthDeathRangeProcess::snapshotSpecialization();
 }
 
 
