@@ -392,26 +392,9 @@ void PhyloOrnsteinUhlenbeckThreePoint::setAlpha(const TypedDagNode<double> *a)
 
 void PhyloOrnsteinUhlenbeckThreePoint::setAlpha(const TypedDagNode<RbVector<double> > *a)
 {
-    
-    // remove the old parameter first
-    this->removeParameter( homogeneous_alpha );
-    this->removeParameter( heterogeneous_alpha );
-    homogeneous_alpha      = NULL;
-    heterogeneous_alpha    = NULL;
-    
-    
-    // set the value
-    heterogeneous_alpha = a;
-    
-    // add the new parameter
-    this->addParameter( heterogeneous_alpha );
-    
-    // redraw the current value
-    if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
-    {
-        this->redrawValue();
-    }
-    
+    // Legacy Rev syntax accepts branch-specific parameters, but this likelihood
+    // currently reads only homogeneous alpha/theta/sigma in computeLnProbability().
+    throw RbException( "dnPhyloOrnsteinUhlenbeckThreePoint does not support branch-heterogeneous alpha values." );
 }
 
 
@@ -461,26 +444,9 @@ void PhyloOrnsteinUhlenbeckThreePoint::setSigma(const TypedDagNode<double> *s)
 
 void PhyloOrnsteinUhlenbeckThreePoint::setSigma(const TypedDagNode<RbVector<double> > *s)
 {
-    
-    // remove the old parameter first
-    this->removeParameter( homogeneous_sigma );
-    this->removeParameter( heterogeneous_sigma );
-    homogeneous_sigma      = NULL;
-    heterogeneous_sigma    = NULL;
-    
-    
-    // set the value
-    heterogeneous_sigma = s;
-    
-    // add the new parameter
-    this->addParameter( heterogeneous_sigma );
-    
-    // redraw the current value
-    if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
-    {
-        this->redrawValue();
-    }
-    
+    // Legacy Rev syntax accepts branch-specific parameters, but this likelihood
+    // currently reads only homogeneous alpha/theta/sigma in computeLnProbability().
+    throw RbException( "dnPhyloOrnsteinUhlenbeckThreePoint does not support branch-heterogeneous sigma values." );
 }
 
 
@@ -511,26 +477,9 @@ void PhyloOrnsteinUhlenbeckThreePoint::setTheta(const TypedDagNode<double> *t)
 
 void PhyloOrnsteinUhlenbeckThreePoint::setTheta(const TypedDagNode<RbVector<double> > *t)
 {
-    
-    // remove the old parameter first
-    this->removeParameter( homogeneous_theta );
-    this->removeParameter( heterogeneous_theta );
-    homogeneous_theta      = NULL;
-    heterogeneous_theta    = NULL;
-    
-    
-    // set the value
-    heterogeneous_theta = t;
-    
-    // add the new parameter
-    this->addParameter( heterogeneous_theta );
-    
-    // redraw the current value
-    if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
-    {
-        this->redrawValue();
-    }
-    
+    // Legacy Rev syntax accepts branch-specific parameters, but this likelihood
+    // currently reads only homogeneous alpha/theta/sigma in computeLnProbability().
+    throw RbException( "dnPhyloOrnsteinUhlenbeckThreePoint does not support branch-heterogeneous theta values." );
 }
 
 
@@ -658,7 +607,7 @@ void PhyloOrnsteinUhlenbeckThreePoint::invalidateSpecialization( const DagNode* 
     if ( affecter == this->heterogeneous_sigma )
     {
         
-        const std::set<size_t> &indices = this->heterogeneous_clock_rates->getTouchedElementIndices();
+        const std::set<size_t> &indices = this->heterogeneous_sigma->getTouchedElementIndices();
         
         // maybe all of them have been touched or the flags haven't been set properly
         if ( indices.size() == 0 )
@@ -1133,4 +1082,3 @@ void PhyloOrnsteinUhlenbeckThreePoint::threePoint(std::vector<double> &output, c
     }
     
 }
-
