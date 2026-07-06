@@ -56,8 +56,9 @@ class DagNode;
         // variables catching some of the probability computation
         bool                                                touched_time_tree;
         bool                                                touched_branch_length_tree;
-        bool                                                was_touched_time_tree;
-        bool                                                was_touched_branch_length_tree;
+        bool                                                has_stored_tree_cache;
+        bool                                                stored_touched_time_tree;
+        bool                                                stored_touched_branch_length_tree;
         std::string                                         newick_time_tree;
         std::string                                         newick_branch_length_tree;
         Tree*                                               time_tree_unrooted;

@@ -24,18 +24,19 @@ BranchRateTreeDistribution::BranchRateTreeDistribution(const TypedDagNode<Tree>*
     time_tree( tt ),
     root_branch_fraction( rbf ),
     num_taxa( tt->getValue().getNumberOfTips() ),
-    time_tree_unrooted( NULL ),
-    stored_time_tree_unrooted( NULL ),
-    touched_branch_length_tree( true ),
     touched_time_tree( true ),
-    was_touched_branch_length_tree( false ),
-    was_touched_time_tree( false ),
+    touched_branch_length_tree( true ),
+    has_stored_tree_cache( false ),
+    stored_touched_time_tree( false ),
+    stored_touched_branch_length_tree( false ),
     newick_time_tree( ),
     newick_branch_length_tree( ),
+    time_tree_unrooted( NULL ),
     splits( ),
     split_to_branch_lengths( ),
     stored_newick_time_tree( ),
     stored_newick_branch_length_tree( ),
+    stored_time_tree_unrooted( NULL ),
     stored_splits( ),
     stored_split_to_branch_lengths( )
 {
@@ -65,18 +66,19 @@ BranchRateTreeDistribution::BranchRateTreeDistribution(const BranchRateTreeDistr
     time_tree( d.time_tree ),
     root_branch_fraction( d.root_branch_fraction ),
     num_taxa( d.num_taxa ),
-    time_tree_unrooted( NULL ),
-    stored_time_tree_unrooted( NULL ),
-    touched_branch_length_tree( true ),
     touched_time_tree( true ),
-    was_touched_branch_length_tree( false ),
-    was_touched_time_tree( false ),
+    touched_branch_length_tree( true ),
+    has_stored_tree_cache( d.has_stored_tree_cache ),
+    stored_touched_time_tree( d.stored_touched_time_tree ),
+    stored_touched_branch_length_tree( d.stored_touched_branch_length_tree ),
     newick_time_tree( d.newick_time_tree ),
     newick_branch_length_tree( d.newick_branch_length_tree ),
+    time_tree_unrooted( NULL ),
     splits( d.splits ),
     split_to_branch_lengths( d.split_to_branch_lengths ),
     stored_newick_time_tree( d.stored_newick_time_tree ),
     stored_newick_branch_length_tree( d.stored_newick_branch_length_tree ),
+    stored_time_tree_unrooted( NULL ),
     stored_splits( d.stored_splits ),
     stored_split_to_branch_lengths( d.stored_split_to_branch_lengths )
 {
@@ -146,10 +148,11 @@ BranchRateTreeDistribution& BranchRateTreeDistribution::operator=(const BranchRa
         if ( d.time_tree_unrooted != NULL ) time_tree_unrooted = d.time_tree_unrooted->clone();
         if ( d.stored_time_tree_unrooted != NULL ) stored_time_tree_unrooted = d.stored_time_tree_unrooted->clone();
         
-        touched_branch_length_tree          = true;
         touched_time_tree                   = true;
-        was_touched_branch_length_tree      = false;
-        was_touched_time_tree               = false;
+        touched_branch_length_tree          = true;
+        has_stored_tree_cache               = d.has_stored_tree_cache;
+        stored_touched_time_tree            = d.stored_touched_time_tree;
+        stored_touched_branch_length_tree   = d.stored_touched_branch_length_tree;
         newick_time_tree                    = d.newick_time_tree;
         newick_branch_length_tree           = d.newick_branch_length_tree;
         splits                              = d.splits;
@@ -417,19 +420,11 @@ void BranchRateTreeDistribution::fireTreeChangeEvent(const TopologyNode &n, cons
 void BranchRateTreeDistribution::keepSpecialization(const DagNode* affecter)
 {
     
-    if ( was_touched_time_tree == true )
+    if ( has_stored_tree_cache == true )
     {
-        was_touched_time_tree       = false;
-        touched_time_tree           = false;
-        
         delete stored_time_tree_unrooted;
         stored_time_tree_unrooted   = NULL;
-    }
-    
-    if ( was_touched_branch_length_tree == true )
-    {
-        was_touched_branch_length_tree  = false;
-        touched_branch_length_tree      = false;
+        has_stored_tree_cache       = false;
     }
     
 }
@@ -496,23 +491,18 @@ void BranchRateTreeDistribution::simulateTree( void )
 void BranchRateTreeDistribution::restoreSpecialization(const DagNode *restorer)
 {
     
-    if ( was_touched_time_tree == true )
+    if ( has_stored_tree_cache == true )
     {
         delete time_tree_unrooted;
-        was_touched_time_tree       = false;
-        touched_time_tree           = false;
         newick_time_tree            = stored_newick_time_tree;
-        time_tree_unrooted          = stored_time_tree_unrooted;
-        stored_time_tree_unrooted   = NULL;
-        splits                      = stored_splits;
-    }
-    
-    if ( was_touched_branch_length_tree == true )
-    {
-        was_touched_branch_length_tree  = false;
-        touched_branch_length_tree      = false;
         newick_branch_length_tree       = stored_newick_branch_length_tree;
+        time_tree_unrooted              = stored_time_tree_unrooted;
+        stored_time_tree_unrooted       = NULL;
+        splits                          = stored_splits;
         split_to_branch_lengths         = stored_split_to_branch_lengths;
+        touched_time_tree               = stored_touched_time_tree;
+        touched_branch_length_tree      = stored_touched_branch_length_tree;
+        has_stored_tree_cache           = false;
     }
     
 }
@@ -547,36 +537,34 @@ void BranchRateTreeDistribution::swapParameterInternal( const DagNode *oldP, con
 void BranchRateTreeDistribution::touchSpecialization(const DagNode *toucher, bool touchAll)
 {
     
+    if ( (toucher == time_tree || toucher == this->dag_node) && has_stored_tree_cache == false )
+    {
+        // Snapshot the full topology-comparison cache because likelihood computation may
+        // reroot the cached time tree even when only the branch-length tree changed.
+        has_stored_tree_cache               = true;
+        stored_touched_time_tree            = touched_time_tree;
+        stored_touched_branch_length_tree   = touched_branch_length_tree;
+        stored_newick_time_tree             = newick_time_tree;
+        stored_newick_branch_length_tree    = newick_branch_length_tree;
+        stored_splits                       = splits;
+        stored_split_to_branch_lengths      = split_to_branch_lengths;
+
+        delete stored_time_tree_unrooted;
+        stored_time_tree_unrooted = NULL;
+        if ( time_tree_unrooted != NULL )
+        {
+            stored_time_tree_unrooted = time_tree_unrooted->clone();
+        }
+    }
+
     if ( toucher == time_tree )
     {
         touched_time_tree = true;
-
-        if ( was_touched_time_tree == false )
-        {
-            was_touched_time_tree       = true;
-            stored_newick_time_tree     = newick_time_tree;
-            stored_time_tree_unrooted   = time_tree_unrooted;
-            stored_splits               = splits;
-        }
-        else
-        {
-            delete time_tree_unrooted;
-        }
-        time_tree_unrooted = NULL;
-        
     }
     
     if ( toucher == this->dag_node )
     {
         touched_branch_length_tree = true;
-
-        if ( was_touched_branch_length_tree == false )
-        {
-            was_touched_branch_length_tree      = true;
-            stored_newick_branch_length_tree    = newick_branch_length_tree;
-            stored_split_to_branch_lengths      = split_to_branch_lengths;
-        }
-        
     }
     
 }
