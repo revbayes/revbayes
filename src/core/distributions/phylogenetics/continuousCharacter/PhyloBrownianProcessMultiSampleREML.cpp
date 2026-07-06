@@ -228,7 +228,7 @@ void PhyloBrownianProcessMultiSampleREML::recursiveComputeLnProbability( const T
         }
 
         // first we grab the specimen data
-        std::vector<std::vector<double>> observations(0);
+        std::vector<std::vector<double> > observations(this->num_sites);
 
         std::vector<Taxon> specimens; 
 
@@ -241,8 +241,6 @@ void PhyloBrownianProcessMultiSampleREML::recursiveComputeLnProbability( const T
 
                 for (int char_index=0; char_index<this->num_sites; ++char_index)
                 {
-                    observations.push_back(std::vector<double>(0));
-
                     if ( dt.isCharacterResolved( site_indices[char_index] ) )
                     {
                         double x = dt.getCharacter( site_indices[char_index] );
@@ -262,6 +260,8 @@ void PhyloBrownianProcessMultiSampleREML::recursiveComputeLnProbability( const T
         //
         for (int char_index=0; char_index<this->num_sites; ++char_index)
         {
+            missing_data[node_index][char_index] = observations[char_index].empty();
+
             if ( !observations[char_index].empty() ){
                 double mu = observations[char_index][0];
                 double var = within_species_variance;
@@ -342,12 +342,14 @@ void PhyloBrownianProcessMultiSampleREML::recursiveComputeLnProbability( const T
 
             if ( left_missing && right_missing )
             {
+                missing_data[node_index][char_index] = true;
                 mu_node[char_index] = RbConstants::Double::nan;
                 v_node[char_index] = 0.0;
                 p_node[char_index] = 0.0;
             }
             else if ( left_missing && !right_missing )
             {
+                missing_data[node_index][char_index] = false;
                 mu_node[char_index] = mu_right[char_index];
                 double var_right = this->computeBranchTime(right_index, right.getBranchLength());
                 v_node[char_index] = v_right[char_index] + var_right;
@@ -355,6 +357,7 @@ void PhyloBrownianProcessMultiSampleREML::recursiveComputeLnProbability( const T
             }
             else if ( !left_missing && right_missing )
             {
+                missing_data[node_index][char_index] = false;
                 mu_node[char_index] = mu_left[char_index];
                 double var_left = this->computeBranchTime(left_index, left.getBranchLength());
                 v_node[char_index] = v_left[char_index] + var_left;
@@ -362,6 +365,8 @@ void PhyloBrownianProcessMultiSampleREML::recursiveComputeLnProbability( const T
             }
             else 
             {
+                missing_data[node_index][char_index] = false;
+
                 // merging rule
                 // D_node(y) = D_left(y) * D_right(y)
                 double var_left = this->computeBranchTime(left_index, left.getBranchLength()) + v_left[char_index];

@@ -4,8 +4,8 @@
    Successfully read file
    Attempting to read the contents of file "Drosophila_pruned.tre"
    Successfully read file
-lp1 = -125.757
-lp2 = -125.757
+lp1 = -661.917
+lp2 = -661.917
 likelihoods in BM multi-sample distributions equal, test passed
    
    Running burn-in phase of Monte Carlo sampler for 50 iterations.
