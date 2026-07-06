@@ -1045,12 +1045,30 @@ double PhyloMultiSampleOrnsteinUhlenbeckProcessREML::sumRootLikelihood( void )
 
 void PhyloMultiSampleOrnsteinUhlenbeckProcessREML::touchSpecialization( const DagNode* affecter, bool touchAll )
 {
-    
-    // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
-    if ( affecter == this->heterogeneous_sigma )
+
+    const TypedDagNode< RbVector< double > > *branch_parameter = NULL;
+    if ( affecter == this->heterogeneous_alpha )
     {
-        
-        const std::set<size_t> &indices = this->heterogeneous_sigma->getTouchedElementIndices();
+        branch_parameter = this->heterogeneous_alpha;
+    }
+    else if ( affecter == this->heterogeneous_sigma )
+    {
+        branch_parameter = this->heterogeneous_sigma;
+    }
+    else if ( affecter == this->heterogeneous_theta )
+    {
+        branch_parameter = this->heterogeneous_theta;
+    }
+    else if ( affecter == this->heterogeneous_clock_rates )
+    {
+        branch_parameter = this->heterogeneous_clock_rates;
+    }
+
+    // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
+    if ( branch_parameter != NULL )
+    {
+
+        const std::set<size_t> &indices = branch_parameter->getTouchedElementIndices();
         
         // maybe all of them have been touched or the flags haven't been set properly
         if ( indices.size() == 0 )
@@ -1064,19 +1082,70 @@ void PhyloMultiSampleOrnsteinUhlenbeckProcessREML::touchSpecialization( const Da
             // flag recomputation only for the nodes
             for (std::set<size_t>::iterator it = indices.begin(); it != indices.end(); ++it)
             {
+                if ( *it >= nodes.size() )
+                {
+                    touchAll = true;
+                    break;
+                }
+
+                if ( nodes[*it]->isRoot() == true )
+                {
+                    this->recursivelyFlagNodeDirty( *nodes[*it] );
+                }
+                else
+                {
+                    this->recursivelyFlagNodeDirty( nodes[*it]->getParent() );
+                }
+            }
+        }
+    }
+
+    if ( affecter == this->within_species_variances )
+    {
+
+        const std::set<size_t> &indices = this->within_species_variances->getTouchedElementIndices();
+
+        // maybe all of them have been touched or the flags haven't been set properly
+        if ( indices.size() == 0 )
+        {
+            // just flag everyting for recomputation
+            touchAll = true;
+        }
+        else
+        {
+            const std::vector<TopologyNode *> &nodes = this->tau->getValue().getNodes();
+            // The variance vector is indexed by species/tip order; fall back to full invalidation
+            // if that mapping is not available for a touched index.
+            for (std::set<size_t>::iterator it = indices.begin(); it != indices.end(); ++it)
+            {
+                if ( *it >= nodes.size() || nodes[*it]->isTip() == false )
+                {
+                    touchAll = true;
+                    break;
+                }
+
                 this->recursivelyFlagNodeDirty( *nodes[*it] );
             }
         }
     }
-    else if ( affecter != this->tau ) // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
+
+    if ( affecter == this->root_state )
+    {
+        this->recursivelyFlagNodeDirty( this->tau->getValue().getRoot() );
+    }
+
+    if ( affecter == this->homogeneous_alpha || affecter == this->homogeneous_sigma || affecter == this->homogeneous_theta || affecter == this->homogeneous_clock_rate || affecter == this->homogeneous_site_rate || affecter == this->heterogeneous_site_rates )
     {
         touchAll = true;
-        
-        if ( affecter == this->dag_node )
-        {
-            resetValue();
-        }
-        
+    }
+    else if ( branch_parameter == NULL && affecter != this->within_species_variances && affecter != this->root_state && affecter != this->tau ) // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
+    {
+        touchAll = true;
+    }
+
+    if ( affecter == this->dag_node )
+    {
+        resetValue();
     }
     
     if ( touchAll )
