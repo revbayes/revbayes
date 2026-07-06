@@ -694,7 +694,11 @@ double PhyloBrownianProcessMultiSampleREML::sumRootLikelihood( void )
 }
 
 
-void PhyloBrownianProcessMultiSampleREML::touchSpecialization( const DagNode* affecter, bool touchAll )
+/*
+ * Mark multisample Brownian REML likelihood caches dirty after a dependency changes.
+ * Proposal rollback is handled by existing active-likelihood buffers.
+ */
+void PhyloBrownianProcessMultiSampleREML::invalidateSpecialization( const DagNode* affecter, bool touchAll )
 {
     
     // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
@@ -763,7 +767,8 @@ void PhyloBrownianProcessMultiSampleREML::touchSpecialization( const DagNode* af
             (*it) = true;
         }
         
-        // flip the active likelihood pointers
+        // Legacy two-buffer rollback: invalidation flips active likelihood slots.
+        // Remove this once dirty nodes own explicit snapshot state.
         for (size_t index = 0; index < changed_nodes.size(); ++index)
         {
             if ( changed_nodes[index] == false )
@@ -798,4 +803,3 @@ void PhyloBrownianProcessMultiSampleREML::swapParameterInternal(const DagNode *o
     }
     
 }
-

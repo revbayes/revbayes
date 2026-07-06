@@ -510,7 +510,11 @@ std::vector<double> PhyloMultivariateBrownianProcessREML::simulateRootCharacters
 }
 
 
-void PhyloMultivariateBrownianProcessREML::touchSpecialization( const DagNode* affecter, bool touchAll )
+/*
+ * Mark multivariate Brownian REML likelihood caches dirty after a dependency changes.
+ * Rate-matrix invalidation also refreshes the active precision matrix.
+ */
+void PhyloMultivariateBrownianProcessREML::invalidateSpecialization( const DagNode* affecter, bool touchAll )
 {
  
     // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
@@ -557,7 +561,8 @@ void PhyloMultivariateBrownianProcessREML::touchSpecialization( const DagNode* a
             (*it) = true;
         }
         
-        // flip the active likelihood pointers
+        // Legacy two-buffer rollback: invalidation flips active likelihood slots.
+        // Remove this once dirty nodes own explicit snapshot state.
         for (size_t index = 0; index < changed_nodes.size(); ++index)
         {
             if ( changed_nodes[index] == false )
@@ -597,4 +602,3 @@ void PhyloMultivariateBrownianProcessREML::swapParameterInternal(const DagNode *
     }
     
 }
-

@@ -810,7 +810,11 @@ double PhyloBrownianProcessStateDependent::sumRootLikelihood( void )
 }
 
 
-void PhyloBrownianProcessStateDependent::touchSpecialization( const DagNode* affecter, bool touchAll )
+/*
+ * Mark state-dependent Brownian likelihood caches dirty after a dependency changes.
+ * The current implementation still invalidates all nodes for any dependency.
+ */
+void PhyloBrownianProcessStateDependent::invalidateSpecialization( const DagNode* affecter, bool touchAll )
 {
 
     // currently we don't actually use any fetching of parts of the tree that don't need recomputation.
@@ -830,7 +834,8 @@ void PhyloBrownianProcessStateDependent::touchSpecialization( const DagNode* aff
             (*it) = true;
         }
 
-        // flip the active likelihood pointers
+        // Legacy two-buffer rollback: invalidation flips active likelihood slots.
+        // Remove this once dirty nodes own explicit snapshot state.
         for (size_t index = 0; index < changed_nodes.size(); ++index)
         {
             if ( changed_nodes[index] == false )

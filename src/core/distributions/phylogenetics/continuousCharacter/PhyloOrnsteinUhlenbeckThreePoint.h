@@ -49,7 +49,7 @@ namespace RevBayesCore {
         void                                                                simulateRecursively(const TopologyNode& node, std::vector< ContinuousTaxonData > &t);
         std::vector<double>                                                 simulateRootCharacters(size_t n);
         double                                                              sumRootLikelihood(void);
-        virtual void                                                        touchSpecialization(const DagNode *toucher, bool touchAll);
+        virtual void                                                        invalidateSpecialization(const DagNode *toucher, bool touchAll);
         std::vector<double>                                                 transformBranchLengths(void) const;
         void                                                                threePoint(std::vector<double> &out, const std::vector<double> &bl, const std::vector<double> &obs, const std::vector<double> &mean);
         
@@ -89,5 +89,4 @@ namespace RevBayesCore {
 
 
 #endif
-
 

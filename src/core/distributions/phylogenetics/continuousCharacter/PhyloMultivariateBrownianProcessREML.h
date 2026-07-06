@@ -43,7 +43,7 @@ namespace RevBayesCore {
         virtual void                                                        restoreSpecialization(const DagNode *restorer);
         std::vector<double>                                                 simulateRootCharacters(size_t n);
         virtual void                                                        simulateRecursively(const TopologyNode& node, std::vector< ContinuousTaxonData > &t);
-        virtual void                                                        touchSpecialization(const DagNode *toucher, bool touchAll);
+        virtual void                                                        invalidateSpecialization(const DagNode *toucher, bool touchAll);
 
         // Parameter management functions.
         virtual void                                                        swapParameterInternal(const DagNode *oldP, const DagNode *newP);                         //!< Swap a parameter

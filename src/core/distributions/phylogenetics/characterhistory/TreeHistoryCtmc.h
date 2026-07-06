@@ -90,7 +90,7 @@ namespace RevBayesCore {
         // virtual methods that may be overwritten, but then the derived class should call this methods
         virtual void                                                        keepSpecialization(const DagNode* affecter);
         virtual void                                                        restoreSpecialization(const DagNode *restorer);
-        virtual void                                                        touchSpecialization(const DagNode *toucher, bool touchAll);
+        virtual void                                                        invalidateSpecialization(const DagNode *toucher, bool touchAll);
 
         // pure virtual methods
         virtual double                                                      computeRootLikelihood(const TopologyNode &nd) = 0;
@@ -909,8 +909,12 @@ void RevBayesCore::TreeHistoryCtmc<charType>::swapParameterInternal(const DagNod
 }
 
 
+/*
+ * Mark character-history likelihood caches dirty after a dependency changes.
+ * Rollback state is maintained by the existing active-likelihood buffers.
+ */
 template<class charType>
-void RevBayesCore::TreeHistoryCtmc<charType>::touchSpecialization( const DagNode* affecter, bool touchAll )
+void RevBayesCore::TreeHistoryCtmc<charType>::invalidateSpecialization( const DagNode* affecter, bool touchAll )
 {
 
     // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
@@ -927,7 +931,8 @@ void RevBayesCore::TreeHistoryCtmc<charType>::touchSpecialization( const DagNode
             (*it) = true;
         }
 
-        // flip the active likelihood pointers
+        // Legacy two-buffer rollback: invalidation flips active likelihood slots.
+        // Remove this once dirty nodes own explicit snapshot state.
         for (size_t index = 0; index < changed_nodes.size(); ++index)
         {
             if ( !changed_nodes[index])

@@ -647,7 +647,11 @@ double PhyloOrnsteinUhlenbeckThreePoint::sumRootLikelihood( void )
 }
 
 
-void PhyloOrnsteinUhlenbeckThreePoint::touchSpecialization( const DagNode* affecter, bool touchAll )
+/*
+ * Mark three-point OU likelihood caches dirty after a dependency changes.
+ * Proposal rollback is handled by existing active-likelihood buffers.
+ */
+void PhyloOrnsteinUhlenbeckThreePoint::invalidateSpecialization( const DagNode* affecter, bool touchAll )
 {
     
     // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
@@ -690,7 +694,8 @@ void PhyloOrnsteinUhlenbeckThreePoint::touchSpecialization( const DagNode* affec
             (*it) = true;
         }
         
-        // flip the active likelihood pointers
+        // Legacy two-buffer rollback: invalidation flips active likelihood slots.
+        // Remove this once dirty nodes own explicit snapshot state.
         for (size_t index = 0; index < changed_nodes.size(); ++index)
         {
             if ( changed_nodes[index] == false )
@@ -1128,5 +1133,4 @@ void PhyloOrnsteinUhlenbeckThreePoint::threePoint(std::vector<double> &output, c
     }
     
 }
-
 

@@ -53,7 +53,7 @@ namespace RevBayesCore {
         virtual double                                      computeRootLikelihood(const TopologyNode &n);
         virtual double                                      computeInternalNodeLikelihood(const TopologyNode &n);
         virtual double                                      computeTipLikelihood(const TopologyNode &node);
-        virtual void                                        touchSpecialization(const DagNode *toucher, bool touchAll);
+        virtual void                                        invalidateSpecialization(const DagNode *toucher, bool touchAll);
 
     private:
 
@@ -876,8 +876,12 @@ void RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::swapParameterInterna
 
 }
 
+/*
+ * Mark the site-IID character-history caches dirty after a dependency changes.
+ * Other dependencies use the base character-history invalidation logic.
+ */
 template<class charType>
-void RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::touchSpecialization( const DagNode* affecter, bool touchAll )
+void RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::invalidateSpecialization( const DagNode* affecter, bool touchAll )
 {
 
     // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
@@ -888,7 +892,7 @@ void RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::touchSpecialization(
     }
     else
     {
-        TreeHistoryCtmc<charType>::touchSpecialization( affecter, touchAll );
+        TreeHistoryCtmc<charType>::invalidateSpecialization( affecter, touchAll );
     }
 
 }
