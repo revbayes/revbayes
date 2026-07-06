@@ -2549,6 +2549,7 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::touchSpecialization(c
         
         if ( dag_node != NULL )
         {
+            // Compatibility: keep legacy downstream propagation until DagNode::invalidate() owns this notification.
             dag_node->touchAffected();
         }
     }
