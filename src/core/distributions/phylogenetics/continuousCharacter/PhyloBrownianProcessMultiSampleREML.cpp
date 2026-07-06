@@ -29,12 +29,7 @@ using namespace RevBayesCore;
 
 PhyloBrownianProcessMultiSampleREML::PhyloBrownianProcessMultiSampleREML(const TypedDagNode<Tree> *tr, const TypedDagNode< RbVector< double > > *v, const std::vector<Taxon> &ta, size_t ns) : AbstractPhyloBrownianProcess( tr, ns ),
     within_species_variances( v ),
-    partial_likelihoods( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
-    means( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
-    variances( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
-    active_likelihood( std::vector<size_t>(this->num_nodes, 0) ),
-    changed_nodes( std::vector<bool>(this->num_nodes, false) ),
-    dirty_nodes( std::vector<bool>(this->num_nodes, true) ),
+    node_likelihoods(this->num_nodes),
     taxa( ta )
 {
     
@@ -87,7 +82,7 @@ double PhyloBrownianProcessMultiSampleREML::computeLnProbability( void )
     if ( tau->getValue().getTreeChangeEventHandler().isListening( this ) == false )
     {
         tau->getValue().getTreeChangeEventHandler().addListener( this );
-        dirty_nodes = std::vector<bool>(tau->getValue().getNumberOfNodes(), true);
+        resetValue();
     }
     
     // compute the ln probability by recursively calling the probability calculation for each node
@@ -97,7 +92,7 @@ double PhyloBrownianProcessMultiSampleREML::computeLnProbability( void )
     size_t root_index = root.getIndex();
     
     // only necessary if the root is actually dirty
-    if ( this->dirty_nodes[root_index] )
+    if ( not this->node_likelihoods.is_valid(root_index) )
     {
         recursiveComputeLnProbability( root, root_index );
     }
@@ -190,30 +185,27 @@ double PhyloBrownianProcessMultiSampleREML::getWithinSpeciesVariance(const std::
 
 void PhyloBrownianProcessMultiSampleREML::keepSpecialization( const DagNode* affecter )
 {
-    
-    // reset all flags
-    for (std::vector<bool>::iterator it = this->dirty_nodes.begin(); it != this->dirty_nodes.end(); ++it)
+    if (node_likelihoods.has_snapshot())
     {
-        (*it) = false;
+        node_likelihoods.keep();
     }
-    
-    for (std::vector<bool>::iterator it = this->changed_nodes.begin(); it != this->changed_nodes.end(); ++it)
-    {
-        (*it) = false;
-    }
-    
 }
 
 
 void PhyloBrownianProcessMultiSampleREML::recursiveComputeLnProbability( const TopologyNode &node, size_t node_index )
 {
     // check for recomputation
-    if ( node.isTip() == true && (dirty_nodes[node_index] == true ) )
+    if ( node.isTip() == true && not node_likelihoods.is_valid(node_index) )
     {
-        
-        std::vector<double> &mu_node  = this->means[this->active_likelihood[node_index]][node_index];
-        std::vector<double> &var_node  = this->variances[this->active_likelihood[node_index]][node_index];
-        std::vector<double> &p_node  = this->partial_likelihoods[this->active_likelihood[node_index]][node_index];
+        NodeCache &node_cache = this->node_likelihoods.init_for_writing(node_index);
+        node_cache.partial_likelihoods.assign(this->num_sites, 0.0);
+        node_cache.means.assign(this->num_sites, 0.0);
+        node_cache.variances.assign(this->num_sites, 0.0);
+        node_cache.missing_data.assign(this->num_sites, false);
+
+        std::vector<double> &mu_node  = node_cache.means;
+        std::vector<double> &var_node = node_cache.variances;
+        std::vector<double> &p_node   = node_cache.partial_likelihoods;
 
         const std::string &name = this->tau->getValue().getNode( node_index ).getName();
 
@@ -260,7 +252,7 @@ void PhyloBrownianProcessMultiSampleREML::recursiveComputeLnProbability( const T
         //
         for (int char_index=0; char_index<this->num_sites; ++char_index)
         {
-            missing_data[node_index][char_index] = observations[char_index].empty();
+            node_cache.missing_data[char_index] = observations[char_index].empty();
 
             if ( !observations[char_index].empty() ){
                 double mu = observations[char_index][0];
@@ -300,14 +292,17 @@ void PhyloBrownianProcessMultiSampleREML::recursiveComputeLnProbability( const T
             }
         }
     }
-    else if ( node.isTip() == false && dirty_nodes[node_index] == true )
+    else if ( node.isTip() == false && not node_likelihoods.is_valid(node_index) )
     {
-        // mark as computed
-        dirty_nodes[node_index] = false;
+        NodeCache &node_cache = this->node_likelihoods.init_for_writing(node_index);
+        node_cache.partial_likelihoods.assign(this->num_sites, 0.0);
+        node_cache.means.assign(this->num_sites, 0.0);
+        node_cache.variances.assign(this->num_sites, 0.0);
+        node_cache.missing_data.assign(this->num_sites, false);
 
-        std::vector<double> &mu_node = this->means[this->active_likelihood[node_index]][node_index];
-        std::vector<double> &v_node  = this->variances[this->active_likelihood[node_index]][node_index];
-        std::vector<double> &p_node  = this->partial_likelihoods[this->active_likelihood[node_index]][node_index];
+        std::vector<double> &mu_node = node_cache.means;
+        std::vector<double> &v_node  = node_cache.variances;
+        std::vector<double> &p_node  = node_cache.partial_likelihoods;
 
         // get the number of children
         size_t num_children = node.getNumberOfChildren();
@@ -324,32 +319,34 @@ void PhyloBrownianProcessMultiSampleREML::recursiveComputeLnProbability( const T
         size_t right_index = right.getIndex();
         recursiveComputeLnProbability( right, right_index );
 
-        const std::vector<double> &mu_left  = this->means[this->active_likelihood[left_index]][left_index];
-        const std::vector<double> &mu_right = this->means[this->active_likelihood[right_index]][right_index];
+        const NodeCache &left_cache  = this->node_likelihoods[left_index];
+        const NodeCache &right_cache = this->node_likelihoods[right_index];
+        const std::vector<double> &mu_left  = left_cache.means;
+        const std::vector<double> &mu_right = right_cache.means;
 
-        const std::vector<double> &v_left   = this->variances[this->active_likelihood[left_index]][left_index];
-        const std::vector<double> &v_right  = this->variances[this->active_likelihood[right_index]][right_index];
+        const std::vector<double> &v_left   = left_cache.variances;
+        const std::vector<double> &v_right  = right_cache.variances;
         
-        const std::vector<double> &p_left   = this->partial_likelihoods[this->active_likelihood[left_index]][left_index];
-        const std::vector<double> &p_right  = this->partial_likelihoods[this->active_likelihood[right_index]][right_index];
+        const std::vector<double> &p_left   = left_cache.partial_likelihoods;
+        const std::vector<double> &p_right  = right_cache.partial_likelihoods;
        
         size_t num_sites = this->num_sites;
 
         for (size_t char_index = 0; char_index < num_sites; char_index++)
         {
-            bool left_missing = missing_data[left_index][char_index];
-            bool right_missing = missing_data[right_index][char_index];
+            bool left_missing = left_cache.missing_data[char_index];
+            bool right_missing = right_cache.missing_data[char_index];
 
             if ( left_missing && right_missing )
             {
-                missing_data[node_index][char_index] = true;
+                node_cache.missing_data[char_index] = true;
                 mu_node[char_index] = RbConstants::Double::nan;
                 v_node[char_index] = 0.0;
                 p_node[char_index] = 0.0;
             }
             else if ( left_missing && !right_missing )
             {
-                missing_data[node_index][char_index] = false;
+                node_cache.missing_data[char_index] = false;
                 mu_node[char_index] = mu_right[char_index];
                 double var_right = this->computeBranchTime(right_index, right.getBranchLength());
                 v_node[char_index] = v_right[char_index] + var_right;
@@ -357,7 +354,7 @@ void PhyloBrownianProcessMultiSampleREML::recursiveComputeLnProbability( const T
             }
             else if ( !left_missing && right_missing )
             {
-                missing_data[node_index][char_index] = false;
+                node_cache.missing_data[char_index] = false;
                 mu_node[char_index] = mu_left[char_index];
                 double var_left = this->computeBranchTime(left_index, left.getBranchLength());
                 v_node[char_index] = v_left[char_index] + var_left;
@@ -365,7 +362,7 @@ void PhyloBrownianProcessMultiSampleREML::recursiveComputeLnProbability( const T
             }
             else 
             {
-                missing_data[node_index][char_index] = false;
+                node_cache.missing_data[char_index] = false;
 
                 // merging rule
                 // D_node(y) = D_left(y) * D_right(y)
@@ -386,26 +383,6 @@ void PhyloBrownianProcessMultiSampleREML::recursiveComputeLnProbability( const T
         }
        
     } // end if we need to compute something for this node.
-    
-
-    if (node.isTip()){
-
-
-        size_t char_index = 0;
-
-        bool missing = missing_data[node_index][char_index];
-
-        if (!missing){
-
-            const std::vector<double> &mu  = this->means[this->active_likelihood[node_index]][node_index];
-            const std::vector<double> &var = this->variances[this->active_likelihood[node_index]][node_index];
-            const std::vector<double> &p   = this->partial_likelihoods[this->active_likelihood[node_index]][node_index];
-
-        }
-
-    }
-    
-    
 }
 
 
@@ -415,27 +392,35 @@ void PhyloBrownianProcessMultiSampleREML::recursivelyFlagNodeDirty( const Topolo
     // we need to flag this node and all ancestral nodes for recomputation
     size_t index = n.getIndex();
     
-    // if this node is already dirty, the also all the ancestral nodes must have been flagged as dirty
-    if ( dirty_nodes[index] == false )
+    // if this node is already invalid, then all ancestral nodes must have been invalidated too
+    if ( node_likelihoods.is_valid(index) )
     {
         // the root doesn't have an ancestor
         if ( n.isRoot() == false )
         {
             recursivelyFlagNodeDirty( n.getParent() );
         }
-        
-        // set the flag
-        dirty_nodes[index] = true;
-        
-        // if we previously haven't touched this node, then we need to change the active likelihood pointer
-        if ( changed_nodes[index] == false )
-        {
-            active_likelihood[index] = (active_likelihood[index] == 0 ? 1 : 0);
-            changed_nodes[index] = true;
-        }
-        
+
+        node_likelihoods.invalidate(index);
     }
     
+}
+
+
+/*
+ * Invalidate the computation that uses a branch transform.
+ * Branch parameters belong to the edge ending at n, and are applied by n's parent.
+ */
+void PhyloBrownianProcessMultiSampleREML::invalidateBranchAndAncestors( const TopologyNode &n )
+{
+    if (n.isRoot())
+    {
+        recursivelyFlagNodeDirty(n);
+    }
+    else
+    {
+        recursivelyFlagNodeDirty(n.getParent());
+    }
 }
 
 
@@ -516,12 +501,8 @@ void PhyloBrownianProcessMultiSampleREML::redrawValue( void )
 void PhyloBrownianProcessMultiSampleREML::resetValue( void )
 {
     
-    // check if the vectors need to be resized
-    partial_likelihoods     = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
-    means                   = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
-    //variances               = std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) );
-    variances               = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
-    missing_data            = std::vector<std::vector<bool> >(this->num_nodes, std::vector<bool>(this->num_sites, true) );
+    this->num_nodes = tau->getValue().getNumberOfNodes();
+    node_likelihoods.resize(this->num_nodes);
 
     // create a vector with the correct site indices
     // some of the sites may have been excluded
@@ -542,6 +523,7 @@ void PhyloBrownianProcessMultiSampleREML::resetValue( void )
     }
     
     // first we check for missing data
+    std::vector<std::vector<bool> > tip_missing(this->num_nodes, std::vector<bool>(this->num_sites, true));
     for (size_t site = 0; site < this->num_sites; ++site)
     {
         for (size_t i=0; i<taxa.size(); ++i)
@@ -553,7 +535,7 @@ void PhyloBrownianProcessMultiSampleREML::resetValue( void )
             if ( taxon.isCharacterResolved(site_indices[site]) == true && RbMath::isFinite(c) == true )
             {
                 size_t species_index = tau->getValue().getTipIndex( t.getSpeciesName() );
-                missing_data[species_index][site] = false;
+                tip_missing[species_index][site] = false;
             }
         }
     }
@@ -568,7 +550,7 @@ void PhyloBrownianProcessMultiSampleREML::resetValue( void )
             {
                 size_t species_index = (*it)->getIndex();
                 
-                if ( missing_data[species_index][site] )
+                if ( tip_missing[species_index][site] )
                 {
                     use_missing_data = true;
                     break;
@@ -578,89 +560,15 @@ void PhyloBrownianProcessMultiSampleREML::resetValue( void )
         }
     }
     
-    if ( use_missing_data == true )
-    {
-        variances.clear();
-        variances = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
-    }
-    else
-    {
-        variances.clear();
-        variances = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
-        //variances = std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) );
-    }
-
-                
-    for (size_t site = 0; site < this->num_sites; ++site)
-    {
-        
-        for (std::vector<TopologyNode*>::iterator it = nodes.begin(); it != nodes.end(); ++it)
-        {
-            if ( (*it)->isTip() )
-            {
-                const std::string &name = (*it)->getName();
-                double c = computeMeanForSpecies(name, site_indices[site]);
-               
-                size_t n = getNumberOfSamplesForSpecies(name);
-                
-                if (n == 0)
-                {
-                    variances[0][(*it)->getIndex()][site] = 0.0;
-                }
-                else if (n > 0){
-                    variances[0][(*it)->getIndex()][site] = sqrt( getWithinSpeciesVariance(name) ) / getNumberOfSamplesForSpecies(name);
-                }
-                else
-                {
-                    throw RbException("sample size cannot be negative");
-                }
-
-                means[0][(*it)->getIndex()][site] = c;
-                means[1][(*it)->getIndex()][site] = c;
-            }
-        }
-    }
-    
-    
-    // finally we set all the flags for recomputation
-    for (std::vector<bool>::iterator it = dirty_nodes.begin(); it != dirty_nodes.end(); ++it)
-    {
-        (*it) = true;
-    }
-    
-    // flip the active likelihood pointers
-    for (size_t index = 0; index < changed_nodes.size(); ++index)
-    {
-        active_likelihood[index] = 0;
-        changed_nodes[index] = true;
-    }
-    
 }
 
 
 void PhyloBrownianProcessMultiSampleREML::restoreSpecialization( const DagNode* affecter )
 {
-    
-    // reset the flags
-    for (std::vector<bool>::iterator it = dirty_nodes.begin(); it != dirty_nodes.end(); ++it)
+    if (node_likelihoods.has_snapshot())
     {
-        (*it) = false;
+        node_likelihoods.restore();
     }
-    
-    // restore the active likelihoods vector
-    for (size_t index = 0; index < changed_nodes.size(); ++index)
-    {
-        // we have to restore, that means if we have changed the active likelihood vector
-        // then we need to revert this change
-        if ( changed_nodes[index] == true )
-        {
-            active_likelihood[index] = (active_likelihood[index] == 0 ? 1 : 0);
-        }
-        
-        // set all flags to false
-        changed_nodes[index] = false;
-    }
-    
 }
 
 
@@ -686,7 +594,7 @@ double PhyloBrownianProcessMultiSampleREML::sumRootLikelihood( void )
     size_t node_index = root.getIndex();
     
     // get the pointers to the partial likelihoods of the left and right subtree
-    std::vector<double> &p_node = this->partial_likelihoods[this->active_likelihood[node_index]][node_index];
+    const std::vector<double> &p_node = this->node_likelihoods[node_index].partial_likelihoods;
     
     // sum the log-likelihoods for all sites together
     double sum_partial_probs = 0.0;
@@ -699,9 +607,15 @@ double PhyloBrownianProcessMultiSampleREML::sumRootLikelihood( void )
 }
 
 
+void PhyloBrownianProcessMultiSampleREML::snapshotSpecialization( void )
+{
+    node_likelihoods.snapshot();
+}
+
+
 /*
  * Mark multisample Brownian REML likelihood caches dirty after a dependency changes.
- * Proposal rollback is handled by existing active-likelihood buffers.
+ * Snapshot state is stored by IndexedCache before this invalidation hook runs.
  */
 void PhyloBrownianProcessMultiSampleREML::invalidateSpecialization( const DagNode* affecter, bool touchAll )
 {
@@ -722,17 +636,20 @@ void PhyloBrownianProcessMultiSampleREML::invalidateSpecialization( const DagNod
         {
             const std::vector<TopologyNode *> &nodes = this->tau->getValue().getNodes();
             // flag recomputation only for the nodes
-            for (TopologyNode* node : nodes)
+            for (std::set<size_t>::iterator it = indices.begin(); it != indices.end(); ++it)
             {
-                if (node->isRoot() == false)
+                if ( *it >= nodes.size() )
                 {
-                    this->recursivelyFlagNodeDirty(*node);
+                    touchAll = true;
+                    break;
                 }
-            }
 
+                this->invalidateBranchAndAncestors( *nodes[*it] );
+            }
         }
     }
-    else if ( affecter == this->within_species_variances )
+
+    if ( affecter == this->within_species_variances )
     {
         
         const std::set<size_t> &indices = this->within_species_variances->getTouchedElementIndices();
@@ -746,43 +663,34 @@ void PhyloBrownianProcessMultiSampleREML::invalidateSpecialization( const DagNod
         else
         {
             const std::vector<TopologyNode *> &nodes = this->tau->getValue().getNodes();
-            // flag recomputation only for the nodes
-            for (TopologyNode* node : nodes)
+            // The variance vector is indexed by species/tip order; fall back to full invalidation
+            // if that mapping is not available for a touched index.
+            for (std::set<size_t>::iterator it = indices.begin(); it != indices.end(); ++it)
             {
-                this->recursivelyFlagNodeDirty(*node);
+                if ( *it >= nodes.size() || nodes[*it]->isTip() == false )
+                {
+                    touchAll = true;
+                    break;
+                }
+
+                this->recursivelyFlagNodeDirty(*nodes[*it]);
             }
         }
         
     }
-    else if ( affecter != this->tau ) // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
+
+    if ( affecter == this->dag_node )
+    {
+        resetValue();
+    }
+    else if ( affecter != this->heterogeneous_clock_rates && affecter != this->within_species_variances && affecter != this->tau ) // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
     {
         touchAll = true;
-        
-        if ( affecter == this->dag_node )
-        {
-            resetValue();
-        }
-        
     }
     
     if ( touchAll )
     {
-        for (std::vector<bool>::iterator it = dirty_nodes.begin(); it != dirty_nodes.end(); ++it)
-        {
-            (*it) = true;
-        }
-        
-        // Legacy two-buffer rollback: invalidation flips active likelihood slots.
-        // Remove this once dirty nodes own explicit snapshot state.
-        for (size_t index = 0; index < changed_nodes.size(); ++index)
-        {
-            if ( changed_nodes[index] == false )
-            {
-                active_likelihood[index] = (active_likelihood[index] == 0 ? 1 : 0);
-                changed_nodes[index] = true;
-            }
-        }
-        
+        node_likelihoods.invalidate_all();
     }
     
 }

@@ -2,6 +2,7 @@
 #define PhyloBrownianProcessMultiSampleREML_H
 
 #include "AbstractPhyloBrownianProcess.h"
+#include "IndexedCache.h"
 #include "TreeChangeEventListener.h"
 
 namespace RevBayesCore {
@@ -35,11 +36,13 @@ namespace RevBayesCore {
         double                                                              getNumberOfSamplesForSpecies(const std::string &n);
         double                                                              getWithinSpeciesVariance(const std::string &n);
         virtual void                                                        keepSpecialization(const DagNode* affecter);
+        void                                                                invalidateBranchAndAncestors(const TopologyNode& n);
         void                                                                recursiveComputeLnProbability( const TopologyNode &node, size_t node_index );
         void                                                                recursivelyFlagNodeDirty(const TopologyNode& n);
         void                                                                resetValue( void );
         virtual void                                                        restoreSpecialization(const DagNode *restorer);
         std::vector<double>                                                 simulateRootCharacters(size_t n);
+        virtual void                                                        snapshotSpecialization(void);
         double                                                              sumRootLikelihood(void);
         virtual void                                                        invalidateSpecialization(const DagNode *toucher, bool touchAll);
         
@@ -49,16 +52,15 @@ namespace RevBayesCore {
         const TypedDagNode< RbVector< double > >*                           within_species_variances;
 
         
-        // the likelihoods
-        std::vector<std::vector<std::vector<double> > >                     partial_likelihoods;
-        std::vector<std::vector<std::vector<double> > >                     means;
-        //std::vector<std::vector<double> >                                   variances;
-        std::vector<std::vector<std::vector<double> > >                     variances;
-        std::vector<size_t>                                                 active_likelihood;
-        
-        // convenience variables available for derived classes too
-        std::vector<bool>                                                   changed_nodes;
-        std::vector<bool>                                                   dirty_nodes;
+        struct NodeCache
+        {
+            std::vector<double>                                             partial_likelihoods;
+            std::vector<double>                                             means;
+            std::vector<double>                                             variances;
+            std::vector<bool>                                               missing_data;
+        };
+
+        IndexedCache<NodeCache>                                             node_likelihoods;
         std::vector<size_t>                                                 site_indices;
 
         
