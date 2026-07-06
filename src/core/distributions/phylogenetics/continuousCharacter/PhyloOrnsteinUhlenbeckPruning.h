@@ -2,7 +2,10 @@
 #define PhyloOrnsteinUhlenbeckPruning_H
 
 #include "AbstractPhyloBrownianProcess.h"
+#include "IndexedCache.h"
 #include "TreeChangeEventListener.h"
+
+#include <vector>
 
 namespace RevBayesCore {
     
@@ -38,8 +41,17 @@ namespace RevBayesCore {
         double                                                              computeLnProbability(void);
         
     protected:
+        struct NodeLikelihood {
+            std::vector<double>                                             partial_likelihoods;
+            std::vector<double>                                             means;
+            std::vector<double>                                             variances;
+            std::vector<bool>                                               missing_data;
+        };
         
         // virtual methods that may be overwritten, but then the derived class should call this methods
+        virtual void                                                        invalidateSpecialization(const DagNode *toucher, bool touchAll);
+        void                                                                invalidateBranchAndAncestors(const TopologyNode& n);
+        void                                                                invalidateInternalNodes(void);
         virtual void                                                        keepSpecialization(const DagNode* affecter);
         void                                                                recursiveComputeLnProbability( const TopologyNode &node, size_t node_index );
         void                                                                recursivelyFlagNodeDirty(const TopologyNode& n);
@@ -48,21 +60,13 @@ namespace RevBayesCore {
         void                                                                simulateRecursively(const TopologyNode& node, std::vector< ContinuousTaxonData > &t);
         std::vector<double>                                                 simulateRootCharacters(size_t n);
         double                                                              sumRootLikelihood(void);
-        virtual void                                                        touchSpecialization(const DagNode *toucher, bool touchAll);
+        virtual void                                                        snapshotSpecialization(void);
         void                                                                propagateAuxiliaryVariables(double &mu, double &variance, double &log_nf, const TopologyNode& node );
         
         // Parameter management functions.
         virtual void                                                        swapParameterInternal(const DagNode *oldP, const DagNode *newP);                         //!< Swap a parameter
         
-        // the likelihoods
-        std::vector<std::vector<std::vector<double> > >                     partial_likelihoods;
-        std::vector<std::vector<std::vector<double> > >                     means;
-        std::vector<std::vector<std::vector<double> > >                     variances;
-        std::vector<size_t>                                                 active_likelihood;
-        std::optional<std::vector<size_t>>                                  prev_active_likelihood;
-
-        // convenience variables available for derived classes too
-        std::vector<bool>                                                   dirty_nodes;
+        IndexedCache<NodeLikelihood>                                        node_likelihoods;
         
     private:
         double                                                              computeRootState(void) const;
@@ -84,4 +88,3 @@ namespace RevBayesCore {
 
 
 #endif
-

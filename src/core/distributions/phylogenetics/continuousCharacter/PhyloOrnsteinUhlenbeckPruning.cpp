@@ -21,6 +21,7 @@
 #include "StringUtilities.h"
 #include "Tree.h"
 #include "TreeChangeEventHandler.h"
+#include "TreeChangeEventMessage.h"
 #include "TypedDagNode.h"
 
 namespace RevBayesCore { class DagNode; }
@@ -30,11 +31,7 @@ namespace RevBayesCore { class RandomNumberGenerator; }
 using namespace RevBayesCore;
 
 PhyloOrnsteinUhlenbeckPruning::PhyloOrnsteinUhlenbeckPruning(const TypedDagNode<Tree> *t, size_t ns) : AbstractPhyloContinuousCharacterProcess( t, ns ),
-    partial_likelihoods( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
-    means( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
-    variances( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
-    active_likelihood( std::vector<size_t>(this->num_nodes, 0) ),
-    dirty_nodes( std::vector<bool>(this->num_nodes, true) )
+    node_likelihoods(this->num_nodes)
 {
     // initialize default parameters
     root_state                  = new ConstantNode<double>("", new double(0.0) );
@@ -161,7 +158,7 @@ double PhyloOrnsteinUhlenbeckPruning::computeLnProbability( void )
     if ( tau->getValue().getTreeChangeEventHandler().isListening( this ) == false )
     {
         tau->getValue().getTreeChangeEventHandler().addListener( this );
-        dirty_nodes = std::vector<bool>(tau->getValue().getNumberOfNodes(), true);
+        resetValue();
     }
     
     // compute the ln probability by recursively calling the probability calculation for each node
@@ -170,8 +167,8 @@ double PhyloOrnsteinUhlenbeckPruning::computeLnProbability( void )
     // we start with the root and then traverse down the tree
     size_t rootIndex = root.getIndex();
     
-    // only necessary if the root is actually dirty
-    if ( this->dirty_nodes[rootIndex] )
+    // only necessary if the root cache is invalid
+    if ( not this->node_likelihoods.is_valid(rootIndex) )
     {
         
         
@@ -188,10 +185,14 @@ double PhyloOrnsteinUhlenbeckPruning::computeLnProbability( void )
 
 void PhyloOrnsteinUhlenbeckPruning::fireTreeChangeEvent( const TopologyNode &n, const unsigned& m )
 {
-    
-    // call a recursive flagging of all node above (closer to the root) and including this node
-    recursivelyFlagNodeDirty( n );
-    
+    if (m == TreeChangeEventMessage::BRANCH_LENGTH)
+    {
+        invalidateBranchAndAncestors( n );
+    }
+    else
+    {
+        invalidateInternalNodes();
+    }
 }
 
 // this function changes mu, variance and log_nf in-place
@@ -233,12 +234,9 @@ void PhyloOrnsteinUhlenbeckPruning::propagateAuxiliaryVariables(double &mu, doub
 
 void PhyloOrnsteinUhlenbeckPruning::keepSpecialization( const DagNode* affecter )
 {
-    prev_active_likelihood = {};
-
-    // reset all flags
-    for (std::vector<bool>::iterator it = this->dirty_nodes.begin(); it != this->dirty_nodes.end(); ++it)
+    if (node_likelihoods.has_snapshot())
     {
-        (*it) = false;
+        node_likelihoods.keep();
     }
 }
 
@@ -247,15 +245,8 @@ void PhyloOrnsteinUhlenbeckPruning::recursiveComputeLnProbability( const Topolog
 {
 
     // check for recomputation
-    if ( node.isTip() == false && (dirty_nodes[node_index] == true || use_missing_data) )
+    if ( node.isTip() == false && not node_likelihoods.is_valid(node_index) )
     {
-        // mark as computed
-        dirty_nodes[node_index] = false;
-
-        std::vector<double> &mu_node            = this->means[this->active_likelihood[node_index]][node_index];
-        std::vector<double> &v_node             = this->variances[this->active_likelihood[node_index]][node_index];
-        std::vector<double> &p_node             = this->partial_likelihoods[this->active_likelihood[node_index]][node_index];
-
         // get the number of children
         size_t num_children = node.getNumberOfChildren();
         if (num_children != 2 )
@@ -271,28 +262,42 @@ void PhyloOrnsteinUhlenbeckPruning::recursiveComputeLnProbability( const Topolog
         size_t right_index = right.getIndex();
         recursiveComputeLnProbability( right, right_index );
 
+        NodeLikelihood &node_cache = this->node_likelihoods.init_for_writing(node_index);
+        node_cache.means.resize(this->num_sites);
+        node_cache.variances.resize(this->num_sites);
+        node_cache.partial_likelihoods.resize(this->num_sites);
+        node_cache.missing_data.resize(this->num_sites);
+
+        std::vector<double> &mu_node            = node_cache.means;
+        std::vector<double> &v_node             = node_cache.variances;
+        std::vector<double> &p_node             = node_cache.partial_likelihoods;
+        std::vector<bool> &missing_node         = node_cache.missing_data;
 
         // get the means for the left and right subtrees
-        const std::vector<double> &mu_left  = this->means[this->active_likelihood[left_index]][left_index];
-        const std::vector<double> &mu_right = this->means[this->active_likelihood[right_index]][right_index];
+        const NodeLikelihood &left_cache  = this->node_likelihoods[left_index];
+        const NodeLikelihood &right_cache = this->node_likelihoods[right_index];
+        const std::vector<double> &mu_left  = left_cache.means;
+        const std::vector<double> &mu_right = right_cache.means;
 
-        const std::vector<double> &v_left   = this->variances[this->active_likelihood[left_index]][left_index];
-        const std::vector<double> &v_right  = this->variances[this->active_likelihood[right_index]][right_index];
+        const std::vector<double> &v_left   = left_cache.variances;
+        const std::vector<double> &v_right  = right_cache.variances;
 
-        const std::vector<double> &p_left   = this->partial_likelihoods[this->active_likelihood[left_index]][left_index];
-        const std::vector<double> &p_right  = this->partial_likelihoods[this->active_likelihood[right_index]][right_index];
+        const std::vector<double> &p_left   = left_cache.partial_likelihoods;
+        const std::vector<double> &p_right  = right_cache.partial_likelihoods;
+        const std::vector<bool> &missing_left  = left_cache.missing_data;
+        const std::vector<bool> &missing_right = right_cache.missing_data;
         
         
         size_t num_sites = this->num_sites;
 
         for (size_t i=0; i < num_sites; i++)
         {
-            bool left_missing = missing_data[left_index][i];
-            bool right_missing = missing_data[right_index][i];
+            bool left_missing = missing_left[i];
+            bool right_missing = missing_right[i];
 
             if ( use_missing_data == true && left_missing && right_missing )
             {
-                missing_data[node_index][i] = true;
+                missing_node[i] = true;
 
                 mu_node[i] = RbConstants::Double::nan;
                 v_node[i]  = 0.0;
@@ -300,7 +305,7 @@ void PhyloOrnsteinUhlenbeckPruning::recursiveComputeLnProbability( const Topolog
             }
             else if ( use_missing_data == true && left_missing && !right_missing )
             {
-                missing_data[node_index][i] = false;
+                missing_node[i] = false;
                 
                 double mean_right = mu_right[i];
                 double var_right  = v_right[i];
@@ -315,7 +320,7 @@ void PhyloOrnsteinUhlenbeckPruning::recursiveComputeLnProbability( const Topolog
             }
             else if ( use_missing_data == true && !left_missing && right_missing )
             {
-                missing_data[node_index][i] = false;
+                missing_node[i] = false;
                 
                 double mean_left = mu_left[i];
                 double var_left = v_left[i];
@@ -359,7 +364,7 @@ void PhyloOrnsteinUhlenbeckPruning::recursiveComputeLnProbability( const Topolog
 
                 if ( use_missing_data == true )
                 {
-                    missing_data[node_index][i] = false;
+                    missing_node[i] = false;
                 }
                 
                 // log_nf
@@ -397,8 +402,8 @@ void PhyloOrnsteinUhlenbeckPruning::recursivelyFlagNodeDirty( const TopologyNode
     // we need to flag this node and all ancestral nodes for recomputation
     size_t index = n.getIndex();
     
-    // if this node is already dirty, then also all the ancestral nodes must have been flagged as dirty
-    if ( !dirty_nodes[index] )
+    // if this node is already invalid, then all ancestral nodes must have been invalidated too
+    if ( node_likelihoods.is_valid(index) )
     {
         // the root doesn't have an ancestor
         if ( !n.isRoot() )
@@ -406,25 +411,51 @@ void PhyloOrnsteinUhlenbeckPruning::recursivelyFlagNodeDirty( const TopologyNode
             recursivelyFlagNodeDirty( n.getParent() );
         }
         
-        // set the flag
-        dirty_nodes[index] = true;
-        
-        // if we previously haven't touched this node, then we need to change the active likelihood pointer
-        active_likelihood[index] = prev_active_likelihood.value()[index] == 0 ? 1 : 0;
-        assert(active_likelihood[index] != prev_active_likelihood.value()[index]);
+        node_likelihoods.invalidate(index);
     }
     
+}
+
+
+/*
+ * Invalidate the computation that uses a branch transform.
+ * Branch parameters belong to the edge ending at n, and are applied by n's parent.
+ */
+void PhyloOrnsteinUhlenbeckPruning::invalidateBranchAndAncestors( const TopologyNode &n )
+{
+    if (n.isRoot())
+    {
+        recursivelyFlagNodeDirty(n);
+    }
+    else
+    {
+        recursivelyFlagNodeDirty(n.getParent());
+    }
+}
+
+
+/*
+ * Invalidate all recomputed pruning entries while leaving fixed tip observations clean.
+ * This is the full-cache fallback for topology and global parameter changes.
+ */
+void PhyloOrnsteinUhlenbeckPruning::invalidateInternalNodes( void )
+{
+    const std::vector<TopologyNode*> &nodes = this->tau->getValue().getNodes();
+    for (std::vector<TopologyNode*>::const_iterator it = nodes.begin(); it != nodes.end(); ++it)
+    {
+        if ((*it)->isTip() == false)
+        {
+            node_likelihoods.invalidate((*it)->getIndex());
+        }
+    }
 }
 
 
 void PhyloOrnsteinUhlenbeckPruning::resetValue()
 {
     
-    // check if the vectors need to be resized
-    partial_likelihoods  = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
-    means                = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
-    variances            = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
-    missing_data         = std::vector<std::vector<bool> >(this->num_nodes, std::vector<bool>(this->num_sites, false) );
+    this->num_nodes = tau->getValue().getNumberOfNodes();
+    node_likelihoods.resize(this->num_nodes);
 
     // create a vector with the correct site indices
     // some of the sites may have been excluded
@@ -445,72 +476,45 @@ void PhyloOrnsteinUhlenbeckPruning::resetValue()
     }
     
     
-    // first we check for missing data
     use_missing_data = false;
     std::vector<TopologyNode*> nodes = this->tau->getValue().getNodes();
-    for (size_t site = 0; site < this->num_sites; ++site)
+
+    for (std::vector<TopologyNode*>::iterator it = nodes.begin(); it != nodes.end(); ++it)
     {
-        
-        for (std::vector<TopologyNode*>::iterator it = nodes.begin(); it != nodes.end(); ++it)
+        if ( (*it)->isTip() )
         {
-            if ( (*it)->isTip() )
+            size_t index = (*it)->getIndex();
+            ContinuousTaxonData& taxon = this->value->getTaxonData( (*it)->getName() );
+
+            NodeLikelihood &tip_cache = node_likelihoods.init_for_writing(index);
+            tip_cache.partial_likelihoods.assign(this->num_sites, 0.0);
+            tip_cache.means.resize(this->num_sites);
+            tip_cache.variances.assign(this->num_sites, 0.0);
+            tip_cache.missing_data.assign(this->num_sites, false);
+
+            for (size_t site = 0; site < this->num_sites; ++site)
             {
-                ContinuousTaxonData& taxon = this->value->getTaxonData( (*it)->getName() );
-                
                 double c = taxon.getCharacter(site_indices[site]);
-                
+
+                tip_cache.means[site] = c;
+
                 if ( RbMath::isFinite(c) == false )
                 {
-                    missing_data[(*it)->getIndex()][site] = true;
+                    tip_cache.missing_data[site] = true;
                     use_missing_data = true;
                 }
-                
             }
         }
-    }
-    
-    
-    for (size_t site = 0; site < this->num_sites; ++site)
-    {
-        
-        for (std::vector<TopologyNode*>::iterator it = nodes.begin(); it != nodes.end(); ++it)
-        {
-            if ( (*it)->isTip() )
-            {
-                ContinuousTaxonData& taxon = this->value->getTaxonData( (*it)->getName() );
-                
-                double c = taxon.getCharacter(site_indices[site]);
-                
-                means[0][(*it)->getIndex()][site] = c;
-                means[1][(*it)->getIndex()][site] = c;
-
-                variances[0][(*it)->getIndex()][site] = 0;
-                variances[1][(*it)->getIndex()][site] = 0;
-            }
-        }
-    }
-    
-    
-    // finally we set all the flags for recomputation
-    for (std::vector<bool>::iterator it = dirty_nodes.begin(); it != dirty_nodes.end(); ++it)
-    {
-        (*it) = true;
     }
 }
 
 
 void PhyloOrnsteinUhlenbeckPruning::restoreSpecialization( const DagNode* affecter )
 {
-    
-    // reset the flags
-    for (std::vector<bool>::iterator it = dirty_nodes.begin(); it != dirty_nodes.end(); ++it)
+    if (node_likelihoods.has_snapshot())
     {
-        (*it) = false;
+        node_likelihoods.restore();
     }
-    
-    // restore the active likelihoods vector
-    active_likelihood = *prev_active_likelihood;
-    prev_active_likelihood = {};
 }
 
 
@@ -783,7 +787,7 @@ double PhyloOrnsteinUhlenbeckPruning::sumRootLikelihood( void )
     size_t root_index = root.getIndex();
     
     // get the pointers to the partial likelihoods of the left and right subtree
-    std::vector<double> &p_root = this->partial_likelihoods[this->active_likelihood[root_index]][root_index];
+    const std::vector<double> &p_root = this->node_likelihoods[root_index].partial_likelihoods;
     
     // sum the log-likelihoods for all sites together
     double sum_partial_probs = 0.0;
@@ -796,15 +800,35 @@ double PhyloOrnsteinUhlenbeckPruning::sumRootLikelihood( void )
 }
 
 
-void PhyloOrnsteinUhlenbeckPruning::touchSpecialization( const DagNode* affecter, bool touchAll )
+void PhyloOrnsteinUhlenbeckPruning::snapshotSpecialization( void )
 {
-    if (not prev_active_likelihood)
-        prev_active_likelihood = active_likelihood;
+    node_likelihoods.snapshot();
+}
 
-    // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
-    if ( affecter == this->heterogeneous_sigma )
+
+/*
+ * Mark OU pruning likelihood cache entries dirty after a dependency changes.
+ * Snapshot state is stored by IndexedCache before this invalidation hook runs.
+ */
+void PhyloOrnsteinUhlenbeckPruning::invalidateSpecialization( const DagNode* affecter, bool touchAll )
+{
+    const TypedDagNode< RbVector< double > > *branch_parameter = NULL;
+    if ( affecter == this->heterogeneous_alpha )
     {
-        const std::set<size_t> &indices = this->heterogeneous_sigma->getTouchedElementIndices();
+        branch_parameter = this->heterogeneous_alpha;
+    }
+    else if ( affecter == this->heterogeneous_sigma )
+    {
+        branch_parameter = this->heterogeneous_sigma;
+    }
+    else if ( affecter == this->heterogeneous_theta )
+    {
+        branch_parameter = this->heterogeneous_theta;
+    }
+
+    if ( branch_parameter != NULL )
+    {
+        const std::set<size_t> &indices = branch_parameter->getTouchedElementIndices();
         
         // maybe all of them have been touched or the flags haven't been set properly
         if ( indices.size() == 0 )
@@ -818,33 +842,33 @@ void PhyloOrnsteinUhlenbeckPruning::touchSpecialization( const DagNode* affecter
             // flag recomputation only for the nodes
             for (std::set<size_t>::iterator it = indices.begin(); it != indices.end(); ++it)
             {
-                this->recursivelyFlagNodeDirty( *nodes[*it] );
+                this->invalidateBranchAndAncestors( *nodes[*it] );
             }
         }
     }
-    else if ( affecter != this->tau ) // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
+
+    if ( affecter == this->root_state )
+    {
+        recursivelyFlagNodeDirty( this->tau->getValue().getRoot() );
+    }
+
+    if ( affecter == this->homogeneous_alpha || affecter == this->homogeneous_sigma || affecter == this->homogeneous_theta )
     {
         touchAll = true;
-        
-        if ( affecter == this->dag_node )
-        {
-            resetValue();
-        }
-        
+    }
+    else if ( branch_parameter == NULL && affecter != this->root_state && affecter != this->tau ) // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
+    {
+        touchAll = true;
+    }
+
+    if ( affecter == this->dag_node )
+    {
+        resetValue();
     }
     
     if ( touchAll )
     {
-        for (std::vector<bool>::iterator it = dirty_nodes.begin(); it != dirty_nodes.end(); ++it)
-        {
-            (*it) = true;
-        }
-        
-        // flip the active likelihood pointers
-        for (size_t index = 0; index < active_likelihood.size(); ++index)
-        {
-            active_likelihood[index] = prev_active_likelihood.value()[index] == 0 ? 1 : 0;
-        }
+        invalidateInternalNodes();
     }
 }
 
@@ -895,5 +919,3 @@ void PhyloOrnsteinUhlenbeckPruning::swapParameterInternal(const DagNode *oldP, c
     this->AbstractPhyloContinuousCharacterProcess::swapParameterInternal(oldP, newP);
     
 }
-
-
