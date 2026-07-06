@@ -444,12 +444,12 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::checkInvariants( 
 	    assert(partialLikelihoodsDirtyForNode(node->getParent().getIndex()));
     }
 
-    // 2. Invariant: if the P-matrix for a node is dirty, then the conditional likelihoods should be dirty
+    // 2. Invariant: if the P-matrix for a node is invalid, then the conditional likelihoods should be dirty
     for(auto node: tree_nodes)
     {
         // The root node has no P-matrix, since there is no branch above it.
 	int index = node->getIndex();
-	if (not node->isRoot() and pmatrices.is_dirty(index))
+	if (not node->isRoot() and not pmatrices.is_valid(index))
 	    assert(partialLikelihoodsDirtyForNode(index));
     }
 }
@@ -596,19 +596,19 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::deallocatePartial
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::markPartialLikelihoodsDirtyForNode(int node_index) const
 {
-    partialLikelihoods.mark_dirty(node_index);
+    partialLikelihoods.invalidate(node_index);
 }
 
 template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::markAllPartialLikelihoodsDirty() const
 {
-    partialLikelihoods.mark_all_dirty();
+    partialLikelihoods.invalidate_all();
 }
 
 template<class charType>
 bool RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::partialLikelihoodsDirtyForNode(int node_index) const
 {
-    return partialLikelihoods.is_dirty(node_index);
+    return not partialLikelihoods.is_valid(node_index);
 }
 
 template<class charType>
@@ -938,7 +938,7 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::computeLnProbab
     {
         tau->getValue().getTreeChangeEventHandler().addListener( this );
         markAllPartialLikelihoodsDirty();
-        pmatrices.mark_all_dirty();
+        pmatrices.invalidate_all();
     }
 
     // if we are not in MCMC mode, then we need to (temporarily) allocate memory
@@ -2111,7 +2111,7 @@ template<class charType>
 void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::flagNodeDirtyPmatrix(size_t node_idx)
 {
     
-    pmatrices.mark_dirty(node_idx);
+    pmatrices.invalidate(node_idx);
 }
 
 
@@ -2491,7 +2491,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::redrawValue( void
         }
     }
     
-    pmatrices.mark_all_dirty();
+    pmatrices.invalidate_all();
 }
 
 
@@ -4002,8 +4002,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::touchSpecializati
         touched = true;
         this->storedLnProb = this->lnProb;
 
-        partialLikelihoods.touch();
-        pmatrices.touch();
+        partialLikelihoods.snapshot();
+        pmatrices.snapshot();
     }
 
 
@@ -4078,7 +4078,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::touchSpecializati
     {
 
         markAllPartialLikelihoodsDirty();
-        pmatrices.mark_all_dirty();
+        pmatrices.invalidate_all();
 
         // flip the active likelihood pointers
         for (size_t index = 0; index < changed_nodes.size(); ++index)
@@ -4118,7 +4118,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
     
 
     // 0. Mark clean
-    if (not pmatrices.is_dirty(node_idx)) return;
+    if (pmatrices.is_valid(node_idx)) return;
 
     auto& pmat_mixture = pmatrices.init_for_writing(node_idx);
 
@@ -4230,7 +4230,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::updateTransitionP
             size_t node_index = node->getIndex();
 
             updateTransitionProbabilityMatrix(node_index);
-            assert(not pmatrices.is_dirty(node_index));
+            assert(pmatrices.is_valid(node_index));
         }
     }
     

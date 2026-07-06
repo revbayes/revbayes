@@ -1427,7 +1427,7 @@ void RevBayesCore::PhyloCTMCClado<charType>::swapParameterInternal(const DagNode
 template<class charType>
 void RevBayesCore::PhyloCTMCClado<charType>::updateTransitionProbabilities(size_t node_idx)
 {
-    if (not this->pmatrices.is_dirty(node_idx)) return;
+    if (this->pmatrices.is_valid(node_idx)) return;
 
     // get cladogenesis event map (sparse transition probability matrix)
     const TopologyNode* node = this->tau->getValue().getNodes()[node_idx];

@@ -1127,7 +1127,7 @@ void RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::redrawValue( v
     this->reInitialized();
 
     this->markAllPartialLikelihoodsDirty();
-    this->pmatrices.mark_all_dirty();
+    this->pmatrices.invalidate_all();
 
     // flip the active likelihood pointers
     for (size_t index = 0; index < this->changed_nodes.size(); ++index)
