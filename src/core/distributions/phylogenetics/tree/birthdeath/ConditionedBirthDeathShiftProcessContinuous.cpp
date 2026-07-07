@@ -1057,13 +1057,6 @@ void ConditionedBirthDeathShiftProcessContinuous::invalidateSpecialization(const
     {
         value->getNode( value->getRoot().getIndex() ).setAge( root_age->getValue() );
         
-        if ( this->dag_node != NULL )
-        {
-            assert( childrenAreAffectedBy( affecter ) );
-            // Compatibility: keep legacy downstream propagation until DagNode::invalidate() owns this notification.
-            dag_node->touchAffected();
-        }
-        
     }
     
     if ( affecter == root_speciation && isSpeciationRateConstant() == true )

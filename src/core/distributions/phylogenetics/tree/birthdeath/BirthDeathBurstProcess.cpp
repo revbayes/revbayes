@@ -591,13 +591,6 @@ void BirthDeathBurstProcess::invalidateSpecialization(const DagNode *affecter, b
                 value->getNode(i).setAge( new_burst_time );
             }
         }
-        
-        if ( dag_node != NULL )
-        {
-            assert( childrenAreAffectedBy( affecter ) );
-            // Compatibility: keep legacy downstream propagation until DagNode::invalidate() owns this notification.
-            dag_node->touchAffected();
-        }
     }
     
     // delegate to base class

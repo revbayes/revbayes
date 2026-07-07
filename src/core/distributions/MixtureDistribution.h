@@ -326,13 +326,6 @@ void RevBayesCore::MixtureDistribution<mixtureType>::invalidateSpecialization( c
         }
         else
             (*this->value) = tmp;
-
-        if ( this->dag_node != NULL )
-        {
-            assert( childrenAreAffectedBy( toucher ) );
-            // Compatibility: keep legacy downstream propagation until DagNode::invalidate() owns this notification.
-            this->dag_node->touchAffected();
-        }
     }
     
 }

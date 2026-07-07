@@ -920,13 +920,14 @@ void RevBayesCore::StochasticNode<valueType>::touchMe( const DagNode *toucher, b
     // Snapshot rollback state before invalidating distribution-specific cached state.
     distribution->snapshot();
     distribution->invalidate( toucher, touchAll );
+    const bool children_affected = distribution->childrenAreAffectedBy( toucher );
     
     // delegate call
     DynamicNode<valueType>::touchMe( toucher, touchAll );
     
-    if ( isIntegratedOut() == true )
+    if ( isIntegratedOut() == true || children_affected )
     {
-        // Dispatch the touch message to downstream nodes
+        // Dispatch the touch message when this stochastic value affects downstream nodes.
         this->touchAffected( touchAll );
     }
     

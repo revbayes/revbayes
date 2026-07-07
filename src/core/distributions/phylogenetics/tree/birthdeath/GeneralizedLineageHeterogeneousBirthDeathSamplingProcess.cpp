@@ -1219,13 +1219,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::invalidateSpecial
             value->getRoot().setAge( age->getValue() );
         }
 
-        if ( dag_node != NULL )
-        {
-            assert( childrenAreAffectedBy( affecter ) );
-            // Compatibility: keep legacy downstream propagation until DagNode::invalidate() owns this notification.
-            dag_node->touchAffected();
-        }
-
         // update the tree
         tree_dirty = true;
 

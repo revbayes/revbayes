@@ -786,9 +786,6 @@ void UltrametricTreeDistribution::invalidateSpecialization(const DagNode *affect
     if ( affecter == root_age )
     {
         value->getNode( value->getRoot().getIndex() ).setAge( root_age->getValue() );
-        assert( childrenAreAffectedBy( affecter ) );
-        // Compatibility: keep legacy downstream propagation until DagNode::invalidate() owns this notification.
-        dag_node->touchAffected();
     }
 
 }

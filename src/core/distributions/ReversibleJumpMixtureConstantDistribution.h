@@ -430,13 +430,6 @@ void RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::inval
         {
             *this->value = const_value->getValue();
         }
-        
-        if ( this->dag_node != NULL )
-        {
-            assert( childrenAreAffectedBy( toucher ) );
-            // Compatibility: keep legacy downstream propagation until DagNode::invalidate() owns this notification.
-            this->dag_node->touchAffected();
-        }
     }
     
 }

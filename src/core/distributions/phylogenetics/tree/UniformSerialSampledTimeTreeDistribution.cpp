@@ -424,13 +424,10 @@ void UniformSerialSampledTimeTreeDistribution::invalidateSpecialization(const Da
     
     if ( affecter == start_age )
     {
-    	if ( has_root_age == true )
+        if ( has_root_age == true )
 	    	{
             value->getNode( value->getRoot().getIndex() ).setAge( start_age->getValue() );
 	    	}
-        assert( childrenAreAffectedBy( affecter ) );
-        // Compatibility: keep legacy downstream propagation until DagNode::invalidate() owns this notification.
-        dag_node->touchAffected();
     }
     
 }
