@@ -1,9 +1,11 @@
 #ifndef SnapshotCache_H
 #define SnapshotCache_H
 
+#include <array>
 #include <cassert>
 #include <cstddef>
 #include <optional>
+#include <utility>
 #include <vector>
 
 namespace RevBayesCore {
@@ -148,6 +150,124 @@ namespace RevBayesCore {
             current_state.clear();
             num_items = 0;
             prev_state = current_state;
+        }
+    };
+
+    template <typename T>
+    class SnapshotCache {
+        struct CacheState {
+            unsigned active : 1;   // which slot: 0 or 1
+            unsigned valid  : 1;   // can this slot be read without recomputation?
+        };
+
+        std::array<std::optional<T>, 2> slots;
+        CacheState current_state = {0, 0};
+        std::optional<CacheState> prev_state;
+
+    public:
+        // Return whether the current slot can be read.
+        bool is_valid() const
+        {
+            return current_state.valid and slots[current_state.active].has_value();
+        }
+
+        // Return read-only access to the current valid slot.
+        const T& operator*() const
+        {
+            assert( is_valid() );
+
+            return *slots[current_state.active];
+        }
+
+        // Return read-only access to the current valid slot.
+        const T& get() const
+        {
+            assert( is_valid() );
+
+            return *slots[current_state.active];
+        }
+
+        // Return mutable access to the current valid slot.
+        T& get_mutable()
+        {
+            assert( is_valid() );
+
+            return *slots[current_state.active];
+        }
+
+        // Invalidate the current slot and detach it from the saved state when needed.
+        void invalidate()
+        {
+            if (prev_state and prev_state->valid and is_valid())
+            {
+                // If we invalidate multiple times, we don't want to flip the bit twice.
+                current_state.active = prev_state->active ^ 1;
+            }
+
+            current_state.valid = 0;
+        }
+
+        // Return whether rollback metadata is currently saved.
+        bool has_snapshot() const
+        {
+            return prev_state.has_value();
+        }
+
+        // Get mutable storage for an invalid slot and mark it valid.
+        template <typename... Args>
+        T& init_for_writing(Args&&... args)
+        {
+            assert( not is_valid() );
+
+            if (not slots[current_state.active])
+                slots[current_state.active].emplace(std::forward<Args>(args)...);
+
+            current_state.valid = 1;
+            return *slots[current_state.active];
+        }
+
+        // Replace the invalid active slot with a fresh value and mark it valid.
+        template <typename... Args>
+        T& emplace_for_writing(Args&&... args)
+        {
+            assert( not is_valid() );
+
+            slots[current_state.active].emplace(std::forward<Args>(args)...);
+            current_state.valid = 1;
+            return *slots[current_state.active];
+        }
+
+        // Accept the current cache metadata and discard the saved rollback state.
+        void keep()
+        {
+            assert(prev_state);
+
+            prev_state.reset();
+        }
+
+        // Restore the saved cache metadata after rejecting a proposal.
+        void restore()
+        {
+            assert(prev_state);
+
+            current_state = *prev_state;
+            prev_state.reset();
+        }
+
+        // Save active-slot and validity metadata for proposal rollback.
+        void snapshot()
+        {
+            if (not prev_state)
+                prev_state = current_state;
+        }
+
+        // Remove cached storage and reset metadata to an invalid unsnapshotted state.
+        void clear()
+        {
+            slots[0].reset();
+            slots[1].reset();
+            current_state = {0, 0};
+            prev_state.reset();
         }
     };
 
