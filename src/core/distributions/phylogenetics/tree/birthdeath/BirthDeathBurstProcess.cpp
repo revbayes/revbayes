@@ -1,5 +1,6 @@
 #include "BirthDeathBurstProcess.h"
 
+#include <cassert>
 #include <cmath>
 #include <string>
 
@@ -259,6 +260,7 @@ void BirthDeathBurstProcess::keepSpecialization(const DagNode *affecter)
     
     if ( affecter == time_burst && dag_node != NULL)
     {
+        assert( childrenAreAffectedBy( affecter ) );
         dag_node->keepAffected();
     }
     
@@ -318,6 +320,7 @@ void BirthDeathBurstProcess::restoreSpecialization(const DagNode *affecter)
         
         if ( dag_node != NULL )
         {
+            assert( childrenAreAffectedBy( affecter ) );
             dag_node->restoreAffected();
         }
     }
@@ -591,6 +594,7 @@ void BirthDeathBurstProcess::invalidateSpecialization(const DagNode *affecter, b
         
         if ( dag_node != NULL )
         {
+            assert( childrenAreAffectedBy( affecter ) );
             // Compatibility: keep legacy downstream propagation until DagNode::invalidate() owns this notification.
             dag_node->touchAffected();
         }

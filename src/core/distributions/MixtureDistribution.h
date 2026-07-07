@@ -71,6 +71,7 @@ namespace RevBayesCore {
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 
+#include <cassert>
 #include <cmath>
 
 template <class mixtureType>
@@ -183,6 +184,7 @@ void RevBayesCore::MixtureDistribution<mixtureType>::keepSpecialization( const D
     // only do this when the toucher was our parameters
     if ( affecter == parameter_values && this->dag_node != NULL )
     {
+        assert( childrenAreAffectedBy( affecter ) );
         this->dag_node->keepAffected();
     }
     
@@ -272,6 +274,7 @@ void RevBayesCore::MixtureDistribution<mixtureType>::restoreSpecialization( cons
 
         if ( this->dag_node != NULL )
         {
+            assert( childrenAreAffectedBy( restorer ) );
             this->dag_node->restoreAffected();
         }
     }
@@ -326,6 +329,7 @@ void RevBayesCore::MixtureDistribution<mixtureType>::invalidateSpecialization( c
 
         if ( this->dag_node != NULL )
         {
+            assert( childrenAreAffectedBy( toucher ) );
             // Compatibility: keep legacy downstream propagation until DagNode::invalidate() owns this notification.
             this->dag_node->touchAffected();
         }

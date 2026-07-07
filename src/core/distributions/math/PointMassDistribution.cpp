@@ -1,5 +1,6 @@
 #include "PointMassDistribution.h"
 
+#include <cassert>
 #include <cmath>
 
 #include "Cloneable.h"
@@ -83,6 +84,7 @@ void PointMassDistribution::keepSpecialization( const DagNode* affecter )
     // only do this when the toucher was our parameters
     if ( affecter == val && this->dag_node != NULL )
     {
+        assert( childrenAreAffectedBy( affecter ) );
         this->dag_node->keepAffected();
     }
     
@@ -117,6 +119,7 @@ void PointMassDistribution::restoreSpecialization( const DagNode *restorer )
 
         if ( this->dag_node != NULL )
         {
+            assert( childrenAreAffectedBy( restorer ) );
             this->dag_node->restoreAffected();
         }
         
@@ -151,6 +154,7 @@ void PointMassDistribution::invalidateSpecialization( const DagNode *toucher, bo
         
         if ( this->dag_node != NULL )
         {
+            assert( childrenAreAffectedBy( toucher ) );
             // Compatibility: keep legacy downstream propagation until DagNode::invalidate() owns this notification.
             this->dag_node->touchAffected();
         }

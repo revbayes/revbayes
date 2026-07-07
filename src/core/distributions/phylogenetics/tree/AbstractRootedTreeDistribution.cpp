@@ -1,5 +1,6 @@
 #include <cstddef>
 #include <algorithm>
+#include <cassert>
 #include <cmath>
 #include <ostream>
 #include <set>
@@ -457,6 +458,7 @@ void AbstractRootedTreeDistribution::keepSpecialization(const DagNode *affecter)
     
     if ( affecter == process_age && dag_node != NULL)
     {
+        assert( childrenAreAffectedBy( affecter ) );
         dag_node->keepAffected();
     }
     
@@ -534,6 +536,7 @@ void AbstractRootedTreeDistribution::restoreSpecialization(const DagNode *affect
         
         if ( dag_node != NULL )
         {
+            assert( childrenAreAffectedBy( affecter ) );
             dag_node->restoreAffected();
         }
     }
@@ -841,6 +844,7 @@ void AbstractRootedTreeDistribution::invalidateSpecialization(const DagNode *aff
         
         if ( dag_node != NULL )
         {
+            assert( childrenAreAffectedBy( affecter ) );
             // Compatibility: keep legacy downstream propagation until DagNode::invalidate() owns this notification.
             dag_node->touchAffected();
         }

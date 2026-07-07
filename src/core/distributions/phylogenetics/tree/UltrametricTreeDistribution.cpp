@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cassert>
 #include <cmath>
 #include <cstddef>
 #include <iostream>
@@ -675,6 +676,7 @@ void UltrametricTreeDistribution::keepSpecialization(const DagNode *affecter)
 
     if ( affecter == root_age )
     {
+        assert( childrenAreAffectedBy( affecter ) );
         dag_node->keepAffected();
     }
 
@@ -735,6 +737,7 @@ void UltrametricTreeDistribution::restoreSpecialization(const DagNode *affecter)
     if ( affecter == root_age )
     {
         value->getNode( value->getRoot().getIndex() ).setAge( root_age->getValue() );
+        assert( childrenAreAffectedBy( affecter ) );
         dag_node->restoreAffected();
     }
 
@@ -783,6 +786,7 @@ void UltrametricTreeDistribution::invalidateSpecialization(const DagNode *affect
     if ( affecter == root_age )
     {
         value->getNode( value->getRoot().getIndex() ).setAge( root_age->getValue() );
+        assert( childrenAreAffectedBy( affecter ) );
         // Compatibility: keep legacy downstream propagation until DagNode::invalidate() owns this notification.
         dag_node->touchAffected();
     }

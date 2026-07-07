@@ -1,5 +1,6 @@
 #include <cstddef>
 #include <algorithm>
+#include <cassert>
 #include <cmath>
 #include <vector>
 
@@ -379,6 +380,7 @@ void UniformSerialSampledTimeTreeDistribution::keepSpecialization(const DagNode 
     
     if ( affecter == start_age )
     {
+        assert( childrenAreAffectedBy( affecter ) );
         dag_node->keepAffected();
     }
     
@@ -397,6 +399,7 @@ void UniformSerialSampledTimeTreeDistribution::restoreSpecialization(const DagNo
     	{
     		value->getNode( value->getRoot().getIndex() ).setAge( start_age->getValue() );
     	}
+        assert( childrenAreAffectedBy( affecter ) );
         dag_node->restoreAffected();
     }
     
@@ -425,6 +428,7 @@ void UniformSerialSampledTimeTreeDistribution::invalidateSpecialization(const Da
 	    	{
             value->getNode( value->getRoot().getIndex() ).setAge( start_age->getValue() );
 	    	}
+        assert( childrenAreAffectedBy( affecter ) );
         // Compatibility: keep legacy downstream propagation until DagNode::invalidate() owns this notification.
         dag_node->touchAffected();
     }

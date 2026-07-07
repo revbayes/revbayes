@@ -1,5 +1,6 @@
 #include <boost/assign/list_of.hpp>
 #include <algorithm>
+#include <cassert>
 #include <cmath>
 #include <cstddef>
 #include <map>
@@ -1743,6 +1744,7 @@ void StateDependentSpeciationExtinctionProcess::keepSpecialization(const DagNode
     
     if ( affecter == process_age )
     {
+        assert( childrenAreAffectedBy( affecter ) );
         dag_node->keepAffected();
     }
 
@@ -1910,6 +1912,7 @@ void StateDependentSpeciationExtinctionProcess::restoreSpecialization(const DagN
 
         if ( dag_node != NULL )
         {
+            assert( childrenAreAffectedBy( affecter ) );
             dag_node->restoreAffected();
         }
     }
@@ -3182,6 +3185,7 @@ void StateDependentSpeciationExtinctionProcess::invalidateSpecialization(const D
 
         if ( dag_node != NULL )
         {
+            assert( childrenAreAffectedBy( affecter ) );
             // Compatibility: keep legacy downstream propagation until DagNode::invalidate() owns this notification.
             dag_node->touchAffected();
         }

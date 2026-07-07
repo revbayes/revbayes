@@ -1,3 +1,4 @@
+#include <cassert>
 #include <string>
 
 #include "RandomNumberFactory.h"
@@ -955,6 +956,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::keepSpecializatio
 
     if ( affecter == age )
     {
+        assert( childrenAreAffectedBy( affecter ) );
         dag_node->keepAffected();
     }
 
@@ -1027,6 +1029,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::restoreSpecializa
 
         if ( dag_node != NULL )
         {
+            assert( childrenAreAffectedBy( restorer ) );
             dag_node->restoreAffected();
         }
 
@@ -1218,6 +1221,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::invalidateSpecial
 
         if ( dag_node != NULL )
         {
+            assert( childrenAreAffectedBy( affecter ) );
             // Compatibility: keep legacy downstream propagation until DagNode::invalidate() owns this notification.
             dag_node->touchAffected();
         }
