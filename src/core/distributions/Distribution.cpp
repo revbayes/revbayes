@@ -160,13 +160,10 @@ void Distribution::invalidate( const DagNode *toucher, bool touchAll )
 }
 
 
-/*
- * Compatibility bridge for distributions that still override touchSpecialization().
- * Remove this after subclasses migrate to snapshot/invalidate hooks.
- */
-void Distribution::invalidateSpecialization( const DagNode *toucher, bool touchAll )
+/* Method stub: override for specialized treatment. */
+void Distribution::invalidateSpecialization( const DagNode *, bool )
 {
-    touchSpecialization( toucher, touchAll );
+    // do nothing
 }
 
 
@@ -293,17 +290,3 @@ void Distribution::swapParameter(const DagNode *old_p, const DagNode *new_p)
     
 }
 
-
-/* Method stub: override for specialized treatment. */
-void Distribution::touch( const DagNode *toucher, bool touchAll )
-{
-    snapshot();
-    invalidate( toucher, touchAll );
-}
-
-
-/* Method stub: override for specialized treatment. */
-void Distribution::touchSpecialization( const DagNode *toucher, bool touchAll )
-{
-    // do nothing
-}

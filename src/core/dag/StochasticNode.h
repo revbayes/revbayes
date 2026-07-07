@@ -915,8 +915,9 @@ void RevBayesCore::StochasticNode<valueType>::touchMe( const DagNode *toucher, b
     
     lnProb = {};
     
-    // call for potential specialized handling (e.g. internal flags), we might have been touched already by someone else, so we need to delegate regardless
-    distribution->touch( toucher, touchAll );
+    // Snapshot rollback state before invalidating distribution-specific cached state.
+    distribution->snapshot();
+    distribution->invalidate( toucher, touchAll );
     
     // delegate call
     DynamicNode<valueType>::touchMe( toucher, touchAll );
