@@ -46,7 +46,6 @@ namespace RevBayesCore {
         
         // special handling of state changes
         bool                                                childrenAreAffectedBy(const DagNode *affecter) const override;                         //!< Does this changed parameter make the value affect children?
-        void                                                keepSpecialization(const DagNode* affecter);
         void                                                restoreSpecialization(const DagNode *restorer);
         void                                                invalidateSpecialization(const DagNode *toucher, bool touchAll);
 
@@ -176,13 +175,6 @@ const RevBayesCore::RbVector<mixtureType>& RevBayesCore::MixtureDistribution<mix
 {
     return parameter_values->getValue();
 }
-
-template <class mixtureType>
-void RevBayesCore::MixtureDistribution<mixtureType>::keepSpecialization( const DagNode* affecter )
-{
-    
-}
-
 
 template <class mixtureType>
 const mixtureType& RevBayesCore::MixtureDistribution<mixtureType>::simulate()

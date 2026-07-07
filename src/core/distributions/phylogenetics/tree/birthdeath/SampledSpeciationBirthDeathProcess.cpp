@@ -491,15 +491,6 @@ void SampledSpeciationBirthDeathProcess::getLineagesAtAge(TopologyNode* n, std::
 }
 
 
-/**
- * Keep the current value and reset some internal flags. Nothing to do here.
- */
-void SampledSpeciationBirthDeathProcess::keepSpecialization(const DagNode *affecter)
-{
-    
-}
-
-
 void SampledSpeciationBirthDeathProcess::redrawValue( void )
 {
     simulateTree();

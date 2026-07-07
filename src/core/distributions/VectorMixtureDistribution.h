@@ -39,7 +39,6 @@ namespace RevBayesCore {
 //        void                                                    setValue(RbVector<mixtureType> *v, bool f=false);
         
         // special handling of state changes
-        void                                                    keepSpecialization(const DagNode* affecter);
         void                                                    restoreSpecialization(const DagNode *restorer);
         void                                                    invalidateSpecialization(const DagNode *toucher, bool touchAll);
         
@@ -217,18 +216,6 @@ void RevBayesCore::VectorMixtureDistribution<mixtureType>::executeMethod(const s
     {
         throw RbException() << "A vector-mixture distribution does not have a member method called '" << n << "'.";
     }
-    
-}
-
-
-template <class mixtureType>
-void RevBayesCore::VectorMixtureDistribution<mixtureType>::keepSpecialization( const DagNode* affecter )
-{
-    // only do this when the toucher was our parameters
-//    if ( affecter == parameterValues && this->dag_node != NULL )
-//    {
-//        this->dag_node->keepAffected();
-//    }
     
 }
 

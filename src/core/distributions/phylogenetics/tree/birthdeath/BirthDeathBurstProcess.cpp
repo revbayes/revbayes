@@ -251,18 +251,6 @@ bool BirthDeathBurstProcess::isBurstSpeciation( size_t index ) const
 }
 
 
-/**
- * Keep the current value and reset some internal flags. Nothing to do here.
- */
-void BirthDeathBurstProcess::keepSpecialization(const DagNode *affecter)
-{
-    
-    // delegate to base class
-    AbstractRootedTreeDistribution::keepSpecialization( affecter );
-    
-}
-
-
 double BirthDeathBurstProcess::lnProbTreeShape(void) const
 {
     // the birth death divergence times density is derived for a (ranked) unlabeled oriented tree

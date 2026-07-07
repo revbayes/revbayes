@@ -667,15 +667,6 @@ bool UltrametricTreeDistribution::childrenAreAffectedBy(const DagNode *affecter)
     return affecter == root_age;
 }
 
-/**
- * Keep the current value and reset some internal flags. Nothing to do here.
- */
-void UltrametricTreeDistribution::keepSpecialization(const DagNode *affecter)
-{
-
-}
-
-
 void UltrametricTreeDistribution::prepareTreeSamples(const std::vector<Tree> &trees)
 {
 

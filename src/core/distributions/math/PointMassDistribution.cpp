@@ -78,13 +78,6 @@ double PointMassDistribution::getMax(void) const
 }
 
 
-void PointMassDistribution::keepSpecialization( const DagNode* affecter )
-{
-    
-}
-
-
-
 double PointMassDistribution::quantile(double p) const
 {
     

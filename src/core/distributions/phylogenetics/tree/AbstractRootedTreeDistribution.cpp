@@ -452,12 +452,6 @@ const std::vector<Taxon>& AbstractRootedTreeDistribution::getTaxa( void ) const
 }
 
 
-void AbstractRootedTreeDistribution::keepSpecialization(const DagNode *affecter)
-{
-    
-}
-
-
 double AbstractRootedTreeDistribution::lnProbTreeShape(void) const
 {
     // the number of ranked non-oriented labeled trees is

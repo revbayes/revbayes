@@ -698,14 +698,6 @@ bool HeterogeneousRateBirthDeath::childrenAreAffectedBy(const DagNode *affecter)
 }
 
 /**
- * Keep the current value and reset some internal flags. Nothing to do here.
- */
-void HeterogeneousRateBirthDeath::keepSpecialization(const DagNode *affecter)
-{
-    
-}
-
-/**
  * Restore the current value and reset some internal flags.
  * If the root age variable has been restored, then we need to change the root age of the tree too.
  */

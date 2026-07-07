@@ -41,7 +41,6 @@ template <class valueType> class TypedDagNode;
 
         // virtual methods that may be overwritten, but then the derived class should call this methods
         bool                                                childrenAreAffectedBy(const DagNode *affecter) const override;                                  //!< Does this changed parameter make the value affect children?
-        virtual void                                        keepSpecialization(const DagNode* affecter);
         virtual void                                        restoreSpecialization(const DagNode *restorer);
         virtual void                                        invalidateSpecialization(const DagNode *toucher, bool touchAll);
         
