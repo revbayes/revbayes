@@ -361,9 +361,6 @@ void RevBayesCore::StochasticNode<valueType>::getAffected( RbOrderedSet<DagNode*
         // Insert this node as one of the affected
         affected.insert( this );
     
-        // Call the distribution for potential specialized handling (e.g. internal flags)
-        distribution->getAffected( affected, affecter );
-
         if ( distribution->childrenAreAffectedBy( affecter ) )
         {
             this->getAffectedNodes( affected );

@@ -130,15 +130,6 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Distribution::executeProcedure(con
 }
 
 
-
-/* Method stub: override for specialized treatment. */
-void Distribution::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode* affecter)
-{
-    // do nothing
-}
-
-
-
 std::vector<double> Distribution::getMixtureProbabilities(void) const
 {
     return std::vector<double>(1, 1.0);

@@ -80,7 +80,7 @@ namespace RevBayesCore {
 
         
         // inheritable attributes
-        StochasticNode<variableType>*                               dag_node;                                                                   //!< The stochastic node holding this distribution. This is needed for delegated calls to the DAG, such as getAffected(), ...
+        StochasticNode<variableType>*                               dag_node;                                                                   //!< The stochastic node holding this distribution for downstream value-change notifications.
         variableType*                                               value;
         
     };
