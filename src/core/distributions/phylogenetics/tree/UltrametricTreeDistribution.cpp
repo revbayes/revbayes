@@ -659,14 +659,12 @@ void UltrametricTreeDistribution::simulateTree( void )
 
 }
 
-void UltrametricTreeDistribution::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode *affecter)
+/*
+ * Rescaling the root age changes the reported tree value.
+ */
+bool UltrametricTreeDistribution::childrenAreAffectedBy(const DagNode *affecter) const
 {
-
-    if ( affecter == root_age)
-    {
-        dag_node->initiateGetAffectedNodes( affected );
-    }
-
+    return affecter == root_age;
 }
 
 /**

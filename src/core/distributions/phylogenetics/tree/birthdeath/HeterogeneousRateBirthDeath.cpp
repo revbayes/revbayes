@@ -689,14 +689,12 @@ void HeterogeneousRateBirthDeath::simulateTree( void )
     
 }
 
-void HeterogeneousRateBirthDeath::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode *affecter)
+/*
+ * Changing the root age changes the heterogeneous birth-death tree value.
+ */
+bool HeterogeneousRateBirthDeath::childrenAreAffectedBy(const DagNode *affecter) const
 {
-    
-    if ( affecter == root_age && this->dag_node != NULL )
-    {
-        dag_node->initiateGetAffectedNodes( affected );
-    }
-    
+    return affecter == root_age;
 }
 
 /**

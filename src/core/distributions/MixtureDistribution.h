@@ -45,7 +45,7 @@ namespace RevBayesCore {
         void                                                setValue(mixtureType *v, bool f=false);
         
         // special handling of state changes
-        void                                                getAffected(RbOrderedSet<DagNode *>& affected, const DagNode* affecter);                          //!< get affected nodes
+        bool                                                childrenAreAffectedBy(const DagNode *affecter) const override;                         //!< Does this changed parameter make the value affect children?
         void                                                keepSpecialization(const DagNode* affecter);
         void                                                restoreSpecialization(const DagNode *restorer);
         void                                                invalidateSpecialization(const DagNode *toucher, bool touchAll);
@@ -123,15 +123,13 @@ void RevBayesCore::MixtureDistribution<mixtureType>::executeMethod(const std::st
 }
 
 
+/*
+ * The active mixture value changes when the vector of possible values changes.
+ */
 template <class mixtureType>
-void RevBayesCore::MixtureDistribution<mixtureType>::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode* affecter)
+bool RevBayesCore::MixtureDistribution<mixtureType>::childrenAreAffectedBy(const DagNode *affecter) const
 {
-    // only delegate when the toucher was our parameters
-    if ( affecter == parameter_values && this->dag_node != NULL )
-    {
-        this->dag_node->initiateGetAffectedNodes( affected );
-    }
-    
+    return affecter == parameter_values;
 }
 
 

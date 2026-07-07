@@ -363,14 +363,12 @@ void UniformSerialSampledTimeTreeDistribution::simulateTree( void )
 
 }
 
-void UniformSerialSampledTimeTreeDistribution::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode *affecter)
+/*
+ * Preserve legacy downstream propagation when the serial-sampled start age changes.
+ */
+bool UniformSerialSampledTimeTreeDistribution::childrenAreAffectedBy(const DagNode *affecter) const
 {
-    
-    if ( affecter == start_age)
-    {
-        dag_node->initiateGetAffectedNodes( affected );
-    }
-    
+    return affecter == start_age;
 }
 
 /**

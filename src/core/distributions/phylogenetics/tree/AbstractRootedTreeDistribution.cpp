@@ -302,14 +302,12 @@ int AbstractRootedTreeDistribution::diversity(double t)
 }
 
 
-void AbstractRootedTreeDistribution::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode *affecter)
+/*
+ * Rooted tree values change when the process age parameter changes.
+ */
+bool AbstractRootedTreeDistribution::childrenAreAffectedBy(const DagNode *affecter) const
 {
-    
-    if ( affecter == process_age && dag_node != NULL )
-    {
-        dag_node->initiateGetAffectedNodes( affected );
-    }
-    
+    return affecter == process_age;
 }
 
 

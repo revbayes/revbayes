@@ -439,14 +439,12 @@ void SampledSpeciationBirthDeathProcess::executeMethod(const std::string &n, con
     
 }
 
-void SampledSpeciationBirthDeathProcess::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode *affecter)
+/*
+ * Changing the root age changes the sampled birth-death tree value.
+ */
+bool SampledSpeciationBirthDeathProcess::childrenAreAffectedBy(const DagNode *affecter) const
 {
-    
-    if ( affecter == root_age)
-    {
-        dag_node->initiateGetAffectedNodes( affected );
-    }
-    
+    return affecter == root_age;
 }
 
 

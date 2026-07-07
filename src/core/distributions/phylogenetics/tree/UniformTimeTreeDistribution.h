@@ -24,7 +24,7 @@ namespace RevBayesCore {
         
     protected:
         // Parameter management functions
-        virtual void                                        getAffected(RbOrderedSet<DagNode *>& affected, const DagNode* affecter);                                      //!< get affected nodes
+        bool                                                childrenAreAffectedBy(const DagNode *affecter) const override;                                      //!< Does this changed parameter make the value affect children?
         virtual void                                        keepSpecialization(const DagNode* affecter);
         virtual void                                        restoreSpecialization(const DagNode *restorer);
         virtual void                                        invalidateSpecialization(const DagNode *toucher, bool touchAll);

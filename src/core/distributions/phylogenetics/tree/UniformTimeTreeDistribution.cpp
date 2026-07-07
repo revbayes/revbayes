@@ -273,14 +273,12 @@ void UniformTimeTreeDistribution::simulateTree( void )
     
 }
 
-void UniformTimeTreeDistribution::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode *affecter)
+/*
+ * Rescaling the root age changes the reported tree value.
+ */
+bool UniformTimeTreeDistribution::childrenAreAffectedBy(const DagNode *affecter) const
 {
-    
-    if ( affecter == root_age)
-    {
-        dag_node->initiateGetAffectedNodes( affected );
-    }
-    
+    return affecter == root_age;
 }
 
 /**

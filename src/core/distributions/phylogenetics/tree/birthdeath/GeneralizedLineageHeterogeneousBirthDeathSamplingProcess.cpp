@@ -915,12 +915,12 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::drawJointConditio
 }
 
 
-void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::getAffected(RbOrderedSet<DagNode *>& affected, const DagNode* affecter)
+/*
+ * Changing the process age changes the generalized lineage tree value.
+ */
+bool GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::childrenAreAffectedBy(const DagNode *affecter) const
 {
-    if ( affecter == age )
-    {
-        dag_node->initiateGetAffectedNodes( affected );
-    }
+    return affecter == age;
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::initializeEmptyCharData(void)

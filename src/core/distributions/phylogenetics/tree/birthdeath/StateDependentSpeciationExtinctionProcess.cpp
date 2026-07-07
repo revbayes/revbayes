@@ -1618,18 +1618,12 @@ void StateDependentSpeciationExtinctionProcess::executeMethod(const std::string 
 }
 
 
-/**
- * Get the affected nodes by a change of this node.
- * If the root age has changed than we need to call get affected again.
+/*
+ * Process-age changes alter the SSE tree value, so children remain affected.
  */
-void StateDependentSpeciationExtinctionProcess::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode *affecter)
+bool StateDependentSpeciationExtinctionProcess::childrenAreAffectedBy(const DagNode *affecter) const
 {
-    
-    if ( affecter == process_age )
-    {
-        dag_node->initiateGetAffectedNodes( affected );
-    }
-    
+    return affecter == process_age;
 }
 
 

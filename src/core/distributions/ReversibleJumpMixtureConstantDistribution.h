@@ -49,7 +49,7 @@ namespace RevBayesCore {
         void                                                        setValue(mixtureType *v, bool f=false);
         
         // special handling of state changes
-        void                                                        getAffected(RbOrderedSet<DagNode *>& affected, const DagNode* affecter);                          //!< get affected nodes
+        bool                                                        childrenAreAffectedBy(const DagNode *affecter) const override;                         //!< Does this changed parameter make the value affect children?
         void                                                        keepSpecialization(const DagNode* affecter);
         void                                                        restoreSpecialization(const DagNode *restorer);
         void                                                        invalidateSpecialization(const DagNode *toucher, bool touchAll);
@@ -212,15 +212,13 @@ void RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::execu
 }
 
 
+/*
+ * The constant-value parameter changes the reported value only in the constant category.
+ */
 template <class mixtureType>
-void RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode* affecter)
+bool RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::childrenAreAffectedBy(const DagNode *affecter) const
 {
-    // only do this when the toucher was our constant value and this value was supposed to be equal to the constant value
-    if ( affecter == const_value && index == 0 && this->dag_node != NULL )
-    {
-        this->dag_node->initiateGetAffectedNodes( affected );
-    }
-    
+    return affecter == const_value && index == 0;
 }
 
 

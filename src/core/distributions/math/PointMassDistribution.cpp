@@ -55,14 +55,12 @@ double PointMassDistribution::computeLnProbability( void )
 }
 
 
-void PointMassDistribution::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode* affecter)
+/*
+ * The point-mass value tracks its parameter exactly.
+ */
+bool PointMassDistribution::childrenAreAffectedBy(const DagNode *affecter) const
 {
-    // only delegate when the toucher was our parameters
-    if ( affecter == val && this->dag_node != NULL )
-    {
-        this->dag_node->initiateGetAffectedNodes( affected );
-    }
-    
+    return affecter == val;
 }
 
 
