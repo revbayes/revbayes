@@ -73,13 +73,9 @@ TimeVaryingStateDependentSpeciationExtinctionProcess::TimeVaryingStateDependentS
                                                                                      size_t max_lineages,
                                                                                      bool prune) : TypedDistribution<Tree>( new TreeDiscreteCharacterData() ),
     condition( cdt ),
-    active_likelihood( std::vector<bool>(5, 0) ),
-    changed_nodes( std::vector<bool>(5, false) ),
-    dirty_nodes( std::vector<bool>(5, true) ),
-    node_partial_likelihoods( std::vector<std::vector<std::vector<double> > >(5, std::vector<std::vector<double> >(2,std::vector<double>(2*ext->getValue().size(),0))) ),
+    node_likelihoods( 5 ),
     extinction_probabilities( std::vector<std::vector<double> >( 500.0, std::vector<double>( ext->getValue().size(), 0) ) ),
     num_states( p->getValue().size() ),
-    scaling_factors( std::vector<std::vector<double> >(5, std::vector<double>(2,0.0) ) ),
     use_cladogenetic_events( false ),
     use_origin( uo ),
     sample_character_history( false ),
@@ -296,7 +292,7 @@ double TimeVaryingStateDependentSpeciationExtinctionProcess::computeLnProbabilit
         }
     }
     
-    if ( value->getNumberOfNodes() != dirty_nodes.size() )
+    if ( value->getNumberOfNodes() != node_likelihoods.size() )
     {
         resizeVectors(value->getNumberOfNodes());
     }
@@ -350,12 +346,18 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::computeNodeProbabilit
 {
     
     // check for recomputation
-    if ( dirty_nodes[node_index] == true || sample_character_history == true )
+    if ( node_likelihoods.is_valid(node_index) == false || sample_character_history == true )
     {
-        // mark as computed
-        dirty_nodes[node_index] = false;
-        
-        std::vector<double> &node_likelihood  = node_partial_likelihoods[node_index][active_likelihood[node_index]];
+        if ( node_likelihoods.is_valid(node_index) == true )
+        {
+            node_likelihoods.invalidate(node_index);
+        }
+
+        NodeCache &node_cache = node_likelihoods.init_for_writing(node_index);
+        node_cache.partial_likelihood.assign(2 * num_states, 0.0);
+        node_cache.branch_likelihoods.clear();
+        node_cache.scaling_factor = 0.0;
+        std::vector<double> &node_likelihood = node_cache.partial_likelihood;
         
         if ( node.isTip() == true )
         {
@@ -423,8 +425,8 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::computeNodeProbabilit
             computeNodeProbability( right, right_index );
             
             // get the likelihoods of descendant nodes
-            const std::vector<double> &left_likelihoods  = node_partial_likelihoods[left_index][active_likelihood[left_index]];
-            const std::vector<double> &right_likelihoods = node_partial_likelihoods[right_index][active_likelihood[right_index]];
+            const std::vector<double> &left_likelihoods  = node_likelihoods[left_index].partial_likelihood;
+            const std::vector<double> &right_likelihoods = node_likelihoods[right_index].partial_likelihood;
             
             std::map<std::vector<unsigned>, double> eventMap;
             std::vector<double> speciation_rates;
@@ -520,7 +522,7 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::computeNodeProbabilit
                 }
                 
                 // save the branch conditional likelihoods
-                branch_partial_likelihoods[node_index] = branch_likelihoods;
+                node_cache.branch_likelihoods = branch_likelihoods;
             }
         }
         
@@ -542,7 +544,7 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::computeNodeProbabilit
                 node_likelihood[num_states+i] /= max;
             }
             
-            scaling_factors[node_index][active_likelihood[node_index]] = log(max);
+            node_cache.scaling_factor = log(max);
             
             if ( node.isTip() == false )
             {
@@ -550,7 +552,7 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::computeNodeProbabilit
                 size_t                      left_index      = left.getIndex();
                 const TopologyNode          &right          = node.getChild(1);
                 size_t                      right_index     = right.getIndex();
-                scaling_factors[node_index][active_likelihood[node_index]] += scaling_factors[left_index][active_likelihood[left_index]] + scaling_factors[right_index][active_likelihood[right_index]];
+                node_cache.scaling_factor += node_likelihoods[left_index].scaling_factor + node_likelihoods[right_index].scaling_factor;
             }
         }
     }
@@ -571,10 +573,18 @@ double TimeVaryingStateDependentSpeciationExtinctionProcess::computeRootLikeliho
     computeNodeProbability( right, right_index );
     
     // get the likelihoods of descendant nodes
-    const std::vector<double> &left_likelihoods  = node_partial_likelihoods[left_index][active_likelihood[left_index]];
-    const std::vector<double> &right_likelihoods = node_partial_likelihoods[right_index][active_likelihood[right_index]];
+    const std::vector<double> &left_likelihoods  = node_likelihoods[left_index].partial_likelihood;
+    const std::vector<double> &right_likelihoods = node_likelihoods[right_index].partial_likelihood;
     
-    std::vector<double> &node_likelihood  = node_partial_likelihoods[node_index][active_likelihood[node_index]];
+    if ( node_likelihoods.is_valid(node_index) == true )
+    {
+        node_likelihoods.invalidate(node_index);
+    }
+    NodeCache &node_cache = node_likelihoods.init_for_writing(node_index);
+    node_cache.partial_likelihood.assign(2 * num_states, 0.0);
+    node_cache.branch_likelihoods.clear();
+    node_cache.scaling_factor = 0.0;
+    std::vector<double> &node_likelihood = node_cache.partial_likelihood;
     
     std::map<std::vector<unsigned>, double> eventMap;
     std::vector<double> speciation_rates;
@@ -668,7 +678,7 @@ double TimeVaryingStateDependentSpeciationExtinctionProcess::computeRootLikeliho
             }
             
             // save the branch conditional likelihoods
-            branch_partial_likelihoods[node_index] = branch_likelihoods;
+            node_cache.branch_likelihoods = branch_likelihoods;
         }
     }
     
@@ -681,9 +691,9 @@ double TimeVaryingStateDependentSpeciationExtinctionProcess::computeRootLikeliho
         prob += freqs[i] * node_likelihood[num_states + i];
     }
     
-    scaling_factors[node_index][active_likelihood[node_index]] = scaling_factors[left_index][active_likelihood[left_index]] + scaling_factors[right_index][active_likelihood[right_index]];
+    node_cache.scaling_factor = node_likelihoods[left_index].scaling_factor + node_likelihoods[right_index].scaling_factor;
     
-    return log(prob) + scaling_factors[node_index][active_likelihood[node_index]];
+    return log(prob) + node_cache.scaling_factor;
 }
 
 
@@ -703,6 +713,8 @@ const RevBayesCore::AbstractHomologousDiscreteCharacterData& TimeVaryingStateDep
 
 void TimeVaryingStateDependentSpeciationExtinctionProcess::drawJointConditionalAncestralStates(std::vector<size_t>& startStates, std::vector<size_t>& endStates)
 {
+    computeLnProbability();
+
     // now begin the root-to-tip pass, drawing ancestral states conditional on the start states
     
     // get the likelihoods of descendant nodes
@@ -710,10 +722,10 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::drawJointConditionalA
     size_t                       node_index         = root.getIndex();
     const TopologyNode          &left               = root.getChild(0);
     size_t                       left_index         = left.getIndex();
-    const std::vector< double > &left_likelihoods   = node_partial_likelihoods[left_index][active_likelihood[left_index]];
+    const std::vector< double > &left_likelihoods   = node_likelihoods[left_index].partial_likelihood;
     const TopologyNode          &right              = root.getChild(1);
     size_t                       right_index        = right.getIndex();
-    const std::vector< double > &right_likelihoods  = node_partial_likelihoods[right_index][active_likelihood[right_index]];
+    const std::vector< double > &right_likelihoods  = node_likelihoods[right_index].partial_likelihood;
     
     
     std::map<std::vector<unsigned>, double> eventMap;
@@ -914,10 +926,10 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::recursivelyDrawJointC
         // get likelihoods of descendant nodes
         const TopologyNode &left = node.getChild(0);
         size_t left_index = left.getIndex();
-        std::vector< double > left_likelihoods = node_partial_likelihoods[left_index][active_likelihood[left_index]];
+        std::vector< double > left_likelihoods = node_likelihoods[left_index].partial_likelihood;
         const TopologyNode &right = node.getChild(1);
         size_t right_index = right.getIndex();
-        std::vector< double > right_likelihoods = node_partial_likelihoods[right_index][active_likelihood[right_index]];
+        std::vector< double > right_likelihoods = node_likelihoods[right_index].partial_likelihood;
         
         std::map<std::vector<unsigned>, double> sample_probs;
         double sample_probs_sum = 0.0;
@@ -1014,7 +1026,7 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::recursivelyFlagNodeDi
     size_t index = n.getIndex();
     
     // if this node is already dirty, the also all the ancestral nodes must have been flagged as dirty
-    if ( dirty_nodes[index] == false )
+    if ( node_likelihoods.is_valid(index) == true )
     {
         // the root doesn't have an ancestor
         if ( n.isRoot() == false )
@@ -1022,15 +1034,7 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::recursivelyFlagNodeDi
             recursivelyFlagNodeDirty( n.getParent() );
         }
         
-        // set the flag
-        dirty_nodes[index] = true;
-        
-        // if we previously haven't touched this node, then we need to change the active likelihood pointer
-        if ( changed_nodes[index] == false )
-        {
-            active_likelihood[index] = (active_likelihood[index] == 0 ? 1 : 0);
-            changed_nodes[index] = true;
-        }
+        node_likelihoods.invalidate(index);
         
     }
     
@@ -1053,10 +1057,10 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::drawStochasticCharact
     size_t                       node_index         = root.getIndex();
     const TopologyNode          &left               = root.getChild(0);
     size_t                       left_index         = left.getIndex();
-    const std::vector< double > &left_likelihoods   = node_partial_likelihoods[left_index][active_likelihood[left_index]];
+    const std::vector< double > &left_likelihoods   = node_likelihoods[left_index].partial_likelihood;
     const TopologyNode          &right              = root.getChild(1);
     size_t                       right_index        = right.getIndex();
-    const std::vector< double > &right_likelihoods  = node_partial_likelihoods[right_index][active_likelihood[right_index]];
+    const std::vector< double > &right_likelihoods  = node_likelihoods[right_index].partial_likelihood;
     
     
     // now begin the root-to-tip pass, drawing ancestral states for each time slice conditional on the start states
@@ -1197,7 +1201,8 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::recursivelyDrawStocha
     std::vector<double> transition_times;
     transition_states.push_back(current_state);
     
-    int downpass_dt = int( branch_partial_likelihoods[node_index].size() ) - 1;
+    const std::vector<std::vector<double> > &branch_likelihoods = node_likelihoods[node_index].branch_likelihoods;
+    int downpass_dt = int( branch_likelihoods.size() ) - 1;
     
     // keep track of rates in each time interval so we can calculate per branch averages of each rate
     double total_speciation_rate = 0.0;
@@ -1217,7 +1222,7 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::recursivelyDrawStocha
         double probs_sum = 0.0;
         for (size_t i = 0; i < num_states; i++)
         {
-            probs_sum += branch_conditional_probs[i + num_states] * branch_partial_likelihoods[node_index][downpass_dt][i];
+            probs_sum += branch_conditional_probs[i + num_states] * branch_likelihoods[downpass_dt][i];
         }
         if ( probs_sum == 0.0 )
         {
@@ -1232,7 +1237,7 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::recursivelyDrawStocha
             
             for (size_t i = 0; i < num_states; i++)
             {
-                u -= branch_conditional_probs[i + num_states] * branch_partial_likelihoods[node_index][downpass_dt][i];
+                u -= branch_conditional_probs[i + num_states] * branch_likelihoods[downpass_dt][i];
                 if (u < 0.0)
                 {
                     new_state = i;
@@ -1372,10 +1377,10 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::recursivelyDrawStocha
         // get likelihoods of descendant nodes
         const TopologyNode &left = node.getChild(0);
         size_t left_index = left.getIndex();
-        std::vector< double > left_likelihoods = node_partial_likelihoods[left_index][active_likelihood[left_index]];
+        std::vector< double > left_likelihoods = node_likelihoods[left_index].partial_likelihood;
         const TopologyNode &right = node.getChild(1);
         size_t right_index = right.getIndex();
-        std::vector< double > right_likelihoods = node_partial_likelihoods[right_index][active_likelihood[right_index]];
+        std::vector< double > right_likelihoods = node_likelihoods[right_index].partial_likelihood;
         
         std::map<std::vector<unsigned>, double> sample_probs;
         double sample_probs_sum = 0.0;
@@ -1714,16 +1719,10 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::keepSpecialization(co
     {
         dag_node->keepAffected();
     }
-    
-    // reset all flags
-    for (std::vector<bool>::iterator it = this->dirty_nodes.begin(); it != this->dirty_nodes.end(); ++it)
+
+    if (node_likelihoods.has_snapshot())
     {
-        (*it) = false;
-    }
-    
-    for (std::vector<bool>::iterator it = this->changed_nodes.begin(); it != this->changed_nodes.end(); ++it)
-    {
-        (*it) = false;
+        node_likelihoods.keep();
     }
     
 }
@@ -1819,24 +1818,9 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::restoreSpecialization
         }
     }
     
-    // reset the flags
-    for (std::vector<bool>::iterator it = dirty_nodes.begin(); it != dirty_nodes.end(); ++it)
+    if (node_likelihoods.has_snapshot())
     {
-        (*it) = false;
-    }
-    
-    // restore the active likelihoods vector
-    for (size_t index = 0; index < changed_nodes.size(); ++index)
-    {
-        // we have to restore, that means if we have changed the active likelihood vector
-        // then we need to revert this change
-        if ( changed_nodes[index] == true )
-        {
-            active_likelihood[index] = (active_likelihood[index] == 0 ? 1 : 0);
-        }
-        
-        // set all flags to false
-        changed_nodes[index] = false;
+        node_likelihoods.restore();
     }
     
 }
@@ -2534,10 +2518,10 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::swapParameterInternal
 
 
 /**
- * Touch the current value and reset some internal flags.
- * If the root age variable has been restored, then we need to change the root age of the tree too.
+ * Mark cached node likelihoods invalid after a parameter change.
+ * Process-age changes also update the exposed tree age for legacy dependents.
  */
-void TimeVaryingStateDependentSpeciationExtinctionProcess::touchSpecialization(const DagNode *affecter, bool touchAll)
+void TimeVaryingStateDependentSpeciationExtinctionProcess::invalidateSpecialization(const DagNode *affecter, bool touchAll)
 {
     
     if ( affecter == process_age )
@@ -2556,23 +2540,18 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::touchSpecialization(c
     
     if ( affecter != this->dag_node )
     {
-        
-        for (std::vector<bool>::iterator it = dirty_nodes.begin(); it != dirty_nodes.end(); ++it)
-        {
-            (*it) = true;
-        }
-        
-        // flip the active likelihood pointers
-        for (size_t index = 0; index < changed_nodes.size(); ++index)
-        {
-            if ( changed_nodes[index] == false )
-            {
-                active_likelihood[index] = (active_likelihood[index] == 0 ? 1 : 0);
-                changed_nodes[index] = true;
-            }
-        }
+        node_likelihoods.invalidate_all();
     }
     
+}
+
+
+/**
+ * Save node-cache metadata so rejected proposals can restore active cache slots.
+ */
+void TimeVaryingStateDependentSpeciationExtinctionProcess::snapshotSpecialization(void)
+{
+    node_likelihoods.snapshot();
 }
 
 
@@ -2649,11 +2628,7 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::numericallyIntegrateP
  */
 void TimeVaryingStateDependentSpeciationExtinctionProcess::resizeVectors(size_t num_nodes)
 {
-    active_likelihood = std::vector<bool>(num_nodes, false);
-    changed_nodes = std::vector<bool>(num_nodes, false);
-    dirty_nodes = std::vector<bool>(num_nodes, true);
-    node_partial_likelihoods = std::vector<std::vector<std::vector<double> > >(num_nodes, std::vector<std::vector<double> >(2,std::vector<double>(2*num_states,0)));
-    scaling_factors = std::vector<std::vector<double> >(num_nodes, std::vector<double>(2,0.0) );
+    node_likelihoods.resize(num_nodes);
     average_speciation = std::vector<double>(num_nodes, 0.0);
     average_extinction = std::vector<double>(num_nodes, 0.0);
     time_in_states = std::vector<double>(num_states, 0.0);
