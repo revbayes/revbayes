@@ -4,6 +4,7 @@
 #include "AbstractHomologousDiscreteCharacterData.h"
 #include "TreeDiscreteCharacterData.h"
 #include "CladogeneticSpeciationRateMatrix.h"
+#include "IndexedCache.h"
 #include "RateMatrix.h"
 #include "RateMatrix_JC.h"
 #include "Simplex.h"
@@ -89,9 +90,10 @@ namespace RevBayesCore {
 
         // virtual methods that may be overwritten, but then the derived class should call this methods
         virtual void                                                    getAffected(RbOrderedSet<DagNode *>& affected, const DagNode* affecter);                                  //!< get affected nodes
+        virtual void                                                    invalidateSpecialization(const DagNode *toucher, bool touchAll);
         virtual void                                                    keepSpecialization(const DagNode* affecter);
         virtual void                                                    restoreSpecialization(const DagNode *restorer);
-        virtual void                                                    touchSpecialization(const DagNode *toucher, bool touchAll);
+        virtual void                                                    snapshotSpecialization(void);
         
         double                                                          lnProbTreeShape(void) const;
 
@@ -117,14 +119,16 @@ namespace RevBayesCore {
         // members
         std::string                                                     condition;                                                                                          //!< The condition of the process (none/survival/#taxa).
         double                                                          dt;                                                                                                 //!< The size of the time slices used by the ODE for numerical integration.
-        std::vector<bool>                                               active_likelihood;
-        mutable std::vector<bool>                                       changed_nodes;
-        mutable std::vector<bool>                                       dirty_nodes;
-        mutable std::vector<std::vector<std::vector<double> > >         node_partial_likelihoods;
-        mutable std::map<size_t, std::vector<std::vector<double> > >    branch_partial_likelihoods;
+        struct NodeCache
+        {
+            std::vector<double>                                         partial_likelihood;
+            std::vector<std::vector<double> >                           branch_likelihoods;
+            double                                                      scaling_factor = 0.0;
+        };
+
+        mutable IndexedCache<NodeCache>                                node_likelihoods;
         mutable std::vector<std::vector<double> >                       extinction_probabilities;
         size_t                                                          num_states;
-        mutable std::vector<std::vector<double> >                       scaling_factors;
         bool                                                            use_cladogenetic_events;                                                                            //!< do we use the speciation rates from the cladogenetic event map?
         bool                                                            use_origin;
         bool                                                            sample_character_history;                                                                           //!< are we sampling the character history along branches?
