@@ -2,6 +2,8 @@
 #define BranchRateTreeDistribution_H
 
 #include <cstddef>
+#include <map>
+#include <string>
 #include <vector>
 
 #include "Taxon.h"
@@ -10,6 +12,7 @@
 #include "TypedDistribution.h"
 #include "TypedDagNode.h"
 #include "Clade.h"
+#include "SnapshotCache.h"
 #include "TopologyNode.h"
 
 namespace RevBayesCore {
@@ -38,14 +41,22 @@ class DagNode;
 
     private:
 
+        struct TreeComparisonCache
+        {
+            bool                                            topologies_match = false;
+            std::vector<RbBitSet>                           time_tree_splits;
+            std::map<RbBitSet, double>                      branch_lengths_by_split;
+        };
+
         // helper functions
         RbBitSet                                            collectTreeSample(const TopologyNode& n, RbBitSet& in, std::map<RbBitSet, double>& bl);
-        RbBitSet                                            collectSplits(const TopologyNode& n, RbBitSet& in, std::vector<RbBitSet>& s) const;
+        void                                                buildTreeComparisonCache(TreeComparisonCache& cache);
         void                                                simulateTree(void);
         void                                                simulateClade(std::vector<TopologyNode*> &n);                           //!< Simulate n speciation events.
         virtual void                                        keepSpecialization(const DagNode* affecter);
         virtual void                                        restoreSpecialization(const DagNode *restorer);
-        virtual void                                        touchSpecialization(const DagNode *toucher, bool touchAll);
+        virtual void                                        snapshotSpecialization(void);
+        virtual void                                        invalidateSpecialization(const DagNode *toucher, bool touchAll);
         
         // members
         TypedDistribution<double>*                          branch_rate_prior;
@@ -54,21 +65,7 @@ class DagNode;
         size_t                                              num_taxa;
         
         // variables catching some of the probability computation
-        bool                                                touched_time_tree;
-        bool                                                touched_branch_length_tree;
-        bool                                                has_stored_tree_cache;
-        bool                                                stored_touched_time_tree;
-        bool                                                stored_touched_branch_length_tree;
-        std::string                                         newick_time_tree;
-        std::string                                         newick_branch_length_tree;
-        Tree*                                               time_tree_unrooted;
-        std::vector<RbBitSet>                               splits;
-        std::map<RbBitSet, double>                          split_to_branch_lengths;
-        std::string                                         stored_newick_time_tree;
-        std::string                                         stored_newick_branch_length_tree;
-        Tree*                                               stored_time_tree_unrooted;
-        std::vector<RbBitSet>                               stored_splits;
-        std::map<RbBitSet, double>                          stored_split_to_branch_lengths;
+        SnapshotCache<TreeComparisonCache>                  tree_comparison_cache;
 
 
     };

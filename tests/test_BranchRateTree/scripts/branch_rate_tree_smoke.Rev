@@ -1,0 +1,18 @@
+seed(12345)
+
+time_tree <- readTrees("data/primates.tree")[1]
+root_branch_fraction <- 0.5
+branch_rate_prior = dnExponential(10.0)
+
+branch_tree ~ dnBranchRateTree(branchRatePrior=branch_rate_prior,
+                               timeTree=time_tree,
+                               rootBranchFraction=root_branch_fraction)
+
+lp1 = branch_tree.lnProbability()
+lp2 = branch_tree.lnProbability()
+
+if (abs(lp1 - lp2) > 1e-12) {
+    stop("dnBranchRateTree likelihood changed between repeated evaluations.")
+}
+
+q()

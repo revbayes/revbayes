@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <iosfwd>
 #include <map>
+#include <memory>
 #include <string>
 
 #include "RandomNumberFactory.h"
@@ -23,22 +24,7 @@ BranchRateTreeDistribution::BranchRateTreeDistribution(const TypedDagNode<Tree>*
     branch_rate_prior( brp ),
     time_tree( tt ),
     root_branch_fraction( rbf ),
-    num_taxa( tt->getValue().getNumberOfTips() ),
-    touched_time_tree( true ),
-    touched_branch_length_tree( true ),
-    has_stored_tree_cache( false ),
-    stored_touched_time_tree( false ),
-    stored_touched_branch_length_tree( false ),
-    newick_time_tree( ),
-    newick_branch_length_tree( ),
-    time_tree_unrooted( NULL ),
-    splits( ),
-    split_to_branch_lengths( ),
-    stored_newick_time_tree( ),
-    stored_newick_branch_length_tree( ),
-    stored_time_tree_unrooted( NULL ),
-    stored_splits( ),
-    stored_split_to_branch_lengths( )
+    num_taxa( tt->getValue().getNumberOfTips() )
 {
 
     // add the parameters of the distribution
@@ -66,27 +52,9 @@ BranchRateTreeDistribution::BranchRateTreeDistribution(const BranchRateTreeDistr
     time_tree( d.time_tree ),
     root_branch_fraction( d.root_branch_fraction ),
     num_taxa( d.num_taxa ),
-    touched_time_tree( true ),
-    touched_branch_length_tree( true ),
-    has_stored_tree_cache( d.has_stored_tree_cache ),
-    stored_touched_time_tree( d.stored_touched_time_tree ),
-    stored_touched_branch_length_tree( d.stored_touched_branch_length_tree ),
-    newick_time_tree( d.newick_time_tree ),
-    newick_branch_length_tree( d.newick_branch_length_tree ),
-    time_tree_unrooted( NULL ),
-    splits( d.splits ),
-    split_to_branch_lengths( d.split_to_branch_lengths ),
-    stored_newick_time_tree( d.stored_newick_time_tree ),
-    stored_newick_branch_length_tree( d.stored_newick_branch_length_tree ),
-    stored_time_tree_unrooted( NULL ),
-    stored_splits( d.stored_splits ),
-    stored_split_to_branch_lengths( d.stored_split_to_branch_lengths )
+    tree_comparison_cache( d.tree_comparison_cache )
 {
     
-    
-    if ( d.time_tree_unrooted != NULL ) time_tree_unrooted = d.time_tree_unrooted->clone();
-    if ( d.stored_time_tree_unrooted != NULL ) stored_time_tree_unrooted = d.stored_time_tree_unrooted->clone();
-
     // add the parameters of the distribution
     const std::vector<const DagNode*>& pars = branch_rate_prior->getParameters();
     for (std::vector<const DagNode*>::const_iterator it = pars.begin(); it != pars.end(); ++it)
@@ -104,9 +72,6 @@ BranchRateTreeDistribution::~BranchRateTreeDistribution()
 {
 
     delete branch_rate_prior;
-    
-    delete time_tree_unrooted;
-    delete stored_time_tree_unrooted;
     
     // the tree will be deleted automatically by the base class
 
@@ -141,26 +106,7 @@ BranchRateTreeDistribution& BranchRateTreeDistribution::operator=(const BranchRa
             this->addParameter( the_node );
         }
         
-        delete time_tree_unrooted;
-        delete stored_time_tree_unrooted;
-        time_tree_unrooted          = NULL;
-        stored_time_tree_unrooted   = NULL;
-        if ( d.time_tree_unrooted != NULL ) time_tree_unrooted = d.time_tree_unrooted->clone();
-        if ( d.stored_time_tree_unrooted != NULL ) stored_time_tree_unrooted = d.stored_time_tree_unrooted->clone();
-        
-        touched_time_tree                   = true;
-        touched_branch_length_tree          = true;
-        has_stored_tree_cache               = d.has_stored_tree_cache;
-        stored_touched_time_tree            = d.stored_touched_time_tree;
-        stored_touched_branch_length_tree   = d.stored_touched_branch_length_tree;
-        newick_time_tree                    = d.newick_time_tree;
-        newick_branch_length_tree           = d.newick_branch_length_tree;
-        splits                              = d.splits;
-        split_to_branch_lengths             = d.split_to_branch_lengths;
-        stored_newick_time_tree             = d.stored_newick_time_tree;
-        stored_newick_branch_length_tree    = d.stored_newick_branch_length_tree;
-        stored_splits                       = d.stored_splits;
-        stored_split_to_branch_lengths      = d.stored_split_to_branch_lengths;
+        tree_comparison_cache       = d.tree_comparison_cache;
 
     }
 
@@ -175,44 +121,9 @@ BranchRateTreeDistribution* BranchRateTreeDistribution::clone( void ) const
 }
 
 
-RbBitSet BranchRateTreeDistribution::collectSplits(const TopologyNode& node, RbBitSet& intaxa, std::vector<RbBitSet>& splits) const
-{
-
-    std::vector<RbBitSet> child_splits;
-
-    RbBitSet taxa( num_taxa );
-
-    if ( node.isTip() )
-    {
-        node.getTaxa(taxa);
-    }
-    else
-    {
-        for (size_t i = 0; i < node.getNumberOfChildren(); i++)
-        {
-            const TopologyNode &child_node = node.getChild(i);
-
-            child_splits.push_back( collectSplits(child_node, taxa, splits) );
-        }
-    }
-
-    intaxa |= taxa;
-
-    splits[node.getIndex()] = taxa;
-
-    RbBitSet taxa_rev = taxa;
-    taxa_rev.flip();
-    splits[node.getIndex()] = taxa_rev;
-
-    return taxa;
-}
-
-
 RbBitSet BranchRateTreeDistribution::collectTreeSample(const TopologyNode& n, RbBitSet& intaxa, std::map<RbBitSet, double>& split_branch_lengths)
 {
     double bl = n.getBranchLength();
-
-    std::vector<RbBitSet> child_splits;
 
     RbBitSet taxa( num_taxa );
 
@@ -226,7 +137,7 @@ RbBitSet BranchRateTreeDistribution::collectTreeSample(const TopologyNode& n, Rb
         {
             const TopologyNode &child_node = n.getChild(i);
 
-            child_splits.push_back( collectTreeSample(child_node, taxa, split_branch_lengths) );
+            collectTreeSample(child_node, taxa, split_branch_lengths);
         }
     }
 
@@ -243,62 +154,77 @@ RbBitSet BranchRateTreeDistribution::collectTreeSample(const TopologyNode& n, Rb
 }
 
 
+/*
+ * Rebuild topology-comparison data from local tree temporaries.
+ * The rerooted time-tree clone never becomes persistent state.
+ */
+void BranchRateTreeDistribution::buildTreeComparisonCache(TreeComparisonCache& cache)
+{
+    cache = TreeComparisonCache();
+
+    const Tree &time_tree_copy = time_tree->getValue();
+    const Tree &branch_length_tree = *value;
+
+    std::unique_ptr<Tree> time_tree_unrooted( time_tree_copy.clone() );
+    time_tree_unrooted->unroot();
+
+    Clade outgroup = branch_length_tree.getRoot().getChild(0).getClade();
+
+    bool strict = true;
+    bool contains = time_tree_unrooted->getRoot().containsClade(outgroup, strict);
+    if ( contains == false )
+    {
+        return;
+    }
+
+    bool make_bifurcating = false;
+    bool reindex = true;
+    time_tree_unrooted->reroot(outgroup, make_bifurcating, reindex);
+
+    std::string newick_time_tree = time_tree_unrooted->getPlainNewickRepresentation();
+    std::string newick_branch_length_tree = branch_length_tree.getPlainNewickRepresentation();
+    if ( newick_time_tree != newick_branch_length_tree )
+    {
+        return;
+    }
+
+    RbBitSet b( branch_length_tree.getNumberOfTips(), false );
+    collectTreeSample(branch_length_tree.getRoot(), b, cache.branch_lengths_by_split);
+
+    const std::vector<TopologyNode*> &time_tree_nodes = time_tree_copy.getNodes();
+    cache.time_tree_splits.resize( time_tree_nodes.size() );
+    for (size_t i=0; i<time_tree_nodes.size(); ++i)
+    {
+        TopologyNode* the_time_node = time_tree_nodes[i];
+        if ( the_time_node->isRoot() == true )
+        {
+            continue;
+        }
+
+        RbBitSet this_split = RbBitSet(num_taxa);
+        the_time_node->getTaxa( this_split );
+
+        cache.time_tree_splits[i] = this_split;
+    }
+
+    cache.topologies_match = true;
+}
+
+
 double BranchRateTreeDistribution::computeLnProbability( void )
 {
 
     double ln_prob = 0.0;
 
-    // make the time tree unrooted
     const Tree &time_tree_copy = time_tree->getValue();
-    if ( touched_time_tree == true )
+    if ( tree_comparison_cache.is_valid() == false )
     {
-        delete time_tree_unrooted;
-        
-        time_tree_unrooted = time_tree_copy.clone();
-        time_tree_unrooted->unroot();
+        TreeComparisonCache &cache = tree_comparison_cache.init_for_writing();
+        buildTreeComparisonCache(cache);
     }
 
-    // get our branch length tree
-    const Tree &branch_length_tree = *value;
-    
-    // we need to reroot the timetree
-    if ( touched_time_tree == true || touched_branch_length_tree == true )
-    {
-        
-        Clade outgroup = branch_length_tree.getRoot().getChild(0).getClade();
-        
-        // check first if the outgroup is contained in the tree
-        bool strict = true;
-        bool contains = time_tree_unrooted->getRoot().containsClade(outgroup, strict);
-
-        // if the outgroup is not contained in the current time tree,
-        // then the topology must mismatch and thus the probability is 0.0
-        if ( contains == false )
-        {
-            return RbConstants::Double::neginf;
-        }
-
-        bool make_bifurcating = false;
-        bool reindex = true;
-        time_tree_unrooted->reroot(outgroup, make_bifurcating, reindex);
-        
-    }
-
-    // compare if the time tree and branch length tree topologies match
-    const std::map<std::string, size_t> &time_tree_taxon_bitmap = time_tree_unrooted->getTaxonBitSetMap();
-    const std::map<std::string, size_t> &branch_length_tree_taxon_bitmap = branch_length_tree.getTaxonBitSetMap();
-
-    // Check that the topologies are identical
-    if ( touched_time_tree == true )
-    {
-        newick_time_tree = time_tree_unrooted->getPlainNewickRepresentation();
-    }
-    if ( touched_branch_length_tree == true )
-    {
-        newick_branch_length_tree = branch_length_tree.getPlainNewickRepresentation();
-    }
-    
-    if ( newick_time_tree != newick_branch_length_tree )
+    const TreeComparisonCache &cache = tree_comparison_cache.get();
+    if ( cache.topologies_match == false )
     {
         return RbConstants::Double::neginf;
     }
@@ -306,33 +232,6 @@ double BranchRateTreeDistribution::computeLnProbability( void )
     // compute the branch rates as r = bl / t
     const std::vector<TopologyNode*> &time_tree_nodes = time_tree_copy.getNodes();
 
-    if ( touched_branch_length_tree == true )
-    {
-        // get the clades for this tree
-        RbBitSet b( branch_length_tree.getNumberOfTips(), false );
-        split_to_branch_lengths.clear();
-        collectTreeSample(branch_length_tree.getRoot(), b, split_to_branch_lengths);
-    }
-    if ( touched_time_tree == true )
-    {
-        splits.clear();
-        splits.resize( time_tree_nodes.size() );
-        for (size_t i=0; i<time_tree_nodes.size(); ++i)
-        {
-            TopologyNode* the_time_node = time_tree_nodes[i];
-            // check if the node is the root node
-            if ( the_time_node->isRoot() == true )
-            {
-                continue;
-            }
-
-            RbBitSet this_split = RbBitSet(num_taxa);
-            the_time_node->getTaxa( this_split );
-
-            splits[i] = this_split;
-        }
-    }
-    
     for (size_t i=0; i<time_tree_nodes.size(); ++i)
     {
 
@@ -343,10 +242,10 @@ double BranchRateTreeDistribution::computeLnProbability( void )
             continue;
         }
 
-        const RbBitSet& this_split = splits[i];
+        const RbBitSet& this_split = cache.time_tree_splits[i];
 
-        std::map<RbBitSet, double>::const_iterator it_branch_length = split_to_branch_lengths.find( this_split );
-        if ( it_branch_length == split_to_branch_lengths.end() )
+        std::map<RbBitSet, double>::const_iterator it_branch_length = cache.branch_lengths_by_split.find( this_split );
+        if ( it_branch_length == cache.branch_lengths_by_split.end() )
         {
             throw RbException("Problem in branch rate tree distribution. Couldn't find branch length ...");
         }
@@ -395,10 +294,6 @@ double BranchRateTreeDistribution::computeLnProbability( void )
         ln_prob += branch_rate_prior->computeLnProbability();
 
     }
-    
-    touched_branch_length_tree  = false;
-    touched_time_tree           = false;
-
     return ln_prob;
 }
 
@@ -419,14 +314,8 @@ void BranchRateTreeDistribution::fireTreeChangeEvent(const TopologyNode &n, cons
 
 void BranchRateTreeDistribution::keepSpecialization(const DagNode* affecter)
 {
-    
-    if ( has_stored_tree_cache == true )
-    {
-        delete stored_time_tree_unrooted;
-        stored_time_tree_unrooted   = NULL;
-        has_stored_tree_cache       = false;
-    }
-    
+    if ( tree_comparison_cache.has_snapshot() )
+        tree_comparison_cache.keep();
 }
 
 
@@ -442,7 +331,7 @@ void BranchRateTreeDistribution::setValue(RevBayesCore::Tree *v, bool force)
     // delegate to super class
     TypedDistribution<Tree>::setValue( v, force );
 
-    // Sebastian: check if anything special needs to be done
+    tree_comparison_cache.invalidate();
 }
 
 
@@ -486,25 +375,14 @@ void BranchRateTreeDistribution::simulateTree( void )
     // now unroot to get the final branch length tree
     value->unroot();
 
+    tree_comparison_cache.invalidate();
+
 }
 
 void BranchRateTreeDistribution::restoreSpecialization(const DagNode *restorer)
 {
-    
-    if ( has_stored_tree_cache == true )
-    {
-        delete time_tree_unrooted;
-        newick_time_tree            = stored_newick_time_tree;
-        newick_branch_length_tree       = stored_newick_branch_length_tree;
-        time_tree_unrooted              = stored_time_tree_unrooted;
-        stored_time_tree_unrooted       = NULL;
-        splits                          = stored_splits;
-        split_to_branch_lengths         = stored_split_to_branch_lengths;
-        touched_time_tree               = stored_touched_time_tree;
-        touched_branch_length_tree      = stored_touched_branch_length_tree;
-        has_stored_tree_cache           = false;
-    }
-    
+    if ( tree_comparison_cache.has_snapshot() )
+        tree_comparison_cache.restore();
 }
 
 
@@ -534,37 +412,18 @@ void BranchRateTreeDistribution::swapParameterInternal( const DagNode *oldP, con
 }
 
 
-void BranchRateTreeDistribution::touchSpecialization(const DagNode *toucher, bool touchAll)
+void BranchRateTreeDistribution::snapshotSpecialization( void )
 {
-    
-    if ( (toucher == time_tree || toucher == this->dag_node) && has_stored_tree_cache == false )
-    {
-        // Snapshot the full topology-comparison cache because likelihood computation may
-        // reroot the cached time tree even when only the branch-length tree changed.
-        has_stored_tree_cache               = true;
-        stored_touched_time_tree            = touched_time_tree;
-        stored_touched_branch_length_tree   = touched_branch_length_tree;
-        stored_newick_time_tree             = newick_time_tree;
-        stored_newick_branch_length_tree    = newick_branch_length_tree;
-        stored_splits                       = splits;
-        stored_split_to_branch_lengths      = split_to_branch_lengths;
+    tree_comparison_cache.snapshot();
+}
 
-        delete stored_time_tree_unrooted;
-        stored_time_tree_unrooted = NULL;
-        if ( time_tree_unrooted != NULL )
-        {
-            stored_time_tree_unrooted = time_tree_unrooted->clone();
-        }
-    }
 
-    if ( toucher == time_tree )
-    {
-        touched_time_tree = true;
-    }
-    
-    if ( toucher == this->dag_node )
-    {
-        touched_branch_length_tree = true;
-    }
-    
+/*
+ * Mark topology-comparison data invalid when either compared tree changes.
+ * Branch-rate-prior and root-fraction changes reuse the cached comparison.
+ */
+void BranchRateTreeDistribution::invalidateSpecialization(const DagNode *toucher, bool touchAll)
+{
+    if ( touchAll == true || toucher == time_tree || toucher == this->dag_node )
+        tree_comparison_cache.invalidate();
 }
