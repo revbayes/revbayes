@@ -46,7 +46,7 @@ template <class variableType> class StochasticNode;
     protected:
         
         // virtual methods that may be overwritten, but then the derived class should call this methods
-        virtual void                                            getAffected(RbOrderedSet<DagNode *>& affected, const DagNode* affecter);                                  //!< get affected nodes
+        bool                                                    childrenAreAffectedBy(const DagNode *affecter) const override;                                  //!< Does this changed parameter make the value affect children?
         virtual void                                            invalidateSpecialization(const DagNode *toucher, bool touchAll);
         virtual void                                            keepSpecialization(const DagNode* affecter);
         virtual void                                            restoreSpecialization(const DagNode *restorer);

@@ -342,15 +342,12 @@ void TopologyConstrainedTreeDistribution::fireTreeChangeEvent(const TopologyNode
 }
 
 
-/**
- * Touch the current value and reset some internal flags.
- * If the root age variable has been restored, then we need to change the root age of the tree too.
+/*
+ * Child-affect propagation follows the wrapped tree distribution.
  */
-void TopologyConstrainedTreeDistribution::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode *affecter)
+bool TopologyConstrainedTreeDistribution::childrenAreAffectedBy(const DagNode *affecter) const
 {
-    
-    // delegate to the base distribution
-    base_distribution->getAffected(affected, affecter);
+    return base_distribution->childrenAreAffectedBy(affecter);
 }
 
 

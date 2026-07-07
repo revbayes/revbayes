@@ -38,7 +38,6 @@ namespace RevBayesCore {
         //        void                                                    setValue(RbAnalytical<mixtureType> *v, bool f=false);
         
         // special handling of state changes
-        void                                                    getAffected(RbOrderedSet<DagNode *>& affected, const DagNode* affecter);                          //!< get affected nodes
         void                                                    keepSpecialization(const DagNode* affecter);
         void                                                    restoreSpecialization(const DagNode *restorer);
         void                                                    invalidateSpecialization(const DagNode *toucher, bool touchAll);
@@ -212,14 +211,6 @@ void RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::executeMethod(con
     {
         throw RbException() << "A Analytical-mixture distribution does not have a member method called '" << n << "'.";
     }
-    
-}
-
-
-template <class mixtureType>
-void RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode* affecter)
-{
-    
     
 }
 

@@ -195,9 +195,12 @@ void TransformedVectorDistribution::snapshotSpecialization(void)
     base_dist->snapshot();
 }
 
-void TransformedVectorDistribution::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode* affecter)
+/*
+ * Child-affect propagation follows the wrapped vector distribution.
+ */
+bool TransformedVectorDistribution::childrenAreAffectedBy(const DagNode *affecter) const
 {
-    base_dist->getAffected(affected, affecter);
+    return base_dist->childrenAreAffectedBy(affecter);
 }
 
 /** Swap a parameter of the distribution */
