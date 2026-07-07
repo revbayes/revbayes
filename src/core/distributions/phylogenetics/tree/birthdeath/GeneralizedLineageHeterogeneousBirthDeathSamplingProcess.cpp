@@ -239,30 +239,22 @@ double GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::computeLnProbab
 {
 
 	// make sure we need to recompute
-	if ( probability_dirty == false )
+	if ( cached_ln_prob.has_value() )
 	{
-		return current_ln_prob;
-	}
-	else
-	{
-		// make sure all parameters are up-to-date
-		// on the tensorphylo side
-		prepareParameters(false);
+		return *cached_ln_prob;
 	}
 
-	// store the old likelihood
-    old_ln_prob = current_ln_prob;
+    // make sure all parameters are up-to-date
+    // on the tensorphylo side
+    prepareParameters(false);
 
     // calculate a likelihood!
     // tp_ptr->writeStateToFile("params.dat");
 	// tp_ptr->loadStateFromFile("state.dat");
-    current_ln_prob = tp_ptr->computeLogLikelihood();
+    cached_ln_prob = tp_ptr->computeLogLikelihood();
 
     // we are now able to reset tp approximator
     tp_can_reset = true;
-
-    // flag the likelihood as up-to-date
-    probability_dirty = false;
 
     // NOTE: this likelihood differs from the one computed in other revbayes
     // distributions because we include the probability density of the root node.
@@ -270,7 +262,7 @@ double GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::computeLnProbab
     // drops out if we condition on survival, in which case this likelihood
     // will be equivalent to a likelihood from other revbayes birth-death models
 
-    return current_ln_prob;
+    return *cached_ln_prob;
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::dumpModel(std::string file_name)
@@ -284,15 +276,24 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::dumpModel(std::st
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::resizeVectors(size_t num_nodes)
 {
     dirty_nodes = std::vector<bool>(num_nodes, true);
+    if ( snapshot_info.has_value() )
+    {
+        snapshot_info->tree_changed = true;
+        snapshot_info->changed_tree_nodes = std::vector<bool>(num_nodes, true);
+    }
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::fireTreeChangeEvent(const TopologyNode &n, const unsigned& m)
 {
 
-	// mark tree as dirty
-	tree_dirty = true;
+    // mark tree as dirty
+    tree_dirty = true;
+    if ( snapshot_info.has_value() )
+    {
+        snapshot_info->tree_changed = true;
+    }
 
-	// mark nodes dirty
+    // mark nodes dirty
     recursivelyFlagNodeDirty( n );
 
 }
@@ -301,9 +302,22 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::recursivelyFlagNo
 
     // we need to flag this node and all ancestral nodes for recomputation
     size_t index = n.getIndex();
+    tree_dirty = true;
+
+    bool was_changed = false;
+    if ( snapshot_info.has_value() )
+    {
+        snapshot_info->tree_changed = true;
+        if ( snapshot_info->changed_tree_nodes.size() < dirty_nodes.size() )
+        {
+            snapshot_info->changed_tree_nodes.resize(dirty_nodes.size(), false);
+        }
+        was_changed = snapshot_info->changed_tree_nodes[index];
+        snapshot_info->changed_tree_nodes[index] = true;
+    }
 
     // if this node is already dirty, the also all the ancestral nodes must have been flagged as dirty
-    if ( dirty_nodes[index] == false )
+    if ( dirty_nodes[index] == false or (snapshot_info.has_value() and was_changed == false) )
     {
 
     	// the root doesn't have an ancestor
@@ -347,7 +361,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setLambda(const T
 
 	// flag for update
 	lambda_dirty = true;
-	probability_dirty = true;
+	cached_ln_prob.reset();
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setLambda(const TypedDagNode< RbVector< RbVector<double> > >* param, const TypedDagNode< RbVector<double> >* times)
@@ -370,7 +384,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setLambda(const T
 
 	// flag for update
 	lambda_dirty = true;
-	probability_dirty = true;
+	cached_ln_prob.reset();
 
 }
 
@@ -390,7 +404,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setMu(const Typed
 
 	// flag for update
 	mu_dirty = true;
-	probability_dirty = true;
+	cached_ln_prob.reset();
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setMu(const TypedDagNode< RbVector< RbVector<double> > >* param, const TypedDagNode< RbVector<double> >* times)
@@ -413,7 +427,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setMu(const Typed
 
 	// flag for update
 	mu_dirty = true;
-	probability_dirty = true;
+	cached_ln_prob.reset();
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setPhi(const TypedDagNode< RbVector<double> >* param)
@@ -432,7 +446,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setPhi(const Type
 
 	// flag for update
 	phi_dirty = true;
-	probability_dirty = true;
+	cached_ln_prob.reset();
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setPhi(const TypedDagNode< RbVector< RbVector<double> > >* param, const TypedDagNode< RbVector<double> >* times)
@@ -455,7 +469,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setPhi(const Type
 
 	// flag for update
 	phi_dirty = true;
-	probability_dirty = true;
+	cached_ln_prob.reset();
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setDelta(const TypedDagNode< RbVector<double> >* param)
@@ -474,7 +488,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setDelta(const Ty
 
 	// flag for update
 	delta_dirty = true;
-	probability_dirty = true;
+	cached_ln_prob.reset();
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setDelta(const TypedDagNode< RbVector< RbVector<double> > >* param, const TypedDagNode< RbVector<double> >* times)
@@ -497,7 +511,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setDelta(const Ty
 
 	// flag for update
 	delta_dirty = true;
-	probability_dirty = true;
+	cached_ln_prob.reset();
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setUpsilon(const TypedDagNode< RbVector< RbVector<double> > >* param, const TypedDagNode< RbVector<double> >* times)
@@ -517,7 +531,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setUpsilon(const 
 
 	// flag for update
 	upsilon_dirty = true;
-	probability_dirty = true;
+	cached_ln_prob.reset();
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setGamma(const TypedDagNode< RbVector< RbVector<double> > >* param, const TypedDagNode< RbVector<double> >* times)
@@ -537,7 +551,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setGamma(const Ty
 
 	// flag for update
 	gamma_dirty = true;
-	probability_dirty = true;
+	cached_ln_prob.reset();
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setRho(const TypedDagNode< double >* param)
@@ -556,7 +570,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setRho(const Type
 
 	// flag for update
 	rho_dirty = true;
-	probability_dirty = true;
+	cached_ln_prob.reset();
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setRho(const TypedDagNode< RbVector< RbVector<double> > >* param, const TypedDagNode< RbVector<double> >* times)
@@ -576,7 +590,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setRho(const Type
 
 	// flag for update
 	rho_dirty = true;
-	probability_dirty = true;
+	cached_ln_prob.reset();
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setXi(const TypedDagNode< RbVector< RbVector<double> > >* param, const TypedDagNode< RbVector<double> >* times)
@@ -596,7 +610,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setXi(const Typed
 
 	// flag for update
 	xi_dirty = true;
-	probability_dirty = true;
+	cached_ln_prob.reset();
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setEta(const TypedDagNode< double >* param)
@@ -615,7 +629,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setEta(const Type
 
 	// flag for update
 	eta_dirty = true;
-	probability_dirty = true;
+	cached_ln_prob.reset();
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setEta(const TypedDagNode< RateGenerator >* param)
@@ -634,7 +648,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setEta(const Type
 
 	// flag for update
 	eta_dirty = true;
-	probability_dirty = true;
+	cached_ln_prob.reset();
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setEta(const TypedDagNode< RbVector< RateGenerator > >* param, const TypedDagNode< RbVector<double> >* times)
@@ -657,7 +671,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setEta(const Type
 
 	// flag for update
 	eta_dirty = true;
-	probability_dirty = true;
+	cached_ln_prob.reset();
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setOmega(const TypedDagNode< CladogeneticProbabilityMatrix >* param)
@@ -676,7 +690,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setOmega(const Ty
 
 	// flag for update
 	omega_dirty = true;
-	probability_dirty = true;
+	cached_ln_prob.reset();
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setOmega(const TypedDagNode< RbVector< CladogeneticProbabilityMatrix > >* param, const TypedDagNode< RbVector<double> >* times)
@@ -699,7 +713,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setOmega(const Ty
 
 	// flag for update
 	omega_dirty = true;
-	probability_dirty = true;
+	cached_ln_prob.reset();
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setZeta(const TypedDagNode< RbVector< MatrixReal > >* param)
@@ -717,7 +731,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setZeta(const Typ
 
 	// flag for update
 	zeta_dirty = true;
-	probability_dirty = true;
+	cached_ln_prob.reset();
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setValue(Tree *v, bool f)
@@ -792,7 +806,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setValue(Tree *v,
     updateTree(true);
 
     // mark the likelihood dirty
-    probability_dirty = true;
+	cached_ln_prob.reset();
 
 }
 
@@ -946,8 +960,25 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::initializeEmptyCh
     updateData(true);
 
     // mark the likelihood dirty
-    probability_dirty = true;
+	cached_ln_prob.reset();
 
+}
+
+/*
+ * Save the GLHBDSP rollback boundary before invalidation mutates TensorPhylo-facing
+ * dirty state. Dirty flags stay live and are merged with changed flags on restore.
+ */
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::snapshotSpecialization(void)
+{
+    if ( snapshot_info.has_value() )
+    {
+        return;
+    }
+
+    SnapshotInfo snapshot;
+    snapshot.cached_ln_prob = cached_ln_prob;
+    snapshot.changed_tree_nodes = std::vector<bool>(dirty_nodes.size(), false);
+    snapshot_info = snapshot;
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::keepSpecialization(const DagNode* affecter)
@@ -959,7 +990,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::keepSpecializatio
         (*it) = false;
     }
 
-    probability_dirty    = false;
     tree_dirty           = false;
     root_frequency_dirty = false;
     lambda_dirty         = false;
@@ -973,7 +1003,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::keepSpecializatio
     eta_dirty            = false;
     omega_dirty          = false;
     zeta_dirty           = false;
-    old_ln_prob          = current_ln_prob; // make sure we don't accidently restore the outdated likelihood
+    snapshot_info.reset();
 
     // tell tp to keep the approximator
     if (tp_can_reset) {
@@ -1004,74 +1034,64 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::prepareParameters
 
 }
 
-void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::restoreSpecialization(const DagNode *restorer)
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::restoreSpecialization(const DagNode *)
 {
 
-    // reset the flags
-    for (std::vector<bool>::iterator it = dirty_nodes.begin(); it != dirty_nodes.end(); ++it)
+    if ( snapshot_info.has_value() == false )
     {
-        (*it) = false;
+        throw RbException("Cannot restore GLHBDSP TensorPhylo state without a snapshot.");
     }
 
-    if ( restorer == age )
+    if ( use_origin == false and value->getRoot().getAge() != age->getValue() )
     {
-        if ( use_origin == false)
+        value->getRoot().setAge( age->getValue() );
+    }
+
+    const SnapshotInfo& snapshot = *snapshot_info;
+
+    cached_ln_prob = snapshot.cached_ln_prob;
+
+    root_frequency_dirty = root_frequency_dirty || snapshot.root_frequency_changed;
+    lambda_dirty = lambda_dirty || snapshot.lambda_changed;
+    mu_dirty = mu_dirty || snapshot.mu_changed;
+    phi_dirty = phi_dirty || snapshot.phi_changed;
+    delta_dirty = delta_dirty || snapshot.delta_changed;
+    upsilon_dirty = upsilon_dirty || snapshot.upsilon_changed;
+    gamma_dirty = gamma_dirty || snapshot.gamma_changed;
+    rho_dirty = rho_dirty || snapshot.rho_changed;
+    xi_dirty = xi_dirty || snapshot.xi_changed;
+    eta_dirty = eta_dirty || snapshot.eta_changed;
+    omega_dirty = omega_dirty || snapshot.omega_changed;
+    zeta_dirty = zeta_dirty || snapshot.zeta_changed;
+
+    if ( snapshot.tree_changed )
+    {
+        tree_dirty = true;
+
+        if ( dirty_nodes.size() < snapshot.changed_tree_nodes.size() )
         {
-            value->getRoot().setAge( age->getValue() );
+            dirty_nodes.resize(snapshot.changed_tree_nodes.size(), false);
         }
 
-    }
+        bool any_changed_node = false;
+        for (size_t i = 0; i < snapshot.changed_tree_nodes.size(); ++i)
+        {
+            if ( snapshot.changed_tree_nodes[i] )
+            {
+                dirty_nodes[i] = true;
+                any_changed_node = true;
+            }
+        }
 
-    if ( restorer != this->dag_node )
-    {
-    	if ( restorer == root_frequency )
-    	{
-    		root_frequency_dirty = true;
-    	}
-    	else if ( restorer == lambda_const || restorer == lambda_var || restorer == lambda_times  )
-    	{
-    		lambda_dirty = true;
-    	}
-    	else if ( restorer == mu_const || restorer == mu_var || restorer == mu_times  )
-    	{
-    		mu_dirty = true;
-    	}
-    	else if ( restorer == phi_const || restorer == phi_var || restorer == phi_times  )
-    	{
-    		phi_dirty = true;
-    	}
-    	else if ( restorer == delta_const || restorer == delta_var || restorer == delta_times )
-    	{
-    		delta_dirty = true;
-    	}
-    	else if ( restorer == upsilon || restorer == upsilon_times  )
-    	{
-    		upsilon_dirty = true;
-    	}
-    	else if ( restorer == gamma || restorer == gamma_times )
-    	{
-    		gamma_dirty = true;
-    	}
-    	else if ( restorer == rho_simple || restorer == rho || restorer == rho_times  )
-    	{
-    		rho_dirty = true;
-    	}
-    	else if ( restorer == xi || restorer == xi_times  )
-    	{
-    		xi_dirty = true;
-    	}
-    	else if ( restorer == eta_simple || restorer == eta_const || restorer == eta_var || restorer == eta_times  )
-    	{
-    		eta_dirty = true;
-    	}
-    	else if ( restorer == omega_const || restorer == omega_var || restorer == omega_times  )
-    	{
-    		omega_dirty = true;
-    	}
-    	else if ( restorer == zeta  )
-    	{
-    		zeta_dirty = true;
-    	}
+        if ( any_changed_node == false )
+        {
+            // Legacy fallback: whole-tree invalidation can arrive without a tree
+            // change event. Remove this once those callers report node indices.
+            for (std::vector<bool>::iterator it = dirty_nodes.begin(); it != dirty_nodes.end(); ++it)
+            {
+                (*it) = true;
+            }
+        }
     }
 
     // reset scheduler and approximator on tp side
@@ -1080,9 +1100,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::restoreSpecializa
     	tp_can_reset = false;
     }
 
-    // clean the likelihood
-    probability_dirty = false;
-    current_ln_prob   = old_ln_prob;
+    snapshot_info.reset();
 
 }
 
@@ -1208,9 +1226,19 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::invalidateSpecial
 
         // update the tree
         tree_dirty = true;
+        if ( snapshot_info.has_value() )
+        {
+            snapshot_info->tree_changed = true;
+            if ( snapshot_info->changed_tree_nodes.size() < dirty_nodes.size() )
+            {
+                snapshot_info->changed_tree_nodes.resize(dirty_nodes.size(), false);
+            }
+            snapshot_info->changed_tree_nodes[value->getRoot().getIndex()] = true;
+        }
+        dirty_nodes[value->getRoot().getIndex()] = true;
 
         // make sure we update the likelihood
-        probability_dirty = true;
+	cached_ln_prob.reset();
 
     }
     
@@ -1219,81 +1247,130 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::invalidateSpecial
     {
         // update the tree
         tree_dirty = true;
+        if ( snapshot_info.has_value() )
+        {
+            snapshot_info->tree_changed = true;
+        }
 
         // make sure we update the likelihood
-        probability_dirty = true;
+	cached_ln_prob.reset();
 
     }
 
     if ( affecter != this->dag_node and affecter != age )
     {
 
-    	// mark all nodes as dirty
-        for (std::vector<bool>::iterator it = dirty_nodes.begin(); it != dirty_nodes.end(); ++it)
-        {
-            (*it) = true;
-        }
+        // Parameter changes are tracked by TensorPhylo parameter dirty flags.
+        // dirty_nodes is reserved for tree changes sent through setTree().
 
         // mark the affecting parameter as dirty
         if ( affecter == root_frequency )
-		{
-			root_frequency_dirty = true;
-			probability_dirty = true;
-		}
+        {
+            root_frequency_dirty = true;
+            if ( snapshot_info.has_value() )
+            {
+                snapshot_info->root_frequency_changed = true;
+            }
+            cached_ln_prob.reset();
+        }
         else if ( affecter == lambda_const || affecter == lambda_var || affecter == lambda_times  )
     	{
-    		lambda_dirty = true;
-    		probability_dirty = true;
+            lambda_dirty = true;
+            if ( snapshot_info.has_value() )
+            {
+                snapshot_info->lambda_changed = true;
+            }
+            cached_ln_prob.reset();
     	}
     	else if ( affecter == mu_const || affecter == mu_var || affecter == mu_times  )
     	{
-    		mu_dirty = true;
-    		probability_dirty = true;
+            mu_dirty = true;
+            if ( snapshot_info.has_value() )
+            {
+                snapshot_info->mu_changed = true;
+            }
+            cached_ln_prob.reset();
     	}
     	else if ( affecter == phi_const || affecter == phi_var || affecter == phi_times  )
     	{
-    		phi_dirty = true;
-    		probability_dirty = true;
+            phi_dirty = true;
+            if ( snapshot_info.has_value() )
+            {
+                snapshot_info->phi_changed = true;
+            }
+            cached_ln_prob.reset();
     	}
     	else if ( affecter == delta_const || affecter == delta_var || affecter == delta_times )
     	{
-    		delta_dirty = true;
-    		probability_dirty = true;
+            delta_dirty = true;
+            if ( snapshot_info.has_value() )
+            {
+                snapshot_info->delta_changed = true;
+            }
+            cached_ln_prob.reset();
     	}
     	else if ( affecter == upsilon || affecter == upsilon_times  )
     	{
-    		upsilon_dirty = true;
-    		probability_dirty = true;
+            upsilon_dirty = true;
+            if ( snapshot_info.has_value() )
+            {
+                snapshot_info->upsilon_changed = true;
+            }
+            cached_ln_prob.reset();
     	}
     	else if ( affecter == gamma || affecter == gamma_times )
     	{
-    		gamma_dirty = true;
-    		probability_dirty = true;
+            gamma_dirty = true;
+            if ( snapshot_info.has_value() )
+            {
+                snapshot_info->gamma_changed = true;
+            }
+            cached_ln_prob.reset();
     	}
     	else if ( affecter == rho_simple || affecter == rho || affecter == rho_times  )
     	{
-    		rho_dirty = true;
-    		probability_dirty = true;
+            rho_dirty = true;
+            if ( snapshot_info.has_value() )
+            {
+                snapshot_info->rho_changed = true;
+            }
+            cached_ln_prob.reset();
     	}
     	else if ( affecter == xi || affecter == xi_times  )
     	{
-    		xi_dirty = true;
-    		probability_dirty = true;
+            xi_dirty = true;
+            if ( snapshot_info.has_value() )
+            {
+                snapshot_info->xi_changed = true;
+            }
+            cached_ln_prob.reset();
     	}
     	else if ( affecter == eta_simple || affecter == eta_const || affecter == eta_var || affecter == eta_times  )
     	{
-    		eta_dirty = true;
-    		probability_dirty = true;
+            eta_dirty = true;
+            if ( snapshot_info.has_value() )
+            {
+                snapshot_info->eta_changed = true;
+            }
+            cached_ln_prob.reset();
     	}
     	else if ( affecter == omega_const || affecter == omega_var || affecter == omega_times  )
     	{
-    		omega_dirty = true;
-    		probability_dirty = true;
+            omega_dirty = true;
+            if ( snapshot_info.has_value() )
+            {
+                snapshot_info->omega_changed = true;
+            }
+            cached_ln_prob.reset();
     	}
     	else if ( affecter == zeta  )
     	{
-    		zeta_dirty = true;
-    		probability_dirty = true;
+            zeta_dirty = true;
+            if ( snapshot_info.has_value() )
+            {
+                snapshot_info->zeta_changed = true;
+            }
+            cached_ln_prob.reset();
     	}
     }
 
@@ -1416,70 +1493,74 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::checkTimesAreAsce
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateTree(bool force)
 {
-	if ( force or tree_dirty )
-	{
+    if ( force or tree_dirty )
+    {
 
-		// MRM/BP 7/26/23: Bruno and I made a change here to collapse zero-length branches
-		// into sampled ancestors before getting the newick string. This solves a problem
-		// but may create a new one: might be expensive to traverse entire tree and collapse
-		// ancestors every time we change the tree?
-		// possible alternative: use a different algorithm to make the newick string that
-		// correctly creates sampled ancestor nodes even when the branch has zero length
+        // MRM/BP 7/26/23: Bruno and I made a change here to collapse zero-length branches
+        // into sampled ancestors before getting the newick string. This solves a problem
+        // but may create a new one: might be expensive to traverse entire tree and collapse
+        // ancestors every time we change the tree?
+        // possible alternative: use a different algorithm to make the newick string that
+        // correctly creates sampled ancestor nodes even when the branch has zero length
 
-		// collapse sampled ancestors
-		Tree* tmp_tree = this->getValue().clone();
-		tmp_tree->collapseSampledAncestors();
+        // collapse sampled ancestors
+        Tree* tmp_tree = this->getValue().clone();
+        tmp_tree->collapseSampledAncestors();
 
-		// get the newick string
-		std::string var = tmp_tree->getNewickRepresentation();
-		size_t num_chars = var.size();
+        // get the newick string
+        std::string var = tmp_tree->getNewickRepresentation();
+        size_t num_chars = var.size();
 
-		if ( use_origin )
-		{
-			// strip out trailing zeros
-			char pattern = ':';
+        if ( use_origin )
+        {
+            // strip out trailing zeros
+            char pattern = ':';
             size_t i;
- 			for(i = num_chars - 1; i >= 0; --i) {
- 				if (var[i] == pattern) {
-					break;
-				}
-			}
-			var = var.substr(0, i + 1);
+            for(i = num_chars - 1; i >= 0; --i) {
+                if (var[i] == pattern) {
+                    break;
+                }
+            }
+            var = var.substr(0, i + 1);
 
-			// now add the tail
-			double origin_age  = age->getValue();
-			double root_age    = this->getValue().getRoot().getAge();
-			double tail_length = origin_age - root_age;
-			var += std::to_string(tail_length);
-		}
-		else
-		{
+            // now add the tail
+            double origin_age  = age->getValue();
+            double root_age    = this->getValue().getRoot().getAge();
+            double tail_length = origin_age - root_age;
+            var += std::to_string(tail_length);
+        }
+        else
+        {
 
-			// strip off the tail
-			// strip out trailing zeros
-			char pattern = ':';
-			size_t i;
-			for(i = num_chars - 1; i >= 0; --i) {
-				if (var[i] == pattern) {
-					break;
-				}
-			}
-			var = var.substr(0, i + 1);
+            // strip off the tail
+            // strip out trailing zeros
+            char pattern = ':';
+            size_t i;
+            for(i = num_chars - 1; i >= 0; --i) {
+                if (var[i] == pattern) {
+                    break;
+                }
+            }
+            var = var.substr(0, i + 1);
 
-			// now add the trailing zeros
-			var += "0.00000";
-		}
+            // now add the trailing zeros
+            var += "0.00000";
+        }
 
-		// make sure there's a closing semicolon
-		var += ";";
+        // make sure there's a closing semicolon
+        var += ";";
 
-		// set the tree
-		tp_ptr->setTree(var, dirty_nodes);
+        // set the tree
+        tp_ptr->setTree(var, dirty_nodes);
 
-		// mark tree as clean
-		tree_dirty = false;
+        // mark tree as clean
+        tree_dirty = false;
+        for (std::vector<bool>::iterator it = dirty_nodes.begin(); it != dirty_nodes.end(); ++it)
+        {
+            (*it) = false;
+        }
 
-	}
+    }
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::updateData(bool force)
@@ -2145,7 +2226,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> GeneralizedLineageHeterogeneousBir
         updateData(true);
 
         // mark the likelihood dirty
-        probability_dirty = true;
+	cached_ln_prob.reset();
 
         return NULL;
     }

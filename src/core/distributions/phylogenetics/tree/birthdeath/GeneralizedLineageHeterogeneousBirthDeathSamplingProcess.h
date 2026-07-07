@@ -18,6 +18,7 @@
 #include "RlString.h"
 #include "Loader.h"
 
+#include <optional>
 #include <vector>
 
 namespace RevBayesCore {
@@ -85,10 +86,8 @@ namespace RevBayesCore {
     protected:
 
         // likelihoods
-        double current_ln_prob = 0.0;
-        double old_ln_prob = 0.0;
-        bool   probability_dirty = true;
-        bool   tp_can_reset = true;
+        std::optional<double> cached_ln_prob;
+        bool                  tp_can_reset = true;
 
         // tensorphylo interface
         size_t                                    n_dense_steps;
@@ -106,7 +105,8 @@ namespace RevBayesCore {
         bool                                                              childrenAreAffectedBy(const DagNode *affecter) const override;                                  //!< Does this changed parameter make the value affect children?
         virtual void                                                      invalidateSpecialization(const DagNode *toucher, bool touchAll);
         virtual void                                                      keepSpecialization(const DagNode* affecter);
-        virtual void                                                      restoreSpecialization(const DagNode *restorer);
+        virtual void                                                      restoreSpecialization(const DagNode *);
+        void                                                              snapshotSpecialization(void) override;
 
         // Parameter management functions. You need to override both if you have additional parameters
         virtual void                                                      swapParameterInternal(const DagNode *oldP, const DagNode *newP);                                    //!< Swap a parameter
@@ -210,6 +210,28 @@ namespace RevBayesCore {
 		// misc. book-keeping
 		bool tree_dirty = true;
         std::vector<bool> dirty_nodes;
+
+        struct SnapshotInfo
+        {
+            std::optional<double> cached_ln_prob;
+
+            bool tree_changed = false;
+            std::vector<bool> changed_tree_nodes;
+
+            bool root_frequency_changed = false;
+            bool lambda_changed = false;
+            bool mu_changed = false;
+            bool phi_changed = false;
+            bool delta_changed = false;
+            bool upsilon_changed = false;
+            bool gamma_changed = false;
+            bool rho_changed = false;
+            bool xi_changed = false;
+            bool eta_changed = false;
+            bool omega_changed = false;
+            bool zeta_changed = false;
+        };
+        std::optional<SnapshotInfo> snapshot_info;
 
 
     };
