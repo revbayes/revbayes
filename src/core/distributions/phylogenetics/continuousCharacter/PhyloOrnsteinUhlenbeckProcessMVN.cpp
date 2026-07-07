@@ -29,15 +29,7 @@ using namespace RevBayesCore;
 PhyloOrnsteinUhlenbeckProcessMVN::PhyloOrnsteinUhlenbeckProcessMVN(const TypedDagNode<Tree> *t, size_t ns) :
     AbstractPhyloContinuousCharacterProcess( t, ns ),
     num_tips( t->getValue().getNumberOfTips() ),
-    obs( std::vector<std::vector<double> >(this->num_sites, std::vector<double>(num_tips, 0.0) ) ),
-    means( new std::vector<std::vector<double> >(this->num_sites, std::vector<double>(num_tips, 0.0) ) ),
-    stored_means( new std::vector<std::vector<double> >(this->num_sites, std::vector<double>(num_tips, 0.0) ) ),
-    phylogenetic_covariance_matrix( new MatrixReal(num_tips, num_tips) ),
-    stored_phylogenetic_covariance_matrix( new MatrixReal(num_tips, num_tips) ),
-    inverse_phylogenetic_covariance_matrix( num_tips, num_tips ),
-    changed_covariance(false),
-    needs_covariance_recomputation( true ),
-    needs_scale_recomputation( true )
+    obs( std::vector<std::vector<double> >(this->num_sites, std::vector<double>(num_tips, 0.0) ) )
 {
     // initialize default parameters
     homogeneous_root_state      = new ConstantNode<double>("", new double(0.0) );
@@ -70,8 +62,6 @@ PhyloOrnsteinUhlenbeckProcessMVN::PhyloOrnsteinUhlenbeckProcessMVN(const TypedDa
 PhyloOrnsteinUhlenbeckProcessMVN::~PhyloOrnsteinUhlenbeckProcessMVN( void )
 {
 
-//    delete phylogenetic_covariance_matrix;
-//    delete stored_phylogenetic_covariance_matrix;
 }
 
 
@@ -92,8 +82,11 @@ double PhyloOrnsteinUhlenbeckProcessMVN::computeLnProbability( void )
     // we start with the root and then traverse down the tree
     size_t root_index = root.getIndex();
     
-    if ( needs_covariance_recomputation == true )
+    if ( likelihood_cache.is_valid() == false )
     {
+        LikelihoodCache &cache = likelihood_cache.init_for_writing();
+        cache.means.assign(this->num_sites, std::vector<double>(num_tips, 0.0) );
+
         std::vector<double> distances = std::vector<double>(num_tips,0.0);
         recursiveComputeRootToTipDistance(distances, 0.0, root, root_index);
         MatrixReal c_matrix = MatrixReal(num_tips,num_tips);
@@ -115,7 +108,8 @@ double PhyloOrnsteinUhlenbeckProcessMVN::computeLnProbability( void )
         double opt   = computeBranchTheta(0);
         double var = (drift*drift)/sel * 0.5;
         
-        MatrixReal &m = *phylogenetic_covariance_matrix;
+        cache.covariance = MatrixReal(num_tips, num_tips);
+        MatrixReal &m = cache.covariance;
         for (size_t i=0; i<num_tips; ++i)
         {
             for (size_t j=0; j<num_tips; ++j)
@@ -123,18 +117,16 @@ double PhyloOrnsteinUhlenbeckProcessMVN::computeLnProbability( void )
                 m[i][j] = var * exp(-sel*c_matrix[i][j]) * (exp(2*sel*shared_distances_matrix[i][j])-1.0);
             }
         }
-        inverse_phylogenetic_covariance_matrix = phylogenetic_covariance_matrix->computeInverse();
+        cache.inverse_covariance = cache.covariance.computeInverse();
 
         // now compute the means
         for (size_t i=0; i<num_sites; ++i)
         {
             for (size_t j=0; j<num_tips; ++j)
             {
-                (*means)[i][j] = opt * (1.0-exp(-sel*distances[j])) + computeRootState(i)*exp(-sel*distances[j]);
+                cache.means[i][j] = opt * (1.0-exp(-sel*distances[j])) + computeRootState(i)*exp(-sel*distances[j]);
             }
         }
-        
-        needs_covariance_recomputation = false;
     }
     
     // sum the partials up
@@ -220,11 +212,8 @@ double PhyloOrnsteinUhlenbeckProcessMVN::computeRootState(size_t siteIdx) const
 
 void PhyloOrnsteinUhlenbeckProcessMVN::keepSpecialization( const DagNode* affecter )
 {
-    
-    // reset the flags
-    changed_covariance = false;
-    needs_covariance_recomputation = false;
-    
+    if ( likelihood_cache.has_snapshot() )
+        likelihood_cache.keep();
 }
 
 
@@ -266,17 +255,7 @@ void PhyloOrnsteinUhlenbeckProcessMVN::resetValue( void )
         }
     }
     
-    // reset the means vectors
-    delete means;
-    delete stored_means;
-    means           = new std::vector<std::vector<double> >(this->num_sites, std::vector<double>(num_tips, 0.0) );
-    stored_means    = new std::vector<std::vector<double> >(this->num_sites, std::vector<double>(num_tips, 0.0) );
-    
-    
-    
-    // finally we set all the flags for recomputation
-    needs_covariance_recomputation = true;
-    needs_scale_recomputation = true;
+    likelihood_cache.clear();
     
 }
 
@@ -381,19 +360,8 @@ std::set<size_t> PhyloOrnsteinUhlenbeckProcessMVN::recursiveComputeDistanceMatri
 
 void PhyloOrnsteinUhlenbeckProcessMVN::restoreSpecialization( const DagNode* affecter )
 {
-    
-    // reset the flags
-    if ( changed_covariance == true )
-    {
-        changed_covariance = false;
-        needs_covariance_recomputation = false;
-        
-        MatrixReal *tmp = phylogenetic_covariance_matrix;
-        phylogenetic_covariance_matrix = stored_phylogenetic_covariance_matrix;
-        stored_phylogenetic_covariance_matrix = tmp;
-        
-    }
-    
+    if ( likelihood_cache.has_snapshot() )
+        likelihood_cache.restore();
 }
 
 
@@ -679,6 +647,7 @@ std::vector<double> PhyloOrnsteinUhlenbeckProcessMVN::simulateRootCharacters(siz
 
 double PhyloOrnsteinUhlenbeckProcessMVN::sumRootLikelihood( void )
 {
+    const LikelihoodCache &cache = likelihood_cache.get();
     
     // sum the log-likelihoods for all sites together
     double sumPartialProbs = 0.0;
@@ -686,7 +655,7 @@ double PhyloOrnsteinUhlenbeckProcessMVN::sumRootLikelihood( void )
     {
         double sigma = this->computeSiteRate(site);
         //        sumPartialProbs += RbStatistics::MultivariateNormal::lnPdfCovariance(m, *phylogeneticCovarianceMatrix, obs[site], sigma*sigma);
-        sumPartialProbs += RbStatistics::MultivariateNormal::lnPdfPrecision( (*means)[site], inverse_phylogenetic_covariance_matrix, obs[site], sigma*sigma);
+        sumPartialProbs += RbStatistics::MultivariateNormal::lnPdfPrecision( cache.means[site], cache.inverse_covariance, obs[site], sigma*sigma);
     }
     
     return sumPartialProbs;
@@ -738,37 +707,18 @@ void PhyloOrnsteinUhlenbeckProcessMVN::swapParameterInternal(const DagNode *oldP
 }
 
 
-void PhyloOrnsteinUhlenbeckProcessMVN::touchSpecialization( const DagNode* affecter, bool touchAll )
+void PhyloOrnsteinUhlenbeckProcessMVN::snapshotSpecialization( void )
 {
-    
-    // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
-    if ( affecter == homogeneous_root_state )
-    {
-        
-        
-    }
-    else if ( affecter == heterogeneous_root_state )
-    {
-        
-        
-    }
-    else
-    {
-        needs_covariance_recomputation = true;
-        if ( changed_covariance == false )
-        {
-            MatrixReal *tmp = phylogenetic_covariance_matrix;
-            phylogenetic_covariance_matrix = stored_phylogenetic_covariance_matrix;
-            stored_phylogenetic_covariance_matrix = tmp;
-        }
-        changed_covariance = true;
-        
-    }
-//    else if ( affecter != this->tau ) // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
-//    {
-//        touchAll = true;
-//    }
-    
+    likelihood_cache.snapshot();
 }
 
+
+/*
+ * Mark the OU MVN likelihood cache invalid after any dependency changes.
+ * Root-state changes are included because the cached means depend on them.
+ */
+void PhyloOrnsteinUhlenbeckProcessMVN::invalidateSpecialization( const DagNode* affecter, bool touchAll )
+{
+    likelihood_cache.invalidate();
+}
 
