@@ -1,6 +1,5 @@
 #include <cstddef>
 #include <algorithm>
-#include <cassert>
 #include <cmath>
 #include <iosfwd>
 #include <set>
@@ -911,12 +910,6 @@ bool ConditionedBirthDeathShiftProcessContinuous::childrenAreAffectedBy(const Da
 void ConditionedBirthDeathShiftProcessContinuous::keepSpecialization(const DagNode *affecter)
 {
     
-    if ( affecter == root_age && this->dag_node != NULL )
-    {
-        assert( childrenAreAffectedBy( affecter ) );
-        dag_node->keepAffected();
-    }
-    
 }
 
 /**
@@ -926,11 +919,9 @@ void ConditionedBirthDeathShiftProcessContinuous::keepSpecialization(const DagNo
 void ConditionedBirthDeathShiftProcessContinuous::restoreSpecialization(const DagNode *affecter)
 {
     
-    if ( affecter == root_age && this->dag_node != NULL )
+    if ( affecter == root_age )
     {
         value->getNode( value->getRoot().getIndex() ).setAge( root_age->getValue() );
-        assert( childrenAreAffectedBy( affecter ) );
-        dag_node->restoreAffected();
     }
     
     if ( affecter == root_speciation && isSpeciationRateConstant() == true )

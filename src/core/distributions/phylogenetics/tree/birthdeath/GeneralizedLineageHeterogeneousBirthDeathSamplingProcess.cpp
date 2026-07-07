@@ -1,4 +1,3 @@
-#include <cassert>
 #include <string>
 
 #include "RandomNumberFactory.h"
@@ -954,12 +953,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::initializeEmptyCh
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::keepSpecialization(const DagNode* affecter)
 {
 
-    if ( affecter == age )
-    {
-        assert( childrenAreAffectedBy( affecter ) );
-        dag_node->keepAffected();
-    }
-
     // clear all flags
     for (std::vector<bool>::iterator it = this->dirty_nodes.begin(); it != this->dirty_nodes.end(); ++it)
     {
@@ -1025,12 +1018,6 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::restoreSpecializa
         if ( use_origin == false)
         {
             value->getRoot().setAge( age->getValue() );
-        }
-
-        if ( dag_node != NULL )
-        {
-            assert( childrenAreAffectedBy( restorer ) );
-            dag_node->restoreAffected();
         }
 
     }

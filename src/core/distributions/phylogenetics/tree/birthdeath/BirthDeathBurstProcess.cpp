@@ -1,6 +1,5 @@
 #include "BirthDeathBurstProcess.h"
 
-#include <cassert>
 #include <cmath>
 #include <string>
 
@@ -258,12 +257,6 @@ bool BirthDeathBurstProcess::isBurstSpeciation( size_t index ) const
 void BirthDeathBurstProcess::keepSpecialization(const DagNode *affecter)
 {
     
-    if ( affecter == time_burst && dag_node != NULL)
-    {
-        assert( childrenAreAffectedBy( affecter ) );
-        dag_node->keepAffected();
-    }
-    
     // delegate to base class
     AbstractRootedTreeDistribution::keepSpecialization( affecter );
     
@@ -316,12 +309,6 @@ void BirthDeathBurstProcess::restoreSpecialization(const DagNode *affecter)
             {
                 value->getNode(i).setAge( new_burst_time );
             }
-        }
-        
-        if ( dag_node != NULL )
-        {
-            assert( childrenAreAffectedBy( affecter ) );
-            dag_node->restoreAffected();
         }
     }
     

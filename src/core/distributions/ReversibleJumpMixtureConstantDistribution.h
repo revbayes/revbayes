@@ -76,7 +76,6 @@ namespace RevBayesCore {
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 
-#include <cassert>
 #include <cmath>
 
 template <class mixtureType>
@@ -267,12 +266,6 @@ size_t RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::get
 template <class mixtureType>
 void RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::keepSpecialization( const DagNode* affecter )
 {
-    // only do this when the toucher was our constant value and this value was supposed to be equal to the constant value
-    if ( affecter == const_value && index == 0 && this->dag_node != NULL )
-    {
-        assert( childrenAreAffectedBy( affecter ) );
-        this->dag_node->keepAffected();
-    }
     
 }
 
@@ -320,12 +313,6 @@ void RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::resto
         else
         {
             *this->value = const_value->getValue();
-        }
-
-        if ( this->dag_node != NULL )
-        {
-            assert( childrenAreAffectedBy( restorer ) );
-            this->dag_node->restoreAffected();
         }
         
     }

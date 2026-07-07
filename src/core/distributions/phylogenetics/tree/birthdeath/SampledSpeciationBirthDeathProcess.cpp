@@ -1,5 +1,4 @@
 #include <algorithm>
-#include <cassert>
 #include <cmath>
 #include <set>
 #include <cstddef>
@@ -498,12 +497,6 @@ void SampledSpeciationBirthDeathProcess::getLineagesAtAge(TopologyNode* n, std::
 void SampledSpeciationBirthDeathProcess::keepSpecialization(const DagNode *affecter)
 {
     
-    if ( affecter == root_age )
-    {
-        assert( childrenAreAffectedBy( affecter ) );
-        dag_node->keepAffected();
-    }
-    
 }
 
 
@@ -523,8 +516,6 @@ void SampledSpeciationBirthDeathProcess::restoreSpecialization(const DagNode *af
     if ( affecter == root_age )
     {
         value->getNode( value->getRoot().getIndex() ).setAge( root_age->getValue() );
-        assert( childrenAreAffectedBy( affecter ) );
-        dag_node->restoreAffected();
     }
     
 }

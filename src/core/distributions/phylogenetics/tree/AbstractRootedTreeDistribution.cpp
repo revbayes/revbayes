@@ -1,6 +1,5 @@
 #include <cstddef>
 #include <algorithm>
-#include <cassert>
 #include <cmath>
 #include <ostream>
 #include <set>
@@ -456,12 +455,6 @@ const std::vector<Taxon>& AbstractRootedTreeDistribution::getTaxa( void ) const
 void AbstractRootedTreeDistribution::keepSpecialization(const DagNode *affecter)
 {
     
-    if ( affecter == process_age && dag_node != NULL)
-    {
-        assert( childrenAreAffectedBy( affecter ) );
-        dag_node->keepAffected();
-    }
-    
 }
 
 
@@ -532,12 +525,6 @@ void AbstractRootedTreeDistribution::restoreSpecialization(const DagNode *affect
         if ( use_origin == false )
         {
             value->getRoot().setAge( process_age->getValue() );
-        }
-        
-        if ( dag_node != NULL )
-        {
-            assert( childrenAreAffectedBy( affecter ) );
-            dag_node->restoreAffected();
         }
     }
     

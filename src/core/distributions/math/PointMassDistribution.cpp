@@ -1,6 +1,5 @@
 #include "PointMassDistribution.h"
 
-#include <cassert>
 #include <cmath>
 
 #include "Cloneable.h"
@@ -81,12 +80,6 @@ double PointMassDistribution::getMax(void) const
 
 void PointMassDistribution::keepSpecialization( const DagNode* affecter )
 {
-    // only do this when the toucher was our parameters
-    if ( affecter == val && this->dag_node != NULL )
-    {
-        assert( childrenAreAffectedBy( affecter ) );
-        this->dag_node->keepAffected();
-    }
     
 }
 
@@ -116,12 +109,6 @@ void PointMassDistribution::restoreSpecialization( const DagNode *restorer )
     {
         const double &tmp = val->getValue();
         *(this->value) = tmp;
-
-        if ( this->dag_node != NULL )
-        {
-            assert( childrenAreAffectedBy( restorer ) );
-            this->dag_node->restoreAffected();
-        }
         
     }
     

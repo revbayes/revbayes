@@ -638,13 +638,14 @@ void RevBayesCore::StochasticNode<valueType>::keepMe( const DagNode* affecter )
         }
         
         distribution->keep( affecter );
+        const bool children_affected = distribution->childrenAreAffectedBy( affecter );
         
         // clear the list of touched element indices
         this->touched_elements.clear();
         
-        if ( isIntegratedOut() == true )
+        if ( isIntegratedOut() == true || children_affected )
         {
-            // Dispatch the touch message to downstream nodes
+            // Dispatch the keep message when this stochastic value affects downstream nodes.
             this->keepAffected();
         }
         
@@ -740,13 +741,14 @@ void RevBayesCore::StochasticNode<valueType>::restoreMe( const DagNode *restorer
 
         // call for potential specialized handling (e.g. internal flags)
         distribution->restore(restorer);
+        const bool children_affected = distribution->childrenAreAffectedBy( restorer );
 
         // clear the list of touched element indices
         this->touched_elements.clear();
 
-        if ( isIntegratedOut() == true )
+        if ( isIntegratedOut() == true || children_affected )
         {
-            // Dispatch the touch message to downstream nodes
+            // Dispatch the restore message when this stochastic value affects downstream nodes.
             this->restoreAffected();
         }
     }

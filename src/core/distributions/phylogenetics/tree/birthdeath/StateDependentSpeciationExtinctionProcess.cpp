@@ -1742,12 +1742,6 @@ std::vector<double> StateDependentSpeciationExtinctionProcess::getRootFrequencie
 void StateDependentSpeciationExtinctionProcess::keepSpecialization(const DagNode *affecter)
 {
     
-    if ( affecter == process_age )
-    {
-        assert( childrenAreAffectedBy( affecter ) );
-        dag_node->keepAffected();
-    }
-
     if (node_likelihoods.has_snapshot())
     {
         node_likelihoods.keep();
@@ -1908,12 +1902,6 @@ void StateDependentSpeciationExtinctionProcess::restoreSpecialization(const DagN
         if ( use_origin == false )
         {
             value->getRoot().setAge( process_age->getValue() );
-        }
-
-        if ( dag_node != NULL )
-        {
-            assert( childrenAreAffectedBy( affecter ) );
-            dag_node->restoreAffected();
         }
     }
 

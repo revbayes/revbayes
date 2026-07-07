@@ -1,6 +1,5 @@
 #include <cstddef>
 #include <algorithm>
-#include <cassert>
 #include <cmath>
 #include <vector>
 
@@ -288,12 +287,6 @@ bool UniformTimeTreeDistribution::childrenAreAffectedBy(const DagNode *affecter)
 void UniformTimeTreeDistribution::keepSpecialization(const DagNode *affecter)
 {
     
-    if ( affecter == root_age )
-    {
-        assert( childrenAreAffectedBy( affecter ) );
-        dag_node->keepAffected();
-    }
-    
 }
 
 /**
@@ -306,8 +299,6 @@ void UniformTimeTreeDistribution::restoreSpecialization(const DagNode *affecter)
     if ( affecter == root_age )
     {
         value->getNode( value->getRoot().getIndex() ).setAge( root_age->getValue() );
-        assert( childrenAreAffectedBy( affecter ) );
-        dag_node->restoreAffected();
     }
     
 }

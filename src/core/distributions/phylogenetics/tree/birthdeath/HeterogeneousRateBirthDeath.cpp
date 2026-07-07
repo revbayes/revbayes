@@ -1,6 +1,5 @@
 #include <boost/numeric/odeint.hpp> // IWYU pragma: keep
 #include <algorithm>
-#include <cassert>
 #include <cmath>
 #include <cstddef>
 #include <iosfwd>
@@ -704,12 +703,6 @@ bool HeterogeneousRateBirthDeath::childrenAreAffectedBy(const DagNode *affecter)
 void HeterogeneousRateBirthDeath::keepSpecialization(const DagNode *affecter)
 {
     
-    if ( affecter == root_age && this->dag_node != NULL )
-    {
-        assert( childrenAreAffectedBy( affecter ) );
-        dag_node->keepAffected();
-    }
-    
 }
 
 /**
@@ -719,11 +712,9 @@ void HeterogeneousRateBirthDeath::keepSpecialization(const DagNode *affecter)
 void HeterogeneousRateBirthDeath::restoreSpecialization(const DagNode *affecter)
 {
     
-    if ( affecter == root_age && this->dag_node != NULL )
+    if ( affecter == root_age )
     {
         value->getNode( value->getRoot().getIndex() ).setAge( root_age->getValue() );
-        assert( childrenAreAffectedBy( affecter ) );
-        dag_node->restoreAffected();
     }
     
 }
