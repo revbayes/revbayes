@@ -41,7 +41,7 @@ void ExtantTreeFunction::reInitialized( void )
     
 }
 
-// NB: Could be vastly improved with TreeListener events and touchSpecialization
+// NB: Could be vastly improved with TreeListener events and targeted invalidation.
 void ExtantTreeFunction::update( void )
 {
     delete value;
@@ -139,4 +139,3 @@ void ExtantTreeFunction::swapParameterInternal(const DagNode *oldP, const DagNod
     }
     
 }
-

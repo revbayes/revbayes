@@ -265,7 +265,7 @@ void StitchTreeFunction::reInitialized( void )
 }
 
 
-// NB: Could be vastly improved with TreeListener events and touchSpecialization
+// NB: Could be vastly improved with TreeListener events and targeted invalidation.
 void StitchTreeFunction::update( void )
 {
     updateStitchTree();
@@ -304,4 +304,3 @@ void StitchTreeFunction::swapParameterInternal(const DagNode *oldP, const DagNod
         patchClades = static_cast<const TypedDagNode<RbVector<Tree> >* >( newP );
     }
 }
-

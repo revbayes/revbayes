@@ -71,24 +71,6 @@ PhyloDistanceGamma* PhyloDistanceGamma::clone( void ) const
 }
 
 
-void PhyloDistanceGamma::keepSpecialization(const DagNode* affecter)
-{
-    
-    
-}
-
-
-/*
- * PhyloDistanceGamma has no specialized cache invalidation beyond recomputing on demand.
- * The hook exists to override the legacy touch path with an explicit invalidation hook.
- */
-void PhyloDistanceGamma::invalidateSpecialization(const DagNode *toucher, bool touchAll)
-{
-    
-    
-}
-
-
 void PhyloDistanceGamma::reInitialized(void)
 {
     

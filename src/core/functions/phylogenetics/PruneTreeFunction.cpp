@@ -52,7 +52,7 @@ PruneTreeFunction* PruneTreeFunction::clone( void ) const
 }
 
 
-// NB: Could be vastly improved with TreeListener events and touchSpecialization
+// NB: Could be vastly improved with TreeListener events and targeted invalidation.
 void PruneTreeFunction::update( void )
 {
     delete value;
@@ -88,4 +88,3 @@ void PruneTreeFunction::swapParameterInternal(const DagNode *oldP, const DagNode
     }
     
 }
-

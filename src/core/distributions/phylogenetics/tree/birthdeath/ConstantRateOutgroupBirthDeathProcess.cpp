@@ -615,7 +615,6 @@ void ConstantRateOutgroupBirthDeathProcess::restoreSpecialization(const DagNode 
 
 /*
  * Save active outgroup clades so restoreSpecialization() can roll them back.
- * This was formerly mixed into touchSpecialization().
  */
 void ConstantRateOutgroupBirthDeathProcess::snapshotSpecialization(void)
 {

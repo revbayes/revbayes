@@ -37,7 +37,7 @@ ChronoToPhyloFunction* ChronoToPhyloFunction::clone( void ) const
 }
 
 
-// NB: Could be vastly improved with TreeListener events and touchSpecialization
+// NB: Could be vastly improved with TreeListener events and targeted invalidation.
 void ChronoToPhyloFunction::update( void )
 {
     delete value;
@@ -74,4 +74,3 @@ void ChronoToPhyloFunction::swapParameterInternal(const DagNode *oldP, const Dag
     }
     
 }
-

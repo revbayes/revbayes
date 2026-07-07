@@ -36,11 +36,6 @@ namespace RevBayesCore {
 		// Parameter management functions.
 		virtual void                                                        swapParameterInternal(const DagNode *oldP, const DagNode *newP);                                    //!< Swap a parameter
 		
-		
-		// virtual methods that may be overwritten, but then the derived class should call this methods
-		virtual void                                                        keepSpecialization(const DagNode* affecter);
-		virtual void                                                        invalidateSpecialization(const DagNode *toucher, bool touchAll);
-		
 		void 																updateAlphaAndBetaMatrices();
 		
 		// members
