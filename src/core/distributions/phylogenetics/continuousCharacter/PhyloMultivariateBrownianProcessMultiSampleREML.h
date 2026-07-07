@@ -64,8 +64,6 @@ namespace RevBayesCore {
         
         std::vector<Taxon>                                                  taxa;
         const TypedDagNode< MatrixReal >*                                   rate_matrix;
-        size_t                                                              active_matrix;
-        std::vector<MatrixReal>                                             precision_matrices;
         
         
     };
