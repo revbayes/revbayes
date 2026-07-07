@@ -1,0 +1,41 @@
+################################################################################
+#
+# RevBayes Validation Test: multivariate Brownian motion with multiple samples
+#
+################################################################################
+
+seed(12345)
+
+data <- readContinuousCharacterData("data/mvBM_multisample.nex")
+taxon_map = readTaxonData("data/mvBM_multisample_species_map.txt")
+
+psi <- readTrees("data/mvBM_multisample.tree")[1]
+
+mvi = 0
+
+rate ~ dnExponential(10.0)
+moves[++mvi] = mvScale(rate, lambda=1.0, tune=true, weight=2.0)
+
+sigma ~ dnLKJ(eta=1, dim=2)
+moves[++mvi] = mvCorrelationMatrixSingleElementBeta(sigma, tune=true, weight=2.0)
+
+for (site in 1:2) {
+    for (i in 1:psi.ntips()) {
+        species_sd[site][i] ~ dnExp(1.0)
+        moves.append( mvScale(species_sd[site][i], weight=1.0) )
+        species_var[site][i] := species_sd[site][i] * species_sd[site][i]
+    }
+}
+
+traits ~ dnPhyloMultivariateBrownianMultiSampleREML(tree=psi, branchRates=rate, rateMatrix=sigma, withinSpeciesVariances=species_var, taxa=taxon_map)
+traits.clamp(data)
+
+mymodel = model(psi)
+
+mni = 0
+monitors[++mni] = mnModel(filename="output/mvBM_multisamples.log", printgen=10, separator=TAB)
+
+mymcmc = mcmc(mymodel, monitors, moves)
+mymcmc.run(generations=50)
+
+q()

@@ -1,0 +1,5 @@
+Taxon	Species	Age
+A1	A	0
+A2	A	0
+B1	B	0
+B2	B	0
