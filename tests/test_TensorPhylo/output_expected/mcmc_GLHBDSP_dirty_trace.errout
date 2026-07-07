@@ -1,0 +1,10 @@
+   Attempting to read the contents of file "tensorphylo_kadua.tre"
+   Successfully read file
+   Successfully read one character matrix from file 'data/tensorphylo_kadua_range_n2.nex'
+   Warning: simulating tree under uniform model.
+   Warning: simulating tree under uniform model.
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 11 different moves in a sequential move schedule with 11 moves per iteration
+   

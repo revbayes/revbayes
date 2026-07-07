@@ -1,0 +1,118 @@
+loadPlugin("TensorPhylo")
+
+seed(1209)
+
+phy <- readTrees("data/tensorphylo_kadua.tre")[1]
+bg_01 = readDiscreteCharacterData("data/tensorphylo_kadua_range_n2.nex")
+num_regions = bg_01.nchar()
+num_ranges = abs(2^num_regions - 1)
+num_pairs = num_regions^2 - num_regions
+bg_dat = formatDiscreteCharacterData(bg_01, format="GeoSSE", numStates=num_ranges)
+taxa = phy.taxa()
+
+moves = VectorMoves()
+monitors = VectorMonitors()
+
+root_age ~ dnUniform(0.95 * phy.rootAge(), 1.05 * phy.rootAge())
+root_age.setValue(phy.rootAge())
+moves.append( mvScale(root_age, lambda=0.05, tune=false, weight=1) )
+
+rho_w ~ dnExp(1)
+rho_e ~ dnExp(1)
+rho_b ~ dnExp(1)
+rho_d ~ dnExp(1)
+moves.append( mvScale(rho_w, lambda=0.2, tune=false, weight=1) )
+moves.append( mvScale(rho_e, lambda=0.2, tune=false, weight=1) )
+moves.append( mvScale(rho_b, lambda=0.2, tune=false, weight=1) )
+moves.append( mvScale(rho_d, lambda=0.2, tune=false, weight=1) )
+
+m_w_simplex ~ dnDirichlet(rep(1, num_regions))
+m_e_simplex ~ dnDirichlet(rep(1, num_regions))
+m_b_simplex ~ dnDirichlet(rep(1, num_pairs/2))
+m_d_simplex ~ dnDirichlet(rep(1, num_pairs))
+moves.append( mvSimplex(m_w_simplex, tune=false, weight=1) )
+moves.append( mvSimplex(m_e_simplex, tune=false, weight=1) )
+moves.append( mvSimplex(m_b_simplex, tune=false, weight=1) )
+moves.append( mvSimplex(m_d_simplex, tune=false, weight=1) )
+
+m_w := m_w_simplex * num_regions
+r_w := rho_w * m_w
+m_e := m_e_simplex * num_regions
+r_e := rho_e * m_e
+
+for (i in 1:num_ranges) {
+    mu[i] <- 0.0
+    if (i <= num_regions) {
+        mu[i] := r_e[i]
+    }
+}
+
+m_b_idx = 1
+for (i in 1:num_regions) {
+    m_b[i][i] <- 0.0
+    for (j in 1:num_regions) {
+        if (i < j) {
+            m_b[i][j] := abs(m_b_simplex[m_b_idx] * num_pairs)
+            m_b[j][i] := abs(m_b_simplex[m_b_idx] * num_pairs)
+            m_b_idx += 1
+        }
+        r_b[i][j] := rho_b * m_b[i][j]
+    }
+}
+
+m_d_idx = 1
+for (i in 1:num_regions) {
+    m_d[i][i] <- 0.0
+    for (j in 1:num_regions) {
+        if (i != j) {
+            m_d[i][j] := abs(m_d_simplex[m_d_idx++] * num_pairs)
+        }
+        r_d[i][j] := rho_d * m_d[i][j]
+    }
+}
+
+eta := fnBiogeographyRateMatrix(
+    dispersalRates=r_d,
+    extirpationRates=r_e,
+    maxRangeSize=num_regions
+)
+
+clado_map := fnBiogeographyCladoEventsBD(
+    speciation_rates=[rho_w, rho_b],
+    within_region_features=m_w,
+    between_region_features=m_b,
+    max_range_size=num_regions,
+    max_subrange_split_size=num_regions
+)
+lambda := clado_map.getSpeciationRateSumPerState()
+omega := clado_map.getCladogeneticProbabilityMatrix()
+
+pi ~ dnDirichlet(rep(1, num_ranges))
+moves.append( mvSimplex(pi, tune=false, weight=1) )
+
+rho_sample ~ dnBeta(20, 1)
+moves.append( mvBetaProbability(rho_sample, tune=false, weight=1) )
+
+timetree ~ dnGLHBDSP(
+    rootAge=root_age,
+    lambda=lambda,
+    mu=mu,
+    eta=eta,
+    omega=omega,
+    pi=pi,
+    rho=rho_sample,
+    condition="time",
+    taxa=taxa,
+    nStates=num_ranges,
+    nProc=1
+)
+timetree.clamp(phy)
+timetree.clampCharData(bg_dat)
+
+monitors.append( mnModel(filename="output/mcmc_GLHBDSP_dirty_trace.log", printgen=1) )
+
+mymodel = model(timetree)
+mymcmc = mcmc(mymodel, monitors, moves, moveschedule="sequential")
+mymcmc.run(generations=2, tuningInterval=100)
+
+q()
