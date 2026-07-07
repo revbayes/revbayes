@@ -1,0 +1,8 @@
+   Successfully read one character matrix from file 'data/OU_three_point.nex'
+   Attempting to read the contents of file "OU_three_point.tree"
+   Successfully read file
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 4 different moves in a random move schedule with 8 moves per iteration
+   

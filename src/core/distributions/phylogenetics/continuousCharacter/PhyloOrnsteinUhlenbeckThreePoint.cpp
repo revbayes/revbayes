@@ -30,14 +30,7 @@ namespace RevBayesCore { class RandomNumberGenerator; }
 using namespace RevBayesCore;
 
 PhyloOrnsteinUhlenbeckThreePoint::PhyloOrnsteinUhlenbeckThreePoint(const TypedDagNode<Tree> *t, size_t ns) : AbstractPhyloContinuousCharacterProcess( t, ns ),
-partial_likelihoods( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
-contrasts( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
-contrast_uncertainty( std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) ) ),
-normalizing_constants( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 1.0) ) ) ),
-active_likelihood( std::vector<size_t>(this->num_nodes, 0) ),
-changed_nodes( std::vector<bool>(this->num_nodes, false) ),
-dirty_nodes( std::vector<bool>(this->num_nodes, true) ),
-obs()
+    obs()
 {
     // initialize default parameters
     root_state                  = new ConstantNode<double>("", new double(0.0) );
@@ -61,7 +54,7 @@ obs()
     // now we need to reset the value
     this->redrawValue();
     
-    // we need to reset the contrasts
+    // we need to cache the observed tip values
     resetValue();
 }
 
@@ -164,7 +157,7 @@ double PhyloOrnsteinUhlenbeckThreePoint::computeLnProbability( void )
     if ( tau->getValue().getTreeChangeEventHandler().isListening( this ) == false )
     {
         tau->getValue().getTreeChangeEventHandler().addListener( this );
-        dirty_nodes = std::vector<bool>(tau->getValue().getNumberOfNodes(), true);
+        resetValue();
     }
     
     // compute the ln probability by recursively calling the probability calculation for each node
@@ -223,68 +216,13 @@ double PhyloOrnsteinUhlenbeckThreePoint::computeLnProbability( void )
 
 void PhyloOrnsteinUhlenbeckThreePoint::fireTreeChangeEvent( const TopologyNode &n, const unsigned& m )
 {
-    
-    // call a recursive flagging of all node above (closer to the root) and including this node
-    recursivelyFlagNodeDirty( n );
-    
-}
-
-
-void PhyloOrnsteinUhlenbeckThreePoint::keepSpecialization( const DagNode* affecter )
-{
-    
-    // reset all flags
-    for (std::vector<bool>::iterator it = this->dirty_nodes.begin(); it != this->dirty_nodes.end(); ++it)
-    {
-        (*it) = false;
-    }
-    
-    for (std::vector<bool>::iterator it = this->changed_nodes.begin(); it != this->changed_nodes.end(); ++it)
-    {
-        (*it) = false;
-    }
-    
-}
-
-
-void PhyloOrnsteinUhlenbeckThreePoint::recursivelyFlagNodeDirty( const TopologyNode &n )
-{
-    
-    // we need to flag this node and all ancestral nodes for recomputation
-    size_t index = n.getIndex();
-    
-    // if this node is already dirty, the also all the ancestral nodes must have been flagged as dirty
-    if ( !dirty_nodes[index] )
-    {
-        // the root doesn't have an ancestor
-        if ( !n.isRoot() )
-        {
-            recursivelyFlagNodeDirty( n.getParent() );
-        }
-        
-        // set the flag
-        dirty_nodes[index] = true;
-        
-        // if we previously haven't touched this node, then we need to change the active likelihood pointer
-        if ( changed_nodes[index] == false )
-        {
-            active_likelihood[index] = (active_likelihood[index] == 0 ? 1 : 0);
-            changed_nodes[index] = true;
-        }
-        
-    }
-    
+    resetValue();
 }
 
 
 void PhyloOrnsteinUhlenbeckThreePoint::resetValue( void )
 {
-    
-    // check if the vectors need to be resized
-    partial_likelihoods = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
-    contrasts = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
-    contrast_uncertainty = std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) );
-    normalizing_constants = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 1.0) ) );
+    this->num_nodes = tau->getValue().getNumberOfNodes();
     
     // create a vector with the correct site indices
     // some of the sites may have been excluded
@@ -321,47 +259,6 @@ void PhyloOrnsteinUhlenbeckThreePoint::resetValue( void )
             }
         }
     }
-    
-    
-    // finally we set all the flags for recomputation
-    for (std::vector<bool>::iterator it = dirty_nodes.begin(); it != dirty_nodes.end(); ++it)
-    {
-        (*it) = true;
-    }
-    
-    // flip the active likelihood pointers
-    for (size_t index = 0; index < changed_nodes.size(); ++index)
-    {
-        active_likelihood[index] = 0;
-        changed_nodes[index] = true;
-    }
-    
-}
-
-
-void PhyloOrnsteinUhlenbeckThreePoint::restoreSpecialization( const DagNode* affecter )
-{
-    
-    // reset the flags
-    for (std::vector<bool>::iterator it = dirty_nodes.begin(); it != dirty_nodes.end(); ++it)
-    {
-        (*it) = false;
-    }
-    
-    // restore the active likelihoods vector
-    for (size_t index = 0; index < changed_nodes.size(); ++index)
-    {
-        // we have to restore, that means if we have changed the active likelihood vector
-        // then we need to revert this change
-        if ( changed_nodes[index] == true )
-        {
-            active_likelihood[index] = (active_likelihood[index] == 0 ? 1 : 0);
-        }
-        
-        // set all flags to false
-        changed_nodes[index] = false;
-    }
-    
 }
 
 
@@ -574,86 +471,15 @@ std::vector<double> PhyloOrnsteinUhlenbeckThreePoint::simulateRootCharacters(siz
 }
 
 
-double PhyloOrnsteinUhlenbeckThreePoint::sumRootLikelihood( void )
-{
-    // get the root node
-    const TopologyNode &root = this->tau->getValue().getRoot();
-    
-    // get the index of the root node
-    size_t node_index = root.getIndex();
-    
-    // get the pointers to the partial likelihoods of the left and right subtree
-    std::vector<double> &p_node = this->partial_likelihoods[this->active_likelihood[node_index]][node_index];
-    
-    // sum the log-likelihoods for all sites together
-    double sum_partial_probs = 0.0;
-    for (size_t site = 0; site < this->num_sites; ++site)
-    {
-        sum_partial_probs += p_node[site];
-    }
-    
-    return sum_partial_probs;
-}
-
-
 /*
- * Mark three-point OU likelihood caches dirty after a dependency changes.
- * Proposal rollback is handled by existing active-likelihood buffers.
+ * Refresh observed tip values when the tree or clamped data changes.
+ * Scalar OU parameters are read directly during computeLnProbability().
  */
 void PhyloOrnsteinUhlenbeckThreePoint::invalidateSpecialization( const DagNode* affecter, bool touchAll )
 {
-    
-    // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
-    if ( affecter == this->heterogeneous_sigma )
+    if ( affecter == this->tau || affecter == static_cast<const DagNode*>(this->dag_node) )
     {
-        
-        const std::set<size_t> &indices = this->heterogeneous_sigma->getTouchedElementIndices();
-        
-        // maybe all of them have been touched or the flags haven't been set properly
-        if ( indices.size() == 0 )
-        {
-            // just flag everyting for recomputation
-            touchAll = true;
-        }
-        else
-        {
-            const std::vector<TopologyNode *> &nodes = this->tau->getValue().getNodes();
-            // flag recomputation only for the nodes
-            for (std::set<size_t>::iterator it = indices.begin(); it != indices.end(); ++it)
-            {
-                this->recursivelyFlagNodeDirty( *nodes[*it] );
-            }
-        }
-    }
-    else if ( affecter != this->tau ) // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
-    {
-        touchAll = true;
-        
-        if ( affecter == this->dag_node )
-        {
-            resetValue();
-        }
-        
-    }
-    
-    if ( touchAll )
-    {
-        for (std::vector<bool>::iterator it = dirty_nodes.begin(); it != dirty_nodes.end(); ++it)
-        {
-            (*it) = true;
-        }
-        
-        // Legacy two-buffer rollback: invalidation flips active likelihood slots.
-        // Remove this once dirty nodes own explicit snapshot state.
-        for (size_t index = 0; index < changed_nodes.size(); ++index)
-        {
-            if ( changed_nodes[index] == false )
-            {
-                active_likelihood[index] = (active_likelihood[index] == 0 ? 1 : 0);
-                changed_nodes[index] = true;
-            }
-        }
-        
+        resetValue();
     }
     
 }
