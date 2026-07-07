@@ -3,7 +3,9 @@
 
 #include "AbstractPhyloBrownianProcess.h"
 #include "MatrixReal.h"
+#include "SnapshotCache.h"
 
+#include <optional>
 #include <vector>
 
 namespace RevBayesCore {
@@ -44,8 +46,9 @@ namespace RevBayesCore {
         void                                                                resetValue( void );
         virtual void                                                        restoreSpecialization(const DagNode *restorer);
         std::vector<double>                                                 simulateRootCharacters(size_t n);
+        virtual void                                                        snapshotSpecialization(void);
         double                                                              sumRootLikelihood(void);
-        virtual void                                                        touchSpecialization(const DagNode *toucher, bool touchAll);
+        virtual void                                                        invalidateSpecialization(const DagNode *toucher, bool touchAll);
        
         // Parameter management functions.
         virtual void                                                        swapParameterInternal(const DagNode *oldP, const DagNode *newP);                         //!< Swap a parameter
@@ -60,15 +63,13 @@ namespace RevBayesCore {
         size_t                                                              num_tips;
         std::vector<std::vector<double> >                                   obs;
 
-        /* NOTE: Currently we cache both current (phylogenetic_covariance_matrix) and previous (stored_phylogenetic_covariance_matrix) values for the covariance matrix,
-                 but only the current value for the inverse (inverse_phylogenetic_covariance_matrix) of this matrix.
-                 Since the inverse is more more expensive to compute, perhaps we should just cache the matrix *inverse*, and cache for both current and previous states. */
-        MatrixReal*                                                         phylogenetic_covariance_matrix;
-        MatrixReal*                                                         stored_phylogenetic_covariance_matrix;
-        std::optional<MatrixReal>                                           inverse_phylogenetic_covariance_matrix;
-        bool                                                                changed_covariance;                                                                      //!< We have a stored matrix to restore from
-        bool                                                                needs_covariance_recomputation;                                                          //!< The primary matrix need to be recomputed.
-        bool                                                                needs_scale_recomputation;
+        struct CovarianceCache
+        {
+            MatrixReal covariance;
+            std::optional<MatrixReal> inverse_covariance;
+        };
+
+        SnapshotCache<CovarianceCache>                                      covariance_cache;
     };
     
 }

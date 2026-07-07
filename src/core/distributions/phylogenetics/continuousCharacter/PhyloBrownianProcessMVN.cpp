@@ -27,19 +27,12 @@ using namespace RevBayesCore;
 
 PhyloBrownianProcessMVN::PhyloBrownianProcessMVN(const TypedDagNode<Tree> *t, size_t ns) : AbstractPhyloBrownianProcess( t, ns ),
     num_tips( t->getValue().getNumberOfTips() ),
-    obs( std::vector<std::vector<double> >(this->num_sites, std::vector<double>(num_tips, 0.0) ) ),
-    phylogenetic_covariance_matrix( new MatrixReal(num_tips, num_tips) ),
-    stored_phylogenetic_covariance_matrix( new MatrixReal(num_tips, num_tips) ),
-    changed_covariance(false),
-    needs_covariance_recomputation( true ),
-    needs_scale_recomputation( true )
+    obs( std::vector<std::vector<double> >(this->num_sites, std::vector<double>(num_tips, 0.0) ) )
 {
     homogeneous_root_state      = new ConstantNode<double>("", new double(0.0) );
     heterogeneous_root_state    = NULL;
 
     addParameter( homogeneous_root_state );
-    phylogenetic_covariance_matrix->setCholesky( true );
-    stored_phylogenetic_covariance_matrix->setCholesky( true );
     
     // now we need to reset the value
     this->redrawValue();
@@ -51,12 +44,7 @@ PhyloBrownianProcessMVN::PhyloBrownianProcessMVN(const PhyloBrownianProcessMVN &
     heterogeneous_root_state( p.heterogeneous_root_state ),
     num_tips( p.num_tips ),
     obs( p.obs ),
-    phylogenetic_covariance_matrix( p.phylogenetic_covariance_matrix->clone() ),
-    stored_phylogenetic_covariance_matrix( p.stored_phylogenetic_covariance_matrix->clone() ),
-    inverse_phylogenetic_covariance_matrix( p.inverse_phylogenetic_covariance_matrix ),
-    changed_covariance( p.changed_covariance ),
-    needs_covariance_recomputation( p.needs_covariance_recomputation ),
-    needs_scale_recomputation( p.needs_scale_recomputation )
+    covariance_cache( p.covariance_cache )
 {
     
 }
@@ -69,9 +57,6 @@ PhyloBrownianProcessMVN::PhyloBrownianProcessMVN(const PhyloBrownianProcessMVN &
  */
 PhyloBrownianProcessMVN::~PhyloBrownianProcessMVN( void )
 {
-    // We don't delete the params, because they might be used somewhere else too. The model needs to do that!
-    delete phylogenetic_covariance_matrix;
-    delete stored_phylogenetic_covariance_matrix;
     
 }
 
@@ -84,20 +69,12 @@ PhyloBrownianProcessMVN& PhyloBrownianProcessMVN::operator=(const PhyloBrownianP
     if ( this != &p )
     {
         AbstractPhyloBrownianProcess::operator=( p );
-        
-        delete phylogenetic_covariance_matrix;
-        delete stored_phylogenetic_covariance_matrix;
-        
+
         homogeneous_root_state                      = p.homogeneous_root_state;
         heterogeneous_root_state                    = p.heterogeneous_root_state;
         num_tips                                    = p.num_tips;
         obs                                         = p.obs;
-        phylogenetic_covariance_matrix              = p.phylogenetic_covariance_matrix->clone();
-        stored_phylogenetic_covariance_matrix       = p.stored_phylogenetic_covariance_matrix->clone();
-        inverse_phylogenetic_covariance_matrix      = p.inverse_phylogenetic_covariance_matrix;
-        changed_covariance                          = p.changed_covariance;
-        needs_covariance_recomputation              = p.needs_covariance_recomputation;
-        needs_scale_recomputation                   = p.needs_scale_recomputation;
+        covariance_cache                            = p.covariance_cache;
     }
     
     return *this;
@@ -121,14 +98,14 @@ double PhyloBrownianProcessMVN::computeLnProbability( void )
     // we start with the root and then traverse down the tree
     size_t rootIndex = root.getIndex();
     
-    if ( needs_covariance_recomputation == true )
+    if ( covariance_cache.is_valid() == false )
     {
         // perhaps there is a more efficient way to reset the matrix to 0.
-        delete phylogenetic_covariance_matrix;
-        phylogenetic_covariance_matrix = new MatrixReal(num_tips, num_tips);
-        phylogenetic_covariance_matrix->setCholesky( true );
-        recursiveComputeCovarianceMatrix(*phylogenetic_covariance_matrix, root, rootIndex);
-        needs_covariance_recomputation = false;
+        CovarianceCache &cache = covariance_cache.init_for_writing();
+        cache.covariance = MatrixReal(num_tips, num_tips);
+        cache.covariance.setCholesky( true );
+        recursiveComputeCovarianceMatrix(cache.covariance, root, rootIndex);
+        cache.inverse_covariance = {};
     }
     
     // sum the partials up
@@ -160,11 +137,8 @@ double PhyloBrownianProcessMVN::computeRootState(size_t siteIdx)
 
 void PhyloBrownianProcessMVN::keepSpecialization( const DagNode* affecter )
 {
-    
-    // reset the flags
-    changed_covariance = false;
-    needs_covariance_recomputation = false;
-    
+    if ( covariance_cache.has_snapshot() )
+        covariance_cache.keep();
 }
 
 
@@ -207,9 +181,7 @@ void PhyloBrownianProcessMVN::resetValue( void )
     }
     
     
-    // finally we set all the flags for recomputation
-    needs_covariance_recomputation = true;
-    needs_scale_recomputation = true;
+    covariance_cache.clear();
     
 }
 
@@ -274,21 +246,8 @@ std::set<size_t> PhyloBrownianProcessMVN::recursiveComputeCovarianceMatrix(Matri
 
 void PhyloBrownianProcessMVN::restoreSpecialization( const DagNode* affecter )
 {
-    
-    // reset the flags
-    if ( changed_covariance == true )
-    {
-        changed_covariance = false;
-        needs_covariance_recomputation = false;
-        
-        MatrixReal *tmp = phylogenetic_covariance_matrix;
-        phylogenetic_covariance_matrix = stored_phylogenetic_covariance_matrix;
-        stored_phylogenetic_covariance_matrix = tmp;
-
-        // The inverse needs to be recalculated.
-        inverse_phylogenetic_covariance_matrix = {};
-    }
-    
+    if ( covariance_cache.has_snapshot() )
+        covariance_cache.restore();
 }
 
 
@@ -357,10 +316,11 @@ std::vector<double> PhyloBrownianProcessMVN::simulateRootCharacters(size_t n)
 
 double PhyloBrownianProcessMVN::sumRootLikelihood( void )
 {
-    if (not inverse_phylogenetic_covariance_matrix)
+    CovarianceCache &cache = covariance_cache.get_mutable();
+    if (not cache.inverse_covariance)
     {
-        inverse_phylogenetic_covariance_matrix = phylogenetic_covariance_matrix->computeInverse();
-        inverse_phylogenetic_covariance_matrix->setCholesky( true );
+        cache.inverse_covariance = cache.covariance.computeInverse();
+        cache.inverse_covariance->setCholesky( true );
     }
     
     // sum the log-likelihoods for all sites together
@@ -370,28 +330,29 @@ double PhyloBrownianProcessMVN::sumRootLikelihood( void )
         std::vector<double> m = std::vector<double>(num_tips, computeRootState(site) );
         
         double sr = this->computeSiteRate(site);
-        sum_site_probs += RbStatistics::MultivariateNormal::lnPdfPrecision(m, *inverse_phylogenetic_covariance_matrix, obs[site], sr*sr);
+        sum_site_probs += RbStatistics::MultivariateNormal::lnPdfPrecision(m, *cache.inverse_covariance, obs[site], sr*sr);
     }
     
     return sum_site_probs;
 }
 
+void PhyloBrownianProcessMVN::snapshotSpecialization( void )
+{
+    covariance_cache.snapshot();
+}
 
-void PhyloBrownianProcessMVN::touchSpecialization( const DagNode* affecter, bool touchAll )
+
+/*
+ * Mark the Brownian MVN covariance cache invalid after non-root dependencies change.
+ * Root-state proposals alter only the mean vector built while summing the likelihood.
+ */
+void PhyloBrownianProcessMVN::invalidateSpecialization( const DagNode* affecter, bool touchAll )
 {
     // changing the root state doesn't affect the covariance matrix.
     if ( affecter == homogeneous_root_state or affecter == heterogeneous_root_state )
         return;
 
-    needs_covariance_recomputation = true;
-    if ( changed_covariance == false )
-    {
-        MatrixReal *tmp = phylogenetic_covariance_matrix;
-        phylogenetic_covariance_matrix = stored_phylogenetic_covariance_matrix;
-        stored_phylogenetic_covariance_matrix = tmp;
-        inverse_phylogenetic_covariance_matrix = {};
-    }
-    changed_covariance = true;
+    covariance_cache.invalidate();
 }
 
 
@@ -413,5 +374,4 @@ void PhyloBrownianProcessMVN::swapParameterInternal(const DagNode *oldP, const D
     }
     
 }
-
 
