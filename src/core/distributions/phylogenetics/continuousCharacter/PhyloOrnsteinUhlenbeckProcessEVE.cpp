@@ -281,7 +281,7 @@ double PhyloOrnsteinUhlenbeckProcessEVE::computeLnProbability( void )
 
     if ( likelihood_cache.is_valid() == false )
     {
-        LikelihoodCache &cache = likelihood_cache.init_for_writing();
+        LikelihoodCache &cache = likelihood_cache.init_for_writing(LikelihoodCache());
         cache.means.assign(num_species, 0.0);
         cache.covariance = MatrixReal(num_species, num_species);
 
@@ -366,7 +366,7 @@ double PhyloOrnsteinUhlenbeckProcessEVE::computeRootState( void ) const
 }
 
 
-void PhyloOrnsteinUhlenbeckProcessEVE::keepSpecialization( const DagNode* affecter )
+void PhyloOrnsteinUhlenbeckProcessEVE::keepSpecialization(void)
 {
     if ( likelihood_cache.has_snapshot() )
         likelihood_cache.keep();
@@ -514,7 +514,7 @@ std::set<size_t> PhyloOrnsteinUhlenbeckProcessEVE::recursiveComputeDistanceMatri
 
 
 
-void PhyloOrnsteinUhlenbeckProcessEVE::restoreSpecialization( const DagNode* affecter )
+void PhyloOrnsteinUhlenbeckProcessEVE::restoreSpecialization(void)
 {
     if ( likelihood_cache.has_snapshot() )
         likelihood_cache.restore();
@@ -851,4 +851,3 @@ void PhyloOrnsteinUhlenbeckProcessEVE::invalidateSpecialization( const DagNode* 
 {
     likelihood_cache.invalidate();
 }
-

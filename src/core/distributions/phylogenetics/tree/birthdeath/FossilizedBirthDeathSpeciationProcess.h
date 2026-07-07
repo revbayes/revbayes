@@ -66,9 +66,9 @@ namespace RevBayesCore {
         double                                          simulateDivergenceTime(double origin, double present) const override;    //!< Simulate a speciation event.
         std::vector<double>                             simulateDivergenceTimes(size_t n, double origin, double present, double min, bool alwaysReturn) const override;                 //!< Simulate n speciation events.
 
-        void                                            keepSpecialization(const DagNode *toucher) override;
+        void                                            keepSpecialization(void) override;
         void                                            invalidateSpecialization(const DagNode *toucher, bool touchAll) override;
-        void                                            restoreSpecialization(const DagNode *toucher) override;
+        void                                            restoreSpecialization(void) override;
         void                                            snapshotSpecialization(void) override;
 
         // Parameter management functions

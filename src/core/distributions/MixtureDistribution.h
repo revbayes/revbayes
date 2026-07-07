@@ -46,7 +46,9 @@ namespace RevBayesCore {
         
         // special handling of state changes
         bool                                                childrenAreAffectedBy(const DagNode *affecter) const override;                         //!< Does this changed parameter make the value affect children?
-        void                                                restoreSpecialization(const DagNode *restorer);
+        void                                                keepSpecialization(void);
+        void                                                restoreSpecialization(void);
+        void                                                snapshotSpecialization(void);
         void                                                invalidateSpecialization(const DagNode *toucher, bool touchAll);
 
     protected:
@@ -63,6 +65,8 @@ namespace RevBayesCore {
         const TypedDagNode< Simplex >*                      probabilities;
         
         size_t                                              index;
+        bool                                                has_rollback_snapshot;                     //!< Guards idempotent snapshot bookkeeping.
+        bool                                                parameter_values_changed_since_snapshot;          //!< Tracks value-vector sync work needed on reject.
     };
     
 }
@@ -76,7 +80,9 @@ template <class mixtureType>
 RevBayesCore::MixtureDistribution<mixtureType>::MixtureDistribution(const TypedDagNode< RbVector<mixtureType> > *v, const TypedDagNode< Simplex > *p) : TypedDistribution<mixtureType>( Cloner<mixtureType, IsDerivedFrom<mixtureType, Cloneable>::Is >::createClone( v->getValue()[0] ) ),
     parameter_values( v ),
     probabilities( p ),
-    index( 0 )
+    index( 0 ),
+    has_rollback_snapshot(false),
+    parameter_values_changed_since_snapshot(false)
 {
     // add the parameters to our set (in the base class)
     // in that way other class can easily access the set of our parameters
@@ -241,12 +247,23 @@ void RevBayesCore::MixtureDistribution<mixtureType>::swapParameterInternal( cons
 }
 
 
+/*
+ * Clear mixture value-vector rollback bookkeeping after accepting a proposal.
+ */
 template <class mixtureType>
-void RevBayesCore::MixtureDistribution<mixtureType>::restoreSpecialization( const DagNode *restorer )
+void RevBayesCore::MixtureDistribution<mixtureType>::keepSpecialization(void)
+{
+    has_rollback_snapshot = false;
+    parameter_values_changed_since_snapshot = false;
+}
+
+
+template <class mixtureType>
+void RevBayesCore::MixtureDistribution<mixtureType>::restoreSpecialization(void)
 {
     
-    // only do this when the toucher was our parameters
-    if ( restorer == parameter_values )
+    // Resynchronize the active value only if the value vector changed.
+    if ( parameter_values_changed_since_snapshot )
     {
         const mixtureType &tmp = parameter_values->getValue()[index];
         if constexpr(std::is_base_of_v<Cloneable, mixtureType>)
@@ -257,6 +274,24 @@ void RevBayesCore::MixtureDistribution<mixtureType>::restoreSpecialization( cons
         else
             (*this->value) = tmp;
     }
+    has_rollback_snapshot = false;
+    parameter_values_changed_since_snapshot = false;
+}
+
+
+/*
+ * Start each proposal with no pending value-vector resynchronization.
+ */
+template <class mixtureType>
+void RevBayesCore::MixtureDistribution<mixtureType>::snapshotSpecialization( void )
+{
+    if ( has_rollback_snapshot )
+    {
+        return;
+    }
+
+    has_rollback_snapshot = true;
+    parameter_values_changed_since_snapshot = false;
 }
 
 
@@ -297,6 +332,10 @@ void RevBayesCore::MixtureDistribution<mixtureType>::invalidateSpecialization( c
     // only do this when the toucher was our parameters
     if ( toucher == parameter_values )
     {
+        if ( has_rollback_snapshot )
+        {
+            parameter_values_changed_since_snapshot = true;
+        }
         const mixtureType &tmp = parameter_values->getValue()[index];
         if constexpr (std::is_base_of_v<Cloneable, mixtureType>)
         {

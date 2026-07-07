@@ -40,11 +40,11 @@ namespace RevBayesCore {
 
         // virtual methods that may be overwritten, but then the derived class should call this methods
         double                                                              computeRootValue( void ) const;
-        virtual void                                                        keepSpecialization(const DagNode* affecter);
+        virtual void                                                        keepSpecialization(void);
         void                                                                recursiveComputeLnProbability( const TopologyNode &node, size_t node_index );
         void                                                                recursivelyFlagNodeDirty(const TopologyNode& n);
         void                                                                resetValue( void );
-        virtual void                                                        restoreSpecialization(const DagNode *restorer);
+        virtual void                                                        restoreSpecialization(void);
         double                                                              simulateEpisode(size_t state_index, double delta_t, double ancestral_value);
         void                                                                simulateRecursively(const TopologyNode& node, std::vector< ContinuousTaxonData > &t);
         std::vector<double>                                                 simulateRootCharacters(size_t n);

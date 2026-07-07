@@ -981,7 +981,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::snapshotSpecializ
     snapshot_info = snapshot;
 }
 
-void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::keepSpecialization(const DagNode* affecter)
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::keepSpecialization(void)
 {
 
     // clear all flags
@@ -1034,7 +1034,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::prepareParameters
 
 }
 
-void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::restoreSpecialization(const DagNode *)
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::restoreSpecialization(void)
 {
 
     if ( snapshot_info.has_value() == false )

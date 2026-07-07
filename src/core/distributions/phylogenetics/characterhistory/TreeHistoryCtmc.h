@@ -88,8 +88,8 @@ namespace RevBayesCore {
         double                                                              computeBranchRate(size_t index);
 
         // virtual methods that may be overwritten, but then the derived class should call this methods
-        virtual void                                                        keepSpecialization(const DagNode* affecter);
-        virtual void                                                        restoreSpecialization(const DagNode *restorer);
+        virtual void                                                        keepSpecialization(void);
+        virtual void                                                        restoreSpecialization(void);
         virtual void                                                        invalidateSpecialization(const DagNode *toucher, bool touchAll);
 
         // pure virtual methods
@@ -598,7 +598,7 @@ void RevBayesCore::TreeHistoryCtmc<charType>::initializeHistoriesVector( void )
 
 
 template<class charType>
-void RevBayesCore::TreeHistoryCtmc<charType>::keepSpecialization( const DagNode* affecter )
+void RevBayesCore::TreeHistoryCtmc<charType>::keepSpecialization(void)
 {
 
     // reset all flags
@@ -616,7 +616,7 @@ void RevBayesCore::TreeHistoryCtmc<charType>::keepSpecialization( const DagNode*
 
 
 template<class charType>
-void RevBayesCore::TreeHistoryCtmc<charType>::restoreSpecialization( const DagNode* affecter )
+void RevBayesCore::TreeHistoryCtmc<charType>::restoreSpecialization(void)
 {
 
     // reset the flags
@@ -624,8 +624,6 @@ void RevBayesCore::TreeHistoryCtmc<charType>::restoreSpecialization( const DagNo
     {
         (*it) = false;
     }
-
-    //std::cout << "affecter " << affecter->getName() << "\n";
 
     // restore the active likelihoods vector
     for (size_t index = 0; index < changed_nodes.size(); ++index)

@@ -154,8 +154,8 @@ namespace RevBayesCore {
 
         // virtual methods that may be overwritten, but then the derived class should call this methods
         virtual void                                                        invalidateSpecialization(const DagNode *toucher, bool touchAll);
-        virtual void                                                        keepSpecialization(const DagNode* affecter);
-        virtual void                                                        restoreSpecialization(const DagNode *restorer);
+        virtual void                                                        keepSpecialization(void);
+        virtual void                                                        restoreSpecialization(void);
         virtual void                                                        snapshotSpecialization(void);
 
         // pure virtual methods
@@ -2253,7 +2253,7 @@ double RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::getPInv( void )
 
 
 template<class charType>
-void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::keepSpecialization( const DagNode* affecter )
+void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::keepSpecialization(void)
 {
     // reset proposal snapshot state
     has_snapshot = false;
@@ -2556,7 +2556,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::resizeLikelihoodV
 
 
 template<class charType>
-void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::restoreSpecialization( const DagNode* affecter )
+void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::restoreSpecialization(void)
 {
     // reset proposal snapshot state
     has_snapshot = false;

@@ -40,7 +40,9 @@ namespace RevBayesCore {
     protected:
         // Parameter management functions
         void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);            //!< Swap a parameter
-        virtual void                                        restoreSpecialization(const DagNode *restorer);
+        virtual void                                        keepSpecialization(void);
+        virtual void                                        restoreSpecialization(void);
+        virtual void                                        snapshotSpecialization(void);
         virtual void                                        invalidateSpecialization(const DagNode *toucher, bool touchAll);
 
         // pure virtual helper functions
@@ -70,6 +72,8 @@ namespace RevBayesCore {
         std::vector<int>                                    missing_species;
         std::vector<Clade>                                  incomplete_clades;                                                          //!< Topological constrains.
         std::vector<double>                                 incomplete_clade_ages;                                                      //!< Topological constrains.
+        bool                                                has_rollback_snapshot;                                                       //!< True while rollback tracking is active.
+        bool                                                dag_node_changed_since_snapshot;                                             //!< True when clade ages must be restored after invalidating the value.
         
         mutable std::vector<double>                         log_p_survival;                                                             //!< Topological constrains.
         mutable std::vector<double>                         rate_integral;                                                              //!< Topological constrains.

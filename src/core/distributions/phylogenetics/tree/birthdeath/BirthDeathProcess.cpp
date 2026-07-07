@@ -45,7 +45,9 @@ BirthDeathProcess::BirthDeathProcess(const TypedDagNode<double> *ra, const Typed
     rho( rh ),
     sampling_mixture_proportion( mp ),
     sampling_strategy( ss ),
-    incomplete_clades( ic )
+    incomplete_clades( ic ),
+    has_rollback_snapshot( false ),
+    dag_node_changed_since_snapshot( false )
 {
     
     addParameter( rho );
@@ -377,15 +379,25 @@ double BirthDeathProcess::pSurvival(double start, double end) const
 
 
 
-/**
- * Restore the current value and reset some internal flags.
- * If the root age variable has been restored, then we need to change the root age of the tree too.
+/*
+ * Clear rollback tracking after accepting the current value.
  */
-void BirthDeathProcess::restoreSpecialization(const DagNode *affecter)
+void BirthDeathProcess::keepSpecialization(void)
+{
+    has_rollback_snapshot = false;
+    dag_node_changed_since_snapshot = false;
+}
+
+
+/*
+ * Restore clade-age state that was derived from a previously invalidated tree value.
+ * Root-age synchronization is delegated to AbstractRootedTreeDistribution.
+ */
+void BirthDeathProcess::restoreSpecialization(void)
 {
     
-    AbstractRootedTreeDistribution::restoreSpecialization(affecter);
-    if ( affecter == this->dag_node )
+    AbstractRootedTreeDistribution::restoreSpecialization();
+    if ( dag_node_changed_since_snapshot == true )
     {
         incomplete_clade_ages.clear();
         incomplete_clade_ages.resize(incomplete_clades.size());
@@ -400,7 +412,24 @@ void BirthDeathProcess::restoreSpecialization(const DagNode *affecter)
         }
         
     }
+
+    has_rollback_snapshot = false;
+    dag_node_changed_since_snapshot = false;
     
+}
+
+
+/*
+ * Start rollback tracking for tree-derived clade ages.
+ * A second snapshot before keep/restore is intentionally a no-op.
+ */
+void BirthDeathProcess::snapshotSpecialization(void)
+{
+    if ( has_rollback_snapshot == false )
+    {
+        has_rollback_snapshot = true;
+        dag_node_changed_since_snapshot = false;
+    }
 }
 
 
@@ -438,6 +467,11 @@ void BirthDeathProcess::invalidateSpecialization(const DagNode *affecter, bool t
     AbstractRootedTreeDistribution::invalidateSpecialization(affecter, touchAll);
     if ( affecter == this->dag_node )
     {
+        if ( has_rollback_snapshot == true )
+        {
+            dag_node_changed_since_snapshot = true;
+        }
+
         incomplete_clade_ages.clear();
         incomplete_clade_ages.resize(incomplete_clades.size());
         

@@ -219,7 +219,7 @@ double BranchRateTreeDistribution::computeLnProbability( void )
     const Tree &time_tree_copy = time_tree->getValue();
     if ( tree_comparison_cache.is_valid() == false )
     {
-        TreeComparisonCache &cache = tree_comparison_cache.init_for_writing();
+        TreeComparisonCache &cache = tree_comparison_cache.init_for_writing(TreeComparisonCache());
         buildTreeComparisonCache(cache);
     }
 
@@ -312,7 +312,7 @@ void BranchRateTreeDistribution::fireTreeChangeEvent(const TopologyNode &n, cons
 }
 
 
-void BranchRateTreeDistribution::keepSpecialization(const DagNode* affecter)
+void BranchRateTreeDistribution::keepSpecialization(void)
 {
     if ( tree_comparison_cache.has_snapshot() )
         tree_comparison_cache.keep();
@@ -379,7 +379,7 @@ void BranchRateTreeDistribution::simulateTree( void )
 
 }
 
-void BranchRateTreeDistribution::restoreSpecialization(const DagNode *restorer)
+void BranchRateTreeDistribution::restoreSpecialization(void)
 {
     if ( tree_comparison_cache.has_snapshot() )
         tree_comparison_cache.restore();

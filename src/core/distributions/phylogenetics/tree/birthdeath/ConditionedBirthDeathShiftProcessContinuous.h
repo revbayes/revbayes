@@ -46,7 +46,9 @@ namespace RevBayesCore {
     protected:
         // Parameter management functions
         bool                                                childrenAreAffectedBy(const DagNode *affecter) const override;                                              //!< Does this changed parameter make the value affect children?
-        virtual void                                        restoreSpecialization(const DagNode *restorer);
+        virtual void                                        keepSpecialization(void);
+        virtual void                                        restoreSpecialization(void);
+        virtual void                                        snapshotSpecialization(void);
         virtual void                                        invalidateSpecialization(const DagNode *toucher, bool touchAll);
         
         double                                              computeNodeProbability(const TopologyNode &n, size_t nIdx);
@@ -87,6 +89,9 @@ namespace RevBayesCore {
         
         // only for testing
         bool                                                event_prior_only;
+        bool                                                has_rollback_snapshot;
+        bool                                                root_speciation_changed_since_snapshot;
+        bool                                                root_extinction_changed_since_snapshot;
         
     };
     

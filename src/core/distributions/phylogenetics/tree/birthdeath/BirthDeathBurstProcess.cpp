@@ -47,7 +47,9 @@ BirthDeathBurstProcess::BirthDeathBurstProcess( const TypedDagNode<double> *ra,
     beta( b ),
     time_burst( bt ),
     rho( r ),
-    lineage_bursted_at_event(tn.size()*2-1,false)
+    lineage_bursted_at_event(tn.size()*2-1,false),
+    has_rollback_snapshot( false ),
+    time_burst_changed_since_snapshot( false )
 {
     addParameter( lambda );
     addParameter( mu );
@@ -278,13 +280,23 @@ double BirthDeathBurstProcess::pSurvival(double start, double end) const
 }
 
 
-/**
- * Restore the current value and reset some internal flags.
- * If the root age variable has been restored, then we need to change the root age of the tree too.
+/*
+ * Clear rollback tracking after accepting the current value.
  */
-void BirthDeathBurstProcess::restoreSpecialization(const DagNode *affecter)
+void BirthDeathBurstProcess::keepSpecialization(void)
 {
-    if ( affecter == time_burst )
+    has_rollback_snapshot = false;
+    time_burst_changed_since_snapshot = false;
+}
+
+
+/*
+ * Restore burst-event node ages when the burst-time parameter was invalidated.
+ * Rooted-tree rollback synchronization is delegated to the base distribution.
+ */
+void BirthDeathBurstProcess::restoreSpecialization(void)
+{
+    if ( time_burst_changed_since_snapshot == true )
     {
         
         size_t num_nodes = value->getNumberOfNodes();
@@ -301,8 +313,25 @@ void BirthDeathBurstProcess::restoreSpecialization(const DagNode *affecter)
     }
     
     // delegate to base class
-    AbstractRootedTreeDistribution::restoreSpecialization( affecter );
+    AbstractRootedTreeDistribution::restoreSpecialization();
+
+    has_rollback_snapshot = false;
+    time_burst_changed_since_snapshot = false;
     
+}
+
+
+/*
+ * Start rollback tracking for burst-time-driven node ages.
+ * A second snapshot before keep/restore is intentionally a no-op.
+ */
+void BirthDeathBurstProcess::snapshotSpecialization(void)
+{
+    if ( has_rollback_snapshot == false )
+    {
+        has_rollback_snapshot = true;
+        time_burst_changed_since_snapshot = false;
+    }
 }
 
 
@@ -554,6 +583,11 @@ void BirthDeathBurstProcess::invalidateSpecialization(const DagNode *affecter, b
     
     if ( affecter == time_burst )
     {
+        if ( has_rollback_snapshot == true )
+        {
+            time_burst_changed_since_snapshot = true;
+        }
+
         
         size_t num_nodes = value->getNumberOfNodes();
         double new_burst_time = time_burst->getValue();

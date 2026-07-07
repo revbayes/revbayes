@@ -84,7 +84,7 @@ double PhyloOrnsteinUhlenbeckProcessMVN::computeLnProbability( void )
     
     if ( likelihood_cache.is_valid() == false )
     {
-        LikelihoodCache &cache = likelihood_cache.init_for_writing();
+        LikelihoodCache &cache = likelihood_cache.init_for_writing(LikelihoodCache());
         cache.means.assign(this->num_sites, std::vector<double>(num_tips, 0.0) );
 
         std::vector<double> distances = std::vector<double>(num_tips,0.0);
@@ -210,7 +210,7 @@ double PhyloOrnsteinUhlenbeckProcessMVN::computeRootState(size_t siteIdx) const
 
 
 
-void PhyloOrnsteinUhlenbeckProcessMVN::keepSpecialization( const DagNode* affecter )
+void PhyloOrnsteinUhlenbeckProcessMVN::keepSpecialization(void)
 {
     if ( likelihood_cache.has_snapshot() )
         likelihood_cache.keep();
@@ -358,7 +358,7 @@ std::set<size_t> PhyloOrnsteinUhlenbeckProcessMVN::recursiveComputeDistanceMatri
 
 
 
-void PhyloOrnsteinUhlenbeckProcessMVN::restoreSpecialization( const DagNode* affecter )
+void PhyloOrnsteinUhlenbeckProcessMVN::restoreSpecialization(void)
 {
     if ( likelihood_cache.has_snapshot() )
         likelihood_cache.restore();
@@ -721,4 +721,3 @@ void PhyloOrnsteinUhlenbeckProcessMVN::invalidateSpecialization( const DagNode* 
 {
     likelihood_cache.invalidate();
 }
-

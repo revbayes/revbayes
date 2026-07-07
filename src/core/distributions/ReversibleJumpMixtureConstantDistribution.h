@@ -50,7 +50,9 @@ namespace RevBayesCore {
         
         // special handling of state changes
         bool                                                        childrenAreAffectedBy(const DagNode *affecter) const override;                         //!< Does this changed parameter make the value affect children?
-        void                                                        restoreSpecialization(const DagNode *restorer);
+        void                                                        keepSpecialization(void);
+        void                                                        restoreSpecialization(void);
+        void                                                        snapshotSpecialization(void);
         void                                                        invalidateSpecialization(const DagNode *toucher, bool touchAll);
 
     protected:
@@ -68,6 +70,8 @@ namespace RevBayesCore {
         const TypedDagNode< double >*                               probability;
         
         size_t                                                      index;
+        bool                                                        has_rollback_snapshot;                     //!< Guards idempotent snapshot bookkeeping.
+        bool                                                        const_value_changed_since_snapshot;          //!< Tracks constant-value sync work needed on reject.
     };
     
 }
@@ -82,7 +86,9 @@ RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::Reversible
     const_value( cv ),
     base_distribution( dv ),
     probability( p ),
-    index( 0 )
+    index( 0 ),
+    has_rollback_snapshot(false),
+    const_value_changed_since_snapshot(false)
 {
     // add the parameters to our set (in the base class)
     // in that way other class can easily access the set of our parameters
@@ -107,7 +113,9 @@ RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::Reversible
     const_value( d.const_value ),
     base_distribution( d.base_distribution->clone() ),
     probability( d.probability ),
-    index( d.index )
+    index( d.index ),
+    has_rollback_snapshot( d.has_rollback_snapshot ),
+    const_value_changed_since_snapshot( d.const_value_changed_since_snapshot )
 {
     
     // add the parameters to our set (in the base class)
@@ -141,6 +149,8 @@ RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>& RevBayesCo
         base_distribution   = d.base_distribution->clone();
         probability         = d.probability;
         index               = d.index;
+        has_rollback_snapshot = d.has_rollback_snapshot;
+        const_value_changed_since_snapshot = d.const_value_changed_since_snapshot;
         
     }
     
@@ -291,11 +301,22 @@ void RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::redra
 }
 
 
+/*
+ * Clear constant-value rollback bookkeeping after accepting a proposal.
+ */
 template <class mixtureType>
-void RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::restoreSpecialization( const DagNode *restorer )
+void RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::keepSpecialization(void)
 {
-    // only do this when the toucher was our constant value and this value was supposed to be equal to the constant value
-    if ( restorer == const_value && index == 0 )
+    has_rollback_snapshot = false;
+    const_value_changed_since_snapshot = false;
+}
+
+
+template <class mixtureType>
+void RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::restoreSpecialization(void)
+{
+    // Resynchronize from the constant value only if that parameter changed.
+    if ( const_value_changed_since_snapshot && index == 0 )
     {
         if constexpr (std::is_base_of_v<Cloneable,mixtureType>)
         {
@@ -308,7 +329,25 @@ void RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::resto
         }
         
     }
+    has_rollback_snapshot = false;
+    const_value_changed_since_snapshot = false;
     
+}
+
+
+/*
+ * Start each proposal with no pending constant-value resynchronization.
+ */
+template <class mixtureType>
+void RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::snapshotSpecialization( void )
+{
+    if ( has_rollback_snapshot )
+    {
+        return;
+    }
+
+    has_rollback_snapshot = true;
+    const_value_changed_since_snapshot = false;
 }
 
 
@@ -397,17 +436,24 @@ void RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::setVa
 template <class mixtureType>
 void RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::invalidateSpecialization( const DagNode *toucher, bool touchAll )
 {
-    // only do this when the toucher was our constant value and this value was supposed to be equal to the constant value
-    if ( toucher == const_value && index == 0 )
+    // Track constant-value changes even when the current value is in the distribution component.
+    if ( toucher == const_value )
     {
-        if constexpr (std::is_base_of_v<Cloneable,mixtureType>)
+        if ( has_rollback_snapshot )
         {
-            delete this->value;
-            this->value = const_value->getValue().clone();
+            const_value_changed_since_snapshot = true;
         }
-        else
+        if ( index == 0 )
         {
-            *this->value = const_value->getValue();
+            if constexpr (std::is_base_of_v<Cloneable,mixtureType>)
+            {
+                delete this->value;
+                this->value = const_value->getValue().clone();
+            }
+            else
+            {
+                *this->value = const_value->getValue();
+            }
         }
     }
     

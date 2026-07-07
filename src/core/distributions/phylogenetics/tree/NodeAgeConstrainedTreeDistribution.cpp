@@ -228,16 +228,16 @@ void NodeAgeConstrainedTreeDistribution::invalidateSpecialization(const DagNode 
     value->getRoot().setAge( a );
 }
 
-void NodeAgeConstrainedTreeDistribution::keepSpecialization(const DagNode *affecter)
+void NodeAgeConstrainedTreeDistribution::keepSpecialization(void)
 {
-    base_distribution->keep(affecter);
+    base_distribution->keep();
     double a = base_distribution->getValue().getRoot().getAge();
     value->getRoot().setAge( a );
 }
 
-void NodeAgeConstrainedTreeDistribution::restoreSpecialization(const DagNode *restorer)
+void NodeAgeConstrainedTreeDistribution::restoreSpecialization(void)
 {
-    base_distribution->restore(restorer);
+    base_distribution->restore();
     double a = base_distribution->getValue().getRoot().getAge();
     value->getRoot().setAge( a );
     

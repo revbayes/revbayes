@@ -42,7 +42,10 @@ ConditionedBirthDeathShiftProcessContinuous::ConditionedBirthDeathShiftProcessCo
     rho( r ),
     branch_histories( NULL, 1 ),
     condition( cdt ),
-    taxa( n )
+    taxa( n ),
+    has_rollback_snapshot( false ),
+    root_speciation_changed_since_snapshot( false ),
+    root_extinction_changed_since_snapshot( false )
 {
     // add the parameters to our set (in the base class)
     // in that way other class can easily access the set of our parameters
@@ -904,19 +907,30 @@ bool ConditionedBirthDeathShiftProcessContinuous::childrenAreAffectedBy(const Da
     return affecter == root_age;
 }
 
-/**
- * Restore the current value and reset some internal flags.
- * If the root age variable has been restored, then we need to change the root age of the tree too.
+/*
+ * Clear rollback tracking after accepting the current value.
  */
-void ConditionedBirthDeathShiftProcessContinuous::restoreSpecialization(const DagNode *affecter)
+void ConditionedBirthDeathShiftProcessContinuous::keepSpecialization(void)
+{
+    has_rollback_snapshot = false;
+    root_speciation_changed_since_snapshot = false;
+    root_extinction_changed_since_snapshot = false;
+}
+
+
+/*
+ * Restore value-derived root and branch-history state without consulting a restore caller.
+ * Constant branch histories are only rewritten when their parameter changed after snapshot.
+ */
+void ConditionedBirthDeathShiftProcessContinuous::restoreSpecialization(void)
 {
     
-    if ( affecter == root_age )
+    if ( value->getRoot().getAge() != root_age->getValue() )
     {
         value->getNode( value->getRoot().getIndex() ).setAge( root_age->getValue() );
     }
     
-    if ( affecter == root_speciation && isSpeciationRateConstant() == true )
+    if ( root_speciation_changed_since_snapshot == true && isSpeciationRateConstant() == true )
     {
         CharacterHistoryContinuous& ch = branch_histories;
         size_t num_branches = ch.getNumberBranches();
@@ -935,7 +949,7 @@ void ConditionedBirthDeathShiftProcessContinuous::restoreSpecialization(const Da
         
     }
     
-    if ( affecter == root_extinction && isExtinctionRateConstant() == true )
+    if ( root_extinction_changed_since_snapshot == true && isExtinctionRateConstant() == true )
     {
         CharacterHistoryContinuous& ch = branch_histories;
         size_t num_branches = ch.getNumberBranches();
@@ -953,7 +967,26 @@ void ConditionedBirthDeathShiftProcessContinuous::restoreSpecialization(const Da
         }
         
     }
+
+    has_rollback_snapshot = false;
+    root_speciation_changed_since_snapshot = false;
+    root_extinction_changed_since_snapshot = false;
     
+}
+
+
+/*
+ * Start rollback tracking for constant branch-history states.
+ * A second snapshot before keep/restore is intentionally a no-op.
+ */
+void ConditionedBirthDeathShiftProcessContinuous::snapshotSpecialization(void)
+{
+    if ( has_rollback_snapshot == false )
+    {
+        has_rollback_snapshot = true;
+        root_speciation_changed_since_snapshot = false;
+        root_extinction_changed_since_snapshot = false;
+    }
 }
 
 
@@ -1044,6 +1077,11 @@ void ConditionedBirthDeathShiftProcessContinuous::invalidateSpecialization(const
     
     if ( affecter == root_speciation && isSpeciationRateConstant() == true )
     {
+        if ( has_rollback_snapshot == true )
+        {
+            root_speciation_changed_since_snapshot = true;
+        }
+
         CharacterHistoryContinuous& ch = branch_histories;
         size_t num_branches = ch.getNumberBranches();
         
@@ -1063,6 +1101,11 @@ void ConditionedBirthDeathShiftProcessContinuous::invalidateSpecialization(const
     
     if ( affecter == root_extinction && isExtinctionRateConstant() == true )
     {
+        if ( has_rollback_snapshot == true )
+        {
+            root_extinction_changed_since_snapshot = true;
+        }
+
         CharacterHistoryContinuous& ch = branch_histories;
         size_t num_branches = ch.getNumberBranches();
         

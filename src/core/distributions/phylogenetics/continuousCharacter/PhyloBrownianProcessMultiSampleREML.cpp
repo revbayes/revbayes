@@ -183,7 +183,7 @@ double PhyloBrownianProcessMultiSampleREML::getWithinSpeciesVariance(const std::
 
 
 
-void PhyloBrownianProcessMultiSampleREML::keepSpecialization( const DagNode* affecter )
+void PhyloBrownianProcessMultiSampleREML::keepSpecialization(void)
 {
     if (node_likelihoods.has_snapshot())
     {
@@ -563,7 +563,7 @@ void PhyloBrownianProcessMultiSampleREML::resetValue( void )
 }
 
 
-void PhyloBrownianProcessMultiSampleREML::restoreSpecialization( const DagNode* affecter )
+void PhyloBrownianProcessMultiSampleREML::restoreSpecialization(void)
 {
     if (node_likelihoods.has_snapshot())
     {

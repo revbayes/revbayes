@@ -272,7 +272,7 @@ double PhyloMultiSampleOrnsteinUhlenbeckProcessREML::getWithinSpeciesVariance(co
 }
 
 
-void PhyloMultiSampleOrnsteinUhlenbeckProcessREML::keepSpecialization( const DagNode* affecter )
+void PhyloMultiSampleOrnsteinUhlenbeckProcessREML::keepSpecialization(void)
 {
     if (node_likelihoods.has_snapshot())
     {
@@ -647,7 +647,7 @@ void PhyloMultiSampleOrnsteinUhlenbeckProcessREML::resetValue( void )
 }
 
 
-void PhyloMultiSampleOrnsteinUhlenbeckProcessREML::restoreSpecialization( const DagNode* affecter )
+void PhyloMultiSampleOrnsteinUhlenbeckProcessREML::restoreSpecialization(void)
 {
     if (node_likelihoods.has_snapshot())
     {

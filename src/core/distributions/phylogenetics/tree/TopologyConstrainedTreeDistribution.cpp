@@ -1295,20 +1295,20 @@ void TopologyConstrainedTreeDistribution::invalidateSpecialization(const DagNode
     base_distribution->invalidate(affecter, touchAll);
 }
 
-void TopologyConstrainedTreeDistribution::keepSpecialization(const DagNode *affecter)
+void TopologyConstrainedTreeDistribution::keepSpecialization(void)
 {
     stored_clades = active_clades;
     stored_backbone_clades = active_backbone_clades;
     
-    base_distribution->keep(affecter);
+    base_distribution->keep();
 }
 
-void TopologyConstrainedTreeDistribution::restoreSpecialization(const DagNode *restorer)
+void TopologyConstrainedTreeDistribution::restoreSpecialization(void)
 {
     active_clades = stored_clades;
     active_backbone_clades = stored_backbone_clades;
     
-    base_distribution->restore(restorer);
+    base_distribution->restore();
     
 }
 

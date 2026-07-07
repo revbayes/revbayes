@@ -232,7 +232,7 @@ void PhyloOrnsteinUhlenbeckPruning::propagateAuxiliaryVariables(double &mu, doub
 }
 
 
-void PhyloOrnsteinUhlenbeckPruning::keepSpecialization( const DagNode* affecter )
+void PhyloOrnsteinUhlenbeckPruning::keepSpecialization(void)
 {
     if (node_likelihoods.has_snapshot())
     {
@@ -509,7 +509,7 @@ void PhyloOrnsteinUhlenbeckPruning::resetValue()
 }
 
 
-void PhyloOrnsteinUhlenbeckPruning::restoreSpecialization( const DagNode* affecter )
+void PhyloOrnsteinUhlenbeckPruning::restoreSpecialization(void)
 {
     if (node_likelihoods.has_snapshot())
     {

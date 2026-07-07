@@ -35,8 +35,8 @@ class Tree;
 
         // special handling of state changes
         void                                                    invalidateSpecialization(const DagNode *toucher, bool touchAll);
-        void                                                    keepSpecialization(const DagNode* affecter);
-        void                                                    restoreSpecialization(const DagNode *restorer);
+        void                                                    keepSpecialization(void);
+        void                                                    restoreSpecialization(void);
         
     private:
         // helper methods

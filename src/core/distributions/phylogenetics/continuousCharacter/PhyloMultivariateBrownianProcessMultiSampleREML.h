@@ -36,12 +36,12 @@ namespace RevBayesCore {
         double                                                              computeMeanForSpecies(const std::string &n, size_t i);
         double                                                              getNumberOfSamplesForSpecies(const std::string &n);
         double                                                              getWithinSpeciesVariance(const std::string &n, size_t site);
-        virtual void                                                        keepSpecialization(const DagNode* affecter);
+        virtual void                                                        keepSpecialization(void);
         void                                                                invalidateBranchAndAncestors(const TopologyNode& n);
         void                                                                recursiveComputeLnProbability( const TopologyNode &node, size_t node_index );
         void                                                                recursivelyFlagNodeDirty(const TopologyNode& n);
         void                                                                resetValue( void );
-        virtual void                                                        restoreSpecialization(const DagNode *restorer);
+        virtual void                                                        restoreSpecialization(void);
         std::vector<double>                                                 simulateRootCharacters(size_t n);
         void                                                                simulateRecursively( const TopologyNode &node, std::vector< ContinuousTaxonData > &taxa);
         virtual void                                                        snapshotSpecialization(void);

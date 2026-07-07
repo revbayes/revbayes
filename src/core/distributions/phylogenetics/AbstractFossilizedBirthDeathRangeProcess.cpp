@@ -53,7 +53,7 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
     complete(c),
     resampled(false),
     resampling(re),
-    touched(false)
+    has_snapshot(false)
 {
     // initialize all the pointers to NULL
     homogeneous_lambda             = NULL;
@@ -508,17 +508,17 @@ void AbstractFossilizedBirthDeathRangeProcess::resampleAge(size_t i)
 }
 
 
-void AbstractFossilizedBirthDeathRangeProcess::keepSpecialization(const DagNode *toucher)
+void AbstractFossilizedBirthDeathRangeProcess::keepSpecialization(void)
 {
     dirty_psi  = std::vector<bool>(taxa.size(), false);
     dirty_taxa = std::vector<bool>(taxa.size(), false);
 
     resampled = false;
-    touched = false;
+    has_snapshot = false;
 }
 
 
-void AbstractFossilizedBirthDeathRangeProcess::restoreSpecialization(const DagNode *toucher)
+void AbstractFossilizedBirthDeathRangeProcess::restoreSpecialization(void)
 {
     partial_likelihood = stored_likelihood;
     Psi = stored_Psi;
@@ -532,7 +532,7 @@ void AbstractFossilizedBirthDeathRangeProcess::restoreSpecialization(const DagNo
     dirty_taxa = std::vector<bool>(taxa.size(), false);
 
     resampled = false;
-    touched = false;
+    has_snapshot = false;
 }
 
 
@@ -552,17 +552,17 @@ void AbstractFossilizedBirthDeathRangeProcess::invalidateSpecialization(const Da
 
 /*
  * Save range-process likelihood state for proposal rollback.
- * The touched flag now guards only this snapshot operation.
+ * The has_snapshot flag makes repeated snapshots before keep/restore a no-op.
  */
 void AbstractFossilizedBirthDeathRangeProcess::snapshotSpecialization(void)
 {
-    if ( touched == false )
+    if ( has_snapshot == false )
     {
         stored_likelihood = partial_likelihood;
         stored_Psi = Psi;
     }
     
-    touched = true;
+    has_snapshot = true;
 }
 
 

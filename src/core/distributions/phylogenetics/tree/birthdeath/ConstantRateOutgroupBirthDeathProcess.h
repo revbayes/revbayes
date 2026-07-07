@@ -36,8 +36,8 @@ template <class valueType> class TypedDagNode;
         bool                                                isLnProbabilityNonZero(void);
         void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);                //!< Swap a parameter
         virtual void                                        invalidateSpecialization(const DagNode *toucher, bool touchAll);
-        virtual void                                        keepSpecialization(const DagNode* affecter);
-        virtual void                                        restoreSpecialization(const DagNode *restorer);
+        virtual void                                        keepSpecialization(void);
+        virtual void                                        restoreSpecialization(void);
         virtual void                                        snapshotSpecialization(void);
         void                                                recursivelyFlagNodesDirty(const TopologyNode& n);
         RbBitSet                                            recursivelyUpdateClades(const TopologyNode& node);
@@ -74,6 +74,7 @@ template <class valueType> class TypedDagNode;
         Clade                                               clade_ingroup;
         std::vector<RbBitSet>                               active_clades;
         std::vector<RbBitSet>                               stored_clades;
+        bool                                                has_clade_snapshot;                          //!< Guards idempotent clade snapshotting.
         std::vector<bool>                                   dirty_nodes;
     };
     

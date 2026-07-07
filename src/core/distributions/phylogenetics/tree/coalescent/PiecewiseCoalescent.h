@@ -45,8 +45,8 @@ namespace RevBayesCore {
 
     protected:
         // Parameter management functions
-        virtual void                                        keepSpecialization(const DagNode* affecter);
-        virtual void                                        restoreSpecialization(const DagNode *restorer);
+        virtual void                                        keepSpecialization(void);
+        virtual void                                        restoreSpecialization(void);
         void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);                                    //!< Swap a parameter
         virtual void                                        invalidateSpecialization(const DagNode *toucher, bool touchAll);
 

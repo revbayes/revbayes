@@ -41,7 +41,9 @@ template <class valueType> class TypedDagNode;
 
         // virtual methods that may be overwritten, but then the derived class should call this methods
         bool                                                childrenAreAffectedBy(const DagNode *affecter) const override;                                  //!< Does this changed parameter make the value affect children?
-        virtual void                                        restoreSpecialization(const DagNode *restorer);
+        virtual void                                        keepSpecialization(void);
+        virtual void                                        restoreSpecialization(void);
+        virtual void                                        snapshotSpecialization(void);
         virtual void                                        invalidateSpecialization(const DagNode *toucher, bool touchAll);
         
         // helper functions
@@ -62,6 +64,8 @@ template <class valueType> class TypedDagNode;
         const TypedDagNode<double>*                         rho;                                                                            //!< The sampling probability of extant taxa.
         
         std::vector<bool>                                   lineage_bursted_at_event;                                                       //!< Did the lineage burst at this event?
+        bool                                                has_rollback_snapshot;                                                          //!< True while rollback tracking is active.
+        bool                                                time_burst_changed_since_snapshot;                                              //!< True when burst node ages must be restored.
     };
     
     

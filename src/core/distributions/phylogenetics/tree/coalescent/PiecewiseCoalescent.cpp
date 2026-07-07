@@ -386,7 +386,7 @@ double PiecewiseCoalescent::getWaitingTime(double age, double rv, size_t index) 
 /**
  * Keep the current value and reset some internal flags. Nothing to do here.
  */
-void PiecewiseCoalescent::keepSpecialization(const DagNode *affecter)
+void PiecewiseCoalescent::keepSpecialization(void)
 {
     
     // nothing to do here
@@ -397,7 +397,7 @@ void PiecewiseCoalescent::keepSpecialization(const DagNode *affecter)
  * Restore the current value and reset some internal flags.
  * If the root age variable has been restored, then we need to change the root age of the tree too.
  */
-void PiecewiseCoalescent::restoreSpecialization(const DagNode *affecter)
+void PiecewiseCoalescent::restoreSpecialization(void)
 {
 
     // Sebastian: This is currently redudant because we update the intervals each time when we compute the probability

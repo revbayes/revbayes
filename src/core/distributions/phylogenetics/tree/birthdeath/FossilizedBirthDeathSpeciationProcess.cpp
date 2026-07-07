@@ -698,15 +698,15 @@ void FossilizedBirthDeathSpeciationProcess::updateStartEndTimes( void )
 }
 
 
-void FossilizedBirthDeathSpeciationProcess::keepSpecialization(const DagNode *toucher)
+void FossilizedBirthDeathSpeciationProcess::keepSpecialization(void)
 {
-    AbstractFossilizedBirthDeathRangeProcess::keepSpecialization(toucher);
+    AbstractFossilizedBirthDeathRangeProcess::keepSpecialization();
 }
 
 
-void FossilizedBirthDeathSpeciationProcess::restoreSpecialization(const DagNode *toucher)
+void FossilizedBirthDeathSpeciationProcess::restoreSpecialization(void)
 {
-    AbstractFossilizedBirthDeathRangeProcess::restoreSpecialization(toucher);
+    AbstractFossilizedBirthDeathRangeProcess::restoreSpecialization();
 }
 
 

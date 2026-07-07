@@ -167,16 +167,16 @@ void Distribution::invalidateSpecialization( const DagNode *, bool )
 
 
 /* Method stub: override for specialized treatment. */
-void Distribution::keep( const DagNode* affecter )
+void Distribution::keep( void )
 {
     // delegate to specialization
-    keepSpecialization(affecter);
+    keepSpecialization();
     
 }
 
 
 /* Method stub: override for specialized treatment. */
-void Distribution::keepSpecialization( const DagNode* affecter )
+void Distribution::keepSpecialization(void)
 {
     // do nothing
 }
@@ -216,15 +216,15 @@ void Distribution::removeParameter(const RevBayesCore::DagNode *p)
 
 
 /* Method stub: override for specialized treatment. */
-void Distribution::restore( const DagNode *restorer )
+void Distribution::restore( void )
 {
     // delegate to specialization
-    restoreSpecialization( restorer );
+    restoreSpecialization();
 }
 
 
 /* Method stub: override for specialized treatment. */
-void Distribution::restoreSpecialization( const DagNode *restorer )
+void Distribution::restoreSpecialization(void)
 {
     // do nothing
 }

@@ -104,8 +104,8 @@ namespace RevBayesCore {
         // virtual methods that may be overwritten, but then the derived class should call this methods
         bool                                                              childrenAreAffectedBy(const DagNode *affecter) const override;                                  //!< Does this changed parameter make the value affect children?
         virtual void                                                      invalidateSpecialization(const DagNode *toucher, bool touchAll);
-        virtual void                                                      keepSpecialization(const DagNode* affecter);
-        virtual void                                                      restoreSpecialization(const DagNode *);
+        virtual void                                                      keepSpecialization(void);
+        virtual void                                                      restoreSpecialization(void);
         void                                                              snapshotSpecialization(void) override;
 
         // Parameter management functions. You need to override both if you have additional parameters

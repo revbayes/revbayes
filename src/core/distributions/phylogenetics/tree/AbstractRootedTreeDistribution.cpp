@@ -512,16 +512,12 @@ void AbstractRootedTreeDistribution::redrawValue( void )
 }
 
 
-void AbstractRootedTreeDistribution::restoreSpecialization(const DagNode *affecter)
+void AbstractRootedTreeDistribution::restoreSpecialization(void)
 {
-    if ( affecter == process_age )
+    if ( use_origin == false && value->getRoot().getAge() != process_age->getValue() )
     {
-        if ( use_origin == false )
-        {
-            value->getRoot().setAge( process_age->getValue() );
-        }
+        value->getRoot().setAge( process_age->getValue() );
     }
-    
 }
 
 

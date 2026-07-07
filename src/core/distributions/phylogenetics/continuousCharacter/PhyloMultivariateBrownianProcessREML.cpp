@@ -31,7 +31,8 @@ PhyloMultivariateBrownianProcessREML::PhyloMultivariateBrownianProcessREML(const
     independent_contrasts_sds( std::vector<double>(this->num_nodes, 0.0) ),
     rate_matrix( c ),
     active_matrix(0),
-    precision_matrices( std::vector<MatrixReal>( 2, MatrixReal(num_sites) ) )
+    precision_matrices( std::vector<MatrixReal>( 2, MatrixReal(num_sites) ) ),
+    rate_matrix_changed_since_snapshot(false)
 {
     
     // add the parameters to our set
@@ -160,12 +161,13 @@ std::vector<std::vector<double> > PhyloMultivariateBrownianProcessREML::getContr
 }
 
 
-void PhyloMultivariateBrownianProcessREML::keepSpecialization( const DagNode* affecter )
+void PhyloMultivariateBrownianProcessREML::keepSpecialization(void)
 {
     if (node_likelihoods.has_snapshot())
     {
         node_likelihoods.keep();
     }
+    rate_matrix_changed_since_snapshot = false;
 }
 
 
@@ -435,11 +437,11 @@ void PhyloMultivariateBrownianProcessREML::resetValue( void )
 }
 
 
-void PhyloMultivariateBrownianProcessREML::restoreSpecialization( const DagNode* affecter )
+void PhyloMultivariateBrownianProcessREML::restoreSpecialization(void)
 {
     
     // reset the precision matrix if necessary
-    if ( affecter == rate_matrix )
+    if ( rate_matrix_changed_since_snapshot )
     {
         // Legacy local two-slot rollback for precision matrices.
         // Remove this once the matrix cache uses explicit snapshot/restore state.
@@ -450,6 +452,7 @@ void PhyloMultivariateBrownianProcessREML::restoreSpecialization( const DagNode*
     {
         node_likelihoods.restore();
     }
+    rate_matrix_changed_since_snapshot = false;
 }
 
 
@@ -523,7 +526,12 @@ std::vector<double> PhyloMultivariateBrownianProcessREML::simulateRootCharacters
  */
 void PhyloMultivariateBrownianProcessREML::snapshotSpecialization( void )
 {
+    const bool had_snapshot = node_likelihoods.has_snapshot();
     node_likelihoods.snapshot();
+    if ( had_snapshot == false )
+    {
+        rate_matrix_changed_since_snapshot = false;
+    }
 }
 
 
@@ -568,6 +576,10 @@ void PhyloMultivariateBrownianProcessREML::invalidateSpecialization( const DagNo
         active_matrix = (active_matrix == 0 ? 1 : 0);
         precision_matrices[active_matrix] = rate_matrix->getValue().computeInverse();
         precision_matrices[active_matrix].setCholesky(true);
+        if ( node_likelihoods.has_snapshot() )
+        {
+            rate_matrix_changed_since_snapshot = true;
+        }
         
         // we need to recompute the likelihood
         touchAll = true;

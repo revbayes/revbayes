@@ -1739,7 +1739,7 @@ std::vector<double> StateDependentSpeciationExtinctionProcess::getRootFrequencie
 /**
  * Keep the current value and reset some internal flags. Nothing to do here.
  */
-void StateDependentSpeciationExtinctionProcess::keepSpecialization(const DagNode *affecter)
+void StateDependentSpeciationExtinctionProcess::keepSpecialization(void)
 {
     
     if (node_likelihoods.has_snapshot())
@@ -1892,17 +1892,14 @@ void StateDependentSpeciationExtinctionProcess::redrawValue( void )
 
 /**
  * Restore the current value and reset some internal flags.
- * If the root age variable has been restored, then we need to change the root age of the tree too.
+ * Synchronize the tree root age if it differs from the process-age parameter.
  */
-void StateDependentSpeciationExtinctionProcess::restoreSpecialization(const DagNode *affecter)
+void StateDependentSpeciationExtinctionProcess::restoreSpecialization(void)
 {
     
-    if ( affecter == process_age )
+    if ( use_origin == false && value->getRoot().getAge() != process_age->getValue() )
     {
-        if ( use_origin == false )
-        {
-            value->getRoot().setAge( process_age->getValue() );
-        }
+        value->getRoot().setAge( process_age->getValue() );
     }
 
     if (node_likelihoods.has_snapshot())

@@ -142,14 +142,14 @@ void TransformedDistribution::invalidateSpecialization(const DagNode *affecter, 
     base_dist->invalidate(affecter, touchAll);
 }
 
-void TransformedDistribution::restoreSpecialization( const DagNode *restorer )
+void TransformedDistribution::restoreSpecialization(void)
 {
-    base_dist->restore(restorer);
+    base_dist->restore();
 }
 
-void TransformedDistribution::keepSpecialization( const DagNode* affecter )
+void TransformedDistribution::keepSpecialization(void)
 {
-    base_dist->keep(affecter);
+    base_dist->keep();
 }
 
 /*

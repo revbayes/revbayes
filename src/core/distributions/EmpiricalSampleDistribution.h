@@ -51,9 +51,9 @@ namespace RevBayesCore {
     private:
         // helper methods
         RbVector<valueType>*                                simulate();
-        virtual void                                        keepSpecialization(const DagNode* affecter);
+        virtual void                                        keepSpecialization(void);
         virtual void                                        invalidateSpecialization(const DagNode *toucher, bool touchAll);
-        virtual void                                        restoreSpecialization(const DagNode *restorer);
+        virtual void                                        restoreSpecialization(void);
         void                                                setInternalDistributions(void);
         virtual void                                        snapshotSpecialization(void);
         
@@ -393,7 +393,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> RevBayesCore::EmpiricalSampleDistr
 
 
 template <class valueType>
-void RevBayesCore::EmpiricalSampleDistribution<valueType>::keepSpecialization(const DagNode *affecter )
+void RevBayesCore::EmpiricalSampleDistribution<valueType>::keepSpecialization(void)
 {
         
     // call keep for each sample
@@ -401,7 +401,7 @@ void RevBayesCore::EmpiricalSampleDistribution<valueType>::keepSpecialization(co
     {
         if ( i >= sample_block_start && i < sample_block_end )
         {
-            base_distribution_instances[i]->keep( affecter );
+            base_distribution_instances[i]->keep();
         }
         
     }
@@ -545,7 +545,7 @@ void RevBayesCore::EmpiricalSampleDistribution<valueType>::invalidateSpecializat
 
 
 template <class valueType>
-void RevBayesCore::EmpiricalSampleDistribution<valueType>::restoreSpecialization(const DagNode *restorer )
+void RevBayesCore::EmpiricalSampleDistribution<valueType>::restoreSpecialization(void)
 {
         
     // call keep for each sample
@@ -553,7 +553,7 @@ void RevBayesCore::EmpiricalSampleDistribution<valueType>::restoreSpecialization
     {
         if ( i >= sample_block_start && i < sample_block_end )
         {
-            base_distribution_instances[i]->restore( restorer );
+            base_distribution_instances[i]->restore();
         }
         
     }

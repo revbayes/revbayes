@@ -38,12 +38,12 @@ namespace RevBayesCore {
         // virtual methods that may be overwritten, but then the derived class should call this methods
         void                                                                invalidateBranchAndAncestors(const TopologyNode& n);
         void                                                                invalidateInternalNodes(void);
-        virtual void                                                        keepSpecialization(const DagNode* affecter);
+        virtual void                                                        keepSpecialization(void);
         void                                                                recursiveComputeLnProbability( const TopologyNode &node, size_t node_index );
         void                                                                recursiveComputeContrasts( const TopologyNode &node, size_t node_index );
         void                                                                recursivelyFlagNodeDirty(const TopologyNode& n);
         void                                                                resetValue( void );
-        virtual void                                                        restoreSpecialization(const DagNode *restorer);
+        virtual void                                                        restoreSpecialization(void);
         std::vector<double>                                                 simulateRootCharacters(size_t n);
         virtual void                                                        simulateRecursively(const TopologyNode& node, std::vector< ContinuousTaxonData > &t);
         virtual void                                                        snapshotSpecialization(void);
@@ -69,6 +69,7 @@ namespace RevBayesCore {
         const TypedDagNode< MatrixReal >*                                   rate_matrix;
         size_t                                                              active_matrix;
         std::vector<MatrixReal>                                             precision_matrices;
+        bool                                                                rate_matrix_changed_since_snapshot;        //!< Tracks local precision-matrix rollback state.
         
     };
     

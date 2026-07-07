@@ -48,9 +48,9 @@ namespace RevBayesCore {
         virtual size_t                                          getNumberOfMixtureElements(void) const;                                             //!< Get the number of elements for this value
         const std::vector<const DagNode*>&                      getParameters(void) const;                                                          //!< get the parameters of the function
         void                                                    invalidate(const DagNode *toucher, bool touchAll);
-        void                                                    keep(const DagNode* affecter);
+        void                                                    keep(void);
         virtual void                                            reInitialized( void );                                                              //!< The model was re-initialized
-        void                                                    restore(const DagNode *restorer);
+        void                                                    restore(void);
         virtual std::string                                     getHiddenStateString(void) const { return ""; }                                     //!< Get hidden internal state as string (empty = no hidden state)
         virtual void                                            setHiddenStateFromString(const std::string &s) {}                                   //!< Set hidden internal state from string
         virtual void                                            setMcmcMode(bool tf);                                                               //!< Change the likelihood computation to or from MCMC mode.
@@ -69,8 +69,8 @@ namespace RevBayesCore {
         
         // keep specialization for derived classes
         virtual void                                            invalidateSpecialization(const DagNode *toucher, bool touchAll);
-        virtual void                                            keepSpecialization(const DagNode* affecter);
-        virtual void                                            restoreSpecialization(const DagNode *restorer);
+        virtual void                                            keepSpecialization(void);
+        virtual void                                            restoreSpecialization(void);
         virtual void                                            snapshotSpecialization(void);
         
         // swap parameter methods for internal use of derived classes

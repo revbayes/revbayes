@@ -111,7 +111,7 @@ void PhyloBrownianProcessREML::fireTreeChangeEvent( const TopologyNode &n, const
 }
 
 
-void PhyloBrownianProcessREML::keepSpecialization( const DagNode* affecter )
+void PhyloBrownianProcessREML::keepSpecialization(void)
 {
     if (node_likelihoods.has_snapshot())
     {
@@ -392,7 +392,7 @@ void PhyloBrownianProcessREML::resetValue( void )
 }
 
 
-void PhyloBrownianProcessREML::restoreSpecialization( const DagNode* affecter )
+void PhyloBrownianProcessREML::restoreSpecialization(void)
 {
     if (node_likelihoods.has_snapshot())
     {

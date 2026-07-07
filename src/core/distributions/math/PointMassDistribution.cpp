@@ -94,15 +94,13 @@ void PointMassDistribution::redrawValue( void )
 
 
 
-void PointMassDistribution::restoreSpecialization( const DagNode *restorer )
+void PointMassDistribution::restoreSpecialization(void)
 {
     
-    // only do this when the toucher was our parameters
-    if ( restorer == val )
+    // Synchronize with the point-mass parameter if it changed during rollback.
+    if ( *this->value != val->getValue() )
     {
-        const double &tmp = val->getValue();
-        *(this->value) = tmp;
-        
+        *(this->value) = val->getValue();
     }
     
 }

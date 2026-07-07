@@ -53,8 +53,8 @@ class DagNode;
         void                                                buildTreeComparisonCache(TreeComparisonCache& cache);
         void                                                simulateTree(void);
         void                                                simulateClade(std::vector<TopologyNode*> &n);                           //!< Simulate n speciation events.
-        virtual void                                        keepSpecialization(const DagNode* affecter);
-        virtual void                                        restoreSpecialization(const DagNode *restorer);
+        virtual void                                        keepSpecialization(void);
+        virtual void                                        restoreSpecialization(void);
         virtual void                                        snapshotSpecialization(void);
         virtual void                                        invalidateSpecialization(const DagNode *toucher, bool touchAll);
         

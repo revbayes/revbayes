@@ -136,7 +136,7 @@ double PhyloBrownianProcessStateDependent::computeLnProbability( void )
 
 
 
-void PhyloBrownianProcessStateDependent::keepSpecialization( const DagNode* affecter )
+void PhyloBrownianProcessStateDependent::keepSpecialization(void)
 {
 
     // reset all flags
@@ -532,7 +532,7 @@ void PhyloBrownianProcessStateDependent::resetValue( void )
 
 
 
-void PhyloBrownianProcessStateDependent::restoreSpecialization( const DagNode* affecter )
+void PhyloBrownianProcessStateDependent::restoreSpecialization(void)
 {
 
     // reset the flags

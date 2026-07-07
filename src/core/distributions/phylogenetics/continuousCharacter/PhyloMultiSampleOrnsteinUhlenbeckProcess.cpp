@@ -311,7 +311,7 @@ double PhyloMultiSampleOrnsteinUhlenbeckProcess::computeLnProbability( void )
 {
     if ( likelihood_cache.is_valid() == false )
     {
-        LikelihoodCache &cache = likelihood_cache.init_for_writing();
+        LikelihoodCache &cache = likelihood_cache.init_for_writing(LikelihoodCache());
         cache.means.assign(num_individuals, 0.0);
         cache.covariance = MatrixReal(num_individuals, num_individuals);
 
@@ -491,7 +491,7 @@ double PhyloMultiSampleOrnsteinUhlenbeckProcess::getWithinSpeciesVariance(const 
 
 
 
-void PhyloMultiSampleOrnsteinUhlenbeckProcess::keepSpecialization( const DagNode* affecter )
+void PhyloMultiSampleOrnsteinUhlenbeckProcess::keepSpecialization(void)
 {
     if ( likelihood_cache.has_snapshot() )
         likelihood_cache.keep();
@@ -696,7 +696,7 @@ std::set<size_t> PhyloMultiSampleOrnsteinUhlenbeckProcess::recursiveComputeDista
 
 
 
-void PhyloMultiSampleOrnsteinUhlenbeckProcess::restoreSpecialization( const DagNode* affecter )
+void PhyloMultiSampleOrnsteinUhlenbeckProcess::restoreSpecialization(void)
 {
     if ( likelihood_cache.has_snapshot() )
         likelihood_cache.restore();
@@ -1047,5 +1047,3 @@ void PhyloMultiSampleOrnsteinUhlenbeckProcess::invalidateSpecialization( const D
 {
     likelihood_cache.invalidate();
 }
-
-

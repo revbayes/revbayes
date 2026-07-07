@@ -39,7 +39,7 @@ namespace RevBayesCore {
 //        void                                                    setValue(RbVector<mixtureType> *v, bool f=false);
         
         // special handling of state changes
-        void                                                    restoreSpecialization(const DagNode *restorer);
+        void                                                    restoreSpecialization(void);
         void                                                    invalidateSpecialization(const DagNode *toucher, bool touchAll);
         
     protected:
@@ -286,7 +286,7 @@ void RevBayesCore::VectorMixtureDistribution<mixtureType>::swapParameterInternal
 
 
 template <class mixtureType>
-void RevBayesCore::VectorMixtureDistribution<mixtureType>::restoreSpecialization( const DagNode *restorer )
+void RevBayesCore::VectorMixtureDistribution<mixtureType>::restoreSpecialization(void)
 {
     
     // only do this when the toucher was our parameters

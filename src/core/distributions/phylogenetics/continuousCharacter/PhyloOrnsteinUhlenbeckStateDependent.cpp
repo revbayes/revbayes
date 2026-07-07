@@ -173,7 +173,7 @@ double PhyloOrnsteinUhlenbeckStateDependent::computeLnProbability( void )
 
 
 
-void PhyloOrnsteinUhlenbeckStateDependent::keepSpecialization( const DagNode* affecter )
+void PhyloOrnsteinUhlenbeckStateDependent::keepSpecialization(void)
 {
 
     // reset all flags
@@ -532,7 +532,7 @@ void PhyloOrnsteinUhlenbeckStateDependent::resetValue( void )
 }
 
 
-void PhyloOrnsteinUhlenbeckStateDependent::restoreSpecialization( const DagNode* affecter )
+void PhyloOrnsteinUhlenbeckStateDependent::restoreSpecialization(void)
 {
 
     // reset the flags

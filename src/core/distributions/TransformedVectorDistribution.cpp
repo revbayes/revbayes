@@ -176,14 +176,14 @@ void TransformedVectorDistribution::invalidateSpecialization(const DagNode *affe
     base_dist->invalidate(affecter, touchAll);
 }
 
-void TransformedVectorDistribution::restoreSpecialization( const DagNode *restorer )
+void TransformedVectorDistribution::restoreSpecialization(void)
 {
-    base_dist->restore(restorer);
+    base_dist->restore();
 }
 
-void TransformedVectorDistribution::keepSpecialization( const DagNode* affecter )
+void TransformedVectorDistribution::keepSpecialization(void)
 {
-    base_dist->keep(affecter);
+    base_dist->keep();
 }
 
 /*

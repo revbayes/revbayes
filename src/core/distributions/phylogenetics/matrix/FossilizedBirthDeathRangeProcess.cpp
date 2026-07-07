@@ -413,16 +413,16 @@ void FossilizedBirthDeathRangeProcess::redrawValue(void)
 }
 
 
-void FossilizedBirthDeathRangeProcess::keepSpecialization(const DagNode *toucher)
+void FossilizedBirthDeathRangeProcess::keepSpecialization(void)
 {
     dirty_gamma = std::vector<bool>(taxa.size(), false);
 
-    AbstractFossilizedBirthDeathRangeProcess::keepSpecialization(toucher);
+    AbstractFossilizedBirthDeathRangeProcess::keepSpecialization();
 }
 
-void FossilizedBirthDeathRangeProcess::restoreSpecialization(const DagNode *toucher)
+void FossilizedBirthDeathRangeProcess::restoreSpecialization(void)
 {
-    AbstractFossilizedBirthDeathRangeProcess::restoreSpecialization(toucher);
+    AbstractFossilizedBirthDeathRangeProcess::restoreSpecialization();
 }
 
 

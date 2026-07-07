@@ -637,7 +637,7 @@ void RevBayesCore::StochasticNode<valueType>::keepMe( const DagNode* affecter )
             }
         }
         
-        distribution->keep( affecter );
+        distribution->keep();
         const bool children_affected = distribution->childrenAreAffectedBy( affecter );
         
         // clear the list of touched element indices
@@ -740,7 +740,7 @@ void RevBayesCore::StochasticNode<valueType>::restoreMe( const DagNode *restorer
         assert(lnProb);
 
         // call for potential specialized handling (e.g. internal flags)
-        distribution->restore(restorer);
+        distribution->restore();
         const bool children_affected = distribution->childrenAreAffectedBy( restorer );
 
         // clear the list of touched element indices

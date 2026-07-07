@@ -364,26 +364,24 @@ void UniformSerialSampledTimeTreeDistribution::simulateTree( void )
 }
 
 /*
- * Preserve legacy downstream propagation when the serial-sampled start age changes.
+ * Changing the start age changes the tree root age when the distribution owns
+ * the root age, so downstream children see a changed tree value.
  */
 bool UniformSerialSampledTimeTreeDistribution::childrenAreAffectedBy(const DagNode *affecter) const
 {
-    return affecter == start_age;
+    return has_root_age == true && affecter == start_age;
 }
 
 /**
  * Restore the current value and reset some internal flags.
- * If the root age variable has been restored, then we need to change the root age of the tree too.
+ * Synchronize the tree root age if it differs from the start-age parameter.
  */
-void UniformSerialSampledTimeTreeDistribution::restoreSpecialization(const DagNode *affecter)
+void UniformSerialSampledTimeTreeDistribution::restoreSpecialization(void)
 {
     
-    if ( affecter == start_age )
+    if ( has_root_age == true && value->getRoot().getAge() != start_age->getValue() )
     {
-    	if ( has_root_age == true )
-    	{
-    		value->getNode( value->getRoot().getIndex() ).setAge( start_age->getValue() );
-    	}
+        value->getNode( value->getRoot().getIndex() ).setAge( start_age->getValue() );
     }
     
 }
@@ -408,9 +406,9 @@ void UniformSerialSampledTimeTreeDistribution::invalidateSpecialization(const Da
     if ( affecter == start_age )
     {
         if ( has_root_age == true )
-	    	{
+        {
             value->getNode( value->getRoot().getIndex() ).setAge( start_age->getValue() );
-	    	}
+        }
     }
     
 }

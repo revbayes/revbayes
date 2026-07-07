@@ -233,21 +233,13 @@ void PhyloMultivariateBrownianProcess::invalidateSpecialization( const DagNode *
 }
 
 
-void PhyloMultivariateBrownianProcess::keepSpecialization( const DagNode* affecter ) {
+void PhyloMultivariateBrownianProcess::keepSpecialization(void)
+{
 }
 
 
-void PhyloMultivariateBrownianProcess::restoreSpecialization( const DagNode *restorer ) {
-    if ( restorer == sigma ) {
-        corruptAll();
-    }
-    else if (restorer == tau)    {
-        // if only branch lengths have changed, something could be done here
-        // but leave it for the moment
-        corruptAll();        
-    } 
-    else {
-        flagNodes();
-    }
+void PhyloMultivariateBrownianProcess::restoreSpecialization(void)
+{
+    corruptAll();
     dag_node->clearTouchedElementIndices();
 }

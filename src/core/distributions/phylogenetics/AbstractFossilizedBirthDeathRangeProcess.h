@@ -63,9 +63,9 @@ namespace RevBayesCore {
 
         virtual void                                    prepareProbComputation(void) const;
 
-        void                                            keepSpecialization(const DagNode *toucher);                  /* NOT VIRTUAL */
+        void                                            keepSpecialization(void);                  /* NOT VIRTUAL */
         void                                            invalidateSpecialization(const DagNode *toucher, bool touchAll);  /* NOT VIRTUAL */
-        void                                            restoreSpecialization(const DagNode *toucher);               /* NOT VIRTUAL */
+        void                                            restoreSpecialization(void);                     /* NOT VIRTUAL */
         void                                            snapshotSpecialization(void);                              /* NOT VIRTUAL */
 
         std::vector<Taxon>                              taxa;                                                  //!< Taxa that will be attached to new simulated trees.
@@ -116,7 +116,7 @@ namespace RevBayesCore {
         std::vector<bool>                               dirty_taxa;                                             //!< Indicates whether partial likelihood needs updating
         
         bool                                            complete;                                               //!< Indicates whether all fossil observations were included
-        bool                                            touched;                                                //!< Indicates whether any terms need updating
+        bool                                            has_snapshot;                                           //!< Indicates whether rollback state has already been snapshotted
         bool                                            resampled;                                              //!< Indicates whether any oldest occurrence ages were resampled
         bool                                            resampling;                                             //!< Indicates whether we are resampling oldest occurrence ages
     };

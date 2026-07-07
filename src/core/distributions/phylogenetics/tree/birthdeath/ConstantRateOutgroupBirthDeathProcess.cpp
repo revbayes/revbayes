@@ -60,6 +60,7 @@ taxa_outgroup( tno ),
 sampling_strategy_outgroup( sso ),
 sampling_strategy_ingroup( ssi ),
 active_clades( tn.size() - 1, RbBitSet() ),
+has_clade_snapshot( false ),
 dirty_nodes( 2 * tn.size() - 1, true )
 
 {
@@ -603,14 +604,16 @@ void ConstantRateOutgroupBirthDeathProcess::invalidateSpecialization(const DagNo
     AbstractRootedTreeDistribution::invalidateSpecialization(affecter, touchAll);
 }
 
-void ConstantRateOutgroupBirthDeathProcess::keepSpecialization(const DagNode *affecter)
+void ConstantRateOutgroupBirthDeathProcess::keepSpecialization(void)
 {
     stored_clades = active_clades;
+    has_clade_snapshot = false;
 }
 
-void ConstantRateOutgroupBirthDeathProcess::restoreSpecialization(const DagNode *restorer)
+void ConstantRateOutgroupBirthDeathProcess::restoreSpecialization(void)
 {
     active_clades = stored_clades;
+    has_clade_snapshot = false;
 }
 
 /*
@@ -618,5 +621,11 @@ void ConstantRateOutgroupBirthDeathProcess::restoreSpecialization(const DagNode 
  */
 void ConstantRateOutgroupBirthDeathProcess::snapshotSpecialization(void)
 {
+    if ( has_clade_snapshot )
+    {
+        return;
+    }
+
     stored_clades = active_clades;
+    has_clade_snapshot = true;
 }

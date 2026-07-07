@@ -101,7 +101,7 @@ double PhyloBrownianProcessMVN::computeLnProbability( void )
     if ( covariance_cache.is_valid() == false )
     {
         // perhaps there is a more efficient way to reset the matrix to 0.
-        CovarianceCache &cache = covariance_cache.init_for_writing();
+        CovarianceCache &cache = covariance_cache.init_for_writing(CovarianceCache());
         cache.covariance = MatrixReal(num_tips, num_tips);
         cache.covariance.setCholesky( true );
         recursiveComputeCovarianceMatrix(cache.covariance, root, rootIndex);
@@ -135,7 +135,7 @@ double PhyloBrownianProcessMVN::computeRootState(size_t siteIdx)
 
 
 
-void PhyloBrownianProcessMVN::keepSpecialization( const DagNode* affecter )
+void PhyloBrownianProcessMVN::keepSpecialization(void)
 {
     if ( covariance_cache.has_snapshot() )
         covariance_cache.keep();
@@ -244,7 +244,7 @@ std::set<size_t> PhyloBrownianProcessMVN::recursiveComputeCovarianceMatrix(Matri
 
 
 
-void PhyloBrownianProcessMVN::restoreSpecialization( const DagNode* affecter )
+void PhyloBrownianProcessMVN::restoreSpecialization(void)
 {
     if ( covariance_cache.has_snapshot() )
         covariance_cache.restore();
@@ -374,4 +374,3 @@ void PhyloBrownianProcessMVN::swapParameterInternal(const DagNode *oldP, const D
     }
     
 }
-

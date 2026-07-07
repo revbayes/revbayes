@@ -52,11 +52,11 @@ namespace RevBayesCore {
         virtual void                                                        invalidateSpecialization(const DagNode *toucher, bool touchAll);
         void                                                                invalidateBranchAndAncestors(const TopologyNode& n);
         void                                                                invalidateInternalNodes(void);
-        virtual void                                                        keepSpecialization(const DagNode* affecter);
+        virtual void                                                        keepSpecialization(void);
         void                                                                recursiveComputeLnProbability( const TopologyNode &node, size_t node_index );
         void                                                                recursivelyFlagNodeDirty(const TopologyNode& n);
         void                                                                resetValue( void );
-        virtual void                                                        restoreSpecialization(const DagNode *restorer);
+        virtual void                                                        restoreSpecialization(void);
         void                                                                simulateRecursively(const TopologyNode& node, std::vector< ContinuousTaxonData > &t);
         std::vector<double>                                                 simulateRootCharacters(size_t n);
         double                                                              sumRootLikelihood(void);

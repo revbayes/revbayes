@@ -713,12 +713,12 @@ void UltrametricTreeDistribution::prepareTreeSamples(const std::vector<Tree> &tr
 
 /**
  * Restore the current value and reset some internal flags.
- * If the root age variable has been restored, then we need to change the root age of the tree too.
+ * Synchronize the tree root age if it differs from the root-age parameter.
  */
-void UltrametricTreeDistribution::restoreSpecialization(const DagNode *affecter)
+void UltrametricTreeDistribution::restoreSpecialization(void)
 {
 
-    if ( affecter == root_age )
+    if ( value->getRoot().getAge() != root_age->getValue() )
     {
         value->getNode( value->getRoot().getIndex() ).setAge( root_age->getValue() );
     }

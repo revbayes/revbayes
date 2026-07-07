@@ -196,7 +196,7 @@ double PhyloMultivariateBrownianProcessMultiSampleREML::getWithinSpeciesVariance
 
 
 
-void PhyloMultivariateBrownianProcessMultiSampleREML::keepSpecialization( const DagNode* affecter )
+void PhyloMultivariateBrownianProcessMultiSampleREML::keepSpecialization(void)
 {
     if (node_likelihoods.has_snapshot())
     {
@@ -501,7 +501,7 @@ void PhyloMultivariateBrownianProcessMultiSampleREML::resetValue( void )
 }
 
 
-void PhyloMultivariateBrownianProcessMultiSampleREML::restoreSpecialization( const DagNode* affecter )
+void PhyloMultivariateBrownianProcessMultiSampleREML::restoreSpecialization(void)
 {
     if (node_likelihoods.has_snapshot())
     {

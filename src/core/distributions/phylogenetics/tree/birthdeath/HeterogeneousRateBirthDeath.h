@@ -40,7 +40,7 @@ namespace RevBayesCore {
     protected:
         // Parameter management functions
         bool                                                childrenAreAffectedBy(const DagNode *affecter) const override;                                      //!< Does this changed parameter make the value affect children?
-        virtual void                                        restoreSpecialization(const DagNode *restorer);
+        virtual void                                        restoreSpecialization(void);
         virtual void                                        invalidateSpecialization(const DagNode *toucher, bool touchAll);
         
         void                                                computeNodeProbability(const TopologyNode &n, size_t nIdx);
