@@ -808,7 +808,7 @@ void PhyloOrnsteinUhlenbeckPruning::snapshotSpecialization( void )
 
 /*
  * Mark OU pruning likelihood cache entries dirty after a dependency changes.
- * Snapshot state is stored by IndexedCache before this invalidation hook runs.
+ * Snapshot state is stored by IndexedSnapshotCache before this invalidation hook runs.
  */
 void PhyloOrnsteinUhlenbeckPruning::invalidateSpecialization( const DagNode* affecter, bool touchAll )
 {

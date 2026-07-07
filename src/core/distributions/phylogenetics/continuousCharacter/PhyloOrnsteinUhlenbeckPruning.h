@@ -2,7 +2,7 @@
 #define PhyloOrnsteinUhlenbeckPruning_H
 
 #include "AbstractPhyloBrownianProcess.h"
-#include "IndexedCache.h"
+#include "SnapshotCache.h"
 #include "TreeChangeEventListener.h"
 
 #include <vector>
@@ -66,7 +66,7 @@ namespace RevBayesCore {
         // Parameter management functions.
         virtual void                                                        swapParameterInternal(const DagNode *oldP, const DagNode *newP);                         //!< Swap a parameter
         
-        IndexedCache<NodeLikelihood>                                        node_likelihoods;
+        IndexedSnapshotCache<NodeLikelihood>                                        node_likelihoods;
         
     private:
         double                                                              computeRootState(void) const;

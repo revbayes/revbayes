@@ -4,7 +4,7 @@
 #include "AbstractHomologousDiscreteCharacterData.h"
 #include "ConstantNode.h"
 #include "DiscreteTaxonData.h"
-#include "IndexedCache.h"
+#include "SnapshotCache.h"
 #include "MatrixReal.h"
 #include "MemberObject.h"
 #include "PartialLikelihoods.h"
@@ -187,12 +187,12 @@ namespace RevBayesCore {
         const TypedDagNode<Tree>*                                           tau;
 
         // the transition probability matrices
-        mutable IndexedCache<std::vector<TransitionProbabilityMatrix>>      pmatrices;
+        mutable IndexedSnapshotCache<std::vector<TransitionProbabilityMatrix>>      pmatrices;
 
         // the likelihood states
         std::vector<size_t>                                                 activeLikelihood;
     private:        
-        mutable IndexedCache<PartialLikelihoods>                            partialLikelihoods;
+        mutable IndexedSnapshotCache<PartialLikelihoods>                            partialLikelihoods;
         std::vector<double>                                                 marginalLikelihoods;
 
     protected:

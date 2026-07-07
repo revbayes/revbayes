@@ -993,7 +993,7 @@ void PhyloMultiSampleOrnsteinUhlenbeckProcessREML::snapshotSpecialization( void 
 
 /*
  * Mark multisample OU REML likelihood caches dirty after a dependency changes.
- * Snapshot state is stored by IndexedCache before this invalidation hook runs.
+ * Snapshot state is stored by IndexedSnapshotCache before this invalidation hook runs.
  */
 void PhyloMultiSampleOrnsteinUhlenbeckProcessREML::invalidateSpecialization( const DagNode* affecter, bool touchAll )
 {

@@ -4,7 +4,7 @@
 #include "AbstractHomologousDiscreteCharacterData.h"
 #include "TreeDiscreteCharacterData.h"
 #include "CladogeneticSpeciationRateMatrix.h"
-#include "IndexedCache.h"
+#include "SnapshotCache.h"
 #include "RateMatrix.h"
 #include "RateMatrix_JC.h"
 #include "Simplex.h"
@@ -126,7 +126,7 @@ namespace RevBayesCore {
             double                                                      scaling_factor = 0.0;
         };
 
-        mutable IndexedCache<NodeCache>                                node_likelihoods;
+        mutable IndexedSnapshotCache<NodeCache>                                node_likelihoods;
         mutable std::vector<std::vector<double> >                       extinction_probabilities;
         size_t                                                          num_states;
         bool                                                            use_cladogenetic_events;                                                                            //!< do we use the speciation rates from the cladogenetic event map?

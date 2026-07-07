@@ -2,7 +2,7 @@
 #define PhyloMultivariateBrownianProcessREML_H
 
 #include "AbstractPhyloBrownianProcess.h"
-#include "IndexedCache.h"
+#include "SnapshotCache.h"
 #include "TreeChangeEventListener.h"
 
 namespace RevBayesCore {
@@ -59,7 +59,7 @@ namespace RevBayesCore {
             double                                                          contrast_uncertainty = 0.0;
         };
 
-        IndexedCache<NodeCache>                                             node_likelihoods;
+        IndexedSnapshotCache<NodeCache>                                             node_likelihoods;
         
         std::vector<std::vector<double> >                                   independent_contrasts;
         std::vector<double>                                                 independent_contrasts_sds;

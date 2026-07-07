@@ -2,7 +2,7 @@
 #define PhyloBrownianProcessMultiSampleREML_H
 
 #include "AbstractPhyloBrownianProcess.h"
-#include "IndexedCache.h"
+#include "SnapshotCache.h"
 #include "TreeChangeEventListener.h"
 
 namespace RevBayesCore {
@@ -60,7 +60,7 @@ namespace RevBayesCore {
             std::vector<bool>                                               missing_data;
         };
 
-        IndexedCache<NodeCache>                                             node_likelihoods;
+        IndexedSnapshotCache<NodeCache>                                             node_likelihoods;
         std::vector<size_t>                                                 site_indices;
 
         

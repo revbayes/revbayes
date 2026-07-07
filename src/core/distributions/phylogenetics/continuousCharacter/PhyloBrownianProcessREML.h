@@ -2,7 +2,7 @@
 #define PhyloBrownianProcessREML_H
 
 #include "AbstractPhyloBrownianProcess.h"
-#include "IndexedCache.h"
+#include "SnapshotCache.h"
 #include "TreeChangeEventListener.h"
 
 namespace RevBayesCore {
@@ -58,7 +58,7 @@ namespace RevBayesCore {
             double                                                          variance = 0.0;
         };
 
-        IndexedCache<NodeCache>                                             node_likelihoods;
+        IndexedSnapshotCache<NodeCache>                                             node_likelihoods;
         
     private:
                 

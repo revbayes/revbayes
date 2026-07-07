@@ -1,5 +1,5 @@
-#ifndef IndexedCache_H
-#define IndexedCache_H
+#ifndef SnapshotCache_H
+#define SnapshotCache_H
 
 #include <cassert>
 #include <cstddef>
@@ -9,7 +9,7 @@
 namespace RevBayesCore {
 
     template <typename T>
-    class IndexedCache {
+    class IndexedSnapshotCache {
         struct ItemState {
             unsigned active : 1;   // which slot: 0 or 1
             unsigned valid  : 1;   // can this slot be read without recomputation?
@@ -27,7 +27,7 @@ namespace RevBayesCore {
 
     public:
         // Construct an indexed two-slot cache with all items initially invalid.
-        IndexedCache(size_t n)
+        IndexedSnapshotCache(size_t n)
             : num_items(n),
               slots(2 * n),
               current_state(n, {0, 0})   // all start as slot 0, invalid

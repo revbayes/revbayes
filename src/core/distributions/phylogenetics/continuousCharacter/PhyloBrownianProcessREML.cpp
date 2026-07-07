@@ -444,7 +444,7 @@ void PhyloBrownianProcessREML::snapshotSpecialization( void )
 
 /*
  * Mark Brownian REML likelihood caches dirty after a dependency changes.
- * Snapshot state is stored by IndexedCache before this invalidation hook runs.
+ * Snapshot state is stored by IndexedSnapshotCache before this invalidation hook runs.
  */
 void PhyloBrownianProcessREML::invalidateSpecialization( const DagNode* affecter, bool touchAll )
 {
