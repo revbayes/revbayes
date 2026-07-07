@@ -29,13 +29,7 @@ using namespace RevBayesCore;
 
 PhyloOrnsteinUhlenbeckProcessEVE::PhyloOrnsteinUhlenbeckProcessEVE(const TypedDagNode<Tree> *t, size_t ns) : AbstractPhyloContinuousCharacterProcess( t, ns ),
     num_species( t->getValue().getNumberOfTips() ),
-    obs( std::vector<std::vector<double> >(this->num_sites, std::vector<double>(num_species, 0.0) ) ),
-    means( new std::vector<double>(num_species, 0.0) ),
-    phylogenetic_covariance_matrix( new MatrixReal(num_species, num_species) ),
-    inverse_phylogenetic_covariance_matrix( num_species, num_species ),
-    changed_covariance(false),
-    needs_covariance_recomputation( true ),
-    needs_scale_recomputation( true )
+    obs( std::vector<std::vector<double> >(this->num_sites, std::vector<double>(num_species, 0.0) ) )
 {
     // initialize default parameters
     root_state                  = new ConstantNode<double>("", new double(0.0) );
@@ -52,9 +46,6 @@ PhyloOrnsteinUhlenbeckProcessEVE::PhyloOrnsteinUhlenbeckProcessEVE(const TypedDa
     addParameter( homogeneous_sigma );
     addParameter( homogeneous_theta );
     
-    // we need to make sure that we can use the Cholesky decomposition
-    inverse_phylogenetic_covariance_matrix.setCholesky( true );
-    
     // now we need to reset the value
     this->redrawValue();
 }
@@ -70,12 +61,7 @@ PhyloOrnsteinUhlenbeckProcessEVE::PhyloOrnsteinUhlenbeckProcessEVE(const PhyloOr
     heterogeneous_theta( p.heterogeneous_theta ),
     num_species( p.num_species ),
     obs( p.obs ),
-    means( new std::vector<double>( *p.means ) ),
-    phylogenetic_covariance_matrix( p.phylogenetic_covariance_matrix->clone() ),
-    inverse_phylogenetic_covariance_matrix( p.inverse_phylogenetic_covariance_matrix ),
-    changed_covariance( p.changed_covariance ),
-    needs_covariance_recomputation( p.needs_covariance_recomputation ),
-    needs_scale_recomputation( p.needs_scale_recomputation )
+    likelihood_cache( p.likelihood_cache )
 {
     
 }
@@ -89,9 +75,6 @@ PhyloOrnsteinUhlenbeckProcessEVE::PhyloOrnsteinUhlenbeckProcessEVE(const PhyloOr
 PhyloOrnsteinUhlenbeckProcessEVE::~PhyloOrnsteinUhlenbeckProcessEVE( void )
 {
     
-    delete means;
-    delete phylogenetic_covariance_matrix;
-    
 }
 
 
@@ -102,10 +85,7 @@ PhyloOrnsteinUhlenbeckProcessEVE& PhyloOrnsteinUhlenbeckProcessEVE::operator=(co
     if ( this != &p )
     {
         AbstractPhyloContinuousCharacterProcess::operator=( p );
-        
-        delete means;
-        delete phylogenetic_covariance_matrix;
-        
+
         root_state                              = p.root_state;
         homogeneous_alpha                       = p.homogeneous_alpha;
         homogeneous_sigma                       = p.homogeneous_sigma;
@@ -115,12 +95,7 @@ PhyloOrnsteinUhlenbeckProcessEVE& PhyloOrnsteinUhlenbeckProcessEVE::operator=(co
         heterogeneous_theta                     = p.heterogeneous_theta;
         num_species                             = p.num_species;
         obs                                     = p.obs;
-        means                                   = new std::vector<double>( *p.means );
-        phylogenetic_covariance_matrix          = p.phylogenetic_covariance_matrix->clone();
-        inverse_phylogenetic_covariance_matrix  = p.inverse_phylogenetic_covariance_matrix;
-        changed_covariance                      = p.changed_covariance;
-        needs_covariance_recomputation          = p.needs_covariance_recomputation;
-        needs_scale_recomputation               = p.needs_scale_recomputation;
+        likelihood_cache                        = p.likelihood_cache;
     }
 
     return *this;
@@ -304,14 +279,21 @@ void PhyloOrnsteinUhlenbeckProcessEVE::computeVarianceRecursive(const TopologyNo
 double PhyloOrnsteinUhlenbeckProcessEVE::computeLnProbability( void )
 {
 
-    // first, compute the expectations for all tips and the variance-covariance matrix
-    computeExpectation( *means );
-    computeCovariance( *phylogenetic_covariance_matrix );
-    
-    inverse_phylogenetic_covariance_matrix = phylogenetic_covariance_matrix->computeInverse();
-    
-    // we need to make sure that we can use the Cholesky decomposition
-    inverse_phylogenetic_covariance_matrix.setCholesky( true );
+    if ( likelihood_cache.is_valid() == false )
+    {
+        LikelihoodCache &cache = likelihood_cache.init_for_writing();
+        cache.means.assign(num_species, 0.0);
+        cache.covariance = MatrixReal(num_species, num_species);
+
+        // first, compute the expectations for all tips and the variance-covariance matrix
+        computeExpectation( cache.means );
+        computeCovariance( cache.covariance );
+        
+        cache.inverse_covariance = cache.covariance.computeInverse();
+        
+        // we need to make sure that we can use the Cholesky decomposition
+        cache.inverse_covariance.setCholesky( true );
+    }
     
     // sum the probability for each site (column) up
     this->ln_prob = sumRootLikelihood();
@@ -386,11 +368,8 @@ double PhyloOrnsteinUhlenbeckProcessEVE::computeRootState( void ) const
 
 void PhyloOrnsteinUhlenbeckProcessEVE::keepSpecialization( const DagNode* affecter )
 {
-    
-    // reset the flags
-    changed_covariance = false;
-    needs_covariance_recomputation = false;
-    
+    if ( likelihood_cache.has_snapshot() )
+        likelihood_cache.keep();
 }
 
 
@@ -432,15 +411,7 @@ void PhyloOrnsteinUhlenbeckProcessEVE::resetValue( void )
         }
     }
     
-    // reset the means vectors
-    delete means;
-    means = new std::vector<double>(num_species, 0.0);
-    
-    
-    
-    // finally we set all the flags for recomputation
-    needs_covariance_recomputation = true;
-    needs_scale_recomputation = true;
+    likelihood_cache.clear();
     
 }
 
@@ -545,15 +516,8 @@ std::set<size_t> PhyloOrnsteinUhlenbeckProcessEVE::recursiveComputeDistanceMatri
 
 void PhyloOrnsteinUhlenbeckProcessEVE::restoreSpecialization( const DagNode* affecter )
 {
-    
-    // reset the flags
-    if ( changed_covariance == true )
-    {
-        changed_covariance = false;
-        needs_covariance_recomputation = false;
-        
-    }
-    
+    if ( likelihood_cache.has_snapshot() )
+        likelihood_cache.restore();
 }
 
 
@@ -819,12 +783,13 @@ std::vector<double> PhyloOrnsteinUhlenbeckProcessEVE::simulateRootCharacters(siz
 
 double PhyloOrnsteinUhlenbeckProcessEVE::sumRootLikelihood( void )
 {
+    const LikelihoodCache &cache = likelihood_cache.get();
     
     // sum the log-likelihoods for all sites together
     double sum_site_probs = 0.0;
     for (size_t site = 0; site < this->num_sites; ++site)
     {
-        sum_site_probs += RbStatistics::MultivariateNormal::lnPdfPrecision( (*means), inverse_phylogenetic_covariance_matrix, obs[site], 1.0);
+        sum_site_probs += RbStatistics::MultivariateNormal::lnPdfPrecision( cache.means, cache.inverse_covariance, obs[site], 1.0);
     }
     
     return sum_site_probs;
@@ -872,32 +837,18 @@ void PhyloOrnsteinUhlenbeckProcessEVE::swapParameterInternal(const DagNode *oldP
 }
 
 
-void PhyloOrnsteinUhlenbeckProcessEVE::touchSpecialization( const DagNode* affecter, bool touchAll )
+void PhyloOrnsteinUhlenbeckProcessEVE::snapshotSpecialization( void )
 {
-    
-    // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
-    if ( affecter == root_state )
-    {
-        
-        
-    }
-    else
-    {
-        needs_covariance_recomputation = true;
-        if ( changed_covariance == false )
-        {
-//            MatrixReal *tmp = phylogenetic_covariance_matrix;
-//            phylogenetic_covariance_matrix = stored_phylogenetic_covariance_matrix;
-//            stored_phylogenetic_covariance_matrix = tmp;
-        }
-        changed_covariance = true;
-        
-    }
-    //    else if ( affecter != this->tau ) // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
-    //    {
-    //        touchAll = true;
-    //    }
-    
+    likelihood_cache.snapshot();
 }
 
+
+/*
+ * Mark the EVE OU likelihood cache invalid after any dependency changes.
+ * This replaces the old recompute-on-every-call behavior with a real cache.
+ */
+void PhyloOrnsteinUhlenbeckProcessEVE::invalidateSpecialization( const DagNode* affecter, bool touchAll )
+{
+    likelihood_cache.invalidate();
+}
 

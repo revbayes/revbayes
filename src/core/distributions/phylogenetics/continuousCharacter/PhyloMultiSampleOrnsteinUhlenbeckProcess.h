@@ -8,6 +8,7 @@
 
 #include "AbstractPhyloContinuousCharacterProcess.h"
 #include "MatrixReal.h"
+#include "SnapshotCache.h"
 #include "Taxon.h"
 #include "TopologyNode.h"
 
@@ -62,7 +63,8 @@ template <class valueType> class TypedDagNode;
         std::vector<double>                                                 simulateRootCharacters(size_t n);
         double                                                              sumRootLikelihood(void);
         void                                                                simulateTipSamples(const std::vector< ContinuousTaxonData > &td);
-        virtual void                                                        touchSpecialization(const DagNode *toucher, bool touchAll);
+        virtual void                                                        snapshotSpecialization(void);
+        virtual void                                                        invalidateSpecialization(const DagNode *toucher, bool touchAll);
         
         void                                                                computeCovariance(MatrixReal &cv);
         void                                                                computeCovarianceRecursive(const TopologyNode &n, MatrixReal &cv);
@@ -101,12 +103,15 @@ template <class valueType> class TypedDagNode;
         std::vector<size_t>                                                 num_individuals_per_species;
         std::vector<Taxon>                                                  taxa;
         std::vector<std::vector<double> >                                   obs;
-        std::vector<double>*                                                means;
-        MatrixReal*                                                         phylogenetic_covariance_matrix;
-        MatrixReal                                                          inverse_phylogenetic_covariance_matrix;
-        bool                                                                changed_covariance;
-        bool                                                                needs_covariance_recomputation;
-        bool                                                                needs_scale_recomputation;
+
+        struct LikelihoodCache
+        {
+            std::vector<double> means;
+            MatrixReal covariance;
+            MatrixReal inverse_covariance;
+        };
+
+        SnapshotCache<LikelihoodCache>                                      likelihood_cache;
         
     };
     
@@ -114,4 +119,3 @@ template <class valueType> class TypedDagNode;
 
 
 #endif
-

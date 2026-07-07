@@ -7,6 +7,7 @@
 
 #include "AbstractPhyloContinuousCharacterProcess.h"
 #include "MatrixReal.h"
+#include "SnapshotCache.h"
 #include "TopologyNode.h"
 
 namespace RevBayesCore {
@@ -60,8 +61,9 @@ template <class valueType> class TypedDagNode;
         virtual void                                                        restoreSpecialization(const DagNode *restorer);
         void                                                                simulateRecursively(const TopologyNode& node, std::vector< ContinuousTaxonData > &t);
         std::vector<double>                                                 simulateRootCharacters(size_t n);
+        virtual void                                                        snapshotSpecialization(void);
         double                                                              sumRootLikelihood(void);
-        virtual void                                                        touchSpecialization(const DagNode *toucher, bool touchAll);
+        virtual void                                                        invalidateSpecialization(const DagNode *toucher, bool touchAll);
         
         void                                                                computeCovariance(MatrixReal &cv);
         void                                                                computeCovarianceRecursive(const TopologyNode &n, MatrixReal &cv);
@@ -90,12 +92,15 @@ template <class valueType> class TypedDagNode;
         
         size_t                                                              num_species;
         std::vector<std::vector<double> >                                   obs;
-        std::vector<double>*                                                means;
-        MatrixReal*                                                         phylogenetic_covariance_matrix;
-        MatrixReal                                                          inverse_phylogenetic_covariance_matrix;
-        bool                                                                changed_covariance;
-        bool                                                                needs_covariance_recomputation;
-        bool                                                                needs_scale_recomputation;
+
+        struct LikelihoodCache
+        {
+            std::vector<double> means;
+            MatrixReal covariance;
+            MatrixReal inverse_covariance;
+        };
+
+        SnapshotCache<LikelihoodCache>                                      likelihood_cache;
         
     };
     
