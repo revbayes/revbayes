@@ -43,6 +43,7 @@ namespace RevBayesCore {
         
         // public methods
         virtual void                                            bootstrap(void);                                                                    //!< Draw a new random value from the distribution
+        virtual bool                                            childrenAreAffectedBy(const DagNode *affecter) const;                               //!< Does this changed parameter make the owning node's value affect children?
         virtual RevLanguage::RevPtr<RevLanguage::RevVariable>   executeProcedure(const std::string &n, const std::vector<DagNode*> args, bool &f);  //!< execute the procedure
         virtual void                                            getAffected(RbOrderedSet<DagNode *>& affected, const DagNode* affecter);            //!< get affected nodes
         virtual std::vector<double>                             getMixtureProbabilities(void) const;

@@ -89,6 +89,14 @@ void Distribution::bootstrap( void )
     // do nothing
 }
 
+/*
+ * By default, distribution parameter changes do not affect child values.
+ */
+bool Distribution::childrenAreAffectedBy(const DagNode *) const
+{
+    return false;
+}
+
 
 /**
  * Add this parameter to our set of parameters.
@@ -289,4 +297,3 @@ void Distribution::swapParameter(const DagNode *old_p, const DagNode *new_p)
     }
     
 }
-
