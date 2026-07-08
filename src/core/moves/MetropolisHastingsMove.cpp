@@ -293,29 +293,25 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     }
 
     /*
-     * NOTE: When checking PDFs, ONLY touch/keep (directly modified) nodes.
-     *       Do NOT touch/keep (indirectly) affected_nodes.
-     *       If we touch/keep affected_nodes, we can hide problems by doing more recalculation.
+     * NOTE: When checking PDFs, ONLY invalidate (directly modified) nodes.
+     *       Do NOT invalidate (indirectly) affected_nodes.
+     *       If we invalidate affected_nodes, we can hide problems by doing more recalculation.
      */
 
     if (debugMCMC >= 1)
     {
-        // 1. Compute PDFs before proposal, before touch
+        // 1. Compute PDFs before proposal, before invalidation
         auto& untouched_before_proposal = initialPdfs;
 
-        // 2. Touch nodes.
+        // 2. Invalidate nodes.
         for (auto node: nodes)
-            node->touch();
+            node->invalidate();
 
-        // 3. Compute PDFs before proposal, after touch
-        auto touched_before_proposal = getNodePrs(nodes, affected_nodes);
+        // 3. Compute PDFs before proposal, after invalidation
+        auto invalidated_before_proposal = getNodePrs(nodes, affected_nodes);
 
-        // 4. Keep nodes
-        for (auto node: nodes)
-            node->keep();
-
-        // 5. Compare pdfs for each node
-        compareNodePrs(proposal->getLongProposalName(), untouched_before_proposal, touched_before_proposal, "PDFs not up-to-date before proposal");
+        // 4. Compare pdfs for each node
+        compareNodePrs(proposal->getLongProposalName(), untouched_before_proposal, invalidated_before_proposal, "PDFs not up-to-date before proposal");
     }
 
     // Snapshot the pre-proposal state before any proposal-side mutation can invalidate it.

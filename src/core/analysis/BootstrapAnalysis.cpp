@@ -140,7 +140,6 @@ void BootstrapAnalysis::runSim(size_t idx, double epsilon)
         if ( the_node->isStochastic() == true && the_node->isClamped() )
         {
             the_node->bootstrap();
-            the_node->touch();
         }
         
     }
@@ -165,4 +164,3 @@ void BootstrapAnalysis::runSim(size_t idx, double epsilon)
 //    }
     
 }
-

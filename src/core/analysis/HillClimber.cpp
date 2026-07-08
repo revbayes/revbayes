@@ -348,11 +348,11 @@ void HillClimber::initializeSampler( void )
 
     // Get initial lnProbability of model
 
-    // first we touch all nodes so that the likelihood is dirty
+    // first invalidate all nodes so that the likelihood is dirty
     for (auto the_node: dagNodes)
     {
         the_node->setMcmcMode( true );
-        the_node->touch();
+        the_node->invalidate();
     }
 
 
@@ -368,7 +368,7 @@ void HillClimber::initializeSampler( void )
         for (std::vector<DagNode *>::iterator i=dagNodes.begin(); i!=dagNodes.end(); i++)
         {
             DagNode* node = (*i);
-            node->touch();
+            node->invalidate();
 
             double lnProb = node->getLnProbability();
 
@@ -389,12 +389,6 @@ void HillClimber::initializeSampler( void )
 
         }
 
-        // now we keep all nodes so that the likelihood is stored
-        for (std::vector<DagNode *>::iterator i=dagNodes.begin(); i!=dagNodes.end(); i++)
-        {
-            (*i)->keep();
-        }
-
         if ( failed == true )
         {
             RBOUT( "Drawing new initial states ... " );
@@ -411,7 +405,7 @@ void HillClimber::initializeSampler( void )
                 {
                     // make sure that the clamped node also recompute their probabilities
                     (*i)->reInitialized();
-                    (*i)->touch();
+                    (*i)->invalidate();
                 }
 
             }

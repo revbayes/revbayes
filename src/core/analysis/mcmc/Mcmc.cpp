@@ -601,11 +601,11 @@ void Mcmc::initializeSampler()
 
     // Get initial ln_probability of model
 
-    // first we touch all nodes so that the likelihood is dirty
+    // first invalidate all nodes so that the likelihood is dirty
     for (auto the_node: dag_nodes)
     {
         the_node->setMcmcMode( true );
-        the_node->touch();
+        the_node->invalidate();
     }
 
     if ( chain_active == false )
@@ -623,7 +623,7 @@ void Mcmc::initializeSampler()
             else if ( the_node->isClamped() == true )
             {
                 // make sure that the clamped node also recompute their probabilities
-                the_node->touch();
+                the_node->invalidate();
             }
     
         }
@@ -640,7 +640,7 @@ void Mcmc::initializeSampler()
 
         ln_probability = 0.0;
         for (auto the_node: dag_nodes)
-            the_node->touch();
+            the_node->invalidate();
 
         for (auto the_node: dag_nodes)
         {
@@ -663,12 +663,6 @@ void Mcmc::initializeSampler()
             ln_probability += ln_prob;
         }
 
-        // now we keep all nodes so that the likelihood is stored
-        for (auto the_node: dag_nodes)
-        {
-            the_node->keep();
-        }
-
         if ( failed == true )
         {
             RBOUT( "Drawing new initial states ... " );
@@ -684,16 +678,19 @@ void Mcmc::initializeSampler()
                 {
                     // make sure that the clamped node also recompute their probabilities
                     the_node->reInitialized();
-                    the_node->touch();
+                    the_node->invalidate();
                 }
             }
-
-            for (auto the_node: ordered_stoch_nodes)
-		if (the_node->isClamped())
-		    the_node->keep();
         }
         else
         {
+            // Model construction can leave legacy snapshots behind; the initial state is now known.
+            // Drop those snapshots before the first proposal creates a fresh one.
+            for (auto the_node: dag_nodes)
+            {
+                the_node->keep();
+            }
+
             break;
         }
 
@@ -824,10 +821,10 @@ void Mcmc::initializeSamplerFromCheckpoint( void )
         }
     }
 
-    // We need to touch these so that their probabilities get recomputed.
+    // We need to invalidate these so that their probabilities get recomputed.
     for(auto& node: nodes)
     {
-        node->touch();
+        node->invalidate();
     }
 
     // assemble the new filename
@@ -1165,15 +1162,7 @@ void Mcmc::redrawStartingValues( void )
             
         }
         
-        the_node->touch();
-        
-    }
-    
-    for (std::vector<DagNode *>::iterator i=ordered_stoch_nodes.begin(); i!=ordered_stoch_nodes.end(); ++i)
-    {
-        
-        DagNode *the_node = (*i);
-        the_node->keep();
+        the_node->invalidate();
         
     }
     
