@@ -324,7 +324,6 @@ void RevBayesCore::DeterministicNode<valueType>::keepMe( const DagNode* affecter
 {
 
     // delegate call to base class
-    // this will unset the touched flag if it was set
     DynamicNode<valueType>::keepMe( affecter );
 
     // allow specialized recovery in functions
@@ -359,7 +358,7 @@ void RevBayesCore::DeterministicNode<valueType>::printStructureInfo( std::ostrea
     {
         o << "_dagNode      = " << this->name << " <" << this << ">" << std::endl;
         o << "_refCount     = " << this->getReferenceCount() << std::endl;
-        o << "_touched      = " << ( this->touched ? "TRUE" : "FALSE" ) << std::endl;
+        o << "_needs_update = " << ( needs_update ? "TRUE" : "FALSE" ) << std::endl;
     }
 }
 
@@ -387,11 +386,8 @@ template<class valueType>
 void RevBayesCore::DeterministicNode<valueType>::restoreMe( const DagNode *restorer )
 {
 
-    // the value has been changed so we need to flag for recomputing the value
-    // we need to do that even if the touched flag is unset because it can already have been unset
-    // by a reset call from one of our parameter while another of our parameters wasn't unset
-    // that means we need to guarantee that either all of our parameters are restore first (which we cannot guarantee currently)
-    // or we need to update our value every time one of our parameters is restored.
+    // The value may have changed, so mark it for lazy recomputation.
+    // Restore order is not guaranteed, so each restored parent must invalidate us.
     needs_update = true;
 
     // we just mark ourselves as clean, albeit perhaps not being updated
@@ -475,13 +471,9 @@ template<class valueType>
 void RevBayesCore::DeterministicNode<valueType>::touchMe( const DagNode *toucher, bool touchAll )
 {
 
-    // store if the state of the variable was dirty (needed an update)
     bool needed_update = needs_update;
-    bool was_touched = this->touched;
-
 
     // delegate call to base class
-    // this will set the touched flag if it wasn't set already
     DynamicNode<valueType>::touchMe( toucher, touchAll );
 
 
@@ -495,10 +487,10 @@ void RevBayesCore::DeterministicNode<valueType>::touchMe( const DagNode *toucher
     // mark for update
     needs_update = true;
 
-    // only if this function did not need an update we delegate the touch affected
-    if ( needed_update == false || was_touched == false || true )
+    // Keep the always-true branch as a marker for a future narrower propagation rule.
+    if ( needed_update == false || true )
     {
-        // Dispatch the touch message to downstream nodes
+        // Dispatch the touch message to downstream nodes.
         this->touchAffected( touchAll );
     }
 
