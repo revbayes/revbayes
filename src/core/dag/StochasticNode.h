@@ -501,16 +501,16 @@ double RevBayesCore::StochasticNode<valueType>::getLnProbability( void )
 template<class valueType>
 double RevBayesCore::StochasticNode<valueType>::getLnProbabilityRatio( void )
 {
-    // 1. If the node is not affected/touched, then the probability is the same for the current and previous state.
+    // 1. If the node is not snapshotted/affected, then the probability is the same for the current and previous state.
     if (not stored_ln_prob)
         return 0;
 
-    // 2. If we touched the node when the log probability was not calculated, then we don't have a value for
+    // 2. If we snapshotted the node when the log probability was not calculated, then we don't have a value for
     // the probability of the previous state.
     if (not *stored_ln_prob)
         throw RbException()<<"getLnProbabilityRatio: the log probability for the previous state was never calculated";
 
-    // 3. If (a) the node is touched/affected and (b) we know the previous probability, then use it.
+    // 3. If (a) the node is snapshotted/affected and (b) we know the previous probability, then use it.
     return getLnProbability() - **stored_ln_prob;
 }
 
@@ -526,16 +526,16 @@ double RevBayesCore::StochasticNode<valueType>::getPrevLnProbability( void ) con
      *       Right now we do (1).
      */
 
-    // 1. If the node is not affected/touched, then throw an exception.
+    // 1. If the node is not snapshotted/affected, then throw an exception.
     if (not stored_ln_prob)
         throw RbException()<<"getPrevLnProbability: no previous probability!";
 
-    // 2. If we touched the node when the log probability was not calculated, then we don't have a value for
+    // 2. If we snapshotted the node when the log probability was not calculated, then we don't have a value for
     // the probability of the previous state.
     if (not *stored_ln_prob)
         throw RbException()<<"getLnProbabilityRatio: the log probability for the previous state was never calculated";
 
-    // 3. If (a) the node is touched/affected and (b) we know the previous probability, then use it.
+    // 3. If (a) the node is snapshotted/affected and (b) we know the previous probability, then use it.
     return **stored_ln_prob;
 }
 
@@ -614,28 +614,15 @@ bool RevBayesCore::StochasticNode<valueType>::isStochastic( void ) const
 
 
 /**
- * Keep the current value of the node.
- * At this point, we also need to make sure we update the stored ln probability.
+ * Keep the current value of the node by dropping any active snapshot.
  */
 template<class valueType>
 void RevBayesCore::StochasticNode<valueType>::keepMe( const DagNode* affecter )
 {
     
-    if ( this->touched == true )
+    if ( stored_ln_prob.has_value() )
     {
         stored_ln_prob = {};
-
-        if ( not lnProb )
-        {
-            if (integrated_out or ignore_data)
-                lnProb = 0.0;
-            else
-            {
-                RbOrderedSet<DagNode *> integrated_parents;
-                getIntegratedParents(integrated_parents);
-                lnProb = computeRecursiveIntegratedLnProbability(integrated_parents,0);
-            }
-        }
         
         distribution->keep();
         const bool children_affected = distribution->childrenAreAffectedBy( affecter );
@@ -650,8 +637,6 @@ void RevBayesCore::StochasticNode<valueType>::keepMe( const DagNode* affecter )
         }
         
     }
-
-    assert( lnProb );
     
     
     // delegate call
@@ -693,7 +678,7 @@ void RevBayesCore::StochasticNode<valueType>::printStructureInfo( std::ostream &
     {
         o << "_dagNode      = " << this->name << " <" << this << ">" << std::endl;
         o << "_refCount     = " << this->getReferenceCount() << std::endl;
-        o << "_touched      = " << ( this->touched ? "TRUE" : "FALSE" ) << std::endl;
+        o << "_has_snapshot = " << ( stored_ln_prob.has_value() ? "TRUE" : "FALSE" ) << std::endl;
     }
 }
 
@@ -731,13 +716,10 @@ template<class valueType>
 void RevBayesCore::StochasticNode<valueType>::restoreMe( const DagNode *restorer )
 {
     
-    if ( this->touched == true )
+    if ( stored_ln_prob.has_value() )
     {
         lnProb              = stored_ln_prob.value();
         stored_ln_prob      = {};    // An almost impossible value for the density
-
-        // reset flags that recalculation is not needed
-        assert(lnProb);
 
         // call for potential specialized handling (e.g. internal flags)
         distribution->restore();
@@ -911,15 +893,15 @@ template<class valueType>
 void RevBayesCore::StochasticNode<valueType>::touchMe( const DagNode *toucher, bool touchAll )
 {
     
-    if ( this->touched == false )
+    if ( not stored_ln_prob.has_value() )
     {
-        assert(not stored_ln_prob);
         stored_ln_prob = lnProb;
     }
     
     lnProb = {};
     
     // Snapshot rollback state before invalidating distribution-specific cached state.
+    // Repeated snapshots intentionally reach the distribution so non-idempotent specializations are exposed.
     distribution->snapshot();
     distribution->invalidate( toucher, touchAll );
     const bool children_affected = distribution->childrenAreAffectedBy( toucher );
