@@ -629,7 +629,7 @@ double StateDependentSpeciationExtinctionProcess::computeRootLikelihood( void ) 
         else
         {
             node_likelihood[num_states + i] = left_likelihoods[num_states + i] * right_likelihoods[num_states + i];
-            node_likelihood[num_states + i] *= (speciation_node ? speciation_rates[i] : 1.0);
+//            node_likelihood[num_states + i] *= (speciation_node ? speciation_rates[i] : 1.0);
         }
     }
     
