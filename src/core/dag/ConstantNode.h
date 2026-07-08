@@ -258,7 +258,7 @@ void RevBayesCore::ConstantNode<valueType>::setValue(valueType const &v)
 {
     
     *value = v;
-    this->touch();
+    this->invalidate();
     
 }
 
@@ -268,7 +268,7 @@ void RevBayesCore::ConstantNode<valueType>::setValueFromFile(const RevBayesCore:
 {
     
     Serializer<valueType, IsDerivedFrom<valueType, RevBayesCore::Serializable>::Is >::ressurectFromFile( value, dir, this->getName() );
-    this->touch();
+    this->invalidate();
     
 }
 
@@ -277,7 +277,7 @@ template<class valueType>
 void RevBayesCore::ConstantNode<valueType>::setValueFromString(const std::string &v)
 {
     Serializer<valueType, IsDerivedFrom<valueType, RevBayesCore::Serializable>::Is >::ressurectFromString( value, v );
-    this->touch();
+    this->invalidate();
     
 }
 

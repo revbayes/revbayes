@@ -260,8 +260,8 @@ void RevBayesCore::StochasticNode<valueType>::bootstrap( void )
     
     distribution->bootstrap();
     
-    // touch this node for probability recalculation
-    this->touch();
+    // invalidate this node for probability recalculation
+    this->invalidate();
     
 }
 
@@ -723,8 +723,8 @@ void RevBayesCore::StochasticNode<valueType>::redraw( SimulationCondition c )
         distribution->redrawValue( c );
     }
     
-    // touch this node for probability recalculation
-    this->touch();
+    // invalidate this node for probability recalculation
+    this->invalidate();
     
 }
 
