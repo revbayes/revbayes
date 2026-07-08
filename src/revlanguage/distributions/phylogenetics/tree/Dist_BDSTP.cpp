@@ -109,7 +109,7 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_BDSTP::createDistribution( void ) 
     // death rate
     RevBayesCore::DagNode* d_s = mu->getRevObject().getDagNode();
     // serial sampling rate
-    RevBayesCore::DagNode* s_s = phi->getRevObject().getDagNode();
+    RevBayesCore::DagNode* s_s = (phi == NULL || phi->getRevObject() == RevNullObject::getInstance() ? NULL : phi->getRevObject().getDagNode() );
     // treatment probability
     RevBayesCore::DagNode* t_s = getRemovalProbability();
 
@@ -311,7 +311,7 @@ const MemberRules& Dist_BDSTP::getParameterRules(void) const
         std::vector<std::string> aliases_event_sampling;
         aliases_event_sampling.push_back("Phi");
         aliases_event_sampling.push_back("rho");
-        dist_member_rules.push_back(new ArgumentRule(aliases_event_sampling, event_sampling_paramTypes, "The probability of sampling taxa at sampling events (at present only if input is scalar).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY));
+        dist_member_rules.push_back(new ArgumentRule(aliases_event_sampling, event_sampling_paramTypes, "The probability of sampling taxa at sampling events (at present only if input is scalar).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL));
 
         std::vector<TypeSpec> other_event_paramTypes;
         other_event_paramTypes.push_back(ModelVector<Probability>::getClassTypeSpec());
@@ -320,7 +320,7 @@ const MemberRules& Dist_BDSTP::getParameterRules(void) const
         std::vector<TypeSpec> rTypes;
         rTypes.push_back(Probability::getClassTypeSpec());
         rTypes.push_back(ModelVector<Probability>::getClassTypeSpec());
-        dist_member_rules.push_back(new ArgumentRule("r", rTypes, "The probabilit(y|ies) of death upon sampling (treatment).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY));
+        dist_member_rules.push_back(new ArgumentRule("r", rTypes, "The probabilit(y|ies) of death upon sampling (treatment).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Probability(0.0)));
         dist_member_rules.push_back(new ArgumentRule("rTimeline", ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the (serial) treatment probability.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL));
 
         rules_set = true;
@@ -350,7 +350,7 @@ void Dist_BDSTP::addCommonRules(MemberRules& dist_member_rules) const
         std::vector<std::string> aliases_serial_sampling;
         aliases_serial_sampling.push_back("phi");
         aliases_serial_sampling.push_back("psi");
-        dist_member_rules.push_back( new ArgumentRule( aliases_serial_sampling,     paramTypes, "The serial sampling rate(s).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        dist_member_rules.push_back( new ArgumentRule( aliases_serial_sampling,     paramTypes, "The serial sampling rate(s).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
         dist_member_rules.push_back( new ArgumentRule( "timeline",          ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the piecewise constant process.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
         dist_member_rules.push_back( new ArgumentRule( "lambdaTimeline",    ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the speciation rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
