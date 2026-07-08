@@ -1363,7 +1363,8 @@ void BirthDeathSamplingTreatmentProcess::prepareTimeline( void ) const
     }
     else
     {
-        phi = std::vector<double>(global_timeline.size(),homogeneous_phi->getValue());
+        double phi_val = ( homogeneous_phi != NULL ? homogeneous_phi->getValue() : 0.0);
+        phi = std::vector<double>(global_timeline.size(), phi_val);
     }
 
     // Get vector of treatment probabilities
@@ -1993,5 +1994,5 @@ bool BirthDeathSamplingTreatmentProcess::allowsSA() {
 void RevBayesCore::BirthDeathSamplingTreatmentProcess::setValue(Tree * v, bool f)
 {
     RevBayesCore::Tree *newv = TreeUtilities::startingTreeInitializer(*v, taxa, age_check_precision);
-    AbstractRootedTreeDistribution::setValue(newv, f);
+    AbstractRootedTreeDistribution::setValue(newv, f);        
 }
