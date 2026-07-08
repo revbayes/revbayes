@@ -35,7 +35,6 @@ namespace RevBayesCore {
         
     public:
         EpisodicStateDependentSpeciationExtinctionFossilizationProcess(const TypedDagNode<double> *root,
-                                                                       const TypedDagNode<double>* r,
                                                                        const TypedDagNode<Simplex>* p,
                                                                        const std::string &cdt,
                                                                        bool uo,
@@ -47,7 +46,7 @@ namespace RevBayesCore {
                                                                        bool condition_on_tip_states,
                                                                        bool condition_on_num_tips,
                                                                        bool condition_on_tree,
-                                                                       bool allow_shifts_extinct);
+                                                                       std::int64_t age_check_precision);
         
         // pure virtual member functions
         virtual EpisodicStateDependentSpeciationExtinctionFossilizationProcess*              clone(void) const;
@@ -69,11 +68,12 @@ namespace RevBayesCore {
         void                                                            setExtinctionRates(const TypedDagNode< RbVector< RbVector<double> > > *r);
         void                                                            setFossilizationRates(const TypedDagNode< RbVector<double> > *r);
         void                                                            setFossilizationRates(const TypedDagNode< RbVector<RbVector<double> > > *r);
+        void                                                            setMassExtinctionSurvivalProbabilities(const TypedDagNode<RbVector<RbVector<double> > > *p);
         void                                                            setSampleCharacterHistory(bool sample_history);                                                     //!< Set whether or not we are sampling the character history along branches.
         void                                                            setSamplingFraction(const TypedDagNode< double > *r);
         void                                                            setSamplingFraction(const TypedDagNode< RbVector<double> > *r);
         void                                                            setSpeciationRates(const TypedDagNode< RbVector<double> > *r);
-        void                                                            setSpeciationRates(const TypedDagNode< RbVector< RbVector<double> > > *r);
+        void                                                            setSpeciationRates(const TypedDagNode< RbVector< RbVector<double> > > *r, const TypedDagNode<RbVector<double> >* t);
         void                                                            setTransitionRateMatrix(const TypedDagNode< RateGenerator > *m);
         void                                                            setTransitionRateMatrix(const TypedDagNode< RbVector< RateGenerator > > *m);
         void                                                            setNumberOfTimeSlices(double n);                                                                    //!< Set the number of time slices for the numerical ODE.
@@ -122,6 +122,7 @@ namespace RevBayesCore {
         void                                                            computeNodeProbability(const TopologyNode &n, size_t nIdx) const;
         double                                                          computeRootLikelihood() const;
         const RbVector<double>&                                         computeExtinctionRateAtTime(double a) const;
+        const RbVector<double>&                                         computeSurvivalProbabilitiesAtTime(double a) const;
         const RbVector<double>&                                         computeFossilizationRateAtTime(double a) const;
         const RbVector<double>&                                         computeSpeciationRateAtTime(double a) const;
 
@@ -137,6 +138,7 @@ namespace RevBayesCore {
         size_t                                                          num_states;
         mutable std::vector<std::vector<double> >                       scaling_factors;
         bool                                                            use_cladogenetic_events;                                                                            //!< do we use the speciation rates from the cladogenetic event map?
+        bool                                                            use_episodic_model;                                                                            //!< do we use the speciation rates from the cladogenetic event map?
         bool                                                            use_origin;
         bool                                                            sample_character_history;                                                                           //!< are we sampling the character history along branches?
         std::vector<double>                                             average_speciation;
@@ -148,17 +150,18 @@ namespace RevBayesCore {
         // parameters
         const TypedDagNode< CladogeneticSpeciationRateMatrix >*         cladogenesis_matrix;
         const TypedDagNode<double>*                                     process_age;                                                                                           //!< Time since the origin.
-//        const TypedDagNode<RbVector<double> >*                          mu;
-        const TypedDagNode<RbVector<RbVector<double> > >*               mu;
-//        const TypedDagNode<RbVector<double> >*                          lambda;
-        const TypedDagNode<RbVector<RbVector<double> > >*               lambda;
-//        const TypedDagNode<RbVector<double> >*                          phi;
-        const TypedDagNode<RbVector<RbVector<double> > >*               phi;
-        const TypedDagNode<RbVector<double> >*                          survival_probs;
+        const TypedDagNode<RbVector<double> >*                          mu_const;
+        const TypedDagNode<RbVector<RbVector<double> > >*               mu_var;
+        const TypedDagNode<RbVector<double> >*                          lambda_const;
+        const TypedDagNode<RbVector<RbVector<double> > >*               lambda_var;
+        const TypedDagNode<RbVector<double> >*                          phi_const;
+        const TypedDagNode<RbVector<RbVector<double> > >*               phi_var;
+        const TypedDagNode<RbVector<RbVector<double> > >*               survival_probs;
         const TypedDagNode<RbVector<double> >*                          epoch_times;
+        const TypedDagNode<RbVector<double> >*                          epoch_times_lambda;
         const TypedDagNode<Simplex >*                                   pi;                                                                                                 //!< The root frequencies (probabilities of the root states).
-//        const TypedDagNode<RateGenerator>*                              Q;
-        const TypedDagNode<RbVector<RateGenerator> >*                   Q;
+        const TypedDagNode<RateGenerator>*                              Q_const;
+        const TypedDagNode<RbVector<RateGenerator> >*                   Q_var;
         const TypedDagNode<double>*                                     rate;                                                                                               //!< Sampling probability of each species.
         const TypedDagNode<double>*                                     rho;                                                                                                //!< Sampling probability of each species.
         const TypedDagNode<RbVector<double> >*                          rho_per_state;                                                                                                //!< Sampling probability of each species.
@@ -174,6 +177,7 @@ namespace RevBayesCore {
         bool                                                            condition_on_num_tips;
         bool                                                            condition_on_tree;
         double                                                          NUM_TIME_SLICES;
+        std::int64_t                                                    age_check_precision;
 
     };
     

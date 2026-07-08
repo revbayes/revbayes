@@ -43,6 +43,7 @@
 #include "Tree.h"
 #include "TreeChangeEventHandler.h"
 #include "TreeDiscreteCharacterData.h"
+#include "TreeUtilities.h"
 #include "TypedDagNode.h"
 #include "TypedDistribution.h"
 #include "boost/numeric/odeint.hpp" // IWYU pragma: keep
@@ -62,19 +63,18 @@ using namespace RevBayesCore;
  * and initializes the probability density by computing the combinatorial constant of the tree structure.
  */
 EpisodicStateDependentSpeciationExtinctionFossilizationProcess::EpisodicStateDependentSpeciationExtinctionFossilizationProcess(const TypedDagNode<double> *age,
-                                                                                   const TypedDagNode<double>* r,
-                                                                                   const TypedDagNode< Simplex >* p,
-                                                                                   const std::string &cdt,
-                                                                                   bool uo,
-                                                                                   size_t min_num_lineages,
-                                                                                   size_t max_num_lineages,
-                                                                                   size_t exact_num_lineages,
-                                                                                   double max_t,
-                                                                                   bool prune,
-                                                                                   bool condition_on_tip_states,
-                                                                                   bool condition_on_num_tips,
-                                                                                   bool condition_on_tree,
-                                                                                   bool allow_shifts_extinct) : TypedDistribution<Tree>( new TreeDiscreteCharacterData() ),
+                                                                                                                               const TypedDagNode< Simplex >* p,
+                                                                                                                               const std::string &cdt,
+                                                                                                                               bool uo,
+                                                                                                                               size_t min_num_lineages,
+                                                                                                                               size_t max_num_lineages,
+                                                                                                                               size_t exact_num_lineages,
+                                                                                                                               double max_t,
+                                                                                                                               bool prune,
+                                                                                                                               bool condition_on_tip_states,
+                                                                                                                               bool condition_on_num_tips,
+                                                                                                                               bool condition_on_tree,
+                                                                                                                               std::int64_t pr) : TypedDistribution<Tree>( new TreeDiscreteCharacterData() ),
     condition( cdt ),
     active_likelihood( std::vector<bool>(5, 0) ),
     changed_nodes( std::vector<bool>(5, false) ),
@@ -93,27 +93,32 @@ EpisodicStateDependentSpeciationExtinctionFossilizationProcess::EpisodicStateDep
     simmap( "" ),
     cladogenesis_matrix( NULL ),
     process_age( age ),
-    lambda(NULL),
-    phi( NULL),
+    lambda_const(NULL),
+    lambda_var(NULL),
+    mu_const(NULL),
+    mu_var(NULL),
+    phi_const( NULL),
+    phi_var( NULL),
     pi( p ),
-    rate( r ),
-    rho( new ConstantNode<double>("", new double(1.0)) ),
+    survival_probs( NULL ),
+    rate( NULL ),
+    rho( NULL ),
     rho_per_state( NULL ),
     Q_default( p->getValue().size() ),
     min_num_lineages( min_num_lineages ),
     max_num_lineages( max_num_lineages ),
     exact_num_lineages( exact_num_lineages ),
     max_time( max_t ),
-    allow_rate_shifts_on_extinct_lineages( allow_shifts_extinct ),
     prune_extinct_lineages( prune ),
+    use_episodic_model( false ),
     condition_on_tip_states( condition_on_tip_states ),
     condition_on_num_tips( condition_on_num_tips ),
     condition_on_tree( condition_on_tree ),
+    age_check_precision( pr ),
     NUM_TIME_SLICES( 500.0 )
 {
     addParameter( pi );
     addParameter( rho );
-    addParameter( rate );
     addParameter( process_age );
     
     if ( min_num_lineages > max_num_lineages )
@@ -122,7 +127,7 @@ EpisodicStateDependentSpeciationExtinctionFossilizationProcess::EpisodicStateDep
     }
     
     // set the length of the time slices used by the ODE for numerical integration
-    dt = process_age->getValue() / NUM_TIME_SLICES * 10.0;
+    dt = process_age->getValue() / NUM_TIME_SLICES * 1.0;
 
     value->getTreeChangeEventHandler().addListener( this );
 
@@ -160,11 +165,11 @@ EpisodicStateDependentSpeciationExtinctionFossilizationProcess::~EpisodicStateDe
 std::vector<double> EpisodicStateDependentSpeciationExtinctionFossilizationProcess::calculateTotalSpeciationRatePerState( double a ) const
 {
     std::vector<double> total_rates = std::vector<double>(num_states, 0);
-    std::map<std::vector<unsigned>, double> eventMap;
-    std::vector<double> speciation_rates;
-    std::map<std::vector<unsigned>, double>::iterator it;
     if ( use_cladogenetic_events == true )
     {
+        std::map<std::vector<unsigned>, double> eventMap;
+        std::map<std::vector<unsigned>, double>::iterator it;
+        
         // get cladogenesis event map (sparse speciation rate matrix)
         eventMap = cladogenesis_matrix->getValue().getEventMap();
         // iterate over each cladogenetic event possible
@@ -176,11 +181,8 @@ std::vector<double> EpisodicStateDependentSpeciationExtinctionFossilizationProce
     }
     else
     {
-        speciation_rates = computeSpeciationRateAtTime( a );
-        for (size_t i = 0; i < num_states; i++)
-        {
-            total_rates[i] += speciation_rates[i];
-        }
+        total_rates = computeSpeciationRateAtTime( a );
+
     }
     return total_rates;
 }
@@ -189,14 +191,14 @@ std::vector<double> EpisodicStateDependentSpeciationExtinctionFossilizationProce
 std::vector<double> EpisodicStateDependentSpeciationExtinctionFossilizationProcess::calculateTotalAnageneticRatePerState( void ) const
 {
     std::vector<double> total_rates = std::vector<double>(num_states, 0);
-    const RateGenerator *rate_matrix = &getEventRateMatrix();
+    const RateGenerator& rate_matrix = getEventRateMatrix( 0.0 );
     for (size_t i = 0; i < num_states; i++)
     {
         for (size_t j = 0; j < num_states; j++)
         {
             if (i != j)
             {
-                total_rates[i] += rate_matrix->getRate(i, j, 0.0, getEventRate());
+                total_rates[i] += rate_matrix.getRate(i, j, 0.0, getEventRate());
             }
         }
     }
@@ -208,11 +210,82 @@ std::vector<double> EpisodicStateDependentSpeciationExtinctionFossilizationProce
 std::vector<double> EpisodicStateDependentSpeciationExtinctionFossilizationProcess::calculateExtinctionRatePerState( double a )
 {
     
+    return computeExtinctionRateAtTime( a );
+}
+
+
+const RbVector<double>& EpisodicStateDependentSpeciationExtinctionFossilizationProcess::computeExtinctionRateAtTime( double a ) const
+{
+    
+    if ( use_episodic_model )
+    {
+        // get the rates for this time from the variable/episodic rates
+        size_t index = computeEpochIndex(a);
+        
+        const RbVector<double> &ext_rates = mu_var->getValue()[index];
+
+        return ext_rates;
+    }
+    else
+    {
+        // use the constant rates
+        const RbVector<double> &ext_rates = mu_const->getValue();
+        return ext_rates;
+    }
+}
+
+
+const RbVector<double>& EpisodicStateDependentSpeciationExtinctionFossilizationProcess::computeFossilizationRateAtTime( double a ) const
+{
+    
+    if ( use_episodic_model )
+    {
+        // get the rates for this time from the variable/episodic rates
+        size_t index = computeEpochIndex(a);
+        
+        const RbVector<double> &fos_rates = phi_var->getValue()[index];
+
+        return fos_rates;
+    }
+    else
+    {
+        // use the constant rates
+        const RbVector<double> &fos_rates = phi_const->getValue();
+        return fos_rates;
+    }
+}
+
+
+const RbVector<double>& EpisodicStateDependentSpeciationExtinctionFossilizationProcess::computeSpeciationRateAtTime( double a ) const
+{
+    
+    if ( use_episodic_model )
+    {
+        // get the rates for this time from the variable/episodic rates
+        size_t index = computeEpochIndex(a);
+        
+        const RbVector<double> &spe_rates = lambda_var->getValue()[index];
+
+        return spe_rates;
+    }
+    else
+    {
+        // use the constant rates
+        const RbVector<double> &spe_rates = lambda_const->getValue();
+        return spe_rates;
+    }
+}
+
+
+const RbVector<double>& EpisodicStateDependentSpeciationExtinctionFossilizationProcess::computeSurvivalProbabilitiesAtTime( double a ) const
+{
+    
+    // get the rates for this time from the variable/episodic rates
     size_t index = computeEpochIndex(a);
-    
-    const RbVector<double> &ext_rates = mu->getValue()[index];
-    
-    return ext_rates;
+        
+    const RbVector<double> &sp = survival_probs->getValue()[index];
+
+    return sp;
 }
 
 
@@ -326,11 +399,15 @@ size_t EpisodicStateDependentSpeciationExtinctionFossilizationProcess::computeEp
 {
     
     size_t index = 0;
-    const RbVector<double> &times = epoch_times->getValue();
     
-    while ( index < times.size() && a > times[index] )
+    if ( epoch_times != NULL )
     {
-        ++index;
+        const RbVector<double> &times = epoch_times->getValue();
+        
+        while ( index < times.size() && a > times[index] )
+        {
+            ++index;
+        }
     }
     
     return index;
@@ -339,6 +416,11 @@ size_t EpisodicStateDependentSpeciationExtinctionFossilizationProcess::computeEp
 
 double EpisodicStateDependentSpeciationExtinctionFossilizationProcess::computeEpochEnd(size_t i) const
 {
+    if ( epoch_times == NULL )
+    {
+        return RbConstants::Double::inf;
+    }
+
     const RbVector<double> &times = epoch_times->getValue();
     if ( i >= times.size() )
     {
@@ -388,9 +470,9 @@ void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::computeNode
             }
             
             
-            if ( node.isFossil() )
+            if ( node.isFossil() && node.getAge() > 1E-4 )
             {
-                if ( phi == NULL )
+                if ( phi_const == NULL && phi_var == NULL )
                 {
                     throw(RbException("Tree has serially sampled tips, but no serial sampling rate was provided."));
                 }
@@ -430,7 +512,7 @@ void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::computeNode
 
                 if ( obs_state.test( j ) == true || gap == true )
                 {
-                    if ( node.isFossil() )
+                    if ( node.isFossil() && node.getAge() > 1E-4 )
                     {
                         node_likelihood[num_states+j] = sampling[j] * extinction[j];
                     }
@@ -480,7 +562,7 @@ void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::computeNode
             bool speciation_node = true;
             if ( left.isSampledAncestorTip() || right.isSampledAncestorTip() )
             {
-                speciation_node = (phi == NULL);
+                speciation_node = (phi_const == NULL && phi_var == NULL);
             }
 
             // merge descendant likelihoods
@@ -635,7 +717,7 @@ double EpisodicStateDependentSpeciationExtinctionFossilizationProcess::computeRo
     bool speciation_node = true;
     if ( left.isSampledAncestorTip() || right.isSampledAncestorTip() )
     {
-        speciation_node = (phi == NULL);
+        speciation_node = (phi_const == NULL && phi_var == NULL);
     }
 
     // merge descendant likelihoods
@@ -668,7 +750,7 @@ double EpisodicStateDependentSpeciationExtinctionFossilizationProcess::computeRo
         else
         {
             node_likelihood[num_states + i] = left_likelihoods[num_states + i] * right_likelihoods[num_states + i];
-            node_likelihood[num_states + i] *= (speciation_node ? speciation_rates[i] : 1.0);
+//            node_likelihood[num_states + i] *= (speciation_node ? speciation_rates[i] : 1.0);
         }
     }
     
@@ -1100,6 +1182,17 @@ void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::drawStochas
         {
             time_in_states[i] = 0.0;
         }
+        
+        // get the likelihoods of descendant nodes
+        const TopologyNode          &root               = value->getRoot();
+        size_t                       node_index         = root.getIndex();
+        const TopologyNode          &left               = root.getChild(0);
+        size_t                       left_index         = left.getIndex();
+        const std::vector< double > &left_likelihoods   = node_partial_likelihoods[left_index][active_likelihood[left_index]];
+        const TopologyNode          &right              = root.getChild(1);
+        size_t                       right_index        = right.getIndex();
+        const std::vector< double > &right_likelihoods  = node_partial_likelihoods[right_index][active_likelihood[right_index]];
+        
 
         // now begin the root-to-tip pass, drawing ancestral states for each time slice conditional on the start states
         std::map<std::vector<unsigned>, double> eventMap;
@@ -1111,18 +1204,9 @@ void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::drawStochas
         }
         else
         {
-            speciation_rates = computeSpeciationRateAtTime( node.getAge() );
+            speciation_rates = computeSpeciationRateAtTime( root.getAge() );
         }
         
-        // get the likelihoods of descendant nodes
-        const TopologyNode          &root               = value->getRoot();
-        size_t                       node_index         = root.getIndex();
-        const TopologyNode          &left               = root.getChild(0);
-        size_t                       left_index         = left.getIndex();
-        const std::vector< double > &left_likelihoods   = node_partial_likelihoods[left_index][active_likelihood[left_index]];
-        const TopologyNode          &right              = root.getChild(1);
-        size_t                       right_index        = right.getIndex();
-        const std::vector< double > &right_likelihoods  = node_partial_likelihoods[right_index][active_likelihood[right_index]];
         
         // get root frequencies
         const RbVector<double> &freqs = getRootFrequencies();
@@ -1692,14 +1776,28 @@ double EpisodicStateDependentSpeciationExtinctionFossilizationProcess::getEventR
 const RateGenerator& EpisodicStateDependentSpeciationExtinctionFossilizationProcess::getEventRateMatrix(double a) const
 {
 
-    if ( Q != NULL )
+    if ( use_episodic_model == true )
     {
-        size_t index_epoch = computeEpochIndex(a);
-        return Q->getValue()[index_epoch];
+        if ( Q_var != NULL )
+        {
+            size_t index_epoch = computeEpochIndex(a);
+            return Q_var->getValue()[index_epoch];
+        }
+        else
+        {
+            return Q_default;
+        }
     }
     else
     {
-        return Q_default;
+        if ( Q_const != NULL )
+        {
+            return Q_const->getValue();
+        }
+        else
+        {
+            return Q_default;
+        }
     }
 
 }
@@ -1812,7 +1910,7 @@ double EpisodicStateDependentSpeciationExtinctionFossilizationProcess::lnProbTre
     int num_extinct = (int)value->getNumberOfExtinctTips();
     int num_sa = (int)value->getNumberOfSampledAncestors();
 
-    return (num_taxa - num_sa - 1) * RbConstants::LN2 - RbMath::lnFactorial(num_taxa - num_extinct);
+    return (num_taxa - num_sa - 1) * RbConstants::LN2 - RbMath::lnFactorial(num_taxa - num_sa);
 }
 
 
@@ -2010,23 +2108,108 @@ void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::setCladogen
 }
 
 
-void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::setFossilizationRates(const TypedDagNode< RbVector<double> >* r)
+void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::setExtinctionRates(const TypedDagNode< RbVector<double> >* r)
 {
 
     // remove the old parameter first
-    this->removeParameter( phi );
+    this->removeParameter( mu_const );
+    this->removeParameter( mu_var );
 
     // set the value
-    phi = r;
+    mu_const = r;
+    mu_var   = NULL;
 
     // add the new parameter
-    this->addParameter( phi );
+    this->addParameter( mu_const );
 
     // redraw the current value
     if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
     {
         this->redrawValue();
     }
+}
+
+
+void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::setExtinctionRates(const TypedDagNode< RbVector< RbVector<double> > >* r)
+{
+
+    // remove the old parameter first
+    this->removeParameter( mu_const );
+    this->removeParameter( mu_var );
+
+    // set the value
+    mu_var   = r;
+    mu_const = NULL;
+    
+    use_episodic_model = true;
+
+    // add the new parameter
+    this->addParameter( mu_var );
+
+    // redraw the current value
+    if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
+    {
+        this->redrawValue();
+    }
+}
+
+
+void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::setFossilizationRates(const TypedDagNode< RbVector<double> >* r)
+{
+
+    // remove the old parameter first
+    this->removeParameter( phi_const );
+    this->removeParameter( phi_var );
+
+    // set the value
+    phi_const = r;
+    phi_var   = NULL;
+
+    // add the new parameter
+    this->addParameter( phi_const );
+
+    // redraw the current value
+    if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
+    {
+        this->redrawValue();
+    }
+}
+
+
+void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::setFossilizationRates(const TypedDagNode< RbVector< RbVector<double> > >* r)
+{
+
+    // remove the old parameter first
+    this->removeParameter( phi_const );
+    this->removeParameter( phi_var );
+
+    // set the value
+    phi_var   = r;
+    phi_const = NULL;
+    
+    use_episodic_model = true;
+
+    // add the new parameter
+    this->addParameter( phi_var );
+
+//    // redraw the current value
+//    if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
+//    {
+//        this->redrawValue();
+//    }
+}
+
+void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::setMassExtinctionSurvivalProbabilities(const TypedDagNode<RbVector<RbVector<double> > > *p)
+{
+    // remove the old parameter first
+    this->removeParameter( survival_probs );
+
+    // set the value
+    survival_probs = p;
+    
+    // add the new parameter
+    this->addParameter( survival_probs );
+
 }
 
 
@@ -2051,11 +2234,11 @@ void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::setSampling
     // add the new parameter
     this->addParameter( rho );
     
-    // redraw the current value
-    if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
-    {
-        this->redrawValue();
-    }
+//    // redraw the current value
+//    if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
+//    {
+//        this->redrawValue();
+//    }
 }
 
 
@@ -2074,11 +2257,11 @@ void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::setSampling
     // add the new parameter
     this->addParameter( rho_per_state );
     
-    // redraw the current value
-    if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
-    {
-        this->redrawValue();
-    }
+//    // redraw the current value
+//    if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
+//    {
+//        this->redrawValue();
+//    }
 }
 
 
@@ -2086,22 +2269,98 @@ void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::setSpeciati
 {
     
     // remove the old parameter first
-    this->removeParameter( lambda );
+    this->removeParameter( lambda_const );
+    this->removeParameter( lambda_var );
     
     // set the value
-    lambda = r;
-    
+    lambda_const = r;
+    lambda_var   = NULL;
+
     // should we use the event map for the speciation rates?
     use_cladogenetic_events = false;
     
     // add the new parameter
-    this->addParameter( lambda );
+    this->addParameter( lambda_const );
     
-    // redraw the current value
-    if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
-    {
-        this->redrawValue();
-    }
+//    // redraw the current value
+//    if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
+//    {
+//        this->redrawValue();
+//    }
+}
+
+
+void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::setSpeciationRates(const TypedDagNode< RbVector< RbVector<double> > >* r, const TypedDagNode<RbVector<double> >* t)
+{
+    
+    // remove the old parameter first
+    this->removeParameter( lambda_const );
+    this->removeParameter( lambda_var );
+    
+    // set the value
+    lambda_var   = r;
+    lambda_const = NULL;
+
+    // should we use the event map for the speciation rates?
+    use_cladogenetic_events = false;
+    use_episodic_model = true;
+    
+    // add the new parameter
+    this->addParameter( lambda_var );
+    
+//    // redraw the current value
+//    if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
+//    {
+//        this->redrawValue();
+//    }
+    
+    removeParameter( epoch_times );
+    epoch_times = t;
+}
+
+
+
+void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::setTransitionRateMatrix(const TypedDagNode<RateGenerator> *m)
+{
+    
+    // remove the old parameter first
+    this->removeParameter( Q_const );
+    this->removeParameter( Q_var );
+    
+    // set the value
+    Q_const   = m;
+    Q_var     = NULL;
+    
+    // add the new parameter
+    this->addParameter( Q_const );
+    
+//    // redraw the current value
+//    if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
+//    {
+//        this->redrawValue();
+//    }
+}
+
+
+void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::setTransitionRateMatrix(const TypedDagNode<RbVector<RateGenerator> > *m)
+{
+    
+    // remove the old parameter first
+    this->removeParameter( Q_const );
+    this->removeParameter( Q_var );
+    
+    // set the value
+    Q_const   = NULL;
+    Q_var     = m;
+    
+    // add the new parameter
+    this->addParameter( Q_var );
+    
+//    // redraw the current value
+//    if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
+//    {
+//        this->redrawValue();
+//    }
 }
 
 
@@ -2119,7 +2378,12 @@ void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::setNumberOf
  */
 void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::setValue(Tree *v, bool f )
 {
-    if (v->isBinary() == false)
+    
+    std::vector<Taxon> taxa = v->getTaxa();
+    RevBayesCore::Tree *newv = TreeUtilities::startingTreeInitializer(*v, taxa, age_check_precision);
+//    AbstractRootedTreeDistribution::setValue(newv, f);
+        
+    if (newv->isBinary() == false)
     {
         throw RbException("The character-dependent birth death process is only implemented for binary trees.");
     }
@@ -2127,13 +2391,14 @@ void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::setValue(Tr
     value->getTreeChangeEventHandler().removeListener( this );
 
     // delegate to super class
-    //    TypedDistribution<Tree>::setValue(v, f);
-    static_cast<TreeDiscreteCharacterData *>(this->value)->setTree( *v );
+//    TypedDistribution<Tree>::setValue(newv, f);
+    static_cast<TreeDiscreteCharacterData *>(this->value)->setTree( *newv );
 
-    resizeVectors(v->getNumberOfNodes());
+    resizeVectors(newv->getNumberOfNodes());
     
     // clear memory
     delete v;
+    v = NULL;
     
     value->getTreeChangeEventHandler().addListener( this );
     
@@ -2188,6 +2453,10 @@ bool EpisodicStateDependentSpeciationExtinctionFossilizationProcess::simulateTre
     {
         throw RbException("Simulations conditioned on the tip states are currently implemented only when pruneExtinctLineages is set to true.");
     }
+    if ( use_episodic_model == true )
+    {
+        throw RbException("Simulations conditioned on the tip states are currently implemented only when rates are constant over time.");
+    }
     
     RandomNumberGenerator* rng = GLOBAL_RNG;
 
@@ -2205,10 +2474,10 @@ bool EpisodicStateDependentSpeciationExtinctionFossilizationProcess::simulateTre
 
     // vectors keeping track of the total rate of all
     // speciation/anagenetic/extinction events for each state
-    const RateGenerator *rate_matrix = &getEventRateMatrix();
-    std::vector<double> extinction_rates = mu->getValue();
-    std::vector<double> total_speciation_rates = calculateTotalSpeciationRatePerState();
-    std::vector<double> total_anagenetic_rates = calculateTotalAnageneticRatePerState();
+    const RateGenerator *rate_matrix = &getEventRateMatrix( 0 );
+    std::vector<double> extinction_rates = calculateExtinctionRatePerState( 0.0 );
+    std::vector<double> total_speciation_rates = calculateTotalSpeciationRatePerState( 0.0 );
+    std::vector<double> total_anagenetic_rates = calculateTotalAnageneticRatePerState( );
     std::vector<double> r = std::vector<double>(num_states, 0);
 
     // create a vector of nodes for our simulated tree
@@ -2641,8 +2910,8 @@ bool EpisodicStateDependentSpeciationExtinctionFossilizationProcess::simulateTre
 
     // vectors keeping track of the total rate of all
     // cladogenetic/anagenetic/extinction events for each state
-    std::vector<double> extinction_rates = mu->getValue();
-    std::vector<double> total_speciation_rates = calculateTotalSpeciationRatePerState();
+    std::vector<double> extinction_rates = calculateExtinctionRatePerState( process_age->getValue() );
+    std::vector<double> total_speciation_rates = calculateTotalSpeciationRatePerState( process_age->getValue() );
     std::vector<double> total_anagenetic_rates = calculateTotalAnageneticRatePerState();
     std::vector<double> total_rate_for_state = std::vector<double>(num_states, 0);
     for (size_t i = 0; i < num_states; i++)
@@ -2660,9 +2929,9 @@ bool EpisodicStateDependentSpeciationExtinctionFossilizationProcess::simulateTre
     }
     else
     {
-        speciation_rates = lambda->getValue();
+        speciation_rates = calculateTotalSpeciationRatePerState( process_age->getValue() );
     }
-    const RateGenerator *rate_matrix = &getEventRateMatrix();
+    const RateGenerator *rate_matrix = &getEventRateMatrix( process_age->getValue() );
 
     // a vector of all nodes in our simulated tree
     std::vector<TopologyNode*> nodes;
@@ -3189,21 +3458,37 @@ void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::swapParamet
     {
         process_age = static_cast<const TypedDagNode<double>* >( newP );
     }
-    if ( oldP == mu )
+    if ( oldP == mu_const )
     {
-        mu = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+        mu_const = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
     }
-    if ( oldP == lambda )
+    if ( oldP == mu_var )
     {
-        lambda = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+        mu_var = static_cast<const TypedDagNode<RbVector<RbVector<double> > >* >( newP );
     }
-    if ( oldP == phi )
+    if ( oldP == lambda_const )
     {
-        phi = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+        lambda_const = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
     }
-    if ( oldP == Q )
+    if ( oldP == lambda_var )
     {
-        Q = static_cast<const TypedDagNode<RateGenerator>* >( newP );
+        lambda_var = static_cast<const TypedDagNode<RbVector<RbVector<double> > >* >( newP );
+    }
+    if ( oldP == phi_const )
+    {
+        phi_const = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+    }
+    if ( oldP == phi_var )
+    {
+        phi_var = static_cast<const TypedDagNode<RbVector<RbVector<double> > >* >( newP );
+    }
+    if ( oldP == Q_const )
+    {
+        Q_const = static_cast<const TypedDagNode<RateGenerator>* >( newP );
+    }
+    if ( oldP == Q_var )
+    {
+        Q_var = static_cast<const TypedDagNode<RbVector<RateGenerator> >* >( newP );
     }
     if ( oldP == rate )
     {
@@ -3277,69 +3562,105 @@ void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::touchSpecia
  */
 void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::numericallyIntegrateProcess(std::vector< double > &likelihoods, double begin_age, double end_age, bool backward_time, bool extinction_only) const
 {
-    const std::vector<double> &extinction_rates = mu->getValue();
-    SSE_ODE ode = SSE_ODE(extinction_rates, &getEventRateMatrix(), getEventRate(), backward_time, extinction_only, allow_rate_shifts_on_extinct_lineages);
-    if ( use_cladogenetic_events == true )
+    
+    size_t index_epoch_begin = 0;
+    size_t index_epoch_end = 0;
+    
+    if ( backward_time == true )
     {
-        cladogenesis_matrix->getValue(); // we must call getValue() to update the speciation and extinction rates in the event map
-        
-        // get cladogenesis event map (sparse speciation rate matrix)
-        std::map<std::vector<unsigned>, double> event_map = cladogenesis_matrix->getValue().getEventMap();
-        
-        ode.setEventMap( event_map );
-    }
-    else
-    {
-        const std::vector<double> &speciation_rates = lambda->getValue();
-        ode.setSpeciationRate( speciation_rates );
+        index_epoch_begin = computeEpochIndex( begin_age );
+        index_epoch_end = computeEpochIndex( end_age );
     }
 
-    if ( phi != NULL )
+    double current_begin_age = begin_age;
+        
+    for ( size_t index_epoch=index_epoch_begin; index_epoch<=index_epoch_end; ++index_epoch )
     {
-        const std::vector<double> &serial_sampling_rates = phi->getValue();
-        ode.setSerialSamplingRate( serial_sampling_rates );
-    }
+        
+        double epoch_end = computeEpochEnd( index_epoch );
+        double current_end_age = (end_age < epoch_end ? end_age : epoch_end );
+        
+        const RbVector<double> &extinction_rates = computeExtinctionRateAtTime(current_end_age);
+        const RateGenerator &rg = getEventRateMatrix( current_begin_age );
+        SSE_ODE ode = SSE_ODE(extinction_rates, &rg, getEventRate(), backward_time, extinction_only);
+        if ( use_cladogenetic_events == true )
+        {
+            cladogenesis_matrix->getValue(); // we must call getValue() to update the speciation and extinction rates in the event map
+        
+            // get cladogenesis event map (sparse speciation rate matrix)
+            std::map<std::vector<unsigned>, double> event_map = cladogenesis_matrix->getValue().getEventMap();
+        
+            ode.setEventMap( event_map );
+        }
+        else
+        {
+            const RbVector<double> &speciation_rates = computeSpeciationRateAtTime(current_end_age);
+            ode.setSpeciationRate( speciation_rates );
+        }
     
-   
-    typedef boost::numeric::odeint::runge_kutta_dopri5< std::vector< double > > stepper_type;
+        if ( phi_var != NULL || phi_const != NULL )
+        {
+            const RbVector<double> &fossilization_rates = computeFossilizationRateAtTime(current_end_age);
+            ode.setSerialSamplingRate( fossilization_rates );
+        }
+    
+        typedef boost::numeric::odeint::runge_kutta_dopri5< std::vector< double > > stepper_type;
 
-//    boost::numeric::odeint::integrate_adaptive( make_controlled( 1E-7, 1E-7, stepper_type() ) , ode , likelihoods , begin_age , end_age , dt );
-    boost::numeric::odeint::integrate_adaptive( stepper_type(), ode , likelihoods , begin_age , end_age , dt );
+        boost::numeric::odeint::integrate_adaptive( make_controlled( 1E-9, 1E-9, stepper_type() ) , ode , likelihoods , current_begin_age , current_end_age , dt );
+//        boost::numeric::odeint::integrate_adaptive( stepper_type(), ode , likelihoods , current_begin_age , current_end_age , dt );
     
-    // catch negative extinction probabilities that can result from
-    // rounding errors in the ODE stepper
-    for (size_t i = 0; i < 2 * num_states; ++i)
-    {
+        // catch negative extinction probabilities that can result from
+        // rounding errors in the ODE stepper
+        for (size_t i = 0; i < 2 * num_states; ++i)
+        {
         
-        // Sebastian: The likelihoods here are probability densities (not log-transformed).
-        // These are densities because they are multiplied by the probability density of the speciation event happening.
-        likelihoods[i] = ( likelihoods[i] < 0.0 ? 0.0 : likelihoods[i] );
+            // Sebastian: The likelihoods here are probability densities (not log-transformed).
+            // These are densities because they are multiplied by the probability density of the speciation event happening.
+            likelihoods[i] = ( likelihoods[i] < 0.0 ? 0.0 : likelihoods[i] );
+        }
         
-    }
-    
-    // catch too large extinction probabilities that can result from
-    // rounding errors in the ODE stepper
-    // for safety we set all likelihoods to nan if rounding errors happened
-    bool rounding_error = false;
-    for (size_t i = 0; i < num_states; ++i)
-    {
-        
-        // Sebastian: The extinction probabilities here are probabilities (not log-transformed).
-        // So they must be between 0 and 1.
-        rounding_error |= ( likelihoods[i] > 1.0 );
-        
-    }
-    
-    if ( rounding_error == true )
-    {
-        for (size_t i = 0; i < (2*num_states); ++i)
+        // catch too large extinction probabilities that can result from
+        // rounding errors in the ODE stepper
+        // for safety we set all likelihoods to nan if rounding errors happened
+        bool rounding_error = false;
+        for (size_t i = 0; i < num_states; ++i)
         {
             
-            // invalidate likelihoods
-            likelihoods[i] = RbConstants::Double::nan;
+            // Sebastian: The extinction probabilities here are probabilities (not log-transformed).
+            // So they must be between 0 and 1.
+            rounding_error |= ( likelihoods[i] > 1.0 );
             
         }
+        
+        if ( rounding_error == true )
+        {
+            for (size_t i = 0; i < (2*num_states); ++i)
+            {
+                
+                // invalidate likelihoods
+                likelihoods[i] = RbConstants::Double::nan;
+                
+            }
+        }
+        
+        if ( index_epoch < index_epoch_end )
+        {
+            const RbVector<double>& surv_probs = computeSurvivalProbabilitiesAtTime( current_end_age );
+            for (size_t i = 0; i < num_states; ++i)
+            {
+                
+                // Sebastian: The extinction probabilities here are probabilities (not log-transformed).
+                // So they must be between 0 and 1.
+                likelihoods[i] = (1.0-surv_probs[i]) + surv_probs[i] * likelihoods[i];
+                likelihoods[i+num_states] = surv_probs[i] * likelihoods[i+num_states];
+
+            }
+        }
+        
+        current_begin_age = current_end_age;
+        
     }
+
     
 }
 
