@@ -29,6 +29,7 @@ namespace RevBayesCore {
         virtual void                                        invalidateMe(const DagNode *affecter, bool fullyInvalidateSelf);                    //!< Mark this node for recomputation without creating rollback state.
         virtual void                                        keepMe(const DagNode* affecter);                                                //!< Keep value of this and affected nodes
         virtual void                                        restoreMe(const DagNode *restorer);                                             //!< Restore value of this node
+        virtual void                                        snapshotMe(const DagNode *snapshotter);                                         //!< Snapshot rollback state without invalidating this node.
         virtual void                                        touchMe(const DagNode *toucher, bool fullyInvalidateSelf);                                 //!< Mark this node for recomputation; the flag forces full local invalidation.
         
     };
@@ -175,6 +176,15 @@ void RevBayesCore::DynamicNode<valueType>::restoreMe( const DagNode * /*restorer
 {
     // Default implementation does nothing.
 }
+
+
+/** Snapshot hook for dynamic nodes with no local rollback state. */
+template<class valueType>
+void RevBayesCore::DynamicNode<valueType>::snapshotMe( const DagNode * /*snapshotter*/ )
+{
+    // Default implementation does nothing.
+}
+
 
 /** Touch hook for dynamic nodes that need specialized local invalidation behavior. */
 template<class valueType>

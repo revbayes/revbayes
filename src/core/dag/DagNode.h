@@ -122,6 +122,8 @@ template <class valueType> class RbOrderedSet;
         void                                                        restore(void);
         void                                                        restoreAffected(void);                                                                      //!< Restore value of affected nodes recursively
         void                                                        restoreVector(std::vector<DagNode *>& nodes);
+        void                                                        snapshot(void);                                                                             //!< Snapshot rollback state without marking current state stale.
+        void                                                        snapshotAffected(void);                                                                     //!< Snapshot affected children without marking current state stale.
         void                                                        setElementVariable(bool tf);                                                                //!< Set if this variable is hidden from printing.
         void                                                        setHidden(bool tf);                                                                         //!< Set if this variable is hidden from printing.
         virtual void                                                setIntegrationIndex( size_t i );
@@ -143,6 +145,7 @@ template <class valueType> class RbOrderedSet;
         virtual void                                                invalidateMe(const DagNode *affecter, bool fullyInvalidateSelf) = 0;                         //!< Mark this node for recomputation without creating rollback state.
         virtual void                                                keepMe(const DagNode* affecter) = 0;                                                        //!< Keep value of myself
         virtual void                                                restoreMe(const DagNode *restorer) = 0;                                                     //!< Restore value of this nodes
+        virtual void                                                snapshotMe(const DagNode *snapshotter) = 0;                                                 //!< Snapshot rollback state without invalidating this node.
         virtual void                                                touchMe(const DagNode *toucher, bool fullyInvalidateSelf) = 0;                                        //!< Mark this node for recomputation; the flag forces full local cache invalidation.
 
         // helper functions

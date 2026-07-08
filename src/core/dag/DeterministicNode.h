@@ -43,6 +43,7 @@ namespace RevBayesCore {
         void                                                invalidateMe(const DagNode *affecter, bool fullyInvalidateSelf);            //!< Mark this node for recomputation without creating rollback state.
         void                                                keepMe(const DagNode* affecter);                                            //!< Keep value of this and affected nodes
         void                                                restoreMe(const DagNode *restorer);                                         //!< Restore value of this nodes
+        void                                                snapshotMe(const DagNode *snapshotter);                                      //!< Snapshot rollback state without invalidating this node.
         void                                                swapParameter(const DagNode *oldP, const DagNode *newP);                    //!< Swap the parameter of this node (needs overwriting in deterministic and stochastic nodes)
         virtual void                                        touchMe(const DagNode *toucher, bool fullyInvalidateSelf);                             //!< Mark this node for recomputation; the flag forces full local invalidation.
 
@@ -489,6 +490,21 @@ void RevBayesCore::DeterministicNode<valueType>::swapParent( const RevBayesCore:
     newParent->incrementReferenceCount();
 
     this->touch();
+}
+
+
+/**
+ * Snapshot rollback state below this deterministic node without invalidating.
+ * Functions do not own snapshots yet, so this only propagates to affected children.
+ */
+template<class valueType>
+void RevBayesCore::DeterministicNode<valueType>::snapshotMe( const DagNode *snapshotter )
+{
+    // delegate call to base class
+    DynamicNode<valueType>::snapshotMe( snapshotter );
+
+    // Deterministic values are functions of their parents, so downstream nodes may need snapshots.
+    this->snapshotAffected();
 }
 
 

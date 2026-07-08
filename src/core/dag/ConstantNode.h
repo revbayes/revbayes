@@ -36,6 +36,7 @@ namespace RevBayesCore {
         void                                                invalidateMe(const DagNode *affecter, bool fullyInvalidateSelf);            //!< Mark this node for recomputation without creating rollback state.
         void                                                keepMe(const DagNode* affecter);                                            //!< Keep value of this and affected nodes
         void                                                restoreMe(const DagNode *restorer);                                         //!< Restore value of this nodes
+        void                                                snapshotMe(const DagNode *snapshotter);                                      //!< Snapshot rollback state without invalidating this node.
         void                                                touchMe(const DagNode *toucher, bool fullyInvalidateSelf);                             //!< Mark this node for recomputation; the flag forces full local invalidation.
         
     private:
@@ -284,6 +285,14 @@ void RevBayesCore::ConstantNode<valueType>::setValueFromString(const std::string
 /** Invalidation hook for constants; only children can become stale. */
 template<class valueType>
 void RevBayesCore::ConstantNode<valueType>::invalidateMe( const DagNode * /*affecter*/, bool /*fullyInvalidateSelf*/ )
+{
+    // nothing to do
+}
+
+
+/** Snapshot hook for constants; only children can have rollback state. */
+template<class valueType>
+void RevBayesCore::ConstantNode<valueType>::snapshotMe( const DagNode * /*snapshotter*/ )
 {
     // nothing to do
 }

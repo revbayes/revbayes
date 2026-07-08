@@ -1408,6 +1408,33 @@ void DagNode::restoreAffected(void)
 }
 
 
+/**
+ * Snapshot this DAG node without invalidating current state.
+ * A later keep() or restore() can then consume the rollback state created here.
+ */
+void DagNode::snapshot(void)
+{
+    // first snapshot myself
+    snapshotMe( this );
+
+    // next, snapshot all my children that would need rollback state
+    snapshotAffected();
+}
+
+
+/**
+ * Tell affected variable nodes to snapshot rollback state without invalidating.
+ */
+void DagNode::snapshotAffected(void)
+{
+    // snapshot all my children
+    for (DagNode* child: children)
+    {
+        child->snapshotMe( this );
+    }
+}
+
+
 void DagNode::setElementVariable(bool tf)
 {
     elementVar = tf;

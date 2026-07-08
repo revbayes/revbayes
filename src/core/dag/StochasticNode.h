@@ -99,6 +99,7 @@ namespace RevBayesCore {
         virtual void                                        keepMe(const DagNode* affecter);                                            //!< Keep value of this and affected nodes
         virtual void                                        restoreMe(const DagNode *restorer);                                         //!< Restore value of this nodes
         virtual void                                        setActivePIDSpecialized(size_t i, size_t n);                                //!< Set the number of processes for this class.
+        virtual void                                        snapshotMe(const DagNode *snapshotter);                                      //!< Snapshot rollback state without invalidating this node.
         virtual void                                        touchMe(const DagNode *toucher, bool fullyInvalidateSelf);                             //!< Mark this node for recomputation; the flag forces full local invalidation.
         
         // protected members
@@ -911,6 +912,34 @@ void RevBayesCore::StochasticNode<valueType>::swapParent( const RevBayesCore::Da
     newParent->incrementReferenceCount();
     
     this->touch();
+}
+
+
+/**
+ * Snapshot this stochastic node without invalidating current probability or distribution caches.
+ * Repeated snapshots intentionally reach the distribution so non-idempotent specializations are exposed.
+ */
+template<class valueType>
+void RevBayesCore::StochasticNode<valueType>::snapshotMe( const DagNode *snapshotter )
+{
+    
+    if ( not stored_ln_prob.has_value() )
+    {
+        stored_ln_prob = std::optional<double>( getLnProbability() );
+    }
+    
+    distribution->snapshot();
+    const bool children_affected = distribution->childrenAreAffectedBy( snapshotter );
+    
+    // delegate call
+    DynamicNode<valueType>::snapshotMe( snapshotter );
+    
+    if ( isIntegratedOut() == true || children_affected )
+    {
+        // Snapshot downstream nodes when this stochastic value affects them.
+        this->snapshotAffected();
+    }
+    
 }
 
 
