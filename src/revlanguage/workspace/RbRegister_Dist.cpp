@@ -190,6 +190,7 @@
 #include "Dist_divDepYuleProcess.h"
 #include "Dist_empiricalTree.h"
 #include "Dist_episodicBirthDeath.h"
+#include "Dist_EpisodicStateDependentSpeciationExtinctionFossilizationProcess.h"
 #include "Dist_heterogeneousRateBirthDeath.h"
 #include "Dist_multispeciesCoalescentInverseGammaPrior.h"
 #include "Dist_multispeciesCoalescentUniformPrior.h"
@@ -390,6 +391,9 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         // episodic birth-death process
         AddDistribution< TimeTree                   >( new Dist_episodicBirthDeath() );
 
+        // episodic state-dependent birth-death-sampling process
+        AddDistribution< TimeTree                   >( new Dist_EpisodicStateDependentSpeciationExtinctionFossilizationProcess() );
+        
         // coalescent (constant population sizes)
         AddDistribution< TimeTree                   >( new Dist_Coalescent() );
 
