@@ -55,6 +55,7 @@ namespace RevLanguage {
         
     protected:
         void                                    getAffected(RevBayesCore::RbOrderedSet<RevBayesCore::DagNode *>& affected, const RevBayesCore::DagNode* affecter);  //!< Mark and get affected nodes
+        void                                    invalidateMe(const RevBayesCore::DagNode *affecter, bool fullyInvalidateSelf);                         //!< Mark this node for recomputation without creating rollback state.
         void                                    keepMe(const RevBayesCore::DagNode* affecter);                                                    //!< Keep value of this and affected nodes
         void                                    restoreMe(const RevBayesCore::DagNode *restorer);                                                 //!< Restore value of this nodes
         void                                    touchMe(const RevBayesCore::DagNode *toucher, bool fullyInvalidateSelf);                                                    //!< Mark this node for recomputation; the flag forces full local invalidation.
@@ -346,6 +347,25 @@ bool UserFunctionNode<rlType>::isConstant( void ) const
     }
     
     return true;
+}
+
+
+/**
+ * Mark this user-function node for lazy recomputation without creating rollback state.
+ * Upstream invalidations propagate because this node's return value depends on its parents.
+ */
+template<typename rlType>
+void UserFunctionNode<rlType>::invalidateMe( const RevBayesCore::DagNode* affecter, bool fullyInvalidateSelf )
+{
+    
+    // Mark this node for lazy recomputation.
+    needs_update = true;
+    
+    if ( affecter != this )
+    {
+        // Notify downstream nodes without creating rollback state.
+        this->invalidateAffected( fullyInvalidateSelf );
+    }
 }
 
 

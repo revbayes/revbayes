@@ -40,6 +40,7 @@ namespace RevBayesCore {
 
     protected:
         void                                                getAffected(RbOrderedSet<DagNode *>& affected, const DagNode* affecter);    //!< Mark and get affected nodes
+        void                                                invalidateMe(const DagNode *affecter, bool fullyInvalidateSelf);            //!< Mark this node for recomputation without creating rollback state.
         void                                                keepMe(const DagNode* affecter);                                            //!< Keep value of this and affected nodes
         void                                                restoreMe(const DagNode *restorer);                                         //!< Restore value of this nodes
         void                                                swapParameter(const DagNode *oldP, const DagNode *newP);                    //!< Swap the parameter of this node (needs overwriting in deterministic and stochastic nodes)
@@ -312,6 +313,35 @@ bool RevBayesCore::DeterministicNode<valueType>::isConstant( void ) const
     }
 
     return true;
+}
+
+
+/**
+ * Mark this deterministic node for lazy recomputation without creating rollback state.
+ * The legacy function touch hook is used here only for function-local invalidation.
+ */
+template<class valueType>
+void RevBayesCore::DeterministicNode<valueType>::invalidateMe( const DagNode *affecter, bool fullyInvalidateSelf )
+{
+
+    bool needed_update = needs_update;
+
+    // delegate call to base class
+    DynamicNode<valueType>::invalidateMe( affecter, fullyInvalidateSelf );
+
+    // Compatibility note: Function::touch() is the legacy function-local invalidation hook.
+    function->touch( affecter );
+
+    // mark for update
+    needs_update = true;
+
+    // Keep the always-true branch as a marker for a future narrower propagation rule.
+    if ( affecter != this && ( needed_update == false || true ) )
+    {
+        // Notify downstream nodes without creating rollback state.
+        this->invalidateAffected( fullyInvalidateSelf );
+    }
+
 }
 
 

@@ -95,6 +95,7 @@ namespace RevBayesCore {
         
         virtual double                                      computeRecursiveIntegratedLnProbability(RbOrderedSet<DagNode *>& ig, size_t idx);
         virtual void                                        getAffected(RbOrderedSet<DagNode *>& affected, const DagNode* affecter);    //!< Mark and get affected nodes
+        virtual void                                        invalidateMe(const DagNode *affecter, bool fullyInvalidateSelf);            //!< Mark this node for recomputation without creating rollback state.
         virtual void                                        keepMe(const DagNode* affecter);                                            //!< Keep value of this and affected nodes
         virtual void                                        restoreMe(const DagNode *restorer);                                         //!< Restore value of this nodes
         virtual void                                        setActivePIDSpecialized(size_t i, size_t n);                                //!< Set the number of processes for this class.
@@ -610,6 +611,31 @@ bool RevBayesCore::StochasticNode<valueType>::isStochastic( void ) const
 {
     
     return true;
+}
+
+
+/**
+ * Mark this stochastic node and its distribution caches dirty without snapshotting.
+ * Upstream changes propagate only when this node's value can affect its children.
+ */
+template<class valueType>
+void RevBayesCore::StochasticNode<valueType>::invalidateMe( const DagNode *affecter, bool fullyInvalidateSelf )
+{
+    
+    lnProb = {};
+    
+    distribution->invalidate( affecter, fullyInvalidateSelf );
+    const bool children_affected = distribution->childrenAreAffectedBy( affecter );
+    
+    // delegate call
+    DynamicNode<valueType>::invalidateMe( affecter, fullyInvalidateSelf );
+    
+    if ( affecter != this && ( isIntegratedOut() == true || children_affected ) )
+    {
+        // Notify downstream nodes when this stochastic value affects them.
+        this->invalidateAffected( fullyInvalidateSelf );
+    }
+    
 }
 
 

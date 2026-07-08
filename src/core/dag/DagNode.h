@@ -95,6 +95,8 @@ template <class valueType> class RbOrderedSet;
         const std::set<size_t>&                                     getTouchedElementIndices(void) const;                                                       //!< Get the indices of the touches elements. If the set is empty, then all elements might have changed.
         bool                                                        getVisitFlag(const size_t flagType) const;
         void                                                        incrementReferenceCount(void) const;                                                        //!< Increment the reference count for reference counting in smart pointers
+        void                                                        invalidate(bool fullyInvalidateSelf=false);                                                           //!< Mark this node for recomputation without creating rollback state; the flag forces full local cache invalidation.
+        void                                                        invalidateAffected(bool fullyInvalidateSelf=false);                                                   //!< Notify affected children without creating rollback state; the flag is forwarded for each child's local cache invalidation.
         void                                                        initiateGetAffectedNodes(RbOrderedSet<DagNode *>& affected);                                //!< get affected nodes
         void                                                        initiateGetAffectedNodesVector(RbOrderedSet<DagNode *>& affected, std::vector<DagNode *>& nodes);
         bool                                                        isAssignable(void) const;                                                                   //!< Is this DAG node modifiable by user?
@@ -138,6 +140,7 @@ template <class valueType> class RbOrderedSet;
         DagNode&                                                    operator=(const DagNode &d);                                                                //!< Overloaded assignment operator
 
         virtual void                                                getAffected(RbOrderedSet<DagNode *>& affected, const DagNode* affecter) = 0;                //!< get affected nodes
+        virtual void                                                invalidateMe(const DagNode *affecter, bool fullyInvalidateSelf) = 0;                         //!< Mark this node for recomputation without creating rollback state.
         virtual void                                                keepMe(const DagNode* affecter) = 0;                                                        //!< Keep value of myself
         virtual void                                                restoreMe(const DagNode *restorer) = 0;                                                     //!< Restore value of this nodes
         virtual void                                                touchMe(const DagNode *toucher, bool fullyInvalidateSelf) = 0;                                        //!< Mark this node for recomputation; the flag forces full local cache invalidation.

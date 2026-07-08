@@ -26,6 +26,7 @@ namespace RevBayesCore {
         virtual const std::string&                          getRevTypeOfValue(void);                                                        //!< Get Rev language type of value
         
     protected:
+        virtual void                                        invalidateMe(const DagNode *affecter, bool fullyInvalidateSelf);                    //!< Mark this node for recomputation without creating rollback state.
         virtual void                                        keepMe(const DagNode* affecter);                                                //!< Keep value of this and affected nodes
         virtual void                                        restoreMe(const DagNode *restorer);                                             //!< Restore value of this node
         virtual void                                        touchMe(const DagNode *toucher, bool fullyInvalidateSelf);                                 //!< Mark this node for recomputation; the flag forces full local invalidation.
@@ -149,6 +150,14 @@ template<class valueType>
 const std::string& RevBayesCore::DynamicNode<valueType>::getRevTypeOfValue(void)
 {
     throw RbException( "Rev language type of dynamic DAG node value not known" );
+}
+
+
+/** Default invalidation hook for dynamic nodes with no local cached state. */
+template<class valueType>
+void RevBayesCore::DynamicNode<valueType>::invalidateMe( const DagNode * /*affecter*/, bool /*fullyInvalidateSelf*/ )
+{
+    // Default implementation does nothing.
 }
 
 

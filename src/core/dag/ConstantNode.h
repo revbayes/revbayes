@@ -33,6 +33,7 @@ namespace RevBayesCore {
 
     protected:
         void                                                getAffected(RbOrderedSet<DagNode *>& affected, const DagNode* affecter);    //!< Mark and get affected nodes
+        void                                                invalidateMe(const DagNode *affecter, bool fullyInvalidateSelf);            //!< Mark this node for recomputation without creating rollback state.
         void                                                keepMe(const DagNode* affecter);                                            //!< Keep value of this and affected nodes
         void                                                restoreMe(const DagNode *restorer);                                         //!< Restore value of this nodes
         void                                                touchMe(const DagNode *toucher, bool fullyInvalidateSelf);                             //!< Mark this node for recomputation; the flag forces full local invalidation.
@@ -277,6 +278,14 @@ void RevBayesCore::ConstantNode<valueType>::setValueFromString(const std::string
     Serializer<valueType, IsDerivedFrom<valueType, RevBayesCore::Serializable>::Is >::ressurectFromString( value, v );
     this->touch();
     
+}
+
+
+/** Invalidation hook for constants; only children can become stale. */
+template<class valueType>
+void RevBayesCore::ConstantNode<valueType>::invalidateMe( const DagNode * /*affecter*/, bool /*fullyInvalidateSelf*/ )
+{
+    // nothing to do
 }
 
 

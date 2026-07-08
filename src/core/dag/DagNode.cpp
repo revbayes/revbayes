@@ -793,6 +793,34 @@ bool DagNode::isStochastic( void ) const
     return false;
 }
 
+
+/**
+ * Invalidate this DAG node without creating rollback state.
+ * The function marks this node and affected children stale so later reads recompute current values.
+ */
+void DagNode::invalidate(bool fullyInvalidateSelf)
+{
+    // first invalidate myself
+    invalidateMe( this, fullyInvalidateSelf );
+
+    // next, notify all my children
+    invalidateAffected( fullyInvalidateSelf );
+}
+
+
+/**
+ * Tell affected variable nodes to invalidate cached current state.
+ * fullyInvalidateSelf is forwarded so each child can invalidate its own local caches fully.
+ */
+void DagNode::invalidateAffected(bool fullyInvalidateSelf)
+{
+    // notify all my children
+    for (DagNode* child: children)
+    {
+        child->invalidateMe( this, fullyInvalidateSelf );
+    }
+}
+
 /**
  * Keep the value of the node.
  * This function delegates the call to keepMe() and calls keepAffected() too.
@@ -1452,7 +1480,8 @@ void DagNode::swapParent( const DagNode *oldParent, const DagNode *newParent )
 /**
  * Touch the DAG node.
  *
- * This function should be called if the value of the variable has changed or if this node should be reevaluated.
+ * This function should be called to prepare rollback state for a proposal and mark current state stale.
+ * Invalidation-only callers should use invalidate() instead.
  * The function calls touchMe(), which is implemented differently by different DAG node types.
  * fullyInvalidateSelf controls local cache-invalidation breadth, not whether children are notified.
  *
@@ -1469,7 +1498,7 @@ void DagNode::touch(bool fullyInvalidateSelf)
 
 
 /**
- * Tell affected variable nodes to mark themselves for update.
+ * Tell affected variable nodes to snapshot rollback state and mark themselves for update.
  * fullyInvalidateSelf is forwarded so each child can invalidate its own local caches fully.
  */
 void DagNode::touchAffected(bool fullyInvalidateSelf)
