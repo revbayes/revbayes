@@ -19,13 +19,13 @@ namespace RevBayesCore {
         virtual                                    ~Function(void);
                
         // public methods
-        bool                                        forceUpdates(void) const;                                                   //!< Does this method forces the DAG node to always call update even if not touched?
+        bool                                        forceUpdates(void) const;                                                   //!< Does this method force the DAG node to always call update even if it is not marked for update?
         virtual void                                getAffected(RbOrderedSet<DagNode *>& affected, const DagNode* affecter);    //!< get affected nodes
         const std::vector<const DagNode*>&          getParameters(void) const;                                                  //!< get the parameters of the function
         virtual void                                keep(const DagNode* affecter);
         virtual void                                reInitialized( void );                                                      //!< The model was re-initialized
         virtual void                                restore(const DagNode *restorer);
-        void                                        setForceUpdates(bool tf);                                                   //!< Does this method forces the DAG node to always call update even if not touched?
+        void                                        setForceUpdates(bool tf);                                                   //!< Set whether this method forces the DAG node to always call update even if it is not marked for update.
         void                                        swapParameter(const DagNode *oldP, const DagNode *newP);                    //!< Exchange the parameter
         virtual void                                touch(const DagNode *toucher );
 

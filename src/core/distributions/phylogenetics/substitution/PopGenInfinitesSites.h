@@ -52,9 +52,6 @@ namespace RevBayesCore {
         bool                                                                compressed;
         std::vector<size_t>                                                 site_pattern;    // an array that keeps track of which pattern is used for each site
         
-        // flags for likelihood recomputation
-        bool                                                                touched;
-        
         // members
         const TypedDagNode< double >*                                       homogeneous_mutation_rates;
         const TypedDagNode< RbVector< double > >*                           heterogeneous_mutation_rates;

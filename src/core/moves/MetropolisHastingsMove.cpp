@@ -348,7 +348,7 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
 
         double ratio = 0;
         try {
-            // There should be a previous lnProbability because the nodes have been touched.
+            // There should be a previous lnProbability because the nodes have been snapshotted.
             double prev = node->getPrevLnProbability();
             // Compute the current lnProbability.
             double current = node->getLnProbability();

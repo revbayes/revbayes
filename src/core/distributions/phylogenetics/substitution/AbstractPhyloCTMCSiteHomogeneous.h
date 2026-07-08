@@ -4025,7 +4025,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::invalidateSpecial
     {
         const std::set<size_t> &indices = heterogeneous_clock_rates->getTouchedElementIndices();
 
-        // maybe all of them have been touched or the flags haven't been set properly
+        // maybe all elements changed or the touched-element flags were not set precisely
         if ( indices.size() == 0 || indices.size() == this->tau->getValue().getNodes().size() )
         {
             // just flag everyting for recomputation
@@ -4046,7 +4046,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::invalidateSpecial
     {
         const std::set<size_t> &indices = heterogeneous_rate_matrices->getTouchedElementIndices();
 
-        // maybe all of them have been touched or the flags haven't been set properly
+        // maybe all elements changed or the touched-element flags were not set precisely
         if ( indices.size() == 0 )
         {
             // just flag everyting for recomputation

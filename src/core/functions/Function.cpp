@@ -108,7 +108,7 @@ void Function::addParameter(const DagNode *p)
 
 
 /**
- * Does this method forces the DAG node to always call update even if not touched?
+ * Does this method force the DAG node to always call update even if it is not marked for update?
  */
 bool Function::forceUpdates(void) const
 {
@@ -185,7 +185,7 @@ void Function::restore( const DagNode *restorer )
 
 
 /**
- * Set if this method forces the DAG node to always call update even if not touched?
+ * Set whether this method forces the DAG node to always call update even if it is not marked for update.
  */
 void Function::setForceUpdates( bool tf )
 {

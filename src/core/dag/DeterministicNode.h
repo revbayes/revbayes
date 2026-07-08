@@ -479,7 +479,7 @@ void RevBayesCore::DeterministicNode<valueType>::touchMe( const DagNode *toucher
 
     // We need to touch the function always because of specialized touch functionality in some functions, like vector functions.
     // In principle, it would sufficient to do the touch once for each toucher, but we do not keep track of the touchers here.
-    // call for potential specialized handling (e.g. internal flags), we might have been touched already by someone else, so we need to delegate regardless
+    // call for potential specialized handling (e.g. internal flags), we might already have been marked for update by someone else, so we need to delegate regardless
     // This is essential for lazy evaluation
     function->touch( toucher );
 

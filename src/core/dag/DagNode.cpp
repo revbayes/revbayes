@@ -1452,11 +1452,10 @@ void DagNode::swapParent( const DagNode *oldParent, const DagNode *newParent )
 /**
  * Touch the DAG node.
  *
- * This function should be called if the value of the variable has changed or if you want this node to be reevaluated.
- * The function will automatically call the touchMe() which is implemented differently in the different DAG node types.
+ * This function should be called if the value of the variable has changed or if this node should be reevaluated.
+ * The function calls touchMe(), which is implemented differently by different DAG node types.
  *
- * Since the DAG node was touched and possibly changed, we tell affected DAG nodes that they too have been touched
- * and need to update their value.
+ * Since the DAG node was possibly changed, we tell affected DAG nodes that they need to update their values.
  */
 void DagNode::touch(bool touchAll)
 {
@@ -1469,14 +1468,13 @@ void DagNode::touch(bool touchAll)
 
 
 /**
- * Tell affected variable nodes to touch themselves (i.e. that they've been touched).
+ * Tell affected variable nodes to mark themselves for update.
  */
 void DagNode::touchAffected(bool touchAll)
 {
-    // touch all my children
+    // notify all my children
     for (DagNode* child: children)
     {
         child->touchMe( this, touchAll );
     }
 }
-

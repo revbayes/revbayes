@@ -626,7 +626,7 @@ void PhyloBrownianProcessMultiSampleREML::invalidateSpecialization( const DagNod
         
         const std::set<size_t> &indices = this->heterogeneous_clock_rates->getTouchedElementIndices();
         
-        // maybe all of them have been touched or the flags haven't been set properly
+        // maybe all elements changed or the touched-element flags were not set precisely
         if ( indices.size() == 0 )
         {
             // just flag everyting for recomputation
@@ -654,7 +654,7 @@ void PhyloBrownianProcessMultiSampleREML::invalidateSpecialization( const DagNod
         
         const std::set<size_t> &indices = this->within_species_variances->getTouchedElementIndices();
         
-        // maybe all of them have been touched or the flags haven't been set properly
+        // maybe all elements changed or the touched-element flags were not set precisely
         if ( indices.size() == 0 )
         {
             // just flag everyting for recomputation
