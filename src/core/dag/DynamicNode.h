@@ -30,10 +30,6 @@ namespace RevBayesCore {
         virtual void                                        restoreMe(const DagNode *restorer);                                             //!< Restore value of this node
         virtual void                                        touchMe(const DagNode *toucher, bool touchAll);                                 //!< Tell affected nodes value is reset
         
-        
-        // members
-        bool                                                touched;
-        
     };
     
 }
@@ -42,16 +38,14 @@ namespace RevBayesCore {
 #include "RbOptions.h"
 
 template<class valueType>
-RevBayesCore::DynamicNode<valueType>::DynamicNode( const std::string &n ) : TypedDagNode<valueType>( n ),
-    touched( true )
+RevBayesCore::DynamicNode<valueType>::DynamicNode( const std::string &n ) : TypedDagNode<valueType>( n )
 {
     // nothing to do here
 }
 
 
 template<class valueType>
-RevBayesCore::DynamicNode<valueType>::DynamicNode( const DynamicNode<valueType> &n ) : TypedDagNode<valueType>( n ),
-    touched( true )
+RevBayesCore::DynamicNode<valueType>::DynamicNode( const DynamicNode<valueType> &n ) : TypedDagNode<valueType>( n )
 {
     // nothing to do here
 }
@@ -158,45 +152,28 @@ const std::string& RevBayesCore::DynamicNode<valueType>::getRevTypeOfValue(void)
 }
 
 
-/**
- * Keep the current value of the node.
- * At this point, we also need to make sure we update the stored ln probability.
- */
+/** Keep hook for dynamic nodes that need specialized acceptance behavior. */
 template<class valueType>
 void RevBayesCore::DynamicNode<valueType>::keepMe( const DagNode* /*affecter*/ )
 {
-    
-    // unset the touched flag
-    touched = false;
-    
+    // Default implementation does nothing.
 }
 
 
-/** 
- * Restore the old value of the node and tell affected 
- */
+/** Restore hook for dynamic nodes that need specialized rollback behavior. */
 template<class valueType>
 void RevBayesCore::DynamicNode<valueType>::restoreMe( const DagNode * /*restorer*/)
 {
-
-    // unset the touched flag
-    touched = false;
-    
+    // Default implementation does nothing.
 }
 
-/** 
- * Touch this node for recalculation 
- */
+/** Touch hook for dynamic nodes that need specialized invalidation behavior. */
 template<class valueType>
 void RevBayesCore::DynamicNode<valueType>::touchMe( const DagNode * /*toucher*/, bool /*touchAll*/ )
 {
-
-    // set the touched flag
-    touched = true;
-    
+    // Default implementation does nothing.
 }
 
 
 
 #endif
-

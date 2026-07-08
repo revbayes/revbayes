@@ -314,7 +314,7 @@ typename rlType::valueType& UserFunctionNode<rlType>::getValue( void )
 
 /**
  * Get the value (const version). Note that we need to type-cast here to get access to the
- * update function in case we have been touched and have not updated before. This is required
+ * update function in case we need an update and have not updated before. This is required
  * by the lazy evaluation mechanism but it is a perfectly safe const cast. If we had not used
  * lazy evaluation but immediate update, the const cast had not been needed.
  */
@@ -409,7 +409,7 @@ void UserFunctionNode<rlType>::printStructureInfo( std::ostream& o, bool verbose
 /**
  * We get this call during the restore phase of an MCMC simulation. We do
  * not know for sure whether the return variable has been updated during
- * the touched phase of the simulation. If it has, it is important to mark
+ * the touch phase of the simulation. If it has, it is important to mark
  * us as dirty, but we do not need to update the value immediately. Instead,
  * we rely on lazy evaluation, and update the value when somebody asks for
  * the value.
