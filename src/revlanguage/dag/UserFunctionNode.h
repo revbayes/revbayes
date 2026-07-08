@@ -62,6 +62,7 @@ namespace RevLanguage {
     private:
         UserFunction*                           userFunction;                                                       //!< The user function used to compute the value
         RevPtr<RevVariable>                     returnVariable;                                                     //!< The current value of the function, wrapped as a variable
+        mutable bool                            needs_update;                                                       //!< Does the return variable need lazy recomputation?
     };
     
 }
@@ -79,7 +80,8 @@ template<typename rlType>
 UserFunctionNode<rlType>::UserFunctionNode( const std::string& n, UserFunction* fxn ) :
 RevBayesCore::DynamicNode<typename rlType::valueType>( n ),
 userFunction( fxn ),
-returnVariable( NULL )
+returnVariable( NULL ),
+needs_update( true )
 {
     this->type = RevBayesCore::DagNode::DETERMINISTIC;
     
@@ -101,7 +103,8 @@ template<typename rlType>
 UserFunctionNode<rlType>::UserFunctionNode( const UserFunctionNode<rlType>& n ) :
 RevBayesCore::DynamicNode<typename rlType::valueType>( n ),
 userFunction( n.userFunction->clone() ),
-returnVariable( NULL )
+returnVariable( NULL ),
+needs_update( true )
 {
     this->type = RevBayesCore::DagNode::DETERMINISTIC;
     
@@ -139,8 +142,8 @@ UserFunctionNode<rlType>::~UserFunctionNode( void )
 /**
  * Assignment operator. We make sure we detach ourselves from
  * the old user function parameters and attach ourselves to the
- * parameters of the new user function. There is no need to update
- * the returnVariable, as std::int64_t as we mark ourselves as dirty.
+     * parameters of the new user function. There is no need to update
+     * the returnVariable here because touch() marks us as dirty.
  */
 template<typename rlType>
 UserFunctionNode<rlType>& UserFunctionNode<rlType>::operator=( const UserFunctionNode<rlType>& x )
@@ -302,7 +305,7 @@ std::vector<const RevBayesCore::DagNode*> UserFunctionNode<rlType>::getParents( 
 template<typename rlType>
 typename rlType::valueType& UserFunctionNode<rlType>::getValue( void )
 {
-    if ( this->touched )
+    if ( needs_update )
         update();
     
     return static_cast< RevBayesCore::TypedDagNode<typename rlType::valueType>* >( returnVariable->getRevObject().getDagNode() )->getValue();
@@ -318,7 +321,7 @@ typename rlType::valueType& UserFunctionNode<rlType>::getValue( void )
 template<typename rlType>
 const typename rlType::valueType& UserFunctionNode<rlType>::getValue( void ) const
 {
-    if ( this->touched )
+    if ( needs_update )
         const_cast<UserFunctionNode<rlType>*>( this )->update();
     
     return static_cast< RevBayesCore::TypedDagNode<typename rlType::valueType>* >( returnVariable->getRevObject().getDagNode() )->getValue();
@@ -347,8 +350,8 @@ bool UserFunctionNode<rlType>::isConstant( void ) const
 
 
 /**
- * Keep the current value of the node. We need not and should not change the touched
- * flag here. If we have not been updated, we should just leave the touched flag in
+ * Keep the current value of the node. We need not and should not change the
+ * needs-update flag here. If we have not been updated, we should just leave it in
  * the dirty state. We pass on the message unconditionally, to be on the safe side
  * if the DAG is in an inconsistent state.
  */
@@ -389,7 +392,7 @@ void UserFunctionNode<rlType>::printStructureInfo( std::ostream& o, bool verbose
     
     if ( verbose == true )
     {
-        o << "_touched      = " << ( this->touched ? "TRUE" : "FALSE" ) << std::endl;
+        o << "_needs_update = " << ( needs_update ? "TRUE" : "FALSE" ) << std::endl;
     }
     
     o << "_parents      = ";
@@ -418,8 +421,8 @@ template<typename rlType>
 void UserFunctionNode<rlType>::restoreMe( const RevBayesCore::DagNode* restorer )
 {
     
-    // We can no longer trust our value, so mark us as touched
-    this->touched = true;
+    // We can no longer trust our value, so mark it for lazy recomputation.
+    needs_update = true;
     
     // Dispatch call to downstream nodes
     this->restoreAffected();
@@ -501,7 +504,7 @@ void UserFunctionNode<rlType>::swapParent(const RevBayesCore::DagNode* oldParent
 
 /**
  * Touch this node for recalculation. We only need to pass the message on
- * if we have not been touched before, conditional on all touched messages being
+ * if we were not already dirty, conditional on all touch messages being
  * guaranteed to be followed either by a keep or a restore message so the DAG is
  * not in an inconsistent state. To be safe, we pass on the message regardless,
  * so that the touch propagates correctly regardless of the starting DAG state.
@@ -510,8 +513,8 @@ template<typename rlType>
 void UserFunctionNode<rlType>::touchMe( const RevBayesCore::DagNode* toucher, bool touchAll )
 {
     
-    // Touch myself
-    this->touched = true;
+    // Mark this node for lazy recomputation.
+    needs_update = true;
     
     // Dispatch the touch message to downstream nodes
     this->touchAffected( touchAll );
@@ -530,8 +533,8 @@ void UserFunctionNode<rlType>::update()
     // Update the return variable
     returnVariable = userFunction->executeCode();
     
-    // We are clean!
-    this->touched = false;
+    // We are clean.
+    needs_update = false;
 }
 
 
