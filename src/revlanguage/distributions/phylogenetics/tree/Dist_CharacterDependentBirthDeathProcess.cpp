@@ -161,7 +161,7 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_CharacterDependentBirt
    
     
     size_t ex_size = ex->getValue().size();
-    size_t q_size = q->getValue().size();
+    size_t q_size = (q != NULL ? q->getValue().size() : 0);
     size_t sp_size = 0;
     
     // set speciation/cladogenetic event rates
@@ -177,7 +177,7 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_CharacterDependentBirt
     } 
 
     std::stringstream ss_err;
-    if (ex_size != q_size)
+    if (q != NULL && ex_size != q_size)
     {
         ss_err << "State count mismatch between extinction rates (" << ex_size << ") and Q (" << q_size << ")";
         throw RbException(ss_err.str());
@@ -187,7 +187,7 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_CharacterDependentBirt
         ss_err << "State count mismatch between extinction rates (" << ex_size << ") and speciation rates (" << sp_size << ")";
         throw RbException(ss_err.str());
     }
-    if (q_size != sp_size)
+    if (q != NULL && q_size != sp_size)
     {
         ss_err << "State count mismatch between speciation rates (" << sp_size << ") and Q (" << q_size << ")";
         throw RbException(ss_err.str());
