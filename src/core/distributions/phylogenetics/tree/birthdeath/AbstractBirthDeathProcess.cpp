@@ -98,7 +98,16 @@ size_t AbstractBirthDeathProcess::getNumberOfTaxaAtPresent( void ) const
  **/
 double AbstractBirthDeathProcess::lnProbTreeShape(void) const
 {
-    return (value->getNumberOfTips() - 1) * RbConstants::LN2 - RbMath::lnFactorial( (int)value->getNumberOfTips() );
+    // the birth death divergence times density is derived for a (ranked) unlabeled oriented tree
+    // so we convert to a (ranked) labeled non-oriented tree probability by multiplying by 2^{n+m-1} / n!
+    // where n is the number of extant tips, m is the number of extinct tips
+
+    int num_taxa = (int)value->getNumberOfTips();
+    int num_extinct = (int)value->getNumberOfExtinctTips();
+    int num_sa = (int)value->getNumberOfSampledAncestors();
+
+    return (num_taxa - num_sa - 1) * RbConstants::LN2 - RbMath::lnFactorial(num_taxa - num_sa);
+//    return (value->getNumberOfTips() - 1) * RbConstants::LN2 - RbMath::lnFactorial( (int)value->getNumberOfTips() );
 }
 
 
