@@ -37,7 +37,7 @@ template <class valueType> class TypedDagNode;
         // special handling of state changes
         bool                                                childrenAreAffectedBy(const DagNode *affecter) const override;                         //!< Does this changed parameter make the value affect children?
         void                                                restoreSpecialization(void);
-        void                                                invalidateSpecialization(const DagNode *toucher, bool touchAll);
+        void                                                invalidateSpecialization(const DagNode *toucher, bool fullyInvalidateSelf);
 
     protected:
         // Parameter management functions

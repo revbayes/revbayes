@@ -53,7 +53,7 @@ namespace RevBayesCore {
         void                                                        keepSpecialization(void);
         void                                                        restoreSpecialization(void);
         void                                                        snapshotSpecialization(void);
-        void                                                        invalidateSpecialization(const DagNode *toucher, bool touchAll);
+        void                                                        invalidateSpecialization(const DagNode *toucher, bool fullyInvalidateSelf);
 
     protected:
         // Parameter management functions
@@ -434,7 +434,7 @@ void RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::setVa
  * This does not save rollback state.
  */
 template <class mixtureType>
-void RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::invalidateSpecialization( const DagNode *toucher, bool touchAll )
+void RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::invalidateSpecialization( const DagNode *toucher, bool fullyInvalidateSelf )
 {
     // Track constant-value changes even when the current value is in the distribution component.
     if ( toucher == const_value )

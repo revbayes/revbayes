@@ -3158,7 +3158,7 @@ void StateDependentSpeciationExtinctionProcess::swapParameterInternal(const DagN
  * Mark cached node likelihoods invalid after a parameter change.
  * Process-age changes also update the exposed tree age for legacy dependents.
  */
-void StateDependentSpeciationExtinctionProcess::invalidateSpecialization(const DagNode *affecter, bool touchAll)
+void StateDependentSpeciationExtinctionProcess::invalidateSpecialization(const DagNode *affecter, bool fullyInvalidateSelf)
 {
     
     if ( affecter == process_age )

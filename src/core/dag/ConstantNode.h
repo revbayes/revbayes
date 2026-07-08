@@ -35,7 +35,7 @@ namespace RevBayesCore {
         void                                                getAffected(RbOrderedSet<DagNode *>& affected, const DagNode* affecter);    //!< Mark and get affected nodes
         void                                                keepMe(const DagNode* affecter);                                            //!< Keep value of this and affected nodes
         void                                                restoreMe(const DagNode *restorer);                                         //!< Restore value of this nodes
-        void                                                touchMe(const DagNode *toucher, bool touchAll);                             //!< Tell affected nodes value is reset
+        void                                                touchMe(const DagNode *toucher, bool fullyInvalidateSelf);                             //!< Mark this node for recomputation; the flag forces full local invalidation.
         
     private:
         // members
@@ -281,10 +281,9 @@ void RevBayesCore::ConstantNode<valueType>::setValueFromString(const std::string
 
 
 template<class valueType>
-void RevBayesCore::ConstantNode<valueType>::touchMe( const DagNode * /*toucher*/, bool /*touchAll*/ )
+void RevBayesCore::ConstantNode<valueType>::touchMe( const DagNode * /*toucher*/, bool /*fullyInvalidateSelf*/ )
 {
     // nothing to do
 }
 
 #endif
-

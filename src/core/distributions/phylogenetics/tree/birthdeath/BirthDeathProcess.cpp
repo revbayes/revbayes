@@ -461,10 +461,10 @@ void BirthDeathProcess::swapParameterInternal(const DagNode *oldP, const DagNode
  * Refresh birth-death derived clade ages after tree invalidation.
  * Root-age synchronization is delegated to AbstractRootedTreeDistribution.
  */
-void BirthDeathProcess::invalidateSpecialization(const DagNode *affecter, bool touchAll)
+void BirthDeathProcess::invalidateSpecialization(const DagNode *affecter, bool fullyInvalidateSelf)
 {
     
-    AbstractRootedTreeDistribution::invalidateSpecialization(affecter, touchAll);
+    AbstractRootedTreeDistribution::invalidateSpecialization(affecter, fullyInvalidateSelf);
     if ( affecter == this->dag_node )
     {
         if ( has_rollback_snapshot == true )

@@ -98,7 +98,7 @@ namespace RevBayesCore {
         virtual void                                        keepMe(const DagNode* affecter);                                            //!< Keep value of this and affected nodes
         virtual void                                        restoreMe(const DagNode *restorer);                                         //!< Restore value of this nodes
         virtual void                                        setActivePIDSpecialized(size_t i, size_t n);                                //!< Set the number of processes for this class.
-        virtual void                                        touchMe(const DagNode *toucher, bool touchAll);                             //!< Tell affected nodes value is reset
+        virtual void                                        touchMe(const DagNode *toucher, bool fullyInvalidateSelf);                             //!< Mark this node for recomputation; the flag forces full local invalidation.
         
         // protected members
         bool                                                ignore_data = false;                                                    //!< The PDF for this node is set to 1, removing the effects of the node.  Only for clamped nodes with no children.
@@ -368,7 +368,7 @@ void RevBayesCore::StochasticNode<valueType>::getAffected( RbOrderedSet<DagNode*
     }
     else
     {
-        // Dispatch the touch message to downstream nodes
+        // Notify downstream nodes.
         this->getAffectedNodes( affected );
     }
 }
@@ -888,9 +888,9 @@ void RevBayesCore::StochasticNode<valueType>::swapParent( const RevBayesCore::Da
 }
 
 
-/** touch this node for recalculation */
+/** Mark this stochastic node for recalculation and invalidate distribution-local caches. */
 template<class valueType>
-void RevBayesCore::StochasticNode<valueType>::touchMe( const DagNode *toucher, bool touchAll )
+void RevBayesCore::StochasticNode<valueType>::touchMe( const DagNode *toucher, bool fullyInvalidateSelf )
 {
     
     if ( not stored_ln_prob.has_value() )
@@ -903,16 +903,16 @@ void RevBayesCore::StochasticNode<valueType>::touchMe( const DagNode *toucher, b
     // Snapshot rollback state before invalidating distribution-specific cached state.
     // Repeated snapshots intentionally reach the distribution so non-idempotent specializations are exposed.
     distribution->snapshot();
-    distribution->invalidate( toucher, touchAll );
+    distribution->invalidate( toucher, fullyInvalidateSelf );
     const bool children_affected = distribution->childrenAreAffectedBy( toucher );
     
     // delegate call
-    DynamicNode<valueType>::touchMe( toucher, touchAll );
+    DynamicNode<valueType>::touchMe( toucher, fullyInvalidateSelf );
     
     if ( isIntegratedOut() == true || children_affected )
     {
-        // Dispatch the touch message when this stochastic value affects downstream nodes.
-        this->touchAffected( touchAll );
+        // Notify downstream nodes when this stochastic value affects them.
+        this->touchAffected( fullyInvalidateSelf );
     }
     
 }

@@ -578,7 +578,7 @@ void BirthDeathBurstProcess::swapParameterInternal(const DagNode *oldP, const Da
  * Synchronize burst-event node ages when the burst time changes.
  * Rooted-tree invalidation is delegated to the base distribution.
  */
-void BirthDeathBurstProcess::invalidateSpecialization(const DagNode *affecter, bool touchAll)
+void BirthDeathBurstProcess::invalidateSpecialization(const DagNode *affecter, bool fullyInvalidateSelf)
 {
     
     if ( affecter == time_burst )
@@ -603,6 +603,6 @@ void BirthDeathBurstProcess::invalidateSpecialization(const DagNode *affecter, b
     }
     
     // delegate to base class
-    AbstractRootedTreeDistribution::invalidateSpecialization( affecter, touchAll );
+    AbstractRootedTreeDistribution::invalidateSpecialization( affecter, fullyInvalidateSelf );
     
 }

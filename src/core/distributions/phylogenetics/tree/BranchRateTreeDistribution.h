@@ -56,7 +56,7 @@ class DagNode;
         virtual void                                        keepSpecialization(void);
         virtual void                                        restoreSpecialization(void);
         virtual void                                        snapshotSpecialization(void);
-        virtual void                                        invalidateSpecialization(const DagNode *toucher, bool touchAll);
+        virtual void                                        invalidateSpecialization(const DagNode *toucher, bool fullyInvalidateSelf);
         
         // members
         TypedDistribution<double>*                          branch_rate_prior;

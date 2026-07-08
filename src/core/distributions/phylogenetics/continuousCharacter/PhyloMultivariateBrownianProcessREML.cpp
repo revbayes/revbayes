@@ -539,10 +539,9 @@ void PhyloMultivariateBrownianProcessREML::snapshotSpecialization( void )
  * Mark multivariate Brownian REML likelihood caches dirty after a dependency changes.
  * Rate-matrix invalidation also refreshes the active precision matrix.
  */
-void PhyloMultivariateBrownianProcessREML::invalidateSpecialization( const DagNode* affecter, bool touchAll )
+void PhyloMultivariateBrownianProcessREML::invalidateSpecialization( const DagNode* affecter, bool fullyInvalidateSelf )
 {
- 
-    // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
+    // Use touched-element metadata when possible; otherwise fully invalidate this distribution's caches.
     if ( affecter == this->heterogeneous_clock_rates )
     {
         
@@ -552,7 +551,7 @@ void PhyloMultivariateBrownianProcessREML::invalidateSpecialization( const DagNo
         if ( indices.size() == 0 )
         {
             // just flag everything for recomputation
-            touchAll = true;
+            fullyInvalidateSelf = true;
         }
         else
         {
@@ -562,7 +561,7 @@ void PhyloMultivariateBrownianProcessREML::invalidateSpecialization( const DagNo
             {
                 if ( *it >= nodes.size() )
                 {
-                    touchAll = true;
+                    fullyInvalidateSelf = true;
                     break;
                 }
 
@@ -582,18 +581,18 @@ void PhyloMultivariateBrownianProcessREML::invalidateSpecialization( const DagNo
         }
         
         // we need to recompute the likelihood
-        touchAll = true;
+        fullyInvalidateSelf = true;
     }
     else if ( affecter == static_cast<const DagNode*>(this->dag_node) )
     {
         resetValue();
     }
-    else if ( affecter != this->tau ) // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
+    else if ( affecter != this->tau )
     {
-        touchAll = true;
+        fullyInvalidateSelf = true;
     }
     
-    if ( touchAll )
+    if ( fullyInvalidateSelf )
     {
         invalidateInternalNodes();
     }

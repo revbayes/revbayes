@@ -540,11 +540,12 @@ void AbstractFossilizedBirthDeathRangeProcess::restoreSpecialization(void)
  * Mark range-process likelihood components dirty after parent changes.
  * Rollback state is saved separately by snapshotSpecialization().
  */
-void AbstractFossilizedBirthDeathRangeProcess::invalidateSpecialization(const DagNode *toucher, bool touchAll)
+void AbstractFossilizedBirthDeathRangeProcess::invalidateSpecialization(const DagNode *toucher, bool fullyInvalidateSelf)
 {
     dirty_taxa = std::vector<bool>(taxa.size(), true);
 
-    if ( toucher == timeline || toucher == homogeneous_psi || toucher == heterogeneous_psi || touchAll )
+    // fullyInvalidateSelf broadens only this distribution's dirty psi state.
+    if ( toucher == timeline || toucher == homogeneous_psi || toucher == heterogeneous_psi || fullyInvalidateSelf )
     {
         dirty_psi  = std::vector<bool>(taxa.size(), true);
     }

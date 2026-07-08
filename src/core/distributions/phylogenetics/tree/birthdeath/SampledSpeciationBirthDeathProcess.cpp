@@ -882,7 +882,7 @@ void SampledSpeciationBirthDeathProcess::swapParameterInternal( const DagNode *o
  * Synchronize the root node age when the root-age parameter changes.
  * Affected child nodes are invalidated through the DAG node afterward.
  */
-void SampledSpeciationBirthDeathProcess::invalidateSpecialization(const DagNode *affecter, bool touchAll)
+void SampledSpeciationBirthDeathProcess::invalidateSpecialization(const DagNode *affecter, bool fullyInvalidateSelf)
 {
     
     if ( affecter == root_age )

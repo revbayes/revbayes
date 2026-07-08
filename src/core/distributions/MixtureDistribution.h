@@ -49,7 +49,7 @@ namespace RevBayesCore {
         void                                                keepSpecialization(void);
         void                                                restoreSpecialization(void);
         void                                                snapshotSpecialization(void);
-        void                                                invalidateSpecialization(const DagNode *toucher, bool touchAll);
+        void                                                invalidateSpecialization(const DagNode *toucher, bool fullyInvalidateSelf);
 
     protected:
         // Parameter management functions
@@ -327,7 +327,7 @@ void RevBayesCore::MixtureDistribution<mixtureType>::setValue(mixtureType *v, bo
  * This does not save rollback state.
  */
 template <class mixtureType>
-void RevBayesCore::MixtureDistribution<mixtureType>::invalidateSpecialization( const DagNode *toucher, bool touchAll )
+void RevBayesCore::MixtureDistribution<mixtureType>::invalidateSpecialization( const DagNode *toucher, bool fullyInvalidateSelf )
 {
     // only do this when the toucher was our parameters
     if ( toucher == parameter_values )

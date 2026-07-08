@@ -1454,27 +1454,29 @@ void DagNode::swapParent( const DagNode *oldParent, const DagNode *newParent )
  *
  * This function should be called if the value of the variable has changed or if this node should be reevaluated.
  * The function calls touchMe(), which is implemented differently by different DAG node types.
+ * fullyInvalidateSelf controls local cache-invalidation breadth, not whether children are notified.
  *
  * Since the DAG node was possibly changed, we tell affected DAG nodes that they need to update their values.
  */
-void DagNode::touch(bool touchAll)
+void DagNode::touch(bool fullyInvalidateSelf)
 {
     // first touch myself
-    touchMe( this, touchAll );
+    touchMe( this, fullyInvalidateSelf );
 
-    // next, touch all my children
-    touchAffected( touchAll );
+    // next, notify all my children
+    touchAffected( fullyInvalidateSelf );
 }
 
 
 /**
  * Tell affected variable nodes to mark themselves for update.
+ * fullyInvalidateSelf is forwarded so each child can invalidate its own local caches fully.
  */
-void DagNode::touchAffected(bool touchAll)
+void DagNode::touchAffected(bool fullyInvalidateSelf)
 {
     // notify all my children
     for (DagNode* child: children)
     {
-        child->touchMe( this, touchAll );
+        child->touchMe( this, fullyInvalidateSelf );
     }
 }

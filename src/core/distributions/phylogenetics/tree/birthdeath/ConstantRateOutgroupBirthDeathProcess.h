@@ -35,7 +35,7 @@ template <class valueType> class TypedDagNode;
         // Parameter management functions
         bool                                                isLnProbabilityNonZero(void);
         void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);                //!< Swap a parameter
-        virtual void                                        invalidateSpecialization(const DagNode *toucher, bool touchAll);
+        virtual void                                        invalidateSpecialization(const DagNode *toucher, bool fullyInvalidateSelf);
         virtual void                                        keepSpecialization(void);
         virtual void                                        restoreSpecialization(void);
         virtual void                                        snapshotSpecialization(void);

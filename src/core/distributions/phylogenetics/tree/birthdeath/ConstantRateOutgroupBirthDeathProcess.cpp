@@ -599,9 +599,9 @@ void ConstantRateOutgroupBirthDeathProcess::setValue(Tree *v, bool f )
  * Synchronize inherited rooted-tree invalidation after parent changes.
  * Clade rollback state is saved separately by snapshotSpecialization().
  */
-void ConstantRateOutgroupBirthDeathProcess::invalidateSpecialization(const DagNode *affecter, bool touchAll)
+void ConstantRateOutgroupBirthDeathProcess::invalidateSpecialization(const DagNode *affecter, bool fullyInvalidateSelf)
 {
-    AbstractRootedTreeDistribution::invalidateSpecialization(affecter, touchAll);
+    AbstractRootedTreeDistribution::invalidateSpecialization(affecter, fullyInvalidateSelf);
 }
 
 void ConstantRateOutgroupBirthDeathProcess::keepSpecialization(void)

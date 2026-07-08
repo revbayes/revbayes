@@ -814,12 +814,11 @@ double PhyloBrownianProcessStateDependent::sumRootLikelihood( void )
  * Mark state-dependent Brownian likelihood caches dirty after a dependency changes.
  * The current implementation still invalidates all nodes for any dependency.
  */
-void PhyloBrownianProcessStateDependent::invalidateSpecialization( const DagNode* affecter, bool touchAll )
+void PhyloBrownianProcessStateDependent::invalidateSpecialization( const DagNode* affecter, bool fullyInvalidateSelf )
 {
 
-    // currently we don't actually use any fetching of parts of the tree that don't need recomputation.
-    // this code is merely as a placeholder when this implemented in the future here.
-    bool touch_all = true;
+    // Partial invalidation is not implemented for this cache yet.
+    fullyInvalidateSelf = true;
 
     if ( affecter == this->dag_node )
     {
@@ -827,7 +826,7 @@ void PhyloBrownianProcessStateDependent::invalidateSpecialization( const DagNode
     }
 
 
-    if ( touch_all )
+    if ( fullyInvalidateSelf )
     {
         for (std::vector<bool>::iterator it = dirty_nodes.begin(); it != dirty_nodes.end(); ++it)
         {

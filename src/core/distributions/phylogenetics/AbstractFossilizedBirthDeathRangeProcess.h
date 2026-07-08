@@ -64,7 +64,7 @@ namespace RevBayesCore {
         virtual void                                    prepareProbComputation(void) const;
 
         void                                            keepSpecialization(void);                  /* NOT VIRTUAL */
-        void                                            invalidateSpecialization(const DagNode *toucher, bool touchAll);  /* NOT VIRTUAL */
+        void                                            invalidateSpecialization(const DagNode *toucher, bool fullyInvalidateSelf);  /* NOT VIRTUAL */
         void                                            restoreSpecialization(void);                     /* NOT VIRTUAL */
         void                                            snapshotSpecialization(void);                              /* NOT VIRTUAL */
 

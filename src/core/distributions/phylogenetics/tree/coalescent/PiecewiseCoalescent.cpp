@@ -617,7 +617,7 @@ void PiecewiseCoalescent::swapParameterInternal(const DagNode *old_p, const DagN
  * Piecewise coalescent intervals are recomputed during probability evaluation.
  * Invalidation currently has no additional eager work to perform.
  */
-void PiecewiseCoalescent::invalidateSpecialization(const DagNode *affecter, bool touchAll)
+void PiecewiseCoalescent::invalidateSpecialization(const DagNode *affecter, bool fullyInvalidateSelf)
 {
     // Sebastian: This is currently redudant because we update the intervals each time when we compute the probability
     // just update the start times of the intervals

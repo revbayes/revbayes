@@ -430,7 +430,7 @@ void FossilizedBirthDeathRangeProcess::restoreSpecialization(void)
  * Mark matrix range-process components dirty after parent or value changes.
  * Rollback state is saved separately by snapshotSpecialization().
  */
-void FossilizedBirthDeathRangeProcess::invalidateSpecialization(const DagNode *toucher, bool touchAll)
+void FossilizedBirthDeathRangeProcess::invalidateSpecialization(const DagNode *toucher, bool fullyInvalidateSelf)
 {
     if ( toucher == dag_node )
     {
@@ -454,7 +454,7 @@ void FossilizedBirthDeathRangeProcess::invalidateSpecialization(const DagNode *t
     }
     else
     {
-        AbstractFossilizedBirthDeathRangeProcess::invalidateSpecialization(toucher, touchAll);
+        AbstractFossilizedBirthDeathRangeProcess::invalidateSpecialization(toucher, fullyInvalidateSelf);
     }
 }
 

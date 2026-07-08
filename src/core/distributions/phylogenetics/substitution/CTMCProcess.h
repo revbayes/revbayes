@@ -57,7 +57,7 @@ namespace RevBayesCore {
         virtual void                                                        keepSpecialization(void);
         virtual void                                                        restoreSpecialization(void);
         virtual void                                                        setActivePIDSpecialized(size_t i, size_t n);                                                 //!< Set the number of processes for this distribution.
-        virtual void                                                        invalidateSpecialization(const DagNode *toucher, bool touchAll);
+        virtual void                                                        invalidateSpecialization(const DagNode *toucher, bool fullyInvalidateSelf);
         virtual void                                                        updateTransitionProbabilities( void ) const;
 
 
@@ -1362,7 +1362,7 @@ void RevBayesCore::CTMCProcess<charType>::swapParameterInternal(const DagNode *o
  * More specific CTMC distributions override this when they cache likelihoods.
  */
 template<class charType>
-void RevBayesCore::CTMCProcess<charType>::invalidateSpecialization( const DagNode* affecter, bool touch_all )
+void RevBayesCore::CTMCProcess<charType>::invalidateSpecialization( const DagNode* affecter, bool fullyInvalidateSelf )
 {
 
 

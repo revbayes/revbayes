@@ -57,7 +57,7 @@ namespace RevLanguage {
         void                                    getAffected(RevBayesCore::RbOrderedSet<RevBayesCore::DagNode *>& affected, const RevBayesCore::DagNode* affecter);  //!< Mark and get affected nodes
         void                                    keepMe(const RevBayesCore::DagNode* affecter);                                                    //!< Keep value of this and affected nodes
         void                                    restoreMe(const RevBayesCore::DagNode *restorer);                                                 //!< Restore value of this nodes
-        void                                    touchMe(const RevBayesCore::DagNode *toucher, bool touchAll);                                                    //!< Touch myself and tell affected nodes value is reset
+        void                                    touchMe(const RevBayesCore::DagNode *toucher, bool fullyInvalidateSelf);                                                    //!< Mark this node for recomputation; the flag forces full local invalidation.
         
     private:
         UserFunction*                           userFunction;                                                       //!< The user function used to compute the value
@@ -503,21 +503,21 @@ void UserFunctionNode<rlType>::swapParent(const RevBayesCore::DagNode* oldParent
 
 
 /**
- * Touch this node for recalculation. We only need to pass the message on
- * if we were not already dirty, conditional on all touch messages being
+ * Mark this user-function node for lazy recomputation. We only need to pass the message on
+ * if we were not already dirty, conditional on all update notifications being
  * guaranteed to be followed either by a keep or a restore message so the DAG is
  * not in an inconsistent state. To be safe, we pass on the message regardless,
- * so that the touch propagates correctly regardless of the starting DAG state.
+ * so that update propagation is correct regardless of the starting DAG state.
  */
 template<typename rlType>
-void UserFunctionNode<rlType>::touchMe( const RevBayesCore::DagNode* toucher, bool touchAll )
+void UserFunctionNode<rlType>::touchMe( const RevBayesCore::DagNode* toucher, bool fullyInvalidateSelf )
 {
     
     // Mark this node for lazy recomputation.
     needs_update = true;
     
-    // Dispatch the touch message to downstream nodes
-    this->touchAffected( touchAll );
+    // Notify downstream nodes.
+    this->touchAffected( fullyInvalidateSelf );
 }
 
 

@@ -52,7 +52,7 @@ namespace RevBayesCore {
         // helper methods
         RbVector<valueType>*                                simulate();
         virtual void                                        keepSpecialization(void);
-        virtual void                                        invalidateSpecialization(const DagNode *toucher, bool touchAll);
+        virtual void                                        invalidateSpecialization(const DagNode *toucher, bool fullyInvalidateSelf);
         virtual void                                        restoreSpecialization(void);
         void                                                setInternalDistributions(void);
         virtual void                                        snapshotSpecialization(void);
@@ -529,14 +529,14 @@ void RevBayesCore::EmpiricalSampleDistribution<valueType>::setValue(RbVector<val
  * Rollback snapshotting is handled separately by snapshotSpecialization().
  */
 template <class valueType>
-void RevBayesCore::EmpiricalSampleDistribution<valueType>::invalidateSpecialization(const DagNode *toucher, bool touchAll )
+void RevBayesCore::EmpiricalSampleDistribution<valueType>::invalidateSpecialization(const DagNode *toucher, bool fullyInvalidateSelf )
 {
         
     for (size_t i = 0; i < num_samples; ++i)
     {
         if ( i >= sample_block_start && i < sample_block_end )
         {
-            base_distribution_instances[i]->invalidate( toucher, touchAll );
+            base_distribution_instances[i]->invalidate( toucher, fullyInvalidateSelf );
         }
         
     }

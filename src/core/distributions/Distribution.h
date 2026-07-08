@@ -47,7 +47,7 @@ namespace RevBayesCore {
         virtual std::vector<double>                             getMixtureProbabilities(void) const;
         virtual size_t                                          getNumberOfMixtureElements(void) const;                                             //!< Get the number of elements for this value
         const std::vector<const DagNode*>&                      getParameters(void) const;                                                          //!< get the parameters of the function
-        void                                                    invalidate(const DagNode *toucher, bool touchAll);
+        void                                                    invalidate(const DagNode *toucher, bool fullyInvalidateSelf);                               //!< Invalidate local cached state; the flag disables partial invalidation.
         void                                                    keep(void);
         virtual void                                            reInitialized( void );                                                              //!< The model was re-initialized
         void                                                    restore(void);
@@ -68,7 +68,7 @@ namespace RevBayesCore {
         Distribution&                                           operator=(const Distribution &f);                                                   //!< Assignment operator
         
         // keep specialization for derived classes
-        virtual void                                            invalidateSpecialization(const DagNode *toucher, bool touchAll);
+        virtual void                                            invalidateSpecialization(const DagNode *toucher, bool fullyInvalidateSelf);                 //!< Specialized local cache invalidation; the flag disables partial invalidation.
         virtual void                                            keepSpecialization(void);
         virtual void                                            restoreSpecialization(void);
         virtual void                                            snapshotSpecialization(void);

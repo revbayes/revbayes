@@ -714,7 +714,7 @@ void FossilizedBirthDeathSpeciationProcess::restoreSpecialization(void)
  * Mark tree FBD speciation components dirty after parent or value changes.
  * Rollback state is saved separately by snapshotSpecialization().
  */
-void FossilizedBirthDeathSpeciationProcess::invalidateSpecialization(const DagNode *toucher, bool touchAll)
+void FossilizedBirthDeathSpeciationProcess::invalidateSpecialization(const DagNode *toucher, bool fullyInvalidateSelf)
 {
     if ( toucher == dag_node )
     {
@@ -730,8 +730,8 @@ void FossilizedBirthDeathSpeciationProcess::invalidateSpecialization(const DagNo
     }
     else
     {
-        AbstractRootedTreeDistribution::invalidateSpecialization(toucher, touchAll);
-        AbstractFossilizedBirthDeathRangeProcess::invalidateSpecialization(toucher, touchAll);
+        AbstractRootedTreeDistribution::invalidateSpecialization(toucher, fullyInvalidateSelf);
+        AbstractFossilizedBirthDeathRangeProcess::invalidateSpecialization(toucher, fullyInvalidateSelf);
     }
 }
 

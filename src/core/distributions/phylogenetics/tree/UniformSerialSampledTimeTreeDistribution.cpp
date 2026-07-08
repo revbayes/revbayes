@@ -400,7 +400,7 @@ void UniformSerialSampledTimeTreeDistribution::swapParameterInternal( const DagN
  * Synchronize the root node age from the serial-sampling start age when needed.
  * Affected child nodes are invalidated through the DAG node afterward.
  */
-void UniformSerialSampledTimeTreeDistribution::invalidateSpecialization(const DagNode *affecter, bool touchAll)
+void UniformSerialSampledTimeTreeDistribution::invalidateSpecialization(const DagNode *affecter, bool fullyInvalidateSelf)
 {
     
     if ( affecter == start_age )

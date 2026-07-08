@@ -43,7 +43,7 @@ namespace RevBayesCore {
         virtual void                                        keepSpecialization(void);
         virtual void                                        restoreSpecialization(void);
         virtual void                                        snapshotSpecialization(void);
-        virtual void                                        invalidateSpecialization(const DagNode *toucher, bool touchAll);
+        virtual void                                        invalidateSpecialization(const DagNode *toucher, bool fullyInvalidateSelf);
 
         // pure virtual helper functions
         virtual double                                      lnSpeciationRate(double t) const = 0;                                       //!< Get the log-transformed speciation rate at time t.

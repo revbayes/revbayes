@@ -1066,7 +1066,7 @@ void ConditionedBirthDeathShiftProcessContinuous::swapParameterInternal( const D
  * Synchronize root age and constant branch-history states after parent changes.
  * This does not save rollback state.
  */
-void ConditionedBirthDeathShiftProcessContinuous::invalidateSpecialization(const DagNode *affecter, bool touchAll)
+void ConditionedBirthDeathShiftProcessContinuous::invalidateSpecialization(const DagNode *affecter, bool fullyInvalidateSelf)
 {
     
     if ( affecter == root_age )

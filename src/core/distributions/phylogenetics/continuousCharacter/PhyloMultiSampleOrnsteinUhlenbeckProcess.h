@@ -64,7 +64,7 @@ template <class valueType> class TypedDagNode;
         double                                                              sumRootLikelihood(void);
         void                                                                simulateTipSamples(const std::vector< ContinuousTaxonData > &td);
         virtual void                                                        snapshotSpecialization(void);
-        virtual void                                                        invalidateSpecialization(const DagNode *toucher, bool touchAll);
+        virtual void                                                        invalidateSpecialization(const DagNode *toucher, bool fullyInvalidateSelf);
         
         void                                                                computeCovariance(MatrixReal &cv);
         void                                                                computeCovarianceRecursive(const TopologyNode &n, MatrixReal &cv);

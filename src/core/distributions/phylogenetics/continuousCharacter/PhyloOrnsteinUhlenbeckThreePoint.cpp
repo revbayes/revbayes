@@ -475,7 +475,7 @@ std::vector<double> PhyloOrnsteinUhlenbeckThreePoint::simulateRootCharacters(siz
  * Refresh observed tip values when the tree or clamped data changes.
  * Scalar OU parameters are read directly during computeLnProbability().
  */
-void PhyloOrnsteinUhlenbeckThreePoint::invalidateSpecialization( const DagNode* affecter, bool touchAll )
+void PhyloOrnsteinUhlenbeckThreePoint::invalidateSpecialization( const DagNode* affecter, bool fullyInvalidateSelf )
 {
     if ( affecter == this->tau || affecter == static_cast<const DagNode*>(this->dag_node) )
     {

@@ -53,7 +53,7 @@ namespace RevBayesCore {
         virtual double                                      computeRootLikelihood(const TopologyNode &n);
         virtual double                                      computeInternalNodeLikelihood(const TopologyNode &n);
         virtual double                                      computeTipLikelihood(const TopologyNode &node);
-        virtual void                                        invalidateSpecialization(const DagNode *toucher, bool touchAll);
+        virtual void                                        invalidateSpecialization(const DagNode *toucher, bool fullyInvalidateSelf);
 
     private:
 
@@ -881,10 +881,10 @@ void RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::swapParameterInterna
  * Other dependencies use the base character-history invalidation logic.
  */
 template<class charType>
-void RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::invalidateSpecialization( const DagNode* affecter, bool touchAll )
+void RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::invalidateSpecialization( const DagNode* affecter, bool fullyInvalidateSelf )
 {
 
-    // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
+    // Root-frequency changes only dirty the root; other dependencies delegate to the base local invalidation.
     if ( affecter == rootFrequencies )
     {
         const TopologyNode &root = this->tau->getValue().getRoot();
@@ -892,7 +892,7 @@ void RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::invalidateSpecializa
     }
     else
     {
-        TreeHistoryCtmc<charType>::invalidateSpecialization( affecter, touchAll );
+        TreeHistoryCtmc<charType>::invalidateSpecialization( affecter, fullyInvalidateSelf );
     }
 
 }

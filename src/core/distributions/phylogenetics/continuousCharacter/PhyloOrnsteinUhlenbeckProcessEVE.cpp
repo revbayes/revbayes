@@ -847,7 +847,7 @@ void PhyloOrnsteinUhlenbeckProcessEVE::snapshotSpecialization( void )
  * Mark the EVE OU likelihood cache invalid after any dependency changes.
  * This replaces the old recompute-on-every-call behavior with a real cache.
  */
-void PhyloOrnsteinUhlenbeckProcessEVE::invalidateSpecialization( const DagNode* affecter, bool touchAll )
+void PhyloOrnsteinUhlenbeckProcessEVE::invalidateSpecialization( const DagNode* affecter, bool fullyInvalidateSelf )
 {
     likelihood_cache.invalidate();
 }

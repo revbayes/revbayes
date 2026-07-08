@@ -153,7 +153,7 @@ namespace RevBayesCore {
 
 
         // virtual methods that may be overwritten, but then the derived class should call this methods
-        virtual void                                                        invalidateSpecialization(const DagNode *toucher, bool touchAll);
+        virtual void                                                        invalidateSpecialization(const DagNode *toucher, bool fullyInvalidateSelf);
         virtual void                                                        keepSpecialization(void);
         virtual void                                                        restoreSpecialization(void);
         virtual void                                                        snapshotSpecialization(void);
@@ -4018,9 +4018,9 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::snapshotSpecializ
  * Snapshotting is handled separately before this invalidation hook is called.
  */
 template<class charType>
-void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::invalidateSpecialization( const DagNode* affecter, bool touch_all )
+void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::invalidateSpecialization( const DagNode* affecter, bool fullyInvalidateSelf )
 {
-    // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
+    // Use touched-element metadata when it can identify the affected branches; otherwise fully invalidate this distribution.
     if ( affecter == heterogeneous_clock_rates )
     {
         const std::set<size_t> &indices = heterogeneous_clock_rates->getTouchedElementIndices();
@@ -4028,8 +4028,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::invalidateSpecial
         // maybe all elements changed or the touched-element flags were not set precisely
         if ( indices.size() == 0 || indices.size() == this->tau->getValue().getNodes().size() )
         {
-            // just flag everyting for recomputation
-            touch_all = true;
+            // just flag everything for recomputation
+            fullyInvalidateSelf = true;
         }
         else
         {
@@ -4049,8 +4049,8 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::invalidateSpecial
         // maybe all elements changed or the touched-element flags were not set precisely
         if ( indices.size() == 0 )
         {
-            // just flag everyting for recomputation
-            touch_all = true;
+            // just flag everything for recomputation
+            fullyInvalidateSelf = true;
         }
         else
         {
@@ -4071,23 +4071,23 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::invalidateSpecial
     }
     else if ( affecter == p_inv )
     {
-        touch_all = true;
+        fullyInvalidateSelf = true;
     }
     else if (affecter == observation_error_probability || affecter == observation_error_frequencies)
     {
-      touch_all = true;
+      fullyInvalidateSelf = true;
     }
     else if ( affecter == site_rates_probs || affecter == site_matrix_probs )
     {
-	// This doesn't affect the cached conditional likelihoods (so don't touch all of them).
+	// This doesn't affect the cached conditional likelihoods (so don't invalidate all of them).
 	// But it does affect the final likelihood (so we need to recompute that).
     }
-    else if ( affecter != tau ) // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
+    else if ( affecter != tau )
     {
-        touch_all = true;
+        fullyInvalidateSelf = true;
     }
 
-    if ( touch_all == true )
+    if ( fullyInvalidateSelf == true )
     {
 
         markAllPartialLikelihoodsDirty();

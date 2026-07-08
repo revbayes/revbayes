@@ -221,9 +221,9 @@ void NodeAgeConstrainedTreeDistribution::swapParameterInternal( const DagNode *o
  * Invalidate the wrapped tree distribution and mirror its root age locally.
  * Rollback snapshotting is delegated separately.
  */
-void NodeAgeConstrainedTreeDistribution::invalidateSpecialization(const DagNode *affecter, bool touchAll)
+void NodeAgeConstrainedTreeDistribution::invalidateSpecialization(const DagNode *affecter, bool fullyInvalidateSelf)
 {
-    base_distribution->invalidate(affecter, touchAll);
+    base_distribution->invalidate(affecter, fullyInvalidateSelf);
     double a = base_distribution->getValue().getRoot().getAge();
     value->getRoot().setAge( a );
 }

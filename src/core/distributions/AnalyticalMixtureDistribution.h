@@ -39,7 +39,7 @@ namespace RevBayesCore {
         
         // special handling of state changes
         void                                                    restoreSpecialization(void);
-        void                                                    invalidateSpecialization(const DagNode *toucher, bool touchAll);
+        void                                                    invalidateSpecialization(const DagNode *toucher, bool fullyInvalidateSelf);
         
     protected:
         // Parameter management functions
@@ -295,7 +295,7 @@ void RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::restoreSpecializa
  * The next likelihood evaluation recomputes the component probabilities.
  */
 template <class mixtureType>
-void RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::invalidateSpecialization( const DagNode *toucher, bool touchAll )
+void RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::invalidateSpecialization( const DagNode *toucher, bool fullyInvalidateSelf )
 {
     // only do this when the toucher was our parameters
     dirty = true;

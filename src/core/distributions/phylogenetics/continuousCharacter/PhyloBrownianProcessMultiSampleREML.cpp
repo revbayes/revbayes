@@ -617,10 +617,9 @@ void PhyloBrownianProcessMultiSampleREML::snapshotSpecialization( void )
  * Mark multisample Brownian REML likelihood caches dirty after a dependency changes.
  * Snapshot state is stored by IndexedSnapshotCache before this invalidation hook runs.
  */
-void PhyloBrownianProcessMultiSampleREML::invalidateSpecialization( const DagNode* affecter, bool touchAll )
+void PhyloBrownianProcessMultiSampleREML::invalidateSpecialization( const DagNode* affecter, bool fullyInvalidateSelf )
 {
-    
-    // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
+    // Use touched-element metadata when possible; otherwise fully invalidate this distribution's caches.
     if ( affecter == this->heterogeneous_clock_rates )
     {
         
@@ -629,8 +628,8 @@ void PhyloBrownianProcessMultiSampleREML::invalidateSpecialization( const DagNod
         // maybe all elements changed or the touched-element flags were not set precisely
         if ( indices.size() == 0 )
         {
-            // just flag everyting for recomputation
-            touchAll = true;
+            // just flag everything for recomputation
+            fullyInvalidateSelf = true;
         }
         else
         {
@@ -640,7 +639,7 @@ void PhyloBrownianProcessMultiSampleREML::invalidateSpecialization( const DagNod
             {
                 if ( *it >= nodes.size() )
                 {
-                    touchAll = true;
+                    fullyInvalidateSelf = true;
                     break;
                 }
 
@@ -657,8 +656,8 @@ void PhyloBrownianProcessMultiSampleREML::invalidateSpecialization( const DagNod
         // maybe all elements changed or the touched-element flags were not set precisely
         if ( indices.size() == 0 )
         {
-            // just flag everyting for recomputation
-            touchAll = true;
+            // just flag everything for recomputation
+            fullyInvalidateSelf = true;
         }
         else
         {
@@ -669,7 +668,7 @@ void PhyloBrownianProcessMultiSampleREML::invalidateSpecialization( const DagNod
             {
                 if ( *it >= nodes.size() || nodes[*it]->isTip() == false )
                 {
-                    touchAll = true;
+                    fullyInvalidateSelf = true;
                     break;
                 }
 
@@ -683,12 +682,12 @@ void PhyloBrownianProcessMultiSampleREML::invalidateSpecialization( const DagNod
     {
         resetValue();
     }
-    else if ( affecter != this->heterogeneous_clock_rates && affecter != this->within_species_variances && affecter != this->tau ) // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
+    else if ( affecter != this->heterogeneous_clock_rates && affecter != this->within_species_variances && affecter != this->tau )
     {
-        touchAll = true;
+        fullyInvalidateSelf = true;
     }
     
-    if ( touchAll )
+    if ( fullyInvalidateSelf )
     {
         node_likelihoods.invalidate_all();
     }

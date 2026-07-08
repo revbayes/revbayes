@@ -55,7 +55,7 @@ namespace RevBayesCore {
         std::vector<double>                                                 simulateRootCharacters(size_t n);
         void                                                                simulateTipSamples( const std::vector< ContinuousTaxonData > &taxon_data );
         double                                                              sumRootLikelihood(void);
-        virtual void                                                        invalidateSpecialization(const DagNode *toucher, bool touchAll);
+        virtual void                                                        invalidateSpecialization(const DagNode *toucher, bool fullyInvalidateSelf);
 
         // Parameter management functions.
         virtual void                                                        swapParameterInternal(const DagNode *oldP, const DagNode *newP);                         //!< Swap a parameter

@@ -346,7 +346,7 @@ void PhyloBrownianProcessMVN::snapshotSpecialization( void )
  * Mark the Brownian MVN covariance cache invalid after non-root dependencies change.
  * Root-state proposals alter only the mean vector built while summing the likelihood.
  */
-void PhyloBrownianProcessMVN::invalidateSpecialization( const DagNode* affecter, bool touchAll )
+void PhyloBrownianProcessMVN::invalidateSpecialization( const DagNode* affecter, bool fullyInvalidateSelf )
 {
     // changing the root state doesn't affect the covariance matrix.
     if ( affecter == homogeneous_root_state or affecter == heterogeneous_root_state )

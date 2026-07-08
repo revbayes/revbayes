@@ -422,8 +422,9 @@ void BranchRateTreeDistribution::snapshotSpecialization( void )
  * Mark topology-comparison data invalid when either compared tree changes.
  * Branch-rate-prior and root-fraction changes reuse the cached comparison.
  */
-void BranchRateTreeDistribution::invalidateSpecialization(const DagNode *toucher, bool touchAll)
+void BranchRateTreeDistribution::invalidateSpecialization(const DagNode *toucher, bool fullyInvalidateSelf)
 {
-    if ( touchAll == true || toucher == time_tree || toucher == this->dag_node )
+    // The comparison cache is local to this distribution; fullyInvalidateSelf does not control child propagation.
+    if ( fullyInvalidateSelf == true || toucher == time_tree || toucher == this->dag_node )
         tree_comparison_cache.invalidate();
 }

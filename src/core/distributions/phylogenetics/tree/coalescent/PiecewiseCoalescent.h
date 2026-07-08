@@ -48,7 +48,7 @@ namespace RevBayesCore {
         virtual void                                        keepSpecialization(void);
         virtual void                                        restoreSpecialization(void);
         void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);                                    //!< Swap a parameter
-        virtual void                                        invalidateSpecialization(const DagNode *toucher, bool touchAll);
+        virtual void                                        invalidateSpecialization(const DagNode *toucher, bool fullyInvalidateSelf);
 
         // derived helper functions
         double                                              computeLnProbabilityTimes(void) const;                                                              //!< Compute the log-transformed probability of the current value.

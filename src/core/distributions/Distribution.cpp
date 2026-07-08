@@ -152,14 +152,14 @@ const std::vector<const DagNode*>& Distribution::getParameters( void ) const
 }
 
 
-/* Method stub: override for specialized treatment. */
-void Distribution::invalidate( const DagNode *toucher, bool touchAll )
+/* Invalidate local cached state; fullyInvalidateSelf disables partial invalidation. */
+void Distribution::invalidate( const DagNode *toucher, bool fullyInvalidateSelf )
 {
-    invalidateSpecialization( toucher, touchAll );
+    invalidateSpecialization( toucher, fullyInvalidateSelf );
 }
 
 
-/* Method stub: override for specialized treatment. */
+/* Method stub: override for specialized local cache invalidation. */
 void Distribution::invalidateSpecialization( const DagNode *, bool )
 {
     // do nothing

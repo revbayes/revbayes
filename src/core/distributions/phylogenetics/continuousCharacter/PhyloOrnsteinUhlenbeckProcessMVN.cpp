@@ -717,7 +717,7 @@ void PhyloOrnsteinUhlenbeckProcessMVN::snapshotSpecialization( void )
  * Mark the OU MVN likelihood cache invalid after any dependency changes.
  * Root-state changes are included because the cached means depend on them.
  */
-void PhyloOrnsteinUhlenbeckProcessMVN::invalidateSpecialization( const DagNode* affecter, bool touchAll )
+void PhyloOrnsteinUhlenbeckProcessMVN::invalidateSpecialization( const DagNode* affecter, bool fullyInvalidateSelf )
 {
     likelihood_cache.invalidate();
 }

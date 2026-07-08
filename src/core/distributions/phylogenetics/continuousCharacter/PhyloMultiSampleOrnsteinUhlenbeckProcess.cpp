@@ -1043,7 +1043,7 @@ void PhyloMultiSampleOrnsteinUhlenbeckProcess::snapshotSpecialization( void )
  * Mark the multisample OU likelihood cache invalid after any dependency changes.
  * This replaces the old recompute-on-every-call behavior with a real cache.
  */
-void PhyloMultiSampleOrnsteinUhlenbeckProcess::invalidateSpecialization( const DagNode* affecter, bool touchAll )
+void PhyloMultiSampleOrnsteinUhlenbeckProcess::invalidateSpecialization( const DagNode* affecter, bool fullyInvalidateSelf )
 {
     likelihood_cache.invalidate();
 }

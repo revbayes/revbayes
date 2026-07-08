@@ -753,7 +753,7 @@ void HeterogeneousRateBirthDeath::swapParameterInternal( const DagNode *oldP, co
  * Synchronize the root node age when the root-age parameter changes.
  * Affected child nodes are invalidated through the DAG node afterward.
  */
-void HeterogeneousRateBirthDeath::invalidateSpecialization(const DagNode *affecter, bool touchAll)
+void HeterogeneousRateBirthDeath::invalidateSpecialization(const DagNode *affecter, bool fullyInvalidateSelf)
 {
     
     if ( affecter == root_age )

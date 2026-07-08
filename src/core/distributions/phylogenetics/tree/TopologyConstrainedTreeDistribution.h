@@ -42,7 +42,7 @@ namespace RevBayesCore {
         
         void                                                initializeBitSets();
         bool                                                childrenAreAffectedBy(const DagNode *affecter) const override;                                  //!< Does this changed parameter make the value affect children?
-        virtual void                                        invalidateSpecialization(const DagNode *toucher, bool touchAll);
+        virtual void                                        invalidateSpecialization(const DagNode *toucher, bool fullyInvalidateSelf);
         virtual void                                        keepSpecialization(void);
         virtual void                                        restoreSpecialization(void);
         virtual void                                        snapshotSpecialization(void);

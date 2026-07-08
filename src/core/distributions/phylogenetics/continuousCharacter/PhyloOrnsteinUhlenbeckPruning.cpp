@@ -810,8 +810,9 @@ void PhyloOrnsteinUhlenbeckPruning::snapshotSpecialization( void )
  * Mark OU pruning likelihood cache entries dirty after a dependency changes.
  * Snapshot state is stored by IndexedSnapshotCache before this invalidation hook runs.
  */
-void PhyloOrnsteinUhlenbeckPruning::invalidateSpecialization( const DagNode* affecter, bool touchAll )
+void PhyloOrnsteinUhlenbeckPruning::invalidateSpecialization( const DagNode* affecter, bool fullyInvalidateSelf )
 {
+    // Branch-parameter changes can invalidate targeted branches; other changes fall back to full local invalidation.
     const TypedDagNode< RbVector< double > > *branch_parameter = NULL;
     if ( affecter == this->heterogeneous_alpha )
     {
@@ -833,8 +834,8 @@ void PhyloOrnsteinUhlenbeckPruning::invalidateSpecialization( const DagNode* aff
         // maybe all elements changed or the touched-element flags were not set precisely
         if ( indices.size() == 0 )
         {
-            // just flag everyting for recomputation
-            touchAll = true;
+            // just flag everything for recomputation
+            fullyInvalidateSelf = true;
         }
         else
         {
@@ -854,11 +855,11 @@ void PhyloOrnsteinUhlenbeckPruning::invalidateSpecialization( const DagNode* aff
 
     if ( affecter == this->homogeneous_alpha || affecter == this->homogeneous_sigma || affecter == this->homogeneous_theta )
     {
-        touchAll = true;
+        fullyInvalidateSelf = true;
     }
-    else if ( branch_parameter == NULL && affecter != this->root_state && affecter != this->tau ) // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
+    else if ( branch_parameter == NULL && affecter != this->root_state && affecter != this->tau )
     {
-        touchAll = true;
+        fullyInvalidateSelf = true;
     }
 
     if ( affecter == this->dag_node )
@@ -866,7 +867,7 @@ void PhyloOrnsteinUhlenbeckPruning::invalidateSpecialization( const DagNode* aff
         resetValue();
     }
     
-    if ( touchAll )
+    if ( fullyInvalidateSelf )
     {
         invalidateInternalNodes();
     }

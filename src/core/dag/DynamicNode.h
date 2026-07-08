@@ -28,7 +28,7 @@ namespace RevBayesCore {
     protected:
         virtual void                                        keepMe(const DagNode* affecter);                                                //!< Keep value of this and affected nodes
         virtual void                                        restoreMe(const DagNode *restorer);                                             //!< Restore value of this node
-        virtual void                                        touchMe(const DagNode *toucher, bool touchAll);                                 //!< Tell affected nodes value is reset
+        virtual void                                        touchMe(const DagNode *toucher, bool fullyInvalidateSelf);                                 //!< Mark this node for recomputation; the flag forces full local invalidation.
         
     };
     
@@ -167,9 +167,9 @@ void RevBayesCore::DynamicNode<valueType>::restoreMe( const DagNode * /*restorer
     // Default implementation does nothing.
 }
 
-/** Touch hook for dynamic nodes that need specialized invalidation behavior. */
+/** Touch hook for dynamic nodes that need specialized local invalidation behavior. */
 template<class valueType>
-void RevBayesCore::DynamicNode<valueType>::touchMe( const DagNode * /*toucher*/, bool /*touchAll*/ )
+void RevBayesCore::DynamicNode<valueType>::touchMe( const DagNode * /*toucher*/, bool /*fullyInvalidateSelf*/ )
 {
     // Default implementation does nothing.
 }

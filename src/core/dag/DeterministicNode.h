@@ -43,7 +43,7 @@ namespace RevBayesCore {
         void                                                keepMe(const DagNode* affecter);                                            //!< Keep value of this and affected nodes
         void                                                restoreMe(const DagNode *restorer);                                         //!< Restore value of this nodes
         void                                                swapParameter(const DagNode *oldP, const DagNode *newP);                    //!< Swap the parameter of this node (needs overwriting in deterministic and stochastic nodes)
-        virtual void                                        touchMe(const DagNode *toucher, bool touchAll);                             //!< Touch myself and tell affected nodes value is reset
+        virtual void                                        touchMe(const DagNode *toucher, bool fullyInvalidateSelf);                             //!< Mark this node for recomputation; the flag forces full local invalidation.
 
     private:
 
@@ -463,18 +463,17 @@ void RevBayesCore::DeterministicNode<valueType>::swapParent( const RevBayesCore:
 
 
 /**
- * Touch this node for recalculation.
- *
- *
+ * Mark this deterministic node for lazy recomputation.
+ * fullyInvalidateSelf is forwarded to affected children; deterministic nodes do not have local caches to broaden here.
  */
 template<class valueType>
-void RevBayesCore::DeterministicNode<valueType>::touchMe( const DagNode *toucher, bool touchAll )
+void RevBayesCore::DeterministicNode<valueType>::touchMe( const DagNode *toucher, bool fullyInvalidateSelf )
 {
 
     bool needed_update = needs_update;
 
     // delegate call to base class
-    DynamicNode<valueType>::touchMe( toucher, touchAll );
+    DynamicNode<valueType>::touchMe( toucher, fullyInvalidateSelf );
 
 
     // We need to touch the function always because of specialized touch functionality in some functions, like vector functions.
@@ -490,8 +489,8 @@ void RevBayesCore::DeterministicNode<valueType>::touchMe( const DagNode *toucher
     // Keep the always-true branch as a marker for a future narrower propagation rule.
     if ( needed_update == false || true )
     {
-        // Dispatch the touch message to downstream nodes.
-        this->touchAffected( touchAll );
+        // Notify downstream nodes.
+        this->touchAffected( fullyInvalidateSelf );
     }
 
 }

@@ -587,10 +587,9 @@ void PhyloMultivariateBrownianProcessMultiSampleREML::snapshotSpecialization( vo
  * Mark multisample multivariate Brownian REML caches dirty after a dependency changes.
  * Rate-matrix invalidation marks everything dirty because likelihoods read the covariance directly.
  */
-void PhyloMultivariateBrownianProcessMultiSampleREML::invalidateSpecialization( const DagNode* affecter, bool touchAll )
+void PhyloMultivariateBrownianProcessMultiSampleREML::invalidateSpecialization( const DagNode* affecter, bool fullyInvalidateSelf )
 {
-    
-    // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
+    // Use touched-element metadata when possible; otherwise fully invalidate this distribution's caches.
     if ( affecter == this->heterogeneous_clock_rates )
     {
         
@@ -599,8 +598,8 @@ void PhyloMultivariateBrownianProcessMultiSampleREML::invalidateSpecialization( 
         // maybe all elements changed or the touched-element flags were not set precisely
         if ( indices.size() == 0 )
         {
-            // just flag everyting for recomputation
-            touchAll = true;
+            // just flag everything for recomputation
+            fullyInvalidateSelf = true;
         }
         else
         {
@@ -610,7 +609,7 @@ void PhyloMultivariateBrownianProcessMultiSampleREML::invalidateSpecialization( 
             {
                 if ( *it >= nodes.size() )
                 {
-                    touchAll = true;
+                    fullyInvalidateSelf = true;
                     break;
                 }
 
@@ -621,13 +620,13 @@ void PhyloMultivariateBrownianProcessMultiSampleREML::invalidateSpecialization( 
     else if ( affecter == rate_matrix )
     {
         // we need to recompute the likelihood
-        touchAll = true;
+        fullyInvalidateSelf = true;
     }
     else if ( affecter == this->within_species_variances )
     {
         // Compatibility note: nested vector touched indices do not identify both site and species.
         // Keep full invalidation until nested touched-index metadata can address individual tips.
-        touchAll = true;
+        fullyInvalidateSelf = true;
         
     }
 //    else if ( affecter == this->within_species_variances2 )
@@ -638,8 +637,8 @@ void PhyloMultivariateBrownianProcessMultiSampleREML::invalidateSpecialization( 
 //        // maybe all elements changed or the touched-element flags were not set precisely
 //        if ( indices.size() == 0 )
 //        {
-//            // just flag everyting for recomputation
-//            touchAll = true;
+//            // just flag everything for recomputation
+//            fullyInvalidateSelf = true;
 //        }
 //        else
 //        {
@@ -657,12 +656,12 @@ void PhyloMultivariateBrownianProcessMultiSampleREML::invalidateSpecialization( 
     {
         resetValue();
     }
-    else if ( affecter != this->tau ) // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
+    else if ( affecter != this->tau )
     {
-        touchAll = true;
+        fullyInvalidateSelf = true;
     }
     
-    if ( touchAll )
+    if ( fullyInvalidateSelf )
     {
         node_likelihoods.invalidate_all();
     }

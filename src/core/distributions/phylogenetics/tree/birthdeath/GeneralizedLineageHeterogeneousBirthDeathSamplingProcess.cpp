@@ -1214,7 +1214,7 @@ std::vector<double> GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::si
  * Mark cached tree, likelihood, and parameter-specific TensorPhylo state dirty.
  * This hook synchronizes root age but does not save rollback state.
  */
-void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::invalidateSpecialization(const DagNode *affecter, bool touchAll)
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::invalidateSpecialization(const DagNode *affecter, bool fullyInvalidateSelf)
 {
 
     if ( affecter == age )

@@ -171,9 +171,9 @@ void TransformedVectorDistribution::redrawValue( void )
  * Forward invalidation to the wrapped vector distribution.
  * This preserves the wrapper's existing delegation behavior.
  */
-void TransformedVectorDistribution::invalidateSpecialization(const DagNode *affecter, bool touchAll)
+void TransformedVectorDistribution::invalidateSpecialization(const DagNode *affecter, bool fullyInvalidateSelf)
 {
-    base_dist->invalidate(affecter, touchAll);
+    base_dist->invalidate(affecter, fullyInvalidateSelf);
 }
 
 void TransformedVectorDistribution::restoreSpecialization(void)

@@ -995,9 +995,9 @@ void PhyloMultiSampleOrnsteinUhlenbeckProcessREML::snapshotSpecialization( void 
  * Mark multisample OU REML likelihood caches dirty after a dependency changes.
  * Snapshot state is stored by IndexedSnapshotCache before this invalidation hook runs.
  */
-void PhyloMultiSampleOrnsteinUhlenbeckProcessREML::invalidateSpecialization( const DagNode* affecter, bool touchAll )
+void PhyloMultiSampleOrnsteinUhlenbeckProcessREML::invalidateSpecialization( const DagNode* affecter, bool fullyInvalidateSelf )
 {
-
+    // Branch-parameter changes can invalidate targeted branches; other changes fall back to full local invalidation.
     const TypedDagNode< RbVector< double > > *branch_parameter = NULL;
     if ( affecter == this->heterogeneous_alpha )
     {
@@ -1015,8 +1015,6 @@ void PhyloMultiSampleOrnsteinUhlenbeckProcessREML::invalidateSpecialization( con
     {
         branch_parameter = this->heterogeneous_clock_rates;
     }
-
-    // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
     if ( branch_parameter != NULL )
     {
 
@@ -1025,8 +1023,8 @@ void PhyloMultiSampleOrnsteinUhlenbeckProcessREML::invalidateSpecialization( con
         // maybe all elements changed or the touched-element flags were not set precisely
         if ( indices.size() == 0 )
         {
-            // just flag everyting for recomputation
-            touchAll = true;
+            // just flag everything for recomputation
+            fullyInvalidateSelf = true;
         }
         else
         {
@@ -1036,7 +1034,7 @@ void PhyloMultiSampleOrnsteinUhlenbeckProcessREML::invalidateSpecialization( con
             {
                 if ( *it >= nodes.size() )
                 {
-                    touchAll = true;
+                    fullyInvalidateSelf = true;
                     break;
                 }
 
@@ -1053,8 +1051,8 @@ void PhyloMultiSampleOrnsteinUhlenbeckProcessREML::invalidateSpecialization( con
         // maybe all elements changed or the touched-element flags were not set precisely
         if ( indices.size() == 0 )
         {
-            // just flag everyting for recomputation
-            touchAll = true;
+            // just flag everything for recomputation
+            fullyInvalidateSelf = true;
         }
         else
         {
@@ -1065,7 +1063,7 @@ void PhyloMultiSampleOrnsteinUhlenbeckProcessREML::invalidateSpecialization( con
             {
                 if ( *it >= nodes.size() || nodes[*it]->isTip() == false )
                 {
-                    touchAll = true;
+                    fullyInvalidateSelf = true;
                     break;
                 }
 
@@ -1081,11 +1079,11 @@ void PhyloMultiSampleOrnsteinUhlenbeckProcessREML::invalidateSpecialization( con
 
     if ( affecter == this->homogeneous_alpha || affecter == this->homogeneous_sigma || affecter == this->homogeneous_theta || affecter == this->homogeneous_clock_rate || affecter == this->homogeneous_site_rate || affecter == this->heterogeneous_site_rates )
     {
-        touchAll = true;
+        fullyInvalidateSelf = true;
     }
-    else if ( branch_parameter == NULL && affecter != this->within_species_variances && affecter != this->root_state && affecter != this->tau ) // if the topology wasn't the culprit for the touch, then we just flag everything as dirty
+    else if ( branch_parameter == NULL && affecter != this->within_species_variances && affecter != this->root_state && affecter != this->tau )
     {
-        touchAll = true;
+        fullyInvalidateSelf = true;
     }
 
     if ( affecter == this->dag_node )
@@ -1093,7 +1091,7 @@ void PhyloMultiSampleOrnsteinUhlenbeckProcessREML::invalidateSpecialization( con
         resetValue();
     }
     
-    if ( touchAll )
+    if ( fullyInvalidateSelf )
     {
         node_likelihoods.invalidate_all();
     }

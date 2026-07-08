@@ -44,7 +44,7 @@ template <class valueType> class TypedDagNode;
         virtual void                                        keepSpecialization(void);
         virtual void                                        restoreSpecialization(void);
         virtual void                                        snapshotSpecialization(void);
-        virtual void                                        invalidateSpecialization(const DagNode *toucher, bool touchAll);
+        virtual void                                        invalidateSpecialization(const DagNode *toucher, bool fullyInvalidateSelf);
         
         // helper functions
         double                                              computeLnProbabilityTimes(void) const;                                                //!< Compute the log-transformed probability of the current value.

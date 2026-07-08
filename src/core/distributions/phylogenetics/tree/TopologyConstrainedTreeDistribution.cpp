@@ -1290,9 +1290,9 @@ void TopologyConstrainedTreeDistribution::swapParameterInternal( const DagNode *
  * Invalidate the wrapped tree distribution after parent changes.
  * Clade rollback state is saved separately by snapshotSpecialization().
  */
-void TopologyConstrainedTreeDistribution::invalidateSpecialization(const DagNode *affecter, bool touchAll)
+void TopologyConstrainedTreeDistribution::invalidateSpecialization(const DagNode *affecter, bool fullyInvalidateSelf)
 {
-    base_distribution->invalidate(affecter, touchAll);
+    base_distribution->invalidate(affecter, fullyInvalidateSelf);
 }
 
 void TopologyConstrainedTreeDistribution::keepSpecialization(void)

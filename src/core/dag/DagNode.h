@@ -128,8 +128,8 @@ template <class valueType> class RbOrderedSet;
         virtual void                                                setIgnoreData(bool tf);                                                                     //!< Set whether we want to have the probability of the prior only.
         void                                                        setVisitFlag(bool tf, const size_t flagType);
         virtual void                                                swapParent(const DagNode *oldP, const DagNode *newP);                                       //!< Exchange the parent node which includes setting myself as a child of the new parent and removing myself from my old parents children list
-        void                                                        touch(bool touchAll=false);
-        void                                                        touchAffected(bool touchAll=false);                                                         //!< Touch affected nodes (flag for recalculation)
+        void                                                        touch(bool fullyInvalidateSelf=false);                                                                //!< Mark this node for recomputation; the flag forces full local cache invalidation.
+        void                                                        touchAffected(bool fullyInvalidateSelf=false);                                                        //!< Notify affected children; the flag is forwarded for each child's local cache invalidation.
 
     protected:
                                                                     DagNode(const std::string &n);                                                              //!< Constructor
@@ -140,7 +140,7 @@ template <class valueType> class RbOrderedSet;
         virtual void                                                getAffected(RbOrderedSet<DagNode *>& affected, const DagNode* affecter) = 0;                //!< get affected nodes
         virtual void                                                keepMe(const DagNode* affecter) = 0;                                                        //!< Keep value of myself
         virtual void                                                restoreMe(const DagNode *restorer) = 0;                                                     //!< Restore value of this nodes
-        virtual void                                                touchMe(const DagNode *toucher, bool touchAll) = 0;                                         //!< Touch myself (flag for recalculation)
+        virtual void                                                touchMe(const DagNode *toucher, bool fullyInvalidateSelf) = 0;                                        //!< Mark this node for recomputation; the flag forces full local cache invalidation.
 
         // helper functions
         void                                                        getPrintableChildren(std::vector<DagNode*> &c) const;
