@@ -173,8 +173,7 @@ void GMRFHyperpriorGibbsMove::performGibbsMove( void )
     eta = std::sqrt(1/eta_squared_inverse);
 
     global_scale->getValue() = eta;
-    global_scale->touch();
-    global_scale->keep();
+    global_scale->invalidate();
 
 }
 

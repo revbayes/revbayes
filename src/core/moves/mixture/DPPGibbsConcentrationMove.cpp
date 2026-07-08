@@ -81,8 +81,7 @@ void RevBayesCore::DPPGibbsConcentrationMove::performGibbsMove( void )
 		newAlpha = RbStatistics::Gamma::rv(sh + k - 1.0, rt - log(eta), *GLOBAL_RNG);
 		
 	cpv = newAlpha;
-	variable->touch();
-	variable->keep();
+	variable->invalidate();
 }
 
 void RevBayesCore::DPPGibbsConcentrationMove::swapNodeInternal(DagNode *oldN, DagNode *newN)
@@ -109,4 +108,3 @@ void RevBayesCore::DPPGibbsConcentrationMove::swapNodeInternal(DagNode *oldN, Da
     }
 
 }
-

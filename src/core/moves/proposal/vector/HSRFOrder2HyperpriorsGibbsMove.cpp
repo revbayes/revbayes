@@ -250,7 +250,7 @@ void HSRFOrder2HyperpriorsGibbsMove::performGibbsMove( void )
         double lambda_squared = 1/(RbStatistics::Helper::rndGamma(1, *GLOBAL_RNG) / (psi_inverse + (2.0*delta_theta_squared)/two_zeta_squared_eta_squared) ); // lambda_squared[i] ~ Gamma(0.5, psi_inverse[i] + delta_theta^2/(2*eta^2*zeta^2)
 
         local_scales[0]->getValue() = std::sqrt(lambda_squared);
-        local_scales[0]->touch();
+        local_scales[0]->invalidate();
 
         eta_squared_rate += 2.0 * delta_theta_squared/lambda_squared;
 
@@ -265,7 +265,7 @@ void HSRFOrder2HyperpriorsGibbsMove::performGibbsMove( void )
             lambda_squared = 1/(RbStatistics::Helper::rndGamma(1, *GLOBAL_RNG) / (psi_inverse + delta_theta_squared/two_zeta_squared_eta_squared) ); // lambda_squared[i] ~ Gamma(0.5, psi_inverse[i] + delta_theta^2/(2*eta^2*zeta^2)
 
             local_scales[i]->getValue() = std::sqrt(lambda_squared);
-            local_scales[i]->touch();
+            local_scales[i]->invalidate();
 
             eta_squared_rate += delta_theta_squared/lambda_squared;
         }
@@ -281,13 +281,7 @@ void HSRFOrder2HyperpriorsGibbsMove::performGibbsMove( void )
     double eta_squared_inverse = RbStatistics::Helper::rndGamma(0.5*n, *GLOBAL_RNG) / eta_squared_rate; // eta_squared ~ InverseGamma(n/2, eta_squared_rate)
 
     global_scale->getValue() = std::sqrt(1/eta_squared_inverse);
-    global_scale->touch();
-
-    // keep the variables
-    for (size_t i = 0; i < field_size; ++i)
-    {
-      local_scales[i]->keep();
-    }
+    global_scale->invalidate();
 
 }
 

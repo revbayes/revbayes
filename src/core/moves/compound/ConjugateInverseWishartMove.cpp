@@ -128,10 +128,8 @@ void ConjugateInverseWishartMove::performGibbsMove( void )
     }
     
     // resample sigma based on new sufficient statistics
-    sigma->setValue( RbStatistics::InverseWishart::rv(A, num_children + df, *rng).clone() );
-
-    sigma->touch();
-    sigma->keep();
+    sigma->setValue( RbStatistics::InverseWishart::rv(A, num_children + df, *rng).clone(), false );
+    sigma->invalidate();
 }
 
 
@@ -144,5 +142,4 @@ void ConjugateInverseWishartMove::swapNodeInternal(DagNode *oldN, DagNode *newN)
     }
     
 }
-
 
