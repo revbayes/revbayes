@@ -510,7 +510,7 @@ double RevBayesCore::StochasticNode<valueType>::getLnProbabilityRatio( void )
     // 2. If we snapshotted the node when the log probability was not calculated, then we don't have a value for
     // the probability of the previous state.
     if (not *stored_ln_prob)
-        throw RbException()<<"getLnProbabilityRatio: the log probability for the previous state was never calculated";
+        throw RbException()<<"getLnProbabilityRatio: the log probability for the previous state of node '"<<this->getName()<<"' was never calculated";
 
     // 3. If (a) the node is snapshotted/affected and (b) we know the previous probability, then use it.
     return getLnProbability() - **stored_ln_prob;
@@ -535,7 +535,7 @@ double RevBayesCore::StochasticNode<valueType>::getPrevLnProbability( void ) con
     // 2. If we snapshotted the node when the log probability was not calculated, then we don't have a value for
     // the probability of the previous state.
     if (not *stored_ln_prob)
-        throw RbException()<<"getLnProbabilityRatio: the log probability for the previous state was never calculated";
+        throw RbException()<<"getPrevLnProbability: the log probability for the previous state of node '"<<this->getName()<<"' was never calculated";
 
     // 3. If (a) the node is snapshotted/affected and (b) we know the previous probability, then use it.
     return **stored_ln_prob;
