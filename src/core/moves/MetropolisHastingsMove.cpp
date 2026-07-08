@@ -163,6 +163,13 @@ Proposal& MetropolisHastingsMove::getProposal( void )
 
 void MetropolisHastingsMove::performHillClimbingMove( double lHeat, double pHeat )
 {
+    const std::vector<DagNode*> nodes = getDagNodes();
+
+    // Snapshot the pre-proposal state before any proposal-side mutation can invalidate it.
+    for (DagNode* node: nodes)
+    {
+        node->snapshot();
+    }
 
     // Propose a new value
     proposal->prepareProposal();
@@ -170,7 +177,6 @@ void MetropolisHastingsMove::performHillClimbingMove( double lHeat, double pHeat
 
 
     const RbOrderedSet<DagNode*> &affectedNodes = getAffectedNodes();
-    const std::vector<DagNode*> nodes = getDagNodes();
 
     // first we touch all the nodes
     // that will set the flags for recomputation
@@ -310,6 +316,12 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
 
         // 5. Compare pdfs for each node
         compareNodePrs(proposal->getLongProposalName(), untouched_before_proposal, touched_before_proposal, "PDFs not up-to-date before proposal");
+    }
+
+    // Snapshot the pre-proposal state before any proposal-side mutation can invalidate it.
+    for (DagNode* node: nodes)
+    {
+        node->snapshot();
     }
 
     // Propose a new value
