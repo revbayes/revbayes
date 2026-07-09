@@ -156,7 +156,6 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_EpisodicStateDependent
             }
             RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* l_rates = static_cast<const ModelVector< ModelVector<RealPos> > &>( lambda->getRevObject() ).getDagNode();
             RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                           l_times = static_cast<const ModelVector< RealPos > &>( lambda_times->getRevObject() ).getDagNode();
-//            d->setSpeciationRates(l_rates);
             d->setSpeciationRates(l_rates, l_times);
         }
         else
@@ -185,8 +184,7 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_EpisodicStateDependent
             }
             RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* m_rates = static_cast<const ModelVector< ModelVector<RealPos> > &>( mu->getRevObject() ).getDagNode();
             RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                           m_times = static_cast<const ModelVector< RealPos > &>( mu_times->getRevObject() ).getDagNode();
-            d->setExtinctionRates(m_rates);
-//            d->setExtinctionRates(m_rates, m_times);
+            d->setExtinctionRates(m_rates, m_times);
         }
         else
         {
@@ -204,10 +202,13 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_EpisodicStateDependent
         }
         else if ( phi->getRevObject().isType( ModelVector< ModelVector<RealPos> >::getClassTypeSpec() ) )
         { // case 2: time heterogeneous
+            if ( phi_times->getRevObject() == RevNullObject::getInstance() )
+            {
+                throw RbException("If you provide a vector of fossilization rates, then you also must provide a vector of fossilization rate change times.");
+            }
             RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* p_rates = static_cast<const ModelVector< ModelVector<RealPos> > &>( phi->getRevObject() ).getDagNode();
             RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                           p_times = static_cast<const ModelVector< RealPos > &>( phi_times->getRevObject() ).getDagNode();
-            d->setFossilizationRates(p_rates);
-//            d->setFossilizationRates(p_rates, p_times);
+            d->setFossilizationRates(p_rates, p_times);
         }
         else
         {
@@ -219,10 +220,13 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_EpisodicStateDependent
     // mass-extinction event
     if ( gamma->getRevObject() != RevNullObject::getInstance() )
     {
+        if ( gamma_times->getRevObject() == RevNullObject::getInstance() )
+        {
+            throw RbException("If you provide a vector of mass extinction survival probabilities, then you also must provide a vector of mass extinction times.");
+        }
         RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* g_probs = static_cast<const ModelVector< ModelVector<Probability> > &>( gamma->getRevObject() ).getDagNode();
-//        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                           g_times = static_cast<const ModelVector< RealPos> &>( gamma_times->getRevObject() ).getDagNode();
-        d->setMassExtinctionSurvivalProbabilities(g_probs);
-//        d->setMassExtinctionSurvivalProbabilities(g_probs, g_times);
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                           g_times = static_cast<const ModelVector< RealPos> &>( gamma_times->getRevObject() ).getDagNode();
+        d->setMassExtinctionSurvivalProbabilities(g_probs, g_times);
     }
 
     
@@ -232,19 +236,28 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_EpisodicStateDependent
         if ( eta->getRevObject().isType( RealPos::getClassTypeSpec() ) )
         {
             RevBayesCore::TypedDagNode< double >* h_rate = static_cast<const RealPos &>( eta->getRevObject() ).getDagNode();
-//            d->setStateChangeRate(h_rate);
+            d->setTransitionRate(h_rate);
+        }
+        else if ( eta->getRevObject().isType( ModelVector< ModelVector<RealPos> >::getClassTypeSpec() ) )
+        { // case 2: time heterogeneous but state homogeneous
+            if ( eta_times->getRevObject() == RevNullObject::getInstance() )
+            {
+                throw RbException("If you provide a vector of transitions rates, then you also must provide a vector of transition rate change times.");
+            }
+            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* e_rates = static_cast<const ModelVector <RealPos > &>( eta->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* e_times = static_cast<const ModelVector< RealPos > &>( eta_times->getRevObject() ).getDagNode();
+            d->setTransitionRate(e_rates, e_times);
         }
         else if ( eta->getRevObject().isType( RateGenerator::getClassTypeSpec() ) )
-        { // case 2: time homogeneous
+        { // case 3: time homogeneous but state heterogeneous
             RevBayesCore::TypedDagNode< RevBayesCore::RateGenerator >* h_mats = static_cast<const RateGenerator &>( eta->getRevObject() ).getDagNode();
             d->setTransitionRateMatrix(h_mats);
         }
         else if ( eta->getRevObject().isType( ModelVector<RateGenerator>::getClassTypeSpec() ) )
-        { // case 3: time heterogeneous
+        { // case 4: time heterogeneous
             RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RateGenerator > >* h_mats  = static_cast<const ModelVector<RateGenerator> &>( eta->getRevObject() ).getDagNode();
             RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                        h_times = static_cast<const ModelVector< RealPos > &>( eta_times->getRevObject() ).getDagNode();
-            d->setTransitionRateMatrix(h_mats);
-//            d->setTransitionRateMatrix(h_mats, h_times);
+            d->setTransitionRateMatrix(h_mats, h_times);
         }
         else
         {
@@ -414,6 +427,7 @@ const MemberRules& Dist_EpisodicStateDependentSpeciationExtinctionFossilizationP
         // state changes
         std::vector<TypeSpec> eta_types;
         eta_types.push_back( RealPos::getClassTypeSpec() );
+        eta_types.push_back( ModelVector<RealPos>::getClassTypeSpec() );
         eta_types.push_back( RateGenerator::getClassTypeSpec() );
         eta_types.push_back( ModelVector<RateGenerator>::getClassTypeSpec() );
         dist_member_rules.push_back( new ArgumentRule( "eta",          eta_types,                                                       "The anagenetic rates of change for each time interval.",                                     ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
@@ -425,8 +439,7 @@ const MemberRules& Dist_EpisodicStateDependentSpeciationExtinctionFossilizationP
         dist_member_rules.push_back( new ArgumentRule( "omega",        omega_types,                                                     "The cladogenetic event probabilities for each time interval.",                               ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
         dist_member_rules.push_back( new ArgumentRule( "omegaTimes",   ModelVector< RealPos >::getClassTypeSpec(),                      "The times at which the cladogenetic rates change.",                                          ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new ModelVector<RealPos>() ) );
 
-//        dist_member_rules.push_back( new ArgumentRule( "zeta",         ModelVector<StochasticMatrix>::getClassTypeSpec(),               "The probabilities of change for each mass-extinction event.",                                ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
-
+        
         std::vector<TypeSpec> sampling_fraction_types;
         sampling_fraction_types.push_back( Probability::getClassTypeSpec() );
         sampling_fraction_types.push_back( ModelVector<Probability>::getClassTypeSpec() );
@@ -443,24 +456,12 @@ const MemberRules& Dist_EpisodicStateDependentSpeciationExtinctionFossilizationP
         options_condition.push_back( "treeExtant" );
         dist_member_rules.push_back( new OptionRule( "condition", new RlString("time"), options_condition, "The condition of the process." ) );
 
-        // taxa
-//        dist_member_rules.push_back( new ArgumentRule( "taxa", ModelVector<Taxon>::getClassTypeSpec(), "The taxa in the tree.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-
-        // number of states
-//        dist_member_rules.push_back( new ArgumentRule( "nStates", Natural::getClassTypeSpec(), "The number of discrete states.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(2) ) );
-
-        // number of processors
-//        dist_member_rules.push_back( new ArgumentRule( "nProc", Natural::getClassTypeSpec(), "The number of processors for parallel calculations.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1) ) );
-
         // tolerances
         dist_member_rules.push_back( new ArgumentRule( "absTol", RealPos::getClassTypeSpec(), "The absolute tolerance of the numerical integrator.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RealPos(1e-7) ) );
         dist_member_rules.push_back( new ArgumentRule( "relTol", RealPos::getClassTypeSpec(), "The relative tolerance of the numerical integrator.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RealPos(1e-7) ) );
 
         // max number of steps
         dist_member_rules.push_back( new ArgumentRule( "maxDenseSteps", Natural::getClassTypeSpec(), "The maximum number of steps dense approximators are allowed to try before giving up.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(10000) ) );
-
-        // zero indexing
-//        dist_member_rules.push_back( new ArgumentRule( "zeroIndex", RlBoolean::getClassTypeSpec(), "Does the state space include zero?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( true ) ) );
 
         dist_member_rules.push_back( new ArgumentRule( "initialTree" , TimeTree::getClassTypeSpec() , "Instead of drawing a tree from the distribution, initialize distribution with this tree.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
         dist_member_rules.push_back( new ArgumentRule( "ageCheckPrecision", Natural::getClassTypeSpec(), "If an initial tree is provided, how many decimal places should be used when checking its tip ages against a taxon file?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(4) ) );
@@ -564,14 +565,6 @@ void Dist_EpisodicStateDependentSpeciationExtinctionFossilizationProcess::setCon
     else if ( name == "condition" )
     {
         condition = var;
-    }
-    else if ( name == "taxa" )
-    {
-        taxa = var;
-    }
-    else if ( name == "nStates" )
-    {
-        n_states = var;
     }
     else if ( name == "absTol")
     {

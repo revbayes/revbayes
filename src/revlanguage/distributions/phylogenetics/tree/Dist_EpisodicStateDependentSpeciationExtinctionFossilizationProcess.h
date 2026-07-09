@@ -57,12 +57,6 @@ namespace RevLanguage {
         // number of dense integrator attempts
         RevPtr<const RevVariable>                                               num_step;         //!< The maximum number of steps before giving up allowed for dense integrators
 
-        // taxa
-        RevPtr<const RevVariable>                                               taxa;            //!< The taxa in the tree
-
-        // number of states
-        RevPtr<const RevVariable>                                               n_states;        //!< The number of discrete states
-
         // age
         RevPtr<const RevVariable>                                               start_age;       //!< The age at the start of the process
         std::string                                                             start_type;      //!< The start condition of the process (rootAge/originAge)

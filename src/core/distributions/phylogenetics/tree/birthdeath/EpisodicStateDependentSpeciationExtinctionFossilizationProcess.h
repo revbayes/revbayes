@@ -65,17 +65,19 @@ namespace RevBayesCore {
         void                                                            setCladogenesisMatrix(const TypedDagNode< CladogeneticSpeciationRateMatrix > *r);
 //        void                                                            setCladogenesisMatrix(const TypedDagNode< CladogeneticSpeciationRateMatrix > *r);
         void                                                            setExtinctionRates(const TypedDagNode< RbVector<double> > *r);
-        void                                                            setExtinctionRates(const TypedDagNode< RbVector< RbVector<double> > > *r);
+        void                                                            setExtinctionRates(const TypedDagNode< RbVector< RbVector<double> > > *r, const TypedDagNode<RbVector<double> >* t);
         void                                                            setFossilizationRates(const TypedDagNode< RbVector<double> > *r);
-        void                                                            setFossilizationRates(const TypedDagNode< RbVector<RbVector<double> > > *r);
-        void                                                            setMassExtinctionSurvivalProbabilities(const TypedDagNode<RbVector<RbVector<double> > > *p);
+        void                                                            setFossilizationRates(const TypedDagNode< RbVector<RbVector<double> > > *r, const TypedDagNode<RbVector<double> >* t);
+        void                                                            setMassExtinctionSurvivalProbabilities(const TypedDagNode<RbVector<RbVector<double> > > *p, const TypedDagNode<RbVector<double> >* t);
         void                                                            setSampleCharacterHistory(bool sample_history);                                                     //!< Set whether or not we are sampling the character history along branches.
         void                                                            setSamplingFraction(const TypedDagNode< double > *r);
         void                                                            setSamplingFraction(const TypedDagNode< RbVector<double> > *r);
         void                                                            setSpeciationRates(const TypedDagNode< RbVector<double> > *r);
         void                                                            setSpeciationRates(const TypedDagNode< RbVector< RbVector<double> > > *r, const TypedDagNode<RbVector<double> >* t);
+        void                                                            setTransitionRate(const TypedDagNode<double> *r);
+        void                                                            setTransitionRate(const TypedDagNode< RbVector<double> > *r, const TypedDagNode<RbVector<double> >* t);
         void                                                            setTransitionRateMatrix(const TypedDagNode< RateGenerator > *m);
-        void                                                            setTransitionRateMatrix(const TypedDagNode< RbVector< RateGenerator > > *m);
+        void                                                            setTransitionRateMatrix(const TypedDagNode< RbVector< RateGenerator > > *m, const TypedDagNode<RbVector<double> >* t);
         void                                                            setNumberOfTimeSlices(double n);                                                                    //!< Set the number of time slices for the numerical ODE.
         virtual void                                                    setValue(Tree *v, bool f=false);                                                                    //!< Set the current value, e.g. attach an observation (clamp)
         
@@ -88,7 +90,7 @@ namespace RevBayesCore {
 
     protected:
         
-        double                                                          getEventRate(void) const;
+        double                                                          getEventRate(double a) const;
         const RateGenerator&                                            getEventRateMatrix(double a) const;
         std::vector<double>                                             getRootFrequencies(void) const;
 
@@ -107,15 +109,17 @@ namespace RevBayesCore {
         RevLanguage::RevPtr<RevLanguage::RevVariable>                   executeProcedure(const std::string &name, const std::vector<DagNode *> args, bool &found);
         
         // helper functions
+        void                                                            addTimesToGlobalTimeline(std::set<double> &event_times, const RbVector<double>& par_times) const;        //!< Adds timeline for parameter to set that we will use for global timeline
         void                                                            buildRandomBinaryTree(std::vector<TopologyNode *> &tips);
+        void                                                            checkVectorSizes(const TypedDagNode<RbVector<double> >* v1, const TypedDagNode<RbVector<double> >* v2, int v1_minus_v2, const std::string& param_name, bool is_rate) const;
         std::vector<double>                                             pExtinction(double start, double end) const;                                                        //!< Compute the probability of extinction of the process (without incomplete taxon sampling).
         virtual double                                                  pSurvival(double start, double end) const;                                                          //!< Compute the probability of survival of the process (without incomplete taxon sampling).
         double                                                          pSurvival(double start, double end, bool speciation) const;                                                          //!< Compute the probability of survival of the process (without incomplete taxon sampling).
         void                                                            recursivelyFlagNodeDirty(const TopologyNode& n);
         bool                                                            simulateTree(size_t attempts = 0);
         bool                                                            simulateTreeConditionedOnTips(size_t attempts = 0);
-        std::vector<double>                                             calculateExtinctionRatePerState(double a);
-        std::vector<double>                                             calculateTotalAnageneticRatePerState(void) const;
+        std::vector<double>                                             calculateExtinctionRatePerState(double a) const;
+        std::vector<double>                                             calculateTotalAnageneticRatePerState(double a) const;
         std::vector<double>                                             calculateTotalSpeciationRatePerState(double a) const;
         size_t                                                          computeEpochIndex(double a) const;
         double                                                          computeEpochEnd(size_t i) const;
@@ -125,6 +129,16 @@ namespace RevBayesCore {
         const RbVector<double>&                                         computeSurvivalProbabilitiesAtTime(double a) const;
         const RbVector<double>&                                         computeFossilizationRateAtTime(double a) const;
         const RbVector<double>&                                         computeSpeciationRateAtTime(double a) const;
+        void                                                            expandNonGlobalProbabilityParameterVector(std::vector< RbVector<double> > &par, const std::vector<double> &par_times, const RbVector<double> &d) const; //!< Updates vector par such that it matches the global timeline
+        void                                                            expandNonGlobalRateParameterVector(std::vector<RbVector<double> > &par, const std::vector<double> &par_times) const; //!< Updates vector par such that it matches the global timeline
+        void                                                            expandNonGlobalRateParameterVector(std::vector<double> &par, const std::vector<double> &par_times) const; //!< Updates vector par such that it matches the global timeline
+        size_t                                                          findIndex(double t) const;                                              //!< Find the index so that times[index-1] < t < times[index]
+        size_t                                                          findIndex(double t, const std::vector<double>& timeline) const;
+        bool                                                            isEpisodicModel(void) const;                                             //!< Checks if we have a constant-rate process
+        void                                                            prepareTimeline(void) const;
+        void                                                            sortGlobalTimesAndVectorParameter(void) const;                          //!< Sorts times to run from 0->inf, and orders ALL vector parameters to match
+        void                                                            sortNonGlobalTimesAndParameters(std::vector<RbVector<double> >& par, std::vector<double>& times) const;     //!< Sorts times to run from 0->inf, and orders par to match
+        void                                                            sortNonGlobalTimesAndParameters(std::vector<double>& par, std::vector<double>& times) const;     //!< Sorts times to run from 0->inf, and orders par to match
 
         // members
         std::string                                                     condition;                                                                                          //!< The condition of the process (none/survival/#taxa).
@@ -138,7 +152,7 @@ namespace RevBayesCore {
         size_t                                                          num_states;
         mutable std::vector<std::vector<double> >                       scaling_factors;
         bool                                                            use_cladogenetic_events;                                                                            //!< do we use the speciation rates from the cladogenetic event map?
-        bool                                                            use_episodic_model;                                                                            //!< do we use the speciation rates from the cladogenetic event map?
+        mutable bool                                                    use_episodic_model;                                                                            //!< do we use the speciation rates from the cladogenetic event map?
         bool                                                            use_origin;
         bool                                                            sample_character_history;                                                                           //!< are we sampling the character history along branches?
         std::vector<double>                                             average_speciation;
@@ -156,16 +170,38 @@ namespace RevBayesCore {
         const TypedDagNode<RbVector<RbVector<double> > >*               lambda_var;
         const TypedDagNode<RbVector<double> >*                          phi_const;
         const TypedDagNode<RbVector<RbVector<double> > >*               phi_var;
-        const TypedDagNode<RbVector<RbVector<double> > >*               survival_probs;
-        const TypedDagNode<RbVector<double> >*                          epoch_times;
-        const TypedDagNode<RbVector<double> >*                          epoch_times_lambda;
-        const TypedDagNode<Simplex >*                                   pi;                                                                                                 //!< The root frequencies (probabilities of the root states).
+        const TypedDagNode<double>*                                     eta_const;
+        const TypedDagNode<RbVector<double> >*                          eta_var;
         const TypedDagNode<RateGenerator>*                              Q_const;
         const TypedDagNode<RbVector<RateGenerator> >*                   Q_var;
-        const TypedDagNode<double>*                                     rate;                                                                                               //!< Sampling probability of each species.
+        const TypedDagNode<RbVector<RbVector<double> > >*               survival_probs;
+//        const TypedDagNode<RbVector<double> >*                          epoch_times;
+        const TypedDagNode<RbVector<double> >*                          epoch_times_lambda;
+        const TypedDagNode<RbVector<double> >*                          epoch_times_mu;
+        const TypedDagNode<RbVector<double> >*                          epoch_times_phi;
+        const TypedDagNode<RbVector<double> >*                          epoch_times_gamma;
+        const TypedDagNode<RbVector<double> >*                          epoch_times_Q;
+        const TypedDagNode<RbVector<double> >*                          epoch_times_eta;
+        const TypedDagNode<Simplex >*                                   pi;                                                                                                 //!< The root frequencies (probabilities of the root states).
         const TypedDagNode<double>*                                     rho;                                                                                                //!< Sampling probability of each species.
         const TypedDagNode<RbVector<double> >*                          rho_per_state;                                                                                                //!< Sampling probability of each species.
 
+        mutable std::vector<RbVector<double> >          lambda;
+        mutable std::vector<RbVector<double> >          mu;
+        mutable std::vector<RbVector<double> >          phi;
+        mutable std::vector<RbVector<double> >          gamma;
+        mutable std::vector<double>                     eta;
+        mutable RbVector<RateGenerator>                 Q;
+
+//        mutable std::vector<double>                     lambda_times;                                          //!< The user-specified non-zero times of the instantaneous events and rate shifts.
+//        mutable std::vector<double>                     mu_times;                                              //!< The user-specified non-zero times of the instantaneous events and rate shifts.
+//        mutable std::vector<double>                     phi_times;                                             //!< The user-specified non-zero times of the instantaneous events and rate shifts.
+//        mutable std::vector<double>                     gamma_times;                                            //!< The user-specified non-zero times of the instantaneous events and rate shifts.
+//        mutable std::vector<double>                     eta_times;                                            //!< The user-specified non-zero times of the instantaneous events and rate shifts.
+//        mutable std::vector<double>                     Q_times;                                            //!< The user-specified non-zero times of the instantaneous events and rate shifts.
+        mutable std::vector<double>                     global_timeline;                                       //!< The times of the instantaneous events and rate shifts.
+
+        
         RateMatrix_JC                                                   Q_default;
         size_t                                                          min_num_lineages;
         size_t                                                          max_num_lineages;

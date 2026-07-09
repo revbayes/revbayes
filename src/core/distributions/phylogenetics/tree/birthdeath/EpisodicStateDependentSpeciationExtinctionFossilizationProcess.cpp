@@ -99,9 +99,16 @@ EpisodicStateDependentSpeciationExtinctionFossilizationProcess::EpisodicStateDep
     mu_var(NULL),
     phi_const( NULL),
     phi_var( NULL),
+    eta_const( NULL),
+    eta_var( NULL),
+    epoch_times_lambda( NULL ),
+    epoch_times_mu( NULL ),
+    epoch_times_phi( NULL ),
+    epoch_times_gamma( NULL ),
+    epoch_times_eta( NULL ),
+    epoch_times_Q( NULL ),
     pi( p ),
     survival_probs( NULL ),
-    rate( NULL ),
     rho( NULL ),
     rho_per_state( NULL ),
     Q_default( p->getValue().size() ),
@@ -162,6 +169,20 @@ EpisodicStateDependentSpeciationExtinctionFossilizationProcess::~EpisodicStateDe
 }
 
 
+/**
+ * Adds parameter-specific timeline to the set
+ */
+void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::addTimesToGlobalTimeline(std::set<double> &event_times, const RbVector<double>& par_times) const
+{
+  
+    for (size_t i = 0; i < par_times.size(); ++i)
+    {
+        event_times.insert( par_times[i] );
+    }
+
+}
+
+
 std::vector<double> EpisodicStateDependentSpeciationExtinctionFossilizationProcess::calculateTotalSpeciationRatePerState( double a ) const
 {
     std::vector<double> total_rates = std::vector<double>(num_states, 0);
@@ -188,17 +209,17 @@ std::vector<double> EpisodicStateDependentSpeciationExtinctionFossilizationProce
 }
 
 
-std::vector<double> EpisodicStateDependentSpeciationExtinctionFossilizationProcess::calculateTotalAnageneticRatePerState( void ) const
+std::vector<double> EpisodicStateDependentSpeciationExtinctionFossilizationProcess::calculateTotalAnageneticRatePerState( double age ) const
 {
     std::vector<double> total_rates = std::vector<double>(num_states, 0);
-    const RateGenerator& rate_matrix = getEventRateMatrix( 0.0 );
+    const RateGenerator& rate_matrix = getEventRateMatrix( age );
     for (size_t i = 0; i < num_states; i++)
     {
         for (size_t j = 0; j < num_states; j++)
         {
             if (i != j)
             {
-                total_rates[i] += rate_matrix.getRate(i, j, 0.0, getEventRate());
+                total_rates[i] += rate_matrix.getRate(i, j, 0.0, getEventRate( age ));
             }
         }
     }
@@ -207,7 +228,7 @@ std::vector<double> EpisodicStateDependentSpeciationExtinctionFossilizationProce
 }
 
 
-std::vector<double> EpisodicStateDependentSpeciationExtinctionFossilizationProcess::calculateExtinctionRatePerState( double a )
+std::vector<double> EpisodicStateDependentSpeciationExtinctionFossilizationProcess::calculateExtinctionRatePerState( double a ) const
 {
     
     return computeExtinctionRateAtTime( a );
@@ -222,9 +243,9 @@ const RbVector<double>& EpisodicStateDependentSpeciationExtinctionFossilizationP
         // get the rates for this time from the variable/episodic rates
         size_t index = computeEpochIndex(a);
         
-        const RbVector<double> &ext_rates = mu_var->getValue()[index];
-
-        return ext_rates;
+        if ( index >= mu.size() ) throw RbException("Didn't rescale vector mu correctly.");
+        
+        return mu[index];
     }
     else
     {
@@ -243,7 +264,10 @@ const RbVector<double>& EpisodicStateDependentSpeciationExtinctionFossilizationP
         // get the rates for this time from the variable/episodic rates
         size_t index = computeEpochIndex(a);
         
-        const RbVector<double> &fos_rates = phi_var->getValue()[index];
+        if ( index >= phi.size() ) throw RbException("Didn't rescale vector phi correctly.");
+
+        
+        const RbVector<double> &fos_rates = phi[index];
 
         return fos_rates;
     }
@@ -263,10 +287,11 @@ const RbVector<double>& EpisodicStateDependentSpeciationExtinctionFossilizationP
     {
         // get the rates for this time from the variable/episodic rates
         size_t index = computeEpochIndex(a);
-        
-        const RbVector<double> &spe_rates = lambda_var->getValue()[index];
 
-        return spe_rates;
+        if ( index >= lambda.size() ) throw RbException("Didn't rescale vector lambda correctly.");
+
+        
+        return lambda[index];
     }
     else
     {
@@ -282,8 +307,12 @@ const RbVector<double>& EpisodicStateDependentSpeciationExtinctionFossilizationP
     
     // get the rates for this time from the variable/episodic rates
     size_t index = computeEpochIndex(a);
+    
+    if ( index >= gamma.size() ) throw RbException("Didn't rescale vector gamma correctly.");
+
         
-    const RbVector<double> &sp = survival_probs->getValue()[index];
+//    const RbVector<double> &sp = survival_probs->getValue()[index];
+    const RbVector<double> &sp = gamma[index];
 
     return sp;
 }
@@ -295,6 +324,9 @@ const RbVector<double>& EpisodicStateDependentSpeciationExtinctionFossilizationP
  */
 double EpisodicStateDependentSpeciationExtinctionFossilizationProcess::computeLnProbability( void )
 {
+    
+    // prepare the timelines and parameter vectors
+    prepareTimeline();
     
     // check that the ages are in correct chronological order
     // i.e., no child is older than its parent
@@ -400,11 +432,10 @@ size_t EpisodicStateDependentSpeciationExtinctionFossilizationProcess::computeEp
     
     size_t index = 0;
     
-    if ( epoch_times != NULL )
+    if ( use_episodic_model )
     {
-        const RbVector<double> &times = epoch_times->getValue();
         
-        while ( index < times.size() && a > times[index] )
+        while ( index < global_timeline.size() && a > global_timeline[index] )
         {
             ++index;
         }
@@ -416,19 +447,18 @@ size_t EpisodicStateDependentSpeciationExtinctionFossilizationProcess::computeEp
 
 double EpisodicStateDependentSpeciationExtinctionFossilizationProcess::computeEpochEnd(size_t i) const
 {
-    if ( epoch_times == NULL )
+    if ( use_episodic_model == false )
     {
         return RbConstants::Double::inf;
     }
 
-    const RbVector<double> &times = epoch_times->getValue();
-    if ( i >= times.size() )
+    if ( i >= global_timeline.size() )
     {
         return RbConstants::Double::inf;
     }
     else
     {
-        return times[i];
+        return global_timeline[i];
     }
 }
 
@@ -813,6 +843,88 @@ double EpisodicStateDependentSpeciationExtinctionFossilizationProcess::computeRo
     scaling_factors[node_index][active_likelihood[node_index]] = scaling_factors[left_index][active_likelihood[left_index]] + scaling_factors[right_index][active_likelihood[right_index]];
     
     return log(prob) + scaling_factors[node_index][active_likelihood[node_index]];
+}
+
+
+/**
+ * Takes a par.size() < global_timeline.size() vector and makes it the correct size to work with our global timeline.
+ * The parameter has its own reference timeline, which we use to find the rate in the global intervals.
+ */
+void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::expandNonGlobalProbabilityParameterVector(std::vector<RbVector<double> > &par, const std::vector<double> &par_times, const RbVector<double>& default_prob) const
+{
+    // @TODO @efficiency: this works but it would be faster to auto-advance indices rather than have an internal loop
+    // Store the original values so we can overwrite the vector
+    std::vector<RbVector<double> > old_par = par;
+    par.resize( global_timeline.size() );
+
+    // For each time in the global timeline, find the rate according to this variable's own timeline
+    for (size_t i=0; i<global_timeline.size(); ++i)
+    {
+        bool global_time_is_variable_time = false;
+        for (size_t j=0; j<par_times.size(); ++j)
+        {
+            if ( fabs(par_times[j] - global_timeline[i]) < DBL_EPSILON )
+            {
+                // time is in variable's timeline
+                par[i] = old_par[j];
+                global_time_is_variable_time = true;
+                break;
+            }
+        }
+
+        // Time is not in variable's own timeline, probability of event here is 0
+        if ( !global_time_is_variable_time )
+        {
+            par[i] = default_prob;
+        }
+    }
+
+}
+
+/**
+ * Takes a par.size() < global_timeline.size() vector and makes it the correct size to work with our global timeline.
+ * The parameter has its own reference timeline, which we use to find the rate in the global intervals.
+ * This works only for parameters (lambda,mu,phi,r), where the global timeline is simply a finer grid than the variable-specific timelines.
+ */
+void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::expandNonGlobalRateParameterVector(std::vector<RbVector<double> > &par, const std::vector<double> &par_times) const
+{
+    // Store the original values so we can overwrite the vector
+    std::vector<RbVector<double> > old_par = par;
+
+    // For each time in the global timeline, find the rate according to this variable's own timeline
+    par.clear();
+    for (size_t i=0; i<global_timeline.size(); ++i)
+    {
+      // Where is this global time interval in the variable's timeline?
+      size_t idx = findIndex(global_timeline[i],par_times);
+      par.push_back( old_par[idx] );
+    }
+    par.push_back( old_par[old_par.size()-1] );
+
+}
+
+
+
+/**
+ * Takes a par.size() < global_timeline.size() vector and makes it the correct size to work with our global timeline.
+ * The parameter has its own reference timeline, which we use to find the rate in the global intervals.
+ * This works only for parameters (lambda,mu,phi,r), where the global timeline is simply a finer grid than the variable-specific timelines.
+ */
+void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::expandNonGlobalRateParameterVector(std::vector<double> &par, const std::vector<double> &par_times) const
+{
+    // Store the original values so we can overwrite the vector
+    std::vector<double> old_par = par;
+
+    // For each time in the global timeline, find the rate according to this variable's own timeline
+    par.clear();
+    for (size_t i=0; i<global_timeline.size(); ++i)
+    {
+      // Where is this global time interval in the variable's timeline?
+      size_t idx = findIndex(global_timeline[i],par_times);
+      par.push_back( old_par[idx] );
+    }
+    par.push_back( old_par[old_par.size()-1] );
+
 }
 
 
@@ -1738,6 +1850,69 @@ void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::executeMeth
 
 
 /**
+ * return the index i so that s_{i-1} <= t < s_i
+ * where s_i is the global timeline of events
+ * s_0 = 0.0
+ * s_l = Inf
+ */
+size_t EpisodicStateDependentSpeciationExtinctionFossilizationProcess::findIndex(double t) const
+{
+    // @TODO @efficiency: this would be much faster if we can get std::lower_bound to work consistently
+    // Linear search for interval because std::lower_bound is not cooperating
+    if (global_timeline.size() == 1)
+    {
+        return (t <= global_timeline[0] ? 0 : 1);
+    }
+    else if ( t <= global_timeline[0] )
+    {
+        return 0;
+    }
+    else
+    {
+        for (size_t i=1; i < global_timeline.size(); ++i)
+        {
+            if (t > (global_timeline[i]-1E-5) && t <= (global_timeline[i+1]-1E-5))
+            {
+                return i-1;
+            }
+        }
+
+        return global_timeline.size();
+    }
+}
+
+/**
+ * return the index i so that x_{i-1} <= t < x_i
+ * where x is one of the input vector timelines
+ */
+size_t EpisodicStateDependentSpeciationExtinctionFossilizationProcess::findIndex(double t, const std::vector<double> &timeline) const
+{
+
+    // Linear search for interval because std::lower_bound is not cooperating
+    if (timeline.size() == 1)
+    {
+        return (t <= timeline[0] ? 0 : 1);
+    }
+    else if ( t <= timeline[0] )
+    {
+        return 0;
+    }
+    else
+    {
+        for (size_t i=1; i < timeline.size(); ++i)
+        {
+            if (t > timeline[i-1] && t <= timeline[i])
+            {
+                return i;
+            }
+        }
+
+        return timeline.size();
+    }
+}
+
+
+/**
  * Get the affected nodes by a change of this node.
  * If the root age has changed than we need to call get affected again.
  */
@@ -1755,12 +1930,20 @@ void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::getAffected
 /**
  * Get the event rate
  */
-double EpisodicStateDependentSpeciationExtinctionFossilizationProcess::getEventRate(void) const
+double EpisodicStateDependentSpeciationExtinctionFossilizationProcess::getEventRate( double age ) const
 {
 
-    if ( rate != NULL )
+    if ( use_episodic_model == true )
     {
-        return rate->getValue();
+        size_t index_epoch = computeEpochIndex(age);
+        
+        if ( index_epoch >= eta.size() ) throw RbException("Didn't rescale vector eta correctly.");
+
+        return eta[index_epoch];
+    }
+    else if ( eta_const != NULL )
+    {
+        return eta_const->getValue();
     }
     else
     {
@@ -1773,20 +1956,16 @@ double EpisodicStateDependentSpeciationExtinctionFossilizationProcess::getEventR
 /**
  * Get the event rate generator
  */
-const RateGenerator& EpisodicStateDependentSpeciationExtinctionFossilizationProcess::getEventRateMatrix(double a) const
+const RateGenerator& EpisodicStateDependentSpeciationExtinctionFossilizationProcess::getEventRateMatrix(double age) const
 {
 
     if ( use_episodic_model == true )
     {
-        if ( Q_var != NULL )
-        {
-            size_t index_epoch = computeEpochIndex(a);
-            return Q_var->getValue()[index_epoch];
-        }
-        else
-        {
-            return Q_default;
-        }
+        size_t index_epoch = computeEpochIndex(age);
+        
+        if ( index_epoch >= Q.size() ) throw RbException("Didn't rescale vector Q correctly.");
+
+        return Q[index_epoch];
     }
     else
     {
@@ -1874,6 +2053,45 @@ std::vector<double> EpisodicStateDependentSpeciationExtinctionFossilizationProce
 
 }
 
+bool EpisodicStateDependentSpeciationExtinctionFossilizationProcess::isEpisodicModel(void) const
+{
+    bool has_interval_times = false;
+    // For there to be no intervals, every timeline must either be NULL or have size 0
+    if ( (epoch_times_lambda != NULL      && epoch_times_lambda->getValue().size() > 0 ) ||
+         (epoch_times_mu != NULL          && epoch_times_mu->getValue().size() > 0 ) ||
+         (epoch_times_phi != NULL         && epoch_times_phi->getValue().size() > 0 ) ||
+         (epoch_times_gamma != NULL       && epoch_times_gamma->getValue().size() > 0 ) ||
+         (epoch_times_eta != NULL         && epoch_times_eta->getValue().size() > 0 ) ||
+         (epoch_times_Q != NULL           && epoch_times_Q->getValue().size() > 0 ) )
+    {
+        has_interval_times = true;
+    }
+
+    bool all_parameters_are_scalars = false;
+    // For all parameters to be scalars,
+    // 1) rate parameters must either be homogenous or they must have size <= 1 (1 for scalar, 0 if it's null)
+    // 2) Lambda/Mu must be of size 0 or NULL
+    // 3) Phi must be of size 1 or a scalar
+    if ( (lambda_var == NULL     || lambda_var->getValue().size() <= 1)     &&
+         (mu_var == NULL         || mu_var->getValue().size() <= 1)         &&
+         (phi_var == NULL        || phi_var->getValue().size() <= 1)        &&
+         (survival_probs == NULL || survival_probs->getValue().size() == 0) &&
+         (eta_var     == NULL    || eta_var->getValue().size() == 0)        &&
+         (Q_var == NULL          || Q_var->getValue().size() <= 1) )
+    {
+         all_parameters_are_scalars = true;
+    }
+
+
+    if (has_interval_times && all_parameters_are_scalars)
+    {
+        throw RbException("No timeline(s) was (were) provided but there are non-scalar parameters.");
+    }
+
+    return has_interval_times && !all_parameters_are_scalars;
+}
+
+
 
 /**
  * Keep the current value and reset some internal flags. Nothing to do here.
@@ -1912,6 +2130,287 @@ double EpisodicStateDependentSpeciationExtinctionFossilizationProcess::lnProbTre
 
     return (num_taxa - num_sa - 1) * RbConstants::LN2 - RbMath::lnFactorial(num_taxa - num_sa);
 }
+
+
+/*
+ * Here wepopulate all parameter vectors with their final values.
+ * This requires that we:
+ *    1) Clear out old values of all parameter vectors
+ *    2) Refill and sort vector-valued parameters (leaving scalar parameters alone) to go from present to past
+ *    3) Sort (assemble first if needed) the global timeline, attach the first time (the offset)
+ * Then we can fill in our final vector for each parameter, which will be a vector of the same size as the global timeline
+ */
+void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::prepareTimeline( void ) const
+{
+    // clean all the sets
+    lambda.clear();
+    mu.clear();
+    phi.clear();
+    eta.clear();
+    gamma.clear();
+    Q.clear();
+
+    global_timeline.clear();
+
+    // put in current values for vector parameters so we can re-order them as needed
+    RbVector<double> empty_timeline;
+    RbVector<double> lambda_times = ( epoch_times_lambda != NULL ? epoch_times_lambda->getValue() : empty_timeline );
+    RbVector<double> mu_times     = ( epoch_times_mu     != NULL ? epoch_times_mu->getValue()     : empty_timeline );
+    RbVector<double> phi_times    = ( epoch_times_phi    != NULL ? epoch_times_phi->getValue()    : empty_timeline );
+    RbVector<double> gamma_times  = ( epoch_times_gamma  != NULL ? epoch_times_gamma->getValue()  : empty_timeline );
+    RbVector<double> eta_times    = ( epoch_times_eta    != NULL ? epoch_times_eta->getValue()    : empty_timeline );
+    RbVector<double> Q_times      = ( epoch_times_Q      != NULL ? epoch_times_Q->getValue()      : empty_timeline );
+
+    // If it's a constant-rate process, make sure we only have scalars
+    use_episodic_model = isEpisodicModel();
+    if ( use_episodic_model == false )
+    {
+        global_timeline = std::vector<double>(0,0.0);
+    }
+    // We only need to assemble a global timeline if
+    else
+    {
+        // check if correct number of speciation rates were provided
+        // if provided as a vector, sort to the correct timescale
+        if ( lambda_const == NULL && lambda_var == NULL)
+        {
+            throw RbException("Speciation rate must be of type RealPos or RealPos[]");
+        }
+        else if ( lambda_var != NULL )
+        {
+            if ( lambda_times.size() == 0 )
+            {
+                throw RbException("No time intervals provided for the piecewise constant speciation rates.");
+            }
+            if ( lambda_var->getValue().size() - lambda_times.size() != 1 )
+            {
+                throw RbException() << "Number of speciation rates (" << lambda_var->getValue().size() << ") does not match number of time intervals (" << lambda_times.size() << ")";
+            }
+        }
+
+        // check if correct number of extinction rates were provided
+        // if provided as a vector, sort to the correct timescale
+        if ( mu_var != NULL )
+        {
+            if ( mu_times.size() == 0 )
+            {
+                throw RbException("No time intervals provided for the piecewise constant extinction rates.");
+            }
+            if ( mu_var->getValue().size() - mu_times.size() != 1 )
+            {
+                throw RbException() << "Number of extinction rates (" << mu_var->getValue().size() << ") does not match number of time intervals (" << mu_times.size() << ")";
+            }
+        }
+
+        // check if correct number of fossilization rates were provided
+        // if provided as a vector, sort to the correct timescale
+        if ( phi_var != NULL )
+        {
+            if ( phi_times.size() == 0 )
+            {
+                throw RbException("No time intervals provided for the piecewise constant fossilization rates.");
+            }
+            if ( phi_var->getValue().size() - phi_times.size() != 1 )
+            {
+                throw RbException() << "Number of fossilization rates (" << phi_var->getValue().size() << ") does not match number of time intervals (" << phi_times.size() << ")";
+            }
+        }
+
+        // check if correct number of mass extinction survival probabilities were provided
+        // if provided as a vector, sort to the correct timescale
+        if ( survival_probs != NULL )
+        {
+            if ( gamma_times.size() == 0 )
+            {
+                throw RbException("No time intervals provided for the mass extinction survival probabilities.");
+            }
+            if ( survival_probs->getValue().size() - gamma_times.size() != 0 )
+            {
+                throw RbException() << "Number of mass extinction survival probabilities (" << survival_probs->getValue().size() << ") does not match number of time intervals (" << gamma_times.size() << ")";
+            }
+        }
+
+        // check if correct number of transition rates were provided
+        // if provided as a vector, sort to the correct timescale
+        if ( eta_var != NULL )
+        {
+            if ( eta_times.size() == 0 )
+            {
+                throw RbException("No time intervals provided for the transition rates.");
+            }
+            if ( eta_var->getValue().size() - eta_times.size() != 1 )
+            {
+                throw RbException() << "Number of transition rates (" << eta_var->getValue().size() << ") does not match number of time intervals (" << eta_times.size() << ")";
+            }
+        }
+
+        // check if correct number of transition rate matrices were provided
+        // if provided as a vector, sort to the correct timescale
+        if ( Q_var != NULL )
+        {
+            if ( Q_times.size() == 0 )
+            {
+                throw RbException("No time intervals provided for the transition rate matrices.");
+            }
+            if ( Q_var->getValue().size() - Q_times.size() != 1 )
+            {
+                throw RbException() << "Number of transition rate matrices (" << Q_var->getValue().size() << ") does not match number of time intervals (" << Q_times.size() << ")";
+            }
+        }
+
+
+        // now we start assembling the global timeline by finding the union of unique intervals for all parameters
+        std::set<double> event_times;
+        addTimesToGlobalTimeline(event_times, lambda_times);
+        addTimesToGlobalTimeline(event_times, mu_times);
+        addTimesToGlobalTimeline(event_times, phi_times);
+        addTimesToGlobalTimeline(event_times, gamma_times);
+        addTimesToGlobalTimeline(event_times, eta_times);
+        addTimesToGlobalTimeline(event_times, Q_times);
+        
+        for (std::set<double>::const_iterator it = event_times.begin(); it != event_times.end(); ++it)
+        {
+            global_timeline.push_back( *it );
+        }
+
+        // we are done with setting up the timeline (i.e., using all the provided timelines) and checking all dimensions of parameters
+
+    }
+
+    // For each parameter vector, we now make sure that its size matches the size of the global vector
+    // For a rate parameter, there are four cases
+    //     1) It is a vector and it matches the size of the global timeline, in which case it is already sorted and we can use it
+    //     2) It is a vector and it DOES NOT match the size of the global timeline, in which case we must expand it to match
+    //     3) It is a scalar, in which case we simply populate a vector of the correct size with the value
+    //     4) It is empty, in which case we simply populate a vector of the correct size with the default value
+
+    // get vector of speciation rates
+    if ( lambda_var != NULL )
+    {
+        lambda = lambda_var->getValue();
+        sortNonGlobalTimesAndParameters(lambda,lambda_times);
+
+        if ( lambda.size() != global_timeline.size() + 1)
+        {
+            expandNonGlobalRateParameterVector(lambda,lambda_times);
+        } // else it matches in size and is already sorted and is thus ready to be used
+    }
+    else
+    {
+        lambda = std::vector<RbVector<double> >(global_timeline.size()+1,lambda_const->getValue());
+    }
+
+    // Get vector of death rates
+    if ( mu_var != NULL )
+    {
+        mu = mu_var->getValue();
+        sortNonGlobalTimesAndParameters(mu,mu_times);
+        
+        if ( mu.size() != global_timeline.size() + 1 )
+        {
+            expandNonGlobalRateParameterVector(mu,mu_times);
+        } // else it matches in size and is already sorted and is thus ready to be used
+    }
+    else
+    {
+        mu = std::vector< RbVector<double> >(global_timeline.size()+1, ( mu_const == NULL ? RbVector<double>(num_states,0.0) : mu_const->getValue()) );
+    }
+
+    // Get vector of sampling rates
+    if ( phi_var != NULL )
+    {
+        phi = phi_var->getValue();
+        sortNonGlobalTimesAndParameters(phi,phi_times);
+        if ( phi.size() != global_timeline.size() + 1)
+        {
+            expandNonGlobalRateParameterVector(phi,phi_times);
+        } // else it matches in size and is already sorted and is thus ready to be used
+    }
+    else
+    {
+        RbVector<double> phi_val = ( phi_const != NULL ? phi_const->getValue() : RbVector<double>(num_states,0.0) );
+        phi = std::vector< RbVector<double> >(global_timeline.size()+1, phi_val);
+    }
+
+    // For each parameter vector, we now make sure that its size matches the size of the global vector
+    // For gamma, there are two cases
+    //     1) It is a vector and is is of length global_timeline.size() - 1, in which case we add an event with probability 0.0 at the present, and it is ready to use
+    //     2) It is a vector and it DOES NOT match the size of the global timeline, in which case we must expand it to match, which automatically adds an event of P=0.0 at the present
+
+    // Get vector of burst birth probabilities
+    if ( survival_probs != NULL )
+    {
+        gamma = survival_probs->getValue();
+        sortNonGlobalTimesAndParameters(gamma,gamma_times);
+        // Expand if needed
+        if (gamma_times.size() != global_timeline.size())
+        {
+            expandNonGlobalProbabilityParameterVector(gamma, gamma_times, RbVector<double>(num_states,1.0));
+        }
+    }
+    else
+    {
+        // User specified nothing, there are no birth bursts
+        gamma = std::vector<RbVector<double> >(global_timeline.size(), RbVector<double>(num_states,1.0) );
+    }
+
+    // Get vector of transition rates
+    if ( eta_var != NULL )
+    {
+        eta = eta_var->getValue();
+        sortNonGlobalTimesAndParameters(eta,eta_times);
+        // Expand if needed
+        if (eta_times.size() != global_timeline.size() + 1)
+        {
+            expandNonGlobalRateParameterVector(eta,eta_times);
+        }
+    }
+    else if ( eta_const != NULL )
+    {
+        // User specified nothing
+         eta = std::vector<double>(global_timeline.size()+1,eta_const->getValue());
+    }
+    else
+    {
+        // User specified nothing
+         eta = std::vector<double>(global_timeline.size()+1,1.0);
+    }
+    
+    // Get vector of transition rates
+    if ( Q_var != NULL )
+    {
+        Q = Q_var->getValue();
+//        sortNonGlobalTimesAndParameters(Q,Q_times);
+        // Expand if needed
+        if (Q_times.size() != global_timeline.size() + 1)
+        {
+//            expandNonGlobalRateParameterVector(Q,Q_times);
+        }
+    }
+    else if ( Q_const != NULL )
+    {
+        // User specified nothing
+         Q = RbVector<RateGenerator>(global_timeline.size()+1,Q_const->getValue() );
+    }
+    else
+    {
+        // User specified nothing
+         Q = RbVector<RateGenerator>(global_timeline.size()+1,Q_default );
+    }
+
+    
+//    std::cerr << "Timeline:\t\t" << global_timeline << std::endl;
+//    std::cerr << "Lambda:\t\t";
+//    for (size_t i=0; i<lambda.size(); ++i) std::cerr << lambda[i][0] << " ";
+//    std::cerr << std::endl;
+//    std::cerr << "Mu:\t\t\t";
+//    for (size_t i=0; i<mu.size(); ++i) std::cerr << mu[i][0] << " ";
+//    std::cerr << std::endl;
+//    std::cerr << "Phi:\t\t";
+//    for (size_t i=0; i<phi.size(); ++i) std::cerr << phi[i][0] << " ";
+//    std::cerr << std::endl;
+}
+
 
 
 std::vector<double> EpisodicStateDependentSpeciationExtinctionFossilizationProcess::pExtinction(double start, double end) const
@@ -2114,43 +2613,34 @@ void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::setExtincti
     // remove the old parameter first
     this->removeParameter( mu_const );
     this->removeParameter( mu_var );
+    this->removeParameter( epoch_times_mu );
 
     // set the value
     mu_const = r;
     mu_var   = NULL;
+    epoch_times_mu = NULL;
 
     // add the new parameter
     this->addParameter( mu_const );
-
-    // redraw the current value
-    if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
-    {
-        this->redrawValue();
-    }
 }
 
 
-void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::setExtinctionRates(const TypedDagNode< RbVector< RbVector<double> > >* r)
+void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::setExtinctionRates(const TypedDagNode< RbVector< RbVector<double> > >* r, const TypedDagNode<RbVector<double> >* t)
 {
 
     // remove the old parameter first
     this->removeParameter( mu_const );
     this->removeParameter( mu_var );
+    this->removeParameter( epoch_times_mu );
 
     // set the value
     mu_var   = r;
     mu_const = NULL;
+    epoch_times_mu = t;
     
-    use_episodic_model = true;
-
     // add the new parameter
     this->addParameter( mu_var );
-
-    // redraw the current value
-    if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
-    {
-        this->redrawValue();
-    }
+    this->addParameter( epoch_times_mu );
 }
 
 
@@ -2160,55 +2650,54 @@ void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::setFossiliz
     // remove the old parameter first
     this->removeParameter( phi_const );
     this->removeParameter( phi_var );
+    this->removeParameter( epoch_times_phi );
 
     // set the value
     phi_const = r;
     phi_var   = NULL;
+    epoch_times_phi = NULL;
 
     // add the new parameter
     this->addParameter( phi_const );
+    this->addParameter( epoch_times_phi );
 
-    // redraw the current value
-    if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
-    {
-        this->redrawValue();
-    }
 }
 
 
-void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::setFossilizationRates(const TypedDagNode< RbVector< RbVector<double> > >* r)
+void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::setFossilizationRates(const TypedDagNode< RbVector< RbVector<double> > >* r, const TypedDagNode<RbVector<double> >* t)
 {
 
     // remove the old parameter first
     this->removeParameter( phi_const );
     this->removeParameter( phi_var );
+    this->removeParameter( epoch_times_phi );
 
     // set the value
     phi_var   = r;
     phi_const = NULL;
-    
+    epoch_times_phi = t;
+
     use_episodic_model = true;
 
     // add the new parameter
     this->addParameter( phi_var );
+    this->addParameter( epoch_times_phi );
 
-//    // redraw the current value
-//    if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
-//    {
-//        this->redrawValue();
-//    }
 }
 
-void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::setMassExtinctionSurvivalProbabilities(const TypedDagNode<RbVector<RbVector<double> > > *p)
+void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::setMassExtinctionSurvivalProbabilities(const TypedDagNode<RbVector<RbVector<double> > > *p, const TypedDagNode<RbVector<double> >* t)
 {
     // remove the old parameter first
     this->removeParameter( survival_probs );
+    this->removeParameter( epoch_times_gamma );
 
     // set the value
     survival_probs = p;
+    epoch_times_gamma = t;
     
     // add the new parameter
     this->addParameter( survival_probs );
+    this->addParameter( epoch_times_gamma );
 
 }
 
@@ -2233,12 +2722,6 @@ void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::setSampling
     
     // add the new parameter
     this->addParameter( rho );
-    
-//    // redraw the current value
-//    if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
-//    {
-//        this->redrawValue();
-//    }
 }
 
 
@@ -2256,12 +2739,6 @@ void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::setSampling
     
     // add the new parameter
     this->addParameter( rho_per_state );
-    
-//    // redraw the current value
-//    if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
-//    {
-//        this->redrawValue();
-//    }
 }
 
 
@@ -2271,22 +2748,18 @@ void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::setSpeciati
     // remove the old parameter first
     this->removeParameter( lambda_const );
     this->removeParameter( lambda_var );
-    
+    this->removeParameter( epoch_times_lambda );
+
     // set the value
     lambda_const = r;
     lambda_var   = NULL;
+    epoch_times_lambda = NULL;
 
     // should we use the event map for the speciation rates?
     use_cladogenetic_events = false;
     
     // add the new parameter
     this->addParameter( lambda_const );
-    
-//    // redraw the current value
-//    if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
-//    {
-//        this->redrawValue();
-//    }
 }
 
 
@@ -2296,28 +2769,70 @@ void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::setSpeciati
     // remove the old parameter first
     this->removeParameter( lambda_const );
     this->removeParameter( lambda_var );
-    
+    removeParameter( epoch_times_lambda );
+
     // set the value
     lambda_var   = r;
     lambda_const = NULL;
+    epoch_times_lambda = t;
 
     // should we use the event map for the speciation rates?
     use_cladogenetic_events = false;
-    use_episodic_model = true;
     
     // add the new parameter
     this->addParameter( lambda_var );
-    
-//    // redraw the current value
-//    if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
-//    {
-//        this->redrawValue();
-//    }
-    
-    removeParameter( epoch_times );
-    epoch_times = t;
+    this->addParameter( epoch_times_lambda );
+
 }
 
+
+void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::setTransitionRate(const TypedDagNode<double> *r)
+{
+    
+    // remove the old parameter first
+    this->removeParameter( Q_const );
+    this->removeParameter( Q_var );
+    this->removeParameter( eta_const );
+    this->removeParameter( eta_var );
+    this->removeParameter( epoch_times_Q );
+    this->removeParameter( epoch_times_eta );
+
+    // set the value
+    eta_const = r;
+    eta_var   = NULL;
+    Q_const   = NULL;
+    Q_var     = NULL;
+    epoch_times_eta = NULL;
+    epoch_times_Q = NULL;
+
+    // add the new parameter
+    this->addParameter( eta_const );
+}
+
+
+void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::setTransitionRate(const TypedDagNode< RbVector<double> > *r, const TypedDagNode<RbVector<double> >* t)
+{
+    
+    // remove the old parameter first
+    this->removeParameter( Q_const );
+    this->removeParameter( Q_var );
+    this->removeParameter( eta_const );
+    this->removeParameter( eta_var );
+    this->removeParameter( epoch_times_Q );
+    this->removeParameter( epoch_times_eta );
+
+    // set the value
+    eta_const = NULL;
+    eta_var   = r;
+    Q_const   = NULL;
+    Q_var     = NULL;
+    epoch_times_eta = t;
+    epoch_times_Q = NULL;
+
+    // add the new parameter
+    this->addParameter( eta_var );
+    this->addParameter( epoch_times_eta );
+}
 
 
 void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::setTransitionRateMatrix(const TypedDagNode<RateGenerator> *m)
@@ -2326,41 +2841,46 @@ void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::setTransiti
     // remove the old parameter first
     this->removeParameter( Q_const );
     this->removeParameter( Q_var );
-    
+    this->removeParameter( eta_const );
+    this->removeParameter( eta_var );
+    this->removeParameter( epoch_times_Q );
+    this->removeParameter( epoch_times_eta );
+
     // set the value
+    eta_const = NULL;
+    eta_var   = NULL;
     Q_const   = m;
     Q_var     = NULL;
-    
+    epoch_times_eta = NULL;
+    epoch_times_Q = NULL;
+
     // add the new parameter
     this->addParameter( Q_const );
-    
-//    // redraw the current value
-//    if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
-//    {
-//        this->redrawValue();
-//    }
 }
 
 
-void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::setTransitionRateMatrix(const TypedDagNode<RbVector<RateGenerator> > *m)
+void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::setTransitionRateMatrix(const TypedDagNode<RbVector<RateGenerator> > *m, const TypedDagNode<RbVector<double> >* t)
 {
     
     // remove the old parameter first
     this->removeParameter( Q_const );
     this->removeParameter( Q_var );
-    
+    this->removeParameter( eta_const );
+    this->removeParameter( eta_var );
+    this->removeParameter( epoch_times_Q );
+    this->removeParameter( epoch_times_eta );
+
     // set the value
+    eta_const = NULL;
+    eta_var   = NULL;
     Q_const   = NULL;
     Q_var     = m;
+    epoch_times_eta = NULL;
+    epoch_times_Q = t;
     
     // add the new parameter
     this->addParameter( Q_var );
-    
-//    // redraw the current value
-//    if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
-//    {
-//        this->redrawValue();
-//    }
+    this->addParameter( epoch_times_Q );
 }
 
 
@@ -2391,7 +2911,6 @@ void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::setValue(Tr
     value->getTreeChangeEventHandler().removeListener( this );
 
     // delegate to super class
-//    TypedDistribution<Tree>::setValue(newv, f);
     static_cast<TreeDiscreteCharacterData *>(this->value)->setTree( *newv );
 
     resizeVectors(newv->getNumberOfNodes());
@@ -2477,7 +2996,7 @@ bool EpisodicStateDependentSpeciationExtinctionFossilizationProcess::simulateTre
     const RateGenerator *rate_matrix = &getEventRateMatrix( 0 );
     std::vector<double> extinction_rates = calculateExtinctionRatePerState( 0.0 );
     std::vector<double> total_speciation_rates = calculateTotalSpeciationRatePerState( 0.0 );
-    std::vector<double> total_anagenetic_rates = calculateTotalAnageneticRatePerState( );
+    std::vector<double> total_anagenetic_rates = calculateTotalAnageneticRatePerState( 0.0 );
     std::vector<double> r = std::vector<double>(num_states, 0);
 
     // create a vector of nodes for our simulated tree
@@ -2644,7 +3163,7 @@ bool EpisodicStateDependentSpeciationExtinctionFossilizationProcess::simulateTre
                 {
                     if (i != j && lineages_in_state[j].size() > 0)
                     {
-                        prob_transition[i][j] = rate_matrix->getRate(i, j, 0.0, getEventRate()) * (lineages_in_state[i].size() + 1) * exp(-1 * dt * total_rate_ana[j]);
+                        prob_transition[i][j] = rate_matrix->getRate(i, j, 0.0, getEventRate( t )) * (lineages_in_state[i].size() + 1) * exp(-1 * dt * total_rate_ana[j]);
                         prob_transition_sum[i] += prob_transition[i][j];
                     }
                 }
@@ -2886,6 +3405,9 @@ bool EpisodicStateDependentSpeciationExtinctionFossilizationProcess::simulateTre
 bool EpisodicStateDependentSpeciationExtinctionFossilizationProcess::simulateTree( size_t attempts )
 {
 
+    // prepare the timelines for simulation
+    prepareTimeline();
+    
     if ( use_origin == true && condition_on_num_tips == false )
     {
         // if originAge is set we start with one lineage
@@ -2912,7 +3434,7 @@ bool EpisodicStateDependentSpeciationExtinctionFossilizationProcess::simulateTre
     // cladogenetic/anagenetic/extinction events for each state
     std::vector<double> extinction_rates = calculateExtinctionRatePerState( process_age->getValue() );
     std::vector<double> total_speciation_rates = calculateTotalSpeciationRatePerState( process_age->getValue() );
-    std::vector<double> total_anagenetic_rates = calculateTotalAnageneticRatePerState();
+    std::vector<double> total_anagenetic_rates = calculateTotalAnageneticRatePerState( process_age->getValue() );
     std::vector<double> total_rate_for_state = std::vector<double>(num_states, 0);
     for (size_t i = 0; i < num_states; i++)
     {
@@ -3206,7 +3728,7 @@ bool EpisodicStateDependentSpeciationExtinctionFossilizationProcess::simulateTre
             {
                 if (i != event_state)
                 {
-                    u -= rate_matrix->getRate( event_state, i, 0, getEventRate() );
+                    u -= rate_matrix->getRate( event_state, i, 0, getEventRate( t ) );
                     if (u < 0.0)
                     {
                         new_state = i;
@@ -3443,6 +3965,102 @@ bool EpisodicStateDependentSpeciationExtinctionFossilizationProcess::simulateTre
 }
 
 
+/**
+ * Sorts times to run from present to past (0->inf) and orders par to match this.
+ */
+void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::sortNonGlobalTimesAndParameters(std::vector<RbVector<double> >& par, std::vector<double> &times) const
+{
+    std::vector<double> times_sorted_ascending = times;
+    std::vector<double> times_sorted_descending = times;
+
+    sort(times_sorted_ascending.begin(), times_sorted_ascending.end() );
+    sort(times_sorted_descending.rbegin(), times_sorted_descending.rend() );
+
+    // We want times in ascending order, so if they already are we're done here
+    if ( times != times_sorted_ascending )
+    {
+        // If times are sorted in descending order, we just flip the parameter and time vectors
+        if ( times == times_sorted_ascending )
+        {
+            std::reverse(times.begin(),times.end());
+            std::reverse(par.begin(),par.end());
+        }
+        else
+        {
+            // Pair up the times and the parameter values so we can sort them together
+            std::vector<std::pair<double, RbVector<double> > > times_par;
+            for (size_t i=0; i<times.size(); ++i)
+            {
+                times_par.push_back(std::make_pair(times[i],par[i]));
+            }
+
+            std::sort(times_par.begin(),times_par.end());
+
+            // Replace times with sorted times
+            for (size_t i=0; i<times.size(); ++i)
+            {
+                times[i] = times_par[i].first;
+                par[i] = times_par[i].second;
+            }
+        }
+    }
+
+    if ( times[0] < DBL_EPSILON )
+    {
+        throw RbException("User-specified interval times cannot include time = 0");
+    }
+
+}
+
+
+/**
+ * Sorts times to run from present to past (0->inf) and orders par to match this.
+ */
+void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::sortNonGlobalTimesAndParameters(std::vector<double> &par, std::vector<double> &times) const
+{
+    std::vector<double> times_sorted_ascending = times;
+    std::vector<double> times_sorted_descending = times;
+
+    sort(times_sorted_ascending.begin(), times_sorted_ascending.end() );
+    sort(times_sorted_descending.rbegin(), times_sorted_descending.rend() );
+
+    // We want times in ascending order, so if they already are we're done here
+    if ( times != times_sorted_ascending )
+    {
+        // If times are sorted in descending order, we just flip the parameter and time vectors
+        if ( times == times_sorted_ascending )
+        {
+            std::reverse(times.begin(),times.end());
+            std::reverse(par.begin(),par.end());
+        }
+        else
+        {
+            // Pair up the times and the parameter values so we can sort them together
+            std::vector<std::pair<double,double> > times_par;
+            for (size_t i=0; i<times.size(); ++i)
+            {
+                times_par.push_back(std::make_pair(times[i],par[i]));
+            }
+
+            std::sort(times_par.begin(),times_par.end());
+
+            // Replace times with sorted times
+            for (size_t i=0; i<times.size(); ++i)
+            {
+                times[i] = times_par[i].first;
+                par[i] = times_par[i].second;
+            }
+        }
+    }
+
+    if ( times[0] < DBL_EPSILON )
+    {
+        throw RbException("User-specified interval times cannot include time = 0");
+    }
+
+}
+
+
 
 /**
  * Swap the parameters held by this distribution.
@@ -3490,9 +4108,37 @@ void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::swapParamet
     {
         Q_var = static_cast<const TypedDagNode<RbVector<RateGenerator> >* >( newP );
     }
-    if ( oldP == rate )
+    if ( oldP == eta_const )
     {
-        rate = static_cast<const TypedDagNode<double>* >( newP );
+        eta_const = static_cast<const TypedDagNode<double>* >( newP );
+    }
+    if ( oldP == eta_var )
+    {
+        eta_var = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+    }
+    if ( oldP == epoch_times_lambda )
+    {
+        epoch_times_lambda = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+    }
+    if ( oldP == epoch_times_mu )
+    {
+        epoch_times_mu = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+    }
+    if ( oldP == epoch_times_phi )
+    {
+        epoch_times_phi = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+    }
+    if ( oldP == epoch_times_gamma )
+    {
+        epoch_times_gamma = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+    }
+    if ( oldP == epoch_times_eta )
+    {
+        epoch_times_eta = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+    }
+    if ( oldP == epoch_times_Q )
+    {
+        epoch_times_Q = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
     }
     if ( oldP == pi )
     {
@@ -3582,7 +4228,7 @@ void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::numerically
         
         const RbVector<double> &extinction_rates = computeExtinctionRateAtTime(current_end_age);
         const RateGenerator &rg = getEventRateMatrix( current_begin_age );
-        SSE_ODE ode = SSE_ODE(extinction_rates, &rg, getEventRate(), backward_time, extinction_only);
+        SSE_ODE ode = SSE_ODE(extinction_rates, &rg, getEventRate(current_end_age), backward_time, extinction_only);
         if ( use_cladogenetic_events == true )
         {
             cladogenesis_matrix->getValue(); // we must call getValue() to update the speciation and extinction rates in the event map
