@@ -1685,6 +1685,88 @@ mymcmc.run(generations=200000))");
 	help_strings[string("dnPoisson")][string("name")] = string(R"(dnPoisson)");
 	help_arrays[string("dnPoisson")][string("see_also")].push_back(string(R"(dnGeom)"));
 	help_strings[string("dnPoisson")][string("title")] = string(R"(Poisson Distribution)");
+	help_arrays[string("dnPseudo")][string("authors")].push_back(string(R"(Benjamin Redelings)"));
+	help_strings[string("dnPseudo")][string("description")] = string(R"(Virtual distribution for adding likelihood evidence)");
+	help_strings[string("dnPseudo")][string("details")] = string(R"(Researchers often want to add information about a parameter that
+already has a prior. For example, we might want to enforce that a
+taxon age t is in the range [a, infinity) or [a,b].  It might seem
+natural to specify a "second prior", but this does not work:
+
+  * A uniform distribution on [a,infinity) cannot be normalized
+    to sum to 1.
+  
+  * A uniform distribution on [a,b] can be normalized, but 
+    normalizing it leads to incorrect results if a and b are
+    themselves random.
+
+The correct approach is to treat this extra information as likelihood
+information.  If we know that t > a, then we can introduce a 
+hypothetical observation F=f such that
+
+    Pr(F=f|t, a) = 1 if t > a
+                 = 0 otherwise
+
+For example, F could be the stratigraphic depth for a fossil.
+Conceptually, there exists some distribution D for F such that
+
+    F ~ D(t,a)
+
+Note that the stratigraphic depth is considered to be a random
+variable that depends on the age t, and not the other way around.
+
+Now, we may want to avoid explicitly modeling the stratigraphic
+observation and simply specify the likelihood function Pr(F=f|t, a)
+directly.  In this case the observed depth f and the distribution
+D are unspecified.
+
+In this case, we say that F=f is "pseudodata" or "virtual evidence".
+We write this as
+
+    F ~ dnPseudo( pdAbove(t,a) )
+    F.clamp( pseudoObservation() )
+
+Here dnPseudo takes the place of the unspecified distribution D,
+and pseudoObservation() takes the place of the unspecified
+stratigraphic depth.  The only thing that is specified is the
+likelihood function pdAbove(t,a).  We call it a pseudodata likelihood
+because the true observed value and model are hidden.
+
+It is important to note that his is NOT a probability distribution,
+because it is not normalized to sum to 1.
+
+Pseudodata likelihoods can be combined by the && operator.  This
+operator multiplies the likelihoods. For example 
+
+    pdAbove(t,a) && pdBelow(t,b)
+
+Is the same as 
+
+    pdBetween(t,a,b))");
+	help_strings[string("dnPseudo")][string("example")] = string(R"(# A taxon age range
+f ~ dnPseudo( pdBetween(t[i], a[i], b[i]))
+f.clamp( pseudoObservation() )
+
+# A fossil node calibration
+f ~ dnPseudo( pdLogNormal(t[i], lmu, lsigma, shift) )
+f.clamp()
+
+# Observing that taxon 1 is younger than taxon 2
+f ~ dnPseudo( pdBelow(taxon1_age, taxon2_age) )
+f.clamp( pseudoObservation() )
+
+# Checking likelihood values
+pdBetween(0.5, 0, 1)  # yields PDL0.0
+pdBetween(1.5, 0, 1)  # yields PDL-inf)");
+	help_strings[string("dnPseudo")][string("name")] = string(R"(dnPseudo)");
+	help_arrays[string("dnPseudo")][string("see_also")].push_back(string(R"(pdAbove)"));
+	help_arrays[string("dnPseudo")][string("see_also")].push_back(string(R"(pdBelow)"));
+	help_arrays[string("dnPseudo")][string("see_also")].push_back(string(R"(pdBetween)"));
+	help_arrays[string("dnPseudo")][string("see_also")].push_back(string(R"(pdNormal)"));
+	help_arrays[string("dnPseudo")][string("see_also")].push_back(string(R"(pdExponential)"));
+	help_arrays[string("dnPseudo")][string("see_also")].push_back(string(R"(pdLogNormal)"));
+	help_arrays[string("dnPseudo")][string("see_also")].push_back(string(R"(pdConstant)"));
+	help_arrays[string("dnPseudo")][string("see_also")].push_back(string(R"(pdRequire)"));
+	help_strings[string("dnPseudo")][string("title")] = string(R"(Pseudodistribution)");
 	help_strings[string("dnReversibleJumpMixture")][string("name")] = string(R"(dnReversibleJumpMixture)");
 	help_arrays[string("dnSSBDP")][string("authors")].push_back(string(R"(Michael Landis)"));
 	help_strings[string("dnSSBDP")][string("description")] = string(R"(Uses a data augmentation approach to sample hidden speciation events on
@@ -3615,13 +3697,14 @@ for(i in 1:fossils.size())
     a[i] = fossils[i].getMinAge()
     b[i] = fossils[i].getMaxAge()
 
-    F[i] ~ dnUniform(t[i] - b[i], t[i] - a[i])
-    F[i].clamp( 0 )
+    F[i] ~ dnPseudo( pdBetween(t[i], a[i], b[i]) )
+    F[i].clamp( pseudoObservation() )
+
     moves.append( mvFossilTipTimeUniform(fbd_tree, origin_time, min=a[i], max=b[i], tip=fossils[i], weight=5.0) )
     moves.append( mvFossilTipTimeSlideUniform(fbd_tree, origin_time, min=a[i], max=b[i], tip=fossils[i], weight=5.0) )
 })");
 	help_strings[string("mvFossilTipTimeSlideUniform")][string("name")] = string(R"(mvFossilTipTimeSlideUniform)");
-	help_arrays[string("mvFossilTipTimeSlideUniform")][string("see_also")].push_back(string(R"(mvFossilTipTimeSlideUniform)"));
+	help_arrays[string("mvFossilTipTimeSlideUniform")][string("see_also")].push_back(string(R"(mvFossilTipTimeUniform)"));
 	help_strings[string("mvFossilTipTimeSlideUniform")][string("title")] = string(R"(Sliding move to change a fossil tip age)");
 	help_arrays[string("mvFossilTipTimeUniform")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("mvFossilTipTimeUniform")][string("description")] = string(R"(This moves either takes a specific fossil, or randomly picks a fossil, and then draws the new ages randomly between the maximum and minimum ages.)");
@@ -3638,8 +3721,9 @@ for(i in 1:fossils.size())
     a[i] = fossils[i].getMinAge()
     b[i] = fossils[i].getMaxAge()
 
-    F[i] ~ dnUniform(t[i] - b[i], t[i] - a[i])
-    F[i].clamp( 0 )
+    F[i] ~ dnPseudo( pdBetween(t[i], a[i], b[i]) )
+    F[i].clamp( pseudoObservation() )
+
     moves.append( mvFossilTipTimeUniform(fbd_tree, origin_time, min=a[i], max=b[i], tip=fossils[i], weight=5.0) )
     moves.append( mvFossilTipTimeSlideUniform(fbd_tree, origin_time, min=a[i], max=b[i], tip=fossils[i], weight=5.0) )
 })");
@@ -4555,6 +4639,180 @@ ps.stdError(bootstrap=TRUE, replicates=50, printFiles=TRUE) # bootstrap (50 repl
 	help_arrays[string("pathSampler")][string("see_also")].push_back(string(R"(powerPosterior)"));
 	help_arrays[string("pathSampler")][string("see_also")].push_back(string(R"(steppingStoneSampler)"));
 	help_strings[string("pathSampler")][string("title")] = string(R"(Path-sampling marginal likelihood estimation)");
+	help_arrays[string("pdAbove")][string("authors")].push_back(string(R"(Benjamin Redelings)"));
+	help_strings[string("pdAbove")][string("description")] = string(R"(Pseudodata that x >= lower)");
+	help_strings[string("pdAbove")][string("details")] = string(R"(This represents a pseudodata likelihood that is
+* 1 if x in [lower, infinity)
+* 0 otherwise
+
+Note the pseudodata likelihood is NOT a density, and is not
+normalized to sum to 1.  Instead it is normalized so that the
+maximum value is 1.
+
+Specifying decayRate allows a "soft bound".  In this case
+if x is below lower, the pseudodata likelihood is:
+* exp(-D*decay)
+where D = x - lower.
+
+See dnPseudo for more information.)");
+	help_strings[string("pdAbove")][string("example")] = string(R"(
+# Evidence that x > 1
+x ~ dnNormal(0,1)
+f1 ~ dnPseudo( pdAbove(x,1) )
+f1.clamp( pseudoObservation() )
+
+# Evidence that t1 > t2
+t1 ~ dnNormal(0,1)
+t2 ~ dnNormal(0,1)
+f2 ~ dnPseudo( pdAbove(t1,t2) )
+f2.clamp( pseudoObservation() ))");
+	help_strings[string("pdAbove")][string("name")] = string(R"(pdAbove)");
+	help_arrays[string("pdAbove")][string("see_also")].push_back(string(R"(dnPseudo)"));
+	help_arrays[string("pdAbove")][string("see_also")].push_back(string(R"(pdBelow)"));
+	help_arrays[string("pdAbove")][string("see_also")].push_back(string(R"(pdBetween)"));
+	help_arrays[string("pdAbove")][string("see_also")].push_back(string(R"(pdExponential)"));
+	help_strings[string("pdAbove")][string("title")] = string(R"(PseudoDataLikelihood Above)");
+	help_arrays[string("pdBelow")][string("authors")].push_back(string(R"(Benjamin Redelings)"));
+	help_strings[string("pdBelow")][string("description")] = string(R"(Pseudodata that x <= upper)");
+	help_strings[string("pdBelow")][string("details")] = string(R"(This represents a pseudodata likelihood that is
+* 1 if x in (-infinity, upper]
+* 0 otherwise
+
+Note the pseudodata likelihood is NOT a density, and is not
+normalized to sum to 1.  Instead it is normalized so that the
+maximum value is 1.
+
+Specifying decayRate allows a "soft bound".  In this case
+if x is above upper, the pseudodata likelihood is:
+* exp(-D*decay)
+where D = upper - x.
+
+See dnPseudo for more information.)");
+	help_strings[string("pdBelow")][string("example")] = string(R"(
+# Evidence that x < 1
+x ~ dnNormal(0,1)
+f1 ~ dnPseudo( pdBelow(x,1) )
+f1.clamp( pseudoObservation() )
+
+# Evidence that t1 < t2
+t1 ~ dnNormal(0,1)
+t2 ~ dnNormal(0,1)
+f2 ~ dnPseudo( pdBelow(t1,t2) )
+f2.clamp( pseudoObservation() ))");
+	help_strings[string("pdBelow")][string("name")] = string(R"(pdBelow)");
+	help_arrays[string("pdBelow")][string("see_also")].push_back(string(R"(dnPseudo)"));
+	help_arrays[string("pdBelow")][string("see_also")].push_back(string(R"(pdAbove)"));
+	help_arrays[string("pdBelow")][string("see_also")].push_back(string(R"(pdBetween)"));
+	help_arrays[string("pdBelow")][string("see_also")].push_back(string(R"(pdExponential)"));
+	help_strings[string("pdBelow")][string("title")] = string(R"(PseudoDataLikelihood Below)");
+	help_arrays[string("pdBetween")][string("authors")].push_back(string(R"(Benjamin Redelings)"));
+	help_strings[string("pdBetween")][string("description")] = string(R"(PseudoData that lower <= x <= upper)");
+	help_strings[string("pdBetween")][string("details")] = string(R"(This represents a pseudodata likelihood that is
+* 1 if x is in [lower, upper]
+* 0 otherwise
+
+Note the pseudodata likelihood is NOT a density, and is not
+normalized to sum to 1.  Instead it is normalized so that the
+maximum value is 1.
+
+Specifying decayRate allows a "soft bound".  In this case
+if x is not in the interval then the pseudodata likelihood is:
+* exp(-D*decay)
+where D is the  distance from x to the interval.
+
+See dnPseudo for more information.)");
+	help_strings[string("pdBetween")][string("example")] = string(R"(
+# Evidence that x is in [1,2]
+x ~ dnNormal(0,1)
+f ~ dnPseudo( pdBetween(x,1,2) )
+f.clamp( pseudoObservation() ))");
+	help_strings[string("pdBetween")][string("name")] = string(R"(pdBetween)");
+	help_arrays[string("pdBetween")][string("see_also")].push_back(string(R"(dnPseudo)"));
+	help_arrays[string("pdBetween")][string("see_also")].push_back(string(R"(pdAbove)"));
+	help_arrays[string("pdBetween")][string("see_also")].push_back(string(R"(pdBelow)"));
+	help_arrays[string("pdBetween")][string("see_also")].push_back(string(R"(pdLogNormal)"));
+	help_strings[string("pdBetween")][string("title")] = string(R"(PseudoDataLikelihood Between)");
+	help_arrays[string("pdConstant")][string("authors")].push_back(string(R"(Benjamin Redelings)"));
+	help_strings[string("pdConstant")][string("description")] = string(R"(Pseudodata that gives no information.)");
+	help_strings[string("pdConstant")][string("details")] = string(R"(This represents a pseudodata likelihood that is always 1.
+
+See the help for dnPseudo for more explanation.)");
+	help_strings[string("pdConstant")][string("example")] = string(R"(f ~ dnPseudo( pdConstant() )
+f.clamp( pseudoObservation() ))");
+	help_strings[string("pdConstant")][string("name")] = string(R"(pdConstant)");
+	help_arrays[string("pdConstant")][string("see_also")].push_back(string(R"(dnPseudo)"));
+	help_strings[string("pdConstant")][string("title")] = string(R"(Constant PseudoDataLikelihood)");
+	help_arrays[string("pdExponential")][string("authors")].push_back(string(R"(Benjamin Redelings)"));
+	help_strings[string("pdExponential")][string("description")] = string(R"(A pseudodata likelihood that is shaped like an Exponential)");
+	help_strings[string("pdExponential")][string("details")] = string(R"(This represents a pseudodata likelihood that is given by
+
+* exp( -lambda * (x-shift) ) if x > shift
+* 0 if x <= shift
+
+Note the pseudodata likelihood is NOT a density, and is not
+normalized to sum to 1. Instead it is normalized so that the
+maximum value is 1.
+
+This is why the additional lambda term is not present.
+
+See dnPseudo for more information.)");
+	help_strings[string("pdExponential")][string("example")] = string(R"(
+# Evidence that x above 1
+x ~ dnNormal(0,10)
+f ~ dnPseudo( pdExponential(x,2,1) )
+f.clamp( pseudoObservation() ))");
+	help_strings[string("pdExponential")][string("name")] = string(R"(pdExponential)");
+	help_arrays[string("pdExponential")][string("see_also")].push_back(string(R"(dnPseudo)"));
+	help_arrays[string("pdExponential")][string("see_also")].push_back(string(R"(pdBetween)"));
+	help_arrays[string("pdExponential")][string("see_also")].push_back(string(R"(pdLogNormal)"));
+	help_strings[string("pdExponential")][string("title")] = string(R"(Exponential PseudoDataLikelihood)");
+	help_arrays[string("pdLogNormal")][string("authors")].push_back(string(R"(Benjamin Redelings)"));
+	help_strings[string("pdLogNormal")][string("description")] = string(R"(A pseudodata likelihood that is shaped like a LogNormal.)");
+	help_strings[string("pdLogNormal")][string("details")] = string(R"(This represents a pseudodata likelihood that is given by
+
+* exp( -(log(x-shift)-mean)^2 / (2*sd^2) ) if x > shift
+* 0 if x <= shift
+
+Note the pseudodata likelihood is NOT a density, and is not
+normalized to sum to 1. Instead it is normalized so that the
+maximum value is 1.
+
+This is why the term (1/x)*(1/sqrt(2*pi*sigma^2)) is not present.
+
+See dnPseudo for more information.)");
+	help_strings[string("pdLogNormal")][string("example")] = string(R"(
+# Evidence that x is near 2
+x ~ dnNormal(0,10)
+f ~ dnPseudo( pdLogNormal(x,2,1) )
+f.clamp( pseudoObservation() ))");
+	help_strings[string("pdLogNormal")][string("name")] = string(R"(pdLogNormal)");
+	help_arrays[string("pdLogNormal")][string("see_also")].push_back(string(R"(dnPseudo)"));
+	help_arrays[string("pdLogNormal")][string("see_also")].push_back(string(R"(pdBetween)"));
+	help_arrays[string("pdLogNormal")][string("see_also")].push_back(string(R"(pdNormal)"));
+	help_strings[string("pdLogNormal")][string("title")] = string(R"(LogNormal PseudoDataLikelihood)");
+	help_arrays[string("pdNormal")][string("authors")].push_back(string(R"(Benjamin Redelings)"));
+	help_strings[string("pdNormal")][string("description")] = string(R"(A pseudodata likelihood that is shaped like a Normal.)");
+	help_strings[string("pdNormal")][string("details")] = string(R"(This represents a pseudodata likelihood that is given by
+
+    exp( -(x-mean)^2 / (2*sd^2) )
+
+Note the pseudodata likelihood is NOT a density, and is not
+normalized to sum to 1. Instead it is normalized so that the
+maximum value is 1.
+
+This is why the term 1/sqrt(2*pi*sigma^2) is not present.
+
+See dnPseudo for more information.)");
+	help_strings[string("pdNormal")][string("example")] = string(R"(
+# Evidence that x is near 2
+x ~ dnNormal(0,10)
+f ~ dnPseudo( pdNormal(x,2,1) )
+f.clamp( pseudoObservation() ))");
+	help_strings[string("pdNormal")][string("name")] = string(R"(pdNormal)");
+	help_arrays[string("pdNormal")][string("see_also")].push_back(string(R"(dnPseudo)"));
+	help_arrays[string("pdNormal")][string("see_also")].push_back(string(R"(pdBetween)"));
+	help_arrays[string("pdNormal")][string("see_also")].push_back(string(R"(pdLogNormal)"));
+	help_strings[string("pdNormal")][string("title")] = string(R"(Normal PseudoDataLikelihood)");
 	help_strings[string("pomoRF")][string("name")] = string(R"(pomoRF)");
 	help_strings[string("pomoState4Convert")][string("name")] = string(R"(pomoState4Convert)");
 	help_strings[string("posteriorPredictiveAnalysis")][string("name")] = string(R"(posteriorPredictiveAnalysis)");
@@ -4673,6 +4931,30 @@ printSeed())");
 	help_strings[string("printSeed")][string("name")] = string(R"(printSeed)");
 	help_arrays[string("printSeed")][string("see_also")].push_back(string(R"(seed)"));
 	help_strings[string("printSeed")][string("title")] = string(R"(Print the random number generator seed)");
+	help_arrays[string("pseudoObservation")][string("authors")].push_back(string(R"(Benjamin Redelings)"));
+	help_strings[string("pseudoObservation")][string("description")] = string(R"(An observation that is unspecified)");
+	help_strings[string("pseudoObservation")][string("details")] = string(R"(The function pseudoObservation() represents the observed
+but unspecified value of a variable sampled from dnPseudo.
+
+For example, if a fossil observation F=f provides evidence
+that a taxon age t is between age_min and age_max, we could
+write:
+
+    F ~ dnPseudo( pdAbove(t, age_min, age_max) )
+    F.clamp( pseudoObservation() )
+
+Here pseudoObservation() represents the unspecified value f,
+similar to how dnPseudo represents the unspecified distribution
+D.
+
+See the help for dnPseudo for a more complete explanation.)");
+	help_strings[string("pseudoObservation")][string("example")] = string(R"(x ~ dnNormal(0,1)
+f ~ dnPseudo( pdAbove(x,1) )
+f.clamp( pseudoObservation() ))");
+	help_strings[string("pseudoObservation")][string("name")] = string(R"(pseudoObservation)");
+	help_arrays[string("pseudoObservation")][string("see_also")].push_back(string(R"(dnPseudo)"));
+	help_arrays[string("pseudoObservation")][string("see_also")].push_back(string(R"(pdRequire)"));
+	help_strings[string("pseudoObservation")][string("title")] = string(R"(A pseudo-observation)");
 	help_strings[string("quantile")][string("name")] = string(R"(quantile)");
 	help_arrays[string("quit")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("quit")][string("description")] = string(R"(Terminates the currently running instance of RevBayes.)");

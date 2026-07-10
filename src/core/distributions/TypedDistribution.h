@@ -99,17 +99,19 @@ namespace RevBayesCore {
 
 
 template <class variableType>
-RevBayesCore::TypedDistribution<variableType>::TypedDistribution(variableType *v) : Distribution(), 
-    dag_node( NULL ),
-    value( v ) 
+RevBayesCore::TypedDistribution<variableType>::TypedDistribution(variableType *v)
+    : Distribution(), 
+      dag_node( NULL ),
+      value( v ) 
 {
     
 }
 
 template <class variableType>
-RevBayesCore::TypedDistribution<variableType>::TypedDistribution(const TypedDistribution &d) : Distribution(d), 
-    dag_node( NULL ),
-    value( Cloner<variableType, IsDerivedFrom<variableType, Cloneable>::Is >::createClone( *d.value ) )
+RevBayesCore::TypedDistribution<variableType>::TypedDistribution(const TypedDistribution &d)
+    : Distribution(d), 
+      dag_node( NULL ),
+      value( d.value ? Cloner<variableType, IsDerivedFrom<variableType, Cloneable>::Is >::createClone( *d.value ) : nullptr )
 {
     
 }

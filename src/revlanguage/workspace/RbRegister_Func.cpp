@@ -320,6 +320,18 @@
 #include "Func_decomposedVarianceCovarianceMatrix.h"
 #include "Func_partialToCorrelationMatrix.h"
 
+/* PseudoData */
+#include "Func_PseudoObservation.h"
+#include "Func_PseudoDataBetween.h"
+#include "Func_PseudoDataAbove.h"
+#include "Func_PseudoDataBelow.h"
+#include "Func_PseudoDataAnd.h"
+#include "Func_PseudoDataNormal.h"
+#include "Func_PseudoDataLogNormal.h"
+#include "Func_PseudoDataConstant.h"
+#include "Func_PseudoDataRequire.h"
+#include "Func_PseudoDataExponential.h"
+
 /* Type conversions */
 #include "Proc_StringToInt.h"
 
@@ -693,10 +705,20 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         
         addFunction( new Func_BSPInterval<RealPos>()          );
 
+        // Pseudo-data
+        addFunction( new Func_PseudoObservation()                   );
+        addFunction( new Func_PseudoDataLikelihoodBetween()         );
+        addFunction( new Func_PseudoDataLikelihoodAbove()           );
+        addFunction( new Func_PseudoDataLikelihoodBelow()           );
+        addFunction( new Func_PseudoDataLikelihoodAnd()             );
+        addFunction( new Func_PseudoDataLikelihoodNormal()          );
+        addFunction( new Func_PseudoDataLikelihoodLogNormal()       );
+        addFunction( new Func_PseudoDataLikelihoodConstant()        );
+        addFunction( new Func_PseudoDataLikelihoodRequire()         );
+        addFunction( new Func_PseudoDataLikelihoodExponential()     );
 
         // Type conversion
         addFunction( new Proc_StringToInt( )                         );
-
     }
     catch(RbException& rbException)
     {

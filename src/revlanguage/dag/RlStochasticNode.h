@@ -4,6 +4,7 @@
 #include "StochasticNode.h"
 #include "RevMemberObject.h"
 #include "RlDistribution.h"
+#include "RlPseudoObservation.h"
 
 namespace RevLanguage {
     
@@ -48,7 +49,8 @@ RevLanguage::StochasticNode<valueType>::StochasticNode( const std::string& n, Re
 {
     
     ArgumentRules* clampArgRules = new ArgumentRules();
-    clampArgRules->push_back( new ArgumentRule("x", rlDistribution->getVariableTypeSpec(), "The observed value.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+    RevObject* default_value = (rlDistribution->getVariableTypeSpec().getType() != "PseudoObservation") ? nullptr : new PseudoObservation;
+    clampArgRules->push_back( new ArgumentRule("x", rlDistribution->getVariableTypeSpec(), "The observed value.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, default_value ) );
     this->methods.addFunction( new MemberProcedure( "clamp",  RlUtils::Void, clampArgRules) );
 
     ArgumentRules* integrate_out_arg_ules = new ArgumentRules();
