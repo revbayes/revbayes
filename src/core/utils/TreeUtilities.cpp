@@ -1332,16 +1332,21 @@ Tree* RevBayesCore::TreeUtilities::minBLTimeScaling(Tree& treeToScale, const std
  */
 void RevBayesCore::TreeUtilities::offsetTree(TopologyNode& node, double factor)
 {
-    // rescale the time of the node
-    double new_age = node.getAge() + factor;
-    node.setAge( new_age );
 
+    // 1. offset the children
+    // 2. offset myself
+    // the order is important so that sampled ancestors don't get set multiple times.
+    
     // offset all children
     const std::vector<TopologyNode*>& children = node.getChildren();
     for (size_t i = 0; i < children.size(); i++)
     {
         offsetTree( *children[i], factor);
     }
+    
+    // rescale the time of the node
+    double new_age = node.getAge() + factor;
+    node.setAge( new_age, false );              // make sure we do not offset the sampled ancestors again!
 
 }
 

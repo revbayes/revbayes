@@ -74,7 +74,6 @@ BirthDeathSamplingTreatmentProcess::BirthDeathSamplingTreatmentProcess(const Typ
     interval_times_event_speciation(event_sampling_timeline),
     interval_times_event_extinction(event_extinction_timeline),
     interval_times_event_sampling(event_sampling_timeline),
-    offset( 0.0 ),
     taxa(tn),
     age_check_precision(age_check_precision)
 {
@@ -159,8 +158,6 @@ BirthDeathSamplingTreatmentProcess::BirthDeathSamplingTreatmentProcess(const Typ
     heterogeneous_R = dynamic_cast<const TypedDagNode<RbVector<double> >*>(in_event_treatment);
 
     addParameter( heterogeneous_R );
-
-    //TODO: should check that the first interval time is not less than the first tip in offset computation
 
     //TODO: returning neginf and nan are not currently consistently used for different issues with invalid values.
 
@@ -411,6 +408,18 @@ double BirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( void ) con
             }
             lnProbTimes += ln_sampling_event_prob;
         }
+        // make sure that the sampling probability at the present was > 0 if there are samples at the present
+        else if ( i == 0 && global_timeline[0] < DBL_EPSILON )
+        {
+            // get the number of samples at present
+            int T_i = int(event_tip_ages[0].size());
+            
+            if ( T_i > 0 )
+            {
+                return RbConstants::Double::neginf;
+            }
+            
+        }
     }
 
     // add the serial tip age terms (iii)
@@ -615,17 +624,9 @@ bool BirthDeathSamplingTreatmentProcess::countAllNodes(void) const
       }
       else if ( n.isTip() && !n.isFossil() )
       {
-          // Node is at present, this can happen even if Phi[0] = 0, so we check if there is really a sampling event at the present
-          if (phi_event[0] >= DBL_EPSILON)
-          {
-              // node is extant leaf
-              num_extant_taxa++;
-              event_tip_ages[0].push_back(0.0);
-          }
-          else
-          {
-              serial_tip_ages.push_back(0.0);
-          }
+          // node is extant leaf
+          num_extant_taxa++;
+          event_tip_ages[0].push_back(0.0);
       }
       else if ( n.isInternal() && !n.getChild(0).isSampledAncestorTip() && !n.getChild(1).isSampledAncestorTip() )
       {
@@ -769,40 +770,7 @@ size_t BirthDeathSamplingTreatmentProcess::findIndex(double t, const std::vector
     }
 }
 
-// calculate offset so we can set t_0 to time of most recent tip
-void BirthDeathSamplingTreatmentProcess::getOffset(void) const
-{
-    // On first pass, there is no tree, so we can't loop over nodes
-    // Get taxon ages directly from taxa instead
-    if ( value->getNumberOfNodes() == 0 )
-    {
-        offset = RbConstants::Double::max;
-        for (size_t i = 0; i < taxa.size(); i++)
-        {
-            const Taxon& n = taxa[i];
 
-            if ( n.getAge() < offset )
-            {
-                offset = n.getAge();
-            }
-        }
-    }
-    // On later passes we have the tree, to avoid any issues with tree and taxon age mismatch, get ages from tree
-    else
-    {
-        offset = RbConstants::Double::max;
-        for (size_t i = 0; i < value->getNumberOfNodes(); i++)
-        {
-            const TopologyNode& n = value->getNode( i );
-
-            if ( n.getAge() < offset )
-            {
-                offset = n.getAge();
-            }
-        }
-    }
-
-}
 
 bool BirthDeathSamplingTreatmentProcess::isConstantRate(void) const
 {
@@ -1315,10 +1283,8 @@ void BirthDeathSamplingTreatmentProcess::prepareTimeline( void ) const
 
     }
 
-    // @TODO: @ANDY: Double check the offset works
-    // Add s_0
-    getOffset();
-    global_timeline.insert(global_timeline.begin(),offset);
+    // Add the present time to our timeline
+    global_timeline.insert(global_timeline.begin(), 0.0);
 
     // For each parameter vector, we now make sure that its size matches the size of the global vector
     // For a RATE parameter, there are three cases
@@ -1449,7 +1415,7 @@ void BirthDeathSamplingTreatmentProcess::prepareTimeline( void ) const
         }
     }
 
-    // Get vector of burst death (mass extinction) probabilities
+    // Get vector of burst speciation probabilities
     // For R, the cases are as follows
     //     1) It is a vector and it is of length phi_event.size() - 1, in which case we simply add R[0] = 0.0 and we can move on
     //     2) It is a vector and it DOES NOT match the size of the global timeline, in which case we must expand it to match
@@ -1654,7 +1620,9 @@ int BirthDeathSamplingTreatmentProcess::survivors(double t) const
             return 0;
         }
         survivors = 1;
-    } else {
+    }
+    else
+    {
         if ( t > value->getRoot().getAge() )
         {
             return 0;
@@ -1662,14 +1630,16 @@ int BirthDeathSamplingTreatmentProcess::survivors(double t) const
         survivors = 2;
     }
 
-    for (size_t i=0; i<serial_bifurcation_times.size(); ++i) {
+    for (size_t i=0; i<serial_bifurcation_times.size(); ++i)
+    {
         if (t < serial_bifurcation_times[i])
         {
             survivors++;
         }
     }
 
-    for (size_t i=0; i<serial_tip_ages.size(); ++i) {
+    for (size_t i=0; i<serial_tip_ages.size(); ++i)
+    {
         if (t < serial_tip_ages[i])
         {
             survivors--;
@@ -1679,10 +1649,12 @@ int BirthDeathSamplingTreatmentProcess::survivors(double t) const
     for (size_t i=0; i<global_timeline.size(); ++i)
     {   
         size_t idx = global_timeline.size() - i - 1;
-        if ( global_timeline[idx] < t ) {
+        if ( global_timeline[idx] < t )
+        {
             break;
-        } else if (global_timeline[idx] > t)
-        {   
+        }
+        else if (global_timeline[idx] > t)
+        {
             // by ignoring time = t we implicitly count all tips at a time as survivors
             // This is compatible with the logic in computing event-sampling probabilities but could be changed
             survivors += (int)event_bifurcation_times[idx].size();

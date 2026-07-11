@@ -286,7 +286,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
         double f = static_cast<const RealPos&>( args[0].getVariable()->getRevObject() ).getValue();
         RevBayesCore::Tree &tree = dag_node->getValue();
         RevBayesCore::TreeUtilities::offsetTree(tree.getRoot(), f);
-
+        
         return NULL;
     }
     else if (name == "removeDuplicateTaxa")
