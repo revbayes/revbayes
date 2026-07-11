@@ -131,18 +131,20 @@ namespace RevBayesCore {
         const RbVector<double>&                                         computeSpeciationRateAtTime(double a) const;
         void                                                            expandNonGlobalProbabilityParameterVector(std::vector< RbVector<double> > &par, const std::vector<double> &par_times, const RbVector<double> &d) const; //!< Updates vector par such that it matches the global timeline
         void                                                            expandNonGlobalRateParameterVector(std::vector<RbVector<double> > &par, const std::vector<double> &par_times) const; //!< Updates vector par such that it matches the global timeline
-        void                                                            expandNonGlobalRateParameterVector(std::vector<double> &par, const std::vector<double> &par_times) const; //!< Updates vector par such that it matches the global timeline
-        size_t                                                          findIndex(double t) const;                                              //!< Find the index so that times[index-1] < t < times[index]
+        void                                                            expandNonGlobalRateParameterVector(std::vector<double> &par, const std::vector<double> &par_times) const;   //!< Updates vector par such that it matches the global timeline
+        void                                                            expandNonGlobalRateParameterVector(std::vector<size_t> &par, const std::vector<double> &par_times) const;   //!< Updates vector par such that it matches the global timeline
+        size_t                                                          findIndex(double t) const;                                                                                  //!< Find the index so that times[index-1] < t < times[index]
         size_t                                                          findIndex(double t, const std::vector<double>& timeline) const;
-        bool                                                            isEpisodicModel(void) const;                                             //!< Checks if we have a constant-rate process
+        bool                                                            isEpisodicModel(void) const;                                                                                //!< Checks if we have a constant-rate process
         void                                                            prepareTimeline(void) const;
-        void                                                            sortGlobalTimesAndVectorParameter(void) const;                          //!< Sorts times to run from 0->inf, and orders ALL vector parameters to match
+        void                                                            sortGlobalTimesAndVectorParameter(void) const;                                                              //!< Sorts times to run from 0->inf, and orders ALL vector parameters to match
         void                                                            sortNonGlobalTimesAndParameters(std::vector<RbVector<double> >& par, std::vector<double>& times) const;     //!< Sorts times to run from 0->inf, and orders par to match
-        void                                                            sortNonGlobalTimesAndParameters(std::vector<double>& par, std::vector<double>& times) const;     //!< Sorts times to run from 0->inf, and orders par to match
+        void                                                            sortNonGlobalTimesAndParameters(std::vector<double>& par, std::vector<double>& times) const;                //!< Sorts times to run from 0->inf, and orders par to match
+        void                                                            sortNonGlobalTimesAndParameters(std::vector<size_t>& par, std::vector<double>& times) const;           //!< Sorts times to run from 0->inf, and orders par to match
 
         // members
-        std::string                                                     condition;                                                                                          //!< The condition of the process (none/survival/#taxa).
-        double                                                          dt;                                                                                                 //!< The size of the time slices used by the ODE for numerical integration.
+        std::string                                                     condition;                                  //!< The condition of the process (none/survival/#taxa).
+        double                                                          dt;                                         //!< The size of the time slices used by the ODE for numerical integration.
         std::vector<bool>                                               active_likelihood;
         mutable std::vector<bool>                                       changed_nodes;
         mutable std::vector<bool>                                       dirty_nodes;
@@ -151,10 +153,10 @@ namespace RevBayesCore {
         mutable std::vector<std::vector<double> >                       extinction_probabilities;
         size_t                                                          num_states;
         mutable std::vector<std::vector<double> >                       scaling_factors;
-        bool                                                            use_cladogenetic_events;                                                                            //!< do we use the speciation rates from the cladogenetic event map?
-        mutable bool                                                    use_episodic_model;                                                                            //!< do we use the speciation rates from the cladogenetic event map?
+        bool                                                            use_cladogenetic_events;                    //!< do we use the speciation rates from the cladogenetic event map?
+        mutable bool                                                    use_episodic_model;                         //!< do we use the speciation rates from the cladogenetic event map?
         bool                                                            use_origin;
-        bool                                                            sample_character_history;                                                                           //!< are we sampling the character history along branches?
+        bool                                                            sample_character_history;                   //!< are we sampling the character history along branches?
         std::vector<double>                                             average_speciation;
         std::vector<double>                                             average_extinction;
         std::vector<std::int64_t>                                       num_shift_events;
@@ -163,7 +165,7 @@ namespace RevBayesCore {
         
         // parameters
         const TypedDagNode< CladogeneticSpeciationRateMatrix >*         cladogenesis_matrix;
-        const TypedDagNode<double>*                                     process_age;                                                                                           //!< Time since the origin.
+        const TypedDagNode<double>*                                     process_age;                                //!< Time since the origin.
         const TypedDagNode<RbVector<double> >*                          mu_const;
         const TypedDagNode<RbVector<RbVector<double> > >*               mu_var;
         const TypedDagNode<RbVector<double> >*                          lambda_const;
@@ -175,31 +177,25 @@ namespace RevBayesCore {
         const TypedDagNode<RateGenerator>*                              Q_const;
         const TypedDagNode<RbVector<RateGenerator> >*                   Q_var;
         const TypedDagNode<RbVector<RbVector<double> > >*               survival_probs;
-//        const TypedDagNode<RbVector<double> >*                          epoch_times;
         const TypedDagNode<RbVector<double> >*                          epoch_times_lambda;
         const TypedDagNode<RbVector<double> >*                          epoch_times_mu;
         const TypedDagNode<RbVector<double> >*                          epoch_times_phi;
         const TypedDagNode<RbVector<double> >*                          epoch_times_gamma;
         const TypedDagNode<RbVector<double> >*                          epoch_times_Q;
         const TypedDagNode<RbVector<double> >*                          epoch_times_eta;
-        const TypedDagNode<Simplex >*                                   pi;                                                                                                 //!< The root frequencies (probabilities of the root states).
-        const TypedDagNode<double>*                                     rho;                                                                                                //!< Sampling probability of each species.
-        const TypedDagNode<RbVector<double> >*                          rho_per_state;                                                                                                //!< Sampling probability of each species.
+        const TypedDagNode<Simplex >*                                   pi;                                         //!< The root frequencies (probabilities of the root states).
+        const TypedDagNode<double>*                                     rho;                                        //!< Sampling probability of each species.
+        const TypedDagNode<RbVector<double> >*                          rho_per_state;                              //!< Sampling probability of each species.
 
-        mutable std::vector<RbVector<double> >          lambda;
-        mutable std::vector<RbVector<double> >          mu;
-        mutable std::vector<RbVector<double> >          phi;
-        mutable std::vector<RbVector<double> >          gamma;
-        mutable std::vector<double>                     eta;
-        mutable RbVector<RateGenerator>                 Q;
+        mutable std::vector<RbVector<double> >                          lambda;
+        mutable std::vector<RbVector<double> >                          mu;
+        mutable std::vector<RbVector<double> >                          phi;
+        mutable std::vector<RbVector<double> >                          gamma;
+        mutable std::vector<double>                                     eta;
+        mutable RbVector<RateGenerator>                                 Q;
+        mutable std::vector<size_t>                                     Q_indices;
 
-//        mutable std::vector<double>                     lambda_times;                                          //!< The user-specified non-zero times of the instantaneous events and rate shifts.
-//        mutable std::vector<double>                     mu_times;                                              //!< The user-specified non-zero times of the instantaneous events and rate shifts.
-//        mutable std::vector<double>                     phi_times;                                             //!< The user-specified non-zero times of the instantaneous events and rate shifts.
-//        mutable std::vector<double>                     gamma_times;                                            //!< The user-specified non-zero times of the instantaneous events and rate shifts.
-//        mutable std::vector<double>                     eta_times;                                            //!< The user-specified non-zero times of the instantaneous events and rate shifts.
-//        mutable std::vector<double>                     Q_times;                                            //!< The user-specified non-zero times of the instantaneous events and rate shifts.
-        mutable std::vector<double>                     global_timeline;                                       //!< The times of the instantaneous events and rate shifts.
+        mutable std::vector<double>                                     global_timeline;                            //!< The times of the instantaneous events and rate shifts.
 
         
         RateMatrix_JC                                                   Q_default;

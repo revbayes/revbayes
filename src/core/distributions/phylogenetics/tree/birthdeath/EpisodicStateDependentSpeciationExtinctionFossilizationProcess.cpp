@@ -928,6 +928,30 @@ void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::expandNonGl
 }
 
 
+
+/**
+ * Takes a par.size() < global_timeline.size() vector and makes it the correct size to work with our global timeline.
+ * The parameter has its own reference timeline, which we use to find the rate in the global intervals.
+ * This works only for parameters (lambda,mu,phi,r), where the global timeline is simply a finer grid than the variable-specific timelines.
+ */
+void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::expandNonGlobalRateParameterVector(std::vector<size_t>& par, const std::vector<double> &par_times) const
+{
+    // Store the original values so we can overwrite the vector
+    std::vector<size_t> old_par = par;
+
+    // For each time in the global timeline, find the rate according to this variable's own timeline
+    par.clear();
+    for (size_t i=0; i<global_timeline.size(); ++i)
+    {
+      // Where is this global time interval in the variable's timeline?
+      size_t idx = findIndex(global_timeline[i],par_times);
+      par.push_back( old_par[idx] );
+    }
+    par.push_back( old_par[old_par.size()-1] );
+
+}
+
+
 void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::fireTreeChangeEvent( const RevBayesCore::TopologyNode &n, const unsigned& m )
 {
     // call a recursive flagging of all node above (closer to the root) and including this node
@@ -1963,9 +1987,26 @@ const RateGenerator& EpisodicStateDependentSpeciationExtinctionFossilizationProc
     {
         size_t index_epoch = computeEpochIndex(age);
         
-        if ( index_epoch >= Q.size() ) throw RbException("Didn't rescale vector Q correctly.");
+        if ( index_epoch >= Q_indices.size() ) throw RbException("Didn't rescale vector Q correctly.");
+        
+        size_t index_Q = Q_indices[index_epoch];
+        if ( index_Q == -1 )
+        {
+            if ( Q_const != NULL )
+            {
+                return Q_const->getValue();
+            }
+            else
+            {
+                return Q_default;
+            }
+        }
+        else
+        {
+            
+            return Q[index_Q];
+        }
 
-        return Q[index_epoch];
     }
     else
     {
@@ -2380,35 +2421,31 @@ void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::prepareTime
     if ( Q_var != NULL )
     {
         Q = Q_var->getValue();
-//        sortNonGlobalTimesAndParameters(Q,Q_times);
+        Q_indices.clear();
+        for (size_t i=0; i<Q.size(); ++i)
+        {
+            Q_indices[i] = i;
+        }
+        sortNonGlobalTimesAndParameters(Q_indices,Q_times);
         // Expand if needed
         if (Q_times.size() != global_timeline.size() + 1)
         {
-//            expandNonGlobalRateParameterVector(Q,Q_times);
+            expandNonGlobalRateParameterVector(Q_indices,Q_times);
         }
     }
     else if ( Q_const != NULL )
     {
         // User specified nothing
-         Q = RbVector<RateGenerator>(global_timeline.size()+1,Q_const->getValue() );
+//        Q = RbVector<RateGenerator>(global_timeline.size()+1,Q_const->getValue() );
+        Q_indices = std::vector<size_t>(global_timeline.size()+1,-1 );
     }
     else
     {
         // User specified nothing
-         Q = RbVector<RateGenerator>(global_timeline.size()+1,Q_default );
+//        Q = RbVector<RateGenerator>(global_timeline.size()+1,Q_default );
+        Q_indices = std::vector<size_t>(global_timeline.size()+1,-1 );
     }
 
-    
-//    std::cerr << "Timeline:\t\t" << global_timeline << std::endl;
-//    std::cerr << "Lambda:\t\t";
-//    for (size_t i=0; i<lambda.size(); ++i) std::cerr << lambda[i][0] << " ";
-//    std::cerr << std::endl;
-//    std::cerr << "Mu:\t\t\t";
-//    for (size_t i=0; i<mu.size(); ++i) std::cerr << mu[i][0] << " ";
-//    std::cerr << std::endl;
-//    std::cerr << "Phi:\t\t";
-//    for (size_t i=0; i<phi.size(); ++i) std::cerr << phi[i][0] << " ";
-//    std::cerr << std::endl;
 }
 
 
@@ -4061,6 +4098,54 @@ void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::sortNonGlob
 }
 
 
+/**
+ * Sorts times to run from present to past (0->inf) and orders par to match this.
+ */
+void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::sortNonGlobalTimesAndParameters(std::vector<size_t>& par, std::vector<double> &times) const
+{
+    std::vector<double> times_sorted_ascending = times;
+    std::vector<double> times_sorted_descending = times;
+
+    sort(times_sorted_ascending.begin(), times_sorted_ascending.end() );
+    sort(times_sorted_descending.rbegin(), times_sorted_descending.rend() );
+
+    // We want times in ascending order, so if they already are we're done here
+    if ( times != times_sorted_ascending )
+    {
+        // If times are sorted in descending order, we just flip the parameter and time vectors
+        if ( times == times_sorted_ascending )
+        {
+            std::reverse(times.begin(),times.end());
+//            std::reverse(par.begin(),par.end());
+        }
+        else
+        {
+            // Pair up the times and the parameter values so we can sort them together
+            std::vector<std::pair<double,size_t> > times_par;
+            for (size_t i=0; i<times.size(); ++i)
+            {
+                times_par.push_back(std::make_pair(times[i],par[i]));
+            }
+
+            std::sort(times_par.begin(),times_par.end());
+
+            // Replace times with sorted times
+            for (size_t i=0; i<times.size(); ++i)
+            {
+                times[i] = times_par[i].first;
+                par[i] = times_par[i].second;
+            }
+        }
+    }
+
+    if ( times[0] < DBL_EPSILON )
+    {
+        throw RbException("User-specified interval times cannot include time = 0");
+    }
+
+}
+
+
 
 /**
  * Swap the parameters held by this distribution.
@@ -4252,7 +4337,8 @@ void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::numerically
     
         typedef boost::numeric::odeint::runge_kutta_dopri5< std::vector< double > > stepper_type;
 
-        boost::numeric::odeint::integrate_adaptive( make_controlled( 1E-9, 1E-9, stepper_type() ) , ode , likelihoods , current_begin_age , current_end_age , dt );
+//        boost::numeric::odeint::integrate_adaptive( make_controlled( 1E-9, 1E-9, stepper_type() ) , ode , likelihoods , current_begin_age , current_end_age , dt );
+        boost::numeric::odeint::integrate_adaptive( make_controlled( 1E-7, 1E-7, stepper_type() ) , ode , likelihoods , current_begin_age , current_end_age , dt );
 //        boost::numeric::odeint::integrate_adaptive( stepper_type(), ode , likelihoods , current_begin_age , current_end_age , dt );
     
         // catch negative extinction probabilities that can result from
