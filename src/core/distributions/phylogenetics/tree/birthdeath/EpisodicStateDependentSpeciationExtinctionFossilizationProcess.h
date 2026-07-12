@@ -121,6 +121,7 @@ namespace RevBayesCore {
         std::vector<double>                                             calculateExtinctionRatePerState(double a) const;
         std::vector<double>                                             calculateTotalAnageneticRatePerState(double a) const;
         std::vector<double>                                             calculateTotalSpeciationRatePerState(double a) const;
+        double                                                          computeEpochBegin(size_t i) const;
         size_t                                                          computeEpochIndex(double a) const;
         double                                                          computeEpochEnd(size_t i) const;
         void                                                            computeNodeProbability(const TopologyNode &n, size_t nIdx) const;

@@ -427,6 +427,27 @@ double EpisodicStateDependentSpeciationExtinctionFossilizationProcess::computeLn
 }
 
 
+double EpisodicStateDependentSpeciationExtinctionFossilizationProcess::computeEpochBegin(size_t i) const
+{
+    // note we are looking backwards in time
+    // so the begin is the more recent
+    
+    if ( use_episodic_model == false )
+    {
+        return 0.0;
+    }
+
+    if ( i == 0 )
+    {
+        return 0.0;
+    }
+    else
+    {
+        return global_timeline[i-1];
+    }
+}
+
+
 size_t EpisodicStateDependentSpeciationExtinctionFossilizationProcess::computeEpochIndex(double a) const
 {
     
@@ -1113,7 +1134,7 @@ void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::recursively
             
             // now calculate conditional likelihoods along branch in forward time
             end_age        = node.getParent().getAge() - node.getAge();
-            numericallyIntegrateProcess(branch_conditional_probs, 0, end_age, false, false);
+            numericallyIntegrateProcess(branch_conditional_probs, end_age, 0, false, false);
             
             double total_prob = 0.0;
             for (size_t i = 0; i < num_states; ++i)
@@ -1428,8 +1449,6 @@ void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::drawStochas
 bool EpisodicStateDependentSpeciationExtinctionFossilizationProcess::recursivelyDrawStochasticCharacterMap(const TopologyNode &node, size_t start_state, std::vector<std::string>& character_histories, bool set_amb_char_data, bool use_simmap_default)
 {
     size_t node_index = node.getIndex();
-    std::vector<double> speciation_rates = calculateTotalSpeciationRatePerState( node.getAge() );
-    std::vector<double> extinction_rates = calculateExtinctionRatePerState( node.getAge() );
     
     // reset the number of rate-shift events
     num_shift_events[node_index] = 0;
@@ -1443,6 +1462,11 @@ bool EpisodicStateDependentSpeciationExtinctionFossilizationProcess::recursively
     // first calculate extinction likelihoods via a backward time pass
     double start_time = node.getParent().getAge();
     numericallyIntegrateProcess(branch_conditional_probs, 0, start_time, true, true);
+    
+    // initialize the current speciation and extinction rates
+    std::vector<double> speciation_rates = calculateTotalSpeciationRatePerState( start_time );
+    std::vector<double> extinction_rates = calculateExtinctionRatePerState( start_time );
+
     
     // now calculate conditional likelihoods along branch in forward time
     double branch_length = node.getParent().getAge() - node.getAge();
@@ -1470,7 +1494,7 @@ bool EpisodicStateDependentSpeciationExtinctionFossilizationProcess::recursively
         current_dt_start = (current_dt * dt);
         current_dt_end = ((current_dt + 1) * dt);
         
-        numericallyIntegrateProcess(branch_conditional_probs, current_dt_start, current_dt_end, false, false);
+        numericallyIntegrateProcess(branch_conditional_probs, start_time-current_dt_start, start_time-current_dt_end, false, false);
 
         // draw state for this time slice
         size_t new_state = current_state;
@@ -1532,6 +1556,11 @@ bool EpisodicStateDependentSpeciationExtinctionFossilizationProcess::recursively
         
         current_dt++;
         downpass_dt--;
+        
+        // recompute the rates for this time point
+        speciation_rates = calculateTotalSpeciationRatePerState( start_time - current_dt_start );
+        extinction_rates = calculateExtinctionRatePerState( start_time - current_dt_start );
+
         
         // keep track of rates in this interal so we can calculate per branch averages of each rate
         total_speciation_rate += speciation_rates[current_state];
@@ -4298,25 +4327,58 @@ void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::touchSpecia
 void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::numericallyIntegrateProcess(std::vector< double > &likelihoods, double begin_age, double end_age, bool backward_time, bool extinction_only) const
 {
     
-    size_t index_epoch_begin = 0;
-    size_t index_epoch_end = 0;
+    int index_epoch_begin = 0;
+    int index_epoch_end = 0;
     
     if ( backward_time == true )
     {
-        index_epoch_begin = computeEpochIndex( begin_age );
-        index_epoch_end = computeEpochIndex( end_age );
+        index_epoch_begin = int(computeEpochIndex( begin_age ));
+        index_epoch_end = int(computeEpochIndex( end_age ));
+    }
+    else
+    {
+        index_epoch_begin = int(computeEpochIndex( begin_age ));
+        index_epoch_end = int(computeEpochIndex( end_age ));
     }
 
     double current_begin_age = begin_age;
         
-    for ( size_t index_epoch=index_epoch_begin; index_epoch<=index_epoch_end; ++index_epoch )
+    for ( int index_epoch=index_epoch_begin; ; )
     {
+        // check for stopping condition
+        if ( backward_time == true )
+        {
+            if ( index_epoch>index_epoch_end )
+            {
+                break;
+            }
+        }
+        else
+        {
+            if ( index_epoch<index_epoch_end )
+            {
+                break;
+            }
+        }
         
-        double epoch_end = computeEpochEnd( index_epoch );
-        double current_end_age = (end_age < epoch_end ? end_age : epoch_end );
+        double epoch_end = 0.0;
+        double current_end_age = 0.0;
+        double age_of_rates = 0.0;
+        if ( backward_time == true )
+        {
+            epoch_end = computeEpochEnd( index_epoch );
+            current_end_age = (end_age < epoch_end ? end_age : epoch_end );
+            age_of_rates = current_end_age;
+        }
+        else 
+        {
+            epoch_end = computeEpochBegin( index_epoch );
+            current_end_age = (end_age > epoch_end ? end_age : epoch_end );
+            age_of_rates = current_begin_age;
+        }
         
-        const RbVector<double> &extinction_rates = computeExtinctionRateAtTime(current_end_age);
-        const RateGenerator &rg = getEventRateMatrix( current_begin_age );
+        const RbVector<double> &extinction_rates = computeExtinctionRateAtTime(age_of_rates);
+        const RateGenerator &rg = getEventRateMatrix( age_of_rates );
         SSE_ODE ode = SSE_ODE(extinction_rates, &rg, getEventRate(current_end_age), backward_time, extinction_only);
         if ( use_cladogenetic_events == true )
         {
@@ -4329,22 +4391,29 @@ void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::numerically
         }
         else
         {
-            const RbVector<double> &speciation_rates = computeSpeciationRateAtTime(current_end_age);
+            const RbVector<double> &speciation_rates = computeSpeciationRateAtTime(age_of_rates);
             ode.setSpeciationRate( speciation_rates );
         }
     
         if ( phi_var != NULL || phi_const != NULL )
         {
-            const RbVector<double> &fossilization_rates = computeFossilizationRateAtTime(current_end_age);
+            const RbVector<double> &fossilization_rates = computeFossilizationRateAtTime(age_of_rates);
             ode.setSerialSamplingRate( fossilization_rates );
         }
     
         typedef boost::numeric::odeint::runge_kutta_dopri5< std::vector< double > > stepper_type;
 
 //        boost::numeric::odeint::integrate_adaptive( make_controlled( 1E-9, 1E-9, stepper_type() ) , ode , likelihoods , current_begin_age , current_end_age , dt );
-        boost::numeric::odeint::integrate_adaptive( make_controlled( 1E-7, 1E-7, stepper_type() ) , ode , likelihoods , current_begin_age , current_end_age , dt );
 //        boost::numeric::odeint::integrate_adaptive( stepper_type(), ode , likelihoods , current_begin_age , current_end_age , dt );
-    
+        if ( backward_time == true )
+        {
+            boost::numeric::odeint::integrate_adaptive( make_controlled( 1E-7, 1E-7, stepper_type() ) , ode , likelihoods , current_begin_age , current_end_age , dt );
+        }
+        else
+        {
+            boost::numeric::odeint::integrate_adaptive( make_controlled( 1E-7, 1E-7, stepper_type() ) , ode , likelihoods , current_end_age , current_begin_age , dt );
+        }
+        
         // catch negative extinction probabilities that can result from
         // rounding errors in the ODE stepper
         for (size_t i = 0; i < 2 * num_states; ++i)
@@ -4381,7 +4450,7 @@ void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::numerically
         
         if ( index_epoch < index_epoch_end )
         {
-            const RbVector<double>& surv_probs = computeSurvivalProbabilitiesAtTime( current_end_age );
+            const RbVector<double>& surv_probs = computeSurvivalProbabilitiesAtTime( age_of_rates );
             for (size_t i = 0; i < num_states; ++i)
             {
                 
@@ -4394,6 +4463,17 @@ void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::numerically
         }
         
         current_begin_age = current_end_age;
+        
+        
+        // check for stopping condition
+        if ( backward_time == true )
+        {
+            ++index_epoch;
+        }
+        else
+        {
+            --index_epoch;
+        }
         
     }
 

@@ -2,6 +2,7 @@
 #define RevBayes_development_branch_StochasticCharacterMappingMonitor_h
 
 #include "AbstractHomologousDiscreteCharacterData.h"
+#include "EpisodicStateDependentSpeciationExtinctionFossilizationProcess.h"
 #include "StateDependentSpeciationExtinctionProcess.h"
 #include "GeneralizedLineageHeterogeneousBirthDeathSamplingProcess.h"
 #include "VariableMonitor.h"
@@ -161,6 +162,7 @@ void StochasticCharacterMappingMonitor<characterType>::monitorVariables(std::uin
 
     // get the distribution for the character
     StateDependentSpeciationExtinctionProcess *sse_process = NULL;
+    EpisodicStateDependentSpeciationExtinctionFossilizationProcess *esse_process = NULL;
     GeneralizedLineageHeterogeneousBirthDeathSamplingProcess *glhbdsp_process = NULL;
     AbstractPhyloCTMCSiteHomogeneous<characterType> *ctmc_dist = NULL;
     if ( ctmc != NULL )
@@ -173,7 +175,11 @@ void StochasticCharacterMappingMonitor<characterType>::monitorVariables(std::uin
         sse_process = dynamic_cast<StateDependentSpeciationExtinctionProcess*>( &cdbdp->getDistribution() );
         if ( sse_process == NULL )
         {
-        	glhbdsp_process = dynamic_cast<GeneralizedLineageHeterogeneousBirthDeathSamplingProcess*>( &cdbdp->getDistribution() );
+            esse_process = dynamic_cast<EpisodicStateDependentSpeciationExtinctionFossilizationProcess*>( &cdbdp->getDistribution() );
+            if ( esse_process == NULL ) 
+            {
+                glhbdsp_process = dynamic_cast<GeneralizedLineageHeterogeneousBirthDeathSamplingProcess*>( &cdbdp->getDistribution() );
+            }
         }
         num_nodes = tree->getValue().getNumberOfNodes();
     }
@@ -190,10 +196,13 @@ void StochasticCharacterMappingMonitor<characterType>::monitorVariables(std::uin
         bool set_amb_char_data = false; // this is the default value for the arg
         sse_process->drawStochasticCharacterMap( character_histories, set_amb_char_data, use_simmap_default );
     }
+    else if ( esse_process != NULL )
+    {
+        bool set_amb_char_data = false; // this is the default value for the arg
+        esse_process->drawStochasticCharacterMap( character_histories, set_amb_char_data, use_simmap_default );
+    }
     else
     {
-        
-        
     	glhbdsp_process->drawStochasticCharacterMap( character_histories, use_simmap_default );
     }
 

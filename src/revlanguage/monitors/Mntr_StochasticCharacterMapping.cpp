@@ -1,11 +1,3 @@
-//
-//  Mntr_StochasticCharacterMapping.cpp
-//  RevBayes_development_branch
-//
-//  Created by will freyman on 12/13/16.
-//  Copyright (c) 2016 will freyman. All rights reserved.
-//
-
 #include "Mntr_StochasticCharacterMapping.h"
 
 #include <cstddef>
@@ -18,6 +10,7 @@
 #include "RlAbstractHomologousDiscreteCharacterData.h"
 #include "RlTimeTree.h"
 #include "RlString.h"
+#include "EpisodicStateDependentSpeciationExtinctionFossilizationProcess.h"
 #include "StateDependentSpeciationExtinctionProcess.h"
 #include "TypeSpec.h"
 #include "ArgumentRules.h"
@@ -93,7 +86,16 @@ void Mntr_StochasticCharacterMapping::constructInternalObject( void )
 
         Core::StateDependentSpeciationExtinctionProcess *sse_process = NULL;
         sse_process = dynamic_cast<Core::StateDependentSpeciationExtinctionProcess*>( &cdbdp_sn->getDistribution() );
-        sse_process->setSampleCharacterHistory( true );
+        Core::EpisodicStateDependentSpeciationExtinctionFossilizationProcess *esse_process = NULL;
+        esse_process = dynamic_cast<Core::EpisodicStateDependentSpeciationExtinctionFossilizationProcess*>( &cdbdp_sn->getDistribution() );
+        if ( sse_process != NULL )
+        {
+            sse_process->setSampleCharacterHistory( true );
+        }
+        else if ( esse_process != NULL )
+        {
+            esse_process->setSampleCharacterHistory( true );
+        }
     }
     else if ( static_cast<const RevLanguage::Tree&>( glhbdsp->getRevObject() ).isModelObject() )
     {
