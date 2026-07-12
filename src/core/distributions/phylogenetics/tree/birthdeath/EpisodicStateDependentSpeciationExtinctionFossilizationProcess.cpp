@@ -4201,6 +4201,10 @@ void EpisodicStateDependentSpeciationExtinctionFossilizationProcess::swapParamet
     {
         eta_var = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
     }
+    if ( oldP == survival_probs )
+    {
+        survival_probs = static_cast<const TypedDagNode<RbVector<RbVector<double> > >* >( newP );
+    }
     if ( oldP == epoch_times_lambda )
     {
         epoch_times_lambda = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
