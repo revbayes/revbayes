@@ -84,12 +84,10 @@ FossilizedBirthDeathRangeProcess* FossilizedBirthDeathRangeProcess::clone( void 
 
 
 /**
- * Set the matrix value (e.g. clamping to fixed birth/death ages). redrawValue keeps
- * first[i] valid for the simulated ages, but a clamp replaces them afterwards, so
- * re-clip any oldest age that now falls outside [max(o_i,d_i), b_i) -- otherwise a
- * clamped chain can start at lnProb = -inf. During MCMC the moves edit the value in
- * place rather than calling setValue, so an out-of-range first[i] is left for the
- * b > o constraint to reject.
+ * Set the matrix value (e.g. clamping to fixed birth/death ages). A clamp replaces the
+ * b/d that redrawValue drew the augmented ages against, so re-clip any age now out of
+ * range -- otherwise a clamped chain can start at lnProb = -inf. MCMC moves edit the
+ * value in place instead, leaving out-of-range ages for the constraints to reject.
  */
 void FossilizedBirthDeathRangeProcess::setValue(MatrixReal *v, bool force)
 {
@@ -99,11 +97,21 @@ void FossilizedBirthDeathRangeProcess::setValue(MatrixReal *v, bool force)
     {
         double d  = (*this->value)[i][1];
         double b  = (*this->value)[i][0];
+
+        // oldest age: valid range [max(o_i,d), min(max_age,b))
         double lo = std::max( o_i[i], d );
         double hi = std::min( taxa[i].getMaxAge(), b );
         if ( hi > lo && ( first[i] < lo || first[i] >= b ) )
         {
             first[i] = 0.5 * ( lo + hi );
+        }
+
+        // youngest age: valid range [max(d,min_age), min(first,y_i)]
+        double lo_y = std::max( d, taxa[i].getMinAge() );
+        double hi_y = std::min( first[i], y_i[i] );
+        if ( hi_y > lo_y && ( last[i] < lo_y || last[i] > hi_y ) )
+        {
+            last[i] = 0.5 * ( lo_y + hi_y );
         }
     }
 }
