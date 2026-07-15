@@ -84,6 +84,32 @@ FossilizedBirthDeathRangeProcess* FossilizedBirthDeathRangeProcess::clone( void 
 
 
 /**
+ * Set the matrix value (e.g. clamping to fixed birth/death ages). redrawValue keeps
+ * first[i] valid for the simulated ages, but a clamp replaces them afterwards, so
+ * re-clip any oldest age that now falls outside [max(o_i,d_i), b_i) -- otherwise a
+ * clamped chain can start at lnProb = -inf. During MCMC the moves edit the value in
+ * place rather than calling setValue, so an out-of-range first[i] is left for the
+ * b > o constraint to reject.
+ */
+void FossilizedBirthDeathRangeProcess::setValue(MatrixReal *v, bool force)
+{
+    TypedDistribution<MatrixReal>::setValue(v, force);
+
+    for (size_t i = 0; i < taxa.size(); i++)
+    {
+        double d  = (*this->value)[i][1];
+        double b  = (*this->value)[i][0];
+        double lo = std::max( o_i[i], d );
+        double hi = std::min( taxa[i].getMaxAge(), b );
+        if ( hi > lo && ( first[i] < lo || first[i] >= b ) )
+        {
+            first[i] = 0.5 * ( lo + hi );
+        }
+    }
+}
+
+
+/**
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
@@ -485,26 +511,6 @@ void FossilizedBirthDeathRangeProcess::updateStartEndTimes( void )
         d_i[i] = (*this->value)[i][1];
 
         max_birth = std::max(max_birth, b_i[i]);
-    }
-
-    // Initialization guard for the augmented oldest age. first[i] is drawn at
-    // construction, before the clamped death is known, and is not re-drawn if the
-    // initial state is invalid -- so on a clamped matrix it can be stuck below the
-    // death time d_i (giving lnProb = -inf and an unstartable chain, esp. when the
-    // reported occurrences straddle d). Re-seed any first[i] that sits below the
-    // valid floor max(o_i, d_i) into the middle of its valid interval. During MCMC
-    // the resample move always proposes first[i] >= d, so this fires only at init.
-    for (size_t i = 0; i < taxa.size(); i++)
-    {
-        // valid oldest-age range is [max(o_i,d), b): clip the stratigraphic occurrence
-        // uncertainty to the birth/death boundaries. Re-seed any first[i] that starts
-        // below the death or at/above the birth into the middle of its valid interval.
-        double lo = std::max( o_i[i], d_i[i] );
-        double hi = std::min( taxa[i].getMaxAge(), b_i[i] );
-        if ( hi > lo && ( first[i] < lo || first[i] >= b_i[i] ) )
-        {
-            first[i] = 0.5 * ( lo + hi );
-        }
     }
 
     if ( origin_age != NULL )
