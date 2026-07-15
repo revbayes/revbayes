@@ -510,6 +510,18 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
             }
 
             partial_likelihood[i] += Psi[i];
+
+            // Jacobian for the auto-resampled tau_1 ~ Uniform(lo, hi): under
+            // u = (tau_1 - lo)/(hi - lo) the resample is symmetric on [0,1], and
+            // log(hi - lo) is the change of variables. It is the only channel to the
+            // acceptance ratio, the auto-resample being a touch side-effect with no
+            // Hastings. Omitted when the augmentation is frozen (resample=false).
+            if ( resampling == true )
+            {
+                double lo, hi;
+                firstLastSupport(i, lo, hi);
+                if ( hi > lo ) partial_likelihood[i] += log( hi - lo );
+            }
         }
 
         lnProb += partial_likelihood[i];
@@ -653,19 +665,35 @@ std::vector<double>& AbstractFossilizedBirthDeathRangeProcess::getAges(void)
 }
 
 
-/**
- *
- *
- */
+// Support of the augmented oldest age tau_1, in one place so the resampling proposal
+// and its Jacobian (computeLnProbabilityRanges) agree.
+//  - "uniform": the true oldest may be unobserved and older than every reported
+//    occurrence, so tau_1 ranges up to the birth b -- an hi that depends on b, which
+//    is what the Jacobian corrects for.
+//  - "firstlast"/"complete": the oldest observed occurrence IS the oldest fossil, so
+//    tau_1 is bounded by its bin [o_i, max_age] and the Jacobian is a constant.
+void AbstractFossilizedBirthDeathRangeProcess::firstLastSupport(size_t i, double &lo, double &hi) const
+{
+    lo = std::max(o_i[i], d_i[i]);
+    if ( sampling == "uniform" )
+    {
+        hi = ( b_i[i] > lo ) ? b_i[i] : std::max(taxa[i].getMaxAge(), b_i[i]);
+    }
+    else
+    {
+        hi = std::max(taxa[i].getMaxAge(), lo);
+    }
+}
+
+
 void AbstractFossilizedBirthDeathRangeProcess::resampleFirstLast(size_t i)
 {
     stored_first = first;
     stored_last = last;
     resampled = true;
 
-    // exchangeable: the true oldest may exceed every observed occurrence -> augment up to the birth time
-    double _lo = std::max(o_i[i], d_i[i]);
-    double _hi = ( b_i[i] > _lo ) ? b_i[i] : std::max(taxa[i].getMaxAge(), b_i[i]);
+    double _lo, _hi;
+    firstLastSupport(i, _lo, _hi);
     first[i] = GLOBAL_RNG->uniform01()*(_hi - _lo) + _lo;
 
     // also augment the youngest occurrence age (single-occurrence taxa skip the

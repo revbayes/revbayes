@@ -49,6 +49,7 @@ namespace RevBayesCore {
 
         std::vector<double>&                            getAges();
         void                                            resampleFirstLast(size_t i);
+        void                                            firstLastSupport(size_t i, double &lo, double &hi) const;  //!< support [lo,hi] of the augmented oldest age tau_1 (retention-model dependent)
 
     protected:
         virtual void                                    updateStartEndTimes() = 0;
