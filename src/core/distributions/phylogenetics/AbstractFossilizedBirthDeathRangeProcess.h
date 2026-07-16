@@ -55,6 +55,7 @@ namespace RevBayesCore {
     protected:
         virtual void                                    updateStartEndTimes() = 0;
         virtual double                                  computeLnProbabilityRanges(bool force = false);
+        double                                          computeLnFossilReporting(size_t i) const;              //!< Fossil-occurrence (reporting) log-term for taxon i, factored out of computeLnProbabilityRanges (skeleton/reporting split).
 
         // Parameter management functions
         void                                            swapParameterInternal(const DagNode *oldP, const DagNode *newP);                //!< Swap a parameter
