@@ -12,6 +12,7 @@ The fossil sampling rate, its timeline, and the augmented occurrence ages are re
 
 The deprecated `dnFBDRMatrix` fuses this term and the skeleton into a single node.
 ## authors
+June Walker
 ## see_also
 dnFossilizedBirthDeathRange
 mvResampleFBDR

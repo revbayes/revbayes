@@ -6,7 +6,7 @@ The fossilized birth death speciation process (FBDSP) describes the diversificat
 ## details
 Fossil species are represented by a collection of fossil occurrences with uncertainty. Speciation, extinction and sampling rates may be time-homogeneous or piecewise time-heterogeneous. If time-heterogeneous rates are provided, then a vector of rate change time-points musts also be provided. If only a subset of fossil occurrences is provided for each species (e.g. only first and last occurrencces), then the remaining number of fossil samples may be marginalized by specifying `complete=FALSE`. Under the hood, the fossil data is augmented with oldest occurrence ages for each species, which must be sampled during MCMC using `mvResampleFBDR`. Tips represent extinction events, and therefore should be sampled during MCMC using e.g. `mvTipTimeSlideUniform`.
 ## authors
-Walker Pett
+June Walker
 ## see_also
 dnFossilizedBirthDeathRange
 dnBirthDeathSamplingTreatment

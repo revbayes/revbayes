@@ -10,7 +10,7 @@ Fossil species are represented by a collection of fossil occurrences with uncert
 
 The deprecated `dnFBDRMatrix` is the older fused form of this process: it carries the fossil-record term internally and takes the occurrences as a constructor argument rather than as clamped data. Its `complete` and `reporting` arguments are replaced by `reporting` on `dnFossilRecord`, where `complete=TRUE` becomes `reporting="complete"`.
 ## authors
-Walker Pett
+June Walker
 ## see_also
 dnFossilRecord
 dnBirthDeathSamplingTreatment

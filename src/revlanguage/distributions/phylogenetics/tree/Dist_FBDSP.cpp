@@ -153,7 +153,6 @@ std::vector<std::string> Dist_FBDSP::getDistributionFunctionAliases( void ) cons
     // create alternative constructor function names variable that is the same for all instance of this class
     std::vector<std::string> a_names;
     a_names.push_back( "FBDSP" );
-    a_names.push_back( "FossilizedBirthDeathSpecies" );  // the former name of this distribution
     
     return a_names;
 }

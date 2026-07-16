@@ -20,7 +20,7 @@ namespace RevBayesCore {
      *
      *
      * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Walker Pett)
+     * @author The RevBayes Development Core Team (June Walker)
      * @since 2014-03-18, version 1.0
      *
      */
