@@ -10,6 +10,7 @@
 
 #include "RbException.h"
 #include "RbMathLogic.h"
+#include "RlUserInterface.h" // for RBOUT
 #include "StringUtilities.h"
 #include "TaxonReader.h"
 #include "DelimitedDataReader.h"
@@ -125,6 +126,9 @@ TaxonReader::TaxonReader(const std::string &fn, std::string delim) : DelimitedDa
 
     std::map<std::string, Taxon > taxon_map;
 
+    // rows declaring a fossil occurrence but counting zero of it, warned about once at the end
+    std::vector<std::string> zero_count_rows;
+
     for (size_t i = 1; i < chars.size(); ++i) //going through all the lines
     {
         const std::vector<std::string>& line = chars[i];
@@ -205,6 +209,17 @@ TaxonReader::TaxonReader(const std::string &fn, std::string delim) : DelimitedDa
 
                 size_t k = size_t(c);
 
+                // a count of 0 says the species has no fossil samples, which only fits an extant
+                // species (max_age = 0, where the process skips the fossil term). On a row that
+                // does place an occurrence in the past it contradicts itself, and the occurrence
+                // added above still stands, so say so rather than read it as no samples.
+                if ( k == 0 && max_age > 0.0 )
+                {
+                    std::stringstream ss;
+                    ss << "\"" << taxon_name << "\" on line " << i+1;
+                    zero_count_rows.push_back( ss.str() );
+                }
+
                 for(size_t j = 1; j < k; j++)
                 {
                     taxon.addOccurrence(interval);
@@ -229,6 +244,26 @@ TaxonReader::TaxonReader(const std::string &fn, std::string delim) : DelimitedDa
         {
             taxon.setExtinct( taxon.getMinAge() > 0.0 );
         }
+    }
+
+    if ( zero_count_rows.empty() == false )
+    {
+        // list a few and count the rest, so a large file cannot bury the console
+        size_t shown = std::min( zero_count_rows.size(), size_t(5) );
+
+        std::stringstream ss;
+        ss << "Warning: count = 0 with max_age > 0 in the taxon definition file, for ";
+        for (size_t j = 0; j < shown; j++)
+        {
+            ss << ( j > 0 ? ", " : "" ) << zero_count_rows[j];
+        }
+        if ( zero_count_rows.size() > shown )
+        {
+            ss << " (and " << zero_count_rows.size() - shown << " more)";
+        }
+        ss << ".";
+
+        RBOUT( ss.str() );
     }
 
     for (std::map<std::string, Taxon>::iterator it = taxon_map.begin(); it != taxon_map.end(); it++ )
