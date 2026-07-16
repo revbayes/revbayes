@@ -24,10 +24,9 @@ namespace {
     /**
      * Parse a numeric field, requiring the whole field to be consumed.
      *
-     * `stringstream >> double` leaves the target at 0 when the field does not parse and sets
-     * failbit, which we never checked -- so a malformed age silently became 0. strtod also
-     * recognizes "Inf"/"infinity", which the stream extractor does not, so an unbounded oldest
-     * occurrence can now be written directly in a taxon file.
+     * Deliberately not `stringstream >> double`, which yields 0 for a field that does not parse
+     * and reports it only through failbit, and which does not recognize "Inf" -- a taxon file may
+     * use that for an occurrence whose age has no upper bound.
      *
      * \param[in]    s        The raw field.
      * \param[in]    field    Field name, for the error message.

@@ -913,13 +913,12 @@ x ~ dnExponential(lambda=rate)
 x.probability())");
 	help_strings[string("dnExponential")][string("name")] = string(R"(dnExponential)");
 	help_strings[string("dnExponential")][string("title")] = string(R"(Exponential Distribution)");
-	help_arrays[string("dnFossilRecord")][string("authors")].push_back(string(R"(Walker Pett)"));
 	help_strings[string("dnFossilRecord")][string("description")] = string(R"(The fossil record of a set of species, conditioned on a fossilized birth-death range skeleton: the probability of the observed fossil occurrences given the species ranges that produced them.)");
-	help_strings[string("dnFossilRecord")][string("details")] = string(R"(This is the observation half of the fossilized birth-death range model. The skeleton (`dnFBDRP`) describes how species ranges diversify; this distribution supplies the probability of the fossil record itself, so the occurrences enter the model as clamped data rather than as a constructor argument.
+	help_strings[string("dnFossilRecord")][string("details")] = string(R"(This is the observation half of the fossilized birth-death range model. The skeleton (`dnFBDRP`) describes how species ranges diversify; this distribution gives the probability of the fossil record itself, so the occurrences enter the model as clamped data rather than as a constructor argument.
 
-The `reporting` argument selects the retention model, i.e. how sampled specimens make it into the reported record: `complete` (every sampled occurrence is reported), `firstlast` (only the oldest and youngest occurrence of each species are reported) or `uniform` (the reported occurrences are an exchangeable subset, capped at the largest observed count). The reporting model is pushed onto the skeleton, since it also determines the support of the augmented oldest age.
+The `reporting` argument selects how sampled specimens make it into the reported record: `complete` (every sampled occurrence is reported), `firstlast` (only the oldest and youngest occurrence of each species are reported) or `uniform` (the reported occurrences are an exchangeable subset, capped at the largest observed count). It also determines the support of the augmented oldest age, which belongs to the skeleton, so both nodes use the model given here.
 
-The fossil sampling rate psi, its timeline, and the augmented occurrence ages are read from the skeleton rather than taken as arguments here: psi also appears in the skeleton's non-detection term, so the two nodes must share it.
+The fossil sampling rate, its timeline, and the augmented occurrence ages are read from the skeleton rather than given as arguments here. The sampling rate also appears in the skeleton's non-detection term, so the two nodes must share it.
 
 The deprecated `dnFBDRMatrix` fuses this term and the skeleton into a single node.)");
 	help_strings[string("dnFossilRecord")][string("example")] = string(R"(lambda ~ dnExp(10)

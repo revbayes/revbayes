@@ -48,23 +48,13 @@ namespace RevBayesCore { class DagNode; }
 using namespace RevLanguage;
 
 /**
- * The reporting model the skeleton starts out with. The skeleton takes no reporting argument:
- * a downstream dnFossilRecord node pushes its own model onto the skeleton (setReportingModel),
- * which is what drives the tau_1 support and its Jacobian from then on. This is only the value
- * in force beforehand -- for the initial tau_1 draw in the constructor, and for a bare skeleton
- * used with no record node at all. "uniform" is dnFossilRecord's own default, and it is the
- * choice that bounds tau_1 by the birth time rather than by the oldest observed occurrence.
- */
-static const std::string DEFAULT_REPORTING = "uniform";
-
-/**
  * Default constructor.
  *
  * The default constructor does nothing except allocating the object.
  */
 Dist_FBDRP::Dist_FBDRP() : FossilizedBirthDeathRangeProcess<MatrixReal>()
 {
-
+    
 }
 
 
@@ -93,10 +83,10 @@ Dist_FBDRP* Dist_FBDRP::clone( void ) const
 RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRP::createDistribution( void ) const
 {
     // get the parameters
-
+    
     // sampling condition
     const std::string& cond  = static_cast<const RlString &>( condition->getRevObject() ).getValue();
-
+    
     // get the taxa to simulate either from a vector of rev taxon objects or a vector of names
     std::vector<RevBayesCore::Taxon> t = static_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
 
@@ -117,6 +107,9 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRP::createDistribution( 
         rt = static_cast<const ModelVector<RealPos> &>( timeline->getRevObject() ).getDagNode();
     }
 
+    // the reporting model in force until a dnFossilRecord node pushes its own on: it applies to
+    // the constructor's initial augmented age draw, and to a skeleton used with no record node
+    std::string c  = "uniform";
     bool use_bds = static_cast<const RlBoolean &>( bds->getRevObject() ).getValue();
     bool re = static_cast<const RlBoolean &>( resample->getRevObject() ).getValue();
 
@@ -128,8 +121,8 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRP::createDistribution( 
     }
 
     // report_internally = false: the bare skeleton, with no inline fossil-record term
-    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, DEFAULT_REPORTING, re, use_bds, og, false);
-
+    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, c, re, use_bds, og, false);
+    
     return d;
 }
 
@@ -141,9 +134,9 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRP::createDistribution( 
  */
 const std::string& Dist_FBDRP::getClassType( void )
 {
-
+    
     static std::string rev_type = "Dist_FBDRP";
-
+    
     return rev_type;
 }
 
@@ -155,9 +148,9 @@ const std::string& Dist_FBDRP::getClassType( void )
  */
 const TypeSpec& Dist_FBDRP::getClassTypeSpec( void )
 {
-
+    
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( TypedDistribution<ModelVector<ModelVector<RealPos> > >::getClassTypeSpec() ) );
-
+    
     return rev_type_spec;
 }
 
@@ -172,7 +165,7 @@ std::vector<std::string> Dist_FBDRP::getDistributionFunctionAliases( void ) cons
     // create alternative constructor function names variable that is the same for all instance of this class
     std::vector<std::string> a_names;
     a_names.push_back( "FBDRP" );
-
+    
     return a_names;
 }
 
@@ -182,18 +175,13 @@ std::vector<std::string> Dist_FBDRP::getDistributionFunctionAliases( void ) cons
  * This name is used for the constructor and the distribution functions,
  * such as the density and random value function
  *
- * The skeleton carries the canonical name: it is the birth-death-range process proper, and the
- * fused form it takes the name from is deprecated. Note this changes what the name means for a
- * script that passed no reporting arguments -- it now gets a bare skeleton, and must add a
- * dnFossilRecord node to recover the fossil-record term.
- *
  * \return Rev name of constructor function.
  */
 std::string Dist_FBDRP::getDistributionFunctionName( void ) const
 {
     // create a distribution name variable that is the same for all instance of this class
     std::string d_name = "FossilizedBirthDeathRange";
-
+    
     return d_name;
 }
 
@@ -208,10 +196,10 @@ std::string Dist_FBDRP::getDistributionFunctionName( void ) const
  */
 const MemberRules& Dist_FBDRP::getParameterRules(void) const
 {
-
+    
     static MemberRules dist_member_rules;
     static bool rules_set = false;
-
+    
     if ( !rules_set )
     {
         dist_member_rules.push_back( new ArgumentRule( "BDS", RlBoolean::getClassTypeSpec(), "Assume complete lineage sampling? (BDS model of Silvestro et al. 2019)", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false ) ) );
@@ -221,10 +209,10 @@ const MemberRules& Dist_FBDRP::getParameterRules(void) const
         // add the rules from the base class, without the reporting args
         const MemberRules &parentRules = FossilizedBirthDeathRangeProcess<MatrixReal>::getSkeletonParameterRules();
         dist_member_rules.insert(dist_member_rules.end(), parentRules.begin(), parentRules.end());
-
+        
         rules_set = true;
     }
-
+    
     return dist_member_rules;
 }
 
@@ -236,9 +224,9 @@ const MemberRules& Dist_FBDRP::getParameterRules(void) const
  */
 const TypeSpec& Dist_FBDRP::getTypeSpec( void ) const
 {
-
+    
     static TypeSpec ts = getClassTypeSpec();
-
+    
     return ts;
 }
 

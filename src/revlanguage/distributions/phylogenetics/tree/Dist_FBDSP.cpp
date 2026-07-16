@@ -153,9 +153,8 @@ std::vector<std::string> Dist_FBDSP::getDistributionFunctionAliases( void ) cons
     // create alternative constructor function names variable that is the same for all instance of this class
     std::vector<std::string> a_names;
     a_names.push_back( "FBDSP" );
-    // the pre-1.4 name, kept working: this rename is purely nominal
-    a_names.push_back( "FossilizedBirthDeathSpecies" );
-
+    a_names.push_back( "FossilizedBirthDeathSpecies" );  // the former name of this distribution
+    
     return a_names;
 }
 
@@ -165,18 +164,13 @@ std::vector<std::string> Dist_FBDSP::getDistributionFunctionAliases( void ) cons
  * This name is used for the constructor and the distribution functions,
  * such as the density and random value function
  *
- * "Speciation", matching both the core class (FossilizedBirthDeathSpeciationProcess) and the
- * FBDSP acronym. It also matches the help entry, which has always been keyed on
- * dnFossilizedBirthDeathSpeciation: registering "...Species" meant `?dnFossilizedBirthDeathSpecies`
- * returned an empty entry while the documented name could not be called at all.
- *
  * \return Rev name of constructor function.
  */
 std::string Dist_FBDSP::getDistributionFunctionName( void ) const
 {
     // create a distribution name variable that is the same for all instance of this class
     std::string d_name = "FossilizedBirthDeathSpeciation";
-
+    
     return d_name;
 }
 

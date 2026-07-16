@@ -554,9 +554,8 @@ void FossilizedBirthDeathRangeProcess::redrawValue(void)
     {
         double o = taxa[i].getMaxAge();
 
-        // An unbounded oldest occurrence (max_age = Inf) cannot set the bracket -- it would put
-        // every initial birth time at infinity. Fall back to the oldest lower bound we do know
-        // for that taxon, which is what its augmented oldest age starts at anyway.
+        // an unbounded oldest occurrence (max_age = Inf) would put every initial birth time at
+        // infinity, so bracket it by the oldest lower bound this taxon does have
         if ( RbMath::isFinite(o) == false )
         {
             o = 0.0;
@@ -569,7 +568,7 @@ void FossilizedBirthDeathRangeProcess::redrawValue(void)
 
         if ( o > max ) max = o;
     }
-
+    
     max *= 1.1;
     
     if (max == 0.0)

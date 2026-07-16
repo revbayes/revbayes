@@ -28,8 +28,8 @@ namespace RevLanguage {
         virtual FossilizedBirthDeathRangeProcess<rlType>*   clone(void) const = 0;                                                              //!< Clone the object
 
         // Basic utility functions you may want to overwrite
-        const MemberRules&                                  getParameterRules(void) const;                                                      //!< Get member rules (const): skeleton + reporting args (the fused process)
-
+        const MemberRules&                                  getParameterRules(void) const;                                                      //!< Get member rules (const), including the reporting args
+        
         // Basic utility functions
         static const std::string&                           getClassType(void);                                                                 //!< Get Rev type
         static const TypeSpec&                              getClassTypeSpec(void);                                                             //!< Get class type spec
@@ -37,9 +37,9 @@ namespace RevLanguage {
     protected:
         FossilizedBirthDeathRangeProcess( void );
 
-        const MemberRules&                                  getSkeletonParameterRules(void) const;                                              //!< Member rules WITHOUT the reporting args; the b/d skeleton (dnFBDRP) takes its reporting model from a downstream dnFossilRecord node instead.
-        static void                                         appendParameterRules(MemberRules &rules, bool include_reporting);                   //!< Build the rule list; the reporting args sit at their fused-process position so the facade's argument order is unchanged.
-
+        const MemberRules&                                  getSkeletonParameterRules(void) const;                                              //!< Get member rules (const), without the reporting args
+        static void                                         appendParameterRules(MemberRules &rules, bool include_reporting);                   //!< Build the member rules, with or without the reporting args
+        
         void                                                setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);   //!< Set member variable
     
         // members        
@@ -117,14 +117,12 @@ const TypeSpec& RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::getClassT
 /**
  * Build the member rules shared by the matrix and tree range processes.
  *
- * The reporting args (complete, reporting) describe how sampled occurrences make it into the
- * observed record. They belong to the fossil-record term, so the bare skeleton (dnFBDRP) omits
- * them and picks its reporting model up from a downstream dnFossilRecord node. They are appended
- * in place rather than at the end so that including them reproduces the historical argument
- * order of the fused process exactly.
+ * The reporting args (complete, reporting) belong to the fossil-record term, so the bare skeleton
+ * omits them and takes its reporting model from a dnFossilRecord node instead. Keep them at this
+ * position in the list: the argument order is part of the interface.
  *
- * \param[in,out] rules              The rule list to append to.
- * \param[in]     include_reporting  Include the reporting args (fused process) or omit them (skeleton).
+ * \param[out]   rules              The rule list to append to.
+ * \param[in]    include_reporting  Whether to include the reporting args.
  */
 template <typename rlType>
 void RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::appendParameterRules(MemberRules &rules, bool include_reporting)

@@ -83,18 +83,14 @@ Dist_FBDRMatrix* Dist_FBDRMatrix::clone( void ) const
  */
 RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRMatrix::createDistribution( void ) const
 {
-    // warn once per session: this fused node is the deprecated form of dnFBDRP + dnFossilRecord
     static bool warned = false;
     if ( warned == false )
     {
-        RBOUT("\nWarning! `dnFBDRMatrix` is deprecated: it fuses the birth-death-range skeleton and the");
-        RBOUT("         fossil-record term into one node, and takes the occurrences as an argument rather");
-        RBOUT("         than as clamped data. Use the factored form instead:");
-        RBOUT("             skeleton ~ dnFBDRP(lambda=..., mu=..., psi=..., taxa=taxa, ...)");
-        RBOUT("             record   ~ dnFossilRecord(skeleton=skeleton, reporting=\"firstlast\", taxa=taxa)");
-        RBOUT("             record.clamp(taxa)");
-        RBOUT("         where `reporting` takes over the `complete`/`reporting` arguments (complete=TRUE");
-        RBOUT("         becomes reporting=\"complete\").\n");
+        RBOUT("\nWarning! `dnFBDRMatrix` is deprecated. It fuses the birth-death range skeleton with the");
+        RBOUT("         fossil record, and takes the occurrences as an argument instead of as clamped data.");
+        RBOUT("         Use `dnFBDRP` for the skeleton and `dnFossilRecord` for the record instead, where");
+        RBOUT("         `reporting` replaces `complete` (complete=TRUE becomes reporting=\"complete\").");
+        RBOUT("         See `?dnFossilRecord` for an example.\n");
         warned = true;
     }
 

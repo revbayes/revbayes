@@ -7,19 +7,17 @@
 #include "RlMatrixReal.h"
 
 namespace RevLanguage {
-
+    
     /**
-     * The RevLanguage wrapper of the Fossilized-Birth-Death Range matrix SKELETON (dnFBDRP)
+     * The RevLanguage wrapper of the Fossilized-Birth-Death Range Matrix Process
      *
-     * The bare birth-death-range process over a matrix of (birth, death) times: the diversification
-     * half of the fossilized-birth-death range model. It carries the fossil occurrences (they bound
-     * the ranges) and the augmented extreme ages tau_1/tau_last, but NOT the fossil-record term
-     * Pr(occurrences | skeleton) -- that is a separate downstream dnFossilRecord node, which also
-     * supplies the reporting model. Hence this distribution takes no reporting arguments.
+     * The RevLanguage wrapper of the fossilized-birth-death range matrix process connects
+     * the variables/parameters of the process and creates the internal FossilizedBirthDeathRangeMatrixProcess object.
      *
-     * Registered as dnFossilizedBirthDeathRange (canonical) and dnFBDRP. dnFBDRMatrix is the
-     * deprecated fused form (skeleton + record in one node), which the canonical name used to
-     * refer to.
+     * This is the birth-death range skeleton alone. It does not include the fossil-record term
+     * Pr(occurrences | skeleton), which is supplied by a separate dnFossilRecord node that also
+     * chooses the reporting model, so there are no reporting arguments here. The deprecated
+     * dnFBDRMatrix is the fused form, carrying both terms in one node.
      *
      * @copyright Copyright 2009-
      * @author The RevBayes Development Core Team (Sebastian Hoehna)
@@ -27,10 +25,10 @@ namespace RevLanguage {
      *
      */
     class Dist_FBDRP : public FossilizedBirthDeathRangeProcess<MatrixReal> {
-
+        
     public:
         Dist_FBDRP( void );
-
+        
         // Basic utility functions
         Dist_FBDRP*                                             clone(void) const;                                                                      //!< Clone the object
         static const std::string&                               getClassType(void);                                                                     //!< Get Rev type
@@ -39,19 +37,19 @@ namespace RevLanguage {
         std::string                                             getDistributionFunctionName(void) const;                                                //!< Get the Rev-name for this distribution.
         const TypeSpec&                                         getTypeSpec(void) const;                                                                //!< Get the type spec of the instance
         const MemberRules&                                      getParameterRules(void) const;                                                          //!< Get member rules (const)
-
-
+        
+        
         // Distribution functions you have to override
         RevBayesCore::FossilizedBirthDeathRangeProcess*         createDistribution(void) const;
 
     protected:
 
         void                                                    setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);       //!< Set member variable
-
+    
         RevPtr<const RevVariable>                               bds;
         RevPtr<const RevVariable>                               origin;
     };
-
+    
 }
 
 #endif

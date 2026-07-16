@@ -9,17 +9,13 @@
 namespace RevLanguage {
 
     /**
-     * The RevLanguage wrapper of the FUSED Fossilized-Birth-Death Range Matrix Process (DEPRECATED)
+     * The RevLanguage wrapper of the fused Fossilized-Birth-Death Range Matrix Process (deprecated)
      *
-     * The historical fused form: one node carrying both the birth-death-range skeleton and the
-     * fossil-record term Pr(occurrences | skeleton), with the occurrences smuggled in through the
-     * `taxa` constructor argument rather than clamped. It is retained as a deprecated facade,
-     * warns, and is byte-identical to the pre-split process. The factored replacement is
-     * dnFBDRP (skeleton) + dnFossilRecord (record).
-     *
-     * Reachable as dnFBDRMatrix only: the canonical dnFossilizedBirthDeathRange name has moved to
-     * the skeleton, so a script that called the fused process by its long name and passed no
-     * reporting arguments now builds a bare skeleton and needs a dnFossilRecord node added.
+     * The fused form of the fossilized-birth-death range process: a single node carrying both the
+     * birth-death range skeleton and the fossil-record term Pr(occurrences | skeleton), taking the
+     * occurrences as a constructor argument rather than as clamped data. Deprecated in favour of
+     * dnFBDRP (the skeleton) plus dnFossilRecord (the record), and kept only so that existing
+     * scripts continue to run.
      *
      * @copyright Copyright 2009-
      * @author The RevBayes Development Core Team (Sebastian Hoehna)
