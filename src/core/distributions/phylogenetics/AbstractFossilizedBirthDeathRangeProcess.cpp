@@ -758,6 +758,9 @@ void AbstractFossilizedBirthDeathRangeProcess::setReportingModel( const std::str
 //    is what the Jacobian corrects for.
 //  - "firstlast"/"complete": the oldest observed occurrence IS the oldest fossil, so
 //    tau_1 is bounded by its bin [o_i, max_age] and the Jacobian is a constant.
+//  - An unbounded oldest occurrence (max_age = Inf, i.e. only a lower bound on its age) leaves
+//    tau_1 with no upper bound from the data, so the process supplies one: no fossil can predate
+//    the birth. This is a no-op for finite max_age, where hi is already finite in every branch.
 void AbstractFossilizedBirthDeathRangeProcess::firstLastSupport(size_t i, double &lo, double &hi) const
 {
     lo = std::max(o_i[i], d_i[i]);
@@ -768,6 +771,11 @@ void AbstractFossilizedBirthDeathRangeProcess::firstLastSupport(size_t i, double
     else
     {
         hi = std::max(taxa[i].getMaxAge(), lo);
+    }
+
+    if ( RbMath::isFinite(hi) == false )
+    {
+        hi = std::max(b_i[i], lo);
     }
 }
 

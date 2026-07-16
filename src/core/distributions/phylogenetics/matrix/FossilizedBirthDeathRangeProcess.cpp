@@ -12,6 +12,7 @@
 #include "DistributionExponential.h"
 #include "MatrixReal.h"
 #include "RbMathCombinatorialFunctions.h"
+#include "RbMathLogic.h"
 #include "RbMathFunctions.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
@@ -552,9 +553,23 @@ void FossilizedBirthDeathRangeProcess::redrawValue(void)
     for (size_t i = 0; i < taxa.size(); i++)
     {
         double o = taxa[i].getMaxAge();
+
+        // An unbounded oldest occurrence (max_age = Inf) cannot set the bracket -- it would put
+        // every initial birth time at infinity. Fall back to the oldest lower bound we do know
+        // for that taxon, which is what its augmented oldest age starts at anyway.
+        if ( RbMath::isFinite(o) == false )
+        {
+            o = 0.0;
+            const std::map<TimeInterval, size_t>& ages = taxa[i].getOccurrences();
+            for ( std::map<TimeInterval, size_t>::const_iterator Fi = ages.begin(); Fi != ages.end(); Fi++ )
+            {
+                o = std::max( o, Fi->first.getMin() );
+            }
+        }
+
         if ( o > max ) max = o;
     }
-    
+
     max *= 1.1;
     
     if (max == 0.0)
