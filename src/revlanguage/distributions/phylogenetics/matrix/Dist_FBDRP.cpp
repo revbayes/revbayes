@@ -163,16 +163,36 @@ const TypeSpec& Dist_FBDRP::getClassTypeSpec( void )
 
 
 /**
+ * Get the alternative Rev names (aliases) for the constructor function.
+ *
+ * \return Rev aliases of constructor function.
+ */
+std::vector<std::string> Dist_FBDRP::getDistributionFunctionAliases( void ) const
+{
+    // create alternative constructor function names variable that is the same for all instance of this class
+    std::vector<std::string> a_names;
+    a_names.push_back( "FBDRP" );
+
+    return a_names;
+}
+
+
+/**
  * Get the Rev name for the distribution.
  * This name is used for the constructor and the distribution functions,
  * such as the density and random value function
+ *
+ * The skeleton carries the canonical name: it is the birth-death-range process proper, and the
+ * fused form it takes the name from is deprecated. Note this changes what the name means for a
+ * script that passed no reporting arguments -- it now gets a bare skeleton, and must add a
+ * dnFossilRecord node to recover the fossil-record term.
  *
  * \return Rev name of constructor function.
  */
 std::string Dist_FBDRP::getDistributionFunctionName( void ) const
 {
     // create a distribution name variable that is the same for all instance of this class
-    std::string d_name = "FBDRP";
+    std::string d_name = "FossilizedBirthDeathRange";
 
     return d_name;
 }

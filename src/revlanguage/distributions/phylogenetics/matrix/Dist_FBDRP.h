@@ -17,7 +17,9 @@ namespace RevLanguage {
      * Pr(occurrences | skeleton) -- that is a separate downstream dnFossilRecord node, which also
      * supplies the reporting model. Hence this distribution takes no reporting arguments.
      *
-     * dnFBDRMatrix is the deprecated fused form (skeleton + record in one node).
+     * Registered as dnFossilizedBirthDeathRange (canonical) and dnFBDRP. dnFBDRMatrix is the
+     * deprecated fused form (skeleton + record in one node), which the canonical name used to
+     * refer to.
      *
      * @copyright Copyright 2009-
      * @author The RevBayes Development Core Team (Sebastian Hoehna)
@@ -33,6 +35,7 @@ namespace RevLanguage {
         Dist_FBDRP*                                             clone(void) const;                                                                      //!< Clone the object
         static const std::string&                               getClassType(void);                                                                     //!< Get Rev type
         static const TypeSpec&                                  getClassTypeSpec(void);                                                                 //!< Get class type spec
+        std::vector<std::string>                                getDistributionFunctionAliases(void) const;                                             //!< Get the alternative names used for the constructor function in Rev.
         std::string                                             getDistributionFunctionName(void) const;                                                //!< Get the Rev-name for this distribution.
         const TypeSpec&                                         getTypeSpec(void) const;                                                                //!< Get the type spec of the instance
         const MemberRules&                                      getParameterRules(void) const;                                                          //!< Get member rules (const)

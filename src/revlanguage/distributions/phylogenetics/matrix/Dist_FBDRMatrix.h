@@ -13,9 +13,13 @@ namespace RevLanguage {
      *
      * The historical fused form: one node carrying both the birth-death-range skeleton and the
      * fossil-record term Pr(occurrences | skeleton), with the occurrences smuggled in through the
-     * `taxa` constructor argument rather than clamped. It is retained as a deprecated facade so
-     * existing scripts keep running unchanged; it warns and is byte-identical to the pre-split
-     * process. The factored replacement is dnFBDRP (skeleton) + dnFossilRecord (record).
+     * `taxa` constructor argument rather than clamped. It is retained as a deprecated facade,
+     * warns, and is byte-identical to the pre-split process. The factored replacement is
+     * dnFBDRP (skeleton) + dnFossilRecord (record).
+     *
+     * Reachable as dnFBDRMatrix only: the canonical dnFossilizedBirthDeathRange name has moved to
+     * the skeleton, so a script that called the fused process by its long name and passed no
+     * reporting arguments now builds a bare skeleton and needs a dnFossilRecord node added.
      *
      * @copyright Copyright 2009-
      * @author The RevBayes Development Core Team (Sebastian Hoehna)
@@ -31,7 +35,6 @@ namespace RevLanguage {
         Dist_FBDRMatrix*                                        clone(void) const;                                                                      //!< Clone the object
         static const std::string&                               getClassType(void);                                                                     //!< Get Rev type
         static const TypeSpec&                                  getClassTypeSpec(void);                                                                 //!< Get class type spec
-        std::vector<std::string>                                getDistributionFunctionAliases(void) const;                                             //!< Get the alternative names used for the constructor function in Rev.
         std::string                                             getDistributionFunctionName(void) const;                                                //!< Get the Rev-name for this distribution.
         const TypeSpec&                                         getTypeSpec(void) const;                                                                //!< Get the type spec of the instance
         const MemberRules&                                      getParameterRules(void) const;                                                          //!< Get member rules (const)

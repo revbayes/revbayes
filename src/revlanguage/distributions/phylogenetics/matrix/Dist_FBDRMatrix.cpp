@@ -172,31 +172,20 @@ const TypeSpec& Dist_FBDRMatrix::getClassTypeSpec( void )
 
 
 /**
- * Get the alternative Rev names (aliases) for the constructor function.
- *
- * \return Rev aliases of constructor function.
- */
-std::vector<std::string> Dist_FBDRMatrix::getDistributionFunctionAliases( void ) const
-{
-    // create alternative constructor function names variable that is the same for all instance of this class
-    std::vector<std::string> a_names;
-    a_names.push_back( "FBDRMatrix" );
-
-    return a_names;
-}
-
-
-/**
  * Get the Rev name for the distribution.
  * This name is used for the constructor and the distribution functions,
  * such as the density and random value function
+ *
+ * The canonical name FossilizedBirthDeathRange now belongs to the skeleton (dnFBDRP), so the
+ * deprecated fused form registers only under dnFBDRMatrix -- the name the fbd_range tutorials
+ * use on this branch. It is not given a long name of its own, since it is on its way out.
  *
  * \return Rev name of constructor function.
  */
 std::string Dist_FBDRMatrix::getDistributionFunctionName( void ) const
 {
     // create a distribution name variable that is the same for all instance of this class
-    std::string d_name = "FossilizedBirthDeathRange";
+    std::string d_name = "FBDRMatrix";
 
     return d_name;
 }
