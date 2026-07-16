@@ -41,7 +41,7 @@ namespace RevBayesCore {
                                             const TypedDagNode<RbVector<double> > *times,
                                             const std::string &condition,
                                             const std::vector<Taxon> &taxa,
-                                            const std::string &sampling,
+                                            const std::string &reporting,
                                             bool resampling,
                                             const TypedDagNode<double>* origin = NULL);  //!< Constructor
 
@@ -49,14 +49,15 @@ namespace RevBayesCore {
 
         std::vector<double>&                            getAges();
         void                                            resampleFirstLast(size_t i);
-        void                                            firstLastSupport(size_t i, double &lo, double &hi) const;  //!< support of the augmented oldest age tau_1
-        std::string                                     effectiveSampling(size_t i) const;                         //!< per-taxon reporting model
-        double                                          computeLnFossilTotal();                                    //!< Total fossil-occurrence (reporting) log-density summed over taxa; used by a standalone dnFossilRecord node conditioned on this skeleton (self-contained: refreshes rate cache + start/end times).
+        void                                            firstLastSupport(size_t i, double &lo, double &hi) const;  //!< support [lo,hi] of the augmented oldest age tau_1 (retention-model dependent)
+        std::string                                     effectiveReporting(size_t i) const;                         //!< per-taxon reporting model; "uniform" is capped at max_count, so a taxon below the cap is treated as "complete"
+        double                                          computeLnFossilTotal();                                    //!< Total fossil-record log-density summed over taxa; used by a standalone dnFossilRecord node conditioned on this skeleton (self-contained: refreshes rate cache + start/end times).
+        void                                            setReportingModel(const std::string &s);                   //!< Set the reporting model (complete|firstlast|uniform). dnFossilRecord pushes it onto its skeleton so the single member drives BOTH the tau1 support (firstLastSupport) and the reporting term.
 
     protected:
         virtual void                                    updateStartEndTimes() = 0;
         virtual double                                  computeLnProbabilityRanges(bool force = false);
-        double                                          computeLnFossilReporting(size_t i) const;              //!< Fossil-occurrence (reporting) log-term for taxon i, factored out of computeLnProbabilityRanges (skeleton/reporting split).
+        double                                          computeLnFossilRecord(size_t i) const;              //!< Fossil-record (occurrence) log-term for taxon i, factored out of computeLnProbabilityRanges (skeleton/reporting split).
 
         // Parameter management functions
         void                                            swapParameterInternal(const DagNode *oldP, const DagNode *newP);                //!< Swap a parameter
@@ -122,7 +123,7 @@ namespace RevBayesCore {
         std::vector<bool>                               dirty_psi;                                              //!< Indicates whether fossil sampling terms need updating
         std::vector<bool>                               dirty_taxa;                                             //!< Indicates whether partial likelihood needs updating
         
-        std::string                                     sampling;                                               //!< Fossil sampling model: complete | firstlast | uniform
+        std::string                                     reporting;                                               //!< Fossil reporting model: complete | firstlast | uniform
         size_t                                          max_count;                                              //!< Max occurrence count across taxa; the uniform model's reporting cap K
         bool                                            touched;                                                //!< Indicates whether any terms need updating
         bool                                            resampled;                                              //!< Indicates whether any oldest occurrence ages were resampled

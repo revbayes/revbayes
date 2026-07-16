@@ -30,7 +30,7 @@ namespace RevBayesCore {
      *
      * REPORTING MODEL (complete | firstlast | uniform): a variant of ONE observation process,
      * differing only in the retention assumption -- so it is an OPTION, not a family of dists,
-     * and it is applied per-taxon (effectiveSampling: uniform downgrades to complete below the
+     * and it is applied per-taxon (effectiveReporting: uniform downgrades to complete below the
      * cap K). OPEN: in path A the reporting model currently lives on the skeleton (its `sampling`
      * member); the target is to move it here as a `reporting=` arg on dnFossilRecord (the skeleton
      * density q/q~ does not depend on it -- only the reporting term does). The dating timeline is a
@@ -61,6 +61,8 @@ namespace RevBayesCore {
 
     protected:
         void                        swapParameterInternal(const DagNode *oldP, const DagNode *newP) override;
+
+        void                        resolveSkeleton(void);                // downcast skeleton_node's distribution to the range base
 
     private:
         const DagNode*                                   skeleton_node;   // owns b,d,tau,psi,timeline + reporting term

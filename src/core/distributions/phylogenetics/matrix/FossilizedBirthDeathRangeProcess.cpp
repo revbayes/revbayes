@@ -49,12 +49,12 @@ FossilizedBirthDeathRangeProcess::FossilizedBirthDeathRangeProcess(const DagNode
                                                                      const TypedDagNode< RbVector<double> > *intimes,
                                                                      const std::string &incondition,
                                                                      const std::vector<Taxon> &intaxa,
-                                                                     const std::string &sampling,
+                                                                     const std::string &reporting,
                                                                      bool resample,
                                                                      bool use_bds,
                                                                      const TypedDagNode<double> *inorigin) :
     TypedDistribution<MatrixReal>(new MatrixReal(intaxa.size(), 2)),
-    AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, sampling, resample, inorigin),
+    AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, reporting, resample, inorigin),
     bds(use_bds)
 {
     dirty_gamma = std::vector<bool>(taxa.size(), true);
@@ -231,7 +231,7 @@ double FossilizedBirthDeathRangeProcess::computeLnProbabilityBDS()
                 // if there is a range of fossil ages
                 if ( min_age != max_age )
                 {
-                    if ( effectiveSampling(i) == "uniform" )
+                    if ( effectiveReporting(i) == "uniform" )
                     {
                     // Truly-exchangeable (uniform subset): the true oldest (tau1 = first[i]) may
                     // be unobserved up to the birth, and interior specimens in (d, tau1) have
@@ -381,7 +381,7 @@ double FossilizedBirthDeathRangeProcess::computeLnProbabilityBDS()
                     // sum over each possible oldest observation
                     Psi[i] += log(recip);
 
-                    if ( effectiveSampling(i) == "complete" )
+                    if ( effectiveReporting(i) == "complete" )
                     {
                         // compute poisson density for count
                         Psi[i] -= RbMath::lnFactorial(count);

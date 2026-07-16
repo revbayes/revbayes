@@ -53,7 +53,7 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
     timeline( intimes ),
     origin_age( inorigin ),
     origin(0.0),
-    sampling(s),
+    reporting(s),
     resampled(false),
     resampling(re),
     touched(false),
@@ -190,7 +190,7 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
             count += Fi->second;
         }
         // the largest per-taxon occurrence count is the implicit reporting cap K
-        // for the uniform model (see effectiveSampling)
+        // for the uniform model (see effectiveReporting)
         max_count = std::max(max_count, count);
         // default the augmented youngest age to the youngest maximum (only resampled,
         // and only used, under first/last conditioning)
@@ -309,7 +309,7 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
             {
                 if ( dirty_psi[i] || force )
                 {
-                    Psi[i] = computeLnFossilReporting(i);
+                    Psi[i] = computeLnFossilRecord(i);
                     if ( Psi[i] == RbConstants::Double::neginf )
                     {
                         return RbConstants::Double::neginf;
@@ -404,7 +404,7 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnFossilTotal()
     double lnProb = 0.0;
     for ( size_t i = 0; i < taxa.size(); ++i )
     {
-        double r = computeLnFossilReporting(i);
+        double r = computeLnFossilRecord(i);
         if ( r == RbConstants::Double::neginf )
         {
             return RbConstants::Double::neginf;
@@ -418,7 +418,7 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnFossilTotal()
 // Fossil-occurrence (reporting) log-term for taxon i: the Psi[i] block factored out of
 // computeLnProbabilityRanges (skeleton/reporting split). Behavior-preserving -- returns
 // exactly what was assigned to Psi[i] inline before the split.
-double AbstractFossilizedBirthDeathRangeProcess::computeLnFossilReporting( size_t i ) const
+double AbstractFossilizedBirthDeathRangeProcess::computeLnFossilRecord( size_t i ) const
 {
     double d = d_i[i];
     double o = first[i];
@@ -433,7 +433,7 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnFossilReporting( size_
                 // if there is a range of fossil ages
                 if ( min_age != max_age )
                 {
-                    if ( effectiveSampling(i) == "firstlast" )
+                    if ( effectiveReporting(i) == "firstlast" )
                     {
 
                     double psi_int = 0.0;                            // interior sampling rate over (last, first)
@@ -598,7 +598,7 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnFossilReporting( size_
                         result += log(psi[k]) * Fi->second;         // log prod_i Psi(F_i)^{count_i}
                     }
 
-                    if ( effectiveSampling(i) == "complete" )
+                    if ( effectiveReporting(i) == "complete" )
                     {
                         result -= RbMath::lnFactorial(count);
                     }
@@ -724,11 +724,11 @@ std::vector<double>& AbstractFossilizedBirthDeathRangeProcess::getAges(void)
 // Per-taxon reporting model. "uniform" reports a random subset capped at K = max_count:
 // a taxon at the cap may have unreported fossils and gets the exchangeable
 // marginalization, while one below it kept its whole record, which is the complete case.
-std::string AbstractFossilizedBirthDeathRangeProcess::effectiveSampling(size_t i) const
+std::string AbstractFossilizedBirthDeathRangeProcess::effectiveReporting(size_t i) const
 {
-    if ( sampling != "uniform" )
+    if ( reporting != "uniform" )
     {
-        return sampling;
+        return reporting;
     }
 
     size_t count = 0;
@@ -742,6 +742,15 @@ std::string AbstractFossilizedBirthDeathRangeProcess::effectiveSampling(size_t i
 }
 
 
+// Set the reporting model. dnFossilRecord pushes its `reporting=` arg onto the skeleton via
+// this setter, so the single `reporting` member is the one source of truth -- driving both the
+// tau1 support (firstLastSupport) and the per-taxon reporting term (effectiveReporting).
+void AbstractFossilizedBirthDeathRangeProcess::setReportingModel( const std::string &s )
+{
+    reporting = s;
+}
+
+
 // Support of the augmented oldest age tau_1, in one place so the resampling proposal
 // and its Jacobian (computeLnProbabilityRanges) agree.
 //  - "uniform": the true oldest may be unobserved and older than every reported
@@ -752,7 +761,7 @@ std::string AbstractFossilizedBirthDeathRangeProcess::effectiveSampling(size_t i
 void AbstractFossilizedBirthDeathRangeProcess::firstLastSupport(size_t i, double &lo, double &hi) const
 {
     lo = std::max(o_i[i], d_i[i]);
-    if ( effectiveSampling(i) == "uniform" )
+    if ( effectiveReporting(i) == "uniform" )
     {
         hi = ( b_i[i] > lo ) ? b_i[i] : std::max(taxa[i].getMaxAge(), b_i[i]);
     }
