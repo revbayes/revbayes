@@ -52,7 +52,7 @@ namespace RevBayesCore {
     class FossilRecordProcess : public TypedDistribution< RbVector<Taxon> > {
 
     public:
-        FossilRecordProcess(const DagNode *skeleton, const std::vector<Taxon> &taxa);
+        FossilRecordProcess(const DagNode *skeleton, const std::string &reporting, const std::vector<Taxon> &taxa);
         virtual ~FossilRecordProcess() {}
 
         FossilRecordProcess*        clone(void) const override;
@@ -67,6 +67,7 @@ namespace RevBayesCore {
     private:
         const DagNode*                                   skeleton_node;   // owns b,d,tau,psi,timeline + reporting term
         AbstractFossilizedBirthDeathRangeProcess*        skeleton;        // downcast view for computeLnFossilTotal()
+        std::string                                      reporting;       // complete|firstlast|uniform, pushed onto the skeleton
         std::vector<Taxon>                               taxa;            // reported occurrences (data)
     };
 }

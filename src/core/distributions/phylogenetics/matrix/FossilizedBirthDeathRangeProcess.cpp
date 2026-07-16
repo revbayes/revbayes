@@ -52,11 +52,14 @@ FossilizedBirthDeathRangeProcess::FossilizedBirthDeathRangeProcess(const DagNode
                                                                      const std::string &reporting,
                                                                      bool resample,
                                                                      bool use_bds,
-                                                                     const TypedDagNode<double> *inorigin) :
+                                                                     const TypedDagNode<double> *inorigin,
+                                                                     bool report_int) :
     TypedDistribution<MatrixReal>(new MatrixReal(intaxa.size(), 2)),
     AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, reporting, resample, inorigin),
     bds(use_bds)
 {
+    report_internally = report_int;
+
     dirty_gamma = std::vector<bool>(taxa.size(), true);
     gamma_i     = std::vector<size_t>(taxa.size(), 0);
     gamma_links = std::vector<std::vector<bool> >(taxa.size(), std::vector<bool>(taxa.size(), false));

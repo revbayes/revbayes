@@ -14,10 +14,11 @@ using namespace RevBayesCore;
  * whose distribution derives from AbstractFossilizedBirthDeathRangeProcess) and contributes
  * the fossil-occurrence (reporting) log-density. Data (this node's value) is the taxon vector.
  */
-FossilRecordProcess::FossilRecordProcess(const DagNode *sk, const std::vector<Taxon> &t) :
+FossilRecordProcess::FossilRecordProcess(const DagNode *sk, const std::string &rep, const std::vector<Taxon> &t) :
     TypedDistribution< RbVector<Taxon> >( new RbVector<Taxon>(t) ),
     skeleton_node( sk ),
     skeleton( NULL ),
+    reporting( rep ),
     taxa( t )
 {
     addParameter( skeleton_node );
@@ -27,6 +28,9 @@ FossilRecordProcess::FossilRecordProcess(const DagNode *sk, const std::vector<Ta
     {
         throw RbException("dnFossilRecord requires a fossilized birth-death range skeleton (e.g. dnFBDRP) as its first argument.");
     }
+
+    // push the reporting model onto the skeleton: one source of truth for the tau1 support + reporting term
+    skeleton->setReportingModel( reporting );
 }
 
 

@@ -41,7 +41,8 @@ namespace RevBayesCore {
 										  const std::string &reporting,
 										  bool resampling,
                                           bool bds,
-                                          const TypedDagNode<double>* origin = NULL);                         //!< Constructor
+                                          const TypedDagNode<double>* origin = NULL,
+                                          bool report_internally = true);   //!< report_internally=false => bare skeleton (dnFBDRP); reporting term supplied by dnFossilRecord
         
         // public member functions
         FossilizedBirthDeathRangeProcess*               clone(void) const override;                                         //!< Create an independent clone

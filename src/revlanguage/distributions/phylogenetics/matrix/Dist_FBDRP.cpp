@@ -120,7 +120,9 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRP::createDistribution( 
         og = static_cast<const RealPos &>( origin->getRevObject() ).getDagNode();
     }
 
-    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, c, re, use_bds, og);
+    bool ri = static_cast<const RlBoolean &>( report_internally->getRevObject() ).getValue();
+
+    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, c, re, use_bds, og, ri);
     
     return d;
 }
@@ -208,6 +210,8 @@ const MemberRules& Dist_FBDRP::getParameterRules(void) const
 
         dist_member_rules.push_back( new ArgumentRule( "origin", RealPos::getClassTypeSpec(), "The origin time of the process (defaults to the oldest sampled birth).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
+        dist_member_rules.push_back( new ArgumentRule( "report_internally", RlBoolean::getClassTypeSpec(), "Add the fossil-record (reporting) term inline? false = bare skeleton for a separate dnFossilRecord node.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( true ) ) );
+
         // add the rules from the base class
         const MemberRules &parentRules = FossilizedBirthDeathRangeProcess<MatrixReal>::getParameterRules();
         dist_member_rules.insert(dist_member_rules.end(), parentRules.begin(), parentRules.end());
@@ -253,6 +257,10 @@ void Dist_FBDRP::setConstParameter(const std::string& name, const RevPtr<const R
     else if ( name == "origin" )
     {
         origin = var;
+    }
+    else if ( name == "report_internally" )
+    {
+        report_internally = var;
     }
     else
     {

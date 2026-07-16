@@ -43,6 +43,7 @@ namespace RevLanguage {
     
         RevPtr<const RevVariable>                               bds;
         RevPtr<const RevVariable>                               origin;
+        RevPtr<const RevVariable>                               report_internally;
     };
     
 }
