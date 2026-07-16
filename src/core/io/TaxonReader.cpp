@@ -195,9 +195,11 @@ TaxonReader::TaxonReader(const std::string &fn, std::string delim) : DelimitedDa
             {
                 double c = parseNumericField( line[ column_map["count"] ], "count", i+1 );
 
-                if ( c < 1.0 || c != std::floor(c) || RbMath::isFinite(c) == false )
+                // 0 is meaningful: an extant species may have no fossil samples. A negative count
+                // would also wrap around on the conversion to size_t below and spin the loop.
+                if ( c < 0.0 || RbMath::isFinite(c) == false || c != std::floor(c) )
                 {
-                    throw RbException() << "count (" << line[ column_map["count"] ] << ") must be a positive whole number on line "
+                    throw RbException() << "count (" << line[ column_map["count"] ] << ") must be a non-negative whole number on line "
                                         << i+1 << " of the taxon definition file.";
                 }
 
