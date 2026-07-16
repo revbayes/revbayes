@@ -231,7 +231,7 @@ double FossilizedBirthDeathRangeProcess::computeLnProbabilityBDS()
                 // if there is a range of fossil ages
                 if ( min_age != max_age )
                 {
-                    if ( sampling == "uniform" )
+                    if ( effectiveSampling(i) == "uniform" )
                     {
                     // Truly-exchangeable (uniform subset): the true oldest (tau1 = first[i]) may
                     // be unobserved up to the birth, and interior specimens in (d, tau1) have
@@ -381,7 +381,7 @@ double FossilizedBirthDeathRangeProcess::computeLnProbabilityBDS()
                     // sum over each possible oldest observation
                     Psi[i] += log(recip);
 
-                    if ( sampling == "complete" )
+                    if ( effectiveSampling(i) == "complete" )
                     {
                         // compute poisson density for count
                         Psi[i] -= RbMath::lnFactorial(count);

@@ -49,7 +49,8 @@ namespace RevBayesCore {
 
         std::vector<double>&                            getAges();
         void                                            resampleFirstLast(size_t i);
-        void                                            firstLastSupport(size_t i, double &lo, double &hi) const;  //!< support [lo,hi] of the augmented oldest age tau_1 (retention-model dependent)
+        void                                            firstLastSupport(size_t i, double &lo, double &hi) const;  //!< support of the augmented oldest age tau_1
+        std::string                                     effectiveSampling(size_t i) const;                         //!< per-taxon reporting model
 
     protected:
         virtual void                                    updateStartEndTimes() = 0;
@@ -120,6 +121,7 @@ namespace RevBayesCore {
         std::vector<bool>                               dirty_taxa;                                             //!< Indicates whether partial likelihood needs updating
         
         std::string                                     sampling;                                               //!< Fossil sampling model: complete | firstlast | uniform
+        size_t                                          max_count;                                              //!< Max occurrence count across taxa; the uniform model's reporting cap K
         bool                                            touched;                                                //!< Indicates whether any terms need updating
         bool                                            resampled;                                              //!< Indicates whether any oldest occurrence ages were resampled
         bool                                            resampling;                                             //!< Indicates whether we are resampling oldest occurrence ages
