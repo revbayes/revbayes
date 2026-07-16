@@ -163,7 +163,6 @@ double FossilizedBirthDeathRangeProcess::computeLnProbabilityBDS()
     double lnProb = 0.0;
 
     size_t num_rho_sampled = 0;
-    size_t num_rho_unsampled = 0;
 
     // add the fossil tip age terms
     for (size_t i = 0; i < taxa.size(); ++i)
@@ -186,9 +185,8 @@ double FossilizedBirthDeathRangeProcess::computeLnProbabilityBDS()
             return RbConstants::Double::neginf;
         }
 
-        // count the number of rho-sampled tips
-        num_rho_sampled   += (d == present && min_age == present);
-        num_rho_unsampled += (d == present && min_age > present);
+        // count the number of rho-sampled tips (see computeLnProbabilityRanges)
+        num_rho_sampled += (d == present);
 
         if ( dirty_taxa[i] == true )
         {
@@ -442,11 +440,6 @@ double FossilizedBirthDeathRangeProcess::computeLnProbabilityBDS()
     if ( homogeneous_rho->getValue() > 0.0)
     {
         lnProb += num_rho_sampled * log( homogeneous_rho->getValue() );
-    }
-    // add the unsampled extant tip age term
-    if ( homogeneous_rho->getValue() < 1.0)
-    {
-        lnProb += num_rho_unsampled * log( 1.0 - homogeneous_rho->getValue() );
     }
 
     if ( RbMath::isFinite(lnProb) == false )
