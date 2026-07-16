@@ -478,7 +478,8 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
 
                     if ( effectiveSampling(i) == "complete" )
                     {
-                        Psi[i] -= RbMath::lnFactorial(count);
+                        // sum over which observation supplies the oldest specimen at tau1
+                        Psi[i] += log(recip_old) - RbMath::lnFactorial(count);
                     }
                     else
                     {
