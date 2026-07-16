@@ -107,9 +107,9 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRP::createDistribution( 
         rt = static_cast<const ModelVector<RealPos> &>( timeline->getRevObject() ).getDagNode();
     }
 
-    // complete=TRUE reports every occurrence; otherwise the reporting model applies
-    bool comp = static_cast<const RlBoolean &>( complete->getRevObject() ).getValue();
-    std::string c  = comp ? "complete" : static_cast<const RlString &>( reporting->getRevObject() ).getValue();
+    // the reporting model in force until a dnFossilRecord node pushes its own on: it applies to
+    // the constructor's initial augmented age draw, and to a skeleton used with no record node
+    std::string c  = "uniform";
     bool use_bds = static_cast<const RlBoolean &>( bds->getRevObject() ).getValue();
     bool re = static_cast<const RlBoolean &>( resample->getRevObject() ).getValue();
 
@@ -120,7 +120,8 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRP::createDistribution( 
         og = static_cast<const RealPos &>( origin->getRevObject() ).getDagNode();
     }
 
-    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, c, re, use_bds, og);
+    // report_internally = false: the bare skeleton, with no inline fossil-record term
+    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, c, re, use_bds, og, false);
     
     return d;
 }
@@ -163,7 +164,7 @@ std::vector<std::string> Dist_FBDRP::getDistributionFunctionAliases( void ) cons
 {
     // create alternative constructor function names variable that is the same for all instance of this class
     std::vector<std::string> a_names;
-    a_names.push_back( "FBDRMatrix" );
+    a_names.push_back( "FBDRP" );
     
     return a_names;
 }
@@ -188,11 +189,8 @@ std::string Dist_FBDRP::getDistributionFunctionName( void ) const
 /**
  * Get the member rules used to create the constructor of this object.
  *
- * The member rules of the fossilized birth-death process are:
- * (1) the speciation rate lambda which must be a positive real.
- * (2) the extinction rate mu that must be a positive real.
- * (3) the fossil sampling rate psi that must be a positive real.
- * (4) the extant sampling rate rho that must be a positive real.
+ * The member rules of the fossilized birth-death range skeleton are those of the fused process
+ * minus the reporting args (complete, reporting), which belong to dnFossilRecord.
  *
  * \return The member rules.
  */
@@ -208,8 +206,8 @@ const MemberRules& Dist_FBDRP::getParameterRules(void) const
 
         dist_member_rules.push_back( new ArgumentRule( "origin", RealPos::getClassTypeSpec(), "The origin time of the process (defaults to the oldest sampled birth).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
-        // add the rules from the base class
-        const MemberRules &parentRules = FossilizedBirthDeathRangeProcess<MatrixReal>::getParameterRules();
+        // add the rules from the base class, without the reporting args
+        const MemberRules &parentRules = FossilizedBirthDeathRangeProcess<MatrixReal>::getSkeletonParameterRules();
         dist_member_rules.insert(dist_member_rules.end(), parentRules.begin(), parentRules.end());
         
         rules_set = true;

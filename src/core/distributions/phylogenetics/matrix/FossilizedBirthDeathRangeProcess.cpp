@@ -12,6 +12,7 @@
 #include "DistributionExponential.h"
 #include "MatrixReal.h"
 #include "RbMathCombinatorialFunctions.h"
+#include "RbMathLogic.h"
 #include "RbMathFunctions.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
@@ -49,14 +50,17 @@ FossilizedBirthDeathRangeProcess::FossilizedBirthDeathRangeProcess(const DagNode
                                                                      const TypedDagNode< RbVector<double> > *intimes,
                                                                      const std::string &incondition,
                                                                      const std::vector<Taxon> &intaxa,
-                                                                     const std::string &sampling,
+                                                                     const std::string &reporting,
                                                                      bool resample,
                                                                      bool use_bds,
-                                                                     const TypedDagNode<double> *inorigin) :
+                                                                     const TypedDagNode<double> *inorigin,
+                                                                     bool report_int) :
     TypedDistribution<MatrixReal>(new MatrixReal(intaxa.size(), 2)),
-    AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, sampling, resample, inorigin),
+    AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, reporting, resample, inorigin),
     bds(use_bds)
 {
+    report_internally = report_int;
+
     dirty_gamma = std::vector<bool>(taxa.size(), true);
     gamma_i     = std::vector<size_t>(taxa.size(), 0);
     gamma_links = std::vector<std::vector<bool> >(taxa.size(), std::vector<bool>(taxa.size(), false));
@@ -229,7 +233,7 @@ double FossilizedBirthDeathRangeProcess::computeLnProbabilityBDS()
                 // if there is a range of fossil ages
                 if ( min_age != max_age )
                 {
-                    if ( effectiveSampling(i) == "uniform" )
+                    if ( effectiveReporting(i) == "uniform" )
                     {
                     // Truly-exchangeable (uniform subset): the true oldest (tau1 = first[i]) may
                     // be unobserved up to the birth, and interior specimens in (d, tau1) have
@@ -379,7 +383,7 @@ double FossilizedBirthDeathRangeProcess::computeLnProbabilityBDS()
                     // sum over each possible oldest observation
                     Psi[i] += log(recip);
 
-                    if ( effectiveSampling(i) == "complete" )
+                    if ( effectiveReporting(i) == "complete" )
                     {
                         // compute poisson density for count
                         Psi[i] -= RbMath::lnFactorial(count);
@@ -542,6 +546,19 @@ void FossilizedBirthDeathRangeProcess::redrawValue(void)
     for (size_t i = 0; i < taxa.size(); i++)
     {
         double o = taxa[i].getMaxAge();
+
+        // an unbounded oldest occurrence (max_age = Inf) would put every initial birth time at
+        // infinity, so bracket it by the oldest lower bound this taxon does have
+        if ( RbMath::isFinite(o) == false )
+        {
+            o = 0.0;
+            const std::map<TimeInterval, size_t>& ages = taxa[i].getOccurrences();
+            for ( std::map<TimeInterval, size_t>::const_iterator Fi = ages.begin(); Fi != ages.end(); Fi++ )
+            {
+                o = std::max( o, Fi->first.getMin() );
+            }
+        }
+
         if ( o > max ) max = o;
     }
     

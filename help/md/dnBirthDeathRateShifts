@@ -6,7 +6,7 @@ The birth death with rate shifts (BDS) model describes the distribution of a mat
 ## details
 Fossil species are represented by a collection of fossil occurrences with uncertainty. Speciation, extinction and sampling rates may be time-homogeneous or piecewise time-heterogeneous. If time-heterogeneous rates are provided, then a vector of rate change time-points musts also be provided. If only a subset of fossil occurrences is provided for each species (e.g. only first and last occurrencces), then the remaining number of fossil samples may be marginalized by specifying `complete=FALSE`.
 ## authors
-Walker Pett
+June Walker
 ## see_also
 dnFossilizedBirthDeathRange
 ## example

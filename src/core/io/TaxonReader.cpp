@@ -1,4 +1,6 @@
 #include <cstddef>
+#include <cstdlib>
+#include <cmath>
 #include <sstream>
 #include <set>
 #include <map>
@@ -7,6 +9,8 @@
 #include <vector>
 
 #include "RbException.h"
+#include "RbMathLogic.h"
+#include "RlUserInterface.h" // for RBOUT
 #include "StringUtilities.h"
 #include "TaxonReader.h"
 #include "DelimitedDataReader.h"
@@ -14,6 +18,42 @@
 #include "TimeInterval.h"
 
 using namespace RevBayesCore;
+
+
+namespace {
+
+    /**
+     * Parse a numeric field, requiring the whole field to be consumed.
+     *
+     * Deliberately not `stringstream >> double`, which yields 0 for a field that does not parse
+     * and reports it only through failbit, and which does not recognize "Inf" -- a taxon file may
+     * use that for an occurrence whose age has no upper bound.
+     *
+     * \param[in]    s        The raw field.
+     * \param[in]    field    Field name, for the error message.
+     * \param[in]    line     1-based line number in the file, for the error message.
+     */
+    double parseNumericField(const std::string &s, const std::string &field, size_t line)
+    {
+        const char *begin = s.c_str();
+        char *end = NULL;
+
+        double v = std::strtod(begin, &end);
+
+        // strtod skips leading whitespace itself; skip any trailing whitespace before checking
+        // that nothing else is left over
+        while ( *end == ' ' || *end == '\t' || *end == '\r' || *end == '\n' ) ++end;
+
+        if ( end == begin || *end != '\0' )
+        {
+            throw RbException() << "Could not parse \'" << s << "\' as a number in the \"" << field
+                                << "\" field on line " << line << " of the taxon definition file.";
+        }
+
+        return v;
+    }
+
+}
 
 
 /**
@@ -86,6 +126,9 @@ TaxonReader::TaxonReader(const std::string &fn, std::string delim) : DelimitedDa
 
     std::map<std::string, Taxon > taxon_map;
 
+    // rows declaring a fossil occurrence but counting zero of it, warned about once at the end
+    std::vector<std::string> zero_count_rows;
+
     for (size_t i = 1; i < chars.size(); ++i) //going through all the lines
     {
         const std::vector<std::string>& line = chars[i];
@@ -122,10 +165,7 @@ TaxonReader::TaxonReader(const std::string &fn, std::string delim) : DelimitedDa
         
         if ( ageit != column_map.end() )
         {
-            double age = 0.0;
-            std::stringstream ss;
-            ss.str( line[ column_map["age"] ] );
-            ss >> age;
+            double age = parseNumericField( line[ column_map["age"] ], "age", i+1 );
 
             TimeInterval interval(age,age);
 
@@ -139,18 +179,12 @@ TaxonReader::TaxonReader(const std::string &fn, std::string delim) : DelimitedDa
 
         if ( minit != column_map.end() )
         {
-            double min_age, max_age;
             TimeInterval interval;
-            std::stringstream ss;
 
-            ss.str( line[ column_map["min_age"] ] );
-            ss >> min_age;
-            ss.clear();
+            double min_age = parseNumericField( line[ column_map["min_age"] ], "min_age", i+1 );
+            double max_age = parseNumericField( line[ column_map["max_age"] ], "max_age", i+1 );
 
-            ss.str( line[ column_map["max_age"] ] );
-            ss >> max_age;
-            ss.clear();
-
+            // ordering (and its intentional 1e-6 tolerance) is TimeInterval's to enforce
             interval.setMin(min_age);
             interval.setMax(max_age);
 
@@ -163,13 +197,30 @@ TaxonReader::TaxonReader(const std::string &fn, std::string delim) : DelimitedDa
 
             if ( countit != column_map.end() )
             {
-                size_t k = 0;
-                std::stringstream ss;
+                double c = parseNumericField( line[ column_map["count"] ], "count", i+1 );
 
-                ss.str( line[ column_map["count"] ] );
-                ss >> k;
+                // 0 is meaningful: an extant species may have no fossil samples. A negative count
+                // would also wrap around on the conversion to size_t below and spin the loop.
+                if ( c < 0.0 || RbMath::isFinite(c) == false || c != std::floor(c) )
+                {
+                    throw RbException() << "count (" << line[ column_map["count"] ] << ") must be a non-negative whole number on line "
+                                        << i+1 << " of the taxon definition file.";
+                }
 
-                for(size_t i = 1; i < k; i++)
+                size_t k = size_t(c);
+
+                // a count of 0 says the species has no fossil samples, which only fits an extant
+                // species (max_age = 0, where the process skips the fossil term). On a row that
+                // does place an occurrence in the past it contradicts itself, and the occurrence
+                // added above still stands, so say so rather than read it as no samples.
+                if ( k == 0 && max_age > 0.0 )
+                {
+                    std::stringstream ss;
+                    ss << "\"" << taxon_name << "\" on line " << i+1;
+                    zero_count_rows.push_back( ss.str() );
+                }
+
+                for(size_t j = 1; j < k; j++)
                 {
                     taxon.addOccurrence(interval);
                 }
@@ -193,6 +244,26 @@ TaxonReader::TaxonReader(const std::string &fn, std::string delim) : DelimitedDa
         {
             taxon.setExtinct( taxon.getMinAge() > 0.0 );
         }
+    }
+
+    if ( zero_count_rows.empty() == false )
+    {
+        // list a few and count the rest, so a large file cannot bury the console
+        size_t shown = std::min( zero_count_rows.size(), size_t(5) );
+
+        std::stringstream ss;
+        ss << "Warning: count = 0 with max_age > 0 in the taxon definition file, for ";
+        for (size_t j = 0; j < shown; j++)
+        {
+            ss << ( j > 0 ? ", " : "" ) << zero_count_rows[j];
+        }
+        if ( zero_count_rows.size() > shown )
+        {
+            ss << " (and " << zero_count_rows.size() - shown << " more)";
+        }
+        ss << ".";
+
+        RBOUT( ss.str() );
     }
 
     for (std::map<std::string, Taxon>::iterator it = taxon_map.begin(); it != taxon_map.end(); it++ )
