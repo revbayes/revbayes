@@ -28,15 +28,18 @@ namespace RevLanguage {
         virtual FossilizedBirthDeathRangeProcess<rlType>*   clone(void) const = 0;                                                              //!< Clone the object
 
         // Basic utility functions you may want to overwrite
-        const MemberRules&                                  getParameterRules(void) const;                                                      //!< Get member rules (const)
-        
+        const MemberRules&                                  getParameterRules(void) const;                                                      //!< Get member rules (const): skeleton + reporting args (the fused process)
+
         // Basic utility functions
         static const std::string&                           getClassType(void);                                                                 //!< Get Rev type
         static const TypeSpec&                              getClassTypeSpec(void);                                                             //!< Get class type spec
 
     protected:
         FossilizedBirthDeathRangeProcess( void );
-        
+
+        const MemberRules&                                  getSkeletonParameterRules(void) const;                                              //!< Member rules WITHOUT the reporting args; the b/d skeleton (dnFBDRP) takes its reporting model from a downstream dnFossilRecord node instead.
+        static void                                         appendParameterRules(MemberRules &rules, bool include_reporting);                   //!< Build the rule list; the reporting args sit at their fused-process position so the facade's argument order is unchanged.
+
         void                                                setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);   //!< Set member variable
     
         // members        
@@ -112,6 +115,52 @@ const TypeSpec& RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::getClassT
 
 
 /**
+ * Build the member rules shared by the matrix and tree range processes.
+ *
+ * The reporting args (complete, reporting) describe how sampled occurrences make it into the
+ * observed record. They belong to the fossil-record term, so the bare skeleton (dnFBDRP) omits
+ * them and picks its reporting model up from a downstream dnFossilRecord node. They are appended
+ * in place rather than at the end so that including them reproduces the historical argument
+ * order of the fused process exactly.
+ *
+ * \param[in,out] rules              The rule list to append to.
+ * \param[in]     include_reporting  Include the reporting args (fused process) or omit them (skeleton).
+ */
+template <typename rlType>
+void RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::appendParameterRules(MemberRules &rules, bool include_reporting)
+{
+    std::vector<TypeSpec> paramTypes;
+    paramTypes.push_back( RealPos::getClassTypeSpec() );
+    paramTypes.push_back( ModelVector<RealPos>::getClassTypeSpec() );
+    rules.push_back( new ArgumentRule( "lambda",  paramTypes, "The speciation rate(s).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+    rules.push_back( new ArgumentRule( "mu",      paramTypes, "The extinction rate(s).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
+    rules.push_back( new ArgumentRule( "psi",     paramTypes, "The fossil sampling rate(s).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
+    rules.push_back( new ArgumentRule( "rho",     Probability::getClassTypeSpec(), "The extant sampling fraction.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(1.0) ) );
+
+    rules.push_back( new ArgumentRule( "timeline",   ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the piecewise constant process.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+
+    std::vector<std::string> optionsCondition;
+    optionsCondition.push_back( "time" );
+    optionsCondition.push_back( "sampling" );
+    optionsCondition.push_back( "survival" );
+    rules.push_back( new OptionRule( "condition", new RlString("time"), optionsCondition, "The condition of the process." ) );
+    rules.push_back( new ArgumentRule( "taxa"  , ModelVector<Taxon>::getClassTypeSpec(), "The taxa with fossil occurrence information.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+
+    if ( include_reporting )
+    {
+        rules.push_back( new ArgumentRule( "complete", RlBoolean::getClassTypeSpec(), "Is the fossil record complete (every sampled occurrence reported)?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false ) ) );
+
+        std::vector<std::string> optionsReporting;
+        optionsReporting.push_back( "firstlast" );
+        optionsReporting.push_back( "uniform" );
+        rules.push_back( new OptionRule( "reporting", new RlString("firstlast"), optionsReporting, "Reporting model for an incomplete record (used when complete=FALSE): firstlast (oldest and youngest occurrence) or uniform (exchangeable, capped at the max observed count)." ) );
+    }
+
+    rules.push_back( new ArgumentRule( "resample", RlBoolean::getClassTypeSpec(), "Resample augmented ages?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
+}
+
+
+/**
  * Get the member rules used to create the constructor of this object.
  *
  * The member rules of the fossilized birth-death range process are:
@@ -135,31 +184,30 @@ const MemberRules& RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::getPar
 
     if ( !rules_set )
     {
-        std::vector<TypeSpec> paramTypes;
-        paramTypes.push_back( RealPos::getClassTypeSpec() );
-        paramTypes.push_back( ModelVector<RealPos>::getClassTypeSpec() );
-        memberRules.push_back( new ArgumentRule( "lambda",  paramTypes, "The speciation rate(s).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        memberRules.push_back( new ArgumentRule( "mu",      paramTypes, "The extinction rate(s).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
-        memberRules.push_back( new ArgumentRule( "psi",     paramTypes, "The fossil sampling rate(s).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
-        memberRules.push_back( new ArgumentRule( "rho",     Probability::getClassTypeSpec(), "The extant sampling fraction.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(1.0) ) );
+        appendParameterRules( memberRules, true );
 
-        memberRules.push_back( new ArgumentRule( "timeline",   ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the piecewise constant process.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        rules_set = true;
+    }
 
-        std::vector<std::string> optionsCondition;
-        optionsCondition.push_back( "time" );
-        optionsCondition.push_back( "sampling" );
-        optionsCondition.push_back( "survival" );
-        memberRules.push_back( new OptionRule( "condition", new RlString("time"), optionsCondition, "The condition of the process." ) );
-        memberRules.push_back( new ArgumentRule( "taxa"  , ModelVector<Taxon>::getClassTypeSpec(), "The taxa with fossil occurrence information.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+    return memberRules;
+}
 
-        memberRules.push_back( new ArgumentRule( "complete", RlBoolean::getClassTypeSpec(), "Is the fossil record complete (every sampled occurrence reported)?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false ) ) );
 
-        std::vector<std::string> optionsReporting;
-        optionsReporting.push_back( "firstlast" );
-        optionsReporting.push_back( "uniform" );
-        memberRules.push_back( new OptionRule( "reporting", new RlString("firstlast"), optionsReporting, "Reporting model for an incomplete record (used when complete=FALSE): firstlast (oldest and youngest occurrence) or uniform (exchangeable, capped at the max observed count)." ) );
+/**
+ * Get the member rules of the bare b/d skeleton: everything except the reporting args.
+ *
+ * \return The member rules.
+ */
+template <typename rlType>
+const MemberRules& RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::getSkeletonParameterRules(void) const
+{
 
-        memberRules.push_back( new ArgumentRule( "resample", RlBoolean::getClassTypeSpec(), "Resample augmented ages?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
+    static MemberRules memberRules;
+    static bool rules_set = false;
+
+    if ( !rules_set )
+    {
+        appendParameterRules( memberRules, false );
 
         rules_set = true;
     }
