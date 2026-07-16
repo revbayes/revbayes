@@ -51,6 +51,7 @@ namespace RevBayesCore {
         void                                            resampleFirstLast(size_t i);
         void                                            firstLastSupport(size_t i, double &lo, double &hi) const;  //!< support of the augmented oldest age tau_1
         std::string                                     effectiveSampling(size_t i) const;                         //!< per-taxon reporting model
+        double                                          computeLnFossilTotal();                                    //!< Total fossil-occurrence (reporting) log-density summed over taxa; used by a standalone dnFossilRecord node conditioned on this skeleton (self-contained: refreshes rate cache + start/end times).
 
     protected:
         virtual void                                    updateStartEndTimes() = 0;
@@ -126,6 +127,7 @@ namespace RevBayesCore {
         bool                                            touched;                                                //!< Indicates whether any terms need updating
         bool                                            resampled;                                              //!< Indicates whether any oldest occurrence ages were resampled
         bool                                            resampling;                                             //!< Indicates whether we are resampling oldest occurrence ages
+        bool                                            report_internally;                                      //!< If true (default) computeLnProbabilityRanges adds the reporting term inline (fused facade); if false the term is omitted (bare skeleton) and supplied by a separate dnFossilRecord node.
     };
 }
 

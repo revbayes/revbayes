@@ -56,7 +56,8 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
     sampling(s),
     resampled(false),
     resampling(re),
-    touched(false)
+    touched(false),
+    report_internally(true)
 {
     // initialize all the pointers to NULL
     homogeneous_lambda             = NULL;
@@ -304,16 +305,19 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
             // include extinction density
             if ( d > present ) partial_likelihood[i] += log( death[di] );
 
-            if ( dirty_psi[i] || force )
+            if ( report_internally )
             {
-                Psi[i] = computeLnFossilReporting(i);
-                if ( Psi[i] == RbConstants::Double::neginf )
+                if ( dirty_psi[i] || force )
                 {
-                    return RbConstants::Double::neginf;
+                    Psi[i] = computeLnFossilReporting(i);
+                    if ( Psi[i] == RbConstants::Double::neginf )
+                    {
+                        return RbConstants::Double::neginf;
+                    }
                 }
-            }
 
-            partial_likelihood[i] += Psi[i];
+                partial_likelihood[i] += Psi[i];
+            }
 
             // Jacobian for the auto-resampled tau_1 ~ Uniform(lo, hi): under
             // u = (tau_1 - lo)/(hi - lo) the resample is symmetric on [0,1], and
@@ -384,6 +388,29 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
         return RbConstants::Double::neginf;
     }
 
+    return lnProb;
+}
+
+
+// Total fossil-occurrence (reporting) log-density for a standalone reporting node
+// (dnFossilRecord) conditioned on this skeleton. Self-contained: refreshes the piecewise-
+// rate cache and per-taxon start/end times, then sums the per-taxon reporting terms --
+// exactly what computeLnProbabilityRanges adds inline when report_internally is true.
+double AbstractFossilizedBirthDeathRangeProcess::computeLnFossilTotal()
+{
+    prepareProbComputation();
+    updateStartEndTimes();
+
+    double lnProb = 0.0;
+    for ( size_t i = 0; i < taxa.size(); ++i )
+    {
+        double r = computeLnFossilReporting(i);
+        if ( r == RbConstants::Double::neginf )
+        {
+            return RbConstants::Double::neginf;
+        }
+        lnProb += r;
+    }
     return lnProb;
 }
 
