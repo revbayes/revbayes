@@ -3,6 +3,7 @@
 
 #include "ModelVector.h"
 #include "OptionRule.h"
+#include "RlBoolean.h"
 #include "RlString.h"
 #include "RlTaxon.h"
 #include "RlTypedDistribution.h"
@@ -46,7 +47,8 @@ namespace RevLanguage {
         RevPtr<const RevVariable>                           timeline;                                                                           //!< The interval times
         RevPtr<const RevVariable>                           taxa;                                                                               //!< The taxa
         RevPtr<const RevVariable>                           condition;                                                                          //!< The condition of the process
-        RevPtr<const RevVariable>                           sampling;
+        RevPtr<const RevVariable>                           complete;                                                                           //!< Is the fossil record complete?
+        RevPtr<const RevVariable>                           reporting;                                                                          //!< Reporting model when the record is incomplete
         RevPtr<const RevVariable>                           resample;
 
     };
@@ -150,11 +152,12 @@ const MemberRules& RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::getPar
         memberRules.push_back( new OptionRule( "condition", new RlString("time"), optionsCondition, "The condition of the process." ) );
         memberRules.push_back( new ArgumentRule( "taxa"  , ModelVector<Taxon>::getClassTypeSpec(), "The taxa with fossil occurrence information.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
-        std::vector<std::string> optionsSampling;
-        optionsSampling.push_back( "firstlast" );
-        optionsSampling.push_back( "uniform" );
-        optionsSampling.push_back( "complete" );
-        memberRules.push_back( new OptionRule( "sampling", new RlString("firstlast"), optionsSampling, "Fossil sampling model: firstlast (extreme occurrences), uniform (exchangeable subset), or complete." ) );
+        memberRules.push_back( new ArgumentRule( "complete", RlBoolean::getClassTypeSpec(), "Is the fossil record complete (every sampled occurrence reported)?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false ) ) );
+
+        std::vector<std::string> optionsReporting;
+        optionsReporting.push_back( "firstlast" );
+        optionsReporting.push_back( "uniform" );
+        memberRules.push_back( new OptionRule( "reporting", new RlString("firstlast"), optionsReporting, "Reporting model for an incomplete record (used when complete=FALSE): firstlast (oldest and youngest occurrence) or uniform (exchangeable, capped at the max observed count)." ) );
 
         memberRules.push_back( new ArgumentRule( "resample", RlBoolean::getClassTypeSpec(), "Resample augmented ages?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
 
@@ -207,9 +210,13 @@ void RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::setConstParameter(co
     {
         condition = var;
     }
-    else if ( name == "sampling" )
+    else if ( name == "complete" )
     {
-        sampling = var;
+        complete = var;
+    }
+    else if ( name == "reporting" )
+    {
+        reporting = var;
     }
     else if ( name == "resample" )
     {

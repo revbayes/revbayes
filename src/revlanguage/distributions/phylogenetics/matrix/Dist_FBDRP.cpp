@@ -107,7 +107,9 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRP::createDistribution( 
         rt = static_cast<const ModelVector<RealPos> &>( timeline->getRevObject() ).getDagNode();
     }
 
-    std::string c  = static_cast<const RlString &>( sampling->getRevObject() ).getValue();
+    // complete=TRUE reports every occurrence; otherwise the reporting model applies
+    bool comp = static_cast<const RlBoolean &>( complete->getRevObject() ).getValue();
+    std::string c  = comp ? "complete" : static_cast<const RlString &>( reporting->getRevObject() ).getValue();
     bool use_bds = static_cast<const RlBoolean &>( bds->getRevObject() ).getValue();
     bool re = static_cast<const RlBoolean &>( resample->getRevObject() ).getValue();
 
