@@ -122,6 +122,22 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRMatrix::createDistribut
     // complete=TRUE reports every occurrence; otherwise the reporting model applies
     bool comp = static_cast<const RlBoolean &>( complete->getRevObject() ).getValue();
     std::string c  = comp ? "complete" : static_cast<const RlString &>( reporting->getRevObject() ).getValue();
+
+    // a supplied cap selects the uniform model and gives it its K
+    size_t K = 0;
+    if ( truncated->getRevObject() != RevNullObject::getInstance() )
+    {
+        if ( comp == true )
+        {
+            RBOUT( "Warning: \"truncated\" is ignored when complete=TRUE." );
+        }
+        else
+        {
+            K = size_t( static_cast<const Natural &>( truncated->getRevObject() ).getValue() );
+            c = "uniform";
+        }
+    }
+
     bool use_bds = static_cast<const RlBoolean &>( bds->getRevObject() ).getValue();
     bool re = static_cast<const RlBoolean &>( resample->getRevObject() ).getValue();
 
@@ -133,7 +149,7 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRMatrix::createDistribut
     }
 
     // report_internally = true: the fused facade adds the fossil-record term inline
-    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, c, re, use_bds, og, true);
+    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, c, K, re, use_bds, og, true);
 
     return d;
 }

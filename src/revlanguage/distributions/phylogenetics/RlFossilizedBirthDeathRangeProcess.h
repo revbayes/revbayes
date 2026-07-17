@@ -2,6 +2,7 @@
 #define RlFossilizedBirthDeathRangeProcess_H
 
 #include "ModelVector.h"
+#include "Natural.h"
 #include "OptionRule.h"
 #include "RlBoolean.h"
 #include "RlString.h"
@@ -52,6 +53,7 @@ namespace RevLanguage {
         RevPtr<const RevVariable>                           condition;                                                                          //!< The condition of the process
         RevPtr<const RevVariable>                           complete;                                                                           //!< Is the fossil record complete?
         RevPtr<const RevVariable>                           reporting;                                                                          //!< Reporting model when the record is incomplete
+        RevPtr<const RevVariable>                           truncated;                                                                          //!< Reporting cap K (uniform model)
         RevPtr<const RevVariable>                           resample;
 
     };
@@ -151,7 +153,9 @@ void RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::appendParameterRules
         std::vector<std::string> optionsReporting;
         optionsReporting.push_back( "firstlast" );
         optionsReporting.push_back( "uniform" );
-        rules.push_back( new OptionRule( "reporting", new RlString("firstlast"), optionsReporting, "Reporting model for an incomplete record (used when complete=FALSE): firstlast (oldest and youngest occurrence) or uniform (exchangeable, capped at the max observed count)." ) );
+        rules.push_back( new OptionRule( "reporting", new RlString("firstlast"), optionsReporting, "Reporting model for an incomplete record (used when complete=FALSE): firstlast (oldest and youngest occurrence) or uniform (exchangeable, capped at K = truncated)." ) );
+
+        rules.push_back( new ArgumentRule( "truncated", Natural::getClassTypeSpec(), "The reporting cap K the record was truncated at (selects the uniform model with complete=FALSE; taxa reporting K may have unreported occurrences).", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
     }
 
     rules.push_back( new ArgumentRule( "resample", RlBoolean::getClassTypeSpec(), "Resample augmented ages?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
@@ -263,6 +267,10 @@ void RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::setConstParameter(co
     else if ( name == "reporting" )
     {
         reporting = var;
+    }
+    else if ( name == "truncated" )
+    {
+        truncated = var;
     }
     else if ( name == "resample" )
     {

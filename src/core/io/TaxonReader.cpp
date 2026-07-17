@@ -242,7 +242,19 @@ TaxonReader::TaxonReader(const std::string &fn, std::string delim) : DelimitedDa
         }
         else
         {
-            taxon.setExtinct( taxon.getMinAge() > 0.0 );
+            // Without a status column, the only proof a taxon survived is an occurrence AT
+            // the present. min_age cannot say: a binned youngest occurrence inherits
+            // min_age == 0 from its interval's edge without being a present-day sample.
+            bool sampled_at_present = false;
+            std::map<TimeInterval, size_t> occs = taxon.getOccurrences();
+            for ( std::map<TimeInterval, size_t>::const_iterator it = occs.begin(); it != occs.end(); it++ )
+            {
+                if ( it->first.getMin() == 0.0 && it->first.getMax() == 0.0 )
+                {
+                    sampled_at_present = true;
+                }
+            }
+            taxon.setExtinct( sampled_at_present == false );
         }
     }
 

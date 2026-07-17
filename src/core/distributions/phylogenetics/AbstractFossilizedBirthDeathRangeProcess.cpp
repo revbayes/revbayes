@@ -4,6 +4,7 @@
 #include <cmath>
 #include <cstddef>
 #include <ostream>
+#include <sstream>
 #include <vector>
 
 
@@ -25,7 +26,40 @@
 using namespace RevBayesCore;
 
 /**
- * Constructor. 
+ * Keep a uniform random K-subset of a taxon's reported occurrences, which is the reporting
+ * rule the exchangeable ("uniform") density assumes.
+ */
+static void truncateRecord( Taxon &taxon, size_t K )
+{
+    std::vector<TimeInterval> record;
+
+    const std::map<TimeInterval, size_t> &ages = taxon.getOccurrences();
+    for ( std::map<TimeInterval, size_t>::const_iterator Fi = ages.begin(); Fi != ages.end(); Fi++ )
+    {
+        record.insert( record.end(), Fi->second, Fi->first );
+    }
+
+    // partial Fisher-Yates: the leading K entries end up a uniform subset
+    for ( size_t j = 0; j < K; j++ )
+    {
+        size_t r = j + size_t( GLOBAL_RNG->uniform01() * (record.size() - j) );
+        std::swap( record[j], record[r] );
+    }
+
+    Taxon kept( taxon.getName() );
+    kept.setSpeciesName( taxon.getSpeciesName() );
+    kept.setExtinct( taxon.isExtinct() );
+    kept.setAgeRange( record[0] );
+    for ( size_t j = 0; j < K; j++ )
+    {
+        kept.addOccurrence( record[j] );
+    }
+
+    taxon = kept;
+}
+
+/**
+ * Constructor.
  *
  * \param[in]    s              Speciation rates.
  * \param[in]    e              Extinction rates.
@@ -35,6 +69,7 @@ using namespace RevBayesCore;
  * \param[in]    cdt            Condition of the process (time/sampling/survival).
  * \param[in]    tn             Taxa.
  * \param[in]    c              Complete sampling?
+ * \param[in]    K              Reporting cap (uniform model only; 0 = uncapped).
  * \param[in]    re             Augmented age resampling weight.
  */
 AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProcess(const DagNode *inspeciation,
@@ -45,6 +80,7 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
                                                                          const std::string &incondition,
                                                                          const std::vector<Taxon> &intaxa,
                                                                          const std::string &s,
+                                                                         size_t K,
                                                                          bool re,
                                                                          const TypedDagNode<double> *inorigin) :
     taxa(intaxa),
@@ -172,13 +208,46 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
     dirty_taxa  = std::vector<bool>(taxa.size(), true);
     dirty_psi   = std::vector<bool>(taxa.size(), true);
 
+    occurrence_counts = std::vector<size_t>(taxa.size(), 0);
+    truncated         = std::vector<bool>(taxa.size(), false);
+
+    if ( reporting == "uniform" && K == 0 )
+    {
+        throw(RbException("The uniform fossil sampling model requires a reporting cap of at least 1."));
+    }
+
     double max_present = RbConstants::Double::inf;
 
-    max_count = 0;
+    size_t num_truncated = 0;
+
     for ( size_t i = 0; i < taxa.size(); i++ )
     {
         std::map<TimeInterval, size_t> ages = taxa[i].getOccurrences();
         size_t count = 0;
+        for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++ )
+        {
+            count += Fi->second;
+        }
+
+        // The cap says the record was already truncated at K, so a taxon reporting K may
+        // have unreported specimens and its record is exchangeable; one below the cap was
+        // reported whole, which is the complete case. A record over the cap was not
+        // truncated as declared, so truncate it here.
+        if ( reporting == "uniform" && count >= K )
+        {
+            if ( count > K )
+            {
+                truncateRecord(taxa[i], K);
+                num_truncated++;
+            }
+
+            truncated[i] = true;
+            count = K;
+        }
+
+        occurrence_counts[i] = count;
+
+        ages = taxa[i].getOccurrences();
         for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++ )
         {
             // find the oldest minimum age
@@ -187,14 +256,19 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
             y_i[i] = std::min(Fi->first.getMax(), y_i[i]);
 
             max_present = std::min(max_present, y_i[i]);
-            count += Fi->second;
         }
-        // the largest per-taxon occurrence count is the implicit reporting cap K
-        // for the uniform model (see effectiveReporting)
-        max_count = std::max(max_count, count);
+
         // default the augmented youngest age to the youngest maximum (only resampled,
-        // and only used, under first/last conditioning)
+        // and only used, when the record has two extremes to order)
         last[i] = y_i[i];
+    }
+
+    if ( num_truncated > 0 )
+    {
+        std::stringstream ss;
+        ss << "Warning: " << num_truncated << " taxa report more than " << K
+           << " occurrences; keeping a uniform random " << K << " of each.";
+        RBOUT( ss.str() );
     }
 
     prepareProbComputation();
@@ -232,6 +306,7 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
     double lnProb = 0.0;
 
     size_t num_rho_sampled = 0;
+    size_t num_rho_unsampled = 0;
 
     // add the fossil tip age terms
     for (size_t i = 0; i < taxa.size(); ++i)
@@ -252,14 +327,16 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
         {
             return RbConstants::Double::neginf;
         }
-        if ( (d > present) != taxa[i].isExtinct() )
+        // The status flag is the rho-sampling datum; the ranges are the psi-sampling data.
+        // Seeing a taxon at the present pins its death there, but NOT seeing one leaves d
+        // free: an unsampled lineage may still have survived, and pays 1-rho if it did.
+        if ( taxa[i].isExtinct() == false && d != present )
         {
             return RbConstants::Double::neginf;
         }
 
-        // count the rho-sampled tips: the constraint above ties d == present to a
-        // non-extinct taxon, so surviving to the present is the same as being sampled.
-        num_rho_sampled += (d == present);  // l
+        num_rho_sampled   += ( taxa[i].isExtinct() == false );          // l
+        num_rho_unsampled += ( taxa[i].isExtinct() && d == present );    // n - m - l
 
         if ( dirty_taxa[i] == true || force )
         {
@@ -318,16 +395,22 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
                 partial_likelihood[i] += Psi[i];
             }
 
-            // Jacobian for the auto-resampled tau_1 ~ Uniform(lo, hi): under
-            // u = (tau_1 - lo)/(hi - lo) the resample is symmetric on [0,1], and
-            // log(hi - lo) is the change of variables. It is the only channel to the
-            // acceptance ratio, the auto-resample being a touch side-effect with no
-            // Hastings. Omitted when the augmentation is frozen (resample=false).
+            // Each age is drawn as tau = lo + u*(hi-lo), so the chain moves in u and
+            // log(hi - lo) is the change of variables. The auto-resample is a touch
+            // side-effect with no Hastings, so this is its only channel to the acceptance
+            // ratio. Skipped when the augmentation is frozen (resample=false).
             if ( resampling == true )
             {
-                double lo, hi;
-                firstLastSupport(i, lo, hi);
-                if ( hi > lo ) partial_likelihood[i] += log( hi - lo );
+                std::pair<double,double> s = firstSupport(i);
+                if ( s.second > s.first ) partial_likelihood[i] += log( s.second - s.first );
+
+                // tau_K is only augmented, and so only changes variables, where the record
+                // has two extremes to order
+                if ( occurrence_counts[i] >= 2 )
+                {
+                    s = lastSupport(i);
+                    if ( s.second > s.first ) partial_likelihood[i] += log( s.second - s.first );
+                }
             }
         }
 
@@ -360,10 +443,18 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
         }
     }
 
-    // add the sampled extant tip age term
-    if ( homogeneous_rho->getValue() > 0.0)
+    // Extant tip age terms. Status is data
+    double rho = homogeneous_rho->getValue();
+
+    if ( num_rho_sampled > 0 )                          // seen at the present, so rho > 0
     {
-        lnProb += num_rho_sampled * log( homogeneous_rho->getValue() );
+        if ( rho == 0.0 ) return RbConstants::Double::neginf;
+        lnProb += num_rho_sampled * log( rho );
+    }
+    if ( num_rho_unsampled > 0 )                        // survived unseen, so rho < 1
+    {
+        if ( rho == 1.0 ) return RbConstants::Double::neginf;
+        lnProb += num_rho_unsampled * log( 1.0 - rho );
     }
 
     // condition on sampling
@@ -427,7 +518,7 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnFossilRecord( size_t i
                 // if there is a range of fossil ages
                 if ( min_age != max_age )
                 {
-                    if ( effectiveReporting(i) == "firstlast" )
+                    if ( reporting == "firstlast" )
                     {
 
                     double psi_int = 0.0;                            // interior sampling rate over (last, first)
@@ -480,7 +571,7 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnFossilRecord( size_t i
                     // skips that branch - never double-counts an instantaneous density)
                     result = log(fossil[oi]);
 
-                    int count = 0;
+                    size_t count = occurrence_counts[i];
                     double recip = 0.0;
                     double recip_young = 0.0;
                     double diag = 0.0;
@@ -489,8 +580,6 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnFossilRecord( size_t i
                     // compute factors of the sum over each possible oldest/youngest observation
                     for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++,k++ )
                     {
-                        count += Fi->second;
-
                         bool eligible_oldest = ( Fi->first.getMax() >= o );
                         bool eligible_youngest = ( Fi->first.getMin() <= y );
 
@@ -540,7 +629,7 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnFossilRecord( size_t i
                             f *= psi_int / double(count - 1 + kap);
                             if ( f < 1e-16 * S1 ) break;
                         }
-                        result += log(S1) - RbMath::lnFactorial(count);
+                        result += log(S1) - RbMath::lnFactorial(int(count));
                     }
                     // count == 1 (single occurrence, first == last): no interior term
                                     }
@@ -577,13 +666,12 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnFossilRecord( size_t i
                     // instantaneous rate of the oldest specimen at tau1
                     result = log(fossil[oi]);
 
-                    int count = 0;
+                    size_t count = occurrence_counts[i];
                     double recip_old = 0.0;                         // sum_{i: tau1 in F_i} count_i / Psi(F_i)
 
                     size_t k = 0;
                     for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++,k++ )
                     {
-                        count += Fi->second;
                         // occurrence i can be the labeled oldest specimen iff its interval contains tau1
                         if ( Fi->first.getMin() <= o && Fi->first.getMax() >= o )
                         {
@@ -592,19 +680,19 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnFossilRecord( size_t i
                         result += log(psi[k]) * Fi->second;         // log prod_i Psi(F_i)^{count_i}
                     }
 
-                    if ( effectiveReporting(i) == "complete" )
+                    if ( truncated[i] == false )
                     {
                         // sum over which observation supplies the oldest specimen at tau1
-                        result += log(recip_old) - RbMath::lnFactorial(count);
+                        result += log(recip_old) - RbMath::lnFactorial(int(count));
                     }
                     else
                     {
                         // P(N >= count) and P(N >= count+1) for N ~ Poisson(Lambda), by upper-tail
                         // summation (no catastrophic cancellation).
                         double Pk = 0.0;
-                        double pmf_count = exp( -Lambda + count*log(Lambda) - RbMath::lnFactorial(count) );
+                        double pmf_count = exp( -Lambda + count*log(Lambda) - RbMath::lnFactorial(int(count)) );
                         double t = pmf_count;
-                        for ( int n = count; n < count + 100000; n++ )
+                        for ( int n = int(count); n < int(count) + 100000; n++ )
                         {
                             Pk += t;
                             t *= Lambda / double(n+1);
@@ -618,8 +706,9 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnFossilRecord( size_t i
                         if ( bracket <= 0.0 ) return RbConstants::Double::neginf;
 
                         // +Lambda: the q_tilde terms already carry e^{-Lambda}, which the
-                        // tails re-introduce.
-                        result += RbMath::lnFactorial(count) - count*log(Lambda) + log(bracket) + Lambda;
+                        // tails re-introduce. The tails also carry their own 1/k!, so no
+                        // further factorial belongs here.
+                        result += log(bracket) - count*log(Lambda) + Lambda;
                     }
                     }
                 }
@@ -716,61 +805,36 @@ std::vector<double>& AbstractFossilizedBirthDeathRangeProcess::getAges(void)
 }
 
 
-// Per-taxon reporting model. "uniform" reports a random subset capped at K = max_count:
-// a taxon at the cap may have unreported fossils and gets the exchangeable
-// marginalization, while one below it kept its whole record, which is the complete case.
-std::string AbstractFossilizedBirthDeathRangeProcess::effectiveReporting(size_t i) const
-{
-    if ( reporting != "uniform" )
-    {
-        return reporting;
-    }
-
-    size_t count = 0;
-    std::map<TimeInterval, size_t> ages = taxa[i].getOccurrences();
-    for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++ )
-    {
-        count += Fi->second;
-    }
-
-    return ( count == max_count ) ? "uniform" : "complete";
-}
-
-
 // Set the reporting model. dnFossilRecord pushes its `reporting=` arg onto the skeleton via
-// this setter, so the single `reporting` member is the one source of truth -- driving both the
-// tau1 support (firstLastSupport) and the per-taxon reporting term (effectiveReporting).
+// this setter, so the single `reporting` member is the one source of truth. The cap that
+// distinguishes uniform from complete per taxon is fixed at construction (truncated[]).
 void AbstractFossilizedBirthDeathRangeProcess::setReportingModel( const std::string &s )
 {
     reporting = s;
 }
 
 
-// Support of the augmented oldest age tau_1, in one place so the resampling proposal
-// and its Jacobian (computeLnProbabilityRanges) agree.
-//  - "uniform": the true oldest may be unobserved and older than every reported
-//    occurrence, so tau_1 ranges up to the birth b -- an hi that depends on b, which
-//    is what the Jacobian corrects for.
-//  - "firstlast"/"complete": the oldest observed occurrence IS the oldest fossil, so
-//    tau_1 is bounded by its bin [o_i, max_age] and the Jacobian is a constant.
-//  - an unbounded oldest occurrence (max_age = Inf) leaves tau_1 with no upper bound from the
-//    data, so the process supplies the one it implies: no fossil can predate the birth.
-void AbstractFossilizedBirthDeathRangeProcess::firstLastSupport(size_t i, double &lo, double &hi) const
+// Support of tau_1. 'last' binds it only where the record has two extremes to order. The
+// reported interval caps it only where the rule guarantees the oldest specimen was
+// reported; a truncated record may omit it, so there only b binds.
+// Shared with the Jacobian, which needs the same support.
+std::pair<double,double> AbstractFossilizedBirthDeathRangeProcess::firstSupport(size_t i) const
 {
-    lo = std::max(o_i[i], d_i[i]);
-    if ( effectiveReporting(i) == "uniform" )
-    {
-        hi = ( b_i[i] > lo ) ? b_i[i] : std::max(taxa[i].getMaxAge(), b_i[i]);
-    }
-    else
-    {
-        hi = std::max(taxa[i].getMaxAge(), lo);
-    }
+    double lo = ( occurrence_counts[i] >= 2 ) ? std::max(o_i[i], last[i]) : o_i[i];
+    double hi = truncated[i] ? b_i[i] : std::min(taxa[i].getMaxAge(), b_i[i]);
 
-    if ( RbMath::isFinite(hi) == false )
-    {
-        hi = std::max(b_i[i], lo);
-    }
+    return std::make_pair(lo, hi);
+}
+
+
+// Support of tau_K, mirroring firstSupport: d binds only where the youngest specimen may
+// have gone unreported.
+std::pair<double,double> AbstractFossilizedBirthDeathRangeProcess::lastSupport(size_t i) const
+{
+    double lo = truncated[i] ? d_i[i] : std::max(taxa[i].getMinAge(), d_i[i]);
+    double hi = y_i[i];
+
+    return std::make_pair(lo, hi);
 }
 
 
@@ -780,14 +844,16 @@ void AbstractFossilizedBirthDeathRangeProcess::resampleFirstLast(size_t i)
     stored_last = last;
     resampled = true;
 
-    double _lo, _hi;
-    firstLastSupport(i, _lo, _hi);
-    first[i] = GLOBAL_RNG->uniform01()*(_hi - _lo) + _lo;
+    // A single-occurrence record has no distinct youngest to augment; firstSupport reads
+    // 'last' only when there is one, so draw it first.
+    if ( occurrence_counts[i] >= 2 )
+    {
+        std::pair<double,double> sl = lastSupport(i);
+        last[i] = ( sl.second > sl.first ) ? GLOBAL_RNG->uniform01()*(sl.second - sl.first) + sl.first : sl.first;
+    }
 
-    // also augment the youngest occurrence age (single-occurrence taxa skip the
-    // count >= 2 likelihood branch, so 'last' is inert there and the value drawn
-    // here is simply unused)
-    last[i] = GLOBAL_RNG->uniform01()*(y_i[i] - taxa[i].getMinAge()) + taxa[i].getMinAge();
+    std::pair<double,double> s = firstSupport(i);
+    first[i] = ( s.second > s.first ) ? GLOBAL_RNG->uniform01()*(s.second - s.first) + s.first : s.first;
 }
 
 

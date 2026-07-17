@@ -108,8 +108,9 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRP::createDistribution( 
     }
 
     // the reporting model in force until a dnFossilRecord node pushes its own on: it applies to
-    // the constructor's initial augmented age draw, and to a skeleton used with no record node
-    std::string c  = "uniform";
+    // the constructor's initial augmented age draw, and to a skeleton used with no record node.
+    // "complete" needs no cap, so the bare skeleton never trips the uniform cap requirement.
+    std::string c  = "complete";
     bool use_bds = static_cast<const RlBoolean &>( bds->getRevObject() ).getValue();
     bool re = static_cast<const RlBoolean &>( resample->getRevObject() ).getValue();
 
@@ -121,7 +122,7 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRP::createDistribution( 
     }
 
     // report_internally = false: the bare skeleton, with no inline fossil-record term
-    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, c, re, use_bds, og, false);
+    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, c, 0, re, use_bds, og, false);
     
     return d;
 }

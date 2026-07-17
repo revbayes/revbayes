@@ -39,6 +39,7 @@ namespace RevBayesCore {
 										  const std::string &condition,
 										  const std::vector<Taxon> &taxa,
 										  const std::string &reporting,
+                                          size_t truncate_at,
 										  bool resampling,
                                           bool bds,
                                           const TypedDagNode<double>* origin = NULL,

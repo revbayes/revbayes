@@ -42,6 +42,7 @@ namespace RevBayesCore {
                                             const std::string &condition,
                                             const std::vector<Taxon> &taxa,
                                             const std::string &reporting,
+                                            size_t truncate_at,
                                             bool resampling,
                                             const TypedDagNode<double>* origin = NULL);  //!< Constructor
 
@@ -49,10 +50,10 @@ namespace RevBayesCore {
 
         std::vector<double>&                            getAges();
         void                                            resampleFirstLast(size_t i);
-        void                                            firstLastSupport(size_t i, double &lo, double &hi) const;  //!< support [lo,hi] of the augmented oldest age tau_1 (retention-model dependent)
-        std::string                                     effectiveReporting(size_t i) const;                         //!< per-taxon reporting model; "uniform" is capped at max_count, so a taxon below the cap is treated as "complete"
+        std::pair<double,double>                        firstSupport(size_t i) const;                              //!< (lo,hi) support of the augmented oldest age tau_1
+        std::pair<double,double>                        lastSupport(size_t i) const;                               //!< (lo,hi) support of the augmented youngest age tau_K
         double                                          computeLnFossilTotal();                                    //!< Total fossil-record log-density summed over taxa; used by a standalone dnFossilRecord node conditioned on this skeleton (self-contained: refreshes rate cache + start/end times).
-        void                                            setReportingModel(const std::string &s);                   //!< Set the reporting model (complete|firstlast|uniform). dnFossilRecord pushes it onto its skeleton so the single member drives BOTH the tau1 support (firstLastSupport) and the reporting term.
+        void                                            setReportingModel(const std::string &s);                   //!< Set the reporting model (complete|firstlast|uniform). dnFossilRecord pushes it onto its skeleton.
 
     protected:
         virtual void                                    updateStartEndTimes() = 0;
@@ -124,8 +125,9 @@ namespace RevBayesCore {
         std::vector<bool>                               dirty_taxa;                                             //!< Indicates whether partial likelihood needs updating
         
         std::string                                     reporting;                                               //!< Fossil reporting model: complete | firstlast | uniform
-        size_t                                          max_count;                                              //!< Max occurrence count across taxa; the uniform model's reporting cap K
-        bool                                            touched;                                                //!< Indicates whether any terms need updating
+        std::vector<size_t>                             occurrence_counts;                                      //!< Number of reported occurrences for each taxon
+        std::vector<bool>                               truncated;                                              //!< Taxa reported up to the cap K, whose unreported specimens are marginalized
+        bool                                            touched;                                               //!< Indicates whether any terms need updating
         bool                                            resampled;                                              //!< Indicates whether any oldest occurrence ages were resampled
         bool                                            resampling;                                             //!< Indicates whether we are resampling oldest occurrence ages
         bool                                            report_internally;                                      //!< If true (default) computeLnProbabilityRanges adds the reporting term inline (fused facade); if false the term is omitted (bare skeleton) and supplied by a separate dnFossilRecord node.

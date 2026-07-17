@@ -51,12 +51,13 @@ FossilizedBirthDeathRangeProcess::FossilizedBirthDeathRangeProcess(const DagNode
                                                                      const std::string &incondition,
                                                                      const std::vector<Taxon> &intaxa,
                                                                      const std::string &reporting,
+                                                                     size_t truncate_at,
                                                                      bool resample,
                                                                      bool use_bds,
                                                                      const TypedDagNode<double> *inorigin,
                                                                      bool report_int) :
     TypedDistribution<MatrixReal>(new MatrixReal(intaxa.size(), 2)),
-    AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, reporting, resample, inorigin),
+    AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, reporting, truncate_at, resample, inorigin),
     bds(use_bds)
 {
     report_internally = report_int;
@@ -233,7 +234,7 @@ double FossilizedBirthDeathRangeProcess::computeLnProbabilityBDS()
                 // if there is a range of fossil ages
                 if ( min_age != max_age )
                 {
-                    if ( effectiveReporting(i) == "uniform" )
+                    if ( truncated[i] )
                     {
                     // Truly-exchangeable (uniform subset): the true oldest (tau1 = first[i]) may
                     // be unobserved up to the birth, and interior specimens in (d, tau1) have
@@ -383,7 +384,7 @@ double FossilizedBirthDeathRangeProcess::computeLnProbabilityBDS()
                     // sum over each possible oldest observation
                     Psi[i] += log(recip);
 
-                    if ( effectiveReporting(i) == "complete" )
+                    if ( reporting != "firstlast" )
                     {
                         // compute poisson density for count
                         Psi[i] -= RbMath::lnFactorial(count);
@@ -574,12 +575,20 @@ void FossilizedBirthDeathRangeProcess::redrawValue(void)
     // get random uniform draws
     for (size_t i = 0; i < taxa.size(); i++)
     {
-        // resample oldest occurrence
+        // Seed b past every occurrence and d at the present, leaving both clips inert for
+        // this call only; updateStartEndTimes overwrites them once the matrix is set.
+        b_i[i] = max;
+        d_i[i] = present;
+
         resampleFirstLast(i);
 
-        // death time is younger than oldest occurrence and youngest maximum
-        // (the youngest augmented age bounds the death time)
-        double d = taxa[i].isExtinct() ? rng->uniform01()*(std::min(last[i], first[i]) - present) + present : present;
+        // the ages are drawn first so d can be placed under them, as the density needs
+        // d <= tau_K <= tau_1
+        double youngest = std::min( occurrence_counts[i] >= 2 ? last[i] : first[i], y_i[i] );
+        double d = taxa[i].isExtinct() ? rng->uniform01()*(youngest - present) + present : present;
+
+        d_i[i] = d;
+
         // birth time is older than oldest occurrence
         double b = first[i] + rng->uniform01()*(max - first[i]);
 

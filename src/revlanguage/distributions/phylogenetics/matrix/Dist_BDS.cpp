@@ -7,12 +7,14 @@
 #include "FossilizedBirthDeathRangeProcess.h"
 
 #include "ModelVector.h"
+#include "Natural.h"
 #include "Probability.h"
 #include "RealPos.h"
 #include "RlString.h"
 #include "RlBoolean.h"
 #include "RlTaxon.h"
 #include "RlMatrixReal.h"
+#include "RlUserInterface.h"
 #include "RevNullObject.h"
 #include "RevObject.h"
 #include "RevVariable.h"
@@ -73,10 +75,26 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_BDS::createDistribution( vo
 
     bool comp = static_cast<const RlBoolean &>( complete->getRevObject() ).getValue();
     std::string c  = comp ? "complete" : static_cast<const RlString &>( reporting->getRevObject() ).getValue();
+
+    // a supplied cap selects the uniform model and gives it its K
+    size_t K = 0;
+    if ( truncated->getRevObject() != RevNullObject::getInstance() )
+    {
+        if ( comp == true )
+        {
+            RBOUT( "Warning: \"truncated\" is ignored when complete=TRUE." );
+        }
+        else
+        {
+            K = size_t( static_cast<const Natural &>( truncated->getRevObject() ).getValue() );
+            c = "uniform";
+        }
+    }
+
     bool re = static_cast<const RlBoolean &>( resample->getRevObject() ).getValue();
 
     // BDS model: use_bds is always true
-    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, c, re, true);
+    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, c, K, re, true);
 
     return d;
 }

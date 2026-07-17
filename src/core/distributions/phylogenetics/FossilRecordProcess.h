@@ -29,10 +29,11 @@ namespace RevBayesCore {
      * skeleton (the coherence requirement). computeLnProbability() == skeleton->computeLnFossilTotal().
      *
      * REPORTING MODEL (complete | firstlast | uniform): a variant of ONE observation process,
-     * differing only in the retention assumption -- so it is an OPTION, not a family of dists,
-     * and it is applied per-taxon (effectiveReporting: uniform downgrades to complete below the
-     * cap K). OPEN: in path A the reporting model currently lives on the skeleton (its `sampling`
-     * member); the target is to move it here as a `reporting=` arg on dnFossilRecord (the skeleton
+     * differing only in the retention assumption -- so it is an OPTION, not a family of dists.
+     * Under uniform, the per-taxon truncated[] flag (fixed at construction from the cap K)
+     * marks the records at the cap as exchangeable; the rest are complete. OPEN: in path A the
+     * reporting model currently lives on the skeleton (its `reporting` member); the target is to
+     * move it here as a `reporting=` arg on dnFossilRecord (the skeleton
      * density q/q~ does not depend on it -- only the reporting term does). The dating timeline is a
      * further arg here (see redrawValue).
      *
