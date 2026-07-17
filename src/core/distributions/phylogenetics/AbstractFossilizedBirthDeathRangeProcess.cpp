@@ -395,12 +395,12 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
                 partial_likelihood[i] += Psi[i];
             }
 
-            // Reparametrization Jacobian for the auto-resampled tau_1 ~ Uniform(lo, hi): the
-            // chain moves in u = (tau_1 - lo)/(hi - lo) and log(hi - lo) is the change of
-            // variables. The auto-resample carries no Hastings ratio, so this is its only
-            // channel to the acceptance ratio. tau_K is a free auxiliary with no Jacobian.
-            // Skipped when the augmentation is frozen (resample=false).
-            if ( resampling == true )
+            // Both augmented ages are proposed symmetrically from data-fixed ranges, so the
+            // change-of-variables terms are constant and cancel -- no Jacobian. The one
+            // exception is the truncated/uniform model, whose tau_1 upper bound is the birth
+            // b: that term is parameter-dependent and must enter here. Skipped when the
+            // augmentation is frozen (resample=false).
+            if ( resampling == true && truncated[i] )
             {
                 std::pair<double,double> s = firstSupport(i);
                 if ( s.second > s.first ) partial_likelihood[i] += log( s.second - s.first );
@@ -809,13 +809,16 @@ void AbstractFossilizedBirthDeathRangeProcess::setReportingModel( const std::str
 // Support of tau_1, floored at the death time (tau_1 >= d). A truncated (uniform) record
 // may not report the true oldest, so tau_1 ranges up to the birth; otherwise it lies in
 // the reported bin [o_i, max_age] and the b > tau_1 constraint -- not the support -- keeps
-// it below b. Keeping the non-truncated support independent of b is deliberate: the
-// auto-resample fires before updateStartEndTimes refreshes b_i, so a b-dependent bound
-// would draw against the old b while the shared Jacobian uses the new one, and the
-// mismatch (no Hastings) would bias b.
+// it below b. The bounds are data-fixed (the reported bin), independent of b AND d, so the
+// proposal is symmetric and needs no Jacobian: the auto-resample fires before
+// updateStartEndTimes refreshes b_i/d_i, and any parameter-dependent bound would draw
+// against the old value while the shared Jacobian used the new one -- a mismatch (no
+// Hastings) that biases that parameter. tau_1 < d is left for the density to reject.
+// (The truncated/uniform model's upper bound is the birth b and so is not symmetric; it
+// keeps the b-dependent bound and its Jacobian below.)
 std::pair<double,double> AbstractFossilizedBirthDeathRangeProcess::firstSupport(size_t i) const
 {
-    double lo = std::max( o_i[i], d_i[i] );
+    double lo = o_i[i];
     double hi = truncated[i] ? ( b_i[i] > lo ? b_i[i] : std::max(taxa[i].getMaxAge(), b_i[i]) )
                              : std::max( taxa[i].getMaxAge(), lo );
 
