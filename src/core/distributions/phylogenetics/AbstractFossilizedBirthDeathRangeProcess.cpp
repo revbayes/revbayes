@@ -395,22 +395,15 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
                 partial_likelihood[i] += Psi[i];
             }
 
-            // Each age is drawn as tau = lo + u*(hi-lo), so the chain moves in u and
-            // log(hi - lo) is the change of variables. The auto-resample is a touch
-            // side-effect with no Hastings, so this is its only channel to the acceptance
-            // ratio. Skipped when the augmentation is frozen (resample=false).
+            // Reparametrization Jacobian for the auto-resampled tau_1 ~ Uniform(lo, hi): the
+            // chain moves in u = (tau_1 - lo)/(hi - lo) and log(hi - lo) is the change of
+            // variables. The auto-resample carries no Hastings ratio, so this is its only
+            // channel to the acceptance ratio. tau_K is a free auxiliary with no Jacobian.
+            // Skipped when the augmentation is frozen (resample=false).
             if ( resampling == true )
             {
                 std::pair<double,double> s = firstSupport(i);
                 if ( s.second > s.first ) partial_likelihood[i] += log( s.second - s.first );
-
-                // tau_K is only augmented, and so only changes variables, where the record
-                // has two extremes to order
-                if ( occurrence_counts[i] >= 2 )
-                {
-                    s = lastSupport(i);
-                    if ( s.second > s.first ) partial_likelihood[i] += log( s.second - s.first );
-                }
             }
         }
 
@@ -813,27 +806,18 @@ void AbstractFossilizedBirthDeathRangeProcess::setReportingModel( const std::str
 }
 
 
-// Support of tau_1. Always floored at the death time (tau_1 >= d), and additionally at
-// 'last' where the record has two extremes to order. The reported interval caps it only
-// where the rule guarantees the oldest specimen was reported; a truncated record may omit
-// it, so there only b binds.
-// Shared with the Jacobian, which needs the same support.
+// Support of tau_1, floored at the death time (tau_1 >= d). A truncated (uniform) record
+// may not report the true oldest, so tau_1 ranges up to the birth; otherwise it lies in
+// the reported bin [o_i, max_age] and the b > tau_1 constraint -- not the support -- keeps
+// it below b. Keeping the non-truncated support independent of b is deliberate: the
+// auto-resample fires before updateStartEndTimes refreshes b_i, so a b-dependent bound
+// would draw against the old b while the shared Jacobian uses the new one, and the
+// mismatch (no Hastings) would bias b.
 std::pair<double,double> AbstractFossilizedBirthDeathRangeProcess::firstSupport(size_t i) const
 {
     double lo = std::max( o_i[i], d_i[i] );
-    if ( occurrence_counts[i] >= 2 ) lo = std::max( lo, last[i] );
-    double hi = truncated[i] ? b_i[i] : std::min(taxa[i].getMaxAge(), b_i[i]);
-
-    return std::make_pair(lo, hi);
-}
-
-
-// Support of tau_K, mirroring firstSupport: d binds only where the youngest specimen may
-// have gone unreported.
-std::pair<double,double> AbstractFossilizedBirthDeathRangeProcess::lastSupport(size_t i) const
-{
-    double lo = truncated[i] ? d_i[i] : std::max(taxa[i].getMinAge(), d_i[i]);
-    double hi = y_i[i];
+    double hi = truncated[i] ? ( b_i[i] > lo ? b_i[i] : std::max(taxa[i].getMaxAge(), b_i[i]) )
+                             : std::max( taxa[i].getMaxAge(), lo );
 
     return std::make_pair(lo, hi);
 }
@@ -845,16 +829,13 @@ void AbstractFossilizedBirthDeathRangeProcess::resampleFirstLast(size_t i)
     stored_last = last;
     resampled = true;
 
-    // A single-occurrence record has no distinct youngest to augment; firstSupport reads
-    // 'last' only when there is one, so draw it first.
-    if ( occurrence_counts[i] >= 2 )
-    {
-        std::pair<double,double> sl = lastSupport(i);
-        last[i] = ( sl.second > sl.first ) ? GLOBAL_RNG->uniform01()*(sl.second - sl.first) + sl.first : sl.first;
-    }
-
     std::pair<double,double> s = firstSupport(i);
     first[i] = ( s.second > s.first ) ? GLOBAL_RNG->uniform01()*(s.second - s.first) + s.first : s.first;
+
+    // The youngest age is a free auxiliary drawn from the reported range. The count >= 2
+    // density branch rejects a draw that is not a valid interior order statistic, and a
+    // single-occurrence taxon ignores it -- so it needs no clip and no Jacobian.
+    last[i] = GLOBAL_RNG->uniform01()*(y_i[i] - taxa[i].getMinAge()) + taxa[i].getMinAge();
 }
 
 

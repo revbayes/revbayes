@@ -51,7 +51,6 @@ namespace RevBayesCore {
         std::vector<double>&                            getAges();
         void                                            resampleFirstLast(size_t i);
         std::pair<double,double>                        firstSupport(size_t i) const;                              //!< (lo,hi) support of the augmented oldest age tau_1
-        std::pair<double,double>                        lastSupport(size_t i) const;                               //!< (lo,hi) support of the augmented youngest age tau_K
         double                                          computeLnFossilTotal();                                    //!< Total fossil-record log-density summed over taxa; used by a standalone dnFossilRecord node conditioned on this skeleton (self-contained: refreshes rate cache + start/end times).
         void                                            setReportingModel(const std::string &s);                   //!< Set the reporting model (complete|firstlast|uniform). dnFossilRecord pushes it onto its skeleton.
 

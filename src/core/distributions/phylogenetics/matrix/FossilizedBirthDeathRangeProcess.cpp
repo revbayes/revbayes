@@ -575,19 +575,15 @@ void FossilizedBirthDeathRangeProcess::redrawValue(void)
     // get random uniform draws
     for (size_t i = 0; i < taxa.size(); i++)
     {
-        // Seed b past every occurrence and d at the present, leaving both clips inert for
-        // this call only; updateStartEndTimes overwrites them once the matrix is set.
-        b_i[i] = max;
-        d_i[i] = present;
-
-        resampleFirstLast(i);
-
-        // the ages are drawn first so d can be placed under them, as the density needs
-        // d <= tau_K <= tau_1
-        double youngest = std::min( occurrence_counts[i] >= 2 ? last[i] : first[i], y_i[i] );
-        double d = taxa[i].isExtinct() ? rng->uniform01()*(youngest - present) + present : present;
+        // Draw d over its full range, then the augmented ages against it (firstSupport
+        // floors tau_1 at d). Seed b past every occurrence so its constraint is inert for
+        // this call; updateStartEndTimes overwrites b_i once the matrix is set.
+        double d = taxa[i].isExtinct() ? rng->uniform01()*(y_i[i] - present) + present : present;
 
         d_i[i] = d;
+        b_i[i] = max;
+
+        resampleFirstLast(i);
 
         // birth time is older than oldest occurrence
         double b = first[i] + rng->uniform01()*(max - first[i]);
