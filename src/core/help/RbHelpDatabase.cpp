@@ -3227,6 +3227,17 @@ moves[1] = mvEmpiricalTree(tree))");
 	help_strings[string("mvEmpiricalTree")][string("title")] = string(R"(Move on an empirical tree distribution)");
 	help_strings[string("mvEventTimeBeta")][string("name")] = string(R"(mvEventTimeBeta)");
 	help_strings[string("mvEventTimeSlide")][string("name")] = string(R"(mvEventTimeSlide)");
+	help_arrays[string("mvExtendedTipTimeUniform")][string("authors")].push_back(string(R"(June Walker)"));
+	help_strings[string("mvExtendedTipTimeUniform")][string("description")] = string(R"(Draws a new extinction time for a random extinct tip of an extended tree, uniformly between the present and the taxon's youngest occurrence.)");
+	help_strings[string("mvExtendedTipTimeUniform")][string("details")] = string(R"(The tips of an extended tree are extinction events rather than occurrences, so a tip age may fall below its taxon's fossil age range. This move therefore draws on the data-fixed window between the present and the youngest occurrence, rather than within the age range as `mvFossilTipTimeUniform` does. The proposal is symmetric and configurations that place the extinction above the augmented oldest age are rejected by the distribution.
+
+Extant tips are pinned at the present and are never proposed.)");
+	help_strings[string("mvExtendedTipTimeUniform")][string("example")] = string(R"(tr ~ dnFBDSP(origin=origin, lambda=lambda, mu=mu, psi=psi, rho=1, timeline=timeline, taxa=taxa)
+moves.append( mvExtendedTipTimeUniform(tr, weight=taxa.size()) ))");
+	help_strings[string("mvExtendedTipTimeUniform")][string("name")] = string(R"(mvExtendedTipTimeUniform)");
+	help_arrays[string("mvExtendedTipTimeUniform")][string("see_also")].push_back(string(R"(dnFossilizedBirthDeathSpeciation)"));
+	help_arrays[string("mvExtendedTipTimeUniform")][string("see_also")].push_back(string(R"(mvResampleAugmentedAges)"));
+	help_strings[string("mvExtendedTipTimeUniform")][string("title")] = string(R"(Extended tip extinction time move)");
 	help_strings[string("mvFNPR")][string("name")] = string(R"(mvFNPR)");
 	help_arrays[string("mvFossilTipTimeSlideUniform")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("mvFossilTipTimeSlideUniform")][string("description")] = string(R"(This moves either takes a specific fossil, or randomly picks a fossil, and then performs a sliding move on the tip age.)");

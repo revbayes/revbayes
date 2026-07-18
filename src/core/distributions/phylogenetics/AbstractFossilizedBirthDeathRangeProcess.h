@@ -52,6 +52,8 @@ namespace RevBayesCore {
         std::vector<double>&                            getAges();
         void                                            executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const;   //!< Expose the augmented first/last ages so they can be monitored through a deterministic node
         const std::vector<Taxon>&                       getTaxa() const { return taxa; }
+        double                                          getPresent(void) const { return times.front(); }                                   //!< Age of the present
+        double                                          getMaxExtinctionAge(size_t i) const { return y_i[i]; }                              //!< A death lies at or below the youngest occurrence
         void                                            resampleFirstLast(size_t i);
         void                                            drawRanges();                                              //!< Draw an initial (b_i, d_i) and the augmented ages for every taxon. Shared by the matrix redraw and the tree (FBDSP) initial-value construction, which hangs a random budding topology on the ranges.
         double                                          computeLnFossilTotal();                                    //!< Total fossil-record log-density summed over taxa; used by a standalone dnFossilRecord node conditioned on this range process (self-contained: refreshes rate cache + start/end times).
