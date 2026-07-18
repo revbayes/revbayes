@@ -208,7 +208,9 @@ double AbstractRootedTreeDistribution::computeLnProbability( void )
 
                 }
                 auto taxon = the_node.getTaxon();
-                if(taxon.getName() != "" && taxon.getMinAge() != taxon.getMaxAge())
+                // an extended tree's tips are extinctions, which may fall below the fossil's age
+                // range; the range bounds constrain them instead, so skip this check there
+                if(isExtendedTree() == false && taxon.getName() != "" && taxon.getMinAge() != taxon.getMaxAge())
                 {
                     if(the_node.getAge() < taxon.getMinAge() || the_node.getAge() > taxon.getMaxAge())
                     {

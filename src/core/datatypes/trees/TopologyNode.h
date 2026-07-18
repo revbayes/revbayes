@@ -161,6 +161,8 @@ namespace RevBayesCore {
         void                                        resolveMultifurcation(bool resolve_root = true);                                    //!< If node has more than 2 children, randomly resolve them into a bifurcating subtree
         void                                        scaleAgesFromTaxonAgesMBL(double minbl);                                            //!< Sets the age of the parent to the age of the oldest of its children + minbl
         void                                        setAge(double a, bool propagate = true );                                           //!< Set the age of this node (should only be done for tips).
+        void                                        setTipAgeUnconstrained(bool u) { tip_age_unconstrained = u; }                       //!< Extended trees: the tip is an extinction, not an occurrence
+        bool                                        isTipAgeUnconstrained(void) const { return tip_age_unconstrained; }
         void                                        setBranchLength(double b, bool flag_dirty=true);                                    //!< Set the length of the branch leading to this node.
         void                                        setIndex(size_t idx);                                                               //!< Set the index of the node
 
@@ -207,6 +209,7 @@ namespace RevBayesCore {
 
         boost::optional<size_t>                     index;                                                                              //!< Node index
         bool                                        sampled_ancestor_tip = false;
+        bool                                        tip_age_unconstrained = false;
 
         // information for newick representation
         std::vector<std::string>                    node_comments;

@@ -5,6 +5,11 @@
 
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
+#include "MethodTable.h"
+#include "StochasticNode.h"
+#include "RlStochasticNode.h"
+#include "DistributionMemberFunction.h"
+#include "RlDistributionMemberFunction.h"
 #include "Dist_FBDSP.h"
 #include "ModelVector.h"
 #include "Natural.h"
@@ -68,10 +73,8 @@ Dist_FBDSP* Dist_FBDSP::clone( void ) const
  */
 RevBayesCore::FossilizedBirthDeathSpeciationProcess* Dist_FBDSP::createDistribution( void ) const
 {
-    throw RbException("FBD range process currently disabled due to invalid calculations.");
-    
     // get the parameters
-    
+
     // the start age
     RevBayesCore::TypedDagNode<double>* sa = static_cast<const RealPos &>( start_age->getRevObject() ).getDagNode();
 
@@ -259,4 +262,22 @@ void Dist_FBDSP::setConstParameter(const std::string& name, const RevPtr<const R
         FossilizedBirthDeathRangeProcess<TimeTree>::setConstParameter(name, var);
     }
     
+}
+
+
+/**
+ * The augmented first (tau_1) and last (tau_K) occurrence ages. They are internal to the
+ * distribution, so a deterministic node is the only way a monitor can reach them.
+ */
+RevLanguage::MethodTable Dist_FBDSP::getDistributionMethods( void ) const
+{
+    MethodTable methods = TypedDistribution<TimeTree>::getDistributionMethods();
+
+    ArgumentRules* first_ages_arg_rules = new ArgumentRules();
+    methods.addFunction( new DistributionMemberFunction<Dist_FBDSP, ModelVector<RealPos> >( "getAugmentedFirstAges", variable, first_ages_arg_rules, true ) );
+
+    ArgumentRules* last_ages_arg_rules = new ArgumentRules();
+    methods.addFunction( new DistributionMemberFunction<Dist_FBDSP, ModelVector<RealPos> >( "getAugmentedLastAges", variable, last_ages_arg_rules, true ) );
+
+    return methods;
 }

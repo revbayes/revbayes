@@ -129,9 +129,11 @@ FossilizedBirthDeathSpeciationProcess* FossilizedBirthDeathSpeciationProcess::cl
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-double FossilizedBirthDeathSpeciationProcess::computeLnProbabilityDivergenceTimes( void )
+double FossilizedBirthDeathSpeciationProcess::computeLnProbabilityDivergenceTimes( void ) const
 {
-    double lnProb = computeLnProbabilityRanges();
+    // computeLnProbabilityRanges refreshes the cached per-taxon terms, so it is not const; the
+    // wrapper must be const to override the base virtual that the tree distribution calls
+    double lnProb = const_cast<FossilizedBirthDeathSpeciationProcess*>(this)->computeLnProbabilityRanges();
 
     lnProb += computeLnProbabilityTimes();
 
@@ -261,17 +263,101 @@ double FossilizedBirthDeathSpeciationProcess::q( size_t i, double t, bool tilde 
  */
 void FossilizedBirthDeathSpeciationProcess::redrawValue(void)
 {
-    AbstractBirthDeathProcess::redrawValue();
+    // Draw a range (b_i, d_i) per taxon exactly as the matrix process does, then hang a random
+    // budding topology on the ranges: conditional on the ranges the tree shape is uniform, so a
+    // uniformly chosen attachment at each birth is a valid draw. Forward simulation of the tree
+    // itself is not feasible, so the inherited simulator is not used.
+    drawRanges();
 
+    RandomNumberGenerator* rng = GLOBAL_RNG;
+    size_t n = taxa.size();
+
+    // extended tree: the tip is the extinction, which must sit at or below the oldest augmented
+    // occurrence. Independent draws can violate this for taxa with age uncertainty, so pull the
+    // tip below the oldest age here (the matrix process re-clips on setValue instead).
+    double present = times.front();
+    for (size_t i = 0; i < n; ++i)
+    {
+        if ( d_i[i] > first[i] ) d_i[i] = rng->uniform01() * (first[i] - present) + present;
+    }
+
+    // one tip per taxon at its drawn end age; top[i] tracks the current top of lineage i's subtree
+    std::vector<TopologyNode*> top(n);
+    for (size_t i = 0; i < n; ++i)
+    {
+        TopologyNode* tip = new TopologyNode( taxa[i], i );
+        tip->setTipAgeUnconstrained( true );
+        tip->setAge( d_i[i] );
+        top[i] = tip;
+    }
+
+    // Independent birth times need not form a tree (a lineage can be born after every other has
+    // died). So draw the births jointly: order lineages by oldest augmented age, make the deepest
+    // the origin lineage (born at the origin), then draw each remaining birth inside the span of a
+    // still-living, already-placed lineage it buds off. This guarantees a valid attachment.
+    double origin = getOriginAge();
+
+    std::vector<size_t> order(n);
+    for (size_t i = 0; i < n; ++i) order[i] = i;
+    std::sort( order.begin(), order.end(), [this](size_t a, size_t b){ return first[a] > first[b]; } );
+
+    size_t root_lineage = order[0];
+    std::vector<size_t> parent(n, n);   // parent[k] = lineage k buds off; n marks the origin
+    b_i[root_lineage] = origin;
+    for (size_t idx = 1; idx < n; ++idx)
+    {
+        size_t k = order[idx];
+
+        // already-placed lineages born before k's oldest age, so the overlap window is non-empty;
+        // the origin lineage (born at the origin) always qualifies
+        std::vector<size_t> cand;
+        for (size_t p = 0; p < idx; ++p)
+        {
+            if ( b_i[order[p]] > first[k] ) cand.push_back( order[p] );
+        }
+        size_t j = cand[ static_cast<size_t>( floor( rng->uniform01() * cand.size() ) ) ];
+
+        // birth in (max(first_k, d_j), b_j): after j is born and while it is still alive
+        double lo = std::max( first[k], d_i[j] );
+        b_i[k] = rng->uniform01()*(b_i[j] - lo) + lo;
+        parent[k] = j;
+    }
+
+    // build the tree youngest birth first, so each lineage's subtree is complete before it attaches
+    std::vector<size_t> byBirth(n);
+    for (size_t i = 0; i < n; ++i) byBirth[i] = i;
+    std::sort( byBirth.begin(), byBirth.end(), [this](size_t a, size_t b){ return b_i[a] < b_i[b]; } );
+
+    for (size_t idx = 0; idx < n; ++idx)
+    {
+        size_t k = byBirth[idx];
+        if ( parent[k] == n ) continue;   // the origin lineage stays the root
+        size_t j = parent[k];
+
+        // budding node at b_k: child 0 is the ancestor (continues), child 1 the new species
+        TopologyNode* node = new TopologyNode();
+        node->setAge( b_i[k] );
+        node->addChild( top[j] );
+        node->addChild( top[k] );
+        top[j]->setParent( node );
+        top[k]->setParent( node );
+        top[j] = node;
+    }
+
+    Tree *psi = new Tree();
+    psi->setRooted( true );
+    psi->setRoot( top[root_lineage], true );
+
+    delete this->value;
+    this->value = psi;
+
+    // index tips by taxon order, as the likelihood expects
     const std::vector<TopologyNode*> nodes = this->getValue().getNodes();
-
     for( size_t i = 0; i < this->getValue().getNumberOfTips(); i++)
     {
         size_t j = find(taxa.begin(), taxa.end(), nodes[i]->getTaxon()) - taxa.begin();
-
         nodes[i]->setIndex(j);
     }
-
     this->getValue().orderNodesByIndex();
 }
 
@@ -697,7 +783,22 @@ void FossilizedBirthDeathSpeciationProcess::prepareProbComputation( void ) const
  */
 void FossilizedBirthDeathSpeciationProcess::updateStartEndTimes( void )
 {
+    // tips are extinctions; re-set each pass so clamped and move-rebuilt trees are covered
+    for (size_t i = 0; i < getValue().getNumberOfNodes(); i++)
+    {
+        TopologyNode &node = getValue().getNode(i);
+        if ( node.isTip() ) node.setTipAgeUnconstrained( true );
+    }
+
     updateStartEndTimes(getValue().getRoot());
+
+    max_birth = 0;
+    for (size_t i = 0; i < taxa.size(); i++)
+    {
+        if ( b_i[i] > b_i[max_birth] ) max_birth = i;
+    }
+
+    origin = getOriginAge();
 }
 
 

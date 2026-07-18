@@ -46,6 +46,7 @@ namespace RevBayesCore {
         virtual double                                      computeLnProbabilityDivergenceTimes(void) const = 0;                                                //!< Compute the log-transformed probability of the current value.
 
         virtual bool                                        isLnProbabilityNonZero(void);
+        virtual bool                                        isExtendedTree(void) const { return false; }        //!< Extended trees have tips at extinctions, which may sit below a fossil's age range.
         virtual double                                      simulateDivergenceTime(double origin, double present) const = 0;                                    //!< Simulate n speciation events.
         virtual std::vector<double>                         simulateDivergenceTimes(size_t n, double origin, double end, double present, bool alwaysReturn) const = 0;             //!< Simulate n speciation events.
         
