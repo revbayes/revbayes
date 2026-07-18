@@ -3,8 +3,6 @@
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
-#include <cstdio>
-#include <cstdlib>
 #include <iosfwd>
 #include <set>
 #include <string>
@@ -281,41 +279,16 @@ void FossilizedBirthDeathRangeProcess::redrawValue(void)
 }
 
 
-// Trace the augmented oldest ages tau_1, which are internal to the distribution and so
-// out of reach of any monitor: write first[] to $RB_TAU1_FILE every $RB_TAU1_THIN calls
-// for the SBC study. keep/restore both leave first[] at the current chain state.
-static void dump_tau1( const std::vector<double> &first )
-{
-    const char *fname = getenv("RB_TAU1_FILE");
-    if ( fname == NULL ) return;
-
-    static long ctr = 0;
-    const char *thin_s = getenv("RB_TAU1_THIN");
-    long thin = ( thin_s != NULL ) ? atol(thin_s) : 10000;
-    if ( thin < 1 ) thin = 1;
-    if ( (ctr++ % thin) != 0 ) return;
-
-    FILE *fp = fopen(fname, "a");
-    if ( fp == NULL ) return;
-    for (size_t i = 0; i < first.size(); ++i) fprintf(fp, "%s%.10g", i ? "\t" : "", first[i]);
-    fprintf(fp, "\n");
-    fclose(fp);
-}
-
 void FossilizedBirthDeathRangeProcess::keepSpecialization(const DagNode *toucher)
 {
     dirty_gamma = std::vector<bool>(taxa.size(), false);
 
     AbstractFossilizedBirthDeathRangeProcess::keepSpecialization(toucher);
-
-    dump_tau1( first );
 }
 
 void FossilizedBirthDeathRangeProcess::restoreSpecialization(const DagNode *toucher)
 {
     AbstractFossilizedBirthDeathRangeProcess::restoreSpecialization(toucher);
-
-    dump_tau1( first );
 }
 
 
