@@ -291,16 +291,10 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
 
     updateStartEndTimes();
 
-    // a supplied origin must be at least as old as every sampled birth
-    if ( origin_age != NULL )
+    // the origin is the oldest birth; a supplied one pins it
+    if ( origin_age != NULL && b_i[max_birth] != origin )
     {
-        for (size_t i = 0; i < taxa.size(); ++i)
-        {
-            if ( origin < b_i[i] )
-            {
-                return RbConstants::Double::neginf;
-            }
-        }
+        return RbConstants::Double::neginf;
     }
 
     // variable declarations and initialization
@@ -409,23 +403,8 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
 
     size_t ori = findIndex(origin);
 
-    // when the origin is not supplied, the oldest sampled birth is the process
-    // origin and is not a speciation event
-    if ( origin_age == NULL )
-    {
-        lnProb -= log( birth[ori] );
-    }
-    else
-    {
-        size_t mbi = findIndex(b_i[max_birth]);
-
-        lnProb += q(ori, origin) - q(mbi, b_i[max_birth]);
-
-        for (size_t j = mbi; j < ori; ++j)
-        {
-            lnProb += q_i[j];
-        }
-    }
+    // the origin is not a speciation event
+    lnProb -= log( birth[ori] );
 
     // Extant tip age terms. Status is data
     double rho = homogeneous_rho->getValue();
@@ -741,9 +720,8 @@ std::vector<double>& AbstractFossilizedBirthDeathRangeProcess::getAges(void)
 
 
 /**
- * The augmented oldest (tau_1) and youngest (tau_K) occurrence ages of every taxon. They are
- * internal to the distribution, so a deterministic node is the only way a monitor can see them.
- * Only first/last reporting augments the youngest; otherwise last == first.
+ * The augmented first (tau_1) and last (tau_K) ages, which no monitor can otherwise reach.
+ * Only first/last reporting augments the last; otherwise last == first.
  */
 void AbstractFossilizedBirthDeathRangeProcess::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, RbVector<double> &rv) const
 {
@@ -849,8 +827,7 @@ void AbstractFossilizedBirthDeathRangeProcess::drawRanges()
         if ( augment_youngest == false ) last[i] = first[i];
     }
 
-    // Place births oldest-first, each inside a lineage already placed and still alive at it:
-    // a non-origin lineage with no such ancestor (gamma_i == 0) describes no tree.
+    // place births oldest-first, each inside a lineage already placed and still alive at it
     std::vector<size_t> order( taxa.size() );
     for (size_t i = 0; i < taxa.size(); i++) order[i] = i;
 
@@ -860,7 +837,7 @@ void AbstractFossilizedBirthDeathRangeProcess::drawRanges()
     {
         size_t i = order[k];
 
-        // the oldest birth is the origin and buds from nothing
+        // the oldest birth is the origin
         if ( k == 0 )
         {
             b_i[i] = first[i] + rng->uniform01()*(max - first[i]);
@@ -873,7 +850,7 @@ void AbstractFossilizedBirthDeathRangeProcess::drawRanges()
 
         size_t a = order[pick];
 
-        // sorted oldest-first, so b_i[a] > first[a] >= first[i] and b_i[a] > d_i[a]
+        // sorted oldest-first, so the window is never empty
         double lo = std::max( first[i], d_i[a] );
 
         b_i[i] = lo + rng->uniform01()*(b_i[a] - lo);

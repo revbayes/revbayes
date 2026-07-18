@@ -134,8 +134,7 @@ double FossilizedBirthDeathRangeProcess::computeLnProbability( void )
     {
         if ( gamma_i[i] == 0 )
         {
-            // only the oldest birth may bud from nothing: it is the origin, or attaches to the
-            // unsampled stem below a supplied one. Otherwise the configuration describes no tree.
+            // only the origin buds from nothing
             if ( i == max_birth ) continue;
 
             return RbConstants::Double::neginf;
