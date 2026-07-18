@@ -790,7 +790,28 @@ void FossilizedBirthDeathSpeciationProcess::updateStartEndTimes( void )
         if ( node.isTip() ) node.setTipAgeUnconstrained( true );
     }
 
-    updateStartEndTimes(getValue().getRoot());
+    const TopologyNode &root = getValue().getRoot();
+
+    updateStartEndTimes(root);
+
+    // a lone lineage is both root and tip, so the recursion sets neither of its times
+    if ( root.isTip() )
+    {
+        size_t i = root.getIndex();
+
+        if ( root.getAge() != d_i[i] || getOriginAge() != b_i[i] )
+        {
+            d_i[i] = root.getAge();
+            b_i[i] = getOriginAge();
+            dirty_psi[i] = true;
+            dirty_taxa[i] = true;
+
+            if ( resampling == true && resampled == false )
+            {
+                resampleFirstLast(i);
+            }
+        }
+    }
 
     max_birth = 0;
     for (size_t i = 0; i < taxa.size(); i++)
