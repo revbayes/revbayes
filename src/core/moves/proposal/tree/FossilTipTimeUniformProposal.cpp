@@ -138,10 +138,14 @@ double FossilTipTimeUniformProposal::doProposal( void )
     }
 
     TopologyNode& node = tau.getNode(node_index);
-    TopologyNode& parent = node.getParent();
 
-    // we need to work with the times
-    double parent_age   = parent.getAge();
+    if ( node.isRoot() == true && origin == NULL )
+    {
+        throw RbException("Attempting to move a root tip, but no origin time provided.");
+    }
+
+    // a lone lineage is its own root, so the origin bounds it instead of a parent
+    double parent_age   = node.isRoot() ? origin->getValue() : node.getParent().getAge();
     double my_age       = node.getAge();
     double min_age      = 0;
     double max_age;
@@ -174,6 +178,8 @@ double FossilTipTimeUniformProposal::doProposal( void )
 
     if ( node.isSampledAncestorTip() == true )
     {
+        TopologyNode& parent = node.getParent();
+
         TopologyNode *sibling = &parent.getChild( 0 );
         if ( sibling == &node )
         {
