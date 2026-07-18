@@ -6,7 +6,7 @@ The fossilized birth death range process (FBDRP) describes the distribution of a
 ## details
 This distribution is the birth-death range process on its own: it describes how species ranges diversify, and the fossil occurrences bound those ranges, but it does not include the probability of the fossil record itself. Pair it with a `dnFossilRecord` node clamped to the occurrences to get the full model. That node also selects the reporting model, i.e. how sampled occurrences reach the record: `complete` (all reported) or first/last (only the oldest and youngest). A range process with no `dnFossilRecord` attached is a valid model, but it does not condition on the fossil record at all.
 
-Fossil species are represented by a collection of fossil occurrences with uncertainty. Speciation, extinction and sampling rates may be time-homogeneous or piecewise time-heterogeneous. If time-heterogeneous rates are provided, then a vector of rate change time-points musts also be provided. Under the hood, the fossil data is augmented with oldest occurrence ages for each species, which must be sampled during MCMC using `mvResampleFBDR`. The related `dnBDS` distribution assumes complete lineage sampling instead (the Birth-Death with Rateshifts model of Silvestro et al. 2019).
+Fossil species are represented by a collection of fossil occurrences with uncertainty. Speciation, extinction and sampling rates may be time-homogeneous or piecewise time-heterogeneous. If time-heterogeneous rates are provided, then a vector of rate change time-points musts also be provided. Under the hood, the fossil data is augmented with oldest occurrence ages for each species, which must be sampled during MCMC using `mvResampleAugmentedAges`. The related `dnBDS` distribution assumes complete lineage sampling instead (the Birth-Death with Rateshifts model of Silvestro et al. 2019).
 
 The deprecated `dnFBDRMatrix` is the older fused form of this process: it carries the fossil-record term internally and takes the occurrences as a constructor argument rather than as clamped data. Its reporting model is instead selected by `complete` on `dnFossilRecord`.
 ## authors
@@ -14,7 +14,7 @@ June Walker
 ## see_also
 dnFossilRecord
 dnBDS
-mvResampleFBDR
+mvResampleAugmentedAges
 ## example
 lambda ~ dnExp(10)
 mu ~ dnExp(10)

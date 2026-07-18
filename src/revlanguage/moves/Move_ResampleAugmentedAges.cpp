@@ -7,7 +7,7 @@
 #include "FossilizedBirthDeathResampleAgeProposal.h"
 #include "RlMatrixReal.h"
 #include "MetropolisHastingsMove.h"
-#include "Move_ResampleFBDR.h"
+#include "Move_ResampleAugmentedAges.h"
 #include "RealPos.h"
 #include "RlTimeTree.h"
 #include "TypeSpec.h"
@@ -30,7 +30,7 @@ using namespace RevLanguage;
  *
  * The default constructor does nothing except allocating the object.
  */
-Move_ResampleFBDR::Move_ResampleFBDR() : Move()
+Move_ResampleAugmentedAges::Move_ResampleAugmentedAges() : Move()
 {
     
 }
@@ -42,10 +42,10 @@ Move_ResampleFBDR::Move_ResampleFBDR() : Move()
  *
  * \return A new copy of the move.
  */
-Move_ResampleFBDR* Move_ResampleFBDR::clone(void) const
+Move_ResampleAugmentedAges* Move_ResampleAugmentedAges::clone(void) const
 {
     
-    return new Move_ResampleFBDR(*this);
+    return new Move_ResampleAugmentedAges(*this);
 }
 
 
@@ -59,7 +59,7 @@ Move_ResampleFBDR* Move_ResampleFBDR::clone(void) const
  *
  * \return A new internal distribution object.
  */
-void Move_ResampleFBDR::constructInternalObject( void )
+void Move_ResampleAugmentedAges::constructInternalObject( void )
 {
     // we free the memory first
     delete value;
@@ -94,10 +94,10 @@ void Move_ResampleFBDR::constructInternalObject( void )
  *
  * \return The class' name.
  */
-const std::string& Move_ResampleFBDR::getClassType(void)
+const std::string& Move_ResampleAugmentedAges::getClassType(void)
 {
     
-    static std::string rev_type = "Move_ResampleFBDR";
+    static std::string rev_type = "Move_ResampleAugmentedAges";
     
     return rev_type;
 }
@@ -108,7 +108,7 @@ const std::string& Move_ResampleFBDR::getClassType(void)
  *
  * \return TypeSpec of this class.
  */
-const TypeSpec& Move_ResampleFBDR::getClassTypeSpec(void)
+const TypeSpec& Move_ResampleAugmentedAges::getClassTypeSpec(void)
 {
     
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( Move::getClassTypeSpec() ) );
@@ -122,10 +122,10 @@ const TypeSpec& Move_ResampleFBDR::getClassTypeSpec(void)
  *
  * \return Rev name of constructor function.
  */
-std::string Move_ResampleFBDR::getMoveName( void ) const
+std::string Move_ResampleAugmentedAges::getMoveName( void ) const
 {
     // create a constructor function name variable that is the same for all instance of this class
-    std::string c_name = "ResampleFBDR";
+    std::string c_name = "ResampleAugmentedAges";
     
     return c_name;
 }
@@ -139,7 +139,7 @@ std::string Move_ResampleFBDR::getMoveName( void ) const
  *
  * \return The member rules.
  */
-const MemberRules& Move_ResampleFBDR::getParameterRules(void) const
+const MemberRules& Move_ResampleAugmentedAges::getParameterRules(void) const
 {
     
     static MemberRules memberRules;
@@ -168,7 +168,7 @@ const MemberRules& Move_ResampleFBDR::getParameterRules(void) const
  *
  * \return The type spec of this object.
  */
-const TypeSpec& Move_ResampleFBDR::getTypeSpec( void ) const
+const TypeSpec& Move_ResampleAugmentedAges::getTypeSpec( void ) const
 {
     
     static TypeSpec type_spec = getClassTypeSpec();
@@ -180,10 +180,10 @@ const TypeSpec& Move_ResampleFBDR::getTypeSpec( void ) const
 /**
  * Print the value for the user.
  */
-void Move_ResampleFBDR::printValue(std::ostream &o) const
+void Move_ResampleAugmentedAges::printValue(std::ostream &o) const
 {
     
-    o << "ResampleFBDR(";
+    o << "ResampleAugmentedAges(";
     if (fbd != NULL)
     {
         o << fbd->getName();
@@ -207,7 +207,7 @@ void Move_ResampleFBDR::printValue(std::ostream &o) const
  * \param[in]    name     Name of the member variable.
  * \param[in]    var      Pointer to the variable.
  */
-void Move_ResampleFBDR::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
+void Move_ResampleAugmentedAges::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
 {
     
     if ( name == "x" )
