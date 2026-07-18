@@ -89,6 +89,7 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
     timeline( intimes ),
     origin_age( inorigin ),
     origin(0.0),
+    max_birth(0),
     reporting(s),
     resampled(false),
     resampling(re),
@@ -416,15 +417,9 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
     }
     else
     {
-        double max_birth = 0.0;
-        for (size_t i = 0; i < taxa.size(); ++i)
-        {
-            max_birth = std::max(max_birth, b_i[i]);
-        }
+        size_t mbi = findIndex(b_i[max_birth]);
 
-        size_t mbi = findIndex(max_birth);
-
-        lnProb += q(ori, origin) - q(mbi, max_birth);
+        lnProb += q(ori, origin) - q(mbi, b_i[max_birth]);
 
         for (size_t j = mbi; j < ori; ++j)
         {
@@ -801,11 +796,7 @@ void AbstractFossilizedBirthDeathRangeProcess::drawRanges()
 
     for (size_t i = 0; i < taxa.size(); i++)
     {
-        // Draw d over its range, then the augmented ages NESTED (d <= last <= first) and the
-        // birth past the oldest. The density requires that ordering per taxon, so drawing the
-        // two ages independently leaves a valid start exponentially unlikely across taxa and the
-        // chain cannot initialize. This is the initial value only -- resampleFirstLast remains a
-        // symmetric draw on the data-fixed support, so the MCMC proposal needs no Hastings term.
+        // Draw d over its range, then the augmented ages NESTED (d <= last <= first)
         d_i[i] = taxa[i].isExtinct() ? rng->uniform01()*(y_i[i] - present) + present : present;
         b_i[i] = max;
 
@@ -832,8 +823,36 @@ void AbstractFossilizedBirthDeathRangeProcess::drawRanges()
 
         // a single occurrence (and complete/truncated reporting) is its own youngest
         if ( augment_youngest == false ) last[i] = first[i];
+    }
 
-        b_i[i] = first[i] + rng->uniform01()*(max - first[i]);
+    // Place births oldest-first, each inside a lineage already placed and still alive at it:
+    // a non-origin lineage with no such ancestor (gamma_i == 0) describes no tree.
+    std::vector<size_t> order( taxa.size() );
+    for (size_t i = 0; i < taxa.size(); i++) order[i] = i;
+
+    std::sort( order.begin(), order.end(), [&](size_t a, size_t b) { return first[a] > first[b]; } );
+
+    for (size_t k = 0; k < order.size(); k++)
+    {
+        size_t i = order[k];
+
+        // the oldest birth is the origin and buds from nothing
+        if ( k == 0 )
+        {
+            b_i[i] = first[i] + rng->uniform01()*(max - first[i]);
+
+            continue;
+        }
+
+        size_t pick = size_t( rng->uniform01()*k );
+        if ( pick >= k ) pick = k - 1;
+
+        size_t a = order[pick];
+
+        // sorted oldest-first, so b_i[a] > first[a] >= first[i] and b_i[a] > d_i[a]
+        double lo = std::max( first[i], d_i[a] );
+
+        b_i[i] = lo + rng->uniform01()*(b_i[a] - lo);
     }
 }
 

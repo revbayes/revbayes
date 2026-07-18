@@ -98,6 +98,7 @@ namespace RevBayesCore {
         std::vector<double>                             y_i;                                                    //!< The youngest maximum fossil age for each taxon
         
         double                                          origin;                                                 //!< The origin time (oldest birth time)
+        size_t                                          max_birth;                                              //!< Index of the taxon holding the oldest birth, refreshed by updateStartEndTimes
 
         // the following vectors are used internally for more efficient likelihood calculations and are filled by 'prepareProbComputation'
         mutable std::vector<double>                     birth;                                                  //!< The sorted speciation rates

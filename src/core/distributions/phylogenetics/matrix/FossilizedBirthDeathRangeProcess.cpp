@@ -132,8 +132,17 @@ double FossilizedBirthDeathRangeProcess::computeLnProbability( void )
 
     for( size_t i = 0; i < taxa.size(); i++ )
     {
+        if ( gamma_i[i] == 0 )
+        {
+            // only the oldest birth may bud from nothing: it is the origin, or attaches to the
+            // unsampled stem below a supplied one. Otherwise the configuration describes no tree.
+            if ( i == max_birth ) continue;
+
+            return RbConstants::Double::neginf;
+        }
+
         // multiply by the number of possible birth locations
-        lnProb += log( gamma_i[i] == 0 ? 1 : gamma_i[i] );
+        lnProb += log( gamma_i[i] );
     }
 
     return lnProb;
@@ -193,14 +202,14 @@ void FossilizedBirthDeathRangeProcess::updateGamma(bool force)
  */
 void FossilizedBirthDeathRangeProcess::updateStartEndTimes( void )
 {
-    double max_birth = 0;
+    max_birth = 0;
 
     for (size_t i = 0; i < taxa.size(); i++)
     {
         b_i[i] = (*this->value)[i][0];
         d_i[i] = (*this->value)[i][1];
 
-        max_birth = std::max(max_birth, b_i[i]);
+        if ( b_i[i] > b_i[max_birth] ) max_birth = i;
     }
 
     if ( origin_age != NULL )
@@ -209,7 +218,7 @@ void FossilizedBirthDeathRangeProcess::updateStartEndTimes( void )
     }
     else
     {
-        origin = max_birth;
+        origin = b_i[max_birth];
     }
 }
 
