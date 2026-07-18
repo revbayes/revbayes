@@ -773,6 +773,71 @@ void AbstractFossilizedBirthDeathRangeProcess::resampleFirstLast(size_t i)
 }
 
 
+void AbstractFossilizedBirthDeathRangeProcess::drawRanges()
+{
+    RandomNumberGenerator* rng = GLOBAL_RNG;
+
+    // bracket birth times: an unbounded max_age would push every birth to infinity, so fall
+    // back to the oldest lower bound the taxon's occurrences provide
+    double max = 0;
+    for (size_t i = 0; i < taxa.size(); i++)
+    {
+        double o = taxa[i].getMaxAge();
+        if ( RbMath::isFinite(o) == false )
+        {
+            o = 0.0;
+            const std::map<TimeInterval, size_t>& ages = taxa[i].getOccurrences();
+            for ( std::map<TimeInterval, size_t>::const_iterator Fi = ages.begin(); Fi != ages.end(); Fi++ )
+            {
+                o = std::max( o, Fi->first.getMin() );
+            }
+        }
+        if ( o > max ) max = o;
+    }
+    max *= 1.1;
+    if ( max == 0.0 ) max = 1.0;
+
+    double present = times.front();
+
+    for (size_t i = 0; i < taxa.size(); i++)
+    {
+        // Draw d over its range, then the augmented ages NESTED (d <= last <= first) and the
+        // birth past the oldest. The density requires that ordering per taxon, so drawing the
+        // two ages independently leaves a valid start exponentially unlikely across taxa and the
+        // chain cannot initialize. This is the initial value only -- resampleFirstLast remains a
+        // symmetric draw on the data-fixed support, so the MCMC proposal needs no Hastings term.
+        d_i[i] = taxa[i].isExtinct() ? rng->uniform01()*(y_i[i] - present) + present : present;
+        b_i[i] = max;
+
+        bool augment_youngest = ( reporting == "firstlast" && occurrence_counts[i] >= 2 );
+
+        double lo, hi;
+
+        // youngest augmented age, at or above the death and within its reported bin
+        if ( augment_youngest )
+        {
+            lo = std::max( d_i[i], taxa[i].getMinAge() );
+            hi = y_i[i];
+            last[i] = ( hi > lo ) ? rng->uniform01()*(hi - lo) + lo : lo;
+        }
+        else
+        {
+            last[i] = d_i[i];
+        }
+
+        // oldest augmented age, at or above the youngest and the oldest reported minimum
+        lo = std::max( last[i], o_i[i] );
+        hi = truncated[i] ? b_i[i] : taxa[i].getMaxAge();
+        first[i] = ( hi > lo ) ? rng->uniform01()*(hi - lo) + lo : lo;
+
+        // a single occurrence (and complete/truncated reporting) is its own youngest
+        if ( augment_youngest == false ) last[i] = first[i];
+
+        b_i[i] = first[i] + rng->uniform01()*(max - first[i]);
+    }
+}
+
+
 void AbstractFossilizedBirthDeathRangeProcess::keepSpecialization(const DagNode *toucher)
 {
     dirty_psi  = std::vector<bool>(taxa.size(), false);

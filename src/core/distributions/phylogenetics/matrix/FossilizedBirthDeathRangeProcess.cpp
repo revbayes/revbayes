@@ -219,62 +219,14 @@ void FossilizedBirthDeathRangeProcess::updateStartEndTimes( void )
  */
 void FossilizedBirthDeathRangeProcess::redrawValue(void)
 {
-    // incorrect placeholder
-    // simulation conditioned on the oldest occurrence
-    // would require a monte carlo method
-    
-    // Get the rng
-    RandomNumberGenerator* rng = GLOBAL_RNG;
-    
-    double max = 0;
-    // get the max age
+    // draw an initial range per taxon (the tree process shares this and hangs a topology on it);
+    // updateStartEndTimes overwrites b_i/d_i once the matrix is set
+    drawRanges();
+
     for (size_t i = 0; i < taxa.size(); i++)
     {
-        double o = taxa[i].getMaxAge();
-
-        // an unbounded oldest occurrence (max_age = Inf) would put every initial birth time at
-        // infinity, so bracket it by the oldest lower bound this taxon does have
-        if ( RbMath::isFinite(o) == false )
-        {
-            o = 0.0;
-            const std::map<TimeInterval, size_t>& ages = taxa[i].getOccurrences();
-            for ( std::map<TimeInterval, size_t>::const_iterator Fi = ages.begin(); Fi != ages.end(); Fi++ )
-            {
-                o = std::max( o, Fi->first.getMin() );
-            }
-        }
-
-        if ( o > max ) max = o;
-    }
-    
-    max *= 1.1;
-    
-    if (max == 0.0)
-    {
-        max = 1.0;
-    }
-
-    double present = times.front();
-
-    // get random uniform draws
-    for (size_t i = 0; i < taxa.size(); i++)
-    {
-        // Draw d over its full range, then the augmented ages against it (firstSupport
-        // floors tau_1 at d). Seed b past every occurrence so its constraint is inert for
-        // this call; updateStartEndTimes overwrites b_i once the matrix is set.
-        double d = taxa[i].isExtinct() ? rng->uniform01()*(y_i[i] - present) + present : present;
-
-        d_i[i] = d;
-        b_i[i] = max;
-
-        resampleFirstLast(i);
-
-        // birth time is older than oldest occurrence
-        double b = first[i] + rng->uniform01()*(max - first[i]);
-
-        // set values
-        (*this->value)[i][0] = b;
-        (*this->value)[i][1] = d;
+        (*this->value)[i][0] = b_i[i];
+        (*this->value)[i][1] = d_i[i];
     }
 }
 
