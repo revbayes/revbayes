@@ -4,12 +4,12 @@ dnFossilizedBirthDeathSpeciation
 ## description
 The fossilized birth death speciation process (FBDSP) describes the diversification and sampling of extant and extinct species trees under a mixed model of asymmetric, symmetric and anagenetic speciation.
 ## details
-Fossil species are represented by a collection of fossil occurrences with uncertainty. Speciation, extinction and sampling rates may be time-homogeneous or piecewise time-heterogeneous. If time-heterogeneous rates are provided, then a vector of rate change time-points musts also be provided. If only a subset of fossil occurrences is provided for each species (e.g. only first and last occurrencces), then the remaining number of fossil samples may be marginalized by specifying `complete=FALSE`. Under the hood, the fossil data is augmented with oldest occurrence ages for each species, which must be sampled during MCMC using `mvResampleFBDR`. Tips represent extinction events, and therefore should be sampled during MCMC using e.g. `mvTipTimeSlideUniform`.
+Fossil species are represented by a collection of fossil occurrences with uncertainty. Speciation, extinction and sampling rates may be time-homogeneous or piecewise time-heterogeneous. If time-heterogeneous rates are provided, then a vector of rate change time-points musts also be provided. Like `dnFBDRP`, this is the birth-death range process on its own (here over trees); pair it with a `dnFossilRecord` node clamped to the occurrences to add the probability of the fossil record, choosing `complete=TRUE` or `complete=FALSE` (first/last) there. Under the hood, the fossil data is augmented with oldest occurrence ages for each species, which must be sampled during MCMC using `mvResampleFBDR`. Tips represent extinction events, and therefore should be sampled during MCMC using e.g. `mvTipTimeSlideUniform`.
 ## authors
 June Walker
 ## see_also
 dnFossilizedBirthDeathRange
-dnBirthDeathSamplingTreatment
+dnFossilRecord
 mvResampleFBDR
 ## example
 lambda ~ dnExp(10)
@@ -27,7 +27,11 @@ for(i in 1:taxa.size())
 
 origin ~ dnExp(1/10)
 
-bd ~ dnFBDSP(originAge=min_age+origin, lambda=lambda, mu=mu, psi=psi, rho=1, taxa=taxa, complete=FALSE)
+bd ~ dnFBDSP(origin=min_age+origin, lambda=lambda, mu=mu, psi=psi, rho=1, taxa=taxa)
+
+# the fossil record, conditioned on the range process and clamped to the observed occurrences
+rec ~ dnFossilRecord(ranges=bd, complete=false)
+rec.clamp(taxa)
 
 moves.append( mvFNPR(bd, weight = taxa.size()) )
 moves.append( mvNodeTimeSlideUniform(bd, weight = taxa.size()) )

@@ -369,7 +369,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< TimeTree                   >( new Dist_TimeVaryingStateDependentSpeciationExtinctionProcess() );
         AddDistribution< TimeTree                   >( new Dist_GLHBDSP() );
 
-        // fossilized-birth-death range processes: the skeleton, its fossil-record term, and the deprecated fused facade
+        // fossilized-birth-death range processes: the range process, its fossil-record term, and the deprecated fused facade
         AddDistribution< MatrixReal                 >( new Dist_FBDRP());
         AddDistribution< ModelVector<Taxon>         >( new Dist_FossilRecord());
         AddDistribution< MatrixReal                 >( new Dist_FBDRMatrix());

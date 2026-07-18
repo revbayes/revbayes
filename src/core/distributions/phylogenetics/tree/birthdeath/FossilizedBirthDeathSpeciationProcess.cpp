@@ -58,10 +58,13 @@ FossilizedBirthDeathSpeciationProcess::FossilizedBirthDeathSpeciationProcess(con
                                                            const std::string &incondition,
                                                            const std::vector<Taxon> &intaxa,
                                                            const std::string &s,
-                                                           bool re) :
+                                                           bool re,
+                                                           bool report_int) :
     AbstractBirthDeathProcess(ra, incondition, intaxa, true, NULL),
     AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, s, 0, re)
 {
+    report_internally = report_int;
+
     for(std::vector<const DagNode*>::iterator it = range_parameters.begin(); it != range_parameters.end(); it++)
     {
         addParameter(*it);

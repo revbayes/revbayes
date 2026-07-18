@@ -11,11 +11,11 @@ namespace RevLanguage {
     /**
      * RevLanguage wrapper of the fossil-record (reporting) model, dnFossilRecord.
      *
-     * The observation half of the factored FBD-range model: conditions on a birth-death-range
-     * skeleton (a MatrixReal-valued dnFBDRP node) and contributes the fossil-record log-density.
-     * Value is the taxon vector (clamped to the observed occurrences).
+     * The observation half of the factored FBD-range model: conditions on a birth-death range
+     * process (a dnFBDRP or dnFBDSP node) and contributes the fossil-record log-density. The
+     * occurrences come from that range process; value is the taxon vector.
      *
-     *     rec ~ dnFossilRecord( skeleton=bd, reporting="uniform", taxa=taxa )
+     *     rec ~ dnFossilRecord( ranges=bd, complete=false )
      *     rec.clamp( taxa )
      */
     class Dist_FossilRecord : public TypedDistribution< ModelVector<Taxon> > {
@@ -35,9 +35,8 @@ namespace RevLanguage {
     protected:
         void                                            setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);
 
-        RevPtr<const RevVariable>                       skeleton;
-        RevPtr<const RevVariable>                       reporting;
-        RevPtr<const RevVariable>                       taxa;
+        RevPtr<const RevVariable>                       ranges;
+        RevPtr<const RevVariable>                       complete;
     };
 
 }

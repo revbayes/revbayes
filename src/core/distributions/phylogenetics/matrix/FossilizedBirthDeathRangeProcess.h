@@ -41,9 +41,8 @@ namespace RevBayesCore {
 										  const std::string &reporting,
                                           size_t truncate_at,
 										  bool resampling,
-                                          bool bds,
                                           const TypedDagNode<double>* origin = NULL,
-                                          bool report_internally = true);   //!< report_internally=false => bare skeleton (dnFBDRP); reporting term supplied by dnFossilRecord
+                                          bool report_internally = true);   //!< report_internally=false => bare range process (dnFBDRP); reporting term supplied by dnFossilRecord
         
         // public member functions
         FossilizedBirthDeathRangeProcess*               clone(void) const override;                                         //!< Create an independent clone
@@ -57,7 +56,6 @@ namespace RevBayesCore {
 
         // Parameter management functions
         double                                          computeLnProbability(void) override;                                //!< Compute the log-transformed probability of the current value.
-        double                                          computeLnProbabilityBDS(void);                                      //!< Compute the log probability assuming complete lineage sampling.
 
         // Parameter management functions
         void                                            swapParameterInternal(const DagNode *oldP, const DagNode *newP) override;  //!< Swap a parameter
@@ -72,7 +70,6 @@ namespace RevBayesCore {
         void                                            updateGamma(bool force = false);                                    //!< Number of species alive at time t.
         void                                            redrawValue(void) override;
 
-        bool                                            bds;                //!< Indicates whether to assume complete lineage sampling (BDS model)
         std::vector<size_t>                             gamma_i;            //!< The number of coexisting lineages at each taxon birth time
         std::vector<std::vector<bool> >                 gamma_links;        //!< A boolean matrix indicating which taxa are coexiting at each birth time
         std::vector<bool>                               dirty_gamma;        //!< Indicates whether gamma needs updating

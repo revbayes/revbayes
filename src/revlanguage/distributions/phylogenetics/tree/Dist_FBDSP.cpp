@@ -104,12 +104,12 @@ RevBayesCore::FossilizedBirthDeathSpeciationProcess* Dist_FBDSP::createDistribut
         rt = static_cast<const ModelVector<RealPos> &>( timeline->getRevObject() ).getDagNode();
     }
 
-    // complete=TRUE reports every occurrence; otherwise the reporting model applies
-    bool comp = static_cast<const RlBoolean &>( complete->getRevObject() ).getValue();
-    std::string c  = comp ? "complete" : static_cast<const RlString &>( reporting->getRevObject() ).getValue();
-    bool re = false; //static_cast<const RlBoolean &>( resample->getRevObject() ).getValue();
+    // bare range process: no inline reporting term (report_internally = false); a dnFossilRecord
+    // node supplies the reporting model
+    std::string c  = "complete";
+    bool re = static_cast<const RlBoolean &>( resample->getRevObject() ).getValue();
 
-    RevBayesCore::FossilizedBirthDeathSpeciationProcess* d = new RevBayesCore::FossilizedBirthDeathSpeciationProcess(sa, l, m, p, r, la, b, rt, cond, t, c, re);
+    RevBayesCore::FossilizedBirthDeathSpeciationProcess* d = new RevBayesCore::FossilizedBirthDeathSpeciationProcess(sa, l, m, p, r, la, b, rt, cond, t, c, re, false);
 
     return d;
 }
@@ -192,10 +192,11 @@ const MemberRules& Dist_FBDSP::getParameterRules(void) const
     
     if ( !rules_set )
     {
-        dist_member_rules.push_back( new ArgumentRule( "originAge", RealPos::getClassTypeSpec(), "The start time of the process.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        dist_member_rules.push_back( new ArgumentRule( "origin", RealPos::getClassTypeSpec(), "The origin time of the process.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
-        // add the rules from the base class
-        const MemberRules &parentRules = FossilizedBirthDeathRangeProcess<TimeTree>::getParameterRules();
+        // add the bare range-process rules from the base class (no reporting args; the reporting
+        // model is supplied by a dnFossilRecord node conditioned on this range process)
+        const MemberRules &parentRules = FossilizedBirthDeathRangeProcess<TimeTree>::getCoreParameterRules();
         dist_member_rules.insert(dist_member_rules.end(), parentRules.begin(), parentRules.end());
 
         std::vector<TypeSpec> paramTypes;
@@ -249,7 +250,7 @@ void Dist_FBDSP::setConstParameter(const std::string& name, const RevPtr<const R
     {
         beta = var;
     }
-    else if ( name == "originAge" )
+    else if ( name == "origin" )
     {
         start_age = var;
     }

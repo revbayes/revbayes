@@ -7,8 +7,10 @@
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "ModelVector.h"
+#include "RlBoolean.h"
 #include "RlString.h"
 #include "RlMatrixReal.h"
+#include "RlTimeTree.h"
 #include "RlTaxon.h"
 #include "Taxon.h"
 #include "TypeSpec.h"
@@ -29,16 +31,16 @@ Dist_FossilRecord* Dist_FossilRecord::clone( void ) const
 
 RevBayesCore::FossilRecordProcess* Dist_FossilRecord::createDistribution( void ) const
 {
-    // the skeleton stochastic node (a MatrixReal-valued dnFBDRP node)
-    RevBayesCore::DagNode* sk = skeleton->getRevObject().getDagNode();
+    // the range process stochastic node (a dnFBDRP or dnFBDSP node)
+    RevBayesCore::DagNode* rn = ranges->getRevObject().getDagNode();
 
-    // the reporting model (complete | firstlast | uniform), pushed onto the skeleton
-    const std::string& rep = static_cast<const RlString &>( reporting->getRevObject() ).getValue();
+    // complete=TRUE reports every occurrence, FALSE is first/last; uniform is reachable only
+    // through the deprecated dnFBDRMatrix
+    bool comp = static_cast<const RlBoolean &>( complete->getRevObject() ).getValue();
+    std::string rep = comp ? "complete" : "firstlast";
 
-    // the observed occurrences (data)
-    const std::vector<RevBayesCore::Taxon>& t = static_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
-
-    RevBayesCore::FossilRecordProcess* d = new RevBayesCore::FossilRecordProcess( sk, rep, t );
+    // the occurrences are read from the range process, so no taxa argument is needed here
+    RevBayesCore::FossilRecordProcess* d = new RevBayesCore::FossilRecordProcess( rn, rep );
 
     return d;
 }
@@ -72,9 +74,11 @@ const MemberRules& Dist_FossilRecord::getParameterRules(void) const
 
     if ( rules_set == false )
     {
-        dist_member_rules.push_back( new ArgumentRule( "skeleton",  MatrixReal::getClassTypeSpec(),        "The FBD-range skeleton (a dnFBDRP node) supplying b/d, tau, psi and the timeline.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::STOCHASTIC ) );
-        dist_member_rules.push_back( new ArgumentRule( "reporting", RlString::getClassTypeSpec(),          "Reporting model: complete | firstlast | uniform.",                                 ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("uniform") ) );
-        dist_member_rules.push_back( new ArgumentRule( "taxa",      ModelVector<Taxon>::getClassTypeSpec(),"The taxa with their fossil occurrences (the observed record).",                     ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+        std::vector<TypeSpec> rangesTypes;
+        rangesTypes.push_back( MatrixReal::getClassTypeSpec() );  // dnFBDRP
+        rangesTypes.push_back( TimeTree::getClassTypeSpec() );    // dnFBDSP
+        dist_member_rules.push_back( new ArgumentRule( "ranges",  rangesTypes, "The FBD range process (a dnFBDRP or dnFBDSP node) supplying b/d, tau, psi and the timeline.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::STOCHASTIC ) );
+        dist_member_rules.push_back( new ArgumentRule( "complete",  RlBoolean::getClassTypeSpec(),         "Is the fossil record complete (every sampled occurrence reported)? FALSE is first/last.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false ) ) );
 
         rules_set = true;
     }
@@ -92,17 +96,13 @@ const TypeSpec& Dist_FossilRecord::getTypeSpec( void ) const
 
 void Dist_FossilRecord::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
 {
-    if ( name == "skeleton" )
+    if ( name == "ranges" )
     {
-        skeleton = var;
+        ranges = var;
     }
-    else if ( name == "reporting" )
+    else if ( name == "complete" )
     {
-        reporting = var;
-    }
-    else if ( name == "taxa" )
-    {
-        taxa = var;
+        complete = var;
     }
     else
     {

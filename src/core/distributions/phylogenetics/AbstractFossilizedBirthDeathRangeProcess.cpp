@@ -395,15 +395,11 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
                 partial_likelihood[i] += Psi[i];
             }
 
-            // Both augmented ages are proposed symmetrically from data-fixed ranges, so the
-            // change-of-variables terms are constant and cancel -- no Jacobian. The one
-            // exception is the truncated/uniform model, whose tau_1 upper bound is the birth
-            // b: that term is parameter-dependent and must enter here. Skipped when the
-            // augmentation is frozen (resample=false).
-            if ( resampling == true && truncated[i] )
+            // change-of-variables for the truncated tau_1 ~ U(o_i, b); firstlast/complete
+            // draw from a data-fixed bin so their term is constant
+            if ( resampling == true && truncated[i] && b_i[i] > o_i[i] )
             {
-                std::pair<double,double> s = firstSupport(i);
-                if ( s.second > s.first ) partial_likelihood[i] += log( s.second - s.first );
+                partial_likelihood[i] += log( b_i[i] - o_i[i] );
             }
         }
 
@@ -471,7 +467,7 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
 
 
 // Total fossil-occurrence (reporting) log-density for a standalone reporting node
-// (dnFossilRecord) conditioned on this skeleton. Self-contained: refreshes the piecewise-
+// (dnFossilRecord) conditioned on this range process. Self-contained: refreshes the piecewise-
 // rate cache and per-taxon start/end times, then sums the per-taxon reporting terms --
 // exactly what computeLnProbabilityRanges adds inline when report_internally is true.
 double AbstractFossilizedBirthDeathRangeProcess::computeLnFossilTotal()
@@ -494,15 +490,24 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnFossilTotal()
 
 
 // Fossil-occurrence (reporting) log-term for taxon i: the Psi[i] block factored out of
-// computeLnProbabilityRanges (skeleton/reporting split). Behavior-preserving -- returns
+// computeLnProbabilityRanges (range/reporting split). Behavior-preserving -- returns
 // exactly what was assigned to Psi[i] inline before the split.
 double AbstractFossilizedBirthDeathRangeProcess::computeLnFossilRecord( size_t i ) const
 {
     double d = d_i[i];
-    double o = first[i];
-    double min_age = taxa[i].getMinAge();
-    double max_age = taxa[i].getMaxAge();
+    double o = first[i];                             // oldest augmented age
     size_t oi = findIndex(o);
+    double y  = last[i];                             // youngest augmented age
+    size_t yi = findIndex(y);
+
+    double min_age = d_i[i];
+    double max_age = o;
+
+    if ( reporting == "firstlast" )
+    {
+        min_age = y;
+        max_age = o;
+    }
 
     double result = 0.0;
 
@@ -511,200 +516,143 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnFossilRecord( size_t i
     // if there is a range of fossil ages
     if ( min_age != max_age )
     {
-        if ( reporting == "firstlast" )
+        double Lambda = 0.0;                            // interior sampling rate over (last, first)
+
+        std::vector<double> psi(ages.size(), 0.0);
+        
+        for (size_t j = 0; j < num_intervals; j++)
         {
-            double psi_int = 0.0;                            // interior sampling rate over (last, first)
+            double t_0 = ( j < num_intervals-1 ? times[j+1] : RbConstants::Double::inf );
 
-            double y  = last[i];                             // youngest augmented age
-            size_t yi = findIndex(y);
-
-            std::vector<double> psi(ages.size(), 0.0);
-            
-            for (size_t j = 0; j < num_intervals; j++)
+            if ( t_0 <= min_age )
             {
-                double t_0 = ( j < num_intervals-1 ? times[j+1] : RbConstants::Double::inf );
-
-                if ( t_0 <= std::max(d,min_age) )
-                {
-                    continue;
-                }
-                if ( times[j] >= o )
-                {
-                    break;
-                }
-
-                // the kappa interior spans (last, first) only
-                double dti = std::min(o, t_0) - std::max(y, times[j]);
-                if ( dti > 0.0 ) psi_int += fossil[j]*dti;
-
-                size_t k = 0;
-                // increase running psi total for each observation
-                for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++,k++ )
-                {
-                    if ( Fi->first.getMin() < t_0 && Fi->first.getMax() > times[j] )
-                    {
-                        double dt = 1.0;
-
-                        // only compute dt if this is a non-singleton
-                        if ( Fi->first.getMin() != Fi->first.getMax() )
-                        {
-                            // observed occurrence sampling rate over its interval (below the oldest);
-                            // the youngest only enters via the interior rate psi_int, not here
-                            dt = std::min(std::min(Fi->first.getMax(), o), t_0) - std::max(std::max(Fi->first.getMin(), d), times[j]);
-                        }
-
-                        psi[k] += fossil[j] * dt;
-                    }
-                }
+                continue;
+            }
+            if ( times[j] >= max_age )
+            {
+                break;
             }
 
-            // include instantaneous sampling density (oldest; the youngest is added
-            // inside the count >= 2 branch below, so a single-occurrence taxon - which
-            // skips that branch - never double-counts an instantaneous density)
-            result = log(fossil[oi]);
-
-            size_t count = occurrence_counts[i];
-            double recip = 0.0;
-            double recip_young = 0.0;
-            double diag = 0.0;
+            // the kappa interior span
+            double int_hi = std::min(max_age, t_0);
+            double int_lo = std::max(min_age, times[j]);
+            double dti = int_hi - int_lo;
+            if ( dti > 0.0 ) Lambda += fossil[j]*dti;
 
             size_t k = 0;
-            // compute factors of the sum over each possible oldest/youngest observation
+            // increase running psi total for each observation
             for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++,k++ )
             {
-                bool eligible_oldest = ( Fi->first.getMax() >= o );
-                bool eligible_youngest = ( Fi->first.getMin() <= y );
-
-                // compute sum of reciprocal oldest ranges
-                if ( eligible_oldest )
+                if ( Fi->first.getMin() < t_0 && Fi->first.getMax() > times[j] )
                 {
-                    recip += Fi->second / psi[k];
-                }
+                    double dt = 1.0;
 
-                // compute sum of reciprocal youngest ranges
-                if ( eligible_youngest )
-                {
-                    recip_young += Fi->second / psi[k];
-                }
+                    // only compute dt if this is a non-singleton
+                    if ( Fi->first.getMin() != Fi->first.getMax() )
+                    {
+                        // observed occurrence sampling rate over its interval
+                        dt = std::min(Fi->first.getMax(), int_hi) - std::max(Fi->first.getMin(), int_lo);
+                    }
 
-                // intervals that could supply both extremes contribute the diagonal term
-                if ( eligible_oldest && eligible_youngest )
-                {
-                    diag += Fi->second / (psi[k]*psi[k]);
+                    psi[k] += fossil[j] * dt;
                 }
+            }
+        }
 
-                // compute product of ranges
-                result += log(psi[k]) * Fi->second;
+         // instantaneous rate of the oldest specimen at tau1
+        result = log(fossil[oi]);
+
+        size_t count = occurrence_counts[i];
+        double recip_old = 0.0;                         // sum_{i: tau1 in F_i} count_i / Psi(F_i)
+        double recip_young = 0.0;                       // sum_{i: tauK in F_i} count_i / Psi(F_i)
+        double diag = 0.0;
+
+        size_t k = 0;
+        // compute factors of the sum over each possible oldest/youngest observation
+        for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++,k++ )
+        {
+            bool eligible_oldest = ( Fi->first.getMax() >= o );
+            bool eligible_youngest = ( Fi->first.getMin() <= y );
+
+            // compute sum of reciprocal oldest ranges
+            if ( eligible_oldest )
+            {
+                recip_old += Fi->second / psi[k];
             }
 
-            // sum over each possible oldest observation
-            result += log(recip);
+            // compute sum of reciprocal youngest ranges
+            if ( eligible_youngest )
+            {
+                recip_young += Fi->second / psi[k];
+            }
+
+            // intervals that could supply both extremes contribute the diagonal term
+            if ( eligible_oldest && eligible_youngest )
+            {
+                diag += Fi->second / (psi[k]*psi[k]);
+            }
+
+            // compute product of ranges
+            result += log(psi[k]) * Fi->second;
+        }
+
+        if ( reporting == "firstlast" )
+        {
+            // sum over which observation supplies the oldest specimen at tau1
+            result += log(recip_old);
 
             if ( count >= 2 )
             {
-                // Condition on the oldest and youngest occurrences: sum over which
-                // observation is the youngest (recip_young) and marginalize the
-                // kappa >= 0 unobserved interior specimens in (last, first). Inside
-                // the count >= 2 branch, so single-occurrence taxa ignore 'last'.
-                if ( !( o >= last[i] && last[i] >= d && last[i] <= y_i[i] && last[i] >= min_age ) )
+                if ( !( o >= y && y >= d && y <= y_i[i] ) )
                 {
                     return RbConstants::Double::neginf;
                 }
                 // youngest instantaneous density + sum over which observation is the youngest,
                 // excluding the diagonal where a single occurrence supplies both extremes
-                result += log(fossil[yi]) + log(recip_young - diag/recip);
+                result += log(fossil[yi]) + log(recip_young - diag/recip_old);
 
                 double S1 = 0.0, f = 1.0;
                 for ( size_t kap = 0; kap < 200; kap++ )
                 {
                     S1 += f;
-                    f *= psi_int / double(count - 1 + kap);
+                    f *= Lambda / double(count - 1 + kap);
                     if ( f < 1e-16 * S1 ) break;
                 }
                 result += log(S1) - RbMath::lnFactorial(int(count));
             }
             // count == 1 (single occurrence, first == last): no interior term
-                            }
-            else  // "uniform" (exchangeable) or "complete"
+        }
+        else if ( truncated[i] == false ) // complete reporting
+        {
+            // sum over which observation supplies the oldest specimen at tau1
+            result += log(recip_old) - RbMath::lnFactorial(int(count));
+        }
+        else // exchangeable reporting
+        {
+            // P(N >= count) and P(N >= count+1) for N ~ Poisson(Lambda), by upper-tail
+            // summation (no catastrophic cancellation).
+            double Pk = 0.0;
+            double pmf_count = exp( -Lambda + count*log(Lambda) - RbMath::lnFactorial(int(count)) );
+            double t = pmf_count;
+            for ( int n = int(count); n < int(count) + 100000; n++ )
             {
-            // Truly-exchangeable incomplete sampling: the reported occurrences are a
-            // uniform subset, so the true oldest (tau1 = first[i]) may be unobserved and
-            // is augmented up to the birth. Unobserved specimens fall anywhere in
-            // (d, tau1), so Lambda integrates psi over that range, not the observed span.
-            double Lambda = 0.0;                            // Psi(d, tau1): sampling over the whole sampled interval
-            std::vector<double> psi(ages.size(), 0.0);      // Psi(F_i): per-occurrence integral over its interval, capped at [d,tau1]
-
-            for (size_t j = 0; j < num_intervals; j++)
-            {
-                double t_0 = ( j < num_intervals-1 ? times[j+1] : RbConstants::Double::inf );
-
-                if ( t_0 <= d ) continue;
-                if ( times[j] >= o ) break;
-
-                double dL = std::min(o, t_0) - std::max(d, times[j]);
-                if ( dL > 0.0 ) Lambda += fossil[j]*dL;
-
-                size_t k = 0;
-                for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++,k++ )
-                {
-                    if ( Fi->first.getMin() < t_0 && Fi->first.getMax() > times[j] )
-                    {
-                        double dt = std::min(std::min(Fi->first.getMax(), o), t_0) - std::max(std::max(Fi->first.getMin(), d), times[j]);
-                        if ( dt > 0.0 ) psi[k] += fossil[j] * dt;
-                    }
-                }
+                Pk += t;
+                t *= Lambda / double(n+1);
+                if ( t < 1e-17 * Pk && n > (int)Lambda ) break;
             }
+            double Pk1 = Pk - pmf_count;                // P(N >= count+1)
 
-            // instantaneous rate of the oldest specimen at tau1
-            result = log(fossil[oi]);
+            // bracket = P>=k * recip_old       (oldest specimen is one of the reported)
+            //         + ( P>=k - (k/Lambda) P>=k+1 )   (oldest unobserved; all reported interior)
+            double bracket = Pk*recip_old + Pk - (double(count)/Lambda)*Pk1;
+            if ( bracket <= 0.0 ) return RbConstants::Double::neginf;
 
-            size_t count = occurrence_counts[i];
-            double recip_old = 0.0;                         // sum_{i: tau1 in F_i} count_i / Psi(F_i)
-
-            size_t k = 0;
-            for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++,k++ )
-            {
-                // occurrence i can be the labeled oldest specimen iff its interval contains tau1
-                if ( Fi->first.getMin() <= o && Fi->first.getMax() >= o )
-                {
-                    recip_old += Fi->second / psi[k];
-                }
-                result += log(psi[k]) * Fi->second;         // log prod_i Psi(F_i)^{count_i}
-            }
-
-            if ( truncated[i] == false )
-            {
-                // sum over which observation supplies the oldest specimen at tau1
-                result += log(recip_old) - RbMath::lnFactorial(int(count));
-            }
-            else
-            {
-                // P(N >= count) and P(N >= count+1) for N ~ Poisson(Lambda), by upper-tail
-                // summation (no catastrophic cancellation).
-                double Pk = 0.0;
-                double pmf_count = exp( -Lambda + count*log(Lambda) - RbMath::lnFactorial(int(count)) );
-                double t = pmf_count;
-                for ( int n = int(count); n < int(count) + 100000; n++ )
-                {
-                    Pk += t;
-                    t *= Lambda / double(n+1);
-                    if ( t < 1e-17 * Pk && n > (int)Lambda ) break;
-                }
-                double Pk1 = Pk - pmf_count;                // P(N >= count+1)
-
-                // bracket = P>=k * recip_old       (oldest specimen is one of the reported)
-                //         + ( P>=k - (k/Lambda) P>=k+1 )   (oldest unobserved; all reported interior)
-                double bracket = Pk*recip_old + Pk - (double(count)/Lambda)*Pk1;
-                if ( bracket <= 0.0 ) return RbConstants::Double::neginf;
-
-                // +Lambda: the q_tilde terms already carry e^{-Lambda}, which the
-                // tails re-introduce. The tails also carry their own 1/k!, so no
-                // further factorial belongs here.
-                result += log(bracket) - count*log(Lambda) + Lambda;
-            }
+            // +Lambda: the q_tilde terms already carry e^{-Lambda}, which the
+            // tails re-introduce. The tails also carry their own 1/k!, so no
+            // further factorial belongs here.
+            result += log(bracket) - count*log(Lambda) + Lambda;
         }
     }
-
     // only one fossil age
     else
     {
@@ -797,34 +745,10 @@ std::vector<double>& AbstractFossilizedBirthDeathRangeProcess::getAges(void)
 }
 
 
-// Set the reporting model. dnFossilRecord pushes its `reporting=` arg onto the skeleton via
-// this setter, so the single `reporting` member is the one source of truth. The cap that
-// distinguishes uniform from complete per taxon is fixed at construction (truncated[]).
 void AbstractFossilizedBirthDeathRangeProcess::setReportingModel( const std::string &s )
 {
     reporting = s;
 }
-
-
-// Support of tau_1, floored at the death time (tau_1 >= d). A truncated (uniform) record
-// may not report the true oldest, so tau_1 ranges up to the birth; otherwise it lies in
-// the reported bin [o_i, max_age] and the b > tau_1 constraint -- not the support -- keeps
-// it below b. The bounds are data-fixed (the reported bin), independent of b AND d, so the
-// proposal is symmetric and needs no Jacobian: the auto-resample fires before
-// updateStartEndTimes refreshes b_i/d_i, and any parameter-dependent bound would draw
-// against the old value while the shared Jacobian used the new one -- a mismatch (no
-// Hastings) that biases that parameter. tau_1 < d is left for the density to reject.
-// (The truncated/uniform model's upper bound is the birth b and so is not symmetric; it
-// keeps the b-dependent bound and its Jacobian below.)
-std::pair<double,double> AbstractFossilizedBirthDeathRangeProcess::firstSupport(size_t i) const
-{
-    double lo = o_i[i];
-    double hi = truncated[i] ? ( b_i[i] > lo ? b_i[i] : std::max(taxa[i].getMaxAge(), b_i[i]) )
-                             : std::max( taxa[i].getMaxAge(), lo );
-
-    return std::make_pair(lo, hi);
-}
-
 
 void AbstractFossilizedBirthDeathRangeProcess::resampleFirstLast(size_t i)
 {
@@ -832,13 +756,20 @@ void AbstractFossilizedBirthDeathRangeProcess::resampleFirstLast(size_t i)
     stored_last = last;
     resampled = true;
 
-    std::pair<double,double> s = firstSupport(i);
-    first[i] = ( s.second > s.first ) ? GLOBAL_RNG->uniform01()*(s.second - s.first) + s.first : s.first;
+    // truncated (uniform): the oldest may be unobserved up to the birth.
+    // Otherwise it is in its reported bin.
+    double hi = truncated[i] ? b_i[i] : taxa[i].getMaxAge();
+    first[i] = GLOBAL_RNG->uniform01()*(o_i[i] - hi) + hi;
 
-    // The youngest age is a free auxiliary drawn from the reported range. The count >= 2
-    // density branch rejects a draw that is not a valid interior order statistic, and a
-    // single-occurrence taxon ignores it -- so it needs no clip and no Jacobian.
-    last[i] = GLOBAL_RNG->uniform01()*(y_i[i] - taxa[i].getMinAge()) + taxa[i].getMinAge();
+    // a single occurrence is its own youngest; complete/uniform do not use the youngest
+    if ( reporting == "firstlast" && occurrence_counts[i] >= 2 )
+    {
+        last[i] = GLOBAL_RNG->uniform01()*(y_i[i] - taxa[i].getMinAge()) + taxa[i].getMinAge();
+    }
+    else
+    {
+        last[i] = first[i];
+    }
 }
 
 

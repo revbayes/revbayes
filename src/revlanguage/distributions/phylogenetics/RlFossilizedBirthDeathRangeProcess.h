@@ -38,7 +38,7 @@ namespace RevLanguage {
     protected:
         FossilizedBirthDeathRangeProcess( void );
 
-        const MemberRules&                                  getSkeletonParameterRules(void) const;                                              //!< Get member rules (const), without the reporting args
+        const MemberRules&                                  getCoreParameterRules(void) const;                                              //!< Get member rules (const), without the reporting args
         static void                                         appendParameterRules(MemberRules &rules, bool include_reporting);                   //!< Build the member rules, with or without the reporting args
         
         void                                                setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);   //!< Set member variable
@@ -94,7 +94,7 @@ template <typename rlType>
 const std::string& RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::getClassType(void)
 {
 
-    static std::string rev_type = "FossilizedBirthDeathRangeProcess";
+    static std::string rev_type = "FossilizedBirthDeathRange";
 
     return rev_type;
 }
@@ -119,7 +119,7 @@ const TypeSpec& RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::getClassT
 /**
  * Build the member rules shared by the matrix and tree range processes.
  *
- * The reporting args (complete, reporting) belong to the fossil-record term, so the bare skeleton
+ * The reporting args (complete, reporting) belong to the fossil-record term, so the bare range process
  * omits them and takes its reporting model from a dnFossilRecord node instead. Keep them at this
  * position in the list: the argument order is part of the interface.
  *
@@ -148,12 +148,7 @@ void RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::appendParameterRules
 
     if ( include_reporting )
     {
-        rules.push_back( new ArgumentRule( "complete", RlBoolean::getClassTypeSpec(), "Is the fossil record complete (every sampled occurrence reported)?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false ) ) );
-
-        std::vector<std::string> optionsReporting;
-        optionsReporting.push_back( "firstlast" );
-        optionsReporting.push_back( "uniform" );
-        rules.push_back( new OptionRule( "reporting", new RlString("firstlast"), optionsReporting, "Reporting model for an incomplete record (used when complete=FALSE): firstlast (oldest and youngest occurrence) or uniform (exchangeable, capped at K = truncated)." ) );
+        rules.push_back( new ArgumentRule( "complete", RlBoolean::getClassTypeSpec(), "Is the fossil record complete (every sampled occurrence reported)? FALSE is first/last, or uniform when truncated is given.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false ) ) );
 
         rules.push_back( new ArgumentRule( "truncated", Natural::getClassTypeSpec(), "The reporting cap K the record was truncated at (selects the uniform model with complete=FALSE; taxa reporting K may have unreported occurrences).", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
     }
@@ -196,12 +191,12 @@ const MemberRules& RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::getPar
 
 
 /**
- * Get the member rules of the bare b/d skeleton: everything except the reporting args.
+ * Get the member rules of the bare b/d process: everything except the reporting args.
  *
  * \return The member rules.
  */
 template <typename rlType>
-const MemberRules& RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::getSkeletonParameterRules(void) const
+const MemberRules& RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::getCoreParameterRules(void) const
 {
 
     static MemberRules memberRules;

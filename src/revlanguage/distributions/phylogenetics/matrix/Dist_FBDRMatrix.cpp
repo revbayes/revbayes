@@ -86,10 +86,9 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRMatrix::createDistribut
     static bool warned = false;
     if ( warned == false )
     {
-        RBOUT("\nWarning! `dnFBDRMatrix` is deprecated. It fuses the birth-death range skeleton with the");
+        RBOUT("\nWarning! `dnFBDRMatrix` is deprecated. It fuses the birth-death range process with the");
         RBOUT("         fossil record, and takes the occurrences as an argument instead of as clamped data.");
-        RBOUT("         Use `dnFBDRP` for the skeleton and `dnFossilRecord` for the record instead, where");
-        RBOUT("         `reporting` replaces `complete` (complete=TRUE becomes reporting=\"complete\").");
+        RBOUT("         Use `dnFBDRP` for the range process and `dnFossilRecord` for the record instead.");
         RBOUT("         See `?dnFossilRecord` for an example.\n");
         warned = true;
     }
@@ -119,9 +118,9 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRMatrix::createDistribut
         rt = static_cast<const ModelVector<RealPos> &>( timeline->getRevObject() ).getDagNode();
     }
 
-    // complete=TRUE reports every occurrence; otherwise the reporting model applies
+    // complete=TRUE reports every occurrence; FALSE is first/last, or uniform when truncated is given
     bool comp = static_cast<const RlBoolean &>( complete->getRevObject() ).getValue();
-    std::string c  = comp ? "complete" : static_cast<const RlString &>( reporting->getRevObject() ).getValue();
+    std::string c  = comp ? "complete" : "firstlast";
 
     // a supplied cap selects the uniform model and gives it its K
     size_t K = 0;
@@ -138,7 +137,6 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRMatrix::createDistribut
         }
     }
 
-    bool use_bds = static_cast<const RlBoolean &>( bds->getRevObject() ).getValue();
     bool re = static_cast<const RlBoolean &>( resample->getRevObject() ).getValue();
 
     // optional origin time of the process
@@ -149,7 +147,7 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRMatrix::createDistribut
     }
 
     // report_internally = true: the fused facade adds the fossil-record term inline
-    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, c, K, re, use_bds, og, true);
+    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, c, K, re, og, true);
 
     return d;
 }
@@ -188,7 +186,7 @@ const TypeSpec& Dist_FBDRMatrix::getClassTypeSpec( void )
  * This name is used for the constructor and the distribution functions,
  * such as the density and random value function
  *
- * The canonical name FossilizedBirthDeathRange now belongs to the skeleton (dnFBDRP), so the
+ * The canonical name FossilizedBirthDeathRange now belongs to the range process (dnFBDRP), so the
  * deprecated fused form registers only under dnFBDRMatrix -- the name the fbd_range tutorials
  * use on this branch. It is not given a long name of its own, since it is on its way out.
  *
@@ -222,8 +220,6 @@ const MemberRules& Dist_FBDRMatrix::getParameterRules(void) const
 
     if ( !rules_set )
     {
-        dist_member_rules.push_back( new ArgumentRule( "BDS", RlBoolean::getClassTypeSpec(), "Assume complete lineage sampling? (BDS model of Silvestro et al. 2019)", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false ) ) );
-
         dist_member_rules.push_back( new ArgumentRule( "origin", RealPos::getClassTypeSpec(), "The origin time of the process (defaults to the oldest sampled birth).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
         // add the rules from the base class, including the reporting args
@@ -264,11 +260,7 @@ const TypeSpec& Dist_FBDRMatrix::getTypeSpec( void ) const
 void Dist_FBDRMatrix::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
 {
 
-    if ( name == "BDS" )
-    {
-        bds = var;
-    }
-    else if ( name == "origin" )
+    if ( name == "origin" )
     {
         origin = var;
     }

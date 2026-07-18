@@ -4,16 +4,16 @@ dnFossilizedBirthDeathRange
 ## description
 The fossilized birth death range process (FBDRP) describes the distribution of a matrix of species origination and extinction times under a model of asymmetric speciation and sampling of extinct species.
 ## details
-This distribution is the birth-death range skeleton on its own: it describes how species ranges diversify, and the fossil occurrences bound those ranges, but it does not include the probability of the fossil record itself. Pair it with a `dnFossilRecord` node clamped to the occurrences to get the full model. That node also selects the reporting model, i.e. how sampled occurrences reach the record: `complete` (all reported), `firstlast` (only the oldest and youngest), or `uniform` (an exchangeable subset). A skeleton with no `dnFossilRecord` attached is a valid model, but it does not condition on the fossil record at all.
+This distribution is the birth-death range process on its own: it describes how species ranges diversify, and the fossil occurrences bound those ranges, but it does not include the probability of the fossil record itself. Pair it with a `dnFossilRecord` node clamped to the occurrences to get the full model. That node also selects the reporting model, i.e. how sampled occurrences reach the record: `complete` (all reported) or first/last (only the oldest and youngest). A range process with no `dnFossilRecord` attached is a valid model, but it does not condition on the fossil record at all.
 
-Fossil species are represented by a collection of fossil occurrences with uncertainty. Speciation, extinction and sampling rates may be time-homogeneous or piecewise time-heterogeneous. If time-heterogeneous rates are provided, then a vector of rate change time-points musts also be provided. Under the hood, the fossil data is augmented with oldest occurrence ages for each species, which must be sampled during MCMC using `mvResampleFBDR`. Setting `BDS` to true causes the model to assume complete lineage sampling i.e. using the Birth-Death with Rateshifts (BDS) model of Silvestro et al. (2019).
+Fossil species are represented by a collection of fossil occurrences with uncertainty. Speciation, extinction and sampling rates may be time-homogeneous or piecewise time-heterogeneous. If time-heterogeneous rates are provided, then a vector of rate change time-points musts also be provided. Under the hood, the fossil data is augmented with oldest occurrence ages for each species, which must be sampled during MCMC using `mvResampleFBDR`. The related `dnBDS` distribution assumes complete lineage sampling instead (the Birth-Death with Rateshifts model of Silvestro et al. 2019).
 
-The deprecated `dnFBDRMatrix` is the older fused form of this process: it carries the fossil-record term internally and takes the occurrences as a constructor argument rather than as clamped data. Its `complete` and `reporting` arguments are replaced by `reporting` on `dnFossilRecord`, where `complete=TRUE` becomes `reporting="complete"`.
+The deprecated `dnFBDRMatrix` is the older fused form of this process: it carries the fossil-record term internally and takes the occurrences as a constructor argument rather than as clamped data. Its reporting model is instead selected by `complete` on `dnFossilRecord`.
 ## authors
 June Walker
 ## see_also
 dnFossilRecord
-dnBirthDeathSamplingTreatment
+dnBDS
 mvResampleFBDR
 ## example
 lambda ~ dnExp(10)
@@ -22,8 +22,8 @@ psi ~ dnExp(10)
 
 bd ~ dnFBDRP(lambda=lambda, mu=mu, psi=psi, rho=1, taxa=taxa)
 
-# the fossil record, conditioned on the skeleton and clamped to the observed occurrences
-rec ~ dnFossilRecord(skeleton=bd, reporting="firstlast", taxa=taxa)
+# the fossil record, conditioned on the range process and clamped to the observed occurrences
+rec ~ dnFossilRecord(ranges=bd, complete=false)
 rec.clamp(taxa)
 
 moves.append( mvMatrixElementScale(bd, weight=taxa.size()) )

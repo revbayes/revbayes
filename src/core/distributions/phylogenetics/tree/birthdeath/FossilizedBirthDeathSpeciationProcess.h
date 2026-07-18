@@ -40,7 +40,8 @@ namespace RevBayesCore {
                                       const std::string &condition,
                                       const std::vector<Taxon> &taxa,
                                       const std::string &reporting,
-                                      bool resampling);  //!< Constructor
+                                      bool resampling,
+                                      bool report_internally = true);  //!< Constructor
         
         // public member functions
         FossilizedBirthDeathSpeciationProcess*          clone(void) const override;                                //!< Create an independent clone

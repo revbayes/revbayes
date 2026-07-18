@@ -108,10 +108,9 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRP::createDistribution( 
     }
 
     // the reporting model in force until a dnFossilRecord node pushes its own on: it applies to
-    // the constructor's initial augmented age draw, and to a skeleton used with no record node.
-    // "complete" needs no cap, so the bare skeleton never trips the uniform cap requirement.
+    // the constructor's initial augmented age draw, and to a range process used with no record node.
+    // "complete" needs no cap, so the bare range process never trips the uniform cap requirement.
     std::string c  = "complete";
-    bool use_bds = static_cast<const RlBoolean &>( bds->getRevObject() ).getValue();
     bool re = static_cast<const RlBoolean &>( resample->getRevObject() ).getValue();
 
     // optional origin time of the process
@@ -121,8 +120,8 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRP::createDistribution( 
         og = static_cast<const RealPos &>( origin->getRevObject() ).getDagNode();
     }
 
-    // report_internally = false: the bare skeleton, with no inline fossil-record term
-    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, c, 0, re, use_bds, og, false);
+    // report_internally = false: the bare range process, with no inline fossil-record term
+    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, c, 0, re, og, false);
     
     return d;
 }
@@ -190,7 +189,7 @@ std::string Dist_FBDRP::getDistributionFunctionName( void ) const
 /**
  * Get the member rules used to create the constructor of this object.
  *
- * The member rules of the fossilized birth-death range skeleton are those of the fused process
+ * The member rules of the fossilized birth-death range process are those of the fused process
  * minus the reporting args (complete, reporting), which belong to dnFossilRecord.
  *
  * \return The member rules.
@@ -203,12 +202,10 @@ const MemberRules& Dist_FBDRP::getParameterRules(void) const
     
     if ( !rules_set )
     {
-        dist_member_rules.push_back( new ArgumentRule( "BDS", RlBoolean::getClassTypeSpec(), "Assume complete lineage sampling? (BDS model of Silvestro et al. 2019)", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false ) ) );
-
         dist_member_rules.push_back( new ArgumentRule( "origin", RealPos::getClassTypeSpec(), "The origin time of the process (defaults to the oldest sampled birth).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
         // add the rules from the base class, without the reporting args
-        const MemberRules &parentRules = FossilizedBirthDeathRangeProcess<MatrixReal>::getSkeletonParameterRules();
+        const MemberRules &parentRules = FossilizedBirthDeathRangeProcess<MatrixReal>::getCoreParameterRules();
         dist_member_rules.insert(dist_member_rules.end(), parentRules.begin(), parentRules.end());
         
         rules_set = true;
@@ -245,11 +242,7 @@ const TypeSpec& Dist_FBDRP::getTypeSpec( void ) const
 void Dist_FBDRP::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
 {
 
-    if ( name == "BDS" )
-    {
-        bds = var;
-    }
-    else if ( name == "origin" )
+    if ( name == "origin" )
     {
         origin = var;
     }

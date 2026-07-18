@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "FossilizedBirthDeathRangeProcess.h"
+#include "BirthDeathWithRateshifts.h"
 
 #include "ModelVector.h"
 #include "Natural.h"
@@ -73,30 +74,34 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_BDS::createDistribution( vo
         rt = static_cast<const ModelVector<RealPos> &>( timeline->getRevObject() ).getDagNode();
     }
 
-    bool comp = static_cast<const RlBoolean &>( complete->getRevObject() ).getValue();
-    std::string c  = comp ? "complete" : static_cast<const RlString &>( reporting->getRevObject() ).getValue();
-
-    // a supplied cap selects the uniform model and gives it its K
-    size_t K = 0;
-    if ( truncated->getRevObject() != RevNullObject::getInstance() )
-    {
-        if ( comp == true )
-        {
-            RBOUT( "Warning: \"truncated\" is ignored when complete=TRUE." );
-        }
-        else
-        {
-            K = size_t( static_cast<const Natural &>( truncated->getRevObject() ).getValue() );
-            c = "uniform";
-        }
-    }
-
     bool re = static_cast<const RlBoolean &>( resample->getRevObject() ).getValue();
 
-    // BDS model: use_bds is always true
-    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, c, K, re, true);
+    // bare BDS range process: report_internally=false (a dnFossilRecord node supplies the
+    // reporting term)
+    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::BirthDeathWithRateshifts(l, m, p, r, rt, cond, t, "complete", 0, re, NULL, false);
 
     return d;
+}
+
+
+/**
+ * Get the member rules: the bare range process, without the reporting args (the reporting model is
+ * supplied by a dnFossilRecord node conditioned on this range process).
+ */
+const MemberRules& Dist_BDS::getParameterRules(void) const
+{
+    static MemberRules dist_member_rules;
+    static bool rules_set = false;
+
+    if ( !rules_set )
+    {
+        const MemberRules &parentRules = FossilizedBirthDeathRangeProcess<MatrixReal>::getCoreParameterRules();
+        dist_member_rules.insert(dist_member_rules.end(), parentRules.begin(), parentRules.end());
+
+        rules_set = true;
+    }
+
+    return dist_member_rules;
 }
 
 
@@ -119,6 +124,21 @@ const TypeSpec& Dist_BDS::getClassTypeSpec( void )
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( TypedDistribution<ModelVector<ModelVector<RealPos> > >::getClassTypeSpec() ) );
 
     return rev_type_spec;
+}
+
+
+/**
+ * Get the alternative Rev names (aliases) for the constructor function.
+ *
+ * \return Rev aliases of constructor function.
+ */
+std::vector<std::string> Dist_BDS::getDistributionFunctionAliases( void ) const
+{
+    // create alternative constructor function names variable that is the same for all instance of this class
+    std::vector<std::string> a_names;
+    a_names.push_back( "BirthDeathWithRateshifts" );
+
+    return a_names;
 }
 
 

@@ -49,15 +49,15 @@ namespace RevBayesCore {
         virtual ~AbstractFossilizedBirthDeathRangeProcess(){};
 
         std::vector<double>&                            getAges();
+        const std::vector<Taxon>&                       getTaxa() const { return taxa; }
         void                                            resampleFirstLast(size_t i);
-        std::pair<double,double>                        firstSupport(size_t i) const;                              //!< (lo,hi) support of the augmented oldest age tau_1
-        double                                          computeLnFossilTotal();                                    //!< Total fossil-record log-density summed over taxa; used by a standalone dnFossilRecord node conditioned on this skeleton (self-contained: refreshes rate cache + start/end times).
-        void                                            setReportingModel(const std::string &s);                   //!< Set the reporting model (complete|firstlast|uniform). dnFossilRecord pushes it onto its skeleton.
+        double                                          computeLnFossilTotal();                                    //!< Total fossil-record log-density summed over taxa; used by a standalone dnFossilRecord node conditioned on this range process (self-contained: refreshes rate cache + start/end times).
+        void                                            setReportingModel(const std::string &s);                   //!< Set the reporting model (complete|firstlast|uniform). dnFossilRecord pushes it onto its range process.
 
     protected:
         virtual void                                    updateStartEndTimes() = 0;
         virtual double                                  computeLnProbabilityRanges(bool force = false);
-        double                                          computeLnFossilRecord(size_t i) const;              //!< Fossil-record (occurrence) log-term for taxon i, factored out of computeLnProbabilityRanges (skeleton/reporting split).
+        double                                          computeLnFossilRecord(size_t i) const;              //!< Fossil-record (occurrence) log-term for taxon i, factored out of computeLnProbabilityRanges (range/reporting split).
 
         // Parameter management functions
         void                                            swapParameterInternal(const DagNode *oldP, const DagNode *newP);                //!< Swap a parameter
@@ -129,7 +129,7 @@ namespace RevBayesCore {
         bool                                            touched;                                               //!< Indicates whether any terms need updating
         bool                                            resampled;                                              //!< Indicates whether any oldest occurrence ages were resampled
         bool                                            resampling;                                             //!< Indicates whether we are resampling oldest occurrence ages
-        bool                                            report_internally;                                      //!< If true (default) computeLnProbabilityRanges adds the reporting term inline (fused facade); if false the term is omitted (bare skeleton) and supplied by a separate dnFossilRecord node.
+        bool                                            report_internally;                                      //!< If true (default) computeLnProbabilityRanges adds the reporting term inline (fused facade); if false the term is omitted (bare range process) and supplied by a separate dnFossilRecord node.
     };
 }
 

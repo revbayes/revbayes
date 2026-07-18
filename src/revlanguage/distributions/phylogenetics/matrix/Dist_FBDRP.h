@@ -14,8 +14,8 @@ namespace RevLanguage {
      * The RevLanguage wrapper of the fossilized-birth-death range matrix process connects
      * the variables/parameters of the process and creates the internal FossilizedBirthDeathRangeMatrixProcess object.
      *
-     * This is the birth-death range skeleton alone. It does not include the fossil-record term
-     * Pr(occurrences | skeleton), which is supplied by a separate dnFossilRecord node that also
+     * This is the birth-death range process alone. It does not include the fossil-record term
+     * Pr(occurrences | ranges), which is supplied by a separate dnFossilRecord node that also
      * chooses the reporting model, so there are no reporting arguments here. The deprecated
      * dnFBDRMatrix is the fused form, carrying both terms in one node.
      *
@@ -46,7 +46,6 @@ namespace RevLanguage {
 
         void                                                    setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);       //!< Set member variable
     
-        RevPtr<const RevVariable>                               bds;
         RevPtr<const RevVariable>                               origin;
     };
     
