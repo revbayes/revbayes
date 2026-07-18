@@ -1,6 +1,7 @@
 #ifndef AbstractFossilizedBirthDeathRangeProcess_H
 #define AbstractFossilizedBirthDeathRangeProcess_H
 
+#include "MemberObject.h"
 #include "RbVector.h"
 #include "Taxon.h"
 #include "TypedDagNode.h"
@@ -31,7 +32,7 @@ namespace RevBayesCore {
      * @since 2014-03-18, version 1.0
      *
      */
-    class AbstractFossilizedBirthDeathRangeProcess {
+    class AbstractFossilizedBirthDeathRangeProcess : public MemberObject< RbVector<double> > {
         
     public:
         AbstractFossilizedBirthDeathRangeProcess(const DagNode *speciation,
@@ -49,6 +50,7 @@ namespace RevBayesCore {
         virtual ~AbstractFossilizedBirthDeathRangeProcess(){};
 
         std::vector<double>&                            getAges();
+        void                                            executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const;   //!< Expose the augmented first/last ages so they can be monitored through a deterministic node
         const std::vector<Taxon>&                       getTaxa() const { return taxa; }
         void                                            resampleFirstLast(size_t i);
         void                                            drawRanges();                                              //!< Draw an initial (b_i, d_i) and the augmented ages for every taxon. Shared by the matrix redraw and the tree (FBDSP) initial-value construction, which hangs a random budding topology on the ranges.

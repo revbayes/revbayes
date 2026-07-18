@@ -740,6 +740,30 @@ std::vector<double>& AbstractFossilizedBirthDeathRangeProcess::getAges(void)
 }
 
 
+/**
+ * The augmented oldest (tau_1) and youngest (tau_K) occurrence ages of every taxon. They are
+ * internal to the distribution, so a deterministic node is the only way a monitor can see them.
+ * Only first/last reporting augments the youngest; otherwise last == first.
+ */
+void AbstractFossilizedBirthDeathRangeProcess::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, RbVector<double> &rv) const
+{
+    if ( n == "getAugmentedFirstAges" || n == "getAugmentedLastAges" )
+    {
+        const std::vector<double> &ages = ( n == "getAugmentedFirstAges" ? first : last );
+
+        rv.clear();
+        for (size_t i = 0; i < ages.size(); i++)
+        {
+            rv.push_back( ages[i] );
+        }
+    }
+    else
+    {
+        throw RbException() << "The fossilized birth death range process does not have a member method called '" << n << "'.";
+    }
+}
+
+
 void AbstractFossilizedBirthDeathRangeProcess::setReportingModel( const std::string &s )
 {
     reporting = s;

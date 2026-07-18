@@ -10,6 +10,11 @@
 
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
+#include "MethodTable.h"
+#include "StochasticNode.h"
+#include "RlStochasticNode.h"
+#include "DistributionMemberFunction.h"
+#include "RlDistributionMemberFunction.h"
 #include "ModelVector.h"
 #include "Natural.h"
 #include "OptionRule.h"
@@ -251,4 +256,22 @@ void Dist_FBDRP::setConstParameter(const std::string& name, const RevPtr<const R
        FossilizedBirthDeathRangeProcess<MatrixReal>::setConstParameter(name,var);
     }
 
+}
+
+
+/**
+ * The augmented first (tau_1) and last (tau_K) occurrence ages. They are internal to the
+ * distribution, so a deterministic node is the only way a monitor can reach them.
+ */
+RevLanguage::MethodTable Dist_FBDRP::getDistributionMethods( void ) const
+{
+    MethodTable methods = TypedDistribution<MatrixReal>::getDistributionMethods();
+
+    ArgumentRules* first_ages_arg_rules = new ArgumentRules();
+    methods.addFunction( new DistributionMemberFunction<Dist_FBDRP, ModelVector<RealPos> >( "getAugmentedFirstAges", variable, first_ages_arg_rules, true ) );
+
+    ArgumentRules* last_ages_arg_rules = new ArgumentRules();
+    methods.addFunction( new DistributionMemberFunction<Dist_FBDRP, ModelVector<RealPos> >( "getAugmentedLastAges", variable, last_ages_arg_rules, true ) );
+
+    return methods;
 }
