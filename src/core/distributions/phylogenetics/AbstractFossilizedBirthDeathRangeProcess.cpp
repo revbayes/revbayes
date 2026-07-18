@@ -27,7 +27,7 @@ using namespace RevBayesCore;
 
 /**
  * Keep a uniform random K-subset of a taxon's reported occurrences, which is the reporting
- * rule the exchangeable ("uniform") density assumes.
+ * rule the exchangeable-occurrence (truncated) density assumes.
  */
 static void truncateRecord( Taxon &taxon, size_t K )
 {
@@ -39,7 +39,7 @@ static void truncateRecord( Taxon &taxon, size_t K )
         record.insert( record.end(), Fi->second, Fi->first );
     }
 
-    // partial Fisher-Yates: the leading K entries end up a uniform subset
+    // partial Fisher-Yates: the leading K entries end up a uniformly random subset
     for ( size_t j = 0; j < K; j++ )
     {
         size_t r = j + size_t( GLOBAL_RNG->uniform01() * (record.size() - j) );
@@ -69,7 +69,7 @@ static void truncateRecord( Taxon &taxon, size_t K )
  * \param[in]    cdt            Condition of the process (time/sampling/survival).
  * \param[in]    tn             Taxa.
  * \param[in]    c              Complete sampling?
- * \param[in]    K              Reporting cap (uniform model only; 0 = uncapped).
+ * \param[in]    K              Reporting cap (truncated model only; 0 = uncapped).
  * \param[in]    re             Augmented age resampling weight.
  */
 AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProcess(const DagNode *inspeciation,
@@ -211,9 +211,9 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
     occurrence_counts = std::vector<size_t>(taxa.size(), 0);
     truncated         = std::vector<bool>(taxa.size(), false);
 
-    if ( reporting == "uniform" && K == 0 )
+    if ( reporting == "truncated" && K == 0 )
     {
-        throw(RbException("The uniform fossil sampling model requires a reporting cap of at least 1."));
+        throw(RbException("The truncated (exchangeable occurrence) reporting model requires a reporting cap of at least 1."));
     }
 
     double max_present = RbConstants::Double::inf;
@@ -233,7 +233,7 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
         // have unreported specimens and its record is exchangeable; one below the cap was
         // reported whole, which is the complete case. A record over the cap was not
         // truncated as declared, so truncate it here.
-        if ( reporting == "uniform" && count >= K )
+        if ( reporting == "truncated" && count >= K )
         {
             if ( count > K )
             {
@@ -756,12 +756,12 @@ void AbstractFossilizedBirthDeathRangeProcess::resampleFirstLast(size_t i)
     stored_last = last;
     resampled = true;
 
-    // truncated (uniform): the oldest may be unobserved up to the birth.
+    // truncated (exchangeable occurrence): the oldest may be unobserved up to the birth.
     // Otherwise it is in its reported bin.
     double hi = truncated[i] ? b_i[i] : taxa[i].getMaxAge();
     first[i] = GLOBAL_RNG->uniform01()*(o_i[i] - hi) + hi;
 
-    // a single occurrence is its own youngest; complete/uniform do not use the youngest
+    // a single occurrence is its own youngest; complete/truncated do not use the youngest
     if ( reporting == "firstlast" && occurrence_counts[i] >= 2 )
     {
         last[i] = GLOBAL_RNG->uniform01()*(y_i[i] - taxa[i].getMinAge()) + taxa[i].getMinAge();

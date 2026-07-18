@@ -10,7 +10,7 @@ The `complete` argument selects how sampled specimens make it into the reported 
 
 The occurrences, the fossil sampling rate, its timeline, and the augmented occurrence ages are all read from the range process rather than given as arguments here. The sampling rate also appears in the range process's non-detection term, so the two nodes must share it.
 
-The deprecated `dnFBDRMatrix` fuses this term and the range process into a single node, and additionally offers the `uniform` (exchangeable-subset) reporting model.
+The deprecated `dnFBDRMatrix` fuses this term and the range process into a single node, and additionally offers the truncated (exchangeable-occurrence) reporting model via its `truncated=K` cap.
 ## authors
 June Walker
 ## see_also

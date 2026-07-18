@@ -118,11 +118,11 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRMatrix::createDistribut
         rt = static_cast<const ModelVector<RealPos> &>( timeline->getRevObject() ).getDagNode();
     }
 
-    // complete=TRUE reports every occurrence; FALSE is first/last, or uniform when truncated is given
+    // complete=TRUE reports every occurrence; FALSE is first/last, or the truncated model when truncated is given
     bool comp = static_cast<const RlBoolean &>( complete->getRevObject() ).getValue();
     std::string c  = comp ? "complete" : "firstlast";
 
-    // a supplied cap selects the uniform model and gives it its K
+    // a supplied cap selects the truncated model and gives it its K
     size_t K = 0;
     if ( truncated->getRevObject() != RevNullObject::getInstance() )
     {
@@ -133,7 +133,7 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRMatrix::createDistribut
         else
         {
             K = size_t( static_cast<const Natural &>( truncated->getRevObject() ).getValue() );
-            c = "uniform";
+            c = "truncated";
         }
     }
 

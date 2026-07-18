@@ -52,7 +52,7 @@ namespace RevBayesCore {
         const std::vector<Taxon>&                       getTaxa() const { return taxa; }
         void                                            resampleFirstLast(size_t i);
         double                                          computeLnFossilTotal();                                    //!< Total fossil-record log-density summed over taxa; used by a standalone dnFossilRecord node conditioned on this range process (self-contained: refreshes rate cache + start/end times).
-        void                                            setReportingModel(const std::string &s);                   //!< Set the reporting model (complete|firstlast|uniform). dnFossilRecord pushes it onto its range process.
+        void                                            setReportingModel(const std::string &s);                   //!< Set the reporting model (complete|firstlast|truncated). dnFossilRecord pushes it onto its range process.
 
     protected:
         virtual void                                    updateStartEndTimes() = 0;
@@ -123,7 +123,7 @@ namespace RevBayesCore {
         std::vector<bool>                               dirty_psi;                                              //!< Indicates whether fossil sampling terms need updating
         std::vector<bool>                               dirty_taxa;                                             //!< Indicates whether partial likelihood needs updating
         
-        std::string                                     reporting;                                               //!< Fossil reporting model: complete | firstlast | uniform
+        std::string                                     reporting;                                               //!< Fossil reporting model: complete | firstlast | truncated
         std::vector<size_t>                             occurrence_counts;                                      //!< Number of reported occurrences for each taxon
         std::vector<bool>                               truncated;                                              //!< Taxa reported up to the cap K, whose unreported specimens are marginalized
         bool                                            touched;                                               //!< Indicates whether any terms need updating
