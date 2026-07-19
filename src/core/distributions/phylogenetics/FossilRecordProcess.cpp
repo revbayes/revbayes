@@ -49,6 +49,13 @@ FossilRecordProcess::FossilRecordProcess(const DagNode *rn, const std::string &r
 
     addParameter( ranges_node );
 
+    // the reporting term reads psi and the timeline off the range process, not through its value
+    const std::vector<const DagNode*> &rp = ranges->getRangeParameters();
+    for (std::vector<const DagNode*>::const_iterator it = rp.begin(); it != rp.end(); ++it)
+    {
+        addParameter( *it );
+    }
+
     // the occurrences are the range process's taxa
     taxa = ranges->getTaxa();
     *this->value = RbVector<Taxon>( taxa );

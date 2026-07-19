@@ -64,6 +64,7 @@ namespace RevBayesCore {
         void                                            drawRanges();                                              //!< Draw an initial (b_i, d_i) and the augmented ages for every taxon. Shared by the matrix redraw and the tree (FBDSP) initial-value construction, which hangs a random budding topology on the ranges.
         double                                          computeLnFossilTotal();                                    //!< Total fossil-record log-density summed over taxa; used by a standalone dnFossilRecord node conditioned on this range process (self-contained: refreshes rate cache + start/end times).
         void                                            setReportingModel(const std::string &s);                   //!< Set the reporting model (complete|firstlast|truncated). dnFossilRecord pushes it onto its range process.
+        const std::vector<const DagNode*>&              getRangeParameters(void) const { return range_parameters; }   //!< The rate/timeline nodes a separate dnFossilRecord node adopts as parents.
 
     protected:
         virtual void                                    updateStartEndTimes() = 0;
