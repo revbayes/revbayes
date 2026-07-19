@@ -744,9 +744,15 @@ std::vector<double>& AbstractFossilizedBirthDeathRangeProcess::getAges(void)
  */
 void AbstractFossilizedBirthDeathRangeProcess::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, RbVector<double> &rv) const
 {
-    if ( n == "getAugmentedFirstAges" || n == "getAugmentedLastAges" )
+    if ( n == "getAugmentedFirstAges" || n == "getAugmentedLastAges" || n == "getBirthAges" || n == "getDeathAges" )
     {
-        const std::vector<double> &ages = ( n == "getAugmentedFirstAges" ? first : last );
+        // b_i/d_i are a byproduct of the density, so refresh them from the value
+        AbstractFossilizedBirthDeathRangeProcess *self = const_cast<AbstractFossilizedBirthDeathRangeProcess *>( this );
+        self->updateStartEndTimes();
+
+        const std::vector<double> &ages = ( n == "getAugmentedFirstAges" ? first :
+                                          ( n == "getAugmentedLastAges"  ? last  :
+                                          ( n == "getBirthAges"          ? b_i   : d_i ) ) );
 
         rv.clear();
         for (size_t i = 0; i < ages.size(); i++)

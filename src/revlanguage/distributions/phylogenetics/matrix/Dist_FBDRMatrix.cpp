@@ -284,5 +284,11 @@ RevLanguage::MethodTable Dist_FBDRMatrix::getDistributionMethods( void ) const
     ArgumentRules* origin_arg_rules = new ArgumentRules();
     methods.addFunction( new DistributionMemberFunction<Dist_FBDRMatrix, RealPos >( "getOrigin", variable, origin_arg_rules, true ) );
 
+    ArgumentRules* birth_arg_rules = new ArgumentRules();
+    methods.addFunction( new DistributionMemberFunction<Dist_FBDRMatrix, ModelVector<RealPos> >( "getBirthAges", variable, birth_arg_rules, true ) );
+
+    ArgumentRules* death_arg_rules = new ArgumentRules();
+    methods.addFunction( new DistributionMemberFunction<Dist_FBDRMatrix, ModelVector<RealPos> >( "getDeathAges", variable, death_arg_rules, true ) );
+
     return methods;
 }

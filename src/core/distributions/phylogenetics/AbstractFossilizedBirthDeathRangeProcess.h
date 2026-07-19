@@ -54,7 +54,7 @@ namespace RevBayesCore {
         virtual ~AbstractFossilizedBirthDeathRangeProcess(){};
 
         std::vector<double>&                            getAges();
-        void                                            executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const;   //!< Expose the augmented first/last ages so they can be monitored through a deterministic node
+        void                                            executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const;   //!< Expose the augmented first/last ages and the birth/death times for monitoring
         void                                            executeMethod(const std::string &n, const std::vector<const DagNode*> &args, double &rv) const;              //!< Expose the origin, which no monitor can otherwise reach
         const std::vector<Taxon>&                       getTaxa() const { return taxa; }
         double                                          getPresent(void) const { return times.front(); }                                   //!< Age of the present
