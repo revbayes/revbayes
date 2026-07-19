@@ -261,6 +261,12 @@ double FossilizedBirthDeathSpeciationProcess::q( size_t i, double t, bool tilde 
 /**
  *
  */
+void FossilizedBirthDeathSpeciationProcess::redrawValue(SimulationCondition c)
+{
+    redrawValue();
+}
+
+
 void FossilizedBirthDeathSpeciationProcess::redrawValue(void)
 {
     // Draw a range (b_i, d_i) per taxon exactly as the matrix process does, then hang a random
@@ -308,17 +314,29 @@ void FossilizedBirthDeathSpeciationProcess::redrawValue(void)
     {
         size_t k = order[idx];
 
-        // already-placed lineages born before k's oldest age, so the overlap window is non-empty;
-        // the origin lineage (born at the origin) always qualifies
+        // already-placed lineages that are old enough to bud k
         std::vector<size_t> cand;
         for (size_t p = 0; p < idx; ++p)
         {
             if ( b_i[order[p]] > first[k] ) cand.push_back( order[p] );
         }
-        size_t j = cand[ static_cast<size_t>( floor( rng->uniform01() * cand.size() ) ) ];
 
-        // birth in (max(first_k, d_j), b_j): after j is born and while it is still alive
+        // an origin younger than k's oldest age leaves none, so bud from the origin lineage and
+        // let the density reject the birth, which lets the caller draw another origin
+        size_t j = root_lineage;
+        if ( cand.empty() == false )
+        {
+            size_t pick = size_t( rng->uniform01() * cand.size() );
+            if ( pick >= cand.size() ) pick = cand.size() - 1;
+
+            j = cand[pick];
+        }
+
+        // birth in (max(first_k, d_j), b_j): after j is born and while it is still alive. The
+        // birth must stay below b_j whatever the window, or the tree is assembled out of order.
         double lo = std::max( first[k], d_i[j] );
+        if ( lo >= b_i[j] ) lo = 0.0;
+
         b_i[k] = rng->uniform01()*(b_i[j] - lo) + lo;
         parent[k] = j;
     }

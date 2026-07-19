@@ -47,6 +47,7 @@ namespace RevBayesCore {
         FossilizedBirthDeathSpeciationProcess*          clone(void) const override;                                //!< Create an independent clone
 
         void                                            redrawValue(void) override;
+        void                                            redrawValue(SimulationCondition c) override;                        //!< The framework redraws through this overload, which must not reach the inherited simulator
         void                                            simulateClade(std::vector<TopologyNode *> &n, double age, double present, bool alwaysReturn) override;
 
     protected:
