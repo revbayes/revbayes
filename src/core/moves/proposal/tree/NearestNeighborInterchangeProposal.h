@@ -56,6 +56,8 @@ template <class variableType> class StochasticNode;
         bool                                    failed;
         TopologyNode*                           storedChosenNode;
         TopologyNode*                           storedUncle;
+        size_t                                  storedNodePos;                                              //!< Child slots, so the undo restores the child order and not just the topology
+        size_t                                  storedUnclePos;
         std::vector<double>                     storedAges;
     
     };

@@ -132,11 +132,12 @@ double NearestNeighborInterchangeProposal::doProposal( void )
     TreeUtilities::getAges(*storedChosenNode, storedAges);
     TreeUtilities::getAges(*storedUncle, storedAges);
 
-    // now exchange the two nodes
-    grandparent.removeChild( uncle );
-    parent.removeChild( node );
-    grandparent.addChild( node );
-    parent.addChild( uncle );
+    // now exchange the two nodes, each taking the other's child slot. addChild appends by
+    // default, which restores the topology but not the order; a model may read order as state.
+    storedUnclePos = grandparent.removeChild( uncle );
+    storedNodePos  = parent.removeChild( node );
+    grandparent.addChild( node, storedUnclePos );
+    parent.addChild( uncle, storedNodePos );
     node->setParent( &grandparent );
     uncle->setParent( &parent );
     
@@ -232,11 +233,11 @@ void NearestNeighborInterchangeProposal::undoProposal( void )
         TopologyNode& parent = storedUncle->getParent();
         TopologyNode& grandparent = storedChosenNode->getParent();
     
-        // now exchange the two nodes
+        // now exchange the two nodes, each back into the slot it came from
         grandparent.removeChild( storedChosenNode );
         parent.removeChild( storedUncle );
-        grandparent.addChild( storedUncle );
-        parent.addChild( storedChosenNode );
+        grandparent.addChild( storedUncle, storedUnclePos );
+        parent.addChild( storedChosenNode, storedNodePos );
         storedUncle->setParent( &grandparent );
         storedChosenNode->setParent( &parent );
     
