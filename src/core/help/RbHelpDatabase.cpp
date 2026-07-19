@@ -3405,6 +3405,20 @@ mymcmc.operatorSummary())");
 	help_strings[string("mvLevyJumpSum")][string("name")] = string(R"(mvLevyJumpSum)");
 	help_strings[string("mvMatrixElementScale")][string("name")] = string(R"(mvMatrixElementScale)");
 	help_strings[string("mvMatrixElementSlide")][string("name")] = string(R"(mvMatrixElementSlide)");
+	help_arrays[string("mvMatrixElementSwap")][string("authors")].push_back(string(R"(June Walker)"));
+	help_strings[string("mvMatrixElementSwap")][string("description")] = string(R"(Exchanges two elements of a matrix, either anywhere in it or within a single row or column.)");
+	help_strings[string("mvMatrixElementSwap")][string("details")] = string(R"(By default any two elements may be exchanged. Confining the swap to one line instead exchanges the same quantity between two positions, which keeps the proposal meaningful when the other margin holds different things. `margin` follows R's MARGIN: 1 swaps within a row, 2 within a column. Supply `row` or `col` to pin the line rather than drawing one at random. Only one of `margin`, `row` and `col` may be given.
+
+Note that the meaningful margin depends on the matrix. For the birth/death matrix of `dnFBDRP`, whose rows are taxa, only column swaps are meaningful: swapping within a row would exchange a taxon's own birth and death, and every such proposal is rejected.
+
+The proposal permutes the value, so it is symmetric and carries no Hastings ratio. It is useful where a random walk on individual elements mixes poorly between orderings, for example over which range of a `dnFBDRP` matrix holds the oldest birth.)");
+	help_strings[string("mvMatrixElementSwap")][string("example")] = string(R"(bd ~ dnFBDRP(lambda=lambda, mu=mu, psi=psi, rho=1, taxa=taxa, origin_prior=dnUniform(9,15))
+# column 1 holds the birth times
+moves.append( mvMatrixElementSwap(bd, col=1, weight=taxa.size()) ))");
+	help_strings[string("mvMatrixElementSwap")][string("name")] = string(R"(mvMatrixElementSwap)");
+	help_arrays[string("mvMatrixElementSwap")][string("see_also")].push_back(string(R"(mvMatrixElementScale)"));
+	help_arrays[string("mvMatrixElementSwap")][string("see_also")].push_back(string(R"(mvMatrixElementSlide)"));
+	help_strings[string("mvMatrixElementSwap")][string("title")] = string(R"(Matrix element swap move)");
 	help_strings[string("mvMirror")][string("description")] = string(R"(The adaptive mirror (normal) proposal of Thawornwattana et al. 2017, uses MCMC samples to find posterior mean and variance. After user-defined waiting time, proposes moves on opposite side of posterior mean from current location using a normal distribution with the learned posterior standard deviation (scaled by lambda). Before this time, the move uses mu0 as the mean, and lambda as the standard deviation. WARNING: Disabling tuning disables both tuning of proposal variance and learning of empirical mean and variance. To learn the empirical mean and variance without tuning sigma, set adaptOnly=true.)");
 	help_strings[string("mvMirror")][string("name")] = string(R"(mvMirror)");
 	help_strings[string("mvMirrorMultiplier")][string("description")] = string(R"(The adaptive mirror multiplier (normal) proposal of Thawornwattana et al. 2017, uses MCMC samples to find posterior mean and variance on the log-scale. After user-defined waiting time, proposes moves (on the log-scale) on opposite side of posterior mean from current location using a normal distribution with the learned posterior standard deviation (scaled by lambda). Before this time, the move uses mu0 as the mean, and lambda as the standard deviation. WARNING: Disabling tuning disables both tuning of proposal variance and learning of empirical mean and variance. To learn the empirical mean and variance without tuning sigma, set adaptOnly=true.)");
