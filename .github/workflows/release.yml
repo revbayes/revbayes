@@ -87,6 +87,9 @@ jobs:
     container:
       image: ${{ matrix.image || '' }}
     steps:
+    - name: Install git (containers have none preinstalled)
+      if: matrix.image != ''
+      run: apt-get update && apt-get install -y git
     - uses: actions/checkout@v4
     - uses: actions/setup-python@v5
       with:
