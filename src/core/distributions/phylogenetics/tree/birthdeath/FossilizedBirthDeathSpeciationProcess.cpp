@@ -699,11 +699,6 @@ int FossilizedBirthDeathSpeciationProcess::updateStartEndTimes( const TopologyNo
                 d_i[i] = age;
                 dirty_psi[i] = true;
                 dirty_taxa[i] = true;
-                // resample augmented age
-                if ( resampling == true && resampled == false )
-                {
-                    resampleFirstLast(i);
-                }
             }
         }
 
@@ -718,11 +713,6 @@ int FossilizedBirthDeathSpeciationProcess::updateStartEndTimes( const TopologyNo
                 b_i[i] = age;
                 dirty_psi[i] = true;
                 dirty_taxa[i] = true;
-                // resample augmented age
-                if ( resampling == true && resampled == false )
-                {
-                    resampleFirstLast(i);
-                }
             }
 
             I[i] = sa;
@@ -745,11 +735,6 @@ int FossilizedBirthDeathSpeciationProcess::updateStartEndTimes( const TopologyNo
                     origin = age;
                     dirty_psi[i] = true;
                     dirty_taxa[i] = true;
-                    // resample augmented age
-                    if ( resampling == true && resampled == false )
-                    {
-                        resampleFirstLast(i);
-                    }
                 }
             }
         }
@@ -824,10 +809,6 @@ void FossilizedBirthDeathSpeciationProcess::updateStartEndTimes( void )
             dirty_psi[i] = true;
             dirty_taxa[i] = true;
 
-            if ( resampling == true && resampled == false )
-            {
-                resampleFirstLast(i);
-            }
         }
     }
 
@@ -870,6 +851,21 @@ void FossilizedBirthDeathSpeciationProcess::touchSpecialization(const DagNode *t
 
                 dirty_psi[i]  = true;
                 dirty_taxa[i] = true;
+            }
+
+            // the augmented ages ride with the move, as they do for the matrix process. Tree moves
+            // report no element indices, so draw the taxon at random.
+            if ( resampling == true && resampled == false )
+            {
+                updateStartEndTimes();
+
+                size_t i = size_t( GLOBAL_RNG->uniform01() * taxa.size() );
+                if ( i >= taxa.size() ) i = taxa.size() - 1;
+
+                dirty_psi[i]  = true;
+                dirty_taxa[i] = true;
+
+                resampleFirstLast(i);
             }
         }
 
