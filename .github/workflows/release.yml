@@ -363,7 +363,7 @@ jobs:
     name: Notify Slack
     needs: [build_singularity_and_upload, build_and_upload]
     runs-on: ubuntu-latest
-    if: always()
+    if: false
     steps:
     - uses: technote-space/workflow-conclusion-action@v3
     - uses: 8398a7/action-slack@v3
