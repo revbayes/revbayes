@@ -876,10 +876,22 @@ void AbstractFossilizedBirthDeathRangeProcess::drawRanges()
     {
         size_t i = order[k];
 
-        // the oldest birth is the origin, which a supplied one pins
+        // the oldest birth is the origin: a supplied one pins it, a prior supplies its support
         if ( k == 0 )
         {
-            b_i[i] = ( origin_age != NULL ) ? origin_age->getValue() : first[i] + rng->uniform01()*(max - first[i]);
+            if ( origin_age != NULL )
+            {
+                b_i[i] = origin_age->getValue();
+            }
+            else if ( origin_prior != NULL )
+            {
+                origin_prior->redrawValue();
+                b_i[i] = origin_prior->getValue();
+            }
+            else
+            {
+                b_i[i] = first[i] + rng->uniform01()*(max - first[i]);
+            }
 
             continue;
         }
