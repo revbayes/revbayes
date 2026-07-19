@@ -301,7 +301,7 @@ if (ceiled_number != 4.0) {
 k <- 2
 x := choose(n, k))");
 	help_strings[string("choose")][string("name")] = string(R"(choose)");
-	help_arrays[string("clade")][string("authors")].push_back(string(R"(Will Pett)"));
+	help_arrays[string("clade")][string("authors")].push_back(string(R"(June Walker)"));
 	help_arrays[string("clade")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_arrays[string("clade")][string("authors")].push_back(string(R"(Michael Landis)"));
 	help_strings[string("clade")][string("description")] = string(R"(A clade is a subtree within a phylogeny.)");
@@ -404,7 +404,7 @@ locus_1_and_2 = concatenate( locus_1, locus_2 ))");
 	help_strings[string("concatenate")][string("title")] = string(R"(Concatenate character matrices)");
 	help_arrays[string("consensusTree")][string("authors")].push_back(string(R"(Seraina Klopfstein)"));
 	help_arrays[string("consensusTree")][string("authors")].push_back(string(R"(Will Freyman)"));
-	help_arrays[string("consensusTree")][string("authors")].push_back(string(R"(Will Pett)"));
+	help_arrays[string("consensusTree")][string("authors")].push_back(string(R"(June Walker)"));
 	help_arrays[string("consensusTree")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("consensusTree")][string("description")] = string(R"(Calculates the majority-rule consensus topology from a trace of trees and summarizes branch lengths.)");
 	help_strings[string("consensusTree")][string("example")] = string(R"(# Read in tree trace
@@ -911,7 +911,7 @@ for (i in 1:(n_genes)) {
 	help_strings[string("dnEmpiricalSample")][string("name")] = string(R"(dnEmpiricalSample)");
 	help_arrays[string("dnEmpiricalTree")][string("authors")].push_back(string(R"(Will Freyman)"));
 	help_arrays[string("dnEmpiricalTree")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
-	help_arrays[string("dnEmpiricalTree")][string("authors")].push_back(string(R"(Will Pett)"));
+	help_arrays[string("dnEmpiricalTree")][string("authors")].push_back(string(R"(June Walker)"));
 	help_strings[string("dnEmpiricalTree")][string("description")] = string(R"(Creates a distribution of trees from a trace of trees.)");
 	help_strings[string("dnEmpiricalTree")][string("example")] = string(R"(# Read in tree trace
 tree_trace = readTreeTrace("output/my.trees", burnin=0.25)
@@ -2793,7 +2793,7 @@ max(a)
 	help_strings[string("max")][string("name")] = string(R"(max)");
 	help_arrays[string("max")][string("see_also")].push_back(string(R"(`min`)"));
 	help_strings[string("max")][string("title")] = string(R"(Maximum of a set of numbers)");
-	help_arrays[string("maxdiff")][string("authors")].push_back(string(R"(Will Pett)"));
+	help_arrays[string("maxdiff")][string("authors")].push_back(string(R"(June Walker)"));
 	help_strings[string("maxdiff")][string("description")] = string(R"(Finds the maximum difference in clade probabilities between two posterior samples.)");
 	help_strings[string("maxdiff")][string("example")] = string(R"(# Read in tree trace
 tree_trace = readTreeTrace("output/my.trees", burnin=0.25, nruns=2)
@@ -2836,7 +2836,7 @@ print(recTree))");
 	help_references[string("maximumTree")].push_back(RbHelpReference(R"(High-resolution species trees without concatenation. Scott V. Edwards, Liang Liu, and Dennis K. Pearl . PNAS April 3, 2007 vol. 104 no. 14 .)",R"()",R"(http://www.pnas.org/content/104/14/5936.full )"));
 	help_references[string("maximumTree")].push_back(RbHelpReference(R"('Maximum tree: a consistent estimator of the species tree. Liu L, Yu L, Pearl DK.  Journal of Mathematical Biology, 2010. Jan;60(1):95-106.')",R"(https://doi.org/10.1007/s00285-009-0260-0)",R"(https://link.springer.com/article/10.1007%2Fs00285-009-0260-0 )"));
 	help_strings[string("maximumTree")][string("title")] = string(R"(Maximum tree function to build a species tree.)");
-	help_arrays[string("mccTree")][string("authors")].push_back(string(R"(Will Pett)"));
+	help_arrays[string("mccTree")][string("authors")].push_back(string(R"(June Walker)"));
 	help_arrays[string("mccTree")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("mccTree")][string("description")] = string(R"(Finds the maximum clade credibility (MCC) topology from a trace of trees and summarizes branch lengths.)");
 	help_strings[string("mccTree")][string("example")] = string(R"(# Read in tree trace
@@ -3215,7 +3215,7 @@ The simplex is then renormalized.)");
 	help_strings[string("mvEllipticalSliceSamplingSimple")][string("name")] = string(R"(mvEllipticalSliceSamplingSimple)");
 	help_arrays[string("mvEmpiricalTree")][string("authors")].push_back(string(R"(Will Freyman)"));
 	help_arrays[string("mvEmpiricalTree")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
-	help_arrays[string("mvEmpiricalTree")][string("authors")].push_back(string(R"(Will Pett)"));
+	help_arrays[string("mvEmpiricalTree")][string("authors")].push_back(string(R"(June Walker)"));
 	help_arrays[string("mvEmpiricalTree")][string("authors")].push_back(string(R"(Jiansi Gao)"));
 	help_strings[string("mvEmpiricalTree")][string("description")] = string(R"(An MCMC move that operates on empirical tree distributions.)");
 	help_strings[string("mvEmpiricalTree")][string("example")] = string(R"(# Read in tree trace

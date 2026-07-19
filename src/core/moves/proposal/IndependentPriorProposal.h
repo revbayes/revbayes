@@ -16,7 +16,7 @@ namespace RevBayesCore {
      * Propose a new value from the prior distribution.
      *
      * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Will Pett)
+     * @author The RevBayes Development Core Team (June Walker)
      * @since 2012-07-12, version 1.0
      *
      */

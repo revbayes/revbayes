@@ -7,7 +7,7 @@ Calculates the majority-rule consensus topology from a trace of trees and summar
 ## authors
 Seraina Klopfstein
 Will Freyman
-Will Pett
+June Walker
 Sebastian Hoehna
 ## see_also
 mapTree
