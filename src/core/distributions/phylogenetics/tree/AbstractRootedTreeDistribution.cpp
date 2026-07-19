@@ -813,8 +813,12 @@ void AbstractRootedTreeDistribution::setValue(Tree *v, bool f )
         
     }
 
-    value->checkTaxonAges(true);
-    
+    // an extended tree's tips are extinctions, which may sit below the fossil's age range
+    if ( isExtendedTree() == false )
+    {
+        value->checkTaxonAges(true);
+    }
+
 }
 
 
