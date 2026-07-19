@@ -146,23 +146,15 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRMatrix::createDistribut
     bool re = static_cast<const RlBoolean &>( resample->getRevObject() ).getValue();
 
     // optional origin time of the process
-    RevBayesCore::TypedDagNode<double>* og = NULL;
     RevBayesCore::TypedDistribution<double>* op = NULL;
-    if ( origin->getRevObject() != RevNullObject::getInstance() )
+    if ( origin_prior->getRevObject() != RevNullObject::getInstance() )
     {
-        if ( origin->getRevObject().isType( TypedDistribution<RealPos>::getClassTypeSpec() ) )
-        {
-            const Distribution &rl_op = static_cast<const Distribution &>( origin->getRevObject() );
-            op = static_cast<RevBayesCore::TypedDistribution<double>* >( rl_op.createDistribution() );
-        }
-        else
-        {
-            og = static_cast<const RealPos &>( origin->getRevObject() ).getDagNode();
-        }
+        const Distribution &rl_op = static_cast<const Distribution &>( origin_prior->getRevObject() );
+        op = static_cast<RevBayesCore::TypedDistribution<double>* >( rl_op.createDistribution() );
     }
 
     // report_internally = true: the fused facade adds the fossil-record term inline
-    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, c, K, re, og, op, true);
+    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, c, K, re, NULL, op, true);
 
     return d;
 }
@@ -235,10 +227,7 @@ const MemberRules& Dist_FBDRMatrix::getParameterRules(void) const
 
     if ( !rules_set )
     {
-        std::vector<TypeSpec> originTypes;
-        originTypes.push_back( RealPos::getClassTypeSpec() );
-        originTypes.push_back( TypedDistribution<RealPos>::getClassTypeSpec() );
-        dist_member_rules.push_back( new ArgumentRule( "origin", originTypes, "The origin of the process, which is the oldest birth: a value pins it, a distribution is a prior on it (default: no prior).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        dist_member_rules.push_back( new ArgumentRule( "origin_prior", TypedDistribution<RealPos>::getClassTypeSpec(), "A prior on the origin of the process, which is the oldest birth.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
         // add the rules from the base class, including the reporting args
         const MemberRules &parentRules = FossilizedBirthDeathRangeProcess<MatrixReal>::getParameterRules();
@@ -278,9 +267,9 @@ const TypeSpec& Dist_FBDRMatrix::getTypeSpec( void ) const
 void Dist_FBDRMatrix::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
 {
 
-    if ( name == "origin" )
+    if ( name == "origin_prior" )
     {
-        origin = var;
+        origin_prior = var;
     }
     else
     {
