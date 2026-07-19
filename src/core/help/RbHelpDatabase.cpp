@@ -3558,6 +3558,22 @@ moves.append( mvResampleAugmentedAges(bd, weight=taxa.size()) ))");
 	help_arrays[string("mvResampleAugmentedAges")][string("see_also")].push_back(string(R"(dnFossilizedBirthDeathRangeMatrix)"));
 	help_strings[string("mvRootTimeScaleBactrian")][string("name")] = string(R"(mvRootTimeScaleBactrian)");
 	help_strings[string("mvRootTimeSlideUniform")][string("name")] = string(R"(mvRootTimeSlideUniform)");
+	help_arrays[string("mvRotateNode")][string("authors")].push_back(string(R"(June Walker)"));
+	help_strings[string("mvRotateNode")][string("description")] = string(R"(Permutes the children of a random internal node, leaving every node age and the clade set unchanged.)");
+	help_strings[string("mvRotateNode")][string("details")] = string(R"(Child order carries no meaning in an unlabelled tree, so under most distributions this proposes the state the chain is already in and always accepts. The move is for a process that reads the order as state.
+
+`dnFBDSP` is one: it takes a node's first child as the lineage that continues its ancestor's species and the rest as budding descendants, so rotating a node is a different budding history over the same topology, with different birth times and a different probability. The topology moves reach those states only as a side effect of rearranging the tree, and never propose one on its own.
+
+The permutation is drawn uniformly over the orders that differ from the current one, in both directions, so the proposal is symmetric and carries no Hastings ratio. On a bifurcating node it exchanges the two children. A node with a single child is never chosen.)");
+	help_strings[string("mvRotateNode")][string("example")] = string(R"(tr ~ dnFBDSP(origin=origin, lambda=lambda, mu=mu, psi=psi, rho=1, timeline=timeline, taxa=taxa)
+
+# which lineage continues the ancestral species at each speciation event
+moves.append( mvRotateNode(tr, weight=taxa.size()/2) ))");
+	help_strings[string("mvRotateNode")][string("name")] = string(R"(mvRotateNode)");
+	help_arrays[string("mvRotateNode")][string("see_also")].push_back(string(R"(dnFossilizedBirthDeathSpeciation)"));
+	help_arrays[string("mvRotateNode")][string("see_also")].push_back(string(R"(mvNNI)"));
+	help_arrays[string("mvRotateNode")][string("see_also")].push_back(string(R"(mvFNPR)"));
+	help_strings[string("mvRotateNode")][string("title")] = string(R"(Node rotation move)");
 	help_strings[string("mvSPR")][string("description")] = string(R"(Tree topology move that performs a Subtree Prune and Regraft (SPR) on
 an unrooted tree.)");
 	help_strings[string("mvSPR")][string("details")] = string(R"(`mvSPR` changes tree topology by cutting off a subtree and reattaching it
