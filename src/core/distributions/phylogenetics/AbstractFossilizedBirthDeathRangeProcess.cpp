@@ -885,7 +885,15 @@ void AbstractFossilizedBirthDeathRangeProcess::drawRanges()
             }
             else if ( origin_prior != NULL )
             {
+                // the origin has to clear every oldest age, which a blind draw rarely does
+                double oldest = first[i];
+
                 origin_prior->redrawValue();
+                for (size_t t = 0; t < 1000 && origin_prior->getValue() <= oldest; t++)
+                {
+                    origin_prior->redrawValue();
+                }
+
                 b_i[i] = origin_prior->getValue();
             }
             else
