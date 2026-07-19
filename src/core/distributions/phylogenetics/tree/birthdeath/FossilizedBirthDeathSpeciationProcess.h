@@ -46,6 +46,7 @@ namespace RevBayesCore {
         // public member functions
         FossilizedBirthDeathSpeciationProcess*          clone(void) const override;                                //!< Create an independent clone
 
+        void                                            setValue(Tree *v, bool force=false) override;                       //!< Clamping replaces the ranges the augmented ages were drawn against, so re-clip them
         void                                            redrawValue(void) override;
         void                                            redrawValue(SimulationCondition c) override;                        //!< The framework redraws through this overload, which must not reach the inherited simulator
         void                                            simulateClade(std::vector<TopologyNode *> &n, double age, double present, bool alwaysReturn) override;

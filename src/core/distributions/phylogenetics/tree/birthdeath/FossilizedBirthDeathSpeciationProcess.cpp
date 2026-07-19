@@ -267,6 +267,46 @@ void FossilizedBirthDeathSpeciationProcess::redrawValue(SimulationCondition c)
 }
 
 
+/**
+ * Set the tree (e.g. clamping to a fixed history). A clamp replaces the b/d the augmented ages
+ * were drawn against, so re-clip any age now out of range, as the matrix process does; otherwise
+ * a clamped chain can start at lnProb = -inf.
+ */
+void FossilizedBirthDeathSpeciationProcess::setValue(Tree *v, bool force)
+{
+    AbstractBirthDeathProcess::setValue(v, force);
+
+    // a tree built here indexes its tips by taxon; one set from outside carries whatever order it
+    // was written in, and the per-taxon terms are read by index
+    const std::vector<TopologyNode*> nodes = this->getValue().getNodes();
+    for (size_t i = 0; i < this->getValue().getNumberOfTips(); i++)
+    {
+        size_t j = find(taxa.begin(), taxa.end(), nodes[i]->getTaxon()) - taxa.begin();
+        nodes[i]->setIndex(j);
+    }
+    this->getValue().orderNodesByIndex();
+
+    updateStartEndTimes();
+
+    for (size_t i = 0; i < taxa.size(); i++)
+    {
+        double lo = std::max( o_i[i], d_i[i] );
+        double hi = std::min( taxa[i].getMaxAge(), b_i[i] );
+        if ( hi > lo && ( first[i] < lo || first[i] >= b_i[i] ) )
+        {
+            first[i] = 0.5 * ( lo + hi );
+        }
+
+        double lo_y = std::max( d_i[i], taxa[i].getMinAge() );
+        double hi_y = std::min( first[i], y_i[i] );
+        if ( hi_y > lo_y && ( last[i] < lo_y || last[i] > hi_y ) )
+        {
+            last[i] = 0.5 * ( lo_y + hi_y );
+        }
+    }
+}
+
+
 void FossilizedBirthDeathSpeciationProcess::redrawValue(void)
 {
     // Draw a range (b_i, d_i) per taxon exactly as the matrix process does, then hang a random
@@ -380,9 +420,7 @@ void FossilizedBirthDeathSpeciationProcess::redrawValue(void)
 }
 
 
-/**
- *
- */
+
 void FossilizedBirthDeathSpeciationProcess::simulateClade(std::vector<TopologyNode *> &n, double age, double present, bool alwaysReturn)
 {
 
