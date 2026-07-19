@@ -4,6 +4,8 @@
 #include "ModelVector.h"
 #include "Natural.h"
 #include "OptionRule.h"
+#include "RlDistribution.h"
+#include "RevNullObject.h"
 #include "RlBoolean.h"
 #include "RlString.h"
 #include "RlTaxon.h"
@@ -40,6 +42,8 @@ namespace RevLanguage {
 
         const MemberRules&                                  getCoreParameterRules(void) const;                                              //!< Get member rules (const), without the reporting args
         static void                                         appendParameterRules(MemberRules &rules, bool include_reporting);                   //!< Build the member rules, with or without the reporting args
+        static ArgumentRule*                                originPriorRule(void);                                                              //!< The optional origin prior argument, for the processes that take one
+        RevBayesCore::TypedDistribution<double>*            createOriginPrior(void) const;                                                      //!< Build the core origin prior, or NULL if none was given
         
         void                                                setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);   //!< Set member variable
     
@@ -52,9 +56,9 @@ namespace RevLanguage {
         RevPtr<const RevVariable>                           taxa;                                                                               //!< The taxa
         RevPtr<const RevVariable>                           condition;                                                                          //!< The condition of the process
         RevPtr<const RevVariable>                           complete;                                                                           //!< Is the fossil record complete?
-        RevPtr<const RevVariable>                           reporting;                                                                          //!< Reporting model when the record is incomplete
         RevPtr<const RevVariable>                           truncated;                                                                          //!< Reporting cap K (truncated model)
         RevPtr<const RevVariable>                           resample;
+        RevPtr<const RevVariable>                           origin_prior;                                                                       //!< Optional prior on the origin, which is the oldest birth
 
     };
     
@@ -154,6 +158,31 @@ void RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::appendParameterRules
     }
 
     rules.push_back( new ArgumentRule( "resample", RlBoolean::getClassTypeSpec(), "Resample augmented ages?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
+}
+
+
+/**
+ * The optional origin prior argument. The origin is the oldest birth, so the prior is evaluated
+ * there rather than on a parameter of its own.
+ */
+template <typename rlType>
+ArgumentRule* RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::originPriorRule(void)
+{
+    return new ArgumentRule( "origin_prior", TypedDistribution<RealPos>::getClassTypeSpec(), "A prior on the origin of the process, which is the oldest birth.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL );
+}
+
+
+template <typename rlType>
+RevBayesCore::TypedDistribution<double>* RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::createOriginPrior(void) const
+{
+    if ( origin_prior == NULL || origin_prior->getRevObject() == RevNullObject::getInstance() )
+    {
+        return NULL;
+    }
+
+    const Distribution &rl_op = static_cast<const Distribution &>( origin_prior->getRevObject() );
+
+    return static_cast<RevBayesCore::TypedDistribution<double>* >( rl_op.createDistribution() );
 }
 
 
@@ -259,13 +288,13 @@ void RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::setConstParameter(co
     {
         complete = var;
     }
-    else if ( name == "reporting" )
-    {
-        reporting = var;
-    }
     else if ( name == "truncated" )
     {
         truncated = var;
+    }
+    else if ( name == "origin_prior" )
+    {
+        origin_prior = var;
     }
     else if ( name == "resample" )
     {

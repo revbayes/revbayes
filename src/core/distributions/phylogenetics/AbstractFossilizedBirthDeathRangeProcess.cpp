@@ -761,6 +761,26 @@ void AbstractFossilizedBirthDeathRangeProcess::executeMethod(const std::string &
 }
 
 
+/**
+ * The origin of the process, which is the oldest birth.
+ */
+void AbstractFossilizedBirthDeathRangeProcess::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, double &rv) const
+{
+    if ( n == "getOrigin" )
+    {
+        // origin is a byproduct of the density and is not restored, so refresh it from the value
+        AbstractFossilizedBirthDeathRangeProcess *self = const_cast<AbstractFossilizedBirthDeathRangeProcess *>( this );
+        self->updateStartEndTimes();
+
+        rv = origin;
+    }
+    else
+    {
+        throw RbException() << "The fossilized birth death range process does not have a member method called '" << n << "'.";
+    }
+}
+
+
 void AbstractFossilizedBirthDeathRangeProcess::setReportingModel( const std::string &s )
 {
     reporting = s;

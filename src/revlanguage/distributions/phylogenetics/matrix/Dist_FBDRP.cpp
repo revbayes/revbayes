@@ -120,12 +120,7 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRP::createDistribution( 
     bool re = static_cast<const RlBoolean &>( resample->getRevObject() ).getValue();
 
     // optional origin time of the process
-    RevBayesCore::TypedDistribution<double>* op = NULL;
-    if ( origin_prior->getRevObject() != RevNullObject::getInstance() )
-    {
-        const Distribution &rl_op = static_cast<const Distribution &>( origin_prior->getRevObject() );
-        op = static_cast<RevBayesCore::TypedDistribution<double>* >( rl_op.createDistribution() );
-    }
+    RevBayesCore::TypedDistribution<double>* op = createOriginPrior();
 
     // report_internally = false: the bare range process, with no inline fossil-record term
     RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, c, 0, re, NULL, op, false);
@@ -209,7 +204,7 @@ const MemberRules& Dist_FBDRP::getParameterRules(void) const
     
     if ( !rules_set )
     {
-        dist_member_rules.push_back( new ArgumentRule( "origin_prior", TypedDistribution<RealPos>::getClassTypeSpec(), "A prior on the origin of the process, which is the oldest birth.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        dist_member_rules.push_back( originPriorRule() );
 
         // add the rules from the base class, without the reporting args
         const MemberRules &parentRules = FossilizedBirthDeathRangeProcess<MatrixReal>::getCoreParameterRules();
@@ -249,14 +244,7 @@ const TypeSpec& Dist_FBDRP::getTypeSpec( void ) const
 void Dist_FBDRP::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
 {
 
-    if ( name == "origin_prior" )
-    {
-        origin_prior = var;
-    }
-    else
-    {
-       FossilizedBirthDeathRangeProcess<MatrixReal>::setConstParameter(name,var);
-    }
+           FossilizedBirthDeathRangeProcess<MatrixReal>::setConstParameter(name,var);
 
 }
 
@@ -274,6 +262,9 @@ RevLanguage::MethodTable Dist_FBDRP::getDistributionMethods( void ) const
 
     ArgumentRules* last_ages_arg_rules = new ArgumentRules();
     methods.addFunction( new DistributionMemberFunction<Dist_FBDRP, ModelVector<RealPos> >( "getAugmentedLastAges", variable, last_ages_arg_rules, true ) );
+
+    ArgumentRules* origin_arg_rules = new ArgumentRules();
+    methods.addFunction( new DistributionMemberFunction<Dist_FBDRP, RealPos >( "getOrigin", variable, origin_arg_rules, true ) );
 
     return methods;
 }
