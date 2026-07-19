@@ -789,7 +789,51 @@ void AbstractFossilizedBirthDeathRangeProcess::executeMethod(const std::string &
 
 void AbstractFossilizedBirthDeathRangeProcess::setReportingModel( const std::string &s )
 {
+    if ( s == reporting ) return;
+
     reporting = s;
+
+    // dnFossilRecord attaches after the range process has drawn, so the ages are the old model's
+    updateStartEndTimes();
+
+    for (size_t i = 0; i < taxa.size(); i++)
+    {
+        drawAugmentedAges(i);
+    }
+}
+
+
+/**
+ * Draw the augmented extremes for taxon i, nested (d_i <= last <= first), under the current
+ * reporting model.
+ */
+void AbstractFossilizedBirthDeathRangeProcess::drawAugmentedAges(size_t i)
+{
+    RandomNumberGenerator* rng = GLOBAL_RNG;
+
+    bool augment_youngest = ( reporting == "firstlast" && occurrence_counts[i] >= 2 );
+
+    double lo, hi;
+
+    // youngest augmented age, at or above the death and within its reported bin
+    if ( augment_youngest )
+    {
+        lo = std::max( d_i[i], taxa[i].getMinAge() );
+        hi = y_i[i];
+        last[i] = ( hi > lo ) ? rng->uniform01()*(hi - lo) + lo : lo;
+    }
+    else
+    {
+        last[i] = d_i[i];
+    }
+
+    // oldest augmented age, at or above the youngest and the oldest reported minimum
+    lo = std::max( last[i], o_i[i] );
+    hi = truncated[i] ? b_i[i] : taxa[i].getMaxAge();
+    first[i] = ( hi > lo ) ? rng->uniform01()*(hi - lo) + lo : lo;
+
+    // a single occurrence (and complete/truncated reporting) is its own youngest
+    if ( augment_youngest == false ) last[i] = first[i];
 }
 
 void AbstractFossilizedBirthDeathRangeProcess::resampleFirstLast(size_t i)
@@ -847,29 +891,7 @@ void AbstractFossilizedBirthDeathRangeProcess::drawRanges()
         d_i[i] = taxa[i].isExtinct() ? rng->uniform01()*(y_i[i] - present) + present : present;
         b_i[i] = max;
 
-        bool augment_youngest = ( reporting == "firstlast" && occurrence_counts[i] >= 2 );
-
-        double lo, hi;
-
-        // youngest augmented age, at or above the death and within its reported bin
-        if ( augment_youngest )
-        {
-            lo = std::max( d_i[i], taxa[i].getMinAge() );
-            hi = y_i[i];
-            last[i] = ( hi > lo ) ? rng->uniform01()*(hi - lo) + lo : lo;
-        }
-        else
-        {
-            last[i] = d_i[i];
-        }
-
-        // oldest augmented age, at or above the youngest and the oldest reported minimum
-        lo = std::max( last[i], o_i[i] );
-        hi = truncated[i] ? b_i[i] : taxa[i].getMaxAge();
-        first[i] = ( hi > lo ) ? rng->uniform01()*(hi - lo) + lo : lo;
-
-        // a single occurrence (and complete/truncated reporting) is its own youngest
-        if ( augment_youngest == false ) last[i] = first[i];
+        drawAugmentedAges(i);
     }
 
     // place births oldest-first, each inside a lineage already placed and still alive at it
