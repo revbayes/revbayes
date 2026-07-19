@@ -25,6 +25,8 @@ MatrixRealSingleElementSlideProposal::MatrixRealSingleElementSlideProposal( Stoc
     array(NULL),
     matrix( n ),
     delta( l ),
+    restrict_row( 0 ),
+    restrict_col( 0 ),
     indexa(0),
     indexb(0),
     storedValue( 0.0 ),
@@ -45,6 +47,8 @@ MatrixRealSingleElementSlideProposal::MatrixRealSingleElementSlideProposal( Stoc
     array( n ),
     matrix(NULL),
     delta( l ),
+    restrict_row( 0 ),
+    restrict_col( 0 ),
     indexa(0),
     indexb(0),
     storedValue( 0.0 ),
@@ -122,8 +126,8 @@ double MatrixRealSingleElementSlideProposal::doProposal( void )
     {
         RbVector<RbVector<double> >& v = array->getValue();
         // choose an index
-        indexa = size_t( rng->uniform01() * v.size() );
-        indexb = size_t( rng->uniform01() * v.front().size() );
+        indexa = ( restrict_row > 0 ? restrict_row - 1 : size_t( rng->uniform01() * v.size() ) );
+        indexb = ( restrict_col > 0 ? restrict_col - 1 : size_t( rng->uniform01() * v.front().size() ) );
 
         // copy value
         storedValue = v[indexa][indexb];
@@ -141,8 +145,8 @@ double MatrixRealSingleElementSlideProposal::doProposal( void )
     {
         MatrixReal& v = matrix->getValue();
         // choose an index
-        indexa = size_t( rng->uniform01() * v.getNumberOfRows() );
-        indexb = size_t( rng->uniform01() * v.getNumberOfColumns() );
+        indexa = ( restrict_row > 0 ? restrict_row - 1 : size_t( rng->uniform01() * v.getNumberOfRows() ) );
+        indexb = ( restrict_col > 0 ? restrict_col - 1 : size_t( rng->uniform01() * v.getNumberOfColumns() ) );
 
         // copy value
         storedValue = v[indexa][indexb];
