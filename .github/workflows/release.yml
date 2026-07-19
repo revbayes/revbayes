@@ -89,7 +89,7 @@ jobs:
     steps:
     - name: Install git (containers have none preinstalled)
       if: matrix.image != ''
-      run: 
+      run: |
         apt-get update && apt-get install -y git
         git config --system --add safe.directory '*'
     - uses: actions/checkout@v4
