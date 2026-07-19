@@ -843,27 +843,17 @@ void FossilizedBirthDeathSpeciationProcess::touchSpecialization(const DagNode *t
             stored_likelihood = partial_likelihood;
             stored_Psi = Psi;
 
-            std::set<size_t> touched_indices = dag_node->getTouchedElementIndices();
+            // a tree move reports no element indices and can shift many taxa's births at once
+            dirty_psi  = std::vector<bool>(taxa.size(), true);
+            dirty_taxa = std::vector<bool>(taxa.size(), true);
 
-            for ( std::set<size_t>::iterator it = touched_indices.begin(); it != touched_indices.end(); it++)
-            {
-                size_t i = (*it) / 2; // (birth,death) matrix is N x 2, row-major: linear index / 2 = taxon
-
-                dirty_psi[i]  = true;
-                dirty_taxa[i] = true;
-            }
-
-            // the augmented ages ride with the move, as they do for the matrix process. Tree moves
-            // report no element indices, so draw the taxon at random.
+            // the augmented ages ride with the move, as they do for the matrix process
             if ( resampling == true && resampled == false )
             {
                 updateStartEndTimes();
 
                 size_t i = size_t( GLOBAL_RNG->uniform01() * taxa.size() );
                 if ( i >= taxa.size() ) i = taxa.size() - 1;
-
-                dirty_psi[i]  = true;
-                dirty_taxa[i] = true;
 
                 resampleFirstLast(i);
             }
