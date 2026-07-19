@@ -42,6 +42,7 @@ namespace RevBayesCore {
                                           size_t truncate_at,
 										  bool resampling,
                                           const TypedDagNode<double>* origin = NULL,
+                                          TypedDistribution<double>* origin_prior = NULL,
                                           bool report_internally = true);   //!< report_internally=false => bare range process (dnFBDRP); reporting term supplied by dnFossilRecord
         
         // public member functions

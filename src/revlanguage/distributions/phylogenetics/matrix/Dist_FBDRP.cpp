@@ -39,6 +39,7 @@
 #include "RlDeterministicNode.h"
 #include "RlMatrixReal.h"
 #include "RlStochasticNode.h"
+#include "RlDistribution.h"
 #include "RlTypedDistribution.h"
 #include "RlTypedFunction.h"
 #include "StochasticNode.h"
@@ -120,13 +121,22 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRP::createDistribution( 
 
     // optional origin time of the process
     RevBayesCore::TypedDagNode<double>* og = NULL;
+    RevBayesCore::TypedDistribution<double>* op = NULL;
     if ( origin->getRevObject() != RevNullObject::getInstance() )
     {
-        og = static_cast<const RealPos &>( origin->getRevObject() ).getDagNode();
+        if ( origin->getRevObject().isType( TypedDistribution<RealPos>::getClassTypeSpec() ) )
+        {
+            const Distribution &rl_op = static_cast<const Distribution &>( origin->getRevObject() );
+            op = static_cast<RevBayesCore::TypedDistribution<double>* >( rl_op.createDistribution() );
+        }
+        else
+        {
+            og = static_cast<const RealPos &>( origin->getRevObject() ).getDagNode();
+        }
     }
 
     // report_internally = false: the bare range process, with no inline fossil-record term
-    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, c, 0, re, og, false);
+    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, c, 0, re, og, op, false);
     
     return d;
 }
@@ -207,7 +217,10 @@ const MemberRules& Dist_FBDRP::getParameterRules(void) const
     
     if ( !rules_set )
     {
-        dist_member_rules.push_back( new ArgumentRule( "origin", RealPos::getClassTypeSpec(), "The origin time of the process (defaults to the oldest sampled birth).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        std::vector<TypeSpec> originTypes;
+        originTypes.push_back( RealPos::getClassTypeSpec() );
+        originTypes.push_back( TypedDistribution<RealPos>::getClassTypeSpec() );
+        dist_member_rules.push_back( new ArgumentRule( "origin", originTypes, "The origin of the process, which is the oldest birth: a value pins it, a distribution is a prior on it (default: no prior).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
         // add the rules from the base class, without the reporting args
         const MemberRules &parentRules = FossilizedBirthDeathRangeProcess<MatrixReal>::getCoreParameterRules();

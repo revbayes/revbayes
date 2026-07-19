@@ -82,12 +82,14 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
                                                                          const std::string &s,
                                                                          size_t K,
                                                                          bool re,
-                                                                         const TypedDagNode<double> *inorigin) :
+                                                                         const TypedDagNode<double> *inorigin,
+                                                                         TypedDistribution<double> *inoriginprior) :
     taxa(intaxa),
     condition(incondition),
     homogeneous_rho(inrho),
     timeline( intimes ),
     origin_age( inorigin ),
+    origin_prior( inoriginprior ),
     origin(0.0),
     max_birth(0),
     reporting(s),
@@ -115,6 +117,16 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
     // add the parameters to the model
     range_parameters.push_back( timeline );
     range_parameters.push_back( origin_age );
+
+    // the prior's own parameters have to reach the DAG
+    if ( origin_prior != NULL )
+    {
+        const std::vector<const DagNode*> &pars = origin_prior->getParameters();
+        for (std::vector<const DagNode*>::const_iterator it = pars.begin(); it != pars.end(); it++)
+        {
+            range_parameters.push_back( *it );
+        }
+    }
     range_parameters.push_back( homogeneous_rho );
     range_parameters.push_back( homogeneous_lambda );
     range_parameters.push_back( heterogeneous_lambda );
@@ -405,6 +417,13 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
 
     // the origin is not a speciation event
     lnProb -= log( birth[ori] );
+
+    // a supplied prior applies to the oldest birth, which is the origin
+    if ( origin_prior != NULL )
+    {
+        origin_prior->setValue( new double(origin) );
+        lnProb += origin_prior->computeLnProbability();
+    }
 
     // Extant tip age terms. Status is data
     double rho = homogeneous_rho->getValue();
@@ -837,10 +856,10 @@ void AbstractFossilizedBirthDeathRangeProcess::drawRanges()
     {
         size_t i = order[k];
 
-        // the oldest birth is the origin
+        // the oldest birth is the origin, which a supplied one pins
         if ( k == 0 )
         {
-            b_i[i] = first[i] + rng->uniform01()*(max - first[i]);
+            b_i[i] = ( origin_age != NULL ) ? origin_age->getValue() : first[i] + rng->uniform01()*(max - first[i]);
 
             continue;
         }

@@ -1,9 +1,12 @@
 #ifndef AbstractFossilizedBirthDeathRangeProcess_H
 #define AbstractFossilizedBirthDeathRangeProcess_H
 
+#include <memory>
+
 #include "MemberObject.h"
 #include "RbVector.h"
 #include "Taxon.h"
+#include "TypedDistribution.h"
 #include "TypedDagNode.h"
 
 
@@ -45,7 +48,8 @@ namespace RevBayesCore {
                                             const std::string &reporting,
                                             size_t truncate_at,
                                             bool resampling,
-                                            const TypedDagNode<double>* origin = NULL);  //!< Constructor
+                                            const TypedDagNode<double>* origin = NULL,
+                                            TypedDistribution<double>* origin_prior = NULL);  //!< Constructor
 
         virtual ~AbstractFossilizedBirthDeathRangeProcess(){};
 
@@ -93,6 +97,7 @@ namespace RevBayesCore {
         const TypedDagNode<double >*                    homogeneous_rho;                                       //!< The homogeneous speciation rates.
         const TypedDagNode<RbVector<double> >*          timeline;                                              //!< The times of the instantaneous sampling events.
         const TypedDagNode<double >*                    origin_age;                                            //!< The optional origin time of the process (NULL = oldest sampled birth).
+        std::shared_ptr<TypedDistribution<double> >      origin_prior;                                          //!< Optional prior evaluated at the oldest birth, which is the origin.
 
         std::vector<const DagNode*>                     range_parameters;
 
