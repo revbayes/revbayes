@@ -3323,14 +3323,18 @@ mymcmc.run(30000,underPrior=TRUE);)");
 	help_strings[string("mvGibbsBuddingTopology")][string("description")] = string(R"(Redraws the whole budding (asymmetric speciation) topology of a `dnFBDSP` tree, holding the species ranges fixed.)");
 	help_strings[string("mvGibbsBuddingTopology")][string("details")] = string(R"(Each lineage is assigned an ancestor drawn uniformly from those alive at its birth. Conditional on the ranges every compatible tree carries the same probability, which is what the range process `dnFBDRP` states as a factor of gamma per taxon, so the draw is from the exact conditional. The move is a Gibbs step: the ratio is one and the proposal is always accepted.
 
-The other topology moves rearrange one branch at a time and reach these trees by random walk; this one lands anywhere in the compatible set in a single step. It also covers which lineage continues the ancestral species, since naming an ancestor fixes that, so `mvRotateNode` is redundant beside it.
+The other topology moves rearrange one branch at a time and reach these trees by random walk; this one lands anywhere in the set compatible with the current birth and death ages in a single step.
 
-Ranges and node ages are untouched, so the move needs company: something to sample the ages, such as `mvFossilTipTimeUniform` for the extinction times and `mvNodeTimeSlideUniform` with `mvRootTimeSlideUniform` for the speciation times.)");
+It rebuilds each budding node at the birth age the taxon already has, so it redraws which lineage a species buds from but never which species buds. The oldest birth in particular is taken as the root lineage and is never reattached. Pair it with `mvRotateNode`, which swaps the roles at a node and is the only move that relabels which lineage carries a given birth age. Without it the oldest birth stays on one taxon for the whole run and every per-taxon birth age is sampled too narrowly.
+
+Ranges and node ages are untouched, so the move needs company for those too: `mvFossilTipTimeUniform` for the extinction times and `mvNodeTimeSlideUniform` with `mvRootTimeSlideUniform` for the speciation times.)");
 	help_strings[string("mvGibbsBuddingTopology")][string("example")] = string(R"(tr ~ dnFBDSP(origin=origin, lambda=lambda, mu=mu, psi=psi, rho=1, timeline=timeline, taxa=taxa)
 rec ~ dnFossilRecord(ranges=tr, complete=false)
 rec.clamp(taxa)
 
 moves.append( mvGibbsBuddingTopology(tr, weight=taxa.size()) )
+# relabels which lineage carries each birth age; the Gibbs move cannot
+moves.append( mvRotateNode(tr, weight=taxa.size()) )
 moves.append( mvFossilTipTimeUniform(tr, weight=taxa.size()) )
 moves.append( mvNodeTimeSlideUniform(tr, weight=taxa.size()) )
 moves.append( mvRootTimeSlideUniform(tr, origin, weight=2) ))");
