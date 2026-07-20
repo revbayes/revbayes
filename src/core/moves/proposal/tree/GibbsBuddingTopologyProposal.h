@@ -15,8 +15,16 @@ namespace RevBayesCore {
      *
      * Every lineage buds off one drawn uniformly from those alive at its birth. Conditional on the
      * ranges each compatible tree carries the same density, which is what the range process states
-     * as a factor of gamma per taxon, so the draw is from the exact conditional and the move is a
-     * Gibbs step: the density ratio is one and the proposal is always accepted.
+     * as a factor of gamma per taxon, so the draw is from the exact conditional and every proposal
+     * is accepted.
+     *
+     * A likelihood on the tree breaks that tie and the move becomes an independence proposal from
+     * the tree prior. The draw is uniform over the compatible set and does not depend on the current
+     * tree, so the ratio stays one and the move stays valid, but acceptance is then the likelihood
+     * ratio alone.
+     *
+     * It rebuilds each budding node at the birth age its taxon already holds, so it never moves a
+     * birth age to another lineage. That is mvRotateNode's job.
      *
      * The local topology moves reach these trees by rearranging one branch at a time; this one
      * lands anywhere in the compatible set in a single step.

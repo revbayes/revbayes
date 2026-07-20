@@ -8,7 +8,9 @@ Gibbs draw of a budding topology
 Redraws the whole budding (asymmetric speciation) topology of a `dnFBDSP` tree, holding the species ranges fixed.
 
 ## details
-Each lineage is assigned an ancestor drawn uniformly from those alive at its birth. Conditional on the ranges every compatible tree carries the same probability, which is what the range process `dnFBDRP` states as a factor of gamma per taxon, so the draw is from the exact conditional. The move is a Gibbs step: the ratio is one and the proposal is always accepted.
+Each lineage is assigned an ancestor drawn uniformly from those alive at its birth. Conditional on the ranges every compatible tree carries the same probability, which is what the range process `dnFBDRP` states as a factor of gamma per taxon, so the draw is from the exact conditional and every proposal is accepted.
+
+That holds while the tree carries no character data. A phylogenetic likelihood breaks the tie between compatible trees, and the move becomes an independence proposal drawn from the tree prior rather than a Gibbs step. It stays valid, since the draw is uniform over the compatible set and independent of the current tree, so the ratio is still one and the likelihood alone decides acceptance. It stops being efficient: a blind draw rarely agrees with an informative alignment, so pair it with `mvFNPR` or `mvNNI` for the local rearrangements a likelihood rewards.
 
 The other topology moves rearrange one branch at a time and reach these trees by random walk; this one lands anywhere in the set compatible with the current birth and death ages in a single step.
 
