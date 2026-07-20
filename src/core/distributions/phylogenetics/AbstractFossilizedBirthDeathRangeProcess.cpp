@@ -288,7 +288,7 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
 
     if ( times.front() > max_present )
     {
-        throw(RbException("Timeline start time is older than youngest fossil first."));
+        throw(RbException("Timeline start time is older than youngest fossil occurrence."));
     }
 }
 
