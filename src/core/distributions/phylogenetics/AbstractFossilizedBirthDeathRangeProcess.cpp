@@ -516,7 +516,7 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnFossilRecord( size_t i
         double Lambda = 0.0;                            // interior sampling rate over (last, first)
 
         std::vector<double> psi(ages.size(), 0.0);
-        
+
         for (size_t j = 0; j < num_intervals; j++)
         {
             double t_0 = ( j < num_intervals-1 ? times[j+1] : RbConstants::Double::inf );
