@@ -471,6 +471,10 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnFossilTotal()
     double lnProb = 0.0;
     for ( size_t i = 0; i < taxa.size(); ++i )
     {
+        // an extant taxon with no fossil sample carries no reporting term; computeLnProbabilityRanges
+        // skips it as well, so the fused and split forms omit the same taxa
+        if ( taxa[i].getMaxAge() == times.front() ) continue;
+
         double r = computeLnFossilRecord(i);
         if ( r == RbConstants::Double::neginf )
         {
