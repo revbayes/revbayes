@@ -58,7 +58,6 @@ namespace RevBayesCore {
         void                                            executeMethod(const std::string &n, const std::vector<const DagNode*> &args, double &rv) const;              //!< Expose the origin, which no monitor can otherwise reach
         const std::vector<Taxon>&                       getTaxa() const { return taxa; }
         double                                          getPresent(void) const { return times.front(); }                                   //!< Age of the present
-        double                                          getMaxExtinctionAge(size_t i) const { return y_i[i]; }                              //!< A death lies at or below the youngest occurrence
         double                                          getOrigin(void) const { return origin; }                                            //!< The origin of the process, which is the oldest birth
         void                                            resampleFirstLast(size_t i);
         void                                            drawAugmentedAges(size_t i);                               //!< Draw taxon i's augmented extremes nested (d_i <= last <= first) under the current reporting model.

@@ -994,7 +994,7 @@ moves.append( mvMatrixElementSlide(bd, weight=taxa.size()) ))");
 	help_strings[string("dnFossilizedBirthDeathSpeciation")][string("description")] = string(R"(The fossilized birth death speciation process (FBDSP) describes the diversification and sampling of extant and extinct species trees under a mixed model of asymmetric, symmetric and anagenetic speciation.)");
 	help_strings[string("dnFossilizedBirthDeathSpeciation")][string("details")] = string(R"(Fossil species are represented by a collection of fossil occurrences with uncertainty. Speciation, extinction and sampling rates may be time-homogeneous or piecewise time-heterogeneous. If time-heterogeneous rates are provided, then a vector of rate change time-points must also be provided. Like `dnFBDRP`, this is the birth-death range process on its own (here over trees); pair it with a `dnFossilRecord` node clamped to the occurrences to add the probability of the fossil record, choosing `complete=TRUE` or `complete=FALSE` (first/last) there. Under the hood, the fossil data is augmented with oldest occurrence ages for each species. These ride with the moves on this node while `resample=TRUE`, and may also be sampled explicitly with `mvResampleAugmentedAges`.
 
-Every age in the tree needs a move, and one left without a move is silently held at its initial value. Tips are extinction events and may fall below their taxon's occurrence range, so sample them with `mvExtendedTipTimeUniform` rather than `mvFossilTipTimeUniform`. The root age is the first speciation event and is sampled like any other node age, but `mvNodeTimeSlideUniform` skips the root, so pair it with `mvRootTimeSlideUniform`.)");
+Every age in the tree needs a move, and one left without a move is silently held at its initial value. Tips are extinction events and may fall below their taxon's occurrence range; `mvFossilTipTimeUniform` reads that off the tree and samples them between the present and the youngest occurrence. The root age is the first speciation event and is sampled like any other node age, but `mvNodeTimeSlideUniform` skips the root, so pair it with `mvRootTimeSlideUniform`.)");
 	help_strings[string("dnFossilizedBirthDeathSpeciation")][string("example")] = string(R"(lambda ~ dnExp(10)
 mu ~ dnExp(10)
 psi ~ dnExp(10)
@@ -1021,12 +1021,12 @@ rec.clamp(taxa)
 moves.append( mvFNPR(bd, weight = taxa.size()) )
 moves.append( mvNodeTimeSlideUniform(bd, weight = taxa.size()) )
 moves.append( mvRootTimeSlideUniform(bd, origin=origin, weight = taxa.size()) )
-moves.append( mvExtendedTipTimeUniform(bd, weight = taxa.size()) ))");
+moves.append( mvFossilTipTimeUniform(bd, weight = taxa.size()) ))");
 	help_strings[string("dnFossilizedBirthDeathSpeciation")][string("name")] = string(R"(dnFossilizedBirthDeathSpeciation)");
 	help_references[string("dnFossilizedBirthDeathSpeciation")].push_back(RbHelpReference(R"(The fossilized birth-death model for the analysis of stratigraphic range data under different speciation modes. Stadler, Tanja et al. Journal of theoretical biology, 447:41-55.)",R"()",R"(https://www.sciencedirect.com/science/article/pii/S002251931830119X )"));
 	help_arrays[string("dnFossilizedBirthDeathSpeciation")][string("see_also")].push_back(string(R"(dnFossilizedBirthDeathRange)"));
 	help_arrays[string("dnFossilizedBirthDeathSpeciation")][string("see_also")].push_back(string(R"(dnFossilRecord)"));
-	help_arrays[string("dnFossilizedBirthDeathSpeciation")][string("see_also")].push_back(string(R"(mvExtendedTipTimeUniform)"));
+	help_arrays[string("dnFossilizedBirthDeathSpeciation")][string("see_also")].push_back(string(R"(mvFossilTipTimeUniform)"));
 	help_arrays[string("dnFossilizedBirthDeathSpeciation")][string("see_also")].push_back(string(R"(mvRootTimeSlideUniform)"));
 	help_arrays[string("dnFossilizedBirthDeathSpeciation")][string("see_also")].push_back(string(R"(mvResampleAugmentedAges)"));
 	help_arrays[string("dnGamma")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
@@ -3233,17 +3233,6 @@ moves[1] = mvEmpiricalTree(tree))");
 	help_strings[string("mvEmpiricalTree")][string("title")] = string(R"(Move on an empirical tree distribution)");
 	help_strings[string("mvEventTimeBeta")][string("name")] = string(R"(mvEventTimeBeta)");
 	help_strings[string("mvEventTimeSlide")][string("name")] = string(R"(mvEventTimeSlide)");
-	help_arrays[string("mvExtendedTipTimeUniform")][string("authors")].push_back(string(R"(June Walker)"));
-	help_strings[string("mvExtendedTipTimeUniform")][string("description")] = string(R"(Draws a new extinction time for a random extinct tip of an extended tree, uniformly between the present and the taxon's youngest occurrence.)");
-	help_strings[string("mvExtendedTipTimeUniform")][string("details")] = string(R"(The tips of an extended tree are extinction events rather than occurrences, so a tip age may fall below its taxon's fossil age range. This move therefore draws on the data-fixed window between the present and the youngest occurrence, rather than within the age range as `mvFossilTipTimeUniform` does. The proposal is symmetric and configurations that place the extinction above the augmented oldest age are rejected by the distribution.
-
-Extant tips are pinned at the present and are never proposed.)");
-	help_strings[string("mvExtendedTipTimeUniform")][string("example")] = string(R"(tr ~ dnFBDSP(origin=origin, lambda=lambda, mu=mu, psi=psi, rho=1, timeline=timeline, taxa=taxa)
-moves.append( mvExtendedTipTimeUniform(tr, weight=taxa.size()) ))");
-	help_strings[string("mvExtendedTipTimeUniform")][string("name")] = string(R"(mvExtendedTipTimeUniform)");
-	help_arrays[string("mvExtendedTipTimeUniform")][string("see_also")].push_back(string(R"(dnFossilizedBirthDeathSpeciation)"));
-	help_arrays[string("mvExtendedTipTimeUniform")][string("see_also")].push_back(string(R"(mvResampleAugmentedAges)"));
-	help_strings[string("mvExtendedTipTimeUniform")][string("title")] = string(R"(Extended tip extinction time move)");
 	help_strings[string("mvFNPR")][string("name")] = string(R"(mvFNPR)");
 	help_arrays[string("mvFossilTipTimeSlideUniform")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("mvFossilTipTimeSlideUniform")][string("description")] = string(R"(This moves either takes a specific fossil, or randomly picks a fossil, and then performs a sliding move on the tip age.)");
@@ -3336,13 +3325,13 @@ mymcmc.run(30000,underPrior=TRUE);)");
 
 The other topology moves rearrange one branch at a time and reach these trees by random walk; this one lands anywhere in the compatible set in a single step. It also covers which lineage continues the ancestral species, since naming an ancestor fixes that, so `mvRotateNode` is redundant beside it.
 
-Ranges and node ages are untouched, so the move needs company: something to sample the ages, such as `mvExtendedTipTimeUniform` for the extinction times and `mvNodeTimeSlideUniform` with `mvRootTimeSlideUniform` for the speciation times.)");
+Ranges and node ages are untouched, so the move needs company: something to sample the ages, such as `mvFossilTipTimeUniform` for the extinction times and `mvNodeTimeSlideUniform` with `mvRootTimeSlideUniform` for the speciation times.)");
 	help_strings[string("mvGibbsBuddingTopology")][string("example")] = string(R"(tr ~ dnFBDSP(origin=origin, lambda=lambda, mu=mu, psi=psi, rho=1, timeline=timeline, taxa=taxa)
 rec ~ dnFossilRecord(ranges=tr, complete=false)
 rec.clamp(taxa)
 
 moves.append( mvGibbsBuddingTopology(tr, weight=taxa.size()) )
-moves.append( mvExtendedTipTimeUniform(tr, weight=taxa.size()) )
+moves.append( mvFossilTipTimeUniform(tr, weight=taxa.size()) )
 moves.append( mvNodeTimeSlideUniform(tr, weight=taxa.size()) )
 moves.append( mvRootTimeSlideUniform(tr, origin, weight=2) ))");
 	help_strings[string("mvGibbsBuddingTopology")][string("name")] = string(R"(mvGibbsBuddingTopology)");

@@ -5,6 +5,7 @@
 
 #include "DistributionUniform.h"
 #include "FossilTipTimeUniformProposal.h"
+#include "RbConstants.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RbException.h"
@@ -112,14 +113,18 @@ double FossilTipTimeUniformProposal::doProposal( void )
     RandomNumberGenerator* rng     = GLOBAL_RNG;
     
     Tree& tau = tree->getValue();
-    
+
+    bool extended = tree->getDistribution().isExtendedTree();
+
     if ( use_index == false )
     {
         std::vector<size_t> tips;
         for (size_t i = 0; i < tau.getNumberOfTips(); ++i)
         {
             TopologyNode* node = &tau.getNode(i);
-            if ( node->isFossil() )
+            // on an extended tree a tip is an extinction, which the taxon declares; its age may
+            // already sit at the present, where isFossil() would miss it
+            if ( extended == true ? node->getTaxon().isExtinct() : node->isFossil() )
             {
                 tips.push_back(i);
             }
@@ -139,13 +144,14 @@ double FossilTipTimeUniformProposal::doProposal( void )
 
     TopologyNode& node = tau.getNode(node_index);
 
-    if ( node.isRoot() == true && origin == NULL )
+    // an extended tip is bounded by its own occurrences, so it needs no origin
+    if ( node.isRoot() == true && origin == NULL && extended == false )
     {
         throw RbException("Attempting to move a root tip, but no origin time provided.");
     }
 
     // a lone lineage is its own root, so the origin bounds it instead of a parent
-    double parent_age   = node.isRoot() ? origin->getValue() : node.getParent().getAge();
+    double parent_age   = node.isRoot() ? ( origin != NULL ? origin->getValue() : RbConstants::Double::inf ) : node.getParent().getAge();
     double my_age       = node.getAge();
     double min_age      = 0;
     double max_age;
@@ -213,7 +219,24 @@ double FossilTipTimeUniformProposal::doProposal( void )
     } else {
         max_age = fmin(max_age, parent_age);
     }
-    
+
+    if ( extended == true )
+    {
+        // the tip is an extinction, bounded by the present and the youngest occurrence rather than
+        // by the parent. A parent-dependent window would need a Hastings term; the density rejects.
+        // Occurrence ages are absolute, so this needs the present once it is settable.
+        const std::map<TimeInterval, size_t>& occurrences = node.getTaxon().getOccurrences();
+
+        min_age = 0.0;
+        max_age = node.getTaxon().getMaxAge();
+
+        // a death lies at or below every occurrence, so the binding bound is the youngest maximum
+        for (std::map<TimeInterval, size_t>::const_iterator it = occurrences.begin(); it != occurrences.end(); ++it)
+        {
+            max_age = fmin(max_age, it->first.getMax());
+        }
+    }
+
     assert(max_age >= min_age); //sanity check
 
     // now we store all necessary values

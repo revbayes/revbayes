@@ -212,7 +212,6 @@
 #include "Move_IndependentTopology.h"
 #include "Move_EmpiricalTree.h"
 #include "Move_FNPR.h"
-#include "Move_ExtendedTipTimeUniform.h"
 #include "Move_RotateNode.h"
 #include "Move_GibbsBuddingTopology.h"
 #include "Move_SPRClock.h"
@@ -442,7 +441,6 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_IndependentTopology()              );
         addType( new Move_EmpiricalTree()                    );
         addType( new Move_FNPR()                             );
-        addType( new Move_ExtendedTipTimeUniform()           );
         addType( new Move_RotateNode()                       );
         addType( new Move_GibbsBuddingTopology()             );
         addType( new Move_SPRClock()                         );

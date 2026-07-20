@@ -12,7 +12,7 @@ Each lineage is assigned an ancestor drawn uniformly from those alive at its bir
 
 The other topology moves rearrange one branch at a time and reach these trees by random walk; this one lands anywhere in the compatible set in a single step. It also covers which lineage continues the ancestral species, since naming an ancestor fixes that, so `mvRotateNode` is redundant beside it.
 
-Ranges and node ages are untouched, so the move needs company: something to sample the ages, such as `mvExtendedTipTimeUniform` for the extinction times and `mvNodeTimeSlideUniform` with `mvRootTimeSlideUniform` for the speciation times.
+Ranges and node ages are untouched, so the move needs company: something to sample the ages, such as `mvFossilTipTimeUniform` for the extinction times and `mvNodeTimeSlideUniform` with `mvRootTimeSlideUniform` for the speciation times.
 
 ## authors
 June Walker
@@ -28,7 +28,7 @@ rec ~ dnFossilRecord(ranges=tr, complete=false)
 rec.clamp(taxa)
 
 moves.append( mvGibbsBuddingTopology(tr, weight=taxa.size()) )
-moves.append( mvExtendedTipTimeUniform(tr, weight=taxa.size()) )
+moves.append( mvFossilTipTimeUniform(tr, weight=taxa.size()) )
 moves.append( mvNodeTimeSlideUniform(tr, weight=taxa.size()) )
 moves.append( mvRootTimeSlideUniform(tr, origin, weight=2) )
 
