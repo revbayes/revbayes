@@ -29,7 +29,10 @@ FossilTipTimeUniformProposal::FossilTipTimeUniformProposal( StochasticNode<Tree>
     origin( o ),
     max( ma ),
     min( mi ),
-    tip_taxon( t )
+    tip_taxon( t ),
+    node_index( 0 ),
+    stored_age( 0.0 ),
+    failed( false )
 {
     // tell the base class to add the node
     addNode( tree );
@@ -115,6 +118,8 @@ double FossilTipTimeUniformProposal::doProposal( void )
     Tree& tau = tree->getValue();
 
     bool extended = tree->getDistribution().isExtendedTree();
+
+    failed = false;
 
     if ( use_index == false )
     {
@@ -285,6 +290,9 @@ void FossilTipTimeUniformProposal::printParameterSummary(std::ostream &o, bool n
 void FossilTipTimeUniformProposal::undoProposal( void )
 {
     
+    // a proposal that found no movable tip never picked a node, so there is nothing to restore
+    if ( failed == true ) return;
+
     // undo the proposal
     Tree& tau = tree->getValue();
     TopologyNode* node = &tau.getNode(node_index);
