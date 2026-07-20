@@ -421,6 +421,101 @@ void FossilizedBirthDeathSpeciationProcess::redrawValue(void)
 
 
 
+/**
+ * Redraw the budding (asymmetric speciation) topology, holding the ranges fixed: each lineage buds off one drawn
+ * uniformly from those alive at its birth. Conditional on the ranges every compatible tree has
+ * the same density -- that equality is what the range process expresses as a factor of gamma per
+ * taxon -- so this is a Gibbs step and the caller accepts it outright.
+ *
+ * Returns false and leaves the tree alone when some lineage has no possible ancestor.
+ */
+bool FossilizedBirthDeathSpeciationProcess::redrawTopology( void )
+{
+    RandomNumberGenerator* rng = GLOBAL_RNG;
+
+    updateStartEndTimes();
+
+    size_t n = taxa.size();
+    if ( n < 2 ) return false;
+
+    size_t root_lineage = 0;
+    for (size_t i = 0; i < n; ++i)
+    {
+        if ( b_i[i] > b_i[root_lineage] ) root_lineage = i;
+    }
+
+    // choose every attachment before touching the tree, so an impossible draw costs nothing
+    std::vector<size_t> parent(n, n);
+    for (size_t k = 0; k < n; ++k)
+    {
+        if ( k == root_lineage ) continue;
+
+        std::vector<size_t> cand;
+        for (size_t j = 0; j < n; ++j)
+        {
+            if ( j != k && b_i[j] > b_i[k] && d_i[j] < b_i[k] ) cand.push_back( j );
+        }
+
+        if ( cand.empty() == true ) return false;
+
+        size_t pick = size_t( rng->uniform01() * cand.size() );
+        if ( pick >= cand.size() ) pick = cand.size() - 1;
+
+        parent[k] = cand[pick];
+    }
+
+    std::vector<TopologyNode*> top(n);
+    for (size_t i = 0; i < n; ++i)
+    {
+        TopologyNode* tip = new TopologyNode( taxa[i], i );
+        tip->setTipAgeUnconstrained( true );
+        tip->setAge( d_i[i] );
+        top[i] = tip;
+    }
+
+    // youngest birth first, so a lineage's subtree is complete before it attaches
+    std::vector<size_t> byBirth(n);
+    for (size_t i = 0; i < n; ++i) byBirth[i] = i;
+    std::sort( byBirth.begin(), byBirth.end(), [this](size_t a, size_t b){ return b_i[a] < b_i[b]; } );
+
+    for (size_t idx = 0; idx < n; ++idx)
+    {
+        size_t k = byBirth[idx];
+        if ( parent[k] == n ) continue;
+
+        size_t j = parent[k];
+
+        // budding node at b_k: child 0 is the ancestor (continues), child 1 the new species
+        TopologyNode* node = new TopologyNode();
+        node->setAge( b_i[k] );
+        node->addChild( top[j] );
+        node->addChild( top[k] );
+        top[j]->setParent( node );
+        top[k]->setParent( node );
+        top[j] = node;
+    }
+
+    Tree *psi = new Tree();
+    psi->setRooted( true );
+    psi->setRoot( top[root_lineage], true );
+
+    delete this->value;
+    this->value = psi;
+
+    const std::vector<TopologyNode*> nodes = this->getValue().getNodes();
+    for( size_t i = 0; i < this->getValue().getNumberOfTips(); i++)
+    {
+        size_t j = find(taxa.begin(), taxa.end(), nodes[i]->getTaxon()) - taxa.begin();
+        nodes[i]->setIndex(j);
+    }
+    this->getValue().orderNodesByIndex();
+
+    return true;
+}
+
+/**
+ *
+ */
 void FossilizedBirthDeathSpeciationProcess::simulateClade(std::vector<TopologyNode *> &n, double age, double present, bool alwaysReturn)
 {
 
