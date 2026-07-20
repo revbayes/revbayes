@@ -690,12 +690,21 @@ double AbstractFossilizedBirthDeathRangeProcess::p( size_t i, double t, bool sur
     double dt   = t - ti;
 
     double A = sqrt( diff*diff + 4.0*b*f);
+
+    // survival takes f = 0, so b == d leaves A = 0, where the closed form is singular
+    if ( A < 1E-10 )
+    {
+        double s = 1.0 - (1.0 - r)*pi;
+
+        return 1.0 - s/(1.0 + b*s*dt);
+    }
+
     double B = ( (1.0 - 2.0*(1.0-r)*pi )*b + d + f ) / A;
 
     double ln_e = -A*dt;
 
     double tmp = (1.0 + B) + exp(ln_e)*(1.0 - B);
-    
+
     return (b + d + f - A * ((1.0+B)-exp(ln_e)*(1.0-B))/tmp)/(2.0*b);
 }
 
@@ -1070,16 +1079,29 @@ void AbstractFossilizedBirthDeathRangeProcess::prepareProbComputation( void ) co
 
             if ( condition == "survival" )
             {
+                // survival ignores fossil sampling, so this is the f = 0 case of the recursion
+                // above, carried on its own probability rather than the sampled one
                 diff = b - d;
 
-                A = sqrt( diff*diff);
-                B = ( (1.0 - 2.0*(1.0-r)*p_i[i] )*b + d ) / A;
+                A = fabs( diff );
 
-                ln_e = -A*dt;
+                double s = 1.0 - (1.0 - r)*pS_i[i];
 
-                tmp = (1.0 + B) + exp(ln_e)*(1.0 - B);
+                if ( A < 1E-10 )
+                {
+                    // b == d leaves A = 0, where the closed form is singular but its limit is not
+                    pS_i[i+1] = 1.0 - s/(1.0 + b*s*dt);
+                }
+                else
+                {
+                    B = ( (1.0 - 2.0*(1.0-r)*pS_i[i] )*b + d ) / A;
 
-                pS_i[i]  = (b + d - A * ((1.0+B)-exp(ln_e)*(1.0-B))/tmp)/(2.0*b);
+                    ln_e = -A*dt;
+
+                    tmp = (1.0 + B) + exp(ln_e)*(1.0 - B);
+
+                    pS_i[i+1] = (b + d - A * ((1.0+B)-exp(ln_e)*(1.0-B))/tmp)/(2.0*b);
+                }
             }
         }
     }
