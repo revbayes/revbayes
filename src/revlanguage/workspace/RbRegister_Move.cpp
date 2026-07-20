@@ -214,6 +214,8 @@
 #include "Move_FossilTipTimeUniform.h"
 #include "Move_FossilTipTimeSlideUniform.h"
 #include "Move_GibbsPruneAndRegraft.h"
+#include "Move_GibbsSubtreePruneAndRegraft.h"
+#include "Move_GibbsSubtreeSwap.h"
 #include "Move_LayeredScaleProposal.h"
 #include "Move_NarrowExchange.h"
 #include "Move_NNIClock.h"
@@ -240,6 +242,9 @@
 #include "Move_SPRNonclock.h"
 #include "Move_TreeScale.h"
 //#include "Move_WeightedNodeTimeSlide.h"
+#include "Move_WeightedBranchLengthScale.h"
+#include "Move_WeightedSubtreePruneAndRegraft.h"
+#include "Move_WeightedSubtreeSwap.h"
 
 
 #include "Move_NarrowExchangeRateMatrix.h"
@@ -441,8 +446,11 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_FossilTipTimeUniform()             );
         addType( new Move_FossilTipTimeSlideUniform()        );
         addType( new Move_GibbsPruneAndRegraft()             );
+        addType( new Move_GibbsSubtreePruneAndRegraft()      );
+        addType( new Move_GibbsSubtreeSwap()                 );
         addType( new Move_LayeredScaleProposal()             );
         addType( new Move_NarrowExchange()                   );
+        addType( new Move_NarrowExchangeRateMatrix()         );
         addType( new Move_NNIClock()                         );
         addType( new Move_NNINonclock()                      );
         addType( new Move_NodeRateTimeSlideUniform()         );
@@ -466,7 +474,9 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_SpeciesSubtreeScaleBeta()          );
         addType( new Move_SpeciesTreeScale()                 );
         addType( new Move_TreeScale()                        );
-        addType( new Move_NarrowExchangeRateMatrix()         );
+        addType( new Move_WeightedBranchLengthScale()        );
+        addType( new Move_WeightedSubtreePruneAndRegraft()   );
+        addType( new Move_WeightedSubtreeSwap()              );
 
         /* Moves on character histories / data augmentation */
         addType( new Move_CharacterHistory() );

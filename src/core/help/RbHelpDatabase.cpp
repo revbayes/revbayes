@@ -3389,7 +3389,17 @@ moves.append( mvAdaptiveRJSwitch(theta,
 	help_strings[string("mvBirthDeathEvent")][string("name")] = string(R"(mvBirthDeathEvent)");
 	help_strings[string("mvBirthDeathEventContinuous")][string("name")] = string(R"(mvBirthDeathEventContinuous)");
 	help_strings[string("mvBirthDeathFromAgeEvent")][string("name")] = string(R"(mvBirthDeathFromAgeEvent)");
+	help_arrays[string("mvBranchLengthScale")][string("authors")].push_back(string(R"(Sebastian Höhna)"));
+	help_strings[string("mvBranchLengthScale")][string("description")] = string(R"(Proposes multiplicative updates to a branch length.)");
+	help_strings[string("mvBranchLengthScale")][string("details")] = string(R"(The `mvBranchLengthScale` move updates a branch length by multiplying it with a randomly chosen factor from a uniform distribution. The move takes arguments that control how often it should be used (`weight`) and the size of the scaling factor (`lambda`). When the `tune` argument is set to `TRUE`, the value of `lambda` is automatically adjusted so that the acceptance rate of the move reaches `tuneTarget`. The `mvBranchLengthScale` selects a random branch in the topology for scaling. Note that you can restrict this to only terminal branches.)");
+	help_strings[string("mvBranchLengthScale")][string("example")] = string(R"(taxa <- v(taxon("A"), taxon("B"), taxon("C"), taxon("D"), taxon("E"), taxon("F"))
+moves = VectorMoves()
+phylogeny ~ dnUniformTopologyBranchLength(taxa, branchLengthDistribution=dnExponential(10.0))
+moves.append( mvBranchLengthScale(phylogeny, weight=1) ))");
 	help_strings[string("mvBranchLengthScale")][string("name")] = string(R"(mvBranchLengthScale)");
+	help_arrays[string("mvBranchLengthScale")][string("see_also")].push_back(string(R"(mvScaleBactrian)"));
+	help_arrays[string("mvBranchLengthScale")][string("see_also")].push_back(string(R"(mvScale)"));
+	help_strings[string("mvBranchLengthScale")][string("title")] = string(R"(Proportional Scaling Move of Single Branch Lengths)");
 	help_strings[string("mvBurstEvent")][string("name")] = string(R"(mvBurstEvent)");
 	help_arrays[string("mvCharacterHistory")][string("authors")].push_back(string(R"(Priscilla Lau)"));
 	help_strings[string("mvCharacterHistory")][string("description")] = string(R"(A proposal to change the (discrete) character history, at a node or along a
@@ -3576,6 +3586,7 @@ moves[1] = mvEmpiricalTree(tree))");
 	help_strings[string("mvEmpiricalTree")][string("title")] = string(R"(Move on an empirical tree distribution)");
 	help_strings[string("mvEventTimeBeta")][string("name")] = string(R"(mvEventTimeBeta)");
 	help_strings[string("mvEventTimeSlide")][string("name")] = string(R"(mvEventTimeSlide)");
+	help_arrays[string("mvFNPR")][string("authors")].push_back(string(R"(Sebastian Höhna)"));
 	help_strings[string("mvFNPR")][string("description")] = string(R"(Tree topology move that prunes and re-attaches a subtree without changing any
 node heights.)");
 	help_strings[string("mvFNPR")][string("details")] = string(R"(`mvFNPR` randomly picks node i which is neither a tip nor the root, and prunes
@@ -3648,7 +3659,6 @@ for(i in 1:fossils.size())
 	help_strings[string("mvFossilTipTimeUniform")][string("title")] = string(R"(Move to uniformly draw fossil tip ages)");
 	help_strings[string("mvGMRFHyperpriorGibbs")][string("name")] = string(R"(mvGMRFHyperpriorGibbs)");
 	help_strings[string("mvGMRFUnevenGridHyperpriorGibbs")][string("name")] = string(R"(mvGMRFUnevenGridHyperpriorGibbs)");
-	help_strings[string("mvGPR")][string("name")] = string(R"(mvGPR)");
 	help_arrays[string("mvGammaScale")][string("authors")].push_back(string(R"(Jeremy M. Brown)"));
 	help_strings[string("mvGammaScale")][string("description")] = string(R"(A move to scale a single continuous value by multiplying by a value drawn from a Gamma(lambda,1) distribution. Lambda is the tuning parameter that controls the size of the proposals.)");
 	help_strings[string("mvGammaScale")][string("example")] = string(R"(# Here is a simple example for conducting MCMC on the mean and sd of a Normal distribution.
@@ -3685,7 +3695,51 @@ mymcmc.run(30000,underPrior=TRUE);)");
 	help_strings[string("mvGammaScale")][string("name")] = string(R"(mvGammaScale)");
 	help_arrays[string("mvGammaScale")][string("see_also")].push_back(string(R"(mvScale)"));
 	help_strings[string("mvGibbsDrawCharacterHistory")][string("name")] = string(R"(mvGibbsDrawCharacterHistory)");
+	help_arrays[string("mvGibbsFNPR")][string("authors")].push_back(string(R"(Sebastian Höhna)"));
+	help_strings[string("mvGibbsFNPR")][string("description")] = string(R"(Tree topology move that performs a Gibbs Fixed-nodeheight Subtree Prune and Regraft on a rooted tree.)");
+	help_strings[string("mvGibbsFNPR")][string("details")] = string(R"(`mvGibbsFNPR` basically performs a FNPR but tries all possible reattachment points, evaluates these based on the current joint DAG probability density, and then proposes the reattachment based on the probability density.
+This move can be efficient to reach quicker the stationary distribution, but is also more costly in computational time.)");
+	help_strings[string("mvGibbsFNPR")][string("example")] = string(R"(taxa <- v(taxon("A"), taxon("B"), taxon("C"), taxon("D"), taxon("E"), taxon("F"))
+moves = VectorMoves()
+
+root_age <- 1.0
+
+topology ~ dnUniformTimeTree(taxa, root_age)
+moves.append( mvGibbsFNPR(topology, weight=taxa.size()) ))");
+	help_strings[string("mvGibbsFNPR")][string("name")] = string(R"(mvGibbsFNPR)");
+	help_references[string("mvGibbsFNPR")].push_back(RbHelpReference(R"(Höhna S & Drummond AJ (2012). Guided Tree Topology Proposals for Bayesian Phylogenetic Inference. Systematic Biology, 61(1):1-11.)",R"(10.1093/sysbio/syr074)",R"(https://academic.oup.com/sysbio/article-abstract/61/1/1/1676649 )"));
+	help_arrays[string("mvGibbsFNPR")][string("see_also")].push_back(string(R"(mvFNPR)"));
+	help_strings[string("mvGibbsFNPR")][string("title")] = string(R"(Gibbs Fixed-nodeheight Subtree Prune and Regraft move.)");
 	help_strings[string("mvGibbsMixtureAllocation")][string("name")] = string(R"(mvGibbsMixtureAllocation)");
+	help_arrays[string("mvGibbsSPR")][string("authors")].push_back(string(R"(Sebastian Höhna)"));
+	help_strings[string("mvGibbsSPR")][string("description")] = string(R"(Tree topology move that performs a Gibbs Subtree Prune and Regraft (GPR) on
+an unrooted tree.)");
+	help_strings[string("mvGibbsSPR")][string("details")] = string(R"(`mvGibbsSubtreePruneAndRegraft` basically performs a SPR but tries all possible reattachment points, evaluates these based on the current joint DAG probability density, and then proposes the reattachment based on the probability density.
+This move can be efficient to reach quicker the stationary distribution, but is also more costly in computational time.)");
+	help_strings[string("mvGibbsSPR")][string("example")] = string(R"(taxa <- v(taxon("A"), taxon("B"), taxon("C"), taxon("D"), taxon("E"), taxon("F"))
+moves = VectorMoves()
+
+phylogeny ~ dnUniformTopologyBranchLength(taxa, branchLengthDistribution=dnExponential(10.0))
+moves.append( mvGibbsSubtreePruneAndRegraft(topology, weight=taxa.size()) ))");
+	help_strings[string("mvGibbsSPR")][string("name")] = string(R"(mvGibbsSubtreePruneAndRegraft)");
+	help_references[string("mvGibbsSPR")].push_back(RbHelpReference(R"(Höhna S & Drummond AJ (2012). Guided Tree Topology Proposals for Bayesian Phylogenetic Inference. Systematic Biology, 61(1):1-11.)",R"(10.1093/sysbio/syr074)",R"(https://academic.oup.com/sysbio/article-abstract/61/1/1/1676649 )"));
+	help_arrays[string("mvGibbsSPR")][string("see_also")].push_back(string(R"(mvGibbsFNPR)"));
+	help_strings[string("mvGibbsSPR")][string("title")] = string(R"(Gibbs Subtree Prune and Regraft (GPR) move.)");
+	help_arrays[string("mvGibbsSubtreeSwap")][string("authors")].push_back(string(R"(Sebastian Höhna)"));
+	help_strings[string("mvGibbsSubtreeSwap")][string("description")] = string(R"(Tree topology move that performs a Gibbs Subtree Swap on an unrooted tree.)");
+	help_strings[string("mvGibbsSubtreeSwap")][string("details")] = string(R"(`mvGibbsSubtreeSwap` randomly picks a first internal node (clade). Then it finds all possible other clades it can be swap with. Now it tries all these possible swaps and computes the resulting joint probability density. The final proposal is done proportional to the probability density.
+The move is thus similar to the basic subtree swap, which randomly pick the second clade.
+This move can be efficient to reach quicker the stationary distribution, but is also more costly in computational time.)");
+	help_strings[string("mvGibbsSubtreeSwap")][string("example")] = string(R"(taxa <- v(taxon("A"), taxon("B"), taxon("C"), taxon("D"), taxon("E"), taxon("F"))
+moves = VectorMoves()
+
+phylogeny ~ dnUniformTopologyBranchLength(taxa, branchLengthDistribution=dnExponential(10.0))
+moves.append( mvGibbsSubtreeSwap(topology, weight=taxa.size()) ))");
+	help_strings[string("mvGibbsSubtreeSwap")][string("name")] = string(R"(mvGibbsSubtreeSwap)");
+	help_references[string("mvGibbsSubtreeSwap")].push_back(RbHelpReference(R"(Höhna S & Drummond AJ (2012). Guided Tree Topology Proposals for Bayesian Phylogenetic Inference. Systematic Biology, 61(1):1-11.)",R"(10.1093/sysbio/syr074)",R"(https://academic.oup.com/sysbio/article-abstract/61/1/1/1676649 )"));
+	help_arrays[string("mvGibbsSubtreeSwap")][string("see_also")].push_back(string(R"(mvFNPR)"));
+	help_arrays[string("mvGibbsSubtreeSwap")][string("see_also")].push_back(string(R"(mvNNI)"));
+	help_strings[string("mvGibbsSubtreeSwap")][string("title")] = string(R"(Gibbs Subtree Swap move.)");
 	help_strings[string("mvGraphFlipClique")][string("name")] = string(R"(mvGraphFlipClique)");
 	help_strings[string("mvGraphFlipEdge")][string("name")] = string(R"(mvGraphFlipEdge)");
 	help_strings[string("mvGraphShiftEdge")][string("name")] = string(R"(mvGraphShiftEdge)");
@@ -4382,6 +4436,20 @@ mymcmc.operatorSummary())");
 	help_arrays[string("mvSpeciesTreeScale")][string("see_also")].push_back(string(R"(mvSpeciesSubtreeScale)"));
 	help_strings[string("mvSpeciesTreeScale")][string("title")] = string(R"(Tree scale move on species tree and gene trees for multispecies coalescent models.)");
 	help_strings[string("mvSubtreeScale")][string("name")] = string(R"(mvSubtreeScale)");
+	help_arrays[string("mvSubtreeSwap")][string("authors")].push_back(string(R"(Sebastian Höhna)"));
+	help_strings[string("mvSubtreeSwap")][string("description")] = string(R"(Tree topology move that performs a Subtree Swap on an unrooted tree.)");
+	help_strings[string("mvSubtreeSwap")][string("details")] = string(R"(`mvSubtreeSwap` randomly picks two non-nested clades and exchanges/swaps them.
+In that sense, it is a superset of the NNI move but different from an SPR move.)");
+	help_strings[string("mvSubtreeSwap")][string("example")] = string(R"(taxa <- v(taxon("A"), taxon("B"), taxon("C"), taxon("D"), taxon("E"), taxon("F"))
+moves = VectorMoves()
+
+phylogeny ~ dnUniformTopologyBranchLength(taxa, branchLengthDistribution=dnExponential(10.0))
+moves.append( mvSubtreeSwap(topology, weight=taxa.size()) ))");
+	help_strings[string("mvSubtreeSwap")][string("name")] = string(R"(mvSubtreeSwap)");
+	help_references[string("mvSubtreeSwap")].push_back(RbHelpReference(R"(Höhna S & Drummond AJ (2012). Guided Tree Topology Proposals for Bayesian Phylogenetic Inference. Systematic Biology, 61(1):1-11.)",R"(10.1093/sysbio/syr074)",R"(https://academic.oup.com/sysbio/article-abstract/61/1/1/1676649 )"));
+	help_arrays[string("mvSubtreeSwap")][string("see_also")].push_back(string(R"(mvFNPR)"));
+	help_arrays[string("mvSubtreeSwap")][string("see_also")].push_back(string(R"(mvNNI)"));
+	help_strings[string("mvSubtreeSwap")][string("title")] = string(R"(Subtree Swap move.)");
 	help_strings[string("mvSymmetricMatrixElementSlide")][string("name")] = string(R"(mvSymmetricMatrixElementSlide)");
 	help_strings[string("mvSynchronizedVectorFixedSingleElementSlide")][string("name")] = string(R"(mvSynchronizedVectorFixedSingleElementSlide)");
 	help_strings[string("mvTreeScale")][string("description")] = string(R"(Scales the ages of all internal nodes in a `TimeTree` by the same factor while
@@ -4476,6 +4544,47 @@ moves.append( delta_up_down_move ))");
 	help_strings[string("mvVectorSingleElementSlide")][string("name")] = string(R"(mvVectorSingleElementSlide)");
 	help_strings[string("mvVectorSlide")][string("name")] = string(R"(mvVectorSlide)");
 	help_strings[string("mvVectorSlideRecenter")][string("name")] = string(R"(mvVectorSlideRecenter)");
+	help_arrays[string("mvWeightedBranchLengthScale")][string("authors")].push_back(string(R"(Sebastian Höhna)"));
+	help_strings[string("mvWeightedBranchLengthScale")][string("description")] = string(R"(Branch Length Scale move that proposes a new branch reattachment based on numeric integration on an unrooted tree.)");
+	help_strings[string("mvWeightedBranchLengthScale")][string("details")] = string(R"(The basic idea of the `mvWeightedBranchLengthScale` is to move an internal node left or right (or up and down, if the tree is considered vertically). Consider a random node. This node has a branch that leads to it (yes, for unrooted trees we still internally give it a direction for easy identification). Now this node is attached to the remaining tree by that branch (connected through an internal node). So that internal node has two more branches connected to it, we arbitrarily call them left and right (or up and down, if you wish). Imagine you could slide this node left or right, which would change the fraction of the left branch to the right branch, but keeping the total the same. The `mvWeightedBranchLengthScale` move tries to propose new values from an approximated probability density of all left/right fractions. This is done by breaking the fraction into intervals which are computed by the quantiles of a Beta distribution. The integral is computed by using a piecewise linear extrapolation (similar to a Riemann integral).)");
+	help_strings[string("mvWeightedBranchLengthScale")][string("example")] = string(R"(taxa <- v(taxon("A"), taxon("B"), taxon("C"), taxon("D"), taxon("E"), taxon("F"))
+moves = VectorMoves()
+
+phylogeny ~ dnUniformTopologyBranchLength(taxa, branchLengthDistribution=dnExponential(10.0))
+moves.append( mvWeightedBranchLengthScale(topology, weight=taxa.size()) ))");
+	help_strings[string("mvWeightedBranchLengthScale")][string("name")] = string(R"(mvWeightedBranchLengthScale)");
+	help_arrays[string("mvWeightedBranchLengthScale")][string("see_also")].push_back(string(R"(mvBranchLengthScale)"));
+	help_arrays[string("mvWeightedBranchLengthScale")][string("see_also")].push_back(string(R"(mvNNI)"));
+	help_strings[string("mvWeightedBranchLengthScale")][string("title")] = string(R"(Weighted Branch Length Scale move.)");
+	help_arrays[string("mvWeightedSPR")][string("authors")].push_back(string(R"(Sebastian Höhna)"));
+	help_strings[string("mvWeightedSPR")][string("description")] = string(R"(Tree topology move that performs a Weighted Subtree Prune and Regraft on an unrooted tree.)");
+	help_strings[string("mvWeightedSPR")][string("details")] = string(R"(The basic idea of the `mvWeightedSubtreePruneAndRegraft` is to propose new trees based on the marginal probabilities (marginal in the sense of integrating over branch lengths for the affected branches) of all possible other trees after the subtree for pruning has been chosen (see `mvGibbsSubtreePruneAndRegraft`). It may be possible that some topology moves are reject only because of the specific branch lengths but otherwise the new topology should have a higher posterior probability.
+
+`mvWeightedSubtreePruneAndRegraft` randomly picks a node and the corresponding branch leading to it (subtree). Then it finds all possible other branches (or nodes, depending on your viewpoint) it can be reattached to. Now it tries all these possible reattachments and computes the resulting joint probability density (see `mvWeightedBranchLengthScale`). Importantly, it integrates over all possible fractions of the branch length it reattaches to. This is done by breaking the fraction into intervals which are computed by the quantiles of a Beta distribution. The integral is computed by using a piecewise linear extrapolation (similar to a Riemann integral).)");
+	help_strings[string("mvWeightedSPR")][string("example")] = string(R"(taxa <- v(taxon("A"), taxon("B"), taxon("C"), taxon("D"), taxon("E"), taxon("F"))
+moves = VectorMoves()
+
+phylogeny ~ dnUniformTopologyBranchLength(taxa, branchLengthDistribution=dnExponential(10.0))
+moves.append( mvWeightedSubtreePruneAndRegraft(topology, weight=taxa.size()) ))");
+	help_strings[string("mvWeightedSPR")][string("name")] = string(R"(mvWeightedSubtreePruneAndRegraft)");
+	help_arrays[string("mvWeightedSPR")][string("see_also")].push_back(string(R"(mvWeightedBranchLengthScale)"));
+	help_arrays[string("mvWeightedSPR")][string("see_also")].push_back(string(R"(mvGibbsSPR)"));
+	help_strings[string("mvWeightedSPR")][string("title")] = string(R"(Weighted Subtree Prune and Regraft move.)");
+	help_arrays[string("mvWeightedSubtreeSwap")][string("authors")].push_back(string(R"(Sebastian Höhna)"));
+	help_strings[string("mvWeightedSubtreeSwap")][string("description")] = string(R"(Tree topology move that performs a Weighted Subtree Swap on an unrooted tree.)");
+	help_strings[string("mvWeightedSubtreeSwap")][string("details")] = string(R"(The basic idea of the `mvWeightedSubtreeSwap` is to propose new trees based on the marginal probabilities (marginal in the sense of integrating over branch lengths for the affected branches). It may be possible that some topology moves are reject only because of the specific branch lengths but otherwise the new topology should have a higher posterior probability.
+
+`mvWeightedSubtreeSwap` randomly picks an internal nodes (clade). Then it finds all possible other clades it can be swap with. Now it tries all these possible swaps and computes the resulting joint probability density. Importantly, it integrates over all possible fractions of the branch length for the swapped node. This is done by breaking the fraction into intervals which are computed by the quantiles of a Beta distribution. The integral is computed by using a piecewise linear extrapolation (similar to a Riemann integral).)");
+	help_strings[string("mvWeightedSubtreeSwap")][string("example")] = string(R"(taxa <- v(taxon("A"), taxon("B"), taxon("C"), taxon("D"), taxon("E"), taxon("F"))
+moves = VectorMoves()
+
+topology ~ dnUniformTopology(taxa)
+moves.append( mvWeightedSubtreeSwap(topology, weight=taxa.size()) ))");
+	help_strings[string("mvWeightedSubtreeSwap")][string("name")] = string(R"(mvWeightedSubtreeSwap)");
+	help_references[string("mvWeightedSubtreeSwap")].push_back(RbHelpReference(R"(Höhna S & Drummond AJ (2012). Guided Tree Topology Proposals for Bayesian Phylogenetic Inference. Systematic Biology, 61(1):1-11.)",R"(10.1093/sysbio/syr074)",R"(https://academic.oup.com/sysbio/article-abstract/61/1/1/1676649 )"));
+	help_arrays[string("mvWeightedSubtreeSwap")][string("see_also")].push_back(string(R"(mvFNPR)"));
+	help_arrays[string("mvWeightedSubtreeSwap")][string("see_also")].push_back(string(R"(mvNNI)"));
+	help_strings[string("mvWeightedSubtreeSwap")][string("title")] = string(R"(Weighted Subtree Swap move.)");
 	help_strings[string("nodeAgeByID")][string("name")] = string(R"(nodeAgeByID)");
 	help_strings[string("normalize")][string("name")] = string(R"(normalize)");
 	help_arrays[string("pathSampler")][string("authors")].push_back(string(R"(Sebastian Höhna)"));

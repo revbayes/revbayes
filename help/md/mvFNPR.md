@@ -15,6 +15,7 @@ general time tree version of the subtree prune and regraft (SPR) move. This
 fully general version is also known as the Wilson-Balding move. `mvFNPR` often
 exhibits higher acceptance rates than the Wilson-Balding move.
 ## authors
+Sebastian Höhna
 ## see_also
 mvSPR
 ## example
@@ -32,4 +33,3 @@ mvSPR
 - citation: Höhna S, Defoin-Platel M, Drummond AJ (2008). Clock-constrained tree proposal operators in Bayesian phylogenetic inference. 1--7 in 8th IEEE International Conference on BioInformatics and BioEngineering (BIBE 2008). Athens, Greece, October 2008.
   doi: 10.1109/BIBE.2008.4696663
   url: https://alexeidrummond.org/assets/publications/2008-hoehna-clock-bibe.pdf
-

@@ -65,10 +65,10 @@ namespace RevBayesCore {
         const std::string                           getHomeologPhase(const std::string &tipName);                               //!< Get the homeolog character data currently assigned to this tip.
         const std::vector<Taxon>&                   getTaxa(void) const;                                                        //!< Get the names of the taxa
         const Taxon&                                getTaxon(size_t idx) const;                                                 //!< Returns the i-th taxon
-        AbstractTaxonData&                          getTaxonData(size_t tn);                                                    //!< Return a reference to a sequence in the character matrix
-        const AbstractTaxonData&                    getTaxonData(size_t tn) const;                                              //!< Return a reference to a sequence in the character matrix
-        AbstractTaxonData&                          getTaxonData(const std::string &tn);                                        //!< Return a reference to a sequence in the character matrix
-        const AbstractTaxonData&                    getTaxonData(const std::string &tn) const;                                  //!< Return a reference to a sequence in the character matrix
+        virtual AbstractTaxonData&                  getTaxonData(size_t tn);                                                    //!< Return a reference to a sequence in the character matrix
+        virtual const AbstractTaxonData&            getTaxonData(size_t tn) const;                                              //!< Return a reference to a sequence in the character matrix
+        virtual AbstractTaxonData&                  getTaxonData(const std::string &tn);                                        //!< Return a reference to a sequence in the character matrix
+        virtual const AbstractTaxonData&            getTaxonData(const std::string &tn) const;                                  //!< Return a reference to a sequence in the character matrix
         const std::string&                          getTaxonNameWithIndex(size_t idx) const;                                    //!< Returns the idx-th taxon name
         std::string                                 getStateLabels(void);                                                       //!< Get the possible state labels
         std::string                                 getStateLabels(void) const;                                                 //!< Get the possible state labels

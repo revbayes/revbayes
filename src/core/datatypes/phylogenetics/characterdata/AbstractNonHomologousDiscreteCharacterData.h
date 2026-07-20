@@ -5,10 +5,10 @@
 #include <vector>
 #include <iosfwd>
 
+#include "AbstractDiscreteTaxonData.h"
 #include "NonHomologousCharacterData.h"
 
 namespace RevBayesCore {
-class AbstractDiscreteTaxonData;
 class AbstractTaxonData;
 class DiscreteCharacterState;
     

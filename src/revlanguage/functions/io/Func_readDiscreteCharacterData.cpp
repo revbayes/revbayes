@@ -100,8 +100,9 @@ RevPtr<RevVariable> Func_readDiscreteCharacterData::execute( void )
     RevBayesCore::NclReader reader = RevBayesCore::NclReader();
     
     // the vector of matrices;
-    ModelVector<AbstractHomologousDiscreteCharacterData> *m = new ModelVector<AbstractHomologousDiscreteCharacterData>();
-    
+    ModelVector<AbstractHomologousDiscreteCharacterData>*       m_aln  = new ModelVector<AbstractHomologousDiscreteCharacterData>();
+    ModelVector<AbstractNonHomologousDiscreteCharacterData>*    m_ualn = new ModelVector<AbstractNonHomologousDiscreteCharacterData>();
+
     // the return value
     RevObject* retVal = NULL;
     
@@ -167,25 +168,25 @@ RevPtr<RevVariable> Func_readDiscreteCharacterData::execute( void )
                     {
                         RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::DnaState> *coreM = static_cast<RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::DnaState> *>( *it );
                         AbstractHomologousDiscreteCharacterData mDNA = AbstractHomologousDiscreteCharacterData( coreM );
-                        m->push_back( mDNA );
+                        m_aln->push_back( mDNA );
                     }
                     else if ( data_type == "RNA" )
                     {
                         RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::RnaState> *coreM = static_cast<RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::RnaState> *>( *it );
                         AbstractHomologousDiscreteCharacterData mRNA = AbstractHomologousDiscreteCharacterData( coreM );
-                        m->push_back( mRNA );
+                        m_aln->push_back( mRNA );
                     }
                     else if ( data_type == "Protein" )
                     {
                         RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::AminoAcidState> *coreM = static_cast<RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::AminoAcidState> *>( *it );
                         AbstractHomologousDiscreteCharacterData mAA = AbstractHomologousDiscreteCharacterData( coreM );
-                        m->push_back( mAA );
+                        m_aln->push_back( mAA );
                     }
                     else if ( data_type == "Standard" )
                     {
                         RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::StandardState> *coreM = static_cast<RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::StandardState> *>( *it );
                         AbstractHomologousDiscreteCharacterData mSS = AbstractHomologousDiscreteCharacterData( coreM );
-                        m->push_back( mSS );
+                        m_aln->push_back( mSS );
                     }
                     else
                     {
@@ -201,19 +202,19 @@ RevPtr<RevVariable> Func_readDiscreteCharacterData::execute( void )
                     {
                         RevBayesCore::NonHomologousDiscreteCharacterData<RevBayesCore::DnaState> *coreM = static_cast<RevBayesCore::NonHomologousDiscreteCharacterData<RevBayesCore::DnaState> *>( *it );
                         NonHomologousDiscreteCharacterData<DnaState> mDNA = NonHomologousDiscreteCharacterData<DnaState>( coreM );
-                        m->push_back( mDNA );
+                        m_ualn->push_back( mDNA );
                     }
                     else if ( data_type == "RNA" )
                     {
                         RevBayesCore::NonHomologousDiscreteCharacterData<RevBayesCore::RnaState> *coreM = static_cast<RevBayesCore::NonHomologousDiscreteCharacterData<RevBayesCore::RnaState> *>( *it );
                         NonHomologousDiscreteCharacterData<RnaState> mRNA = NonHomologousDiscreteCharacterData<RnaState>( coreM );
-                        m->push_back( mRNA );
+                        m_ualn->push_back( mRNA );
                     }
                     else if ( data_type == "Protein" )
                     {
                         RevBayesCore::NonHomologousDiscreteCharacterData<RevBayesCore::AminoAcidState> *coreM = static_cast<RevBayesCore::NonHomologousDiscreteCharacterData<RevBayesCore::AminoAcidState> *>( *it );
                         NonHomologousDiscreteCharacterData<AminoAcidState> mAA = NonHomologousDiscreteCharacterData<AminoAcidState>( coreM );
-                        m->push_back( mAA );
+                        m_ualn->push_back( mAA );
                     }
                     else
                     {
@@ -247,18 +248,18 @@ RevPtr<RevVariable> Func_readDiscreteCharacterData::execute( void )
         }
         else if ( numFilesRead == 1 )
         {
-            if ( m->size() == 1 )
+            if ( m_aln->size() == 1 )
             {
                 o2 << "Successfully read one file with one character matrix from directory " << fn;
             }
             else
             {
-                o2 << "Successfully read one file with " << m->size() << " character matrices from directory " << fn;
+                o2 << "Successfully read one file with " << m_aln->size() << " character matrices from directory " << fn;
             }
         }
         else
         {
-            o2 << "Successfully read " << numFilesRead << " files with " << m->size() << " character matrices from directory " << fn;
+            o2 << "Successfully read " << numFilesRead << " files with " << m_aln->size() << " character matrices from directory " << fn;
         }
         RBOUT(o2.str());
         std::set<std::string> myWarnings = reader.getWarnings();
@@ -290,33 +291,64 @@ RevPtr<RevVariable> Func_readDiscreteCharacterData::execute( void )
         }
 
         // set the return value
-        retVal = m;
+        if ( m_aln->size() > m_ualn->size() )
+        {
+            retVal = m_aln;
+        }
+        else
+        {
+            retVal = m_ualn;
+        }
     }
     else
     {
-        if (m->size() == 1)
+        if (m_aln->size() == 1)
         {
             RBOUT("Successfully read one character matrix from file '" + fn.string() + "'");
                 
             // set the return value
             if ( return_as_vector == false )
             {
-                retVal = new AbstractHomologousDiscreteCharacterData( (*m)[0] );
-                delete m;
+                retVal = new AbstractHomologousDiscreteCharacterData( (*m_aln)[0] );
+                delete m_aln;
             }
             else
             {
-                retVal = m;
+                retVal = m_aln;
             }
         }
-        else if (m->size() > 1)
+        else if (m_aln->size() > 1)
         {
             std::stringstream o3;
-            o3 << "Successfully read " << m->size() << " character matrices from file " << fn;
+            o3 << "Successfully read " << m_aln->size() << " character matrices from file " << fn;
             RBOUT(o3.str());
             
             // set the return value
-            retVal = m;
+            retVal = m_aln;
+        }
+        else if (m_ualn->size() == 1)
+        {
+            RBOUT("Successfully read one character matrix from file '" + fn.string() + "'");
+                
+            // set the return value
+            if ( return_as_vector == false )
+            {
+                retVal = new AbstractNonHomologousDiscreteCharacterData( (*m_ualn)[0] );
+                delete m_ualn;
+            }
+            else
+            {
+                retVal = m_aln;
+            }
+        }
+        else if (m_aln->size() > 1)
+        {
+            std::stringstream o3;
+            o3 << "Successfully read " << m_aln->size() << " character matrices from file " << fn;
+            RBOUT(o3.str());
+            
+            // set the return value
+            retVal = m_aln;
         }
         else
         {

@@ -55,12 +55,13 @@ void Move_BranchLengthScale::constructInternalObject( void )
     RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = static_cast<const BranchLengthTree &>( tree->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
     
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    double l = static_cast<const RealPos &>( delta->getRevObject() ).getValue();
+    double w  = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double l  = static_cast<const RealPos &>( lambda->getRevObject() ).getValue();
+    bool e    = static_cast<const RlBoolean &>( external->getRevObject() ).getValue();
     bool tune = static_cast<const RlBoolean &>( tuning->getRevObject() ).getValue();
     double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
-    
-    RevBayesCore::Proposal *p = new RevBayesCore::BranchLengthScaleProposal(t, l);
+
+    RevBayesCore::Proposal *p = new RevBayesCore::BranchLengthScaleProposal(t, l, e);
     p->setTargetAcceptanceRate(tt);
     
     value = new RevBayesCore::MetropolisHastingsMove(p, w, tune);
@@ -109,9 +110,10 @@ const MemberRules& Move_BranchLengthScale::getParameterRules(void) const
     
     if ( rules_set == false )
     {
-        move_member_rules.push_back( new ArgumentRule( "tree"   , BranchLengthTree::getClassTypeSpec() , "The tree variable the move operates on.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
-        move_member_rules.push_back( new ArgumentRule( "delta"  , RealPos::getClassTypeSpec()  , "The scaling factor (strength) of the proposal.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY       , new RealPos( 1.0 ) ) );
-        move_member_rules.push_back( new ArgumentRule( "tune"   , RlBoolean::getClassTypeSpec(), "Should we tune the scaling factor during burnin?", ArgumentRule::BY_VALUE    , ArgumentRule::ANY       , new RlBoolean( true ) ) );
+        move_member_rules.push_back( new ArgumentRule( "tree"       , BranchLengthTree::getClassTypeSpec() , "The tree variable the move operates on.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
+        move_member_rules.push_back( new ArgumentRule( "lambda"      , RealPos::getClassTypeSpec()  , "The scaling factor (strength) of the proposal.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY       , new RealPos( 1.0 ) ) );
+        move_member_rules.push_back( new ArgumentRule( "external"   , RlBoolean::getClassTypeSpec(), "Should we scale only external/terminal branches?", ArgumentRule::BY_VALUE    , ArgumentRule::ANY       , new RlBoolean( false ) ) );
+        move_member_rules.push_back( new ArgumentRule( "tune"       , RlBoolean::getClassTypeSpec(), "Should we tune the scaling factor during burnin?", ArgumentRule::BY_VALUE    , ArgumentRule::ANY       , new RlBoolean( true ) ) );
         
         /* Inherit weight (but not tuneTarget!) from Move and put it after the arguments created above */
         const MemberRules& inheritedRules = Move::getParameterRules();
@@ -168,9 +170,13 @@ void Move_BranchLengthScale::setConstParameter(const std::string& name, const Re
     {
         tree = var;
     }
-    else if ( name == "delta" )
+    else if ( name == "lambda" )
     {
-        delta = var;
+        lambda = var;
+    }
+    else if ( name == "external" )
+    {
+        external = var;
     }
     else if ( name == "tune" )
     {
