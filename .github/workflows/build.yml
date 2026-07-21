@@ -21,8 +21,8 @@ jobs:
                ubuntu-gcc-15,
                ubuntu-gcc-15-debugoptimized,
                ubuntu-clang-15,
-               macos-xcode-15-intel,
-               macos-xcode-16-arm,
+               macos-xcode-16-intel,
+               macos-xcode-26-arm,
                windows
                ]
 
@@ -97,17 +97,17 @@ jobs:
             mpi: false
             arch: linux64
 
-          - name: macos-xcode-15-intel
-            os: macos-13
+          - name: macos-xcode-16-intel
+            os: macos-15-intel
             compiler: xcode
-            version: "15"
+            version: "16"
             mpi: false
             arch: mac-intel64
 
-          - name: macos-xcode-16-arm
-            os: macos-14
+          - name: macos-xcode-26-arm
+            os: macos-latest
             compiler: xcode
-            version: "16"
+            version: "26"
             mpi: false
             arch: mac-arm64
 
