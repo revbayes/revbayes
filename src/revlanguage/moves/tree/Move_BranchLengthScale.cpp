@@ -60,7 +60,7 @@ void Move_BranchLengthScale::constructInternalObject( void )
     size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     double l = static_cast<const RealPos &>( delta->getRevObject() ).getValue();
     bool tune = static_cast<const RlBoolean &>( tuning->getRevObject() ).getValue();
-    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double tt = static_cast<const Probability &>( tune_target->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *p = new RevBayesCore::BranchLengthScaleProposal(t, l);
     p->setTargetAcceptanceRate(tt);

@@ -59,7 +59,7 @@ void Move_NodeTimeSlideBeta::constructInternalObject( void )
     double o = static_cast<const RealPos &>( offset->getRevObject() ).getValue();
     bool tu = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double tt = static_cast<const Probability &>( tune_target->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *p = new RevBayesCore::NodeTimeSlideBetaProposal(t, d, o);
     p->setTargetAcceptanceRate(tt);

@@ -87,7 +87,7 @@ void Move_SpeciesTreeScale::constructInternalObject( void )
     RevBayesCore::StochasticNode<double> *ra = static_cast<RevBayesCore::StochasticNode<double> *>( tmp_a );
     double d = static_cast<const RealPos &>( delta->getRevObject() ).getValue();
     bool tune = static_cast<const RlBoolean &>( tuning->getRevObject() ).getValue();
-    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double tt = static_cast<const Probability &>( tune_target->getRevObject() ).getValue();
 
     RevBayesCore::Proposal *p = new RevBayesCore::SpeciesTreeScaleProposal(st, ra, d);
     p->setTargetAcceptanceRate(tt);

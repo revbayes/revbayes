@@ -75,7 +75,7 @@ void Move_RandomGeometricWalk::constructInternalObject( void )
     size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     double a = static_cast<const Probability &>( p->getRevObject() ).getValue();
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double tt = static_cast<const Probability &>( tune_target->getRevObject() ).getValue();
 
     // finally create the internal move object
     RevBayesCore::Proposal *prop = new RevBayesCore::RandomGeometricWalkProposal(n, a);

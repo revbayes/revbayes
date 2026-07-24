@@ -74,7 +74,7 @@ void Move_ContinuousEventScale::constructInternalObject( void )
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
     
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double tt = static_cast<const Probability &>( tune_target->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *p = new RevBayesCore::ContinuousEventScaleProposal(n, l);
     p->setTargetAcceptanceRate(tt);

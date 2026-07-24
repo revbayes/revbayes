@@ -59,7 +59,7 @@ void Move_BetaProbability::constructInternalObject( void )
     RevBayesCore::TypedDagNode< double >* tmp = static_cast<const Probability &>( x->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode< double > *n = static_cast<RevBayesCore::StochasticNode< double > *>( tmp );
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double tt = static_cast<const Probability &>( tune_target->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *prop = new RevBayesCore::BetaProbabilityProposal(n, d, o);
     prop->setTargetAcceptanceRate(tt);

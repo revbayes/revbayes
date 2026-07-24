@@ -65,7 +65,7 @@ void Move_CorrelationMatrixUpdate::constructInternalObject( void ) {
     RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::MatrixReal> *>( tmp );
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* sigma = static_cast<const ModelVector<RealPos> &>( s->getRevObject() ).getDagNode();
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double tt = static_cast<const Probability &>( tune_target->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *p = new RevBayesCore::CorrelationMatrixProposal(n, sigma, l);
     p->setTargetAcceptanceRate(tt);

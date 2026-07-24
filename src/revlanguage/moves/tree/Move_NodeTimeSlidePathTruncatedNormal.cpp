@@ -63,7 +63,7 @@ void Move_NodeTimeSlidePathTruncatedNormal::constructInternalObject( void )
     size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double tt = static_cast<const Probability &>( tune_target->getRevObject() ).getValue();
 
     RevBayesCore::Proposal *p = new RevBayesCore::NodeTimeSlidePathTruncatedNormalProposal(tau, s, a);
     p->setTargetAcceptanceRate(tt);

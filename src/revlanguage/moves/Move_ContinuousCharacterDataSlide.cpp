@@ -59,7 +59,7 @@ void Move_ContinuousCharacterDataSlide::constructInternalObject( void )
     RevBayesCore::TypedDagNode<RevBayesCore::ContinuousCharacterData>* tmp = static_cast<const ContinuousCharacterData &>( x->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::ContinuousCharacterData> *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::ContinuousCharacterData> *>( tmp );
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double tt = static_cast<const Probability &>( tune_target->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *p = new RevBayesCore::ContinuousCharacterDataSlideProposal(n, l);
     p->setTargetAcceptanceRate(tt);

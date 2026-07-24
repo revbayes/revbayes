@@ -96,7 +96,7 @@ void Move_SynchronizedVectorFixedSingleElementSlide::constructInternalObject( vo
     }
     
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double tt = static_cast<const Probability &>( tune_target->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *prop = new RevBayesCore::SynchronizedVectorFixedSingleElementSlideProposal(n, l, e);
     prop->setTargetAcceptanceRate(tt);

@@ -123,7 +123,7 @@ void Move_AVMVN::constructInternalObject( void )
     int m    = static_cast<const Natural &>( maxUpdates->getRevObject() ).getValue();
 
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double tt = static_cast<const Probability &>( tune_target->getRevObject() ).getValue();
 
     // finally create the internal move object
     RevBayesCore::AVMVNProposal *prop = new RevBayesCore::AVMVNProposal(s, e, n0, c0, m);

@@ -92,7 +92,7 @@ void RevLanguage::Move_CharacterHistory::constructInternalObject( void )
     double l                 = static_cast<const Probability &>( lambda->getRevObject() ).getValue();
     std::string gt           = static_cast<const RlString &>( graph->getRevObject() ).getValue();
     std::string pt           = static_cast<const RlString &>( proposal->getRevObject() ).getValue();
-    double r                 = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double r                 = static_cast<const Probability &>( tune_target->getRevObject() ).getValue();
 
     size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     

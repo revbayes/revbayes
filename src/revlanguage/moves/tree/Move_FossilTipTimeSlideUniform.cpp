@@ -61,7 +61,7 @@ void Move_FossilTipTimeSlideUniform::constructInternalObject( void )
     double de = static_cast<const RealPos &>( delta->getRevObject() ).getValue();
     double we = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     bool   tu = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double tt = static_cast<const Probability &>( tune_target->getRevObject() ).getValue();
     
     RevBayesCore::TypedDagNode<double> *org = NULL;
     if ( origin != NULL && origin->getRevObject() != RevNullObject::getInstance() )

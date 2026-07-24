@@ -73,7 +73,7 @@ void Move_EventTimeBeta::constructInternalObject( void )
     double d = static_cast<const RealPos &>( delta->getRevObject() ).getValue();
     double o = static_cast<const RealPos &>( offset->getRevObject() ).getValue();
     bool tu = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double tt = static_cast<const Probability &>( tune_target->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *p = new RevBayesCore::EventBranchTimeBetaProposal(n, d, o);
     p->setTargetAcceptanceRate(tt);

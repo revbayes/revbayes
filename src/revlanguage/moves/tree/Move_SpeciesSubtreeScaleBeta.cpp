@@ -84,7 +84,7 @@ void Move_SpeciesSubtreeScaleBeta::constructInternalObject( void )
     double a = static_cast<const RealPos &>( alpha->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = static_cast<const TimeTree &>( speciesTree->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *st = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
-    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double tt = static_cast<const Probability &>( tune_target->getRevObject() ).getValue();
 
     RevBayesCore::Proposal *p = new RevBayesCore::SpeciesSubtreeScaleBetaProposal(st, a);
     p->setTargetAcceptanceRate(tt);

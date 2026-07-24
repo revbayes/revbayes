@@ -76,7 +76,7 @@ void Move_MultiValueEventSlide::constructInternalObject( void )
     const std::string &v_name = static_cast<const RlString &>( val_name->getRevObject() ).getValue();
     bool tuning               = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
     double l                  = static_cast<const RealPos &>( lambda->getRevObject() ).getValue();
-    double tt                 = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double tt                 = static_cast<const Probability &>( tune_target->getRevObject() ).getValue();
     
     // finally create the internal move object
     RevBayesCore::Proposal *prop = new RevBayesCore::MultiValueEventSlideProposal(n, v_name, l);

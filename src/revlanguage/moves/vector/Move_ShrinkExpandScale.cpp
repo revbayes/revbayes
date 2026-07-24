@@ -87,7 +87,7 @@ void Move_ShrinkExpandScale::constructInternalObject( void )
     
     // get the tuning
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double tt = static_cast<const Probability &>( tune_target->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *prop = new RevBayesCore::ShrinkExpandScaleProposal(n, s, l);
     prop->setTargetAcceptanceRate(tt);

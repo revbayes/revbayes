@@ -55,7 +55,6 @@ void Move_NodeTimeScale::constructInternalObject( void )
     
     // now allocate a new sliding move
     RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
-<<<<<<< HEAD
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *tr = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
     double l = static_cast<const RealPos &>( lambda->getRevObject() ).getValue();
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();

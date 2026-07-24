@@ -76,7 +76,7 @@ void Move_OrderedEventTimeSlide::constructInternalObject( void )
     
     bool tuning = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
     double d    = static_cast<const RealPos &>( delta->getRevObject() ).getValue();
-    double tt   = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double tt   = static_cast<const Probability &>( tune_target->getRevObject() ).getValue();
     
     // finally create the internal move object
     RevBayesCore::Proposal *prop = new RevBayesCore::OrderedEventTimeSlideProposal(n, d);

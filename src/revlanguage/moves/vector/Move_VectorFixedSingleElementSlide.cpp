@@ -62,7 +62,7 @@ void Move_VectorFixedSingleElementSlide::constructInternalObject( void )
     RevBayesCore::StochasticNode<RevBayesCore::RbVector<double> > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::RbVector<double> > *>( tmp );
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
     size_t e = static_cast<const Natural &>( whichElement->getRevObject() ).getValue();
-    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double tt = static_cast<const Probability &>( tune_target->getRevObject() ).getValue();
 
     RevBayesCore::Proposal *p = new RevBayesCore::VectorFixedSingleElementSlideProposal(n, l, e-1);
     p->setTargetAcceptanceRate(tt);
