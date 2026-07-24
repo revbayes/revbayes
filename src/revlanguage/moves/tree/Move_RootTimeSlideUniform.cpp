@@ -130,7 +130,7 @@ const MemberRules& Move_RootTimeSlideUniform::getParameterRules(void) const
         const MemberRules& inherited_rules = Move::getParameterRules();
         for (size_t i = 0; i < inherited_rules.size(); ++i)
         {
-            if ( inherited_rules[i].getArgumentLabel() == "weight" )
+            if ( inherited_rules[i].getArgumentLabel() == "weight" || inherited_rules[i].getArgumentLabel() == "delay")
             {
                 member_rules.push_back( inherited_rules[i].clone() );
             }
