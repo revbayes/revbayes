@@ -91,7 +91,7 @@ RateMatrix_MPQ& RateMatrix_MPQ::operator=(const RateMatrix_MPQ& rhs) {
         for (int i=0; i<6; i++)
             this->r[i] = rhs.r[i];
             
-            moveToDouble();
+        moveToDouble();
         }
     return *this;
 }

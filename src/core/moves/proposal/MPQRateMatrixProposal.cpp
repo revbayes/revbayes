@@ -316,7 +316,7 @@ double MPQRateMatrixProposal::updateToNonReversible(void) {
     double wCT = piC * stored_Q(C,T).get_d();
     double wGT = piG * stored_Q(G,T).get_d();
     double lnJacobian = (log(64.0) + log(wCG) + log(wCT) + log(wGT));
-    lnJacobian -= log(piC) + 2.0 * log(piG);
+    //lnJacobian -= log(piC) + 2.0 * log(piG);
 
     // polyhedron density for forward move
     Q.calculateWeights(W);
@@ -419,8 +419,9 @@ double MPQRateMatrixProposal::updateToReversible(void) {
     double wGT = piG * stored_Q(G,T).get_d();
     double wTG = piT * stored_Q(T,G).get_d();
     //double lnJacobian = (piC * piG * piG) / (8.0 * (wCG + wGC) * (wCT + wTC) * (wGT + wTG));
-    double lnJacobian = log(piC) + 2.0 * log(piG);
-    lnJacobian -= (log(8.0) + log(wCG + wGC) + log(wCT + wTC) + log(wGT + wTG));
+    //double lnJacobian = log(piC) + 2.0 * log(piG);
+    //lnJacobian -= (log(8.0) + log(wCG + wGC) + log(wCT + wTC) + log(wGT + wTG));
+    double lnJacobian = -(log(8.0) + log(wCG + wGC) + log(wCT + wTC) + log(wGT + wTG));
     
     // polyhedron parameters
     Q.calculateWeights(W);
