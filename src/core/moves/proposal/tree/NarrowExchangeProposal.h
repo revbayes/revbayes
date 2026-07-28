@@ -60,6 +60,8 @@ template <class variableType> class StochasticNode;
         size_t                                  tree_index;
         TopologyNode*                           storedChosenNode;
         TopologyNode*                           storedUncle;
+        size_t                                  storedNodePos;                                              //!< Child slots, so the undo restores the child order and not just the topology
+        size_t                                  storedUnclePos;
     };
     
 }
