@@ -82,7 +82,9 @@ double RotateNodeProposal::doProposal( void )
     {
         const TopologyNode& n = tau.getNode(i);
 
-        if ( n.isTip() == false && n.getNumberOfChildren() > 1 )
+        // a sampled ancestor tip is the ancestral species whichever slot it sits in, so rotating
+        // such a node yields the same tree twice and would double its weight
+        if ( n.isTip() == false && n.getNumberOfChildren() > 1 && n.isSampledAncestorTipOrParent() == false )
         {
             internal.push_back( i );
         }
