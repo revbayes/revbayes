@@ -421,17 +421,40 @@ void FossilizedBirthDeathSpeciationProcess::redrawValue(void)
 
 
 
+bool FossilizedBirthDeathSpeciationProcess::hasAnagenesis( void ) const
+{
+    if ( homogeneous_lambda_a != NULL )
+    {
+        return homogeneous_lambda_a->getValue() > 0.0;
+    }
+    if ( heterogeneous_lambda_a != NULL )
+    {
+        const RbVector<double>& rates = heterogeneous_lambda_a->getValue();
+        for (size_t i = 0; i < rates.size(); ++i)
+        {
+            if ( rates[i] > 0.0 ) return true;
+        }
+    }
+
+    return false;
+}
+
+
 /**
  * Redraw the budding (asymmetric speciation) topology, holding the ranges fixed: each lineage buds off one drawn
  * uniformly from those alive at its birth. Conditional on the ranges every compatible tree has
  * the same density -- that equality is what the range process expresses as a factor of gamma per
  * taxon -- so this is a Gibbs step and the caller accepts it outright.
  *
- * Returns false and leaves the tree alone when some lineage has no possible ancestor.
+ * Returns false and leaves the tree alone when some lineage has no possible ancestor, and under
+ * anagenesis, where the equal-density premise fails.
  */
 bool FossilizedBirthDeathSpeciationProcess::redrawTopology( void )
 {
     RandomNumberGenerator* rng = GLOBAL_RNG;
+
+    // an anagenetic attachment sits at d_i[j] == b_i[k], which the candidate test below cannot reach
+    if ( hasAnagenesis() == true ) return false;
 
     updateStartEndTimes();
 

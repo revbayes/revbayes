@@ -15,6 +15,14 @@ GibbsBuddingTopologyProposal::GibbsBuddingTopologyProposal( StochasticNode<Tree>
     failed( false )
 {
     addNode( variable );
+
+    // the uniform draw is the exact conditional only under pure budding
+    FossilizedBirthDeathSpeciationProcess* dist = dynamic_cast<FossilizedBirthDeathSpeciationProcess* >( &variable->getDistribution() );
+
+    if ( dist != NULL && dist->hasAnagenesis() == true )
+    {
+        throw RbException("mvGibbsBuddingTopology is a Gibbs step only under pure budding, so it cannot be used with lambda_a > 0. Use the MH topology moves instead.");
+    }
 }
 
 
