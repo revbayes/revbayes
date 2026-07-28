@@ -51,6 +51,7 @@ namespace RevBayesCore {
         void                                            redrawValue(SimulationCondition c) override;                        //!< The framework redraws through this overload, which must not reach the inherited simulator
         bool                                            redrawTopology(void);                                               //!< Redraw the budding topology uniformly with the ranges held fixed. Every compatible tree has one density, so this is a Gibbs step.
         void                                            simulateClade(std::vector<TopologyNode *> &n, double age, double present, bool alwaysReturn) override;
+        bool                                            allowsSA(void) override { return true; }                            //!< A sampled ancestor is an anagenetic speciation; with lambda_a = 0 its density is zero, so the flag stays on and the density does the rejecting.
 
     protected:
         void                                            updateStartEndTimes(void) override;
