@@ -106,7 +106,11 @@ double CollapseExpandFossilBranchProposal::doProposal( void )
     {
         TopologyNode* node = &t.getNode(i);
 
-        if ( node->isFossil() == true )
+        // a lone lineage is its own root, so it has no branch to collapse and no sibling.
+        // A sampled ancestor is the ancestral species, so only the ancestral continuation
+        // (child 0) is a candidate; collapsing any other child would not be reversible.
+        if ( node->isFossil() == true && node->isRoot() == false
+             && &node->getParent().getChild( 0 ) == node )
         {
             fossils.push_back(node);
         }
