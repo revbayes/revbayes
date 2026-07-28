@@ -251,7 +251,7 @@ double FossilizedBirthDeathSpeciationProcess::q( size_t i, double t, bool tilde 
         double a = anagenetic[i];
         double s = symmetric[i];
 
-        q = - a - s * (b + d + f) * dt + (1.0 - s) * q;
+        q = - a * dt - s * (b + d + f) * dt + (1.0 - s) * q;
     }
 
     return q;
@@ -907,7 +907,7 @@ void FossilizedBirthDeathSpeciationProcess::prepareProbComputation( void ) const
         {
             double dt = times[i+1] - times[i];
 
-            q_tilde_i[i] = - anagenetic[i] - symmetric[i] * (birth[i] + death[i] + fossil[i]) * dt + (1.0 - symmetric[i]) * q_tilde_i[i];
+            q_tilde_i[i] = - anagenetic[i] * dt - symmetric[i] * (birth[i] + death[i] + fossil[i]) * dt + (1.0 - symmetric[i]) * q_tilde_i[i];
         }
     }
 }
