@@ -41,6 +41,12 @@ namespace RevBayesCore {
         virtual void                                        simulateClade(std::vector<TopologyNode *> &n, double age, double present, bool alwaysReturn);
         virtual double                                      simulateCladeAge(size_t n, double origin, double present, double min, bool alwaysReturn) const;
 
+    public:
+        //!< Must this taxon's tip age lie inside its occurrence range?
+        virtual bool                                        tipAgeConstrainedToRange(const Taxon &t) const { return isExtendedTree() == false; }
+        //!< Whether setValue validates every tip age up front rather than leaving it to the density.
+        virtual bool                                        validatesTipAgesOnSet(void) const { return isExtendedTree() == false; }
+
     protected:
         // pure virtual helper functions
         virtual double                                      computeLnProbabilityDivergenceTimes(void) const = 0;                                                //!< Compute the log-transformed probability of the current value.

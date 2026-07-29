@@ -343,7 +343,8 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
         }
 
         num_rho_sampled   += ( taxa[i].isExtinct() == false );          // l
-        num_rho_unsampled += ( taxa[i].isExtinct() && d == present );    // n - m - l
+        // a marginalized range closes with p(), which already carries the survived-unseen branch
+        num_rho_unsampled += ( taxa[i].isExtinct() && d == present && marginalizesExtinction() == false );    // n - m - l
 
         if ( dirty_taxa[i] == true || force )
         {
@@ -385,8 +386,12 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
             // divide by q_tilde at the death time
             partial_likelihood[i] -= q( di, d, true);
 
-            // include extinction density
-            if ( d > present ) partial_likelihood[i] += log( death[di] );
+            // close the range: an extinction density, or whatever the derived process puts there
+            // when the extinction time is integrated out
+            if ( d > present )
+            {
+                partial_likelihood[i] += rangeEndTerm( i, di, d );
+            }
 
             if ( report_internally )
             {
@@ -763,6 +768,14 @@ void AbstractFossilizedBirthDeathRangeProcess::executeMethod(const std::string &
         AbstractFossilizedBirthDeathRangeProcess *self = const_cast<AbstractFossilizedBirthDeathRangeProcess *>( this );
         self->updateStartEndTimes();
 
+        // with the extinction times marginalized out there is none to report: d_i holds the range
+        // end instead, and a sampled ancestor's is jointly distributed with the unobserved
+        // speciation separating it from its descendant, so it is not recoverable here
+        if ( n == "getDeathAges" && marginalizesExtinction() == true )
+        {
+            throw RbException("getDeathAges is unavailable when extended=false: the extinction times are marginalized out rather than sampled. Use getAugmentedLastAges for the youngest occurrence ages, or extended=true to sample extinction times.");
+        }
+
         const std::vector<double> &ages = ( n == "getAugmentedFirstAges" ? first :
                                           ( n == "getAugmentedLastAges"  ? last  :
                                           ( n == "getBirthAges"          ? b_i   : d_i ) ) );
@@ -828,10 +841,11 @@ void AbstractFossilizedBirthDeathRangeProcess::drawAugmentedAges(size_t i)
 
     double lo, hi;
 
-    // youngest augmented age, at or above the death and within its reported bin
+    // youngest augmented age, at or above the death and within its reported bin. A non-extended
+    // range ends at this age rather than at an extinction, so the death does not bound it.
     if ( augment_youngest )
     {
-        lo = std::max( d_i[i], taxa[i].getMinAge() );
+        lo = marginalizesExtinction() ? taxa[i].getMinAge() : std::max( d_i[i], taxa[i].getMinAge() );
         hi = y_i[i];
         last[i] = ( hi > lo ) ? rng->uniform01()*(hi - lo) + lo : lo;
     }
@@ -847,6 +861,10 @@ void AbstractFossilizedBirthDeathRangeProcess::drawAugmentedAges(size_t i)
 
     // a single occurrence (and complete/truncated reporting) is its own youngest
     if ( augment_youngest == false ) last[i] = first[i];
+
+    // a non-extended range ends at its youngest augmented age, so the initial tree is built there.
+    // An extant range still ends at the present, and its tau_K is a fossil age, not its tip.
+    if ( marginalizesExtinction() == true && taxa[i].isExtinct() == true ) d_i[i] = last[i];
 }
 
 void AbstractFossilizedBirthDeathRangeProcess::resampleFirstLast(size_t i)
@@ -859,6 +877,14 @@ void AbstractFossilizedBirthDeathRangeProcess::resampleFirstLast(size_t i)
     // Otherwise it is in its reported bin.
     double hi = truncated[i] ? b_i[i] : taxa[i].getMaxAge();
     first[i] = GLOBAL_RNG->uniform01()*(o_i[i] - hi) + hi;
+
+    // an extinct non-extended tip is the augmented youngest age itself, so a move samples it and
+    // updateStartEndTimes reads it back off the tree. An extant tip sits at the present instead,
+    // so its tau_K is still drawn here.
+    if ( marginalizesExtinction() == true && taxa[i].isExtinct() == true )
+    {
+        return;
+    }
 
     // a single occurrence is its own youngest; complete/truncated do not use the youngest
     if ( reporting == "firstlast" && occurrence_counts[i] >= 2 )

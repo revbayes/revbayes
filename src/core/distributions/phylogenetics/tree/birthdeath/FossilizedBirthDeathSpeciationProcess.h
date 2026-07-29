@@ -41,7 +41,8 @@ namespace RevBayesCore {
                                       const std::vector<Taxon> &taxa,
                                       const std::string &reporting,
                                       bool resampling,
-                                      bool report_internally = true);  //!< Constructor
+                                      bool report_internally = true,
+                                      bool extended = true);  //!< Constructor
         
         // public member functions
         FossilizedBirthDeathSpeciationProcess*          clone(void) const override;                                //!< Create an independent clone
@@ -55,6 +56,9 @@ namespace RevBayesCore {
         bool                                            allowsSA(void) override { return true; }                            //!< A sampled ancestor is an anagenetic speciation; with lambda_a = 0 its density is zero, so the flag stays on and the density does the rejecting.
 
     protected:
+        bool                                            marginalizesExtinction(void) const override { return extended == false; }
+        double                                          rangeEndTerm(size_t i, size_t di, double d) const override;
+
         void                                            updateStartEndTimes(void) override;
         int                                             updateStartEndTimes(const TopologyNode & );
 
@@ -64,7 +68,13 @@ namespace RevBayesCore {
         double                                          computeLnProbabilityTimes(void) const override;                            //!< Compute the log-transformed probability of the current value.
         double                                          computeLnProbabilityDivergenceTimes(void) const override;            //!< Compute the log-transformed probability of the current value.
 
-        bool                                            isExtendedTree(void) const override { return true; }                //!< FBDR trees are extended: tips are extinctions, so a tip may fall below its fossil age range.
+        //!< A non-extended tip is the augmented youngest age and must stay in its bin, but only for
+        //!< an extinct taxon: an extant tip is pinned at the present, outside its fossil range.
+        bool                                            tipAgeConstrainedToRange(const Taxon &t) const override { return extended == false && t.isExtinct(); }
+        //!< The per-taxon check in the density covers this, and it alone knows which tips are exempt.
+        bool                                            validatesTipAgesOnSet(void) const override { return false; }
+
+        bool                                            isExtendedTree(void) const override { return extended; }            //!< An extended tree ends each range at the extinction time, so a tip may fall below its fossil age range. A non-extended tree ends it at the marginalization limit instead.
 
         double                                          lnProbNumTaxa(size_t n, double start, double end, bool MRCA) const override { throw RbException("Cannot compute P(nTaxa)."); }
         double                                          lnProbTreeShape(void) const override;
@@ -88,7 +98,10 @@ namespace RevBayesCore {
         // helper functions
         double                                          getMaxTaxonAge( const TopologyNode& ) const;
 
+        bool                                            extended;                                                //!< Tips are extinction times. When false the extinction times are marginalized out and each range ends at min(tau_K, youngest child birth).
+
         mutable std::vector<bool>                       I;                                                       //!< Indicates for each taxon whether the parent species was a sampled ancestor.
+        mutable std::vector<bool>                       is_sa;                                                   //!< Indicates for each taxon whether its own range ends at a sampled ancestor node, so its lineage carries on.
 
         mutable std::vector<double>                     anagenetic;                                              //!< The sorted anagenetic speciation rates.
         mutable std::vector<double>                     symmetric;                                               //!< The sorted symmetric speciation probabilities.

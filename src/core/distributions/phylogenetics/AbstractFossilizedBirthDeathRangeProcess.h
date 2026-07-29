@@ -67,6 +67,9 @@ namespace RevBayesCore {
         const std::vector<const DagNode*>&              getRangeParameters(void) const { return range_parameters; }   //!< The rate/timeline nodes a separate dnFossilRecord node adopts as parents.
 
     protected:
+        virtual bool                                    marginalizesExtinction(void) const { return false; }    //!< True when d_i is integrated out, so a range ends at the marginalization limit and closes with p() rather than mu.
+        virtual double                                  rangeEndTerm(size_t i, size_t di, double d) const { return log( death[di] ); }   //!< Log term closing range i at d > present.
+
         virtual void                                    updateStartEndTimes() = 0;
         virtual double                                  computeLnProbabilityRanges(bool force = false);
         double                                          computeLnFossilRecord(size_t i) const;              //!< Fossil-record (occurrence) log-term for taxon i, factored out of computeLnProbabilityRanges (range/reporting split).

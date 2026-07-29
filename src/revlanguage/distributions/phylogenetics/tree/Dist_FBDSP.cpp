@@ -111,8 +111,9 @@ RevBayesCore::FossilizedBirthDeathSpeciationProcess* Dist_FBDSP::createDistribut
     // node supplies the reporting model
     std::string c  = "complete";
     bool re = static_cast<const RlBoolean &>( resample->getRevObject() ).getValue();
+    bool ext = static_cast<const RlBoolean &>( extended->getRevObject() ).getValue();
 
-    RevBayesCore::FossilizedBirthDeathSpeciationProcess* d = new RevBayesCore::FossilizedBirthDeathSpeciationProcess(sa, l, m, p, r, la, b, rt, cond, t, c, re, false);
+    RevBayesCore::FossilizedBirthDeathSpeciationProcess* d = new RevBayesCore::FossilizedBirthDeathSpeciationProcess(sa, l, m, p, r, la, b, rt, cond, t, c, re, false, ext);
 
     return d;
 }
@@ -211,6 +212,7 @@ const MemberRules& Dist_FBDSP::getParameterRules(void) const
         betaParamTypes.push_back( Probability::getClassTypeSpec() );
         betaParamTypes.push_back( ModelVector<Probability>::getClassTypeSpec() );
         dist_member_rules.push_back( new ArgumentRule( "beta",  betaParamTypes, "The probability of symmetric speciation.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
+        dist_member_rules.push_back( new ArgumentRule( "extended",  RlBoolean::getClassTypeSpec(), "Are the tips extinction times? If false the extinction times are marginalized out and each range ends at min(tau_K, youngest child birth).", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
 
         rules_set = true;
     }
@@ -252,6 +254,10 @@ void Dist_FBDSP::setConstParameter(const std::string& name, const RevPtr<const R
     else if ( name == "beta" )
     {
         beta = var;
+    }
+    else if ( name == "extended" )
+    {
+        extended = var;
     }
     else if ( name == "origin" )
     {

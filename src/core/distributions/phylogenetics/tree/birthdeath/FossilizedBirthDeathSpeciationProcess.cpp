@@ -59,9 +59,11 @@ FossilizedBirthDeathSpeciationProcess::FossilizedBirthDeathSpeciationProcess(con
                                                            const std::vector<Taxon> &intaxa,
                                                            const std::string &s,
                                                            bool re,
-                                                           bool report_int) :
+                                                           bool report_int,
+                                                           bool ext) :
     AbstractBirthDeathProcess(ra, incondition, intaxa, true, NULL),
-    AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, s, 0, re)
+    AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, s, 0, re),
+    extended( ext )
 {
     report_internally = report_int;
 
@@ -103,6 +105,7 @@ FossilizedBirthDeathSpeciationProcess::FossilizedBirthDeathSpeciationProcess(con
     }
 
     I             = std::vector<bool>(taxa.size(), false);
+    is_sa         = std::vector<bool>(taxa.size(), false);
 
     anagenetic    = std::vector<double>(num_intervals, 0.0);
     symmetric     = std::vector<double>(num_intervals, 0.0);
@@ -151,25 +154,59 @@ double FossilizedBirthDeathSpeciationProcess::computeLnProbabilityTimes( void ) 
 
     for (size_t i = 0; i < taxa.size(); i++)
     {
-        // include the anagenetic speciation density for descendants of sampled ancestors
+        // the parent species is a sampled ancestor, which means different things in the two trees
         if ( I[i] == true )
         {
-            double y_a   = b_i[i];
-            double d     = d_i[i];
-
+            double y_a  = b_i[i];
             size_t y_ai = findIndex(y_a);
-            size_t di   = findIndex(d);
 
-            // offset speciation density
-            lnProb -= log( birth[y_ai] );
-            // offset the extinction density for the ancestor
-            lnProb -= log( death[y_ai] );
-            // include anagenetic speciation density
-            lnProb += log( anagenetic[y_ai] );
+            if ( extended == true )
+            {
+                // the ancestor's range ended by anagenetic speciation, not by extinction
+                lnProb -= log( birth[y_ai] );
+                lnProb -= log( death[y_ai] );
+                lnProb += log( anagenetic[y_ai] );
+            }
+            else
+            {
+                // a sampled ancestor is not a branching event. The speciation separating the two
+                // ranges is unobserved, so integrate it over (y_a, o_i): the bracket is the
+                // probability of at least one species change along that lineage.
+                double o  = first[i];
+                size_t oi = findIndex(o);
+
+                // o_i is younger than y_a, so the intermediate terms are subtracted here rather
+                // than added as they are when walking from a first occurrence up to a birth
+                double ln_q  = q(oi, o) - q(y_ai, y_a);
+                double ln_qt = q(oi, o, true) - q(y_ai, y_a, true);
+                for (size_t j = oi; j < y_ai; j++)
+                {
+                    ln_q  -= q_i[j];
+                    ln_qt -= q_tilde_i[j];
+                }
+
+                lnProb -= log( birth[y_ai] );
+                lnProb += log( 1.0 - exp( ln_q - ln_qt ) );
+            }
         }
     }
 
     return lnProb;
+}
+
+
+/**
+ * Close range i at d. An extended range ends at the extinction time. A non-extended one has its
+ * extinction time integrated out, which leaves p(d) unless the range is a sampled ancestor, whose
+ * lineage carries on into its descendants and so is closed by the subtree instead.
+ */
+double FossilizedBirthDeathSpeciationProcess::rangeEndTerm( size_t i, size_t di, double d ) const
+{
+    if ( extended == true ) return log( death[di] );
+
+    if ( is_sa[i] == true ) return 0.0;
+
+    return log( p( di, d ) );
 }
 
 
@@ -856,6 +893,10 @@ int FossilizedBirthDeathSpeciationProcess::updateStartEndTimes( const TopologyNo
                 dirty_psi[i] = true;
                 dirty_taxa[i] = true;
             }
+
+            // an extinct non-extended tip is the augmented youngest age itself, so it is not
+            // resampled; an extant one sits at the present and keeps its own tau_K
+            if ( extended == false && taxa[i].isExtinct() == true ) last[i] = age;
         }
 
         // is child a new species?
@@ -878,6 +919,9 @@ int FossilizedBirthDeathSpeciationProcess::updateStartEndTimes( const TopologyNo
         {
             // propagate species index
             species = i;
+
+            // its range ends here and the lineage carries on below
+            if ( sa == true ) is_sa[i] = true;
 
             // if this is the root
             // set the start time to the origin
@@ -942,12 +986,26 @@ void FossilizedBirthDeathSpeciationProcess::prepareProbComputation( void ) const
  */
 void FossilizedBirthDeathSpeciationProcess::updateStartEndTimes( void )
 {
-    // tips are extinctions; re-set each pass so clamped and move-rebuilt trees are covered
+    // an extended tip is an extinction and may sit below its occurrence range; a non-extended one
+    // is the augmented youngest age and has to stay in its bin. Re-set each pass so clamped and
+    // move-rebuilt trees are covered.
     for (size_t i = 0; i < getValue().getNumberOfNodes(); i++)
     {
         TopologyNode &node = getValue().getNode(i);
-        if ( node.isTip() ) node.setTipAgeUnconstrained( true );
+        // an extant tip is pinned at the present, which lies outside the fossil age range whenever
+        // the taxon's youngest occurrence is old, so the range must not constrain it
+        if ( node.isTip() )
+        {
+            size_t ti = node.getIndex();
+            bool constrained = ( extended == false && ti < taxa.size() && taxa[ti].isExtinct() == true );
+            node.setTipAgeUnconstrained( constrained == false );
+        }
     }
+
+    // the root lineage never reaches the assignment in the recursion, and which taxon holds the
+    // oldest birth changes during MCMC, so a stale I would otherwise persist on it
+    I     = std::vector<bool>(taxa.size(), false);
+    is_sa = std::vector<bool>(taxa.size(), false);
 
     const TopologyNode &root = getValue().getRoot();
 
@@ -966,6 +1024,8 @@ void FossilizedBirthDeathSpeciationProcess::updateStartEndTimes( void )
             dirty_taxa[i] = true;
 
         }
+
+        if ( extended == false && taxa[i].isExtinct() == true ) last[i] = root.getAge();
     }
 
     max_birth = 0;
