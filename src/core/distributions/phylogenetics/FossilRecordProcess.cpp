@@ -35,11 +35,11 @@ AbstractFossilizedBirthDeathRangeProcess* FossilRecordProcess::rangesOf(const Da
  * log-density. The occurrences are read from the ranges' taxa, so they need not be supplied again
  * here; this node's value is that same taxon vector.
  */
-FossilRecordProcess::FossilRecordProcess(const DagNode *rn, const std::string &rep) :
+FossilRecordProcess::FossilRecordProcess(const DagNode *rn, bool comp) :
     TypedDistribution< RbVector<Taxon> >( new RbVector<Taxon>() ),
     ranges_node( rn ),
     ranges( rangesOf( rn ) ),
-    reporting( rep ),
+    complete( comp ),
     taxa()
 {
     if ( ranges == NULL )
@@ -61,7 +61,7 @@ FossilRecordProcess::FossilRecordProcess(const DagNode *rn, const std::string &r
     *this->value = RbVector<Taxon>( taxa );
 
     // push the reporting model onto the ranges: one source of truth for the tau1 support + reporting term
-    ranges->setReportingModel( reporting );
+    ranges->setCompleteRecord( complete );
 }
 
 

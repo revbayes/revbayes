@@ -109,11 +109,10 @@ RevBayesCore::FossilizedBirthDeathSpeciationProcess* Dist_FBDSP::createDistribut
 
     // bare range process: no inline reporting term (report_internally = false); a dnFossilRecord
     // node supplies the reporting model
-    std::string c  = "complete";
     bool re = static_cast<const RlBoolean &>( resample->getRevObject() ).getValue();
     bool ext = static_cast<const RlBoolean &>( extended->getRevObject() ).getValue();
 
-    RevBayesCore::FossilizedBirthDeathSpeciationProcess* d = new RevBayesCore::FossilizedBirthDeathSpeciationProcess(sa, l, m, p, r, la, b, rt, cond, t, c, re, false, ext);
+    RevBayesCore::FossilizedBirthDeathSpeciationProcess* d = new RevBayesCore::FossilizedBirthDeathSpeciationProcess(sa, l, m, p, r, la, b, rt, cond, t, true, re, false, ext);
 
     return d;
 }

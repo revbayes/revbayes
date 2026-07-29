@@ -20,13 +20,13 @@ namespace RevBayesCore {
      * psi and its timeline) and the occurrences are all read from the range process, so one psi and
      * one timeline are owned there; computeLnProbability() == ranges->computeLnFossilTotal().
      *
-     * The reporting model (complete | firstlast) lives on the range process, set here via
-     * setReportingModel so both nodes agree on the tau1 support and the reporting term.
+     * The reporting model lives on the range process, set here via setCompleteRecord so both
+     * nodes agree on the tau1 support and the reporting term.
      */
     class FossilRecordProcess : public TypedDistribution< RbVector<Taxon> > {
 
     public:
-        FossilRecordProcess(const DagNode *ranges, const std::string &reporting);
+        FossilRecordProcess(const DagNode *ranges, bool complete);
         virtual ~FossilRecordProcess() {}
 
         FossilRecordProcess*        clone(void) const override;
@@ -43,7 +43,7 @@ namespace RevBayesCore {
     private:
         const DagNode*                                   ranges_node;   // owns b,d,tau,psi,timeline + reporting term
         AbstractFossilizedBirthDeathRangeProcess*        ranges;        // downcast view for computeLnFossilTotal()
-        std::string                                      reporting;     // complete|firstlast, pushed onto the range process
+        bool                                             complete;      // every sampled occurrence reported; false is first/last. Pushed onto the range process
         std::vector<Taxon>                               taxa;          // reported occurrences (data)
     };
 }

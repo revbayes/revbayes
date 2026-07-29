@@ -50,14 +50,14 @@ FossilizedBirthDeathRangeProcess::FossilizedBirthDeathRangeProcess(const DagNode
                                                                      const TypedDagNode< RbVector<double> > *intimes,
                                                                      const std::string &incondition,
                                                                      const std::vector<Taxon> &intaxa,
-                                                                     const std::string &reporting,
+                                                                     bool complete_record,
                                                                      size_t truncate_at,
                                                                      bool resample,
                                                                      const TypedDagNode<double> *inorigin,
                                                                      TypedDistribution<double> *inoriginprior,
                                                                      bool report_int) :
     TypedDistribution<MatrixReal>(new MatrixReal(intaxa.size(), 2)),
-    AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, reporting, truncate_at, resample, inorigin, inoriginprior)
+    AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, complete_record, truncate_at, resample, inorigin, inoriginprior)
 {
     report_internally = report_int;
 

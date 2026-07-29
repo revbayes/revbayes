@@ -57,12 +57,12 @@ FossilizedBirthDeathSpeciationProcess::FossilizedBirthDeathSpeciationProcess(con
                                                            const TypedDagNode< RbVector<double> > *intimes,
                                                            const std::string &incondition,
                                                            const std::vector<Taxon> &intaxa,
-                                                           const std::string &s,
+                                                           bool comp,
                                                            bool re,
                                                            bool report_int,
                                                            bool ext) :
     AbstractBirthDeathProcess(ra, incondition, intaxa, true, NULL),
-    AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, s, 0, re),
+    AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, comp, 0, re),
     extended( ext )
 {
     report_internally = report_int;

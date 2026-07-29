@@ -79,7 +79,7 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
                                                                          const TypedDagNode< RbVector<double> > *intimes,
                                                                          const std::string &incondition,
                                                                          const std::vector<Taxon> &intaxa,
-                                                                         const std::string &s,
+                                                                         bool comp,
                                                                          size_t K,
                                                                          bool re,
                                                                          const TypedDagNode<double> *inorigin,
@@ -92,7 +92,6 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
     origin_prior( inoriginprior ),
     origin(0.0),
     max_birth(0),
-    reporting(s),
     resampled(false),
     resampling(re),
     touched(false),
@@ -223,11 +222,7 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
 
     occurrence_counts = std::vector<size_t>(taxa.size(), 0);
     truncated         = std::vector<bool>(taxa.size(), false);
-
-    if ( reporting == "truncated" && K == 0 )
-    {
-        throw(RbException("The truncated (exchangeable occurrence) reporting model requires a reporting cap of at least 1."));
-    }
+    complete          = std::vector<bool>(taxa.size(), comp);
 
     double max_present = RbConstants::Double::inf;
 
@@ -246,16 +241,23 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
         // have unreported specimens and its record is exchangeable; one below the cap was
         // reported whole, which is the complete case. A record over the cap was not
         // truncated as declared, so truncate it here.
-        if ( reporting == "truncated" && count >= K )
+        if ( K > 0 )
         {
-            if ( count > K )
+            if ( count >= K )
             {
-                truncateRecord(taxa[i], K);
-                num_truncated++;
-            }
+                if ( count > K )
+                {
+                    truncateRecord(taxa[i], K);
+                    num_truncated++;
+                }
 
-            truncated[i] = true;
-            count = K;
+                truncated[i] = true;
+                count = K;
+            }
+            else
+            {
+                complete[i] = true;
+            }
         }
 
         occurrence_counts[i] = count;
@@ -502,14 +504,10 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnFossilRecord( size_t i
     double y  = last[i];                             // youngest augmented age
     size_t yi = findIndex(y);
 
-    double min_age = d_i[i];
+    // with tau_K instantiated the interior spans (tau_K, tau_1); otherwise it runs down to the
+    // range end, since an unreported occurrence may lie anywhere above it
+    double min_age = augmentsYoungest(i) ? y : d;
     double max_age = o;
-
-    if ( reporting == "firstlast" )
-    {
-        min_age = y;
-        max_age = o;
-    }
 
     double result = 0.0;
 
@@ -598,12 +596,12 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnFossilRecord( size_t i
             result += log(psi[k]) * Fi->second;
         }
 
-        if ( reporting == "firstlast" )
+        if ( truncated[i] == false ) // both extremes are reported
         {
             // sum over which observation supplies the oldest specimen at tau1
-            result += log(recip_old);
+            result += log(recip_old) - RbMath::lnFactorial(int(count));
 
-            if ( count >= 2 )
+            if ( augmentsYoungest(i) )
             {
                 if ( !( o >= y && y >= d && y <= y_i[i] ) )
                 {
@@ -613,21 +611,20 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnFossilRecord( size_t i
                 // excluding the diagonal where a single occurrence supplies both extremes
                 result += log(fossil[yi]) + log(recip_young - diag/recip_old);
 
-                double S1 = 0.0, f = 1.0;
-                for ( size_t kap = 0; kap < 200; kap++ )
+                // the first/last rule leaves the interior occurrences unreported, so their count
+                // is marginalized; a complete record has none to marginalize
+                if ( complete[i] == false )
                 {
-                    S1 += f;
-                    f *= Lambda / double(count - 1 + kap);
-                    if ( f < 1e-16 * S1 ) break;
+                    double S1 = 0.0, f = 1.0;
+                    for ( size_t kap = 0; kap < 200; kap++ )
+                    {
+                        S1 += f;
+                        f *= Lambda / double(count - 1 + kap);
+                        if ( f < 1e-16 * S1 ) break;
+                    }
+                    result += log(S1);
                 }
-                result += log(S1) - RbMath::lnFactorial(int(count));
             }
-            // count == 1 (single occurrence, first == last): no interior term
-        }
-        else if ( truncated[i] == false ) // complete reporting
-        {
-            // sum over which observation supplies the oldest specimen at tau1
-            result += log(recip_old) - RbMath::lnFactorial(int(count));
         }
         else // exchangeable reporting
         {
@@ -758,7 +755,7 @@ std::vector<double>& AbstractFossilizedBirthDeathRangeProcess::getAges(void)
 
 /**
  * The augmented first (tau_1) and last (tau_K) ages, which no monitor can otherwise reach.
- * Only first/last reporting augments the last; otherwise last == first.
+ * A record with one occurrence or an unreported youngest has last == first.
  */
 void AbstractFossilizedBirthDeathRangeProcess::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, RbVector<double> &rv) const
 {
@@ -813,22 +810,6 @@ void AbstractFossilizedBirthDeathRangeProcess::executeMethod(const std::string &
 }
 
 
-void AbstractFossilizedBirthDeathRangeProcess::setReportingModel( const std::string &s )
-{
-    if ( s == reporting ) return;
-
-    reporting = s;
-
-    // dnFossilRecord attaches after the range process has drawn, so the ages are the old model's
-    updateStartEndTimes();
-
-    for (size_t i = 0; i < taxa.size(); i++)
-    {
-        drawAugmentedAges(i);
-    }
-}
-
-
 /**
  * Draw the augmented extremes for taxon i, nested (d_i <= last <= first), under the current
  * reporting model.
@@ -837,7 +818,7 @@ void AbstractFossilizedBirthDeathRangeProcess::drawAugmentedAges(size_t i)
 {
     RandomNumberGenerator* rng = GLOBAL_RNG;
 
-    bool augment_youngest = ( reporting == "firstlast" && occurrence_counts[i] >= 2 );
+    bool augment_youngest = augmentsYoungest(i);
 
     double lo, hi;
 
@@ -886,8 +867,9 @@ void AbstractFossilizedBirthDeathRangeProcess::resampleFirstLast(size_t i)
         return;
     }
 
-    // a single occurrence is its own youngest; complete/truncated do not use the youngest
-    if ( reporting == "firstlast" && occurrence_counts[i] >= 2 )
+    // a single occurrence is its own youngest, as is an exchangeable record whose true youngest
+    // may be unreported
+    if ( augmentsYoungest(i) )
     {
         last[i] = GLOBAL_RNG->uniform01()*(y_i[i] - taxa[i].getMinAge()) + taxa[i].getMinAge();
     }

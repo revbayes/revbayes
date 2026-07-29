@@ -23,7 +23,7 @@ namespace RevBayesCore {
                                   const TypedDagNode<RbVector<double> > *times,
                                   const std::string &condition,
                                   const std::vector<Taxon> &taxa,
-                                  const std::string &reporting,
+                                  bool complete_record,
                                   size_t truncate_at,
                                   bool resampling,
                                   const TypedDagNode<double>* origin = NULL,

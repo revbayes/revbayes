@@ -113,17 +113,15 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRP::createDistribution( 
         rt = static_cast<const ModelVector<RealPos> &>( timeline->getRevObject() ).getDagNode();
     }
 
-    // the reporting model in force until a dnFossilRecord node pushes its own on: it applies to
-    // the constructor's initial augmented age draw, and to a range process used with no record node.
-    // "complete" needs no cap, so the bare range process never trips the uniform cap requirement.
-    std::string c  = "complete";
+    // a bare range process reports complete until a dnFossilRecord node pushes its own model on;
+    // that governs the constructor's initial augmented age draw
     bool re = static_cast<const RlBoolean &>( resample->getRevObject() ).getValue();
 
     // optional origin time of the process
     RevBayesCore::TypedDistribution<double>* op = createOriginPrior();
 
     // report_internally = false: the bare range process, with no inline fossil-record term
-    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, c, 0, re, NULL, op, false);
+    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, true, 0, re, NULL, op, false);
     
     return d;
 }

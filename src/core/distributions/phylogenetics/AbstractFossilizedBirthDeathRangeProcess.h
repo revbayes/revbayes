@@ -45,7 +45,7 @@ namespace RevBayesCore {
                                             const TypedDagNode<RbVector<double> > *times,
                                             const std::string &condition,
                                             const std::vector<Taxon> &taxa,
-                                            const std::string &reporting,
+                                            bool complete_record,
                                             size_t truncate_at,
                                             bool resampling,
                                             const TypedDagNode<double>* origin = NULL,
@@ -63,12 +63,19 @@ namespace RevBayesCore {
         void                                            drawAugmentedAges(size_t i);                               //!< Draw taxon i's augmented extremes nested (d_i <= last <= first) under the current reporting model.
         void                                            drawRanges();                                              //!< Draw an initial (b_i, d_i) and the augmented ages for every taxon. Shared by the matrix redraw and the tree (FBDSP) initial-value construction, which hangs a random budding topology on the ranges.
         double                                          computeLnFossilTotal();                                    //!< Total fossil-record log-density summed over taxa; used by a standalone dnFossilRecord node conditioned on this range process (self-contained: refreshes rate cache + start/end times).
-        void                                            setReportingModel(const std::string &s);                   //!< Set the reporting model (complete|firstlast|truncated). dnFossilRecord pushes it onto its range process.
+        //!< dnFossilRecord owns the reporting model and pushes it here, since the augmented ages
+        //!< live on the range process. The cap is a constructor argument, so only a complete or
+        //!< first/last record can be declared this way. Both augment the same ages, so the draw
+        //!< the constructor already made stands.
+        void                                            setCompleteRecord(bool comp) { complete = std::vector<bool>(taxa.size(), comp); }
         const std::vector<const DagNode*>&              getRangeParameters(void) const { return range_parameters; }   //!< The rate/timeline nodes a separate dnFossilRecord node adopts as parents.
 
     protected:
         virtual bool                                    marginalizesExtinction(void) const { return false; }    //!< True when d_i is integrated out, so a range ends at the marginalization limit and closes with p() rather than mu.
         virtual double                                  rangeEndTerm(size_t i, size_t di, double d) const { return log( death[di] ); }   //!< Log term closing range i at d > present.
+
+        //!< Is tau_K an explicit latent? Not when unreported occurrences may lie below the youngest reported one.
+        bool                                            augmentsYoungest(size_t i) const { return occurrence_counts[i] >= 2 && truncated[i] == false; }
 
         virtual void                                    updateStartEndTimes() = 0;
         virtual double                                  computeLnProbabilityRanges(bool force = false);
@@ -140,9 +147,9 @@ namespace RevBayesCore {
         std::vector<bool>                               dirty_psi;                                              //!< Indicates whether fossil sampling terms need updating
         std::vector<bool>                               dirty_taxa;                                             //!< Indicates whether partial likelihood needs updating
         
-        std::string                                     reporting;                                               //!< Fossil reporting model: complete | firstlast | truncated
         std::vector<size_t>                             occurrence_counts;                                      //!< Number of reported occurrences for each taxon
         std::vector<bool>                               truncated;                                              //!< Taxa reported up to the cap K, whose unreported specimens are marginalized
+        std::vector<bool>                               complete;                                               //!< Taxa whose whole record is reported. Neither flag set is the first/last rule: both extremes reported, the interior count marginalized
         bool                                            touched;                                               //!< Indicates whether any terms need updating
         bool                                            resampled;                                              //!< Indicates whether any oldest occurrence ages were resampled
         bool                                            resampling;                                             //!< Indicates whether we are resampling oldest occurrence ages

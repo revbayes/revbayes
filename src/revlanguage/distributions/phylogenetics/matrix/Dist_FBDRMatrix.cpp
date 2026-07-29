@@ -22,6 +22,7 @@
 #include "RealPos.h"
 #include "RlString.h"
 #include "RlTaxon.h"
+#include "RbException.h"
 #include "RlUserInterface.h"
 #include "DagMemberFunction.h"
 #include "DeterministicNode.h"
@@ -126,9 +127,8 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRMatrix::createDistribut
 
     // complete=TRUE reports every occurrence; FALSE is first/last, or the truncated model when truncated is given
     bool comp = static_cast<const RlBoolean &>( complete->getRevObject() ).getValue();
-    std::string c  = comp ? "complete" : "firstlast";
 
-    // a supplied cap selects the truncated model and gives it its K
+    // a cap selects the truncated model: a taxon reporting K may have unreported occurrences
     size_t K = 0;
     if ( truncated->getRevObject() != RevNullObject::getInstance() )
     {
@@ -139,7 +139,11 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRMatrix::createDistribut
         else
         {
             K = size_t( static_cast<const Natural &>( truncated->getRevObject() ).getValue() );
-            c = "truncated";
+
+            if ( K == 0 )
+            {
+                throw(RbException("The truncated (exchangeable occurrence) reporting model requires a reporting cap of at least 1."));
+            }
         }
     }
 
@@ -149,7 +153,7 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRMatrix::createDistribut
     RevBayesCore::TypedDistribution<double>* op = createOriginPrior();
 
     // report_internally = true: the fused facade adds the fossil-record term inline
-    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, c, K, re, NULL, op, true);
+    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, comp, K, re, NULL, op, true);
 
     return d;
 }

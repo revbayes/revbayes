@@ -37,10 +37,9 @@ RevBayesCore::FossilRecordProcess* Dist_FossilRecord::createDistribution( void )
     // complete=TRUE reports every occurrence, FALSE is first/last; the truncated (exchangeable occurrence) model is reachable only
     // through the deprecated dnFBDRMatrix
     bool comp = static_cast<const RlBoolean &>( complete->getRevObject() ).getValue();
-    std::string rep = comp ? "complete" : "firstlast";
 
     // the occurrences are read from the range process, so no taxa argument is needed here
-    RevBayesCore::FossilRecordProcess* d = new RevBayesCore::FossilRecordProcess( rn, rep );
+    RevBayesCore::FossilRecordProcess* d = new RevBayesCore::FossilRecordProcess( rn, comp );
 
     return d;
 }
