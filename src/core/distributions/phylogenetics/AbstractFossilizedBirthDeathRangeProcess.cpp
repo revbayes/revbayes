@@ -854,14 +854,20 @@ void AbstractFossilizedBirthDeathRangeProcess::resampleFirstLast(size_t i)
     stored_last = last;
     resampled = true;
 
+    // a non-extended extinct range ends at its tip, which a move samples and updateStartEndTimes
+    // reads back. With one occurrence that tip is tau_1 too, so there is nothing to draw at all
+    if ( marginalizesExtinction() == true && taxa[i].isExtinct() == true && occurrence_counts[i] < 2 )
+    {
+        return;
+    }
+
     // truncated (exchangeable occurrence): the oldest may be unobserved up to the birth.
     // Otherwise it is in its reported bin.
     double hi = truncated[i] ? b_i[i] : taxa[i].getMaxAge();
     first[i] = GLOBAL_RNG->uniform01()*(o_i[i] - hi) + hi;
 
-    // an extinct non-extended tip is the augmented youngest age itself, so a move samples it and
-    // updateStartEndTimes reads it back off the tree. An extant tip sits at the present instead,
-    // so its tau_K is still drawn here.
+    // an extinct non-extended tip is the augmented youngest age itself, so tau_K is not drawn
+    // here. An extant tip sits at the present instead, so its tau_K still is.
     if ( marginalizesExtinction() == true && taxa[i].isExtinct() == true )
     {
         return;

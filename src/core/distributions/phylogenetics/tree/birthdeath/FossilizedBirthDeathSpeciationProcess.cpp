@@ -896,7 +896,13 @@ int FossilizedBirthDeathSpeciationProcess::updateStartEndTimes( const TopologyNo
 
             // an extinct non-extended tip is the augmented youngest age itself, so it is not
             // resampled; an extant one sits at the present and keeps its own tau_K
-            if ( extended == false && taxa[i].isExtinct() == true ) last[i] = age;
+            if ( extended == false && taxa[i].isExtinct() == true )
+            {
+                last[i] = age;
+
+                // a single occurrence is both extremes, so the tip is tau_1 as well
+                if ( occurrence_counts[i] < 2 ) first[i] = age;
+            }
         }
 
         // is child a new species?
@@ -1025,7 +1031,12 @@ void FossilizedBirthDeathSpeciationProcess::updateStartEndTimes( void )
 
         }
 
-        if ( extended == false && taxa[i].isExtinct() == true ) last[i] = root.getAge();
+        if ( extended == false && taxa[i].isExtinct() == true )
+        {
+            last[i] = root.getAge();
+
+            if ( occurrence_counts[i] < 2 ) first[i] = root.getAge();
+        }
     }
 
     max_birth = 0;
