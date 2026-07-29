@@ -36,8 +36,8 @@ namespace RevBayesCore {
         void                                                setBackbone( const TypedDagNode<Tree> *backbone_one=NULL, const TypedDagNode<RbVector<Tree> > *backbone_many=NULL);
         virtual void                                        setStochasticNode(StochasticNode<Tree> *n);                                                         //!< Set the stochastic node holding this distribution
         virtual void                                        setValue(Tree *v, bool f=false);                                                                    //!< Set the current value, e.g. attach an observation (clamp)
-        virtual bool                                        allowsSA(void) { return base_distribution->allowsSA(); }                                            //!< Checks if distribution is compatible with sampled ancestors
-        virtual bool                                        isExtendedTree(void) const { return base_distribution->isExtendedTree(); }                           //!< Extended trees have tips at extinctions, which may sit below a fossil's age range
+        virtual bool                                        allowsSampledAncestors(void) { return base_distribution->allowsSampledAncestors(); }                                            //!< Checks if distribution is compatible with sampled ancestors
+        virtual bool                                        isExtended(void) const { return base_distribution->isExtended(); }                           //!< Extended trees have tips at extinctions, which may sit below a fossil's age range
 
     protected:
         

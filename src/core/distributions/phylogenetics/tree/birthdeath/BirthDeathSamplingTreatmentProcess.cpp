@@ -1976,7 +1976,7 @@ void BirthDeathSamplingTreatmentProcess::swapParameterInternal(const DagNode *ol
  * Checks if removal probabilities set for this distribution are compatible with sampled ancestors
  * (i.e. removal < 1)
  */
-bool BirthDeathSamplingTreatmentProcess::allowsSA() {
+bool BirthDeathSamplingTreatmentProcess::allowsSampledAncestors() {
     for(auto removal : r) {
         if(removal < 1.0 - DBL_EPSILON) return true;
     }

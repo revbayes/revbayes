@@ -32,7 +32,7 @@ CollapseExpandFossilBranchProposal::CollapseExpandFossilBranchProposal( Stochast
     // tell the base class to add the node
     addNode( tau );
     addNode( origin );
-    if(! tau->getDistribution().allowsSA()) throw RbException("Setup includes a move for sampled ancestors but the corresponding tree distribution doesn't allow sampled ancestors");
+    if(! tau->getDistribution().allowsSampledAncestors()) throw RbException("Setup includes a move for sampled ancestors but the corresponding tree distribution doesn't allow sampled ancestors");
 }
 
 
@@ -169,7 +169,7 @@ double CollapseExpandFossilBranchProposal::collapseBranch(TopologyNode &n)
     // determine lower and upper bound of backward move. An extended tip is an extinction, which
     // may sit below its occurrence range, so the window starts at the tip and always contains
     // the parent's current age.
-    double min_age = tau->getDistribution().isExtendedTree() ? n.getAge()
+    double min_age = tau->getDistribution().isExtended() ? n.getAge()
                                                              : n.getTaxon().getAgeRange().getMax();
     double max_age = parent.getAge();
     if ( parent.isRoot() )
@@ -235,7 +235,7 @@ double CollapseExpandFossilBranchProposal::expandBranch(TopologyNode &n)
     // determine lower and upper bound of backward move. An extended tip is an extinction, which
     // may sit below its occurrence range, so the window starts at the tip and always contains
     // the parent's current age.
-    double min_age = tau->getDistribution().isExtendedTree() ? n.getAge()
+    double min_age = tau->getDistribution().isExtended() ? n.getAge()
                                                              : n.getTaxon().getAgeRange().getMax();
     double max_age = parent.getAge();
     if ( parent.isRoot() )

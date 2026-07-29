@@ -53,7 +53,7 @@ namespace RevBayesCore {
         bool                                            redrawTopology(void);                                               //!< Redraw the budding topology uniformly with the ranges held fixed. Every compatible tree has one density, so this is a Gibbs step. Pure budding only, see hasAnagenesis().
         bool                                            hasAnagenesis(void) const;                                          //!< True when any anagenetic rate is positive, which breaks the equal-density premise a budding topology Gibbs draw rests on.
         void                                            simulateClade(std::vector<TopologyNode *> &n, double age, double present, bool alwaysReturn) override;
-        bool                                            allowsSA(void) override { return true; }                            //!< A sampled ancestor is an anagenetic speciation; with lambda_a = 0 its density is zero, so the flag stays on and the density does the rejecting.
+        bool                                            allowsSampledAncestors(void) override { return true; }                            //!< A sampled ancestor is an anagenetic speciation; with lambda_a = 0 its density is zero, so the flag stays on and the density does the rejecting.
 
     protected:
         bool                                            marginalizesExtinction(void) const override { return extended == false; }
@@ -74,7 +74,7 @@ namespace RevBayesCore {
         //!< The per-taxon check in the density covers this, and it alone knows which tips are exempt.
         bool                                            validatesTipAgesOnSet(void) const override { return false; }
 
-        bool                                            isExtendedTree(void) const override { return extended; }            //!< An extended tree ends each range at the extinction time, so a tip may fall below its fossil age range. A non-extended tree ends it at the marginalization limit instead.
+        bool                                            isExtended(void) const override { return extended; }            //!< An extended tree ends each range at the extinction time, so a tip may fall below its fossil age range. A non-extended tree ends it at the marginalization limit instead.
 
         double                                          lnProbNumTaxa(size_t n, double start, double end, bool MRCA) const override { throw RbException("Cannot compute P(nTaxa)."); }
         double                                          lnProbTreeShape(void) const override;

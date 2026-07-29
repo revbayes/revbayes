@@ -43,9 +43,9 @@ namespace RevBayesCore {
 
     public:
         //!< Must this taxon's tip age lie inside its occurrence range?
-        virtual bool                                        tipAgeConstrainedToRange(const Taxon &t) const { return isExtendedTree() == false; }
+        virtual bool                                        tipAgeConstrainedToRange(const Taxon &t) const { return isExtended() == false; }
         //!< Whether setValue validates every tip age up front rather than leaving it to the density.
-        virtual bool                                        validatesTipAgesOnSet(void) const { return isExtendedTree() == false; }
+        virtual bool                                        validatesTipAgesOnSet(void) const { return isExtended() == false; }
 
     protected:
         // pure virtual helper functions

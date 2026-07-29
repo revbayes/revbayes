@@ -117,7 +117,7 @@ double FossilTipTimeUniformProposal::doProposal( void )
     
     Tree& tau = tree->getValue();
 
-    bool extended = tree->getDistribution().isExtendedTree();
+    bool extended = tree->getDistribution().isExtended();
 
     failed = false;
 
