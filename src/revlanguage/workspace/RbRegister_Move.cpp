@@ -117,6 +117,7 @@
 #include "Move_SingleElementScale.h"
 #include "Move_SingleElementSlide.h"
 #include "Move_EllipticalSliceSamplingSimple.h"
+#include "Move_RandomCategoryWalk.h"
 #include "Move_SynchronizedVectorFixedSingleElementSlide.h"
 #include "Move_VectorBinarySwitch.h"
 #include "Move_VectorSingleElementScale.h"
@@ -157,6 +158,7 @@
 
 
 /* Moves on mixtures (in folder "datatypes/inference/moves/mixture") */
+#include "Move_AdaptiveReversibleJumpSwitch.h"
 #include "Move_DPPAllocateAuxGibbsMove.h"
 #include "Move_DPPGibbsConcentration.h"
 #include "Move_DPPTableValueUpdate.h"
@@ -195,14 +197,14 @@
 #include "Move_BranchRateNodeValueSlide.h"
 
 /* Tree proposals (in folder "datatypes/inference/moves/tree") */
-#include "Move_AddRemoveTip.h"
 #include "Move_BurstEvent.h"
 #include "Move_BranchLengthScale.h"
 #include "Move_CollapseExpandFossilBranch.h"
 #include "Move_IndependentTopology.h"
 #include "Move_EmpiricalTree.h"
 #include "Move_FNPR.h"
-#include "Move_TipTimeSlideUniform.h"
+#include "Move_FossilTipTimeSlideUniform.h"
+#include "Move_FossilTipTimeUniform.h"
 #include "Move_GibbsPruneAndRegraft.h"
 #include "Move_LayeredScaleProposal.h"
 #include "Move_NarrowExchange.h"
@@ -290,6 +292,7 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_HSRFHyperpriorsGibbs() );
         addType( new Move_HSRFIntervalSwap() );
         addType( new Move_HSRFUnevenGridHyperpriorsGibbs() );
+        addType( new Move_RandomCategoryWalk());
         addType( new Move_SingleElementSlide() );
         addType( new Move_SingleElementScale() );
         addType( new Move_ShrinkExpand() );
@@ -372,6 +375,8 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_GibbsMixtureAllocation<RateGenerator>( ) );
         addType( new Move_UPPAllocation<RealPos>() );
 
+        addType( new Move_AdaptiveReversibleJumpSwitch()                 );
+
         addType( new Move_ReversibleJumpSwitch<Real>( )                  );
         addType( new Move_ReversibleJumpSwitch<RealPos>( )               );
         addType( new Move_ReversibleJumpSwitch<Natural>( )               );
@@ -397,12 +402,13 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_GibbsDrawCharacterHistory()                    );
 
         /* Tree proposals (in folder "datatypes/inference/moves/tree") */
-        addType( new Move_AddRemoveTip()                     );
         addType( new Move_BurstEvent()                       );
         addType( new Move_BranchLengthScale()                );
         addType( new Move_CollapseExpandFossilBranch()       );
         addType( new Move_IndependentTopology()              );
-		addType( new Move_EmpiricalTree()                    );
+        addType( new Move_EmpiricalTree()                    );
+        addType( new Move_FossilTipTimeSlideUniform()        );
+        addType( new Move_FossilTipTimeUniform())             ;
         addType( new Move_FNPR()                             );
         addType( new Move_GibbsPruneAndRegraft()             );
         addType( new Move_LayeredScaleProposal()             );
@@ -427,7 +433,6 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_SpeciesNodeTimeSlideUniform()      );
         addType( new Move_SpeciesSubtreeScale()              );
         addType( new Move_SpeciesSubtreeScaleBeta()          );
-        addType( new Move_TipTimeSlideUniform()              );
         addType( new Move_SpeciesTreeScale()                 );
         addType( new Move_TreeScale()                        );
         addType( new Move_NarrowExchangeRateMatrix()         );
@@ -449,7 +454,8 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_IndependentPriorSampler<Simplex>( ) );
         addType( new Move_IndependentPriorSampler<ModelVector<RealPos> >( ) );
         addType( new Move_IndependentPriorSampler<ModelVector<Real> >( ) );
-//        addType( new Move_IndependentPriorSampler<RateGenerator>( ) );
+        addType(new Move_IndependentPriorSampler<ModelVector<Natural>>());
+        //        addType( new Move_IndependentPriorSampler<RateGenerator>( ) );
         addType( new Move_IndependentPriorSampler<Tree>( ) );
 
     }
