@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <vector>
 
+#include "RbConstants.h"
 #include "DistributionUniform.h"
 #include "FossilTipTimeSlideUniformProposal.h"
 #include "RandomNumberFactory.h"
@@ -129,8 +130,10 @@ double FossilTipTimeSlideUniformProposal::doProposal( void )
 
         if ( tips.empty() )
         {
+            // reject rather than return 0: an unchanged state with ratio 1 is accepted, so a move
+            // that can never act reports 100% acceptance and its rate is useless as a diagnostic
             failed = true;
-            return 0;
+            return RbConstants::Double::neginf;
         }
 
         // pick a random fossil node

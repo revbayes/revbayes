@@ -119,8 +119,10 @@ double CollapseExpandFossilBranchProposal::doProposal( void )
 
     if ( fossils.empty() )
     {
+        // reject rather than return 0: an unchanged state with ratio 1 is accepted, so a move that
+        // can never act reports 100% acceptance and its rate becomes useless as a diagnostic
         failed = true;
-        return 0;
+        return RbConstants::Double::neginf;
     }
 
     // pick a random fossil node
