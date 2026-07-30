@@ -380,14 +380,8 @@ double search_interval(double x0,double& L, double& R, slice_function& g,double 
             L = x1;
     }
 
-    // Could not locate a point inside the slice after 200 shrinkage steps.
-    // x0 is always in the slice (logy <= g(x0) by construction; see assert above),
-    // so fall back to it instead of aborting: returning x0 rejects the move, which
-    // is itself a valid slice sample. This guards against near-degenerate
-    // conditionals (e.g. very small / single-taxon datasets) where numerical
-    // inconsistency can prevent the search from converging.
-    // The loop left the variable at the last (rejected) trial point, so restore
-    // it to x0 before returning.
+    // x0 is in the slice by the assert above, so returning it rejects the move.
+    // The loop left the variable at the last trial point, so restore it first.
     static bool warned = false;
     if (not warned)
     {

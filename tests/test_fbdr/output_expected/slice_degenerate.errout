@@ -1,0 +1,7 @@
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 1 different moves in a random move schedule with 1 moves per iteration
+   
+   Warning: slice sampler could not locate the slice after 200 steps
+   analysis finished without aborting
