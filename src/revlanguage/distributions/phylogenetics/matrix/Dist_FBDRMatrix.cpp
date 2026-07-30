@@ -93,10 +93,7 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRMatrix::createDistribut
     static bool warned = false;
     if ( warned == false )
     {
-        RBOUT("\nWarning! `dnFBDRMatrix` is deprecated. It fuses the birth-death range process with the");
-        RBOUT("         fossil record, and takes the occurrences as an argument instead of as clamped data.");
-        RBOUT("         Use `dnFBDRP` for the range process and `dnFossilRecord` for the record instead.");
-        RBOUT("         See `?dnFossilRecord` for an example.\n");
+        RBOUT("Warning: `dnFBDRMatrix` is deprecated; use `dnFBDRP` with `dnFossilRecord`.");
         warned = true;
     }
 
@@ -147,13 +144,12 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRMatrix::createDistribut
         }
     }
 
-    bool re = static_cast<const RlBoolean &>( resample->getRevObject() ).getValue();
 
     // optional origin time of the process
     RevBayesCore::TypedDistribution<double>* op = createOriginPrior();
 
     // report_internally = true: the fused facade adds the fossil-record term inline
-    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, comp, K, re, NULL, op, true);
+    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, comp, K, NULL, op, true);
 
     return d;
 }

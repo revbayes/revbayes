@@ -45,7 +45,6 @@ using namespace RevBayesCore;
  * \param[in]    cdt            Condition of the process (time/sampling/survival).
  * \param[in]    tn             Taxa.
  * \param[in]    c              Complete sampling?
- * \param[in]    re             Augmented age resampling weight.
  */
 FossilizedBirthDeathSpeciationProcess::FossilizedBirthDeathSpeciationProcess(const TypedDagNode<double> *ra,
                                                            const DagNode *inspeciation,
@@ -58,11 +57,10 @@ FossilizedBirthDeathSpeciationProcess::FossilizedBirthDeathSpeciationProcess(con
                                                            const std::string &incondition,
                                                            const std::vector<Taxon> &intaxa,
                                                            bool comp,
-                                                           bool re,
-                                                           bool report_int,
+                                                                                                                      bool report_int,
                                                            bool ext) :
     AbstractBirthDeathProcess(ra, incondition, intaxa, true, NULL),
-    AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, comp, 0, re),
+    AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, comp, 0),
     extended( ext )
 {
     report_internally = report_int;
@@ -352,6 +350,13 @@ void FossilizedBirthDeathSpeciationProcess::setValue(Tree *v, bool force)
 
     // a tree clamped from outside carries no flags, so establish the invariant here as well
     normalizeContinuationFlags( this->getValue().getRoot() );
+}
+
+
+void FossilizedBirthDeathSpeciationProcess::setMcmcMode(bool tf)
+{
+    AbstractBirthDeathProcess::setMcmcMode(tf);
+    if ( tf == true ) warnIfNoResampleMove();
 }
 
 
@@ -1195,16 +1200,6 @@ void FossilizedBirthDeathSpeciationProcess::touchSpecialization(const DagNode *t
             dirty_psi  = std::vector<bool>(taxa.size(), true);
             dirty_taxa = std::vector<bool>(taxa.size(), true);
 
-            // the augmented ages ride with the move, as they do for the matrix process
-            if ( resampling == true && resampled == false )
-            {
-                updateStartEndTimes();
-
-                size_t i = size_t( GLOBAL_RNG->uniform01() * taxa.size() );
-                if ( i >= taxa.size() ) i = taxa.size() - 1;
-
-                resampleFirstLast(i);
-            }
         }
 
         touched = true;

@@ -41,7 +41,6 @@ using namespace RevBayesCore;
  * \param[in]    cdt            Condition of the process (time/sampling/survival).
  * \param[in]    tn             Taxa.
  * \param[in]    c              Complete sampling?
- * \param[in]    re             Augmented age resampling weight.
  */
 FossilizedBirthDeathRangeProcess::FossilizedBirthDeathRangeProcess(const DagNode *inspeciation,
                                                                      const DagNode *inextinction,
@@ -52,12 +51,11 @@ FossilizedBirthDeathRangeProcess::FossilizedBirthDeathRangeProcess(const DagNode
                                                                      const std::vector<Taxon> &intaxa,
                                                                      bool complete_record,
                                                                      size_t truncate_at,
-                                                                     bool resample,
-                                                                     const TypedDagNode<double> *inorigin,
+                                                                                                                                          const TypedDagNode<double> *inorigin,
                                                                      TypedDistribution<double> *inoriginprior,
                                                                      bool report_int) :
     TypedDistribution<MatrixReal>(new MatrixReal(intaxa.size(), 2)),
-    AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, complete_record, truncate_at, resample, inorigin, inoriginprior)
+    AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, complete_record, truncate_at, inorigin, inoriginprior)
 {
     report_internally = report_int;
 
@@ -81,6 +79,13 @@ FossilizedBirthDeathRangeProcess::FossilizedBirthDeathRangeProcess(const DagNode
  *
  * \return A new copy of myself 
  */
+
+void FossilizedBirthDeathRangeProcess::setMcmcMode(bool tf)
+{
+    TypedDistribution<MatrixReal>::setMcmcMode(tf);
+    if ( tf == true ) warnIfNoResampleMove();
+}
+
 FossilizedBirthDeathRangeProcess* FossilizedBirthDeathRangeProcess::clone( void ) const
 {
     return new FossilizedBirthDeathRangeProcess( *this );
@@ -272,15 +277,6 @@ void FossilizedBirthDeathRangeProcess::touchSpecialization(const DagNode *touche
                 dirty_psi[i]   = true;
                 dirty_taxa[i]  = true;
 
-                if ( resampling == true && resampled == false )
-                {
-                    // refresh b_i/d_i from the moved value so the proposal and its Jacobian
-                    // use the same b (updateStartEndTimes has not run yet)
-                    b_i[i] = (*this->value)[i][0];
-                    d_i[i] = (*this->value)[i][1];
-
-                    resampleFirstLast(i);
-                }
             }
 
         }

@@ -40,12 +40,13 @@ namespace RevBayesCore {
 										  const std::vector<Taxon> &taxa,
 										  bool complete_record,
                                           size_t truncate_at,
-										  bool resampling,
                                           const TypedDagNode<double>* origin = NULL,
                                           TypedDistribution<double>* origin_prior = NULL,
                                           bool report_internally = true);   //!< report_internally=false => bare range process (dnFBDRP); reporting term supplied by dnFossilRecord
         
         // public member functions
+        void                                            setMcmcMode(bool tf) override;
+
         FossilizedBirthDeathRangeProcess*               clone(void) const override;                                         //!< Create an independent clone
 
         // Re-clip the augmented oldest ages when the matrix is set externally (clamp);

@@ -47,11 +47,13 @@ namespace RevBayesCore {
                                             const std::vector<Taxon> &taxa,
                                             bool complete_record,
                                             size_t truncate_at,
-                                            bool resampling,
                                             const TypedDagNode<double>* origin = NULL,
                                             TypedDistribution<double>* origin_prior = NULL);  //!< Constructor
 
         virtual ~AbstractFossilizedBirthDeathRangeProcess(){};
+
+        //!< The resampling move registers itself here, so the model can tell when it is missing
+        void                                            setHasResampleMove(void) { has_resample_move = true; }
 
         std::vector<double>&                            getAges();
         void                                            executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const;   //!< Expose the augmented first/last ages and the birth/death times for monitoring
@@ -60,6 +62,7 @@ namespace RevBayesCore {
         double                                          getPresent(void) const { return times.front(); }                                   //!< Age of the present
         double                                          getOrigin(void) const { return origin; }                                            //!< The origin of the process, which is the oldest birth
         void                                            resampleFirstLast(size_t i);
+        void                                            warnIfNoResampleMove(void) const;
         void                                            drawAugmentedAges(size_t i);                               //!< Draw taxon i's augmented extremes nested (d_i <= last <= first) under the current reporting model.
         void                                            drawRanges();                                              //!< Draw an initial (b_i, d_i) and the augmented ages for every taxon. Shared by the matrix redraw and the tree (FBDSP) initial-value construction, which hangs a random budding topology on the ranges.
         double                                          computeLnFossilTotal();                                    //!< Total fossil-record log-density summed over taxa; used by a standalone dnFossilRecord node conditioned on this range process (self-contained: refreshes rate cache + start/end times).
@@ -151,8 +154,9 @@ namespace RevBayesCore {
         std::vector<bool>                               truncated;                                              //!< Taxa reported up to the cap K, whose unreported specimens are marginalized
         std::vector<bool>                               complete;                                               //!< Taxa whose whole record is reported. Neither flag set is the first/last rule: both extremes reported, the interior count marginalized
         bool                                            touched;                                               //!< Indicates whether any terms need updating
+        bool                                            has_resample_move = false;
+        mutable bool                                    warned_no_resample = false;             //!< setMcmcMode fires more than once per run              //!< Set by mvResampleAugmentedAges when it attaches
         bool                                            resampled;                                              //!< Indicates whether any oldest occurrence ages were resampled
-        bool                                            resampling;                                             //!< Indicates whether we are resampling oldest occurrence ages
         bool                                            report_internally;                                      //!< If true (default) computeLnProbabilityRanges adds the reporting term inline (fused facade); if false the term is omitted (bare range process) and supplied by a separate dnFossilRecord node.
     };
 }

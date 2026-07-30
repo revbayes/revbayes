@@ -40,7 +40,6 @@ namespace RevBayesCore {
                                       const std::string &condition,
                                       const std::vector<Taxon> &taxa,
                                       bool complete_record,
-                                      bool resampling,
                                       bool report_internally = true,
                                       bool extended = true);  //!< Constructor
         
@@ -74,6 +73,8 @@ namespace RevBayesCore {
         bool                                            tipAgeConstrainedToRange(const Taxon &t) const override { return extended == false && t.isExtinct(); }
         //!< The per-taxon check in the density covers this, and it alone knows which tips are exempt.
         bool                                            validatesTipAgesOnSet(void) const override { return false; }
+
+        void                                            setMcmcMode(bool tf) override;
 
         bool                                            isExtended(void) const override { return extended; }            //!< An extended tree ends each range at the extinction time, so a tip may fall below its fossil age range. A non-extended tree ends it at the marginalization limit instead.
 

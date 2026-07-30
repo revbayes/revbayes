@@ -70,7 +70,6 @@ static void truncateRecord( Taxon &taxon, size_t K )
  * \param[in]    tn             Taxa.
  * \param[in]    c              Complete sampling?
  * \param[in]    K              Reporting cap (truncated model only; 0 = uncapped).
- * \param[in]    re             Augmented age resampling weight.
  */
 AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProcess(const DagNode *inspeciation,
                                                                          const DagNode *inextinction,
@@ -81,7 +80,6 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
                                                                          const std::vector<Taxon> &intaxa,
                                                                          bool comp,
                                                                          size_t K,
-                                                                         bool re,
                                                                          const TypedDagNode<double> *inorigin,
                                                                          TypedDistribution<double> *inoriginprior) :
     taxa(intaxa),
@@ -93,7 +91,6 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
     origin(0.0),
     max_birth(0),
     resampled(false),
-    resampling(re),
     touched(false),
     report_internally(true)
 {
@@ -281,8 +278,7 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
     if ( num_truncated > 0 )
     {
         std::stringstream ss;
-        ss << "Warning: " << num_truncated << " taxa report more than " << K
-           << " occurrences; keeping a uniform random " << K << " of each.";
+        ss << "Warning: " << num_truncated << " taxa exceed " << K << " occurrences; keeping a random " << K << " of each.";
         RBOUT( ss.str() );
     }
 
@@ -411,7 +407,7 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
 
             // change-of-variables for the truncated tau_1 ~ U(o_i, b); firstlast/complete
             // draw from a data-fixed bin so their term is constant
-            if ( resampling == true && truncated[i] && b_i[i] > o_i[i] )
+            if ( truncated[i] && b_i[i] > o_i[i] )
             {
                 partial_likelihood[i] += log( b_i[i] - o_i[i] );
             }
@@ -847,6 +843,18 @@ void AbstractFossilizedBirthDeathRangeProcess::drawAugmentedAges(size_t i)
     // An extant range still ends at the present, and its tau_K is a fossil age, not its tip.
     if ( marginalizesExtinction() == true && taxa[i].isExtinct() == true ) d_i[i] = last[i];
 }
+
+// The augmented ages move only through mvResampleAugmentedAges. Without it they stay at their
+// initial draw and the chain silently samples the wrong space, so say so once at startup.
+void AbstractFossilizedBirthDeathRangeProcess::warnIfNoResampleMove( void ) const
+{
+    if ( has_resample_move == false && warned_no_resample == false )
+    {
+        warned_no_resample = true;
+        RBOUT("Warning: no mvResampleAugmentedAges move; augmented ages will not be sampled.");
+    }
+}
+
 
 void AbstractFossilizedBirthDeathRangeProcess::resampleFirstLast(size_t i)
 {

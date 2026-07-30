@@ -67,6 +67,8 @@ RevBayesCore::FossilizedBirthDeathResampleAgeProposal<valType>::FossilizedBirthD
     {
     	throw RbException("FossilizedBirthDeathResampleAgeProposal can only be used with Fossilized Birth Death Range Processes");
     }
+
+    dist->setHasResampleMove();
 }
 
 

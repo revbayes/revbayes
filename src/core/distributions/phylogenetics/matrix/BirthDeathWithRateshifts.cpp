@@ -22,10 +22,9 @@ BirthDeathWithRateshifts::BirthDeathWithRateshifts(const DagNode *inspeciation,
                                                    const std::vector<Taxon> &intaxa,
                                                    bool complete_record,
                                                    size_t truncate_at,
-                                                   bool resample,
                                                    const TypedDagNode<double> *inorigin,
                                                    bool report_int) :
-    FossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, complete_record, truncate_at, resample, inorigin, NULL, report_int)
+    FossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, complete_record, truncate_at, inorigin, NULL, report_int)
 {
 
 }

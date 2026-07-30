@@ -25,7 +25,6 @@ namespace RevBayesCore {
                                   const std::vector<Taxon> &taxa,
                                   bool complete_record,
                                   size_t truncate_at,
-                                  bool resampling,
                                   const TypedDagNode<double>* origin = NULL,
                                   bool report_internally = true);
 

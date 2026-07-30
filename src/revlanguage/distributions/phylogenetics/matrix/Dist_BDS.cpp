@@ -74,11 +74,10 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_BDS::createDistribution( vo
         rt = static_cast<const ModelVector<RealPos> &>( timeline->getRevObject() ).getDagNode();
     }
 
-    bool re = static_cast<const RlBoolean &>( resample->getRevObject() ).getValue();
 
     // bare BDS range process: report_internally=false (a dnFossilRecord node supplies the
     // reporting term)
-    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::BirthDeathWithRateshifts(l, m, p, r, rt, cond, t, true, 0, re, NULL, false);
+    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::BirthDeathWithRateshifts(l, m, p, r, rt, cond, t, true, 0, NULL, false);
 
     return d;
 }
