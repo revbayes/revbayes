@@ -260,11 +260,11 @@ TaxonReader::TaxonReader(const std::string &fn, std::string delim) : DelimitedDa
 
     if ( zero_count_rows.empty() == false )
     {
-        // list a few and count the rest, so a large file cannot bury the console
-        size_t shown = std::min( zero_count_rows.size(), size_t(5) );
+        // list a few and count the rest, so the message stays on one line
+        size_t shown = std::min( zero_count_rows.size(), size_t(2) );
 
         std::stringstream ss;
-        ss << "Warning: count = 0 with max_age > 0 in the taxon definition file, for ";
+        ss << "Warning: count = 0 but max_age > 0 in the taxon file, row ";
         for (size_t j = 0; j < shown; j++)
         {
             ss << ( j > 0 ? ", " : "" ) << zero_count_rows[j];

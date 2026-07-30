@@ -391,9 +391,7 @@ double search_interval(double x0,double& L, double& R, slice_function& g,double 
     static bool warned = false;
     if (not warned)
     {
-        RBOUT("Warning: slice sampler could not locate the slice after 200 steps; "
-              "keeping the current value (move rejected). This can occur for "
-              "near-degenerate conditionals, e.g. very small datasets.");
+        RBOUT("Warning: slice sampler could not locate the slice after 200 steps");
         warned = true;
     }
     g(x0);
