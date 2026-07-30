@@ -77,55 +77,56 @@ double RotateNodeProposal::doProposal( void )
 
     failed = false;
 
-    std::vector<size_t> internal;
+    // Move the continuation between siblings rather than permuting the child list. Child order no
+    // longer carries the range assignment, so a permutation is a no-op; which sibling continues the
+    // parent's species is the free parameter and this is the move that explores it. A sampled
+    // ancestor node is skipped: there the continuation is forced onto the sampled ancestor tip.
+    std::vector<size_t> candidates;
     for (size_t i = 0; i < tau.getNumberOfNodes(); i++)
     {
         const TopologyNode& n = tau.getNode(i);
 
-        // a sampled ancestor tip is the ancestral species whichever slot it sits in, so rotating
-        // such a node yields the same tree twice and would double its weight
-        if ( n.isTip() == false && n.getNumberOfChildren() > 1 && n.isSampledAncestorTipOrParent() == false )
+        if ( n.isTip() == true || n.getNumberOfChildren() < 2 ) continue;
+        if ( n.isSampledAncestorTipOrParent() == true ) continue;
+
+        size_t n_cont = 0;
+        for (size_t c = 0; c < n.getNumberOfChildren(); c++)
         {
-            internal.push_back( i );
+            if ( n.getChild(c).continuesParentSpecies() == true ) ++n_cont;
         }
+
+        // exactly one holder leaves somewhere to move it to
+        if ( n_cont == 1 ) candidates.push_back( i );
     }
 
-    if ( internal.empty() == true )
+    if ( candidates.empty() == true )
     {
         failed = true;
 
-        return 0.0;
+        // reject rather than return 0, or a move that could not act counts as accepted
+        return RbConstants::Double::neginf;
     }
 
-    node_index = internal[ size_t( rng->uniform01() * internal.size() ) ];
+    node_index = candidates[ size_t( rng->uniform01() * candidates.size() ) ];
 
-    stored_children = tau.getNode( node_index ).getChildren();
+    TopologyNode& node = tau.getNode( node_index );
 
-    // an order drawn uniformly from those that differ from the current one; the reverse draw has
-    // the same probability, so the proposal is symmetric
-    std::vector<TopologyNode*> rotated = stored_children;
-    for (size_t attempt = 0; attempt < 100; attempt++)
+    std::vector<TopologyNode*> others;
+    stored_continuer = NULL;
+
+    for (size_t c = 0; c < node.getNumberOfChildren(); c++)
     {
-        for (size_t i = rotated.size() - 1; i > 0; i--)
-        {
-            size_t j = size_t( rng->uniform01() * (i + 1) );
-            if ( j > i ) j = i;
+        TopologyNode *child = &node.getChild(c);
 
-            TopologyNode *tmp = rotated[i];
-            rotated[i] = rotated[j];
-            rotated[j] = tmp;
-        }
-        if ( rotated != stored_children ) break;
+        if ( child->continuesParentSpecies() == true ) stored_continuer = child;
+        else                                          others.push_back( child );
     }
 
-    if ( rotated == stored_children )
-    {
-        failed = true;
+    // the reverse move draws from a set of the same size, so the proposal is symmetric
+    moved_continuer = others[ size_t( rng->uniform01() * others.size() ) ];
 
-        return 0.0;
-    }
-
-    setChildren( node_index, rotated );
+    stored_continuer->setContinuesParentSpecies( false );
+    moved_continuer->setContinuesParentSpecies( true );
 
     return 0.0;
 }
@@ -145,7 +146,8 @@ void RotateNodeProposal::undoProposal( void )
 {
     if ( failed == false )
     {
-        setChildren( node_index, stored_children );
+        moved_continuer->setContinuesParentSpecies( false );
+        stored_continuer->setContinuesParentSpecies( true );
     }
 }
 

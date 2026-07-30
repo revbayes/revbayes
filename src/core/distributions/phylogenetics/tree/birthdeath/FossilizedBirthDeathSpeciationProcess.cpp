@@ -136,7 +136,15 @@ double FossilizedBirthDeathSpeciationProcess::computeLnProbabilityDivergenceTime
 {
     // computeLnProbabilityRanges refreshes the cached per-taxon terms, so it is not const; the
     // wrapper must be const to override the base virtual that the tree distribution calls
+    // cleared here rather than in updateStartEndTimes, which is skipped when nothing is dirty: a
+    // single invalid state would otherwise poison every later evaluation and freeze the chain
+    invalid_continuation = false;
+
     double lnProb = const_cast<FossilizedBirthDeathSpeciationProcess*>(this)->computeLnProbabilityRanges();
+
+    // some node's children do not name exactly one continuation, which no tree this process can
+    // produce, so reject rather than score it
+    if ( invalid_continuation == true ) return RbConstants::Double::neginf;
 
     lnProb += computeLnProbabilityTimes();
 
@@ -341,6 +349,9 @@ void FossilizedBirthDeathSpeciationProcess::setValue(Tree *v, bool force)
             last[i] = 0.5 * ( lo_y + hi_y );
         }
     }
+
+    // a tree clamped from outside carries no flags, so establish the invariant here as well
+    normalizeContinuationFlags( this->getValue().getRoot() );
 }
 
 
@@ -429,13 +440,16 @@ void FossilizedBirthDeathSpeciationProcess::redrawValue(void)
         if ( parent[k] == n ) continue;   // the origin lineage stays the root
         size_t j = parent[k];
 
-        // budding node at b_k: child 0 is the ancestor (continues), child 1 the new species
+        // budding node at b_k: lineage j continues, k is the new species. Recorded on the children
+        // rather than in their order, so no later move can reassign it by permuting them
         TopologyNode* node = new TopologyNode();
         node->setAge( b_i[k] );
         node->addChild( top[j] );
         node->addChild( top[k] );
         top[j]->setParent( node );
         top[k]->setParent( node );
+        top[j]->setContinuesParentSpecies( true );
+        top[k]->setContinuesParentSpecies( false );
         top[j] = node;
     }
 
@@ -454,6 +468,9 @@ void FossilizedBirthDeathSpeciationProcess::redrawValue(void)
         nodes[i]->setIndex(j);
     }
     this->getValue().orderNodesByIndex();
+
+    // whatever path built this tree, leave it with exactly one continuation per node
+    normalizeContinuationFlags( this->getValue().getRoot() );
 }
 
 
@@ -545,13 +562,16 @@ bool FossilizedBirthDeathSpeciationProcess::redrawTopology( void )
 
         size_t j = parent[k];
 
-        // budding node at b_k: child 0 is the ancestor (continues), child 1 the new species
+        // budding node at b_k: lineage j continues, k is the new species. Recorded on the children
+        // rather than in their order, so no later move can reassign it by permuting them
         TopologyNode* node = new TopologyNode();
         node->setAge( b_i[k] );
         node->addChild( top[j] );
         node->addChild( top[k] );
         top[j]->setParent( node );
         top[k]->setParent( node );
+        top[j]->setContinuesParentSpecies( true );
+        top[k]->setContinuesParentSpecies( false );
         top[j] = node;
     }
 
@@ -569,6 +589,9 @@ bool FossilizedBirthDeathSpeciationProcess::redrawTopology( void )
         nodes[i]->setIndex(j);
     }
     this->getValue().orderNodesByIndex();
+
+    // whatever path built this tree, leave it with exactly one continuation per node
+    normalizeContinuationFlags( this->getValue().getRoot() );
 
     return true;
 }
@@ -719,6 +742,8 @@ void FossilizedBirthDeathSpeciationProcess::simulateClade(std::vector<TopologyNo
                 parent->addChild( right_child );
                 left_child->setParent( parent );
                 right_child->setParent( parent );
+                left_child->setContinuesParentSpecies( true );
+                right_child->setContinuesParentSpecies( false );
                 parent->setAge( next_sim_age );
 
                 // insert the parent to our list
@@ -777,6 +802,10 @@ void FossilizedBirthDeathSpeciationProcess::simulateClade(std::vector<TopologyNo
         parent->addChild( right_child );
         left_child->setParent( parent );
         right_child->setParent( parent );
+        // this simulator has no notion of which lineage keeps the ancestral species, so name one:
+        // the density needs exactly one continuation per node, and mvRotateNode explores the choice
+        left_child->setContinuesParentSpecies( true );
+        right_child->setContinuesParentSpecies( false );
         parent->setAge( age );
 
         // insert the parent to our list
@@ -863,6 +892,62 @@ double FossilizedBirthDeathSpeciationProcess::simulateDivergenceTime(double orig
 }
 
 
+/**
+ * Make every node name exactly one continuing child.
+ *
+ * Called only where the value is established (a fresh draw, or a clamped tree), never from the
+ * density: a move that breaks the invariant must be rejected, not silently repaired. Several
+ * construction paths build this tree and not all of them know which lineage keeps the ancestral
+ * species, so rather than trusting each site, the invariant is enforced once here.
+ */
+void FossilizedBirthDeathSpeciationProcess::normalizeContinuationFlags( const TopologyNode &node )
+{
+    if ( node.isTip() == true ) return;
+
+    std::vector<TopologyNode*> children = node.getChildren();
+
+    for (size_t c = 0; c < children.size(); c++)
+    {
+        normalizeContinuationFlags( *children[c] );
+    }
+
+    size_t n_cont = 0;
+    for (size_t c = 0; c < children.size(); c++)
+    {
+        if ( children[c]->continuesParentSpecies() == true ) ++n_cont;
+    }
+
+    bool sa = node.isSampledAncestorTipOrParent();
+
+    // a sampled ancestor node carries its species on the sampled ancestor tip; otherwise keep the
+    // existing choice when there is exactly one, and otherwise pick the lowest index so that two
+    // presentations of the same tree agree
+    if ( sa == true || n_cont != 1 )
+    {
+        size_t keep = 0;
+        bool found = false;
+
+        for (size_t c = 0; c < children.size(); c++)
+        {
+            if ( sa == true && children[c]->isSampledAncestorTip() == true ) { keep = c; found = true; break; }
+        }
+
+        if ( found == false )
+        {
+            for (size_t c = 0; c < children.size(); c++)
+            {
+                if ( children[c]->getIndex() < children[keep]->getIndex() ) keep = c;
+            }
+        }
+
+        for (size_t c = 0; c < children.size(); c++)
+        {
+            children[c]->setContinuesParentSpecies( c == keep );
+        }
+    }
+}
+
+
 int FossilizedBirthDeathSpeciationProcess::updateStartEndTimes( const TopologyNode& node )
 {
     if( node.isTip() )
@@ -876,11 +961,47 @@ int FossilizedBirthDeathSpeciationProcess::updateStartEndTimes( const TopologyNo
 
     bool sa = node.isSampledAncestorTipOrParent();
 
+    // Exactly one child must carry this node's species. The flag is state, set when the tree is
+    // built and maintained by the moves, so it is only read here: a density must never write to the
+    // value it scores, or a rejected proposal leaves the write behind.
+    size_t n_cont = 0;
+
+    for (size_t c = 0; c < children.size(); c++)
+    {
+        if ( children[c]->continuesParentSpecies() == true ) ++n_cont;
+    }
+
+    if ( n_cont != 1 ) invalid_continuation = true;
+
+    // at a sampled ancestor node the continuation is forced to the sampled ancestor tip
+    if ( sa == true )
+    {
+        for (size_t c = 0; c < children.size(); c++)
+        {
+            if ( children[c]->continuesParentSpecies() != children[c]->isSampledAncestorTip() )
+            {
+                invalid_continuation = true;
+            }
+        }
+    }
+
+    // stop before the assignment loop. With the invariant broken there is no continuing child, so
+    // species stays -1 and -1 would be used to index first[]/b_i[]/d_i[]. The density rejects on
+    // invalid_continuation; nothing below may run first.
+    if ( invalid_continuation == true ) return -1;
+
     for(int c = 0; c < children.size(); c++)
     {
         const TopologyNode& child = *children[c];
 
         int i = updateStartEndTimes(child);
+
+        // a subtree that failed propagates up rather than writing through a negative index
+        if ( i < 0 )
+        {
+            invalid_continuation = true;
+            return -1;
+        }
 
         // if child is a tip, set the species/end time
         if( child.isTip() )
@@ -907,7 +1028,7 @@ int FossilizedBirthDeathSpeciationProcess::updateStartEndTimes( const TopologyNo
 
         // is child a new species?
         // set start time at this node
-        if( ( sa == false && c > 0 ) || ( sa && !child.isSampledAncestorTip() ) )
+        if( child.continuesParentSpecies() == false )
         {
             double age = node.getAge(); // y_{a(i)}
 

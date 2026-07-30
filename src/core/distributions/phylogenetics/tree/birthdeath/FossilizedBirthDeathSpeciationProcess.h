@@ -60,6 +60,7 @@ namespace RevBayesCore {
         double                                          rangeEndTerm(size_t i, size_t di, double d) const override;
 
         void                                            updateStartEndTimes(void) override;
+        void                                            normalizeContinuationFlags(const TopologyNode &node);    //!< Make each node name exactly one continuing child. Construction only: the density must reject an invalid state, not repair it.
         int                                             updateStartEndTimes(const TopologyNode & );
 
         double                                          pSurvival(double start, double end) const override;             //!< Compute the probability of survival of the process (without incomplete taxon sampling).
@@ -102,6 +103,7 @@ namespace RevBayesCore {
 
         mutable std::vector<bool>                       I;                                                       //!< Indicates for each taxon whether the parent species was a sampled ancestor.
         mutable std::vector<bool>                       is_sa;                                                   //!< Indicates for each taxon whether its own range ends at a sampled ancestor node, so its lineage carries on.
+        mutable bool                                    invalid_continuation = false;                            //!< Some node's children do not name exactly one continuation of its species.
 
         mutable std::vector<double>                     anagenetic;                                              //!< The sorted anagenetic speciation rates.
         mutable std::vector<double>                     symmetric;                                               //!< The sorted symmetric speciation probabilities.

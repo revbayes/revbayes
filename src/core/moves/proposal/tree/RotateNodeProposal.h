@@ -61,6 +61,8 @@ namespace RevBayesCore {
 
         size_t                                  node_index;
         std::vector<TopologyNode*>              stored_children;
+        TopologyNode*                           stored_continuer = NULL;                                 //!< The child that held the continuation before the swap
+        TopologyNode*                           moved_continuer = NULL;                                  //!< The child it moved to
         bool                                    failed;
     };
 

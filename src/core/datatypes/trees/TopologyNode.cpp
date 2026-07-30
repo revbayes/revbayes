@@ -74,6 +74,7 @@ TopologyNode::TopologyNode(const TopologyNode &n) :
     taxon( n.taxon ),
     index( n.index ),
     sampled_ancestor_tip( n.sampled_ancestor_tip ),
+    continues_parent_species( n.continues_parent_species ),
     node_comments( n.node_comments ),
     branch_comments( n.branch_comments ),
     time_in_states( n.time_in_states ),
@@ -131,6 +132,7 @@ TopologyNode& TopologyNode::operator=(const TopologyNode &n)
         node_comments           = n.node_comments;
         parent                  = n.parent;
         sampled_ancestor_tip    = n.sampled_ancestor_tip;
+        continues_parent_species = n.continues_parent_species;
         sampling_event          = n.sampling_event;
         serial_sampling         = n.serial_sampling;
         serial_speciation       = n.serial_speciation;
@@ -2118,6 +2120,18 @@ void TopologyNode::setSampledAncestor(bool tf)
 
     // Only tips can have the sampled_ancestor_tip flag set.
     assert(not sampled_ancestor_tip or isTip());
+}
+
+
+bool TopologyNode::continuesParentSpecies( void ) const
+{
+    return continues_parent_species;
+}
+
+
+void TopologyNode::setContinuesParentSpecies(bool tf)
+{
+    continues_parent_species = tf;
 }
 
 
