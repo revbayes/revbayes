@@ -13,32 +13,23 @@
 namespace RevBayesCore {
     
     /**
-     * @brief Up-Down Scaling Proposal for several parameters jointly.
-     *
-     *
-     * This proposal randomly scales all a set of parameter up while the other set of parameters
-     * is scaled down by the same value. This should hopefully improve mixing in many cases.
-     * The actual scaling factor is computed by sf = exp( lambda * ( u - 0.5 ) )
-     * where u ~ Uniform(0,1).
-     *
      * @author The RevBayes Development Core Team (Sebastian Hoehna)
      * @copyright GPL version 3
      * @since 2015-05-25, version 1.0
-     *
      */
     class RateAgeSubtreeProposal : public Proposal {
         
     public:
-        RateAgeSubtreeProposal(StochasticNode<Tree> *n, double a, double p=0.44);                                 //!< Constructor
+        RateAgeSubtreeProposal(StochasticNode<Tree> *n, double a, double p=0.44);                                                       //!< Constructor
         
-        void                                        addRates(std::vector<StochasticNode<double> *> v);                         //!< Add an up-scaling variable
+        void                                        addRates(std::vector<StochasticNode<double> *> v);                                  //!< Add an up-scaling variable
 
         void                                        cleanProposal(void);                                                                //!< Clean up proposal
         RateAgeSubtreeProposal*                     clone(void) const;                                                                  //!< Clone object
         double                                      doProposal(void);                                                                   //!< Perform proposal
         const std::string&                          getProposalName(void) const;                                                        //!< Get the name of the proposal for summary printing
         double                                      getProposalTuningParameter(void) const;
-        void                                        printParameterSummary(std::ostream &o, bool name_only) const;                                       //!< Print the parameter summary
+        void                                        printParameterSummary(std::ostream &o, bool name_only) const;                       //!< Print the parameter summary
         void                                        prepareProposal(void);                                                              //!< Prepare the proposal
         void                                        setProposalTuningParameter(double tp);
         void                                        tune(double r);                                                                     //!< Tune the proposal to achieve a better acceptance/rejection ratio
@@ -46,7 +37,7 @@ namespace RevBayesCore {
         
     protected:
         
-        void                                        swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes on which the Proposal is working on
+        void                                        swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes the Proposal is working on
         
         
     private:
@@ -60,7 +51,7 @@ namespace RevBayesCore {
         std::vector<double>                                  stored_ages;
         std::vector<double>                                  stored_branch_lengths;
         
-        double                                               alpha;                                                                     //!< The scale parameter of the Proposal (larger lambda -> larger proposals).
+        double                                               alpha;                                                                     //!< The scale parameter of the proposal (smaller alpha -> smaller a and b -> larger beta distr. variance -> larger proposals)
         
         
     };

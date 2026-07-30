@@ -17,7 +17,7 @@ class CharacterEvent;
 
     public:
         ~BranchHistory(void);
-        
+
         // overloaded operators
         BranchHistory& operator=(const BranchHistory& bh);
         //bool operator()(const BranchHistory&) const;
@@ -48,9 +48,7 @@ class CharacterEvent;
         void                                                            print(const TopologyNode* nd=NULL) const;
 
         // setters
-        void                                                            setParentCharacters(const std::set<CharacterEvent*>& s);
         void                                                            setParentCharacters(const std::vector<CharacterEvent*>& s);
-        void                                                            setChildCharacters(const std::set<CharacterEvent*>& s);
         void                                                            setChildCharacters(const std::vector<CharacterEvent*>& s);
         void                                                            setHistory(const std::set<CharacterEvent*,CharacterEventCompare>& s);
         void                                                            setHistory(const std::multiset<CharacterEvent*,CharacterEventCompare>& s);
@@ -60,12 +58,11 @@ class CharacterEvent;
         void                                                            updateHistory(const std::multiset<CharacterEvent*,CharacterEventCompare>& updateSet, const std::set<size_t>& indexSet);
         void                                                            updateHistory(const std::multiset<CharacterEvent*,CharacterEventCompare>& updateSet);
 
-        
+
 
     protected:
         //BranchHistory(void);
         BranchHistory(size_t nc, size_t idx);
-        BranchHistory(size_t nc, size_t idx, std::set<int> sc);
         BranchHistory(const BranchHistory& m);
 
         // container/element arguments

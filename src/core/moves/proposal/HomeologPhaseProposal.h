@@ -22,7 +22,7 @@ namespace RevBayesCore {
     class HomeologPhaseProposal : public Proposal {
 
     public:
-        HomeologPhaseProposal( StochasticNode<AbstractHomologousDiscreteCharacterData> *c, std::string t1, std::string t2);                                  //!<  constructor
+        HomeologPhaseProposal( StochasticNode<AbstractHomologousDiscreteCharacterData> *c, std::string t1, std::string t2);                                  //!< Constructor
 
         // Basic utility functions
         HomeologPhaseProposal*                                      clone(void) const;                                              //!< Clone object
@@ -30,15 +30,13 @@ namespace RevBayesCore {
         double                                                      doProposal(void);                                               //!< Perform proposal
         const std::string&                                          getProposalName(void) const;                                    //!< Get the name of the proposal for summary printing
         double                                                      getProposalTuningParameter(void) const;
-        void                                                        prepareProposal(void);                                                              //!< Propose a new state
-        void                                                        printParameterSummary(std::ostream &o, bool name_only) const;                   //!< Print the parameter summary
-        void                                                        setProposalTuningParameter(double tp);
-        void                                                        tune(double r);                                                                     //!< Tune the parameters of the proposal.
+        void                                                        prepareProposal(void);                                          //!< Propose a new state
+        void                                                        printParameterSummary(std::ostream &o, bool name_only) const;   //!< Print the parameter summary
         void                                                        undoProposal(void);                                             //!< Reject the proposal
 
     protected:
 
-        void                                                        swapNodeInternal(DagNode *oldN, DagNode *newN);                 //!< Swap the DAG nodes on which the Proposal is working on
+        void                                                        swapNodeInternal(DagNode *oldN, DagNode *newN);                 //!< Swap the DAG nodes the Proposal is working on
 
         // parameters
         StochasticNode<AbstractHomologousDiscreteCharacterData>*    ctmc;

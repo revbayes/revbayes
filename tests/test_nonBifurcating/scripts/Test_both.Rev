@@ -65,7 +65,7 @@ print( "   Is the tree binary? " + ifelse( blt.isBinary(), "TRUE", "FALSE") + "\
 print( "Resolve multifurcations first, suppress outdegree-1 nodes second\n" )
 
 print( "Resolving multifurcations..." )
-blt.resolveMultifurcations(resolveRoot=TRUE)
+blt.resolveMultifurcations(resolveRoot=FALSE)
 print( "   The modified tree has " + blt.ntips() + " tips and " + (blt.nnodes() - blt.ntips()) + " internal nodes." )
 print( "   Is the modified tree binary? " + ifelse( blt.isBinary(), "TRUE", "FALSE") + "\n" )
 

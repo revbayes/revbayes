@@ -904,10 +904,36 @@ HomologousDiscreteCharacterData<StandardState>* NclReader::createStandardMatrix(
             }
             else
             {
-                for (unsigned int s=0; s<charblock->GetNumStates(origTaxIndex, *cit); s++)
+                // If we have a partial ambiguity and one of the states involved in the ambiguity is a gap / inapplicable state,
+                // set the matrix cell to missing data and emit a warning
+                if ( charblock->GetState(origTaxIndex, *cit, 0) == charblock->GetGapSymbol() )
+                {
+                    std::stringstream ambig_inapp_mssg;
+                    ambig_inapp_mssg << "Partial ambiguity involving a gap state (" << charblock->GetGapSymbol() << ") detected for taxon ";
+                    ambig_inapp_mssg << charblock->GetTaxonLabel(origTaxIndex) << " at character " << std::distance(charset.begin(), cit) + 1;
+                    ambig_inapp_mssg << "." << std::endl << "Replacing by missing data (" << charblock->GetMissingSymbol() << ").";
+                    RBOUT( ambig_inapp_mssg.str() );
+                    
+                    stdState.setMissingState(true);
+                }
+                else
                 {
                     stdState.setState( std::string(1, charblock->GetState(origTaxIndex, *cit, 0) ) );
-                    for (unsigned int s=1; s<charblock->GetNumStates(origTaxIndex, *cit); s++)
+                }
+                
+                for (unsigned int s=1; s<charblock->GetNumStates(origTaxIndex, *cit); s++)
+                {
+                    if ( charblock->GetState(origTaxIndex, *cit, s) == charblock->GetGapSymbol() )
+                    {
+                        std::stringstream ambig_inapp_mssg;
+                        ambig_inapp_mssg << "Partial ambiguity involving a gap state (" << charblock->GetGapSymbol() << ") detected for taxon ";
+                        ambig_inapp_mssg << charblock->GetTaxonLabel(origTaxIndex) << " at character " << std::distance(charset.begin(), cit) + 1;
+                        ambig_inapp_mssg << "." << std::endl << "Replacing by missing data (" << charblock->GetMissingSymbol() << ").";
+                        RBOUT( ambig_inapp_mssg.str() );
+                        
+                        stdState.setMissingState(true);
+                    }
+                    else
                     {
                         stdState.addState( std::string(1, charblock->GetState(origTaxIndex, *cit, s) ) );
                     }
@@ -948,6 +974,7 @@ void NclReader::getTranslateTables(std::vector<std::map<int,std::string> >& tran
     }
     
 }
+
 
 /** Attempt to determine the type of data this is being read */
 std::string NclReader::intuitDataType(std::string& s)
@@ -1678,6 +1705,13 @@ std::vector<Tree*>* NclReader::readBranchLengthTrees(const path &fn)
         // read the files in the map containing the file names with the output being a vector of pointers to
         // the character matrices that have been read
         trees = readBranchLengthTrees( *p, "nexus" );
+
+        if ( trees == NULL || trees->size() == 0 )
+        {
+            delete trees;
+            trees = readBranchLengthTrees( *p, "newick" );
+        }
+
         if ( trees == NULL || trees->size() == 0 )
         {
             delete trees;
@@ -1696,11 +1730,6 @@ std::vector<Tree*>* NclReader::readBranchLengthTrees(const path &fn)
             }
         }
         
-        if ( trees == NULL || trees->size() == 0 )
-        {
-            delete trees;
-            trees = readBranchLengthTrees( *p, "newick" );
-        }
     }
     
 // We cannot reset the tip node indices in case the tree topology changed during ancestral state monitoring.
@@ -1820,17 +1849,19 @@ std::vector<Tree*>* NclReader::readBranchLengthTrees(const path &file_name, cons
             // NEXUS file format
             nexusReader.ReadFilepath( fns.c_str(), MultiFormatReader::NEXUS_FORMAT);
         }
-        else if (file_format == "phylip")
-        {
-            // phylip file format with std::int64_t taxon names
-            nexusReader.ReadFilepath( fns.c_str(), MultiFormatReader::RELAXED_PHYLIP_TREE_FORMAT);
-        }
         else if (file_format == "newick")
         {
             NewickTreeReader ntr;
             std::vector<Tree*>* trees = ntr.readBranchLengthTrees(fns);
             return trees;
         }
+        else if (file_format == "phylip")
+        {
+            // phylip file format with std::int64_t taxon names
+            nexusReader.ReadFilepath( fns.c_str(), MultiFormatReader::RELAXED_PHYLIP_TREE_FORMAT);
+        }
+        else
+            throw RbException()<<"I don't recognize tree format '"<<file_format<<"'";
     }
     catch(NxsException& err)
     {

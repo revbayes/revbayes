@@ -33,8 +33,10 @@ namespace RevBayesCore {
         virtual AbstractMove*                                   clone(void) const = 0;
         virtual const std::string&                              getMoveName(void) const = 0;                                        //!< Get the name of the move for summary printing
         virtual double                                          getMoveTuningParameter(void) const = 0;
-        virtual void                                            printSummary(std::ostream &o, bool current_period) const = 0;                            //!< Print the move summary
-        virtual void                                            setMoveTuningParameter(double tp) = 0;
+        virtual void                                            printSummary(std::ostream &o, bool current_period) const = 0;       //!< Print the move summary
+        
+        // virtual functions with a default implementations that derived class can override
+        virtual void                                            setMoveTuningParameter(double tp);
         
         // functions you should not override
         void                                                    addNode(DagNode* p);                                                //!< add a node to the proposal
@@ -56,7 +58,7 @@ namespace RevBayesCore {
         void                                                    setNumberTriedTotal(size_t nt);
         
     protected:
-        AbstractMove(double w, bool autoTune = false);                                              //!< Constructor
+        AbstractMove(double w, bool autoTune = false);                                                                              //!< Constructor
         AbstractMove(const std::vector<DagNode*> &d, double w, bool autoTune = false);                                              //!< Constructor
         AbstractMove(const AbstractMove &m);                                                                                        //!< Constructor
         
@@ -67,8 +69,8 @@ namespace RevBayesCore {
         virtual void                                            performMcmcMove(double prHeat, double lHeat, double pHeat) = 0;     //!< Perform the move.
         virtual void                                            performHillClimbingMove(double lHeat, double pHeat);                //!< Perform the move.
         virtual void                                            swapNodeInternal(DagNode *oldN, DagNode *newN) = 0;                 //!< Swap the pointers to the variable on which the move works on.
-        virtual void                                            tune(void) = 0;                                                     //!< Specific tuning of the move
-        
+        virtual void                                            tune(void);                                                         //!< Specific tuning of the move
+        //!
         // virtual methods
         virtual void                                            resetMoveCounters(void);                                            //!< Reset the counters such as numTried and numAccepted.
         

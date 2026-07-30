@@ -1,0 +1,38 @@
+## Model::getOrderedStochasticNodes must emit parents before children when a child shares ancestorswith its parent.
+## Expected output: Var[C--A--P]~1
+
+seed(1)
+
+P ~ dnNormal(0, 1)
+A ~ dnNormal(P, 1)
+C ~ dnNormal(A + P, 1)
+
+moves = VectorMoves()
+moves.append( mvSlide(P, weight=2) )
+moves.append( mvSlide(A, weight=2) )
+moves.append( mvSlide(C, weight=2) )
+
+mymodel = model(A)
+
+monitors = VectorMonitors()
+monitors.append( mnModel(printgen=1, filename="output/ordered_stoch_nodes_shared_parent.log") )
+mc_log = mcmc(mymodel, monitors, moves)
+mc_log.run(generations=5)
+
+seed(1)
+
+N = 200
+validation = validationAnalysis( mcmc(mymodel, VectorMonitors(), moves), N, directory="output" )
+validation.burnin(2000, 200)
+validation.run(5000)
+
+for (i in 0:(N-1)) {
+    p_data = readDelimitedDataFile("output/Validation_Sim_" + i + "/P.txt", delimiter=" ", header=FALSE)
+    a_data = readDelimitedDataFile("output/Validation_Sim_" + i + "/A.txt", delimiter=" ", header=FALSE)
+    c_data = readDelimitedDataFile("output/Validation_Sim_" + i + "/C.txt", delimiter=" ", header=FALSE)
+    diffs[i+1] = c_data[1][1] - a_data[1][1] - p_data[1][1]
+}
+
+print("Var[C - A - P] = " + var(diffs))
+
+q()

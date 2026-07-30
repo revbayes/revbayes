@@ -1,0 +1,21 @@
+   Processing file "data/laspl_autosomes_all_SFS_GeMu.Rev"
+   Processing of file "data/laspl_autosomes_all_SFS_GeMu.Rev" completed
+Number of individuals:	40
+   [ 20789845, 176814, 71825, 48479, 36158, 31398, 29578, 26747, 23805, 21822, 21019, 20682, 19231, 18714, 18457, 17936, 18461, 18781, 20553, 21001, 29320 ]
+   
+   Running burn-in phase of Monte Carlo sampler for 100 iterations.
+   This simulation runs 1 independent replicate.
+   The simulator uses 115 different moves in a random move schedule with 648 moves per iteration
+   
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 115 different moves in a random move schedule with 648 moves per iteration
+   
+   Processing file "output/StairwayPlot_autosomes_all_GeMu_RJ_esfs.log"
+Predictive probability: -4.98303e+06

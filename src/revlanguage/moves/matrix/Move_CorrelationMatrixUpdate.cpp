@@ -16,6 +16,7 @@
 #include "RlBoolean.h"
 #include "MetropolisHastingsMove.h"
 #include "ModelVector.h"
+#include "Probability.h"
 #include "Real.h"
 #include "RealPos.h"
 #include "RevObject.h"
@@ -63,9 +64,12 @@ void Move_CorrelationMatrixUpdate::constructInternalObject( void ) {
     RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::MatrixReal> *>( tmp );
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* sigma = static_cast<const ModelVector<RealPos> &>( s->getRevObject() ).getDagNode();
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *p = new RevBayesCore::CorrelationMatrixProposal(n, sigma, l);
-    value = new RevBayesCore::MetropolisHastingsMove(p,w,t);
+    p->setTargetAcceptanceRate(tt);
+    
+    value = new RevBayesCore::MetropolisHastingsMove(p, w, t);
 
 }
 

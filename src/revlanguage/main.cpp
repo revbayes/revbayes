@@ -44,9 +44,10 @@ struct ParsedOptions
 
     bool script_or_expr() const {return filename or not expressions.empty();}
 
-    bool force_interactive = false;       /* Force interactive if script_or_expr() == true. */
-    bool force_continue_on_error = false; /* Force continue-on-error if script_or_expr() == true. */
-    bool force_quiet = false;             /* Suppress header if script_or_expr() == false */
+    bool force_interactive = false;          /* Force interactive if script_or_expr() == true. */
+    bool force_continue_on_error = false;    /* Force continue-on-error if script_or_expr() == true. */
+    bool force_quiet = false;                /* Suppress header if script_or_expr() == false */
+    bool echo_script_or_expression = false;  /* Echo commands from scripts or expressions */
 
     bool jupyter = false;
 
@@ -100,9 +101,10 @@ ParsedOptions parse_cmd_line(int argc, char* argv[])
     stage1.add_flag("-v,--version",          options.version,         "Show version and exit");
     stage1.add_flag("-j,--jupyter",          options.jupyter,         "Run in jupyter mode");
 
-    stage1.add_flag("-q,--quiet",            options.force_quiet,             "Hide startup message (if no file or -e expr)");
-    stage1.add_flag("-i,--interactive",      options.force_interactive,       "Force interactive (with file or -e expr)");
-    stage1.add_flag("-c,--continue",         options.force_continue_on_error, "Continue after error (with file or -e expr)");
+    stage1.add_flag("-q,--quiet",            options.force_quiet,               "Hide startup message (if no file or -e expr)");
+    stage1.add_flag("-i,--interactive",      options.force_interactive,         "Force interactive (with file or -e expr)");
+    stage1.add_flag("-c,--continue",         options.force_continue_on_error,   "Continue after error (with file or -e expr)");
+    stage1.add_flag("-p,--print-commands",   options.echo_script_or_expression, "Print commands from file or -e expr");
 
     stage1.add_option("-s,--seed",           options.seed,            "Random seed (unsigned integer)");
     stage1.add_option("-o,--setOption",      options.options,         "Set an option key=value  (See ?setOption for the list of available keys and their associated values)")->allow_extra_args(false);
@@ -243,7 +245,7 @@ int main(int argc, char* argv[])
 
     /* initialize environment */
     RevLanguageMain rl = RevLanguageMain(cmd_line.force_continue_on_error,
-                                         false, /* echo */
+                                         cmd_line.echo_script_or_expression,
                                          cmd_line.force_quiet);
 
     /* Set output stream */
@@ -251,13 +253,17 @@ int main(int argc, char* argv[])
     RevLanguage::UserInterface::userInterface().setOutputStream( rev_output );
 
     /* Any script or expressions from `-e expr` are executed here. */
-    rl.startRevLanguageEnvironment(cmd_line.expressions, cmd_line.filename, cmd_line.args);
+    int result = rl.startRevLanguageEnvironment(cmd_line.expressions, cmd_line.filename, cmd_line.args);
 
+    /* Don't do anything if we encountered an error and aren't interactive */
+    if (result != 0 and not cmd_line.force_interactive)
+        ;
     /* Interactive or jupyter commands are executed here. */
-    if ( cmd_line.jupyter )
+    else if ( cmd_line.jupyter )
     {
         RevClient::startJupyterInterpreter();
     }
+    /* Start the interactive loop or there's no script or we are told to do so */
     else if ( not cmd_line.script_or_expr() or cmd_line.force_interactive )
     {
         enableTermAnsi();
@@ -265,11 +271,10 @@ int main(int argc, char* argv[])
         RevClient::startInterpreter();
     }
 
-#   ifdef RB_MPI
-    MPI_Finalize();
-#   endif
-
-    return 0;
+    // MPI finalize is called here.
+    RevClient::shutdown();
+    
+    return result;
 }
 
 #endif

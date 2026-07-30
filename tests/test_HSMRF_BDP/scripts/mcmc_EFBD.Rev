@@ -1,0 +1,228 @@
+########################################################
+#
+# RevBayes Script: Diversification rate estimation with the
+#                  episodic fossilized-birth-death process and
+#                  a HSMRF prior.
+#
+#
+# authors: Sebastian Hoehna
+#
+########################################################
+
+seed(8472)
+
+NUM_MCMC_ITERATIONS = 20
+N_REPS              = 2
+NUM_EPOCHS          = 10
+HYPERPRIOR          = 0.0021
+
+
+H = 0.587405
+OFFSET <- 11.0
+
+#vector of moves and monitors.
+moves    = VectorMoves()
+monitors = VectorMonitors()
+
+#######################
+# Reading in the Data #
+#######################
+
+T <- readTrees("data/test_offset.tre")[1]
+
+# shift the tree so that the youngest tip has the offset age
+T.offset( OFFSET )
+
+# Here, we extract the taxa information directly from the tree
+taxa <- T.taxa()
+
+# we create a helper variable that specifies the number of intervals
+NUM_INTERVALS = NUM_EPOCHS
+NUM_BREAKS := NUM_INTERVALS - 1
+
+
+# We are using assumes that time points are evenly spaced.
+# We must now create this vector of times to give to the birth death model.
+# We assume a single epoch for the time between the present and the offset.
+interval_times <- abs( (T.rootAge()-OFFSET) * seq(1, NUM_BREAKS, 1)/NUM_INTERVALS + OFFSET)
+
+
+####################
+# Create the rates #
+####################
+
+# specify prior distributions on the rates of speciation, extinction, and fossilization through time. The overall model is a Horseshoe Markov random field (HSMRF) birth-death model
+speciation_rate_global_scale_hyperprior <- HYPERPRIOR
+extinction_rate_global_scale_hyperprior <- HYPERPRIOR
+fossilization_rate_global_scale_hyperprior <- HYPERPRIOR
+
+speciation_rate_global_scale ~ dnHalfCauchy(0,1)
+extinction_rate_global_scale ~ dnHalfCauchy(0,1)
+fossilization_rate_global_scale ~ dnHalfCauchy(0,1)
+
+moves.append( mvScale(speciation_rate_global_scale,weight=5) )
+moves.append( mvScale(extinction_rate_global_scale,weight=5) )
+moves.append( mvScale(fossilization_rate_global_scale,weight=5) )
+moves.append( mvScaleBactrian(speciation_rate_global_scale,weight=5) )
+moves.append( mvScaleBactrian(extinction_rate_global_scale,weight=5) )
+moves.append( mvScaleBactrian(fossilization_rate_global_scale,weight=5) )
+moves.append( mvMirrorMultiplier(speciation_rate_global_scale,weight=5) )
+moves.append( mvMirrorMultiplier(extinction_rate_global_scale,weight=5) )
+moves.append( mvMirrorMultiplier(fossilization_rate_global_scale,weight=5) )
+moves.append( mvRandomDive(speciation_rate_global_scale,weight=5) )
+moves.append( mvRandomDive(extinction_rate_global_scale,weight=5) )
+moves.append( mvRandomDive(fossilization_rate_global_scale,weight=5) )
+
+
+# create a random variable at the present time
+speciation_rate_at_present ~ dnLognormal( ln(0.5), 2*H )
+extinction_rate_at_present ~ dnLognormal( ln(0.5), 2*H )
+fossilization_rate_at_present ~ dnLognormal( ln(0.005), 2*H )
+
+moves.append( mvScale(speciation_rate_at_present,weight=5) )
+moves.append( mvScale(extinction_rate_at_present,weight=5) )
+moves.append( mvScale(fossilization_rate_at_present,weight=5) )
+moves.append( mvScaleBactrian(speciation_rate_at_present,weight=5) )
+moves.append( mvScaleBactrian(extinction_rate_at_present,weight=5) )
+moves.append( mvScaleBactrian(fossilization_rate_at_present,weight=5) )
+moves.append( mvMirrorMultiplier(speciation_rate_at_present,weight=5) )
+moves.append( mvMirrorMultiplier(extinction_rate_at_present,weight=5) )
+moves.append( mvMirrorMultiplier(fossilization_rate_at_present,weight=5) )
+moves.append( mvRandomDive(speciation_rate_at_present,weight=5) )
+moves.append( mvRandomDive(extinction_rate_at_present,weight=5) )
+moves.append( mvRandomDive(fossilization_rate_at_present,weight=5) )
+
+# joint moves on rates at present
+avmvn_rates_at_present = mvAVMVN(weight=50)
+avmvn_rates_at_present.addVariable(speciation_rate_at_present)
+avmvn_rates_at_present.addVariable(extinction_rate_at_present)
+avmvn_rates_at_present.addVariable(fossilization_rate_at_present)
+moves.append( avmvn_rates_at_present )
+
+up_down_move = mvUpDownScale(weight=5.0)
+up_down_move.addVariable(speciation_rate_at_present,TRUE)
+up_down_move.addVariable(extinction_rate_at_present,TRUE)
+moves.append( up_down_move )
+
+for (i in 1:NUM_BREAKS) {
+  # Variable-scaled variances for hierarchical horseshoe
+  sigma_speciation_rate[i] ~ dnHalfCauchy(0,1)
+  sigma_extinction_rate[i] ~ dnHalfCauchy(0,1)
+  sigma_fossilization_rate[i] ~ dnHalfCauchy(0,1)
+
+  # Make sure values initialize to something reasonable
+  sigma_speciation_rate[i].setValue(runif(1,0.005,0.1)[1])
+  sigma_extinction_rate[i].setValue(runif(1,0.005,0.1)[1])
+  sigma_fossilization_rate[i].setValue(runif(1,0.005,0.1)[1])
+
+  # moves on the single sigma values
+  moves.append( mvScale(sigma_speciation_rate[i], weight=5) )
+  moves.append( mvScale(sigma_extinction_rate[i], weight=5) )
+  moves.append( mvScale(sigma_fossilization_rate[i], weight=5) )
+  moves.append( mvScaleBactrian(sigma_speciation_rate[i], weight=5) )
+  moves.append( mvScaleBactrian(sigma_extinction_rate[i], weight=5) )
+  moves.append( mvScaleBactrian(sigma_fossilization_rate[i], weight=5) )
+
+  # non-centralized parameterization of horseshoe
+  delta_log_speciation_rate[i] ~ dnNormal( mean=0, sd=sigma_speciation_rate[i]*speciation_rate_global_scale*speciation_rate_global_scale_hyperprior )
+  delta_log_extinction_rate[i] ~ dnNormal( mean=0, sd=sigma_extinction_rate[i]*extinction_rate_global_scale*extinction_rate_global_scale_hyperprior )
+  delta_log_fossilization_rate[i] ~ dnNormal( mean=0, sd=sigma_fossilization_rate[i]*fossilization_rate_global_scale*fossilization_rate_global_scale_hyperprior )
+
+  # Make sure values initialize to something reasonable
+  delta_log_speciation_rate[i].setValue(runif(1,-0.1,0.1)[1])
+  delta_log_extinction_rate[i].setValue(runif(1,-0.1,0.1)[1])
+  delta_log_fossilization_rate[i].setValue(runif(1,-0.1,0.1)[1])
+
+  moves.append( mvSlide(delta_log_speciation_rate[i], weight=5) )
+  moves.append( mvSlide(delta_log_extinction_rate[i], weight=5) )
+  moves.append( mvSlide(delta_log_fossilization_rate[i], weight=5) )
+  moves.append( mvSlideBactrian(delta_log_speciation_rate[i], weight=5) )
+  moves.append( mvSlideBactrian(delta_log_extinction_rate[i], weight=5) )
+  moves.append( mvSlideBactrian(delta_log_fossilization_rate[i], weight=5) )
+
+  delta_up_down_move[i] = mvUpDownSlide(weight=5.0)
+  delta_up_down_move[i].addVariable(delta_log_speciation_rate[i],TRUE)
+  delta_up_down_move[i].addVariable(delta_log_extinction_rate[i],TRUE)
+  moves.append( delta_up_down_move[i] )
+}
+
+# Assemble first-order differences and speciation_rate at present into the random field
+speciation_rate := fnassembleContinuousMRF(speciation_rate_at_present,delta_log_speciation_rate,initialValueIsLogScale=FALSE,order=1)
+extinction_rate := fnassembleContinuousMRF(extinction_rate_at_present,delta_log_extinction_rate,initialValueIsLogScale=FALSE,order=1)
+fossilization_rate := fnassembleContinuousMRF(fossilization_rate_at_present,delta_log_fossilization_rate,initialValueIsLogScale=FALSE,order=1)
+
+# Move all field parameters in one go
+moves.append( mvEllipticalSliceSamplingSimple(delta_log_speciation_rate,weight=5,tune=FALSE) )
+moves.append( mvEllipticalSliceSamplingSimple(delta_log_extinction_rate,weight=5,tune=FALSE) )
+moves.append( mvEllipticalSliceSamplingSimple(delta_log_fossilization_rate,weight=5,tune=FALSE) )
+
+# Swap moves to exchange adjacent delta,sigma pairs
+moves.append( mvHSRFIntervalSwap(delta_log_speciation_rate ,sigma_speciation_rate ,weight=5) )
+moves.append( mvHSRFIntervalSwap(delta_log_extinction_rate ,sigma_extinction_rate ,weight=5) )
+moves.append( mvHSRFIntervalSwap(delta_log_fossilization_rate ,sigma_fossilization_rate ,weight=5) )
+
+
+expected_number_of_mass_extinctions <- 1.0
+mix_p <- Probability(1.0 - expected_number_of_mass_extinctions/NUM_BREAKS)
+
+for (i in 1:NUM_BREAKS) {
+  mass_extinction_probabilities[i] ~ dnReversibleJumpMixture(0.0,dnBeta(18.0,2.0),mix_p)
+  moves.append( mvRJSwitch(mass_extinction_probabilities[i]) )
+  moves.append( mvSlideBactrian(mass_extinction_probabilities[i]) )
+}
+
+
+## this is the probability of sampling extant species at the present
+sampling_at_present <- 0/26
+
+timetree ~ dnFBDP(
+                  rootAge       = T.rootAge(),
+                  timeline      = interval_times,
+                  lambda        = speciation_rate,
+                  mu            = extinction_rate,
+                  phi           = fossilization_rate,
+                  Phi           = sampling_at_present,
+                  Mu            = mass_extinction_probabilities,
+                  condition     = "time",
+                  taxa          = taxa,
+                  initialTree   = T)
+
+### clamp the model with the "observed" tree
+timetree.clamp(T)
+
+
+
+#############
+# The Model #
+#############
+
+
+### workspace model wrapper ###
+mymodel = model(sampling_at_present)
+
+### set up the monitors that will output parameter values to file and screen
+monitors.append( mnModel(filename="output/EFBD_HSMRF.log",printgen=10, separator = TAB) )
+monitors.append( mnFile(filename="output/EFBD_HSMRF_speciation_rates.log",printgen=10, separator = TAB, speciation_rate) )
+monitors.append( mnFile(filename="output/EFBD_HSMRF_speciation_rate_times.log",printgen=10, separator = TAB, interval_times) )
+monitors.append( mnFile(filename="output/EFBD_HSMRF_extinction_rates.log",printgen=10, separator = TAB, extinction_rate) )
+monitors.append( mnFile(filename="output/EFBD_HSMRF_extinction_rate_times.log",printgen=10, separator = TAB, interval_times) )
+monitors.append( mnFile(filename="output/EFBD_HSMRF_fossilization_rates.log",printgen=10, separator = TAB, fossilization_rate) )
+monitors.append( mnFile(filename="output/EFBD_HSMRF_fossilization_rate_times.log",printgen=10, separator = TAB, interval_times) )
+monitors.append( mnFile(filename="output/EFBD_HSMRF_mass_extinction_probabilities.log",printgen=10, separator = TAB, mass_extinction_probabilities) )
+monitors.append( mnFile(filename="output/EFBD_HSMRF_mass_extinction_rate_times.log",printgen=10, separator = TAB, interval_times) )
+
+
+
+################
+# The Analysis #
+################
+
+### workspace mcmc ###
+mymcmc = mcmc(mymodel, monitors, moves, nruns=N_REPS, combine="mixed")
+
+### run the MCMC ###
+mymcmc.run(generations=NUM_MCMC_ITERATIONS, tuningInterval=200)
+
+
+## quit ##
+q()

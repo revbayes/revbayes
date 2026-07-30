@@ -9,10 +9,8 @@ all_args="$@"
 debug="false"
 mpi="false"
 cmd="false"
-help2yml="false"
+help2yml="true"
 boost_root=""
-boost_lib=""
-boost_include=""
 install_dir="$HOME/Applications/RevBayes"
 
 meson_args=""
@@ -26,10 +24,8 @@ while echo $1 | grep ^- > /dev/null; do
 -debug          <true|false>    : set to true to build in debug mode. Defaults to false.
 -mpi            <true|false>    : set to true if you want to build the MPI version. Defaults to false.
 -cmd            <true|false>    : set to true if you want to build RevStudio with GTK2+. Defaults to false.
--help2yml       <true|false>    : update the help database and build the YAML help generator. Defaults to false.
+-help2yml       <true|false>    : update the help database and build the YAML help generator. Defaults to true.
 -boost_root     string          : specify directory containing Boost headers (e.g. `/usr/include`). Defaults to unset.
--boost_lib      string          : specify directory containing Boost libraries. (e.g. `/usr/lib`). Defaults to unset.
--boost_include  string          : specify directory containing Boost libraries. (e.g. `/usr/include`). Defaults to unset.
 -install_dir    string          : defaults to ~/Applications/RevBayes
 -j              integer         : the number of threads to use when compiling RevBayes. Defaults to automatic.
 
@@ -38,7 +34,6 @@ You can also specify meson options as -Dvar1=value1 -Dvar2=value2
 Examples:
   ./build.sh -mpi true -help2yml true
   ./build.sh -boost_root /home/santa/installed-boost_1.72 -install_dir $HOME/local/RevBayes
-  ./build.sh -boost_include /home/santa/boost_1_72_0/ -boost_lib /home/santa/boost_1_72_0/stage/lib
   ./build.sh -mpi true -Dhelp2yml=true
   export BOOST_ROOT=/home/santa/installed-boost_1.72; ./build.sh'
         exit
@@ -201,17 +196,7 @@ then
     exit 1
 fi
 
-######### Generate help database
-if [ "$help2yml" = "true" ]
-then
-    (
-        cd ../../src
-        echo "Generating help database"
-        perl ../help/md2help.pl ../help/md/*.md > core/help/RbHelpDatabase.cpp
-    )
-fi
-
-######## Generate some files for meson
+######## Generate some files for meson (including help files)
 echo "Running './generate.sh' in $(pwd)"
 ./generate.sh
 echo
@@ -240,7 +225,7 @@ else
     mkdir "${BUILD_DIR}"
     ######### Actually run meson
     echo "Running 'meson ${BUILDDIR} ../.. $meson_args' in $(pwd)"
-    meson ${BUILD_DIR} ../.. $meson_args
+    meson setup ${BUILD_DIR} ../.. $meson_args
     echo
     echo "Running 'ninja -C ${BUILD_DIR} ${ninja_args}' in $(pwd)"
     ninja -C "${BUILD_DIR}" ${ninja_args}

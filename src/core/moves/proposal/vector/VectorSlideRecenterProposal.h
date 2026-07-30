@@ -31,14 +31,14 @@ template <class variableType> class StochasticNode;
     class VectorSlideRecenterProposal : public Proposal {
         
     public:
-        VectorSlideRecenterProposal(std::vector<StochasticNode<double> *> n, StochasticNode<double> *m, double l,  double p=0.23);                             //!< Constructor
+        VectorSlideRecenterProposal(std::vector<StochasticNode<double> *> n, StochasticNode<double> *m, double l,  double p=0.23);      //!< Constructor
         
         void                                        cleanProposal(void);                                                                //!< Clean up proposal
         VectorSlideRecenterProposal*                clone(void) const;                                                                  //!< Clone object
         double                                      doProposal(void);                                                                   //!< Perform proposal
         const std::string&                          getProposalName(void) const;                                                        //!< Get the name of the proposal for summary printing
         double                                      getProposalTuningParameter(void) const;
-        void                                        printParameterSummary(std::ostream &o, bool name_only) const;                                       //!< Print the parameter summary
+        void                                        printParameterSummary(std::ostream &o, bool name_only) const;                       //!< Print the parameter summary
         void                                        prepareProposal(void);                                                              //!< Prepare the proposal
         void                                        setProposalTuningParameter(double tp);
         void                                        tune(double r);                                                                     //!< Tune the proposal to achieve a better acceptance/rejection ratio
@@ -46,7 +46,7 @@ template <class variableType> class StochasticNode;
         
     protected:
         
-        void                                        swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes on which the Proposal is working on
+        void                                        swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes the Proposal is working on
         
         
     private:
@@ -56,7 +56,7 @@ template <class variableType> class StochasticNode;
         StochasticNode<double>                     *mean;
         double                                      lambda;                                                                             //!< The scale parameter of the Proposal (larger lambda -> larger proposals).
         size_t                                      length;
-        double                                      stored_sliding_factor;                                                                        //!< The stored value of the last modified element.
+        double                                      stored_sliding_factor;                                                              //!< The stored value of the last modified element.
         
         
     };

@@ -49,7 +49,7 @@ moves[++mvi] = mvScale(sigma, lambda=1.0, tune=true, weight=2.0)
 ##############
 
 
-psi <- readTrees( "data/Primates_tree.nex" )[1]
+psi <- readTrees( "data/primates_tree.nex" )[1]
 
 
 

@@ -146,23 +146,3 @@ void BinarySwitchProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
     variable = static_cast<StochasticNode<std::int64_t>* >(newN) ;
     
 }
-
-
-void BinarySwitchProposal::setProposalTuningParameter(double tp)
-{
-    // this proposal has no tuning parameter: nothing to do
-}
-
-
-/**
- * Tune the Proposal to accept the desired acceptance ratio.
- *
- * There is no tuning parameter here.
- */
-void BinarySwitchProposal::tune( double rate )
-{
-    
-    // no tuning parameter
-    
-}
-

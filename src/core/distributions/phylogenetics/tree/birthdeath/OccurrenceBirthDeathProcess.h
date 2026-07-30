@@ -67,10 +67,10 @@ namespace RevBayesCore {
         void                                                    checkVectorSizes(const TypedDagNode<RbVector<double> >* v1, const TypedDagNode<RbVector<double> >* v2, int v1_minus_v2, const std::string& param_name, bool is_rate) const;
         void                                                    expandNonGlobalRateParameterVector(std::vector<double> &par, const std::vector<double> &par_times) const; //!< Updates vector par such that it matches the global timeline
         void                                                    sortNonGlobalTimesAndVectorParameter(std::vector<double>& times, std::vector<double>& par) const;         //!< Sorts times to run from 0->inf, and orders par to match
-        bool                                                    isConstantRate(void) const;                                             //!< Checks if we have a constant-rate process
-        void                                                    sortGlobalTimesAndVectorParameter(void) const;                          //!< Sorts times to run from 0->inf, and orders ALL vector parameters to match
+        bool                                                    isConstantRate(void) const;                                            //!< Checks if we have a constant-rate process
+        void                                                    sortGlobalTimesAndVectorParameter(void) const;                         //!< Sorts times to run from 0->inf, and orders ALL vector parameters to match
 
-        double                                                  computeLnProbabilityDivergenceTimes(void) ;                            //!< Compute the log-transformed probability of the current value.
+        double                                                  computeLnProbabilityDivergenceTimes(void) const;                       //!< Compute the log-transformed probability of the current value.
         double                                                  computeLnProbabilityTimes(void) const;                                 //!< Compute the log-transformed probability of the current value.
         size_t                                                  findIndex(double t) const;                                             //!< Find the index so that times[index-1] < t < times[index]
         size_t                                                  findIndex(double t, const std::vector<double>& timeline) const;

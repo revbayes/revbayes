@@ -9,6 +9,7 @@
 #include "ModelVector.h"
 #include "Move_VectorFixedSingleElementSlide.h"
 #include "Natural.h"
+#include "Probability.h"
 #include "Real.h"
 #include "RealPos.h"
 #include "RevObject.h"
@@ -60,8 +61,11 @@ void Move_VectorFixedSingleElementSlide::constructInternalObject( void )
     RevBayesCore::StochasticNode<RevBayesCore::RbVector<double> > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::RbVector<double> > *>( tmp );
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
     size_t e = static_cast<const Natural &>( whichElement->getRevObject() ).getValue();
+    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
 
     RevBayesCore::Proposal *p = new RevBayesCore::VectorFixedSingleElementSlideProposal(n, l, e-1);
+    p->setTargetAcceptanceRate(tt);
+    
     value = new RevBayesCore::MetropolisHastingsMove(p, w, t);
 
 }

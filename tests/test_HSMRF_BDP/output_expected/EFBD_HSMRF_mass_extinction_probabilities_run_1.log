@@ -1,0 +1,4 @@
+Iteration	Posterior	Likelihood	Prior	mass_extinction_probabilities[1]	mass_extinction_probabilities[2]	mass_extinction_probabilities[3]	mass_extinction_probabilities[4]	mass_extinction_probabilities[5]	mass_extinction_probabilities[6]	mass_extinction_probabilities[7]	mass_extinction_probabilities[8]	mass_extinction_probabilities[9]
+0	-7332050	-719.035	-7331331	0	0	0	0	0.731588	0	0	0.894603	0
+10	-655.6214	-669.54	13.91856	0	0	0	0	0	0	0	0	0
+20	-663.7682	-670.9731	7.204942	0	0	0	0	0	0	0	0	0

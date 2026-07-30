@@ -144,6 +144,7 @@
 #include "Func_printSeed.h"
 #include "Func_profile.h"
 #include "Func_quit.h"
+#include "Func_stop.h"
 #include "Func_range.h"
 #include "Func_replicate.h"
 #include "Func_reverse.h"
@@ -216,6 +217,7 @@
 #include "Func_readAncestralStateTrace.h"
 #include "Func_readAtlas.h"
 #include "Func_readBranchLengthTrees.h"
+#include "Func_readCharacterHistory.h"
 #include "Func_readDelimitedCharacterData.h"
 #include "Func_readCharacterData.h"
 #include "Func_readContinuousCharacterData.h"
@@ -238,6 +240,7 @@
 #include "Func_writeDelimitedCharacterData.h"
 #include "Func_writeFasta.h"
 #include "Func_writeNexus.h"
+#include "Func_writePhylip.h"
 
 
 /* Math functions (in folder "functions/math") */
@@ -314,6 +317,7 @@ void RevLanguage::Workspace::initializeBasicGlobalWorkspace(void)
         addFunction( new Func_reverse<Real>()               );
         addFunction( new Func_reverse<Natural>()            );
         addFunction( new Func_reverse<RealPos>()            );
+        addFunction( new Func_reverse<Probability>()        );
         addFunction( new Func_reverse<RlString>()           );
         addFunction( new Func_reverse<RlBoolean>()          );
         addFunction( new Func_clear()                       );
@@ -332,9 +336,11 @@ void RevLanguage::Workspace::initializeBasicGlobalWorkspace(void)
         addFunction( new Func_printSeed()                   );
         addFunction( new Func_profile()                     );
         addFunction( new Func_quit()                        );
+        addFunction( new Func_stop()                        );
         addFunction( new Func_replicate<Integer>()          );
         addFunction( new Func_replicate<Real>()             );
         addFunction( new Func_replicate<Natural>()          );
+        addFunction( new Func_replicate<Probability>()      );
         addFunction( new Func_replicate<RealPos>()          );
         addFunction( new Func_replicate<RlString>()         );
         addFunction( new Func_replicate<RlBoolean>()        );
@@ -545,18 +551,19 @@ void RevLanguage::Workspace::initializeBasicGlobalWorkspace(void)
         addFunction( new Func_maxdiff()                                 );
         addFunction( new Func_mapTree()                                 );
         addFunction( new Func_mccTree()                                 );
-        addFunction( new Func_loadPlugin()                                 );
+        addFunction( new Func_loadPlugin()                              );
         addFunction( new Func_module()                                  );
         addFunction( new Func_readAncestralStateTreeTrace()             );
 		addFunction( new Func_readAncestralStateTrace()                 );
         addFunction( new Func_readAtlas()                               );
 		addFunction( new Func_readBranchLengthTrees()                   );
+        addFunction( new Func_readCharacterHistory()                    );
         addFunction( new Func_readContinuousCharacterData()             );
         addFunction( new Func_readDelimitedCharacterData()              );
         addFunction( new Func_readDelimitedDataFile()                   );
         addFunction( new Func_readDiscreteCharacterData()               );
 		addFunction( new Func_readDistanceMatrix()                      );
-        addFunction( new Func_readCharacterData()              );
+        addFunction( new Func_readCharacterData()                       );
         addFunction( new Func_readMatrix()                              );
         addFunction( new Func_readRelativeNodeAgeConstraints()          );
         addFunction( new Func_readRelativeNodeAgeWeightedConstraints()  );
@@ -573,6 +580,7 @@ void RevLanguage::Workspace::initializeBasicGlobalWorkspace(void)
         addFunction( new Func_writeDelimitedCharacterData()             );
         addFunction( new Func_writeFasta()                              );
         addFunction( new Func_writeNexus()                              );
+        addFunction( new Func_writePhylip()                             );
 
     }
     catch(RbException& rbException)

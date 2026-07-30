@@ -9,6 +9,7 @@
 #include "MetropolisHastingsMove.h"
 #include "Move_LevyJumpSum.h"
 #include "LevyJumpSumProposal.h"
+#include "Probability.h"
 #include "Real.h"
 #include "RealPos.h"
 #include "RevObject.h"
@@ -59,11 +60,13 @@ void Move_LevyJumpSum::constructInternalObject( void )
     RevBayesCore::TypedDagNode<double>* tmpsv2 = static_cast<const Real &>( slideDown->getRevObject() ).getDagNode();
     RevBayesCore::ContinuousStochasticNode *sv2 = static_cast<RevBayesCore::ContinuousStochasticNode *>( tmpsv2 );
     
-    
     bool tv = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
     
-    RevBayesCore::Proposal *p = new RevBayesCore::LevyJumpSumProposal(sv1, sv2,sf);
-    value = new RevBayesCore::MetropolisHastingsMove(p,w,tv);
+    RevBayesCore::Proposal *p = new RevBayesCore::LevyJumpSumProposal(sv1, sv2, sf);
+    p->setTargetAcceptanceRate(tt);
+    
+    value = new RevBayesCore::MetropolisHastingsMove(p, w, tv);
     
 }
 

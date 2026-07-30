@@ -1,0 +1,4 @@
+Iteration	Posterior	Likelihood	Prior	interval_times[1]	interval_times[2]	interval_times[3]	interval_times[4]	interval_times[5]	interval_times[6]	interval_times[7]	interval_times[8]	interval_times[9]
+0	-7332050	-719.035	-7331331	27.1733	43.3467	59.52	75.6933	91.8667	108.04	124.213	140.387	156.56
+10	-655.6214	-669.54	13.91856	27.1733	43.3467	59.52	75.6933	91.8667	108.04	124.213	140.387	156.56
+20	-663.7682	-670.9731	7.204942	27.1733	43.3467	59.52	75.6933	91.8667	108.04	124.213	140.387	156.56

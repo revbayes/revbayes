@@ -36,8 +36,8 @@ template <class variableType> class StochasticNode;
         DPPGibbsConcentrationMove(StochasticNode<double> *n, DeterministicNode<std::int64_t>* v, TypedDagNode< double >* gS, TypedDagNode< double >* gR, int ne, double w);                                                                      //!< Internal constructor
 		
         // Basic utility functions
-        DPPGibbsConcentrationMove*                              clone(void) const;                                                                  //!< Clone object
-        const std::string&                                      getMoveName(void) const;                                                            //!< Get the name of the move for summary printing
+        DPPGibbsConcentrationMove*                              clone(void) const;                                                                 //!< Clone object
+        const std::string&                                      getMoveName(void) const;                                                           //!< Get the name of the move for summary printing
 		
     protected:
         void													performGibbsMove(void);                                                            //!< Perform move
@@ -46,7 +46,7 @@ template <class variableType> class StochasticNode;
     private:
 		
         StochasticNode<double>*									variable;
-		DeterministicNode<std::int64_t>*								numCats;
+		DeterministicNode<std::int64_t>*					    numCats;
 		TypedDagNode< double >*									gammaShape;
 		TypedDagNode< double >*									gammaRate;
 		int														numElem;

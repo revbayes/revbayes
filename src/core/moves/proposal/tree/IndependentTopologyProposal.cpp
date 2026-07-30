@@ -353,20 +353,6 @@ void IndependentTopologyProposal::undoProposal( void )
 }
 
 
-void IndependentTopologyProposal::setProposalTuningParameter(double tp)
-{
-    // this proposal has no tuning parameter: nothing to do
-}
-
-
-/** Tune the proposal */
-void IndependentTopologyProposal::tune(double r)
-{
-    
-    // nothing to do
-}
-
-
 void IndependentTopologyProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     if( oldN == variable )

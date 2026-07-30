@@ -11,6 +11,7 @@
 #include "TypeSpec.h"
 #include "RlUserInterface.h"
 #include "RbHelpSystem.h"
+#include "RbHelpDatabase.h"
 #include "RbHelpRenderer.h"
 #include "ArgumentRules.h"
 #include "Procedure.h"
@@ -79,11 +80,22 @@ RevPtr<RevVariable> Func_help::execute( void )
     
         // Get some help
         RevBayesCore::RbHelpSystem& hs = RevBayesCore::RbHelpSystem::getHelpSystem();
+        RevBayesCore::RbHelpDatabase& hd = RevBayesCore::RbHelpDatabase::getHelpDatabase();
+        const std::string& help_title = hd.getHelpString(baseQuery, "name");
+        
         if ( hs.isHelpAvailableForQuery(baseQuery) )
         {
             const RevBayesCore::RbHelpEntry& h = hs.getHelp( baseQuery );
             RevBayesCore::HelpRenderer hRenderer;
             std::string hStr = hRenderer.renderHelp(h, RbSettings::userSettings().getLineWidth() - RevBayesCore::RbUtils::PAD.size());
+            UserInterface::userInterface().output("\n", true);
+            UserInterface::userInterface().output("\n", true);
+            UserInterface::userInterface().output(hStr, true);
+        }
+        else if ( not hs.isHelpAvailableForQuery(baseQuery) and help_title.size() > 0 )
+        {
+            RevBayesCore::HelpRenderer hRenderer;
+            std::string hStr = hRenderer.renderHelp(hd, baseQuery, RbSettings::userSettings().getLineWidth() - RevBayesCore::RbUtils::PAD.size());
             UserInterface::userInterface().output("\n", true);
             UserInterface::userInterface().output("\n", true);
             UserInterface::userInterface().output(hStr, true);

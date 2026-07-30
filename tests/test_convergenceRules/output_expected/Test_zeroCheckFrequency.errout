@@ -1,0 +1,16 @@
+   Error:	Argument or label mismatch for function call.
+   Arguments which could not be matched (we stopped after the first mismatch):
+   	
+   Provided call:
+   srMinESS (Natural<constant>,
+             String<constant> 'file',
+             Natural<constant> 'freq' )
+   
+   Correct usage is:
+   srMinESS (RealPos<any> minEss,
+             String<any> filename,
+             IntegerPos<any> frequency,
+             String<any> burninMethod {valid options: "ESS"|"SEM"|"fixed"},
+             Probability<any> burnin)
+   
+   Missing Variable:	Variable stopping_rules does not exist

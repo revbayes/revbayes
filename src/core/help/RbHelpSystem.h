@@ -34,6 +34,7 @@ namespace RevBayesCore {
         void                                        addHelpDistribution( RbHelpDistribution *h );
         void                                        addHelpFunction( RbHelpFunction *h );
         void                                        addHelpType( RbHelpType *h );
+        void                                        appendConstructors( RbHelpType *target, const RbHelpType *source );
         const std::set<std::string>&                getFunctionEntries(void) const;
         const std::set<std::string>&                getTypeEntries(void) const;
         const RbHelpEntry&                          getHelp(const std::string &qs);                                         //!< Format the help information for printing to the terminal

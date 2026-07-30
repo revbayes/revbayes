@@ -1,0 +1,13 @@
+## continue-on-error
+## print-commands
+x[0]
+x[1]
+
+x[-1] = -1
+x[0] = 0
+x[1] = 1
+x[2] = -2
+print(x)
+
+x[1.5]
+x[1.5] = 1

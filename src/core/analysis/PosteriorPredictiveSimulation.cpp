@@ -73,7 +73,8 @@ void RevBayesCore::PosteriorPredictiveSimulation::run( int thinning )
     // some general constant variables
     // this is where we need to implement the posterior predictive simulation
     
-    size_t n_samples = traces[0].size();
+    size_t burnin = traces[0].getBurnin();
+    size_t n_samples = traces[0].size() - burnin;
     size_t n_traces = traces.size();
         
     // build a map for the ancestral state trace labels -> tip indices
@@ -143,7 +144,7 @@ void RevBayesCore::PosteriorPredictiveSimulation::run( int thinning )
                 if ( the_node->getName() == parameter_name )
                 {
                     // set the value for the variable with the i-th sample
-                    the_node->setValueFromString( traces[j].objectAt( index_sample ) );
+                    the_node->setValueFromString( traces[j].objectAt( index_sample + burnin ) );
                 }
             }
         }

@@ -18,6 +18,7 @@
 #include "MatrixRealSingleElementScaleProposal.h"
 #include "MetropolisHastingsMove.h"
 #include "ModelVector.h"
+#include "Probability.h"
 #include "Real.h"
 #include "RealPos.h"
 #include "RevObject.h"
@@ -65,6 +66,7 @@ void Move_MatrixSingleElementScale::constructInternalObject( void )
     double l = static_cast<const RealPos &>( lambda->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
 
     RevBayesCore::Proposal *p = NULL;
 
@@ -72,19 +74,22 @@ void Move_MatrixSingleElementScale::constructInternalObject( void )
     {
         RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* tmp = static_cast<const MatrixReal &>( v->getRevObject() ).getDagNode();
         RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::MatrixReal> *>( tmp );
-        p = new RevBayesCore::MatrixRealSingleElementScaleProposal(n,l, v->getRevObject().isType( MatrixRealSymmetric::getClassTypeSpec() ) );
+        p = new RevBayesCore::MatrixRealSingleElementScaleProposal(n, l, v->getRevObject().isType( MatrixRealSymmetric::getClassTypeSpec() ) );
+        p->setTargetAcceptanceRate(tt);
     }
     else if (v->getRevObject().isType( ModelVector<ModelVector<RealPos> >::getClassTypeSpec() ))
     {
         RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* tmp = static_cast<const ModelVector<ModelVector<RealPos> > &>( v->getRevObject() ).getDagNode();
         RevBayesCore::StochasticNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > > *>( tmp );
-        p = new RevBayesCore::MatrixRealSingleElementScaleProposal(n,l);
+        p = new RevBayesCore::MatrixRealSingleElementScaleProposal(n, l);
+        p->setTargetAcceptanceRate(tt);
     }
     else if (v->getRevObject().isType( ModelVector<ModelVector<Real> >::getClassTypeSpec() ))
     {
         RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* tmp = static_cast<const ModelVector<ModelVector<Real> > &>( v->getRevObject() ).getDagNode();
         RevBayesCore::StochasticNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > > *>( tmp );
-        p = new RevBayesCore::MatrixRealSingleElementScaleProposal(n,l);
+        p = new RevBayesCore::MatrixRealSingleElementScaleProposal(n, l);
+        p->setTargetAcceptanceRate(tt);
     }
     
     long rval = static_cast<const Natural &>( row->getRevObject() ).getValue();

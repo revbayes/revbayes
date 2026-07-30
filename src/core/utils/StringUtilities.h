@@ -38,6 +38,7 @@ namespace StringUtilities {
     bool                        isFormattingChar(char c) ;
     bool                        isIntegerNumber(const std::string& s);                                              //!< Checks if a string is an integer number
     bool                        isNumber(const std::string& s);                                                     //!< Checks if a string is a number
+    bool                        naturalSort(const std::string& a, const std::string& b);                            //!< Sort strings in natural order (i.e., with digits compared numerically)
     std::string                 oneLiner(const std::string& input, size_t maxLen);                                  //!< Get a one-liner of specified length
     void                        replaceSubstring(std::string& str, const std::string& oldStr, const std::string& newStr);
     void                        replaceAllOccurrences(std::string& str, char old_ch, char new_ch);

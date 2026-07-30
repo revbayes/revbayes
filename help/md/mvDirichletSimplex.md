@@ -11,12 +11,11 @@ Then, the proposal draws a new simplex `u ~ Dirichlet(val[index] * alpha)`, wher
 The new value is set to `u`.
 The simplex is then renormalized.
 
+Usage examples can be found at https://revbayes.github.io/tutorials/morph_tree/V2.html and https://revbayes.github.io/tutorials/morph_ase/ase_free.html
 ## details
 ## authors
 ## see_also
-- mvBetaSimplex
-- mvElementSwapSimplex
-
+mvBetaSimplex
+mvElementSwapSimplex
 ## example
-Usage examples can be found at https://revbayes.github.io/tutorials/morph_tree/V2.html and https://revbayes.github.io/tutorials/morph_ase/ase_free.html
 ## references

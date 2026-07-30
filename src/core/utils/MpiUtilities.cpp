@@ -4,6 +4,7 @@
 #include "RandomNumberGenerator.h"
 #include "RbConstants.h"
 
+#include <cstdio>
 #include <iostream>
 #include <sstream>
 
@@ -15,9 +16,13 @@ void RevBayesCore::MpiUtilities::DebugWait(int rank)
 {
     
 #ifdef RB_MPI
-    char	a;
+    char	a = '\0';
     if (rank == 0) {
-    	scanf("%c", &a);
+        if ( std::scanf("%c", &a) != 1 )
+        {
+            // EOF or read error: still broadcast a defined byte so other ranks do not hang on garbage
+            a = '\0';
+        }
     	printf("%d: Starting now\n", rank);
     }
     

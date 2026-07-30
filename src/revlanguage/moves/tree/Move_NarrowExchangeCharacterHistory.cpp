@@ -176,9 +176,15 @@ const MemberRules& Move_NarrowExchangeCharacterHistory::getParameterRules(void) 
         memberRules.push_back( new ArgumentRule( "ctmc", AbstractHomologousDiscreteCharacterData::getClassTypeSpec(), "The ctmc.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::STOCHASTIC ) );
         memberRules.push_back( new ArgumentRule( "qmap", RateGenerator::getClassTypeSpec(), "The rate matrix.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
-        /* Inherit weight from Move, put it after variable */
+        /* Inherit weight (but not tuneTarget!) from Move and put it after the arguments created above */
         const MemberRules& inheritedRules = Move::getParameterRules();
-        memberRules.insert( memberRules.end(), inheritedRules.begin(), inheritedRules.end() );
+        for (size_t i = 0; i < inheritedRules.size(); ++i)
+        {
+            if ( inheritedRules[i].getArgumentLabel() == "weight" )
+            {
+                memberRules.push_back( inheritedRules[i].clone() );
+            }
+        }
 
         rules_set = true;
     }

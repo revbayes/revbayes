@@ -1,11 +1,11 @@
-cmake_minimum_required(VERSION 3.5.1)
+cmake_minimum_required(VERSION 3.10.2)
 project(RevBayes)
 
 # Consider:
 # -Wno-sign-compare
 # -D_GLIBCXX_DEBUG
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 23)
 
 
 

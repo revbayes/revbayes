@@ -59,7 +59,7 @@ namespace RevBayesCore {
 
     protected:
     
-        void                                        sortNodesByName(void);  //!< Sort the nodes by name
+        void                                        sortNodesByName(bool natural=false);  //!< Sort the nodes by name
         
         // parameters
         bool                                        enabled; //!< is the monitor enabled

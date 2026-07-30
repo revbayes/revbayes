@@ -1,0 +1,71 @@
+################################################################################
+#
+# RevBayes Test-Script: Checking that the return type of functions operating on
+#                       vectors is determined by the type of the vector entries
+#
+#
+# authors: David Cerny
+#
+################################################################################
+
+seed(12345)
+
+
+real_vec <- [1.414, -2.718, 3.142]
+real_vec
+print("This vector is of type " + type(real_vec))
+print("The maximum is " + max(real_vec) + " and is of type " + type( max(real_vec) ))
+print("The minimum is " + min(real_vec) + " and is of type " + type( min(real_vec) ))
+print("The sum is " + sum(real_vec) + " and is of type " + type( sum(real_vec) ))
+print("The median is " + median(real_vec) + " and is of type " + type( median(real_vec) ) + "\n")
+
+real_pos_vec <- [1.414, 2.718, 3.142]
+real_pos_vec
+print("This vector is of type " + type(real_pos_vec))
+print("The maximum is " + max(real_pos_vec) + " and is of type " + type( max(real_pos_vec) ))
+print("The minimum is " + min(real_pos_vec) + " and is of type " + type( min(real_pos_vec) ))
+print("The sum is " + sum(real_pos_vec) + " and is of type " + type( sum(real_pos_vec) ))
+print("The median is " + median(real_pos_vec) + " and is of type " + type( median(real_pos_vec) ) + "\n")
+
+integer_vec <- [1, -42, 69, -420]
+integer_vec
+print("This vector is of type " + type(integer_vec))
+print("The maximum is " + max(integer_vec) + " and is of type " + type( max(integer_vec) ))
+print("The minimum is " + min(integer_vec) + " and is of type " + type( min(integer_vec) ))
+print("The sum is " + sum(integer_vec) + " and is of type " + type( sum(integer_vec) ))
+print("The median is " + median(integer_vec) + " and is of type " + type( median(integer_vec) ) + "\n")
+
+natural_vec <- [1, 42, 69, 420]
+natural_vec
+print("This vector is of type " + type(natural_vec))
+print("The maximum is " + max(natural_vec) + " and is of type " + type( max(natural_vec) ))
+print("The minimum is " + min(natural_vec) + " and is of type " + type( min(natural_vec) ))
+print("The sum is " + sum(natural_vec) + " and is of type " + type( sum(natural_vec) ))
+print("The median is " + median(natural_vec) + " and is of type " + type( median(natural_vec) ) + "\n")
+
+probability_vec <- [0.1, 0.3, 0.4, 0.9]
+probability_vec
+print("This vector is of type " + type(probability_vec))
+print("The maximum is " + max(probability_vec) + " and is of type " + type( max(probability_vec) ))
+print("The minimum is " + min(probability_vec) + " and is of type " + type( min(probability_vec) ))
+print("The sum is " + sum(probability_vec) + " and is of type " + type( sum(probability_vec) ))
+print("The median is " + median(probability_vec) + " and is of type " + type( median(probability_vec) ) + "\n")
+
+# Generate a random tree for 5 taxa
+taxa <- [taxon("A"), taxon("B"), taxon("C"), taxon("D"), taxon("E")]
+tree ~ dnUniformTopologyBranchLength(taxa, dnExp(10))
+
+# Get the corresponding distance matrix
+DM := fnTreePairwiseDistances(tree)
+
+# Extract the underlying MatrixReal object
+real_mat = DM.matrix()
+real_mat
+print("This matrix is of type " + type(real_mat))
+print("The maximum is " + max(real_mat) + " and is of type " + type( max(real_mat) ))
+print("The minimum is " + min(real_mat) + " and is of type " + type( min(real_mat) ))
+print("The sum is " + sum(real_mat) + " and is of type " + type( sum(real_mat) ))
+
+clear()
+
+q()

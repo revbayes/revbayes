@@ -10,6 +10,7 @@
 #include "Move_UpDownTreeScale.h"
 #include "UpDownScaleProposal.h"
 #include "RbException.h"
+#include "Probability.h"
 #include "RealPos.h"
 #include "RevObject.h"
 #include "RlBoolean.h"
@@ -139,11 +140,15 @@ void Move_UpDownTreeScale::constructInternalObject( void )
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
     
     // finally create the internal move object
     RevBayesCore::UpDownScaleProposal *prop = new RevBayesCore::UpDownScaleProposal(l);
     
-    value = new RevBayesCore::MetropolisHastingsMove(prop,w,t);
+    // set the target acceptance rate after construction
+    prop->setTargetAcceptanceRate(tt);
+    
+    value = new RevBayesCore::MetropolisHastingsMove(prop, w, t);
     
 }
 

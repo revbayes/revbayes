@@ -1,0 +1,129 @@
+################################################################################
+#
+# RevBayes Test-Script: Check that we can initialize a nonclock tree analysis
+#                       enforcing a multifurcating backbone tree that includes
+#                       all of the analyzed taxa
+#
+#
+# authors: David Cerny
+#
+################################################################################
+
+seed(12345)
+
+# The dataset used here comes from Pol et al. (2024), Cladistics 40(3): 307-356.
+# The paper shows that nonclock analyses favor the Abelisauroidea topology and clock
+# analyses favor the Etrigansauria topology, so we will enforce Etrigansauria in the
+# nonclock analysis.
+
+#######################
+# Reading in the data #
+#######################
+
+# Load the matrix
+morpho <- readDiscreteCharacterData("data/ceratosauria_morphology.nex")
+
+species <- morpho.taxa()
+n_taxa <- morpho.ntaxa()
+
+moves = VectorMoves()
+monitors = VectorMonitors()
+
+###############################
+# Topology and branch lengths #
+###############################
+
+# Define a tree distribution (uniform over topologies, exponentially distributed
+# branch lengths)
+
+tree_dist = dnUniformTopologyBranchLength(species, branchLengthDistribution=dnExp(10))
+
+# Read in the backbone tree
+backbone_tree = readTrees("data/etrigansauria_backbone_complete_multifurcating.tre", treetype="non-clock")[1]
+
+# Impose the constraint
+psi ~ dnConstrainedTopology(tree_dist, backbone=backbone_tree)
+
+# We need 2n - 3 for an unrooted tree
+n_branches := 2 * n_taxa - 3
+
+# Moves
+moves.append( mvNNI(psi, weight=n_branches/2.0) )
+moves.append( mvSPR(psi, weight=n_branches/10.0) )
+moves.append( mvBranchLengthScale(psi, weight=n_branches) )
+
+##############################################
+# Substitution and rate heterogeneity models #
+##############################################
+
+n_max_states = 4
+
+# Delete constant characters
+inv_ix = morpho.getInvariantSiteIndices(excludeAmbiguous=TRUE)
+morpho.excludeCharacter( inv_ix )
+morpho.removeExcludedCharacters()
+
+ordered_vect = [28, 29, 33, 100, 102, 123, 139, 148, 152, 160, 166, 177, 180, 192]
+
+unord <- morpho
+unord.excludeCharacter(ordered_vect)
+
+order <- morpho
+order.excludeCharacter(1:morpho.nchar()) # Exclude everything at first
+order.includeCharacter(ordered_vect)     # Include only the ordered characters
+
+# Discretized gamma distribution of rates across sites
+alpha ~ dnUniform(0, 1E6)
+moves.append( mvScale(alpha, weight=9.0) )
+char_rates := fnDiscretizeGamma(alpha, alpha, 4)
+
+idx = 1
+
+for (i in 2:n_max_states) {
+    unordered[i - 1] <- unord
+    unordered[i - 1].setNumStatesPartition(i)
+    nc = unordered[i - 1].nchar()
+    if (nc > 0) {
+        Qu[idx] <- fnJC(i)
+        unord_ctmc[idx] ~ dnPhyloCTMC(tree=psi, Q=Qu[idx], siteRates=char_rates,
+                                      type="Standard", coding="variable")
+        unord_ctmc[idx].clamp(unordered[i - 1])
+        idx = idx + 1
+    }
+}
+
+ix = 1
+
+for (i in 3:n_max_states) {
+    ordered[i - 2] <- order
+    ordered[i - 2].setNumStatesPartition(i)
+    nco = ordered[i - 2].nchar()
+    if (nco > 0) {
+        Qo[ix] <- fnOrderedRateMatrix(i, lambda=1, mu=1)
+        order_ctmc[ix] ~ dnPhyloCTMC(tree=psi, Q=Qo[ix], siteRates=char_rates,
+                                     type="Standard", coding="variable")
+        order_ctmc[ix].clamp(ordered[i - 2])
+        ix = ix + 1
+    }
+}
+
+############
+# Analysis #
+############
+
+# Initialize the model object
+mymodel = model(psi)
+
+# Add monitors
+monitors.append( mnModel(filename="output/backbone_multifurcating_branchlengthtree.log", printgen=10) )
+monitors.append( mnFile(filename="output/backbone_multifurcating_branchlengthtree.trees", printgen=10, psi) )
+
+# Create the workspace variable that defines an MCMC run
+mymcmc = mcmc(mymodel, monitors, moves)
+
+# Run the analysis
+mymcmc.burnin(generations=100, tuningInterval=5)
+mymcmc.run(generations=200)
+
+clear()
+q()

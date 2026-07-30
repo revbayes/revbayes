@@ -12,6 +12,7 @@
 #include "RandomNumberGenerator.h"
 #include "RbConstants.h"
 #include "RbException.h"
+#include "RbMathLogic.h"
 #include "TopologyNode.h"
 #include "RbBitSet.h"
 #include "TimeInterval.h"
@@ -161,6 +162,28 @@ UniformTopologyBranchLengthDistribution& UniformTopologyBranchLengthDistribution
     }
 
     return *this;
+}
+
+
+void UniformTopologyBranchLengthDistribution::assignBranchLengths(Tree &psi)
+{
+    for (size_t i = 0; i < psi.getNumberOfNodes(); ++i)
+    {
+        TopologyNode &node = psi.getNode(i);
+        if ( node.isRoot() )
+        {
+            continue;
+        }
+        
+        double bl = node.getBranchLength();
+        
+        // each branch length that is NaN or nonpositive is reset to an independent draw from the prior
+        if ( RbMath::isNan(bl) || bl <= 0.0 )
+        {
+            branch_length_prior->redrawValue();
+            node.setBranchLength( branch_length_prior->getValue() );
+        }
+    }
 }
 
 

@@ -17,7 +17,7 @@ Let _n_ be the number of categories.
 If `median = TRUE`, the quantile function is performed at the midpoint of each category.  Call this vector _q_.
 _q_ is then normalized by dividing against its sum, so its elements sum to one; then multiplied by a factor _n_ * _alpha) / (_alpha_ + _beta_).
 
-The computation to obtain the mean for each category, when `median = FALSE`, is more complex, making use of the incomplete beta function ( Majumder & Bhattacharjee 1973).
+The computation to obtain the mean for each category, when `median = FALSE`, is more complex, making use of the incomplete beta function (Majumder & Bhattacharjee 1973).
 
 A real-world use case is available in Wright et al. (2016), with discussion of the properties of the beta distribution. Corresponding tutorials are available at https://www.palass.org/sites/default/files/media/publications/newsletters/number_106/number_106_0.pdf and https://revbayes.github.io/tutorials/morph_tree/V2.html.
 
@@ -32,10 +32,9 @@ A translation of `fnDiscretizeBeta` into R is available at https://gist.github.c
     print(categories)
 ## references
 
-- citation: Majumder & Bhattacharjee. 1973. Algorithm AS63. Applied Statistics, 22.
-  doi: NULL
-  url: NULL
-
-- citation: WRIGHT, A. M., LLOYD, G. T. and HILLIS, D. H. 2016. Modeling character change heterogeneity in phylogenetic analyses of morphology through the use of priors. _Systematic Biology_, 65, 602–11.
+- citation: Majumder KL, Bhattacharjee GP (1973). Algorithm AS 63: The incomplete beta integral. Applied Statistics, 22(3):409--411.
+  doi: 10.2307/2346797
+  url: https://www.jstor.org/stable/2346797
+- citation: Wright AM, Lloyd GT, Hillis DM (2016). Modeling character change heterogeneity in phylogenetic analyses of morphology through the use of priors. Systematic Biology, 65(4):602--611.
   doi: 10.1093/sysbio/syv122
   url: https://doi.org/10.1093/sysbio/syv122

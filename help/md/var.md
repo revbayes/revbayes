@@ -9,7 +9,7 @@ This function accepts a vector of real numbers and returns the variance.
 This a measure of how the data points deviate from the mean which is calculated
 as follows:
 
-s² = (1 / (n - 1)) * Σ (x[i] - x̄)² 
+s^2 = (1 / (n - 1)) * \sum (x[i] - \bar{x})^2
 
 which is essentially:
 (sum of squared differences from the mean) / (n - 1)

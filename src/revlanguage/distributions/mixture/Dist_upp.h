@@ -89,6 +89,8 @@ template <typename valType>
 RevBayesCore::UniformPartitioningDistribution<typename valType::valueType>* RevLanguage::Dist_upp<valType>::createDistribution( void ) const
 {
 	
+    throw RbException("Uniform partitioning distribution currently disabled due to invalid calculations.");
+    
     // get the parameters
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<typename valType::valueType> >* v   = static_cast<const ModelVector<valType> &>( values->getRevObject() ).getDagNode();
     bool iz = static_cast<const RlBoolean &>(include_zero->getRevObject()).getValue();

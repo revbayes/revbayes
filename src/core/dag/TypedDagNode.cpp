@@ -1,5 +1,6 @@
 #include "TypedDagNode.h"
 
+#include "MatrixReal.h"
 #include "NexusWriter.h"
 #include "RbSettings.h"
 #include "RbUtil.h"
@@ -80,6 +81,59 @@ template<>
 bool TypedDagNode<Simplex>::isSimpleNumeric(void) const
 {
     return true;
+}
+
+/* This is requirement of printing in mnModel.
+ * MatrixReal can be flatten as simple numeric so here return true.
+ * Same behavior with Simplex and RbVector.*/
+template<>
+bool TypedDagNode<MatrixReal>::isSimpleNumeric(void) const
+{
+    return true;
+}
+
+template<>
+size_t TypedDagNode<MatrixReal>::getNumberOfElements(void) const
+{
+    return getValue().getNumberOfRows() * getValue().getNumberOfColumns();
+}
+
+template<>
+void TypedDagNode<MatrixReal>::printName(std::ostream &o, const std::string &sep, int l, bool left, bool flattenMatrix) const
+{
+    if (flattenMatrix)
+    {
+        bool first = true;
+        for (size_t i = 0; i < getValue().getNumberOfRows(); ++i)
+        {
+            for (size_t j = 0; j < getValue().getNumberOfColumns(); ++j)
+            {
+                if (!first)
+                {
+                    o << sep;
+                }
+                first = false;
+
+                std::stringstream ss;
+                ss << getName() << "[" << (i + 1) << "][" << (j + 1) << "]";
+                std::string n = ss.str();
+                if (l > 0)
+                {
+                    StringUtilities::formatFixedWidth(n, l, left);
+                }
+                o << n;
+            }
+        }
+    }
+    else
+    {
+        std::string n = getName();
+        if (l > 0)
+        {
+            StringUtilities::formatFixedWidth(n, l, left);
+        }
+        o << n;
+    }
 }
     
 ////////////////

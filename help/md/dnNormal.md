@@ -3,7 +3,7 @@ dnNormal
 ## title
 Normal Distribution
 ## description
-Normal (gaussian) distribution with mean equal to ‘mean’ and standard deviation equal to ‘sd’.
+Normal (gaussian) distribution with mean equal to `mean` and standard deviation equal to `sd`.
 ## details
 The normal distribution has density:
 

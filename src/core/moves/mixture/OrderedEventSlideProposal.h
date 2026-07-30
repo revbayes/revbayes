@@ -14,7 +14,7 @@ namespace RevBayesCore {
     class OrderedEventSlideProposal : public Proposal {
         
     public:
-        OrderedEventSlideProposal( StochasticNode< OrderedEvents<valueType> > *n, double d=0.1 );                                                                    //!<  constructor
+        OrderedEventSlideProposal( StochasticNode< OrderedEvents<valueType> > *n, double d=0.1 );                                                                    //!< Constructor
         
         // Basic utility functions
         void                                cleanProposal(void);                                                                //!< Clean up proposal
@@ -23,20 +23,20 @@ namespace RevBayesCore {
         const std::string&                  getProposalName(void) const;                                                        //!< Get the name of the proposal for summary printing
         double                              getProposalTuningParameter(void) const;
         void                                prepareProposal(void);                                                              //!< Prepare the proposal
-        void                                printParameterSummary(std::ostream &o, bool name_only) const;                                       //!< Print the parameter summary
+        void                                printParameterSummary(std::ostream &o, bool name_only) const;                       //!< Print the parameter summary
         void                                setProposalTuningParameter(double tp);
         void                                tune(double r);                                                                     //!< Tune the proposal to achieve a better acceptance/rejection ratio
         void                                undoProposal(void);                                                                 //!< Reject the proposal
         
     protected:
         
-        void                                swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes on which the Proposal is working on
+        void                                swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes the Proposal is working on
         
         
     private:
 
         // parameters
-        StochasticNode< OrderedEvents<valueType> >*        variable;                                                                           //!< The variable the Proposal is working on
+        StochasticNode< OrderedEvents<valueType> >*        variable;                                                            //!< The variable the Proposal is working on
         double                                             delta;
         valueType                                          old_value;
         double                                             event_time;
@@ -246,8 +246,7 @@ void RevBayesCore::OrderedEventSlideProposal<valueType>::swapNodeInternal(DagNod
 template <class valueType>
 void RevBayesCore::OrderedEventSlideProposal<valueType>::setProposalTuningParameter(double tp)
 {
-    // this proposal has no tuning parameter: nothing to do
-	delta = tp;
+    delta = tp;
 }
 
 

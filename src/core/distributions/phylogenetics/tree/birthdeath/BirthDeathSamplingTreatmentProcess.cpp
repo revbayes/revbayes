@@ -71,10 +71,9 @@ BirthDeathSamplingTreatmentProcess::BirthDeathSamplingTreatmentProcess(const Typ
     interval_times_extinction(extinction_timeline),
     interval_times_sampling(sampling_timeline),
     interval_times_treatment(treatment_timeline),
-    interval_times_event_speciation(event_sampling_timeline),
+    interval_times_event_speciation(event_speciation_timeline),
     interval_times_event_extinction(event_extinction_timeline),
     interval_times_event_sampling(event_sampling_timeline),
-    offset( 0.0 ),
     taxa(tn),
     age_check_precision(age_check_precision)
 {
@@ -117,6 +116,18 @@ BirthDeathSamplingTreatmentProcess::BirthDeathSamplingTreatmentProcess(const Typ
     }
 
     addParameter( interval_times_global );
+    
+    // addParameter() is safe to use even if the argument is NULL. We also don't need dynamic_cast here, since
+    // the timeline parameters already are RbVector's wrapped in TypedDagNode's. Finally, the sorting that we
+    // perform above for the global timeline should be handled for the parameter-specific timelines by
+    // prepareTimeline(), which we call below.
+    addParameter( interval_times_speciation );
+    addParameter( interval_times_extinction );
+    addParameter( interval_times_sampling );
+    addParameter( interval_times_treatment );
+    addParameter( interval_times_event_speciation );
+    addParameter( interval_times_event_extinction );
+    addParameter( interval_times_event_sampling );
 
     heterogeneous_lambda = dynamic_cast<const TypedDagNode<RbVector<double> >*>(in_speciation);
     homogeneous_lambda   = dynamic_cast<const TypedDagNode<double >*>(in_speciation);
@@ -159,8 +170,6 @@ BirthDeathSamplingTreatmentProcess::BirthDeathSamplingTreatmentProcess(const Typ
     heterogeneous_R = dynamic_cast<const TypedDagNode<RbVector<double> >*>(in_event_treatment);
 
     addParameter( heterogeneous_R );
-
-    //TODO: should check that the first interval time is not less than the first tip in offset computation
 
     //TODO: returning neginf and nan are not currently consistently used for different issues with invalid values.
 
@@ -228,9 +237,9 @@ void BirthDeathSamplingTreatmentProcess::addTimesToGlobalTimeline(std::set<doubl
   if ( par_times != NULL )
   {
       const std::vector<double>& times = par_times->getValue();
-      for (std::vector<double>::const_iterator it = times.begin(); it != times.end(); ++it)
+      for (size_t i = 0; i < times.size(); ++i)
       {
-          event_times.insert( *it );
+          event_times.insert( times[i] );
       }
   }
 
@@ -410,6 +419,18 @@ double BirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( void ) con
                 
             }
             lnProbTimes += ln_sampling_event_prob;
+        }
+        // make sure that the sampling probability at the present was > 0 if there are samples at the present
+        else if ( i == 0 && global_timeline[0] < DBL_EPSILON )
+        {
+            // get the number of samples at present
+            int T_i = int(event_tip_ages[0].size());
+            
+            if ( T_i > 0 )
+            {
+                return RbConstants::Double::neginf;
+            }
+            
         }
     }
 
@@ -615,17 +636,9 @@ bool BirthDeathSamplingTreatmentProcess::countAllNodes(void) const
       }
       else if ( n.isTip() && !n.isFossil() )
       {
-          // Node is at present, this can happen even if Phi[0] = 0, so we check if there is really a sampling event at the present
-          if (phi_event[0] >= DBL_EPSILON)
-          {
-              // node is extant leaf
-              num_extant_taxa++;
-              event_tip_ages[0].push_back(0.0);
-          }
-          else
-          {
-              serial_tip_ages.push_back(0.0);
-          }
+          // node is extant leaf
+          num_extant_taxa++;
+          event_tip_ages[0].push_back(0.0);
       }
       else if ( n.isInternal() && !n.getChild(0).isSampledAncestorTip() && !n.getChild(1).isSampledAncestorTip() )
       {
@@ -769,40 +782,7 @@ size_t BirthDeathSamplingTreatmentProcess::findIndex(double t, const std::vector
     }
 }
 
-// calculate offset so we can set t_0 to time of most recent tip
-void BirthDeathSamplingTreatmentProcess::getOffset(void) const
-{
-    // On first pass, there is no tree, so we can't loop over nodes
-    // Get taxon ages directly from taxa instead
-    if ( value->getNumberOfNodes() == 0 )
-    {
-        offset = RbConstants::Double::max;
-        for (size_t i = 0; i < taxa.size(); i++)
-        {
-            const Taxon& n = taxa[i];
 
-            if ( n.getAge() < offset )
-            {
-                offset = n.getAge();
-            }
-        }
-    }
-    // On later passes we have the tree, to avoid any issues with tree and taxon age mismatch, get ages from tree
-    else
-    {
-        offset = RbConstants::Double::max;
-        for (size_t i = 0; i < value->getNumberOfNodes(); i++)
-        {
-            const TopologyNode& n = value->getNode( i );
-
-            if ( n.getAge() < offset )
-            {
-                offset = n.getAge();
-            }
-        }
-    }
-
-}
 
 bool BirthDeathSamplingTreatmentProcess::isConstantRate(void) const
 {
@@ -881,9 +861,9 @@ void BirthDeathSamplingTreatmentProcess::expandNonGlobalProbabilityParameterVect
     for (size_t i=0; i<global_timeline.size(); ++i)
     {
         bool global_time_is_variable_time = false;
-        for (size_t j=0; i<par_times.size(); ++j)
+        for (size_t j=0; j<par_times.size(); ++j)
         {
-            if ( fabs(par_times[j] - global_timeline[j]) < DBL_EPSILON )
+            if ( fabs(par_times[j] - global_timeline[i]) < DBL_EPSILON )
             {
                 // time is in variable's timeline
                 par[i] = old_par[j];
@@ -912,11 +892,12 @@ void BirthDeathSamplingTreatmentProcess::expandNonGlobalRateParameterVector(std:
     std::vector<double> old_par = par;
 
     // For each time in the global timeline, find the rate according to this variable's own timeline
+    par.clear();
     for (size_t i=0; i<global_timeline.size(); ++i)
     {
       // Where is this global time interval in the variable's timeline?
       size_t idx = findIndex(global_timeline[i],par_times);
-      par[i] = old_par[idx];
+      par.push_back( old_par[idx] );
     }
 
 }
@@ -1298,23 +1279,24 @@ void BirthDeathSamplingTreatmentProcess::prepareTimeline( void ) const
 
         // now we start assembling the global timeline by finding the union of unique intervals for all parameters
         std::set<double> event_times;
-        addTimesToGlobalTimeline(event_times,interval_times_speciation);
-        addTimesToGlobalTimeline(event_times,interval_times_extinction);
-        addTimesToGlobalTimeline(event_times,interval_times_sampling);
-        addTimesToGlobalTimeline(event_times,interval_times_treatment);
-        addTimesToGlobalTimeline(event_times,interval_times_event_speciation);
-        addTimesToGlobalTimeline(event_times,interval_times_event_extinction);
-        addTimesToGlobalTimeline(event_times,interval_times_event_sampling);
+        addTimesToGlobalTimeline(event_times, interval_times_speciation);
+        addTimesToGlobalTimeline(event_times, interval_times_extinction);
+        addTimesToGlobalTimeline(event_times, interval_times_sampling);
+        addTimesToGlobalTimeline(event_times, interval_times_treatment);
+        addTimesToGlobalTimeline(event_times, interval_times_event_speciation);
+        addTimesToGlobalTimeline(event_times, interval_times_event_extinction);
+        addTimesToGlobalTimeline(event_times, interval_times_event_sampling);
+        
+        for (auto it : event_times) {
+            global_timeline.push_back( it );
+        }
 
-
-        // we are done with setting up the timeline (i.e., using the all the provided timeline) and checking all dimension of parameters
+        // we are done with setting up the timeline (i.e., using all the provided timelines) and checking all dimensions of parameters
 
     }
 
-    // @TODO: @ANDY: Double check the offset works
-    // Add s_0
-    getOffset();
-    global_timeline.insert(global_timeline.begin(),offset);
+    // Add the present time to our timeline
+    global_timeline.insert(global_timeline.begin(), 0.0);
 
     // For each parameter vector, we now make sure that its size matches the size of the global vector
     // For a RATE parameter, there are three cases
@@ -1444,7 +1426,7 @@ void BirthDeathSamplingTreatmentProcess::prepareTimeline( void ) const
         }
     }
 
-    // Get vector of burst death (mass extinction) probabilities
+    // Get vector of burst speciation probabilities
     // For R, the cases are as follows
     //     1) It is a vector and it is of length phi_event.size() - 1, in which case we simply add R[0] = 0.0 and we can move on
     //     2) It is a vector and it DOES NOT match the size of the global timeline, in which case we must expand it to match
@@ -1649,7 +1631,9 @@ int BirthDeathSamplingTreatmentProcess::survivors(double t) const
             return 0;
         }
         survivors = 1;
-    } else {
+    }
+    else
+    {
         if ( t > value->getRoot().getAge() )
         {
             return 0;
@@ -1657,14 +1641,16 @@ int BirthDeathSamplingTreatmentProcess::survivors(double t) const
         survivors = 2;
     }
 
-    for (size_t i=0; i<serial_bifurcation_times.size(); ++i) {
+    for (size_t i=0; i<serial_bifurcation_times.size(); ++i)
+    {
         if (t < serial_bifurcation_times[i])
         {
             survivors++;
         }
     }
 
-    for (size_t i=0; i<serial_tip_ages.size(); ++i) {
+    for (size_t i=0; i<serial_tip_ages.size(); ++i)
+    {
         if (t < serial_tip_ages[i])
         {
             survivors--;
@@ -1674,10 +1660,12 @@ int BirthDeathSamplingTreatmentProcess::survivors(double t) const
     for (size_t i=0; i<global_timeline.size(); ++i)
     {   
         size_t idx = global_timeline.size() - i - 1;
-        if ( global_timeline[idx] < t ) {
+        if ( global_timeline[idx] < t )
+        {
             break;
-        } else if (global_timeline[idx] > t)
-        {   
+        }
+        else if (global_timeline[idx] > t)
+        {
             // by ignoring time = t we implicitly count all tips at a time as survivors
             // This is compatible with the logic in computing event-sampling probabilities but could be changed
             survivors += (int)event_bifurcation_times[idx].size();
@@ -1919,55 +1907,112 @@ void BirthDeathSamplingTreatmentProcess::swapParameterInternal(const DagNode *ol
     {
         heterogeneous_lambda = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
     }
-    else if (oldP == heterogeneous_mu)
+    
+    if (oldP == heterogeneous_mu)
     {
         heterogeneous_mu = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
     }
-    else if (oldP == heterogeneous_phi)
+    
+    if (oldP == heterogeneous_phi)
     {
         heterogeneous_phi = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
     }
-    else if (oldP == homogeneous_lambda)
+    
+    if (oldP == homogeneous_lambda)
     {
         homogeneous_lambda = static_cast<const TypedDagNode<double>* >( newP );
     }
-    else if (oldP == homogeneous_mu)
+    
+    if (oldP == homogeneous_mu)
     {
         homogeneous_mu = static_cast<const TypedDagNode<double>* >( newP );
     }
-    else if (oldP == homogeneous_phi)
+    
+    if (oldP == homogeneous_phi)
     {
         homogeneous_phi = static_cast<const TypedDagNode<double>* >( newP );
     }
-    // Treatment
-    else if (oldP == heterogeneous_r)
+    
+    if (oldP == heterogeneous_r)
     {
         heterogeneous_r = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
     }
-    else if (oldP == homogeneous_r)
+    
+    if (oldP == homogeneous_r)
     {
         homogeneous_r = static_cast<const TypedDagNode<double>* >( newP );
     }
+    
     // Event probability parameters
     if (oldP == heterogeneous_Lambda)
     {
         heterogeneous_Lambda = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
     }
-    else if (oldP == heterogeneous_Mu)
+    
+    if (oldP == heterogeneous_Mu)
     {
         heterogeneous_Mu = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
     }
-    else if (oldP == heterogeneous_Phi)
+    
+    if (oldP == heterogeneous_Phi)
     {
         heterogeneous_Phi = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
     }
-    else if (oldP == homogeneous_Phi)
+    
+    if (oldP == homogeneous_Phi)
     {
         homogeneous_Phi = static_cast<const TypedDagNode<double>* >( newP );
     }
+    
+    if (oldP == heterogeneous_R)
+    {
+        heterogeneous_R = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+    }
+    
+    // Rate timeline parameters
+    if (oldP == interval_times_global)
+    {
+        interval_times_global = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+    }
+    
+    if (oldP == interval_times_speciation)
+    {
+        interval_times_speciation = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+    }
+    
+    if (oldP == interval_times_extinction)
+    {
+        interval_times_extinction = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+    }
+    
+    if (oldP == interval_times_sampling)
+    {
+        interval_times_sampling = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+    }
+    
+    if (oldP == interval_times_treatment)
+    {
+        interval_times_treatment = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+    }
+        
+    // Event timeline parameters
+    if (oldP == interval_times_event_speciation)
+    {
+        interval_times_event_speciation = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+    }
+    
+    if (oldP == interval_times_event_extinction)
+    {
+        interval_times_event_extinction = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+    }
+    
+    if (oldP == interval_times_event_sampling)
+    {
+        interval_times_event_sampling = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+    }
     else
     {
-        // delegate the super-class
+        // delegate to the super-class
         AbstractBirthDeathProcess::swapParameterInternal(oldP, newP);
     }
 }

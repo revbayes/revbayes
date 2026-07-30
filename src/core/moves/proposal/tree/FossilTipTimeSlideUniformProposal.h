@@ -31,7 +31,7 @@ namespace RevBayesCore {
                                            TypedDagNode<double>* mi,
                                            const std::string& t,
                                            double l,
-                                           double r=0.44);                                                      //!<  constructor
+                                           double r=0.44);                                                      //!< Constructor
         
         // Basic utility functions
         void                                    cleanProposal(void);                                            //!< Clean up proposal
@@ -47,7 +47,7 @@ namespace RevBayesCore {
 
     protected:
         
-        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);                 //!< Swap the DAG nodes on which the Proposal is working on
+        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);                 //!< Swap the DAG nodes the Proposal is working on
         
         
     private:
@@ -64,7 +64,7 @@ namespace RevBayesCore {
 
         // stored objects to undo proposal
         double                                  stored_age;
-        double                                  lambda;                                                                             //!< The value we propose.
+        double                                  lambda;                                                         //!< The value we propose.
 
         bool                                    failed;
     };

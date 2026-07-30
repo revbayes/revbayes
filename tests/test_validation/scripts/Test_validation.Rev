@@ -11,77 +11,85 @@ seed(12345)
 NUM_VALIDATION_REPLICATES = 10
 NUM_MCMC_ITERATIONS       = 1000
 
-# Create the monitor and move vectors
-moves    = VectorMoves()
-monitors = VectorMonitors()
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
 
 #######################
-# Reading in the data #
+# Reading in the Data #
 #######################
 
-# Import the morphological character matrix. This file contains only the taxa for
-# which morphological characters are available.
+data <- readDiscreteCharacterData("data/primates_cytb_small.nex")
 
-morpho <- readDiscreteCharacterData("data/bears_morphology.nex")
+# Get some useful variables from the data. We need these later on.
+taxa <- data.taxa()
 
-# Helper variables
-taxa <- morpho.names()
-n_taxa <- taxa.size()
-n_branches <- 2 * n_taxa - 2
+
+
+######################
+# Substitution Model #
+######################
+
+#### specify the Felsenstein 1981 substitution model applied uniformly to all sites ###
+
+pi_prior <- v(1,1,1,1)
+pi ~ dnDirichlet(pi_prior)
+moves.append( mvSimplexElementScale(pi,weight=2) )
+
+Q := fnF81(pi)
 
 ##############
 # Tree model #
 ##############
 
-# Obtain a list of names from the Nexus file. We will use this to add tips to the tree.
-names <- morpho.names()
+# specify a prior on the root age (our informed guess is about 75-80 mya)
+root ~ dnUniform(50.0,100.0)
 
-# Set up branch length hyperprior with a move
-br_len_lambda ~ dnExp(0.2)
-moves.append( mvScale(br_len_lambda, weight=2) )
+# create some moves that change the stochastic variables
+# all moves are sliding proposals but you could use scaling proposals for the rates too
+moves.append( mvSlide(root,delta=1,tune=true,weight=1) )
 
-# Draw a tree with a uniformly distributed topology and exponentially distributed
-# branch lengths.
+# construct a variable for the tree drawn from a birth death process
+psi ~ dnUniformTimeTree(rootAge=root, taxa=taxa )
 
-phylogeny ~ dnUniformTopologyBranchLength(names,
-                                          branchLengthDistribution=dnExp(br_len_lambda))
-# Compute the tree length
-tree_length := phylogeny.treeLength()
+moves.append( mvNarrow(psi, weight=5.0) )
+moves.append( mvNNI(psi, weight=1.0) )
+moves.append( mvFNPR(psi, weight=3.0) )
+moves.append( mvSubtreeScale(psi, weight=3.0) )
+moves.append( mvNodeTimeSlideUniform(psi, weight=15.0) )
 
-moves.append( mvNNI(phylogeny, weight=n_branches/2.0) )
-moves.append( mvSPR(phylogeny, weight=n_branches/10.0) )
-moves.append( mvBranchLengthScale(phylogeny, weight=n_branches) )
 
-###########################################
-# Binary morphological substitution model #
-###########################################
+###################
+# PhyloCTMC Model #
+###################
 
-# Create the Q matrix. These data are binary, so we initialize the Jukes-Cantor matrix
-# with two states.
+# We use an empirical estimate of the clock rate which is 0.01 (=1%) per million years per site
+clockRate <- 0.01
 
-Q_morpho <- fnJC(2)
+# the sequence evolution model
+seq ~ dnPhyloCTMC(tree=psi, Q=Q, branchRates=clockRate, type="DNA")
 
-# Combine all our elements into a CTMC. No ascertainment bias correction will be used.
-phyMorpho ~ dnPhyloCTMC(tree=phylogeny, Q=Q_morpho, type="Standard")
-phyMorpho.clamp(morpho)
+# attach the data
+seq.clamp(data)
 
-############
-# Analysis #
-############
 
-# Initialize the model object 
-mymodel = model(phylogeny)
+#############
+# THE Model #
+#############
 
-# Initialize the analysis objects
+# We define our model.
+# We can use any node of our model as a handle, here we chose to use the rate matrix.
+mymodel = model(Q)
+
+
 mymcmc = mcmc(mymodel, monitors, moves)
-validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output" )
 
-# Run the validation analysis
-validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS, tuningInterval=10)
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory="output" )
+validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
 validation.run(generations=NUM_MCMC_ITERATIONS)
 validation.summarize(coverageProbability=0.9)
 validation.summarize(coverageProbability=0.5)
 
-clear()
 
+# you may want to quit RevBayes now
 q()

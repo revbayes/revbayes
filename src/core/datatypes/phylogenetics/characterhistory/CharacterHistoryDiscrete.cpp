@@ -14,10 +14,16 @@ namespace RevBayesCore { class BranchHistory; }
 using namespace RevBayesCore;
 
 
-CharacterHistoryDiscrete::CharacterHistoryDiscrete(Tree *t, size_t nc, size_t ns, bool rb ) : CharacterHistory(t, nc, rb),
+CharacterHistoryDiscrete::CharacterHistoryDiscrete( void ) : CharacterHistory(NULL, 0, false),
+    n_states( 0 )
+{
+
+}
+
+CharacterHistoryDiscrete::CharacterHistoryDiscrete(const Tree *t, size_t nc, size_t ns, bool rb ) : CharacterHistory(t, nc, rb),
     n_states( ns )
 {
-    
+
     if ( tree != NULL )
     {
         n_branches = tree->getNumberOfNodes() - 1 + ( use_root_branch ? 1 : 0 );
@@ -26,9 +32,9 @@ CharacterHistoryDiscrete::CharacterHistoryDiscrete(Tree *t, size_t nc, size_t ns
         {
             histories.push_back( new BranchHistoryDiscrete(n_character, n_states, i) );
         }
-        
+
     }
-    
+
 }
 
 
@@ -38,7 +44,21 @@ CharacterHistoryDiscrete::CharacterHistoryDiscrete(Tree *t, size_t nc, size_t ns
  */
 CharacterHistoryDiscrete::~CharacterHistoryDiscrete()
 {
-    
+
+}
+
+
+/**
+ * Index operator.
+ */
+BranchHistoryDiscrete& CharacterHistoryDiscrete::operator[](size_t i)
+{
+    if ( i > histories.size() )
+    {
+        throw RbException("Index out of bounds in character history.");
+    }
+
+    return static_cast<BranchHistoryDiscrete &>(*histories[i]);
 }
 
 
@@ -51,7 +71,7 @@ const BranchHistoryDiscrete& CharacterHistoryDiscrete::operator[](size_t i) cons
     {
         throw RbException("Index out of bounds in character history.");
     }
-    
+
     return static_cast<const BranchHistoryDiscrete &>(*histories[i]);
 }
 
@@ -61,7 +81,7 @@ const BranchHistoryDiscrete& CharacterHistoryDiscrete::operator[](size_t i) cons
  */
 CharacterHistoryDiscrete* CharacterHistoryDiscrete::clone( void ) const
 {
-    
+
     return new CharacterHistoryDiscrete( *this );
 }
 
@@ -69,7 +89,30 @@ CharacterHistoryDiscrete* CharacterHistoryDiscrete::clone( void ) const
 /**
  * Get the number of states for this character.
  */
-size_t CharacterHistoryDiscrete::getNumberStates( void ) const
+size_t CharacterHistoryDiscrete::getMaxObservedState( void ) const
+{
+    size_t max_obs_state = 0;
+
+    // create a branch history object for each branch
+    for (size_t i=0; i<n_branches; ++i)
+    {
+        size_t branch_max_states = static_cast<BranchHistoryDiscrete*>(histories[i])->getMaxObservedState();
+
+        if ( branch_max_states > max_obs_state )
+        {
+            max_obs_state = branch_max_states;
+        }
+    }
+
+
+    return max_obs_state;
+}
+
+
+/**
+ * Get the number of states for this character.
+ */
+size_t CharacterHistoryDiscrete::getNumberOfStates( void ) const
 {
     return n_states;
 }
@@ -80,36 +123,47 @@ size_t CharacterHistoryDiscrete::getNumberStates( void ) const
  */
 CharacterEventDiscrete* CharacterHistoryDiscrete::pickRandomEvent( size_t &branch_index )
 {
-    
+
     return static_cast<CharacterEventDiscrete *>( CharacterHistory::pickRandomEvent(branch_index) );
+}
+
+
+/**
+ * Set the number of states.
+ */
+void CharacterHistoryDiscrete::setNumberOfStates(size_t n)
+{
+
+    n_states = n;
+
+    // create a branch history object for each branch
+    for (size_t i=0; i<n_branches; ++i)
+    {
+        static_cast<BranchHistoryDiscrete*>(histories[i])->setNumberOfStates( n_states );
+    }
+
 }
 
 
 /**
  * Set the new tree.
  */
-void CharacterHistoryDiscrete::setTree(Tree *t)
+void CharacterHistoryDiscrete::setTree(const Tree *t)
 {
-    
+
     tree = t;
     if ( tree != NULL )
     {
         histories.clear();
         n_events = 0;
         n_branches = tree->getNumberOfNodes() - 1  + (use_root_branch ? 1 : 0);
-        
+
         // create a branch history object for each branch
         for (size_t i=0; i<n_branches; ++i)
         {
             histories.push_back( new BranchHistoryDiscrete(n_character, n_states, i) );
         }
-        
+
     }
-    
+
 }
-
-
-
-
-
-

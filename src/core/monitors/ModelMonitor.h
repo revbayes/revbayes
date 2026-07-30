@@ -3,6 +3,7 @@
 
 #include <iosfwd>
 #include <set>
+#include <string>
 
 #include "VariableMonitor.h"
 
@@ -31,6 +32,9 @@ class Model;
         // basic methods
         ModelMonitor*                       clone(void) const;                                                  //!< Clone the object
         
+        // Override addVariable to allow bulk addition without sorting
+        void                                addVariable(DagNode *n);                                            //!< Add variable to monitor (without sorting)
+        
         // getters and setters
         void                                setModel(Model* m);
         void                                setStochasticNodesOnly(bool tf);                                    //!< Set if only stochastic nodes should be monitored
@@ -38,6 +42,7 @@ class Model;
     private:
         // helper methods
         void                                resetDagNodes(void);                                                //!< Extract the variable to be monitored again.
+        static bool                         isExcluded(const std::string &name, const std::set<std::string> &exclude_list);
         
         // members
         bool                                stochastic_nodes_only;                                              //!< Flag if only stochastic nodes should be printed

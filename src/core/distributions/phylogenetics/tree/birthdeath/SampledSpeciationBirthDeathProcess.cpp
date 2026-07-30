@@ -283,14 +283,11 @@ void SampledSpeciationBirthDeathProcess::computeNodeProbability(const RevBayesCo
         const double &sample_prob = rho->getValue();
 
         // branch/tree variables
-        double branch_length = 0.0;
         double prev_age = 0.0;
         if (node.isRoot()) {
-            branch_length = node.getAge();
             prev_age = 2 * node.getAge();
         }
         else {
-            branch_length = node.getBranchLength();
             prev_age = node.getParent().getAge();
         }
         

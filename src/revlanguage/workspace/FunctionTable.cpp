@@ -689,34 +689,36 @@ void FunctionTable::printValue(std::ostream& o, bool env) const
         i->second->printValue( s, true );
         
         // nice printing with arguments aligned
-        size_t offset = i->first.size() + 3;
-        std::string temp = "";
-        std::string repl = "";
-        
-        // remove the whitespace *before* the left parenthesis (look backward, while constructing the string)
-        for (size_t i = 0; i < s.str().size(); ++i)
+        std::string temp = s.str();
+        std::string result;
+        result.reserve( temp.size() );
+
+        for (size_t i = 0; i < temp.size(); ++i)
         {
-            temp += s.str()[i];
+            char c = temp[i];
             
-            if (s.str()[i] == '(')
+            // skip the whitespace *before* the left parenthesis
+            if (std::isspace(c) && i + 1 < temp.size() && temp[i + 1] == '(')
             {
-                temp[i - 1] = *repl.c_str();
+                continue;
             }
-        }
-        
-        // remove the newline and whitespace *after* a comma (look forward, after the string has been constructed)
-        for (size_t i = 0; i < s.str().size(); ++i)
-        {
-            if (s.str()[i] == ',')
+            
+            // add the current character
+            result += c;
+            
+            // replace the newline and whitespace *after* a comma by exactly one space
+            if (c == ',')
             {
-                for (size_t j = 1; j < offset; ++j)
+                result += ' ';
+                
+                while (i + 1 < temp.size() && std::isspace(temp[i + 1]))
                 {
-                    temp[i + j] = *repl.c_str();
+                    ++i; // adjust the index to skip the next character
                 }
             }
         }
         
-        o << temp << std::endl;
+        o << result << std::endl;
     }
     
     // Print the parent table too

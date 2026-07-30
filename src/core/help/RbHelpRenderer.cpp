@@ -208,17 +208,21 @@ std::string HelpRenderer::renderConstructors(const RbHelpType &typeHelp, size_t 
         }
         result.append( section_break );
         
+        // First list every constructor signature together, so that all overloads
+        // (e.g. the time-tree and branch-length-tree forms of dnConstrainedTopology)
+        // are clearly grouped under the "Constructors" heading rather than being
+        // interleaved with their argument blocks.
         for (std::vector<RbHelpFunction>::const_iterator it = ctors.begin(); it != ctors.end(); ++it)
         {
-            const RbHelpFunction &functionHelp = *it;
-            
-            result.append( StringUtilities::formatTabWrap(functionHelp.getUsage(),1,w,true) );
+            result.append( StringUtilities::formatTabWrap(it->getUsage(),1,w,true) );
             result.append( line_break );
-            result.append( section_break );
-            
-            // arguments
-            result.append( renderArguments( functionHelp, w ) );
-            
+        }
+        result.append( section_break );
+        
+        // Then render the arguments of each constructor.
+        for (std::vector<RbHelpFunction>::const_iterator it = ctors.begin(); it != ctors.end(); ++it)
+        {
+            result.append( renderArguments( *it, w ) );
         }
         
     }
@@ -372,8 +376,45 @@ std::string HelpRenderer::renderHelp(const RbHelpType &typeHelp, size_t w)
 
     if ( dynamic_cast< const RbHelpDistribution *>( &typeHelp ) != NULL)
     {
-        // domain type
-        result.append( renderReturnType( typeHelp.getConstructors().front(), w, true ) );
+        // domain type(s): a distribution may be registered under a single Rev name
+        // for several underlying value types (e.g. dnConstrainedTopology applies to
+        // both time trees and branch-length trees), so list every distinct return
+        // type instead of only the first constructor's.
+        const std::vector<RbHelpFunction> &ctors = typeHelp.getConstructors();
+        std::vector<std::string> domain_types;
+        for (std::vector<RbHelpFunction>::const_iterator it = ctors.begin(); it != ctors.end(); ++it)
+        {
+            const std::string &rt = it->getReturnType();
+            if ( rt.size() == 0 )
+            {
+                continue;
+            }
+            bool seen = false;
+            for (std::vector<std::string>::const_iterator d = domain_types.begin(); d != domain_types.end(); ++d)
+            {
+                if ( *d == rt )
+                {
+                    seen = true;
+                    break;
+                }
+            }
+            if ( seen == false )
+            {
+                domain_types.push_back( rt );
+            }
+        }
+        
+        if ( domain_types.size() > 0 )
+        {
+            result.append( TerminalFormatter::makeUnderlined("Domain Type") );
+            result.append( section_break );
+            for (std::vector<std::string>::const_iterator d = domain_types.begin(); d != domain_types.end(); ++d)
+            {
+                result.append( StringUtilities::formatTabWrap(*d, 1, w) );
+                result.append( line_break );
+            }
+            result.append( section_break );
+        }
     }
         
     // details

@@ -28,7 +28,7 @@ public:
     
     RevLanguageMain(bool e, bool c, bool q);
     
-    void startRevLanguageEnvironment(const std::vector<std::string> &expressions, const std::optional<std::string>& filename, const std::vector<std::string> &args);
+    int startRevLanguageEnvironment(const std::vector<std::string> &expressions, const std::optional<std::string>& filename, const std::vector<std::string> &args);
 
 private:
     

@@ -1,6 +1,7 @@
 #include <cmath>
 #include <cstddef>
 #include <vector>
+#include <cassert>
 
 #include "RateMatrix_F81.h"
 #include "TransitionProbabilityMatrix.h"
@@ -33,23 +34,31 @@ void RateMatrix_F81::calculateTransitionProbabilities(double startAge, double en
     // compute auxilliary variables
     double t = rate * (startAge - endAge);
     double tmp = 1.0;
-	for (size_t i=0; i<num_states; i++) tmp -= stationary_freqs[i]*stationary_freqs[i];
+    for (size_t i=0; i<num_states; i++)
+        tmp -= stationary_freqs[i]*stationary_freqs[i];
+
+    // If stationary_freqs = {1, 5e-18}, then tmp will be negative.
+    // This causes xx = VERY LARGE AND NEGATIVE, e = Inf, oneminuse = -inf
+    tmp = std::max(tmp, 0.0);
+
     double beta = 1.0 / tmp; 
     double xx = -beta * t;
     double e = exp( xx );
     double oneminuse = 1.0 - e;
     
     // calculate the transition probabilities
-	for (size_t i=0; i<num_states; i++) 
+    for (size_t i=0; i<num_states; i++) 
     {
         double to_i = stationary_freqs[i] * oneminuse;
-		for (size_t j=0; j<num_states; j++) 
+        for (size_t j=0; j<num_states; j++) 
         {
             P[j][i] = to_i;    // it is easier to overwrite the case i -> i later than checking for every j
+            assert(not (P[j][i] < 0 or P[j][i] > 1.00000000001));
         }
          
         // from i to i
         P[i][i] = stationary_freqs[i] + (1.0-stationary_freqs[i])*e;
+        assert(not (P[i][i] < 0 or P[i][i] > 1.00000000001));
     }
 }
 

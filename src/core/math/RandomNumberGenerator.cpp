@@ -3,23 +3,20 @@
 
 #include "boost/date_time/posix_time/posix_time.hpp" // IWYU pragma: keep
 #include <boost/random.hpp>
-#include <boost/random/uniform_01.hpp> // IWYU pragma: keep
-#include <boost/random/linear_congruential.hpp> // IWYU pragma: keep
+#include <boost/random/uniform_real_distribution.hpp> // IWYU pragma: keep
 #include <boost/random/mersenne_twister.hpp>
 
 using namespace RevBayesCore;
 
 /** Default constructor calling time to get the initial seeds */
-RandomNumberGenerator::RandomNumberGenerator(void) :
-        zeroone( boost::mt19937() )
+RandomNumberGenerator::RandomNumberGenerator(void)
 {
     
     seed = getNewSeed();
     
-    boost::mt19937 rng;
     rng.seed( seed );
-    zeroone = boost::uniform_01<boost::mt19937>(rng);
-    last_u = zeroone();
+
+    last_u = boost::random::uniform_real_distribution<>(0,1)(rng);
 
 }
 
@@ -51,11 +48,8 @@ unsigned int RandomNumberGenerator::getSeed( void ) const
 void RandomNumberGenerator::setSeed(unsigned int s)
 {
 
-    boost::mt19937 rng;
     seed = s % RbConstants::Integer::max; //see constructor for explanation of this
     rng.seed( seed );
-    zeroone = boost::uniform_01<boost::mt19937>(rng);
-
 }
 
 
@@ -67,7 +61,7 @@ void RandomNumberGenerator::setSeed(unsigned int s)
  */
 double RandomNumberGenerator::uniform01(void)
 {
-    last_u = zeroone();
+    last_u = boost::random::uniform_real_distribution<>(0,1)(rng);
 
 	// Returns a pseudo-random number between 0 and 1.
     return last_u;

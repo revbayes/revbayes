@@ -46,7 +46,6 @@
 #include "Real.h"
 #include "RealPos.h"
 #include "RevPtr.h"
-#include "ReversibleJumpMixtureProposal.h"
 #include "RlTree.h"
 #include "SimpleProposal.h"
 #include "Simplex.h"
@@ -118,6 +117,7 @@
 #include "Move_SingleElementScale.h"
 #include "Move_SingleElementSlide.h"
 #include "Move_EllipticalSliceSamplingSimple.h"
+#include "Move_RandomCategoryWalk.h"
 #include "Move_SynchronizedVectorFixedSingleElementSlide.h"
 #include "Move_VectorBinarySwitch.h"
 #include "Move_VectorSingleElementScale.h"
@@ -160,6 +160,7 @@
 
 
 /* Moves on mixtures (in folder "datatypes/inference/moves/mixture") */
+#include "Move_AdaptiveReversibleJumpSwitch.h"
 #include "Move_DPPAllocateAuxGibbsMove.h"
 #include "Move_DPPGibbsConcentration.h"
 #include "Move_DPPTableValueUpdate.h"
@@ -205,7 +206,6 @@
 /* Moves on continuous phyloprocesses (Brownian, multivariate Brownian, etc) */
 
 /* Tree proposals (in folder "datatypes/inference/moves/tree") */
-#include "Move_AddRemoveTip.h"
 #include "Move_BurstEvent.h"
 #include "Move_BranchLengthScale.h"
 #include "Move_CollapseExpandFossilBranch.h"
@@ -215,6 +215,7 @@
 #include "Move_RotateNode.h"
 #include "Move_GibbsBuddingTopology.h"
 #include "Move_SPRClock.h"
+#include "Move_FossilSiteTimeSlideUniform.h"
 #include "Move_FossilTipTimeUniform.h"
 #include "Move_FossilTipTimeSlideUniform.h"
 #include "Move_GibbsPruneAndRegraft.h"
@@ -305,6 +306,7 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_HSRFHyperpriorsGibbs() );
         addType( new Move_HSRFIntervalSwap() );
         addType( new Move_HSRFUnevenGridHyperpriorsGibbs() );
+        addType( new Move_RandomCategoryWalk() );
         addType( new Move_SingleElementSlide() );
         addType( new Move_SingleElementScale() );
         addType( new Move_ShrinkExpand() );
@@ -398,6 +400,8 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_GibbsMixtureAllocation<RateGenerator>( ) );
         addType( new Move_UPPAllocation<RealPos>() );
 
+        addType( new Move_AdaptiveReversibleJumpSwitch( )                );
+        
         addType( new Move_ReversibleJumpSwitch<Real>( )                  );
         addType( new Move_ReversibleJumpSwitch<RealPos>( )               );
         addType( new Move_ReversibleJumpSwitch<Natural>( )               );
@@ -434,7 +438,6 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_GibbsDrawCharacterHistory()                    );
 
         /* Tree proposals (in folder "datatypes/inference/moves/tree") */
-        addType( new Move_AddRemoveTip()                     );
         addType( new Move_BurstEvent()                       );
         addType( new Move_BranchLengthScale()                );
         addType( new Move_CollapseExpandFossilBranch()       );
@@ -444,6 +447,7 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_RotateNode()                       );
         addType( new Move_GibbsBuddingTopology()             );
         addType( new Move_SPRClock()                         );
+        addType( new Move_FossilSiteTimeSlideUniform()       );
         addType( new Move_FossilTipTimeUniform()             );
         addType( new Move_FossilTipTimeSlideUniform()        );
         addType( new Move_GibbsPruneAndRegraft()             );

@@ -14,7 +14,7 @@ namespace RevBayesCore {
     class OrderedEventScaleProposal : public Proposal {
         
     public:
-        OrderedEventScaleProposal( StochasticNode< OrderedEvents<valueType> > *n, double l=0.5 );                                                                    //!<  constructor
+        OrderedEventScaleProposal( StochasticNode< OrderedEvents<valueType> > *n, double l=0.5 );                                                                    //!< Constructor
         
         // Basic utility functions
         void                                cleanProposal(void);                                                                //!< Clean up proposal
@@ -30,7 +30,7 @@ namespace RevBayesCore {
         
     protected:
         
-        void                                swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes on which the Proposal is working on
+        void                                swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes the Proposal is working on
         
         
     private:
