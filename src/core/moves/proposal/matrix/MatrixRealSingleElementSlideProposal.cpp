@@ -139,7 +139,7 @@ double MatrixRealSingleElementSlideProposal::doProposal( void )
             v[indexb][indexa] += scalingFactor;
         }
 
-        array->addTouchedElementIndex(indexa*v.size() + indexb);
+        array->addTouchedElementIndex(indexa*v.front().size() + indexb);
     }
     else
     {

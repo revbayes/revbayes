@@ -130,8 +130,8 @@ const MemberRules& Move_MatrixSingleElementSwap::getParameterRules(void) const
     {
         move_member_rules.push_back( new ArgumentRule( "x", MatrixReal::getClassTypeSpec(), "The matrix on which this move operates.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
         move_member_rules.push_back( new ArgumentRule( "margin", Natural::getClassTypeSpec(), "Swap within a row (1) or within a column (2), as in R's MARGIN. Omit to swap any two elements.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
-        move_member_rules.push_back( new ArgumentRule( "row", Natural::getClassTypeSpec(), "Swap within this row rather than a random line.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
-        move_member_rules.push_back( new ArgumentRule( "col", Natural::getClassTypeSpec(), "Swap within this column rather than a random line.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
+        move_member_rules.push_back( new ArgumentRule( "row", Natural::getClassTypeSpec(), "Swap within this row.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
+        move_member_rules.push_back( new ArgumentRule( "col", Natural::getClassTypeSpec(), "Swap within this column.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
 
         const MemberRules& inheritedRules = Move::getParameterRules();
         move_member_rules.insert( move_member_rules.end(), inheritedRules.begin(), inheritedRules.end() );
