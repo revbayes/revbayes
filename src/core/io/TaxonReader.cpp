@@ -40,8 +40,7 @@ namespace {
 
         double v = std::strtod(begin, &end);
 
-        // strtod skips leading whitespace itself; skip any trailing whitespace before checking
-        // that nothing else is left over
+        // strtod skips leading whitespace; skip trailing before checking for leftovers
         while ( *end == ' ' || *end == '\t' || *end == '\r' || *end == '\n' ) ++end;
 
         if ( end == begin || *end != '\0' )
@@ -126,7 +125,7 @@ TaxonReader::TaxonReader(const std::string &fn, std::string delim) : DelimitedDa
 
     std::map<std::string, Taxon > taxon_map;
 
-    // rows declaring a fossil occurrence but counting zero of it, warned about once at the end
+    // rows declaring an occurrence but counting zero of it
     std::vector<std::string> zero_count_rows;
 
     for (size_t i = 1; i < chars.size(); ++i) //going through all the lines
@@ -199,8 +198,7 @@ TaxonReader::TaxonReader(const std::string &fn, std::string delim) : DelimitedDa
             {
                 double c = parseNumericField( line[ column_map["count"] ], "count", i+1 );
 
-                // 0 is meaningful: an extant species may have no fossil samples. A negative count
-                // would also wrap around on the conversion to size_t below and spin the loop.
+                // 0 is meaningful: an extant species may have no fossil samples
                 if ( c < 0.0 || RbMath::isFinite(c) == false || c != std::floor(c) )
                 {
                     throw RbException() << "count (" << line[ column_map["count"] ] << ") must be a non-negative whole number on line "
@@ -209,10 +207,8 @@ TaxonReader::TaxonReader(const std::string &fn, std::string delim) : DelimitedDa
 
                 size_t k = size_t(c);
 
-                // a count of 0 says the species has no fossil samples, which only fits an extant
-                // species (max_age = 0, where the process skips the fossil term). On a row that
-                // does place an occurrence in the past it contradicts itself, and the occurrence
-                // added above still stands, so say so rather than read it as no samples.
+                // count 0 fits an extant species; on a row placing an occurrence in the
+                // past it contradicts itself
                 if ( k == 0 && max_age > 0.0 )
                 {
                     std::stringstream ss;
@@ -242,9 +238,8 @@ TaxonReader::TaxonReader(const std::string &fn, std::string delim) : DelimitedDa
         }
         else
         {
-            // Without a status column, the only proof a taxon survived is an occurrence AT
-            // the present. min_age cannot say: a binned youngest occurrence inherits
-            // min_age == 0 from its interval's edge without being a present-day sample.
+            // only an occurrence at the present proves survival; min_age == 0 can come
+            // from a bin edge instead
             bool sampled_at_present = false;
             std::map<TimeInterval, size_t> occs = taxon.getOccurrences();
             for ( std::map<TimeInterval, size_t>::const_iterator it = occs.begin(); it != occs.end(); it++ )
