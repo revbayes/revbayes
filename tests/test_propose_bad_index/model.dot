@@ -1,0 +1,339 @@
+/* Graphical model description in DOT language                                    */
+/*    To view graph:                                                              */
+/*       open this file in the program Graphviz: http://www.graphviz.org          */
+/*       or paste contents into an online viewer: http://stamm-wilbrandt.de/GraphvizFiddle */
+
+digraph REVDAG {
+   n_phylogeny [shape=oval, style="dashed,filled", fillcolor=white, label="phylogeny\n[ fnTreeAssembly(Tree<any>) ]"]
+   n_topology [shape=oval, style=filled, fillcolor=white, label="topology"]
+   n_br_lens [shape=oval, style="dashed,filled", fillcolor=white, label="br_lens\n[ v(RealPos<any>) ]"]
+   n_br_lens_1 [shape=oval, style=filled, fillcolor=white, label="br_lens[1]"]
+   n_0x55bb4f4e0b30 [shape=box, style=filled, fillcolor=white, label="10"]
+   n_br_lens_1_offset [shape=record, style=filled, fillcolor=white, label="{br_lens[1].offset|0}"]
+   n_br_lens_2 [shape=oval, style=filled, fillcolor=white, label="br_lens[2]"]
+   n_0x55bb4f4e1cf0 [shape=box, style=filled, fillcolor=white, label="10"]
+   n_br_lens_2_offset [shape=record, style=filled, fillcolor=white, label="{br_lens[2].offset|0}"]
+   n_br_lens_3 [shape=oval, style=filled, fillcolor=white, label="br_lens[3]"]
+   n_0x55bb4f4e2fe0 [shape=box, style=filled, fillcolor=white, label="10"]
+   n_br_lens_3_offset [shape=record, style=filled, fillcolor=white, label="{br_lens[3].offset|0}"]
+   n_br_lens_4 [shape=oval, style=filled, fillcolor=white, label="br_lens[4]"]
+   n_0x55bb4f4e4250 [shape=box, style=filled, fillcolor=white, label="10"]
+   n_br_lens_4_offset [shape=record, style=filled, fillcolor=white, label="{br_lens[4].offset|0}"]
+   n_br_lens_5 [shape=oval, style=filled, fillcolor=white, label="br_lens[5]"]
+   n_0x55bb4f4e5660 [shape=box, style=filled, fillcolor=white, label="10"]
+   n_br_lens_5_offset [shape=record, style=filled, fillcolor=white, label="{br_lens[5].offset|0}"]
+   n_br_lens_6 [shape=oval, style=filled, fillcolor=white, label="br_lens[6]"]
+   n_0x55bb4f4e6ab0 [shape=box, style=filled, fillcolor=white, label="10"]
+   n_br_lens_6_offset [shape=record, style=filled, fillcolor=white, label="{br_lens[6].offset|0}"]
+   n_br_lens_7 [shape=oval, style=filled, fillcolor=white, label="br_lens[7]"]
+   n_0x55bb4f4e7f00 [shape=box, style=filled, fillcolor=white, label="10"]
+   n_br_lens_7_offset [shape=record, style=filled, fillcolor=white, label="{br_lens[7].offset|0}"]
+   n_br_lens_8 [shape=oval, style=filled, fillcolor=white, label="br_lens[8]"]
+   n_0x55bb4f4e9350 [shape=box, style=filled, fillcolor=white, label="10"]
+   n_br_lens_8_offset [shape=record, style=filled, fillcolor=white, label="{br_lens[8].offset|0}"]
+   n_br_lens_9 [shape=oval, style=filled, fillcolor=white, label="br_lens[9]"]
+   n_0x55bb4f4ea7a0 [shape=box, style=filled, fillcolor=white, label="10"]
+   n_br_lens_9_offset [shape=record, style=filled, fillcolor=white, label="{br_lens[9].offset|0}"]
+   n_br_lens_10 [shape=oval, style=filled, fillcolor=white, label="br_lens[10]"]
+   n_0x55bb4f4ebbf0 [shape=box, style=filled, fillcolor=white, label="10"]
+   n_br_lens_10_offset [shape=record, style=filled, fillcolor=white, label="{br_lens[10].offset|0}"]
+   n_br_lens_11 [shape=oval, style=filled, fillcolor=white, label="br_lens[11]"]
+   n_0x55bb4f4ed460 [shape=box, style=filled, fillcolor=white, label="10"]
+   n_br_lens_11_offset [shape=record, style=filled, fillcolor=white, label="{br_lens[11].offset|0}"]
+   n_br_lens_12 [shape=oval, style=filled, fillcolor=white, label="br_lens[12]"]
+   n_0x55bb4f4ee8b0 [shape=box, style=filled, fillcolor=white, label="10"]
+   n_br_lens_12_offset [shape=record, style=filled, fillcolor=white, label="{br_lens[12].offset|0}"]
+   n_br_lens_13 [shape=oval, style=filled, fillcolor=white, label="br_lens[13]"]
+   n_0x55bb4f4efd00 [shape=box, style=filled, fillcolor=white, label="10"]
+   n_br_lens_13_offset [shape=record, style=filled, fillcolor=white, label="{br_lens[13].offset|0}"]
+   n_br_lens_14 [shape=oval, style=filled, fillcolor=white, label="br_lens[14]"]
+   n_0x55bb4f4f1150 [shape=box, style=filled, fillcolor=white, label="10"]
+   n_br_lens_14_offset [shape=record, style=filled, fillcolor=white, label="{br_lens[14].offset|0}"]
+   n_br_lens_15 [shape=oval, style=filled, fillcolor=white, label="br_lens[15]"]
+   n_0x55bb4f4f25a0 [shape=box, style=filled, fillcolor=white, label="10"]
+   n_br_lens_15_offset [shape=record, style=filled, fillcolor=white, label="{br_lens[15].offset|0}"]
+   n_br_lens_16 [shape=oval, style=filled, fillcolor=white, label="br_lens[16]"]
+   n_0x55bb4f4f39f0 [shape=box, style=filled, fillcolor=white, label="10"]
+   n_br_lens_16_offset [shape=record, style=filled, fillcolor=white, label="{br_lens[16].offset|0}"]
+   n_br_lens_17 [shape=oval, style=filled, fillcolor=white, label="br_lens[17]"]
+   n_0x55bb4f4f4e40 [shape=box, style=filled, fillcolor=white, label="10"]
+   n_br_lens_17_offset [shape=record, style=filled, fillcolor=white, label="{br_lens[17].offset|0}"]
+   n_br_lens_18 [shape=oval, style=filled, fillcolor=white, label="br_lens[18]"]
+   n_0x55bb4f4f6290 [shape=box, style=filled, fillcolor=white, label="10"]
+   n_br_lens_18_offset [shape=record, style=filled, fillcolor=white, label="{br_lens[18].offset|0}"]
+   n_br_lens_19 [shape=oval, style=filled, fillcolor=white, label="br_lens[19]"]
+   n_0x55bb4f4f76e0 [shape=box, style=filled, fillcolor=white, label="10"]
+   n_br_lens_19_offset [shape=record, style=filled, fillcolor=white, label="{br_lens[19].offset|0}"]
+   n_br_lens_20 [shape=oval, style=filled, fillcolor=white, label="br_lens[20]"]
+   n_0x55bb4f4f8b30 [shape=box, style=filled, fillcolor=white, label="10"]
+   n_br_lens_20_offset [shape=record, style=filled, fillcolor=white, label="{br_lens[20].offset|0}"]
+   n_br_lens_21 [shape=oval, style=filled, fillcolor=white, label="br_lens[21]"]
+   n_0x55bb4f4f9f80 [shape=box, style=filled, fillcolor=white, label="10"]
+   n_br_lens_21_offset [shape=record, style=filled, fillcolor=white, label="{br_lens[21].offset|0}"]
+   n_br_lens_22 [shape=oval, style=filled, fillcolor=white, label="br_lens[22]"]
+   n_0x55bb4f4fb7e0 [shape=box, style=filled, fillcolor=white, label="10"]
+   n_br_lens_22_offset [shape=record, style=filled, fillcolor=white, label="{br_lens[22].offset|0}"]
+   n_br_lens_23 [shape=oval, style=filled, fillcolor=white, label="br_lens[23]"]
+   n_0x55bb4f4fcc30 [shape=box, style=filled, fillcolor=white, label="10"]
+   n_br_lens_23_offset [shape=record, style=filled, fillcolor=white, label="{br_lens[23].offset|0}"]
+   n_br_lens_24 [shape=oval, style=filled, fillcolor=white, label="br_lens[24]"]
+   n_0x55bb4f4fe080 [shape=box, style=filled, fillcolor=white, label="10"]
+   n_br_lens_24_offset [shape=record, style=filled, fillcolor=white, label="{br_lens[24].offset|0}"]
+   n_br_lens_25 [shape=oval, style=filled, fillcolor=white, label="br_lens[25]"]
+   n_0x55bb4f4ff4d0 [shape=box, style=filled, fillcolor=white, label="10"]
+   n_br_lens_25_offset [shape=record, style=filled, fillcolor=white, label="{br_lens[25].offset|0}"]
+   n_br_lens_26 [shape=oval, style=filled, fillcolor=white, label="br_lens[26]"]
+   n_0x55bb4f500920 [shape=box, style=filled, fillcolor=white, label="10"]
+   n_br_lens_26_offset [shape=record, style=filled, fillcolor=white, label="{br_lens[26].offset|0}"]
+   n_br_lens_27 [shape=oval, style=filled, fillcolor=white, label="br_lens[27]"]
+   n_0x55bb4f501d70 [shape=box, style=filled, fillcolor=white, label="10"]
+   n_br_lens_27_offset [shape=record, style=filled, fillcolor=white, label="{br_lens[27].offset|0}"]
+   n_br_lens_28 [shape=oval, style=filled, fillcolor=white, label="br_lens[28]"]
+   n_0x55bb4f5031c0 [shape=box, style=filled, fillcolor=white, label="10"]
+   n_br_lens_28_offset [shape=record, style=filled, fillcolor=white, label="{br_lens[28].offset|0}"]
+   n_br_lens_29 [shape=oval, style=filled, fillcolor=white, label="br_lens[29]"]
+   n_0x55bb4f504610 [shape=box, style=filled, fillcolor=white, label="10"]
+   n_br_lens_29_offset [shape=record, style=filled, fillcolor=white, label="{br_lens[29].offset|0}"]
+   n_br_lens_30 [shape=oval, style=filled, fillcolor=white, label="br_lens[30]"]
+   n_0x55bb4f505a60 [shape=box, style=filled, fillcolor=white, label="10"]
+   n_br_lens_30_offset [shape=record, style=filled, fillcolor=white, label="{br_lens[30].offset|0}"]
+   n_br_lens_31 [shape=oval, style=filled, fillcolor=white, label="br_lens[31]"]
+   n_0x55bb4f506eb0 [shape=box, style=filled, fillcolor=white, label="10"]
+   n_br_lens_31_offset [shape=record, style=filled, fillcolor=white, label="{br_lens[31].offset|0}"]
+   n_br_lens_32 [shape=oval, style=filled, fillcolor=white, label="br_lens[32]"]
+   n_0x55bb4f508300 [shape=box, style=filled, fillcolor=white, label="10"]
+   n_br_lens_32_offset [shape=record, style=filled, fillcolor=white, label="{br_lens[32].offset|0}"]
+   n_br_lens_33 [shape=oval, style=filled, fillcolor=white, label="br_lens[33]"]
+   n_0x55bb4f509750 [shape=box, style=filled, fillcolor=white, label="10"]
+   n_br_lens_33_offset [shape=record, style=filled, fillcolor=white, label="{br_lens[33].offset|0}"]
+   n_br_lens_34 [shape=oval, style=filled, fillcolor=white, label="br_lens[34]"]
+   n_0x55bb4f50aba0 [shape=box, style=filled, fillcolor=white, label="10"]
+   n_br_lens_34_offset [shape=record, style=filled, fillcolor=white, label="{br_lens[34].offset|0}"]
+   n_br_lens_35 [shape=oval, style=filled, fillcolor=white, label="br_lens[35]"]
+   n_0x55bb4f50bff0 [shape=box, style=filled, fillcolor=white, label="10"]
+   n_br_lens_35_offset [shape=record, style=filled, fillcolor=white, label="{br_lens[35].offset|0}"]
+   n_br_lens_36 [shape=oval, style=filled, fillcolor=white, label="br_lens[36]"]
+   n_0x55bb4f50d440 [shape=box, style=filled, fillcolor=white, label="10"]
+   n_br_lens_36_offset [shape=record, style=filled, fillcolor=white, label="{br_lens[36].offset|0}"]
+   n_br_lens_37 [shape=oval, style=filled, fillcolor=white, label="br_lens[37]"]
+   n_0x55bb4f50e890 [shape=box, style=filled, fillcolor=white, label="10"]
+   n_br_lens_37_offset [shape=record, style=filled, fillcolor=white, label="{br_lens[37].offset|0}"]
+   n_br_lens_38 [shape=oval, style=filled, fillcolor=white, label="br_lens[38]"]
+   n_0x55bb4f50fce0 [shape=box, style=filled, fillcolor=white, label="10"]
+   n_br_lens_38_offset [shape=record, style=filled, fillcolor=white, label="{br_lens[38].offset|0}"]
+   n_br_lens_39 [shape=oval, style=filled, fillcolor=white, label="br_lens[39]"]
+   n_0x55bb4f511130 [shape=box, style=filled, fillcolor=white, label="10"]
+   n_br_lens_39_offset [shape=record, style=filled, fillcolor=white, label="{br_lens[39].offset|0}"]
+   n_br_lens_40 [shape=oval, style=filled, fillcolor=white, label="br_lens[40]"]
+   n_0x55bb4f512580 [shape=box, style=filled, fillcolor=white, label="10"]
+   n_br_lens_40_offset [shape=record, style=filled, fillcolor=white, label="{br_lens[40].offset|0}"]
+   n_br_lens_41 [shape=oval, style=filled, fillcolor=white, label="br_lens[41]"]
+   n_0x55bb4f5139d0 [shape=box, style=filled, fillcolor=white, label="10"]
+   n_br_lens_41_offset [shape=record, style=filled, fillcolor=white, label="{br_lens[41].offset|0}"]
+   n_br_lens_42 [shape=oval, style=filled, fillcolor=white, label="br_lens[42]"]
+   n_0x55bb4f514e20 [shape=box, style=filled, fillcolor=white, label="10"]
+   n_br_lens_42_offset [shape=record, style=filled, fillcolor=white, label="{br_lens[42].offset|0}"]
+   n_br_lens_43 [shape=oval, style=filled, fillcolor=white, label="br_lens[43]"]
+   n_0x55bb4f517290 [shape=box, style=filled, fillcolor=white, label="10"]
+   n_br_lens_43_offset [shape=record, style=filled, fillcolor=white, label="{br_lens[43].offset|0}"]
+   n_TL [shape=oval, style="dashed,filled", fillcolor=white, label="TL\n[ sum(RealPos[]<any>) ]"]
+   n_seq [shape=oval, style=filled, fillcolor=gray, label="seq"]
+   n_seq_branchRates [shape=record, style=filled, fillcolor=white, label="{seq.branchRates|1}"]
+   n_Q [shape=oval, style="dashed,filled", fillcolor=white, label="Q\n[ <0x55bb4f5b95f0>) ]"]
+   n_Q_vec_model_indicator [shape=oval, style="dashed,filled", fillcolor=white, label="Q_vec[model_indicator]\n[ [](RateGenerator[]<any>) ]"]
+   n_Q_vec [shape=oval, style="dashed,filled", fillcolor=white, label="Q_vec\n[ v(RateGenerator<any>) ]"]
+   n_Q_JC [shape=record, style=filled, fillcolor=white, label="{Q_JC|...}"]
+   n_Q_K80 [shape=oval, style="dashed,filled", fillcolor=white, label="Q_K80\n[ fnK80(RealPos<any>) ]"]
+   n_kappa [shape=oval, style=filled, fillcolor=white, label="kappa"]
+   n_0x55bb4f5bd1e0 [shape=box, style=filled, fillcolor=white, label="1"]
+   n_kappa_offset [shape=record, style=filled, fillcolor=white, label="{kappa.offset|0}"]
+   n_Q_HKY [shape=oval, style="dashed,filled", fillcolor=white, label="Q_HKY\n[ fnHKY(RealPos<any>) ]"]
+   n_pi [shape=oval, style=filled, fillcolor=white, label="pi"]
+   n_0x55bb4f5bf390 [shape=box, style=filled, fillcolor=white, label="[ 1.000, 1.000, 1.000, 1.000 ]"]
+   n_Q_F81 [shape=oval, style="dashed,filled", fillcolor=white, label="Q_F81\n[ fnF81(Simplex<any>) ]"]
+   n_Q_GTR [shape=oval, style="dashed,filled", fillcolor=white, label="Q_GTR\n[ fnGTR(Simplex<any>) ]"]
+   n_er [shape=oval, style=filled, fillcolor=white, label="er"]
+   n_0x55bb4f5c2370 [shape=box, style=filled, fillcolor=white, label="[ 1.000, 1.000, 1.000, 1.000, 1.000, 1.000 ]"]
+   n_model_indicator [shape=oval, style=filled, fillcolor=white, label="model_indicator"]
+   n_0x55bb4f5c3c40 [shape=box, style=filled, fillcolor=white, label="[ 0.200, 0.200, 0.200, 0.200, 0.200 ]"]
+   n_site_rates [shape=oval, style="dashed,filled", fillcolor=white, label="site_rates\n[ fnDiscretizeGamma(RealPos<any>) ]"]
+   n_alpha [shape=oval, style=filled, fillcolor=white, label="alpha"]
+   n_0x55bb4f5c59e0 [shape=box, style=filled, fillcolor=white, label="1e+08"]
+   n_0x55bb4f5c5be0 [shape=box, style=filled, fillcolor=white, label="0.5"]
+   n_0x55bb4f5c5da0 [shape=box, style=filled, fillcolor=white, label="0"]
+   n_0x55bb4f5c5f60 [shape=box, style=filled, fillcolor=white, label="1e+08"]
+   n_0x55bb4f5c6120 [shape=oval, style="dashed,filled", fillcolor=white, label="function\n[ eq(Real<any>) ]"]
+   n_0x55bb4f5c6570 [shape=box, style=filled, fillcolor=white, label="1e+08"]
+   n_alpha_indicator [shape=oval, style="dashed,filled", fillcolor=white, label="alpha_indicator\n[ ifelse(Bool<any>) ]"]
+   n_0x55bb4f5c6b90 [shape=box, style=filled, fillcolor=white, label="0"]
+   n_0x55bb4f5c6cf0 [shape=box, style=filled, fillcolor=white, label="1"]
+   n_0x55bb4f5c6e70 [shape=box, style=filled, fillcolor=white, label="4"]
+   n_phylogeny -> n_seq
+   n_topology -> n_phylogeny[style=dashed]
+   n_br_lens -> n_TL[style=dashed]
+   n_br_lens -> n_phylogeny[style=dashed]
+   n_br_lens_1 -> n_br_lens[style=dashed]
+   n_0x55bb4f4e0b30 -> n_br_lens_1
+   n_br_lens_1_offset -> n_br_lens_1
+   n_br_lens_2 -> n_br_lens[style=dashed]
+   n_0x55bb4f4e1cf0 -> n_br_lens_2
+   n_br_lens_2_offset -> n_br_lens_2
+   n_br_lens_3 -> n_br_lens[style=dashed]
+   n_0x55bb4f4e2fe0 -> n_br_lens_3
+   n_br_lens_3_offset -> n_br_lens_3
+   n_br_lens_4 -> n_br_lens[style=dashed]
+   n_0x55bb4f4e4250 -> n_br_lens_4
+   n_br_lens_4_offset -> n_br_lens_4
+   n_br_lens_5 -> n_br_lens[style=dashed]
+   n_0x55bb4f4e5660 -> n_br_lens_5
+   n_br_lens_5_offset -> n_br_lens_5
+   n_br_lens_6 -> n_br_lens[style=dashed]
+   n_0x55bb4f4e6ab0 -> n_br_lens_6
+   n_br_lens_6_offset -> n_br_lens_6
+   n_br_lens_7 -> n_br_lens[style=dashed]
+   n_0x55bb4f4e7f00 -> n_br_lens_7
+   n_br_lens_7_offset -> n_br_lens_7
+   n_br_lens_8 -> n_br_lens[style=dashed]
+   n_0x55bb4f4e9350 -> n_br_lens_8
+   n_br_lens_8_offset -> n_br_lens_8
+   n_br_lens_9 -> n_br_lens[style=dashed]
+   n_0x55bb4f4ea7a0 -> n_br_lens_9
+   n_br_lens_9_offset -> n_br_lens_9
+   n_br_lens_10 -> n_br_lens[style=dashed]
+   n_0x55bb4f4ebbf0 -> n_br_lens_10
+   n_br_lens_10_offset -> n_br_lens_10
+   n_br_lens_11 -> n_br_lens[style=dashed]
+   n_0x55bb4f4ed460 -> n_br_lens_11
+   n_br_lens_11_offset -> n_br_lens_11
+   n_br_lens_12 -> n_br_lens[style=dashed]
+   n_0x55bb4f4ee8b0 -> n_br_lens_12
+   n_br_lens_12_offset -> n_br_lens_12
+   n_br_lens_13 -> n_br_lens[style=dashed]
+   n_0x55bb4f4efd00 -> n_br_lens_13
+   n_br_lens_13_offset -> n_br_lens_13
+   n_br_lens_14 -> n_br_lens[style=dashed]
+   n_0x55bb4f4f1150 -> n_br_lens_14
+   n_br_lens_14_offset -> n_br_lens_14
+   n_br_lens_15 -> n_br_lens[style=dashed]
+   n_0x55bb4f4f25a0 -> n_br_lens_15
+   n_br_lens_15_offset -> n_br_lens_15
+   n_br_lens_16 -> n_br_lens[style=dashed]
+   n_0x55bb4f4f39f0 -> n_br_lens_16
+   n_br_lens_16_offset -> n_br_lens_16
+   n_br_lens_17 -> n_br_lens[style=dashed]
+   n_0x55bb4f4f4e40 -> n_br_lens_17
+   n_br_lens_17_offset -> n_br_lens_17
+   n_br_lens_18 -> n_br_lens[style=dashed]
+   n_0x55bb4f4f6290 -> n_br_lens_18
+   n_br_lens_18_offset -> n_br_lens_18
+   n_br_lens_19 -> n_br_lens[style=dashed]
+   n_0x55bb4f4f76e0 -> n_br_lens_19
+   n_br_lens_19_offset -> n_br_lens_19
+   n_br_lens_20 -> n_br_lens[style=dashed]
+   n_0x55bb4f4f8b30 -> n_br_lens_20
+   n_br_lens_20_offset -> n_br_lens_20
+   n_br_lens_21 -> n_br_lens[style=dashed]
+   n_0x55bb4f4f9f80 -> n_br_lens_21
+   n_br_lens_21_offset -> n_br_lens_21
+   n_br_lens_22 -> n_br_lens[style=dashed]
+   n_0x55bb4f4fb7e0 -> n_br_lens_22
+   n_br_lens_22_offset -> n_br_lens_22
+   n_br_lens_23 -> n_br_lens[style=dashed]
+   n_0x55bb4f4fcc30 -> n_br_lens_23
+   n_br_lens_23_offset -> n_br_lens_23
+   n_br_lens_24 -> n_br_lens[style=dashed]
+   n_0x55bb4f4fe080 -> n_br_lens_24
+   n_br_lens_24_offset -> n_br_lens_24
+   n_br_lens_25 -> n_br_lens[style=dashed]
+   n_0x55bb4f4ff4d0 -> n_br_lens_25
+   n_br_lens_25_offset -> n_br_lens_25
+   n_br_lens_26 -> n_br_lens[style=dashed]
+   n_0x55bb4f500920 -> n_br_lens_26
+   n_br_lens_26_offset -> n_br_lens_26
+   n_br_lens_27 -> n_br_lens[style=dashed]
+   n_0x55bb4f501d70 -> n_br_lens_27
+   n_br_lens_27_offset -> n_br_lens_27
+   n_br_lens_28 -> n_br_lens[style=dashed]
+   n_0x55bb4f5031c0 -> n_br_lens_28
+   n_br_lens_28_offset -> n_br_lens_28
+   n_br_lens_29 -> n_br_lens[style=dashed]
+   n_0x55bb4f504610 -> n_br_lens_29
+   n_br_lens_29_offset -> n_br_lens_29
+   n_br_lens_30 -> n_br_lens[style=dashed]
+   n_0x55bb4f505a60 -> n_br_lens_30
+   n_br_lens_30_offset -> n_br_lens_30
+   n_br_lens_31 -> n_br_lens[style=dashed]
+   n_0x55bb4f506eb0 -> n_br_lens_31
+   n_br_lens_31_offset -> n_br_lens_31
+   n_br_lens_32 -> n_br_lens[style=dashed]
+   n_0x55bb4f508300 -> n_br_lens_32
+   n_br_lens_32_offset -> n_br_lens_32
+   n_br_lens_33 -> n_br_lens[style=dashed]
+   n_0x55bb4f509750 -> n_br_lens_33
+   n_br_lens_33_offset -> n_br_lens_33
+   n_br_lens_34 -> n_br_lens[style=dashed]
+   n_0x55bb4f50aba0 -> n_br_lens_34
+   n_br_lens_34_offset -> n_br_lens_34
+   n_br_lens_35 -> n_br_lens[style=dashed]
+   n_0x55bb4f50bff0 -> n_br_lens_35
+   n_br_lens_35_offset -> n_br_lens_35
+   n_br_lens_36 -> n_br_lens[style=dashed]
+   n_0x55bb4f50d440 -> n_br_lens_36
+   n_br_lens_36_offset -> n_br_lens_36
+   n_br_lens_37 -> n_br_lens[style=dashed]
+   n_0x55bb4f50e890 -> n_br_lens_37
+   n_br_lens_37_offset -> n_br_lens_37
+   n_br_lens_38 -> n_br_lens[style=dashed]
+   n_0x55bb4f50fce0 -> n_br_lens_38
+   n_br_lens_38_offset -> n_br_lens_38
+   n_br_lens_39 -> n_br_lens[style=dashed]
+   n_0x55bb4f511130 -> n_br_lens_39
+   n_br_lens_39_offset -> n_br_lens_39
+   n_br_lens_40 -> n_br_lens[style=dashed]
+   n_0x55bb4f512580 -> n_br_lens_40
+   n_br_lens_40_offset -> n_br_lens_40
+   n_br_lens_41 -> n_br_lens[style=dashed]
+   n_0x55bb4f5139d0 -> n_br_lens_41
+   n_br_lens_41_offset -> n_br_lens_41
+   n_br_lens_42 -> n_br_lens[style=dashed]
+   n_0x55bb4f514e20 -> n_br_lens_42
+   n_br_lens_42_offset -> n_br_lens_42
+   n_br_lens_43 -> n_br_lens[style=dashed]
+   n_0x55bb4f517290 -> n_br_lens_43
+   n_br_lens_43_offset -> n_br_lens_43
+   n_seq_branchRates -> n_seq
+   n_Q -> n_seq
+   n_Q_vec_model_indicator -> n_Q[style=dashed]
+   n_Q_vec -> n_Q_vec_model_indicator[style=dashed]
+   n_Q_JC -> n_Q_vec[style=dashed]
+   n_Q_K80 -> n_Q_vec[style=dashed]
+   n_kappa -> n_Q_HKY[style=dashed]
+   n_kappa -> n_Q_K80[style=dashed]
+   n_0x55bb4f5bd1e0 -> n_kappa
+   n_kappa_offset -> n_kappa
+   n_Q_HKY -> n_Q_vec[style=dashed]
+   n_pi -> n_Q_F81[style=dashed]
+   n_pi -> n_Q_GTR[style=dashed]
+   n_pi -> n_Q_HKY[style=dashed]
+   n_0x55bb4f5bf390 -> n_pi
+   n_Q_F81 -> n_Q_vec[style=dashed]
+   n_Q_GTR -> n_Q_vec[style=dashed]
+   n_er -> n_Q_GTR[style=dashed]
+   n_0x55bb4f5c2370 -> n_er
+   n_model_indicator -> n_Q_vec_model_indicator[style=dashed]
+   n_0x55bb4f5c3c40 -> n_model_indicator
+   n_site_rates -> n_seq
+   n_alpha -> n_0x55bb4f5c6120[style=dashed]
+   n_alpha -> n_site_rates[style=dashed]
+   n_0x55bb4f5c59e0 -> n_alpha
+   n_0x55bb4f5c5be0 -> n_alpha
+   n_0x55bb4f5c5da0 -> n_alpha
+   n_0x55bb4f5c5f60 -> n_alpha
+   n_0x55bb4f5c6120 -> n_alpha_indicator[style=dashed]
+   n_0x55bb4f5c6570 -> n_0x55bb4f5c6120[style=dashed]
+   n_0x55bb4f5c6b90 -> n_alpha_indicator[style=dashed]
+   n_0x55bb4f5c6cf0 -> n_alpha_indicator[style=dashed]
+   n_0x55bb4f5c6e70 -> n_site_rates[style=dashed]
+   {rank=same; n_seq;}
+   graph [bgcolor=lavenderblush2, pad=0.25]
+}

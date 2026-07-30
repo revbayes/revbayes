@@ -168,10 +168,8 @@ double CollapseExpandFossilBranchProposal::collapseBranch(TopologyNode &n)
         sibling = &parent.getChild( 1 );
     }
     
-    // determine lower and upper bound of backward move. The window has to contain the parent's
-    // current age, or expand cannot undo collapse. The age range maximum need not contain it: a
-    // fossil with an uncertain age sits anywhere in its range, and the parent is only required
-    // to be older than the tip itself.
+    // determine lower and upper bound of backward move. The window has to contain the
+    // parent's current age, or expand cannot undo collapse; the age range maximum need not.
     double min_age = n.getAge();
     double max_age = parent.getAge();
     if ( parent.isRoot() )
@@ -234,10 +232,8 @@ double CollapseExpandFossilBranchProposal::expandBranch(TopologyNode &n)
         sibling = &parent.getChild( 1 );
     }
     
-    // determine lower and upper bound of backward move. The window has to contain the parent's
-    // current age, or expand cannot undo collapse. The age range maximum need not contain it: a
-    // fossil with an uncertain age sits anywhere in its range, and the parent is only required
-    // to be older than the tip itself.
+    // determine lower and upper bound of backward move. The window has to contain the
+    // parent's current age, or expand cannot undo collapse; the age range maximum need not.
     double min_age = n.getAge();
     double max_age = parent.getAge();
     if ( parent.isRoot() )
