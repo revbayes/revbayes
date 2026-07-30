@@ -17,6 +17,7 @@
 #include "RbOrderedSet.h"
 #include "StochasticNode.h"
 #include "RbSettings.h" // for debugMCMC setting
+#include "RlUserInterface.h" // for RBOUT
 
 using boost::optional;
 
@@ -379,7 +380,23 @@ double search_interval(double x0,double& L, double& R, slice_function& g,double 
             L = x1;
     }
 
-    std::abort();
+    // Could not locate a point inside the slice after 200 shrinkage steps.
+    // x0 is always in the slice (logy <= g(x0) by construction; see assert above),
+    // so fall back to it instead of aborting: returning x0 rejects the move, which
+    // is itself a valid slice sample. This guards against near-degenerate
+    // conditionals (e.g. very small / single-taxon datasets) where numerical
+    // inconsistency can prevent the search from converging.
+    // The loop left the variable at the last (rejected) trial point, so restore
+    // it to x0 before returning.
+    static bool warned = false;
+    if (not warned)
+    {
+        RBOUT("Warning: slice sampler could not locate the slice after 200 steps; "
+              "keeping the current value (move rejected). This can occur for "
+              "near-degenerate conditionals, e.g. very small datasets.");
+        warned = true;
+    }
+    g(x0);
 
     return x0;
 }
