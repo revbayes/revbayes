@@ -168,12 +168,11 @@ double CollapseExpandFossilBranchProposal::collapseBranch(TopologyNode &n)
         sibling = &parent.getChild( 1 );
     }
     
-    // determine lower and upper bound of backward move. On a range tree the window must contain
-    // the parent's current age or expand cannot undo collapse, and an occurrence bound is not
-    // one, since a birth may fall inside the taxon's oldest bin. Proposals below the range are
-    // rejected by the density. A non-range tree keeps its own bound.
-    double min_age = tau->getDistribution().isStratigraphicRangeTree() ? n.getAge()
-                                                             : n.getTaxon().getAgeRange().getMax();
+    // determine lower and upper bound of backward move. The window must contain the parent's
+    // current age or expand cannot undo collapse, so it starts at the tip: an occurrence bound
+    // is not one, since a birth may fall inside the taxon's oldest bin. Proposals below the
+    // range are simply rejected by the density.
+    double min_age = n.getAge();
     double max_age = parent.getAge();
     if ( parent.isRoot() )
     {
@@ -235,12 +234,11 @@ double CollapseExpandFossilBranchProposal::expandBranch(TopologyNode &n)
         sibling = &parent.getChild( 1 );
     }
     
-    // determine lower and upper bound of backward move. On a range tree the window must contain
-    // the parent's current age or expand cannot undo collapse, and an occurrence bound is not
-    // one, since a birth may fall inside the taxon's oldest bin. Proposals below the range are
-    // rejected by the density. A non-range tree keeps its own bound.
-    double min_age = tau->getDistribution().isStratigraphicRangeTree() ? n.getAge()
-                                                             : n.getTaxon().getAgeRange().getMax();
+    // determine lower and upper bound of backward move. The window must contain the parent's
+    // current age or expand cannot undo collapse, so it starts at the tip: an occurrence bound
+    // is not one, since a birth may fall inside the taxon's oldest bin. Proposals below the
+    // range are simply rejected by the density.
+    double min_age = n.getAge();
     double max_age = parent.getAge();
     if ( parent.isRoot() )
     {
