@@ -107,10 +107,10 @@ double CollapseExpandFossilBranchProposal::doProposal( void )
         TopologyNode* node = &t.getNode(i);
 
         // a lone lineage is its own root, so it has no branch to collapse and no sibling.
-        // A sampled ancestor is the ancestral species, so only the ancestral continuation
-        // (child 0) is a candidate; collapsing any other child would not be reversible.
-        if ( node->isFossil() == true && node->isRoot() == false
-             && &node->getParent().getChild( 0 ) == node )
+        // No further restriction: on a range tree a sampled ancestor node must carry its species on
+        // the sampled ancestor tip, and the density rejects a collapse that breaks that, which also
+        // leaves the move usable by the distributions that do not track continuation at all.
+        if ( node->isFossil() == true && node->isRoot() == false )
         {
             fossils.push_back(node);
         }
