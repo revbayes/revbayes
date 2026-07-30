@@ -166,11 +166,11 @@ double CollapseExpandFossilBranchProposal::collapseBranch(TopologyNode &n)
         sibling = &parent.getChild( 1 );
     }
     
-    // determine lower and upper bound of backward move. An extended tip is an extinction, which
-    // may sit below its occurrence range, so the window starts at the tip and always contains
-    // the parent's current age.
-    double min_age = tau->getDistribution().isExtended() ? n.getAge()
-                                                             : n.getTaxon().getAgeRange().getMax();
+    // determine lower and upper bound of backward move. The window must contain the parent's
+    // current age or expand cannot undo collapse, so it starts at the tip: an occurrence bound
+    // is not one, since a birth may fall inside the taxon's oldest bin. Proposals below the
+    // range are simply rejected by the density.
+    double min_age = n.getAge();
     double max_age = parent.getAge();
     if ( parent.isRoot() )
     {
@@ -232,11 +232,11 @@ double CollapseExpandFossilBranchProposal::expandBranch(TopologyNode &n)
         sibling = &parent.getChild( 1 );
     }
     
-    // determine lower and upper bound of backward move. An extended tip is an extinction, which
-    // may sit below its occurrence range, so the window starts at the tip and always contains
-    // the parent's current age.
-    double min_age = tau->getDistribution().isExtended() ? n.getAge()
-                                                             : n.getTaxon().getAgeRange().getMax();
+    // determine lower and upper bound of backward move. The window must contain the parent's
+    // current age or expand cannot undo collapse, so it starts at the tip: an occurrence bound
+    // is not one, since a birth may fall inside the taxon's oldest bin. Proposals below the
+    // range are simply rejected by the density.
+    double min_age = n.getAge();
     double max_age = parent.getAge();
     if ( parent.isRoot() )
     {
