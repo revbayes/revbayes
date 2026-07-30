@@ -35,14 +35,17 @@ class Model;
         
         
         // basic methods
-        StochasticVariableMonitor*          clone(void) const;                                                  //!< Clone the object
-        
+        StochasticVariableMonitor*          clone(void) const override;                                  //!< Clone the object
+
+        // monitor methods
+        void                                monitorVariables(std::uint64_t gen) override;
+
         // getters and setters
-        void                                setModel(Model* m);
+        void                                setModel(Model* m) override;
         
     private:
         // helper methods
-        void                                resetDagNodes(void);                                                //!< Extract the variable to be monitored again.
+        void                                resetDagNodes(void);                                         //!< Extract the variable to be monitored again.
         
     };
     

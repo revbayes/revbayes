@@ -17,6 +17,7 @@
 
 #include "StringUtilities.h"
 
+#include <cctype>
 #include <cstdio>
 #include <cstdint>
 #include <iomanip>
@@ -378,6 +379,63 @@ bool StringUtilities::isNumber(const std::string& s)
     }
     
     return true;
+}
+
+
+/**
+ * Perform natural sort, i.e., one that treats digits numerically and other
+ * characters lexicographically: "a10" goes after rather than before "a2", etc.
+ * */
+bool StringUtilities::naturalSort(const std::string& a, const std::string& b)
+{
+    size_t i = 0;
+    size_t j = 0;
+        
+    while (i < a.size() && j < b.size())
+    {
+        // numerical comparison if both are digits
+        if (std::isdigit(a[i]) && std::isdigit(b[j]))
+        {
+            // parse integer substrings
+            size_t i2 = i;
+            size_t j2 = j;
+            
+            while ( i2 < a.size() && std::isdigit(a[i2]) ) i2++;
+            while ( j2 < b.size() && std::isdigit(b[j2]) ) j2++;
+            
+            std::int64_t numA = std::stoll( a.substr(i, i2 - i) );
+            std::int64_t numB = std::stoll( b.substr(j, j2 - j) );
+            
+            if (numA != numB)
+            {
+                return numA < numB;
+            }
+            
+            // if numbers are equal but differently "spelled" (e.g., 02 vs. 2), fall back on lexicographic
+            // comparison (i.e., shorter sequence comes first) to get a strict ordering
+            if ( (i2 - i) != (j2 - j) )
+            {
+                return (i2 - i) < (j2 - j);
+            }
+            
+            i = i2;
+            j = j2;
+        }
+        // regular lexicographic comparison for non-digits
+        else
+        {
+            if (a[i] != b[j])
+            {
+                return a[i] < b[j];
+            }
+            
+            i++;
+            j++;
+        }
+    }
+    
+    // what if one is a prefix of the other
+    return i == a.size() && j != b.size();
 }
 
 

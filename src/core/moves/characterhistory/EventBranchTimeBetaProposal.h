@@ -40,14 +40,14 @@ namespace RevBayesCore {
         
     protected:
         
-        void                                            swapNodeInternal(DagNode *oldN, DagNode *newN) override;                            //!< Swap the DAG nodes on which the Proposal is working on
+        void                                            swapNodeInternal(DagNode *oldN, DagNode *newN) override;                            //!< Swap the DAG nodes the Proposal is working on
         
     private:
         // parameters
         
         StochasticNode<Tree>*                           variable;                                                                           //!< The variable the Proposal is working on
         AbstractCharacterHistoryBirthDeathProcess*      distribution;
-        double                                          delta;
+        double                                          delta;                                                                              //!< The scale parameter of the proposal (smaller delta -> smaller a and b -> larger beta distr. variance -> larger proposals)
         double                                          offset;
 
         CharacterEvent*                                 stored_value;                                                                       //!< The stored value of the Proposal used for rejections.

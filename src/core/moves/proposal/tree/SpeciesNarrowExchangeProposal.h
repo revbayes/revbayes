@@ -29,21 +29,19 @@ template <class variableType> class StochasticNode;
     class SpeciesNarrowExchangeProposal : public Proposal {
         
     public:
-        SpeciesNarrowExchangeProposal(StochasticNode<Tree> *sp);                                                                    //!<  constructor
+        SpeciesNarrowExchangeProposal(StochasticNode<Tree> *sp);                                                                    //!< Constructor
         
         // Basic utility functions
         void                                            addGeneTree(StochasticNode<Tree> *gt);                                      //!< Add a DAG Node holding a gene tree on which this move should operate on
-        void                                            cleanProposal(void);                                                            //!< Clean up proposal
-        SpeciesNarrowExchangeProposal*                  clone(void) const;                                                              //!< Clone object
-        double                                          doProposal(void);                                                               //!< Perform proposal
-        const std::string&                              getProposalName(void) const;                                                    //!< Get the name of the proposal for summary printing
+        void                                            cleanProposal(void);                                                        //!< Clean up proposal
+        SpeciesNarrowExchangeProposal*                  clone(void) const;                                                          //!< Clone object
+        double                                          doProposal(void);                                                           //!< Perform proposal
+        const std::string&                              getProposalName(void) const;                                                //!< Get the name of the proposal for summary printing
         double                                          getProposalTuningParameter(void) const;
-        void                                            prepareProposal(void);                                                          //!< Prepare the proposal
-        void                                            printParameterSummary(std::ostream &o, bool name_only) const;                                   //!< Print the parameter summary
+        void                                            prepareProposal(void);                                                      //!< Prepare the proposal
+        void                                            printParameterSummary(std::ostream &o, bool name_only) const;               //!< Print the parameter summary
         void                                            removeGeneTree(StochasticNode<Tree> *gt);                                   //!< Remove a DAG Node holding a gene tree on which this move should operate on
-        void                                            setProposalTuningParameter(double tp);
-        void                                            tune(double r);                                                                 //!< Tune the proposal to achieve a better acceptance/rejection ratio
-        void                                            undoProposal(void);                                                             //!< Reject the proposal
+        void                                            undoProposal(void);                                                         //!< Reject the proposal
         
     protected:
         
@@ -55,13 +53,13 @@ template <class variableType> class StochasticNode;
         void                                            prune(TopologyNode *n, TopologyNode *c);
         void                                            regraft(TopologyNode *n, TopologyNode *c);
         
-        void                                            swapNodeInternal(DagNode *oldN, DagNode *newN);                                 //!< Swap the DAG nodes on which the Proposal is working on
+        void                                            swapNodeInternal(DagNode *oldN, DagNode *newN);                             //!< Swap the DAG nodes the Proposal is working on
         
         
     private:
         
         // parameters
-        StochasticNode<Tree>*                           speciesTree;                                                                    //!< The variable the Proposal is working on
+        StochasticNode<Tree>*                           speciesTree;                                                                //!< The variable the Proposal is working on
         std::vector< StochasticNode<Tree> *>            geneTrees;
         
         // stored objects to undo proposal

@@ -156,7 +156,7 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
         if ( ( !n->isTip() || ( n->isRoot() && !clade.getMrca().empty() ) ) && report.clade_probs )
         {
             double pp = cladeProbability( clade, false );
-            n->addNodeParameter("posterior",pp);
+            n->addBranchParameter("posterior",pp);
         }
 
         // are we using sampled ancestors?
@@ -198,6 +198,13 @@ void TreeSummary::annotateTree( Tree &tree, AnnotationReport report, bool verbos
         if ( report.conditional_tree_ages )
         {
             node_ages = tree_clade_ages[newick][split];
+        }
+
+        // Verify that we have age data for this node
+        if ( node_ages.empty() )
+        {
+            std::string node_desc = n->isTip() ? ("tip '" + n->getName() + "'") : ("internal node with clade " + clade.toString());
+            throw RbException() << "No age samples found for " << node_desc << ".";
         }
 
         // set the node ages/branch lengths
@@ -925,71 +932,67 @@ Tree* TreeSummary::mrTree(AnnotationReport report, double cutoff, bool verbose)
         RbBitSet tmp(tipNames.size());
         TopologyNode* parentNode = findParentNode(*root, clade, children, tmp );
 
-        if (parentNode != NULL )
+        //skip this clade if it is not compatible
+        if (not parentNode) continue;
+
+        // find the mrca child(ren) if they exist
+        std::vector<TopologyNode*> mrca;
+        if ( not clade.second.empty() )
         {
-            // skip this node if we've already found a clade compatible with it
-            if ( children.size() == parentNode->getNumberOfChildren() ) continue;
-
-            std::vector<TopologyNode*> mrca;
-
-            // find the mrca child if it exists
-            if ( clade.second.empty() == false )
+            for (auto& child: children)
             {
-                for (size_t i = 0; i < children.size(); i++)
-                {
-                    if ( children[i]->isTip() && std::find(clade.second.begin(), clade.second.end(), children[i]->getTaxon() ) != clade.second.end() )
-                    {
-                        mrca.push_back(children[i]);
-                    }
-                }
-
-                // if we couldn't find the mrca, then this clade is not compatible
-                if ( mrca.size() != clade.second.size() )
-                {
-                    continue;
-                }
-                else
-                {
-                    for (size_t i = 0; i < mrca.size(); i++)
-                    {
-                        mrca[i]->setSampledAncestor(true);
-                    }
-                }
+                // Add the child to the mrca if it's a tip and its taxon is in clade.second
+                if ( child->isTip() && std::find(clade.second.begin(), clade.second.end(), child->getTaxon() ) != clade.second.end() )
+                    mrca.push_back(child);
             }
+
+            // if we couldn't find all the mrcas, then this clade is not compatible
+            if ( mrca.size() != clade.second.size() )
+            {
+                continue;
+            }
+            else
+            {
+                for (auto& mrca_node: mrca)
+                    mrca_node->setSampledAncestor(true);
+            }
+        }
+
+        // avoid creating a new child if we've already found a clade compatible with it
+        if ( children.size() == parentNode->getNumberOfChildren() ) continue;
+
+        nIndex++;   //increment node index
+        TopologyNode* intNode = new TopologyNode(nIndex); //Topology node constructor, with proper node index
+
+        // move the children to a new internal node
+        for (size_t i = 0; i < children.size(); i++)
+        {
+            parentNode->removeChild(children[i]);
+            intNode->addChild(children[i]);
+            children[i]->setParent(intNode);
+        }
+
+        intNode->setParent(parentNode);
+        parentNode->addChild(intNode);
+
+        // add a mrca child if it exists and there is more than one non-mrca taxa
+        if ( mrca.empty() == false && children.size() > 2 )
+        {
+            TopologyNode* old_parent = parentNode;
 
             nIndex++;   //increment node index
-            TopologyNode* intNode = new TopologyNode(nIndex); //Topology node constructor, with proper node index
+            parentNode = new TopologyNode(nIndex); //Topology node constructor, with proper node index
 
-            // move the children to a new internal node
-            for (size_t i = 0; i < children.size(); i++)
-            {
-                parentNode->removeChild(children[i]);
-                intNode->addChild(children[i]);
-                children[i]->setParent(intNode);
-            }
+            intNode->removeChild(mrca[0]);
+            parentNode->addChild(mrca[0]);
+            mrca[0]->setParent(parentNode);
 
-            intNode->setParent(parentNode);
+            old_parent->removeChild(intNode);
+            old_parent->addChild(parentNode);
+            parentNode->setParent(old_parent);
+
             parentNode->addChild(intNode);
-
-            // add a mrca child if it exists and there is more than one non-mrca taxa
-            if ( mrca.empty() == false && children.size() > 2 )
-            {
-                TopologyNode* old_parent = parentNode;
-
-                nIndex++;   //increment node index
-                parentNode = new TopologyNode(nIndex); //Topology node constructor, with proper node index
-
-                intNode->removeChild(mrca[0]);
-                parentNode->addChild(mrca[0]);
-                mrca[0]->setParent(parentNode);
-
-                old_parent->removeChild(intNode);
-                old_parent->addChild(parentNode);
-                parentNode->setParent(old_parent);
-
-                parentNode->addChild(intNode);
-                intNode->setParent(parentNode);
-            }
+            intNode->setParent(parentNode);
         }
 
         root->setTree(consensusTree);
@@ -1983,7 +1986,12 @@ void TreeSummary::summarize( bool verbose )
             tree_counts[newick]++;
 
             // get the clades for this tree
-            RbBitSet b( tree.getNumberOfTips(), false );
+            // Size the bitset based on the taxon bitset map, not just tip count,
+            // since getTaxa() uses indices from the map which may include sampled ancestors
+            // and other non-tip taxa. Ensure the map is built by calling getTaxonBitSetMap().
+            const std::map<std::string, size_t>& taxon_map = tree.getTaxonBitSetMap();
+            size_t bitset_size = taxon_map.size();
+            RbBitSet b( bitset_size, false );
             collectTreeSample(tree.getRoot(), b, newick, clade_counts);
         }
     }

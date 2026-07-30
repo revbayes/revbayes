@@ -74,7 +74,7 @@ RevLanguage::Func_reverse<valType>* RevLanguage::Func_reverse<valType>::clone( v
 template <typename valType>
 RevBayesCore::TypedFunction< RevBayesCore::RbVector< typename valType::valueType> >* RevLanguage::Func_reverse<valType>::createFunction( void ) const
 {
-    const RevBayesCore::TypedDagNode< RevBayesCore::RbVector< typename valType::valueType> >* v     = static_cast<const ModelVector<valType> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    const RevBayesCore::TypedDagNode< RevBayesCore::RbVector< typename valType::valueType> >* v = static_cast<const ModelVector<valType> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     
     RevBayesCore::VectorReverse<typename valType::valueType>* func = new RevBayesCore::VectorReverse<typename valType::valueType>( v );
     

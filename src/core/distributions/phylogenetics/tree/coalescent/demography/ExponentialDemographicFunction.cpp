@@ -37,13 +37,13 @@ ExponentialDemographicFunction::ExponentialDemographicFunction(const Exponential
     time_ancient( f.time_ancient ),
     time_recent( f.time_recent )
 {
-    
+
 }
 
 
 ExponentialDemographicFunction::~ExponentialDemographicFunction( void )
 {
-    
+
 }
 
 /**
@@ -52,7 +52,7 @@ ExponentialDemographicFunction::~ExponentialDemographicFunction( void )
 ExponentialDemographicFunction& ExponentialDemographicFunction::operator=(const ExponentialDemographicFunction &f)
 {
     DemographicFunction::operator=( f );
-    
+
     if ( this != &f )
     {
         theta_ancient   = f.theta_ancient;
@@ -60,7 +60,7 @@ ExponentialDemographicFunction& ExponentialDemographicFunction::operator=(const 
         time_ancient    = f.time_ancient;
         time_recent     = f.time_recent;
     }
-    
+
     return *this;
 }
 
@@ -74,7 +74,7 @@ ExponentialDemographicFunction& ExponentialDemographicFunction::operator=(const 
  */
 ExponentialDemographicFunction* ExponentialDemographicFunction::clone( void ) const
 {
-    
+
     return new ExponentialDemographicFunction(*this);
 }
 
@@ -89,12 +89,12 @@ double ExponentialDemographicFunction::getDemographic(double t) const
     double N1 = theta_ancient->getValue();
     double t0 = time_recent->getValue();
     double t1 = time_ancient->getValue();
-    
+
     if ( t1 < t0 || t0 < 0 || N1 < 0 || t < t0 || t > t1 )
     {
         throw RbException("Impossible parameter values in exponential growth/decline demographic functions.");
     }
-    
+
     if ( N0 == N1 )
     {
         return N0;
@@ -104,7 +104,7 @@ double ExponentialDemographicFunction::getDemographic(double t) const
         double alpha = log( N1/N0 ) / (t0 - t1);
         return N0 * exp( (t0-t) * alpha);
     }
-    
+
 }
 
 /**
@@ -119,13 +119,13 @@ double ExponentialDemographicFunction::getIntegral(double start, double finish) 
     double N1 = theta_ancient->getValue();
     double t0 = time_recent->getValue();
     double t1 = time_ancient->getValue();
-    
+
     if ( t1 < t0 || t0 < 0 || N1 < 0 || start < t0 || start > t1 || finish < t0 || finish > t1 )
     {
         throw RbException("Impossible parameter values in exponential growth/decline demographic functions.");
     }
-    
-    
+
+
     if ( N0 == N1 )
     {
         double delta = finish - start;
@@ -136,43 +136,47 @@ double ExponentialDemographicFunction::getIntegral(double start, double finish) 
         double alpha = log( N1/N0 ) / (t0 - t1);
         return (exp( (finish-t0)*alpha ) - exp((start-t0)*alpha)) / N0 / alpha;
     }
-    
+
 }
 
 /**
- * @param[in]   time    Current time in coalescent simulation process
- * @param[in]   lambda  
+ * @param[in]   time         Current time in coalescent simulation process
+ * @param[in]   lambda     Random draw from a standard exponential
  *
  * @return Waiting Time until next coalescent event
  */
-double ExponentialDemographicFunction::getWaitingTime(double time, double lambda) const
+double ExponentialDemographicFunction::getWaitingTime(double time, double lambda, double ploidy) const
 {
-    double N0 = theta_recent->getValue();
-    double N1 = theta_ancient->getValue();
+    double N0 = theta_recent->getValue() * ploidy;
+    double N1 = theta_ancient->getValue() * ploidy;
     double t0 = time_recent->getValue();
     double t1 = time_ancient->getValue();
-    
+
     if ( t1 < t0 || t0 < 0 || N1 < 0 || time < t0 || time > t1 )
     {
         throw RbException("Impossible parameter values in exponential growth/decline demographic functions.");
     }
-    
+
     if ( N0 == N1 )
     {
         return N0 * lambda;
     }
     else
     {
-	    double alpha = log( N1/N0 ) / (t0 - t1);
-	    double inlog = exp(alpha * (time - t0)) + lambda * alpha * theta_recent->getValue();
-	    if (inlog < 0)
-	    {
-	        return -1;
-	    }
-	    else 
-	    {
-	        return log(inlog) / alpha - (time - t0);
-	    }
+	      double alpha = log( N1/N0 ) / (t0 - t1);
+	      double inlog = exp(alpha * (time - t0)) + lambda * alpha * N0;
+
+        // we compute the value for which the waiting time is longer than this demographic function (outside its range)
+        double max_lambda = ( exp(alpha*t1) - exp(alpha*time) ) / (N0*alpha);
+        if ( max_lambda < lambda || inlog < 0)
+	      {
+            // simply return a waiting time that is just outside this demographic function range
+	          return t1-time+1.0;
+	      }
+	      else
+	      {
+	          return log(inlog) / alpha - (time - t0);
+	      }
     }
 }
 
@@ -182,27 +186,27 @@ double ExponentialDemographicFunction::getWaitingTime(double time, double lambda
  */
 void ExponentialDemographicFunction::swapNodeInternal(const DagNode *old_node, const DagNode *new_node)
 {
-    
+
     if (old_node == theta_ancient)
     {
         theta_ancient = static_cast<const TypedDagNode<double>* >( new_node );
     }
-    
+
     if (old_node == theta_recent)
     {
         theta_recent = static_cast<const TypedDagNode<double>* >( new_node );
     }
-    
+
     if (old_node == time_ancient)
     {
         time_ancient = static_cast<const TypedDagNode<double>* >( new_node );
     }
-    
+
     if (old_node == time_recent)
     {
         time_recent = static_cast<const TypedDagNode<double>* >( new_node );
     }
-    
+
 }
 
 

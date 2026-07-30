@@ -91,7 +91,7 @@ if [ ${#only_tests[@]} = 0 ] ; then
 (
     cd revbayes.github.io/tutorials
     ./run_tutorial_tests.sh ${rb_exec[@]}
-)
+) || exit 1
 fi
 
 if [ ${#only_tests[@]} -gt 0 ] ; then
@@ -130,6 +130,9 @@ for t in ${TESTS}; do
         rb_options=""
         if grep "^## continue-on-error" "$f" 2>&1 >/dev/null ; then
             rb_options="-c"
+        fi
+        if grep "^## print-commands" "$f" 2>&1 >/dev/null ; then
+            rb_options="$rb_options -p"
         fi
         ${rb_exec[@]} ${rb_options} $f &> output/${script_name}.errout # print output so we can see any error messages
         script_result="$?"

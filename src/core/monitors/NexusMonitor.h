@@ -24,7 +24,8 @@ public:
 
     virtual void printHeader();
     virtual void monitor(std::uint64_t gen);
-    virtual void closeStream();    
+    virtual void closeStream();
+    virtual void truncateAfterGeneration(std::uint64_t lastGen);
     void swapNode(DagNode *oldN, DagNode *newN);
 
 protected:

@@ -3,7 +3,6 @@
 //  RevLanguage
 //
 //  Created by Michael Landis on 8/19/14.
-//  Copyright 2012 __MyCompanyName__. All rights reserved.
 //
 
 #include <iosfwd>
@@ -13,7 +12,7 @@
 #include "Func_mrcaIndex.h"
 #include "Natural.h"
 #include "RlClade.h"
-#include "RlTimeTree.h"
+#include "RlTree.h"
 #include "RlDeterministicNode.h"
 #include "MrcaIndexStatistic.h"
 #include "TypedDagNode.h"
@@ -57,7 +56,7 @@ Func_mrcaIndex* Func_mrcaIndex::clone( void ) const
 RevBayesCore::TypedFunction<std::int64_t>* Func_mrcaIndex::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = static_cast<const TimeTree&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = static_cast<const Tree&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     const RevBayesCore::Clade& c = static_cast<const Clade &>( this->args[1].getVariable()->getRevObject() ).getValue();
     RevBayesCore::MrcaIndexStatistic* f = new RevBayesCore::MrcaIndexStatistic( tau, c );
     
@@ -70,13 +69,13 @@ const ArgumentRules& Func_mrcaIndex::getArgumentRules( void ) const
 {
     
     static ArgumentRules argumentRules = ArgumentRules();
-    static bool          rules_set = false;
+    static bool rules_set = false;
     
     if ( !rules_set )
     {
         
-        argumentRules.push_back( new ArgumentRule( "tree" , TimeTree::getClassTypeSpec(), "The tree which is used to compute the MRCA.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        argumentRules.push_back( new ArgumentRule( "clade", Clade::getClassTypeSpec()   , "The clade for which the MRCA is searched.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "tree" , Tree::getClassTypeSpec(),  "The tree which is used to compute the MRCA.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "clade", Clade::getClassTypeSpec(), "The clade for which the MRCA is searched.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         
         rules_set = true;
     }
@@ -113,6 +112,16 @@ std::string Func_mrcaIndex::getFunctionName( void ) const
     std::string f_name = "mrcaIndex";
     
     return f_name;
+}
+
+
+std::vector<std::string> Func_mrcaIndex::getFunctionNameAliases( void ) const
+{
+    std::vector<std::string> aliases;
+
+    aliases.push_back("getMRCA");
+
+    return aliases;
 }
 
 

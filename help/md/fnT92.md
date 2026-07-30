@@ -39,6 +39,6 @@ fnGTR
     Q := fnT92(kappa, gc)
 
 ## references
-- citation: Tamura K (1992). "Estimation of the number of nucleotide substitutions when there are strong transition-transversion and G+C-content biases". Molecular Biology and Evolution. 9:678–87.
+- citation: Tamura K (1992). "Estimation of the number of nucleotide substitutions when there are strong transition-transversion and G+C-content biases". Molecular Biology and Evolution. 9:678--87.
   doi: https://doi.org/10.1093/oxfordjournals.molbev.a040752
   url: https://academic.oup.com/mbe/article/9/4/678/1254082

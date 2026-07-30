@@ -19,7 +19,7 @@ namespace RevBayesCore {
     class UPPAllocationProposal : public Proposal {
         
     public:
-        UPPAllocationProposal( StochasticNode< RbVector<mixtureType> >* n );                                                                    //!<  constructor
+        UPPAllocationProposal( StochasticNode< RbVector<mixtureType> >* n );                                                    //!< Constructor
         
         // Basic utility functions
         void                                cleanProposal(void);                                                                //!< Clean up proposal
@@ -28,20 +28,18 @@ namespace RevBayesCore {
         const std::string&                  getProposalName(void) const;                                                        //!< Get the name of the proposal for summary printing
         double                              getProposalTuningParameter(void) const;
         void                                prepareProposal(void);                                                              //!< Prepare the proposal
-        void                                printParameterSummary(std::ostream &o, bool name_only) const;                                       //!< Print the parameter summary
-        void                                setProposalTuningParameter(double tp);
-        void                                tune(double r);                                                                     //!< Tune the proposal to achieve a better acceptance/rejection ratio
+        void                                printParameterSummary(std::ostream &o, bool name_only) const;                       //!< Print the parameter summary
         void                                undoProposal(void);                                                                 //!< Reject the proposal
         
     protected:
         
-        void                                swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes on which the Proposal is working on
+        void                                swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes the Proposal is working on
         
         
     private:
 
         // parameters
-        StochasticNode< RbVector<mixtureType> >*  variable;                                                                           //!< The variable the Proposal is working on
+        StochasticNode< RbVector<mixtureType> >*  variable;                                                                     //!< The variable the Proposal is working on
         size_t                                    old_partition;
         std::vector<int>                          old_value_assignments;
         
@@ -210,29 +208,6 @@ void RevBayesCore::UPPAllocationProposal<mixtureType>::swapNodeInternal(DagNode 
     variable = static_cast<StochasticNode< RbVector<mixtureType> >* >(newN) ;
     
 }
-
-
-template <class mixtureType>
-void RevBayesCore::UPPAllocationProposal<mixtureType>::setProposalTuningParameter(double tp)
-{
-    // this proposal has no tuning parameter: nothing to do
-}
-
-
-/**
- * Tune the Proposal to accept the desired acceptance ratio.
- *
- * The acceptance ratio for this Proposal should be around 0.44.
- * If it is too large, then we increase the proposal size,
- * and if it is too small, then we decrease the proposal size.
- */
-template <class mixtureType>
-void RevBayesCore::UPPAllocationProposal<mixtureType>::tune( double rate )
-{
-    // nothing to do here.
-    
-}
-
 
 
 #endif

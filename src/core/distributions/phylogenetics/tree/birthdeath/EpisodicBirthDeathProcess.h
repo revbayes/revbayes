@@ -34,8 +34,8 @@ namespace RevBayesCore {
         void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP) override;                //!< Swap a parameter
         void                                                prepareProbComputation(void) const override;
         
-        void                                                prepareRateIntegral(double end);                                                        //!< Compute the rate integral.
-        void                                                prepareSurvivalProbability(double end, double r);                                       //!< Compute the rate integral.
+        void                                                prepareRateIntegral(double end) const override;                                          //!< Compute the rate integral.
+        void                                                prepareSurvivalProbability(double end, double r) const override;                         //!< Compute the rate integral.
 
         // helper functions
         double                                              lnSpeciationRate(double t) const override;

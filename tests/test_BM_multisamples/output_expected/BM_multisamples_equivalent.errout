@@ -1,0 +1,24 @@
+   Successfully read one character matrix from file 'data/Drosophila_tpm.nex'
+   Successfully read one character matrix from file 'data/Drosophila_tpm_pruned.nex'
+   Attempting to read the contents of file "Drosophila.tre"
+   Successfully read file
+   Attempting to read the contents of file "Drosophila_pruned.tre"
+   Successfully read file
+lp1 = -125.757
+lp2 = -125.757
+likelihoods in BM multi-sample distributions equal, test passed
+   
+   Running burn-in phase of Monte Carlo sampler for 50 iterations.
+   This simulation runs 1 independent replicate.
+   The simulator uses 7 different moves in a random move schedule with 7 moves per iteration
+   
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 7 different moves in a random move schedule with 7 moves per iteration
+   

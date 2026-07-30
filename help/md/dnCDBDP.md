@@ -63,7 +63,7 @@ shift independently of each other, the vectors have to be of length N^2. The
 In this case, a draw from the distribution is only fixed to a tree using 
 `.clamp()`.
 ## authors
-Sebastian Hoehna
+Sebastian Höhna
 ## see_also
 dnCBDSP
 fnCladogeneticProbabilityMatrix
@@ -110,7 +110,7 @@ fnCladogeneticSpeciationRateMatrix
                        condition = "time")
 
 ## references
-- citation: Barido-Sottani J, Vaughan TG, Stadler T (2020). A multitype birth–death model for Bayesian inference of lineage-specific birth and death rates. Systematic Biology, 69(5):973–986.
+- citation: Barido-Sottani J, Vaughan TG, Stadler T (2020). A multitype birth--death model for Bayesian inference of lineage-specific birth and death rates. Systematic Biology, 69(5):973-986.
   doi: 10.1093/sysbio/syaa016
   url: https://academic.oup.com/sysbio/article/69/5/973/5762626
 - citation: FitzJohn RG (2012). Diversitree: comparative phylogenetic analyses of diversification in R. Methods in Ecology and Evolution, 3(6):1084-1092.

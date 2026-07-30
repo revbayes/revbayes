@@ -89,7 +89,7 @@ mymcmc.run(generations=50000, tuningInterval=100)
 
 
 # Reading Trace
-trace = readStochasticVariableTrace("output/simple_BM.var", delimiter=TAB)
+trace = readStochasticVariableTrace("output/simple_BM.var", burnin=0.0, delimiter=TAB)
 
 # Creating Posterior Predictive Simulation
 pps = posteriorPredictiveSimulation(mymodel, directory="output/simple_BM_post_sims", trace)

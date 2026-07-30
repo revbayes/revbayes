@@ -55,7 +55,7 @@ RbVector<std::string> RateGenerator::getStateDescriptions( void ) const
     return state_descriptions;
 }
 
-double RateGenerator::getSumOfRates(std::vector<CharacterEvent*> from, const std::vector<size_t> &counts, double age, double rate) const
+double RateGenerator::getSumOfRates(const std::vector<CharacterEvent*>& from, const std::vector<size_t> &counts, double age, double rate) const
 {
 
     // get the rate of leaving the sequence-state
@@ -68,7 +68,7 @@ double RateGenerator::getSumOfRates(std::vector<CharacterEvent*> from, const std
     return sum;
 }
 
-double RateGenerator::getSumOfRates(std::vector<CharacterEvent*> from, double age, double rate) const
+double RateGenerator::getSumOfRates(const std::vector<CharacterEvent*>& from, double age, double rate) const
 {
 
     // need dynamic allocation

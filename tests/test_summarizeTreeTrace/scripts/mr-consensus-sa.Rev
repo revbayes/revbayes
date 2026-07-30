@@ -1,0 +1,3 @@
+tree_trace = readTreeTrace("data/fbd-trees-sa-1.log")
+tr = consensusTree(trace = tree_trace, file = "output/mr-consensus.nex")
+

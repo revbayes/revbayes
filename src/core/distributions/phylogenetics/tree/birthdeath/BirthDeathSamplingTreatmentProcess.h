@@ -79,7 +79,6 @@ namespace RevBayesCore {
         void                                            expandNonGlobalRateParameterVector(std::vector<double> &par, const std::vector<double> &par_times) const; //!< Updates vector par such that it matches the global timeline
         size_t                                          findIndex(double t) const;                                              //!< Find the index so that times[index-1] < t < times[index]
         size_t                                          findIndex(double t, const std::vector<double>& timeline) const;
-        void                                            getOffset(void) const;
         bool                                            isConstantRate(void) const;                                             //!< Checks if we have a constant-rate process
         double                                          lnProbNumTaxa(size_t n, double start, double end, bool MRCA) const override { throw RbException("Cannot compute P(nTaxa)."); }
         double                                          lnProbTreeShape(void) const override;
@@ -94,7 +93,7 @@ namespace RevBayesCore {
         int                                             whichIntervalTime(double t) const;                                      //!< If a time corresponds to an interval/event time, returns that interval, otherwise returns -1
 
         // members
-        bool                                            using_global_timeline;
+        bool                                            using_global_timeline = false;
 
         const TypedDagNode<double >*                    homogeneous_lambda;                                    //!< The homogeneous birth rates.
         const TypedDagNode<RbVector<double> >*          heterogeneous_lambda;                                  //!< The heterogeneous birth rates.
@@ -135,7 +134,6 @@ namespace RevBayesCore {
         mutable std::vector<double>                     serial_bifurcation_times;                              //!< The ages of all bifurcation events in the tree NOT at a burst event
         mutable std::vector<std::vector<double> >       event_bifurcation_times;                               //!< The ages of all bifurcation events in the tree at burst events
 
-        mutable double                                  offset;                                                //!< In the case there the most recent tip is at time y, we internally adjust by this time and treat y as the present; this does not affect the boundary times of the rate shifts
         int                                             num_extant_taxa;
 
         mutable std::vector<double>                     lambda;

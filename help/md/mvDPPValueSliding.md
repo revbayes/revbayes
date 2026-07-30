@@ -9,10 +9,10 @@ In Dirichlet process mixtures, the number of categories (= clusters) is not spec
 ## authors
 Sebastian Hoehna
 ## see_also
-- dnDPP
-- mvSlide
-- mvDPPValueBetaSimplex
-- mvDPPValueScaling
+dnDPP
+mvSlide
+mvDPPValueBetaSimplex
+mvDPPValueScaling
 ## example
 	# Here, we draw from a DP mixture for 3 elements, where every element
 	# is a real number drawn from the standard normal distribution

@@ -54,6 +54,7 @@ cat > "${CROSSNAME}" <<EOF
 ${COMPILER_LINES}
 ar = 'x86_64-w64-mingw32-ar'
 strip = 'x86_64-w64-mingw32-strip'
+dlltool = 'x86_64-w64-mingw32-dlltool'
 pkg-config = 'pkg-config'
 exe_wrapper = 'wine64' # A command used to run generated executables.
 

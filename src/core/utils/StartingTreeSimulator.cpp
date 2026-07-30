@@ -19,6 +19,8 @@
 #include "Taxon.h"
 #include "TimeInterval.h"
 #include "Tree.h"
+#include "TreeUtilities.h"
+#include "RbOrderedSet.h"
 
 using namespace RevBayesCore;
 
@@ -29,9 +31,6 @@ StartingTreeSimulator::StartingTreeSimulator( void )
 }
 
 
-/**
- *
- */
 Tree* StartingTreeSimulator::simulateTree( const std::vector<Taxon> &taxa, const std::vector<Clade> &constraints ) const
 {
     std::vector<Clade> my_constraints = constraints;
@@ -195,7 +194,7 @@ Tree* StartingTreeSimulator::simulateTree( const std::vector<Taxon> &taxa, const
         }
         
         
-        std::set<TopologyNode*> nodes_in_clade;
+        RbOrderedSet<TopologyNode*> nodes_in_clade;
         
         
         for (size_t k = 0; k < taxa.size(); ++k)
@@ -231,8 +230,24 @@ Tree* StartingTreeSimulator::simulateTree( const std::vector<Taxon> &taxa, const
         }
         
         simulateClade(nodes_in_clade, c.getAge());
-        TopologyNode *remaining_node = *(nodes_in_clade.begin());
-        nodes.push_back( remaining_node );
+        
+        // Get the remaining node deterministically by sorting the set
+        TopologyNode *remaining_node = nullptr;
+        
+        if (nodes_in_clade.size() > 0) {
+            // Sort by smallest tip name in subtree for deterministic selection
+            std::sort(nodes_in_clade.begin(), nodes_in_clade.end(), [](const TopologyNode* a, const TopologyNode* b)
+            {
+                return TreeUtilities::getSmallestTipName(a) < TreeUtilities::getSmallestTipName(b);
+            });
+            
+            remaining_node = nodes_in_clade[0];
+            nodes.push_back( remaining_node );
+        }
+        
+        if (remaining_node == nullptr) {
+            throw RbException("No remaining node after simulateClade");
+        }
         
         std::vector<Taxon> v_taxa;
         remaining_node->getTaxa(v_taxa);
@@ -251,7 +266,7 @@ Tree* StartingTreeSimulator::simulateTree( const std::vector<Taxon> &taxa, const
 }
 
 
-void StartingTreeSimulator::simulateClade( std::set<TopologyNode*> &nodes, double max_clade_age) const
+void StartingTreeSimulator::simulateClade( RbOrderedSet<TopologyNode*> &nodes, double max_clade_age) const
 {
     
     // Get the rng
@@ -264,9 +279,8 @@ void StartingTreeSimulator::simulateClade( std::set<TopologyNode*> &nodes, doubl
     size_t num_taxa_at_present = 0;
     
     double min_age = RbConstants::Double::inf;
-    for (std::set<TopologyNode*>::const_iterator it=nodes.begin(); it!=nodes.end(); ++it)
+    for (TopologyNode* this_node : nodes)
     {
-        TopologyNode *this_node = *it;
         double a = this_node->getAge();
         if ( min_age > a )
         {
@@ -275,11 +289,10 @@ void StartingTreeSimulator::simulateClade( std::set<TopologyNode*> &nodes, doubl
     }
 
     double max_tip_age = 0;
-    std::set<TopologyNode*> current_nodes;
+    RbOrderedSet<TopologyNode*> current_nodes;
     std::multimap<double,TopologyNode*> serial_nodes;
-    for (std::set<TopologyNode*>::const_iterator it=nodes.begin(); it!=nodes.end(); ++it)
+    for (TopologyNode* this_node : nodes)
     {
-        TopologyNode *this_node = *it;
         double a = this_node->getAge();
         if ( this_node->isTip() == true )
         {
@@ -358,25 +371,37 @@ void StartingTreeSimulator::simulateClade( std::set<TopologyNode*> &nodes, doubl
             }
         } while ( valid == false );
         
+        // Sort to ensure node selection is deterministic
+        std::sort(current_nodes.begin(), current_nodes.end(), [](const TopologyNode* a, const TopologyNode* b)
+        {
+            return TreeUtilities::getSmallestTipName(a) < TreeUtilities::getSmallestTipName(b);
+        });
+        
         size_t left_index = size_t( current_nodes.size() * rng->uniform01() );
-        std::set<TopologyNode*>::iterator left_it = current_nodes.begin();
-        std::advance(left_it, left_index);
-        TopologyNode *left = *left_it;
-        current_nodes.erase( left_it );
-        
+        TopologyNode *left = current_nodes[left_index];
+        current_nodes.erase( left );
+
         size_t right_index = size_t( current_nodes.size() * rng->uniform01() );
-        std::set<TopologyNode*>::iterator right_it = current_nodes.begin();
-        std::advance(right_it, right_index);
-        TopologyNode *right = *right_it;
-        current_nodes.erase( right_it );
-        
+        TopologyNode *right = current_nodes[right_index];
+        current_nodes.erase( right );
+
+        // Make the left/right assignment deterministic to ensure that fillNodesByPhylogeneticTraversal() will visit the
+        // children in consistent order
         TopologyNode *parent = new TopologyNode();
-        parent->addChild( left );
-        parent->addChild( right );
+        
+        if (TreeUtilities::getSmallestTipName(left) < TreeUtilities::getSmallestTipName(right)) {
+            parent->addChild( left );
+            parent->addChild( right );
+        } else {
+            parent->addChild( right );
+            parent->addChild( left );
+        }
+        
         left->setParent( parent );
         right->setParent( parent );
-        
         parent->setAge( sim_age );
+        
+        // Update current_nodes set with remaining nodes plus new parent
         current_nodes.insert( parent );
 
         --j;

@@ -15,20 +15,17 @@ namespace RevBayesCore {
     public:
         //BranchHistory(void);
         BranchHistoryDiscrete(size_t nc, size_t ns, size_t idx);
-        BranchHistoryDiscrete(size_t nc, size_t ns, size_t idx, std::set<int> sc);
-        BranchHistoryDiscrete(const BranchHistoryDiscrete& m);
         ~BranchHistoryDiscrete(void);
-        
-        // overloaded operators
-        BranchHistoryDiscrete& operator=(const BranchHistoryDiscrete& bh);
         
         // public methods
         BranchHistoryDiscrete*                                          clone(void) const;
         
         // getters
         CharacterEventDiscrete*                                         getEvent(size_t i);
-        const size_t                                                    getNumberStates(void) const;
-        
+        size_t                                                          getMaxObservedState(void) const;
+        size_t                                                          getNumberOfStates(void) const;
+        void                                                            setNumberOfStates(size_t n);
+
         
     protected:
         

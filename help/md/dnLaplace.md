@@ -3,7 +3,7 @@ dnLaplace
 ## title
 Laplace Distribution
 ## description
-Laplace distribution with mean equal to ‘mean’ and scale equal to ‘scale’.
+Laplace distribution with mean equal to `mean` and scale equal to `scale`.
 ## details
 The Laplace distribution has density:
 

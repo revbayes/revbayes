@@ -7,13 +7,16 @@
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "EssMax.h"
+#include "FixedBurnin.h"
 #include "OptionRule.h"
+#include "Probability.h"
 #include "RlAbstractConvergenceStoppingRule.h"
 #include "RbException.h"
 #include "RlString.h"
+#include "RlUserInterface.h"
 #include "SemMin.h"
 #include "TypeSpec.h"
-#include "Natural.h"
+#include "IntegerPos.h"
 #include "RevObject.h"
 #include "RevPtr.h"
 #include "RevVariable.h"
@@ -44,11 +47,28 @@ RevBayesCore::BurninEstimatorContinuous* AbstractConvergenceStoppingRule::constr
     
     if ( bm == "ESS" )
     {
+        // We want to throw a warning when the user explicitly specifies the `burnin` argument while simultaneously setting
+        // `burninMethod` to "ESS" or "SEM". However, the argument has a default value, so it will not be NULL even if the user does
+        // not explicitly set it. To circumvent the issue, we will exploit an implicit convention in Function::processArguments():
+        // when an optional parameter is assigned its ArgumentRule default, its name is prepended with a leading dot.
+        if ( burnin != NULL && burnin->getName() != ".burnin" )
+        {
+            RBOUT( "Warning: the `burnin` argument is ignored when `burninMethod` is \"ESS\"." );
+        }
         burninEst = new RevBayesCore::EssMax();
     }
     else if ( bm == "SEM" )
     {
+        if ( burnin != NULL && burnin->getName() != ".burnin" )
+        {
+            RBOUT( "Warning: the `burnin` argument is ignored when `burninMethod` is \"SEM\"." );
+        }
         burninEst = new RevBayesCore::SemMin();
+    }
+    else if ( bm == "fixed" )
+    {
+        double fraction = static_cast<const Probability &>( burnin->getRevObject() ).getValue();
+        burninEst = new RevBayesCore::FixedBurnin( fraction );
     }
     else
     {
@@ -90,13 +110,14 @@ const MemberRules& AbstractConvergenceStoppingRule::getParameterRules(void) cons
     {
         
         memberRules.push_back( new ArgumentRule( "filename" , RlString::getClassTypeSpec(), "The name of the file containing the samples.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        memberRules.push_back( new ArgumentRule( "frequency", Natural::getClassTypeSpec() , "The frequency how often to check for convergence.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(10000) ) );
+        memberRules.push_back( new ArgumentRule( "frequency", IntegerPos::getClassTypeSpec() , "The frequency how often to check for convergence.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new IntegerPos(10000) ) );
         
         std::vector<std::string> bMethods;
         bMethods.push_back( "ESS" );
         bMethods.push_back( "SEM" );
-        //        optionsUnits.push_back( "fixed" );
+        bMethods.push_back( "fixed" );
         memberRules.push_back( new OptionRule( "burninMethod", new RlString("ESS"), bMethods, "Which type of burnin method to use." ) );
+        memberRules.push_back( new ArgumentRule( "burnin", Probability::getClassTypeSpec(), "The fraction of samples to discard as burnin (only used when burninMethod is \"fixed\").", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.25) ) );
         
         
         rules_set = true;
@@ -119,7 +140,11 @@ const TypeSpec& AbstractConvergenceStoppingRule::getTypeSpec( void ) const
 void AbstractConvergenceStoppingRule::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
 {
     
-    if ( name == "burninMethod" )
+    if ( name == "burnin" )
+    {
+        burnin = var;
+    }
+    else if ( name == "burninMethod" )
     {
         burninMethod = var;
     }

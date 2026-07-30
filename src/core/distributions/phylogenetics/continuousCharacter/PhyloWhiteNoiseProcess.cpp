@@ -58,7 +58,7 @@ double PhyloWhiteNoiseProcess::recursiveLnProb(const TopologyNode &from)
         double alpha = mean * mean / (stdev * stdev);
         double beta = mean / (stdev * stdev);
         double v = (*value)[from.getIndex()];
-        lnProb += log( RbStatistics::Gamma::lnPdf(alpha,beta,v) );
+        lnProb += RbStatistics::Gamma::lnPdf(alpha,beta,v);
     }
     
     size_t numChildren = from.getNumberOfChildren();

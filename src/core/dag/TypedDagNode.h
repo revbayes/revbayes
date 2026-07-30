@@ -43,6 +43,7 @@ namespace RevBayesCore {
 
     class Tree;
     class Simplex;
+    class MatrixReal;
     template <typename T> class RbVector;
 
     ///////////////////////
@@ -81,7 +82,9 @@ namespace RevBayesCore {
     
     template<>
     bool                                                    TypedDagNode<Simplex>::isSimpleNumeric(void) const;
-    
+
+    template<>
+    bool                                                    TypedDagNode<MatrixReal>::isSimpleNumeric(void) const;
     
     
     ////////////////
@@ -98,6 +101,17 @@ namespace RevBayesCore {
     
     template<>
     void TypedDagNode<std::string>::printValue(std::ostream &o, const std::string & /*sep*/, int l, bool left, bool /*user*/, bool /*simple*/, bool /*flatten*/) const;
+
+
+    ///////////////////////////
+    // Others for MatrixReal //
+    ///////////////////////////
+
+    template<>
+    size_t                                                  TypedDagNode<MatrixReal>::getNumberOfElements(void) const;
+
+    template<>
+    void                                                    TypedDagNode<MatrixReal>::printName(std::ostream &o, const std::string &sep, int l, bool left, bool fv) const;
 }
 
 #include "Printable.h"
@@ -243,4 +257,3 @@ void RevBayesCore::TypedDagNode<valueType>::writeToFile(const path &dir) const
 }
 
 #endif
-

@@ -158,7 +158,11 @@ namespace RevBayesCore {
         void                                                setTaxonObject(const std::string& currentName, const Taxon &newName);                               //!< Change the name of a taxon
         void                                                suppressOutdegreeOneNodes(bool replace);                                                            //!< Suppress all internal nodes of outdegree 1
         void                                                unroot(void);                                                                                       //!< Unroot the tree, if it was previously rooted.
-
+        void                                                addTreeParameter_(const std::string& chunk);                                                        //!< Add a tree comment, maybe not of the form key = value
+        void                                                addTreeParameter(const std::string& key, const std::optional<std::string>& value = {});             //!< Add a tree comment, maybe not of the form key = value
+        std::optional<std::optional<std::string>>           getTreeParameter(const std::string& key) const;                                                     //!< 
+        std::optional<std::optional<std::string>>           eraseTreeParameter(const std::string& key);                                                         //!< Erase a comment of the form key or key = value
+        const std::vector<std::string>&                     getTreeParameters(void) const;                                                                      //!< Get the branch length leading towards this node
     protected:
 
 
@@ -180,6 +184,7 @@ namespace RevBayesCore {
         size_t                                              num_nodes = 0;
         mutable std::map<std::string, size_t>               taxon_bitset_map;
 
+        std::vector<std::string>                            tree_comments;
     };
 
     // Global functions using the class

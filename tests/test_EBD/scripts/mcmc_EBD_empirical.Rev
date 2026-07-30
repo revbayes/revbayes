@@ -14,7 +14,7 @@ seed(12345)
 #######################
 
 # Read in the "observed" tree
-T <- readTrees("data/Primates_tree.nex")[1]
+T <- readTrees("data/primates_tree.nex")[1]
 
 # Get some useful variables from the data. We need these later on.
 taxa <- T.taxa()

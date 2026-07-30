@@ -13,8 +13,6 @@
 
 #include "ArgumentRule.h"
 #include "IntegerPos.h"
-#include "NaturalNumbersState.h"
-#include "StandardState.h"
 #include "RbException.h"
 #include "RevObject.h"
 #include "RlAbstractHomologousDiscreteCharacterData.h"
@@ -31,6 +29,7 @@
 #include "StochasticCharacterMappingMonitor.h"
 #include "StochasticNode.h"
 #include "TypedDistribution.h"
+#include "CharTypeApply.h"
 
 namespace RevBayesCore { class AbstractHomologousDiscreteCharacterData; }
 namespace RevBayesCore { class Tree; }
@@ -61,6 +60,7 @@ Mntr_StochasticCharacterMapping* Mntr_StochasticCharacterMapping::clone(void) co
 
 void Mntr_StochasticCharacterMapping::constructInternalObject( void )
 {
+    namespace Core = RevBayesCore;
 
     const std::string& file_name      = static_cast<const RlString        &>( filename->getRevObject()           ).getValue();
     bool               is             = static_cast<const RlBoolean       &>( include_simmap->getRevObject()     ).getValue();
@@ -72,33 +72,33 @@ void Mntr_StochasticCharacterMapping::constructInternalObject( void )
     size_t             idx            = (size_t)static_cast<const Natural &>( index->getRevObject()              ).getValue();
 
 
-    RevBayesCore::TypedDagNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_tdn = NULL;
-    RevBayesCore::StochasticNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_sn = NULL;
+    Core::TypedDagNode<Core::AbstractHomologousDiscreteCharacterData>* ctmc_tdn = NULL;
+    Core::StochasticNode<Core::AbstractHomologousDiscreteCharacterData>* ctmc_sn = NULL;
 
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* cdbdp_tdn = NULL;
-    RevBayesCore::StochasticNode<RevBayesCore::Tree>* cdbdp_sn = NULL;
+    Core::TypedDagNode<Core::Tree>* cdbdp_tdn = NULL;
+    Core::StochasticNode<Core::Tree>* cdbdp_sn = NULL;
 
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* glhbdsp_tdn = NULL;
-    RevBayesCore::StochasticNode<RevBayesCore::Tree>* glhbdsp_sn = NULL;
+    Core::TypedDagNode<Core::Tree>* glhbdsp_tdn = NULL;
+    Core::StochasticNode<Core::Tree>* glhbdsp_sn = NULL;
 
     if ( static_cast<const RevLanguage::AbstractHomologousDiscreteCharacterData&>( ctmc->getRevObject() ).isModelObject() )
     {
         ctmc_tdn = static_cast<const RevLanguage::AbstractHomologousDiscreteCharacterData&>( ctmc->getRevObject() ).getDagNode();
-        ctmc_sn  = static_cast<RevBayesCore::StochasticNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* >(ctmc_tdn);
+        ctmc_sn  = static_cast<Core::StochasticNode<Core::AbstractHomologousDiscreteCharacterData>* >(ctmc_tdn);
     }
     else if ( static_cast<const RevLanguage::Tree&>( cdbdp->getRevObject() ).isModelObject() )
     {
         cdbdp_tdn = static_cast<const RevLanguage::Tree&>( cdbdp->getRevObject() ).getDagNode();
-        cdbdp_sn  = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree>* >( cdbdp_tdn );
+        cdbdp_sn  = static_cast<Core::StochasticNode<Core::Tree>* >( cdbdp_tdn );
 
-        RevBayesCore::StateDependentSpeciationExtinctionProcess *sse_process = NULL;
-        sse_process = dynamic_cast<RevBayesCore::StateDependentSpeciationExtinctionProcess*>( &cdbdp_sn->getDistribution() );
+        Core::StateDependentSpeciationExtinctionProcess *sse_process = NULL;
+        sse_process = dynamic_cast<Core::StateDependentSpeciationExtinctionProcess*>( &cdbdp_sn->getDistribution() );
         sse_process->setSampleCharacterHistory( true );
     }
     else if ( static_cast<const RevLanguage::Tree&>( glhbdsp->getRevObject() ).isModelObject() )
     {
     	glhbdsp_tdn = static_cast<const RevLanguage::Tree&>( glhbdsp->getRevObject() ).getDagNode();
-    	glhbdsp_sn  = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree>* >( glhbdsp_tdn );
+    	glhbdsp_sn  = static_cast<Core::StochasticNode<Core::Tree>* >( glhbdsp_tdn );
     }
     else
     {
@@ -122,57 +122,37 @@ void Mntr_StochasticCharacterMapping::constructInternalObject( void )
         model_type = "glhbdsp";
         data_type = "NaturalNumbers";
     }
-    
-    if ( model_type == "ctmc" )
+
+    auto make_monitor = [&]<typename T>()
     {
-        std::string data_type = ctmc_sn->getValue().getDataType();
-        if (data_type == "Standard") {
-            RevBayesCore::StochasticCharacterMappingMonitor<RevBayesCore::StandardState>* m;
-            m = new RevBayesCore::StochasticCharacterMappingMonitor<RevBayesCore::StandardState>( ctmc_sn, (std::uint64_t)print_gen, file_name, is, sd, sep, idx - 1 );
-            m->setAppend( app );
-            m->setPrintVersion( wv );
-            
-            delete value;
-            value = m;
-            
-        } else if (data_type == "NaturalNumbers") {
-            RevBayesCore::StochasticCharacterMappingMonitor<RevBayesCore::NaturalNumbersState>* m;
-            m = new RevBayesCore::StochasticCharacterMappingMonitor<RevBayesCore::NaturalNumbersState>( ctmc_sn, (std::uint64_t)print_gen, file_name, is, sd, sep, idx - 1 );
-            m->setAppend( app );
-            m->setPrintVersion( wv );
-            
-            delete value;
-            value = m;
-        }
-        
-    }
-    else if ( model_type == "cdbdp" )
-    {
-        if (data_type == "NaturalNumbers") {
-            RevBayesCore::StochasticCharacterMappingMonitor<RevBayesCore::NaturalNumbersState>* m;
-            m = new RevBayesCore::StochasticCharacterMappingMonitor<RevBayesCore::NaturalNumbersState>( cdbdp_sn, (std::uint64_t)print_gen, file_name, is, sd, sep );
-            m->setAppend( app );
-            m->setPrintVersion( wv );
-            
-            delete value;
-            value = m;
-        }
-    }
-    else if ( model_type == "glhbdsp" )
-    {
-    	if (data_type == "NaturalNumbers")
-    	{
-            RevBayesCore::StochasticCharacterMappingMonitor<RevBayesCore::NaturalNumbersState>* m;
-            m = new RevBayesCore::StochasticCharacterMappingMonitor<RevBayesCore::NaturalNumbersState>( glhbdsp_sn, (std::uint64_t)print_gen, file_name, is, sd, sep );
+        delete value;
+        if ( model_type == "ctmc" )
+        {
+            auto m = new Core::StochasticCharacterMappingMonitor<T>( ctmc_sn, (std::uint64_t)print_gen, file_name, is, sd, sep, idx - 1 );
             m->setAppend( app );
             m->setPrintVersion( wv );
 
-            delete value;
             value = m;
-    	}
-    }
-    
+        }
+        else if ( model_type == "cdbdp" )
+        {
+            auto m = new Core::StochasticCharacterMappingMonitor<T>( cdbdp_sn, (std::uint64_t)print_gen, file_name, is, sd, sep );
+            m->setAppend( app );
+            m->setPrintVersion( wv );
+            
+            value = m;
+        }
+        else if ( model_type == "glhbdsp" )
+        {
+            auto m = new Core::StochasticCharacterMappingMonitor<T>( glhbdsp_sn, (std::uint64_t)print_gen, file_name, is, sd, sep );
+            m->setAppend( app );
+            m->setPrintVersion( wv );
 
+            value = m;
+        }
+    };
+
+    apply_to_character_type(make_monitor, data_type);
 }
 
 

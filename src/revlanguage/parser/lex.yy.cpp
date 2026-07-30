@@ -1680,7 +1680,7 @@ static int yy_get_next_buffer (void)
 
 #ifndef YY_NO_UNPUT
 
-    static void yyunput (int c, char * yy_bp )
+[[maybe_unused]] static void yyunput (int c, char * yy_bp )
 {
 	char *yy_cp;
     
@@ -2350,5 +2350,3 @@ void yyfree (void * ptr )
 #define YYTABLES_NAME "yytables"
 
 #line 264 "./lex.l"
-
-

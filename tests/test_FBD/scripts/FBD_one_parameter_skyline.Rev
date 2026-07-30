@@ -1,0 +1,76 @@
+################################################################################
+#
+# RevBayes Test-Script: Analysis under the fossilized birth-death model in which
+#                       the macroevolutionary rates (lambda, mu) are constant
+#                       through time but the psiTimeline argument is specified
+#                       to allow the sampling rate (psi) to vary in a skyline
+#                       (piecewise-constant) manner.
+#
+# authors: David Cerny
+#
+################################################################################
+
+seed(12345)
+
+# simulated data originally provided by Niklas Hohmann
+# (see https://github.com/revbayes/revbayes/issues/811)
+
+morph <- readDiscreteCharacterData("data/char_mat_gappy_rho1.nex")
+taxa <- readTaxonData("data/fossils_gappy_rho1.tsv")
+num_out <- "output/skyline_num.log"
+
+moves = VectorMoves()
+rho <- 1.0
+timeline <- v(0.4, 0.8, 1.2, 1.6)
+
+speciation_rate ~ dnExponential(lambda = 1.0)
+moves.append( mvScale(speciation_rate, weight=5.0, lambda = 1.0) )
+moves.append( mvScale(speciation_rate, weight=5.0, lambda = 5.0) )
+
+extinction_rate ~ dnExponential(lambda = 3.3)
+moves.append( mvScale(extinction_rate, weight=5.0, lambda = 1.0) )
+moves.append( mvScale(extinction_rate, weight=5.0, lambda = 5.0) )
+
+origin_time ~ dnExponential(lambda = 1.0, offset = 2.0)
+moves.append( mvScale(origin_time, weight=5.0, lambda = 1.0) )
+moves.append( mvScale(origin_time, weight=5.0, lambda = 10.0) )
+
+for(i in 1:(timeline.size()+1)){
+    psi[i] ~ dnExponential(lambda = 0.25)
+    moves.append( mvScale( psi[i], weight = 5.0, lambda = 0.1) )
+    moves.append( mvScale( psi[i], weight = 5.0, lambda = 1.0) )
+    moves.append( mvScale( psi[i], weight = 5.0, lambda = 10.0) )
+}
+
+fbd_tree ~ dnFBDP(origin=origin_time, lambda=speciation_rate, mu=extinction_rate, psi=psi, rho=rho, taxa=taxa, psiTimeline = timeline)
+
+moves.append( mvFNPR(fbd_tree, weight=200.0) )
+moves.append( mvGPR(fbd_tree, weight = 100.0))
+moves.append( mvCollapseExpandFossilBranch(fbd_tree, origin_time, weight=500.0) )
+moves.append( mvNodeTimeSlideUniform(fbd_tree, weight=100.0) )
+moves.append( mvNodeTimeScale(fbd_tree, weight = 200.0))
+moves.append( mvRootTimeSlideUniform(fbd_tree, origin_time, weight=50.0) )
+moves.append( mvSubtreeScale(fbd_tree, weight = 100.0))
+moves.append( mvTreeScale(fbd_tree, origin_time, weight = 100.0))
+
+branch_rates_morpho ~ dnExponential(lambda = 10.0)
+moves.append( mvScale(branch_rates_morpho, weight = 5.0, lambda = 0.1))
+moves.append( mvScale(branch_rates_morpho, weight = 5.0, lambda = 1.0))
+moves.append( mvScale(branch_rates_morpho, weight = 5.0, lambda = 10.0))
+
+Q_morpho := fnJC(2)
+phy_morpho ~ dnPhyloCTMC(tree = fbd_tree, branchRates = branch_rates_morpho, Q = Q_morpho, type = "Standard", coding = "all")
+
+phy_morpho.clamp(morph)
+
+mymodel = model(phy_morpho)
+
+monitors = VectorMonitors()
+monitors.append( mnModel(filename=num_out, printgen=5) )
+
+mymcmc = mcmc(mymodel, monitors, moves, ntries = 10000)
+mymcmc.run(generations=500)
+
+clear()
+
+q()

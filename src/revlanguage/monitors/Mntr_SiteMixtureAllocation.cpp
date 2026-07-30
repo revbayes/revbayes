@@ -27,6 +27,7 @@
 #include "RlBoolean.h"
 #include "RlTree.h"
 #include "StochasticNode.h"
+#include "CharTypeApply.h" // for apply_to_character_type( )
 
 namespace RevBayesCore { class Tree; }
 namespace RevBayesCore { template <class valueType> class TypedDagNode; }
@@ -60,7 +61,7 @@ void Mntr_SiteMixtureAllocation::constructInternalObject( void )
     
     bool                                ap      = static_cast<const RlBoolean &>( append->getRevObject() ).getValue();
     bool                                wv      = static_cast<const RlBoolean &>( version->getRevObject() ).getValue();
-    std::string                         character = static_cast<const RlString &>( monitorType->getRevObject() ).getValue();
+    std::string                         character_type = static_cast<const RlString &>( monitorType->getRevObject() ).getValue();
     
 
     
@@ -68,75 +69,16 @@ void Mntr_SiteMixtureAllocation::constructInternalObject( void )
     RevBayesCore::StochasticNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_sn = static_cast<RevBayesCore::StochasticNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* >(ctmc_tdn);
     
     delete value;
-    if (character == "AA" || character == "Protein")
+
+    auto make_monitor = [&]<typename T>()
     {
-        RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::AminoAcidState> *m;
-        m = new RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::AminoAcidState>(ctmc_sn, (std::uint64_t)g, fn, sep);
+        auto m = new RevBayesCore::SiteMixtureAllocationMonitor<T>(ctmc_sn, (std::uint64_t)g, fn, sep);
         m->setAppend( ap );
         m->setPrintVersion(wv);
         value = m;
-    }
-    else if (character == "DNA")
-    {
-        RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::DnaState> *m;
-        m = new RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::DnaState>(ctmc_sn, (std::uint64_t)g, fn, sep);
-        m->setAppend( ap );
-        m->setPrintVersion(wv);
-        value = m;
-    }
-    else if (character == "Codon")
-    {
-        RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::CodonState> *m;
-        m = new RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::CodonState>(ctmc_sn, (std::uint64_t)g, fn, sep);
-        m->setAppend( ap );
-        m->setPrintVersion(wv);
-        value = m;
-    }
-    else if (character == "NaturalNumbers")
-    {
-        RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::NaturalNumbersState> *m;
-		m = new RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::NaturalNumbersState>(ctmc_sn, (std::uint64_t)g, fn, sep);
-        m->setAppend( ap );
-        m->setPrintVersion(wv);
-        value = m;
-    }
-    else if (character == "PoMo")
-    {
-        RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::PoMoState> *m;
-        m = new RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::PoMoState>(ctmc_sn, (std::uint64_t)g, fn, sep);
-        m->setAppend( ap );
-        m->setPrintVersion(wv);
-        value = m;
-    }
-    else if (character == "RNA")
-    {
-        RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::DnaState> *m;
-        m = new RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::DnaState>(ctmc_sn, (std::uint64_t)g, fn, sep);
-        m->setAppend( ap );
-        m->setPrintVersion(wv);
-        value = m;
-    }
-    else if (character == "Standard")
-    {
-        RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::StandardState> *m;
-		m = new RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::StandardState>(ctmc_sn, (std::uint64_t)g, fn, sep);
-        m->setAppend( ap );
-        m->setPrintVersion(wv);
-        value = m;
-    }
-    else if (character == "Binary" || character == "Restriction")
-    {
-        RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::BinaryState> *m;
-        m = new RevBayesCore::SiteMixtureAllocationMonitor<RevBayesCore::BinaryState>(ctmc_sn, (std::uint64_t)g, fn, sep);
-        m->setAppend( ap );
-        m->setPrintVersion(wv);
-        value = m;
-    }
-    else
-    {
-        throw RbException( "Incorrect character type specified. Valid options are: AA, DNA, Codon, NaturalNumbers, PoMo, Protein, RNA, Standard, Binary/Restriction" );
-    }
-    
+    };
+
+    apply_to_character_type(make_monitor, character_type);
 }
 
 

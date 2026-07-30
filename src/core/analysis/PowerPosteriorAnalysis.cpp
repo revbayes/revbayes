@@ -119,13 +119,10 @@ void PowerPosteriorAnalysis::burnin(size_t generations, size_t tuningInterval)
         sampler->nextCycle(false);
             
         // check for autotuning
-        if ( k % tuningInterval == 0 && k != generations )
+        if ( tuningInterval != 0 && (k % tuningInterval) == 0 && k != generations )
         {
-                
             sampler->tune();
-            
         }
-        
     }
     
     

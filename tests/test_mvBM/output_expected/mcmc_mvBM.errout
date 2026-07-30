@@ -16,3 +16,7 @@ Progress:
    This simulation runs 1 independent replicate.
    The simulator uses 2 different moves in a random move schedule with 4 moves per iteration
    
+   Appending to previous MCMC simulation of 2500 iterations
+   This simulation runs 1 independent replicate.
+   The simulator uses 2 different moves in a random move schedule with 4 moves per iteration
+   

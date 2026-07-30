@@ -34,7 +34,7 @@ monitors = VectorMonitors()
 # Here we use a fixed tree topology of primates
 # Note that the readTrees function always returns a vector of trees,
 # so we simple take the first tree
-phylogeny <- readTrees("data/Primates_tree.nex")[1]
+phylogeny <- readTrees("data/primates_tree.nex")[1]
 
 
 #########################

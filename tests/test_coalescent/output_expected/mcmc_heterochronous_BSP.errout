@@ -5,31 +5,7 @@
    
    Drawing new initial states ... 
 Problem when computing waiting time.
-   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
-   850000
-   
-   
-   Drawing new initial states ... 
-   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
-   850000
-   
-   
-   Drawing new initial states ... 
-   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
-   850000
-   
-   
-   Drawing new initial states ... 
-   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
-   850000
-   
-   
-   Drawing new initial states ... 
-   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
-   850000
-   
-   
-   Drawing new initial states ... 
+Problem when computing waiting time.
    
    Running MCMC simulation
    This simulation runs 2 independent replicates.

@@ -7,6 +7,7 @@
 #include "MetropolisHastingsMove.h"
 #include "Move_RootTimeSlide.h"
 #include "RootTimeSlideProposal.h"
+#include "Probability.h"
 #include "RealPos.h"
 #include "RevObject.h"
 #include "RlBoolean.h"
@@ -54,13 +55,14 @@ void Move_RootTimeSlide::constructInternalObject( void )
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
     
     double d = static_cast<const RealPos &>( delta->getRevObject() ).getValue();
-    
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    
     bool tune = static_cast<const RlBoolean &>( tuning->getRevObject() ).getValue();
+    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
 
-    RevBayesCore::Proposal *p = new RevBayesCore::RootTimeSlideProposal( t, d );
-    value = new RevBayesCore::MetropolisHastingsMove(p,w,tune);
+    RevBayesCore::Proposal *p = new RevBayesCore::RootTimeSlideProposal(t, d);
+    p->setTargetAcceptanceRate(tt);
+    
+    value = new RevBayesCore::MetropolisHastingsMove(p, w, tune);
 }
 
 

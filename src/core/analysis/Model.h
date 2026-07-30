@@ -56,10 +56,8 @@ namespace RevBayesCore {
         
         // private methods
         void                                                        addSourceNode(const DagNode *sourceNode);                       //!< Add a source node, extract the model graph and create and indepedent copy of it.
-        void                                                        getOrderedStochasticNodes(  const DagNode*    dagNode,
-                                                                                      std::vector<DagNode*>&      orderedStochasticNodes,
-                                                                                      std::set<const DagNode*>&   visitedNodes);  //!< Get vector of nodes in parent-children order, starting from a specific node
-        
+
+
         // members
         std::vector<DagNode*>                                       nodes;  //!< The DAG nodes of the model graph. These need to be pointers because we don't actually know their specific type. We own these.
         DagNodeMap                                                  nodesMap;  //!< Map between original nodes and own copy.

@@ -47,11 +47,11 @@ namespace RevBayesCore {
         // Parameter management functions
         virtual void                                        keepSpecialization(const DagNode* affecter);
         virtual void                                        restoreSpecialization(const DagNode *restorer);
-        void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);                                //!< Swap a parameter
+        void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);                                    //!< Swap a parameter
         virtual void                                        touchSpecialization(const DagNode *toucher, bool touchAll);
 
         // derived helper functions
-        double                                              computeLnProbabilityTimes(void) const;                                                          //!< Compute the log-transformed probability of the current value.
+        double                                              computeLnProbabilityTimes(void) const;                                                              //!< Compute the log-transformed probability of the current value.
         std::vector<double>                                 simulateCoalescentAges(size_t n) const;
         
         

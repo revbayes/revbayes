@@ -1,0 +1,11 @@
+Taxon	Species	Age
+DsuzFAL	   Dsuz 0
+DsuzITALY	Dsuz	0
+DanaBANG	Dana	0
+DanaBKK12	Dana	0
+DanaBKK13	Dana	0
+DanaKATH14	Dana	0
+DanaKATH19	Dana	0
+DimmED03	Dimm	0
+DimmED05	Dimm	0
+DimmMU22	Dimm	0

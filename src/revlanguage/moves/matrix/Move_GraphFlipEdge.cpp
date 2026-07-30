@@ -73,17 +73,18 @@ void Move_GraphFlipEdge::constructInternalObject( void )
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
     const RevBayesCore::RbVector<RevBayesCore::RbVector<std::int64_t> >&e = static_cast<const ModelVector<ModelVector<Natural> > &>( edges->getRevObject() ).getValue();
-
+    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *p = NULL;
     
     RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* tmp = static_cast<const MatrixRealSymmetric &>( v->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::MatrixReal> *>( tmp );
-    
     bool symm = v->getRevObject().isType( MatrixRealSymmetric::getClassTypeSpec() );
-    p = new RevBayesCore::GraphFlipEdgeProposal(n, e, l, symm );
     
-    value = new RevBayesCore::MetropolisHastingsMove(p,w,t);
+    p = new RevBayesCore::GraphFlipEdgeProposal(n, e, l, symm );
+    p->setTargetAcceptanceRate(tt);
+    
+    value = new RevBayesCore::MetropolisHastingsMove(p, w, t);
     
 }
 

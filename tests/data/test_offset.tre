@@ -1,0 +1,79 @@
+#NEXUS
+
+	Begin taxa;
+	Dimensions ntax=68;
+	Taxlabels
+		Adamantinasuchus_navae
+		Anatosuchus_minor
+		Antaeusuchus_taouzensis
+		Aphaurosuchus_escharafacies
+		Aplestosuchus_sordidus
+		Araripesuchus_buitreraensis
+		Araripesuchus_gomesii
+		Araripesuchus_patagonicus
+		Araripesuchus_tsangatsangana
+		Araripesuchus_wegeneri
+		Armadillosuchus_arrudai
+		Ayllusuchus_fernandezi
+		Barinasuchus_arveloi
+		Barrosasuchus_neuquenianus
+		Baurusuchus_albertoi
+		Baurusuchus_pachecoi
+		Baurusuchus_salgadoensis
+		Bayomesasuchus_hernandezi
+		Bergisuchus_dietrichbergi
+		Bretesuchus_bonapartei
+		Caipirasuchus_mineirus
+		Caipirasuchus_montealtensis
+		Caipirasuchus_paulistanus
+		Caipirasuchus_stenognathus
+		Campinasuchus_dinizi
+		Candidodon_itapecurense
+		Caryonosuchus_pricei
+		Chimaerasuchus_paradoxus
+		Comahuesuchus_brachybuccalis
+		Coringasuchus_anisodontis
+		Cynodontosuchus_rothi
+		Dentaneosuchus_crassiproratus
+		Eremosuchus_elkoholicus
+		Gasparinisuchus_peirosauroides
+		Gondwanasuchus_scabrosus
+		Hamadasuchus_rebouli
+		Iberosuchus_macrodon
+		Kaprosuchus_saharicus
+		Labidiosuchus_ammicum
+		Libycosuchus_brevirostris
+		Llanosuchus_tamaensis
+		Lomasuchus_palpebrosus
+		Lorosuchus_nodosus
+		Lumbrera_Form
+		Mahajangasuchus_insignis
+		Malawisuchus_mwakasyungutiensis
+		Mariliasuchus_amarali
+		Montealtosuchus_arrudacamposi
+		Morrinhosuchus_luziae
+		Notosuchus_terrestris
+		Ogresuchus_furatus
+		Pabhwehshi_pakistanensis
+		Pakasuchus_kapilimai
+		Pehuenchesuchus_enderi
+		Pissarrachampsa_sera
+		Razanandrongobe_sakalavae
+		Rukwasuchus_yajabalijekundu
+		Sahitisuchus_fluminensis
+		Sebecus_huilensis
+		Sebecus_icaeorhinus
+		Sebecus_querejazus
+		Simosuchus_clarki
+		Sphagesaurus_huenei
+		Stolokrosuchus_lapparenti
+		Stratiotosuchus_maxhechti
+		Uberabasuchus_terrificus
+		Uruguaysuchus_aznarezi
+		Yacarerani_boliviensis
+		;
+End;
+
+Begin trees;
+tree TREE1 = [&R](((((((((((((((Baurusuchus_salgadoensis[&index=27,sampled_ancestor=0.238169,age_95%_HPD={58.8969,68.7266}]:2.639442,Baurusuchus_pachecoi[&index=62,sampled_ancestor=0.788825,age_95%_HPD={60.9251,71.6281}]:0.000000)[&index=69,age_95%_HPD={60.9269,71.5023}]:2.650527[&posterior=0.705732],Baurusuchus_albertoi[&index=64,sampled_ancestor=0.836092,age_95%_HPD={63.3931,73.7466}]:0.000000)[&index=70,age_95%_HPD={63.6549,73.5619}]:2.697802[&posterior=0.556932],Stratiotosuchus_maxhechti[&index=65,sampled_ancestor=0.336370,age_95%_HPD={59.5994,72.0764}]:5.991743)[&index=71,age_95%_HPD={65.2875,76.9756}]:3.635030[&posterior=0.247112],((Aphaurosuchus_escharafacies[&index=58,sampled_ancestor=0.001222,age_95%_HPD={59.8578,72.7302}]:4.963692,Aplestosuchus_sordidus[&index=29,sampled_ancestor=0.184237,age_95%_HPD={60.6582,73.6357}]:4.176467)[&index=72,age_95%_HPD={64.4556,77.5883}]:1.001273[&posterior=0.429127],Cynodontosuchus_rothi[&index=30,sampled_ancestor=0.023439,age_95%_HPD={53.9935,72.857}]:9.028641)[&index=73,age_95%_HPD={65.2482,78.8197}]:2.559934[&posterior=0.092535])[&index=74,age_95%_HPD={68.7233,81.1962}]:2.191601[&posterior=0.321317],((Pabhwehshi_pakistanensis[&index=36,age_95%_HPD={53.2657,58.8409}]:9.326429,Pissarrachampsa_sera[&index=55,sampled_ancestor=0.620751,age_95%_HPD={59.6279,72.2417}]:0.000000)[&index=75,age_95%_HPD={59.6279,72.2417}]:6.686295[&posterior=0.620584],Campinasuchus_dinizi[&index=26,sampled_ancestor=0.122695,age_95%_HPD={60.337,73.4059}]:5.065868)[&index=76,age_95%_HPD={64.06,79.1886}]:5.252063[&posterior=0.530993])[&index=77,age_95%_HPD={70.4971,84.344}]:2.366611[&posterior=0.374695],Gondwanasuchus_scabrosus[&index=61,sampled_ancestor=0.003499,age_95%_HPD={60.0409,73.4228}]:12.724992)[&index=78,age_95%_HPD={71.8188,88.5203}]:4.643692[&posterior=0.786659],Pehuenchesuchus_enderi[&index=22,sampled_ancestor=0.050711,age_95%_HPD={70.2624,74.079}]:12.018677)[&index=79,age_95%_HPD={74.9913,94.5394}]:6.096425[&posterior=0.571651],Comahuesuchus_brachybuccalis[&index=23,sampled_ancestor=0.000278,age_95%_HPD={70.4901,74.6171}]:17.770237)[&index=80,age_95%_HPD={79.46,102.66}]:9.321960[&posterior=0.156910],(((((((Caipirasuchus_mineirus[&index=66,sampled_ancestor=0.008998,age_95%_HPD={59.4368,71.3044}]:3.024335,Caipirasuchus_stenognathus[&index=28,sampled_ancestor=0.688014,age_95%_HPD={64.349,73.9074}]:0.000000)[&index=81,age_95%_HPD={62.8711,73.1521}]:3.336437[&posterior=0.282271],(Caipirasuchus_paulistanus[&index=67,sampled_ancestor=0.663908,age_95%_HPD={59.3037,71.9304}]:1.792683,Caipirasuchus_montealtensis[&index=63,sampled_ancestor=0.728116,age_95%_HPD={62.2828,71.9829}]:0.000000)[&index=82,age_95%_HPD={61.5918,72.2395}]:4.895255[&posterior=0.200344])[&index=83,age_95%_HPD={65.5405,77.1475}]:1.731749[&posterior=0.212231],((Caryonosuchus_pricei[&index=32,sampled_ancestor=0.276494,age_95%_HPD={58.6099,65.8602}]:1.124737,Armadillosuchus_arrudai[&index=56,sampled_ancestor=0.743335,age_95%_HPD={59.0785,67.7826}]:0.000000)[&index=84,age_95%_HPD={59.043,67.7318}]:2.228202[&posterior=0.723117],Sphagesaurus_huenei[&index=57,sampled_ancestor=0.976172,age_95%_HPD={60.2729,70.8239}]:0.000000)[&index=85,age_95%_HPD={60.2729,70.8207}]:8.261456[&posterior=0.974672])[&index=86,age_95%_HPD={67.4105,78.809}]:2.662925[&posterior=0.691513],(Adamantinasuchus_navae[&index=68,sampled_ancestor=0.079038,age_95%_HPD={59.132,71.5156}]:6.347497,Yacarerani_boliviensis[&index=33,sampled_ancestor=0.313042,age_95%_HPD={56.1775,71.6861}]:6.378155)[&index=87,age_95%_HPD={64.2885,77.7578}]:4.711529[&posterior=0.590480])[&index=88,age_95%_HPD={69.4143,82.5525}]:4.148739[&posterior=0.753222],(Labidiosuchus_ammicum[&index=38,age_95%_HPD={53.2326,58.8758}]:11.779682,Mariliasuchus_amarali[&index=31,sampled_ancestor=0.432293,age_95%_HPD={60.9621,73.9171}]:0.000000)[&index=89,age_95%_HPD={60.6328,73.5771}]:12.338478[&posterior=0.398967])[&index=90,age_95%_HPD={73.0117,87.7231}]:4.590087[&posterior=0.911409],((Llanosuchus_tamaensis[&index=34,sampled_ancestor=0.003777,age_95%_HPD={60.5843,71.7814}]:5.195624,Morrinhosuchus_luziae[&index=60,sampled_ancestor=0.094979,age_95%_HPD={61.7952,74.1774}]:3.046542)[&index=91,age_95%_HPD={65.7542,78.98}]:5.432155[&posterior=0.162353],Notosuchus_terrestris[&index=24,sampled_ancestor=0.526883,age_95%_HPD={70.5001,74.5957}]:4.852397)[&index=92,age_95%_HPD={71.6578,85.1175}]:7.374612[&posterior=0.689014])[&index=93,age_95%_HPD={76.1013,93.8906}]:5.723469[&posterior=0.523772],Coringasuchus_anisodontis[&index=13,sampled_ancestor=0.214064,age_95%_HPD={80.8659,88.1201}]:6.062779)[&index=94,age_95%_HPD={82.9884,98.3742}]:9.195547[&posterior=0.526494])[&index=95,age_95%_HPD={88.2774,112.439}]:6.863049[&posterior=0.404021],Chimaerasuchus_paradoxus[&index=5,sampled_ancestor=0.152744,age_95%_HPD={87.5434,110.238}]:9.661462)[&index=96,age_95%_HPD={94.4784,120.209}]:2.375924[&posterior=0.098200],(Libycosuchus_brevirostris[&index=18,sampled_ancestor=0.150800,age_95%_HPD={81.0227,87.8518}]:8.960703,Simosuchus_clarki[&index=53,age_95%_HPD={53.479,60.3073}]:36.470410)[&index=97,age_95%_HPD={82.0868,108.375}]:15.447199[&posterior=0.392080])[&index=98,age_95%_HPD={98.0613,122.542}]:7.347419[&posterior=0.036214],((Pakasuchus_kapilimai[&index=9,sampled_ancestor=0.005054,age_95%_HPD={68.9314,89.2912}]:22.014015,Malawisuchus_mwakasyungutiensis[&index=4,sampled_ancestor=0.982282,age_95%_HPD={99.4625,109.056}]:0.000000)[&index=99,age_95%_HPD={99.3998,109.135}]:8.085248[&posterior=0.741669],Candidodon_itapecurense[&index=8,sampled_ancestor=0.275717,age_95%_HPD={101.108,110.669}]:5.414632)[&index=100,age_95%_HPD={103.937,119.522}]:4.625192[&posterior=0.154910])[&index=101,age_95%_HPD={106.298,128.109}]:3.888446[&posterior=0.376639],((((((Uruguaysuchus_aznarezi[&index=11,sampled_ancestor=0.000056,age_95%_HPD={71.4094,85.3598}]:6.149993,Araripesuchus_patagonicus[&index=15,sampled_ancestor=0.859920,age_95%_HPD={81.3904,87.9553}]:0.000000)[&index=102,age_95%_HPD={81.4039,87.9915}]:7.030110[&posterior=0.825150],Araripesuchus_buitreraensis[&index=16,sampled_ancestor=0.014663,age_95%_HPD={80.7305,87.6419}]:7.763604)[&index=103,age_95%_HPD={84.432,100.521}]:10.879125[&posterior=0.622639],Araripesuchus_gomesii[&index=3,sampled_ancestor=0.991669,age_95%_HPD={99.4417,107.08}]:0.000000)[&index=104,age_95%_HPD={99.3868,107.052}]:3.305316[&posterior=0.625194],Araripesuchus_tsangatsangana[&index=54,age_95%_HPD={53.4916,60.2745}]:48.952550)[&index=105,age_95%_HPD={101.009,112.28}]:1.529810[&posterior=0.518607],Anatosuchus_minor[&index=7,sampled_ancestor=0.037214,age_95%_HPD={88.1738,109.675}]:8.562261)[&index=106,age_95%_HPD={101.718,113.821}]:4.320725[&posterior=0.546823],Araripesuchus_wegeneri[&index=6,sampled_ancestor=0.552266,age_95%_HPD={92.6955,113.506}]:7.465064)[&index=107,age_95%_HPD={103.673,119.917}]:8.246891[&posterior=0.340591])[&index=108,age_95%_HPD={110.276,131.237}]:5.387278[&posterior=0.061209],(((((((((((((Bergisuchus_dietrichbergi[&index=47,sampled_ancestor=0.425405,age_95%_HPD={27.6305,36.2985}]:2.767645,Iberosuchus_macrodon[&index=51,sampled_ancestor=0.915297,age_95%_HPD={28.4797,41.4275}]:0.000000)[&index=109,age_95%_HPD={28.7112,41.3859}]:4.522708[&posterior=0.412020],Dentaneosuchus_crassiproratus[&index=48,age_95%_HPD={24.7416,29.2935}]:11.996094)[&index=110,age_95%_HPD={30.6183,48.8641}]:3.238125[&posterior=0.428294],Barinasuchus_arveloi[&index=50,sampled_ancestor=0.001277,age_95%_HPD={0,3.7278}]:40.849471)[&index=111,age_95%_HPD={31.8861,54.6146}]:8.748004[&posterior=0.625194],(Ayllusuchus_fernandezi[&index=52,sampled_ancestor=0.039602,age_95%_HPD={35.8251,44.1864}]:4.333675,Bretesuchus_bonapartei[&index=43,sampled_ancestor=0.801377,age_95%_HPD={42.4057,46.6109}]:0.000000)[&index=112,age_95%_HPD={42.4084,46.6085}]:6.470861[&posterior=0.764164])[&index=113,age_95%_HPD={45.018,59.4163}]:0.000001[&posterior=0.115308],Eremosuchus_elkoholicus[&index=46,sampled_ancestor=0.403799,age_95%_HPD={35.5669,44.2176}]:11.017426)[&index=114,age_95%_HPD={44.585,58.8746}]:2.187388[&posterior=0.258720],((Lumbrera_Form[&index=45,sampled_ancestor=0.290658,age_95%_HPD={33.9516,43.1006}]:2.200194,Sebecus_icaeorhinus[&index=44,sampled_ancestor=0.615474,age_95%_HPD={27.2985,44.3893}]:0.000000)[&index=115,age_95%_HPD={36.3549,44.249}]:3.769303[&posterior=0.111309],Sebecus_huilensis[&index=49,sampled_ancestor=0.002611,age_95%_HPD={0,1.03538}]:44.351995)[&index=116,age_95%_HPD={35.6445,52.68}]:8.764250[&posterior=0.226783])[&index=117,age_95%_HPD={45.8877,60.9691}]:14.341080[&posterior=0.203788],((Lorosuchus_nodosus[&index=42,sampled_ancestor=0.000222,age_95%_HPD={42.739,46.9873}]:16.951484,Ogresuchus_furatus[&index=37,sampled_ancestor=0.000167,age_95%_HPD={52.8021,58.3886}]:6.267618)[&index=118,age_95%_HPD={55.945,70.2672}]:0.441243[&posterior=0.027494],(Sahitisuchus_fluminensis[&index=41,sampled_ancestor=0.162853,age_95%_HPD={36.1707,46.4563}]:15.361350,Sebecus_querejazus[&index=40,sampled_ancestor=0.214230,age_95%_HPD={48.6631,54.0931}]:5.176094)[&index=119,age_95%_HPD={49.6958,64.0232}]:5.664814[&posterior=0.089647])[&index=120,age_95%_HPD={56.1525,68.421}]:5.353256[&posterior=0.005054])[&index=121,age_95%_HPD={57.4837,79.414}]:12.638297[&posterior=0.939847],Barrosasuchus_neuquenianus[&index=25,sampled_ancestor=0.008220,age_95%_HPD={70.4934,74.6192}]:7.717909)[&index=122,age_95%_HPD={72.2226,89.5011}]:6.834982[&posterior=0.553988],(((Gasparinisuchus_peirosauroides[&index=21,sampled_ancestor=0.194179,age_95%_HPD={59.5791,74.5824}]:6.934016,Lomasuchus_palpebrosus[&index=20,sampled_ancestor=0.956676,age_95%_HPD={72.5579,80.3428}]:0.000000)[&index=123,age_95%_HPD={72.432,79.315}]:1.507325[&posterior=0.280993],Uberabasuchus_terrificus[&index=39,age_95%_HPD={53.2814,58.8326}]:20.616324)[&index=124,age_95%_HPD={72.557,81.4096}]:1.596004[&posterior=0.086925],Montealtosuchus_arrudacamposi[&index=59,sampled_ancestor=0.031049,age_95%_HPD={60.9764,73.9929}]:10.130517)[&index=125,age_95%_HPD={73.3457,84.8099}]:8.650361[&posterior=0.583426])[&index=126,age_95%_HPD={76.5771,97.0447}]:2.045942[&posterior=0.105865],(Bayomesasuchus_hernandezi[&index=19,sampled_ancestor=0.263941,age_95%_HPD={76.6157,81.8536}]:5.636180,Rukwasuchus_yajabalijekundu[&index=12,sampled_ancestor=0.047767,age_95%_HPD={60.5995,87.0467}]:10.031107)[&index=127,age_95%_HPD={77.8488,92.4884}]:4.226093[&posterior=0.081315])[&index=128,age_95%_HPD={79.859,98.7518}]:5.855176[&posterior=0.085870],(Antaeusuchus_taouzensis[&index=17,sampled_ancestor=0.171795,age_95%_HPD={80.3347,87.0563}]:2.113934,Hamadasuchus_rebouli[&index=10,sampled_ancestor=0.893968,age_95%_HPD={81.0918,91.1442}]:0.000000)[&index=129,age_95%_HPD={81.0462,90.8322}]:9.266448[&posterior=0.765385])[&index=130,age_95%_HPD={86.4235,105.2}]:3.753430[&posterior=0.358976],(Kaprosuchus_saharicus[&index=14,sampled_ancestor=0.468563,age_95%_HPD={80.6257,87.4187}]:4.894471,Mahajangasuchus_insignis[&index=35,age_95%_HPD={53.5404,60.3766}]:31.733105)[&index=131,age_95%_HPD={82.2426,96.2104}]:9.955624[&posterior=0.529493])[&index=132,age_95%_HPD={88.8982,109.644}]:5.097225[&posterior=0.262331],Stolokrosuchus_lapparenti[&index=2,sampled_ancestor=0.093313,age_95%_HPD={86.9135,103.319}]:10.477370)[&index=133,age_95%_HPD={92.7778,115.964}]:21.715574[&posterior=0.724283])[&index=134,age_95%_HPD={111.977,141.327}]:36.335390[&posterior=0.999667],Razanandrongobe_sakalavae[&index=1,sampled_ancestor=0.363253,age_95%_HPD={152.892,156.655}]:7.089444)[&index=135,age_95%_HPD={153.629,172.307}]:0.000000[&posterior=0.636803];
+End;

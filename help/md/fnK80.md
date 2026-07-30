@@ -33,6 +33,6 @@ fnGTR
     Q := fnK80(kappa)
 
 ## references
-- citation: Kimura M (1980). "A simple method for estimating evolutionary rates of base substitutions through comparative studies of nucleotide sequences". Journal of Molecular Evolution. 16:111–20.
-  doi: https://doi.org/10.1007/BF01731581
+- citation: Kimura M (1980). A simple method for estimating evolutionary rates of base substitutions through comparative studies of nucleotide sequences. Journal of Molecular Evolution, 16:111--20.
+  doi: 10.1007/BF01731581
   url: https://link.springer.com/article/10.1007/BF01731581

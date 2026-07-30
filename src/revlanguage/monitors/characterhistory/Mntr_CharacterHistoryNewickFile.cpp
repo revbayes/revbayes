@@ -33,7 +33,8 @@ namespace RevBayesCore { template <class valueType> class TypedDagNode; }
 
 using namespace RevLanguage;
 
-Mntr_CharacterHistoryNewickFile::Mntr_CharacterHistoryNewickFile(void) : FileMonitor() {
+Mntr_CharacterHistoryNewickFile::Mntr_CharacterHistoryNewickFile(void) : FileMonitor()
+{
     
 }
 
@@ -44,13 +45,15 @@ Mntr_CharacterHistoryNewickFile::Mntr_CharacterHistoryNewickFile(void) : FileMon
  *
  * \return A new copy of the process.
  */
-Mntr_CharacterHistoryNewickFile* Mntr_CharacterHistoryNewickFile::clone(void) const {
+Mntr_CharacterHistoryNewickFile* Mntr_CharacterHistoryNewickFile::clone(void) const
+{
     
 	return new Mntr_CharacterHistoryNewickFile(*this);
 }
 
 
-void Mntr_CharacterHistoryNewickFile::constructInternalObject( void ) {
+void Mntr_CharacterHistoryNewickFile::constructInternalObject( void )
+{
     // we free the memory first
     delete value;
     
@@ -88,7 +91,8 @@ void Mntr_CharacterHistoryNewickFile::constructInternalObject( void ) {
 
 
 /** Get class name of object */
-const std::string& Mntr_CharacterHistoryNewickFile::getClassType(void) {
+const std::string& Mntr_CharacterHistoryNewickFile::getClassType(void)
+{
     
     static std::string revClassType = "Mntr_CharacterHistoryNewickFile";
     
@@ -156,7 +160,8 @@ const MemberRules& Mntr_CharacterHistoryNewickFile::getParameterRules(void) cons
 }
 
 /** Get type spec */
-const TypeSpec& Mntr_CharacterHistoryNewickFile::getTypeSpec( void ) const {
+const TypeSpec& Mntr_CharacterHistoryNewickFile::getTypeSpec( void ) const
+{
     
     static TypeSpec type_spec = getClassTypeSpec();
     
@@ -165,14 +170,16 @@ const TypeSpec& Mntr_CharacterHistoryNewickFile::getTypeSpec( void ) const {
 
 
 /** Get type spec */
-void Mntr_CharacterHistoryNewickFile::printValue(std::ostream &o) const {
+void Mntr_CharacterHistoryNewickFile::printValue(std::ostream &o) const
+{
     
     o << "Mntr_CharacterHistoryNewickFile";
 }
 
 
 /** Set a member variable */
-void Mntr_CharacterHistoryNewickFile::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var) {
+void Mntr_CharacterHistoryNewickFile::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
+{
     
     if ( name == "tree" )
     {

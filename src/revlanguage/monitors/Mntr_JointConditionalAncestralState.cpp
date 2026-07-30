@@ -26,6 +26,7 @@
 #include "RlBoolean.h"
 #include "RlTree.h"
 #include "StochasticNode.h"
+#include "CharTypeApply.h" // for apply_to_character_type( )
 
 namespace RevBayesCore { class Tree; }
 namespace RevBayesCore { template <class valueType> class TypedDagNode; }
@@ -53,34 +54,36 @@ Mntr_JointConditionalAncestralState* Mntr_JointConditionalAncestralState::clone(
 
 void Mntr_JointConditionalAncestralState::constructInternalObject( void )
 {
-    const std::string&                  fn      = static_cast<const RlString &>( filename->getRevObject() ).getValue();
-    const std::string&                  sep     = static_cast<const RlString &>( separator->getRevObject() ).getValue();
-    unsigned int                        g       = (int)static_cast<const IntegerPos  &>( printgen->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* t = static_cast<const Tree &>( tree->getRevObject() ).getDagNode();
+    namespace Core = RevBayesCore;
+
+    const std::string&              fn      = static_cast<const RlString &>( filename->getRevObject() ).getValue();
+    const std::string&              sep     = static_cast<const RlString &>( separator->getRevObject() ).getValue();
+    unsigned int                    g       = (int)static_cast<const IntegerPos  &>( printgen->getRevObject() ).getValue();
+    Core::TypedDagNode<Core::Tree>* t = static_cast<const Tree &>( tree->getRevObject() ).getDagNode();
     
-    bool                                ap      = static_cast<const RlBoolean &>( append->getRevObject() ).getValue();
-    bool                                wt      = static_cast<const RlBoolean &>( withTips->getRevObject() ).getValue();
-    bool                                wss     = static_cast<const RlBoolean &>( withStartStates->getRevObject() ).getValue();
-    bool                                wv      = static_cast<const RlBoolean &>( version->getRevObject() ).getValue();
-    std::string                         character = static_cast<const RlString &>( monitorType->getRevObject() ).getValue();
+    bool                            ap      = static_cast<const RlBoolean &>( append->getRevObject() ).getValue();
+    bool                            wt      = static_cast<const RlBoolean &>( withTips->getRevObject() ).getValue();
+    bool                            wss     = static_cast<const RlBoolean &>( withStartStates->getRevObject() ).getValue();
+    bool                            wv      = static_cast<const RlBoolean &>( version->getRevObject() ).getValue();
+    std::string                     character_type = static_cast<const RlString &>( monitorType->getRevObject() ).getValue();
     
 
     
-    RevBayesCore::TypedDagNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_tdn = NULL;
-    RevBayesCore::StochasticNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_sn = NULL;
+    Core::TypedDagNode<Core::AbstractHomologousDiscreteCharacterData>* ctmc_tdn = NULL;
+    Core::StochasticNode<Core::AbstractHomologousDiscreteCharacterData>* ctmc_sn = NULL;
     
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* cdbdp_tdn = NULL;
-    RevBayesCore::StochasticNode<RevBayesCore::Tree>* cdbdp_sn = NULL;
+    Core::TypedDagNode<Core::Tree>* cdbdp_tdn = NULL;
+    Core::StochasticNode<Core::Tree>* cdbdp_sn = NULL;
     
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* glhbdsp_tdn = NULL;
-    RevBayesCore::StochasticNode<RevBayesCore::Tree>* glhbdsp_sn = NULL;
+    Core::TypedDagNode<Core::Tree>* glhbdsp_tdn = NULL;
+    Core::StochasticNode<Core::Tree>* glhbdsp_sn = NULL;
 
     if ( static_cast<const RevLanguage::AbstractHomologousDiscreteCharacterData&>( ctmc->getRevObject() ).isModelObject() )
     {
         ctmc_tdn = static_cast<const RevLanguage::AbstractHomologousDiscreteCharacterData&>( ctmc->getRevObject() ).getDagNode();
-        ctmc_sn  = static_cast<RevBayesCore::StochasticNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* >(ctmc_tdn);
+        ctmc_sn  = static_cast<Core::StochasticNode<Core::AbstractHomologousDiscreteCharacterData>* >(ctmc_tdn);
         
-        if ( ctmc_sn->getValue().getDataType() != character )
+        if ( ctmc_sn->getValue().getDataType() != character_type )
         {
             throw RbException("mnJointConditionalAncestralStateMonitor requires the CTMC to be of same type as the specified character.");
         }
@@ -88,99 +91,41 @@ void Mntr_JointConditionalAncestralState::constructInternalObject( void )
     else if ( static_cast<const RevLanguage::Tree&>( cdbdp->getRevObject() ).isModelObject() )
     {
         cdbdp_tdn = static_cast<const RevLanguage::Tree&>( cdbdp->getRevObject() ).getDagNode();
-        cdbdp_sn  = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree>* >( cdbdp_tdn );
+        cdbdp_sn  = static_cast<Core::StochasticNode<Core::Tree>* >( cdbdp_tdn );
     }
     else if ( static_cast<const RevLanguage::Tree&>( glhbdsp->getRevObject() ).isModelObject() )
     {
     	glhbdsp_tdn = static_cast<const RevLanguage::Tree&>( glhbdsp->getRevObject() ).getDagNode();
-    	glhbdsp_sn  = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree>* >( glhbdsp_tdn );
+    	glhbdsp_sn  = static_cast<Core::StochasticNode<Core::Tree>* >( glhbdsp_tdn );
     }
     else
     {
         throw RbException("mnJointConditionalAncestralStateMonitor requires either a CTMC or a character-dependent birth death process (CDBDP).");
     }
-    
-    
+
     delete value;
-    if (character == "AA" || character == "Protein")
+
+    auto make_monitor = [&]<typename T>()
     {
-        RevBayesCore::JointConditionalAncestralStateMonitor<RevBayesCore::AminoAcidState> *m;
-        m = new RevBayesCore::JointConditionalAncestralStateMonitor<RevBayesCore::AminoAcidState>(t, ctmc_sn, (std::uint64_t)g, fn, sep, wt, wss);
-        m->setAppend( ap );
-        m->setPrintVersion(wv);
-        value = m;
-    }
-    else if (character == "DNA")
-    {
-        RevBayesCore::JointConditionalAncestralStateMonitor<RevBayesCore::DnaState> *m;
-        m = new RevBayesCore::JointConditionalAncestralStateMonitor<RevBayesCore::DnaState>(t, ctmc_sn, (std::uint64_t)g, fn, sep, wt, wss);
-        m->setAppend( ap );
-        m->setPrintVersion(wv);
-        value = m;
-    }
-    else if (character == "NaturalNumbers")
-    {
-        RevBayesCore::JointConditionalAncestralStateMonitor<RevBayesCore::NaturalNumbersState> *m;
+        Core::JointConditionalAncestralStateMonitor<T> *m;
         if ( static_cast<const RevLanguage::AbstractHomologousDiscreteCharacterData&>( ctmc->getRevObject() ).isModelObject() )
         {
-            m = new RevBayesCore::JointConditionalAncestralStateMonitor<RevBayesCore::NaturalNumbersState>(t, ctmc_sn, (std::uint64_t)g, fn, sep, wt, wss);
+            m = new Core::JointConditionalAncestralStateMonitor<T>(t, ctmc_sn, (std::uint64_t)g, fn, sep, wt, wss);
         }
         else if ( static_cast<const RevLanguage::Tree&>( cdbdp->getRevObject() ).isModelObject() )
         {
-            m = new RevBayesCore::JointConditionalAncestralStateMonitor<RevBayesCore::NaturalNumbersState>(cdbdp_sn, (std::uint64_t)g, fn, sep, wt, wss);
+            m = new Core::JointConditionalAncestralStateMonitor<T>(cdbdp_sn, (std::uint64_t)g, fn, sep, wt, wss);
         }
         else
         {
-        	m = new RevBayesCore::JointConditionalAncestralStateMonitor<RevBayesCore::NaturalNumbersState>(glhbdsp_sn, (std::uint64_t)g, fn, sep, wt, wss);
+            m = new Core::JointConditionalAncestralStateMonitor<T>(glhbdsp_sn, (std::uint64_t)g, fn, sep, wt, wss);
         }
         m->setAppend( ap );
         m->setPrintVersion(wv);
         value = m;
-    }
-    else if (character == "PoMo")
-    {
-        RevBayesCore::JointConditionalAncestralStateMonitor<RevBayesCore::PoMoState> *m;
-        m = new RevBayesCore::JointConditionalAncestralStateMonitor<RevBayesCore::PoMoState>(t, ctmc_sn, (std::uint64_t)g, fn, sep, wt, wss);
-        m->setAppend( ap );
-        m->setPrintVersion(wv);
-        value = m;
-    }
-    else if (character == "RNA")
-    {
-        RevBayesCore::JointConditionalAncestralStateMonitor<RevBayesCore::DnaState> *m;
-        m = new RevBayesCore::JointConditionalAncestralStateMonitor<RevBayesCore::DnaState>(t, ctmc_sn, (std::uint64_t)g, fn, sep, wt, wss);
-        m->setAppend( ap );
-        m->setPrintVersion(wv);
-        value = m;
-    }
-    else if (character == "Standard")
-    {
-        RevBayesCore::JointConditionalAncestralStateMonitor<RevBayesCore::StandardState> *m;
-        if ( static_cast<const RevLanguage::AbstractHomologousDiscreteCharacterData&>( ctmc->getRevObject() ).isModelObject() )
-        {
-            m = new RevBayesCore::JointConditionalAncestralStateMonitor<RevBayesCore::StandardState>(t, ctmc_sn, (std::uint64_t)g, fn, sep, wt, wss);
-        }
-        else
-        {
-            m = new RevBayesCore::JointConditionalAncestralStateMonitor<RevBayesCore::StandardState>(cdbdp_sn, (std::uint64_t)g, fn, sep, wt, wss);
-        }
-        m->setAppend( ap );
-        m->setPrintVersion(wv);
-        value = m;
-    }
-    else if (character == "Binary" || character == "Restriction")
-    {
-        RevBayesCore::JointConditionalAncestralStateMonitor<RevBayesCore::BinaryState> *m;
-        m = new RevBayesCore::JointConditionalAncestralStateMonitor<RevBayesCore::BinaryState>(t, ctmc_sn, (std::uint64_t)g, fn, sep, wt, wss);
-        m->setAppend( ap );
-        m->setPrintVersion(wv);
-        value = m;
-    }
-    else
-    {
-        throw RbException( "Incorrect character type specified. Valid options are: AA, DNA, NaturalNumbers, PoMo, Protein, RNA, Standard, Binary/Restriction" );
-    }
-    
+    };
+
+    apply_to_character_type(make_monitor, character_type);
 }
 
 

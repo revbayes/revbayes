@@ -1,9 +1,12 @@
 #include "NexusMonitor.h"
 
 #include <cstddef>
+#include <cstdlib>
+#include <filesystem>
 #include <ostream>
 
 #include "DagNode.h"
+#include "RbFileManager.h"
 #include "StringUtilities.h"
 #include "Taxon.h"
 #include "TopologyNode.h"
@@ -103,6 +106,45 @@ void NexusMonitor::monitor(std::uint64_t gen) {
 
     out_stream << tree->getValue() << std::endl;
     out_stream.flush();
+}
+
+void NexusMonitor::truncateAfterGeneration(std::uint64_t lastGen) {
+    // open in binary mode so that tellg() returns reliable byte offsets
+    std::ifstream infile( working_file_name.string(), std::ios::binary );
+    if ( !infile.good() ) return;
+
+    std::string line;
+    bool in_trees_block = false;
+
+    while ( true ) {
+        std::streampos pos = infile.tellg();
+        if ( !safeGetline(infile, line) ) break;
+
+        if ( line == "Begin trees;" ) {
+            in_trees_block = true;
+            continue;
+        }
+
+        // Nexus tree lines: "tree TREE_<gen> = ..."
+        const size_t tree_prefix_len = 10; // length of "tree TREE_"
+        if ( line.compare(0, tree_prefix_len, "tree TREE_") == 0 ) {
+            char *end_ptr = NULL;
+            std::uint64_t gen = static_cast<std::uint64_t>( std::strtoull(line.c_str() + tree_prefix_len, &end_ptr, 10) );
+            if ( end_ptr != line.c_str() + tree_prefix_len && gen > lastGen ) {
+                infile.close();
+                std::filesystem::resize_file(working_file_name, pos);
+                return;
+            }
+        }
+
+        // remove trailing "End;" of the trees block so new samples can be appended
+        if ( in_trees_block == true && line == "End;" ) {
+            infile.close();
+            std::filesystem::resize_file(working_file_name, pos);
+            return;
+        }
+    }
+
 }
 
 void NexusMonitor::closeStream() {

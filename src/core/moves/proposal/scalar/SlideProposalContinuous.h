@@ -25,7 +25,7 @@ class DagNode;
     class SlideProposalContinuous : public Proposal {
         
     public:
-        SlideProposalContinuous( ContinuousStochasticNode *n, double l, double r=0.44);                                                                      //!<  constructor
+        SlideProposalContinuous( ContinuousStochasticNode *n, double l, double r=0.44);                                                                      //!< Constructor
         
         // Basic utility functions
         void                                    cleanProposal(void);                                                                //!< Clean up proposal
@@ -40,7 +40,7 @@ class DagNode;
         void                                    undoProposal(void);                                                                 //!< Reject the proposal
         
     protected:
-        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes on which the Proposal is working on
+        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes the Proposal is working on
         
     private:
         // parameters

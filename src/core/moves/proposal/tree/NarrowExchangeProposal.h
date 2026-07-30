@@ -30,7 +30,7 @@ template <class variableType> class StochasticNode;
     class NarrowExchangeProposal : public Proposal {
         
     public:
-        NarrowExchangeProposal( StochasticNode<Tree> *n, StochasticNode< RbVector<Tree> > *vec_s );             //!<  constructor
+        NarrowExchangeProposal( StochasticNode<Tree> *n, StochasticNode< RbVector<Tree> > *vec_s );             //!< Constructor
         
         // Basic utility functions
         void                                    cleanProposal(void);                                            //!< Clean up proposal
@@ -40,13 +40,11 @@ template <class variableType> class StochasticNode;
         double                                  getProposalTuningParameter(void) const;
         void                                    prepareProposal(void);                                          //!< Prepare the proposal
         void                                    printParameterSummary(std::ostream &o, bool name_only) const;   //!< Print the parameter summary
-        void                                    setProposalTuningParameter(double tp);
-        void                                    tune(double r);                                                 //!< Tune the proposal to achieve a better acceptance/rejection ratio
         void                                    undoProposal(void);                                             //!< Reject the proposal
         
     protected:
         
-        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);                 //!< Swap the DAG nodes on which the Proposal is working on
+        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);                 //!< Swap the DAG nodes the Proposal is working on
         
         
     private:

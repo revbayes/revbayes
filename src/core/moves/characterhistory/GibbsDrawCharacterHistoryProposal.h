@@ -15,7 +15,7 @@ template <class variableType> class StochasticNode;
         
     public:
         
-        GibbsDrawCharacterHistoryProposal(StochasticNode<Tree> *n);                                                                              //!<  constructor
+        GibbsDrawCharacterHistoryProposal(StochasticNode<Tree> *n);                                                                         //!< Constructor
         void                                            cleanProposal(void);                                                                //!< Clean up proposal
         GibbsDrawCharacterHistoryProposal*              clone(void) const;                                                                  //!< Clone object
         double                                          doProposal(void);                                                                   //!< Perform proposal
@@ -24,13 +24,11 @@ template <class variableType> class StochasticNode;
 
         void                                            prepareProposal(void);                                                              //!< Prepare the proposal
         void                                            printParameterSummary(std::ostream &o, bool name_only) const;                                       //!< Print the parameter summary
-        void                                            setProposalTuningParameter(double tp);
-        void                                            tune(double r);                                                                     //!< Tune the proposal to achieve a better acceptance/rejection ratio
         void                                            undoProposal(void);                                                                 //!< Reject the proposal
         
     protected:
 
-        void                                            swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes on which the Proposal is working on
+        void                                            swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes the Proposal is working on
         
         StateDependentSpeciationExtinctionProcess*      distribution;
 

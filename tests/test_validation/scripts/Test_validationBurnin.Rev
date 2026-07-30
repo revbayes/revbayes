@@ -1,0 +1,25 @@
+################################################################################
+#
+# RevBayes Test-Script: Check that the burnin progress monitor can deal with
+#                       blocks of length zero.
+#
+# authors: David Cerny
+#
+################################################################################
+
+seed(12345)
+
+# use a setup originally suggested by Wonseop Lim
+# (see https://github.com/revbayes/revbayes/issues/1046)
+
+n_val_reps = 1
+iter = 100
+moves = VectorMoves()
+monitors = VectorMonitors()
+x ~ dnNormal(0, 1)
+mymodel = model(x)
+mymcmc  = mcmc(mymodel, monitors, moves)
+v = validationAnalysis(mymcmc, n_val_reps, directory="output")
+v.burnin(generations=0.1*iter, tuningInterval=100)
+
+q()

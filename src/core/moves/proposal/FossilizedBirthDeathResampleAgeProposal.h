@@ -25,30 +25,28 @@ namespace RevBayesCore {
     class FossilizedBirthDeathResampleAgeProposal : public Proposal {
         
     public:
-        FossilizedBirthDeathResampleAgeProposal( StochasticNode<valType> *n);                                               //!<  constructor
+        FossilizedBirthDeathResampleAgeProposal( StochasticNode<valType> *n);                                           //!< Constructor
         
         // Basic utility functions
         bool                                     		  allowClamped() const override { return true; }              //!< Resamples the internally augmented oldest/youngest occurrence ages, not the clamped birth/death matrix, so it is valid on a clamped node. See #600.
-        void                                     		  cleanProposal(void);                                        //!< Clean up proposal
-        FossilizedBirthDeathResampleAgeProposal<valType>* clone(void) const;                                          //!< Clone object
-        double                                   		  doProposal(void);                                           //!< Perform proposal
-        const std::string&                       		  getProposalName(void) const;                                //!< Get the name of the proposal for summary printing
+        void                                     		  cleanProposal(void);                                          //!< Clean up proposal
+        FossilizedBirthDeathResampleAgeProposal<valType>* clone(void) const;                                            //!< Clone object
+        double                                   		  doProposal(void);                                             //!< Perform proposal
+        const std::string&                       		  getProposalName(void) const;                                  //!< Get the name of the proposal for summary printing
         double                                   		  getProposalTuningParameter(void) const;
-        void                                     		  prepareProposal(void);                                      //!< Prepare the proposal
-        void                                     		  printParameterSummary(std::ostream &o, bool name_only) const;               //!< Print the parameter summary
-        void                                     		  setProposalTuningParameter(double tp);
-        void                                     		  tune(double r);                                             //!< Tune the proposal to achieve a better acceptance/rejection ratio
-        void                                     		  undoProposal(void);                                         //!< Reject the proposal
+        void                                     		  prepareProposal(void);                                        //!< Prepare the proposal
+        void                                     		  printParameterSummary(std::ostream &o, bool name_only) const; //!< Print the parameter summary
+        void                                     		  undoProposal(void);                                           //!< Reject the proposal
         
     protected:
         
-        void                                     		  swapNodeInternal(DagNode *oldN, DagNode *newN);             //!< Swap the DAG nodes on which the Proposal is working on
+        void                                     		  swapNodeInternal(DagNode *oldN, DagNode *newN);               //!< Swap the DAG nodes the Proposal is working on
         
         
     private:
         
         // parameters
-        StochasticNode<valType>*                 		  variable;                                                   //!< The variable the Proposal is working on
+        StochasticNode<valType>*                 		  variable;                                                     //!< The variable the Proposal is working on
         
         std::vector<double>								  stored_ages;
     };
@@ -214,26 +212,6 @@ void RevBayesCore::FossilizedBirthDeathResampleAgeProposal<valType>::swapNodeInt
 {
 
     variable = static_cast<StochasticNode<valType>* >(newN) ;
-
-}
-
-template<class valType>
-void RevBayesCore::FossilizedBirthDeathResampleAgeProposal<valType>::setProposalTuningParameter(double tp)
-{
-    // this proposal has no tuning parameter: nothing to do
-}
-
-
-/**
- * Tune the Proposal to accept the desired acceptance ratio.
- *
- * The acceptance ratio for this Proposal should be around 0.44.
- * If it is too large, then we increase the proposal size,
- * and if it is too small, then we decrease the proposal size.
- */
-template<class valType>
-void RevBayesCore::FossilizedBirthDeathResampleAgeProposal<valType>::tune( double rate )
-{
 
 }
 
