@@ -193,10 +193,10 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
         throw(RbException(ss.str()));
     }
 
-    b_i = std::vector<double>(taxa.size(), 0.0);
-    d_i = std::vector<double>(taxa.size(), 0.0);
-    o_i = std::vector<double>(taxa.size(), 0.0);
-    y_i = std::vector<double>(taxa.size(), RbConstants::Double::inf);
+    range_start = std::vector<double>(taxa.size(), 0.0);
+    range_end = std::vector<double>(taxa.size(), 0.0);
+    first_min = std::vector<double>(taxa.size(), 0.0);
+    last_max = std::vector<double>(taxa.size(), RbConstants::Double::inf);
 
     p_i         = std::vector<double>(num_intervals, 1.0);
     pS_i        = std::vector<double>(num_intervals, 1.0);
@@ -233,14 +233,14 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
 
 /**
  * Derive everything the likelihood reads off the occurrence record: the per-taxon counts, which
- * reporting model each taxon falls under, the bounds o_i and y_i that constrain the augmented
+ * reporting model each taxon falls under, the bounds first_min and last_max that constrain the augmented
  * extremes, and the default tau_K. Called from the constructor and again whenever a clamped
  * record replaces the occurrences.
  */
 void AbstractFossilizedBirthDeathRangeProcess::deriveRecordModel( void )
 {
-    o_i = std::vector<double>(taxa.size(), 0.0);
-    y_i = std::vector<double>(taxa.size(), RbConstants::Double::inf);
+    first_min = std::vector<double>(taxa.size(), 0.0);
+    last_max = std::vector<double>(taxa.size(), RbConstants::Double::inf);
 
     occurrence_counts = std::vector<size_t>(taxa.size(), 0);
     truncated         = std::vector<bool>(taxa.size(), false);
@@ -288,16 +288,16 @@ void AbstractFossilizedBirthDeathRangeProcess::deriveRecordModel( void )
         for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++ )
         {
             // find the oldest minimum age
-            o_i[i] = std::max(Fi->first.getMin(), o_i[i]);
+            first_min[i] = std::max(Fi->first.getMin(), first_min[i]);
             // find the youngest maximum age
-            y_i[i] = std::min(Fi->first.getMax(), y_i[i]);
+            last_max[i] = std::min(Fi->first.getMax(), last_max[i]);
 
-            max_present_age = std::min(max_present_age, y_i[i]);
+            max_present_age = std::min(max_present_age, last_max[i]);
         }
 
         // default the augmented youngest age to the youngest maximum (only resampled,
         // and only used, when the record has two extremes to order)
-        last[i] = y_i[i];
+        last[i] = last_max[i];
     }
 
     if ( num_truncated > 0 )
@@ -367,15 +367,15 @@ void AbstractFossilizedBirthDeathRangeProcess::clipAugmentedAges( void )
 
     for (size_t i = 0; i < taxa.size(); i++)
     {
-        double lo = std::max( o_i[i], d_i[i] );
-        double hi = std::min( taxa[i].getMaxAge(), b_i[i] );
-        if ( hi > lo && ( first[i] < lo || first[i] >= b_i[i] ) )
+        double lo = std::max( first_min[i], range_end[i] );
+        double hi = std::min( taxa[i].getMaxAge(), range_start[i] );
+        if ( hi > lo && ( first[i] < lo || first[i] >= range_start[i] ) )
         {
             first[i] = 0.5 * ( lo + hi );
         }
 
-        double lo_y = std::max( d_i[i], taxa[i].getMinAge() );
-        double hi_y = std::min( first[i], y_i[i] );
+        double lo_y = std::max( range_end[i], taxa[i].getMinAge() );
+        double hi_y = std::min( first[i], last_max[i] );
         if ( hi_y > lo_y && ( last[i] < lo_y || last[i] > hi_y ) )
         {
             last[i] = 0.5 * ( lo_y + hi_y );
@@ -435,7 +435,7 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
     updateStartEndTimes();
 
     // the origin is the oldest birth; a supplied one pins it
-    if ( origin_age != NULL && b_i[max_birth] != origin )
+    if ( origin_age != NULL && range_start[max_birth] != origin )
     {
         return RbConstants::Double::neginf;
     }
@@ -449,8 +449,8 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
     // add the fossil tip age terms
     for (size_t i = 0; i < taxa.size(); ++i)
     {
-        double b = b_i[i];
-        double d = d_i[i];
+        double b = range_start[i];
+        double d = range_end[i];
 
         double o = first[i];
 
@@ -459,9 +459,11 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
 
         double present = times.front();
 
-        // check model constraints
-        //if ( !( b > max_age && min_age >= d && d >= 0.0 ) )
-        if ( !( b > o && o >= d && o >= o_i[i] && y_i[i] >= d && d >= present ) )
+        // check model constraints. tau_K sits between the range end and tau_1, which the
+        // reporting term only checks for taxa whose two extremes are separate variables; a move
+        // on the value can put it anywhere, so the support is enforced here for every taxon
+        if ( !( b > o && o >= d && o >= first_min[i] && last_max[i] >= d && d >= present
+                && last[i] >= d && o >= last[i] ) )
         {
             return RbConstants::Double::neginf;
         }
@@ -538,11 +540,11 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
                 partial_likelihood[i] += Psi[i];
             }
 
-            // change-of-variables for the truncated tau_1 ~ U(o_i, b); firstlast/complete
+            // change-of-variables for the truncated tau_1 ~ U(first_min, b); firstlast/complete
             // draw from a data-fixed bin so their term is constant
-            if ( truncated[i] && b_i[i] > o_i[i] )
+            if ( truncated[i] && range_start[i] > first_min[i] )
             {
-                partial_likelihood[i] += log( b_i[i] - o_i[i] );
+                partial_likelihood[i] += log( range_start[i] - first_min[i] );
             }
         }
 
@@ -627,7 +629,7 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnFossilTotal()
 // exactly what was assigned to Psi[i] inline before the split.
 double AbstractFossilizedBirthDeathRangeProcess::computeLnFossilRecord( size_t i ) const
 {
-    double d = d_i[i];
+    double d = range_end[i];
     double o = first[i];                             // oldest augmented age
     size_t oi = findIndex(o);
     double y  = last[i];                             // youngest augmented age
@@ -732,7 +734,7 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnFossilRecord( size_t i
 
             if ( augmentsYoungest(i) )
             {
-                if ( !( o >= y && y >= d && y <= y_i[i] ) )
+                if ( !( o >= y && y >= d && y <= last_max[i] ) )
                 {
                     return RbConstants::Double::neginf;
                 }
@@ -890,11 +892,11 @@ void AbstractFossilizedBirthDeathRangeProcess::executeMethod(const std::string &
 {
     if ( n == "getAugmentedFirstAges" || n == "getAugmentedLastAges" || n == "getBirthAges" || n == "getDeathAges" )
     {
-        // b_i/d_i are a byproduct of the density, so refresh them from the value
+        // range_start/range_end are a byproduct of the density, so refresh them from the value
         AbstractFossilizedBirthDeathRangeProcess *self = const_cast<AbstractFossilizedBirthDeathRangeProcess *>( this );
         self->updateStartEndTimes();
 
-        // with the extinction times marginalized out there is none to report: d_i holds the range
+        // with the extinction times marginalized out there is none to report: range_end holds the range
         // end instead, and a sampled ancestor's is jointly distributed with the unobserved
         // speciation separating it from its descendant, so it is not recoverable here
         if ( n == "getDeathAges" && marginalizesExtinction() == true )
@@ -904,7 +906,7 @@ void AbstractFossilizedBirthDeathRangeProcess::executeMethod(const std::string &
 
         const std::vector<double> &ages = ( n == "getAugmentedFirstAges" ? first :
                                           ( n == "getAugmentedLastAges"  ? last  :
-                                          ( n == "getBirthAges"          ? b_i   : d_i ) ) );
+                                          ( n == "getBirthAges"          ? range_start   : range_end ) ) );
 
         rv.clear();
         for (size_t i = 0; i < ages.size(); i++)
@@ -940,7 +942,7 @@ void AbstractFossilizedBirthDeathRangeProcess::executeMethod(const std::string &
 
 
 /**
- * Draw the augmented extremes for taxon i, nested (d_i <= last <= first), under the current
+ * Draw the augmented extremes for taxon i, nested (range_end <= last <= first), under the current
  * reporting model.
  */
 void AbstractFossilizedBirthDeathRangeProcess::drawAugmentedAges(size_t i)
@@ -955,18 +957,18 @@ void AbstractFossilizedBirthDeathRangeProcess::drawAugmentedAges(size_t i)
     // range ends at this age rather than at an extinction, so the death does not bound it.
     if ( augment_youngest )
     {
-        lo = marginalizesExtinction() ? taxa[i].getMinAge() : std::max( d_i[i], taxa[i].getMinAge() );
-        hi = y_i[i];
+        lo = marginalizesExtinction() ? taxa[i].getMinAge() : std::max( range_end[i], taxa[i].getMinAge() );
+        hi = last_max[i];
         last[i] = ( hi > lo ) ? rng->uniform01()*(hi - lo) + lo : lo;
     }
     else
     {
-        last[i] = d_i[i];
+        last[i] = range_end[i];
     }
 
     // oldest augmented age, at or above the youngest and the oldest reported minimum
-    lo = std::max( last[i], o_i[i] );
-    hi = truncated[i] ? b_i[i] : taxa[i].getMaxAge();
+    lo = std::max( last[i], first_min[i] );
+    hi = truncated[i] ? range_start[i] : taxa[i].getMaxAge();
     first[i] = ( hi > lo ) ? rng->uniform01()*(hi - lo) + lo : lo;
 
     // a single occurrence (and complete/truncated reporting) is its own youngest
@@ -974,7 +976,9 @@ void AbstractFossilizedBirthDeathRangeProcess::drawAugmentedAges(size_t i)
 
     // a non-extended range ends at its youngest augmented age, so the initial tree is built there.
     // An extant range still ends at the present, and its tau_K is a fossil age, not its tip.
-    if ( marginalizesExtinction() == true && taxa[i].isExtinct() == true ) d_i[i] = last[i];
+    if ( marginalizesExtinction() == true && taxa[i].isExtinct() == true ) range_end[i] = last[i];
+
+    pushAugmentedToValue();
 }
 
 // The augmented ages move only through mvResampleAugmentedAges. Without it they stay at their
@@ -1019,8 +1023,8 @@ void AbstractFossilizedBirthDeathRangeProcess::resampleFirstLast(size_t i)
 
     // truncated (exchangeable occurrence): the oldest may be unobserved up to the birth.
     // Otherwise it is in its reported bin.
-    double hi = truncated[i] ? b_i[i] : taxa[i].getMaxAge();
-    first[i] = GLOBAL_RNG->uniform01()*(o_i[i] - hi) + hi;
+    double hi = truncated[i] ? range_start[i] : taxa[i].getMaxAge();
+    first[i] = GLOBAL_RNG->uniform01()*(first_min[i] - hi) + hi;
 
     // an extinct non-extended tip is the augmented youngest age itself, so tau_K is not drawn
     // here. An extant tip sits at the present instead, so its tau_K still is.
@@ -1033,12 +1037,14 @@ void AbstractFossilizedBirthDeathRangeProcess::resampleFirstLast(size_t i)
     // may be unreported
     if ( augmentsYoungest(i) )
     {
-        last[i] = GLOBAL_RNG->uniform01()*(y_i[i] - taxa[i].getMinAge()) + taxa[i].getMinAge();
+        last[i] = GLOBAL_RNG->uniform01()*(last_max[i] - taxa[i].getMinAge()) + taxa[i].getMinAge();
     }
     else
     {
         last[i] = first[i];
     }
+
+    pushAugmentedToValue();
 }
 
 
@@ -1071,8 +1077,8 @@ void AbstractFossilizedBirthDeathRangeProcess::drawRanges()
     for (size_t i = 0; i < taxa.size(); i++)
     {
         // Draw d over its range, then the augmented ages NESTED (d <= last <= first)
-        d_i[i] = taxa[i].isExtinct() ? rng->uniform01()*(y_i[i] - present) + present : present;
-        b_i[i] = max;
+        range_end[i] = taxa[i].isExtinct() ? rng->uniform01()*(last_max[i] - present) + present : present;
+        range_start[i] = max;
 
         drawAugmentedAges(i);
     }
@@ -1092,7 +1098,7 @@ void AbstractFossilizedBirthDeathRangeProcess::drawRanges()
         {
             if ( origin_age != NULL )
             {
-                b_i[i] = origin_age->getValue();
+                range_start[i] = origin_age->getValue();
             }
             else if ( origin_prior != NULL )
             {
@@ -1105,11 +1111,11 @@ void AbstractFossilizedBirthDeathRangeProcess::drawRanges()
                     origin_prior->redrawValue();
                 }
 
-                b_i[i] = origin_prior->getValue();
+                range_start[i] = origin_prior->getValue();
             }
             else
             {
-                b_i[i] = first[i] + rng->uniform01()*(max - first[i]);
+                range_start[i] = first[i] + rng->uniform01()*(max - first[i]);
             }
 
             continue;
@@ -1121,9 +1127,9 @@ void AbstractFossilizedBirthDeathRangeProcess::drawRanges()
         size_t a = order[pick];
 
         // sorted oldest-first, so the window is never empty
-        double lo = std::max( first[i], d_i[a] );
+        double lo = std::max( first[i], range_end[a] );
 
-        b_i[i] = lo + rng->uniform01()*(b_i[a] - lo);
+        range_start[i] = lo + rng->uniform01()*(range_start[a] - lo);
     }
 }
 

@@ -68,6 +68,11 @@ RevBayesCore::FossilizedBirthDeathResampleAgeProposal<valType>::FossilizedBirthD
     	throw RbException("FossilizedBirthDeathResampleAgeProposal can only be used with Fossilized Birth Death Range Processes");
     }
 
+    if ( dist->augmentedAgesInValue() == true )
+    {
+        throw RbException("mvResampleAugmentedAges: these augmented ages are value elements; sample columns 2 and 3 with mvMatrixElementSlide.");
+    }
+
     dist->setHasResampleMove();
 }
 

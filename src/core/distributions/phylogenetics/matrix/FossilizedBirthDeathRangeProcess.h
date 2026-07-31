@@ -1,6 +1,8 @@
 #ifndef FossilizedBirthDeathRangeProcess_H
 #define FossilizedBirthDeathRangeProcess_H
 
+#include <set>
+#include <utility>
 #include "AbstractFossilizedBirthDeathRangeProcess.h"
 
 #include "MatrixReal.h"
@@ -31,6 +33,7 @@ namespace RevBayesCore {
     class FossilizedBirthDeathRangeProcess : public TypedDistribution<MatrixReal>, public AbstractFossilizedBirthDeathRangeProcess {
         
     public:
+        bool                                            augmentedAgesInValue(void) const override { return true; }   //!< Columns 1 and 2 of the value.
         FossilizedBirthDeathRangeProcess (const DagNode *speciation,
 										  const DagNode *extinction,
 										  const DagNode *psi,
@@ -64,6 +67,9 @@ namespace RevBayesCore {
         // Parameter management functions
         void                                            swapParameterInternal(const DagNode *oldP, const DagNode *newP) override;  //!< Swap a parameter
 
+        std::vector<std::pair<size_t,double> >          stored_repairs;                                                     //!< Elements the repair wrote that no move stored, undone on restore.
+        void                                            repairAugmentedAges(void);                                          //!< No move to follow: tau_K takes tau_1.
+        void                                            repairAugmentedAges(const std::set<size_t> &touched);                //!< Follow whichever of the two columns the move wrote.                                          //!< tau_1 and tau_K are one quantity below two occurrences; hold the columns equal.
         void                                            keepSpecialization(const DagNode *toucher) override;
         void                                            restoreSpecialization(const DagNode *toucher) override;
         void                                            touchSpecialization(const DagNode *toucher, bool touchAll) override;

@@ -16,7 +16,7 @@ namespace RevBayesCore {
      *
      * The observation half of the factored FBD-range model: the per-taxon fossil-occurrence term
      * factored out of AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges() into
-     * computeLnFossilTotal(). The conditioned-on latent state (b_i, d_i, the augmented extremes,
+     * computeLnFossilTotal(). The conditioned-on latent state (range_start, range_end, the augmented extremes,
      * psi and its timeline) and the occurrences are all read from the range process, so one psi and
      * one timeline are owned there; computeLnProbability() == ranges->computeLnFossilTotal().
      *

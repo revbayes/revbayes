@@ -59,7 +59,7 @@ double BirthDeathWithRateshifts::computeLnProbability( void )
         double present = times.front();
 
         // check model constraints
-        if ( !( b > o_i[i] && b > d && y_i[i] >= d && d >= present ) )
+        if ( !( b > first_min[i] && b > d && last_max[i] >= d && d >= present ) )
         {
             return RbConstants::Double::neginf;
         }
@@ -115,8 +115,8 @@ double BirthDeathWithRateshifts::computeLnProbability( void )
             // inline reporting term, unless a dnFossilRecord node supplies it
             if ( report_internally && dirty_psi[i] )
             {
-                b_i[i] = b;
-                d_i[i] = d;
+                range_start[i] = b;
+                range_end[i] = d;
                 Psi[i] = computeLnFossilRecord(i);
                 if ( Psi[i] == RbConstants::Double::neginf )
                 {

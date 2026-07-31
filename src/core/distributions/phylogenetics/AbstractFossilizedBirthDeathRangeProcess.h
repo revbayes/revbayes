@@ -55,6 +55,10 @@ namespace RevBayesCore {
         //!< The resampling move registers itself here, so the model can tell when it is missing
         void                                            setHasResampleMove(void) { has_resample_move = true; }
 
+        //!< True when the augmented ages are elements of the owning distribution's value, so a
+        //!< generic move on those elements samples them and restores them on rejection.
+        virtual bool                                    augmentedAgesInValue(void) const { return false; }
+
         //!< A dnFossilRecord registers itself here. With report_internally false it carries the
         //!< whole sampling density, so without one psi has no data at all.
         void                                            setHasReportingNode(void) { has_reporting_node = true; }
@@ -68,8 +72,8 @@ namespace RevBayesCore {
         void                                            resampleFirstLast(size_t i);
         void                                            warnIfNoResampleMove(void) const;
         void                                            warnIfNoReportingNode(void) const;
-        void                                            drawAugmentedAges(size_t i);                               //!< Draw taxon i's augmented extremes nested (d_i <= last <= first) under the current reporting model.
-        void                                            drawRanges();                                              //!< Draw an initial (b_i, d_i) and the augmented ages for every taxon. Shared by the matrix redraw and the tree (FBDSP) initial-value construction, which hangs a random budding topology on the ranges.
+        void                                            drawAugmentedAges(size_t i);                               //!< Draw taxon i's augmented extremes nested (range_end <= last <= first) under the current reporting model.
+        void                                            drawRanges();                                              //!< Draw an initial (range_start, range_end) and the augmented ages for every taxon. Shared by the matrix redraw and the tree (FBDSP) initial-value construction, which hangs a random budding topology on the ranges.
         double                                          computeLnFossilTotal();                                    //!< Total fossil-record log-density summed over taxa; used by a standalone dnFossilRecord node conditioned on this range process (self-contained: refreshes rate cache + start/end times).
         //!< dnFossilRecord owns the reporting model and pushes it here, since the augmented ages
         //!< live on the range process. The cap is a constructor argument, so only a complete or
@@ -84,7 +88,7 @@ namespace RevBayesCore {
         const std::vector<const DagNode*>&              getRangeParameters(void) const { return range_parameters; }   //!< The rate/timeline nodes a separate dnFossilRecord node adopts as parents.
 
     protected:
-        virtual bool                                    marginalizesExtinction(void) const { return false; }    //!< True when d_i is integrated out, so a range ends at the marginalization limit and closes with p() rather than mu.
+        virtual bool                                    marginalizesExtinction(void) const { return false; }    //!< True when range_end is integrated out, so a range ends at the marginalization limit and closes with p() rather than mu.
         virtual double                                  rangeEndTerm(size_t i, size_t di, double d) const { return log( death[di] ); }   //!< Log term closing range i at d > present.
 
         //!< Is tau_K an explicit latent? Not when unreported occurrences may lie below the youngest reported one.
@@ -94,6 +98,12 @@ namespace RevBayesCore {
         //!< a fresh draw of its value.
         virtual double                                  ownLnProbability() = 0;
         virtual void                                    ownRedrawValue() = 0;
+
+        //!< The augmented extremes are latent state that no node's value holds, so a checkpoint
+        //!< drops them. These move them into the owning distribution's value and back. No-ops until
+        //!< each process has somewhere to put them (a wider matrix, a tree that carries them).
+        virtual void                                    pushAugmentedToValue() {}
+        virtual void                                    pullAugmentedFromValue() {}
 
         void                                            clipAugmentedAges();                                    //!< Put every augmented extreme back inside its bin.
         bool                                            startsFinite();                                         //!< Does the current value score finitely under both the range and the reporting term?
@@ -125,7 +135,7 @@ namespace RevBayesCore {
         bool                                            record_complete;                                        //!< The declared reporting model, same
         double                                          max_present_age;                                        //!< Youngest occurrence maximum over all taxa; the timeline may not start above it
 
-        void                                            deriveRecordModel(void);                                //!< Recompute counts, o_i/y_i and the per-taxon reporting model from the occurrences
+        void                                            deriveRecordModel(void);                                //!< Recompute counts, first_min/last_max and the per-taxon reporting model from the occurrences
 
         size_t                                          num_intervals;
 
@@ -143,10 +153,10 @@ namespace RevBayesCore {
 
         std::vector<const DagNode*>                     range_parameters;
 
-        std::vector<double>                             b_i;                                                    //!< The birth times for each taxon
-        std::vector<double>                             d_i;                                                    //!< The extinction times for each taxon
-        std::vector<double>                             o_i;                                                    //!< The oldest minimum fossil age for each taxon
-        std::vector<double>                             y_i;                                                    //!< The youngest maximum fossil age for each taxon
+        std::vector<double>                             range_start;                                                    //!< The birth times for each taxon
+        std::vector<double>                             range_end;                                                    //!< The extinction times for each taxon
+        std::vector<double>                             first_min;                                                    //!< The oldest minimum fossil age for each taxon
+        std::vector<double>                             last_max;                                                    //!< The youngest maximum fossil age for each taxon
         
         double                                          origin;                                                 //!< The origin time (oldest birth time)
         size_t                                          max_birth;                                              //!< Index of the taxon holding the oldest birth, refreshed by updateStartEndTimes
