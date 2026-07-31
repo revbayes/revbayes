@@ -104,6 +104,7 @@ FossilizedBirthDeathSpeciationProcess::FossilizedBirthDeathSpeciationProcess(con
 
     I             = std::vector<bool>(taxa.size(), false);
     is_sa         = std::vector<bool>(taxa.size(), false);
+    ends_symmetric= std::vector<bool>(taxa.size(), false);
 
     anagenetic    = std::vector<double>(num_intervals, 0.0);
     symmetric     = std::vector<double>(num_intervals, 0.0);
@@ -145,6 +146,10 @@ double FossilizedBirthDeathSpeciationProcess::computeLnProbabilityDivergenceTime
     if ( invalid_continuation == true ) return RbConstants::Double::neginf;
 
     lnProb += computeLnProbabilityTimes();
+
+    // speciation mode: every budding event carries 1-beta, and the symmetric ones are paid for
+    // where they close a range
+    lnProb += budding_lnProb;
 
     return lnProb;
 }
@@ -208,6 +213,11 @@ double FossilizedBirthDeathSpeciationProcess::computeLnProbabilityTimes( void ) 
  */
 double FossilizedBirthDeathSpeciationProcess::rangeEndTerm( size_t i, size_t di, double d ) const
 {
+    // a range ending by symmetric speciation is not an extinction, and its end is observed rather
+    // than integrated out. The event contributes lambda*beta, and its two daughters already carry a
+    // lambda each at their births, so one of those is corrected away here
+    if ( ends_symmetric[i] == true ) return log( symmetric[di] ) - log( birth[di] );
+
     if ( extended == true ) return log( death[di] );
 
     if ( is_sa[i] == true ) return 0.0;
@@ -349,7 +359,7 @@ void FossilizedBirthDeathSpeciationProcess::setValue(Tree *v, bool force)
     }
 
     // a tree clamped from outside carries no flags, so establish the invariant here as well
-    normalizeContinuationFlags( this->getValue().getRoot() );
+    normalizeContinuationFlags();
 }
 
 
@@ -475,9 +485,48 @@ void FossilizedBirthDeathSpeciationProcess::redrawValue(void)
     this->getValue().orderNodesByIndex();
 
     // whatever path built this tree, leave it with exactly one continuation per node
-    normalizeContinuationFlags( this->getValue().getRoot() );
+    normalizeContinuationFlags();
 }
 
+
+
+/**
+ * beta in the interval containing age. Which continuation configurations a node may take is a
+ * property of its own interval, not of the timeline as a whole, so every node-local test goes
+ * through here. Reads the parameter directly: the simulator reaches updateStartEndTimes without
+ * prepareProbComputation, so the cached symmetric[] may still be empty.
+ */
+double FossilizedBirthDeathSpeciationProcess::symmetricAt( double age ) const
+{
+    if ( homogeneous_beta != NULL )
+    {
+        return homogeneous_beta->getValue();
+    }
+
+    const RbVector<double>& probs = heterogeneous_beta->getValue();
+    size_t i = findIndex( age );
+
+    return i < probs.size() ? probs[i] : 0.0;
+}
+
+
+bool FossilizedBirthDeathSpeciationProcess::hasSymmetricSpeciation( void ) const
+{
+    if ( homogeneous_beta != NULL )
+    {
+        return homogeneous_beta->getValue() > 0.0;
+    }
+    if ( heterogeneous_beta != NULL )
+    {
+        const RbVector<double>& probs = heterogeneous_beta->getValue();
+        for (size_t i = 0; i < probs.size(); ++i)
+        {
+            if ( probs[i] > 0.0 ) return true;
+        }
+    }
+
+    return false;
+}
 
 
 bool FossilizedBirthDeathSpeciationProcess::hasAnagenesis( void ) const
@@ -514,6 +563,10 @@ bool FossilizedBirthDeathSpeciationProcess::redrawTopology( void )
 
     // an anagenetic attachment sits at d_i[j] == b_i[k], which the candidate test below cannot reach
     if ( hasAnagenesis() == true ) return false;
+
+    // the draw is pure budding, so under beta > 0 it does not target the conditional: the current
+    // tree may hold symmetric nodes the replacement cannot
+    if ( hasSymmetricSpeciation() == true ) return false;
 
     updateStartEndTimes();
 
@@ -596,7 +649,7 @@ bool FossilizedBirthDeathSpeciationProcess::redrawTopology( void )
     this->getValue().orderNodesByIndex();
 
     // whatever path built this tree, leave it with exactly one continuation per node
-    normalizeContinuationFlags( this->getValue().getRoot() );
+    normalizeContinuationFlags();
 
     return true;
 }
@@ -897,6 +950,15 @@ double FossilizedBirthDeathSpeciationProcess::simulateDivergenceTime(double orig
 }
 
 
+void FossilizedBirthDeathSpeciationProcess::normalizeContinuationFlags( void )
+{
+    // the legal repair depends on beta at each node, so the interval boundaries have to be current
+    prepareProbComputation();
+
+    normalizeContinuationFlags( getValue().getRoot() );
+}
+
+
 /**
  * Make every node name exactly one continuing child.
  *
@@ -916,97 +978,134 @@ void FossilizedBirthDeathSpeciationProcess::normalizeContinuationFlags( const To
         normalizeContinuationFlags( *children[c] );
     }
 
+    // a sampled ancestor tip is a sample of this node's species and always continues
+    bool sa_tip = false;
+    for (size_t c = 0; c < children.size(); c++)
+    {
+        if ( children[c]->isSampledAncestorTip() == true )
+        {
+            sa_tip = true;
+            children[c]->setContinuesParentSpecies( true );
+        }
+    }
+
     size_t n_cont = 0;
     for (size_t c = 0; c < children.size(); c++)
     {
-        if ( children[c]->continuesParentSpecies() == true ) ++n_cont;
+        if ( children[c]->isSampledAncestorTip() == false && children[c]->continuesParentSpecies() == true ) ++n_cont;
     }
 
-    bool sa = node.isSampledAncestorTipOrParent();
+    // zero continuing children is symmetric speciation, legal where this node's own beta is
+    // positive, so leave it alone; the sampled ancestor case is legal either way. Anything else is
+    // repaired to a single continuation, taking the lowest index so two presentations agree. The
+    // interval matters here in a way it does not in the density: repairing to a configuration the
+    // node's interval forbids starts the chain at -inf, with no move able to leave it
+    bool legal = ( n_cont == 1 ) ||
+                 ( n_cont == 0 && ( sa_tip == true || symmetricAt( node.getAge() ) > 0.0 ) );
 
-    // a sampled ancestor node carries its species on the sampled ancestor tip; otherwise keep the
-    // existing choice when there is exactly one, and otherwise pick the lowest index so that two
-    // presentations of the same tree agree
-    if ( sa == true || n_cont != 1 )
+    if ( legal == false )
     {
-        size_t keep = 0;
-        bool found = false;
+        size_t keep = children.size();
 
         for (size_t c = 0; c < children.size(); c++)
         {
-            if ( sa == true && children[c]->isSampledAncestorTip() == true ) { keep = c; found = true; break; }
-        }
-
-        if ( found == false )
-        {
-            for (size_t c = 0; c < children.size(); c++)
-            {
-                if ( children[c]->getIndex() < children[keep]->getIndex() ) keep = c;
-            }
+            if ( children[c]->isSampledAncestorTip() == true ) continue;
+            if ( keep == children.size() || children[c]->getIndex() < children[keep]->getIndex() ) keep = c;
         }
 
         for (size_t c = 0; c < children.size(); c++)
         {
+            if ( children[c]->isSampledAncestorTip() == true ) continue;
             children[c]->setContinuesParentSpecies( c == keep );
         }
     }
 }
 
 
-int FossilizedBirthDeathSpeciationProcess::updateStartEndTimes( const TopologyNode& node )
+FossilizedBirthDeathSpeciationProcess::RangeFlow FossilizedBirthDeathSpeciationProcess::updateStartEndTimes( const TopologyNode& node )
 {
     if( node.isTip() )
     {
-        return node.getIndex();
+        return RangeFlow{ int(node.getIndex()), 0.0 };
     }
 
-    int species = -1;
+    RangeFlow flow = { -1, 0.0 };
 
     std::vector<TopologyNode* > children = node.getChildren();
 
     bool sa = node.isSampledAncestorTipOrParent();
 
-    // Exactly one child must carry this node's species. The flag is state, set when the tree is
-    // built and maintained by the moves, so it is only read here: a density must never write to the
-    // value it scores, or a rejected proposal leaves the write behind.
+    // A sampled ancestor tip is a sample of this node's species, so it always continues. Among the
+    // remaining children exactly one continues, which is a budding event, or none does, which ends
+    // the species here by symmetric speciation. The flag is state, set when the tree is built and
+    // maintained by the moves, so it is only read here: a density must never write to the value it
+    // scores, or a rejected proposal leaves the write behind.
     size_t n_cont = 0;
+    bool   sa_tip = false;
 
     for (size_t c = 0; c < children.size(); c++)
     {
-        if ( children[c]->continuesParentSpecies() == true ) ++n_cont;
+        if ( children[c]->isSampledAncestorTip() == true )
+        {
+            sa_tip = true;
+            if ( children[c]->continuesParentSpecies() == false ) invalid_continuation = true;
+        }
+        else if ( children[c]->continuesParentSpecies() == true )
+        {
+            ++n_cont;
+        }
     }
 
-    if ( n_cont != 1 ) invalid_continuation = true;
+    if ( n_cont > 1 ) invalid_continuation = true;
 
-    // at a sampled ancestor node the continuation is forced to the sampled ancestor tip
-    if ( sa == true )
+    // both tests below are screens against a timeline with no symmetric speciation anywhere. Which
+    // interval permits the event is settled exactly by the beta in rangeEndTerm, which is zero and
+    // so rejects on its own when the range ends where beta does not apply
+    if ( sa_tip == true )
     {
-        for (size_t c = 0; c < children.size(); c++)
-        {
-            if ( children[c]->continuesParentSpecies() != children[c]->isSampledAncestorTip() )
-            {
-                invalid_continuation = true;
-            }
-        }
+        // the sampled ancestor already carries the species. A sibling that continues it as well is
+        // a sample taken within a range that runs on past it, which only ends by symmetric speciation
+        if ( n_cont == 1 && hasSymmetricSpeciation() == false ) invalid_continuation = true;
+    }
+    else
+    {
+        // no child carries the species, so it ends here by symmetric speciation
+        if ( n_cont == 0 && hasSymmetricSpeciation() == false ) invalid_continuation = true;
     }
 
     // stop before the assignment loop. With the invariant broken there is no continuing child, so
     // species stays -1 and -1 would be used to index first[]/b_i[]/d_i[]. The density rejects on
     // invalid_continuation; nothing below may run first.
-    if ( invalid_continuation == true ) return -1;
+    if ( invalid_continuation == true ) return flow;
+
+    // a bifurcation that is not symmetric is a budding event; the symmetric ones pay their beta
+    // through rangeEndTerm on the range they close
+    if ( sa_tip == false && n_cont == 1 )
+    {
+        budding_lnProb += log( 1.0 - symmetricAt( node.getAge() ) );
+    }
+
+    // a species that ends below reaches this node unnamed; the sampled ancestor here names it
+    int pending_species = -1;
+    double pending_end  = 0.0;
 
     for(int c = 0; c < children.size(); c++)
     {
         const TopologyNode& child = *children[c];
 
-        int i = updateStartEndTimes(child);
+        RangeFlow sub = updateStartEndTimes(child);
 
         // a subtree that failed propagates up rather than writing through a negative index
-        if ( i < 0 )
+        if ( invalid_continuation == true ) return flow;
+
+        // the subtree's species ended below and is still unnamed; carry it past this node
+        if ( sub.species < 0 )
         {
-            invalid_continuation = true;
-            return -1;
+            pending_end = sub.end_age;
+            continue;
         }
+
+        int i = sub.species;
 
         // if child is a tip, set the species/end time
         if( child.isTip() )
@@ -1050,7 +1149,10 @@ int FossilizedBirthDeathSpeciationProcess::updateStartEndTimes( const TopologyNo
         else
         {
             // propagate species index
-            species = i;
+            flow.species = i;
+
+            // a sampled ancestor tip is a sample of this species, so it can name one that ended below
+            if ( child.isSampledAncestorTip() == true ) pending_species = i;
 
             // its range ends here and the lineage carries on below
             if ( sa == true ) is_sa[i] = true;
@@ -1072,7 +1174,30 @@ int FossilizedBirthDeathSpeciationProcess::updateStartEndTimes( const TopologyNo
         }
     }
 
-    return species;
+    // a species that ended below is named by the sampled ancestor here, which is a sample of it
+    if ( pending_end > 0.0 && pending_species >= 0 )
+    {
+        if ( d_i[pending_species] != pending_end )
+        {
+            d_i[pending_species] = pending_end;
+            dirty_psi[pending_species] = true;
+            dirty_taxa[pending_species] = true;
+        }
+        ends_symmetric[pending_species] = true;
+        pending_end = 0.0;
+    }
+
+    // no child carries this node's species, so it ends here and the node above has to name it
+    if ( flow.species < 0 && sa_tip == false )
+    {
+        flow.end_age = node.getAge();
+    }
+    else
+    {
+        flow.end_age = pending_end;
+    }
+
+    return flow;
 }
 
 /**
@@ -1138,6 +1263,8 @@ void FossilizedBirthDeathSpeciationProcess::updateStartEndTimes( void )
     // oldest birth changes during MCMC, so a stale I would otherwise persist on it
     I     = std::vector<bool>(taxa.size(), false);
     is_sa = std::vector<bool>(taxa.size(), false);
+    ends_symmetric = std::vector<bool>(taxa.size(), false);
+    budding_lnProb = 0.0;
 
     const TopologyNode &root = getValue().getRoot();
 

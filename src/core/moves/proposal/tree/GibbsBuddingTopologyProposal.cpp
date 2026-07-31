@@ -23,6 +23,11 @@ GibbsBuddingTopologyProposal::GibbsBuddingTopologyProposal( StochasticNode<Tree>
     {
         throw RbException("mvGibbsBuddingTopology is a Gibbs step only under pure budding, so it cannot be used with lambda_a > 0. Use the MH topology moves instead.");
     }
+
+    if ( dist != NULL && dist->hasSymmetricSpeciation() == true )
+    {
+        throw RbException("mvGibbsBuddingTopology is a Gibbs step only under pure budding, so it cannot be used with beta > 0. Use the MH topology moves instead.");
+    }
 }
 
 

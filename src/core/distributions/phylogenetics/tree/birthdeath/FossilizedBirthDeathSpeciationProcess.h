@@ -49,8 +49,9 @@ namespace RevBayesCore {
         void                                            setValue(Tree *v, bool force=false) override;                       //!< Clamping replaces the ranges the augmented ages were drawn against, so re-clip them
         void                                            redrawValue(void) override;
         void                                            redrawValue(SimulationCondition c) override;                        //!< The framework redraws through this overload, which must not reach the inherited simulator
-        bool                                            redrawTopology(void);                                               //!< Redraw the budding topology uniformly with the ranges held fixed. Every compatible tree has one density, so this is a Gibbs step. Pure budding only, see hasAnagenesis().
-        bool                                            hasAnagenesis(void) const;                                          //!< True when any anagenetic rate is positive, which breaks the equal-density premise a budding topology Gibbs draw rests on.
+        bool                                            redrawTopology(void);                                               //!< Redraw the budding topology uniformly with the ranges held fixed. Every compatible tree has one density, so this is a Gibbs step. Pure budding only, see hasAnagenesis() and hasSymmetricSpeciation().
+        bool                                            hasAnagenesis(void) const;                                          //!< True when any interval's anagenetic rate is positive, which breaks the equal-density premise a budding topology Gibbs draw rests on.
+        bool                                            hasSymmetricSpeciation(void) const;                                 //!< True when any interval's symmetric speciation probability is positive. Whether a given node may speciate symmetrically is symmetricAt().
         void                                            simulateClade(std::vector<TopologyNode *> &n, double age, double present, bool alwaysReturn) override;
         bool                                            allowsSampledAncestors(void) override { return true; }                            //!< A sampled ancestor is an anagenetic speciation; with lambda_a = 0 its density is zero, so the flag stays on and the density does the rejecting.
 
@@ -59,8 +60,14 @@ namespace RevBayesCore {
         double                                          rangeEndTerm(size_t i, size_t di, double d) const override;
 
         void                                            updateStartEndTimes(void) override;
+        double                                          symmetricAt(double age) const;                           //!< beta in the interval containing age, read from the parameter rather than the prepared cache, which the simulator paths run without.
+        void                                            normalizeContinuationFlags(void);                        //!< Repair the whole tree. Refreshes the interval cache first, since the legal repair depends on beta at each node.
         void                                            normalizeContinuationFlags(const TopologyNode &node);    //!< Make each node name exactly one continuing child. Construction only: the density must reject an invalid state, not repair it.
-        int                                             updateStartEndTimes(const TopologyNode & );
+        //!< What a subtree reports upward: the species running through it, or species == -1 when
+        //!< that species ended below by symmetric speciation and the sampled ancestor above has yet
+        //!< to name it. Invalidity travels separately, in invalid_continuation.
+        struct RangeFlow { int species; double end_age; };
+        RangeFlow                                       updateStartEndTimes(const TopologyNode & );
 
         double                                          pSurvival(double start, double end) const override;             //!< Compute the probability of survival of the process (without incomplete taxon sampling).
 
@@ -104,6 +111,8 @@ namespace RevBayesCore {
 
         mutable std::vector<bool>                       I;                                                       //!< Indicates for each taxon whether the parent species was a sampled ancestor.
         mutable std::vector<bool>                       is_sa;                                                   //!< Indicates for each taxon whether its own range ends at a sampled ancestor node, so its lineage carries on.
+        mutable std::vector<bool>                       ends_symmetric;                                          //!< Range i ends by symmetric speciation, so it is a speciation event and not an extinction.
+        mutable double                                  budding_lnProb;                                          //!< Sum of log(1-beta) over budding events, accumulated by the tree pass.
         mutable bool                                    invalid_continuation = false;                            //!< Some node's children do not name exactly one continuation of its species.
 
         mutable std::vector<double>                     anagenetic;                                              //!< The sorted anagenetic speciation rates.
