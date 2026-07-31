@@ -12,6 +12,7 @@
 #include "TypedDagNode.h"
 #include "Proposal.h"
 #include "StochasticNode.h"
+#include "TreeDistributionProperties.h"
 #include "TopologyNode.h"
 #include "Tree.h"
 
@@ -115,7 +116,8 @@ double FossilTipTimeUniformProposal::doProposal( void )
     
     Tree& tau = tree->getValue();
 
-    bool extended = tree->getDistribution().isExtended();
+    const TreeDistributionProperties *props = dynamic_cast<const TreeDistributionProperties *>( &tree->getDistribution() );
+    bool extended = ( props != NULL && props->isExtended() );
 
     failed = false;
 

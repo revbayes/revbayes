@@ -61,8 +61,6 @@ namespace RevBayesCore {
         
         // virtual methods
         virtual void                                                setValue(variableType *v, bool f=false);                                    //!< Set the current value, e.g. attach an observation (clamp)
-        virtual bool                                                allowsSampledAncestors(void) { return false; }                                            //!< Checks if distribution is compatible with sampled ancestors
-        virtual bool                                                isExtended(void) const { return false; }                                //!< Extended trees have tips at extinctions, which may sit below a fossil's age range
 
         // pure virtual public methods
         virtual TypedDistribution*                                  clone(void) const = 0;                                                      //!< Clone the distribution

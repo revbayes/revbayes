@@ -4,6 +4,7 @@
 #include "Taxon.h"
 #include "Tree.h"
 #include "TypedDagNode.h"
+#include "TreeDistributionProperties.h"
 #include "TypedDistribution.h"
 
 namespace RevBayesCore {
@@ -12,7 +13,7 @@ namespace RevBayesCore {
      * Constant rate Birth-Death process.
      *
      */
-    class AbstractRootedTreeDistribution : public TypedDistribution<Tree> {
+    class AbstractRootedTreeDistribution : public TypedDistribution<Tree>, public TreeDistributionProperties {
         
     public:
         AbstractRootedTreeDistribution(const TypedDagNode<double> *ra, const std::vector<Taxon> &tn, bool uo, Tree *t );
@@ -43,9 +44,7 @@ namespace RevBayesCore {
 
     public:
         //!< Must this taxon's tip age lie inside its occurrence range?
-        virtual bool                                        tipAgeConstrainedToRange(const Taxon &t) const { return isExtended() == false; }
         //!< Whether setValue validates every tip age up front rather than leaving it to the density.
-        virtual bool                                        validatesTipAgesOnSet(void) const { return isExtended() == false; }
 
     protected:
         // pure virtual helper functions

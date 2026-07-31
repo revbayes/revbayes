@@ -59,7 +59,7 @@ namespace RevBayesCore {
         // public member functions
         BirthDeathSamplingTreatmentProcess*             clone(void) const override;                                             //!< Create an independent clone
         void                                            redrawValue(SimulationCondition c = SimulationCondition::MCMC) override;//!< Draw a new random value from the distribution
-        bool                                            allowsSampledAncestors() override;                                                    //!< Checks if distribution is compatible with sampled ancestors
+        bool                                            allowsSampledAncestors() const override;                                                    //!< Checks if distribution is compatible with sampled ancestors
         virtual void                                    setValue(Tree *v, bool f=false) override;                               //!< Sets value to specified tree
 
     protected:

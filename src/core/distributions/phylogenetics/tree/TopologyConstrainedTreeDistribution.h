@@ -6,13 +6,14 @@
 #include "Tree.h"
 #include "TreeChangeEventListener.h"
 #include "TypedDagNode.h"
+#include "TreeDistributionProperties.h"
 #include "TypedDistribution.h"
 
 namespace RevBayesCore {
     
     /**
      */
-    class TopologyConstrainedTreeDistribution : public TypedDistribution<Tree>, TreeChangeEventListener {
+    class TopologyConstrainedTreeDistribution : public TypedDistribution<Tree>, public TreeDistributionProperties, TreeChangeEventListener {
         
     public:
         TopologyConstrainedTreeDistribution(TypedDistribution<Tree>* base_dist, const std::vector<Clade> &c, Tree *t, std::int64_t age_check_precision);
@@ -36,8 +37,8 @@ namespace RevBayesCore {
         void                                                setBackbone( const TypedDagNode<Tree> *backbone_one=NULL, const TypedDagNode<RbVector<Tree> > *backbone_many=NULL);
         virtual void                                        setStochasticNode(StochasticNode<Tree> *n);                                                         //!< Set the stochastic node holding this distribution
         virtual void                                        setValue(Tree *v, bool f=false);                                                                    //!< Set the current value, e.g. attach an observation (clamp)
-        virtual bool                                        allowsSampledAncestors(void) { return base_distribution->allowsSampledAncestors(); }                                            //!< Checks if distribution is compatible with sampled ancestors
-        virtual bool                                        isExtended(void) const { return base_distribution->isExtended(); }                           //!< Extended trees have tips at extinctions, which may sit below a fossil's age range
+        virtual bool                                        allowsSampledAncestors(void) const override { const TreeDistributionProperties *p = dynamic_cast<const TreeDistributionProperties *>( base_distribution ); return p != NULL && p->allowsSampledAncestors(); }
+        virtual bool                                        isExtended(void) const override { const TreeDistributionProperties *p = dynamic_cast<const TreeDistributionProperties *>( base_distribution ); return p != NULL && p->isExtended(); }
 
     protected:
         

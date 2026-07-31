@@ -13,6 +13,7 @@
 #include "StochasticNode.h"
 #include "Taxon.h"
 #include "TimeInterval.h"
+#include "TreeDistributionProperties.h"
 #include "TopologyNode.h"
 #include "Tree.h"
 
@@ -32,7 +33,8 @@ CollapseExpandFossilBranchProposal::CollapseExpandFossilBranchProposal( Stochast
     // tell the base class to add the node
     addNode( tau );
     addNode( origin );
-    if(! tau->getDistribution().allowsSampledAncestors()) throw RbException("Setup includes a move for sampled ancestors but the corresponding tree distribution doesn't allow sampled ancestors");
+    const TreeDistributionProperties *props = dynamic_cast<const TreeDistributionProperties *>( &tau->getDistribution() );
+    if ( props == NULL || props->allowsSampledAncestors() == false ) throw RbException("Setup includes a move for sampled ancestors but the corresponding tree distribution doesn't allow sampled ancestors");
 }
 
 
