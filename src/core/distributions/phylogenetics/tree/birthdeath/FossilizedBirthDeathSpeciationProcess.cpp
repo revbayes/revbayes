@@ -17,6 +17,8 @@
 #include "RbMathCombinatorialFunctions.h"
 #include "RbException.h"
 #include "RbMathFunctions.h"
+#include "RbMathLogic.h"
+#include "RlUserInterface.h"
 #include "StringUtilities.h"
 #include "StochasticNode.h"
 #include "Taxon.h"
@@ -339,27 +341,19 @@ void FossilizedBirthDeathSpeciationProcess::setValue(Tree *v, bool force)
     }
     this->getValue().orderNodesByIndex();
 
-    updateStartEndTimes();
-
-    for (size_t i = 0; i < taxa.size(); i++)
-    {
-        double lo = std::max( o_i[i], d_i[i] );
-        double hi = std::min( taxa[i].getMaxAge(), b_i[i] );
-        if ( hi > lo && ( first[i] < lo || first[i] >= b_i[i] ) )
-        {
-            first[i] = 0.5 * ( lo + hi );
-        }
-
-        double lo_y = std::max( d_i[i], taxa[i].getMinAge() );
-        double hi_y = std::min( first[i], y_i[i] );
-        if ( hi_y > lo_y && ( last[i] < lo_y || last[i] > hi_y ) )
-        {
-            last[i] = 0.5 * ( lo_y + hi_y );
-        }
-    }
+    clipAugmentedAges();
 
     // a tree clamped from outside carries no flags, so establish the invariant here as well
     normalizeContinuationFlags();
+}
+
+
+bool FossilizedBirthDeathSpeciationProcess::reclipToOccurrences( void )
+{
+    // the tree distribution keeps its own taxon copy to build tips from, and it carries the ages
+    AbstractRootedTreeDistribution::taxa = taxa;
+
+    return AbstractFossilizedBirthDeathRangeProcess::reclipToOccurrences();
 }
 
 
@@ -367,6 +361,7 @@ void FossilizedBirthDeathSpeciationProcess::setMcmcMode(bool tf)
 {
     AbstractBirthDeathProcess::setMcmcMode(tf);
     if ( tf == true ) warnIfNoResampleMove();
+    if ( tf == true ) warnIfNoReportingNode();
 }
 
 

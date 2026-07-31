@@ -62,6 +62,7 @@ FossilRecordProcess::FossilRecordProcess(const DagNode *rn, bool comp) :
 
     // push the reporting model onto the ranges: one source of truth for the tau1 support + reporting term
     ranges->setCompleteRecord( complete );
+    ranges->setHasReportingNode();
 }
 
 
@@ -106,11 +107,21 @@ void FossilRecordProcess::setValue(RbVector<Taxon> *v, bool force)
         {
             throw RbException("dnFossilRecord: taxon '" + c.getName() + "' is not in the range process.");
         }
-        if ( c.getOccurrences() != r->getOccurrences() )
+    }
+
+    // the clamped record is the data, so the range process adopts its occurrences; the tree's tips
+    // are the taxon set, which is why only the occurrences may differ
+    std::vector<Taxon> adopted;
+    for (size_t i = 0; i < ref.size(); ++i)
+    {
+        for (size_t j = 0; j < v->size(); ++j)
         {
-            throw RbException("dnFossilRecord: the occurrences for taxon '" + c.getName() + "' do not match the range process.");
+            if ( (*v)[j].getName() == ref[i].getName() ) { adopted.push_back( (*v)[j] ); break; }
         }
     }
+    ranges->setOccurrences( adopted );
+
+    taxa = adopted;
 
     TypedDistribution< RbVector<Taxon> >::setValue( v, force );
 }

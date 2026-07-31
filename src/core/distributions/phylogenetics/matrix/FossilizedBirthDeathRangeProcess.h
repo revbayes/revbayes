@@ -58,6 +58,8 @@ namespace RevBayesCore {
 
         // Parameter management functions
         double                                          computeLnProbability(void) override;                                //!< Compute the log-transformed probability of the current value.
+        double                                          ownLnProbability(void) override { return computeLnProbability(); }
+        void                                            ownRedrawValue(void) override { redrawValue(); }
 
         // Parameter management functions
         void                                            swapParameterInternal(const DagNode *oldP, const DagNode *newP) override;  //!< Swap a parameter

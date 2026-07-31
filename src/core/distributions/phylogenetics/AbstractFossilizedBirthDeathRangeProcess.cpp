@@ -217,11 +217,36 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
     dirty_taxa  = std::vector<bool>(taxa.size(), true);
     dirty_psi   = std::vector<bool>(taxa.size(), true);
 
+    record_cap      = K;
+    record_complete = comp;
+
+    deriveRecordModel();
+
+    prepareProbComputation();
+
+    if ( times.front() > max_present_age )
+    {
+        throw(RbException("Timeline start time is older than youngest fossil occurrence."));
+    }
+}
+
+
+/**
+ * Derive everything the likelihood reads off the occurrence record: the per-taxon counts, which
+ * reporting model each taxon falls under, the bounds o_i and y_i that constrain the augmented
+ * extremes, and the default tau_K. Called from the constructor and again whenever a clamped
+ * record replaces the occurrences.
+ */
+void AbstractFossilizedBirthDeathRangeProcess::deriveRecordModel( void )
+{
+    o_i = std::vector<double>(taxa.size(), 0.0);
+    y_i = std::vector<double>(taxa.size(), RbConstants::Double::inf);
+
     occurrence_counts = std::vector<size_t>(taxa.size(), 0);
     truncated         = std::vector<bool>(taxa.size(), false);
-    complete          = std::vector<bool>(taxa.size(), comp);
+    complete          = std::vector<bool>(taxa.size(), record_complete);
 
-    double max_present = RbConstants::Double::inf;
+    max_present_age = RbConstants::Double::inf;
 
     size_t num_truncated = 0;
 
@@ -238,18 +263,18 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
         // have unreported specimens and its record is exchangeable; one below the cap was
         // reported whole, which is the complete case. A record over the cap was not
         // truncated as declared, so truncate it here.
-        if ( K > 0 )
+        if ( record_cap > 0 )
         {
-            if ( count >= K )
+            if ( count >= record_cap )
             {
-                if ( count > K )
+                if ( count > record_cap )
                 {
-                    truncateRecord(taxa[i], K);
+                    truncateRecord(taxa[i], record_cap);
                     num_truncated++;
                 }
 
                 truncated[i] = true;
-                count = K;
+                count = record_cap;
             }
             else
             {
@@ -267,7 +292,7 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
             // find the youngest maximum age
             y_i[i] = std::min(Fi->first.getMax(), y_i[i]);
 
-            max_present = std::min(max_present, y_i[i]);
+            max_present_age = std::min(max_present_age, y_i[i]);
         }
 
         // default the augmented youngest age to the youngest maximum (only resampled,
@@ -278,16 +303,124 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
     if ( num_truncated > 0 )
     {
         std::stringstream ss;
-        ss << "Warning: " << num_truncated << " taxa exceed " << K << " occurrences; keeping a random " << K << " of each.";
+        ss << "Warning: " << num_truncated << " taxa exceed " << record_cap << " occurrences; keeping a random " << record_cap << " of each.";
         RBOUT( ss.str() );
     }
+}
+
+
+/**
+ * Adopt a clamped record's occurrences as the data. The augmented extremes and the value were drawn
+ * against the old bins, so re-derive the record model and hand the value to the derived process to
+ * be moved back into the new support.
+ */
+void AbstractFossilizedBirthDeathRangeProcess::setOccurrences( const std::vector<Taxon> &t )
+{
+    // clamping the record the process was built with is the ordinary case, and it must leave the
+    // augmented ages the constructor drew against those occurrences exactly as they are
+    bool changed = ( t.size() != taxa.size() );
+
+    for (size_t i = 0; i < taxa.size() && changed == false; ++i)
+    {
+        if ( taxa[i].getOccurrences() != t[i].getOccurrences() ) changed = true;
+        if ( taxa[i].isExtinct()     != t[i].isExtinct()     ) changed = true;
+    }
+
+    if ( changed == false ) return;
+
+    taxa = t;
+
+    deriveRecordModel();
 
     prepareProbComputation();
 
-    if ( times.front() > max_present )
+    if ( times.front() > max_present_age )
     {
-        throw(RbException("Timeline start time is older than youngest fossil occurrence."));
+        throw(RbException("dnFossilRecord: the clamped record has an occurrence younger than the timeline start."));
     }
+
+    dirty_taxa = std::vector<bool>(taxa.size(), true);
+    dirty_psi  = std::vector<bool>(taxa.size(), true);
+
+    // the extremes were drawn under the old reporting model, and which of them the new one even
+    // instantiates may differ, so draw them again rather than patching the old values
+    for (size_t i = 0; i < taxa.size(); ++i)
+    {
+        drawAugmentedAges(i);
+    }
+
+    if ( reclipToOccurrences() == false )
+    {
+        throw(RbException("dnFossilRecord: no starting value fits the clamped record; check that its occurrences are consistent with the taxa."));
+    }
+}
+
+
+/**
+ * Move any augmented extreme that the current ranges put outside its bin back inside it. A taxon
+ * whose bin the ranges cannot accommodate at all is left alone, since only a different value fixes it.
+ */
+void AbstractFossilizedBirthDeathRangeProcess::clipAugmentedAges( void )
+{
+    prepareProbComputation();
+    updateStartEndTimes();
+
+    for (size_t i = 0; i < taxa.size(); i++)
+    {
+        double lo = std::max( o_i[i], d_i[i] );
+        double hi = std::min( taxa[i].getMaxAge(), b_i[i] );
+        if ( hi > lo && ( first[i] < lo || first[i] >= b_i[i] ) )
+        {
+            first[i] = 0.5 * ( lo + hi );
+        }
+
+        double lo_y = std::max( d_i[i], taxa[i].getMinAge() );
+        double hi_y = std::min( first[i], y_i[i] );
+        if ( hi_y > lo_y && ( last[i] < lo_y || last[i] > hi_y ) )
+        {
+            last[i] = 0.5 * ( lo_y + hi_y );
+        }
+    }
+}
+
+
+/**
+ * Can the chain start here? Clipping alone can leave an extreme that excludes one of the reported
+ * bins, which the reporting term sees as a bin of zero sampling rate, so nothing short of scoring
+ * the value settles it. Both terms, unless this process already carries the reporting one inline.
+ */
+bool AbstractFossilizedBirthDeathRangeProcess::startsFinite( void )
+{
+    clipAugmentedAges();
+
+    double lnProb = ownLnProbability();
+
+    if ( report_internally == false ) lnProb += computeLnFossilTotal();
+
+    return RbMath::isFinite( lnProb );
+}
+
+
+/**
+ * The value was drawn before the record was clamped, so its births and range ends may sit outside
+ * the new bins, which no clipping of the augmented ages alone can repair. Redraw in that case: the
+ * starting value carries no information, and the alternative is a chain that begins at -inf and
+ * cannot move.
+ */
+bool AbstractFossilizedBirthDeathRangeProcess::reclipToOccurrences( void )
+{
+    if ( startsFinite() == true ) return true;
+
+    RBOUT("Warning: redrawing the starting value, which does not fit the clamped fossil record.");
+
+    for (size_t attempt = 0; attempt < 100; ++attempt)
+    {
+        ownRedrawValue();
+
+        if ( startsFinite() == true ) return true;
+    }
+
+    return false;
 }
 
 /**
@@ -852,6 +985,21 @@ void AbstractFossilizedBirthDeathRangeProcess::warnIfNoResampleMove( void ) cons
     {
         warned_no_resample = true;
         RBOUT("Warning: no mvResampleAugmentedAges move; augmented ages will not be sampled.");
+    }
+}
+
+
+/**
+ * With report_internally false this process omits every fossil-occurrence density, so on its own it
+ * is not a density over the record at all and psi is left with no data. A dnFossilRecord supplies
+ * that term; warn once if none does.
+ */
+void AbstractFossilizedBirthDeathRangeProcess::warnIfNoReportingNode( void ) const
+{
+    if ( report_internally == false && has_reporting_node == false && warned_no_reporting == false )
+    {
+        warned_no_reporting = true;
+        RBOUT("Warning: no dnFossilRecord node; fossil sampling is not scored and psi has no data.");
     }
 }
 

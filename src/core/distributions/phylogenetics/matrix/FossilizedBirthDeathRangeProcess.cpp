@@ -84,6 +84,7 @@ void FossilizedBirthDeathRangeProcess::setMcmcMode(bool tf)
 {
     TypedDistribution<MatrixReal>::setMcmcMode(tf);
     if ( tf == true ) warnIfNoResampleMove();
+    if ( tf == true ) warnIfNoReportingNode();
 }
 
 FossilizedBirthDeathRangeProcess* FossilizedBirthDeathRangeProcess::clone( void ) const

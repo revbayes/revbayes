@@ -55,6 +55,10 @@ namespace RevBayesCore {
         //!< The resampling move registers itself here, so the model can tell when it is missing
         void                                            setHasResampleMove(void) { has_resample_move = true; }
 
+        //!< A dnFossilRecord registers itself here. With report_internally false it carries the
+        //!< whole sampling density, so without one psi has no data at all.
+        void                                            setHasReportingNode(void) { has_reporting_node = true; }
+
         std::vector<double>&                            getAges();
         void                                            executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const;   //!< Expose the augmented first/last ages and the birth/death times for monitoring
         void                                            executeMethod(const std::string &n, const std::vector<const DagNode*> &args, double &rv) const;              //!< Expose the origin, which no monitor can otherwise reach
@@ -63,6 +67,7 @@ namespace RevBayesCore {
         double                                          getOrigin(void) const { return origin; }                                            //!< The origin of the process, which is the oldest birth
         void                                            resampleFirstLast(size_t i);
         void                                            warnIfNoResampleMove(void) const;
+        void                                            warnIfNoReportingNode(void) const;
         void                                            drawAugmentedAges(size_t i);                               //!< Draw taxon i's augmented extremes nested (d_i <= last <= first) under the current reporting model.
         void                                            drawRanges();                                              //!< Draw an initial (b_i, d_i) and the augmented ages for every taxon. Shared by the matrix redraw and the tree (FBDSP) initial-value construction, which hangs a random budding topology on the ranges.
         double                                          computeLnFossilTotal();                                    //!< Total fossil-record log-density summed over taxa; used by a standalone dnFossilRecord node conditioned on this range process (self-contained: refreshes rate cache + start/end times).
@@ -70,7 +75,12 @@ namespace RevBayesCore {
         //!< live on the range process. The cap is a constructor argument, so only a complete or
         //!< first/last record can be declared this way. Both augment the same ages, so the draw
         //!< the constructor already made stands.
-        void                                            setCompleteRecord(bool comp) { complete = std::vector<bool>(taxa.size(), comp); }
+        void                                            setCompleteRecord(bool comp) { record_complete = comp; complete = std::vector<bool>(taxa.size(), comp); }
+
+        //!< Adopt a clamped record's occurrences as the data. The taxon set is the tree's tips, so
+        //!< the caller must have checked that the names and order match; only the occurrences,
+        //!< counts and extant status may differ.
+        void                                            setOccurrences(const std::vector<Taxon> &t);
         const std::vector<const DagNode*>&              getRangeParameters(void) const { return range_parameters; }   //!< The rate/timeline nodes a separate dnFossilRecord node adopts as parents.
 
     protected:
@@ -79,6 +89,17 @@ namespace RevBayesCore {
 
         //!< Is tau_K an explicit latent? Not when unreported occurrences may lie below the youngest reported one.
         bool                                            augmentsYoungest(size_t i) const { return occurrence_counts[i] >= 2 && truncated[i] == false; }
+
+        //!< Adapters to the owning distribution, which this mixin is not a base of: its density, and
+        //!< a fresh draw of its value.
+        virtual double                                  ownLnProbability() = 0;
+        virtual void                                    ownRedrawValue() = 0;
+
+        void                                            clipAugmentedAges();                                    //!< Put every augmented extreme back inside its bin.
+        bool                                            startsFinite();                                         //!< Does the current value score finitely under both the range and the reporting term?
+        //!< The value was drawn against the old occurrences, so move it back inside the new bins,
+        //!< redrawing it if no clipping suffices. False when nothing found puts it in the support.
+        virtual bool                                    reclipToOccurrences();
 
         virtual void                                    updateStartEndTimes() = 0;
         virtual double                                  computeLnProbabilityRanges(bool force = false);
@@ -100,6 +121,11 @@ namespace RevBayesCore {
 
         std::vector<Taxon>                              taxa;                                                  //!< Taxa that will be attached to new simulated trees.
         std::string                                     condition;
+        size_t                                          record_cap;                                            //!< The reporting cap K, kept so the per-taxon record model can be re-derived on a clamp
+        bool                                            record_complete;                                        //!< The declared reporting model, same
+        double                                          max_present_age;                                        //!< Youngest occurrence maximum over all taxa; the timeline may not start above it
+
+        void                                            deriveRecordModel(void);                                //!< Recompute counts, o_i/y_i and the per-taxon reporting model from the occurrences
 
         size_t                                          num_intervals;
 
@@ -154,8 +180,10 @@ namespace RevBayesCore {
         std::vector<bool>                               truncated;                                              //!< Taxa reported up to the cap K, whose unreported specimens are marginalized
         std::vector<bool>                               complete;                                               //!< Taxa whose whole record is reported. Neither flag set is the first/last rule: both extremes reported, the interior count marginalized
         bool                                            touched;                                               //!< Indicates whether any terms need updating
-        bool                                            has_resample_move = false;
-        mutable bool                                    warned_no_resample = false;             //!< setMcmcMode fires more than once per run              //!< Set by mvResampleAugmentedAges when it attaches
+        bool                                            has_resample_move = false;              //!< Set by mvResampleAugmentedAges when it attaches
+        bool                                            has_reporting_node = false;             //!< Set by dnFossilRecord when it attaches
+        mutable bool                                    warned_no_resample = false;             //!< setMcmcMode fires more than once per run
+        mutable bool                                    warned_no_reporting = false;
         bool                                            resampled;                                              //!< Indicates whether any oldest occurrence ages were resampled
         bool                                            report_internally;                                      //!< If true (default) computeLnProbabilityRanges adds the reporting term inline (fused facade); if false the term is omitted (bare range process) and supplied by a separate dnFossilRecord node.
     };
