@@ -8,6 +8,7 @@
 #include "MetropolisHastingsMove.h"
 #include "Move_FossilTipTimeUniform.h"
 #include "FossilTipTimeUniformProposal.h"
+#include "Natural.h"
 #include "Probability.h"
 #include "RealPos.h"
 #include "RevObject.h"
@@ -59,6 +60,7 @@ void Move_FossilTipTimeUniform::constructInternalObject( void )
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
     
     double we = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     
     RevBayesCore::TypedDagNode<double> *org = NULL;
     if ( origin != NULL && origin->getRevObject() != RevNullObject::getInstance() )
@@ -91,7 +93,7 @@ void Move_FossilTipTimeUniform::constructInternalObject( void )
 
     RevBayesCore::FossilTipTimeUniformProposal *p = new RevBayesCore::FossilTipTimeUniformProposal( t, org, ma, mi, tip_name );
 
-    value = new RevBayesCore::MetropolisHastingsMove(p, we, false);
+    value = new RevBayesCore::MetropolisHastingsMove(p, we, del, false);
 }
 
 

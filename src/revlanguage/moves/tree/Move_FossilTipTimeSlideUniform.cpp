@@ -8,6 +8,7 @@
 #include "MetropolisHastingsMove.h"
 #include "Move_FossilTipTimeSlideUniform.h"
 #include "FossilTipTimeSlideUniformProposal.h"
+#include "Natural.h"
 #include "Probability.h"
 #include "RealPos.h"
 #include "RevObject.h"
@@ -60,6 +61,7 @@ void Move_FossilTipTimeSlideUniform::constructInternalObject( void )
     
     double de = static_cast<const RealPos &>( delta->getRevObject() ).getValue();
     double we = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     bool   tu = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
     double tt = static_cast<const Probability &>( tune_target->getRevObject() ).getValue();
     
@@ -94,7 +96,7 @@ void Move_FossilTipTimeSlideUniform::constructInternalObject( void )
 
     RevBayesCore::FossilTipTimeSlideUniformProposal *p = new RevBayesCore::FossilTipTimeSlideUniformProposal( t, org, ma, mi, tip_name, de, tt );
 
-    value = new RevBayesCore::MetropolisHastingsMove(p, we, tu);
+    value = new RevBayesCore::MetropolisHastingsMove(p, we, del, tu);
 }
 
 
