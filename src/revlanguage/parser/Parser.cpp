@@ -78,9 +78,26 @@ RevLanguage::ParserInfo RevLanguage::Parser::breakIntoLines(const std::string& c
         std::stringstream temp;
         bool escaped = false;
 
+        // A comment never spans more than a single line, so we always start a new
+        // line outside of any comment.
+        inComment = false;
+
         while (buf.good()) {
 
             char c = char( buf.get());
+
+            // Everything from an (unquoted) '#' to the end of the line is a comment.
+            // We drop those characters here instead of retaining them. If they were
+            // kept, an incomplete line ending in a comment would later be spliced
+            // onto the following line (see processCommand, which replaces the
+            // trailing newline with a space), and flex's comment rule '#.*' would
+            // then greedily swallow the real code that followed -- silently breaking
+            // multi-line function calls that comment out an argument. Line
+            // terminators must still be processed below so the line breaks correctly.
+            if ( inComment == true && c != '\n' && c != '\r' && c != EOF && c != '\377' )
+            {
+                continue;
+            }
 
             if (c == EOF && inQuote == true) {
                 if (validate) {
@@ -94,8 +111,10 @@ RevLanguage::ParserInfo RevLanguage::Parser::breakIntoLines(const std::string& c
                 else if (inComment == false)
                     inQuote = true;
             } else if (c == '#' && inQuote == false) {
-                /* we are now in comment */
+                /* the rest of the line is a comment: enter comment mode and drop the
+                   '#' itself (the remaining characters are skipped above) */
                 inComment = true;
+                continue;
             } else if (c == ';' && inQuote == false && inComment == false) {
                 /* break line here */
                 break;
