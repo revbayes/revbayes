@@ -49,8 +49,8 @@ double BirthDeathWithRateshifts::computeLnProbability( void )
     // add the fossil tip age terms
     for (size_t i = 0; i < taxa.size(); ++i)
     {
-        double b = this->getValue()[i][0];
-        double d = this->getValue()[i][1];
+        double b = ranges[i].birth;
+        double d = ranges[i].death;
 
         double max_age = taxa[i].getMaxAge();
 
