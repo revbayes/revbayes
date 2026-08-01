@@ -15,6 +15,7 @@
 #include "Natural.h"
 #include "OptionRule.h"
 #include "FossilizedBirthDeathSpeciationProcess.h"
+#include "ConstantNode.h"
 #include "Probability.h"
 #include "RealPos.h"
 #include "RlString.h"
@@ -94,8 +95,8 @@ RevBayesCore::FossilizedBirthDeathSpeciationProcess* Dist_FBDSP::createDistribut
     RevBayesCore::DagNode* p = psi->getRevObject().getDagNode();
     // anagnetic speciation rate
     RevBayesCore::DagNode* la = lambda_a->getRevObject().getDagNode();
-    // symmetric speciation probability
-    RevBayesCore::DagNode* b = beta->getRevObject().getDagNode();
+    // symmetric speciation probability, pinned at zero until it has a move
+    RevBayesCore::DagNode* b = new RevBayesCore::ConstantNode<double>( "", new double(0.0) );
 
     // sampling probability
     RevBayesCore::TypedDagNode<double>* r = static_cast<const Probability &>( rho->getRevObject() ).getDagNode();
@@ -206,10 +207,8 @@ const MemberRules& Dist_FBDSP::getParameterRules(void) const
         paramTypes.push_back( ModelVector<RealPos>::getClassTypeSpec() );
         dist_member_rules.push_back( new ArgumentRule( "lambda_a",  paramTypes, "The anagenetic speciation rate(s).", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
 
-        std::vector<TypeSpec> betaParamTypes;
-        betaParamTypes.push_back( Probability::getClassTypeSpec() );
-        betaParamTypes.push_back( ModelVector<Probability>::getClassTypeSpec() );
-        dist_member_rules.push_back( new ArgumentRule( "beta",  betaParamTypes, "The probability of symmetric speciation.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
+        // beta is omitted: symmetric speciation has no move, so beta > 0 would leave the
+        // configurations it allows unreachable. Restore the argument with the move.
         dist_member_rules.push_back( new ArgumentRule( "extended",  RlBoolean::getClassTypeSpec(), "Are the tips extinction times? If false the extinction times are marginalized out and each range ends at min(tau_K, youngest child birth).", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
 
         rules_set = true;
@@ -248,10 +247,6 @@ void Dist_FBDSP::setConstParameter(const std::string& name, const RevPtr<const R
     if ( name == "lambda_a" )
     {
         lambda_a = var;
-    }
-    else if ( name == "beta" )
-    {
-        beta = var;
     }
     else if ( name == "extended" )
     {

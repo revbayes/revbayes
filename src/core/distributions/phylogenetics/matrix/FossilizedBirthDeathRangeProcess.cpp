@@ -93,7 +93,7 @@ FossilizedBirthDeathRangeProcess* FossilizedBirthDeathRangeProcess::clone( void 
 
 /**
  * Set the matrix value (e.g. clamping to fixed birth/death ages). A clamp replaces the
- * b/d that redrawValue drew the augmented ages against, so re-clip any age now out of
+ * b/d that redrawValue drew the appearances against, so re-clip any age now out of
  * range -- otherwise a clamped chain can start at lnProb = -inf. MCMC moves edit the
  * value in place instead, leaving out-of-range ages for the constraints to reject.
  */
@@ -106,9 +106,7 @@ void FossilizedBirthDeathRangeProcess::setValue(MatrixReal *v, bool force)
         double d  = (*this->value)[i][0];
         double b  = (*this->value)[i][3];
 
-        // the augmented ages arrive in the value as well, so read them from it before deciding
-        // whether they need clipping. The members still hold what was drawn against the ranges
-        // this value replaces, and clipping those would discard a restored checkpoint.
+        // read them from the value, not the table, which still holds the draw this replaces
         ranges[i].last  = (*this->value)[i][1];
         ranges[i].first = (*this->value)[i][2];
 
@@ -268,7 +266,7 @@ void FossilizedBirthDeathRangeProcess::redrawValue(void)
 
 
 /**
- * A taxon reporting fewer than two occurrences has one augmented age, not two: tau_1 and tau_K are
+ * A taxon reporting fewer than two occurrences has one appearance, not two: tau_1 and tau_K are
  * the same quantity, and the value carries a redundant copy. A move that slides the two columns
  * apart is repaired here rather than rejected, which is forced (the reverse is equally forced, so
  * the ratio is 1) and costs no mixing. Taxa with both extremes are ordered rather than equal, and
@@ -286,9 +284,8 @@ void FossilizedBirthDeathRangeProcess::repairRanges( const std::set<size_t> &tou
 
         if ( ranges[i].singleton == false ) continue;
 
-        // follow whichever column the move wrote, so neither direction is silently undone. The
-        // move stored only the element it touched, so the sibling is stored here and put back by
-        // restoreSpecialization; otherwise a rejected proposal leaves this write behind.
+        // follow whichever column the move wrote; the sibling is stored here, since the move
+        // stored only the element it touched
         size_t sib;
         if      ( c == 1 ) sib = 2;
         else if ( c == 2 ) sib = 1;

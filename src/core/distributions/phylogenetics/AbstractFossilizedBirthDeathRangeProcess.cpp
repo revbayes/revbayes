@@ -189,12 +189,7 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
 }
 
 
-/**
- * Derive everything the likelihood reads off the occurrence record: the per-taxon counts, which
- * reporting model each taxon falls under, the bounds first_min and last_max that constrain the augmented
- * extremes, and the default tau_K. Called from the constructor and again whenever a clamped
- * record replaces the occurrences.
- */
+/** Derive from the occurrence record the reporting model and the bounds on the appearances. */
 void AbstractFossilizedBirthDeathRangeProcess::updateRecord( void )
 {
     // the record fixes the bounds and the reporting model; the sampled ages survive a re-derive
@@ -233,23 +228,17 @@ void AbstractFossilizedBirthDeathRangeProcess::updateRecord( void )
         ranges[i].first_max = taxa[i].getMaxAge();
         ranges[i].last_min  = taxa[i].getMinAge();
 
-        // default the augmented youngest age to the youngest maximum (only resampled,
-        // and only used, when the record has two extremes to order)
+        // only used when the record has two extremes to order
         ranges[i].last = ranges[i].last_max;
     }
 
 }
 
 
-/**
- * Adopt a clamped record's occurrences as the data. The augmented extremes and the value were drawn
- * against the old bins, so re-derive the record model and hand the value to the derived process to
- * be moved back into the new support.
- */
+/** Adopt a clamped record's occurrences as the data and re-derive the record model. */
 void AbstractFossilizedBirthDeathRangeProcess::setOccurrences( const std::vector<Taxon> &t )
 {
-    // clamping the record the process was built with is the ordinary case, and it must leave the
-    // augmented ages the constructor drew against those occurrences exactly as they are
+    // the ordinary case, which must leave every sampled age exactly as it is
     bool changed = ( t.size() != taxa.size() );
 
     for (size_t i = 0; i < taxa.size() && changed == false; ++i)
@@ -273,17 +262,10 @@ void AbstractFossilizedBirthDeathRangeProcess::setOccurrences( const std::vector
 
     dirty_taxa = std::vector<bool>(taxa.size(), true);
 
-    // Adopting the record must not move any sampled age. The ages here were drawn against the old
-    // occurrences and may now be out of support, as may the births and range ends, which no repair
-    // of the ages alone reaches. The MCMC redraws every free node jointly when a start is -inf, so
-    // that is where the new starting value comes from.
+    // a value now out of support is left to the MCMC, which redraws every free node jointly
 }
 
 
-/**
- * Move any augmented extreme that the current ranges put outside its bin back inside it. A taxon
- * whose bin the ranges cannot accommodate at all is left alone, since only a different value fixes it.
- */
 /**
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
@@ -318,16 +300,13 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
 
         double present = times.front();
 
-        // check model constraints. tau_K sits between the range end and tau_1, which the
-        // reporting term only checks for taxa whose two extremes are separate variables; a move
-        // on the value can put it anywhere, so the support is enforced here for every taxon
+        // a move on the value can put an age anywhere, so enforce the support for every taxon
         if ( ranges[i].isOrdered( present ) == false )
         {
             return RbConstants::Double::neginf;
         }
-        // The status flag is the rho-sampling datum; the ranges are the psi-sampling data.
-        // Seeing a taxon at the present pins its death there, but NOT seeing one leaves d
-        // free: an unsampled lineage may still have survived, and pays 1-rho if it did.
+        // the status flag is the rho datum: seeing a taxon at the present pins its death there,
+        // but not seeing one leaves it free to have survived unseen and pay 1-rho
         if ( taxa[i].isExtinct() == false && d != present )
         {
             return RbConstants::Double::neginf;
@@ -377,8 +356,7 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
             // divide by q_tilde at the death time
             partial_likelihood[i] -= q( di, d, true);
 
-            // close the range: an extinction density, or whatever the derived process puts there
-            // when the extinction time is integrated out
+            // an extinction density, or whatever closes the range where that is marginalized
             if ( d > present )
             {
                 partial_likelihood[i] += rangeEndTerm( i, di, d );
@@ -435,9 +413,7 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
 }
 
 
-// Total fossil-occurrence (reporting) log-density for a standalone reporting node
-// (dnFossilRecord) conditioned on this range process. Reads the ranges the pull left on touch;
-// only the piecewise-rate cache, which this node's own parameters move, is refreshed here --
+// Total fossil-occurrence log-density for a dnFossilRecord node. Reads the ranges the pull left.
 double AbstractFossilizedBirthDeathRangeProcess::computeLnFossilTotal()
 {
     prepareProbComputation();
@@ -445,8 +421,7 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnFossilTotal()
     double lnProb = 0.0;
     for ( size_t i = 0; i < taxa.size(); ++i )
     {
-        // an extant taxon with no fossil sample carries no reporting term; computeLnProbabilityRanges
-        // skips it as well, so the fused and split forms omit the same taxa
+        // an extant taxon with no fossil sample carries no reporting term
         if ( taxa[i].getMaxAge() == times.front() ) continue;
 
         double r = computeLnFossilRecord(i);
@@ -460,19 +435,16 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnFossilTotal()
 }
 
 
-// Fossil-occurrence (reporting) log-term for taxon i: the Psi[i] block factored out of
-// computeLnProbabilityRanges (range/reporting split). Behavior-preserving -- returns
-// exactly what was assigned to Psi[i] inline before the split.
+/** Fossil-occurrence log-term for taxon i. */
 double AbstractFossilizedBirthDeathRangeProcess::computeLnFossilRecord( size_t i ) const
 {
     double d = ranges[i].death;
-    double o = ranges[i].first;                             // oldest augmented age
+    double o = ranges[i].first;                             // oldest appearance
     size_t oi = findIndex(o);
-    double y  = ranges[i].last;                             // youngest augmented age
+    double y  = ranges[i].last;                             // youngest appearance
     size_t yi = findIndex(y);
 
-    // with tau_K instantiated the interior spans (tau_K, tau_1); otherwise it runs down to the
-    // range end, since an unreported occurrence may lie anywhere above it
+    // the interior runs down to tau_K, or to the range end where the youngest is unreported
     double min_age = ranges[i].singleton == false ? y : d;
     double max_age = o;
 
@@ -573,12 +545,10 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnFossilRecord( size_t i
             {
                 return RbConstants::Double::neginf;
             }
-            // youngest instantaneous density + sum over which observation is the youngest,
-            // excluding the diagonal where a single occurrence supplies both extremes
+            // excluding the diagonal, where a single occurrence supplies both extremes
             result += log(fossil[yi]) + log(recip_young - diag/recip_old);
 
-            // the first/last rule leaves the interior occurrences unreported, so their count
-            // is marginalized; a complete record has none to marginalize
+            // the first/last rule leaves the interior count unreported, so it is marginalized
             if ( record_complete == false )
             {
                 double S1 = 0.0, f = 1.0;
@@ -687,10 +657,7 @@ double AbstractFossilizedBirthDeathRangeProcess::q( size_t i, double t, bool til
  *
  *
  */
-/**
- * The first (tau_1) and last (tau_K) appearances, and the origination and extinction times, which
- * no monitor can otherwise reach. A record with one occurrence has its two appearances equal.
- */
+/** The appearances and the origination/extinction times, which no monitor can otherwise reach. */
 void AbstractFossilizedBirthDeathRangeProcess::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, RbVector<double> &rv) const
 {
     if ( n == "getFirstAppearances" || n == "getLastAppearances" || n == "getOriginationTimes" || n == "getExtinctionTimes" )
@@ -699,9 +666,7 @@ void AbstractFossilizedBirthDeathRangeProcess::executeMethod(const std::string &
         AbstractFossilizedBirthDeathRangeProcess *self = const_cast<AbstractFossilizedBirthDeathRangeProcess *>( this );
         self->updateRanges();
 
-        // with the extinction times marginalized out there is none to report: range_end holds the range
-        // end instead, and a sampled ancestor's is jointly distributed with the unobserved
-        // speciation separating it from its descendant, so it is not recoverable here
+        // marginalized out, so there is no extinction time to report
         if ( n == "getExtinctionTimes" && marginalizesExtinction() == true )
         {
             throw RbException("getExtinctionTimes is unavailable when extended=false: the extinction times are marginalized out rather than sampled. Use getLastAppearances for the youngest occurrence ages, or extended=true to sample extinction times.");
@@ -742,10 +707,7 @@ void AbstractFossilizedBirthDeathRangeProcess::executeMethod(const std::string &
 }
 
 
-/**
- * Draw the augmented extremes for taxon i, nested (range_end <= last <= first), under the current
- * reporting model.
- */
+/** Draw taxon i's appearances, nested within its range and its reported bins. */
 void AbstractFossilizedBirthDeathRangeProcess::initializeFirstLast(size_t i)
 {
     RandomNumberGenerator* rng = GLOBAL_RNG;
@@ -754,8 +716,7 @@ void AbstractFossilizedBirthDeathRangeProcess::initializeFirstLast(size_t i)
 
     double lo, hi;
 
-    // youngest augmented age, at or above the death and within its reported bin. A non-extended
-    // range ends at this age rather than at an extinction, so the death does not bound it.
+    // within its reported bin; a non-extended range ends here, so the death does not bound it
     if ( augment_youngest )
     {
         lo = marginalizesExtinction() ? taxa[i].getMinAge() : std::max( ranges[i].death, taxa[i].getMinAge() );
@@ -767,9 +728,7 @@ void AbstractFossilizedBirthDeathRangeProcess::initializeFirstLast(size_t i)
         ranges[i].last = ranges[i].death;
     }
 
-    // oldest augmented age, at or above the youngest and the oldest reported minimum
-    // both extremes sit under the birth. An initial draw brackets the birth well above every
-    // occurrence so this binds nothing there, but a clamped tree brings its own and it does.
+    // both appearances sit under the birth, which binds only for a clamped tree
     lo = std::max( ranges[i].last, ranges[i].first_min );
     hi = std::min( ranges[i].first_max, ranges[i].birth );
     ranges[i].first = ( hi > lo ) ? rng->uniform01()*(hi - lo) + lo : lo;
@@ -777,31 +736,24 @@ void AbstractFossilizedBirthDeathRangeProcess::initializeFirstLast(size_t i)
     // a single occurrence is its own youngest
     if ( augment_youngest == false ) ranges[i].last = ranges[i].first;
 
-    // a non-extended range ends at its youngest augmented age, so the initial tree is built there.
-    // An extant range still ends at the present, and its tau_K is a fossil age, not its tip.
+    // a non-extended extinct range ends at its youngest appearance, so build the tree there
     if ( marginalizesExtinction() == true && taxa[i].isExtinct() == true ) ranges[i].death = ranges[i].last;
 
-    // the pull compares against the table, so a draw written straight into it is invisible there
-    dirty_taxa[i] = true;
+    dirty_taxa[i] = true;   // written straight into the table, where the pull cannot see it
 }
 
-// The augmented ages move only through mvStratigraphicRange. Without it they stay at their
-// initial draw and the chain silently samples the wrong space, so say so once at startup.
+/** Without mvStratigraphicRange the appearances never move; say so once at startup. */
 void AbstractFossilizedBirthDeathRangeProcess::warnIfNoResampleMove( void ) const
 {
     if ( has_resample_move == false && warned_no_resample == false )
     {
         warned_no_resample = true;
-        RBOUT("Warning: no mvStratigraphicRange move; augmented ages will not be sampled.");
+        RBOUT("Warning: no mvStratigraphicRange move; appearances will not be sampled.");
     }
 }
 
 
-/**
- * This process omits every fossil-occurrence density, so on its own it
- * is not a density over the record at all and psi is left with no data. A dnFossilRecord supplies
- * that term; warn once if none does.
- */
+/** Without a dnFossilRecord the sampling is unscored and psi has no data; warn once. */
 void AbstractFossilizedBirthDeathRangeProcess::warnIfNoReportingNode( void ) const
 {
     if ( has_reporting_node == false && warned_no_reporting == false )
@@ -819,30 +771,25 @@ void AbstractFossilizedBirthDeathRangeProcess::resampleFirstLast(size_t i)
     stored_last  = ranges[i].last;
     resampled = true;
 
-    // a tree does not carry these ages, so the pull cannot see this write; mark it here
-    dirty_taxa[i] = true;
+    dirty_taxa[i] = true;   // a tree does not carry these ages, so the pull cannot see this write
 
-    // a non-extended extinct range ends at its tip, which a move samples and updateRanges
-    // reads back. With one occurrence that tip is tau_1 too, so there is nothing to draw at all
+    // a non-extended extinct range ends at its tip, which the tree moves sample
     if ( marginalizesExtinction() == true && taxa[i].isExtinct() == true && ranges[i].singleton )
     {
         return;
     }
 
-    // the bin that reported it, and nothing state-dependent: this is an independence proposal
-    // whose Hastings ratio is 1 only while its support is fixed by the data
+    // data-fixed support: an independence proposal, whose ratio is 1 only while it stays so
     double hi = ranges[i].first_max;
     ranges[i].first = GLOBAL_RNG->uniform01()*(ranges[i].first_min - hi) + hi;
 
-    // an extinct non-extended tip is the augmented youngest age itself, so tau_K is not drawn
-    // here. An extant tip sits at the present instead, so its tau_K still is.
+    // that tip is the youngest appearance, so tau_K is not drawn here
     if ( marginalizesExtinction() == true && taxa[i].isExtinct() == true )
     {
         return;
     }
 
-    // a single occurrence is its own youngest, as is an exchangeable record whose true youngest
-    // may be unreported
+    // a single reported occurrence is its own youngest
     if ( ranges[i].singleton == false )
     {
         ranges[i].last = GLOBAL_RNG->uniform01()*(ranges[i].last_max - taxa[i].getMinAge()) + taxa[i].getMinAge();
@@ -859,8 +806,7 @@ void AbstractFossilizedBirthDeathRangeProcess::drawRanges()
 {
     RandomNumberGenerator* rng = GLOBAL_RNG;
 
-    // bracket birth times: an unbounded max_age would push every birth to infinity, so fall
-    // back to the oldest lower bound the taxon's occurrences provide
+    // an unbounded max_age would push every birth to infinity, so fall back to the minima
     double max = 0;
     for (size_t i = 0; i < taxa.size(); i++)
     {
@@ -883,7 +829,7 @@ void AbstractFossilizedBirthDeathRangeProcess::drawRanges()
 
     for (size_t i = 0; i < taxa.size(); i++)
     {
-        // Draw d over its range, then the augmented ages NESTED (d <= last <= first)
+        // Draw d over its range, then the appearances NESTED (d <= last <= first)
         ranges[i].death = taxa[i].isExtinct() ? rng->uniform01()*(ranges[i].last_max - present) + present : present;
         ranges[i].birth = max;
 
@@ -954,8 +900,7 @@ void AbstractFossilizedBirthDeathRangeProcess::restoreSpecialization(const DagNo
 {
     partial_likelihood = stored_likelihood;
 
-    // the pull's writes first, then the proposal's: the snapshot was taken after the proposal, so
-    // a resampled entry comes back from it holding the proposed ages rather than the stored ones
+    // the pull's writes first: its snapshot was taken after the proposal, so it holds the new ages
     ranges = stored_ranges;
 
     if ( resampled )

@@ -14,7 +14,7 @@ June Walker
 ## see_also
 dnFossilizedBirthDeathRange
 dnFossilRecord
-mvResampleAugmentedAges
+mvStratigraphicRange
 ## example
 lambda ~ dnExp(10)
 mu ~ dnExp(10)

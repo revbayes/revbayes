@@ -16,34 +16,28 @@
 namespace RevBayesCore {
 
     /**
-     * One taxon's stratigraphic range: the four ages the model samples, ordered present to past,
-     * and the bounds its occurrence record fixes them within. It owns the ordering, so the density
-     * asks rather than restating the constraint.
+     * @brief One taxon's stratigraphic range: the ages the model samples and the bounds its
+     * occurrence record fixes them within.
      */
     struct RangeEntry {
 
-        double  death = 0.0;                                //!< d_i, where the range ends: an extinction, or the marginalization limit
-        double  last  = 0.0;                                //!< tau_K, the youngest augmented occurrence
-        double  first = 0.0;                                //!< tau_1, the oldest augmented occurrence
-        double  birth = 0.0;                                //!< b_i, where the range separates from its ancestor
+        double  death = 0.0;                                //!< The extinction time, or the marginalization limit.
+        double  last  = 0.0;                                //!< The youngest appearance, tau_K.
+        double  first = 0.0;                                //!< The oldest appearance, tau_1.
+        double  birth = 0.0;                                //!< The origination time.
 
-        //!< The extremes are order statistics of the record, so every occurrence bounds them:
-        //!< tau_1 is at least each reported minimum, tau_K at most each reported maximum.
-        double  first_min = 0.0;                            //!< the oldest reported minimum
-        double  first_max = RbConstants::Double::inf;       //!< the oldest reported maximum
-        double  last_min  = 0.0;                            //!< the youngest reported minimum
-        double  last_max  = RbConstants::Double::inf;       //!< the youngest reported maximum
+        double  first_min = 0.0;                            //!< The oldest reported minimum.
+        double  first_max = RbConstants::Double::inf;       //!< The oldest reported maximum.
+        double  last_min  = 0.0;                            //!< The youngest reported minimum.
+        double  last_max  = RbConstants::Double::inf;       //!< The youngest reported maximum.
 
-        //!< Fewer than two reported occurrences, so tau_1 and tau_K are one age rather than two.
-        bool    singleton = true;
+        bool    singleton = true;                           //!< Fewer than two occurrences, so the appearances are one age.
 
-        //!< Ages never decrease into the past, and each extreme sits within the bins that reported it.
+        //!< Ages never decrease into the past, and each appearance sits within the bins reporting it.
         bool    isOrdered(double present) const
                 {
                     if ( !( birth > first && first >= last && last >= death && death >= present ) ) return false;
 
-                    // the extremes are order statistics of the record, so every reported bin bounds
-                    // them: tau_1 clears every minimum, tau_K sits under every maximum
                     return first >= first_min && first <= first_max
                            && last >= last_min && last <= last_max;
                 }
@@ -90,54 +84,32 @@ namespace RevBayesCore {
 
         virtual ~AbstractFossilizedBirthDeathRangeProcess(){};
 
-        //!< The resampling move registers itself here, so the model can tell when it is missing
-        void                                            setHasResampleMove(void) { has_resample_move = true; }
+        void                                            setHasResampleMove(void) { has_resample_move = true; }       //!< Registered by mvStratigraphicRange.
+        void                                            setHasReportingNode(void) { has_reporting_node = true; }     //!< Registered by dnFossilRecord.
 
-        //!< A dnFossilRecord registers itself here. It carries the
-        //!< whole sampling density, so without one psi has no data at all.
-        void                                            setHasReportingNode(void) { has_reporting_node = true; }
-
-        void                                            executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const;   //!< Expose the first/last appearances and the origination/extinction times for monitoring
-        void                                            executeMethod(const std::string &n, const std::vector<const DagNode*> &args, double &rv) const;              //!< Expose the origin, which no monitor can otherwise reach
+        void                                            executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const;   //!< Expose the appearances and the origination/extinction times.
+        void                                            executeMethod(const std::string &n, const std::vector<const DagNode*> &args, double &rv) const;              //!< Expose the origin.
         const std::vector<Taxon>&                       getTaxa() const { return taxa; }
-        void                                            resampleFirstLast(size_t i);
-        void                                            warnIfNoResampleMove(void) const;
-        void                                            warnIfNoReportingNode(void) const;
-        void                                            initializeFirstLast(size_t i);                               //!< Draw taxon i's augmented extremes nested (range_end <= last <= first) under the current reporting model.
-        void                                            drawRanges();                                              //!< Draw an initial (range_start, range_end) and the augmented ages for every taxon. Shared by the matrix redraw and the tree (FBDSP) initial-value construction, which hangs a random budding topology on the ranges.
-        double                                          computeLnFossilTotal();                                    //!< Total fossil-record log-density summed over taxa; used by a standalone dnFossilRecord node conditioned on this range process.
-        //!< dnFossilRecord owns the reporting model and pushes it here, since the augmented ages
-        //!< live on the range process. The cap is a constructor argument, so only a complete or
-        //!< first/last record can be declared this way. Both augment the same ages, so the draw
-        //!< the constructor already made stands.
-        void                                            setCompleteRecord(bool comp) { record_complete = comp; }
+        void                                            resampleFirstLast(size_t i);                                //!< Redraw taxon i's appearances within its reported bins.
+        void                                            warnIfNoResampleMove(void) const;                           //!< Warn once when the appearances have no move.
+        void                                            warnIfNoReportingNode(void) const;                          //!< Warn once when psi has no data.
+        void                                            initializeFirstLast(size_t i);                              //!< Draw taxon i's appearances, nested within the range and its reported bins.
+        void                                            drawRanges();                                               //!< Draw an initial range and appearances for every taxon.
+        double                                          computeLnFossilTotal();                                     //!< Total fossil-record log-density, for a dnFossilRecord node.
+        void                                            setCompleteRecord(bool comp) { record_complete = comp; }    //!< The reporting model, pushed here by dnFossilRecord.
 
-        //!< Adopt a clamped record's occurrences as the data. The taxon set is the tree's tips, so
-        //!< the caller must have checked that the names and order match; only the occurrences,
-        //!< counts and extant status may differ.
-        virtual void                                    setOccurrences(const std::vector<Taxon> &t);
-        const std::vector<const DagNode*>&              getRangeParameters(void) const { return range_parameters; }   //!< The rate/timeline nodes a separate dnFossilRecord node adopts as parents.
+        virtual void                                    setOccurrences(const std::vector<Taxon> &t);                //!< Adopt a clamped record's occurrences as the data.
+        const std::vector<const DagNode*>&              getRangeParameters(void) const { return range_parameters; } //!< The rate and timeline nodes a dnFossilRecord adopts as parents.
 
     protected:
-        virtual bool                                    marginalizesExtinction(void) const { return false; }    //!< True when range_end is integrated out, so a range ends at the marginalization limit and closes with p() rather than mu.
-        virtual double                                  rangeEndTerm(size_t i, size_t di, double d) const { return log( death[di] ); }   //!< Log term closing range i at d > present.
+        virtual bool                                    marginalizesExtinction(void) const { return false; }        //!< True when the extinction times are integrated out.
+        virtual double                                  rangeEndTerm(size_t i, size_t di, double d) const { return log( death[di] ); } //!< Log term closing range i at d.
 
-        //!< Is tau_K an explicit latent? Not when unreported occurrences may lie below the youngest reported one.
-
-
-        //!< Refresh the range table's state half from the value: the birth and death each process
-        //!< keeps its ranges in, and for a tree the appearance ages the tips carry. The record
-        //!< half (the occurrences and the bounds they fix) is updateRecord's, on the data's clock.
-        //!< Re-establish what this process's own moves can break: the matrix's moves write one
-        //!< column of a tied pair, and a tree's moves carry the ages its tips are authoritative for.
-        virtual void                                    repairRanges(void) {}
-
-        //!< Pull the ranges from the value. Runs on touch, where the proposal has already written
-        //!< the value, so the density reads the table rather than refreshing it.
-        virtual void                                    updateRanges() = 0;
+        virtual void                                    repairRanges(void) {}                                       //!< Re-establish the invariants this process's own moves can break.
+        virtual void                                    updateRanges() = 0;                                         //!< Pull the ranges from the value. Runs on touch, before the density reads them.
 
         virtual double                                  computeLnProbabilityRanges(bool force = false);
-        double                                          computeLnFossilRecord(size_t i) const;              //!< Fossil-record (occurrence) log-term for taxon i, factored out of computeLnProbabilityRanges (range/reporting split).
+        double                                          computeLnFossilRecord(size_t i) const;                      //!< Fossil-record log-term for taxon i.
 
         // Parameter management functions
         void                                            swapParameterInternal(const DagNode *oldP, const DagNode *newP);                //!< Swap a parameter
@@ -155,10 +127,10 @@ namespace RevBayesCore {
 
         std::vector<Taxon>                              taxa;                                                  //!< Taxa that will be attached to new simulated trees.
         std::string                                     condition;
-        bool                                            record_complete;                                        //!< The declared reporting model: every occurrence reported, or the first/last rule
-        double                                          max_present_age;                                        //!< Youngest occurrence maximum over all taxa; the timeline may not start above it
+        bool                                            record_complete;                                        //!< Every occurrence reported, or the first/last rule.
+        double                                          max_present_age;                                        //!< Youngest occurrence maximum; the timeline may not start above it.
 
-        void                                            updateRecord(void);                                //!< Refresh the range table's record half from the occurrences: the reported bins and the bounds they put on the appearance ages. Runs when the data changes, not per evaluation.
+        void                                            updateRecord(void);                                     //!< Refresh the reported bins and the bounds they put on the appearances.
 
         size_t                                          num_intervals;
 
@@ -176,10 +148,10 @@ namespace RevBayesCore {
 
         std::vector<const DagNode*>                     range_parameters;
 
-        std::vector<RangeEntry>                         ranges;                                                 //!< One per taxon: its four ages and the bounds its record fixes them within
+        std::vector<RangeEntry>                         ranges;                                                 //!< One per taxon.
         
         double                                          origin;                                                 //!< The origin time (oldest birth time)
-        size_t                                          max_birth;                                              //!< Index of the taxon holding the oldest birth, refreshed by updateRanges
+        size_t                                          max_birth;                                              //!< Index of the taxon holding the oldest origination time.
 
         // the following vectors are used internally for more efficient likelihood calculations and are filled by 'prepareProbComputation'
         mutable std::vector<double>                     birth;                                                  //!< The sorted speciation rates
@@ -193,15 +165,11 @@ namespace RevBayesCore {
         mutable std::vector<double>                     pS_i;                                                   //!< Probability of leaving no descendants from the end of each time interval
 
                                 
-        //!< The one range mvStratigraphicRange drew, and the two ages it replaced. Taken in the
-        //!< proposal, before the pull, so it undoes the proposal's own write and not the pull's.
-        size_t                                          stored_range = 0;
-        double                                          stored_first = 0.0;
+        size_t                                          stored_range = 0;                                       //!< The range mvStratigraphicRange drew, and the two ages it replaced.
+        double                                          stored_first = 0.0;                                     //!< Taken in the proposal, before the pull, so it undoes the proposal's write.
         double                                          stored_last  = 0.0;
 
-        //!< The table as the proposal found it. A rejected proposal restores the value, and the
-        //!< table has to follow it back, or the next pull compares against the rejected state.
-        std::vector<RangeEntry>                         stored_ranges;
+        std::vector<RangeEntry>                         stored_ranges;                                          //!< The table as the proposal found it, restored when it is rejected.
 
         std::vector<double>                             partial_likelihood;                                     //!< Partial likelihood for each taxon
         std::vector<double>                             stored_likelihood;                                      //!< Stored partial likelihood for each taxon
@@ -209,11 +177,11 @@ namespace RevBayesCore {
         std::vector<bool>                               dirty_taxa;                                             //!< Indicates whether partial likelihood needs updating
         
         bool                                            touched;                                               //!< Indicates whether any terms need updating
-        bool                                            has_resample_move = false;              //!< Set by mvStratigraphicRange when it attaches
-        bool                                            has_reporting_node = false;             //!< Set by dnFossilRecord when it attaches
-        mutable bool                                    warned_no_resample = false;             //!< setMcmcMode fires more than once per run
+        bool                                            has_resample_move = false;                              //!< Set by mvStratigraphicRange when it attaches.
+        bool                                            has_reporting_node = false;                             //!< Set by dnFossilRecord when it attaches.
+        mutable bool                                    warned_no_resample = false;                             //!< setMcmcMode fires more than once per run.
         mutable bool                                    warned_no_reporting = false;
-        bool                                            resampled;                                              //!< mvStratigraphicRange drew a new pair and the undo above is armed
+        bool                                            resampled;                                              //!< The undo above is armed.
     };
 }
 

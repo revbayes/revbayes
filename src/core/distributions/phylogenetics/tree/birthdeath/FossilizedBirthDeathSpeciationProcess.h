@@ -7,14 +7,13 @@
 namespace RevBayesCore {
 
     /**
-     * What the topology says about one taxon's species: how its range begins, and how it ends. The
-     * tree fixes these rather than the ages, so a move can change them with every age left alone.
+     * @brief What the topology says about one taxon's range: how it begins, and how it ends.
      */
     struct SpeciesEntry {
 
-        bool parent_is_sa   = false;    //!< the species this one budded from was sampled at that node
-        bool ends_at_sa     = false;    //!< the range ends at a sampled ancestor, so the lineage carries on below
-        bool ends_symmetric = false;    //!< the range ends by symmetric speciation, an event rather than an extinction
+        bool parent_is_sa   = false;    //!< The range this one budded from was sampled at that node.
+        bool ends_at_sa     = false;    //!< The range ends at a sampled ancestor, so its lineage carries on.
+        bool ends_symmetric = false;    //!< The range ends by symmetric speciation rather than extinction.
 
         bool operator==(const SpeciesEntry &e) const
                 {
@@ -63,12 +62,9 @@ namespace RevBayesCore {
         // public member functions
         FossilizedBirthDeathSpeciationProcess*          clone(void) const override;                                //!< Create an independent clone
 
-        void                                            setValue(Tree *v, bool force=false) override;                       //!< Clamping replaces the ranges the augmented ages were drawn against, so re-clip them
+        void                                            setValue(Tree *v, bool force=false) override;                       //!< Adopt a tree's annotations, or draw the state it does not carry.
 
-        //!< A plain Newick drops everything this process samples besides the divergence times: which
-        //!< range each node belongs to, and where each range's two appearances sit. Written as
-        //!< node annotations so a checkpoint restores the state rather than a state like it.
-        std::string                                     getHiddenStateString(void) const override;
+        std::string                                     getHiddenStateString(void) const override;                          //!< The tree annotated with the range labels and appearances a Newick drops.
         void                                            setHiddenStateFromString(const std::string &s) override;
         void                                            redrawValue(void) override;
         void                                            redrawValue(SimulationCondition c) override;                        //!< The framework redraws through this overload, which must not reach the inherited simulator
@@ -76,22 +72,22 @@ namespace RevBayesCore {
         bool                                            hasAnagenesis(void) const;                                          //!< True when any interval's anagenetic rate is positive, which breaks the equal-density premise a budding topology Gibbs draw rests on.
         bool                                            hasSymmetricSpeciation(void) const;                                 //!< True when any interval's symmetric speciation probability is positive. Whether a given node may speciate symmetrically is symmetricAt().
         void                                            simulateClade(std::vector<TopologyNode *> &n, double age, double present, bool alwaysReturn) override;
-        bool                                            allowsSampledAncestors(void) const override { return true; }                            //!< A sampled ancestor is an anagenetic speciation; with lambda_a = 0 its density is zero, so the flag stays on and the density does the rejecting.
+        bool                                            allowsSampledAncestors(void) const override { return true; }        //!< With lambda_a = 0 the density is zero, so the density rejects rather than the flag.
 
     protected:
         bool                                            marginalizesExtinction(void) const override { return extended == false; }
         double                                          rangeEndTerm(size_t i, size_t di, double d) const override;
 
-        void                                            repairRanges(void) override;                             //!< A tree move carries the tip, which is the range end and the youngest appearance where the extinction time is marginalized.
+        void                                            repairRanges(void) override;                             //!< Re-take from the tip what a tree move carries there.
         void                                            updateRanges(void) override;
         void                                            setOccurrences(const std::vector<Taxon> &t) override;    //!< Sync the tree-side taxon copy, then adopt as the base does.
-        double                                          symmetricAt(double age) const;                           //!< beta in the interval containing age, read from the parameter rather than the prepared cache, which the simulator paths run without.
-        void                                            normalizeContinuationFlags(void);                        //!< Repair the whole tree. Refreshes the interval cache first, since the legal repair depends on beta at each node.
-        void                                            normalizeContinuationFlags(const TopologyNode &node);    //!< Make each node name exactly one continuing child. Construction only: the density must reject an invalid state, not repair it.
-        int                                             continuingSpecies(const TopologyNode &node) const;       //!< The taxon whose range this node belongs to, following the continuations down. -1 where none is named.
-        //!< What a subtree reports upward: the species running through it, or species == -1 when
-        //!< that species ended below by symmetric speciation and the sampled ancestor above has yet
-        //!< to name it. Invalidity travels separately, in invalid_continuation.
+        double                                          symmetricAt(double age) const;                           //!< beta in the interval containing age, read from the parameter.
+        void                                            normalizeContinuationFlags(void);                        //!< Repair the whole tree, refreshing the interval cache first.
+        void                                            normalizeContinuationFlags(const TopologyNode &node);    //!< Make each node name exactly one continuing child.
+        int                                             continuingSpecies(const TopologyNode &node) const;       //!< The taxon whose range this node belongs to, or -1 where none is named.
+
+        //!< What a subtree reports upward: the range running through it, or -1 when that range
+        //!< ended below and has yet to be named. Invalidity travels in invalid_continuation.
         struct RangeFlow { int species; double end_age; };
         RangeFlow                                       updateRanges(const TopologyNode & );
 
@@ -101,15 +97,12 @@ namespace RevBayesCore {
         double                                          computeLnProbabilityTimes(void) const override;                            //!< Compute the log-transformed probability of the current value.
         double                                          computeLnProbabilityDivergenceTimes(void) const override;            //!< Compute the log-transformed probability of the current value.
 
-        //!< A non-extended tip is the augmented youngest age and must stay in its bin, but only for
-        //!< an extinct taxon: an extant tip is pinned at the present, outside its fossil range.
-        bool                                            tipAgeConstrainedToRange(const Taxon &t) const override { return extended == false && t.isExtinct(); }
-        //!< The per-taxon check in the density covers this, and it alone knows which tips are exempt.
-        bool                                            validatesTipAgesOnSet(void) const override { return false; }
+        bool                                            tipAgeConstrainedToRange(const Taxon &t) const override { return extended == false && t.isExtinct(); } //!< A non-extended extinct tip is its youngest appearance.
+        bool                                            validatesTipAgesOnSet(void) const override { return false; }        //!< The density's per-taxon check knows which tips are exempt.
 
         void                                            setMcmcMode(bool tf) override;
 
-        bool                                            isExtended(void) const override { return extended; }            //!< An extended tree ends each range at the extinction time, so a tip may fall below its fossil age range. A non-extended tree ends it at the marginalization limit instead.
+        bool                                            isExtended(void) const override { return extended; }     //!< An extended tree ends each range at an extinction time.
 
         double                                          lnProbNumTaxa(size_t n, double start, double end, bool MRCA) const override { throw RbException("Cannot compute P(nTaxa)."); }
         double                                          lnProbTreeShape(void) const override;
@@ -133,18 +126,18 @@ namespace RevBayesCore {
         // helper functions
         double                                          getMaxTaxonAge( const TopologyNode& ) const;
 
-        void                                            labelSpecies(TopologyNode &node, int s) const;   //!< Stamp the range each node belongs to, top down, so a symmetric node carries the one that ends there.
-        bool                                            adoptSpeciesLabels(void);                        //!< Take the continuation flags from the range labels a tree arrived with. False when it carries none.
-        bool                                            adoptAppearances(void);                          //!< Take tau_1 and tau_K from the tips' FAD and LAD. False when they carry none.
+        void                                            labelSpecies(TopologyNode &node, int s) const;           //!< Stamp the range each node belongs to, top down.
+        bool                                            adoptSpeciesLabels(void);                               //!< Take the continuation flags from a tree's range labels.
+        bool                                            adoptAppearances(void);                                 //!< Take the appearances from the tips' FAD and LAD.
 
-        bool                                            extended;                                                //!< Tips are extinction times. When false the extinction times are marginalized out and each range ends at min(tau_K, youngest child birth).
+        bool                                            extended;                                                //!< Tips are extinction times, else those are marginalized out.
 
-        std::vector<SpeciesEntry>                       species;                                                 //!< One per taxon, as the last pull left it
-        std::vector<SpeciesEntry>                       next_species;                                            //!< Where the tree pass builds the replacement, so the commit can see what moved
-        std::vector<SpeciesEntry>                       stored_species;                                          //!< The table as the proposal found it, restored when it is rejected
+        std::vector<SpeciesEntry>                       species;                                                 //!< One per taxon, as the last pull left it.
+        std::vector<SpeciesEntry>                       next_species;                                            //!< Where the tree pass builds the replacement.
+        std::vector<SpeciesEntry>                       stored_species;                                          //!< The table as the proposal found it.
 
-        mutable double                                  budding_lnProb;                                          //!< Sum of log(1-beta) over budding events, accumulated by the tree pass.
-        mutable bool                                    invalid_continuation = false;                            //!< Some node's children do not name exactly one continuation of its species.
+        mutable double                                  budding_lnProb;                                          //!< Sum of log(1-beta) over budding events.
+        mutable bool                                    invalid_continuation = false;                            //!< Some node's children do not name exactly one continuation.
 
         mutable std::vector<double>                     anagenetic;                                              //!< The sorted anagenetic speciation rates.
         mutable std::vector<double>                     symmetric;                                               //!< The sorted symmetric speciation probabilities.

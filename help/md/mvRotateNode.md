@@ -2,25 +2,25 @@
 mvRotateNode
 
 ## title
-Node rotation move
+Species continuation move
 
 ## description
-Permutes the children of a random internal node, leaving every node age and the clade set unchanged.
+Moves the continuation of an ancestral species between the children of a random internal node, leaving every node age and the topology unchanged.
 
 ## details
-Child order carries no meaning in an unlabelled tree, so under most distributions this proposes the state the chain is already in and always accepts. The move is for a process that reads the order as state.
+Under budding (asymmetric) speciation exactly one child of each node continues its ancestor's species, and the others begin new species there. Which one continues is a free parameter, separate from the topology and from the node ages, and this is the move that samples it. It is recorded on the child rather than in the child order, so no topology move can reassign it silently.
 
-`dnFBDSP` is one: it takes a node's first child as the lineage that continues its ancestor's species and the rest as budding (asymmetric speciation) descendants, so rotating a node is a different budding history over the same topology, with different birth times and a different probability. The topology moves reach those states only as a side effect of rearranging the tree, and never propose one on its own.
+A node with no continuing child, or with more than one, is not a state `dnFBDSP` can produce, so the move acts only on nodes that currently name exactly one, and always leaves exactly one. The replacement is drawn uniformly among the remaining children, and the reverse draw is from a set of the same size, so the proposal is symmetric and carries no Hastings ratio.
 
-The permutation is drawn uniformly over the orders that differ from the current one, in both directions, so the proposal is symmetric and carries no Hastings ratio. On a bifurcating node it exchanges the two children. A node with a single child is never chosen.
+The continuation determines each range's origination time, so the topology moves reach these states only as a side effect of rearranging the tree, and never propose one on its own.
 
 ## authors
 June Walker
 
 ## see_also
 dnFossilizedBirthDeathSpeciation
-mvNNI
-mvFNPR
+mvGibbsBuddingTopology
+mvStratigraphicRange
 
 ## example
 tr ~ dnFBDSP(origin=origin, lambda=lambda, mu=mu, psi=psi, rho=1, timeline=timeline, taxa=taxa)

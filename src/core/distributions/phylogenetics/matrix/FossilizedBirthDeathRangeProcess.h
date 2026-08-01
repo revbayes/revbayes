@@ -49,7 +49,7 @@ namespace RevBayesCore {
 
         FossilizedBirthDeathRangeProcess*               clone(void) const override;                                         //!< Create an independent clone
 
-        // Re-clip the augmented oldest ages when the matrix is set externally (clamp);
+        // Re-clip the appearances when the matrix is set externally (clamp);
         // MCMC moves mutate the value in place and never come through here.
         void                                            setValue(MatrixReal *v, bool force = false) override;
 

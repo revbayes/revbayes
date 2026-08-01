@@ -77,10 +77,8 @@ double RotateNodeProposal::doProposal( void )
 
     failed = false;
 
-    // Move the continuation between siblings rather than permuting the child list. Child order no
-    // longer carries the range assignment, so a permutation is a no-op; which sibling continues the
-    // parent's species is the free parameter and this is the move that explores it. A sampled
-    // ancestor node is skipped: there the continuation is forced onto the sampled ancestor tip.
+    // which sibling continues the parent's species is the free parameter; child order carries
+    // nothing. A sampled ancestor node is skipped, its continuation being forced onto the tip
     std::vector<size_t> candidates;
     for (size_t i = 0; i < tau.getNumberOfNodes(); i++)
     {
