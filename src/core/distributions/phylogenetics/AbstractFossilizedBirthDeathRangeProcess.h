@@ -121,7 +121,7 @@ namespace RevBayesCore {
         void                                            resampleFirstLast(size_t i);
         void                                            warnIfNoResampleMove(void) const;
         void                                            warnIfNoReportingNode(void) const;
-        void                                            drawAugmentedAges(size_t i);                               //!< Draw taxon i's augmented extremes nested (range_end <= last <= first) under the current reporting model.
+        void                                            initializeFirstLast(size_t i);                               //!< Draw taxon i's augmented extremes nested (range_end <= last <= first) under the current reporting model.
         void                                            drawRanges();                                              //!< Draw an initial (range_start, range_end) and the augmented ages for every taxon. Shared by the matrix redraw and the tree (FBDSP) initial-value construction, which hangs a random budding topology on the ranges.
         double                                          computeLnFossilTotal();                                    //!< Total fossil-record log-density summed over taxa; used by a standalone dnFossilRecord node conditioned on this range process (self-contained: refreshes rate cache + start/end times).
         //!< dnFossilRecord owns the reporting model and pushes it here, since the augmented ages
@@ -205,8 +205,11 @@ namespace RevBayesCore {
         mutable std::vector<double>                     pS_i;                                                   //!< Probability of leaving no descendants from the end of each time interval
 
                                 
-        std::vector<double>                             stored_first;                                           //!< Stored age of the oldest occurence for each taxon
-        std::vector<double>                             stored_last;                                            //!< Stored augmented age of the youngest occurrence for each taxon
+        //!< The one range mvResampleAugmentedAges drew, and the two ages it replaced. The
+        //!< tree-owned ages refresh from the tips each pass, so only this one needs undoing.
+        size_t                                          stored_range = 0;
+        double                                          stored_first = 0.0;
+        double                                          stored_last  = 0.0;
                                 
         std::vector<double>                             partial_likelihood;                                     //!< Partial likelihood for each taxon
         std::vector<double>                             stored_likelihood;                                      //!< Stored partial likelihood for each taxon
@@ -218,7 +221,7 @@ namespace RevBayesCore {
         bool                                            has_reporting_node = false;             //!< Set by dnFossilRecord when it attaches
         mutable bool                                    warned_no_resample = false;             //!< setMcmcMode fires more than once per run
         mutable bool                                    warned_no_reporting = false;
-        bool                                            resampled;                                              //!< Indicates whether any oldest occurrence ages were resampled
+        bool                                            resampled;                                              //!< mvResampleAugmentedAges drew a new pair and the undo above is armed
     };
 }
 

@@ -63,6 +63,7 @@ namespace RevBayesCore {
         double                                          symmetricAt(double age) const;                           //!< beta in the interval containing age, read from the parameter rather than the prepared cache, which the simulator paths run without.
         void                                            normalizeContinuationFlags(void);                        //!< Repair the whole tree. Refreshes the interval cache first, since the legal repair depends on beta at each node.
         void                                            normalizeContinuationFlags(const TopologyNode &node);    //!< Make each node name exactly one continuing child. Construction only: the density must reject an invalid state, not repair it.
+        int                                             continuingSpecies(const TopologyNode &node) const;       //!< The taxon whose range this node belongs to, following the continuations down. -1 where none is named.
         //!< What a subtree reports upward: the species running through it, or species == -1 when
         //!< that species ended below by symmetric speciation and the sampled ancestor above has yet
         //!< to name it. Invalidity travels separately, in invalid_continuation.

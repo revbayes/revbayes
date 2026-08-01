@@ -272,17 +272,10 @@ void AbstractFossilizedBirthDeathRangeProcess::setOccurrences( const std::vector
 
     dirty_taxa = std::vector<bool>(taxa.size(), true);
 
-    // the extremes were drawn under the old reporting model, and which of them the new one even
-    // instantiates may differ, so draw them again rather than patching the old values
-    for (size_t i = 0; i < taxa.size(); ++i)
-    {
-        drawAugmentedAges(i);
-    }
-
-    // the new record may still leave the value out of support, which no clipping repairs: the
-    // range ends and births were drawn against the old bins. The MCMC redraws every free node
-    // jointly when a start is -inf, so leave that to it rather than redrawing this one alone.
-    clipAugmentedAges();
+    // Adopting the record must not move any sampled age. The ages here were drawn against the old
+    // occurrences and may now be out of support, as may the births and range ends, which no repair
+    // of the ages alone reaches. The MCMC redraws every free node jointly when a start is -inf, so
+    // that is where the new starting value comes from.
 }
 
 
@@ -767,7 +760,7 @@ void AbstractFossilizedBirthDeathRangeProcess::executeMethod(const std::string &
  * Draw the augmented extremes for taxon i, nested (range_end <= last <= first), under the current
  * reporting model.
  */
-void AbstractFossilizedBirthDeathRangeProcess::drawAugmentedAges(size_t i)
+void AbstractFossilizedBirthDeathRangeProcess::initializeFirstLast(size_t i)
 {
     RandomNumberGenerator* rng = GLOBAL_RNG;
 
@@ -831,13 +824,9 @@ void AbstractFossilizedBirthDeathRangeProcess::warnIfNoReportingNode( void ) con
 
 void AbstractFossilizedBirthDeathRangeProcess::resampleFirstLast(size_t i)
 {
-    stored_first.resize( taxa.size() );
-    stored_last.resize( taxa.size() );
-    for (size_t k = 0; k < taxa.size(); ++k)
-    {
-        stored_first[k] = ranges[k].first;
-        stored_last[k]  = ranges[k].last;
-    }
+    stored_range = i;
+    stored_first = ranges[i].first;
+    stored_last  = ranges[i].last;
     resampled = true;
 
     // a non-extended extinct range ends at its tip, which a move samples and updateRanges
@@ -904,7 +893,7 @@ void AbstractFossilizedBirthDeathRangeProcess::drawRanges()
         ranges[i].death = taxa[i].isExtinct() ? rng->uniform01()*(ranges[i].last_max - present) + present : present;
         ranges[i].birth = max;
 
-        drawAugmentedAges(i);
+        initializeFirstLast(i);
     }
 
     // place births oldest-first, each inside a lineage already placed and still alive at it
@@ -973,11 +962,8 @@ void AbstractFossilizedBirthDeathRangeProcess::restoreSpecialization(const DagNo
 
     if ( resampled )
     {
-        for (size_t i = 0; i < taxa.size(); ++i)
-        {
-            ranges[i].first = stored_first[i];
-            ranges[i].last  = stored_last[i];
-        }
+        ranges[stored_range].first = stored_first;
+        ranges[stored_range].last  = stored_last;
     }
 
     dirty_taxa = std::vector<bool>(taxa.size(), false);

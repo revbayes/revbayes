@@ -339,10 +339,12 @@ void FossilizedBirthDeathSpeciationProcess::setValue(Tree *v, bool force)
     }
     this->getValue().orderNodesByIndex();
 
-    clipAugmentedAges();
-
-    // a tree clamped from outside carries no flags, so establish the invariant here as well
+    // a tree clamped from outside carries no flags, so establish the invariant here as well.
+    // Before the clip, not after: the flags name each range's birth, and the birth is what bounds
+    // the ages the clip moves.
     normalizeContinuationFlags();
+
+    clipAugmentedAges();
 }
 
 
@@ -961,6 +963,24 @@ void FossilizedBirthDeathSpeciationProcess::normalizeContinuationFlags( void )
  * construction paths build this tree and not all of them know which lineage keeps the ancestral
  * species, so rather than trusting each site, the invariant is enforced once here.
  */
+/**
+ * The taxon whose range this node belongs to: the continuations name one child at each step, so
+ * following them reaches the tip that range ends at.
+ */
+int FossilizedBirthDeathSpeciationProcess::continuingSpecies( const TopologyNode &node ) const
+{
+    if ( node.isTip() == true ) return int( node.getIndex() );
+
+    const std::vector<TopologyNode*> &children = node.getChildren();
+    for (size_t c = 0; c < children.size(); c++)
+    {
+        if ( children[c]->continuesParentSpecies() == true ) return continuingSpecies( *children[c] );
+    }
+
+    return -1;
+}
+
+
 void FossilizedBirthDeathSpeciationProcess::normalizeContinuationFlags( const TopologyNode &node )
 {
     if ( node.isTip() == true ) return;
@@ -991,20 +1011,42 @@ void FossilizedBirthDeathSpeciationProcess::normalizeContinuationFlags( const To
 
     // zero continuing children is symmetric speciation, legal where this node's own beta is
     // positive, so leave it alone; the sampled ancestor case is legal either way. Anything else is
-    // repaired to a single continuation, taking the lowest index so two presentations agree. The
-    // interval matters here in a way it does not in the density: repairing to a configuration the
-    // node's interval forbids starts the chain at -inf, with no move able to leave it
+    // repaired to a single continuation. The interval matters here in a way it does not in the
+    // density: repairing to a configuration the node's interval forbids starts the chain at -inf,
+    // with no move able to leave it
     bool legal = ( n_cont == 1 ) ||
                  ( n_cont == 0 && ( sa_tip == true || symmetricAt( node.getAge() ) > 0.0 ) );
 
     if ( legal == false )
     {
+        // Naming c the continuation starts every other child's range here, and a range cannot be
+        // born younger than its own oldest reported occurrence: that is -inf for any rates, and no
+        // clipping of the ages reaches it. Prefer a choice the record allows, lowest index among
+        // those so two presentations of one tree agree.
         size_t keep = children.size();
 
         for (size_t c = 0; c < children.size(); c++)
         {
             if ( children[c]->isSampledAncestorTip() == true ) continue;
+
+            bool feasible = true;
+            for (size_t o = 0; o < children.size() && feasible == true; o++)
+            {
+                if ( o == c || children[o]->isSampledAncestorTip() == true ) continue;
+
+                int s = continuingSpecies( *children[o] );
+                if ( s < 0 || ranges[s].first_min >= node.getAge() ) feasible = false;
+            }
+
+            if ( feasible == false ) continue;
             if ( keep == children.size() || children[c]->getIndex() < children[keep]->getIndex() ) keep = c;
+        }
+
+        // no choice fits the record, so take the lowest index and let the density reject it
+        for (size_t c = 0; keep == children.size() && c < children.size(); c++)
+        {
+            if ( children[c]->isSampledAncestorTip() == true ) continue;
+            keep = c;
         }
 
         for (size_t c = 0; c < children.size(); c++)
@@ -1110,16 +1152,6 @@ FossilizedBirthDeathSpeciationProcess::RangeFlow FossilizedBirthDeathSpeciationP
             {
                 ranges[i].death = age;
                 dirty_taxa[i] = true;
-            }
-
-            // an extinct non-extended tip is the augmented youngest age itself, so it is not
-            // resampled; an extant one sits at the present and keeps its own tau_K
-            if ( extended == false && taxa[i].isExtinct() == true )
-            {
-                ranges[i].last = age;
-
-                // a single occurrence is both extremes, so the tip is tau_1 as well
-                if ( ranges[i].singleton ) ranges[i].first = age;
             }
         }
 
@@ -1246,6 +1278,15 @@ void FossilizedBirthDeathSpeciationProcess::updateRanges( void )
             size_t ti = node.getIndex();
             bool constrained = ( extended == false && ti < taxa.size() && taxa[ti].isExtinct() == true );
             node.setTipAgeUnconstrained( constrained == false );
+
+            // where the tip is the youngest appearance it is also the authority for it. Refresh
+            // here rather than in the recursion, which returns early on an invalid continuation
+            // and would leave the cache holding an age the tree no longer has.
+            if ( constrained == true )
+            {
+                ranges[ti].last = node.getAge();
+                if ( ranges[ti].singleton == true ) ranges[ti].first = node.getAge();
+            }
         }
     }
 
@@ -1271,13 +1312,6 @@ void FossilizedBirthDeathSpeciationProcess::updateRanges( void )
             ranges[i].birth = getOriginAge();
             dirty_taxa[i] = true;
 
-        }
-
-        if ( extended == false && taxa[i].isExtinct() == true )
-        {
-            ranges[i].last = root.getAge();
-
-            if ( ranges[i].singleton ) ranges[i].first = root.getAge();
         }
     }
 

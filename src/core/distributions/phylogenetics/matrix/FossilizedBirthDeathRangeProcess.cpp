@@ -11,7 +11,6 @@
 #include "AbstractFossilizedBirthDeathRangeProcess.h"
 #include "DistributionExponential.h"
 #include "MatrixReal.h"
-#include "FossilRangeMatrix.h"
 #include "RbMathCombinatorialFunctions.h"
 #include "RbMathLogic.h"
 #include "RbMathFunctions.h"
@@ -54,7 +53,7 @@ FossilizedBirthDeathRangeProcess::FossilizedBirthDeathRangeProcess(const DagNode
                                                                      bool complete_record,
                                                                                                                                           const TypedDagNode<double> *inorigin,
                                                                      TypedDistribution<double> *inoriginprior) :
-    TypedDistribution<MatrixReal>(new FossilRangeMatrix(intaxa)),
+    TypedDistribution<MatrixReal>(new MatrixReal(intaxa.size(), 4)),
     AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, complete_record, inorigin, inoriginprior)
 {
 
