@@ -17,7 +17,6 @@ namespace RevLanguage {
      * This is the birth-death range process alone. It does not include the fossil-record term
      * Pr(occurrences | ranges), which is supplied by a separate dnFossilRecord node that also
      * chooses the reporting model, so there are no reporting arguments here. The deprecated
-     * dnFBDRMatrix is the fused form, carrying both terms in one node.
      *
      * @copyright Copyright 2009-
      * @author The RevBayes Development Core Team (Sebastian Hoehna)

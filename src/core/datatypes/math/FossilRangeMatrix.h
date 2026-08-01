@@ -67,8 +67,8 @@ namespace RevBayesCore {
             for (size_t i = 0; i < taxa.size(); ++i)
             {
                 size_t count = 0;
-                const std::map<TimeInterval, size_t> &ages = taxa[i].getOccurrences();
-                for (std::map<TimeInterval, size_t>::const_iterator it = ages.begin(); it != ages.end(); ++it) count += it->second;
+                const std::vector<std::pair<TimeInterval, size_t> > &ages = taxa[i].getOccurrences();
+                for (size_t k = 0; k < ages.size(); ++k) count += ages[k].second;
 
                 free_entries[i][1] = ( count >= 2 );
                 free_entries[i][2] = true;

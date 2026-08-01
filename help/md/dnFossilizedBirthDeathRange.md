@@ -8,7 +8,6 @@ This distribution is the birth-death range process on its own: it describes how 
 
 Fossil species are represented by a collection of fossil occurrences with uncertainty. Speciation, extinction and sampling rates may be time-homogeneous or piecewise time-heterogeneous. If time-heterogeneous rates are provided, then a vector of rate change time-points musts also be provided. Under the hood, the fossil data is augmented with oldest occurrence ages for each species, which must be sampled during MCMC using `mvResampleAugmentedAges`. The related `dnBDS` distribution assumes complete lineage sampling instead (the Birth-Death with Rateshifts model of Silvestro et al. 2019).
 
-The deprecated `dnFBDRMatrix` is the older fused form of this process: it carries the fossil-record term internally and takes the occurrences as a constructor argument rather than as clamped data. Its reporting model is instead selected by `complete` on `dnFossilRecord`.
 ## authors
 June Walker
 ## see_also

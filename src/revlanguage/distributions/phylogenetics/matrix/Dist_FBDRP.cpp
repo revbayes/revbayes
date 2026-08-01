@@ -118,8 +118,8 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRP::createDistribution( 
     // optional origin time of the process
     RevBayesCore::TypedDistribution<double>* op = createOriginPrior();
 
-    // report_internally = false: the bare range process, with no inline fossil-record term
-    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, true, 0, NULL, op, false);
+    // the bare range process: the fossil-record term belongs to a dnFossilRecord node
+    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, true, NULL, op);
     
     return d;
 }

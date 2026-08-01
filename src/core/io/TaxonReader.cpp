@@ -241,8 +241,8 @@ TaxonReader::TaxonReader(const std::string &fn, std::string delim) : DelimitedDa
             // only an occurrence at the present proves survival; min_age == 0 can come
             // from a bin edge instead
             bool sampled_at_present = false;
-            std::map<TimeInterval, size_t> occs = taxon.getOccurrences();
-            for ( std::map<TimeInterval, size_t>::const_iterator it = occs.begin(); it != occs.end(); it++ )
+            const std::vector<std::pair<TimeInterval, size_t> > &occs = taxon.getOccurrences();
+            for ( std::vector<std::pair<TimeInterval, size_t> >::const_iterator it = occs.begin(); it != occs.end(); it++ )
             {
                 if ( it->first.getMin() == 0.0 && it->first.getMax() == 0.0 )
                 {

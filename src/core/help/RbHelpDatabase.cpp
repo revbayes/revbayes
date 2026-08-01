@@ -942,9 +942,7 @@ x.probability())");
 
 The `complete` argument selects how sampled specimens make it into the reported record: `complete=TRUE` (every sampled occurrence is reported) or `complete=FALSE` (only the oldest and youngest occurrence of each species are reported, i.e. first/last). It also determines the support of the augmented oldest age, which belongs to the range process, so both nodes use the model given here.
 
-The occurrences, the fossil sampling rate, its timeline, and the augmented occurrence ages are all read from the range process rather than given as arguments here. The sampling rate also appears in the range process's non-detection term, so the two nodes must share it.
-
-The deprecated `dnFBDRMatrix` fuses this term and the range process into a single node, and additionally offers the truncated (exchangeable-occurrence) reporting model via its `truncated=K` cap.)");
+The occurrences, the fossil sampling rate, its timeline, and the augmented occurrence ages are all read from the range process rather than given as arguments here. The sampling rate also appears in the range process's non-detection term, so the two nodes must share it.)");
 	help_strings[string("dnFossilRecord")][string("example")] = string(R"(lambda ~ dnExp(10)
 mu ~ dnExp(10)
 psi ~ dnExp(10)
@@ -967,9 +965,7 @@ moves.append( mvMatrixElementSlide(bd, weight=taxa.size()) ))");
 	help_strings[string("dnFossilizedBirthDeathRange")][string("description")] = string(R"(The fossilized birth death range process (FBDRP) describes the distribution of a matrix of species origination and extinction times under a model of asymmetric speciation and sampling of extinct species.)");
 	help_strings[string("dnFossilizedBirthDeathRange")][string("details")] = string(R"(This distribution is the birth-death range process on its own: it describes how species ranges diversify, and the fossil occurrences bound those ranges, but it does not include the probability of the fossil record itself. Pair it with a `dnFossilRecord` node clamped to the occurrences to get the full model. That node also selects the reporting model, i.e. how sampled occurrences reach the record: `complete` (all reported) or first/last (only the oldest and youngest). A range process with no `dnFossilRecord` attached is a valid model, but it does not condition on the fossil record at all.
 
-Fossil species are represented by a collection of fossil occurrences with uncertainty. Speciation, extinction and sampling rates may be time-homogeneous or piecewise time-heterogeneous. If time-heterogeneous rates are provided, then a vector of rate change time-points musts also be provided. Under the hood, the fossil data is augmented with oldest occurrence ages for each species, which must be sampled during MCMC using `mvResampleAugmentedAges`. The related `dnBDS` distribution assumes complete lineage sampling instead (the Birth-Death with Rateshifts model of Silvestro et al. 2019).
-
-The deprecated `dnFBDRMatrix` is the older fused form of this process: it carries the fossil-record term internally and takes the occurrences as a constructor argument rather than as clamped data. Its reporting model is instead selected by `complete` on `dnFossilRecord`.)");
+Fossil species are represented by a collection of fossil occurrences with uncertainty. Speciation, extinction and sampling rates may be time-homogeneous or piecewise time-heterogeneous. If time-heterogeneous rates are provided, then a vector of rate change time-points musts also be provided. Under the hood, the fossil data is augmented with oldest occurrence ages for each species, which must be sampled during MCMC using `mvResampleAugmentedAges`. The related `dnBDS` distribution assumes complete lineage sampling instead (the Birth-Death with Rateshifts model of Silvestro et al. 2019).)");
 	help_strings[string("dnFossilizedBirthDeathRange")][string("example")] = string(R"(lambda ~ dnExp(10)
 mu ~ dnExp(10)
 psi ~ dnExp(10)
@@ -4104,7 +4100,7 @@ remains unchanged for the tree branches.)");
 	help_arrays[string("mvRateAgeBetaShift")][string("see_also")].push_back(string(R"(mvRateAgeSubtreeProposal)"));
 	help_strings[string("mvRateAgeBetaShift")][string("title")] = string(R"(The RateAgeBetaShift move)");
 	help_arrays[string("mvResampleAugmentedAges")][string("authors")].push_back(string(R"(June Walker)"));
-	help_strings[string("mvResampleAugmentedAges")][string("description")] = string(R"(This move resamples an oldest occurrence age for a random species in a fossilized birth death process described by `dnFBDRP` or `dnFBDRMatrix`)");
+	help_strings[string("mvResampleAugmentedAges")][string("description")] = string(R"(This move resamples an oldest occurrence age for a random species in a fossilized birth death process described by `dnFBDRP`)");
 	help_strings[string("mvResampleAugmentedAges")][string("details")] = string(R"(Under the hood, FBD fossil data is augmented with oldest occurrence ages for each species, which are automatically marginalized during when the model is sampled using MCMC. These ages can also be resampled manually using this move.)");
 	help_strings[string("mvResampleAugmentedAges")][string("example")] = string(R"(bd ~ dnFBDRP(lambda=lambda, mu=mu, psi=psi, rho=1, taxa=taxa, resample=FALSE)
 

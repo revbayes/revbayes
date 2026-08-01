@@ -21,10 +21,8 @@ BirthDeathWithRateshifts::BirthDeathWithRateshifts(const DagNode *inspeciation,
                                                    const std::string &incondition,
                                                    const std::vector<Taxon> &intaxa,
                                                    bool complete_record,
-                                                   size_t truncate_at,
-                                                   const TypedDagNode<double> *inorigin,
-                                                   bool report_int) :
-    FossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, complete_record, truncate_at, inorigin, NULL, report_int)
+                                                   const TypedDagNode<double> *inorigin) :
+    FossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, complete_record, inorigin, NULL)
 {
 
 }
@@ -59,7 +57,7 @@ double BirthDeathWithRateshifts::computeLnProbability( void )
         double present = times.front();
 
         // check model constraints
-        if ( !( b > first_min[i] && b > d && last_max[i] >= d && d >= present ) )
+        if ( !( b > ranges[i].first_min && b > d && ranges[i].last_max >= d && d >= present ) )
         {
             return RbConstants::Double::neginf;
         }
@@ -112,19 +110,6 @@ double BirthDeathWithRateshifts::computeLnProbability( void )
                 partial_likelihood[i] -= log(-expm1(-psi_b_d));
             }
 
-            // inline reporting term, unless a dnFossilRecord node supplies it
-            if ( report_internally && dirty_psi[i] )
-            {
-                range_start[i] = b;
-                range_end[i] = d;
-                Psi[i] = computeLnFossilRecord(i);
-                if ( Psi[i] == RbConstants::Double::neginf )
-                {
-                    return RbConstants::Double::neginf;
-                }
-            }
-
-            if ( report_internally ) partial_likelihood[i] += Psi[i];
         }
 
         lnProb += partial_likelihood[i];

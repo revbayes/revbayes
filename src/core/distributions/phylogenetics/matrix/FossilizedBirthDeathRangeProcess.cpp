@@ -52,14 +52,11 @@ FossilizedBirthDeathRangeProcess::FossilizedBirthDeathRangeProcess(const DagNode
                                                                      const std::string &incondition,
                                                                      const std::vector<Taxon> &intaxa,
                                                                      bool complete_record,
-                                                                     size_t truncate_at,
                                                                                                                                           const TypedDagNode<double> *inorigin,
-                                                                     TypedDistribution<double> *inoriginprior,
-                                                                     bool report_int) :
+                                                                     TypedDistribution<double> *inoriginprior) :
     TypedDistribution<MatrixReal>(new FossilRangeMatrix(intaxa)),
-    AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, complete_record, truncate_at, inorigin, inoriginprior)
+    AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, complete_record, inorigin, inoriginprior)
 {
-    report_internally = report_int;
 
     dirty_gamma = std::vector<bool>(taxa.size(), true);
     gamma_i     = std::vector<size_t>(taxa.size(), 0);
@@ -113,28 +110,28 @@ void FossilizedBirthDeathRangeProcess::setValue(MatrixReal *v, bool force)
         // the augmented ages arrive in the value as well, so read them from it before deciding
         // whether they need clipping. The members still hold what was drawn against the ranges
         // this value replaces, and clipping those would discard a restored checkpoint.
-        last[i]  = (*this->value)[i][1];
-        first[i] = (*this->value)[i][2];
+        ranges[i].last  = (*this->value)[i][1];
+        ranges[i].first = (*this->value)[i][2];
 
         // oldest age: valid range [max(first_min,d), min(max_age,b))
-        double lo = std::max( first_min[i], d );
+        double lo = std::max( ranges[i].first_min, d );
         double hi = std::min( taxa[i].getMaxAge(), b );
-        if ( hi > lo && ( first[i] < lo || first[i] >= b ) )
+        if ( hi > lo && ( ranges[i].first < lo || ranges[i].first >= b ) )
         {
-            first[i] = 0.5 * ( lo + hi );
+            ranges[i].first = 0.5 * ( lo + hi );
         }
 
         // youngest age: valid range [max(d,min_age), min(first,last_max)]
         double lo_y = std::max( d, taxa[i].getMinAge() );
-        double hi_y = std::min( first[i], last_max[i] );
-        if ( hi_y > lo_y && ( last[i] < lo_y || last[i] > hi_y ) )
+        double hi_y = std::min( ranges[i].first, ranges[i].last_max );
+        if ( hi_y > lo_y && ( ranges[i].last < lo_y || ranges[i].last > hi_y ) )
         {
-            last[i] = 0.5 * ( lo_y + hi_y );
+            ranges[i].last = 0.5 * ( lo_y + hi_y );
         }
 
         // the value is what the density reads, so a clip that only moved the members is lost
-        (*this->value)[i][1] = last[i];
-        (*this->value)[i][2] = first[i];
+        (*this->value)[i][1] = ranges[i].last;
+        (*this->value)[i][2] = ranges[i].first;
     }
 
     repairAugmentedAges();
@@ -220,18 +217,18 @@ void FossilizedBirthDeathRangeProcess::updateGamma(bool force)
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-void FossilizedBirthDeathRangeProcess::updateStartEndTimes( void )
+void FossilizedBirthDeathRangeProcess::updateRanges( void )
 {
     max_birth = 0;
 
     for (size_t i = 0; i < taxa.size(); i++)
     {
-        range_start[i] = (*this->value)[i][3];
-        range_end[i]   = (*this->value)[i][0];
-        first[i]       = (*this->value)[i][2];
-        last[i]        = (*this->value)[i][1];
+        ranges[i].birth = (*this->value)[i][3];
+        ranges[i].death   = (*this->value)[i][0];
+        ranges[i].first       = (*this->value)[i][2];
+        ranges[i].last        = (*this->value)[i][1];
 
-        if ( range_start[i] > range_start[max_birth] ) max_birth = i;
+        if ( ranges[i].birth > ranges[max_birth].birth ) max_birth = i;
     }
 
     if ( origin_age != NULL )
@@ -240,7 +237,7 @@ void FossilizedBirthDeathRangeProcess::updateStartEndTimes( void )
     }
     else
     {
-        origin = range_start[max_birth];
+        origin = ranges[max_birth].birth;
     }
 }
 
@@ -251,15 +248,15 @@ void FossilizedBirthDeathRangeProcess::updateStartEndTimes( void )
 void FossilizedBirthDeathRangeProcess::redrawValue(void)
 {
     // draw an initial range per taxon (the tree process shares this and hangs a topology on it);
-    // updateStartEndTimes overwrites range_start/range_end once the matrix is set
+    // updateRanges overwrites range_start/range_end once the matrix is set
     drawRanges();
 
     for (size_t i = 0; i < taxa.size(); i++)
     {
-        (*this->value)[i][0] = range_end[i];
-        (*this->value)[i][1] = last[i];
-        (*this->value)[i][2] = first[i];
-        (*this->value)[i][3] = range_start[i];
+        (*this->value)[i][0] = ranges[i].death;
+        (*this->value)[i][1] = ranges[i].last;
+        (*this->value)[i][2] = ranges[i].first;
+        (*this->value)[i][3] = ranges[i].birth;
     }
 
     repairAugmentedAges();
@@ -283,7 +280,7 @@ void FossilizedBirthDeathRangeProcess::repairAugmentedAges( const std::set<size_
         size_t i = (*it) / 4;
         size_t c = (*it) % 4;
 
-        if ( augmentsYoungest(i) == true ) continue;
+        if ( ranges[i].singleton == false ) continue;
 
         // follow whichever column the move wrote, so neither direction is silently undone. The
         // move stored only the element it touched, so the sibling is stored here and put back by
@@ -304,7 +301,7 @@ void FossilizedBirthDeathRangeProcess::repairAugmentedAges( void )
     // no move to follow (a fresh draw, or a value set from outside): tau_1 is the reported one
     for (size_t i = 0; i < taxa.size(); i++)
     {
-        if ( augmentsYoungest(i) == false ) (*this->value)[i][1] = (*this->value)[i][2];
+        if ( ranges[i].singleton ) (*this->value)[i][1] = (*this->value)[i][2];
     }
 }
 
@@ -338,7 +335,6 @@ void FossilizedBirthDeathRangeProcess::touchSpecialization(const DagNode *touche
         if ( touched == false )
         {
             stored_likelihood = partial_likelihood;
-            stored_Psi = Psi;
 
             std::set<size_t> touched_indices = dag_node->getTouchedElementIndices();
 
@@ -347,7 +343,6 @@ void FossilizedBirthDeathRangeProcess::touchSpecialization(const DagNode *touche
                 size_t i = (*it) / 4; // N x 4 row-major, so the linear index over the columns is the taxon
 
                 dirty_gamma[i] = true;
-                dirty_psi[i]   = true;
                 dirty_taxa[i]  = true;
 
             }

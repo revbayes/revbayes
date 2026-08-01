@@ -34,8 +34,7 @@ RevBayesCore::FossilRecordProcess* Dist_FossilRecord::createDistribution( void )
     // the range process stochastic node (a dnFBDRP or dnFBDSP node)
     RevBayesCore::DagNode* rn = ranges->getRevObject().getDagNode();
 
-    // complete=TRUE reports every occurrence, FALSE is first/last; the truncated (exchangeable occurrence) model is reachable only
-    // through the deprecated dnFBDRMatrix
+    // complete=TRUE reports every occurrence, FALSE is the first/last rule
     bool comp = static_cast<const RlBoolean &>( complete->getRevObject() ).getValue();
 
     // the occurrences are read from the range process, so no taxa argument is needed here

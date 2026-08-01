@@ -40,7 +40,6 @@ namespace RevBayesCore {
                                       const std::string &condition,
                                       const std::vector<Taxon> &taxa,
                                       bool complete_record,
-                                      bool report_internally = true,
                                       bool extended = true);  //!< Constructor
         
         // public member functions
@@ -59,10 +58,8 @@ namespace RevBayesCore {
         bool                                            marginalizesExtinction(void) const override { return extended == false; }
         double                                          rangeEndTerm(size_t i, size_t di, double d) const override;
 
-        void                                            updateStartEndTimes(void) override;
-        bool                                            reclipToOccurrences(void) override;                      //!< Sync the tree-side taxon copy, then repair as the base does.
-        double                                          ownLnProbability(void) override { return computeLnProbability(); }
-        void                                            ownRedrawValue(void) override { redrawValue(); }
+        void                                            updateRanges(void) override;
+        void                                            setOccurrences(const std::vector<Taxon> &t) override;    //!< Sync the tree-side taxon copy, then adopt as the base does.
         double                                          symmetricAt(double age) const;                           //!< beta in the interval containing age, read from the parameter rather than the prepared cache, which the simulator paths run without.
         void                                            normalizeContinuationFlags(void);                        //!< Repair the whole tree. Refreshes the interval cache first, since the legal repair depends on beta at each node.
         void                                            normalizeContinuationFlags(const TopologyNode &node);    //!< Make each node name exactly one continuing child. Construction only: the density must reject an invalid state, not repair it.
@@ -70,7 +67,7 @@ namespace RevBayesCore {
         //!< that species ended below by symmetric speciation and the sampled ancestor above has yet
         //!< to name it. Invalidity travels separately, in invalid_continuation.
         struct RangeFlow { int species; double end_age; };
-        RangeFlow                                       updateStartEndTimes(const TopologyNode & );
+        RangeFlow                                       updateRanges(const TopologyNode & );
 
         double                                          pSurvival(double start, double end) const override;             //!< Compute the probability of survival of the process (without incomplete taxon sampling).
 

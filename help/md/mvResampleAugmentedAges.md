@@ -2,7 +2,7 @@
 mvResampleAugmentedAges
 ## title
 ## description
-This move resamples an oldest occurrence age for a random species in a fossilized birth death process described by `dnFBDRP` or `dnFBDRMatrix`
+This move resamples an oldest occurrence age for a random species in a fossilized birth death process described by `dnFBDRP`
 ## details
 Under the hood, FBD fossil data is augmented with oldest occurrence ages for each species, which are automatically marginalized during when the model is sampled using MCMC. These ages can also be resampled manually using this move.
 ## authors

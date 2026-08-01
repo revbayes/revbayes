@@ -237,13 +237,13 @@ double FossilTipTimeUniformProposal::doProposal( void )
         // the tip is an extinction, bounded by the present and the youngest occurrence rather than
         // by the parent. A parent-dependent window would need a Hastings term; the density rejects.
         // Occurrence ages are absolute, so this needs the present once it is settable.
-        const std::map<TimeInterval, size_t>& occurrences = node.getTaxon().getOccurrences();
+        const std::vector<std::pair<TimeInterval, size_t> >& occurrences = node.getTaxon().getOccurrences();
 
         min_age = 0.0;
         max_age = node.getTaxon().getMaxAge();
 
         // a death lies at or below every occurrence, so the binding bound is the youngest maximum
-        for (std::map<TimeInterval, size_t>::const_iterator it = occurrences.begin(); it != occurrences.end(); ++it)
+        for (std::vector<std::pair<TimeInterval, size_t> >::const_iterator it = occurrences.begin(); it != occurrences.end(); ++it)
         {
             max_age = fmin(max_age, it->first.getMax());
         }

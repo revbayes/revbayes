@@ -24,9 +24,7 @@ namespace RevBayesCore {
                                   const std::string &condition,
                                   const std::vector<Taxon> &taxa,
                                   bool complete_record,
-                                  size_t truncate_at,
-                                  const TypedDagNode<double>* origin = NULL,
-                                  bool report_internally = true);
+                                  const TypedDagNode<double>* origin = NULL);
 
         BirthDeathWithRateshifts*                       clone(void) const override;
 

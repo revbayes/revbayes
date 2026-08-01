@@ -56,7 +56,6 @@ namespace RevLanguage {
         RevPtr<const RevVariable>                           taxa;                                                                               //!< The taxa
         RevPtr<const RevVariable>                           condition;                                                                          //!< The condition of the process
         RevPtr<const RevVariable>                           complete;                                                                           //!< Is the fossil record complete?
-        RevPtr<const RevVariable>                           truncated;                                                                          //!< Reporting cap K (truncated model)
         RevPtr<const RevVariable>                           origin_prior;                                                                       //!< Optional prior on the origin, which is the oldest birth
 
     };
@@ -151,9 +150,7 @@ void RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::appendParameterRules
 
     if ( include_reporting )
     {
-        rules.push_back( new ArgumentRule( "complete", RlBoolean::getClassTypeSpec(), "Is the fossil record complete (every sampled occurrence reported)? FALSE is first/last, or the truncated model when truncated is given.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false ) ) );
-
-        rules.push_back( new ArgumentRule( "truncated", Natural::getClassTypeSpec(), "The reporting cap K the record was truncated at (selects the truncated model with complete=FALSE; taxa reporting K may have unreported occurrences).", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
+        rules.push_back( new ArgumentRule( "complete", RlBoolean::getClassTypeSpec(), "Is the fossil record complete (every sampled occurrence reported)? FALSE is the first/last rule: both extremes reported, the interior count marginalized.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false ) ) );
     }
 
 }
@@ -285,10 +282,6 @@ void RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::setConstParameter(co
     else if ( name == "complete" )
     {
         complete = var;
-    }
-    else if ( name == "truncated" )
-    {
-        truncated = var;
     }
     else if ( name == "origin_prior" )
     {

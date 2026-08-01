@@ -42,10 +42,8 @@ namespace RevBayesCore {
 										  const std::string &condition,
 										  const std::vector<Taxon> &taxa,
 										  bool complete_record,
-                                          size_t truncate_at,
                                           const TypedDagNode<double>* origin = NULL,
-                                          TypedDistribution<double>* origin_prior = NULL,
-                                          bool report_internally = true);   //!< report_internally=false => bare range process (dnFBDRP); reporting term supplied by dnFossilRecord
+                                          TypedDistribution<double>* origin_prior = NULL);
         
         // public member functions
         void                                            setMcmcMode(bool tf) override;
@@ -57,12 +55,10 @@ namespace RevBayesCore {
         void                                            setValue(MatrixReal *v, bool force = false) override;
 
     protected:
-        void                                            updateStartEndTimes() override;
+        void                                            updateRanges() override;
 
         // Parameter management functions
         double                                          computeLnProbability(void) override;                                //!< Compute the log-transformed probability of the current value.
-        double                                          ownLnProbability(void) override { return computeLnProbability(); }
-        void                                            ownRedrawValue(void) override { redrawValue(); }
 
         // Parameter management functions
         void                                            swapParameterInternal(const DagNode *oldP, const DagNode *newP) override;  //!< Swap a parameter

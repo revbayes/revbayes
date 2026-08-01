@@ -184,7 +184,6 @@
 #include "Dist_WeightedConstrainedNodeOrder.h"
 #include "Dist_DuplicationLoss.h"
 #include "Dist_FBDRP.h"
-#include "Dist_FBDRMatrix.h"
 #include "Dist_FossilRecord.h"
 #include "RlTaxon.h"
 #include "Dist_BDS.h"
@@ -382,7 +381,6 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         // fossilized-birth-death range processes: the range process, its fossil-record term, and the deprecated fused facade
         AddDistribution< MatrixReal                 >( new Dist_FBDRP());
         AddDistribution< ModelVector<Taxon>         >( new Dist_FossilRecord());
-        AddDistribution< MatrixReal                 >( new Dist_FBDRMatrix());
         AddDistribution< MatrixReal                 >( new Dist_BDS());
         AddDistribution< TimeTree                   >( new Dist_FBDSP());
 

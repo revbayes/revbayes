@@ -130,7 +130,7 @@ void FossilRecordProcess::setValue(RbVector<Taxon> *v, bool force)
 double FossilRecordProcess::computeLnProbability( void )
 {
     // psi, timeline, b/d, tau1/tau_last and the reporting model all live on the range process;
-    // this is exactly the term computeLnProbabilityRanges omits when report_internally is false.
+    // this is the fossil-occurrence term the range process leaves to this node.
     return ranges->computeLnFossilTotal();
 }
 
