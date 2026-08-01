@@ -5,7 +5,25 @@
 #include "AbstractBirthDeathProcess.h"
 
 namespace RevBayesCore {
-    
+
+    /**
+     * What the topology says about one taxon's species: how its range begins, and how it ends. The
+     * tree fixes these rather than the ages, so a move can change them with every age left alone.
+     */
+    struct SpeciesEntry {
+
+        bool parent_is_sa   = false;    //!< the species this one budded from was sampled at that node
+        bool ends_at_sa     = false;    //!< the range ends at a sampled ancestor, so the lineage carries on below
+        bool ends_symmetric = false;    //!< the range ends by symmetric speciation, an event rather than an extinction
+
+        bool operator==(const SpeciesEntry &e) const
+                {
+                    return parent_is_sa == e.parent_is_sa && ends_at_sa == e.ends_at_sa
+                           && ends_symmetric == e.ends_symmetric;
+                }
+
+    };
+
     /**
      * @brief Piecewise-constant fossilized birth-death species distribution of extended trees.
      *
@@ -58,6 +76,7 @@ namespace RevBayesCore {
         bool                                            marginalizesExtinction(void) const override { return extended == false; }
         double                                          rangeEndTerm(size_t i, size_t di, double d) const override;
 
+        void                                            repairRanges(void) override;                             //!< A tree move carries the tip, which is the range end and the youngest appearance where the extinction time is marginalized.
         void                                            updateRanges(void) override;
         void                                            setOccurrences(const std::vector<Taxon> &t) override;    //!< Sync the tree-side taxon copy, then adopt as the base does.
         double                                          symmetricAt(double age) const;                           //!< beta in the interval containing age, read from the parameter rather than the prepared cache, which the simulator paths run without.
@@ -110,9 +129,10 @@ namespace RevBayesCore {
 
         bool                                            extended;                                                //!< Tips are extinction times. When false the extinction times are marginalized out and each range ends at min(tau_K, youngest child birth).
 
-        mutable std::vector<bool>                       I;                                                       //!< Indicates for each taxon whether the parent species was a sampled ancestor.
-        mutable std::vector<bool>                       is_sa;                                                   //!< Indicates for each taxon whether its own range ends at a sampled ancestor node, so its lineage carries on.
-        mutable std::vector<bool>                       ends_symmetric;                                          //!< Range i ends by symmetric speciation, so it is a speciation event and not an extinction.
+        std::vector<SpeciesEntry>                       species;                                                 //!< One per taxon, as the last pull left it
+        std::vector<SpeciesEntry>                       next_species;                                            //!< Where the tree pass builds the replacement, so the commit can see what moved
+        std::vector<SpeciesEntry>                       stored_species;                                          //!< The table as the proposal found it, restored when it is rejected
+
         mutable double                                  budding_lnProb;                                          //!< Sum of log(1-beta) over budding events, accumulated by the tree pass.
         mutable bool                                    invalid_continuation = false;                            //!< Some node's children do not name exactly one continuation of its species.
 

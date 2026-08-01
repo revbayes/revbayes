@@ -102,16 +102,18 @@ FossilizedBirthDeathSpeciationProcess::FossilizedBirthDeathSpeciationProcess(con
         if ( heterogeneous_beta->getValue().size() != num_intervals ) throw inconsistent_rates;
     }
 
-    I             = std::vector<bool>(taxa.size(), false);
-    is_sa         = std::vector<bool>(taxa.size(), false);
-    ends_symmetric= std::vector<bool>(taxa.size(), false);
+    species        = std::vector<SpeciesEntry>(taxa.size());
+    next_species   = std::vector<SpeciesEntry>(taxa.size());
+    stored_species = std::vector<SpeciesEntry>(taxa.size());
 
     anagenetic    = std::vector<double>(num_intervals, 0.0);
     symmetric     = std::vector<double>(num_intervals, 0.0);
 
     
     redrawValue();
-    updateRanges(this->getValue().getRoot());
+
+    // nothing has touched this node yet, so the first density reads whatever the pull leaves here
+    updateRanges();
 }
 
 
@@ -135,10 +137,6 @@ double FossilizedBirthDeathSpeciationProcess::computeLnProbabilityDivergenceTime
 {
     // computeLnProbabilityRanges refreshes the cached per-taxon terms, so it is not const; the
     // wrapper must be const to override the base virtual that the tree distribution calls
-    // cleared here rather than in updateRanges, which is skipped when nothing is dirty: a
-    // single invalid state would otherwise poison every later evaluation and freeze the chain
-    invalid_continuation = false;
-
     double lnProb = const_cast<FossilizedBirthDeathSpeciationProcess*>(this)->computeLnProbabilityRanges();
 
     // some node's children do not name exactly one continuation, which no tree this process can
@@ -166,7 +164,7 @@ double FossilizedBirthDeathSpeciationProcess::computeLnProbabilityTimes( void ) 
     for (size_t i = 0; i < taxa.size(); i++)
     {
         // the parent species is a sampled ancestor, which means different things in the two trees
-        if ( I[i] == true )
+        if ( species[i].parent_is_sa == true )
         {
             double y_a  = ranges[i].birth;
             size_t y_ai = findIndex(y_a);
@@ -216,11 +214,11 @@ double FossilizedBirthDeathSpeciationProcess::rangeEndTerm( size_t i, size_t di,
     // a range ending by symmetric speciation is not an extinction, and its end is observed rather
     // than integrated out. The event contributes lambda*beta, and its two daughters already carry a
     // lambda each at their births, so one of those is corrected away here
-    if ( ends_symmetric[i] == true ) return log( symmetric[di] ) - log( birth[di] );
+    if ( species[i].ends_symmetric == true ) return log( symmetric[di] ) - log( birth[di] );
 
     if ( extended == true ) return log( death[di] );
 
-    if ( is_sa[i] == true ) return 0.0;
+    if ( species[i].ends_at_sa == true ) return 0.0;
 
     return log( p( di, d ) );
 }
@@ -344,7 +342,16 @@ void FossilizedBirthDeathSpeciationProcess::setValue(Tree *v, bool force)
     // the ages the clip moves.
     normalizeContinuationFlags();
 
-    clipAugmentedAges();
+    // The appearance ages were drawn against the tree the constructor built; this one carries its
+    // own births and deaths and no tau_1 of its own. Draw them again inside it rather than dragging
+    // the old ones into range: a clamp preserves nothing about them either way.
+    prepareProbComputation();
+    updateRanges();
+
+    for (size_t i = 0; i < taxa.size(); ++i)
+    {
+        initializeFirstLast(i);
+    }
 }
 
 
@@ -1143,18 +1150,6 @@ FossilizedBirthDeathSpeciationProcess::RangeFlow FossilizedBirthDeathSpeciationP
 
         int i = sub.species;
 
-        // if child is a tip, set the species/end time
-        if( child.isTip() )
-        {
-            double age = child.getAge();
-
-            if ( age != ranges[i].death )
-            {
-                ranges[i].death = age;
-                dirty_taxa[i] = true;
-            }
-        }
-
         // is child a new species?
         // set start time at this node
         if( child.continuesParentSpecies() == false )
@@ -1167,7 +1162,7 @@ FossilizedBirthDeathSpeciationProcess::RangeFlow FossilizedBirthDeathSpeciationP
                 dirty_taxa[i] = true;
             }
 
-            I[i] = sa;
+            next_species[i].parent_is_sa = sa;
         }
         // child is the ancestral species
         else
@@ -1179,7 +1174,7 @@ FossilizedBirthDeathSpeciationProcess::RangeFlow FossilizedBirthDeathSpeciationP
             if ( child.isSampledAncestorTip() == true ) pending_species = i;
 
             // its range ends here and the lineage carries on below
-            if ( sa == true ) is_sa[i] = true;
+            if ( sa == true ) next_species[i].ends_at_sa = true;
 
             // if this is the root
             // set the start time to the origin
@@ -1205,7 +1200,7 @@ FossilizedBirthDeathSpeciationProcess::RangeFlow FossilizedBirthDeathSpeciationP
             ranges[pending_species].death = pending_end;
             dirty_taxa[pending_species] = true;
         }
-        ends_symmetric[pending_species] = true;
+        next_species[pending_species].ends_symmetric = true;
         pending_end = 0.0;
     }
 
@@ -1263,7 +1258,13 @@ void FossilizedBirthDeathSpeciationProcess::prepareProbComputation( void ) const
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-void FossilizedBirthDeathSpeciationProcess::updateRanges( void )
+/**
+ * A tree move carries the tip, and where the extinction time is marginalized that tip is the range
+ * end and the youngest appearance both. Re-take them from it before anything reads them: the
+ * recursion below returns early on an invalid continuation and would otherwise leave an age the
+ * tree no longer has.
+ */
+void FossilizedBirthDeathSpeciationProcess::repairRanges( void )
 {
     // an extended tip is an extinction and may sit below its occurrence range; a non-extended one
     // is the augmented youngest age and has to stay in its bin. Re-set each pass so clamped and
@@ -1276,42 +1277,68 @@ void FossilizedBirthDeathSpeciationProcess::updateRanges( void )
         if ( node.isTip() )
         {
             size_t ti = node.getIndex();
-            bool constrained = ( extended == false && ti < taxa.size() && taxa[ti].isExtinct() == true );
+            if ( ti >= taxa.size() ) continue;
+
+            bool constrained = ( extended == false && taxa[ti].isExtinct() == true );
             node.setTipAgeUnconstrained( constrained == false );
 
-            // where the tip is the youngest appearance it is also the authority for it. Refresh
-            // here rather than in the recursion, which returns early on an invalid continuation
-            // and would leave the cache holding an age the tree no longer has.
-            if ( constrained == true )
+            double age = node.getAge();
+
+            // the tip is where the range ends, always. The recursion below sets this too, but
+            // returns early on an invalid continuation and leaves the taxa past that point stale.
+            if ( ranges[ti].death != age )
             {
-                ranges[ti].last = node.getAge();
-                if ( ranges[ti].singleton == true ) ranges[ti].first = node.getAge();
+                ranges[ti].death = age;
+                dirty_taxa[ti] = true;
+            }
+
+            if ( constrained == true && ( ranges[ti].last != age || ( ranges[ti].singleton && ranges[ti].first != age ) ) )
+            {
+                ranges[ti].last = age;
+                if ( ranges[ti].singleton == true ) ranges[ti].first = age;
+                dirty_taxa[ti] = true;
             }
         }
     }
+}
+
+
+void FossilizedBirthDeathSpeciationProcess::updateRanges( void )
+{
+    // the recursion below only ever sets this, and returns early once it is set, so a stale one
+    // would freeze the chain: every later pull would bail before reaching the assignments
+    invalid_continuation = false;
+
+    repairRanges();
 
     // the root lineage never reaches the assignment in the recursion, and which taxon holds the
-    // oldest birth changes during MCMC, so a stale I would otherwise persist on it
-    I     = std::vector<bool>(taxa.size(), false);
-    is_sa = std::vector<bool>(taxa.size(), false);
-    ends_symmetric = std::vector<bool>(taxa.size(), false);
+    // oldest birth changes during MCMC, so the pass builds a fresh table rather than editing one
+    next_species.assign( taxa.size(), SpeciesEntry() );
     budding_lnProb = 0.0;
 
     const TopologyNode &root = getValue().getRoot();
 
     updateRanges(root);
 
+    // commit what the pass built. partial_likelihood[i] reads ends_at_sa and ends_symmetric
+    // through rangeEndTerm, so an entry that moved invalidates the term cached against it
+    for (size_t i = 0; i < taxa.size(); ++i)
+    {
+        if ( next_species[i] == species[i] ) continue;
+
+        species[i] = next_species[i];
+        dirty_taxa[i] = true;
+    }
+
     // a lone lineage is both root and tip, so the recursion sets neither of its times
     if ( root.isTip() )
     {
         size_t i = root.getIndex();
 
-        if ( root.getAge() != ranges[i].death || getOriginAge() != ranges[i].birth )
+        if ( getOriginAge() != ranges[i].birth )
         {
-            ranges[i].death = root.getAge();
             ranges[i].birth = getOriginAge();
             dirty_taxa[i] = true;
-
         }
     }
 
@@ -1333,30 +1360,41 @@ void FossilizedBirthDeathSpeciationProcess::keepSpecialization(const DagNode *to
 
 void FossilizedBirthDeathSpeciationProcess::restoreSpecialization(const DagNode *toucher)
 {
+    // the table has to name the same state partial_likelihood was computed against, or the next
+    // pull compares against the rejected tree and reads a moved entry as unchanged
+    species = stored_species;
+
     AbstractFossilizedBirthDeathRangeProcess::restoreSpecialization(toucher);
 }
 
 
 void FossilizedBirthDeathSpeciationProcess::touchSpecialization(const DagNode *toucher, bool touchAll)
 {
+    bool first_touch = ( touched == false );
+
     if ( toucher == dag_node )
     {
-        if ( touched == false )
+        if ( first_touch )
         {
             stored_likelihood = partial_likelihood;
-
-            // a tree move reports no element indices and can shift many taxa's births at once
-            dirty_taxa = std::vector<bool>(taxa.size(), true);
-
+            stored_ranges     = ranges;
         }
 
         touched = true;
     }
     else
     {
+        // every per-taxon term reads the rates and the timeline, so a parameter dirties all of them
         AbstractBirthDeathProcess::touchSpecialization(toucher, touchAll);
         AbstractFossilizedBirthDeathRangeProcess::touchSpecialization(toucher, touchAll);
     }
+
+    if ( first_touch == true ) stored_species = species;
+
+    // the proposal has already written the value, so pull now. The timeline decides which interval
+    // each node speciates in, so the rate cache leads the pull whichever parameter moved.
+    prepareProbComputation();
+    updateRanges();
 }
 
 

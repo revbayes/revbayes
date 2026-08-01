@@ -34,9 +34,6 @@ namespace RevBayesCore {
         double  last_min  = 0.0;                            //!< the youngest reported minimum
         double  last_max  = RbConstants::Double::inf;       //!< the youngest reported maximum
 
-        //!< The reported occurrences, flattened from the taxon's map and kept in its order, so
-        //!< the density reads the record here rather than copying the map on every evaluation.
-        std::vector<std::pair<TimeInterval, size_t> > record;
         //!< Fewer than two reported occurrences, so tau_1 and tau_K are one age rather than two.
         bool    singleton = true;
 
@@ -51,17 +48,6 @@ namespace RevBayesCore {
                            && last >= last_min && last <= last_max;
                 }
 
-        //!< Move an extreme the current birth and death put outside its bin back inside it.
-        void    clip(void)
-                {
-                    double lo = std::max( first_min, death );
-                    double hi = std::min( first_max, birth );
-                    if ( hi > lo && ( first < lo || first >= birth ) ) first = 0.5 * ( lo + hi );
-
-                    double lo_y = std::max( death, last_min );
-                    double hi_y = std::min( first, last_max );
-                    if ( hi_y > lo_y && ( last < lo_y || last > hi_y ) ) last = 0.5 * ( lo_y + hi_y );
-                }
     };
 
 
@@ -123,7 +109,7 @@ namespace RevBayesCore {
         void                                            warnIfNoReportingNode(void) const;
         void                                            initializeFirstLast(size_t i);                               //!< Draw taxon i's augmented extremes nested (range_end <= last <= first) under the current reporting model.
         void                                            drawRanges();                                              //!< Draw an initial (range_start, range_end) and the augmented ages for every taxon. Shared by the matrix redraw and the tree (FBDSP) initial-value construction, which hangs a random budding topology on the ranges.
-        double                                          computeLnFossilTotal();                                    //!< Total fossil-record log-density summed over taxa; used by a standalone dnFossilRecord node conditioned on this range process (self-contained: refreshes rate cache + start/end times).
+        double                                          computeLnFossilTotal();                                    //!< Total fossil-record log-density summed over taxa; used by a standalone dnFossilRecord node conditioned on this range process.
         //!< dnFossilRecord owns the reporting model and pushes it here, since the augmented ages
         //!< live on the range process. The cap is a constructor argument, so only a complete or
         //!< first/last record can be declared this way. Both augment the same ages, so the draw
@@ -142,12 +128,18 @@ namespace RevBayesCore {
 
         //!< Is tau_K an explicit latent? Not when unreported occurrences may lie below the youngest reported one.
 
-        void                                            clipAugmentedAges();                                    //!< Put every augmented extreme back inside its bin.
 
         //!< Refresh the range table's state half from the value: the birth and death each process
         //!< keeps its ranges in, and for a tree the appearance ages the tips carry. The record
         //!< half (the occurrences and the bounds they fix) is updateRecord's, on the data's clock.
+        //!< Re-establish what this process's own moves can break: the matrix's moves write one
+        //!< column of a tied pair, and a tree's moves carry the ages its tips are authoritative for.
+        virtual void                                    repairRanges(void) {}
+
+        //!< Pull the ranges from the value. Runs on touch, where the proposal has already written
+        //!< the value, so the density reads the table rather than refreshing it.
         virtual void                                    updateRanges() = 0;
+
         virtual double                                  computeLnProbabilityRanges(bool force = false);
         double                                          computeLnFossilRecord(size_t i) const;              //!< Fossil-record (occurrence) log-term for taxon i, factored out of computeLnProbabilityRanges (range/reporting split).
 
@@ -205,12 +197,16 @@ namespace RevBayesCore {
         mutable std::vector<double>                     pS_i;                                                   //!< Probability of leaving no descendants from the end of each time interval
 
                                 
-        //!< The one range mvResampleAugmentedAges drew, and the two ages it replaced. The
-        //!< tree-owned ages refresh from the tips each pass, so only this one needs undoing.
+        //!< The one range mvResampleAugmentedAges drew, and the two ages it replaced. Taken in the
+        //!< proposal, before the pull, so it undoes the proposal's own write and not the pull's.
         size_t                                          stored_range = 0;
         double                                          stored_first = 0.0;
         double                                          stored_last  = 0.0;
-                                
+
+        //!< The table as the proposal found it. A rejected proposal restores the value, and the
+        //!< table has to follow it back, or the next pull compares against the rejected state.
+        std::vector<RangeEntry>                         stored_ranges;
+
         std::vector<double>                             partial_likelihood;                                     //!< Partial likelihood for each taxon
         std::vector<double>                             stored_likelihood;                                      //!< Stored partial likelihood for each taxon
                                 

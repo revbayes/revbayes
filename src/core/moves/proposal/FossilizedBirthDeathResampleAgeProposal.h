@@ -146,15 +146,9 @@ double RevBayesCore::FossilizedBirthDeathResampleAgeProposal<valType>::doProposa
 
     size_t i = rng->uniform01() * dist->getTaxa().size();
 
+    // marks taxon i dirty itself: these ages are not elements of the value, so no touched
+    // element index names them
     dist->resampleFirstLast(i);
-
-    // Mark taxon i dirty. Both valType touchSpecializations decode touched
-    // element indices as N x 2 linear (birth,death) and recover the taxon as
-    // (*it)/2: see FossilizedBirthDeathRangeProcess (matrix) and
-    // FossilizedBirthDeathSpeciationProcess (tree). So taxon i is encoded 2*i;
-    // passing plain i would mark the wrong taxon (i/2) and reweight against the
-    // prior instead of the likelihood.
-    variable->addTouchedElementIndex(2 * i);
 
     return 0.0;
 
@@ -196,9 +190,7 @@ void RevBayesCore::FossilizedBirthDeathResampleAgeProposal<valType>::printParame
 template<class valType>
 void RevBayesCore::FossilizedBirthDeathResampleAgeProposal<valType>::undoProposal( void )
 {
-	AbstractFossilizedBirthDeathRangeProcess* dist = dynamic_cast<AbstractFossilizedBirthDeathRangeProcess* >(&variable->getDistribution());
-
-	variable->clearTouchedElementIndices();
+    // the distribution restores the two ages from restoreSpecialization, which the DAG calls next
 }
 
 

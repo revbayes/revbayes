@@ -133,7 +133,9 @@ void FossilizedBirthDeathRangeProcess::setValue(MatrixReal *v, bool force)
         (*this->value)[i][2] = ranges[i].first;
     }
 
-    repairAugmentedAges();
+    repairRanges();
+
+    updateRanges();
 }
 
 
@@ -223,9 +225,9 @@ void FossilizedBirthDeathRangeProcess::updateRanges( void )
     for (size_t i = 0; i < taxa.size(); i++)
     {
         ranges[i].birth = (*this->value)[i][3];
-        ranges[i].death   = (*this->value)[i][0];
-        ranges[i].first       = (*this->value)[i][2];
-        ranges[i].last        = (*this->value)[i][1];
+        ranges[i].death = (*this->value)[i][0];
+        ranges[i].first = (*this->value)[i][2];
+        ranges[i].last  = (*this->value)[i][1];
 
         if ( ranges[i].birth > ranges[max_birth].birth ) max_birth = i;
     }
@@ -258,7 +260,10 @@ void FossilizedBirthDeathRangeProcess::redrawValue(void)
         (*this->value)[i][3] = ranges[i].birth;
     }
 
-    repairAugmentedAges();
+    repairRanges();
+
+    // repairRanges writes the value, and the value is what the density reads through the table
+    updateRanges();
 }
 
 
@@ -272,7 +277,7 @@ void FossilizedBirthDeathRangeProcess::redrawValue(void)
  * On touch, not on score: the move stored the value, so a rejected proposal takes the repair with
  * it. A density that writes to the value it scores leaves the write behind.
  */
-void FossilizedBirthDeathRangeProcess::repairAugmentedAges( const std::set<size_t> &touched )
+void FossilizedBirthDeathRangeProcess::repairRanges( const std::set<size_t> &touched )
 {
     for ( std::set<size_t>::const_iterator it = touched.begin(); it != touched.end(); it++ )
     {
@@ -295,7 +300,7 @@ void FossilizedBirthDeathRangeProcess::repairAugmentedAges( const std::set<size_
 }
 
 
-void FossilizedBirthDeathRangeProcess::repairAugmentedAges( void )
+void FossilizedBirthDeathRangeProcess::repairRanges( void )
 {
     // no move to follow (a fresh draw, or a value set from outside): tau_1 is the reported one
     for (size_t i = 0; i < taxa.size(); i++)
@@ -334,6 +339,7 @@ void FossilizedBirthDeathRangeProcess::touchSpecialization(const DagNode *touche
         if ( touched == false )
         {
             stored_likelihood = partial_likelihood;
+            stored_ranges     = ranges;
 
             std::set<size_t> touched_indices = dag_node->getTouchedElementIndices();
 
@@ -346,7 +352,7 @@ void FossilizedBirthDeathRangeProcess::touchSpecialization(const DagNode *touche
 
             }
 
-            repairAugmentedAges( touched_indices );
+            repairRanges( touched_indices );
         }
 
         touched = true;
@@ -355,6 +361,9 @@ void FossilizedBirthDeathRangeProcess::touchSpecialization(const DagNode *touche
     {
         AbstractFossilizedBirthDeathRangeProcess::touchSpecialization(toucher, touchAll);
     }
+
+    // the proposal has already written the value, so pull now
+    updateRanges();
 }
 
 
