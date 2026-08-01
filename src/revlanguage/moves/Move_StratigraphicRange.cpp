@@ -4,10 +4,9 @@
 
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
-#include "FossilizedBirthDeathResampleAgeProposal.h"
-#include "RlMatrixReal.h"
+#include "StratigraphicRangeProposal.h"
 #include "MetropolisHastingsMove.h"
-#include "Move_ResampleAugmentedAges.h"
+#include "Move_StratigraphicRange.h"
 #include "RealPos.h"
 #include "RlTimeTree.h"
 #include "TypeSpec.h"
@@ -30,7 +29,7 @@ using namespace RevLanguage;
  *
  * The default constructor does nothing except allocating the object.
  */
-Move_ResampleAugmentedAges::Move_ResampleAugmentedAges() : Move()
+Move_StratigraphicRange::Move_StratigraphicRange() : Move()
 {
     
 }
@@ -42,10 +41,10 @@ Move_ResampleAugmentedAges::Move_ResampleAugmentedAges() : Move()
  *
  * \return A new copy of the move.
  */
-Move_ResampleAugmentedAges* Move_ResampleAugmentedAges::clone(void) const
+Move_StratigraphicRange* Move_StratigraphicRange::clone(void) const
 {
     
-    return new Move_ResampleAugmentedAges(*this);
+    return new Move_StratigraphicRange(*this);
 }
 
 
@@ -59,27 +58,15 @@ Move_ResampleAugmentedAges* Move_ResampleAugmentedAges::clone(void) const
  *
  * \return A new internal distribution object.
  */
-void Move_ResampleAugmentedAges::constructInternalObject( void )
+void Move_StratigraphicRange::constructInternalObject( void )
 {
     // we free the memory first
     delete value;
     
-    RevBayesCore::Proposal *p = NULL;
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = static_cast<const TimeTree &>( fbd->getRevObject() ).getDagNode();
+    RevBayesCore::StochasticNode<RevBayesCore::Tree> *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
 
-    if (fbd->getRevObject().isType( MatrixReal::getClassTypeSpec() ))
-    {
-    	RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* tmp = static_cast<const MatrixReal &>( fbd->getRevObject() ).getDagNode();
-		RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::MatrixReal> *>( tmp );
-
-		p = new RevBayesCore::FossilizedBirthDeathResampleAgeProposal<RevBayesCore::MatrixReal>(n);
-    }
-    else
-    {
-    	RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = static_cast<const TimeTree &>( fbd->getRevObject() ).getDagNode();
-    	RevBayesCore::StochasticNode<RevBayesCore::Tree> *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
-
-    	p = new RevBayesCore::FossilizedBirthDeathResampleAgeProposal<RevBayesCore::Tree>(n);
-    }
+    RevBayesCore::Proposal *p = new RevBayesCore::StratigraphicRangeProposal( n );
 
     // now allocate a new sliding move
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
@@ -94,10 +81,10 @@ void Move_ResampleAugmentedAges::constructInternalObject( void )
  *
  * \return The class' name.
  */
-const std::string& Move_ResampleAugmentedAges::getClassType(void)
+const std::string& Move_StratigraphicRange::getClassType(void)
 {
     
-    static std::string rev_type = "Move_ResampleAugmentedAges";
+    static std::string rev_type = "Move_StratigraphicRange";
     
     return rev_type;
 }
@@ -108,7 +95,7 @@ const std::string& Move_ResampleAugmentedAges::getClassType(void)
  *
  * \return TypeSpec of this class.
  */
-const TypeSpec& Move_ResampleAugmentedAges::getClassTypeSpec(void)
+const TypeSpec& Move_StratigraphicRange::getClassTypeSpec(void)
 {
     
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( Move::getClassTypeSpec() ) );
@@ -122,10 +109,10 @@ const TypeSpec& Move_ResampleAugmentedAges::getClassTypeSpec(void)
  *
  * \return Rev name of constructor function.
  */
-std::string Move_ResampleAugmentedAges::getMoveName( void ) const
+std::string Move_StratigraphicRange::getMoveName( void ) const
 {
     // create a constructor function name variable that is the same for all instance of this class
-    std::string c_name = "ResampleAugmentedAges";
+    std::string c_name = "StratigraphicRange";
     
     return c_name;
 }
@@ -139,7 +126,7 @@ std::string Move_ResampleAugmentedAges::getMoveName( void ) const
  *
  * \return The member rules.
  */
-const MemberRules& Move_ResampleAugmentedAges::getParameterRules(void) const
+const MemberRules& Move_StratigraphicRange::getParameterRules(void) const
 {
     
     static MemberRules memberRules;
@@ -147,10 +134,7 @@ const MemberRules& Move_ResampleAugmentedAges::getParameterRules(void) const
     
     if ( !rules_set )
     {
-    	std::vector<TypeSpec> paramTypes;
-		paramTypes.push_back( TimeTree::getClassTypeSpec() );
-		paramTypes.push_back( MatrixReal::getClassTypeSpec() );
-        memberRules.push_back( new ArgumentRule( "x", paramTypes, "The fossilized birth death process whose ages to resample.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
+        memberRules.push_back( new ArgumentRule( "x", TimeTree::getClassTypeSpec(), "The fossilized birth death speciation process whose stratigraphic ranges to resample.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
         
         /* Inherit weight (but not tuneTarget!) from Move and put it after the arguments created above */
         const MemberRules& inheritedRules = Move::getParameterRules();
@@ -174,7 +158,7 @@ const MemberRules& Move_ResampleAugmentedAges::getParameterRules(void) const
  *
  * \return The type spec of this object.
  */
-const TypeSpec& Move_ResampleAugmentedAges::getTypeSpec( void ) const
+const TypeSpec& Move_StratigraphicRange::getTypeSpec( void ) const
 {
     
     static TypeSpec type_spec = getClassTypeSpec();
@@ -186,10 +170,10 @@ const TypeSpec& Move_ResampleAugmentedAges::getTypeSpec( void ) const
 /**
  * Print the value for the user.
  */
-void Move_ResampleAugmentedAges::printValue(std::ostream &o) const
+void Move_StratigraphicRange::printValue(std::ostream &o) const
 {
     
-    o << "ResampleAugmentedAges(";
+    o << "StratigraphicRange(";
     if (fbd != NULL)
     {
         o << fbd->getName();
@@ -213,7 +197,7 @@ void Move_ResampleAugmentedAges::printValue(std::ostream &o) const
  * \param[in]    name     Name of the member variable.
  * \param[in]    var      Pointer to the variable.
  */
-void Move_ResampleAugmentedAges::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
+void Move_StratigraphicRange::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
 {
     
     if ( name == "x" )

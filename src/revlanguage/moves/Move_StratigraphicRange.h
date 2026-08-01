@@ -1,5 +1,5 @@
-#ifndef Move_ResampleAugmentedAges_H
-#define Move_ResampleAugmentedAges_H
+#ifndef Move_StratigraphicRange_H
+#define Move_StratigraphicRange_H
 
 #include "RlMove.h"
 #include "TypedDagNode.h"
@@ -21,14 +21,14 @@ namespace RevLanguage {
      * @author The RevBayes Development Core Team (Sebastian Hoehna)
      * @copyright GPL version 3
      */
-    class Move_ResampleAugmentedAges : public Move {
+    class Move_StratigraphicRange : public Move {
         
     public:
         
-        Move_ResampleAugmentedAges(void);                                                                                                                    //!< Default constructor
+        Move_StratigraphicRange(void);                                                                                                                    //!< Default constructor
         
         // Basic utility functions
-        virtual Move_ResampleAugmentedAges*                   clone(void) const;                                                                      //!< Clone object
+        virtual Move_StratigraphicRange*                   clone(void) const;                                                                      //!< Clone object
         void                                        constructInternalObject(void);                                                          //!< We construct the a new internal Move.
         static const std::string&                   getClassType(void);                                                                     //!< Get Rev type
         static const TypeSpec&                      getClassTypeSpec(void);                                                                 //!< Get class type spec

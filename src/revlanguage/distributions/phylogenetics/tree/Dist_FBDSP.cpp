@@ -270,27 +270,27 @@ void Dist_FBDSP::setConstParameter(const std::string& name, const RevPtr<const R
 
 
 /**
- * The augmented first (tau_1) and last (tau_K) occurrence ages. They are internal to the
- * distribution, so a deterministic node is the only way a monitor can reach them.
+ * The first (tau_1) and last (tau_K) appearances, and the times the range originates and ends. They
+ * are internal to the distribution, so a deterministic node is the only way a monitor reaches them.
  */
 RevLanguage::MethodTable Dist_FBDSP::getDistributionMethods( void ) const
 {
     MethodTable methods = TypedDistribution<TimeTree>::getDistributionMethods();
 
-    ArgumentRules* first_ages_arg_rules = new ArgumentRules();
-    methods.addFunction( new DistributionMemberFunction<Dist_FBDSP, ModelVector<RealPos> >( "getAugmentedFirstAges", variable, first_ages_arg_rules, true ) );
+    ArgumentRules* first_app_arg_rules = new ArgumentRules();
+    methods.addFunction( new DistributionMemberFunction<Dist_FBDSP, ModelVector<RealPos> >( "getFirstAppearances", variable, first_app_arg_rules, true ) );
 
-    ArgumentRules* last_ages_arg_rules = new ArgumentRules();
-    methods.addFunction( new DistributionMemberFunction<Dist_FBDSP, ModelVector<RealPos> >( "getAugmentedLastAges", variable, last_ages_arg_rules, true ) );
+    ArgumentRules* last_app_arg_rules = new ArgumentRules();
+    methods.addFunction( new DistributionMemberFunction<Dist_FBDSP, ModelVector<RealPos> >( "getLastAppearances", variable, last_app_arg_rules, true ) );
 
     ArgumentRules* origin_arg_rules = new ArgumentRules();
     methods.addFunction( new DistributionMemberFunction<Dist_FBDSP, RealPos >( "getOrigin", variable, origin_arg_rules, true ) );
 
-    ArgumentRules* birth_arg_rules = new ArgumentRules();
-    methods.addFunction( new DistributionMemberFunction<Dist_FBDSP, ModelVector<RealPos> >( "getBirthAges", variable, birth_arg_rules, true ) );
+    ArgumentRules* origination_arg_rules = new ArgumentRules();
+    methods.addFunction( new DistributionMemberFunction<Dist_FBDSP, ModelVector<RealPos> >( "getOriginationTimes", variable, origination_arg_rules, true ) );
 
-    ArgumentRules* death_arg_rules = new ArgumentRules();
-    methods.addFunction( new DistributionMemberFunction<Dist_FBDSP, ModelVector<RealPos> >( "getDeathAges", variable, death_arg_rules, true ) );
+    ArgumentRules* extinction_arg_rules = new ArgumentRules();
+    methods.addFunction( new DistributionMemberFunction<Dist_FBDSP, ModelVector<RealPos> >( "getExtinctionTimes", variable, extinction_arg_rules, true ) );
 
     return methods;
 }

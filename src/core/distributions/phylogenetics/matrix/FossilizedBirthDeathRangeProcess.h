@@ -33,7 +33,6 @@ namespace RevBayesCore {
     class FossilizedBirthDeathRangeProcess : public TypedDistribution<MatrixReal>, public AbstractFossilizedBirthDeathRangeProcess {
         
     public:
-        bool                                            augmentedAgesInValue(void) const override { return true; }   //!< Columns 1 and 2 of the value.
         FossilizedBirthDeathRangeProcess (const DagNode *speciation,
 										  const DagNode *extinction,
 										  const DagNode *psi,

@@ -1,3 +1,6 @@
+#include <optional>
+#include <sstream>
+#include <cstdlib>
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
@@ -337,21 +340,162 @@ void FossilizedBirthDeathSpeciationProcess::setValue(Tree *v, bool force)
     }
     this->getValue().orderNodesByIndex();
 
-    // a tree clamped from outside carries no flags, so establish the invariant here as well.
-    // Before the clip, not after: the flags name each range's birth, and the birth is what bounds
-    // the ages the clip moves.
-    normalizeContinuationFlags();
+    // an annotated tree names its own speciation modes; an unannotated one leaves the choice here.
+    // Before the ages either way: the flags name each range's birth, and the birth bounds them.
+    if ( adoptSpeciesLabels() == false )
+    {
+        normalizeContinuationFlags();
+    }
 
-    // The appearance ages were drawn against the tree the constructor built; this one carries its
-    // own births and deaths and no tau_1 of its own. Draw them again inside it rather than dragging
-    // the old ones into range: a clamp preserves nothing about them either way.
     prepareProbComputation();
     updateRanges();
 
+    // The appearance ages were drawn against the tree the constructor built; this one carries its
+    // own births and deaths. Draw them again inside it rather than dragging the old ones into
+    // range, unless the tips brought their own.
+    if ( adoptAppearances() == false )
+    {
+        for (size_t i = 0; i < taxa.size(); ++i)
+        {
+            initializeFirstLast(i);
+        }
+    }
+}
+
+
+/**
+ * The tree, annotated with what a plain Newick drops: the range each node belongs to, and the two
+ * appearances of each range. Stamped on a copy, so no comparison of the value ever sees them, and
+ * written at full precision: an appearance has to come back inside the bin that reported it, and a
+ * rounded one need not.
+ */
+std::string FossilizedBirthDeathSpeciationProcess::getHiddenStateString( void ) const
+{
+    Tree t = *this->value;
+
+    labelSpecies( t.getRoot(), continuingSpecies( t.getRoot() ) );
+
     for (size_t i = 0; i < taxa.size(); ++i)
     {
-        initializeFirstLast(i);
+        TopologyNode &tip = t.getNode(i);
+
+        std::stringstream first, last;
+        first.precision( 17 );
+        last.precision( 17 );
+        first << ranges[i].first;
+        last  << ranges[i].last;
+
+        tip.setNodeParameter( "FAD", first.str() );
+        tip.setNodeParameter( "LAD", last.str() );
     }
+
+    return t.getNewickRepresentation( false );
+}
+
+
+void FossilizedBirthDeathSpeciationProcess::setHiddenStateFromString( const std::string &s )
+{
+    // through the value's own type, so the Newick is read back as a time tree
+    Tree *t = this->value->clone();
+    t->initFromString( s );
+
+    setValue( t );
+}
+
+
+/**
+ * The range each node belongs to, stamped top down. A node whose range ends there by symmetric
+ * speciation carries that range: it is the one arriving from above, which the bottom-up pass can
+ * only name once a sampled ancestor identifies it.
+ */
+void FossilizedBirthDeathSpeciationProcess::labelSpecies( TopologyNode &node, int s ) const
+{
+    if ( s >= 0 ) node.setNodeParameter( "range", StringUtilities::to_string(s) );
+
+    std::vector<TopologyNode*> children = node.getChildren();
+    for (size_t c = 0; c < children.size(); c++)
+    {
+        // a child that does not continue begins its own species at this node
+        int cs = children[c]->continuesParentSpecies() ? s : continuingSpecies( *children[c] );
+
+        labelSpecies( *children[c], cs );
+    }
+}
+
+
+/**
+ * A child continues its parent's range exactly when the two carry the same label, which is the whole
+ * of the flag. Read before erasing, since a parent's label is what its children are read against,
+ * and erased because the value must not carry an annotation that MCMC will make stale.
+ */
+bool FossilizedBirthDeathSpeciationProcess::adoptSpeciesLabels( void )
+{
+    Tree &t = this->getValue();
+
+    size_t n = t.getNumberOfNodes();
+
+    std::vector<std::string> label( n );
+    bool annotated = false;
+
+    for (size_t i = 0; i < n; ++i)
+    {
+        const TopologyNode &node = t.getNode(i);
+
+        std::optional<std::string> s = node.getNodeParameter( "range" );
+        if ( s.has_value() == false ) continue;
+
+        label[ node.getIndex() ] = *s;
+        annotated = true;
+    }
+
+    if ( annotated == false ) return false;
+
+    for (size_t i = 0; i < n; ++i)
+    {
+        TopologyNode &node = t.getNode(i);
+
+        node.eraseNodeParameter( "range" );
+
+        if ( node.isRoot() == true ) continue;
+
+        const std::string &mine   = label[ node.getIndex() ];
+        const std::string &parent = label[ node.getParent().getIndex() ];
+
+        node.setContinuesParentSpecies( mine.empty() == false && mine == parent );
+    }
+
+    return true;
+}
+
+
+bool FossilizedBirthDeathSpeciationProcess::adoptAppearances( void )
+{
+    Tree &t = this->getValue();
+
+    bool annotated = false;
+
+    for (size_t i = 0; i < taxa.size(); ++i)
+    {
+        TopologyNode &tip = t.getNode(i);
+
+        std::optional<std::string> f = tip.eraseNodeParameter( "FAD" );
+        std::optional<std::string> l = tip.eraseNodeParameter( "LAD" );
+
+        if ( f.has_value() == true )
+        {
+            ranges[i].first = atof( f->c_str() );
+            annotated = true;
+        }
+        if ( l.has_value() == true )
+        {
+            ranges[i].last = atof( l->c_str() );
+            annotated = true;
+        }
+
+        if ( annotated == true ) dirty_taxa[i] = true;
+    }
+
+    return annotated;
 }
 
 

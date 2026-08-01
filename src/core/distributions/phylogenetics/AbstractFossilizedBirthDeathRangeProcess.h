@@ -93,15 +93,11 @@ namespace RevBayesCore {
         //!< The resampling move registers itself here, so the model can tell when it is missing
         void                                            setHasResampleMove(void) { has_resample_move = true; }
 
-        //!< True when the augmented ages are elements of the owning distribution's value, so a
-        //!< generic move on those elements samples them and restores them on rejection.
-        virtual bool                                    augmentedAgesInValue(void) const { return false; }
-
         //!< A dnFossilRecord registers itself here. It carries the
         //!< whole sampling density, so without one psi has no data at all.
         void                                            setHasReportingNode(void) { has_reporting_node = true; }
 
-        void                                            executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const;   //!< Expose the augmented first/last ages and the birth/death times for monitoring
+        void                                            executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const;   //!< Expose the first/last appearances and the origination/extinction times for monitoring
         void                                            executeMethod(const std::string &n, const std::vector<const DagNode*> &args, double &rv) const;              //!< Expose the origin, which no monitor can otherwise reach
         const std::vector<Taxon>&                       getTaxa() const { return taxa; }
         void                                            resampleFirstLast(size_t i);
@@ -197,7 +193,7 @@ namespace RevBayesCore {
         mutable std::vector<double>                     pS_i;                                                   //!< Probability of leaving no descendants from the end of each time interval
 
                                 
-        //!< The one range mvResampleAugmentedAges drew, and the two ages it replaced. Taken in the
+        //!< The one range mvStratigraphicRange drew, and the two ages it replaced. Taken in the
         //!< proposal, before the pull, so it undoes the proposal's own write and not the pull's.
         size_t                                          stored_range = 0;
         double                                          stored_first = 0.0;
@@ -213,11 +209,11 @@ namespace RevBayesCore {
         std::vector<bool>                               dirty_taxa;                                             //!< Indicates whether partial likelihood needs updating
         
         bool                                            touched;                                               //!< Indicates whether any terms need updating
-        bool                                            has_resample_move = false;              //!< Set by mvResampleAugmentedAges when it attaches
+        bool                                            has_resample_move = false;              //!< Set by mvStratigraphicRange when it attaches
         bool                                            has_reporting_node = false;             //!< Set by dnFossilRecord when it attaches
         mutable bool                                    warned_no_resample = false;             //!< setMcmcMode fires more than once per run
         mutable bool                                    warned_no_reporting = false;
-        bool                                            resampled;                                              //!< mvResampleAugmentedAges drew a new pair and the undo above is armed
+        bool                                            resampled;                                              //!< mvStratigraphicRange drew a new pair and the undo above is armed
     };
 }
 

@@ -64,6 +64,12 @@ namespace RevBayesCore {
         FossilizedBirthDeathSpeciationProcess*          clone(void) const override;                                //!< Create an independent clone
 
         void                                            setValue(Tree *v, bool force=false) override;                       //!< Clamping replaces the ranges the augmented ages were drawn against, so re-clip them
+
+        //!< A plain Newick drops everything this process samples besides the divergence times: which
+        //!< range each node belongs to, and where each range's two appearances sit. Written as
+        //!< node annotations so a checkpoint restores the state rather than a state like it.
+        std::string                                     getHiddenStateString(void) const override;
+        void                                            setHiddenStateFromString(const std::string &s) override;
         void                                            redrawValue(void) override;
         void                                            redrawValue(SimulationCondition c) override;                        //!< The framework redraws through this overload, which must not reach the inherited simulator
         bool                                            redrawTopology(void);                                               //!< Redraw the budding topology uniformly with the ranges held fixed. Every compatible tree has one density, so this is a Gibbs step. Pure budding only, see hasAnagenesis() and hasSymmetricSpeciation().
@@ -126,6 +132,10 @@ namespace RevBayesCore {
         
         // helper functions
         double                                          getMaxTaxonAge( const TopologyNode& ) const;
+
+        void                                            labelSpecies(TopologyNode &node, int s) const;   //!< Stamp the range each node belongs to, top down, so a symmetric node carries the one that ends there.
+        bool                                            adoptSpeciesLabels(void);                        //!< Take the continuation flags from the range labels a tree arrived with. False when it carries none.
+        bool                                            adoptAppearances(void);                          //!< Take tau_1 and tau_K from the tips' FAD and LAD. False when they carry none.
 
         bool                                            extended;                                                //!< Tips are extinction times. When false the extinction times are marginalized out and each range ends at min(tau_K, youngest child birth).
 

@@ -180,7 +180,7 @@
 // #include "Move_PathCharacterHistoryRejectionSample.h"
 #include "Move_CharacterHistory.h"
 
-#include "Move_ResampleAugmentedAges.h"
+#include "Move_StratigraphicRange.h"
 
 #include "Move_BirthDeathEventContinuous.h"
 #include "Move_BirthDeathEventDiscrete.h"
@@ -496,7 +496,7 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
 //        addType( new Move_IndependentPriorSampler<RateGenerator>( ) );
         addType( new Move_IndependentPriorSampler<Tree>( ) );
 
-        addType( new Move_ResampleAugmentedAges()                     );
+        addType( new Move_StratigraphicRange()                     );
     }
     catch(RbException& rbException)
     {

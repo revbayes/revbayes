@@ -688,12 +688,12 @@ double AbstractFossilizedBirthDeathRangeProcess::q( size_t i, double t, bool til
  *
  */
 /**
- * The augmented first (tau_1) and last (tau_K) ages, which no monitor can otherwise reach.
- * A record with one occurrence or an unreported youngest has last == first.
+ * The first (tau_1) and last (tau_K) appearances, and the origination and extinction times, which
+ * no monitor can otherwise reach. A record with one occurrence has its two appearances equal.
  */
 void AbstractFossilizedBirthDeathRangeProcess::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, RbVector<double> &rv) const
 {
-    if ( n == "getAugmentedFirstAges" || n == "getAugmentedLastAges" || n == "getBirthAges" || n == "getDeathAges" )
+    if ( n == "getFirstAppearances" || n == "getLastAppearances" || n == "getOriginationTimes" || n == "getExtinctionTimes" )
     {
         // range_start/range_end are a byproduct of the density, so refresh them from the value
         AbstractFossilizedBirthDeathRangeProcess *self = const_cast<AbstractFossilizedBirthDeathRangeProcess *>( this );
@@ -702,17 +702,17 @@ void AbstractFossilizedBirthDeathRangeProcess::executeMethod(const std::string &
         // with the extinction times marginalized out there is none to report: range_end holds the range
         // end instead, and a sampled ancestor's is jointly distributed with the unobserved
         // speciation separating it from its descendant, so it is not recoverable here
-        if ( n == "getDeathAges" && marginalizesExtinction() == true )
+        if ( n == "getExtinctionTimes" && marginalizesExtinction() == true )
         {
-            throw RbException("getDeathAges is unavailable when extended=false: the extinction times are marginalized out rather than sampled. Use getAugmentedLastAges for the youngest occurrence ages, or extended=true to sample extinction times.");
+            throw RbException("getExtinctionTimes is unavailable when extended=false: the extinction times are marginalized out rather than sampled. Use getLastAppearances for the youngest occurrence ages, or extended=true to sample extinction times.");
         }
 
         rv.clear();
         for (size_t i = 0; i < ranges.size(); i++)
         {
-            rv.push_back( n == "getAugmentedFirstAges" ? ranges[i].first :
-                        ( n == "getAugmentedLastAges"  ? ranges[i].last  :
-                        ( n == "getBirthAges"          ? ranges[i].birth : ranges[i].death ) ) );
+            rv.push_back( n == "getFirstAppearances" ? ranges[i].first :
+                        ( n == "getLastAppearances"  ? ranges[i].last  :
+                        ( n == "getOriginationTimes"          ? ranges[i].birth : ranges[i].death ) ) );
         }
     }
     else
@@ -785,14 +785,14 @@ void AbstractFossilizedBirthDeathRangeProcess::initializeFirstLast(size_t i)
     dirty_taxa[i] = true;
 }
 
-// The augmented ages move only through mvResampleAugmentedAges. Without it they stay at their
+// The augmented ages move only through mvStratigraphicRange. Without it they stay at their
 // initial draw and the chain silently samples the wrong space, so say so once at startup.
 void AbstractFossilizedBirthDeathRangeProcess::warnIfNoResampleMove( void ) const
 {
     if ( has_resample_move == false && warned_no_resample == false )
     {
         warned_no_resample = true;
-        RBOUT("Warning: no mvResampleAugmentedAges move; augmented ages will not be sampled.");
+        RBOUT("Warning: no mvStratigraphicRange move; augmented ages will not be sampled.");
     }
 }
 
