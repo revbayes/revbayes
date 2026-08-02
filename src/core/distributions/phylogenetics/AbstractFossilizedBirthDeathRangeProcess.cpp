@@ -780,7 +780,7 @@ void AbstractFossilizedBirthDeathRangeProcess::warnIfNoResampleMove( void ) cons
     if ( has_resample_move == false && warned_no_resample == false )
     {
         warned_no_resample = true;
-        RBOUT("Warning: no mvStratigraphicRange move; appearances will not be sampled.");
+        RBOUT("Warning: no mvStratigraphicRange move. Appearances will not be sampled.");
     }
 }
 
@@ -791,7 +791,7 @@ void AbstractFossilizedBirthDeathRangeProcess::warnIfNoReportingNode( void ) con
     if ( has_reporting_node == false && warned_no_reporting == false )
     {
         warned_no_reporting = true;
-        RBOUT("Warning: no dnFossilRecord node; fossil sampling is not scored and psi has no data.");
+        RBOUT("Warning: no dnFossilRecord node. Fossil sampling is not scored and psi has no data.");
     }
 }
 

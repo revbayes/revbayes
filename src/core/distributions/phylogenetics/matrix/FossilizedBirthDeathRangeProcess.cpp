@@ -81,7 +81,8 @@ FossilizedBirthDeathRangeProcess::FossilizedBirthDeathRangeProcess(const DagNode
 void FossilizedBirthDeathRangeProcess::setMcmcMode(bool tf)
 {
     TypedDistribution<MatrixReal>::setMcmcMode(tf);
-    if ( tf == true ) warnIfNoResampleMove();
+    // the appearances live in the value here, where the element moves reach them, so only
+    // the tree process needs to warn that nothing samples them
     if ( tf == true ) warnIfNoReportingNode();
 }
 
