@@ -1,4 +1,4 @@
-#include "ComputeSpeciesVarianceFunction.h"
+#include "ComputeSpeciesVarianceFromMultiSampleDataFunction.h"
 
 #include <cmath>
 #include <cstddef>
@@ -16,11 +16,10 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
-ComputeSpeciesVarianceFunction::ComputeSpeciesVarianceFunction(const TypedDagNode<ContinuousCharacterData> *d, const TypedDagNode<std::int64_t> *s, const std::vector<Taxon> &ta, MISSING_TREATMENT mtr, bool bool_vom ) : TypedFunction< RbVector<double> >( new RbVector<double>() ),
+ComputeSpeciesVarianceFromMultiSampleDataFunction::ComputeSpeciesVarianceFromMultiSampleDataFunction(const TypedDagNode<ContinuousCharacterData> *d, const TypedDagNode<std::int64_t> *s, const std::vector<Taxon> &ta, MISSING_TREATMENT mtr ) : TypedFunction< RbVector<double> >( new RbVector<double>() ),
     data( d ),
     site( s ),
-    taxa( ta ),
-    compute_VarOfMean( bool_vom )
+    taxa( ta )
 {
     missing_var_treatment = mtr;
 
@@ -33,20 +32,20 @@ ComputeSpeciesVarianceFunction::ComputeSpeciesVarianceFunction(const TypedDagNod
 }
 
 
-ComputeSpeciesVarianceFunction::~ComputeSpeciesVarianceFunction( void )
+ComputeSpeciesVarianceFromMultiSampleDataFunction::~ComputeSpeciesVarianceFromMultiSampleDataFunction( void )
 {
     // We don't delete the parameters, because they might be used somewhere else too. The model needs to do that!
 }
 
 
 
-ComputeSpeciesVarianceFunction* ComputeSpeciesVarianceFunction::clone( void ) const
+ComputeSpeciesVarianceFromMultiSampleDataFunction* ComputeSpeciesVarianceFromMultiSampleDataFunction::clone( void ) const
 {
-    return new ComputeSpeciesVarianceFunction( *this );
+    return new ComputeSpeciesVarianceFromMultiSampleDataFunction( *this );
 }
 
 
-double ComputeSpeciesVarianceFunction::computeMeanForSpecies(const std::string &name, size_t index)
+double ComputeSpeciesVarianceFromMultiSampleDataFunction::computeMeanForSpecies(const std::string &name, size_t index)
 {
 
     double mean = 0.0;
@@ -75,7 +74,7 @@ double ComputeSpeciesVarianceFunction::computeMeanForSpecies(const std::string &
 }
 
 
-double ComputeSpeciesVarianceFunction::computeTipErrorOrVarianceForSpecies(const std::string &name, size_t index)
+double ComputeSpeciesVarianceFromMultiSampleDataFunction::computeVarianceOfSpeciesMean(const std::string &name, size_t index)
 {
 
     double num_samples = getNumberOfSamplesForSpecies(name);
@@ -101,14 +100,7 @@ double ComputeSpeciesVarianceFunction::computeTipErrorOrVarianceForSpecies(const
         }
 
         // normalize
-        var /= ( num_samples - 1 );
-
-        // if standard error of mean trait is desired
-        if ( compute_VarOfMean )
-        {
-            var /= num_samples;
-        }
-
+        var /= num_samples;
 
     }
     else
@@ -116,11 +108,11 @@ double ComputeSpeciesVarianceFunction::computeTipErrorOrVarianceForSpecies(const
         // change here with options MISSING_TREATMENT
         if ( missing_var_treatment == MEAN )
         {
-            var = computeMeanErrorOrVarianceAcrossSpecies();
+            var = computeMeanVarianceAcrossSpecies();
         }
         else if ( missing_var_treatment == MEDIAN )
         {
-            var = computeMedianErrorOrVarianceAcrossSpecies();
+            var = computeMedianVarianceAcrossSpecies();
         }
         else if ( missing_var_treatment == NONE )
         {
@@ -137,7 +129,7 @@ double ComputeSpeciesVarianceFunction::computeTipErrorOrVarianceForSpecies(const
 }
 
 
-double ComputeSpeciesVarianceFunction::getNumberOfSamplesForSpecies(const std::string &name)
+double ComputeSpeciesVarianceFromMultiSampleDataFunction::getNumberOfSamplesForSpecies(const std::string &name)
 {
 
     double num_samples = 0.0;
@@ -157,7 +149,7 @@ double ComputeSpeciesVarianceFunction::getNumberOfSamplesForSpecies(const std::s
 }
 
 
-std::vector<std::string> ComputeSpeciesVarianceFunction::getAlphabeticalSpeciesNames(void)
+std::vector<std::string> ComputeSpeciesVarianceFromMultiSampleDataFunction::getAlphabeticalSpeciesNames(void)
 {
 
     std::vector<std::string> species_names;
@@ -177,7 +169,7 @@ std::vector<std::string> ComputeSpeciesVarianceFunction::getAlphabeticalSpeciesN
 }
 
 
-double ComputeSpeciesVarianceFunction::computeMeanErrorOrVarianceAcrossSpecies( void )
+double ComputeSpeciesVarianceFromMultiSampleDataFunction::computeMeanVarianceAcrossSpecies( void )
 {
 
     // some of the sites may have been excluded
@@ -197,7 +189,7 @@ double ComputeSpeciesVarianceFunction::computeMeanErrorOrVarianceAcrossSpecies( 
 
         if ( num_samples > 1 )
         {
-            mean_var += computeTipErrorOrVarianceForSpecies(name,site_index);
+            mean_var += computeVarianceOfSpeciesMean(name,site_index);
             num_species_multi_sample++;
         }
 
@@ -207,7 +199,7 @@ double ComputeSpeciesVarianceFunction::computeMeanErrorOrVarianceAcrossSpecies( 
     return mean_var;
 }
 
-double ComputeSpeciesVarianceFunction::computeMedianErrorOrVarianceAcrossSpecies( void )
+double ComputeSpeciesVarianceFromMultiSampleDataFunction::computeMedianVarianceAcrossSpecies( void )
 {
     size_t site_index = site->getValue()-1;
 
@@ -224,7 +216,7 @@ double ComputeSpeciesVarianceFunction::computeMedianErrorOrVarianceAcrossSpecies
 
         if ( num_samples > 1 )
         {
-            double var = computeTipErrorOrVarianceForSpecies(name,site_index);
+            double var = computeVarianceOfSpeciesMean(name,site_index);
             vars.push_back(var);
         }
 
@@ -246,7 +238,7 @@ double ComputeSpeciesVarianceFunction::computeMedianErrorOrVarianceAcrossSpecies
 }
 
 
-void ComputeSpeciesVarianceFunction::reset( void )
+void ComputeSpeciesVarianceFromMultiSampleDataFunction::reset( void )
 {
 
     std::vector<std::string> species_names = getAlphabeticalSpeciesNames();
@@ -262,13 +254,13 @@ void ComputeSpeciesVarianceFunction::reset( void )
     {
 
         std::string name = species_names[i];
-        within_species_variance[i] = computeTipErrorOrVarianceForSpecies(name,site_index);
+        within_species_variance[i] = computeVarianceOfSpeciesMean(name,site_index);
 
     }
 
 }
 
-void ComputeSpeciesVarianceFunction::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
+void ComputeSpeciesVarianceFromMultiSampleDataFunction::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
 {
 
     if (oldP == data)
@@ -283,7 +275,7 @@ void ComputeSpeciesVarianceFunction::swapParameterInternal(const DagNode *oldP, 
 }
 
 
-void ComputeSpeciesVarianceFunction::update( void )
+void ComputeSpeciesVarianceFromMultiSampleDataFunction::update( void )
 {
     RbVector<double> &v = *value;
 

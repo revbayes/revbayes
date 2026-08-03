@@ -3,9 +3,9 @@
 
 #include "Argument.h"
 #include "ArgumentRule.h"
-#include "Func_getWithinSpeciesVariances.h"
+#include "Func_computeWithinSpeciesVarianceFromMultiSampleData.h"
 #include "ModelVector.h"
-#include "GetTipErrorOrVarianceFunction.h"
+#include "ComputeSpeciesVarianceFromMultiSampleDataFunction.h"
 #include "RlContinuousCharacterData.h"
 #include "RlTaxon.h"
 #include "RlTimeTree.h"
@@ -41,7 +41,7 @@ namespace RevBayesCore { class Tree; }
 using namespace RevLanguage;
 
 /** Default constructor */
-Func_getWithinSpeciesVariances::Func_getWithinSpeciesVariances( void ) : TypedFunction<ModelVector<Real> >()
+Func_computeWithinSpeciesVarianceFromMultiSampleData::Func_computeWithinSpeciesVarianceFromMultiSampleData( void ) : TypedFunction<ModelVector<Real> >()
 {
 
 }
@@ -53,32 +53,34 @@ Func_getWithinSpeciesVariances::Func_getWithinSpeciesVariances( void ) : TypedFu
  *
  * \return A new copy of the process.
  */
-Func_getWithinSpeciesVariances* Func_getWithinSpeciesVariances::clone( void ) const
+Func_computeWithinSpeciesVarianceFromMultiSampleData* Func_computeWithinSpeciesVarianceFromMultiSampleData::clone( void ) const
 {
 
-    return new Func_getWithinSpeciesVariances( *this );
+    return new Func_computeWithinSpeciesVarianceFromMultiSampleData( *this );
 }
 
 
-RevBayesCore::TypedFunction<RevBayesCore::RbVector<double> >* Func_getWithinSpeciesVariances::createFunction( void ) const
+RevBayesCore::TypedFunction<RevBayesCore::RbVector<double> >* Func_computeWithinSpeciesVarianceFromMultiSampleData::createFunction( void ) const
 {
     const RevBayesCore::TypedDagNode<RevBayesCore::ContinuousCharacterData>* data = static_cast<const ContinuousCharacterData &>( args[0].getVariable()->getRevObject() ).getDagNode();
-    const RevBayesCore::TypedDagNode<std::int64_t>* v_site = static_cast<const Natural &>( args[1].getVariable()->getRevObject() ).getDagNode();
-    const RevBayesCore::TypedDagNode<std::int64_t>* n_site = static_cast<const Natural &>( args[2].getVariable()->getRevObject() ).getDagNode();
+    const RevBayesCore::TypedDagNode<std::int64_t>* site = static_cast<const Natural &>( args[1].getVariable()->getRevObject() ).getDagNode();
+    const RevBayesCore::RbVector<RevBayesCore::Taxon>& taxa = static_cast<const ModelVector<Taxon> &>( args[2].getVariable()->getRevObject() ).getValue();
+
     const std::string& tr = static_cast<const RlString &>( args[3].getVariable()->getRevObject() ).getValue();
 
-    RevBayesCore::GetTipErrorOrVarianceFunction::MISSING_TREATMENT mtr;
+
+    RevBayesCore::ComputeSpeciesVarianceFromMultiSampleDataFunction::MISSING_TREATMENT mtr;
     if (tr == "mean")
     {
-        mtr = RevBayesCore::GetTipErrorOrVarianceFunction::MISSING_TREATMENT::MEAN;
+        mtr = RevBayesCore::ComputeSpeciesVarianceFromMultiSampleDataFunction::MISSING_TREATMENT::MEAN;
     }
     else if (tr == "median")
     {
-        mtr = RevBayesCore::GetTipErrorOrVarianceFunction::MISSING_TREATMENT::MEDIAN;
+        mtr = RevBayesCore::ComputeSpeciesVarianceFromMultiSampleDataFunction::MISSING_TREATMENT::MEDIAN;
     }
     else if (tr == "none")
     {
-        mtr = RevBayesCore::GetTipErrorOrVarianceFunction::MISSING_TREATMENT::NONE;
+        mtr = RevBayesCore::ComputeSpeciesVarianceFromMultiSampleDataFunction::MISSING_TREATMENT::NONE;
     }
     else
     {
@@ -86,14 +88,14 @@ RevBayesCore::TypedFunction<RevBayesCore::RbVector<double> >* Func_getWithinSpec
     }
 
 
-    RevBayesCore::GetTipErrorOrVarianceFunction* f = new RevBayesCore::GetTipErrorOrVarianceFunction( data, v_site, n_site, mtr, false );
+    RevBayesCore::ComputeSpeciesVarianceFromMultiSampleDataFunction* f = new RevBayesCore::ComputeSpeciesVarianceFromMultiSampleDataFunction( data, site, taxa, mtr );
 
     return f;
 }
 
 
 /** Get argument rules */
-const ArgumentRules& Func_getWithinSpeciesVariances::getArgumentRules( void ) const
+const ArgumentRules& Func_computeWithinSpeciesVarianceFromMultiSampleData::getArgumentRules( void ) const
 {
 
     static ArgumentRules argument_rules = ArgumentRules();
@@ -103,8 +105,8 @@ const ArgumentRules& Func_getWithinSpeciesVariances::getArgumentRules( void ) co
     {
 
         argument_rules.push_back( new ArgumentRule( "data", ContinuousCharacterData::getClassTypeSpec(), "The character data object.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        argument_rules.push_back( new ArgumentRule( "variance_site", Natural::getClassTypeSpec(), "The site that stores the trait variance.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        argument_rules.push_back( new ArgumentRule( "num_sample_site", Natural::getClassTypeSpec(), "The site that stores the number of samples per species.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argument_rules.push_back( new ArgumentRule( "site", Natural::getClassTypeSpec(), "The site for which we compute the number of samples per species.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argument_rules.push_back( new ArgumentRule( "taxa", ModelVector<Taxon>::getClassTypeSpec(), "The vector of taxa which have species and individual names.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
 
         std::vector<std::string> missingTreatmentTypes;
         missingTreatmentTypes.push_back( "mean" );
@@ -120,16 +122,16 @@ const ArgumentRules& Func_getWithinSpeciesVariances::getArgumentRules( void ) co
 
 
 /** Get Rev type of object */
-const std::string& Func_getWithinSpeciesVariances::getClassType(void)
+const std::string& Func_computeWithinSpeciesVarianceFromMultiSampleData::getClassType(void)
 {
 
-    static std::string rev_type = "Func_getWithinSpeciesVariances";
+    static std::string rev_type = "Func_computeWithinSpeciesVarianceFromMultiSampleData";
 
     return rev_type;
 }
 
 /** Get class type spec describing type of object */
-const TypeSpec& Func_getWithinSpeciesVariances::getClassTypeSpec(void)
+const TypeSpec& Func_computeWithinSpeciesVarianceFromMultiSampleData::getClassTypeSpec(void)
 {
 
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( Function::getClassTypeSpec() ) );
@@ -141,25 +143,26 @@ const TypeSpec& Func_getWithinSpeciesVariances::getClassTypeSpec(void)
 /**
  * Get the primary Rev name for this function.
  */
-std::string Func_getWithinSpeciesVariances::getFunctionName( void ) const
+std::string Func_computeWithinSpeciesVarianceFromMultiSampleData::getFunctionName( void ) const
 {
     // create a name variable that is the same for all instance of this class
-    std::string f_name = "fnGetWithinSpeciesVariances";
+    std::string f_name = "fnComputeWithinSpeciesVarianceFromMultiSampleData";
 
     return f_name;
 }
 
-std::vector<std::string> Func_getWithinSpeciesVariances::getFunctionNameAliases( void ) const
+std::vector<std::string> Func_computeWithinSpeciesVarianceFromMultiSampleData::getFunctionNameAliases( void ) const
 {
     // create alternative constructor function names variable that is the same for all instance of this class
     std::vector<std::string> a_names;
-    a_names.push_back( "fnGetSpVar" );
+    a_names.push_back( "fnComputeWithinSpeciesVariance" );
+    a_names.push_back( "fnWithinSpeciesVariance" );
 
     return a_names;
 }
 
 /** Get type spec */
-const TypeSpec& Func_getWithinSpeciesVariances::getTypeSpec( void ) const
+const TypeSpec& Func_computeWithinSpeciesVarianceFromMultiSampleData::getTypeSpec( void ) const
 {
 
     static TypeSpec type_spec = getClassTypeSpec();

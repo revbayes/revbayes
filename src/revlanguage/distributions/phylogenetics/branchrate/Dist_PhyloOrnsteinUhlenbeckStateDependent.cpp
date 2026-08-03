@@ -1,5 +1,6 @@
 #include "Dist_PhyloOrnsteinUhlenbeckStateDependent.h"
 
+#include <cstddef>
 #include <stddef.h>
 #include <ostream>
 
@@ -77,7 +78,27 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
         throw RbException("argument rootTreatment must be one of \"optimum\", \"equilibrium\" or \"parameter\"");
     }
 
-    RevBayesCore::PhyloOrnsteinUhlenbeckStateDependent *dist = new RevBayesCore::PhyloOrnsteinUhlenbeckStateDependent(char_hist, n, rtr);
+    //    set the treatment for variance of species means for species with one sample only
+     const std::string& sst = static_cast<const RlString &>( single_sample_treatment->getRevObject() ).getValue();
+     RevBayesCore::PhyloOrnsteinUhlenbeckStateDependent::SINGLE_SAMPLE_TREATMENT sstr;
+     if (sst == "mean")
+     {
+         sstr = RevBayesCore::PhyloOrnsteinUhlenbeckStateDependent::SINGLE_SAMPLE_TREATMENT::MEAN;
+     }
+     else if (sst == "median")
+     {
+         sstr = RevBayesCore::PhyloOrnsteinUhlenbeckStateDependent::SINGLE_SAMPLE_TREATMENT::MEDIAN;
+     }
+     else if (sst == "as_is")
+     {
+         sstr = RevBayesCore::PhyloOrnsteinUhlenbeckStateDependent::SINGLE_SAMPLE_TREATMENT::AS_IS;
+     }
+     else
+     {
+         throw RbException("argument singleSampleTreatment must be one of \"mean\", \"median\" or \"as_is\"");
+     }
+
+    RevBayesCore::PhyloOrnsteinUhlenbeckStateDependent *dist = new RevBayesCore::PhyloOrnsteinUhlenbeckStateDependent(char_hist, n, rtr, sstr);
 
     // set alpha
     if ( alpha->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
@@ -157,17 +178,46 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
         }
     }
 
-    if ( species_VarOfMean->getRevObject() != RevNullObject::getInstance() )
+    if ( species_var->getRevObject() != RevNullObject::getInstance() )
     {
-        RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal>* sp_vom  = static_cast<const MatrixReal&>( species_VarOfMean->getRevObject() ).getDagNode();
-
-        if (sp_vom->getValue().size() != n)
+        if ( num_samples_per_species->getRevObject() == RevNullObject::getInstance() )
         {
-            throw RbException()<< "The number of sites (" << n << ") specified doesn't match the size of the species mean matrix (" << sp_vom->getValue().size() << ")";
+            throw RbException() << "Please also provide the number of samples per species if you want to include uncertainty at the tips.";
+
+        }
+
+        RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal>* sp_var  = static_cast<const MatrixReal&>( species_var->getRevObject() ).getDagNode();
+
+        if (sp_var->getValue().size() != n)
+        {
+            throw RbException()<< "The number of sites (" << n << ") specified doesn't match the size of the within-species variance matrix (" << sp_var->getValue().size() << ")";
         }
         else
         {
-            dist->setVarianceOfSpeciesMean( sp_vom );
+            dist->setWithinSpeciesVariance( sp_var );
+        }
+
+    }
+
+    if ( num_samples_per_species->getRevObject() != RevNullObject::getInstance() )
+    {
+        if ( species_var->getRevObject() == RevNullObject::getInstance() )
+        {
+            throw RbException() << "Please also provide the number of samples per species if you want to include uncertainty at the tips.";
+
+        }
+        else
+        {
+            RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal>* n_samples  = static_cast<const MatrixReal&>( num_samples_per_species->getRevObject() ).getDagNode();
+
+            if (n_samples->getValue().size() != n)
+            {
+                throw RbException()<< "The number of sites (" << n << ") specified doesn't match the size of the number-of-samples-per-species matrix (" << n_samples->getValue().size() << ")";
+            }
+            else
+            {
+                dist->setNumberOfSamplesPerSpecies( n_samples );
+            }
         }
 
     }
@@ -265,7 +315,16 @@ const MemberRules& Dist_PhyloOrnsteinUhlenbeckStateDependent::getParameterRules(
         rootTreatmentTypes.push_back( "parameter" );
         dist_member_rules.push_back( new OptionRule ("rootTreatment", new RlString("optimum"), rootTreatmentTypes, "Whether the root value should be assumed to be equal to the optimum at the root (the default), assumed to be a random variable distributed according to the equilibrium state of the OU process, or whether to estimate the ancestral value as an independent parameter.") );
 
-        dist_member_rules.push_back( new ArgumentRule( "variancesOfSpeciesMeans" , MatrixReal::getClassTypeSpec(), "The standard error of mean value for each species for each site.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+
+        dist_member_rules.push_back( new ArgumentRule( "withinSpeciesVariance" , MatrixReal::getClassTypeSpec(), "The within-species variance for each species at each site.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+
+        dist_member_rules.push_back( new ArgumentRule( "numberOfSamplesPerSpecies" , MatrixReal::getClassTypeSpec(), "The number of samples for each species at each site.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+
+        std::vector<std::string> singleSampleTreatmentTypes;
+        singleSampleTreatmentTypes.push_back( "mean" );
+        singleSampleTreatmentTypes.push_back( "median" );
+        singleSampleTreatmentTypes.push_back( "as_is" );
+        dist_member_rules.push_back( new OptionRule ("singleSampleTreatment", new RlString("mean"), singleSampleTreatmentTypes, "What to be input as the variance of species mean at the tip is the species contains one sample only. Options \"mean\" and \"median\" calculate the mean/median of the variance of species mean for species with multiple sample. Option \"as_is\" uses the value provided in the vector of \"withinSpeciesVariance\" directly.") );
 
         dist_member_rules.push_back( new ArgumentRule( "nSites",  Natural::getClassTypeSpec(), "The number of sites which is used for the initialized (random draw) from this distribution.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1) ) );
 
@@ -344,9 +403,25 @@ void Dist_PhyloOrnsteinUhlenbeckStateDependent::printValue(std::ostream& o) cons
         o << "?";
     }
     o << ")";
-    if ( species_VarOfMean != NULL )
+    if ( species_var != NULL )
     {
-        o << species_VarOfMean->getName();
+        o << species_var->getName();
+    }
+    else
+    {
+        o << "?";
+    }
+    if ( num_samples_per_species != NULL )
+    {
+        o << num_samples_per_species->getName();
+    }
+    else
+    {
+        o << "?";
+    }
+    if ( single_sample_treatment != NULL )
+    {
+        o << single_sample_treatment->getName();
     }
     else
     {
@@ -388,9 +463,17 @@ void Dist_PhyloOrnsteinUhlenbeckStateDependent::setConstParameter(const std::str
     {
         root_treatment = var;
     }
-    else if ( name == "variancesOfSpeciesMeans" )
+    else if ( name == "withinSpeciesVariance" )
     {
-        species_VarOfMean = var;
+        species_var = var;
+    }
+    else if ( name == "numberOfSamplesPerSpecies" )
+    {
+        num_samples_per_species = var;
+    }
+    else if ( name == "singleSampleTreatment" )
+    {
+        single_sample_treatment = var;
     }
     else
     {

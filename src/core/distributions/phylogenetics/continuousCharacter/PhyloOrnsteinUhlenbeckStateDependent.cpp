@@ -34,9 +34,10 @@ namespace RevBayesCore { class RandomNumberGenerator; }
 
 using namespace RevBayesCore;
 
-PhyloOrnsteinUhlenbeckStateDependent::PhyloOrnsteinUhlenbeckStateDependent(const TypedDagNode<CharacterHistoryDiscrete> *ch, size_t ns, ROOT_TREATMENT rt) : TypedDistribution< ContinuousCharacterData > ( new ContinuousCharacterData() ),
+PhyloOrnsteinUhlenbeckStateDependent::PhyloOrnsteinUhlenbeckStateDependent(const TypedDagNode<CharacterHistoryDiscrete> *ch, size_t ns, ROOT_TREATMENT rt, SINGLE_SAMPLE_TREATMENT st) : TypedDistribution< ContinuousCharacterData > ( new ContinuousCharacterData() ),
     num_nodes( ch->getValue().getNumberBranches()+1 ),
     num_sites( ns ),
+    num_taxa( ch->getValue().getTree().getNumberOfTips() ),
     partial_likelihoods( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
     means( std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) ) ),
 //    variances( std::vector<std::vector<double> >(2, std::vector<double>(this->num_nodes, 0) ) ),
@@ -44,19 +45,25 @@ PhyloOrnsteinUhlenbeckStateDependent::PhyloOrnsteinUhlenbeckStateDependent(const
     active_likelihood( std::vector<size_t>(this->num_nodes, 0) ),
     changed_nodes( std::vector<bool>(this->num_nodes, false) ),
     dirty_nodes( std::vector<bool>(this->num_nodes, true) ),
-    character_histories( ch )
+    character_histories( ch ),
+    use_missing_data(false),
+    variance_of_species_mean( std::vector<std::vector<double> >(num_sites, std::vector<double>(this->num_taxa, 0) ) ),
+    mean_var_species_mean  (std::vector<double> (num_sites, 0)),
+    median_var_species_mean(std::vector<double> (num_sites, 0))
 {
     // initialize default parameters
-    root_value                  = new ConstantNode<double>("", new double(0.0) );
-    homogeneous_alpha           = new ConstantNode<double>("", new double(0.0) );
-    homogeneous_sigma           = new ConstantNode<double>("", new double(1.0) );
-    homogeneous_theta           = new ConstantNode<double>("", new double(0.0) );
-    species_VarOfMean                = new ConstantNode<MatrixReal>("", new MatrixReal( num_sites, character_histories->getValue().getTree().getNumberOfTips() ) );
+    root_value                    = new ConstantNode<double>("", new double(0.0) );
+    homogeneous_alpha             = new ConstantNode<double>("", new double(0.0) );
+    homogeneous_sigma             = new ConstantNode<double>("", new double(1.0) );
+    homogeneous_theta             = new ConstantNode<double>("", new double(0.0) );
+    within_species_variance       = new ConstantNode<MatrixReal>("", new MatrixReal( num_sites, num_taxa, 0 ) );
+    number_of_samples_per_species = new ConstantNode<MatrixReal>("", new MatrixReal( num_sites, num_taxa, 1 ) );
 
     state_dependent_alpha       = NULL;
     state_dependent_sigma       = NULL;
     state_dependent_theta       = NULL;
     root_treatment              = rt;
+    single_sample_treatment     = st;
 
     // add parameters
     addParameter( homogeneous_alpha );
@@ -64,10 +71,12 @@ PhyloOrnsteinUhlenbeckStateDependent::PhyloOrnsteinUhlenbeckStateDependent(const
     addParameter( homogeneous_theta );
     addParameter( character_histories );
     addParameter( root_value );
-    addParameter( species_VarOfMean );
+    addParameter( within_species_variance );
+    addParameter( number_of_samples_per_species );
 
     alphabetical_species_names = character_histories->getValue().getTree().getSpeciesNames();
     sort(alphabetical_species_names.begin(), alphabetical_species_names.end());
+
 
     // now we need to reset the value
     this->redrawValue();
@@ -200,14 +209,14 @@ void PhyloOrnsteinUhlenbeckStateDependent::keepSpecialization( const DagNode* af
 void PhyloOrnsteinUhlenbeckStateDependent::recursiveComputeLnProbability( const TopologyNode &node, size_t node_index )
 {
     // check for recomputation
-    if ( node.isTip() == false && dirty_nodes[node_index] == true )
+    if ( node.isTip() == false && (dirty_nodes[node_index] == true || use_missing_data == true ) )
     {
         // mark as computed
         dirty_nodes[node_index] = false;
 
         std::vector<double> &p_node     = this->partial_likelihoods[this->active_likelihood[node_index]][node_index];
         std::vector<double> &mu_node    = this->means[this->active_likelihood[node_index]][node_index];
-        std::vector<double> &var_node    = this->variances[this->active_likelihood[node_index]][node_index];
+        std::vector<double> &var_node   = this->variances[this->active_likelihood[node_index]][node_index];
 
 
         // get the number of children
@@ -236,9 +245,6 @@ void PhyloOrnsteinUhlenbeckStateDependent::recursiveComputeLnProbability( const 
             const std::vector<double> &mu_left  = this->means[this->active_likelihood[left_index]][left_index];
             const std::vector<double> &mu_right = this->means[this->active_likelihood[right_index]][right_index];
 
-            // get the variances of the left and right child nodes
-            // double delta_left  = this->variances[this->active_likelihood[left_index]][left_index];
-            // double delta_right = this->variances[this->active_likelihood[right_index]][right_index];
             const std::vector<double> &delta_left  = this->variances[this->active_likelihood[left_index]][left_index];
             const std::vector<double> &delta_right = this->variances[this->active_likelihood[right_index]][right_index];
 
@@ -314,42 +320,108 @@ void PhyloOrnsteinUhlenbeckStateDependent::recursiveComputeLnProbability( const 
 
             for (size_t site_index=0; site_index<this->num_sites; ++site_index)
             {
-                double mean_left  = mu_left[site_index];
-                double var_left = delta_left[site_index];
-                double log_nf_left = 0;
-                for (size_t k = 0; k < times_left.size(); ++k)
+                bool left_missing = missing_data[left_index][site_index];
+                bool right_missing = missing_data[right_index][site_index];
+
+                double lnl_node = 0;
+
+                if ( use_missing_data == true && left_missing && right_missing )
                 {
-                    size_t state   = states_left[k];
-                    double delta_t = times_left[k];
-                    mean_left      = computeEpisodeMean(mean_left, state, delta_t);
-                    var_left       = computeEpisodeVariance(var_left, state, delta_t);
-                    log_nf_left    = computeEpisodeScalingFactor(log_nf_left, state, delta_t);
+                    missing_data[node_index][site_index] = true;
+
+                    mu_node[site_index]   = RbConstants::Double::nan;
+                    var_node[site_index]  = 0.0;
+                    p_node[site_index]    = p_left[site_index] + p_right[site_index];
+                }
+                else if ( use_missing_data == true && left_missing && !right_missing )
+                {
+                    missing_data[node_index][site_index] = false;
+
+                    double mean_right = mu_right[site_index];
+                    double var_right = delta_right[site_index];
+                    double log_nf_right = 0;
+
+                    for (size_t k = 0; k < times_right.size(); ++k)
+                    {
+                        size_t state   = states_right[k];
+                        double delta_t = times_right[k];
+                        mean_right     = computeEpisodeMean(mean_right, state, delta_t);
+                        var_right      = computeEpisodeVariance(var_right, state, delta_t);
+                        log_nf_right   = computeEpisodeScalingFactor(log_nf_right, state, delta_t);
+                    }
+
+                    mu_node[site_index]  = mean_right;
+                    var_node[site_index] = var_right;
+                    p_node[site_index]   = log_nf_right;
 
                 }
-
-                double mean_right = mu_right[site_index];
-                double var_right = delta_right[site_index];
-                double log_nf_right = 0;
-                for (size_t k = 0; k < times_right.size(); ++k)
+                else if ( use_missing_data == true && !left_missing && right_missing )
                 {
-                    size_t state   = states_right[k];
-                    double delta_t = times_right[k];
-                    mean_right     = computeEpisodeMean(mean_right, state, delta_t);
-                    var_right      = computeEpisodeVariance(var_right, state, delta_t);
-                    log_nf_right   = computeEpisodeScalingFactor(log_nf_right, state, delta_t);
+                    missing_data[node_index][site_index] = false;
+
+                    double mean_left  = mu_left[site_index];
+                    double var_left = delta_left[site_index];
+                    double log_nf_left = 0;
+
+                    for (size_t k = 0; k < times_left.size(); ++k)
+                    {
+                        size_t state   = states_left[k];
+                        double delta_t = times_left[k];
+                        mean_left      = computeEpisodeMean(mean_left, state, delta_t);
+                        var_left       = computeEpisodeVariance(var_left, state, delta_t);
+                        log_nf_left    = computeEpisodeScalingFactor(log_nf_left, state, delta_t);
+
+                    }
+
+                    mu_node[site_index] = mean_left;
+                    var_node[site_index] = var_left;
+                    p_node[site_index] = log_nf_left;
+
+                }
+                else
+                {
+                    double mean_left  = mu_left[site_index];
+                    double var_left = delta_left[site_index];
+                    double log_nf_left = 0;
+                    for (size_t k = 0; k < times_left.size(); ++k)
+                    {
+                        size_t state   = states_left[k];
+                        double delta_t = times_left[k];
+                        mean_left      = computeEpisodeMean(mean_left, state, delta_t);
+                        var_left       = computeEpisodeVariance(var_left, state, delta_t);
+                        log_nf_left    = computeEpisodeScalingFactor(log_nf_left, state, delta_t);
+
+                    }
+
+                    double mean_right = mu_right[site_index];
+                    double var_right = delta_right[site_index];
+                    double log_nf_right = 0;
+                    for (size_t k = 0; k < times_right.size(); ++k)
+                    {
+                        size_t state   = states_right[k];
+                        double delta_t = times_right[k];
+                        mean_right     = computeEpisodeMean(mean_right, state, delta_t);
+                        var_right      = computeEpisodeVariance(var_right, state, delta_t);
+                        log_nf_right   = computeEpisodeScalingFactor(log_nf_right, state, delta_t);
+                    }
+
+                    // Do the merging rule
+                    mu_node[site_index] = (var_left*mean_right + var_right*mean_left) / (var_left+var_right);
+                    var_node[site_index] = (var_left*var_right) / (var_left+var_right);
+
+
+                    // compute the contrasts for this site and node
+                    double contrast = mean_left - mean_right;
+
+                    double a = -(contrast*contrast / (2*(var_left + var_right)));
+                    double b = log(2*RbConstants::PI*(var_left+var_right))/2.0;
+                    lnl_node = log_nf_left + log_nf_right + a - b;
+
+                    // sum up the log normalizing factors of the subtrees
+                    p_node[site_index] = lnl_node + p_left[site_index] + p_right[site_index];
                 }
 
-                // Do the merging rule
-                mu_node[site_index] = (var_left*mean_right + var_right*mean_left) / (var_left+var_right);
-                var_node[site_index] = (var_left*var_right) / (var_left+var_right);
 
-
-                // compute the contrasts for this site and node
-                double contrast = mean_left - mean_right;
-
-                double a = -(contrast*contrast / (2*(var_left + var_right)));
-                double b = log(2*RbConstants::PI*(var_left+var_right))/2.0;
-                double lnl_node = log_nf_left + log_nf_right + a - b;
 
                 if ( node.isRoot() == true )
                 {
@@ -378,31 +450,17 @@ void PhyloOrnsteinUhlenbeckStateDependent::recursiveComputeLnProbability( const 
                     }
 
                     lnl_node += RbStatistics::Normal::lnPdf( root_value, sqrt(var_root), mu_node[site_index]);
+
+                    // sum up the log normalizing factors of the subtrees
+                    p_node[site_index] = lnl_node + p_left[site_index] + p_right[site_index];
                 } // if this is the root node
 
-                // sum up the log normalizing factors of the subtrees
-                p_node[site_index] = lnl_node + p_left[site_index] + p_right[site_index];
+
             } // end for-loop over all sites
 
         } // end for-loop over all children
 
     } // end if we need to compute something for this node.
-    else
-    {
-        dirty_nodes[node_index] = false;
-
-        //std::vector<double> &mu_node  = this->means[this->active_likelihood[node_index]][node_index];
-        std::vector<double> &v_node   = this->variances[this->active_likelihood[node_index]][node_index];
-        std::vector<double> &p_node   = this->partial_likelihoods[this->active_likelihood[node_index]][node_index];
-
-        const Tree& tau = character_histories->getValue().getTree();
-        const std::string &name = tau.getNode( node_index ).getName();
-
-        for (size_t i=0; i<this->num_sites; i++)
-        {
-            v_node[i] = getWithinSpeciesSEM(name, i);
-        }
-    }
 }
 
 
@@ -485,6 +543,7 @@ void PhyloOrnsteinUhlenbeckStateDependent::resetValue( void )
     partial_likelihoods  = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
     means                = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
     variances            = std::vector<std::vector<std::vector<double> > >(2, std::vector<std::vector<double> >(this->num_nodes, std::vector<double>(this->num_sites, 0) ) );
+    missing_data         = std::vector<std::vector<bool> >(this->num_nodes, std::vector<bool>(this->num_sites, false) );
 
 
     // create a vector with the correct site indices
@@ -505,6 +564,27 @@ void PhyloOrnsteinUhlenbeckStateDependent::resetValue( void )
         ++site_index;
     }
 
+    // PL: maybe this should not be initialized because the within species variance and the num samples per species are not set yet
+    if ( single_sample_treatment == MEAN)
+    {
+        mean_var_species_mean   = computeMeanVarianceOfSpeciesMean();
+    }
+    else if ( single_sample_treatment == MEDIAN )
+    {
+        computeMedianVarianceOfSpeciesMean();
+    }
+
+    for (size_t s=0; s < num_sites; s++)
+    {
+        for (size_t i=0; i < alphabetical_species_names.size(); i++)
+        {
+            variance_of_species_mean[s][i] = computeVarianceOfSpeciesMean(i, s);
+        }
+    }
+
+
+    // first we check for missing data
+    use_missing_data = false;
     const Tree& tau = character_histories->getValue().getTree();
     std::vector<TopologyNode*> nodes = tau.getNodes();
     for (size_t site = 0; site < this->num_sites; ++site)
@@ -515,8 +595,29 @@ void PhyloOrnsteinUhlenbeckStateDependent::resetValue( void )
             if ( (*it)->isTip() )
             {
                 ContinuousTaxonData& taxon = this->value->getTaxonData( (*it)->getName() );
+
+                double c = taxon.getCharacter(site_indices[site]);
+
+                if ( RbMath::isFinite(c) == false )
+                {
+                    missing_data[(*it)->getIndex()][site] = true;
+                    use_missing_data = true;
+                }
+
+            }
+        }
+    }
+
+    for (size_t site = 0; site < this->num_sites; ++site)
+    {
+
+        for (std::vector<TopologyNode*>::iterator it = nodes.begin(); it != nodes.end(); ++it)
+        {
+            if ( (*it)->isTip() )
+            {
+                ContinuousTaxonData& taxon = this->value->getTaxonData( (*it)->getName() );
                 double &c = taxon.getCharacter(site_indices[site]);
-                double v = getWithinSpeciesSEM((*it)->getName(), site);
+                double v  = getVarianceOfSpeciesMean((*it)->getName(), site);
                 means[0][(*it)->getIndex()][site]     = c;
                 means[1][(*it)->getIndex()][site]     = c;
                 variances[0][(*it)->getIndex()][site] = v;
@@ -624,6 +725,28 @@ void PhyloOrnsteinUhlenbeckStateDependent::setAlpha(const TypedDagNode<RbVector<
 }
 
 
+void PhyloOrnsteinUhlenbeckStateDependent::setNumberOfSamplesPerSpecies(const TypedDagNode< MatrixReal >* wsv)
+{
+
+    // remove the old parameter first
+    this->removeParameter( number_of_samples_per_species );
+    number_of_samples_per_species   = NULL;
+
+    // set the value
+    number_of_samples_per_species   = wsv;
+
+    // add the new parameter
+    this->addParameter( number_of_samples_per_species );
+
+    // redraw the current value
+    if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
+    {
+        this->redrawValue();
+    }
+
+}
+
+
 void PhyloOrnsteinUhlenbeckStateDependent::setRootTreatment(ROOT_TREATMENT rt)
 {
 
@@ -718,18 +841,33 @@ void PhyloOrnsteinUhlenbeckStateDependent::setSigma(const TypedDagNode<RbVector<
 }
 
 
-void PhyloOrnsteinUhlenbeckStateDependent::setVarianceOfSpeciesMean(const TypedDagNode< MatrixReal >* sp_sem)
+void PhyloOrnsteinUhlenbeckStateDependent::setSingleSampleTreatment(SINGLE_SAMPLE_TREATMENT st)
+{
+
+    if ( st == MEAN || st == MEDIAN || st == AS_IS )
+    {
+        single_sample_treatment = st;
+    }
+    else
+    {
+        throw RbException("Unkown single sample treatment chosen for probability computation in state-dependent Ornstein-Uhlenbeck process. Possible single sample treatments are \"mean\", \"median\", and \"as_is\" ");
+    }
+
+}
+
+
+void PhyloOrnsteinUhlenbeckStateDependent::setWithinSpeciesVariance(const TypedDagNode< MatrixReal >* wsv)
 {
 
     // remove the old parameter first
-    this->removeParameter( species_VarOfMean );
-    species_VarOfMean   = NULL;
+    this->removeParameter( within_species_variance );
+    within_species_variance   = NULL;
 
     // set the value
-    species_VarOfMean   = sp_sem;
+    within_species_variance   = wsv;
 
     // add the new parameter
-    this->addParameter( species_VarOfMean );
+    this->addParameter( within_species_variance );
 
     // redraw the current value
     if ( this->dag_node == NULL || this->dag_node->isClamped() == false )
@@ -740,8 +878,118 @@ void PhyloOrnsteinUhlenbeckStateDependent::setVarianceOfSpeciesMean(const TypedD
 }
 
 
+double PhyloOrnsteinUhlenbeckStateDependent::computeVarianceOfSpeciesMean(size_t tip_index, size_t site_index) const
+{
 
-double PhyloOrnsteinUhlenbeckStateDependent::getWithinSpeciesSEM(const std::string &name, size_t site_index) const
+    double var_species_mean = 0;
+
+    size_t num_samples = number_of_samples_per_species->getValue()[site_index][tip_index];
+
+    if ( num_samples == 1 )
+    {
+        if ( single_sample_treatment == MEAN )
+        {
+            var_species_mean = mean_var_species_mean[site_index];
+        }
+        else if ( single_sample_treatment == MEDIAN )
+        {
+            var_species_mean = median_var_species_mean[site_index];
+        }
+        else if ( single_sample_treatment == AS_IS )
+        {
+            var_species_mean = within_species_variance->getValue()[site_index][tip_index];
+        }
+        else
+        {
+            // throw error
+        }
+    }
+    else if ( num_samples > 1 )
+    {
+        var_species_mean = within_species_variance->getValue()[site_index][tip_index] / num_samples;
+    }
+    else
+    {
+        throw RbException( "Number of samples for this species is not positive." );
+    }
+
+    return var_species_mean;
+}
+
+
+std::vector<double> PhyloOrnsteinUhlenbeckStateDependent::computeMeanVarianceOfSpeciesMean()
+{
+
+    size_t num_species = alphabetical_species_names.size();
+
+    for (size_t s=0; s<num_sites; ++s)
+    {
+        size_t num_species_multiple_sample = 0;
+        double var_for_site = 0.0;
+
+        for (size_t i=0; i<num_species; ++i)
+        {
+            double num_samples = number_of_samples_per_species->getValue()[s][i];
+
+            if ( num_samples > 1 )
+            {
+                var_for_site += within_species_variance->getValue()[s][i] / num_samples;
+                num_species_multiple_sample++;
+            }
+
+        }
+
+        if ( num_species_multiple_sample != 0 )
+        {
+            mean_var_species_mean[s] = var_for_site / num_species_multiple_sample;
+        }
+
+    }
+
+    return mean_var_species_mean;
+}
+
+
+void PhyloOrnsteinUhlenbeckStateDependent::computeMedianVarianceOfSpeciesMean()
+{
+
+    size_t num_species = alphabetical_species_names.size();
+
+    for (size_t s=0; s<num_sites; ++s)
+    {
+        std::vector<double> var_for_site;
+
+        for (size_t i=0; i<num_species; ++i)
+        {
+            double num_samples = number_of_samples_per_species->getValue()[s][i];
+
+            if ( num_samples > 1 )
+            {
+                double var = within_species_variance->getValue()[s][i] / num_samples;
+                var_for_site.push_back( var );
+            }
+
+        }
+
+        if ( var_for_site.size() != 0 )
+        {
+            sort( var_for_site.begin(), var_for_site.end() );
+            if (var_for_site.size() % 2 != 0) // if the number of elements is odd
+            {
+                median_var_species_mean[s] = var_for_site[var_for_site.size() / 2];
+            }
+            else                      // if the number of elements is odd
+            {
+                median_var_species_mean[s] = (var_for_site[(var_for_site.size() - 1) / 2] + var_for_site[var_for_site.size() / 2]) / 2.0;
+            }
+        }
+
+    }
+
+}
+
+
+double PhyloOrnsteinUhlenbeckStateDependent::getVarianceOfSpeciesMean(const std::string &name, size_t site_index) const
 {
 
     size_t tip_index = 0;
@@ -763,19 +1011,18 @@ double PhyloOrnsteinUhlenbeckStateDependent::getWithinSpeciesSEM(const std::stri
         throw RbException( "Cannot find this tip." );
     }
 
-    // get the selection rate for the branch
-    double sem     = 0.0;
+    double tip_var     = 0.0;
 
-    if ( this->species_VarOfMean != NULL )
+    if ( this->within_species_variance != NULL && this->number_of_samples_per_species != NULL)
     {
-        sem = species_VarOfMean->getValue()[site_index][tip_index];
+        tip_var = variance_of_species_mean[site_index][tip_index];
     }
     else
     {
-        sem = 0;
+        tip_var = 0;
     }
 
-    return sem;
+    return tip_var;
 }
 
 
@@ -1042,10 +1289,10 @@ std::vector<double> PhyloOrnsteinUhlenbeckStateDependent::simulateRootCharacters
         size_t left_index = left->getIndex();
         const CharacterHistory& left_history = character_histories->getValue();
         const BranchHistory& bh_left = left_history.getHistory(left_index);
-        size_t root_value_index  = static_cast<CharacterEventDiscrete*>(bh_left.getParentCharacters()[0])->getState();
-        theta = computeStateDependentTheta(root_value_index);
-        double sigma = computeStateDependentSigma(root_value_index);
-        double alpha = computeStateDependentAlpha(root_value_index);
+        size_t root_state_index  = static_cast<CharacterEventDiscrete*>(bh_left.getParentCharacters()[0])->getState();
+        theta = computeStateDependentTheta(root_state_index);
+        double sigma = computeStateDependentSigma(root_state_index);
+        double alpha = computeStateDependentAlpha(root_state_index);
         stationary_variance = sigma * sigma / (2 * alpha);
     }
 
