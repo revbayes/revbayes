@@ -887,25 +887,73 @@ void AbstractFossilizedBirthDeathRangeProcess::drawRanges()
 
     double present = times.front();
 
+    // The origin comes first, and every appearance is drawn under it. Drawing the appearances
+    // first and then hunting an origin above them fails whenever one lands above the prior's
+    // support, which a reported bin reaching past it allows.
+    double floor_age = 0.0;
+    for (size_t i = 0; i < taxa.size(); i++)
+    {
+        floor_age = std::max( floor_age, ranges[i].first_min );
+    }
+
+    if ( origin_age != NULL )
+    {
+        max = origin_age->getValue();
+    }
+    else if ( origin_prior != NULL )
+    {
+        // rejected against a bound the record fixes, so the acceptance rate does not depend on
+        // an age drawn earlier in this same pass
+        origin_prior->redrawValue();
+        for (size_t t = 0; t < 1000 && origin_prior->getValue() <= floor_age; t++)
+        {
+            origin_prior->redrawValue();
+        }
+
+        max = origin_prior->getValue();
+    }
+
     for (size_t i = 0; i < taxa.size(); i++)
     {
         // Draw d over its range, then the appearances NESTED (d <= last <= first)
-        // 1-rho is P(unseen | survived), not P(survived), so this over-starts taxa on the point mass
         if ( taxa[i].isExtinct() == false )
-        {
-            ranges[i].survived = true;
-            ranges[i].death = present;
-        }
-        else if ( survivors == true && homogeneous_rho->getValue() < 1.0
-                  && rng->uniform01() > homogeneous_rho->getValue() )
         {
             ranges[i].survived = true;
             ranges[i].death = present;
         }
         else
         {
-            ranges[i].survived = false;
-            ranges[i].death = rng->uniform01()*(ranges[i].last_max - present) + present;
+            // a lineage alive at its youngest reported age reaches the present with exp(-mu L),
+            // and is then missed there with 1-rho. Both branches are weighted by that, not by 1-rho
+            double L = ranges[i].last_max - present;
+            double m = death[ findIndex( ranges[i].last_max ) ];
+            bool   exponential = ( m > 0.0 && RbMath::isFinite(L) == true );
+
+            double p_survived = 0.0;
+            if ( survivors == true && exponential == true )
+            {
+                double reach = exp( -m * L );
+                p_survived = ( 1.0 - homogeneous_rho->getValue() ) * reach;
+                p_survived /= p_survived + 1.0 - reach;
+            }
+
+            if ( rng->uniform01() < p_survived )
+            {
+                ranges[i].survived = true;
+                ranges[i].death = present;
+            }
+            else if ( exponential == true )
+            {
+                // the same exponential, truncated to the deaths the record allows
+                double u = rng->uniform01();
+                ranges[i].survived = false;
+                ranges[i].death = ranges[i].last_max + log( 1.0 - u*( 1.0 - exp( -m * L ) ) ) / m;
+            }
+            else
+            {
+                ranges[i].survived = false;
+                ranges[i].death = rng->uniform01()*L + present;
+            }
         }
         ranges[i].birth = max;
 
@@ -922,30 +970,12 @@ void AbstractFossilizedBirthDeathRangeProcess::drawRanges()
     {
         size_t i = order[k];
 
-        // the oldest birth is the origin: a supplied one pins it, a prior supplies its support
+        // the oldest birth is the origin, already drawn above and bounding every appearance
         if ( k == 0 )
         {
-            if ( origin_age != NULL )
-            {
-                ranges[i].birth = origin_age->getValue();
-            }
-            else if ( origin_prior != NULL )
-            {
-                // the origin has to clear every oldest age, which a blind draw rarely does
-                double oldest = ranges[i].first;
-
-                origin_prior->redrawValue();
-                for (size_t t = 0; t < 1000 && origin_prior->getValue() <= oldest; t++)
-                {
-                    origin_prior->redrawValue();
-                }
-
-                ranges[i].birth = origin_prior->getValue();
-            }
-            else
-            {
-                ranges[i].birth = ranges[i].first + rng->uniform01()*(max - ranges[i].first);
-            }
+            ranges[i].birth = ( origin_age != NULL || origin_prior != NULL )
+                              ? max
+                              : ranges[i].first + rng->uniform01()*(max - ranges[i].first);
 
             continue;
         }
