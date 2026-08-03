@@ -1,7 +1,10 @@
 #ifndef RlFossilizedBirthDeathRangeProcess_H
 #define RlFossilizedBirthDeathRangeProcess_H
 
+#include "DistributionMemberFunction.h"
 #include "ModelVector.h"
+#include "RealPos.h"
+#include "RlDistributionMemberFunction.h"
 #include "Natural.h"
 #include "OptionRule.h"
 #include "RlDistribution.h"
@@ -32,6 +35,7 @@ namespace RevLanguage {
 
         // Basic utility functions you may want to overwrite
         const MemberRules&                                  getParameterRules(void) const;                                                      //!< Get member rules (const), including the reporting args
+        MethodTable                                         getDistributionMethods(void) const;                                                 //!< The range times and appearances, which no monitor can otherwise reach
         
         // Basic utility functions
         static const std::string&                           getClassType(void);                                                                 //!< Get Rev type
@@ -292,6 +296,31 @@ void RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::setConstParameter(co
         TypedDistribution<rlType>::setConstParameter(name,var);
     }
 
+}
+
+
+/** The range times and appearances, which are internal to the distribution. */
+template <typename rlType>
+RevLanguage::MethodTable RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::getDistributionMethods( void ) const
+{
+    MethodTable methods = TypedDistribution<rlType>::getDistributionMethods();
+
+    ArgumentRules* first_app_arg_rules = new ArgumentRules();
+    methods.addFunction( new DistributionMemberFunction<FossilizedBirthDeathRangeProcess<rlType>, ModelVector<RealPos> >( "getFirstAppearances", this->variable, first_app_arg_rules, true ) );
+
+    ArgumentRules* last_app_arg_rules = new ArgumentRules();
+    methods.addFunction( new DistributionMemberFunction<FossilizedBirthDeathRangeProcess<rlType>, ModelVector<RealPos> >( "getLastAppearances", this->variable, last_app_arg_rules, true ) );
+
+    ArgumentRules* origin_arg_rules = new ArgumentRules();
+    methods.addFunction( new DistributionMemberFunction<FossilizedBirthDeathRangeProcess<rlType>, RealPos >( "getOrigin", this->variable, origin_arg_rules, true ) );
+
+    ArgumentRules* origination_arg_rules = new ArgumentRules();
+    methods.addFunction( new DistributionMemberFunction<FossilizedBirthDeathRangeProcess<rlType>, ModelVector<RealPos> >( "getOriginationTimes", this->variable, origination_arg_rules, true ) );
+
+    ArgumentRules* extinction_arg_rules = new ArgumentRules();
+    methods.addFunction( new DistributionMemberFunction<FossilizedBirthDeathRangeProcess<rlType>, ModelVector<RealPos> >( "getExtinctionTimes", this->variable, extinction_arg_rules, true ) );
+
+    return methods;
 }
 
 #endif

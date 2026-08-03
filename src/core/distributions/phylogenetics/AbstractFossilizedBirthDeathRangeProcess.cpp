@@ -318,66 +318,13 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
 
         if ( dirty_taxa[i] == true || force )
         {
-            size_t bi = findIndex(b);
-            size_t oi = findIndex(o);
-            size_t di = findIndex(d);
-
-            partial_likelihood[i] = 0.0;
-
-            // include speciation density
-            partial_likelihood[i] += log( birth[bi] );
-
-            // multiply by q at the birth time
-            partial_likelihood[i] += q(bi, b);
-
-            // include intermediate q terms
-            for (size_t j = oi; j < bi; j++)
-            {
-                partial_likelihood[i] += q_i[j];
-            }
-
-            // skip the rest for extant taxa with no fossil samples
-            if ( max_age == present )
-            {
-                lnProb += partial_likelihood[i];
-
-                continue;
-            }
-
-            // replace q terms at oldest occurrence
-            partial_likelihood[i] += q(oi, o, true) - q(oi, o);
-
-            // include intermediate q_tilde terms
-            for (size_t j = di; j < oi; j++)
-            {
-                partial_likelihood[i] += q_tilde_i[j];
-            }
-
-            // divide by q_tilde at the death time
-            partial_likelihood[i] -= q( di, d, true);
-
-            // an extinction density, or whatever closes the range where that is marginalized
-            if ( d > present )
-            {
-                partial_likelihood[i] += rangeEndTerm( i, di, d );
-            }
-
+            partial_likelihood[i] = rangeLnProb( i );
         }
 
         lnProb += partial_likelihood[i];
     }
 
-    size_t ori = findIndex(origin);
-
-    // the origin is not a speciation event
-    lnProb -= log( birth[ori] );
-
-    // a supplied prior applies to the oldest birth, which is the origin
-    if ( origin_prior != NULL )
-    {
-        origin_prior->setValue( new double(origin) );
-        lnProb += origin_prior->computeLnProbability();
-    }
+    lnProb += originLnProb();
 
     // Extant tip age terms. Status is data
     double rho = homogeneous_rho->getValue();
@@ -393,16 +340,7 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
         lnProb += num_rho_unsampled * log( 1.0 - rho );
     }
 
-    // condition on sampling
-    if ( condition == "sampling" )
-    {
-        lnProb -= log( 1.0 - p(ori, origin, false) );
-    }
-    // condition on survival
-    else if ( condition == "survival" )
-    {
-        lnProb -= log( 1.0 - p(ori, origin, true) );
-    }
+    lnProb += conditionLnProb();
 
     if ( RbMath::isFinite(lnProb) == false )
     {
@@ -411,6 +349,100 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
 
     return lnProb;
 }
+
+
+/**
+ * Birth-death density of range i, with the q terms that carry the survival probability p(t).
+ *
+ * This is the only part of the range likelihood that a different birth-death model has to
+ * replace. Everything around it, the support checks, the rho terms and the caching, is the
+ * same whatever births and deaths are assumed.
+ */
+double AbstractFossilizedBirthDeathRangeProcess::rangeLnProb( size_t i )
+{
+    double b = ranges[i].birth;
+    double d = ranges[i].death;
+    double o = ranges[i].first;
+
+    double present = times.front();
+
+    size_t bi = findIndex(b);
+    size_t oi = findIndex(o);
+    size_t di = findIndex(d);
+
+    // include speciation density
+    double lnProb = log( birth[bi] );
+
+    // multiply by q at the birth time
+    lnProb += q(bi, b);
+
+    // include intermediate q terms
+    for (size_t j = oi; j < bi; j++)
+    {
+        lnProb += q_i[j];
+    }
+
+    // skip the rest for extant taxa with no fossil samples
+    if ( taxa[i].getMaxAge() == present )
+    {
+        return lnProb;
+    }
+
+    // replace q terms at oldest occurrence
+    lnProb += q(oi, o, true) - q(oi, o);
+
+    // include intermediate q_tilde terms
+    for (size_t j = di; j < oi; j++)
+    {
+        lnProb += q_tilde_i[j];
+    }
+
+    // divide by q_tilde at the death time
+    lnProb -= q( di, d, true);
+
+    // an extinction density, or whatever closes the range where that is marginalized
+    if ( d > present )
+    {
+        lnProb += rangeEndTerm( i, di, d );
+    }
+
+    return lnProb;
+}
+
+
+/** The origin is the oldest birth and not a speciation event, so its rate divides out. */
+double AbstractFossilizedBirthDeathRangeProcess::originLnProb( void )
+{
+    double lnProb = -log( birth[ findIndex(origin) ] );
+
+    // a supplied prior applies to the oldest birth, which is the origin
+    if ( origin_prior != NULL )
+    {
+        origin_prior->setValue( new double(origin) );
+        lnProb += origin_prior->computeLnProbability();
+    }
+
+    return lnProb;
+}
+
+
+/** Conditioning that applies to the process as a whole rather than range by range. */
+double AbstractFossilizedBirthDeathRangeProcess::conditionLnProb( void ) const
+{
+    size_t ori = findIndex(origin);
+
+    if ( condition == "sampling" )
+    {
+        return -log( 1.0 - p(ori, origin, false) );
+    }
+    if ( condition == "survival" )
+    {
+        return -log( 1.0 - p(ori, origin, true) );
+    }
+
+    return 0.0;
+}
+
 
 
 // Total fossil-occurrence log-density for a dnFossilRecord node. Reads the ranges the pull left.

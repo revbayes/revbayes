@@ -36,7 +36,6 @@ namespace RevLanguage {
         std::string                                             getDistributionFunctionName(void) const;                                                //!< Get the Rev-name for this distribution.
         const TypeSpec&                                         getTypeSpec(void) const;                                                                //!< Get the type spec of the instance
         const MemberRules&                                      getParameterRules(void) const;                                                          //!< Get member rules (const)
-        MethodTable                                             getDistributionMethods(void) const;                                                     //!< Member methods (augmented first/last ages)
         
         
         // Distribution functions you have to override

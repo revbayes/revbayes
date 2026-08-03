@@ -30,6 +30,9 @@ namespace RevBayesCore {
 
     protected:
         double                                          computeLnProbability(void) override;
+        double                                          rangeLnProb(size_t i) override;                 //!< Waiting times and a Poisson record, with no p(t).
+        double                                          originLnProb(void) override { return 0.0; }     //!< No origin term: this model has no p(t) to close the process with.
+        double                                          conditionLnProb(void) const override { return 0.0; } //!< Conditioning on sampling is per range here, inside rangeLnProb.
     };
 }
 

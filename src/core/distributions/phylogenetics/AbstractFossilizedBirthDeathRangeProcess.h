@@ -104,6 +104,9 @@ namespace RevBayesCore {
     protected:
         virtual bool                                    marginalizesExtinction(void) const { return false; }        //!< True when the extinction times are integrated out.
         virtual double                                  rangeEndTerm(size_t i, size_t di, double d) const { return log( death[di] ); } //!< Log term closing range i at d.
+        virtual double                                  rangeLnProb(size_t i);                                     //!< Birth-death density of range i. The one term a different birth-death model has to replace.
+        virtual double                                  originLnProb(void);                                        //!< Terms attaching to the origin rather than to a range.
+        virtual double                                  conditionLnProb(void) const;                               //!< The conditioning normalization, where it applies to the process as a whole.
 
         virtual void                                    repairRanges(void) {}                                       //!< Re-establish the invariants this process's own moves can break.
         virtual void                                    updateRanges() = 0;                                         //!< Pull the ranges from the value. Runs on touch, before the density reads them.

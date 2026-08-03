@@ -38,92 +38,63 @@ BirthDeathWithRateshifts* BirthDeathWithRateshifts::clone( void ) const
  * BDS (Silvestro et al. 2019) treats lineages as independent: no coexistence (gamma) factor, and
  * each range is normalized by the fossil non-detection probability e^{-psi_b_d} over [d,b].
  */
+/**
+ * The likelihood is the range process's, so only the birth-death term below differs. Nothing
+ * about rho does: the status flag is data here too, and a taxon reported extinct is free to
+ * have survived unseen and pay 1-rho.
+ */
 double BirthDeathWithRateshifts::computeLnProbability( void )
 {
-    prepareProbComputation();
+    // no gamma factor: lineages are independent under complete lineage sampling
+    return computeLnProbabilityRanges();
+}
 
-    double lnProb = 0.0;
 
-    size_t num_rho_sampled = 0;
+/**
+ * Birth-death density of range i under Silvestro et al. (2019): exponential waiting over the
+ * range and a Poisson record on it, with no survival probability p(t) anywhere.
+ */
+double BirthDeathWithRateshifts::rangeLnProb( size_t i )
+{
+    double b = ranges[i].birth;
+    double d = ranges[i].death;
 
-    // add the fossil tip age terms
-    for (size_t i = 0; i < taxa.size(); ++i)
+    double present = times.front();
+
+    size_t bi = findIndex(b);
+    size_t di = findIndex(d);
+
+    // include speciation density
+    double lnProb = log( birth[bi] );
+
+    // skip the rest for extant taxa with no fossil samples
+    if ( taxa[i].getMaxAge() == present )
     {
-        double b = ranges[i].birth;
-        double d = ranges[i].death;
-
-        double max_age = taxa[i].getMaxAge();
-
-        double present = times.front();
-
-        // check model constraints
-        if ( !( b > ranges[i].first_min && b > d && ranges[i].last_max >= d && d >= present ) )
-        {
-            return RbConstants::Double::neginf;
-        }
-        if ( (d > present) != taxa[i].isExtinct() )
-        {
-            return RbConstants::Double::neginf;
-        }
-
-        // count the number of rho-sampled tips (see computeLnProbabilityRanges)
-        num_rho_sampled += (d == present);
-
-        if ( dirty_taxa[i] == true )
-        {
-            size_t bi = findIndex(b);
-            size_t di = findIndex(d);
-
-            partial_likelihood[i] = 0.0;
-
-            // include speciation density
-            partial_likelihood[i] += log( birth[bi] );
-
-            // skip the rest for extant taxa with no fossil samples
-            if ( max_age == present )
-            {
-                continue;
-            }
-
-            // include extinction density
-            if (d > present) partial_likelihood[i] += log( death[di] );
-
-            double psi_b_d = 0.0;
-
-            // include poisson density
-            for ( size_t j = di; j <= bi; j++ )
-            {
-                double t_0 = ( j < num_intervals-1 ? times[j+1] : RbConstants::Double::inf );
-
-                double dt = std::min(b, t_0) - std::max(d, times[j]);
-
-                partial_likelihood[i] -= (birth[j] + death[j])*dt;
-
-                psi_b_d += fossil[j]*dt;
-            }
-
-            // fossil non-sampling normalization over [d,b] (range-process term)
-            partial_likelihood[i] -= psi_b_d;
-
-            if ( condition == "sampling" )
-            {
-                partial_likelihood[i] -= log(-expm1(-psi_b_d));
-            }
-
-        }
-
-        lnProb += partial_likelihood[i];
+        return lnProb;
     }
 
-    // add the sampled extant tip age term
-    if ( homogeneous_rho->getValue() > 0.0)
+    // include extinction density
+    if ( d > present ) lnProb += log( death[di] );
+
+    double psi_b_d = 0.0;
+
+    for ( size_t j = di; j <= bi; j++ )
     {
-        lnProb += num_rho_sampled * log( homogeneous_rho->getValue() );
+        double t_0 = ( j < num_intervals-1 ? times[j+1] : RbConstants::Double::inf );
+
+        double dt = std::min(b, t_0) - std::max(d, times[j]);
+
+        lnProb -= (birth[j] + death[j])*dt;
+
+        psi_b_d += fossil[j]*dt;
     }
 
-    if ( RbMath::isFinite(lnProb) == false )
+    // fossil non-sampling normalization over [d,b]
+    lnProb -= psi_b_d;
+
+    if ( condition == "sampling" )
     {
-        return RbConstants::Double::neginf;
+        lnProb -= log(-expm1(-psi_b_d));
     }
 
     return lnProb;

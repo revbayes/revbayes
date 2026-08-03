@@ -245,28 +245,3 @@ void Dist_FBDRP::setConstParameter(const std::string& name, const RevPtr<const R
 }
 
 
-/**
- * The first (tau_1) and last (tau_K) appearances, and the times the range originates and ends. They
- * are internal to the distribution, so a deterministic node is the only way a monitor reaches them.
- */
-RevLanguage::MethodTable Dist_FBDRP::getDistributionMethods( void ) const
-{
-    MethodTable methods = TypedDistribution<MatrixReal>::getDistributionMethods();
-
-    ArgumentRules* first_app_arg_rules = new ArgumentRules();
-    methods.addFunction( new DistributionMemberFunction<Dist_FBDRP, ModelVector<RealPos> >( "getFirstAppearances", variable, first_app_arg_rules, true ) );
-
-    ArgumentRules* last_app_arg_rules = new ArgumentRules();
-    methods.addFunction( new DistributionMemberFunction<Dist_FBDRP, ModelVector<RealPos> >( "getLastAppearances", variable, last_app_arg_rules, true ) );
-
-    ArgumentRules* origin_arg_rules = new ArgumentRules();
-    methods.addFunction( new DistributionMemberFunction<Dist_FBDRP, RealPos >( "getOrigin", variable, origin_arg_rules, true ) );
-
-    ArgumentRules* origination_arg_rules = new ArgumentRules();
-    methods.addFunction( new DistributionMemberFunction<Dist_FBDRP, ModelVector<RealPos> >( "getOriginationTimes", variable, origination_arg_rules, true ) );
-
-    ArgumentRules* extinction_arg_rules = new ArgumentRules();
-    methods.addFunction( new DistributionMemberFunction<Dist_FBDRP, ModelVector<RealPos> >( "getExtinctionTimes", variable, extinction_arg_rules, true ) );
-
-    return methods;
-}
