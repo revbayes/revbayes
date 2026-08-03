@@ -52,9 +52,10 @@ FossilizedBirthDeathRangeProcess::FossilizedBirthDeathRangeProcess(const DagNode
                                                                      const std::vector<Taxon> &intaxa,
                                                                      bool complete_record,
                                                                                                                                           const TypedDagNode<double> *inorigin,
-                                                                     TypedDistribution<double> *inoriginprior) :
+                                                                     TypedDistribution<double> *inoriginprior,
+                                                                     bool insurvivors) :
     TypedDistribution<MatrixReal>(new MatrixReal(intaxa.size(), 4)),
-    AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, complete_record, inorigin, inoriginprior)
+    AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, complete_record, inorigin, inoriginprior, insurvivors)
 {
 
     dirty_gamma = std::vector<bool>(taxa.size(), true);
@@ -110,6 +111,9 @@ void FossilizedBirthDeathRangeProcess::setValue(MatrixReal *v, bool force)
         // read them from the value, not the table, which still holds the draw this replaces
         ranges[i].last  = (*this->value)[i][1];
         ranges[i].first = (*this->value)[i][2];
+
+        // a value from outside carries no status, so take the one its death implies
+        ranges[i].survived = ( d == getPresent() );
 
         // oldest age: valid range [max(first_min,d), min(max_age,b))
         double lo = std::max( ranges[i].first_min, d );

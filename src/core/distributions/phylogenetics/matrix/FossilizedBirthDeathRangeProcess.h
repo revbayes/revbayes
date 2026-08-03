@@ -42,7 +42,8 @@ namespace RevBayesCore {
 										  const std::vector<Taxon> &taxa,
 										  bool complete_record,
                                           const TypedDagNode<double>* origin = NULL,
-                                          TypedDistribution<double>* origin_prior = NULL);
+                                          TypedDistribution<double>* origin_prior = NULL,
+                                          bool survivors = true);
         
         // public member functions
         void                                            setMcmcMode(bool tf) override;

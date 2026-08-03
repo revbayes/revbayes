@@ -74,7 +74,7 @@ double BirthDeathWithRateshifts::rangeLnProb( size_t i )
     }
 
     // include extinction density
-    if ( d > present ) lnProb += log( death[di] );
+    if ( ranges[i].survived == false ) lnProb += log( death[di] );
 
     double psi_b_d = 0.0;
 

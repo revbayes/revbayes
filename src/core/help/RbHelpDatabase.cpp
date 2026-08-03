@@ -3650,6 +3650,27 @@ moves[1] = mvEmpiricalTree(tree))");
 	help_strings[string("mvEmpiricalTree")][string("title")] = string(R"(Move on an empirical tree distribution)");
 	help_strings[string("mvEventTimeBeta")][string("name")] = string(R"(mvEventTimeBeta)");
 	help_strings[string("mvEventTimeSlide")][string("name")] = string(R"(mvEventTimeSlide)");
+	help_strings[string("mvExtinctionRJSwitch")][string("description")] = string(R"(Moves one taxon's extinction time between the present, where it survived to the present without
+being sampled, and a time above it.)");
+	help_strings[string("mvExtinctionRJSwitch")][string("details")] = string(R"(When rho is below one, a taxon reported extinct may have survived unsampled. Its extinction time
+then has a point mass at the present, carrying weight 1 - rho, mixed with a density over times
+above it. The element moves are continuous, so the point has probability zero under them and is
+never proposed. This move jumps between the two states, which is what makes rho < 1 samplable.
+
+One direction is deterministic and the other draws uniformly below the taxon's youngest
+appearance, so the Hastings ratio is the width of that support. Taxa reported extant are pinned at
+the present and are never chosen.
+
+At rho = 1 the point mass has no weight and the move is wasted effort, not an error.)");
+	help_strings[string("mvExtinctionRJSwitch")][string("example")] = string(R"(bd ~ dnFBDRP(taxa=taxa, lambda=lambda, mu=mu, psi=psi, rho=0.5, timeline=timeline)
+
+moves.append( mvMatrixElementSlide(bd, delta=1, weight=taxa.size()/10) )
+moves.append( mvExtinctionRJSwitch(bd, weight=taxa.size()/10) ))");
+	help_strings[string("mvExtinctionRJSwitch")][string("name")] = string(R"(mvExtinctionRJSwitch)");
+	help_arrays[string("mvExtinctionRJSwitch")][string("see_also")].push_back(string(R"(mvMatrixElementSlide)"));
+	help_arrays[string("mvExtinctionRJSwitch")][string("see_also")].push_back(string(R"(mvStratigraphicRange)"));
+	help_arrays[string("mvExtinctionRJSwitch")][string("see_also")].push_back(string(R"(mvRJSwitch)"));
+	help_strings[string("mvExtinctionRJSwitch")][string("title")] = string(R"(Jump a taxon's extinction time to and from the present)");
 	help_strings[string("mvFNPR")][string("description")] = string(R"(Tree topology move that prunes and re-attaches a subtree without changing any
 node heights.)");
 	help_strings[string("mvFNPR")][string("details")] = string(R"(`mvFNPR` randomly picks node i which is neither a tip nor the root, and prunes

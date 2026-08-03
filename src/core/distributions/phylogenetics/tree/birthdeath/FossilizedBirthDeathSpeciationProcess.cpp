@@ -333,6 +333,12 @@ void FossilizedBirthDeathSpeciationProcess::setValue(Tree *v, bool force)
     prepareProbComputation();
     updateRanges();
 
+    // a tree from outside carries no status, so take the one its tip ages imply
+    for (size_t i = 0; i < taxa.size(); ++i)
+    {
+        ranges[i].survived = ( ranges[i].death == getPresent() );
+    }
+
     // drawn against the tree the constructor built, so draw them again inside this one
     if ( adoptAppearances() == false )
     {

@@ -44,7 +44,11 @@ namespace RevLanguage {
     protected:
 
         void                                                    setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);       //!< Set member variable
-    
+
+    private:
+
+        RevPtr<const RevVariable>                               survivors;                                                                    //!< May a taxon reported extinct have survived unseen?
+
     };
     
 }

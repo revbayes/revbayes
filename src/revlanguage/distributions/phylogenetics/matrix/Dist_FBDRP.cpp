@@ -119,8 +119,11 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRP::createDistribution( 
     RevBayesCore::TypedDistribution<double>* op = createOriginPrior();
 
     // the bare range process: the fossil-record term belongs to a dnFossilRecord node
-    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, true, NULL, op);
-    
+    // may a taxon reported extinct have survived to the present unseen
+    bool surv = static_cast<const RlBoolean &>( survivors->getRevObject() ).getValue();
+
+    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, true, NULL, op, surv);
+
     return d;
 }
 
@@ -202,6 +205,8 @@ const MemberRules& Dist_FBDRP::getParameterRules(void) const
     {
         dist_member_rules.push_back( originPriorRule() );
 
+        dist_member_rules.push_back( new ArgumentRule( "survivors", RlBoolean::getClassTypeSpec(), "Allow unsampled survivors?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( true ) ) );
+
         // add the rules from the base class, without the reporting args
         const MemberRules &parentRules = FossilizedBirthDeathRangeProcess<MatrixReal>::getCoreParameterRules();
         dist_member_rules.insert(dist_member_rules.end(), parentRules.begin(), parentRules.end());
@@ -240,7 +245,14 @@ const TypeSpec& Dist_FBDRP::getTypeSpec( void ) const
 void Dist_FBDRP::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
 {
 
+    if ( name == "survivors" )
+    {
+        survivors = var;
+    }
+    else
+    {
            FossilizedBirthDeathRangeProcess<MatrixReal>::setConstParameter(name,var);
+    }
 
 }
 

@@ -46,7 +46,8 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
                                                                          const std::vector<Taxon> &intaxa,
                                                                          bool comp,
                                                                          const TypedDagNode<double> *inorigin,
-                                                                         TypedDistribution<double> *inoriginprior) :
+                                                                         TypedDistribution<double> *inoriginprior,
+                                                                         bool survivors) :
     taxa(intaxa),
     condition(incondition),
     homogeneous_rho(inrho),
@@ -56,7 +57,8 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
     origin(0.0),
     max_birth(0),
     resampled(false),
-    touched(false)
+    touched(false),
+    survivors(survivors)
 {
     // initialize all the pointers to NULL
     homogeneous_lambda             = NULL;
@@ -305,16 +307,25 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
         {
             return RbConstants::Double::neginf;
         }
-        // the status flag is the rho datum: seeing a taxon at the present pins its death there,
-        // but not seeing one leaves it free to have survived unseen and pay 1-rho
-        if ( taxa[i].isExtinct() == false && d != present )
+        // a survivor ends at the present, so a continuous move that walks d off it is rejected here
+        if ( ranges[i].survived == true && d != present )
+        {
+            return RbConstants::Double::neginf;
+        }
+        // survivors = false forbids the point mass outright
+        if ( ranges[i].survived == true && survivors == false )
+        {
+            return RbConstants::Double::neginf;
+        }
+        // seeing a taxon at the present means it survived
+        if ( taxa[i].isExtinct() == false && ranges[i].survived == false )
         {
             return RbConstants::Double::neginf;
         }
 
         num_rho_sampled   += ( taxa[i].isExtinct() == false );          // l
         // a marginalized range closes with p(), which already carries the survived-unseen branch
-        num_rho_unsampled += ( taxa[i].isExtinct() && d == present && marginalizesExtinction() == false );    // n - m - l
+        num_rho_unsampled += ( taxa[i].isExtinct() && ranges[i].survived && marginalizesExtinction() == false );    // n - m - l
 
         if ( dirty_taxa[i] == true || force )
         {
@@ -401,7 +412,7 @@ double AbstractFossilizedBirthDeathRangeProcess::rangeLnProb( size_t i )
     lnProb -= q( di, d, true);
 
     // an extinction density, or whatever closes the range where that is marginalized
-    if ( d > present )
+    if ( ranges[i].survived == false )
     {
         lnProb += rangeEndTerm( i, di, d );
     }
@@ -769,7 +780,11 @@ void AbstractFossilizedBirthDeathRangeProcess::initializeFirstLast(size_t i)
     if ( augment_youngest == false ) ranges[i].last = ranges[i].first;
 
     // a non-extended extinct range ends at its youngest appearance, so build the tree there
-    if ( marginalizesExtinction() == true && taxa[i].isExtinct() == true ) ranges[i].death = ranges[i].last;
+    if ( marginalizesExtinction() == true && taxa[i].isExtinct() == true )
+    {
+        ranges[i].death = ranges[i].last;
+        ranges[i].survived = ( ranges[i].last == times.front() );
+    }
 
     dirty_taxa[i] = true;   // written straight into the table, where the pull cannot see it
 }
@@ -793,6 +808,19 @@ void AbstractFossilizedBirthDeathRangeProcess::warnIfNoReportingNode( void ) con
         warned_no_reporting = true;
         RBOUT("Warning: no dnFossilRecord node. Fossil sampling is not scored and psi has no data.");
     }
+}
+
+
+/** Flip taxon i between surviving and dying. The caller sets the death time to match. */
+void AbstractFossilizedBirthDeathRangeProcess::switchSurvived(size_t i)
+{
+    switched_range  = i;
+    stored_survived = ranges[i].survived;
+    switched        = true;
+
+    ranges[i].survived = !ranges[i].survived;
+
+    dirty_taxa[i] = true;   // no value carries this, so the pull cannot see the write
 }
 
 
@@ -862,7 +890,23 @@ void AbstractFossilizedBirthDeathRangeProcess::drawRanges()
     for (size_t i = 0; i < taxa.size(); i++)
     {
         // Draw d over its range, then the appearances NESTED (d <= last <= first)
-        ranges[i].death = taxa[i].isExtinct() ? rng->uniform01()*(ranges[i].last_max - present) + present : present;
+        // 1-rho is P(unseen | survived), not P(survived), so this over-starts taxa on the point mass
+        if ( taxa[i].isExtinct() == false )
+        {
+            ranges[i].survived = true;
+            ranges[i].death = present;
+        }
+        else if ( survivors == true && homogeneous_rho->getValue() < 1.0
+                  && rng->uniform01() > homogeneous_rho->getValue() )
+        {
+            ranges[i].survived = true;
+            ranges[i].death = present;
+        }
+        else
+        {
+            ranges[i].survived = false;
+            ranges[i].death = rng->uniform01()*(ranges[i].last_max - present) + present;
+        }
         ranges[i].birth = max;
 
         initializeFirstLast(i);
@@ -924,6 +968,7 @@ void AbstractFossilizedBirthDeathRangeProcess::keepSpecialization(const DagNode 
     dirty_taxa = std::vector<bool>(taxa.size(), false);
 
     resampled = false;
+    switched = false;
     touched = false;
 }
 
@@ -941,9 +986,15 @@ void AbstractFossilizedBirthDeathRangeProcess::restoreSpecialization(const DagNo
         ranges[stored_range].last  = stored_last;
     }
 
+    if ( switched )
+    {
+        ranges[switched_range].survived = stored_survived;
+    }
+
     dirty_taxa = std::vector<bool>(taxa.size(), false);
 
     resampled = false;
+    switched = false;
     touched = false;
 }
 

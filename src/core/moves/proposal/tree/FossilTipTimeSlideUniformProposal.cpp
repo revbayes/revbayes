@@ -14,6 +14,7 @@
 #include "StochasticNode.h"
 #include "TopologyNode.h"
 #include "Tree.h"
+#include "TreeDistributionProperties.h"
 
 namespace RevBayesCore { class DagNode; }
 
@@ -112,7 +113,10 @@ double FossilTipTimeSlideUniformProposal::doProposal( void )
     RandomNumberGenerator* rng     = GLOBAL_RNG;
     
     Tree& tau = tree->getValue();
-    
+
+    const TreeDistributionProperties *props = dynamic_cast<const TreeDistributionProperties *>( &tree->getDistribution() );
+    bool extended = ( props != NULL && props->isExtended() );
+
     // We shouldn't have to do this -- it should be enough to, say, invalidate the node_index in the constructor, check that
     // use_index is true AND node_index is invalidated in the prepareProposal() function, and then let that function compute
     // the node_index if (and only if) both conditions are met. However, this is not enough to prevent mismatches between the
@@ -129,7 +133,9 @@ double FossilTipTimeSlideUniformProposal::doProposal( void )
         for (size_t i = 0; i < tau.getNumberOfTips(); ++i)
         {
             TopologyNode* node = &tau.getNode(i);
-            if ( node->isFossil() )
+            // on an extended tree a tip is an extinction, which the taxon declares. Its age may
+            // already sit at the present, where isFossil() would miss it
+            if ( extended == true ? node->getTaxon().isExtinct() : node->isFossil() )
             {
                 tips.push_back(i);
             }
@@ -225,13 +231,35 @@ double FossilTipTimeSlideUniformProposal::doProposal( void )
     } else {
         max_age = fmin(max_age, parent_age);
     }
+
+    if ( extended == true )
+    {
+        // the tip is an extinction, bounded by the present and the youngest occurrence rather than
+        // by the parent. A parent-dependent window would need a Hastings term.
+        const std::vector<std::pair<TimeInterval, size_t> >& occurrences = node.getTaxon().getOccurrences();
+
+        min_age = 0.0;
+        max_age = node.getTaxon().getMaxAge();
+
+        // a death lies at or below every occurrence, so the binding bound is the youngest maximum
+        for (std::vector<std::pair<TimeInterval, size_t> >::const_iterator it = occurrences.begin(); it != occurrences.end(); ++it)
+        {
+            max_age = fmin(max_age, it->first.getMax());
+        }
+    }
     
     // now we store all necessary values
     stored_age = my_age;
     
     double size = max_age - min_age;
-    assert(size >= 0); //otherwise the while will hang forever
-    
+
+    // an inverted window makes the reflection below bounce forever
+    if ( size <= 0.0 )
+    {
+        failed = true;
+        return RbConstants::Double::neginf;
+    }
+
     double u      = rng->uniform01();
     double delta  = ( lambda * ( u - 0.5 ) );
     

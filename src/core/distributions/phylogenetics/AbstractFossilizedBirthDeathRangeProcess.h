@@ -33,6 +33,9 @@ namespace RevBayesCore {
 
         bool    singleton = true;                           //!< Fewer than two occurrences, so the appearances are one age.
 
+        //!< Alive at the present. In no value, so only mvExtinctionRJSwitch changes it.
+        bool    survived = false;
+
         //!< Ages never decrease into the past, and each appearance sits within the bins reporting it.
         bool    isOrdered(double present) const
                 {
@@ -80,7 +83,8 @@ namespace RevBayesCore {
                                             const std::vector<Taxon> &taxa,
                                             bool complete_record,
                                             const TypedDagNode<double>* origin = NULL,
-                                            TypedDistribution<double>* origin_prior = NULL);  //!< Constructor
+                                            TypedDistribution<double>* origin_prior = NULL,
+                                            bool survivors = true);  //!< Constructor
 
         virtual ~AbstractFossilizedBirthDeathRangeProcess(){};
 
@@ -89,14 +93,19 @@ namespace RevBayesCore {
 
         void                                            executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const;   //!< Expose the appearances and the origination/extinction times.
         void                                            executeMethod(const std::string &n, const std::vector<const DagNode*> &args, double &rv) const;              //!< Expose the origin.
+        double                                          getPresent() const { return times.front(); }               //!< The youngest interval boundary, which extinction times cannot precede.
         const std::vector<Taxon>&                       getTaxa() const { return taxa; }
         void                                            resampleFirstLast(size_t i);                                //!< Redraw taxon i's appearances within its reported bins.
+        bool                                            hasSurvived(size_t i) const { return ranges[i].survived; }  //!< Taxon i's latent status: alive at the present.
+        double                                          getLastAppearance(size_t i) const { return ranges[i].last; } //!< tau_K, which a tree does not carry.
+        void                                            switchSurvived(size_t i);                                   //!< Flip that status, arming the undo. Only mvExtinctionRJSwitch may.
         void                                            warnIfNoResampleMove(void) const;                           //!< Warn once when the appearances have no move.
         void                                            warnIfNoReportingNode(void) const;                          //!< Warn once when psi has no data.
         void                                            initializeFirstLast(size_t i);                              //!< Draw taxon i's appearances, nested within the range and its reported bins.
         void                                            drawRanges();                                               //!< Draw an initial range and appearances for every taxon.
         double                                          computeLnFossilTotal();                                     //!< Total fossil-record log-density, for a dnFossilRecord node.
         void                                            setCompleteRecord(bool comp) { record_complete = comp; }    //!< The reporting model, pushed here by dnFossilRecord.
+        bool                                            unsampledSurvivors(void) const { return survivors; }        //!< False forbids the point mass outright.
 
         virtual void                                    setOccurrences(const std::vector<Taxon> &t);                //!< Adopt a clamped record's occurrences as the data.
         const std::vector<const DagNode*>&              getRangeParameters(void) const { return range_parameters; } //!< The rate and timeline nodes a dnFossilRecord adopts as parents.
@@ -172,6 +181,10 @@ namespace RevBayesCore {
         double                                          stored_first = 0.0;                                     //!< Taken in the proposal, before the pull, so it undoes the proposal's write.
         double                                          stored_last  = 0.0;
 
+        size_t                                          switched_range = 0;                                     //!< The range mvExtinctionRJSwitch flipped, and the status it replaced.
+        bool                                            stored_survived = false;                                //!< Taken in the proposal, before the pull, like the two ages above.
+        bool                                            switched = false;                                       //!< That undo is armed.
+
         std::vector<RangeEntry>                         stored_ranges;                                          //!< The table as the proposal found it, restored when it is rejected.
 
         std::vector<double>                             partial_likelihood;                                     //!< Partial likelihood for each taxon
@@ -185,6 +198,8 @@ namespace RevBayesCore {
         mutable bool                                    warned_no_resample = false;                             //!< setMcmcMode fires more than once per run.
         mutable bool                                    warned_no_reporting = false;
         bool                                            resampled;                                              //!< The undo above is armed.
+        //!< False forbids the point mass, leaving a continuous extinction time.
+        bool                                            survivors = true;
     };
 }
 
