@@ -3855,9 +3855,9 @@ mymcmc = mcmc(mymodel, moves, monitors)
 mymcmc.run(30000,underPrior=TRUE);)");
 	help_strings[string("mvGammaScale")][string("name")] = string(R"(mvGammaScale)");
 	help_arrays[string("mvGammaScale")][string("see_also")].push_back(string(R"(mvScale)"));
-	help_arrays[string("mvGibbsBuddingTopology")][string("authors")].push_back(string(R"(June Walker)"));
-	help_strings[string("mvGibbsBuddingTopology")][string("description")] = string(R"(Redraws the whole budding (asymmetric speciation) topology of a `dnFBDSP` tree, holding the species ranges fixed.)");
-	help_strings[string("mvGibbsBuddingTopology")][string("details")] = string(R"(Each lineage is assigned an ancestor drawn uniformly from those alive at its birth. Conditional on the ranges every compatible tree carries the same probability, which is what the range process `dnFBDRP` states as a factor of gamma per taxon, so the draw is from the exact conditional and every proposal is accepted.
+	help_arrays[string("mvBuddingTopologyRedraw")][string("authors")].push_back(string(R"(June Walker)"));
+	help_strings[string("mvBuddingTopologyRedraw")][string("description")] = string(R"(Redraws the whole budding (asymmetric speciation) topology of a `dnFBDSP` tree, holding the species ranges fixed.)");
+	help_strings[string("mvBuddingTopologyRedraw")][string("details")] = string(R"(Each lineage is assigned an ancestor drawn uniformly from those alive at its birth. Conditional on the ranges every compatible tree carries the same probability, which is what the range process `dnFBDRP` states as a factor of gamma per taxon, so the draw is from the exact conditional and every proposal is accepted.
 
 That equality needs pure budding. With `lambda_a > 0` an anagenetic attachment sits exactly at the ancestor's extinction time and carries `lambda_a` in place of `lambda` and `mu`, so compatible trees no longer share one density. The uniform draw cannot reach such an attachment, and rebuilding a budding tree would discard every sampled ancestor, so the move refuses to be set up on a process with a positive anagenetic rate. Use the MH topology moves there.
 
@@ -3868,21 +3868,21 @@ The other topology moves rearrange one branch at a time and reach these trees by
 It rebuilds each budding node at the birth age the taxon already has, so it redraws which lineage a species buds from but never which species buds. The oldest birth in particular is taken as the root lineage and is never reattached. Pair it with `mvRotateNode`, which swaps the roles at a node and is the only move that relabels which lineage carries a given birth age. Without it the oldest birth stays on one taxon for the whole run and every per-taxon birth age is sampled too narrowly.
 
 Ranges and node ages are untouched, so the move needs company for those too: `mvFossilTipTimeUniform` for the extinction times and `mvNodeTimeSlideUniform` with `mvRootTimeSlideUniform` for the speciation times.)");
-	help_strings[string("mvGibbsBuddingTopology")][string("example")] = string(R"(tr ~ dnFBDSP(origin=origin, lambda=lambda, mu=mu, psi=psi, rho=1, timeline=timeline, taxa=taxa)
+	help_strings[string("mvBuddingTopologyRedraw")][string("example")] = string(R"(tr ~ dnFBDSP(origin=origin, lambda=lambda, mu=mu, psi=psi, rho=1, timeline=timeline, taxa=taxa)
 rec ~ dnFossilRecord(ranges=tr, complete=false)
 rec.clamp(taxa)
 
-moves.append( mvGibbsBuddingTopology(tr, weight=taxa.size()) )
+moves.append( mvBuddingTopologyRedraw(tr, weight=taxa.size()) )
 # relabels which lineage carries each birth age; the Gibbs move cannot
 moves.append( mvRotateNode(tr, weight=taxa.size()) )
 moves.append( mvFossilTipTimeUniform(tr, weight=taxa.size()) )
 moves.append( mvNodeTimeSlideUniform(tr, weight=taxa.size()) )
 moves.append( mvRootTimeSlideUniform(tr, origin, weight=2) ))");
-	help_strings[string("mvGibbsBuddingTopology")][string("name")] = string(R"(mvGibbsBuddingTopology)");
-	help_arrays[string("mvGibbsBuddingTopology")][string("see_also")].push_back(string(R"(dnFossilizedBirthDeathSpeciation)"));
-	help_arrays[string("mvGibbsBuddingTopology")][string("see_also")].push_back(string(R"(mvRotateNode)"));
-	help_arrays[string("mvGibbsBuddingTopology")][string("see_also")].push_back(string(R"(mvFNPR)"));
-	help_strings[string("mvGibbsBuddingTopology")][string("title")] = string(R"(Gibbs draw of a budding topology)");
+	help_strings[string("mvBuddingTopologyRedraw")][string("name")] = string(R"(mvBuddingTopologyRedraw)");
+	help_arrays[string("mvBuddingTopologyRedraw")][string("see_also")].push_back(string(R"(dnFossilizedBirthDeathSpeciation)"));
+	help_arrays[string("mvBuddingTopologyRedraw")][string("see_also")].push_back(string(R"(mvRotateNode)"));
+	help_arrays[string("mvBuddingTopologyRedraw")][string("see_also")].push_back(string(R"(mvFNPR)"));
+	help_strings[string("mvBuddingTopologyRedraw")][string("title")] = string(R"(Gibbs draw of a budding topology)");
 	help_strings[string("mvGibbsDrawCharacterHistory")][string("name")] = string(R"(mvGibbsDrawCharacterHistory)");
 	help_strings[string("mvGibbsMixtureAllocation")][string("name")] = string(R"(mvGibbsMixtureAllocation)");
 	help_strings[string("mvGraphFlipClique")][string("name")] = string(R"(mvGraphFlipClique)");
@@ -4142,7 +4142,7 @@ The continuation determines each range's origination time, so the topology moves
 moves.append( mvRotateNode(tr, weight=taxa.size()/2) ))");
 	help_strings[string("mvRotateNode")][string("name")] = string(R"(mvRotateNode)");
 	help_arrays[string("mvRotateNode")][string("see_also")].push_back(string(R"(dnFossilizedBirthDeathSpeciation)"));
-	help_arrays[string("mvRotateNode")][string("see_also")].push_back(string(R"(mvGibbsBuddingTopology)"));
+	help_arrays[string("mvRotateNode")][string("see_also")].push_back(string(R"(mvBuddingTopologyRedraw)"));
 	help_arrays[string("mvRotateNode")][string("see_also")].push_back(string(R"(mvStratigraphicRange)"));
 	help_strings[string("mvRotateNode")][string("title")] = string(R"(Species continuation move)");
 	help_arrays[string("mvSPR")][string("authors")].push_back(string(R"(June Walker)"));

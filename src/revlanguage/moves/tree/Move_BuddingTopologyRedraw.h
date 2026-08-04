@@ -1,5 +1,5 @@
-#ifndef Move_GibbsBuddingTopology_H
-#define Move_GibbsBuddingTopology_H
+#ifndef Move_BuddingTopologyRedraw_H
+#define Move_BuddingTopologyRedraw_H
 
 #include <ostream>
 #include <string>
@@ -13,17 +13,17 @@ namespace RevLanguage {
     class TypeSpec;
 
     /**
-     * @brief Rev wrapper class for the GibbsBuddingTopology move.
+     * @brief Rev wrapper class for the BuddingTopologyRedraw move.
      *
      * Draws a new extinction time for a random extinct tip of an extended tree.
      */
-    class Move_GibbsBuddingTopology : public Move {
+    class Move_BuddingTopologyRedraw : public Move {
 
     public:
 
-        Move_GibbsBuddingTopology(void);                                                                                          //!< Default constructor
+        Move_BuddingTopologyRedraw(void);                                                                                          //!< Default constructor
 
-        virtual Move_GibbsBuddingTopology*        clone(void) const;                                                                      //!< Clone object
+        virtual Move_BuddingTopologyRedraw*        clone(void) const;                                                                      //!< Clone object
         void                                        constructInternalObject(void);                                                          //!< We construct the a new internal Move.
         static const std::string&                   getClassType(void);                                                                     //!< Get Rev type
         static const TypeSpec&                      getClassTypeSpec(void);                                                                 //!< Get class type spec

@@ -1,5 +1,5 @@
-#ifndef GibbsBuddingTopologyProposal_H
-#define GibbsBuddingTopologyProposal_H
+#ifndef BuddingTopologyRedrawProposal_H
+#define BuddingTopologyRedrawProposal_H
 
 #include <iosfwd>
 
@@ -34,14 +34,14 @@ namespace RevBayesCore {
      * @since 2026-07-19, version 1.0
      *
      */
-    class GibbsBuddingTopologyProposal : public Proposal {
+    class BuddingTopologyRedrawProposal : public Proposal {
 
     public:
-        GibbsBuddingTopologyProposal( StochasticNode<Tree> *n );                                      //!< constructor
+        BuddingTopologyRedrawProposal( StochasticNode<Tree> *n );                                      //!< constructor
 
         // Basic utility functions
         void                                    cleanProposal(void);                                            //!< Clean up proposal
-        GibbsBuddingTopologyProposal*           clone(void) const;                                              //!< Clone object
+        BuddingTopologyRedrawProposal*           clone(void) const;                                              //!< Clone object
         double                                  doProposal(void);                                               //!< Perform proposal
         const std::string&                      getProposalName(void) const;                                    //!< Get the name of the proposal for summary printing
         double                                  getProposalTuningParameter(void) const;

@@ -1,5 +1,5 @@
 ## name
-mvGibbsBuddingTopology
+mvBuddingTopologyRedraw
 
 ## title
 Gibbs draw of a budding topology
@@ -33,7 +33,7 @@ tr ~ dnFBDSP(origin=origin, lambda=lambda, mu=mu, psi=psi, rho=1, timeline=timel
 rec ~ dnFossilRecord(ranges=tr, complete=false)
 rec.clamp(taxa)
 
-moves.append( mvGibbsBuddingTopology(tr, weight=taxa.size()) )
+moves.append( mvBuddingTopologyRedraw(tr, weight=taxa.size()) )
 # relabels which lineage carries each birth age; the Gibbs move cannot
 moves.append( mvRotateNode(tr, weight=taxa.size()) )
 moves.append( mvFossilTipTimeUniform(tr, weight=taxa.size()) )

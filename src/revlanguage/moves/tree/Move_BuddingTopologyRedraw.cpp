@@ -6,8 +6,8 @@
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "MetropolisHastingsMove.h"
-#include "Move_GibbsBuddingTopology.h"
-#include "GibbsBuddingTopologyProposal.h"
+#include "Move_BuddingTopologyRedraw.h"
+#include "BuddingTopologyRedrawProposal.h"
 #include "RealPos.h"
 #include "RevObject.h"
 #include "RlTimeTree.h"
@@ -23,20 +23,20 @@
 
 using namespace RevLanguage;
 
-Move_GibbsBuddingTopology::Move_GibbsBuddingTopology() : Move()
+Move_BuddingTopologyRedraw::Move_BuddingTopologyRedraw() : Move()
 {
 
 }
 
 
-Move_GibbsBuddingTopology* Move_GibbsBuddingTopology::clone(void) const
+Move_BuddingTopologyRedraw* Move_BuddingTopologyRedraw::clone(void) const
 {
 
-    return new Move_GibbsBuddingTopology(*this);
+    return new Move_BuddingTopologyRedraw(*this);
 }
 
 
-void Move_GibbsBuddingTopology::constructInternalObject( void )
+void Move_BuddingTopologyRedraw::constructInternalObject( void )
 {
     // we free the memory first
     delete value;
@@ -47,24 +47,24 @@ void Move_GibbsBuddingTopology::constructInternalObject( void )
 
     double we = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
 
-    RevBayesCore::GibbsBuddingTopologyProposal *p = new RevBayesCore::GibbsBuddingTopologyProposal( t );
+    RevBayesCore::BuddingTopologyRedrawProposal *p = new RevBayesCore::BuddingTopologyRedrawProposal( t );
 
     value = new RevBayesCore::MetropolisHastingsMove(p, we, false);
 }
 
 
 /** Get Rev type of object */
-const std::string& Move_GibbsBuddingTopology::getClassType(void)
+const std::string& Move_BuddingTopologyRedraw::getClassType(void)
 {
 
-    static std::string rev_type = "Move_GibbsBuddingTopology";
+    static std::string rev_type = "Move_BuddingTopologyRedraw";
 
     return rev_type;
 }
 
 
 /** Get class type spec describing type of object */
-const TypeSpec& Move_GibbsBuddingTopology::getClassTypeSpec(void)
+const TypeSpec& Move_BuddingTopologyRedraw::getClassTypeSpec(void)
 {
 
     static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( Move::getClassTypeSpec() ) );
@@ -76,16 +76,16 @@ const TypeSpec& Move_GibbsBuddingTopology::getClassTypeSpec(void)
 /**
  * Get the Rev name for the constructor function.
  */
-std::string Move_GibbsBuddingTopology::getMoveName( void ) const
+std::string Move_BuddingTopologyRedraw::getMoveName( void ) const
 {
-    std::string c_name = "GibbsBuddingTopology";
+    std::string c_name = "BuddingTopologyRedraw";
 
     return c_name;
 }
 
 
 /** Return member rules (no members) */
-const MemberRules& Move_GibbsBuddingTopology::getParameterRules(void) const
+const MemberRules& Move_BuddingTopologyRedraw::getParameterRules(void) const
 {
 
     static MemberRules move_member_rules;
@@ -106,7 +106,7 @@ const MemberRules& Move_GibbsBuddingTopology::getParameterRules(void) const
 
 
 /** Get type spec */
-const TypeSpec& Move_GibbsBuddingTopology::getTypeSpec( void ) const
+const TypeSpec& Move_BuddingTopologyRedraw::getTypeSpec( void ) const
 {
 
     static TypeSpec type_spec = getClassTypeSpec();
@@ -116,10 +116,10 @@ const TypeSpec& Move_GibbsBuddingTopology::getTypeSpec( void ) const
 
 
 /** Get type spec */
-void Move_GibbsBuddingTopology::printValue(std::ostream &o) const
+void Move_BuddingTopologyRedraw::printValue(std::ostream &o) const
 {
 
-    o << "Move_GibbsBuddingTopology(";
+    o << "Move_BuddingTopologyRedraw(";
     if (tree != NULL)
     {
         o << tree->getName();
@@ -133,7 +133,7 @@ void Move_GibbsBuddingTopology::printValue(std::ostream &o) const
 
 
 /** Set a member variable */
-void Move_GibbsBuddingTopology::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
+void Move_BuddingTopologyRedraw::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
 {
 
     if ( name == "tree" )

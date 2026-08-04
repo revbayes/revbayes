@@ -19,7 +19,7 @@ June Walker
 
 ## see_also
 dnFossilizedBirthDeathSpeciation
-mvGibbsBuddingTopology
+mvBuddingTopologyRedraw
 mvStratigraphicRange
 
 ## example
