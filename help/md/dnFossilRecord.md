@@ -1,6 +1,7 @@
 ## name
 dnFossilRecord
 ## title
+The fossil record of a set of stratigraphic ranges
 ## description
 The fossil record of a set of species, conditioned on a fossilized birth-death range process: the probability of the observed fossil occurrences given the species ranges that produced them.
 ## details
