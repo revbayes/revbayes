@@ -85,7 +85,7 @@ mymodel = model(Y)
 monitors.append( mnModel(filename="output/artiodactyla_OUsd_fixedHistory.log", printgen=100) )
 
 
-################cd
+################
 # The Analysis #
 ################
 

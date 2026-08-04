@@ -1,0 +1,107 @@
+################################################################################
+#
+# RevBayes Integration Test: Ornstein-Uhlenbeck on a fixed tree
+#
+# Model: Univariate continuous character evolving under a state-dependent
+#            Ornstein-Uhlenbeck process
+#
+# authors: Priscilla Lau
+#
+################################################################################
+
+seed(12345)
+
+#######################
+# Reading in the Data #
+#######################
+
+# The phylogeny and character data were taken from Toljagić et al. (2018). Millions of Years Behind: Slow Adaptation of Ruminants to Grasslands.
+
+
+### Read in the character history
+char_hist <- readCharacterHistory( "/Users/plau/Desktop/rb-branches/rb-sdou-err/tests/data/artiodactyla_character_history.tree" )[1]
+num_disc_states <- 3
+
+cont = readContinuousCharacterData( "/Users/plau/Desktop/rb-branches/rb-sdou-err/tests/data/artiodactyla_hypsodonty_with_var.nex" )
+cont.excludeAll()
+cont.includeCharacter(1)
+
+
+# Create some vector for the moves and monitors of this analysis
+moves    = VectorMoves()
+monitors = VectorMonitors()
+
+##############################
+# continuous character model #
+##############################
+
+# OU parameter values
+for (i in 1:num_disc_states){
+  theta[i] ~ dnUniform(-10, 10)
+  moves.append(mvSlide(theta[i], weight = 1.0) )
+
+  a <- ln(2)
+
+  alpha[i] ~ dnLognormal(ln(a), 0.587405)
+  moves.append(mvScale(alpha[i], weight = 1.0) )
+
+  s <- 2 * 2 * a
+  sigma2[i] ~ dnLognormal(ln(s), 0.587405)
+  moves.append(mvScale(sigma2[i], weight = 1.0) )
+
+}
+
+
+#############################################
+# Option 1: specify within species variance #
+#############################################
+num_tips = 82
+
+for (i in 1:num_tips){
+  sp_var[i] ~ dnLognormal(ln(1), 0.587)
+  moves.append(mvScale(sp_var[i], weight = 1.0) )
+}
+within_species_var := matrix([sp_var])
+
+##########################################################
+# Option 2: get within species variance from data matrix #
+##########################################################
+#within_species_var <- matrix([fnGetContinuousCharacterAsVector(cont, 2)])
+
+
+#########################################
+# specify number of samples for species #
+#########################################
+num_samples_per_species <- matrix([fnGetContinuousCharacterAsVector(cont, 3)])
+
+
+Y ~ dnPhyloOUSD(characterHistory=char_hist, alpha=alpha, theta=theta, sigma=sigma2^0.5, nSites=1,
+  withinSpeciesVariance=within_species_var, numberOfSamplesPerSpecies=num_samples_per_species,
+  singleSampleTreatment="mean", rootTreatment = "optimum")
+Y.clamp(cont)
+
+
+
+
+#############
+# The Model #
+#############
+
+mymodel = model(Y)
+
+monitors.append( mnModel(filename="output/artiodactyla_OUsd_tip_var.log", printgen=100) )
+
+
+################
+# The Analysis #
+################
+
+### workspace mcmc ###
+mymcmc = mcmc(mymodel, monitors, moves, nruns=1, combine="none")
+
+### run the MCMC ###
+mymcmc.run(generations=100)
+
+
+# you may want to quit RevBayes now
+q()

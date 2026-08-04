@@ -1,0 +1,109 @@
+################################################################################
+#
+# RevBayes Integration Test: Ornstein-Uhlenbeck on a fixed tree
+#
+# Model: Univariate continuous character evolving under a state-dependent
+#            Ornstein-Uhlenbeck process
+#
+# authors: Priscilla Lau
+#
+################################################################################
+
+seed(12345)
+
+#######################
+# Reading in the Data #
+#######################
+
+# The phylogeny and character data were taken from Toljagić et al. (2018). Millions of Years Behind: Slow Adaptation of Ruminants to Grasslands.
+
+
+### Read in the character history
+char_hist_full <- readCharacterHistory( "/Users/plau/Desktop/rb-branches/rb-sdou-err/tests/data/artiodactyla_character_history.tree" )[1]
+char_hist_drop <- readCharacterHistory( "/Users/plau/Desktop/rb-branches/rb-sdou-err/tests/data/artiodactyla_character_history_drop.tree" )[1]
+num_disc_states = 3
+
+
+
+cont_missing = readContinuousCharacterData( "/Users/plau/Desktop/rb-branches/rb-sdou-err/tests/data/artiodactyla_hypsodonty_missing.nex" )
+cont_missing.excludeAll()
+cont_missing.includeCharacter(1)
+
+cont_drop = readContinuousCharacterData( "/Users/plau/Desktop/rb-branches/rb-sdou-err/tests/data/artiodactyla_hypsodonty_drop.nex" )
+cont_drop.excludeAll()
+cont_drop.includeCharacter(1)
+
+
+# Create some vector for the moves and monitors of this analysis
+moves    = VectorMoves()
+monitors = VectorMonitors()
+
+##############################
+# continuous character model #
+##############################
+
+# OU parameter values
+for (i in 1:num_disc_states){
+  theta[i] ~ dnUniform(-10, 10)
+  moves.append(mvSlide(theta[i], weight = 1.0) )
+
+  a <- ln(2)
+
+  alpha[i] ~ dnLognormal(ln(a), 0.587405)
+  moves.append(mvScale(alpha[i], weight = 1.0) )
+
+  s <- 2 * 2 * a
+  sigma2[i] ~ dnLognormal(ln(s), 0.587405)
+  moves.append(mvScale(sigma2[i], weight = 1.0) )
+
+}
+
+
+
+##########################
+# Specify the OU process #
+##########################
+
+
+Y_drop ~ dnPhyloOUSD(characterHistory=char_hist_drop, alpha=alpha, theta=theta, sigma=sigma2^0.5, nSites=1,
+  rootTreatment = "optimum")
+Y_drop.clamp(cont_drop)
+lik1 <- Y_drop.lnProbability()
+
+Y_missing ~ dnPhyloOUSD(characterHistory=char_hist_full, alpha=alpha, theta=theta, sigma=sigma2^0.5, nSites=1,
+  rootTreatment = "optimum")
+Y_missing.clamp(cont_missing)
+lik2 <- Y_missing.lnProbability()
+
+
+threshold <- 0.00001
+if (abs(lik1 - lik2) < threshold){
+    print("likelihoods in OU distribution equal, test passed")
+}else{
+    print("likelihoods in OU distributions not equal, test failed")
+}
+
+
+
+#############
+# The Model #
+#############
+
+mymodel = model(Y_missing)
+
+monitors.append( mnModel(filename="output/artiodactyla_OUsd_missing_data.log", printgen=100) )
+
+
+################
+# The Analysis #
+################
+
+### workspace mcmc ###
+mymcmc = mcmc(mymodel, monitors, moves, nruns=1, combine="none")
+
+### run the MCMC ###
+mymcmc.run(generations=500)
+
+
+# you may want to quit RevBayes now
+q()

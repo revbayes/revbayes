@@ -58,8 +58,8 @@ BEGIN DATA;
     Litocranius_walleri           1.32
     Kobus_leche                   3.63
     Kobus_ellipsiprymnus          3.47
-    Hippotragus_niger             3.77
-    Hippotragus_equinus           4.28
+    Hippotragus_niger             ?
+    Hippotragus_equinus           ?
     Hemitragus_jemlahicus         4.95
     Eudorcas_rufifrons            3.77
     Dorcatragus_megalotis         2.93
@@ -82,7 +82,7 @@ BEGIN DATA;
     Antilope_cervicapra           5.14
     Antidorcas_marsupialis        4.89
     Ammotragus_lervia             4.45
-    Alcelaphus_buselaphus         5.23
+    Alcelaphus_buselaphus         ?
     Aepyceros_melampus            4.89
     Addax_nasomaculatus           4.09
     Antilocapra_americana         4.61

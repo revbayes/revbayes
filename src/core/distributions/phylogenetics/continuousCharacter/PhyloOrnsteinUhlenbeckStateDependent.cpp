@@ -352,7 +352,7 @@ void PhyloOrnsteinUhlenbeckStateDependent::recursiveComputeLnProbability( const 
 
                     mu_node[site_index]  = mean_right;
                     var_node[site_index] = var_right;
-                    p_node[site_index]   = log_nf_right;
+                    p_node[site_index]   = log_nf_right + p_left[site_index] + p_right[site_index];
 
                 }
                 else if ( use_missing_data == true && !left_missing && right_missing )
@@ -375,7 +375,7 @@ void PhyloOrnsteinUhlenbeckStateDependent::recursiveComputeLnProbability( const 
 
                     mu_node[site_index] = mean_left;
                     var_node[site_index] = var_left;
-                    p_node[site_index] = log_nf_left;
+                    p_node[site_index] = log_nf_left + p_left[site_index] + p_right[site_index];
 
                 }
                 else

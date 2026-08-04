@@ -1,7 +1,7 @@
 #NEXUS
 [Data written by write.nexus.data.R, Fri Sep 12 15:20:49 2025]
 BEGIN DATA;
-  DIMENSIONS NTAX=82 NCHAR=1;
+  DIMENSIONS NTAX=79 NCHAR=1;
   FORMAT DATATYPE=CONTINUOUS MISSING=? GAP=- INTERLEAVE=NO;
   MATRIX
     Hyemoschus_aquaticus          1.30
@@ -58,8 +58,6 @@ BEGIN DATA;
     Litocranius_walleri           1.32
     Kobus_leche                   3.63
     Kobus_ellipsiprymnus          3.47
-    Hippotragus_niger             3.77
-    Hippotragus_equinus           4.28
     Hemitragus_jemlahicus         4.95
     Eudorcas_rufifrons            3.77
     Dorcatragus_megalotis         2.93
@@ -82,7 +80,6 @@ BEGIN DATA;
     Antilope_cervicapra           5.14
     Antidorcas_marsupialis        4.89
     Ammotragus_lervia             4.45
-    Alcelaphus_buselaphus         5.23
     Aepyceros_melampus            4.89
     Addax_nasomaculatus           4.09
     Antilocapra_americana         4.61
