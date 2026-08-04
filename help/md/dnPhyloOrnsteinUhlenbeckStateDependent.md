@@ -42,6 +42,10 @@ distribution `dnPhyloCTMCDASiteIID` (see Landis et al. 2013, May and Moore
 `.characterHistories`) and specified in the `characterHistory` argument. Other
 parameter specifications are same as above.
 
+
+You can incorporate tip uncertainty by specifying the within-species variance and the number of samples for each species. The variance of species means will be calculated in the back end. If only some species are represented by multiple samples, you can choose the treatment for species with one sample only. Options include "mean", "median", and "as_is". "Mean" and "Median" calculates the mean or median variance of species means for all species with multiple samples. "As_is" will use the value supplied by the user without modification. This option should be used with caution. Note the difference between within-species variance and the variance of species mean.
+
+
 ## authors
 Priscilla Lau
 ## see_also
@@ -51,6 +55,12 @@ readCharacterHistory
 ## example
     # setup for a two-state phyloOUSD model
     num_states = 2          # 0 and 1 are the only states
+    num_tips = 82
+
+    # read in continuous trait
+    cont = readContinuousCharacterData( cont_trait_path )
+    cont.excludeAll()
+    cont.includeCharacter(1)
 
     # option 1: conditioning on a fixed character history
     char_hist = readCharacterHistory( simmap_path )[1]
@@ -65,9 +75,14 @@ readCharacterHistory
       alpha[i] ~ dnLognormal(ln(2), 0.587405)
       sigma2[i] ~ dnLognormal(1, 0.587405)
     }
+
+    # if you have information of the within-species variance and number of samples per species in your character data
+    within_species_var <- matrix([fnGetContinuousCharacterAsVector(cont, 2)])
+    num_samples_per_sp <- matrix([fnGetContinuousCharacterAsVector(cont, 3)])
     
     # basic use of the function (assuming the continuous trait value at the root is the same at the state-specific optimum)
-    Y ~ dnPhyloOUSD(char_hist, theta=theta, rootTreatment="optimum", alpha=alpha, sigma=sigma2^0.5)
+    Y ~ dnPhyloOUSD(char_hist, theta=theta, rootTreatment="optimum", alpha=alpha, sigma=sigma2^0.5,
+      withinSpeciesVariance=within_species_var, numberOfSamplesPerSpecies=num_samples_per_sp, singleSampleTreatment="mean")
 
 
 

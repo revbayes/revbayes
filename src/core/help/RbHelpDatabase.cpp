@@ -1634,9 +1634,18 @@ In this application, the discrete character evolution is modeled using the
 distribution `dnPhyloCTMCDASiteIID` (see Landis et al. 2013, May and Moore
 2020). The character history is retrieved from the distribution (using
 `.characterHistories`) and specified in the `characterHistory` argument. Other
-parameter specifications are same as above.)");
+parameter specifications are same as above.
+
+
+You can incorporate tip uncertainty by specifying the within-species variance and the number of samples for each species. The variance of species means will be calculated in the back end. If only some species are represented by multiple samples, you can choose the treatment for species with one sample only. Options include "mean", "median", and "as_is". "Mean" and "Median" calculates the mean or median variance of species means for all species with multiple samples. "As_is" will use the value supplied by the user without modification. This option should be used with caution. Note the difference between within-species variance and the variance of species mean.)");
 	help_strings[string("dnPhyloOrnsteinUhlenbeckStateDependent")][string("example")] = string(R"(# setup for a two-state phyloOUSD model
 num_states = 2          # 0 and 1 are the only states
+num_tips = 82
+
+# read in continuous trait
+cont = readContinuousCharacterData( cont_trait_path )
+cont.excludeAll()
+cont.includeCharacter(1)
 
 # option 1: conditioning on a fixed character history
 char_hist = readCharacterHistory( simmap_path )[1]
@@ -1652,8 +1661,13 @@ for (i in 1:num_states){
   sigma2[i] ~ dnLognormal(1, 0.587405)
 }
 
+# if you have information of the within-species variance and number of samples per species in your character data
+within_species_var <- matrix([fnGetContinuousCharacterAsVector(cont, 2)])
+num_samples_per_sp <- matrix([fnGetContinuousCharacterAsVector(cont, 3)])
+
 # basic use of the function (assuming the continuous trait value at the root is the same at the state-specific optimum)
-Y ~ dnPhyloOUSD(char_hist, theta=theta, rootTreatment="optimum", alpha=alpha, sigma=sigma2^0.5))");
+Y ~ dnPhyloOUSD(char_hist, theta=theta, rootTreatment="optimum", alpha=alpha, sigma=sigma2^0.5,
+  withinSpeciesVariance=within_species_var, numberOfSamplesPerSpecies=num_samples_per_sp, singleSampleTreatment="mean"))");
 	help_strings[string("dnPhyloOrnsteinUhlenbeckStateDependent")][string("name")] = string(R"(dnPhyloOrnsteinUhlenbeckStateDependent)");
 	help_references[string("dnPhyloOrnsteinUhlenbeckStateDependent")].push_back(RbHelpReference(R"(Hansen TF (1997). Stabilizing selection and the comparative analysis of adaptation. Evolution, 51(5):1341-1351.)",R"(10.1111/j.1558-5646.1997.tb01457.x)",R"(https://academic.oup.com/evolut/article/51/5/1341/6757302 )"));
 	help_references[string("dnPhyloOrnsteinUhlenbeckStateDependent")].push_back(RbHelpReference(R"(FitzJohn RG (2012). Diversitree: comparative phylogenetic analyses of diversification in R. Methods in Ecology and Evolution, 3(6):1084-1092.)",R"(10.1111/j.2041-210X.2012.00234.x)",R"(https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/j.2041-210X.2012.00234.x )"));
@@ -2414,6 +2428,12 @@ M := fnMixtureASRV([fnGTR(er,pi1),fnGTR(er,pi2)],weights) |> fnGammaASRV(alpha) 
 	help_arrays[string("fnGammaASRV")][string("see_also")].push_back(string(R"(fnDiscretizeGamma)"));
 	help_strings[string("fnGammaASRV")][string("title")] = string(R"(fnGammaASRV)");
 	help_strings[string("fnGeographicalDistance")][string("name")] = string(R"(fnGeographicalDistance)");
+	help_arrays[string("fnGetContinuousCharacterAsVector")][string("authors")].push_back(string(R"(Priscilla Lau)"));
+	help_strings[string("fnGetContinuousCharacterAsVector")][string("description")] = string(R"(`fnGetContinuousCharacterAsVector` returns the continuous character of your choice from a character matrix as a vector. The elements inside the vector is ordered alphabetically by the species name.)");
+	help_strings[string("fnGetContinuousCharacterAsVector")][string("example")] = string(R"(within_species_var <- fnGetContinuousCharacterAsVector(cont_char, 2)])");
+	help_strings[string("fnGetContinuousCharacterAsVector")][string("name")] = string(R"(fnGetContinuousCharacterAsVector)");
+	help_arrays[string("fnGetContinuousCharacterAsVector")][string("see_also")].push_back(string(R"(fnComputeWithinSpeciesVarianceFromMultiSampleData)"));
+	help_strings[string("fnGetContinuousCharacterAsVector")][string("title")] = string(R"(Discretize a Gamma distribution)");
 	help_strings[string("fnHKY")][string("description")] = string(R"(DNA evolution model proposed in Hasegawa, Kishino, and Yano (1985).)");
 	help_strings[string("fnHKY")][string("details")] = string(R"(In this model, nucleotides have different stationary frequencies, and transition and transversion rates are allowed to be different. Its first parameter, kappa, codes for the ratio between the rate of transitions and transversions. Its second parameter, baseFrequencies, codes for the frequencies of each nucleotide.
 

@@ -19,17 +19,17 @@ seed(12345)
 
 
 ### Read in the character history
-char_hist_full <- readCharacterHistory( "/Users/plau/Desktop/rb-branches/rb-sdou-err/tests/data/artiodactyla_character_history.tree" )[1]
-char_hist_drop <- readCharacterHistory( "/Users/plau/Desktop/rb-branches/rb-sdou-err/tests/data/artiodactyla_character_history_drop.tree" )[1]
+char_hist_full <- readCharacterHistory( "data/artiodactyla_character_history.tree" )[1]
+char_hist_drop <- readCharacterHistory( "data/artiodactyla_character_history_drop.tree" )[1]
 num_disc_states = 3
 
 
 
-cont_missing = readContinuousCharacterData( "/Users/plau/Desktop/rb-branches/rb-sdou-err/tests/data/artiodactyla_hypsodonty_missing.nex" )
+cont_missing = readContinuousCharacterData( "data/artiodactyla_hypsodonty_missing.nex" )
 cont_missing.excludeAll()
 cont_missing.includeCharacter(1)
 
-cont_drop = readContinuousCharacterData( "/Users/plau/Desktop/rb-branches/rb-sdou-err/tests/data/artiodactyla_hypsodonty_drop.nex" )
+cont_drop = readContinuousCharacterData( "data/artiodactyla_hypsodonty_drop.nex" )
 cont_drop.excludeAll()
 cont_drop.includeCharacter(1)
 

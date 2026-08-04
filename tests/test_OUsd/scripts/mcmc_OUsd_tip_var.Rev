@@ -19,10 +19,10 @@ seed(12345)
 
 
 ### Read in the character history
-char_hist <- readCharacterHistory( "/Users/plau/Desktop/rb-branches/rb-sdou-err/tests/data/artiodactyla_character_history.tree" )[1]
+char_hist <- readCharacterHistory( "data/artiodactyla_character_history.tree" )[1]
 num_disc_states <- 3
 
-cont = readContinuousCharacterData( "/Users/plau/Desktop/rb-branches/rb-sdou-err/tests/data/artiodactyla_hypsodonty_with_var.nex" )
+cont = readContinuousCharacterData( "data/artiodactyla_hypsodonty_with_var.nex" )
 cont.excludeAll()
 cont.includeCharacter(1)
 
@@ -34,6 +34,8 @@ monitors = VectorMonitors()
 ##############################
 # continuous character model #
 ##############################
+vy <- cont.var(1)
+vy
 
 # OU parameter values
 for (i in 1:num_disc_states){
