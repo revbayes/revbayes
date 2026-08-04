@@ -925,8 +925,11 @@ void AbstractFossilizedBirthDeathRangeProcess::drawRanges()
         {
             // a lineage alive at its youngest reported age reaches the present with exp(-mu L),
             // and is then missed there with 1-rho. Both branches are weighted by that, not by 1-rho
-            double L = ranges[i].last_max - present;
-            double m = death[ findIndex( ranges[i].last_max ) ];
+            // capped at the origin: a death above it leaves no room for the appearances, and the
+            // empty-window fallback then writes a range the density always rejects
+            double cap = std::min( ranges[i].last_max, max );
+            double L = cap - present;
+            double m = death[ findIndex( cap ) ];
             bool   exponential = ( m > 0.0 && RbMath::isFinite(L) == true );
 
             double p_survived = 0.0;
@@ -947,7 +950,7 @@ void AbstractFossilizedBirthDeathRangeProcess::drawRanges()
                 // the same exponential, truncated to the deaths the record allows
                 double u = rng->uniform01();
                 ranges[i].survived = false;
-                ranges[i].death = ranges[i].last_max + log( 1.0 - u*( 1.0 - exp( -m * L ) ) ) / m;
+                ranges[i].death = cap + log( 1.0 - u*( 1.0 - exp( -m * L ) ) ) / m;
             }
             else
             {
