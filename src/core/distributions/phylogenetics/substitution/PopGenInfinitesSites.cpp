@@ -38,7 +38,7 @@ void PopGenInfiniteSites::compress(void)
 }
 
 
-double PopGenInfiniteSites::computeLnProbability(void)
+LogDensity PopGenInfiniteSites::computeLnProbability(void)
 {
     
     return 0.0;

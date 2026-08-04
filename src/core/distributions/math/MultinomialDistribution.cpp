@@ -45,7 +45,7 @@ MultinomialDistribution* MultinomialDistribution::clone( void ) const
 }
 
 
-double MultinomialDistribution::computeLnProbability( void )
+LogDensity MultinomialDistribution::computeLnProbability( void )
 {
     return RbStatistics::Multinomial::lnPdf(p->getValue(), *value);
 }

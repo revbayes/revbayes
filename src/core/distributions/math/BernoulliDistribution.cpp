@@ -45,7 +45,7 @@ BernoulliDistribution* BernoulliDistribution::clone( void ) const {
 }
 
 
-double BernoulliDistribution::computeLnProbability( void )
+LogDensity BernoulliDistribution::computeLnProbability( void )
 {
 
     // check that the value is actually a bernoulli trial (1 or 0)

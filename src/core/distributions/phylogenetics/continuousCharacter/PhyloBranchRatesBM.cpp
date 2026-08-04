@@ -42,7 +42,7 @@ PhyloBranchRatesBM* PhyloBranchRatesBM::clone(void) const
 }
 
 
-double PhyloBranchRatesBM::computeLnProbability(void)
+LogDensity PhyloBranchRatesBM::computeLnProbability(void)
 {
     size_t n_nodes = tau->getValue().getNumberOfNodes();
     std::vector<double> node_values = std::vector<double>(n_nodes, 0.0);

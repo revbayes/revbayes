@@ -110,7 +110,7 @@ double PhyloBrownianProcessStateDependent::computeStateDependentSigma(size_t sta
 }
 
 
-double PhyloBrownianProcessStateDependent::computeLnProbability( void )
+LogDensity PhyloBrownianProcessStateDependent::computeLnProbability( void )
 {
 
     const Tree& tau = character_histories->getValue().getTree();

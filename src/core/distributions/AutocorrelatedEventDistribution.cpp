@@ -182,7 +182,7 @@ AutocorrelatedEventDistribution* AutocorrelatedEventDistribution::clone( void ) 
 
 
 
-double AutocorrelatedEventDistribution::computeLnProbability( void )
+LogDensity AutocorrelatedEventDistribution::computeLnProbability( void )
 {
     
     // first, we check the sorting (-1 if we don't sort)
@@ -207,7 +207,7 @@ double AutocorrelatedEventDistribution::computeLnProbability( void )
     
     // compute the prior probability for the number of events
     event_prior->setValue( new std::int64_t( value->getNumberOfEvents() ) );
-    double ln_prob = event_prior->computeLnProbability();
+    LogDensity ln_prob = event_prior->computeLnProbability();
     
     
     // compute the priors for each new valuea at each event

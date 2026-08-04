@@ -339,7 +339,7 @@ void UltrametricTreeDistribution::computeBranchRates(const Tree &my_time_tree, c
 
 }
 
-double UltrametricTreeDistribution::computeBranchRateLnProbability(const Tree &my_time_tree, const std::string &newick, const std::vector<Split> &splits, size_t index) const
+LogDensity UltrametricTreeDistribution::computeBranchRateLnProbability(const Tree &my_time_tree, const std::string &newick, const std::vector<Split> &splits, size_t index) const
 {
 
     // we need to check if the "outgroup" is present first
@@ -356,7 +356,7 @@ double UltrametricTreeDistribution::computeBranchRateLnProbability(const Tree &m
     }
 
     // initialize the probability
-    double ln_prob =  0.0;
+    LogDensity ln_prob =  0.0;
 
     const std::vector<TopologyNode*> &nodes = my_time_tree.getNodes();
     std::vector<double> rates(nodes.size()-1,0.0);
@@ -399,7 +399,7 @@ double UltrametricTreeDistribution::computeBranchRateLnProbability(const Tree &m
             }
         }
 
-        if ( RbMath::isFinite( ln_prob ) == false )
+        if ( ln_prob.isfinite() == false )
         {
             break;
         }
@@ -411,7 +411,7 @@ double UltrametricTreeDistribution::computeBranchRateLnProbability(const Tree &m
 
 
 /* Compute probability */
-double UltrametricTreeDistribution::computeLnProbability( void )
+LogDensity UltrametricTreeDistribution::computeLnProbability( void )
 {
 
     // create a temporary copy of the this tree
@@ -432,8 +432,8 @@ double UltrametricTreeDistribution::computeLnProbability( void )
     collectSplits(my_time_tree.getRoot(), b, my_splits);
 
     const std::map<std::string, size_t> &my_taxon_bitmap = my_time_tree.getTaxonBitSetMap();
-    std::vector<double> probs    = std::vector<double>(num_samples, 0.0);
-    std::vector<double> ln_probs = std::vector<double>(num_samples, 0.0);
+    std::vector<double> probs(num_samples, 0.0);
+    std::vector<LogDensity> ln_probs(num_samples, 0.0);
 
 //    size_t num_observed = 0;
 
@@ -452,7 +452,7 @@ double UltrametricTreeDistribution::computeLnProbability( void )
 
             ln_probs[i] = computeBranchRateLnProbability( my_time_tree, my_tree_newick, my_splits, i );
 
-            if ( sample_prior_density != NULL && RbMath::isFinite( ln_probs[i] ) )
+            if ( sample_prior_density != NULL && ln_probs[i].isfinite() )
             {
                 ln_probs[i] -= sample_prior_density->getValues()[i+BURNIN];
             }
@@ -489,7 +489,7 @@ double UltrametricTreeDistribution::computeLnProbability( void )
 #endif
 
 
-    double max = 0;
+    LogDensity max = 0;
     // add the ln-probs for each sample
     for (size_t i = 0; i < num_samples; ++i)
     {
@@ -511,7 +511,7 @@ double UltrametricTreeDistribution::computeLnProbability( void )
 
 
     // Variable declarations and initialization
-    double ln_prob = 0.0;
+    LogDensity ln_prob = 0.0;
     double prob    = 0;
 
 #ifdef RB_MPI

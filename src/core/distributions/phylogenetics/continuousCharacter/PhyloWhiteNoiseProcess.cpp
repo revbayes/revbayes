@@ -40,7 +40,7 @@ PhyloWhiteNoiseProcess* PhyloWhiteNoiseProcess::clone(void) const
 }
 
 
-double PhyloWhiteNoiseProcess::computeLnProbability(void)
+LogDensity PhyloWhiteNoiseProcess::computeLnProbability(void)
 {
   
     return recursiveLnProb(tau->getValue().getRoot());

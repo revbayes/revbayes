@@ -215,7 +215,7 @@ std::vector<double> StateDependentSpeciationExtinctionProcess::calculateTotalAna
  * Compute the log-transformed probability of the current value under the current parameter values.
  *
  */
-double StateDependentSpeciationExtinctionProcess::computeLnProbability( void )
+LogDensity StateDependentSpeciationExtinctionProcess::computeLnProbability( void )
 {
     
     // check that the ages are in correct chronological order

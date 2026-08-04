@@ -18,7 +18,7 @@ namespace RevBayesCore {
         
         // public member functions
         UniformTimeTreeDistribution*                        clone(void) const;                                          //!< Create an independent clone
-        double                                              computeLnProbability(void);                                 //!< Compute ln prob of current value
+        LogDensity                                          computeLnProbability(void);                                 //!< Compute ln prob of current value
         void                                                redrawValue(void);                                          //!< Draw a new random value from distribution
 
         

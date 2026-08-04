@@ -40,7 +40,7 @@ HalfCauchyDistribution* HalfCauchyDistribution::clone( void ) const {
 }
 
 
-double HalfCauchyDistribution::computeLnProbability( void ) {
+LogDensity HalfCauchyDistribution::computeLnProbability( void ) {
     
     double v = *value;
     

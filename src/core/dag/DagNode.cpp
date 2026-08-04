@@ -360,11 +360,11 @@ void DagNode::executeMethod(const std::string &n, const std::vector<const DagNod
 
     if ( n == "lnProbability" )
     {
-        rv = const_cast<DagNode *>(this)->getLnProbability();
+        rv = (double)const_cast<DagNode *>(this)->getLnProbability();
     }
     else if ( n == "probability" )
     {
-        rv = std::exp(const_cast<DagNode *>(this)->getLnProbability());
+        rv = const_cast<DagNode *>(this)->getLnProbability().exp();
     }
     else
     {
@@ -569,7 +569,7 @@ std::vector<const DagNode*> DagNode::getParents( void ) const
 }
 
 
-double DagNode::getPrevLnProbability(void) const
+LogDensity DagNode::getPrevLnProbability(void) const
 {
     throw RbException()<<"getPrevLnProbability: not a stochastic node!";
 }
@@ -1480,3 +1480,7 @@ void DagNode::touchAffected(bool touchAll)
     }
 }
 
+bool DagNode::isTouched() const
+{
+    return false;
+}

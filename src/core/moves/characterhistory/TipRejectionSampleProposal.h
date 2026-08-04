@@ -50,7 +50,7 @@ namespace RevBayesCore {
         TipRejectionSampleProposal*                                 clone(void) const;                                              //!< Clone object
         void                                                        cleanProposal(void);
 //        virtual double                                              computeLnProposal();
-        double                                                      doProposal(void);                                               //!< Perform proposal
+        LogDensity                                                  doProposal(void);                                               //!< Perform proposal
         const std::string&                                          getProposalName(void) const;                                    //!< Get the name of the proposal for summary printing
         double                                                      getProposalTuningParameter(void) const;
         void                                                        printParameterSummary(std::ostream &o, bool name_only) const;                   //!< Print the parameter summary
@@ -83,8 +83,8 @@ namespace RevBayesCore {
 //        std::vector<size_t>                                         storedSubrootState;
 
         TopologyNode*                                               node;
-        double                                                      storedLnProb;
-        double                                                      proposedLnProb;
+        LogDensity                                                  storedLnProb;
+        LogDensity                                                  proposedLnProb;
 
         PathRejectionSampleProposal<charType>*                      tip_branch_proposal;
 
@@ -272,11 +272,11 @@ RevBayesCore::TipRejectionSampleProposal<charType>* RevBayesCore::TipRejectionSa
  * \return The hastings ratio.
  */
 template<class charType>
-double RevBayesCore::TipRejectionSampleProposal<charType>::doProposal( void )
+LogDensity RevBayesCore::TipRejectionSampleProposal<charType>::doProposal( void )
 {
     proposedLnProb = 0.0;
 
-    double proposedLnProbRatio = 0.0;
+    LogDensity proposedLnProbRatio = 0.0;
 
     // backward proposal probability
 //    proposedLnProbRatio += computeLnProposal();

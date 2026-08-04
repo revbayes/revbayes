@@ -25,7 +25,7 @@ template <class valueType> class TypedDagNode;
         
         // public member functions
         PhyloOrnsteinUhlenbeckProcess*                          clone(void) const;                                                                      //!< Create an independent clone
-        double                                                  computeLnProbability(void);
+        LogDensity                                              computeLnProbability(void);
         void                                                    redrawValue(void);
         
         void                                                    setMean( const TypedDagNode< double >* x);

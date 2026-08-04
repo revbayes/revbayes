@@ -135,12 +135,12 @@ DuplicationLossProcess* DuplicationLossProcess::clone(void) const
     return new DuplicationLossProcess(*this);
 }
 
-double DuplicationLossProcess::computeLnProbability( void )
+LogDensity DuplicationLossProcess::computeLnProbability( void )
 {
     resetTipAllocations();
     
     // variable declarations and initialization
-    double ln_prob_coal = 0;
+    LogDensity ln_prob_coal = 0;
     
     const Tree &it = individual_tree->getValue();
     
@@ -152,10 +152,10 @@ double DuplicationLossProcess::computeLnProbability( void )
 }
 
 
-double DuplicationLossProcess::computeLnDuplicationLossProbability(size_t num_genes_recent, const std::vector<double> &dupl_ages, double age_recent, double age_ancient, const TopologyNode &node_individual, bool f)
+LogDensity DuplicationLossProcess::computeLnDuplicationLossProbability(size_t num_genes_recent, const std::vector<double> &dupl_ages, double age_recent, double age_ancient, const TopologyNode &node_individual, bool f)
 {
     
-    double ln_prob = 0.0;
+    LogDensity ln_prob = 0.0;
     
     size_t index_individual = node_individual.getIndex();
     double dupl_rate = duplication_rate->getValue();
@@ -241,10 +241,10 @@ double DuplicationLossProcess::computeE(double dt, double e)
 
 
 
-double DuplicationLossProcess::recursivelyComputeLnProbability( const RevBayesCore::TopologyNode &individual_node )
+LogDensity DuplicationLossProcess::recursivelyComputeLnProbability( const RevBayesCore::TopologyNode &individual_node )
 {
     
-    double ln_prob_dupl_loss = 0;
+    LogDensity ln_prob_dupl_loss = 0;
     
     double individual_age = individual_node.getAge();
     double parent_individual_age = RbConstants::Double::inf;

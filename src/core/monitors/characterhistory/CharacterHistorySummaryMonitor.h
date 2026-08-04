@@ -142,11 +142,11 @@ std::string RevBayesCore::CharacterHistorySummaryMonitor<charType>::buildChainSu
         ss << separator;
 
         const std::vector<DagNode*> &n = model->getDagNodes();
-        double pp = 0.0;
+        LogDensity pp = 0.0;
         for (std::vector<DagNode*>::const_iterator it = n.begin(); it != n.end(); ++it) {
             pp += (*it)->getLnProbability();
         }
-        ss << pp;
+        ss << (double)pp;
     }
 
     if ( likelihood ) {
@@ -154,13 +154,13 @@ std::string RevBayesCore::CharacterHistorySummaryMonitor<charType>::buildChainSu
         ss << separator;
 
         const std::vector<DagNode*> &n = model->getDagNodes();
-        double pp = 0.0;
+        LogDensity pp = 0.0;
         for (std::vector<DagNode*>::const_iterator it = n.begin(); it != n.end(); ++it) {
             if ( (*it)->isClamped() ) {
                 pp += (*it)->getLnProbability();
             }
         }
-        ss << pp;
+        ss << (double)pp;
     }
 
     if ( prior ) {
@@ -168,13 +168,13 @@ std::string RevBayesCore::CharacterHistorySummaryMonitor<charType>::buildChainSu
         ss << separator;
 
         const std::vector<DagNode*> &n = model->getDagNodes();
-        double pp = 0.0;
+        LogDensity pp = 0.0;
         for (std::vector<DagNode*>::const_iterator it = n.begin(); it != n.end(); ++it) {
             if ( !(*it)->isClamped() ) {
                 pp += (*it)->getLnProbability();
             }
         }
-        ss << pp;
+        ss << (double)pp;
     }
 
     return ss.str();

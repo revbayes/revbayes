@@ -87,7 +87,7 @@ double NodeTimeSlidePathTruncatedNormalProposal::getProposalTuningParameter( voi
  *
  * \return The hastings ratio.
  */
-double NodeTimeSlidePathTruncatedNormalProposal::doProposal( void )
+LogDensity NodeTimeSlidePathTruncatedNormalProposal::doProposal( void )
 {
     
     // Get random number generator
@@ -109,7 +109,7 @@ double NodeTimeSlidePathTruncatedNormalProposal::doProposal( void )
     double my_new_age;
     double UB;
     double LB;
-    double lnHastingsRatio = 0.0;
+    LogDensity lnHastingsRatio = 0.0;
     
     // For scaling proposal variances to match projections from BDP
     double ra = tau.getRoot().getAge();

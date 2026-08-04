@@ -90,7 +90,7 @@ double OrderedEventTimeSlideProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double OrderedEventTimeSlideProposal::doProposal( void )
+LogDensity OrderedEventTimeSlideProposal::doProposal( void )
 {
     // clear the failed state
 	failed = false;

@@ -55,7 +55,7 @@ LogUniformDistribution* LogUniformDistribution::clone( void ) const
 }
 
 
-double LogUniformDistribution::computeLnProbability( void ) 
+LogDensity LogUniformDistribution::computeLnProbability( void ) 
 {
     
     double x = *value;

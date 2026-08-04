@@ -186,7 +186,7 @@ StairwayPlotDistribution* StairwayPlotDistribution::clone( void ) const
 }
 
 
-double StairwayPlotDistribution::computeLnProbability( void )
+LogDensity StairwayPlotDistribution::computeLnProbability( void )
 {
     
     // initialize the probability

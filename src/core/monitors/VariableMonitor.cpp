@@ -150,14 +150,14 @@ void VariableMonitor::monitor(std::uint64_t gen)
     std::ios_base::fmtflags previousFlags = out_stream.flags();
     out_stream.precision(RbSettings::userSettings().getOutputPrecision());
 
-    double Posterior = 0;
-    double Likelihood = 0;
-    double Prior = 0;
+    LogDensity Posterior = 0;
+    LogDensity Likelihood = 0;
+    LogDensity Prior = 0;
     if (posterior or likelihood or prior)
     {
 	for (auto& node: model->getDagNodes())
 	{
-	    double Pr = node->getLnProbability();
+	    LogDensity Pr = node->getLnProbability();
 	    Posterior += Pr;
 	    if (node->isClamped())
 		Likelihood += Pr;
@@ -173,9 +173,9 @@ void VariableMonitor::monitor(std::uint64_t gen)
 
 	    line["Iteration"] = gen;
         
-	    if (Posterior) line["Posterior"] = Posterior;
-	    if (Likelihood) line["Likelihood"] = Likelihood;
-	    if (Prior) line["Prior"] = Prior;
+	    if (Posterior != 0) line["Posterior"] = (double)Posterior;
+	    if (Likelihood != 0) line["Likelihood"] = (double)Likelihood;
+	    if (Prior != 0) line["Prior"] = (double)Prior;
 
 	    for (auto& node: nodes)
 	    {

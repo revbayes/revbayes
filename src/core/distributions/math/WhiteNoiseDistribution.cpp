@@ -67,7 +67,7 @@ WhiteNoiseDistribution* WhiteNoiseDistribution::clone( void ) const
 }
 
 
-double WhiteNoiseDistribution::computeLnProbability( void )
+LogDensity WhiteNoiseDistribution::computeLnProbability( void )
 {
     
     double v = *value;

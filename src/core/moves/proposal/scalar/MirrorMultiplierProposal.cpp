@@ -90,7 +90,7 @@ double MirrorMultiplierProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double MirrorMultiplierProposal::doProposal( void )
+LogDensity MirrorMultiplierProposal::doProposal( void )
 {
     ++nTried;
 

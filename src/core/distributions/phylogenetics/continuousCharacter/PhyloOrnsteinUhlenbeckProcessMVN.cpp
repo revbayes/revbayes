@@ -83,7 +83,7 @@ PhyloOrnsteinUhlenbeckProcessMVN* PhyloOrnsteinUhlenbeckProcessMVN::clone( void 
 }
 
 
-double PhyloOrnsteinUhlenbeckProcessMVN::computeLnProbability( void )
+LogDensity PhyloOrnsteinUhlenbeckProcessMVN::computeLnProbability( void )
 {
     
     // compute the ln probability by recursively calling the probability calculation for each node

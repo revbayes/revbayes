@@ -182,7 +182,7 @@ HeterogeneousRateBirthDeath* HeterogeneousRateBirthDeath::clone( void ) const
 
 
 /* Compute probability */
-double HeterogeneousRateBirthDeath::computeLnProbability( void )
+LogDensity HeterogeneousRateBirthDeath::computeLnProbability( void )
 {
     // for now
     totalScaling = 0;

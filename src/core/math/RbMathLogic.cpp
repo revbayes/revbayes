@@ -158,3 +158,15 @@ int RbMath::sgn(double x)
 }
 
 
+/** Tests whether a double is finite */
+bool RbMath::isFinite(const LogDensity& x)
+{
+    return x.isfinite();
+}
+
+/** Tests whether a double is finite */
+bool RbMath::isNan(const LogDensity& x)
+{
+    return x.isnan();
+}
+

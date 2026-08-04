@@ -34,7 +34,7 @@ template <class variableType> class StochasticNode;
         
         void                                        cleanProposal(void);
         VectorSingleElementScaleProposal*           clone(void) const;
-        double                                      doProposal(void);
+        LogDensity                                  doProposal(void);
         const std::string&                          getProposalName(void) const;
         double                                      getProposalTuningParameter(void) const;
         void                                        printParameterSummary(std::ostream &o, bool name_only) const;

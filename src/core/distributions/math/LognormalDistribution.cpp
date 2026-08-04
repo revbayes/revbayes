@@ -50,7 +50,7 @@ LognormalDistribution* LognormalDistribution::clone( void ) const
 }
 
 
-double LognormalDistribution::computeLnProbability( void )
+LogDensity LognormalDistribution::computeLnProbability( void )
 {
     
     double v = *value - offset->getValue();

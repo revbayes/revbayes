@@ -29,7 +29,7 @@ template <class valueType> class TypedDagNode;
 
             double                          cdf(void) const;                                                                    //!< Cumulative probability function
             LaplaceDistribution*            clone(void) const;                                                                  //!< Create an independent clone
-            double                          computeLnProbability(void);                                                         //!< Natural log of the probability density
+            LogDensity                      computeLnProbability(void);                                                         //!< Natural log of the probability density
             double                          getMax(void) const;                                                                 //!< Maximum value (@f$\infty@f$)
             double                          getMin(void) const;                                                                 //!< Minimum value (@f$-\infty@f$)
             double                          quantile(double p) const;                                                           //!< Quantile function

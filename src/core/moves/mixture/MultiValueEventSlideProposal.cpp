@@ -89,7 +89,7 @@ double MultiValueEventSlideProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double MultiValueEventSlideProposal::doProposal( void )
+LogDensity MultiValueEventSlideProposal::doProposal( void )
 {
     
     // Get random number generator

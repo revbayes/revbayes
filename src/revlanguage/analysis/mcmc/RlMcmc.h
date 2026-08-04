@@ -41,6 +41,7 @@ namespace RevLanguage {
         virtual void                                    printValue(std::ostream& o) const;                                                      //!< Print value (for user)
         virtual void                                    setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);          //!< Set member variable
         
+        RevPtr<const RevVariable>                       num_search_gens;
         RevPtr<const RevVariable>                       likelihood_heat;
         RevPtr<const RevVariable>                       posterior_heat;
         RevPtr<const RevVariable>                       prior_heat;

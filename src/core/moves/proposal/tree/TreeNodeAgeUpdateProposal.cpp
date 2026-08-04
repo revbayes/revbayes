@@ -113,7 +113,7 @@ double TreeNodeAgeUpdateProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double TreeNodeAgeUpdateProposal::doProposal( void )
+LogDensity TreeNodeAgeUpdateProposal::doProposal( void )
 {
     int logMCMC = RbSettings::userSettings().getLogMCMC();
     int debugMCMC = RbSettings::userSettings().getDebugMCMC();

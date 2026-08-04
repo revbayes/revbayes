@@ -34,7 +34,7 @@ namespace RevBayesCore {
         // non-virtual
 //        void                                                                fireTreeChangeEvent(const TopologyNode &n, const unsigned& m=0);                                             //!< The tree has changed and we want to know which part.
         virtual void                                                        redrawValue(void);
-        double                                                              computeLnProbability(void);
+        LogDensity                                                          computeLnProbability(void);
 
     protected:
 

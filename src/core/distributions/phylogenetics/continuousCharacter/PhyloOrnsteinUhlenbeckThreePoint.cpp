@@ -156,7 +156,7 @@ double PhyloOrnsteinUhlenbeckThreePoint::computeRootState( void ) const
 }
 
 
-double PhyloOrnsteinUhlenbeckThreePoint::computeLnProbability( void )
+LogDensity PhyloOrnsteinUhlenbeckThreePoint::computeLnProbability( void )
 {
     
     // we need to check here if we still are listining to this tree for change events

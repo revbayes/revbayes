@@ -18,7 +18,7 @@ namespace RevBayesCore {
         virtual                                            ~AbstractMultispeciesCoalescentGenewise(void);                                                                       //!< Virtual destructor
 
         // public member functions
-        double                                              computeLnProbability(void);
+        LogDensity                                          computeLnProbability(void);
         void                                                redrawValue(void);
         virtual void                                        setValue(RbVector<Tree>* v, bool f=false);   
 
@@ -31,13 +31,13 @@ namespace RevBayesCore {
     protected:
         // Parameter management functions
         void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);            //!< Swap a parameter
-        virtual double                                      computeLnCoalescentProbability(std::vector<size_t> k, const std::vector< std::vector<double> > &t, double a, double b, size_t index, bool f) = 0;
+        virtual LogDensity                                  computeLnCoalescentProbability(std::vector<size_t> k, const std::vector< std::vector<double> > &t, double a, double b, size_t index, bool f) = 0;
         virtual double                                      drawNe(size_t index);
 
         // helper functions
         void                                                attachTimes(std::vector<Tree*> psi, std::vector< std::vector<TopologyNode *> > &tips, size_t index, const std::vector< std::vector<double> > &times);
         void                                                buildRandomBinaryTree(std::vector< std::vector<TopologyNode*> > &tips);
-        double                                              recursivelyComputeLnProbability(const TopologyNode &n);
+        LogDensity                                          recursivelyComputeLnProbability(const TopologyNode &n);
         void                                                resetTipAllocations(void);
         void                                                simulateTrees(void);
 

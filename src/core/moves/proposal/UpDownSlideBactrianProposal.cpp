@@ -131,7 +131,7 @@ double UpDownSlideBactrianProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double UpDownSlideBactrianProposal::doProposal( void )
+LogDensity UpDownSlideBactrianProposal::doProposal( void )
 {
 
     // Get random number generator

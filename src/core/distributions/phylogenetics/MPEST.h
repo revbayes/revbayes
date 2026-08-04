@@ -36,7 +36,7 @@ namespace RevBayesCore {
         
         // public member functions
         MPEST*                                              clone(void) const;                                                                 //!< Create an independent clone
-        double                                              computeLnProbability(void);
+        LogDensity                                          computeLnProbability(void);
         void                                                redrawValue(void);
         
     protected:

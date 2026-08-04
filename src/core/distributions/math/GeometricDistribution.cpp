@@ -42,7 +42,7 @@ GeometricDistribution* GeometricDistribution::clone( void ) const
 }
 
 
-double GeometricDistribution::computeLnProbability( void ) 
+LogDensity GeometricDistribution::computeLnProbability( void ) 
 {
     
     std::int64_t v = *value;

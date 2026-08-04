@@ -126,7 +126,7 @@ void UniformSerialSampledTimeTreeDistribution::buildSerialSampledRandomBinaryTre
 
 
 /* Compute probability */
-double UniformSerialSampledTimeTreeDistribution::computeLnProbability( void )
+LogDensity UniformSerialSampledTimeTreeDistribution::computeLnProbability( void )
 {
     // Variable declarations and initialization
     double lnProb = 0.0;

@@ -56,7 +56,7 @@ HalfNormalDistribution* HalfNormalDistribution::clone( void ) const
 }
 
 
-double HalfNormalDistribution::computeLnProbability( void )
+LogDensity HalfNormalDistribution::computeLnProbability( void )
 {
     
     if ( offset->getValue() > *value )

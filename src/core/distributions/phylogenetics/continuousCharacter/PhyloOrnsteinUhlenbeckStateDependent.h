@@ -40,7 +40,7 @@ namespace RevBayesCore {
         ROOT_TREATMENT                                                      getRootTreatment() const { return root_treatment; }
         // non-virtual
         virtual void                                                        redrawValue(void);
-        double                                                              computeLnProbability(void);
+        LogDensity                                                          computeLnProbability(void);
 
     protected:
 

@@ -37,7 +37,7 @@ DirichletDistribution* DirichletDistribution::clone( void ) const
 }
 
 
-double DirichletDistribution::computeLnProbability( void )
+LogDensity DirichletDistribution::computeLnProbability( void )
 {
     return RbStatistics::Dirichlet::lnPdf(alpha->getValue(), *value);
 }

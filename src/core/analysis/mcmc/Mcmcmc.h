@@ -46,7 +46,7 @@ namespace RevBayesCore {
         void                                    checkpoint(void) const;
         void                                    finishMonitors(size_t n, MonteCarloAnalysisOptions::TraceCombinationTypes ct);  //!< Finish the monitors
         const Model&                            getModel(void) const;
-        double                                  getModelLnProbability(bool likelihood_only);
+        LogDensity                              getModelLnProbability(bool likelihood_only);
         RbVector<Monitor>&                      getMonitors( void );
         std::string                             getStrategyDescription(void) const;                                             //!< Get the discription of the strategy used for this sampler.
         void                                    initializeSampler();                                                            //!< Initialize objects for mcmc sampling

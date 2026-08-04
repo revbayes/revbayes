@@ -78,7 +78,7 @@ double LayeredScaleProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double LayeredScaleProposal::doProposal( void )
+LogDensity LayeredScaleProposal::doProposal( void )
 {
     // Get random number generator
     RandomNumberGenerator* rng     = GLOBAL_RNG;

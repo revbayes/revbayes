@@ -49,7 +49,7 @@ UniformDistribution* UniformDistribution::clone( void ) const
 }
 
 
-double UniformDistribution::computeLnProbability( void )
+LogDensity UniformDistribution::computeLnProbability( void )
 {
 
     return RbStatistics::Uniform::lnPdf(min->getValue(), max->getValue(), *value);

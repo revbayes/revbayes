@@ -126,7 +126,7 @@ double UpDownSlideProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double UpDownSlideProposal::doProposal( void )
+LogDensity UpDownSlideProposal::doProposal( void )
 {
 
     // Get random number generator

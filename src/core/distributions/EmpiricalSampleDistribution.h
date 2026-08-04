@@ -36,7 +36,7 @@ namespace RevBayesCore {
 
         // public member functions
         EmpiricalSampleDistribution*                        clone(void) const;                                                                      //!< Create an independent clone
-        double                                              computeLnProbability(void);
+        LogDensity                                          computeLnProbability(void);
         void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const;     //!< Map the member methods to internal function calls
         RevLanguage::RevPtr<RevLanguage::RevVariable>       executeProcedure(const std::string &name, const std::vector<DagNode *> args, bool &found);
         void                                                redrawValue(void);
@@ -225,7 +225,7 @@ RevBayesCore::EmpiricalSampleDistribution<valueType>* RevBayesCore::EmpiricalSam
 
 
 template <class valueType>
-double RevBayesCore::EmpiricalSampleDistribution<valueType>::computeLnProbability( void )
+LogDensity RevBayesCore::EmpiricalSampleDistribution<valueType>::computeLnProbability( void )
 {
     
     double ln_prob = 0;
@@ -238,7 +238,7 @@ double RevBayesCore::EmpiricalSampleDistribution<valueType>::computeLnProbabilit
     {
         if ( i >= sample_block_start && i < sample_block_end )
         {
-            ln_probs[i] = base_distribution_instances[i]->computeLnProbability();
+            ln_probs[i] = (double)base_distribution_instances[i]->computeLnProbability();
         }
         
     }

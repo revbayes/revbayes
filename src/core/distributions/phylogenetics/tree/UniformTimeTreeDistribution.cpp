@@ -130,7 +130,7 @@ UniformTimeTreeDistribution* UniformTimeTreeDistribution::clone( void ) const
 
 
 /* Compute probability */
-double UniformTimeTreeDistribution::computeLnProbability( void )
+LogDensity UniformTimeTreeDistribution::computeLnProbability( void )
 {
     
     // Variable declarations and initialization

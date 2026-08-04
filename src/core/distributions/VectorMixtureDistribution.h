@@ -33,7 +33,7 @@ namespace RevBayesCore {
 
         // public member functions
         VectorMixtureDistribution*                              clone(void) const;                                                                      //!< Create an independent clone
-        double                                                  computeLnProbability(void);
+        LogDensity                                              computeLnProbability(void);
         void                                                    executeMethod(const std::string &n, const std::vector<const DagNode*> &args, Simplex &rv) const;     //!< Map the member methods to internal function calls
         void                                                    redrawValue(void);
 //        void                                                    setValue(RbVector<mixtureType> *v, bool f=false);
@@ -132,7 +132,7 @@ RevBayesCore::VectorMixtureDistribution<mixtureType>* RevBayesCore::VectorMixtur
 
 
 template <class mixtureType>
-double RevBayesCore::VectorMixtureDistribution<mixtureType>::computeLnProbability( void )
+LogDensity RevBayesCore::VectorMixtureDistribution<mixtureType>::computeLnProbability( void )
 {
     dirty = false;
     
@@ -150,7 +150,7 @@ double RevBayesCore::VectorMixtureDistribution<mixtureType>::computeLnProbabilit
         {
             const mixtureType &tmp_val = (*this->value)[j];
             this_base_dist->setValue( Cloner<mixtureType, IsDerivedFrom<mixtureType, Cloneable>::Is >::createClone( tmp_val ) );
-            ln_probabilities[i] += this_base_dist->computeLnProbability();
+            ln_probabilities[i] += (double)this_base_dist->computeLnProbability();
         }
     }
     

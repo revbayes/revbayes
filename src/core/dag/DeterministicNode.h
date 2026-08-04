@@ -22,8 +22,8 @@ namespace RevBayesCore {
         virtual TypedFunction<valueType>&                   getFunction(void);
         virtual const TypedFunction<valueType>&             getFunction(void) const;
         void                                                getIntegratedParents(RbOrderedSet<DagNode *>& ip) const;
-        double                                              getLnProbability(void);
-        double                                              getLnProbabilityRatio(void);
+        LogDensity                                          getLnProbability(void);
+        LogDensity                                          getLnProbabilityRatio(void);
         valueType&                                          getValue(void);
         const valueType&                                    getValue(void) const;
         bool                                                isConstant(void) const;                                                     //!< Is this DAG node constant?
@@ -241,7 +241,7 @@ void RevBayesCore::DeterministicNode<valueType>::getIntegratedParents(RbOrderedS
 }
 
 template<class valueType>
-double RevBayesCore::DeterministicNode<valueType>::getLnProbability( void )
+LogDensity RevBayesCore::DeterministicNode<valueType>::getLnProbability( void )
 {
 
     return 0.0;
@@ -249,7 +249,7 @@ double RevBayesCore::DeterministicNode<valueType>::getLnProbability( void )
 
 
 template<class valueType>
-double RevBayesCore::DeterministicNode<valueType>::getLnProbabilityRatio( void )
+LogDensity RevBayesCore::DeterministicNode<valueType>::getLnProbabilityRatio( void )
 {
 
     return 0.0;

@@ -24,7 +24,7 @@ namespace RevBayesCore {
         // Basic utility functions
         void                                cleanProposal(void);                                                                //!< Clean up proposal
         UPPAllocationProposal*              clone(void) const;                                                                  //!< Clone object
-        double                              doProposal(void);                                                                   //!< Perform proposal
+        LogDensity                          doProposal(void);                                                                   //!< Perform proposal
         const std::string&                  getProposalName(void) const;                                                        //!< Get the name of the proposal for summary printing
         double                              getProposalTuningParameter(void) const;
         void                                prepareProposal(void);                                                              //!< Prepare the proposal
@@ -132,7 +132,7 @@ double RevBayesCore::UPPAllocationProposal<mixtureType>::getProposalTuningParame
  * \return The hastings ratio.
  */
 template <class mixtureType>
-double RevBayesCore::UPPAllocationProposal<mixtureType>::doProposal( void )
+LogDensity RevBayesCore::UPPAllocationProposal<mixtureType>::doProposal( void )
 {
     
     UniformPartitioningDistribution<mixtureType>& dist = static_cast<UniformPartitioningDistribution<mixtureType> &>( variable->getDistribution() );

@@ -152,7 +152,7 @@ double PhyloOrnsteinUhlenbeckStateDependent::computeRootValue( void ) const
 }
 
 
-double PhyloOrnsteinUhlenbeckStateDependent::computeLnProbability( void )
+LogDensity PhyloOrnsteinUhlenbeckStateDependent::computeLnProbability( void )
 {
 
     const Tree& tau = character_histories->getValue().getTree();

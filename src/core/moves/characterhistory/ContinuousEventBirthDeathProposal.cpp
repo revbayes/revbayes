@@ -63,7 +63,7 @@ double ContinuousEventBirthDeathProposal::computeEventProposalProbability(Charac
     
     ConditionedBirthDeathShiftProcessContinuous *process = static_cast<ConditionedBirthDeathShiftProcessContinuous*>(distribution);
     
-    double ln_proposal_prob = 0;
+    LogDensity ln_proposal_prob = 0;
 
     CharacterEventContinuous *cont_event = static_cast<CharacterEventContinuous*>( event );
     double rate_lambda  = cont_event->getState(0);
@@ -103,7 +103,7 @@ double ContinuousEventBirthDeathProposal::computeEventProposalProbability(Charac
     
 
 
-    return ln_proposal_prob;
+    return (double)ln_proposal_prob;
 }
 
 

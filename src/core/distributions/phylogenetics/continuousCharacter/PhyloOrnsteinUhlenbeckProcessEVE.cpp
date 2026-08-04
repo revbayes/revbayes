@@ -301,7 +301,7 @@ void PhyloOrnsteinUhlenbeckProcessEVE::computeVarianceRecursive(const TopologyNo
 
 
 
-double PhyloOrnsteinUhlenbeckProcessEVE::computeLnProbability( void )
+LogDensity PhyloOrnsteinUhlenbeckProcessEVE::computeLnProbability( void )
 {
 
     // first, compute the expectations for all tips and the variance-covariance matrix

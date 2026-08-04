@@ -45,7 +45,7 @@ ChisqDistribution* ChisqDistribution::clone( void ) const
 }
 
 
-double ChisqDistribution::computeLnProbability( void )
+LogDensity ChisqDistribution::computeLnProbability( void )
 {
     double v = *value;
     

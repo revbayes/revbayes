@@ -50,7 +50,7 @@ MarkovTimesDistribution* MarkovTimesDistribution::clone( void ) const
     return new MarkovTimesDistribution( *this );
 }
 
-double MarkovTimesDistribution::computeLnProbability(void)
+LogDensity MarkovTimesDistribution::computeLnProbability(void)
 {
 	// get the number of events
 	const size_t &num_events = this->value->size();

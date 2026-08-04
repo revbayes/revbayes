@@ -235,7 +235,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::buildSerialSample
 
 }
 
-double GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::computeLnProbability(void)
+LogDensity GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::computeLnProbability(void)
 {
 
 	// make sure we need to recompute

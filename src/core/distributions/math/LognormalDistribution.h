@@ -54,7 +54,7 @@ template <class valueType> class TypedDagNode;
         // public member functions
         double                              cdf(void) const;                                                  //!< Cummulative density function
         LognormalDistribution*              clone(void) const;                                                //!< Create an independent clone
-        double                              computeLnProbability(void);                                       //!< Natural log of the probability density
+        LogDensity                          computeLnProbability(void);                                       //!< Natural log of the probability density
         double                              getMax(void) const;                                               //!< Maximum value (@f$\infty@f$)
         double                              getMin(void) const;                                               //!< Minimum value (offset)
         double                              quantile(double p) const;                                         //!< Quantile function

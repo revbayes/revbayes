@@ -117,7 +117,7 @@ double GibbsPruneAndRegraftProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double GibbsPruneAndRegraftProposal::doProposal( void )
+LogDensity GibbsPruneAndRegraftProposal::doProposal( void )
 {
     
     // reset flags
@@ -138,12 +138,12 @@ double GibbsPruneAndRegraftProposal::doProposal( void )
     RbOrderedSet<DagNode *> affected;
     variable->initiateGetAffectedNodes( affected );
     
-    double backwardLikelihood = variable->getLnProbability();
+    LogDensity backwardLikelihood = variable->getLnProbability();
     for (RbOrderedSet<DagNode*>::const_iterator it = affected.begin(); it != affected.end(); ++it)
     {
         backwardLikelihood += (*it)->getLnProbability();
     }
-    int offset = (int) -backwardLikelihood;
+    int offset = (int) (-(double)backwardLikelihood);
     double backward = exp(backwardLikelihood + offset);
     
     // pick a random node which is not the root and neithor the direct descendant of the root
@@ -171,7 +171,20 @@ double GibbsPruneAndRegraftProposal::doProposal( void )
     if ( new_brothers.size() < 1)
     {
         failed = true;
-        return RbConstants::Double::neginf;
+        return RbConstants::Double::neginf;  // fail proposal
+    }
+
+    if (brother.isSampledAncestorTip())
+    {
+        // If the brother is a sampled-ancestor, then we are moving its descendant away.
+        // It would no longer be a sampled-ancestor.
+
+        // However, the real problem is that the reverse move would be to find a bifurcating
+        // parent which at the exact height of a tip, and then merge the two nodes.
+        // Since we don't do this, the reverse move is impossible, so we can't do the forward move.
+
+        failed = true;
+        return RbConstants::Double::neginf;  // fail proposal
     }
     
     std::vector<double> weights = std::vector<double>(new_brothers.size(), 0.0);
@@ -188,8 +201,8 @@ double GibbsPruneAndRegraftProposal::doProposal( void )
         variable->touch();
         
         // compute the likelihood of the new value
-        double priorRatio = variable->getLnProbability();
-        double likelihoodRatio = 0.0;
+        LogDensity priorRatio = variable->getLnProbability();
+        LogDensity likelihoodRatio = 0.0;
         for (RbOrderedSet<DagNode*>::const_iterator it = affected.begin(); it != affected.end(); ++it)
         {
             likelihoodRatio += (*it)->getLnProbability();

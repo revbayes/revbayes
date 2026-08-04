@@ -72,6 +72,7 @@ void Mcmc::constructInternalObject( void )
     const std::string &                                     sched   = static_cast<const RlString &>( moveschedule->getRevObject() ).getValue();
     int                                                     nreps   = (int)static_cast<const Natural &>( num_runs->getRevObject() ).getValue();
     int                                                     ntries  = (int)static_cast<const Natural &>( num_init_attempts->getRevObject() ).getValue();
+    int                                                     nsearch = (int)static_cast<const Natural &>( num_search_gens->getRevObject() ).getValue();
     const std::string &                                     comb    = static_cast<const RlString &>( combine_traces->getRevObject() ).getValue();
 
     RevBayesCore::MonteCarloAnalysisOptions::TraceCombinationTypes ct = RevBayesCore::MonteCarloAnalysisOptions::SEQUENTIAL;
@@ -88,7 +89,7 @@ void Mcmc::constructInternalObject( void )
         ct = RevBayesCore::MonteCarloAnalysisOptions::NONE;
     }
     
-    RevBayesCore::Mcmc *m = new RevBayesCore::Mcmc(mdl, mvs, mntr, ntries);
+    RevBayesCore::Mcmc *m = new RevBayesCore::Mcmc(mdl, mvs, mntr, ntries, nsearch);
     m->setScheduleType( sched );
     
     double                                                  lHeat   = static_cast<const RealPos &>( likelihood_heat->getRevObject() ).getValue();
@@ -164,6 +165,9 @@ const MemberRules& Mcmc::getParameterRules(void) const
         const MemberRules &parentRules = MonteCarloAnalysis::getParameterRules();
         memberRules.insert(memberRules.end(), parentRules.begin(), parentRules.end());
         
+        // the number of tries to initialize the MCMC until it fails
+        memberRules.push_back( new ArgumentRule("nsearch"   , Natural::getClassTypeSpec(), "The number of MCMC generations to search for non-zero probability without improvement.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0) ) );
+
         memberRules.push_back( new ArgumentRule("priorHeat", RealPos::getClassTypeSpec(), "The power that the prior will be raised to.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RealPos(1.0) ) );
         memberRules.push_back( new ArgumentRule("likelihoodHeat", RealPos::getClassTypeSpec(), "The power that the likelihood will be raised to.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RealPos(1.0) ) );
         memberRules.push_back( new ArgumentRule("posteriorHeat", RealPos::getClassTypeSpec(), "The power that the posterior will be raised to.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RealPos(1.0) ) );
@@ -207,6 +211,10 @@ void Mcmc::setConstParameter(const std::string& name, const RevPtr<const RevVari
     else if ( name == "priorHeat" )
     {
         prior_heat = var;
+    }
+    else if (name == "nsearch")
+    {
+        num_search_gens = var;
     }
     else
     {

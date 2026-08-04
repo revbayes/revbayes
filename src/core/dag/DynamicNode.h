@@ -24,7 +24,9 @@ namespace RevBayesCore {
         
         // this function provided for derived classes used in the language layer, which need to override it
         virtual const std::string&                          getRevTypeOfValue(void);                                                        //!< Get Rev language type of value
-        
+
+        virtual bool                                        isTouched() const override;                                                     //!< Check if touched flag is set.
+
     protected:
         virtual void                                        keepMe(const DagNode* affecter);                                                //!< Keep value of this and affected nodes
         virtual void                                        restoreMe(const DagNode *restorer);                                             //!< Restore value of this node
@@ -32,7 +34,7 @@ namespace RevBayesCore {
         
         
         // members
-        bool                                                touched;
+        bool                                                touched = false;
         
     };
     
@@ -42,16 +44,14 @@ namespace RevBayesCore {
 #include "RbOptions.h"
 
 template<class valueType>
-RevBayesCore::DynamicNode<valueType>::DynamicNode( const std::string &n ) : TypedDagNode<valueType>( n ),
-    touched( true )
+RevBayesCore::DynamicNode<valueType>::DynamicNode( const std::string &n ) : TypedDagNode<valueType>( n )
 {
     // nothing to do here
 }
 
 
 template<class valueType>
-RevBayesCore::DynamicNode<valueType>::DynamicNode( const DynamicNode<valueType> &n ) : TypedDagNode<valueType>( n ),
-    touched( true )
+RevBayesCore::DynamicNode<valueType>::DynamicNode( const DynamicNode<valueType> &n ) : TypedDagNode<valueType>( n )
 {
     // nothing to do here
 }
@@ -197,6 +197,11 @@ void RevBayesCore::DynamicNode<valueType>::touchMe( const DagNode * /*toucher*/,
 }
 
 
+template<class valueType>
+bool RevBayesCore::DynamicNode<valueType>::isTouched() const
+{
+    return touched;
+}
 
 #endif
 

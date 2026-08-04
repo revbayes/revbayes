@@ -61,7 +61,7 @@ double VectorScaleProposal::getProposalTuningParameter( void ) const
  *
  * \return The log hastings ratio.
  */
-double VectorScaleProposal::doProposal( void )
+LogDensity VectorScaleProposal::doProposal( void )
 {
     
     // Get random number generator

@@ -33,7 +33,7 @@ namespace RevBayesCore {
         virtual PhyloBrownianProcessMVN*                                    clone(void) const;                                                                      //!< Create an independent clone
         
         // non-virtual
-        double                                                              computeLnProbability(void);
+        LogDensity                                                          computeLnProbability(void);
         void                                                                setRootState(const TypedDagNode< double >* s);
         void                                                                setRootState(const TypedDagNode< RbVector< double > >* s);
         

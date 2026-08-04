@@ -84,7 +84,7 @@ double VectorSlideRecenterProposal::getProposalTuningParameter( void ) const
  *
  * \return The hastings ratio.
  */
-double VectorSlideRecenterProposal::doProposal( void )
+LogDensity VectorSlideRecenterProposal::doProposal( void )
 {
     
     // Get random number generator
