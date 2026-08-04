@@ -62,9 +62,10 @@ FossilizedBirthDeathSpeciationProcess::FossilizedBirthDeathSpeciationProcess(con
                                                            const std::string &incondition,
                                                            const std::vector<Taxon> &intaxa,
                                                            bool comp,
-                                                           bool ext) :
+                                                           bool ext,
+                                                           double inpresent) :
     AbstractBirthDeathProcess(ra, incondition, intaxa, true, NULL),
-    AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, comp),
+    AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, comp, NULL, NULL, true, inpresent),
     extended( ext )
 {
 

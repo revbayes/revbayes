@@ -122,7 +122,9 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRP::createDistribution( 
     // may a taxon reported extinct have survived to the present unseen
     bool surv = static_cast<const RlBoolean &>( survivors->getRevObject() ).getValue();
 
-    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, true, NULL, op, surv);
+    double pres = static_cast<const RealPos &>( present->getRevObject() ).getValue();
+
+    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, true, NULL, op, surv, pres);
 
     return d;
 }

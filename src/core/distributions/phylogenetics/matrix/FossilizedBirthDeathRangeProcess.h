@@ -43,7 +43,8 @@ namespace RevBayesCore {
 										  bool complete_record,
                                           const TypedDagNode<double>* origin = NULL,
                                           TypedDistribution<double>* origin_prior = NULL,
-                                          bool survivors = true);
+                                          bool survivors = true,
+                                            double present = 0.0);
         
         // public member functions
         void                                            setMcmcMode(bool tf) override;

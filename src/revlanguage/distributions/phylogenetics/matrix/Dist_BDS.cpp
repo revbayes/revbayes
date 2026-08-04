@@ -77,7 +77,9 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_BDS::createDistribution( vo
 
     // bare BDS range process (a dnFossilRecord node supplies the
     // reporting term)
-    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::BirthDeathWithRateshifts(l, m, p, r, rt, cond, t, true, NULL);
+    double pres = static_cast<const RealPos &>( present->getRevObject() ).getValue();
+
+    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::BirthDeathWithRateshifts(l, m, p, r, rt, cond, t, true, NULL, pres);
 
     return d;
 }

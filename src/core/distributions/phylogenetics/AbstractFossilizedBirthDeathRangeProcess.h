@@ -84,7 +84,8 @@ namespace RevBayesCore {
                                             bool complete_record,
                                             const TypedDagNode<double>* origin = NULL,
                                             TypedDistribution<double>* origin_prior = NULL,
-                                            bool survivors = true);  //!< Constructor
+                                            bool survivors = true,
+                                            double present = 0.0);  //!< Constructor
 
         virtual ~AbstractFossilizedBirthDeathRangeProcess(){};
 
@@ -200,6 +201,10 @@ namespace RevBayesCore {
         bool                                            resampled;                                              //!< The undo above is armed.
         //!< False forbids the point mass, leaving a continuous extinction time.
         bool                                            survivors = true;
+
+        //!< The time defining the present, and the minimum age of the process. The timeline
+        //!< starts here rather than at zero.
+        double                                          present_time = 0.0;
     };
 }
 

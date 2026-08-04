@@ -47,7 +47,8 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
                                                                          bool comp,
                                                                          const TypedDagNode<double> *inorigin,
                                                                          TypedDistribution<double> *inoriginprior,
-                                                                         bool survivors) :
+                                                                         bool survivors,
+                                                                         double inpresent) :
     taxa(intaxa),
     condition(incondition),
     homogeneous_rho(inrho),
@@ -58,7 +59,8 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
     max_birth(0),
     resampled(false),
     touched(false),
-    survivors(survivors)
+    survivors(survivors),
+    present_time(inpresent)
 {
     // initialize all the pointers to NULL
     homogeneous_lambda             = NULL;
@@ -104,7 +106,7 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
     }
     else
     {
-        num_intervals = timeline->getValue().size() + (timeline->getValue().front() != 0.0);
+        num_intervals = timeline->getValue().size() + (timeline->getValue().front() != present_time);
     }
 
     if ( num_intervals > 1 )
@@ -117,6 +119,11 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
         if ( times != times_sorted_ascending )
         {
             throw(RbException("Interval times must be provided in ascending order"));
+        }
+
+        if ( times.front() < present_time )
+        {
+            throw(RbException("An interval time is younger than present"));
         }
     }
 
@@ -1088,7 +1095,7 @@ void AbstractFossilizedBirthDeathRangeProcess::prepareProbComputation( void ) co
 
     if ( times.size() < num_intervals )
     {
-        times.insert(times.begin(), 0.0);
+        times.insert(times.begin(), present_time);
     }
 
     for (size_t i = 0; i < num_intervals; i++)

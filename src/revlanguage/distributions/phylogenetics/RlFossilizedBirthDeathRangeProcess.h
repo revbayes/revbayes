@@ -57,6 +57,7 @@ namespace RevLanguage {
         RevPtr<const RevVariable>                           psi;                                                                                //!< The fossilization rate(s)
         RevPtr<const RevVariable>                           rho;                                                                                //!< The extant sampling proportion
         RevPtr<const RevVariable>                           timeline;                                                                           //!< The interval times
+        RevPtr<const RevVariable>                           present;                                                                            //!< Where the process stops
         RevPtr<const RevVariable>                           taxa;                                                                               //!< The taxa
         RevPtr<const RevVariable>                           condition;                                                                          //!< The condition of the process
         RevPtr<const RevVariable>                           complete;                                                                           //!< Is the fossil record complete?
@@ -144,6 +145,7 @@ void RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::appendParameterRules
     rules.push_back( new ArgumentRule( "rho",     Probability::getClassTypeSpec(), "The extant sampling fraction.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(1.0) ) );
 
     rules.push_back( new ArgumentRule( "timeline",   ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the piecewise constant process.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+    rules.push_back( new ArgumentRule( "present",    RealPos::getClassTypeSpec(), "The time defining the present. Minimum age of the process.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
 
     std::vector<std::string> optionsCondition;
     optionsCondition.push_back( "time" );
@@ -270,6 +272,10 @@ void RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::setConstParameter(co
     else if ( name == "rho" )
     {
         rho = var;
+    }
+    else if ( name == "present" )
+    {
+        present = var;
     }
     else if ( name == "timeline" )
     {
