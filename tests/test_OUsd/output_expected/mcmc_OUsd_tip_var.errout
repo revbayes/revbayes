@@ -1,4 +1,5 @@
-   Successfully read one character matrix from file '/Users/plau/Desktop/rb-branches/rb-sdou-err/tests/data/artiodactyla_hypsodonty_with_var.nex'
+   Successfully read one character matrix from file 'data/artiodactyla_hypsodonty_with_var.nex'
+   1.574102
    
    Running MCMC simulation
    This simulation runs 1 independent replicate.

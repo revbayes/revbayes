@@ -1,5 +1,5 @@
-   Successfully read one character matrix from file '/Users/plau/Desktop/rb-branches/rb-sdou-err/tests/data/artiodactyla_hypsodonty_missing.nex'
-   Successfully read one character matrix from file '/Users/plau/Desktop/rb-branches/rb-sdou-err/tests/data/artiodactyla_hypsodonty_drop.nex'
+   Successfully read one character matrix from file 'data/artiodactyla_hypsodonty_missing.nex'
+   Successfully read one character matrix from file 'data/artiodactyla_hypsodonty_drop.nex'
 likelihoods in OU distribution equal, test passed
    
    Running MCMC simulation
