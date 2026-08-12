@@ -52,15 +52,13 @@ void Move_MPQTree::constructInternalObject( void ) {
     
     // now allocate a new sliding move
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator >* tmp = static_cast<const RateGenerator &>( Q->getRevObject() ).getDagNode();
-    RevBayesCore::StochasticNode<RevBayesCore::RateGenerator > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::RateGenerator> *>( tmp );
-
     RevBayesCore::TypedDagNode<RevBayesCore::Tree >* tmp_tree = static_cast<const Tree &>( tree->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::Tree > *t = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp_tree );
 
     bool tu = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    bool ur = static_cast<const RlBoolean &>( update_root->getRevObject() ).getValue();
     
-    RevBayesCore::Proposal *p = new RevBayesCore::MPQTreeProposal(n, t);
+    RevBayesCore::Proposal *p = new RevBayesCore::MPQTreeProposal(t, ur);
     value = new RevBayesCore::MetropolisHastingsMove(p,w,tu);
 
 }
@@ -106,9 +104,13 @@ const MemberRules& Move_MPQTree::getParameterRules(void) const {
     
     if ( !rules_set )
         {
-        move_member_rules.push_back( new ArgumentRule( "Q"     , RateGenerator::getClassTypeSpec(),        "The general nucleotide rate matrix on which this move operates.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
+        /* No Q argument. This move does not read or modify the rate matrix, and a
+           move that registers a node it does not change makes RevBayes touch that
+           node on every proposal, which here would dirty the whole CTMC and force
+           a full likelihood recomputation for what is only a branch-length change. */
         move_member_rules.push_back( new ArgumentRule( "tree"  , Tree::getClassTypeSpec(),                 "The phylogeny.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY ) );
         move_member_rules.push_back( new ArgumentRule( "tune"  , RlBoolean::getClassTypeSpec(),            "Should we tune the scaling factor during burnin?", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new RlBoolean( true ) ) );
+        move_member_rules.push_back( new ArgumentRule( "updateRoot", RlBoolean::getClassTypeSpec(),        "Should the position of the root be updated? Set this to FALSE whenever an outgroup has been assigned. The move cannot work this out for itself: the tree prior does not enforce the outgroup once the MCMC is running (RevBayes issue #157), so a root move would walk the root off the outgroup and nothing would object.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( true ) ) );
         
         /* Inherit weight from Move, put it after variable */
         const MemberRules& inheritedRules = Move::getParameterRules();
@@ -132,9 +134,9 @@ const TypeSpec& Move_MPQTree::getTypeSpec( void ) const {
 void Move_MPQTree::printValue(std::ostream &o) const {
     
     o << "Move_MPQTree(";
-    if (Q != NULL)
+    if (tree != NULL)
         {
-        o << Q->getName();
+        o << tree->getName();
         }
     else
         {
@@ -147,11 +149,7 @@ void Move_MPQTree::printValue(std::ostream &o) const {
 /** Set a member variable */
 void Move_MPQTree::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var) {
     
-    if ( name == "Q" )
-        {
-        Q = var;
-        }
-    else if ( name == "tree" )
+    if ( name == "tree" )
         {
         tree = var;
         }
@@ -162,6 +160,10 @@ void Move_MPQTree::setConstParameter(const std::string& name, const RevPtr<const
     else if ( name == "tune" )
         {
         tune = var;
+        }
+    else if ( name == "updateRoot" )
+        {
+        update_root = var;
         }
     else
         {

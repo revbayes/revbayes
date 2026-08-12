@@ -3,7 +3,6 @@
 #include <cmath>
 #include <iostream>
 
-#include "RateMatrix_MPQ.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "Cloneable.h"
@@ -20,14 +19,13 @@ using namespace RevBayesCore;
  *
  * Here we simply allocate and initialize the Proposal object.
  */
-ReversibilityAwareBranchLengthScaleProposal::ReversibilityAwareBranchLengthScaleProposal( StochasticNode<Tree> *t, TypedDagNode<RateGenerator>* q_in, double d ) : Proposal(),
+ReversibilityAwareBranchLengthScaleProposal::ReversibilityAwareBranchLengthScaleProposal( StochasticNode<Tree> *t, double d ) : Proposal(),
     tree( t ),
-    q( q_in ),
-    delta( d )
+    delta( d ),
+    stored_paired( false )
 {
-    // tell the base class to add the node
+    // only the tree; see the note in the header on why the rate matrix is not held
     addNode( tree );
-    addNode( q );
 
 }
 
@@ -84,15 +82,13 @@ double ReversibilityAwareBranchLengthScaleProposal::getProposalTuningParameter( 
 double ReversibilityAwareBranchLengthScaleProposal::doProposal( void )
 {
     
-    bool is_reversible = static_cast<RateMatrix_MPQ&>( q->getValue() ).getIsReversible();
-    
     // Get random number generator
     RandomNumberGenerator* rng     = GLOBAL_RNG;
 
     Tree& tau = tree->getValue();
 
 
-    // pick a random node which is not the root and neithor the direct descendant of the root
+    // pick a random node which is not the root
     TopologyNode* node = NULL;
     do {
         double u = rng->uniform01();
@@ -119,7 +115,12 @@ double ReversibilityAwareBranchLengthScaleProposal::doProposal( void )
     // compute the Hastings ratio
     double ln_hastings_ratio = log( scaling_factor );
     
-    if ( is_reversible == true && node->getParent().isRoot() )
+    /* If this branch descends from the root, scale its sibling by the same factor,
+       so that the root edge is scaled as a whole and the split between its two
+       halves is untouched. Two branches scaled by a common factor have Jacobian
+       sf^2, hence the second log term. */
+    stored_paired = ( node->getParent().isRoot() == true && node->getParent().getNumberOfChildren() == 2 );
+    if ( stored_paired == true )
     {
         TopologyNode *sibling = &node->getParent().getChild(0);
         if ( sibling == node )
@@ -182,8 +183,11 @@ void ReversibilityAwareBranchLengthScaleProposal::undoProposal( void )
     // undo the proposal
     node.setBranchLength( stored_value, false );
     
-    bool is_reversible = static_cast<RateMatrix_MPQ&>( q->getValue() ).getIsReversible();
-    if ( is_reversible == true && node.getParent().isRoot() )
+    /* Undo the pairing on the strength of what doProposal recorded, rather than
+       working the condition out a second time. The old code re-read the rate
+       matrix here, so a reversibility flag that differed between the two calls
+       would have left the sibling branch permanently scaled. */
+    if ( stored_paired == true )
     {
         TopologyNode *sibling = &node.getParent().getChild(0);
         if ( sibling == &node )
@@ -208,11 +212,6 @@ void ReversibilityAwareBranchLengthScaleProposal::swapNodeInternal(DagNode *oldN
     if ( oldN == tree )
     {
         tree = static_cast<StochasticNode<Tree>* >(newN);
-    }
-    
-    if ( oldN == q )
-    {
-        q = static_cast<TypedDagNode<RateGenerator>* >(newN);
     }
     
 }

@@ -9,7 +9,6 @@
 #include "RealPos.h"
 #include "RevObject.h"
 #include "RlBoolean.h"
-#include "RlRateGenerator.h"
 #include "RlTree.h"
 #include "ReversibilityAwareBranchLengthScaleProposal.h"
 #include "TypeSpec.h"
@@ -55,13 +54,11 @@ void Move_ReversibilityAwareBranchLengthScale::constructInternalObject( void )
     RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = static_cast<const Tree &>( tree->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
 
-    RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator> *q_dag_node = static_cast<const RateGenerator &>( q->getRevObject() ).getDagNode();
-
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     double l = static_cast<const RealPos &>( delta->getRevObject() ).getValue();
     bool tune = static_cast<const RlBoolean &>( tuning->getRevObject() ).getValue();
     
-    RevBayesCore::Proposal *p = new RevBayesCore::ReversibilityAwareBranchLengthScaleProposal(t, q_dag_node, l);
+    RevBayesCore::Proposal *p = new RevBayesCore::ReversibilityAwareBranchLengthScaleProposal(t, l);
     value = new RevBayesCore::MetropolisHastingsMove(p, w, tune);
 }
 
@@ -109,7 +106,15 @@ const MemberRules& Move_ReversibilityAwareBranchLengthScale::getParameterRules(v
     if ( rules_set == false )
     {
         move_member_rules.push_back( new ArgumentRule( "tree"   , Tree::getClassTypeSpec() , "The tree variable the move operates on.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
-        move_member_rules.push_back( new ArgumentRule( "q"      , RateGenerator::getClassTypeSpec() , "The general Q rate matrix.", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY ) );
+        /* No "q" argument. This move scales the two root branches together whatever
+           the rate matrix currently is, so it has no reason to read the rate
+           matrix, and registering a node it does not change would make RevBayes
+           touch that node on every proposal.
+
+           Note that this move has to be used alongside an ordinary single-branch
+           scaler such as mvBranchLengthScale. On its own it never changes the ratio
+           of the two root branches, which under the time-reversible model is
+           identified by the prior alone and still has to be sampled. */
         move_member_rules.push_back( new ArgumentRule( "delta"  , RealPos::getClassTypeSpec()  , "The scaling factor (strength) of the proposal.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY       , new RealPos( 1.0 ) ) );
         move_member_rules.push_back( new ArgumentRule( "tune"   , RlBoolean::getClassTypeSpec(), "Should we tune the scaling factor during burnin?", ArgumentRule::BY_VALUE    , ArgumentRule::ANY       , new RlBoolean( true ) ) );
         
@@ -158,10 +163,6 @@ void Move_ReversibilityAwareBranchLengthScale::setConstParameter(const std::stri
     if ( name == "tree" )
     {
         tree = var;
-    }
-    else if ( name == "q" )
-    {
-        q = var;
     }
     else if ( name == "delta" )
     {

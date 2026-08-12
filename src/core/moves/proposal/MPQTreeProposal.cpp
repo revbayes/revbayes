@@ -1,5 +1,8 @@
 #include "MPQTreeProposal.h"
 
+#include "RbConstants.h"
+#include "RbException.h"
+
 #include <cstdlib>
 #include <cmath>
 #include <iostream>
@@ -32,28 +35,27 @@ using namespace RevBayesCore;
  *
  * Here we simply allocate and initialize the Proposal object.
  */
-MPQTreeProposal::MPQTreeProposal( TypedDagNode<RateGenerator> *q, StochasticNode<Tree>* t ) : Proposal(),
-q_matrix( q ),
+MPQTreeProposal::MPQTreeProposal( StochasticNode<Tree>* t, bool ur ) : Proposal(),
 tree( t ),
+update_root( ur ),
 tuning_branch_length( 0.1 ),
-tuning_tree_length( 0.01 )
+tuning_tree_length( 0.01 ),
+verify_root_move( false )
 {
 
-    // tell the base class to add the node
-    addNode( q_matrix );
     addNode( tree );
 }
 
 
 MPQTreeProposal::MPQTreeProposal( const MPQTreeProposal& p ) : Proposal( p ),
-q_matrix( p.q_matrix ),
 tree( p.tree ),
+update_root( p.update_root ),
 tuning_branch_length( p.tuning_branch_length ),
-tuning_tree_length( p.tuning_tree_length )
+tuning_tree_length( p.tuning_tree_length ),
+verify_root_move( p.verify_root_move )
 {
         
     // tell the base class to add the node
-    addNode( q_matrix );
     addNode( tree );
     
 }
@@ -114,43 +116,34 @@ double MPQTreeProposal::doProposal( void ) {
     // Get a pointer to the random number generator
     RandomNumberGenerator* rng = GLOBAL_RNG;
     
-    RateMatrix_MPQ& Q = static_cast<RateMatrix_MPQ&>(q_matrix->getValue());
-    
+    /* Note that the mixture no longer depends on whether the rate matrix is
+       currently time reversible.
+
+       It is tempting to propose root positions only in the non-reversible model,
+       since that is the only one whose likelihood can tell root positions apart.
+       Doing that is a mistake. While the chain sits in the time-reversible model
+       the root position would stop moving entirely, and it would then be handed
+       to the non-reversible model, on the next reversible-jump move, frozen at
+       whatever value it happened to hold when the chain last left. Proposing it
+       in both models costs a likelihood evaluation that cannot change the
+       likelihood while reversible, and buys a root position that arrives at the
+       non-reversible model already drawn from its prior. */
     double lnProb = 0.0;
-    if (Q.getIsReversible() == true)
+    double u = rng->uniform01();
+    if ( u < 0.1 )
         {
-        // update the tree length or branch lengths
-        double u = rng->uniform01();
-        if ( u < 0.1 )
-            {
-            last_move = TREE_LENGTH;
-            lnProb = updateTreeLength();
-            }
-        else
-            {
-            last_move = BRANCH_LENGTH;
-            lnProb = updateBranchLengths();
-            }
+        last_move = TREE_LENGTH;
+        lnProb = updateTreeLength();
+        }
+    else if ( u < 0.9 || update_root == false )
+        {
+        last_move = BRANCH_LENGTH;
+        lnProb = updateBranchLengths();
         }
     else
         {
-        // update non-reversible model (tree length, branch lengths or root position)
-        double u = rng->uniform01();
-        if ( u < 0.1 )
-            {
-            last_move = TREE_LENGTH;
-            lnProb = updateTreeLength();
-            }
-        else if ( u < 0.9 )
-            {
-            last_move = BRANCH_LENGTH;
-            lnProb = updateBranchLengths();
-            }
-        else
-            {
-            last_move = ROOT_POSITION;
-            lnProb = updateRootPosition();
-            }
+        last_move = ROOT_POSITION;
+        lnProb = updateRootPosition();
         }
         
     
@@ -197,8 +190,6 @@ void MPQTreeProposal::printParameterSummary(std::ostream &o, bool name_only) con
 void MPQTreeProposal::undoProposal( void ) 
 {
     
-    RateMatrix_MPQ& v = static_cast<RateMatrix_MPQ&>( q_matrix->getValue() );
-    
     if ( last_move == BRANCH_LENGTH )
     {
         Tree& tau = tree->getValue();
@@ -222,7 +213,10 @@ void MPQTreeProposal::undoProposal( void )
             if ( nodes[i]->isRoot() == false )
             {
                 
-                double new_branch_length = nodes[i]->getBranchLength() * stored_scaling_factor;
+                // divide: doProposal multiplied by this factor, so undoing it
+                // means dividing.  Multiplying here, as this used to, inflated
+                // the tree by the square of the factor on every rejection.
+                double new_branch_length = nodes[i]->getBranchLength() / stored_scaling_factor;
 
                 // rescale the subtrees
                 nodes[i]->setBranchLength( new_branch_length );
@@ -267,8 +261,6 @@ void MPQTreeProposal::undoProposal( void )
             {
                 index_sibling = 1;
             }
-            double old_total_root_branch_length = node.getBranchLength() + current_root->getChild(index_sibling).getBranchLength();
-
             node.setBranchLength( stored_first_root_branch_length );
             current_root->getChild(index_sibling).setBranchLength( stored_second_root_branch_length );
 
@@ -309,17 +301,22 @@ void MPQTreeProposal::undoProposal( void )
                 this_node->setBranchLength( marked_nodes[i-2]->getBranchLength() );
             }
             
-//            double old_root_branch_length = node.getBranchLength();
             node.setBranchLength( stored_first_root_branch_length );
             marked_nodes[1]->setBranchLength( stored_second_root_branch_length );
         }
-        
-        
-        
-        
-        
-//        tau.debugPrint();
-        
+
+        /* The root move is the only proposal here that rearranges topology, and
+           the reversal above is written by hand rather than restored from a copy.
+           If it is ever wrong the tree is corrupted quietly and the run keeps
+           going, so when asked we check that the tree really did come back. */
+        if ( verify_root_move == true )
+        {
+            std::string restored = tau.getNewickRepresentation();
+            if ( restored != stored_newick )
+            {
+                throw RbException("MPQTreeProposal::undoProposal failed to restore the tree after a root-position move.\n  before: " + stored_newick + "\n  after:  " + restored);
+            }
+        }
     }
 
 }
@@ -333,11 +330,6 @@ void MPQTreeProposal::undoProposal( void )
  */
 void MPQTreeProposal::swapNodeInternal(DagNode *oldN, DagNode *newN) 
 {
-    
-    if ( oldN == q_matrix )
-    {
-        q_matrix = static_cast< TypedDagNode<RateGenerator>* >(newN) ;
-    }
     
     if ( oldN == tree )
     {
@@ -430,33 +422,93 @@ double MPQTreeProposal::updateRootPosition(void)
 //    std::cerr << std::endl;
 
     
-    size_t num_nodes = tau.getNumberOfNodes();
-    
-    double tree_length = tau.getTreeLength();
-    
-    double u = rng->uniform01() * tree_length;
-    
-    double sum = 0.0;
-    
-    size_t node_index = 0;
-    // loop over all nodes
-    for ( ; node_index < num_nodes; ++node_index)
-    {
-        // get the i-th node
-        const TopologyNode& n = tau.getNode( node_index );
+    /* The move places the root at a point drawn uniformly along the tree, by
+       length: a branch is chosen in proportion to its length and the root then
+       goes at a uniform position along that branch. The two branches either side
+       of the old root merge into one.
 
-        if ( n.isRoot() == false )
+       The Hastings ratio is one, and this is worth writing down because it is not
+       obvious and because the two ingredients look like they should not cancel.
+       Write b1 and b2 for the old root branches, L = b1 + b2, and l for the length
+       of the chosen branch, which f in (0,1) splits into c1 = f l and c2 = (1-f) l.
+       The reverse move would have to draw f' = b1 / L. The map
+
+           (b1, b2, l, f)  ->  (L, c1, c2, f')
+
+       is block diagonal once the rows are put in the order (L, f', c1, c2), with
+       blocks of determinant -1/L and -l, so its Jacobian is l / L. Branch choice
+       is proportional to length and the tree length T is unchanged by rerooting,
+       so the proposal densities contribute (L/T) / (l/T) = L / l. The product is
+       exactly one. The special case below, where the chosen branch already
+       descends from the root, has Jacobian one and selection probability L/T in
+       both directions, so it is one as well.
+
+       This is why the function returns 0.0. An earlier draft carried
+       log(old_root_branch_length) - log(new_total_root_branch_length), which is
+       the Jacobian without the proposal densities that cancel it. */
+
+    size_t num_nodes = tau.getNumberOfNodes();
+
+    // a rooted binary tree is assumed throughout; the merge and split below have
+    // no meaning otherwise
+    TopologyNode* current_root = &tau.getRoot();
+    if ( current_root->getNumberOfChildren() != 2 )
+    {
+        return RbConstants::Double::neginf;
+    }
+
+    double tree_length = tau.getTreeLength();
+    if ( tree_length <= 0.0 )
+    {
+        return RbConstants::Double::neginf;
+    }
+
+    double u = rng->uniform01() * tree_length;
+
+    /* Choose a branch in proportion to its length. The root carries no branch, so
+       it is skipped rather than merely contributing zero: the original loop
+       tested the running sum on the root's iteration too, and could leave the
+       index at num_nodes when rounding left the accumulated sum at or below u,
+       which then indexed one past the end. */
+    double sum = 0.0;
+    size_t node_index = num_nodes;
+    for (size_t i = 0; i < num_nodes; ++i)
+    {
+        const TopologyNode& n = tau.getNode( i );
+        if ( n.isRoot() == true )
         {
-            // add the branch length
-            sum += n.getBranchLength();
+            continue;
         }
-        
+        sum += n.getBranchLength();
         if ( sum > u )
         {
+            node_index = i;
             break;
         }
     }
-    
+    if ( node_index == num_nodes )
+    {
+        // u fell past the accumulated total by a rounding error; take the last
+        // branch, which is the one it was heading for
+        for (size_t i = num_nodes; i > 0; --i)
+        {
+            if ( tau.getNode(i-1).isRoot() == false )
+            {
+                node_index = i-1;
+                break;
+            }
+        }
+        if ( node_index == num_nodes )
+        {
+            return RbConstants::Double::neginf;
+        }
+    }
+
+    if ( verify_root_move == true )
+    {
+        stored_newick = tau.getNewickRepresentation();
+    }
+
     stored_root_index = tau.getRoot().getIndex();
     
     // get the node that we have picked
@@ -465,8 +517,6 @@ double MPQTreeProposal::updateRootPosition(void)
     // now mark the nodes from the selected node to the root
     std::vector<TopologyNode*> marked_nodes;
     markNodes(marked_nodes, &node);
-    
-    TopologyNode* current_root = &tau.getRoot();
     
     stored_root_node = &current_root->getChild(0);
     if ( stored_root_node == marked_nodes[ marked_nodes.size()-1 ] )

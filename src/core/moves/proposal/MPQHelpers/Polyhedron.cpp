@@ -35,7 +35,11 @@ void MpqMatrix::set(int idx, Vector* v) {
 }
 
 Polyhedron::Polyhedron(void) {
-    
+
+    // this polyhedron owns its vertex pool; it is not shared with any other
+    // polyhedron, and in particular not with a polyhedron on another chain
+    vertexFactory = new VertexFactory;
+
     // initialize commonly used constants
     zeroQ     = 0;
     oneQ      = 1;
@@ -84,6 +88,12 @@ Polyhedron::Polyhedron(void) {
  * \param[in]    vertices  The vertices of the facet
  * \param[in]    vol       A reference to the volume, which will be added to
  */
+Polyhedron::~Polyhedron(void) {
+
+    // frees every vertex the factory ever allocated
+    delete vertexFactory;
+}
+
 void Polyhedron::calculateFacetVolume(Plane* pln, std::vector<Vertex*>& vertices, mpq_class& vol) {
 
     // loop over triangulations of the facet
@@ -371,7 +381,7 @@ void Polyhedron::initializePlanes(void) {
         
     // note that this checks all 12 choose 3 combinations of planes for intersection even though
     // six pairs of the planes are parallel to one another!
-    VertexFactory& vf = VertexFactory::vertexFactoryInstance();
+    VertexFactory& vf = *vertexFactory;
     verticesMap.clear();
     linesMap.clear();
     for (int i=0, n1 = (int)planes.size(); i<n1; i++)

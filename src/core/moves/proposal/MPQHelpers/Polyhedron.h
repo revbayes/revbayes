@@ -14,6 +14,7 @@ namespace RevBayesCore {
     class RateMatrix;
     class Vector;
     class Vertex;
+    class VertexFactory;
 
     // a 4 X 4 matrix of GMP rationals used in determining if a point is in a tetrahedron
     class MpqMatrix {
@@ -96,7 +97,7 @@ namespace RevBayesCore {
          * can represent a point in a tetrahedron with vertices V1, V2, V3, and V4 as a mixture
          * of those four vertices:
          *
-         * P = V1 * b1 + V2 * b2 + V3 * b3 + V4 * (1-s-t-u)b4
+         * P = V1 * b1 + V2 * b2 + V3 * b3 + V4 * b4
          *
          * Here, b1, b2, b3, and b4 are called the barycentric coordinates, with b1+b2+b3+b4=1.
          * You can generate a point uniformly and at random from a tetrahedron by generating
@@ -150,7 +151,9 @@ namespace RevBayesCore {
         
     public:
                             Polyhedron(void);
+                           ~Polyhedron(void);
                             Polyhedron(const Polyhedron& p) = delete;
+        Polyhedron&         operator=(const Polyhedron& p) = delete;
         void                certify(void);
         void                setAlphaT(double x) { alphaT = x; }
         double              lnProbabilityForward(std::vector<mpq_class>& W, Vector& pt);
@@ -252,6 +255,9 @@ namespace RevBayesCore {
         double              alphaC;                   // the barycentric coordinate for the center vertex (for biasing the random point)
             
         mpq_class           sumJacobians;             // the sum of the determinants of the tetrahedra, for volume/probability calculations
+
+        VertexFactory*      vertexFactory;            // the pool of vertices this polyhedron builds its facets from; owned by
+                                                      // this object, allocated in the constructor and freed in the destructor
     };
 }
 

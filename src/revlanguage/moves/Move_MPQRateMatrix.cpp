@@ -54,9 +54,11 @@ void Move_MPQRateMatrix::constructInternalObject( void ) {
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator >* tmp = static_cast<const RateGenerator &>( Q->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::RateGenerator > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::RateGenerator> *>( tmp );
-    bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    bool t   = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    bool tmp_ = static_cast<const RlBoolean &>( tune_model_prior->getRevObject() ).getValue();
     
-    RevBayesCore::Proposal *p = new RevBayesCore::MPQRateMatrixProposal(n);
+    RevBayesCore::MPQRateMatrixProposal *p = new RevBayesCore::MPQRateMatrixProposal(n);
+    p->setTuneModelPrior( tmp_ );
     value = new RevBayesCore::MetropolisHastingsMove(p,w,t);
 
 }
@@ -105,6 +107,7 @@ const MemberRules& Move_MPQRateMatrix::getParameterRules(void) const {
         move_member_rules.push_back( new ArgumentRule( "Q"     , RateGenerator::getClassTypeSpec(),        "The general nucleotide rate matrix on which this move operates.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
 //        move_member_rules.push_back( new ArgumentRule( "lambda", RealPos::getClassTypeSpec(),              "The scaling factor (strength) of the proposal.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new Real(1.0) ) );
         move_member_rules.push_back( new ArgumentRule( "tune"  , RlBoolean::getClassTypeSpec(),            "Should we tune the scaling factor during burnin?", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new RlBoolean( true ) ) );
+        move_member_rules.push_back( new ArgumentRule( "tuneModelPrior", RlBoolean::getClassTypeSpec(),    "Should the prior on the model indicator be adapted toward equal time in the two models? This changes the target distribution, so it must only be done during burnin: run the burnin with a tuningInterval, then do the production run without one. The tilt that was reached is reported as lnPriorOdds by the operator summary, and the Bayes factor is recovered from it as BF_NR = (p_N/p_R) * exp(lnPriorOdds). Note that this has no effect unless tune=TRUE, since that is what makes the MCMC call the move's tuning function at all.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false ) ) );
         
         /* Inherit weight from Move, put it after variable */
         const MemberRules& inheritedRules = Move::getParameterRules();
@@ -158,6 +161,10 @@ void Move_MPQRateMatrix::setConstParameter(const std::string& name, const RevPtr
     else if ( name == "tune" )
         {
         tune = var;
+        }
+    else if ( name == "tuneModelPrior" )
+        {
+        tune_model_prior = var;
         }
     else
         {

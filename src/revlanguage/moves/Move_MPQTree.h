@@ -31,10 +31,10 @@ class TypeSpec;
         
         void                                        setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);       //!< Set member variable
         
-        RevPtr<const RevVariable>                   Q;
         RevPtr<const RevVariable>                   tree;
         RevPtr<const RevVariable>                   weight;
         RevPtr<const RevVariable>                   tune;
+        RevPtr<const RevVariable>                   update_root;
         
     };
     
