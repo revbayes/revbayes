@@ -29,8 +29,13 @@ namespace RevLanguage {
                     
         void                                                    setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);       //!< Set member variable
                     
+        /* No q member. This move no longer reads the rate matrix: it scales the two
+           branches descending from the root together unconditionally, which is a
+           valid proposal whether or not the rate matrix is currently time
+           reversible. Holding the rate matrix would have forced RevBayes to touch
+           it on every proposal, dirtying the whole CTMC and turning each
+           branch-length change into a full-tree likelihood recomputation. */
         RevPtr<const RevVariable>                               tree;
-        RevPtr<const RevVariable>                               q;
         RevPtr<const RevVariable>                               delta;
         RevPtr<const RevVariable>                               tuning;
         

@@ -3,6 +3,8 @@
 
 using namespace RevBayesCore;
 
+
+
 VertexFactory::VertexFactory(void) {
 
 }
@@ -20,6 +22,10 @@ void VertexFactory::drainPool(void) {
         allocatedVertices.erase( *v );
         delete (*v);
         }
+    // the pool held the only pointers to those vertices, and they are gone now;
+    // leaving the pool populated would hand out dangling pointers on the next call
+    // to getVertex
+    vertexPool.clear();
 }
 
 Vertex* VertexFactory::getVertex(Vector& v) {

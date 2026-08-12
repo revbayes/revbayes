@@ -94,7 +94,9 @@ double Vector::length(void) {
 
     mpq_class sqQ = (x * x) + (y * y) + (z * z);
     double sqD = sqQ.get_d();
-    return std::sqrtf(sqD);
+    // std::sqrtf is not standard; it compiles under clang through transitive
+    // includes but not under gcc, and it would narrow this double to a float
+    return std::sqrt(sqD);
 }
 
 void Vector::normalize(void) {

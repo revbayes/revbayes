@@ -8,6 +8,8 @@
 #include "ArgumentRules.h"
 #include "BetaDistribution.h"
 #include "Dist_Q.h"
+#include "RbException.h"
+#include "Real.h"
 #include "RlSimplex.h"
 #include "Probability.h"
 #include "RlContinuousStochasticNode.h"
@@ -62,9 +64,18 @@ RevBayesCore::QDistribution* Dist_Q::createDistribution( void ) const
     // get the parameters
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* a   = static_cast<const ModelVector<RealPos> &>( alpha->getRevObject() ).getDagNode();
         
+    /* rho is the LOG of the prior probability of the time-reversible model, so it
+       must be negative. Passing a probability rather than its log, say rho=0.5,
+       silently produced log(1 - exp(0.5)) = log of a negative number and seeded
+       the whole analysis with a NaN model prior, which then made every acceptance
+       ratio NaN. Catch it here instead. */
     double tmp   = static_cast<const Real &>( rho->getRevObject() ).getDagNode()->getValue();
+    if ( tmp >= 0.0 )
+        {
+        throw RbException("The 'rho' argument of dnQ is the LOG of the prior probability of the time-reversible model, so it must be negative. Use rho=ln(0.5) rather than rho=0.5.");
+        }
     double log_rho_reversible     = tmp;
-    double log_rho_non_reversible = log( 1.0 - exp(log_rho_reversible) );
+    double log_rho_non_reversible = log1p( -exp(log_rho_reversible) );
         
     RevBayesCore::QDistribution* d          = new RevBayesCore::QDistribution(a, log_rho_reversible, log_rho_non_reversible);
     
@@ -133,6 +144,24 @@ MethodTable Dist_Q::getDistributionMethods( void ) const
 
     ArgumentRules* get_rates_arg_rules = new ArgumentRules();
     methods.addFunction( new DistributionMemberFunction<Dist_Q, ModelVector<RealPos> >( "getRates", this->variable, get_rates_arg_rules, true ) );
+
+    /* The prior on the model indicator. These matter when the prior is being
+       tuned by mvMPQRateMatrix(tuneModelPrior=TRUE), because the sampled model
+       frequencies can only be turned back into a Bayes factor if the prior odds
+       that produced them are known:
+
+           BF_NR = (p_N / p_R) * exp(lnPriorOdds)
+
+       Monitor lnPriorOdds alongside isReversible and the tuned value is on record
+       with the samples it produced. */
+    ArgumentRules* get_ln_prior_odds_arg_rules = new ArgumentRules();
+    methods.addFunction( new DistributionMemberFunction<Dist_Q, Real >( "lnPriorOdds", this->variable, get_ln_prior_odds_arg_rules, true ) );
+
+    ArgumentRules* get_ln_rho_rev_arg_rules = new ArgumentRules();
+    methods.addFunction( new DistributionMemberFunction<Dist_Q, Real >( "lnRhoReversible", this->variable, get_ln_rho_rev_arg_rules, true ) );
+
+    ArgumentRules* get_ln_rho_nonrev_arg_rules = new ArgumentRules();
+    methods.addFunction( new DistributionMemberFunction<Dist_Q, Real >( "lnRhoNonReversible", this->variable, get_ln_rho_nonrev_arg_rules, true ) );
 
     return methods;
 }
