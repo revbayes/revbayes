@@ -7,6 +7,7 @@
 #include "Integer.h"
 #include "MetropolisHastingsMove.h"
 #include "Move_RandomGeometricWalk.h"
+#include "Natural.h"
 #include "Probability.h"
 #include "RandomGeometricWalkProposal.h"
 #include "RealPos.h"
@@ -68,17 +69,19 @@ void Move_RandomGeometricWalk::constructInternalObject( void )
     
     // now allocate a new random-geometric-walk move
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+
     RevBayesCore::TypedDagNode<std::int64_t>* tmp = static_cast<const Integer &>( x->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<std::int64_t> *n = static_cast<RevBayesCore::StochasticNode<std::int64_t> *>( tmp );
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     double a = static_cast<const Probability &>( p->getRevObject() ).getValue();
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double tt = static_cast<const Probability &>( tune_target->getRevObject() ).getValue();
 
     // finally create the internal move object
     RevBayesCore::Proposal *prop = new RevBayesCore::RandomGeometricWalkProposal(n, a);
     prop->setTargetAcceptanceRate(tt);
     
-    value = new RevBayesCore::MetropolisHastingsMove(prop, w, t);
+    value = new RevBayesCore::MetropolisHastingsMove(prop,w,del,t);
     
 }
 

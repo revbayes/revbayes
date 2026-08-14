@@ -5,6 +5,7 @@
 #include "ArgumentRules.h"
 #include "MetropolisHastingsMove.h"
 #include "Move_ContinuousEventScale.h"
+#include "Natural.h"
 #include "ContinuousEventScaleProposal.h"
 #include "Probability.h"
 #include "RealPos.h"
@@ -68,16 +69,17 @@ void Move_ContinuousEventScale::constructInternalObject( void )
     // now allocate a new scaling move
     double l = static_cast<const RealPos &>( lambda->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
     
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double tt = static_cast<const Probability &>( tune_target->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *p = new RevBayesCore::ContinuousEventScaleProposal(n, l);
     p->setTargetAcceptanceRate(tt);
     
-    value = new RevBayesCore::MetropolisHastingsMove(p, w, t);
+    value = new RevBayesCore::MetropolisHastingsMove(p,w,del,t);
     
 }
 

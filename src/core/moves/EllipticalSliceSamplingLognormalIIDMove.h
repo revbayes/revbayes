@@ -26,11 +26,11 @@ namespace RevBayesCore {
     class EllipticalSliceSamplingLognormalIIDMove : public AbstractMove {
 
     public:
-        EllipticalSliceSamplingLognormalIIDMove( std::vector< StochasticNode<double> *> n, TypedDagNode<double>* m, TypedDagNode<double>* s, double window_, double weight_, bool t );        //!< Constructor
-        virtual                                                 ~EllipticalSliceSamplingLognormalIIDMove(void);             //!< Destructor
+        EllipticalSliceSamplingLognormalIIDMove( std::vector< StochasticNode<double> *> n, TypedDagNode<double>* m, TypedDagNode<double>* s, double window_, double weight_, size_t d, bool t );        //!< Constructor
+        virtual                                                 ~EllipticalSliceSamplingLognormalIIDMove(void);                           //!< Destructor
 
         // public methods
-        virtual EllipticalSliceSamplingLognormalIIDMove*              clone(void) const;
+        virtual EllipticalSliceSamplingLognormalIIDMove*        clone(void) const;
         const std::string&                                      getMoveName(void) const;                                    //!< Get the name of the move for summary printing
         double                                                  getMoveTuningParameter(void) const;
         void                                                    printSummary(std::ostream &o, bool current_period) const;   //!< Print the move summary

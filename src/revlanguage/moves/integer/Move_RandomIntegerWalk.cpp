@@ -65,12 +65,13 @@ void Move_RandomIntegerWalk::constructInternalObject( void )
     
     // now allocate a new random-integer-walk move
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode<std::int64_t>* tmp = static_cast<const Integer &>( x->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<std::int64_t> *n = static_cast<RevBayesCore::StochasticNode<std::int64_t> *>( tmp );
     
     // finally create the internal move object
     RevBayesCore::Proposal *prop = new RevBayesCore::RandomIntegerWalkProposal(n);
-    value = new RevBayesCore::MetropolisHastingsMove(prop,w);
+    value = new RevBayesCore::MetropolisHastingsMove(prop,w,del,false);
     
 }
 
@@ -154,7 +155,7 @@ const MemberRules& Move_RandomIntegerWalk::getParameterRules(void) const
         const MemberRules& inheritedRules = Move::getParameterRules();
         for (size_t i = 0; i < inheritedRules.size(); ++i)
         {
-            if ( inheritedRules[i].getArgumentLabel() == "weight" )
+            if ( inheritedRules[i].getArgumentLabel() == "weight" || inheritedRules[i].getArgumentLabel() == "delay")
             {
                 move_member_rules.push_back( inheritedRules[i].clone() );
             }

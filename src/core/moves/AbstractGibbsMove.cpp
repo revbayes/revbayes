@@ -22,7 +22,7 @@ using namespace RevBayesCore;
  * \param[in]    w   The weight how often the proposal will be used (per iteration).
  * \param[in]    t   If auto tuning should be used.
  */
-AbstractGibbsMove::AbstractGibbsMove( double w  ) : AbstractMove( w, false )
+AbstractGibbsMove::AbstractGibbsMove( double w, size_t d  ) : AbstractMove( w, d, false )
 {
 
 }
@@ -175,5 +175,21 @@ void AbstractGibbsMove::printSummary(std::ostream &o, bool current_period) const
     o.setf(previousFlags);
     o.precision(previousPrecision);
 
+
+}
+
+
+void AbstractGibbsMove::setMoveTuningParameter(double tp)
+{
+    // Gibbs move has no tuning parameter: nothing to do
+}
+
+
+/**
+ * Tune the move.
+ * This is a dummy implementation because Gibbs move cannot be tuned.
+ */
+void AbstractGibbsMove::tune( void )
+{
 
 }

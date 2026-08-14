@@ -6,6 +6,7 @@
 #include "ArgumentRules.h"
 #include "MetropolisHastingsMove.h"
 #include "Move_NodeTimeSlidePathTruncatedNormal.h"
+#include "Natural.h"
 #include "NodeTimeSlidePathTruncatedNormalProposal.h"
 #include "RlBoolean.h"
 #include "Probability.h"
@@ -58,13 +59,16 @@ void Move_NodeTimeSlidePathTruncatedNormal::constructInternalObject( void )
     double s = static_cast<const RealPos &>( sigma->getRevObject() ).getValue();
     bool a = static_cast<const RlBoolean &>( scaleByAge->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
+    
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double tt = static_cast<const Probability &>( tune_target->getRevObject() ).getValue();
 
     RevBayesCore::Proposal *p = new RevBayesCore::NodeTimeSlidePathTruncatedNormalProposal(tau, s, a);
     p->setTargetAcceptanceRate(tt);
     
-    value = new RevBayesCore::MetropolisHastingsMove(p, w, t);
+    value = new RevBayesCore::MetropolisHastingsMove(p,w,del,t);
 }
 
 

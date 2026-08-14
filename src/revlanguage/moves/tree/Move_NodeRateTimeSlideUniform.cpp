@@ -59,6 +59,7 @@ void Move_NodeRateTimeSlideUniform::constructInternalObject( void )
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
     
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *p;
 
@@ -90,7 +91,7 @@ void Move_NodeRateTimeSlideUniform::constructInternalObject( void )
         p = new RevBayesCore::NodeRateTimeSlideUniformProposal(t, n);
     }
 
-    value = new RevBayesCore::MetropolisHastingsMove(p,w,false);
+    value = new RevBayesCore::MetropolisHastingsMove(p,w,del,false);
 }
 
 
@@ -144,7 +145,7 @@ const MemberRules& Move_NodeRateTimeSlideUniform::getParameterRules(void) const
         const MemberRules& inheritedRules = Move::getParameterRules();
         for (size_t i = 0; i < inheritedRules.size(); ++i)
         {
-            if ( inheritedRules[i].getArgumentLabel() == "weight" )
+            if ( inheritedRules[i].getArgumentLabel() == "weight" || inheritedRules[i].getArgumentLabel() == "delay")
             {
                 memberRules.push_back( inheritedRules[i].clone() );
             }

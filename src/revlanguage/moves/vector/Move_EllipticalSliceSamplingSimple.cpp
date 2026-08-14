@@ -72,6 +72,7 @@ void Move_EllipticalSliceSamplingSimple::constructInternalObject( void )
     // now allocate a new sliding move
     double window_ = static_cast<const RealPos &>( window->getRevObject() ).getValue();
     double weight_ = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t delay_  = static_cast<const Natural &>( delay->getRevObject() ).getValue();
 
     // Add the field parameters
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp = static_cast<const ModelVector<RealPos> &>( x->getRevObject() ).getDagNode();
@@ -96,7 +97,7 @@ void Move_EllipticalSliceSamplingSimple::constructInternalObject( void )
 
     // finally create the internal move object
 
-    value = new RevBayesCore::EllipticalSliceSamplingSimpleMove(n, window_, weight_ ,tune_, fa);
+    value = new RevBayesCore::EllipticalSliceSamplingSimpleMove(n, window_, weight_ ,delay_, tune_, fa);
 }
 
 
@@ -172,7 +173,7 @@ const MemberRules& Move_EllipticalSliceSamplingSimple::getParameterRules(void) c
         const MemberRules& inheritedRules = Move::getParameterRules();
         for (size_t i = 0; i < inheritedRules.size(); ++i)
         {
-            if ( inheritedRules[i].getArgumentLabel() == "weight" )
+            if ( inheritedRules[i].getArgumentLabel() == "weight" || inheritedRules[i].getArgumentLabel() == "delay")
             {
                 move_member_rules.push_back( inheritedRules[i].clone() );
             }

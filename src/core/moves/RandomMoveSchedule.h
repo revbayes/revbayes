@@ -23,7 +23,7 @@ template <class valueType> class RbVector;
     private:
         
         // Hidden member variables
-        double                                          movesPerIteration;
+        double                                          moves_per_iteration;
         std::vector<double>                             weights;
     };
     

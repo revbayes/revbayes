@@ -7,6 +7,7 @@
 #include "ArgumentRules.h"
 #include "MetropolisHastingsMove.h"
 #include "Move_SpeciesNodeTimeSlideUniform.h"
+#include "Natural.h"
 #include "TreeNodeAgeUpdateProposal.h"
 #include "RealPos.h"
 #include "RlTimeTree.h"
@@ -76,11 +77,12 @@ void Move_SpeciesNodeTimeSlideUniform::constructInternalObject( void )
 
     // now allocate a new move
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = static_cast<const TimeTree &>( speciesTree->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *st = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
 
     RevBayesCore::Proposal *p = new RevBayesCore::TreeNodeAgeUpdateProposal(st);
-    value = new RevBayesCore::MetropolisHastingsMove(p,w);
+    value = new RevBayesCore::MetropolisHastingsMove(p, w, del, false);
 
 }
 
@@ -149,7 +151,7 @@ const MemberRules& Move_SpeciesNodeTimeSlideUniform::getParameterRules(void) con
         const MemberRules& inheritedRules = Move::getParameterRules();
         for (size_t i = 0; i < inheritedRules.size(); ++i)
         {
-            if ( inheritedRules[i].getArgumentLabel() == "weight" )
+            if ( inheritedRules[i].getArgumentLabel() == "weight" || inheritedRules[i].getArgumentLabel() == "delay")
             {
                 memberRules.push_back( inheritedRules[i].clone() );
             }

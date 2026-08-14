@@ -31,11 +31,13 @@ namespace RevBayesCore {
         virtual AbstractGibbsMove*                              clone(void) const = 0;
         virtual const std::string&                              getMoveName(void) const = 0;                                  //!< Get the name of the move for summary printing
         virtual double                                          getMoveTuningParameter(void) const;
+        virtual void                                            setMoveTuningParameter(double tp);
 
     protected:
-        AbstractGibbsMove(double w);                                                                                          //!< Constructor
+        AbstractGibbsMove(double w, size_t d=0);                                                                            //!< Constructor
 
-        void                                                    performMcmcMove(double prHeat, double lHeat, double pHeat);   //!< Perform the move.
+        void                                                    performMcmcMove(double prHeat, double lHeat, double pHeat);            //!< Perform the move.
+        void                                                    tune(void);                                                     //!< Specific tuning of the move
         
         // pure virtual protected methods
         virtual void                                            performGibbsMove(void) = 0;                                   //!< Perform the move.

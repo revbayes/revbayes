@@ -6,6 +6,7 @@
 #include "ArgumentRules.h"
 #include "MetropolisHastingsMove.h"
 #include "Move_OrderedEventBirthDeath.h"
+#include "Natural.h"
 #include "RealPos.h"
 #include "RevObject.h"
 #include "RlBoolean.h"
@@ -68,12 +69,13 @@ void Move_OrderedEventBirthDeath::constructInternalObject( void )
     
     // now allocate a new random-geometric-walk move
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode<RevBayesCore::OrderedEventTimes>* tmp = static_cast<const RlOrderedEventTimes &>( x->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::OrderedEventTimes> *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::OrderedEventTimes> *>( tmp );
     
     // finally create the internal move object
     RevBayesCore::Proposal *prop = new RevBayesCore::OrderedEventBirthDeathProposal(n);
-    value = new RevBayesCore::MetropolisHastingsMove(prop, w, false);
+    value = new RevBayesCore::MetropolisHastingsMove(prop, w, del, false);
 }
 
 
@@ -141,7 +143,7 @@ const MemberRules& Move_OrderedEventBirthDeath::getParameterRules(void) const
         const MemberRules& inheritedRules = Move::getParameterRules();
         for (size_t i = 0; i < inheritedRules.size(); ++i)
         {
-            if ( inheritedRules[i].getArgumentLabel() == "weight" )
+            if ( inheritedRules[i].getArgumentLabel() == "weight" || inheritedRules[i].getArgumentLabel() == "delay")
             {
                 move_member_rules.push_back( inheritedRules[i].clone() );
             }

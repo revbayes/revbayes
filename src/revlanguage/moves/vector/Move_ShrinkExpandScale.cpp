@@ -59,6 +59,7 @@ void Move_ShrinkExpandScale::constructInternalObject( void )
     // now allocate a new vector-scale move
     double l = static_cast<const RealPos &>( lambda->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp = static_cast<const ModelVector<RealPos> &>( x->getRevObject() ).getDagNode();
     std::vector<const RevBayesCore::DagNode*> p = tmp->getParents();
@@ -86,12 +87,12 @@ void Move_ShrinkExpandScale::constructInternalObject( void )
     
     // get the tuning
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double tt = static_cast<const Probability &>( tune_target->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *prop = new RevBayesCore::ShrinkExpandScaleProposal(n, s, l);
     prop->setTargetAcceptanceRate(tt);
     
-    value = new RevBayesCore::MetropolisHastingsMove(prop, w, t);
+    value = new RevBayesCore::MetropolisHastingsMove(prop,w,del,t);
     
 }
 
@@ -148,7 +149,7 @@ const MemberRules& Move_ShrinkExpandScale::getParameterRules(void) const
         const MemberRules& inherited_rules = Move::getParameterRules();
         for (size_t i = 0; i < inherited_rules.size(); ++i)
         {
-            if ( inherited_rules[i].getArgumentLabel() == "weight" )
+            if ( inherited_rules[i].getArgumentLabel() == "weight" || inherited_rules[i].getArgumentLabel() == "delay")
             {
                 move_member_rules.push_back( inherited_rules[i].clone() );
             }

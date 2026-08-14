@@ -78,14 +78,14 @@ void Move_TreeScale::constructInternalObject( void )
         ra = static_cast<RevBayesCore::StochasticNode<double> *>( tmp );
     }
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     double l = static_cast<const RealPos &>( delta->getRevObject() ).getValue();
     bool tune = static_cast<const RlBoolean &>( tuning->getRevObject() ).getValue();
-    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double tt = static_cast<const Probability &>( tune_target->getRevObject() ).getValue();
 
     RevBayesCore::Proposal *p = new RevBayesCore::TreeScaleProposal(t, vec_t, ra, l);
     p->setTargetAcceptanceRate(tt);
-    
-    value = new RevBayesCore::MetropolisHastingsMove(p, w, tune);
+    value = new RevBayesCore::MetropolisHastingsMove(p, w, del, tune);
 }
 
 
@@ -143,7 +143,7 @@ const MemberRules& Move_TreeScale::getParameterRules(void) const
         const MemberRules& inheritedRules = Move::getParameterRules();
         for (size_t i = 0; i < inheritedRules.size(); ++i)
         {
-            if ( inheritedRules[i].getArgumentLabel() == "weight" )
+            if ( inheritedRules[i].getArgumentLabel() == "weight" || inheritedRules[i].getArgumentLabel() == "delay")
             {
                 move_member_rules.push_back( inheritedRules[i].clone() );
             }

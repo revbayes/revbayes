@@ -8,6 +8,7 @@
 #include "MetropolisHastingsMove.h"
 #include "Move_FossilSiteTimeSlideUniform.h"
 #include "FossilSiteTimeSlideUniformProposal.h"
+#include "Natural.h"
 #include "Probability.h"
 #include "RealPos.h"
 #include "RevObject.h"
@@ -62,8 +63,9 @@ void Move_FossilSiteTimeSlideUniform::constructInternalObject( void )
     
     double de = static_cast<const RealPos &>( delta->getRevObject() ).getValue();
     double we = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     bool   tu = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double tt = static_cast<const Probability &>( tune_target->getRevObject() ).getValue();
     
     RevBayesCore::TypedDagNode<double> *org = NULL;
     if ( origin != NULL && origin->getRevObject() != RevNullObject::getInstance() )
@@ -88,7 +90,7 @@ void Move_FossilSiteTimeSlideUniform::constructInternalObject( void )
 
     RevBayesCore::FossilSiteTimeSlideUniformProposal *p = new RevBayesCore::FossilSiteTimeSlideUniformProposal( t, org, ma, mi, taxa_vec, de, tt );
 
-    value = new RevBayesCore::MetropolisHastingsMove(p, we, tu);
+    value = new RevBayesCore::MetropolisHastingsMove(p, we, del, tu);
 }
 
 
@@ -157,7 +159,7 @@ const MemberRules& Move_FossilSiteTimeSlideUniform::getParameterRules(void) cons
         move_member_rules.push_back( new ArgumentRule( "delta" , RealPos::getClassTypeSpec()  , "The window size parameter.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY       , new RealPos(1.0) ) );
         move_member_rules.push_back( new ArgumentRule( "tune"  , RlBoolean::getClassTypeSpec(), "Should we tune the window size during burnin?", ArgumentRule::BY_VALUE    , ArgumentRule::ANY       , new RlBoolean( true ) ) );
         
-        /* Inherit weight from Move, put it after variable */
+        /* Inherit tuneTarget, weight, and delay from Move, put them after tune */
         const MemberRules& inheritedRules = Move::getParameterRules();
         move_member_rules.insert( move_member_rules.end(), inheritedRules.begin(), inheritedRules.end() );
         

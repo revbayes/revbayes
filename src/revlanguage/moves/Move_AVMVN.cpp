@@ -116,13 +116,14 @@ void Move_AVMVN::constructInternalObject( void )
     // now allocate a new up-down-scale move
     double s = static_cast<const RealPos &>( sigmaSquared->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     double e = static_cast<const Probability &>( epsilon->getRevObject() ).getValue();
     int n0   = static_cast<const Natural &>( waitBeforeLearning->getRevObject() ).getValue();
     int c0   = static_cast<const Natural &>( waitBeforeUsing->getRevObject() ).getValue();
     int m    = static_cast<const Natural &>( maxUpdates->getRevObject() ).getValue();
 
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double tt = static_cast<const Probability &>( tune_target->getRevObject() ).getValue();
 
     // finally create the internal move object
     RevBayesCore::AVMVNProposal *prop = new RevBayesCore::AVMVNProposal(s, e, n0, c0, m);
@@ -130,7 +131,7 @@ void Move_AVMVN::constructInternalObject( void )
     // set the target acceptance rate after construction
     prop->setTargetAcceptanceRate(tt);
 
-    value = new RevBayesCore::MetropolisHastingsMove(prop, w, t);
+    value = new RevBayesCore::MetropolisHastingsMove(prop,w,del,t);
 
 }
 
@@ -374,7 +375,7 @@ const MemberRules& Move_AVMVN::getParameterRules(void) const
         const MemberRules& inherited_rules = Move::getParameterRules();
         for (size_t i = 0; i < inherited_rules.size(); ++i)
         {
-            if ( inherited_rules[i].getArgumentLabel() == "weight" )
+            if ( inherited_rules[i].getArgumentLabel() == "weight" || inherited_rules[i].getArgumentLabel() == "delay")
             {
                 member_rules.push_back( inherited_rules[i].clone() );
             }

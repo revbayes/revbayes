@@ -8,6 +8,7 @@
 #include "ContinuousStochasticNode.h"
 #include "MetropolisHastingsMove.h"
 #include "Move_LevyJumpSum.h"
+#include "Natural.h"
 #include "LevyJumpSumProposal.h"
 #include "Probability.h"
 #include "Real.h"
@@ -53,6 +54,7 @@ void Move_LevyJumpSum::constructInternalObject( void )
     // now allocate a new sliding move
     double sf = static_cast<const RealPos &>( slideFactor->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     
     RevBayesCore::TypedDagNode<double>* tmpsv1 = static_cast<const Real &>( slideUp->getRevObject() ).getDagNode();
     RevBayesCore::ContinuousStochasticNode *sv1 = static_cast<RevBayesCore::ContinuousStochasticNode *>( tmpsv1 );
@@ -61,12 +63,12 @@ void Move_LevyJumpSum::constructInternalObject( void )
     RevBayesCore::ContinuousStochasticNode *sv2 = static_cast<RevBayesCore::ContinuousStochasticNode *>( tmpsv2 );
     
     bool tv = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double tt = static_cast<const Probability &>( tune_target->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *p = new RevBayesCore::LevyJumpSumProposal(sv1, sv2, sf);
     p->setTargetAcceptanceRate(tt);
     
-    value = new RevBayesCore::MetropolisHastingsMove(p, w, tv);
+    value = new RevBayesCore::MetropolisHastingsMove(p,w,del,tv);
     
 }
 

@@ -24,7 +24,8 @@ namespace views = ranges::views;
 
 using namespace RevBayesCore;
 
-RateAgeBetaShift::RateAgeBetaShift(StochasticNode<Tree> *tr, std::vector<StochasticNode<double> *> v, StochasticNode<RbVector<double> > *sv, double d, bool t, double w, double targetAcceptanceRate) : AbstractMove( w, t),
+
+RateAgeBetaShift::RateAgeBetaShift(StochasticNode<Tree> *tr, std::vector<StochasticNode<double> *> v, StochasticNode<RbVector<double> > *sv, double d, bool t, double w, size_t del, double targetAcceptanceRate) : AbstractMove( w, del, t),
     tree( tr ),
     rates_vec( v ),
     rates( sv ),

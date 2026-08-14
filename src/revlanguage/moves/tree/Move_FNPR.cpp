@@ -62,6 +62,7 @@ void Move_FNPR::constructInternalObject( void )
     
     // now allocate a new sliding move
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     
     // get the tree(s) variable
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = NULL;
@@ -82,7 +83,7 @@ void Move_FNPR::constructInternalObject( void )
     }
     
     RevBayesCore::Proposal *p = new RevBayesCore::FixedNodeheightPruneAndRegraftProposal(t, vec_t);
-    value = new RevBayesCore::MetropolisHastingsMove(p,w);
+    value = new RevBayesCore::MetropolisHastingsMove(p,w,del,false);
     
 }
 
@@ -155,7 +156,7 @@ const MemberRules& Move_FNPR::getParameterRules(void) const
         const MemberRules& inherited_rules = Move::getParameterRules();
         for (size_t i = 0; i < inherited_rules.size(); ++i)
         {
-            if ( inherited_rules[i].getArgumentLabel() == "weight" )
+            if ( inherited_rules[i].getArgumentLabel() == "weight" || inherited_rules[i].getArgumentLabel() == "delay")
             {
                 member_rules.push_back( inherited_rules[i].clone() );
             }

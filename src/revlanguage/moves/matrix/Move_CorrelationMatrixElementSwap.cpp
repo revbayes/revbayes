@@ -1,10 +1,3 @@
-/* 
- * File:   Move_CorrelationMatrixElementSwap.cpp
- * Author: Michael R. May
- *
- * Created on 5 August 2017
- */
-
 #include "Move_CorrelationMatrixElementSwap.h"
 
 #include <cstddef>
@@ -14,6 +7,7 @@
 #include "ArgumentRules.h"
 #include "CorrelationMatrixElementSwapProposal.h"
 #include "MetropolisHastingsMove.h"
+#include "Natural.h"
 #include "RealPos.h"
 #include "RevObject.h"
 #include "RlMatrixReal.h"
@@ -55,11 +49,12 @@ void Move_CorrelationMatrixElementSwap::constructInternalObject( void )
     
     // now allocate a new sliding move
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* tmp = static_cast<const MatrixReal &>( v->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::MatrixReal> *>( tmp );
     
     RevBayesCore::Proposal *p = new RevBayesCore::CorrelationMatrixElementSwapProposal(n);
-    value = new RevBayesCore::MetropolisHastingsMove(p, w, false);
+    value = new RevBayesCore::MetropolisHastingsMove(p, w, del, false);
 
 }
 
@@ -113,7 +108,7 @@ const MemberRules& Move_CorrelationMatrixElementSwap::getParameterRules(void) co
         const MemberRules& inheritedRules = Move::getParameterRules();
         for (size_t i = 0; i < inheritedRules.size(); ++i)
         {
-            if ( inheritedRules[i].getArgumentLabel() == "weight" )
+            if ( inheritedRules[i].getArgumentLabel() == "weight" || inheritedRules[i].getArgumentLabel() == "delay")
             {
                 move_member_rules.push_back( inheritedRules[i].clone() );
             }

@@ -61,9 +61,10 @@ void Move_NodeTimeSlideUniformAgeConstrained::constructInternalObject( void )
 
     
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *p = new RevBayesCore::NodeTimeSlideUniformAgeConstrainedProposal( t, constr );
-    value = new RevBayesCore::MetropolisHastingsMove(p,w,false);
+    value = new RevBayesCore::MetropolisHastingsMove(p,w,del,false);
 }
 
 
@@ -117,7 +118,7 @@ const MemberRules& Move_NodeTimeSlideUniformAgeConstrained::getParameterRules(vo
         const MemberRules& inherited_rules = Move::getParameterRules();
         for (size_t i = 0; i < inherited_rules.size(); ++i)
         {
-            if ( inherited_rules[i].getArgumentLabel() == "weight" )
+            if ( inherited_rules[i].getArgumentLabel() == "weight" || inherited_rules[i].getArgumentLabel() == "delay")
             {
                 member_rules.push_back( inherited_rules[i].clone() );
             }

@@ -7,6 +7,7 @@
 #include "MetropolisHastingsMove.h"
 #include "Move_NarrowExchangeCharacterHistory.h"
 #include "NarrowExchangeCharacterHistoryProposal.h"
+#include "Natural.h"
 #include "RealPos.h"
 #include "RlAbstractHomologousDiscreteCharacterData.h"
 #include "RlRateGenerator.h"
@@ -74,6 +75,7 @@ void Move_NarrowExchangeCharacterHistory::constructInternalObject( void )
 
     // now allocate a new sliding move
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
 
@@ -109,7 +111,7 @@ void Move_NarrowExchangeCharacterHistory::constructInternalObject( void )
         p = tmp_p;
     }
     
-    value = new RevBayesCore::MetropolisHastingsMove(p,w);
+    value = new RevBayesCore::MetropolisHastingsMove(p,w,del,false);
 
 }
 
@@ -180,7 +182,7 @@ const MemberRules& Move_NarrowExchangeCharacterHistory::getParameterRules(void) 
         const MemberRules& inheritedRules = Move::getParameterRules();
         for (size_t i = 0; i < inheritedRules.size(); ++i)
         {
-            if ( inheritedRules[i].getArgumentLabel() == "weight" )
+            if ( inheritedRules[i].getArgumentLabel() == "weight" || inheritedRules[i].getArgumentLabel() == "delay")
             {
                 memberRules.push_back( inheritedRules[i].clone() );
             }

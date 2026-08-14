@@ -91,12 +91,13 @@ void RevLanguage::Move_OrderedEventScale<rlValueType>::constructInternalObject( 
     // now allocate a new vector-scale move
     double d = static_cast<const RealPos &>( lambda->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
 
     RevBayesCore::TypedDagNode<RevBayesCore::OrderedEvents<typename rlValueType::valueType> >* tmp = static_cast<const RlOrderedEvents<rlValueType> &>( x->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::OrderedEvents<typename rlValueType::valueType> > *sn = static_cast<RevBayesCore::StochasticNode<RevBayesCore::OrderedEvents<typename rlValueType::valueType >> *>( tmp );
 
     RevBayesCore::Proposal *p = new RevBayesCore::OrderedEventScaleProposal<typename rlValueType::valueType>( sn, d );
-    value = new RevBayesCore::MetropolisHastingsMove(p, w, false);
+    value = new RevBayesCore::MetropolisHastingsMove(p, w, del, false);
 
 }
 

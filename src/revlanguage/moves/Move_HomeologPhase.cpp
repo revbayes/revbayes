@@ -6,6 +6,7 @@
 #include "HomeologPhaseProposal.h"
 #include "MetropolisHastingsMove.h"
 #include "Move_HomeologPhase.h"
+#include "Natural.h"
 #include "RealPos.h"
 #include "RevObject.h"
 #include "RlAbstractHomologousDiscreteCharacterData.h"
@@ -64,6 +65,7 @@ void RevLanguage::Move_HomeologPhase::constructInternalObject( void )
     
     // move/proposal arguments
     double w        = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    size_t del = static_cast<const Natural &>( delay->getRevObject() ).getValue();
     
     // move/proposal parameters
     RevBayesCore::TypedDagNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_tdn   = static_cast<const RevLanguage::AbstractHomologousDiscreteCharacterData&>( ctmc->getRevObject() ).getDagNode();
@@ -74,7 +76,7 @@ void RevLanguage::Move_HomeologPhase::constructInternalObject( void )
     // create the proposal
     RevBayesCore::HomeologPhaseProposal *p = new RevBayesCore::HomeologPhaseProposal(ctmc_sn, t1, t2);
     
-    value = new RevBayesCore::MetropolisHastingsMove(p, w, false);
+    value = new RevBayesCore::MetropolisHastingsMove(p, w, del, false);
 }
 
 
@@ -142,7 +144,7 @@ const MemberRules& RevLanguage::Move_HomeologPhase::getParameterRules(void) cons
         const MemberRules& inheritedRules = Move::getParameterRules();
         for (size_t i = 0; i < inheritedRules.size(); ++i)
         {
-            if ( inheritedRules[i].getArgumentLabel() == "weight" )
+            if ( inheritedRules[i].getArgumentLabel() == "weight" || inheritedRules[i].getArgumentLabel() == "delay")
             {
                 memberRules.push_back( inheritedRules[i].clone() );
             }
