@@ -4,6 +4,7 @@
 
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
+#include "DagNodeTypeUtilities.h"
 #include "RlBoolean.h"
 #include "MetropolisHastingsMove.h"
 #include "Move_Mirror.h"
@@ -77,7 +78,7 @@ void Move_Mirror::constructInternalObject( void )
     int c0    = static_cast<const Natural &>( waitBeforeUsing->getRevObject() ).getValue();
     int m     = static_cast<const Natural &>( maxUpdates->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode<double>* tmp = static_cast<const Real &>( x->getRevObject() ).getDagNode();
-    RevBayesCore::StochasticNode<double> *n = dynamic_cast<RevBayesCore::StochasticNode<double> *>( tmp );
+    RevBayesCore::StochasticNode<double> *n = RevBayesCore::requireStochastic<double>( tmp );
     bool a = static_cast<const RlBoolean &>( adaptOnly->getRevObject() ).getValue();
     p = new RevBayesCore::MirrorProposal(n,d,m0,n0,c0,m,a,r);
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();

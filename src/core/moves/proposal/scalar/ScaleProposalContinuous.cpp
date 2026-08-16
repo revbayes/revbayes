@@ -7,6 +7,7 @@
 #include "RandomNumberGenerator.h"
 #include "Cloneable.h"
 #include "ContinuousStochasticNode.h"
+#include "DagNodeTypeUtilities.h"
 
 namespace RevBayesCore { class DagNode; }
 
@@ -171,7 +172,7 @@ void ScaleProposalContinuous::undoProposal( void )
 void ScaleProposalContinuous::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     
-    variable = static_cast< ContinuousStochasticNode* >(newN) ;
+    replaceNodeReference(variable, newN);
     
 }
 
@@ -203,4 +204,3 @@ void ScaleProposalContinuous::tune( double rate )
     }
     
 }
-

@@ -3,6 +3,7 @@
 
 #include "DeterministicNodeBase.h"
 #include "DynamicNode.h"
+#include "FunctionTypeUtilities.h"
 #include "RbException.h"
 #include "TypedFunction.h"
 
@@ -75,7 +76,7 @@ RevBayesCore::DeterministicNode<valueType>::DeterministicNode(const Deterministi
     this->attachToFunctionParameters( *this );
 
     // Set us as the DAG node of the function
-    static_cast<TypedFunction<valueType>*>( this->function )->setDeterministicNode( this );
+    assumeFunctionReturns<valueType>( this->function )->setDeterministicNode( this );
 }
 
 
@@ -98,7 +99,7 @@ RevBayesCore::DeterministicNode<valueType>& RevBayesCore::DeterministicNode<valu
         DeterministicNodeBase::assign( n, *this );
 
         // Set us as the DAG node of the new function
-        static_cast<TypedFunction<valueType>*>( this->function )->setDeterministicNode( this );
+        assumeFunctionReturns<valueType>( this->function )->setDeterministicNode( this );
     }
 
     return *this;
@@ -136,7 +137,7 @@ void RevBayesCore::DeterministicNode<valueType>::getAffected(RbOrderedSet<DagNod
 template<class valueType>
 RevBayesCore::TypedFunction<valueType>& RevBayesCore::DeterministicNode<valueType>::getFunction(void)
 {
-    return *static_cast<TypedFunction<valueType>*>( this->function );
+    return *assumeFunctionReturns<valueType>( this->function );
 }
 
 
@@ -184,7 +185,7 @@ std::vector<const RevBayesCore::DagNode*> RevBayesCore::DeterministicNode<valueT
 template<class valueType>
 valueType& RevBayesCore::DeterministicNode<valueType>::getValue(void)
 {
-    TypedFunction<valueType> *typedFunction = static_cast<TypedFunction<valueType>*>( this->function );
+    TypedFunction<valueType> *typedFunction = assumeFunctionReturns<valueType>( this->function );
 
     // lazy evaluation
     if ( this->needs_update == true || this->force_update == true )
@@ -201,7 +202,7 @@ valueType& RevBayesCore::DeterministicNode<valueType>::getValue(void)
 template<class valueType>
 const valueType& RevBayesCore::DeterministicNode<valueType>::getValue(void) const
 {
-    TypedFunction<valueType> *typedFunction = static_cast<TypedFunction<valueType>*>( this->function );
+    TypedFunction<valueType> *typedFunction = assumeFunctionReturns<valueType>( this->function );
 
     // lazy evaluation
     if ( this->needs_update == true || this->force_update == true )

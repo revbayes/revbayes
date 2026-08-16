@@ -5,6 +5,7 @@
 
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
+#include "DagNodeTypeUtilities.h"
 #include "GMRFHyperpriorGibbsMove.h"
 #include "GMRFOrder2HyperpriorGibbsMove.h"
 #include "ModelVector.h"
@@ -57,14 +58,14 @@ void Move_GMRFHyperpriorGibbs::constructInternalObject( void )
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
 
     RevBayesCore::TypedDagNode<double>* tmp = static_cast<const RealPos &>( x->getRevObject() ).getDagNode();
-    RevBayesCore::StochasticNode<double> *g = static_cast< RevBayesCore::StochasticNode<double>* >( tmp );
+    RevBayesCore::StochasticNode<double> *g = RevBayesCore::assumeStochastic<double>( tmp );
 
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp2 = static_cast<const ModelVector<RealPos> &>( normals->getRevObject() ).getDagNode();
     std::vector<const RevBayesCore::DagNode*> p = tmp2->getParents();
     std::vector< RevBayesCore::StochasticNode<double> *> n;
     for (std::vector<const RevBayesCore::DagNode*>::const_iterator it = p.begin(); it != p.end(); ++it)
     {
-        const RevBayesCore::StochasticNode<double> *the_node = dynamic_cast< const RevBayesCore::StochasticNode<double>* >( *it );
+        const RevBayesCore::StochasticNode<double> *the_node = RevBayesCore::checkStochastic<double>( *it );
         if ( the_node != NULL )
         {
             n.push_back( const_cast< RevBayesCore::StochasticNode<double>* >( the_node ) );

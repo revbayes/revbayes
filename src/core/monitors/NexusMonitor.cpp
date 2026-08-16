@@ -6,6 +6,7 @@
 #include <ostream>
 
 #include "DagNode.h"
+#include "DagNodeTypeUtilities.h"
 #include "RbFileManager.h"
 #include "StringUtilities.h"
 #include "Taxon.h"
@@ -38,7 +39,7 @@ NexusMonitor* NexusMonitor::clone() const {
 
 void NexusMonitor::swapNode(DagNode *oldN, DagNode *newN) {
 
-    TypedDagNode< RbVector<double> >* nodeVar = dynamic_cast< TypedDagNode< RbVector<double> > *>(oldN);
+    TypedDagNode< RbVector<double> >* nodeVar = checkNodeOfType<RbVector<double> >(oldN);
     if ( oldN == tree ) {
         tree = static_cast< TypedDagNode< Tree > *>( newN );
     }
