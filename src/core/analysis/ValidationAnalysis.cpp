@@ -25,7 +25,7 @@
 #include "RbVector.h"
 #include "RbVectorImpl.h"
 #include "StoppingRule.h"
-#include "StochasticNode.h"
+#include "StochasticNodeBase.h"
 #include "StringUtilities.h"
 
 
@@ -540,4 +540,3 @@ void ValidationAnalysis::summarizeSim(double credible_interval_size, size_t idx)
     }
     
 }
-

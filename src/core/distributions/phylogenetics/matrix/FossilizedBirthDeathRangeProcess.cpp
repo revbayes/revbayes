@@ -13,6 +13,7 @@
 #include "MatrixReal.h"
 #include "RbMathCombinatorialFunctions.h"
 #include "RbMathFunctions.h"
+#include "RbMathLogic.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "StochasticNode.h"
