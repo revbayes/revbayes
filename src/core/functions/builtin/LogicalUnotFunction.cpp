@@ -1,4 +1,5 @@
 #include "LogicalUnotFunction.h"
+#include "DagNodeTypeUtilities.h"
 #include "TypedDagNode.h"
 
 namespace RevBayesCore { class DagNode; }
@@ -39,7 +40,7 @@ void LogicalUnotFunction::update( void )
 void LogicalUnotFunction::swapParameterInternal(const DagNode *oldP, const DagNode *newP) {
     
     if ( oldP == left ) {
-        left = static_cast<const TypedDagNode<Boolean>* >( newP );
+        replaceNodeReference(left, newP);
     }
     
 }

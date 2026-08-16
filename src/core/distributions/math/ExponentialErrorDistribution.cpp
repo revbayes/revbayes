@@ -6,6 +6,7 @@
  */
 
 #include "ExponentialErrorDistribution.h"
+#include "DagNodeTypeUtilities.h"
 #include "DistributionExponentialError.h"
 #include "RandomNumberFactory.h"
 #include "Cloneable.h"
@@ -60,17 +61,17 @@ void ExponentialErrorDistribution::swapParameterInternal(const DagNode *oldP, co
     
     if (oldP == avgDistMat)
     {
-        avgDistMat = static_cast<const TypedDagNode<AverageDistanceMatrix>* >( newP );
+        replaceNodeReference(avgDistMat, newP);
     }
     
     if (oldP == distMat)
     {
-        distMat = static_cast<const TypedDagNode<DistanceMatrix>* >( newP );
+        replaceNodeReference(distMat, newP);
     }
     
     if (oldP == lambda)
     {
-        lambda = static_cast<const TypedDagNode<double>* >(newP);
+        replaceNodeReference(lambda, newP);
     }
     
 }

@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "DuplicationLossProcess.h"
+#include "DagNodeTypeUtilities.h"
 #include "DistributionExponential.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
@@ -679,32 +680,32 @@ void DuplicationLossProcess::swapParameterInternal(const DagNode *oldP, const Da
     
     if ( oldP == individual_tree )
     {
-        individual_tree = static_cast<const TypedDagNode< Tree >* >( newP );
+        replaceNodeReference(individual_tree, newP);
     }
     
     if ( oldP == duplication_rate )
     {
-        duplication_rate = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(duplication_rate, newP);
     }
     
     if ( oldP == duplication_rates )
     {
-        duplication_rates = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(duplication_rates, newP);
     }
     
     if ( oldP == loss_rate )
     {
-        loss_rate = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(loss_rate, newP);
     }
     
     if ( oldP == loss_rates )
     {
-        loss_rates = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(loss_rates, newP);
     }
     
     if ( oldP == gene_sampling_probability )
     {
-        gene_sampling_probability = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(gene_sampling_probability, newP);
     }
     
 }

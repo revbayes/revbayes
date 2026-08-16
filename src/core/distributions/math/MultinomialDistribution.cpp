@@ -1,4 +1,5 @@
 #include "MultinomialDistribution.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
 
@@ -63,10 +64,10 @@ void MultinomialDistribution::swapParameterInternal(const DagNode *oldP, const D
     
     if (oldP == p)
     {
-        p = static_cast<const TypedDagNode< Simplex >* >( newP );
+        replaceNodeReference(p, newP);
     }
     else if (oldP == n)
     {
-        n = static_cast<const TypedDagNode<std::int64_t>* >(newP);
+        replaceNodeReference(n, newP);
     }
 }

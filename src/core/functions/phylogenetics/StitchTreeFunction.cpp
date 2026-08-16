@@ -7,6 +7,7 @@
 //
 
 #include "StitchTreeFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <set>
 
@@ -297,11 +298,11 @@ void StitchTreeFunction::swapParameterInternal(const DagNode *oldP, const DagNod
     
     if (oldP == backboneTree)
     {
-        backboneTree = static_cast<const TypedDagNode<Tree>* >( newP );
+        replaceNodeReference(backboneTree, newP);
     }
     else if (oldP == patchClades)
     {
-        patchClades = static_cast<const TypedDagNode<RbVector<Tree> >* >( newP );
+        replaceNodeReference(patchClades, newP);
     }
 }
 

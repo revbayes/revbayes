@@ -1,4 +1,5 @@
 #include "UniformIntegerDistribution.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cmath>
 
@@ -76,11 +77,11 @@ void UniformIntegerDistribution::swapParameterInternal(const DagNode *oldP, cons
     
     if (oldP == min)
     {
-        min = static_cast<const TypedDagNode<std::int64_t>* >( newP );
+        replaceNodeReference(min, newP);
     }
     else if (oldP == max)
     {
-        max = static_cast<const TypedDagNode<std::int64_t>* >( newP );
+        replaceNodeReference(max, newP);
     }
     
 }

@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "RandomNumberFactory.h"
+#include "DagNodeTypeUtilities.h"
 #include "RandomNumberGenerator.h"
 #include "RbConstants.h"
 #include "StochasticNode.h"
@@ -740,27 +741,27 @@ void HeterogeneousRateBirthDeath::swapParameterInternal( const DagNode *oldP, co
 {
     if (oldP == root_age)
     {
-        root_age = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(root_age, newP);
     }
     else if (oldP == root_state)
     {
-        root_state = static_cast<const TypedDagNode<std::int64_t>* >( newP );
+        replaceNodeReference(root_state, newP);
     }
     else if (oldP == speciation)
     {
-        speciation = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+        replaceNodeReference(speciation, newP);
     }
     else if (oldP == extinction)
     {
-        extinction = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+        replaceNodeReference(extinction, newP);
     }
     else if (oldP == event_rate)
     {
-        event_rate = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(event_rate, newP);
     }
     else if (oldP == rho)
     {
-        rho = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(rho, newP);
     }
     
 }

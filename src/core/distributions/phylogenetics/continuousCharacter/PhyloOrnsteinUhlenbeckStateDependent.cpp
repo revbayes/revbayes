@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "AbstractPhyloContinuousCharacterProcess.h"
+#include "DagNodeTypeUtilities.h"
 #include "BranchHistory.h"
 #include "ConstantNode.h"
 #include "DistributionNormal.h"
@@ -1079,39 +1080,39 @@ void PhyloOrnsteinUhlenbeckStateDependent::swapParameterInternal(const DagNode *
 
     if (oldP == root_value)
     {
-        root_value = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(root_value, newP);
     }
 
     if (oldP == homogeneous_alpha)
     {
-        homogeneous_alpha = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(homogeneous_alpha, newP);
     }
     else if (oldP == state_dependent_alpha)
     {
-        state_dependent_alpha = static_cast<const TypedDagNode< RbVector< double > >* >( newP );
+        replaceNodeReference(state_dependent_alpha, newP);
     }
 
     if (oldP == homogeneous_sigma)
     {
-        homogeneous_sigma = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(homogeneous_sigma, newP);
     }
     else if (oldP == state_dependent_sigma)
     {
-        state_dependent_sigma = static_cast<const TypedDagNode< RbVector< double > >* >( newP );
+        replaceNodeReference(state_dependent_sigma, newP);
     }
 
     if (oldP == homogeneous_theta)
     {
-        homogeneous_theta = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(homogeneous_theta, newP);
     }
     else if (oldP == state_dependent_theta)
     {
-        state_dependent_theta = static_cast<const TypedDagNode< RbVector< double > >* >( newP );
+        replaceNodeReference(state_dependent_theta, newP);
     }
 
     if (oldP == character_histories)
     {
-        character_histories = static_cast<const TypedDagNode< CharacterHistoryDiscrete >* >( newP );
+        replaceNodeReference(character_histories, newP);
     }
 
 }

@@ -8,6 +8,7 @@
 
 
 #include "BiogeographyRateMatrixFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cmath>
 #include <vector>
@@ -82,9 +83,9 @@ void BiogeographyRateMatrixFunction::update( void ) {
 
 void BiogeographyRateMatrixFunction::swapParameterInternal(const DagNode *oldP, const DagNode *newP) {
     if (oldP == dispersalRates) {
-        dispersalRates = static_cast<const TypedDagNode< RbVector<RbVector<double> > >* >( newP );
+        replaceNodeReference(dispersalRates, newP);
     }
     else if (oldP == extirpationRates) {
-        extirpationRates = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(extirpationRates, newP);
     }
 }

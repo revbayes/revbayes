@@ -1,4 +1,5 @@
 #include "AbsoluteValueVectorFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
 #include <cmath>
@@ -35,7 +36,7 @@ void AbsoluteValueVectorFunction::swapParameterInternal(const DagNode *oldP, con
     
     if (oldP == a)
     {
-        a = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+        replaceNodeReference(a, newP);
 
         // free the old value and allocate a new one of the right size
         delete value;

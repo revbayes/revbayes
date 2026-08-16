@@ -2,6 +2,7 @@
 #define ShiftEventsFunction_H
 
 #include "OrderedEvents.h"
+#include "DagNodeTypeUtilities.h"
 #include "RbVector.h"
 #include "TypedFunction.h"
 
@@ -101,12 +102,12 @@ void RevBayesCore::ShiftEventsFunction<valueType>::swapParameterInternal(const D
 {
     if ( oldP == initial_values )
     {
-    	initial_values = static_cast<const TypedDagNode<valueType>* >( newP );
+        replaceNodeReference(initial_values, newP);
         this->update();
     }
 	else if ( oldP == shift_events )
     {
-		shift_events = static_cast<const TypedDagNode<OrderedEvents<valueType>>* >( newP );
+		replaceNodeReference(shift_events, newP);
         this->update();
     }
     

@@ -1,4 +1,5 @@
 #include "MultivariateNormalDistribution.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cmath>
 #include <string>
@@ -179,15 +180,15 @@ void MultivariateNormalDistribution::swapParameterInternal(const DagNode *oldP, 
     
     if (oldP == mean)
     {
-        mean = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(mean, newP);
     }
     if (oldP == covariance)
     {
-        covariance = static_cast<const TypedDagNode<MatrixReal >* >( newP );
+        replaceNodeReference(covariance, newP);
     }
     if (oldP == precision)
     {
-        precision = static_cast<const TypedDagNode<MatrixReal >* >( newP );
+        replaceNodeReference(precision, newP);
     }
     
 }

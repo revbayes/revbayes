@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "MatrixReal.h"
+#include "DagNodeTypeUtilities.h"
 #include "MatrixFunction.h"
 #include "TypedDagNode.h"
 #include "Cloneable.h"
@@ -113,7 +114,7 @@ void MatrixFunction::swapParameterInternal(const DagNode *oldP, const DagNode *n
             {
                 if (oldP == matrixParamsAsVariables[i][j])
                 {
-                    matrixParamsAsVariables[i][j] = static_cast<const TypedDagNode<double>* >( newP );
+                    replaceNodeReference(matrixParamsAsVariables[i][j], newP);
                     // don't jump out of the loop because we could have the same parameter multiple times for this vector, e.g., v(a,a,b,a)
                 }
             }
@@ -123,7 +124,7 @@ void MatrixFunction::swapParameterInternal(const DagNode *oldP, const DagNode *n
     {
         if (oldP == matrixParamsAsVector)
         {
-            matrixParamsAsVector = static_cast<const TypedDagNode<RbVector<RbVector<double> > >* >( newP );
+            replaceNodeReference(matrixParamsAsVector, newP);
         }
     }
     

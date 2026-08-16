@@ -2,6 +2,7 @@
 #define CTMCProcess_H
 
 #include "Simplex.h"
+#include "DagNodeTypeUtilities.h"
 #include "RateGenerator.h"
 #include "TransitionProbabilityMatrix.h"
 #include "TypedDistribution.h"
@@ -1332,27 +1333,27 @@ void RevBayesCore::CTMCProcess<charType>::swapParameterInternal(const DagNode *o
 
     if (oldP == rate_matrix)
     {
-        rate_matrix = static_cast<const TypedDagNode< RateGenerator >* >( newP );
+        replaceNodeReference(rate_matrix, newP);
     }
     else if (oldP == site_rate_matrices)
     {
-        site_rate_matrices = static_cast<const TypedDagNode< RbVector< RateGenerator > >* >( newP );
+        replaceNodeReference(site_rate_matrices, newP);
     }
     else if (oldP == root_frequencies)
     {
-        root_frequencies = static_cast<const TypedDagNode< Simplex >* >( newP );
+        replaceNodeReference(root_frequencies, newP);
     }
     else if (oldP == site_matrix_probs)
     {
-        site_matrix_probs = static_cast<const TypedDagNode< Simplex >* >( newP );
+        replaceNodeReference(site_matrix_probs, newP);
     }
     else if (oldP == site_rates)
     {
-        site_rates = static_cast<const TypedDagNode< RbVector< double > >* >( newP );
+        replaceNodeReference(site_rates, newP);
     }
     else if (oldP == site_rates_probs)
     {
-        site_rates_probs = static_cast<const TypedDagNode< Simplex >* >( newP );
+        replaceNodeReference(site_rates_probs, newP);
     }
 
 }

@@ -1,4 +1,5 @@
 #include "TreeScaleFunction.h"
+#include "DagNodeTypeUtilities.h"
 #include <cstddef>
 #include "TopologyNode.h"
 #include "TypedDagNode.h"
@@ -96,11 +97,11 @@ void TreeScaleFunction::swapParameterInternal(const DagNode *oldP, const DagNode
     
     if (oldP == tau)
     {
-        tau = static_cast<const TypedDagNode<Tree>* >( newP );
+        replaceNodeReference(tau, newP);
     }
     else if (oldP == scale)
     {
-        scale = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(scale, newP);
     }
 }
 

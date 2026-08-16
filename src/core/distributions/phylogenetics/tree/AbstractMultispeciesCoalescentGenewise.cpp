@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "AbstractMultispeciesCoalescentGenewise.h"
+#include "DagNodeTypeUtilities.h"
 #include "DistributionExponential.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
@@ -593,7 +594,7 @@ void AbstractMultispeciesCoalescentGenewise::swapParameterInternal(const DagNode
 
     if ( oldP == species_tree )
     {
-        species_tree = static_cast<const TypedDagNode< Tree >* >( newP );
+        replaceNodeReference(species_tree, newP);
     }
 
     // if ( oldP == gene_trees )

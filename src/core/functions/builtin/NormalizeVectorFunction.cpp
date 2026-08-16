@@ -1,4 +1,5 @@
 #include "NormalizeVectorFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
 #include <vector>
@@ -57,11 +58,11 @@ void NormalizeVectorFunction::swapParameterInternal(const DagNode *oldP, const D
     
     if ( oldP == vals ) 
     {
-        vals = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(vals, newP);
     }
     else if ( oldP == sum )
     {
-        sum = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(sum, newP);
     }
     
 }

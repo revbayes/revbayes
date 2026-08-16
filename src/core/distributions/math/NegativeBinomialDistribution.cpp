@@ -1,4 +1,5 @@
 #include "NegativeBinomialDistribution.h"
+#include "DagNodeTypeUtilities.h"
 
 #include "DistributionNegativeBinomial.h"
 #include "RandomNumberFactory.h"
@@ -69,11 +70,11 @@ void NegativeBinomialDistribution::swapParameterInternal(const DagNode *oldP, co
 
     if (oldP == p)
     {
-        p = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(p, newP);
     }
     else if (oldP == r)
     {
-        r = static_cast<const TypedDagNode<std::int64_t>* >( newP );
+        replaceNodeReference(r, newP);
     }
 
 }

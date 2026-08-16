@@ -13,6 +13,7 @@
  */
 
 #include "ChromosomesRateMatrixFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include "RateMatrix_Chromosomes.h"
 #include "Cloneable.h"
@@ -71,21 +72,21 @@ void ChromosomesRateMatrixFunction::update( void ) {
 void ChromosomesRateMatrixFunction::swapParameterInternal(const DagNode *oldP, const DagNode *newP) {
     
     if (oldP == gamma) {
-        gamma = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(gamma, newP);
     }
     else if (oldP == delta) {
-        delta = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(delta, newP);
     }
     else if (oldP == rho) {
-        rho = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(rho, newP);
     } else if (oldP == eta) {
-        eta = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(eta, newP);
     }
     else if (oldP == delta_l) {
-        delta_l = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(delta_l, newP);
     }
     else if (oldP == gamma_l) {
-        gamma_l = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(gamma_l, newP);
     }
     
 }

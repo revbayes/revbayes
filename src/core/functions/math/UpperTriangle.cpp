@@ -1,4 +1,5 @@
 #include "UpperTriangle.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
 
@@ -58,7 +59,7 @@ void UpperTriangle::swapParameterInternal(const DagNode *oldP, const DagNode *ne
     // check dimensions here
     if (oldP == matrix)
     {
-        matrix = static_cast<const TypedDagNode< MatrixReal >* >( newP );
+        replaceNodeReference(matrix, newP);
     }
 }
 

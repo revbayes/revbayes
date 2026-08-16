@@ -1,4 +1,5 @@
 #include "GilbertGraphDistribution.h"
+#include "DagNodeTypeUtilities.h"
 
 #include "RandomNumberFactory.h"
 #include "DistributionGilbertGraph.h"
@@ -41,7 +42,7 @@ void GilbertGraphDistribution::swapParameterInternal(const DagNode *oldP, const 
     
     if (oldP == edge_probability)
     {
-        edge_probability = static_cast<const TypedDagNode<double>* >(newP);
+        replaceNodeReference(edge_probability, newP);
     }
     
 }

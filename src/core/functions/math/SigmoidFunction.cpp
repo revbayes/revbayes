@@ -1,4 +1,5 @@
 #include "SigmoidFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cmath>
 
@@ -40,23 +41,23 @@ void SigmoidFunction::swapParameterInternal(const DagNode *oldP, const DagNode *
     
     if (oldP == x)
     {
-        x = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(x, newP);
     }
     if (oldP == min)
     {
-        min = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(min, newP);
     }
     if (oldP == max)
     {
-        max = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(max, newP);
     }
     if (oldP == middle)
     {
-        middle = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(middle, newP);
     }
     if (oldP == slope)
     {
-        slope = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(slope, newP);
     }
 
 }

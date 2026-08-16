@@ -1,4 +1,5 @@
 #include "GammaDistribution.h"
+#include "DagNodeTypeUtilities.h"
 
 #include "DistributionGamma.h"
 #include "RandomNumberFactory.h"
@@ -88,12 +89,12 @@ void GammaDistribution::swapParameterInternal(const DagNode *oldP, const DagNode
 {
     if (oldP == shape)
     {
-        shape = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(shape, newP);
     }
     
     if (oldP == rate)
     {
-        rate = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(rate, newP);
     }
 }
 

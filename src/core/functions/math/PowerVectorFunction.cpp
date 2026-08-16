@@ -1,4 +1,5 @@
 #include "PowerVectorFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
 #include <cmath>
@@ -37,11 +38,11 @@ void PowerVectorFunction::swapParameterInternal(const DagNode *oldP, const DagNo
 {
     if (oldP == base)
     {
-        base = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+        replaceNodeReference(base, newP);
     }
     if (oldP == exponent)
     {
-        exponent = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(exponent, newP);
     }
     
 }

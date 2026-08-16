@@ -7,6 +7,7 @@
 //
 
 #include "CovarionRateMatrixFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
 
@@ -87,17 +88,17 @@ void CovarionRateMatrixFunction::swapParameterInternal(const DagNode *oldP, cons
     
     if (oldP == rate_matrices)
     {
-        rate_matrices = static_cast<const TypedDagNode< RbVector<RateGenerator> >* >( newP );
+        replaceNodeReference(rate_matrices, newP);
     }
     
     if (oldP == switch_rates)
     {
-        switch_rates = static_cast<const TypedDagNode<RateGenerator>* >( newP );
+        replaceNodeReference(switch_rates, newP);
     }
     
     if (oldP == clock_rates)
     {
-        clock_rates = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(clock_rates, newP);
     }
     
 }

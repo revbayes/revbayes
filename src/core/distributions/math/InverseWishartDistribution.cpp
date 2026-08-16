@@ -1,6 +1,7 @@
 
 
 #include "InverseWishartDistribution.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
 
@@ -110,27 +111,27 @@ void InverseWishartDistribution::swapParameterInternal(const DagNode *oldP, cons
     
     if (oldP == sigma0)
     {
-        sigma0 = static_cast<const TypedDagNode<MatrixReal>* >( newP );
+        replaceNodeReference(sigma0, newP);
     }
     
     if (oldP == kappaVector)
     {
-        kappaVector = static_cast<const TypedDagNode<RbVector<double> >* >(newP);
+        replaceNodeReference(kappaVector, newP);
     }
     
     if (oldP == kappa)
     {
-        kappa = static_cast<const TypedDagNode<double>* >(newP);
+        replaceNodeReference(kappa, newP);
     }
     
     if (oldP == dim)
     {
-        dim = static_cast<const TypedDagNode<std::int64_t>* >(newP);
+        replaceNodeReference(dim, newP);
     }
     
     if (oldP == df)
     {
-        df = static_cast<const TypedDagNode<std::int64_t>* >(newP);
+        replaceNodeReference(df, newP);
     }
     
 }

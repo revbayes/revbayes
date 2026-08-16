@@ -1,5 +1,6 @@
 
 #include "CauchyDistribution.h"
+#include "DagNodeTypeUtilities.h"
 
 #include "DistributionCauchy.h"
 #include "RandomNumberFactory.h"
@@ -83,10 +84,10 @@ void CauchyDistribution::swapParameterInternal(const DagNode *oldP, const DagNod
 {
     if (oldP == location)
     {
-        location = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(location, newP);
     }
     if (oldP == scale)
     {
-        scale = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(scale, newP);
     }
 }

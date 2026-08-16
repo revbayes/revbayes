@@ -1,4 +1,5 @@
 #include "FloorFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cmath>
 
@@ -35,7 +36,7 @@ void FloorFunction::swapParameterInternal(const DagNode *oldP, const DagNode *ne
     
     if (oldP == a) 
     {
-        a = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(a, newP);
     }
     
 }

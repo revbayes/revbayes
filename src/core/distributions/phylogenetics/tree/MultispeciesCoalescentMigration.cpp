@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "MultispeciesCoalescentMigration.h"
+#include "DagNodeTypeUtilities.h"
 #include "ConstantNode.h"
 #include "DistributionExponential.h"
 #include "MultispeciesCoalescentMigrationODE.h"
@@ -778,27 +779,27 @@ void MultispeciesCoalescentMigration::swapParameterInternal(const DagNode *oldP,
     
     if ( oldP == species_tree )
     {
-        species_tree = static_cast<const TypedDagNode< Tree >* >( newP );
+        replaceNodeReference(species_tree, newP);
     }
     
     if ( oldP == Nes )
     {
-        Nes = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(Nes, newP);
     }
     
     if ( oldP == Ne )
     {
-        Ne = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(Ne, newP);
     }
     
     if ( oldP == Q )
     {
-        Q = static_cast<const TypedDagNode< RateGenerator >* >( newP );
+        replaceNodeReference(Q, newP);
     }
     
     if ( oldP == delta )
     {
-        delta = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(delta, newP);
     }
     
 }

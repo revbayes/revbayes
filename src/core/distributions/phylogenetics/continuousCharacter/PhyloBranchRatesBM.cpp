@@ -1,4 +1,5 @@
 #include "PhyloBranchRatesBM.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
 #include <cmath>
@@ -147,22 +148,22 @@ void PhyloBranchRatesBM::swapParameterInternal(const DagNode *oldP, const DagNod
     
     if ( oldP == tau )
     {
-        tau = static_cast< const TypedDagNode<Tree> * >( newP );
+        replaceNodeReference(tau, newP);
     }
     
     if ( oldP == root_state )
     {
-        root_state = static_cast< const TypedDagNode<double> * >( newP );
+        replaceNodeReference(root_state, newP);
     }
     
     if ( oldP == sigma )
     {
-        sigma = static_cast< const TypedDagNode<double> * >( newP );
+        replaceNodeReference(sigma, newP);
     }
     
     if ( oldP == drift )
     {
-        drift = static_cast< const TypedDagNode< double > * >( newP );
+        replaceNodeReference(drift, newP);
     }
     
 }

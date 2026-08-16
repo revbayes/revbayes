@@ -1,4 +1,5 @@
 #include "LogFunction.h"
+#include "DagNodeTypeUtilities.h"
 #include <cmath>
 #include "Cloneable.h"
 #include "TypedDagNode.h"
@@ -37,11 +38,11 @@ void LogFunction::swapParameterInternal(const DagNode *oldP, const DagNode *newP
     
     if (oldP == a)
     {
-        a = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(a, newP);
     }
     if (oldP == base)
     {
-        base = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(base, newP);
     }
     
 }

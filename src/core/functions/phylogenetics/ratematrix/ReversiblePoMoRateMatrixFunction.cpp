@@ -1,4 +1,5 @@
 #include "ReversiblePoMoRateMatrixFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include "Cloneable.h"
 #include "RateMatrix_ReversiblePoMo.h"
@@ -65,11 +66,11 @@ void ReversiblePoMoRateMatrixFunction::swapParameterInternal(const DagNode *oldP
     // }
     if (oldP == exchangeabilities)
     {
-        exchangeabilities = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(exchangeabilities, newP);
     }
     else if (oldP == equilibrium_frequencies)
     {
-        equilibrium_frequencies = static_cast<const TypedDagNode< Simplex >* >( newP );
+        replaceNodeReference(equilibrium_frequencies, newP);
     }
 
 }

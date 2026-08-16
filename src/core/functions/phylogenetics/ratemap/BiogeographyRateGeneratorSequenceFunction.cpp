@@ -1,4 +1,5 @@
 #include "BiogeographyRateGeneratorSequenceFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <string>
 
@@ -108,11 +109,11 @@ void BiogeographyRateGeneratorSequenceFunction::swapParameterInternal(const DagN
 
     if (oldP == homogeneousRateMatrix)
     {
-        homogeneousRateMatrix = static_cast<const TypedDagNode<RateGenerator>* >( newP );
+        replaceNodeReference(homogeneousRateMatrix, newP);
     }
     else if (oldP == distanceRateModifier)
     {
-        distanceRateModifier = static_cast<const TypedDagNode<CharacterHistoryRateModifier>* >( newP );
+        replaceNodeReference(distanceRateModifier, newP);
     }
 
 }

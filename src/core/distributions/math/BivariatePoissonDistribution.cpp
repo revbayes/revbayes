@@ -1,6 +1,7 @@
 #include <vector>
 
 #include "BivariatePoissonDistribution.h"
+#include "DagNodeTypeUtilities.h"
 #include "DistributionBivariatePoisson.h"
 #include "RandomNumberFactory.h"
 #include "RbConstants.h"
@@ -68,12 +69,12 @@ void BivariatePoissonDistribution::swapParameterInternal(const DagNode *oldP, co
 {
     if (oldP == theta1)
     {
-        theta1 = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(theta1, newP);
     } else if (oldP == theta2)
     {
-        theta2 = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(theta2, newP);
     } else if (oldP == theta0)
     {
-      theta0 = static_cast<const TypedDagNode<double>* >( newP );
+      replaceNodeReference(theta0, newP);
     }
 }

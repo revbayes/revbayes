@@ -2,6 +2,7 @@
 #define IfElseFunction_H
 
 #include "RbBoolean.h"
+#include "DagNodeTypeUtilities.h"
 #include "TypedFunction.h"
 #include "TypedDagNode.h"
 
@@ -57,17 +58,17 @@ void RevBayesCore::IfElseFunction<valType>::swapParameterInternal(const DagNode 
     
     if ( oldP == condition)
     {
-        condition = static_cast<const TypedDagNode<Boolean>* >( newP );
+        replaceNodeReference(condition, newP);
     }
     
     if (oldP == a)
     {
-        a = static_cast<const TypedDagNode<valType>* >( newP );
+        replaceNodeReference(a, newP);
     }
     
     if (oldP == b)
     {
-        b = static_cast<const TypedDagNode<valType>* >( newP );
+        replaceNodeReference(b, newP);
     }
     
 }

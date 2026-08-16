@@ -1,4 +1,5 @@
 #include "BranchRateTreeDistribution.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <algorithm>
 #include <cmath>
@@ -525,11 +526,11 @@ void BranchRateTreeDistribution::swapParameterInternal( const DagNode *oldP, con
 
     if (oldP == root_branch_fraction )
     {
-        root_branch_fraction = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(root_branch_fraction, newP);
     }
     else if ( oldP == time_tree )
     {
-        time_tree = static_cast<const TypedDagNode<Tree>* >( newP );        
+        replaceNodeReference(time_tree, newP);
     }
 
     //if ( branch_rate_prior != NULL )

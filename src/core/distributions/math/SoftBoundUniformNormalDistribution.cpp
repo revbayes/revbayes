@@ -1,4 +1,5 @@
 #include "SoftBoundUniformNormalDistribution.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cmath>
 
@@ -182,19 +183,19 @@ void SoftBoundUniformNormalDistribution::swapParameterInternal(const DagNode *ol
     
     if (oldP == min)
     {
-        min = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(min, newP);
     }
     if (oldP == max)
     {
-        max = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(max, newP);
     }
     if (oldP == stDev)
     {
-        stDev = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(stDev, newP);
     }
     if (oldP == prob)
     {
-        prob = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(prob, newP);
     }
     
 }

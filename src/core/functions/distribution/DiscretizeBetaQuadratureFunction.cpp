@@ -1,4 +1,5 @@
 #include "DiscretizeBetaQuadratureFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
 #include <cmath>
@@ -40,17 +41,17 @@ void RevBayesCore::DiscretizeBetaQuadratureFunction::swapParameterInternal(const
     
     if (oldP == alpha)
     {
-        alpha = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(alpha, newP);
     }
     
     if (oldP == beta)
     {
-        beta = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(beta, newP);
     }
     
     if (oldP == numCats)
     {
-        numCats = static_cast<const TypedDagNode<std::int64_t>* >( newP );
+        replaceNodeReference(numCats, newP);
     }
     
 }

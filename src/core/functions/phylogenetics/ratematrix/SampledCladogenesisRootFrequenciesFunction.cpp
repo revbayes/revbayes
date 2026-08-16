@@ -15,6 +15,7 @@
 #include <vector>
 
 #include "AbstractCharacterHistoryBirthDeathProcess.h"
+#include "DagNodeTypeUtilities.h"
 #include "SampledCladogenesisRootFrequenciesFunction.h"
 #include "RbException.h"
 #include "TransitionProbabilityMatrix.h"
@@ -265,15 +266,15 @@ void SampledCladogenesisRootFrequenciesFunction::update( void ) {
 
 void SampledCladogenesisRootFrequenciesFunction::swapParameterInternal(const DagNode *oldP, const DagNode *newP) {
     if (oldP == rateMatrix) {
-        rateMatrix = static_cast<const TypedDagNode< RateGenerator >* >( newP );
+        replaceNodeReference(rateMatrix, newP);
     }
     else if (oldP == cladogenesisProbabilities) {
-        cladogenesisProbabilities = static_cast<const TypedDagNode< MatrixReal >* >( newP );
+        replaceNodeReference(cladogenesisProbabilities, newP);
     }
     else if (oldP == tree) {
-        tree = static_cast<const TypedDagNode<Tree>* >( newP );
+        replaceNodeReference(tree, newP);
     }
     else if (oldP == clock) {
-        clock = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(clock, newP);
     }
 }

@@ -7,6 +7,7 @@
 //
 
 #include "DistanceRateModifierFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include "DistanceRateModifier.h"
 #include "TypedDagNode.h"
@@ -53,6 +54,6 @@ void DistanceRateModifierFunction::swapParameterInternal(const DagNode *oldP, co
     
     if (oldP == distancePower)
     {
-        distancePower = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(distancePower, newP);
     }
 }

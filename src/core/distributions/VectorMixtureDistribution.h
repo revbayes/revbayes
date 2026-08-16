@@ -1,6 +1,7 @@
 #ifndef VectorMixtureDistribution_H
 #define VectorMixtureDistribution_H
 
+#include "DagNodeTypeUtilities.h"
 #include "MemberObject.h"
 #include "RbVector.h"
 #include "Simplex.h"
@@ -278,7 +279,7 @@ void RevBayesCore::VectorMixtureDistribution<mixtureType>::swapParameterInternal
     if (old_p == probabilities)
     {
         found = true;
-        probabilities = static_cast<const TypedDagNode< Simplex >* >( new_p );
+        replaceNodeReference(probabilities, new_p);
     }
     else
     {

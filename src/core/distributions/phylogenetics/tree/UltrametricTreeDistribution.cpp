@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "RandomNumberFactory.h"
+#include "DagNodeTypeUtilities.h"
 #include "RandomNumberGenerator.h"
 #include "RbConstants.h"
 #include "StochasticNode.h"
@@ -747,12 +748,12 @@ void UltrametricTreeDistribution::swapParameterInternal( const DagNode *oldP, co
 {
     if (oldP == root_age )
     {
-        root_age = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(root_age, newP);
     }
 
     if (oldP == root_branch_fraction )
     {
-        root_branch_fraction = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(root_branch_fraction, newP);
     }
 
     try

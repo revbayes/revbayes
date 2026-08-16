@@ -1,4 +1,5 @@
 #include "PhyloWhiteNoiseProcess.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
 #include <cmath>
@@ -84,12 +85,12 @@ void PhyloWhiteNoiseProcess::swapParameterInternal( const DagNode *oldP, const D
     
     if ( oldP == tau )
     {
-        tau = static_cast< const TypedDagNode<Tree> * >( newP );
+        replaceNodeReference(tau, newP);
     }
     
     if ( oldP == sigma )
     {
-        sigma = static_cast< const TypedDagNode<double> * >( newP );
+        replaceNodeReference(sigma, newP);
     }
     
 }

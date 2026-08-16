@@ -2,6 +2,7 @@
 #define ProbabilityDensityFunction_H
 
 #include "ContinuousFunction.h"
+#include "DagNodeTypeUtilities.h"
 #include "TypedDistribution.h"
 #include "TypedDagNode.h"
 
@@ -66,7 +67,7 @@ RevBayesCore::ProbabilityDensityFunction<valueType>* RevBayesCore::ProbabilityDe
 template <class valueType>
 void RevBayesCore::ProbabilityDensityFunction<valueType>::swapParameterInternal(const DagNode *oldP, const DagNode *newP) {
     if (oldP == x) {
-        x = static_cast<const TypedDagNode<valueType>* >( newP );
+        replaceNodeReference(x, newP);
     }
     else {
         dist->swapParameter(oldP, newP);

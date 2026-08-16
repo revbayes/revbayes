@@ -2,6 +2,7 @@
 #define IndirectReferenceFunction_H
 
 #include "TypedFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <string>
 
@@ -61,7 +62,7 @@ void  RevBayesCore::IndirectReferenceFunction<rbType>::swapParameterInternal(con
     
     if ( oldP == argumentNode )
     {
-        argumentNode = static_cast<const TypedDagNode< rbType > *>(newP);
+        replaceNodeReference(argumentNode, newP);
     }
     
 }

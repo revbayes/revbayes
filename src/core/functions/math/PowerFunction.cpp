@@ -1,4 +1,5 @@
 #include "PowerFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cmath>
 
@@ -37,11 +38,11 @@ void PowerFunction::swapParameterInternal(const DagNode *oldP, const DagNode *ne
     
     if (oldP == base)
     {
-        base = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(base, newP);
     }
     if (oldP == exponent)
     {
-        exponent = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(exponent, newP);
     }
     
 }

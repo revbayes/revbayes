@@ -1,4 +1,5 @@
 #include "LogUniformDistribution.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cmath>
 
@@ -116,11 +117,11 @@ void LogUniformDistribution::swapParameterInternal(const DagNode *oldP, const Da
 
     if (oldP == min) 
     {
-        min = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(min, newP);
     }
     else if (oldP == max) 
     {
-        max = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(max, newP);
     }
     
 }

@@ -23,6 +23,7 @@
 #define VectorFunction_H
 
 #include "RbVector.h"
+#include "DagNodeTypeUtilities.h"
 #include "TypedFunction.h"
 
 #include <vector>
@@ -159,7 +160,7 @@ void RevBayesCore::VectorFunction<valueType>::swapParameterInternal(const DagNod
     {
         if (oldP == vectorParams[i])
         {
-            vectorParams[i] = static_cast<const TypedDagNode<valueType>* >( newP );
+            replaceNodeReference(vectorParams[i], newP);
             // don't jump out of the loop because we could have the same parameter multiple times for this vector, e.g., v(a,a,b,a)
         }
         

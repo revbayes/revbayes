@@ -3,6 +3,7 @@
 #include <cmath>
 #include <vector>
 #include "ConstantPopulationCoalescent.h"
+#include "DagNodeTypeUtilities.h"
 #include "DistributionExponential.h"
 #include "RandomNumberFactory.h"
 #include "RbConstants.h"
@@ -274,6 +275,6 @@ void ConstantPopulationCoalescent::swapParameterInternal(const DagNode *old_p, c
 {
     if (old_p == Ne)
     {
-        Ne = static_cast<const TypedDagNode<double>* >( new_p );
+        replaceNodeReference(Ne, new_p);
     }
 }

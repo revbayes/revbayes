@@ -7,6 +7,7 @@
 //
 
 #include "AdjacentRateModifierFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <string>
 
@@ -122,22 +123,22 @@ void AdjacentRateModifierFunction::swapParameterInternal(const DagNode *oldP, co
     
     if (oldP == gainFactor)
     {
-        gainFactor = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(gainFactor, newP);
     }
     else if (oldP == lossFactor)
     {
-        lossFactor = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(lossFactor, newP);
     }
     else if (oldP == width)
     {
-        width = static_cast<const TypedDagNode<std::int64_t>* >( newP );
+        replaceNodeReference(width, newP);
     }
     else if (oldP == context_array)
     {
-        context_array = static_cast<const TypedDagNode<RbVector<RbVector<std::int64_t> > >* >( newP );
+        replaceNodeReference(context_array, newP);
     }
     else if (oldP == context_matrix)
     {
-        context_matrix = static_cast<const TypedDagNode<MatrixReal>* >( newP );
+        replaceNodeReference(context_matrix, newP);
     }
 }

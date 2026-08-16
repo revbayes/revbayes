@@ -2,6 +2,7 @@
 #include <iosfwd>
 
 #include "AbstractDiscreteTaxonData.h"
+#include "DagNodeTypeUtilities.h"
 #include "PattersonsDFunction.h"
 #include "AbstractHomologousDiscreteCharacterData.h"
 #include "Cloneable.h"
@@ -83,7 +84,7 @@ void PattersonsDFunction::swapParameterInternal(const DagNode *oldP, const DagNo
     
     if (oldP == alignment)
     {
-        alignment = static_cast<const TypedDagNode< AbstractHomologousDiscreteCharacterData >* >( newP );
+        replaceNodeReference(alignment, newP);
     }
     
 }

@@ -23,6 +23,7 @@
 #define LessEqualFunction_H
 
 #include "RbBoolean.h"
+#include "DagNodeTypeUtilities.h"
 #include "TypedFunction.h"
 
 #include <vector>
@@ -97,11 +98,11 @@ void RevBayesCore::LessEqualFunction<leftValueType,rightValueType>::swapParamete
     
     if ( oldP == left )
     {
-        left = static_cast<const TypedDagNode<leftValueType>* >( newP );
+        replaceNodeReference(left, newP);
     }
     if ( oldP == right )
     {
-        right = static_cast<const TypedDagNode<rightValueType>* >( newP );
+        replaceNodeReference(right, newP);
     }
     
 }

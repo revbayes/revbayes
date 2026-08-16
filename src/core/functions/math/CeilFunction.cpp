@@ -1,4 +1,5 @@
 #include "CeilFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cmath>
 
@@ -35,7 +36,7 @@ void CeilFunction::swapParameterInternal(const DagNode *oldP, const DagNode *new
 
     if (oldP == a) 
     {
-        a = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(a, newP);
     }
     
 }

@@ -1,4 +1,5 @@
 #include "FoldSFSFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include "RbException.h"
 #include "TypedDagNode.h"
@@ -64,6 +65,6 @@ void FoldSFSFunction::swapParameterInternal(const DagNode *oldP, const DagNode *
 {
     if ( oldP == unfolded )
     {
-        unfolded = static_cast< const TypedDagNode< RbVector<std::int64_t> >* >( newP );
+        replaceNodeReference(unfolded, newP);
     }
 }
