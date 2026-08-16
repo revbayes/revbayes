@@ -1,4 +1,5 @@
 #include "TreeNodeAgeUpdateProposal.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
 #include <cmath>
@@ -449,7 +450,7 @@ void TreeNodeAgeUpdateProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 
     if ( oldN == speciesTree )
     {
-        speciesTree = static_cast<StochasticNode<Tree>* >(newN) ;
+        replaceNodeReference(speciesTree, newN);
     }
     else
     {
@@ -457,7 +458,7 @@ void TreeNodeAgeUpdateProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
         {
             if ( oldN == geneTrees[i] )
             {
-                geneTrees[i] = static_cast<StochasticNode<Tree>* >(newN) ;
+                replaceNodeReference(geneTrees[i], newN);
             }
         }
     }

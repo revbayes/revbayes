@@ -1,4 +1,5 @@
 #include "VectorSlideRecenterProposal.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cmath>
 
@@ -174,14 +175,14 @@ void VectorSlideRecenterProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
     {
         if ( variables[i] == oldN )
         {
-            variables[i] = static_cast<StochasticNode<double> *>(newN);
+            replaceNodeReference(variables[i], newN);
         }
     }
     
     // also swap the sd parameter
     if ( mean == oldN )
     {
-        mean = static_cast<StochasticNode<double> *>(newN);
+        replaceNodeReference(mean, newN);
     }
     
 }

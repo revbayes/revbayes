@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "DagNodeTypeUtilities.h"
 #include <cmath>
 #include <iostream>
 #include <vector>
@@ -221,6 +222,6 @@ void NodeTimeSlideUniformAgeConstrainedProposal::undoProposal( void )
 void NodeTimeSlideUniformAgeConstrainedProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     
-    variable = static_cast<StochasticNode<Tree>* >(newN) ;
+    replaceNodeReference(variable, newN);
     
 }

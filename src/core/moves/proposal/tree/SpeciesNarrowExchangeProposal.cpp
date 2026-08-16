@@ -1,4 +1,5 @@
 #include "SpeciesNarrowExchangeProposal.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
 #include <cmath>
@@ -583,7 +584,7 @@ void SpeciesNarrowExchangeProposal::swapNodeInternal(DagNode *oldN, DagNode *new
 
     if ( oldN == speciesTree )
     {
-        speciesTree = static_cast<StochasticNode<Tree>* >(newN) ;
+        replaceNodeReference(speciesTree, newN);
     }
     else
     {
@@ -591,7 +592,7 @@ void SpeciesNarrowExchangeProposal::swapNodeInternal(DagNode *oldN, DagNode *new
         {
             if ( oldN == geneTrees[i] )
             {
-                geneTrees[i] = static_cast<StochasticNode<Tree>* >(newN) ;
+                replaceNodeReference(geneTrees[i], newN);
             }
         }
     }

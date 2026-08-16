@@ -1,4 +1,5 @@
 #include "VectorBinarySwitchProposal.h"
+#include "DagNodeTypeUtilities.h"
 
 
 #include "RandomNumberFactory.h"
@@ -206,7 +207,7 @@ void VectorBinarySwitchProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
     {
         if ( variables[i] == oldN )
         {
-            variables[i] = static_cast<StochasticNode<std::int64_t> *>(newN);
+            replaceNodeReference(variables[i], newN);
         }
     }
 }

@@ -1,4 +1,5 @@
 #include "GammaScaleProposal.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cmath>
 #include <iostream>
@@ -166,7 +167,7 @@ void GammaScaleProposal::undoProposal( void )
 void GammaScaleProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     
-    variable = static_cast<StochasticNode<double>* >(newN) ;
+    replaceNodeReference(variable, newN);
     
 }
 

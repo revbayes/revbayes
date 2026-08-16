@@ -1,4 +1,5 @@
 #include "SubtreeSwapProposal.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cmath>
 #include <cstddef>
@@ -216,6 +217,6 @@ void SubtreeSwapProposal::undoProposal( void )
 void SubtreeSwapProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     
-    tree = static_cast<StochasticNode<Tree>* >(newN) ;
+    replaceNodeReference(tree, newN);
     
 }

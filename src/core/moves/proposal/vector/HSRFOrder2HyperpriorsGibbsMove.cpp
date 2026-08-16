@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "DagNodeTypeUtilities.h"
 #include <cmath>
 #include <cassert>
 #include <iostream>
@@ -299,7 +300,7 @@ void HSRFOrder2HyperpriorsGibbsMove::swapNodeInternal(DagNode *oldN, DagNode *ne
     {
         if ( local_scales[i] == oldN )
         {
-            local_scales[i] = static_cast<StochasticNode<double> *>(newN);
+            replaceNodeReference(local_scales[i], newN);
         }
     }
 
@@ -307,13 +308,13 @@ void HSRFOrder2HyperpriorsGibbsMove::swapNodeInternal(DagNode *oldN, DagNode *ne
     {
         if ( normals[i] == oldN )
         {
-            normals[i] = static_cast<StochasticNode<double> *>(newN);
+            replaceNodeReference(normals[i], newN);
         }
     }
 
     if (oldN == global_scale)
     {
-        global_scale = static_cast<StochasticNode<double>* >(newN) ;
+        replaceNodeReference(global_scale, newN);
     }
 
 }

@@ -1,4 +1,5 @@
 #include <map>
+#include "DagNodeTypeUtilities.h"
 #include <ostream>
 #include <string>
 #include <utility>
@@ -87,7 +88,7 @@ void HomeologPhaseMonitor::swapNode(DagNode *oldN, DagNode* newN)
 	
 	if ( oldN == ctmc )
 	{
-		ctmc = static_cast< StochasticNode<AbstractHomologousDiscreteCharacterData> *>( newN );
+		replaceNodeReference(ctmc, newN);
 	}
     
     Monitor::swapNode( oldN, newN );

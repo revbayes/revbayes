@@ -1,4 +1,5 @@
 #include "CorrelationMatrixExpansionProposal.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
 #include <cmath>
@@ -265,15 +266,15 @@ void CorrelationMatrixExpansionProposal::swapNodeInternal(DagNode *oldN, DagNode
     
     if (oldN == correlation_matrix)
     {
-        correlation_matrix = static_cast<StochasticNode<MatrixReal>* >(newN) ;
+        replaceNodeReference(correlation_matrix, newN);
     }
     else if (oldN == variance)
     {
-        variance = static_cast<TypedDagNode<RbVector<double> >* >(newN) ;
+        replaceNodeReference(variance, newN);
     }
     else if (oldN == mvbm)
     {
-        mvbm = static_cast<StochasticNode<ContinuousCharacterData>* >(newN) ;
+        replaceNodeReference(mvbm, newN);
     }
     
 }

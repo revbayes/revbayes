@@ -1,4 +1,5 @@
 #include "OrderedEventTimeSlideProposal.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cmath>
 #include <iostream>
@@ -234,7 +235,7 @@ void OrderedEventTimeSlideProposal::swapNodeInternal(DagNode *oldN, DagNode *new
 {
     if ( oldN == event_var )
     {
-        event_var = static_cast<StochasticNode<OrderedEventTimes>* >(newN) ;
+        replaceNodeReference(event_var, newN);
     }
     
 }

@@ -3,6 +3,7 @@
 
 
 #include "Monitor.h"
+#include "DagNodeTypeUtilities.h"
 #include "BranchHistoryDiscrete.h"
 #include "StochasticNode.h"
 #include "TypedDagNode.h"
@@ -439,12 +440,12 @@ void RevBayesCore::TreeCharacterHistoryNhxMonitor<charType>::swapNode(DagNode *o
     // bool found = false;
     if ( oldN == tree )
     {
-        tree = static_cast< TypedDagNode<Tree> *>(newN);
+        replaceNodeReference(tree, newN);
         // found = true;
     }
     else if ( oldN == variable )
     {
-        variable = static_cast<StochasticNode<AbstractHomologousDiscreteCharacterData>* >(newN);
+        replaceNodeReference(variable, newN);
         // found = true;
     }
     

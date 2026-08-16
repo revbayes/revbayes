@@ -1,4 +1,5 @@
 #include <cmath>
+#include "DagNodeTypeUtilities.h"
 #include <iostream>
 
 #include "DistributionCauchy.h"
@@ -162,7 +163,7 @@ void ScaleBactrianCauchyProposal::undoProposal( void )
 void ScaleBactrianCauchyProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     
-    variable = static_cast<StochasticNode<double>* >(newN) ;
+    replaceNodeReference(variable, newN);
     
 }
 

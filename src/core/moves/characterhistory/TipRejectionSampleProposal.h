@@ -2,6 +2,7 @@
 #define TipRejectionSampleProposal_H
 
 #include "BranchHistoryDiscrete.h"
+#include "DagNodeTypeUtilities.h"
 #include "CharacterEventDiscrete.h"
 #include "DeterministicNode.h"
 #include "HomologousDiscreteCharacterData.h"
@@ -503,15 +504,15 @@ void RevBayesCore::TipRejectionSampleProposal<charType>::swapNodeInternal(DagNod
 
     if (oldN == ctmc)
     {
-        ctmc = static_cast<StochasticNode<AbstractHomologousDiscreteCharacterData>* >(newN) ;
+        replaceNodeReference(ctmc, newN);
     }
     else if (oldN == q_map_site)
     {
-        q_map_site = static_cast<DeterministicNode<RateGenerator>* >(newN);
+        replaceNodeReference(q_map_site, newN);
     }
     else if (oldN == q_map_sequence)
     {
-        q_map_sequence = static_cast<DeterministicNode<RateGeneratorSequence>* >(newN);
+        replaceNodeReference(q_map_sequence, newN);
     }
 
     tip_branch_proposal->swapNode(oldN, newN);

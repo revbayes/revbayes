@@ -1,4 +1,5 @@
 #include "VectorFixedSingleElementSlideProposal.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <vector>
 
@@ -159,7 +160,7 @@ void VectorFixedSingleElementSlideProposal::undoProposal( void )
 void VectorFixedSingleElementSlideProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     
-    variable = static_cast<StochasticNode< RbVector<double> >* >(newN) ;
+    replaceNodeReference(variable, newN);
     
 }
 

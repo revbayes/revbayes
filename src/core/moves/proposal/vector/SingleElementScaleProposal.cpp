@@ -1,4 +1,5 @@
 #include "SingleElementScaleProposal.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cmath>
 #include <ostream>
@@ -114,7 +115,7 @@ void SingleElementScaleProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
     {
         if ( variables[i] == oldN )
         {
-            variables[i] = static_cast<StochasticNode<double> *>(newN);
+            replaceNodeReference(variables[i], newN);
         }
     }
     

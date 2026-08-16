@@ -2,6 +2,7 @@
 #define CharacterHistorySummaryMonitor_h
 
 #include "AbstractCharacterData.h"
+#include "DagNodeTypeUtilities.h"
 #include "TreeHistoryCtmc.h"
 #include "BiogeographicCladoEvent.h"
 #include "GeneralTreeHistoryCtmc.h"
@@ -441,11 +442,11 @@ void RevBayesCore::CharacterHistorySummaryMonitor<charType>::swapNode(DagNode *o
 
     if ( oldN == tree )
     {
-        tree = static_cast< TypedDagNode< Tree > *>( newN );
+        replaceNodeReference(tree, newN);
     }
     else if (oldN == variable)
     {
-        variable = static_cast<StochasticNode<AbstractHomologousDiscreteCharacterData>* >(newN);
+        replaceNodeReference(variable, newN);
     }
 
     // delegate to base class

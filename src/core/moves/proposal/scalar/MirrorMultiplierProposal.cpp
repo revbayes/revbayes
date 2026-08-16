@@ -1,4 +1,5 @@
 #include <cmath>
+#include "DagNodeTypeUtilities.h"
 #include <iostream>
 
 #include "DistributionNormal.h"
@@ -186,7 +187,7 @@ void MirrorMultiplierProposal::undoProposal( void )
 void MirrorMultiplierProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
 
-    variable = static_cast< ContinuousStochasticNode* >(newN) ;
+    replaceNodeReference(variable, newN);
 
 }
 

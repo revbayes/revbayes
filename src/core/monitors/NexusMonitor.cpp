@@ -41,14 +41,14 @@ void NexusMonitor::swapNode(DagNode *oldN, DagNode *newN) {
 
     TypedDagNode< RbVector<double> >* nodeVar = checkNodeOfType<RbVector<double> >(oldN);
     if ( oldN == tree ) {
-        tree = static_cast< TypedDagNode< Tree > *>( newN );
+        replaceNodeReference(tree, newN);
     }
     else if ( nodeVar != nullptr ) {
         std::vector<DagNode*>::iterator it = find(nodeVariables.begin(), nodeVariables.end(), nodeVar);
         if (it == nodeVariables.end()) {
             throw RbException() << "Cannot replace DAG node with name\"" << oldN->getName() << "\" in this nexus monitor because the monitor doesn't hold this DAG node.";
         }
-        *it = static_cast< TypedDagNode< RbVector<double> > *>(newN);
+        replaceNodeReference(*it, newN);
     }
 
     // delegate to base class

@@ -1,4 +1,5 @@
 #include <iostream>
+#include "DagNodeTypeUtilities.h"
 
 #include "DistributionGeometric.h"
 #include "RandomGeometricWalkProposal.h"
@@ -156,7 +157,7 @@ void RandomGeometricWalkProposal::undoProposal( void )
 void RandomGeometricWalkProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     
-    variable = static_cast<StochasticNode<std::int64_t>* >(newN) ;
+    replaceNodeReference(variable, newN);
     
 }
 

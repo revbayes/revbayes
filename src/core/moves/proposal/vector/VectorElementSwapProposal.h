@@ -2,6 +2,7 @@
 #define VectorElementSwapProposal_H
 
 #include <set>
+#include "DagNodeTypeUtilities.h"
 #include <string>
 
 #include "Proposal.h"
@@ -238,7 +239,7 @@ void RevBayesCore::VectorElementSwapProposal<valueType>::swapNodeInternal(DagNod
     {
         if ( variables[i] == oldN )
         {
-            variables[i] = static_cast<StochasticNode<valueType> *>(newN);
+            replaceNodeReference(variables[i], newN);
         }
     }
     

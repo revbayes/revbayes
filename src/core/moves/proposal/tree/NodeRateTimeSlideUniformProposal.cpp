@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "DagNodeTypeUtilities.h"
 #include <cmath>
 #include <iostream>
 #include <algorithm>
@@ -263,11 +264,11 @@ void NodeRateTimeSlideUniformProposal::swapNodeInternal(DagNode *oldN, DagNode *
 {
     if( oldN == variable )
     {
-        variable = static_cast<StochasticNode<Tree>* >(newN) ;
+        replaceNodeReference(variable, newN);
     }
     else if( oldN == rates_node )
     {
-        rates_node = static_cast<StochasticNode<RbVector<double> >* >( newN );
+        replaceNodeReference(rates_node, newN);
     }
     else if( rates_vector.empty() == false )
     {
@@ -275,7 +276,7 @@ void NodeRateTimeSlideUniformProposal::swapNodeInternal(DagNode *oldN, DagNode *
         {
             if(oldN == rates_vector[i])
             {
-                rates_vector[i] = static_cast<StochasticNode<double>* >( newN );
+                replaceNodeReference(rates_vector[i], newN);
             }
         }
     }

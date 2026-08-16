@@ -1,4 +1,5 @@
 #include "ContinuousCharacterDataSlideProposal.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cmath>
 #include <iostream>
@@ -165,7 +166,7 @@ void ContinuousCharacterDataSlideProposal::undoProposal( void )
 void ContinuousCharacterDataSlideProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     
-    variable = static_cast< StochasticNode<ContinuousCharacterData>* >(newN) ;
+    replaceNodeReference(variable, newN);
     
 }
 
