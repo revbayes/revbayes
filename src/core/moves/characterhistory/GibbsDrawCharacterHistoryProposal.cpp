@@ -1,4 +1,5 @@
 #include "GibbsDrawCharacterHistoryProposal.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
 #include <vector>
@@ -110,7 +111,7 @@ void GibbsDrawCharacterHistoryProposal::undoProposal( void )
 void GibbsDrawCharacterHistoryProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     
-    variable = static_cast< StochasticNode<Tree>* >(newN) ;
+    replaceNodeReference(variable, newN);
     
     distribution = dynamic_cast< StateDependentSpeciationExtinctionProcess* >( &variable->getDistribution() );
     if ( distribution == NULL )

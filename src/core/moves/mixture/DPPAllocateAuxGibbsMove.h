@@ -2,6 +2,7 @@
 #define DPPAllocateAuxGibbsMove_H
 
 #include "DirichletProcessPriorDistribution.h"
+#include "DagNodeTypeUtilities.h"
 #include "AbstractGibbsMove.h"
 #include "RbMathLogic.h"
 
@@ -193,7 +194,7 @@ template <class valueType>
 void RevBayesCore::DPPAllocateAuxGibbsMove<valueType>::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
 
-    variable = static_cast<StochasticNode< RbVector<valueType> > * >( newN );
+    replaceNodeReference(variable, newN);
 
 }
 

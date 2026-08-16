@@ -1,4 +1,5 @@
 #include "MatrixRealSymmetricSingleElementSlidingProposal.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cmath>
 #include <iostream>
@@ -170,7 +171,7 @@ void MatrixRealSymmetricSingleElementSlidingProposal::undoProposal( void )
 void MatrixRealSymmetricSingleElementSlidingProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     
-    variable = static_cast< StochasticNode<MatrixReal>* >(newN) ;
+    replaceNodeReference(variable, newN);
     
 }
 

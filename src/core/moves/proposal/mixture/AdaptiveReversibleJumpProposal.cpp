@@ -1,4 +1,5 @@
 #include "AdaptiveReversibleJumpProposal.h"
+#include "DagNodeTypeUtilities.h"
 #include "DistributionNormal.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
@@ -338,6 +339,6 @@ void RevBayesCore::AdaptiveReversibleJumpProposal::undoProposal( void )
 void RevBayesCore::AdaptiveReversibleJumpProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     
-    variable = static_cast<StochasticNode<double>* >(newN) ;
+    replaceNodeReference(variable, newN);
     
 }

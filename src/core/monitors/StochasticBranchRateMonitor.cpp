@@ -1,4 +1,5 @@
 #include "StochasticBranchRateMonitor.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
 #include <ostream>
@@ -199,7 +200,7 @@ void StochasticBranchRateMonitor::swapNode(DagNode *oldN, DagNode* newN)
     
     if ( oldN == cdbdp )
     {
-        cdbdp = static_cast< StochasticNode<Tree> *>( newN );
+        replaceNodeReference(cdbdp, newN);
     }
     
     VariableMonitor::swapNode( oldN, newN );

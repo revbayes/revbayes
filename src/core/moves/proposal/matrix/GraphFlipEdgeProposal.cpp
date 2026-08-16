@@ -1,4 +1,5 @@
 #include "GraphFlipEdgeProposal.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <iostream>
 #include <vector>
@@ -218,11 +219,11 @@ void GraphFlipEdgeProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     if (oldN == array)
     {
-        array = static_cast< StochasticNode<RbVector<RbVector<double> > >* >(newN) ;
+        replaceNodeReference(array, newN);
     }
     else if (oldN == matrix)
     {
-        matrix = static_cast< StochasticNode<MatrixReal>* >(newN) ;
+        replaceNodeReference(matrix, newN);
     }
     
 }

@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "DagNodeTypeUtilities.h"
 #include <cmath>
 #include <iomanip>
 #include <ostream>
@@ -559,7 +560,7 @@ void RateAgeBetaShift::swapNodeInternal(DagNode *oldN, DagNode *newN)
     
     if (oldN == tree)
     {
-        tree = static_cast<StochasticNode<Tree>* >(newN) ;
+        replaceNodeReference(tree, newN);
     }
     else
     {
@@ -569,7 +570,7 @@ void RateAgeBetaShift::swapNodeInternal(DagNode *oldN, DagNode *newN)
             {
                 if (oldN == rates_vec[i])
                 {
-                    rates_vec[i] = static_cast<StochasticNode<double>* >(newN);
+                    replaceNodeReference(rates_vec[i], newN);
                 }
             }
         }
@@ -577,7 +578,7 @@ void RateAgeBetaShift::swapNodeInternal(DagNode *oldN, DagNode *newN)
         {
             if (oldN == rates)
             {
-                rates = static_cast<StochasticNode< RbVector<double> >* >(newN);
+                replaceNodeReference(rates, newN);
             }
         }
     }

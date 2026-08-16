@@ -1,4 +1,5 @@
 #include <iostream>
+#include "DagNodeTypeUtilities.h"
 
 #include "DistributionUniform.h"
 #include "RootTimeSlideUniformProposal.h"
@@ -186,15 +187,15 @@ void RootTimeSlideUniformProposal::swapNodeInternal(DagNode *oldN, DagNode *newN
 {
     if ( oldN == variable )
     {
-        variable = static_cast<StochasticNode<Tree>* >(newN) ;
+        replaceNodeReference(variable, newN);
     }
     else if ( oldN == vector_variable )
     {
-        vector_variable = static_cast<StochasticNode< RbVector<Tree> >* >(newN) ;
+        replaceNodeReference(vector_variable, newN);
     }
     else if ( oldN == origin )
     {
-        origin = static_cast<StochasticNode<double>* >(newN) ;
+        replaceNodeReference(origin, newN);
     }
     
 }

@@ -1,4 +1,5 @@
 #include "SpeciesTreeScaleProposal.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
 #include <cmath>
@@ -284,11 +285,11 @@ void SpeciesTreeScaleProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 
     if ( oldN == rootAge )
     {
-        rootAge = static_cast<StochasticNode<double>* >(newN) ;
+        replaceNodeReference(rootAge, newN);
     }
     else if ( oldN == speciesTree )
     {
-        speciesTree = static_cast<StochasticNode<Tree>* >(newN) ;
+        replaceNodeReference(speciesTree, newN);
     }
     else
     {
@@ -297,7 +298,7 @@ void SpeciesTreeScaleProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
         {
             if ( oldN == geneTrees[i] )
             {
-                geneTrees[i] = static_cast<StochasticNode<Tree>* >(newN) ;
+                replaceNodeReference(geneTrees[i], newN);
                 ++num_found_trees;
             }
         }

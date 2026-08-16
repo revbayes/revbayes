@@ -1,4 +1,5 @@
 #include "ShrinkExpandProposal.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cmath>
 
@@ -199,14 +200,14 @@ void ShrinkExpandProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
     {
         if ( variables[i] == oldN )
         {
-            variables[i] = static_cast<StochasticNode<double> *>(newN);
+            replaceNodeReference(variables[i], newN);
         }
     }
     
     // also swap the sd parameter
     if ( sd != NULL && sd == oldN )
     {
-        sd = static_cast<StochasticNode<double> *>(newN);
+        replaceNodeReference(sd, newN);
     }
     
 }

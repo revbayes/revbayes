@@ -1,4 +1,5 @@
 #include "OrderedEventBirthDeathProposal.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cmath>
 #include <iostream>
@@ -292,7 +293,7 @@ void OrderedEventBirthDeathProposal::swapNodeInternal(DagNode *oldN, DagNode *ne
 {
     if ( oldN == event_var )
     {
-        event_var = static_cast<StochasticNode<OrderedEventTimes>* >(newN) ;
+        replaceNodeReference(event_var, newN);
     }
     
 }

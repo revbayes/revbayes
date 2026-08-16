@@ -1,4 +1,5 @@
 #include "SlideProposalContinuous.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cmath>
 #include <iostream>
@@ -179,7 +180,7 @@ void SlideProposalContinuous::undoProposal( void )
 void SlideProposalContinuous::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     
-    variable = static_cast< ContinuousStochasticNode* >(newN) ;
+    replaceNodeReference(variable, newN);
     
 }
 

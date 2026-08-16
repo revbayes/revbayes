@@ -2,6 +2,7 @@
 #define IndependentPriorProposal_H
 
 #include <string>
+#include "DagNodeTypeUtilities.h"
 
 #include "Proposal.h"
 #include "RandomNumberFactory.h"
@@ -154,7 +155,7 @@ template <class valueType>
 void RevBayesCore::IndependentPriorProposal<valueType>::swapNodeInternal(RevBayesCore::DagNode *oldN, RevBayesCore::DagNode *newN)
 {
 
-    variable = static_cast<StochasticNode<valueType>* >( newN );
+    replaceNodeReference(variable, newN);
 
 }
 

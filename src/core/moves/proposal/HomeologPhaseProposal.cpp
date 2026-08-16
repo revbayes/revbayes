@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "DagNodeTypeUtilities.h"
 #include <iostream>
 #include <string>
 
@@ -121,7 +122,7 @@ void RevBayesCore::HomeologPhaseProposal::swapNodeInternal(DagNode *oldN, DagNod
 
     if (oldN == ctmc)
     {
-        ctmc = static_cast<StochasticNode<AbstractHomologousDiscreteCharacterData>* >(newN) ;
+        replaceNodeReference(ctmc, newN);
     }
 }
 

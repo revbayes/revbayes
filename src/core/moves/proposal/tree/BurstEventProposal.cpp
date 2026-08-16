@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "DagNodeTypeUtilities.h"
 #include <cmath>
 #include <iostream>
 
@@ -230,7 +231,7 @@ void BurstEventProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
     
     if ( oldN == psi )
     {
-        psi = static_cast<StochasticNode<Tree>* >(newN) ;
+        replaceNodeReference(psi, newN);
     }
     
 }

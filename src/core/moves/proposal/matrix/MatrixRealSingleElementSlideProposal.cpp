@@ -1,4 +1,5 @@
 #include "MatrixRealSingleElementSlideProposal.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cmath>
 #include <iostream>
@@ -257,11 +258,11 @@ void MatrixRealSingleElementSlideProposal::swapNodeInternal(DagNode *oldN, DagNo
 {
     if (oldN == array)
     {
-        array = static_cast< StochasticNode<RbVector<RbVector<double> > >* >(newN) ;
+        replaceNodeReference(array, newN);
     }
     else
     {
-        matrix = static_cast< StochasticNode<MatrixReal>* >(newN) ;
+        replaceNodeReference(matrix, newN);
     }
     
 }

@@ -1,4 +1,5 @@
 #include "AVMVNProposal.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cmath>
 #include <algorithm>
@@ -587,7 +588,7 @@ void AVMVNProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
     {
         if ( noTransformScalarVariables[i] == oldN )
         {
-            noTransformScalarVariables[i] = static_cast<StochasticNode<double> *>(newN);
+            replaceNodeReference(noTransformScalarVariables[i], newN);
         }
     }
 
@@ -595,7 +596,7 @@ void AVMVNProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
     {
         if ( logTransformScalarVariables[i] == oldN )
         {
-            logTransformScalarVariables[i] = static_cast<StochasticNode<double> *>(newN);
+            replaceNodeReference(logTransformScalarVariables[i], newN);
         }
     }
 
@@ -603,7 +604,7 @@ void AVMVNProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
     {
         if ( logitTransformScalarVariables[i] == oldN )
         {
-            logitTransformScalarVariables[i] = static_cast<ContinuousStochasticNode *>(newN);
+            replaceNodeReference(logitTransformScalarVariables[i], newN);
         }
     }
 
@@ -611,7 +612,7 @@ void AVMVNProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
     {
         if ( noTransformVectorVariables[i] == oldN )
         {
-            noTransformVectorVariables[i] = static_cast<StochasticNode<RbVector<double> > *>(newN);
+            replaceNodeReference(noTransformVectorVariables[i], newN);
         }
     }
 
@@ -619,7 +620,7 @@ void AVMVNProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
     {
         if ( logConstrainedSumTransformVectorVariables[i] == oldN )
         {
-            logConstrainedSumTransformVectorVariables[i] = static_cast<StochasticNode<Simplex> *>(newN);
+            replaceNodeReference(logConstrainedSumTransformVectorVariables[i], newN);
         }
     }
 

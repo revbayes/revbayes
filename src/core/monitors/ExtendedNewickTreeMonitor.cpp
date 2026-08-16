@@ -1,4 +1,5 @@
 #include "ExtendedNewickTreeMonitor.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
 #include <algorithm>
@@ -103,7 +104,7 @@ void ExtendedNewickTreeMonitor::swapNode(DagNode *oldN, DagNode *newN)
     TypedDagNode< RbVector<double> >* nodeVar = dynamic_cast< TypedDagNode< RbVector<double> > *>(oldN);
     if ( oldN == tree )
     {
-        tree = static_cast< TypedDagNode< Tree > *>( newN );
+        replaceNodeReference(tree, newN);
     }
     else if ( nodeVar != NULL )
     {
@@ -116,7 +117,7 @@ void ExtendedNewickTreeMonitor::swapNode(DagNode *oldN, DagNode *newN)
         {
             throw RbException() << "Cannot replace DAG node with name\"" << oldN->getName() << "\" in this extended newick monitor because the monitor doesn't hold this DAG node.";
         }
-        *it = static_cast< TypedDagNode< RbVector<double> > *>(newN);
+        replaceNodeReference(*it, newN);
 //        nodeVariables.erase( nodeVar );
 //        nodeVariables.insert( static_cast< TypedDagNode< RbVector<double> > *>(newN) );
     }

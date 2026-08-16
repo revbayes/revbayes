@@ -1,4 +1,5 @@
 #include "CorrelationMatrixElementSwapProposal.h"
+#include "DagNodeTypeUtilities.h"
 
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
@@ -193,6 +194,6 @@ void CorrelationMatrixElementSwapProposal::undoProposal( void )
 void CorrelationMatrixElementSwapProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     
-    variable = static_cast< StochasticNode<MatrixReal>* >(newN) ;
+    replaceNodeReference(variable, newN);
     
 }

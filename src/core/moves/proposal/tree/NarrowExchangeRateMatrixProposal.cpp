@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "DagNodeTypeUtilities.h"
 #include <cmath>
 #include <iostream>
 #include <vector>
@@ -343,14 +344,14 @@ void NarrowExchangeRateMatrixProposal::swapNodeInternal(DagNode *oldN, DagNode *
     
     if ( oldN == tree )
     {
-        tree = static_cast<StochasticNode<Tree>* >(newN) ;
+        replaceNodeReference(tree, newN);
     }
     
     for (size_t i=0; i<rate_matrices.size(); ++i)
     {
         if ( oldN == rate_matrices[i] )
         {
-            rate_matrices[i] = static_cast<StochasticNode<RateGenerator>* >(newN) ;
+            replaceNodeReference(rate_matrices[i], newN);
         }
         
     }

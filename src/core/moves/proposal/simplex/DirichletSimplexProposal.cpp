@@ -1,4 +1,5 @@
 #include "DirichletSimplexProposal.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cmath>
 #include <iostream>
@@ -323,7 +324,7 @@ void DirichletSimplexProposal::undoProposal( void )
 void DirichletSimplexProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     
-    variable = static_cast<StochasticNode<Simplex>* >(newN) ;
+    replaceNodeReference(variable, newN);
     
 }
 
