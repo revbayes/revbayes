@@ -1,4 +1,5 @@
 #include "UpDownScaleProposal.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
 #include <cmath>
@@ -440,7 +441,7 @@ void UpDownScaleProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
     {
         if ( up_scalar_variables[i] == oldN )
         {
-            up_scalar_variables[i] = static_cast<StochasticNode<double> *>(newN);
+            replaceNodeReference(up_scalar_variables[i], newN);
         }
     }
     
@@ -448,7 +449,7 @@ void UpDownScaleProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
     {
         if ( up_vector_variables[i] == oldN )
         {
-            up_vector_variables[i] = static_cast<StochasticNode<RbVector<double> > *>(newN);
+            replaceNodeReference(up_vector_variables[i], newN);
         }
     }
     
@@ -456,7 +457,7 @@ void UpDownScaleProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
     {
         if ( up_tree_variables[i] == oldN )
         {
-            up_tree_variables[i] = static_cast<StochasticNode<Tree> *>(newN);
+            replaceNodeReference(up_tree_variables[i], newN);
         }
     }
     
@@ -464,7 +465,7 @@ void UpDownScaleProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
     {
         if ( down_scalar_variables[i] == oldN )
         {
-            down_scalar_variables[i] = static_cast<StochasticNode<double> *>(newN);
+            replaceNodeReference(down_scalar_variables[i], newN);
         }
     }
     
@@ -472,7 +473,7 @@ void UpDownScaleProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
     {
         if ( down_vector_variables[i] == oldN )
         {
-            down_vector_variables[i] = static_cast<StochasticNode<RbVector<double> > *>(newN);
+            replaceNodeReference(down_vector_variables[i], newN);
         }
     }
     
@@ -480,7 +481,7 @@ void UpDownScaleProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
     {
         if ( down_tree_variables[i] == oldN )
         {
-            down_tree_variables[i] = static_cast<StochasticNode<Tree> *>(newN);
+            replaceNodeReference(down_tree_variables[i], newN);
         }
     }
     

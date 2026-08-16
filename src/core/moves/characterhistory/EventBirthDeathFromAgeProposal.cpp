@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "DagNodeTypeUtilities.h"
 #include <cmath>
 #include <iostream>
 
@@ -256,7 +257,7 @@ void EventBirthDeathFromAgeProposal::undoProposal( void )
 void EventBirthDeathFromAgeProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     
-    variable = static_cast< StochasticNode<Tree>* >(newN) ;
+    replaceNodeReference(variable, newN);
     
     distribution = dynamic_cast< AbstractCharacterHistoryBirthDeathProcess* >( &variable->getDistribution() );
     if ( distribution == NULL )

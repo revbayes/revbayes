@@ -1,4 +1,5 @@
 #include <cmath>
+#include "DagNodeTypeUtilities.h"
 #include <iostream>
 #include <cstddef>
 #include <vector>
@@ -281,7 +282,7 @@ void FossilTipTimeUniformProposal::swapNodeInternal(DagNode *oldN, DagNode *newN
     
     if (oldN == tree)
     {
-        tree = static_cast<StochasticNode<Tree>* >(newN);
+        replaceNodeReference(tree, newN);
         if ( tip_taxon != "" )
         {
             node_index = tree->getValue().getTipIndex( tip_taxon );
@@ -289,15 +290,15 @@ void FossilTipTimeUniformProposal::swapNodeInternal(DagNode *oldN, DagNode *newN
     }
     else if (oldN == origin)
     {
-        origin = static_cast<TypedDagNode<double>* >(newN) ;
+        replaceNodeReference(origin, newN);
     }
     else if (oldN == max)
     {
-        max = static_cast<TypedDagNode<double>* >(newN) ;
+        replaceNodeReference(max, newN);
     }
     else if (oldN == min)
     {
-        min = static_cast<TypedDagNode<double>* >(newN) ;
+        replaceNodeReference(min, newN);
     }
     
 }

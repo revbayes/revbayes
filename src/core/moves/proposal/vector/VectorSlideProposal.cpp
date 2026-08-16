@@ -1,4 +1,5 @@
 #include "VectorSlideProposal.h"
+#include "DagNodeTypeUtilities.h"
 
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
@@ -178,7 +179,7 @@ void VectorSlideProposal::undoProposal( void )
 void VectorSlideProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     
-    variable = static_cast<StochasticNode< RbVector<double> >* >(newN) ;
+    replaceNodeReference(variable, newN);
     
 }
 

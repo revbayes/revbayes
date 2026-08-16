@@ -1,4 +1,5 @@
 #include "VectorSingleElementScaleProposal.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cmath>
 #include <ostream>
@@ -112,7 +113,7 @@ void VectorSingleElementScaleProposal::undoProposal( void )
 
 void VectorSingleElementScaleProposal::swapNodeInternal(DagNode *, DagNode *newN)
 {
-    variable = static_cast<StochasticNode< RbVector<double> >* >(newN) ;
+    replaceNodeReference(variable, newN);
 }
 
 

@@ -1,4 +1,5 @@
 #include "UpDownSlideProposal.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
 #include <algorithm>
@@ -320,7 +321,7 @@ void UpDownSlideProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
     {
         if ( up_scalar_variables[i] == oldN )
         {
-            up_scalar_variables[i] = static_cast<StochasticNode<double> *>(newN);
+            replaceNodeReference(up_scalar_variables[i], newN);
         }
     }
 
@@ -328,7 +329,7 @@ void UpDownSlideProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
     {
         if ( up_vector_variables[i] == oldN )
         {
-            up_vector_variables[i] = static_cast<StochasticNode<RbVector<double> > *>(newN);
+            replaceNodeReference(up_vector_variables[i], newN);
         }
     }
 
@@ -336,7 +337,7 @@ void UpDownSlideProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
     {
         if ( down_scalar_variables[i] == oldN )
         {
-            down_scalar_variables[i] = static_cast<StochasticNode<double> *>(newN);
+            replaceNodeReference(down_scalar_variables[i], newN);
         }
     }
 
@@ -344,7 +345,7 @@ void UpDownSlideProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
     {
         if ( down_vector_variables[i] == oldN )
         {
-            down_vector_variables[i] = static_cast<StochasticNode<RbVector<double> > *>(newN);
+            replaceNodeReference(down_vector_variables[i], newN);
         }
     }
 

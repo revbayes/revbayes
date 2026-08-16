@@ -1,4 +1,5 @@
 #include "StochasticBranchStateTimesMonitor.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
 #include <vector>
@@ -113,12 +114,12 @@ void StochasticBranchStateTimesMonitor::swapNode(DagNode *oldN, DagNode* newN)
     
     if ( oldN == tree )
     {
-        tree = static_cast< TypedDagNode<Tree> *>( newN );
+        replaceNodeReference(tree, newN);
     }
     else if ( oldN == cdbdp )
     {
-        cdbdp = static_cast< StochasticNode<Tree> *>( newN );
-        tree = static_cast< StochasticNode<Tree> *>( newN );
+        replaceNodeReference(cdbdp, newN);
+        replaceNodeReference(tree, newN);
     }
     
     VariableMonitor::swapNode( oldN, newN );

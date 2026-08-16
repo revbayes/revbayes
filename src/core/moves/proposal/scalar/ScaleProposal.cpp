@@ -1,4 +1,5 @@
 #include "ScaleProposal.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cmath>
 #include <iostream>
@@ -151,7 +152,7 @@ void ScaleProposal::undoProposal( void )
 void ScaleProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     
-    variable = static_cast<StochasticNode<double>* >(newN) ;
+    replaceNodeReference(variable, newN);
     
 }
 

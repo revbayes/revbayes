@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "DagNodeTypeUtilities.h"
 #include <cmath>
 #include <iostream>
 #include <vector>
@@ -327,11 +328,11 @@ void CollapseExpandFossilBranchProposal::swapNodeInternal(DagNode *oldN, DagNode
     
     if ( oldN == tau )
     {
-        tau = static_cast<StochasticNode<Tree>* >(newN) ;
+        replaceNodeReference(tau, newN);
     }
     else if ( oldN == origin )
     {
-        origin = static_cast<TypedDagNode<double>* >(newN);
+        replaceNodeReference(origin, newN);
     }
     
 }

@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "DagNodeTypeUtilities.h"
 #include <cmath>
 #include <iostream>
 
@@ -199,7 +200,7 @@ void NodeTimeScaleProposal::undoProposal( void )
 void NodeTimeScaleProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     
-    variable = static_cast<StochasticNode<Tree>* >(newN) ;
+    replaceNodeReference(variable, newN);
     
 }
 

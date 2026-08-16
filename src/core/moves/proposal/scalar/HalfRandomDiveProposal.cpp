@@ -1,4 +1,5 @@
 #include <cmath>
+#include "DagNodeTypeUtilities.h"
 #include <iostream>
 
 #include "DistributionBeta.h"
@@ -164,7 +165,7 @@ void HalfRandomDiveProposal::undoProposal( void )
 void HalfRandomDiveProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     
-    variable = static_cast< ContinuousStochasticNode* >(newN) ;
+    replaceNodeReference(variable, newN);
     
 }
 

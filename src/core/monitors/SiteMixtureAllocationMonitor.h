@@ -2,6 +2,7 @@
 #define JointConditionalSiteMixtureAllocationMonitor_H
 
 #include "AbstractHomologousDiscreteCharacterData.h"
+#include "DagNodeTypeUtilities.h"
 #include "VariableMonitor.h"
 #include "Tree.h"
 #include "TypedDagNode.h"
@@ -217,7 +218,7 @@ void SiteMixtureAllocationMonitor<characterType>::swapNode(DagNode *oldN, DagNod
 {
 	if ( oldN == ctmc )
 	{
-		ctmc = static_cast< StochasticNode<AbstractHomologousDiscreteCharacterData> *>( newN );
+		replaceNodeReference(ctmc, newN);
 	}
     
     Monitor::swapNode( oldN, newN );

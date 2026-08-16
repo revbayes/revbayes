@@ -1,4 +1,5 @@
 #include "IndependentTopologyProposal.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <algorithm>
 #include <cstddef>
@@ -357,11 +358,11 @@ void IndependentTopologyProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     if( oldN == variable )
     {
-        variable = static_cast<StochasticNode<Tree>* >( newN );
+        replaceNodeReference(variable, newN);
     }
     else if( oldN == rates_node )
     {
-        rates_node = static_cast<StochasticNode<RbVector<double> >* >( newN );
+        replaceNodeReference(rates_node, newN);
     }
     else if( rates_vector.empty() == false )
     {
@@ -369,7 +370,7 @@ void IndependentTopologyProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
         {
             if(oldN == rates_vector[i])
             {
-                rates_vector[i] = static_cast<StochasticNode<double>* >( newN );
+                replaceNodeReference(rates_vector[i], newN);
             }
         }
     }

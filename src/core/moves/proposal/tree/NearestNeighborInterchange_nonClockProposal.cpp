@@ -1,4 +1,5 @@
 #include "NearestNeighborInterchange_nonClockProposal.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
 #include <cmath>
@@ -316,6 +317,6 @@ void NearestNeighborInterchange_nonClockProposal::undoProposal( void )
 void NearestNeighborInterchange_nonClockProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     
-    tree = static_cast<StochasticNode<Tree>* >(newN) ;
+    replaceNodeReference(tree, newN);
     
 }

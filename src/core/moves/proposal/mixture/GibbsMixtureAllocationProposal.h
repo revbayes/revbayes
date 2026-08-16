@@ -2,6 +2,7 @@
 #define GibbsMixtureAllocationProposal_H
 
 #include <set>
+#include "DagNodeTypeUtilities.h"
 #include <string>
 
 #include "Proposal.h"
@@ -260,7 +261,7 @@ template <class mixtureType>
 void RevBayesCore::GibbsMixtureAllocationProposal<mixtureType>::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     
-    variable = static_cast<StochasticNode<mixtureType>* >(newN) ;
+    replaceNodeReference(variable, newN);
     
 }
 

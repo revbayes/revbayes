@@ -1,4 +1,5 @@
 #include "GibbsPruneAndRegraftProposal.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
 #include <cmath>
@@ -346,6 +347,6 @@ void GibbsPruneAndRegraftProposal::undoProposal( void )
 void GibbsPruneAndRegraftProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     
-    variable = static_cast<StochasticNode<Tree>* >(newN) ;
+    replaceNodeReference(variable, newN);
     
 }

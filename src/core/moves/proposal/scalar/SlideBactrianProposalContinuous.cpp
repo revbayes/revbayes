@@ -1,4 +1,5 @@
 #include <cmath>
+#include "DagNodeTypeUtilities.h"
 #include <iostream>
 
 #include "DistributionNormal.h"
@@ -183,7 +184,7 @@ void SlideBactrianProposalContinuous::undoProposal( void )
 void SlideBactrianProposalContinuous::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     
-    variable = static_cast< ContinuousStochasticNode* >(newN) ;
+    replaceNodeReference(variable, newN);
     
 }
 

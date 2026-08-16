@@ -1,4 +1,5 @@
 #include <cmath>
+#include "DagNodeTypeUtilities.h"
 #include <iostream>
 #include <cstddef>
 #include <vector>
@@ -210,7 +211,7 @@ void ContinuousEventScaleProposal::undoProposal( void )
 void ContinuousEventScaleProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     
-    variable = static_cast< StochasticNode<Tree>* >(newN) ;
+    replaceNodeReference(variable, newN);
     
     distribution = dynamic_cast< ConditionedBirthDeathShiftProcessContinuous* >( &variable->getDistribution() );
     if ( distribution == NULL )

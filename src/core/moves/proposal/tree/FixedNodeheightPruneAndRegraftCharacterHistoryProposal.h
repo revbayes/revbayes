@@ -2,6 +2,7 @@
 #define FixedNodeheightPruneAndRegraftCharacterHistoryProposal_H
 
 #include "BranchHistoryDiscrete.h"
+#include "DagNodeTypeUtilities.h"
 #include "HomologousDiscreteCharacterData.h"
 #include "PathRejectionSampleProposal.h"
 #include "Proposal.h"
@@ -834,19 +835,19 @@ void RevBayesCore::FixedNodeheightPruneAndRegraftCharacterHistoryProposal<charTy
     
     if ( oldN == tree )
     {
-        tree = static_cast<StochasticNode<Tree>* >(newN);
+        replaceNodeReference(tree, newN);
     }
     else if ( oldN == ctmc )
     {
-        ctmc = static_cast<StochasticNode<AbstractHomologousDiscreteCharacterData>* >(newN);
+        replaceNodeReference(ctmc, newN);
     }
     else if ( oldN == rate_generator )
     {
-        rate_generator = static_cast<TypedDagNode<RateGenerator>* >(newN);
+        replaceNodeReference(rate_generator, newN);
     }
     else if ( oldN == rate_generator_sequence )
     {
-        rate_generator_sequence = static_cast<DeterministicNode<RateGeneratorSequence>* >(newN);
+        replaceNodeReference(rate_generator_sequence, newN);
     }
     
     node_proposal_one->swapNodeInternal(oldN, newN);

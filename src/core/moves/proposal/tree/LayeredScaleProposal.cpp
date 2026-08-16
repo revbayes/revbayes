@@ -1,4 +1,5 @@
 #include "LayeredScaleProposal.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
 #include <cmath>
@@ -188,7 +189,7 @@ void LayeredScaleProposal::undoProposal( void )
 void LayeredScaleProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
 
-    variable = static_cast<StochasticNode<Tree>* >(newN) ;
+    replaceNodeReference(variable, newN);
 
 }
 
