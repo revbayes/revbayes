@@ -272,19 +272,12 @@ Argument ArgumentRule::fitArgument( Argument& arg ) const
         }
         else if ( the_var->getRevObject().isConvertibleTo( argTypeSpec, convert_by_value ) != -1 )
         {
-            // Fit by type conversion. For now, we also modify the type of the incoming variable wrapper.
+            // Fit by type conversion without changing the incoming variable or its DAG node.
             RevObject* convertedObject = the_var->getRevObject().convertTo( argTypeSpec );
+            RevPtr<RevVariable> the_new_var = RevPtr<RevVariable>( new RevVariable(convertedObject, the_var->getName() ) );
+            the_new_var->setHiddenVariableState( true );
+            the_new_var->setRequiredTypeSpec( argTypeSpec );
 
-            RevPtr<RevVariable> the_new_var = nullptr;
-            if ( the_var->getRevObject().isConstant() and not by_value )
-            {
-                the_new_var = the_var;
-                the_new_var->replaceRevObject( convertedObject );
-                the_new_var->setRequiredTypeSpec( argTypeSpec );
-            }
-            else
-                the_new_var = RevPtr<RevVariable>( new RevVariable(convertedObject, the_var->getName() ) );
-                
             return Argument( the_new_var, arg.getLabel(), false );
         }
         else
@@ -544,4 +537,3 @@ void ArgumentRule::printValue(std::ostream &o) const
     
     o << " " << label;
 }
-

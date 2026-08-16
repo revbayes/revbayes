@@ -78,12 +78,12 @@ void SyntaxConstantAssignment::assign(RevPtr<RevVariable> &lhs, RevPtr<RevVariab
     else
     {
         new_value = value.clone();
-        new_value->makeConstantValue();  // We cannot trust evaluateContent to return a constant variable
     }
+
+    // We cannot trust evaluateContent to return a constant variable, and an implicit conversion retains a dependency.
+    new_value->makeConstantValue();
     
     // Fill the slot with newValue
     lhs->replaceRevObject( new_value );
         
 }
-
-

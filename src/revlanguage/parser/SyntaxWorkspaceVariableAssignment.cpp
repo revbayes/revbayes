@@ -68,8 +68,10 @@ void SyntaxWorkspaceVariableAssignment::assign(RevPtr<RevVariable> &lhs, RevPtr<
     else
     {
         newValue = value.clone();
-        newValue->makeConstantValue();  // We cannot trust evaluateContent to return a constant variable
     }
+
+    // We cannot trust evaluateContent to return a constant variable, and an implicit conversion retains a dependency.
+    newValue->makeConstantValue();
     
     // Fill the slot with newValue. The variable itself will be
     // passed on as the semantic value of the statement and can
@@ -87,5 +89,3 @@ bool SyntaxWorkspaceVariableAssignment::isDynamic( void )
 {
     return true;
 }
-
-
