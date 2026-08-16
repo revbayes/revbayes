@@ -2,6 +2,7 @@
 #define Move_OrderedEventVectorSlide_H
 
 #include "RlMove.h"
+#include "DagNodeTypeUtilities.h"
 #include "RlOrderedEvents.h"
 #include "TypedDagNode.h"
 
@@ -93,7 +94,7 @@ void RevLanguage::Move_OrderedEventVectorSlide<rlValueType>::constructInternalOb
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
 
     RevBayesCore::TypedDagNode<RevBayesCore::OrderedEvents<typename rlValueType::valueType> >* tmp = static_cast<const RlOrderedEvents<rlValueType> &>( x->getRevObject() ).getDagNode();
-    RevBayesCore::StochasticNode<RevBayesCore::OrderedEvents<typename rlValueType::valueType> > *sn = static_cast<RevBayesCore::StochasticNode<RevBayesCore::OrderedEvents<typename rlValueType::valueType >> *>( tmp );
+    RevBayesCore::StochasticNode<RevBayesCore::OrderedEvents<typename rlValueType::valueType> > *sn = RevBayesCore::assumeStochastic<RevBayesCore::OrderedEvents<typename rlValueType::valueType >>( tmp );
 
     RevBayesCore::Proposal *p = new RevBayesCore::OrderedEventVectorSlideProposal<typename rlValueType::valueType>( sn, d );
     value = new RevBayesCore::MetropolisHastingsMove(p, w, false);

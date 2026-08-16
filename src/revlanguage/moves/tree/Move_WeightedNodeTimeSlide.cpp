@@ -3,6 +3,7 @@
 #include <string>
 
 #include "ArgumentRule.h"
+#include "DagNodeTypeUtilities.h"
 #include "ArgumentRules.h"
 #include "MetropolisHastingsMove.h"
 #include "Move_WeightedNodeTimeSlide.h"
@@ -53,7 +54,7 @@ void Move_WeightedNodeTimeSlide::constructInternalObject( void )
     RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
     size_t b = static_cast<const Natural &>( blocks->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
+    RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
     
     RevBayesCore::Proposal *p = new RevBayesCore::NodeTimeSlideWeightedProposal(t, b);
     value = new RevBayesCore::MetropolisHastingsMove(p, w, false);

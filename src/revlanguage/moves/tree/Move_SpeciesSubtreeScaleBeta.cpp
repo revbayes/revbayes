@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "ArgumentRule.h"
+#include "DagNodeTypeUtilities.h"
 #include "ArgumentRules.h"
 #include "MetropolisHastingsMove.h"
 #include "Move_SpeciesSubtreeScaleBeta.h"
@@ -81,7 +82,7 @@ void Move_SpeciesSubtreeScaleBeta::constructInternalObject( void )
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     double a = static_cast<const RealPos &>( alpha->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = static_cast<const TimeTree &>( speciesTree->getRevObject() ).getDagNode();
-    RevBayesCore::StochasticNode<RevBayesCore::Tree> *st = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
+    RevBayesCore::StochasticNode<RevBayesCore::Tree> *st = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
     double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
 
     RevBayesCore::Proposal *p = new RevBayesCore::SpeciesSubtreeScaleBetaProposal(st, a);
@@ -101,7 +102,7 @@ RevPtr<RevVariable> Move_SpeciesSubtreeScaleBeta::executeMethod(const std::strin
         found = true;
 
         RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = static_cast<const TimeTree &>( args[0].getVariable()->getRevObject() ).getDagNode();
-        RevBayesCore::StochasticNode<RevBayesCore::Tree> *gt = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
+        RevBayesCore::StochasticNode<RevBayesCore::Tree> *gt = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
 
         RevBayesCore::MetropolisHastingsMove *m = static_cast<RevBayesCore::MetropolisHastingsMove*>(this->value);
         RevBayesCore::SpeciesSubtreeScaleBetaProposal &p = static_cast<RevBayesCore::SpeciesSubtreeScaleBetaProposal&>( m->getProposal() );
@@ -114,7 +115,7 @@ RevPtr<RevVariable> Move_SpeciesSubtreeScaleBeta::executeMethod(const std::strin
         found = true;
 
         RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = static_cast<const TimeTree &>( args[0].getVariable()->getRevObject() ).getDagNode();
-        RevBayesCore::StochasticNode<RevBayesCore::Tree> *gt = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
+        RevBayesCore::StochasticNode<RevBayesCore::Tree> *gt = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
 
         RevBayesCore::MetropolisHastingsMove *m = static_cast<RevBayesCore::MetropolisHastingsMove*>(this->value);
         RevBayesCore::SpeciesSubtreeScaleBetaProposal &p = static_cast<RevBayesCore::SpeciesSubtreeScaleBetaProposal&>( m->getProposal() );

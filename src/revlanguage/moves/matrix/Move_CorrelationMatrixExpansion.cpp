@@ -2,6 +2,7 @@
 #include <string>
 
 #include "ArgumentRule.h"
+#include "DagNodeTypeUtilities.h"
 #include "ArgumentRules.h"
 #include "MetropolisHastingsMove.h"
 #include "ModelVector.h"
@@ -53,12 +54,12 @@ void Move_CorrelationMatrixExpansion::constructInternalObject( void )
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
 
     RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* tmp = static_cast<const MatrixReal &>( correlation_matrix->getRevObject() ).getDagNode();
-    RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::MatrixReal> *>( tmp );
+    RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *n = RevBayesCore::assumeStochastic<RevBayesCore::MatrixReal>( tmp );
 
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* var = static_cast<const ModelVector<RealPos>& >( variance->getRevObject() ).getDagNode();
 
     RevBayesCore::TypedDagNode<RevBayesCore::ContinuousCharacterData>* mvbm_tdn  = static_cast<const RevLanguage::ContinuousCharacterData&>( mvbm->getRevObject() ).getDagNode();
-    RevBayesCore::StochasticNode<RevBayesCore::ContinuousCharacterData>* mvbm_sn = static_cast<RevBayesCore::StochasticNode<RevBayesCore::ContinuousCharacterData>* >(mvbm_tdn);
+    RevBayesCore::StochasticNode<RevBayesCore::ContinuousCharacterData>* mvbm_sn = RevBayesCore::assumeStochastic<RevBayesCore::ContinuousCharacterData>( mvbm_tdn );
     
     RevBayesCore::Proposal *p  = new RevBayesCore::CorrelationMatrixExpansionProposal(n, var, mvbm_sn);
     value = new RevBayesCore::MetropolisHastingsMove(p,w,false);

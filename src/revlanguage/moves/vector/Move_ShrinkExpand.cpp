@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "ArgumentRule.h"
+#include "DagNodeTypeUtilities.h"
 #include "ArgumentRules.h"
 #include "MetropolisHastingsMove.h"
 #include "ModelVector.h"
@@ -74,7 +75,7 @@ void Move_ShrinkExpand::constructInternalObject( void )
     std::vector< RevBayesCore::StochasticNode<double> *> n;
     for (std::vector<const RevBayesCore::DagNode*>::const_iterator it = p.begin(); it != p.end(); ++it)
     {
-        const RevBayesCore::StochasticNode<double> *the_node = dynamic_cast< const RevBayesCore::StochasticNode<double>* >( *it );
+        const RevBayesCore::StochasticNode<double> *the_node = RevBayesCore::checkStochastic<double>( *it );
         if ( the_node != NULL )
         {
             n.push_back( const_cast< RevBayesCore::StochasticNode<double>* >( the_node ) );
@@ -90,7 +91,7 @@ void Move_ShrinkExpand::constructInternalObject( void )
     if ( sd != NULL && sd->getRevObject() != RevNullObject::getInstance() )
     {
         RevBayesCore::TypedDagNode<double> *tmp = static_cast<const RealPos &>( sd->getRevObject() ).getDagNode();
-        s = static_cast<RevBayesCore::StochasticNode<double> *>( tmp );
+        s = RevBayesCore::assumeStochastic<double>( tmp );
     }
     
     // get the tuning

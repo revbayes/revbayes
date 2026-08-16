@@ -3,6 +3,7 @@
 #include <string>
 
 #include "ArgumentRule.h"
+#include "DagNodeTypeUtilities.h"
 #include "ArgumentRules.h"
 #include "MetropolisHastingsMove.h"
 #include "Move_MultiValueEventBirthDeath.h"
@@ -66,7 +67,7 @@ void Move_MultiValueEventBirthDeath::constructInternalObject( void )
     // now allocate a new random-geometric-walk move
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode<RevBayesCore::MultiValueEvent>* tmp = static_cast<const MultiValueEvent &>( x->getRevObject() ).getDagNode();
-    RevBayesCore::StochasticNode<RevBayesCore::MultiValueEvent> *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::MultiValueEvent> *>( tmp );
+    RevBayesCore::StochasticNode<RevBayesCore::MultiValueEvent> *n = RevBayesCore::assumeStochastic<RevBayesCore::MultiValueEvent>( tmp );
     bool use_ac = static_cast<const RlBoolean &>( ac->getRevObject() ).getValue();
 //    bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
     bool t = false;

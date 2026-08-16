@@ -3,6 +3,7 @@
 #include <string>
 
 #include "ArgumentRule.h"
+#include "DagNodeTypeUtilities.h"
 #include "ArgumentRules.h"
 #include "MetropolisHastingsMove.h"
 #include "Move_ContinuousCharacterDataSlide.h"
@@ -55,7 +56,7 @@ void Move_ContinuousCharacterDataSlide::constructInternalObject( void )
     double l = static_cast<const RealPos &>( delta->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode<RevBayesCore::ContinuousCharacterData>* tmp = static_cast<const ContinuousCharacterData &>( x->getRevObject() ).getDagNode();
-    RevBayesCore::StochasticNode<RevBayesCore::ContinuousCharacterData> *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::ContinuousCharacterData> *>( tmp );
+    RevBayesCore::StochasticNode<RevBayesCore::ContinuousCharacterData> *n = RevBayesCore::assumeStochastic<RevBayesCore::ContinuousCharacterData>( tmp );
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
     double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
     

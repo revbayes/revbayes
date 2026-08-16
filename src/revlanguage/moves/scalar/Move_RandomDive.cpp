@@ -3,6 +3,7 @@
 #include <string>
 
 #include "ArgumentRule.h"
+#include "DagNodeTypeUtilities.h"
 #include "ArgumentRules.h"
 #include "RlBoolean.h"
 #include "MetropolisHastingsMove.h"
@@ -79,13 +80,13 @@ void Move_RandomDive::constructInternalObject( void )
     if ( upReal != NULL )
     {
         RevBayesCore::TypedDagNode<double>* tmp = static_cast<const RealPos &>( x->getRevObject() ).getDagNode();
-        RevBayesCore::StochasticNode<double> *n = dynamic_cast<RevBayesCore::StochasticNode<double> *>( tmp );
+        RevBayesCore::StochasticNode<double> *n = RevBayesCore::requireStochastic<double>( tmp );
         p = new RevBayesCore::HalfRandomDiveProposal(n,d,r);
     }
     else
     {
         RevBayesCore::TypedDagNode<double>* tmp = static_cast<const Real &>( x->getRevObject() ).getDagNode();
-        RevBayesCore::StochasticNode<double> *n = dynamic_cast<RevBayesCore::StochasticNode<double> *>( tmp );
+        RevBayesCore::StochasticNode<double> *n = RevBayesCore::requireStochastic<double>( tmp );
         p = new RevBayesCore::RandomDiveProposal(n,d,r);
     }
 

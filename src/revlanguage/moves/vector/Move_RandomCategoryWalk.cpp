@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "ArgumentRule.h"
+#include "DagNodeTypeUtilities.h"
 #include "ArgumentRules.h"
 #include "MetropolisHastingsMove.h"
 #include "ModelVector.h"
@@ -68,7 +69,7 @@ void Move_RandomCategoryWalk::constructInternalObject( void )
     
     // get the stochastic variable
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<std::int64_t> >* tmp = static_cast<const ModelVector<Natural> &>( x->getRevObject() ).getDagNode();
-    RevBayesCore::StochasticNode<RevBayesCore::RbVector<std::int64_t> > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::RbVector<std::int64_t> > *>( tmp );
+    RevBayesCore::StochasticNode<RevBayesCore::RbVector<std::int64_t> > *n = RevBayesCore::assumeStochastic<RevBayesCore::RbVector<std::int64_t> >( tmp );
     
     // create the internal proposal object
     RevBayesCore::Proposal *prop = new RevBayesCore::RandomCategoryWalkProposal(n);

@@ -6,6 +6,7 @@
  */
 
 #include "Move_CorrelationMatrixElementSwap.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
 #include <string>
@@ -56,7 +57,7 @@ void Move_CorrelationMatrixElementSwap::constructInternalObject( void )
     // now allocate a new sliding move
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* tmp = static_cast<const MatrixReal &>( v->getRevObject() ).getDagNode();
-    RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::MatrixReal> *>( tmp );
+    RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *n = RevBayesCore::assumeStochastic<RevBayesCore::MatrixReal>( tmp );
     
     RevBayesCore::Proposal *p = new RevBayesCore::CorrelationMatrixElementSwapProposal(n);
     value = new RevBayesCore::MetropolisHastingsMove(p, w, false);

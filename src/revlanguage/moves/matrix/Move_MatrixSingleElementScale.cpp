@@ -6,6 +6,7 @@
  */
 
 #include "Move_MatrixSingleElementScale.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
 #include <string>
@@ -75,21 +76,21 @@ void Move_MatrixSingleElementScale::constructInternalObject( void )
     if (v->getRevObject().isType( MatrixReal::getClassTypeSpec() ))
     {
         RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* tmp = static_cast<const MatrixReal &>( v->getRevObject() ).getDagNode();
-        RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::MatrixReal> *>( tmp );
+        RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *n = RevBayesCore::assumeStochastic<RevBayesCore::MatrixReal>( tmp );
         p = new RevBayesCore::MatrixRealSingleElementScaleProposal(n, l, v->getRevObject().isType( MatrixRealSymmetric::getClassTypeSpec() ) );
         p->setTargetAcceptanceRate(tt);
     }
     else if (v->getRevObject().isType( ModelVector<ModelVector<RealPos> >::getClassTypeSpec() ))
     {
         RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* tmp = static_cast<const ModelVector<ModelVector<RealPos> > &>( v->getRevObject() ).getDagNode();
-        RevBayesCore::StochasticNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > > *>( tmp );
+        RevBayesCore::StochasticNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > > *n = RevBayesCore::assumeStochastic<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >( tmp );
         p = new RevBayesCore::MatrixRealSingleElementScaleProposal(n, l);
         p->setTargetAcceptanceRate(tt);
     }
     else if (v->getRevObject().isType( ModelVector<ModelVector<Real> >::getClassTypeSpec() ))
     {
         RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* tmp = static_cast<const ModelVector<ModelVector<Real> > &>( v->getRevObject() ).getDagNode();
-        RevBayesCore::StochasticNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > > *>( tmp );
+        RevBayesCore::StochasticNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > > *n = RevBayesCore::assumeStochastic<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >( tmp );
         p = new RevBayesCore::MatrixRealSingleElementScaleProposal(n, l);
         p->setTargetAcceptanceRate(tt);
     }

@@ -3,6 +3,7 @@
 #include <string>
 
 #include "ArgumentRule.h"
+#include "DagNodeTypeUtilities.h"
 #include "ArgumentRules.h"
 #include "GibbsDrawCharacterHistoryProposal.h"
 #include "MetropolisHastingsMove.h"
@@ -63,7 +64,7 @@ void Move_GibbsDrawCharacterHistory::constructInternalObject( void )
     
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
-    RevBayesCore::StochasticNode<RevBayesCore::Tree> *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
+    RevBayesCore::StochasticNode<RevBayesCore::Tree> *n = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
 
     RevBayesCore::Proposal *p = new RevBayesCore::GibbsDrawCharacterHistoryProposal(n);
     value = new RevBayesCore::MetropolisHastingsMove(p,w);

@@ -7,6 +7,7 @@
 //
 
 #include "Move_MatrixRealSymmetricSlide.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
 #include <string>
@@ -61,7 +62,7 @@ void Move_MatrixRealSymmetricSlide::constructInternalObject( void )
     double l = static_cast<const RealPos &>( delta->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal>* tmp = static_cast<const MatrixRealSymmetric &>( mat->getRevObject() ).getDagNode();
-    RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *matrix = static_cast<RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *>( tmp );
+    RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *matrix = RevBayesCore::assumeStochastic<RevBayesCore::MatrixReal >( tmp );
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
     double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
     

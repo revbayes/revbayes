@@ -275,7 +275,7 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
     double ln_prior_ratio = 0;
     for(auto node: views::concat(nodes, affected_nodes))
     {
-        if (auto test_stoch = dynamic_cast<StochasticNode< AbstractHomologousDiscreteCharacterData >* >(node))
+        if (auto test_stoch = RevBayesCore::checkStochastic< AbstractHomologousDiscreteCharacterData >( node ))
         {
             if (dynamic_cast< TypedDistribution< AbstractHomologousDiscreteCharacterData >* >(&test_stoch->getDistribution()))
             {

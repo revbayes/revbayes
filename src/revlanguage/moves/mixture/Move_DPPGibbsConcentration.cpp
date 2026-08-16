@@ -3,6 +3,7 @@
 #include <string>
 
 #include "ArgumentRule.h"
+#include "DagNodeTypeUtilities.h"
 #include "ArgumentRules.h"
 #include "Move_DPPGibbsConcentration.h"
 #include "DPPGibbsConcentrationMove.h"
@@ -50,7 +51,7 @@ void Move_DPPGibbsConcentration::constructInternalObject( void )
     double ne = static_cast<const RealPos &>( numElements->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode<double>* tmp = static_cast<const RealPos &>( cp->getRevObject() ).getDagNode();
-    RevBayesCore::StochasticNode< double > *sn = static_cast<RevBayesCore::StochasticNode<double> *>( tmp );
+    RevBayesCore::StochasticNode< double > *sn = RevBayesCore::assumeStochastic<double>( tmp );
     RevBayesCore::TypedDagNode<std::int64_t>* tmpNC = static_cast<const Integer &>( numCats->getRevObject() ).getDagNode();
     RevBayesCore::DeterministicNode<std::int64_t> *nc = static_cast<RevBayesCore::DeterministicNode<std::int64_t> *>( tmpNC );
     RevBayesCore::TypedDagNode<double>* gS = static_cast<const RealPos &>( gammaShape->getRevObject() ).getDagNode();

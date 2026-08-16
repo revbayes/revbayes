@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "ArgumentRule.h"
+#include "DagNodeTypeUtilities.h"
 #include "ArgumentRules.h"
 #include "MetropolisHastingsMove.h"
 #include "ModelVector.h"
@@ -160,7 +161,7 @@ RevPtr<RevVariable> Move_AVMVN::executeMethod(const std::string& name, const std
             }
             else
             {
-                RevBayesCore::StochasticNode<double> *n2 = dynamic_cast<RevBayesCore::StochasticNode<double> *>( upReal->getDagNode() );
+                RevBayesCore::StochasticNode<double> *n2 = RevBayesCore::requireStochastic<double>( upReal->getDagNode() );
                 prop.addLogScalar(n2);
 
             }
@@ -179,7 +180,7 @@ RevPtr<RevVariable> Move_AVMVN::executeMethod(const std::string& name, const std
             }
             else
             {
-                RevBayesCore::StochasticNode<double> *n2 = dynamic_cast<RevBayesCore::StochasticNode<double> *>( uReal->getDagNode() );
+                RevBayesCore::StochasticNode<double> *n2 = RevBayesCore::requireStochastic<double>( uReal->getDagNode() );
                 prop.addUntransformedScalar(n2);
 
             }
@@ -190,13 +191,13 @@ RevPtr<RevVariable> Move_AVMVN::executeMethod(const std::string& name, const std
             RevBayesCore::MetropolisHastingsMove *m = static_cast<RevBayesCore::MetropolisHastingsMove*>(this->value);
             RevBayesCore::AVMVNProposal &prop = static_cast<RevBayesCore::AVMVNProposal&>( m->getProposal() );
 
-            RevBayesCore::StochasticNode<RevBayesCore::Simplex> *n = dynamic_cast<RevBayesCore::StochasticNode<RevBayesCore::Simplex > *>( sim->getDagNode() );
+            RevBayesCore::StochasticNode<RevBayesCore::Simplex> *n = RevBayesCore::requireStochastic<RevBayesCore::Simplex >( sim->getDagNode() );
             prop.addLogConstrainedSumVector(n);
 
         }
         else if ( uVector != NULL && uVector->getDagNode()->isStochastic() == true )
         {
-            RevBayesCore::StochasticNode<RevBayesCore::RbVector<double> > *the_node = dynamic_cast< RevBayesCore::StochasticNode<RevBayesCore::RbVector<double> > * >( uVector->getDagNode() );
+            RevBayesCore::StochasticNode<RevBayesCore::RbVector<double> > *the_node = RevBayesCore::checkStochastic<RevBayesCore::RbVector<double> >( uVector->getDagNode() );
             RevBayesCore::MetropolisHastingsMove *m = static_cast<RevBayesCore::MetropolisHastingsMove*>(this->value);
             RevBayesCore::AVMVNProposal &prop = static_cast<RevBayesCore::AVMVNProposal&>( m->getProposal() );
 
@@ -275,13 +276,13 @@ RevPtr<RevVariable> Move_AVMVN::executeMethod(const std::string& name, const std
 //            RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* tmp = static_cast<const Simplex &>( args[0].getVariable()->getRevObject() ).getDagNode();
 //            RevBayesCore::StochasticNode< RevBayesCore::Simplex > *n2 = static_cast<RevBayesCore::StochasticNode< RevBayesCore::Simplex > *>( tmp );
 
-            RevBayesCore::StochasticNode<RevBayesCore::Simplex> *n = dynamic_cast<RevBayesCore::StochasticNode<RevBayesCore::Simplex > *>( sim->getDagNode() );
+            RevBayesCore::StochasticNode<RevBayesCore::Simplex> *n = RevBayesCore::requireStochastic<RevBayesCore::Simplex >( sim->getDagNode() );
             prop.removeLogConstrainedSumVector(n);
 
         }
         else if ( uVector != NULL && uVector->getDagNode()->isStochastic() == true )
         {
-            RevBayesCore::StochasticNode<RevBayesCore::RbVector<double> > *the_node = dynamic_cast< RevBayesCore::StochasticNode<RevBayesCore::RbVector<double> > * >( uVector->getDagNode() );
+            RevBayesCore::StochasticNode<RevBayesCore::RbVector<double> > *the_node = RevBayesCore::checkStochastic<RevBayesCore::RbVector<double> >( uVector->getDagNode() );
             RevBayesCore::MetropolisHastingsMove *m = static_cast<RevBayesCore::MetropolisHastingsMove*>(this->value);
             RevBayesCore::AVMVNProposal &prop = static_cast<RevBayesCore::AVMVNProposal&>( m->getProposal() );
 
