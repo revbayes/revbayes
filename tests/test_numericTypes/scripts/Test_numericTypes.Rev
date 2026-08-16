@@ -51,6 +51,16 @@ print("The minimum is " + min(probability_vec) + " and is of type " + type( min(
 print("The sum is " + sum(probability_vec) + " and is of type " + type( sum(probability_vec) ))
 print("The median is " + median(probability_vec) + " and is of type " + type( median(probability_vec) ) + "\n")
 
+# Implicit numeric conversions must preserve the source type and dependency without replacing its DAG node;
+# full-model tests exercise the failure path but do not check the source type or subsequent reassignment.
+conversion_source <- -4
+integer_denominator := 2.0 / conversion_source
+converted_numerator := conversion_source / 2
+print("The implicitly converted source is of type " + type(conversion_source))
+print("The initial results are " + integer_denominator + " and " + converted_numerator)
+conversion_source <- -8
+print("The updated results are " + integer_denominator + " and " + converted_numerator + "\n")
+
 # Generate a random tree for 5 taxa
 taxa <- [taxon("A"), taxon("B"), taxon("C"), taxon("D"), taxon("E")]
 tree ~ dnUniformTopologyBranchLength(taxa, dnExp(10))

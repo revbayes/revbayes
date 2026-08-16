@@ -33,6 +33,10 @@ The minimum is 0.1 and is of type Probability
 The sum is 1.7 and is of type RealPos
 The median is 0.35 and is of type Probability
 
+The implicitly converted source is of type Integer
+The initial results are -0.5 and -2
+The updated results are -0.25 and -4
+
    [ [ 0.0000, 0.1878, 0.2151, 0.1854, 0.3952 ] ,
      [ 0.1878, 0.0000, 0.3796, 0.3410, 0.4376 ] ,
      [ 0.2151, 0.3796, 0.0000, 0.3773, 0.5870 ] ,
