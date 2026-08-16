@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 
+#include "DagNodeTypeUtilities.h"
 #include "MeanFunction.h"
 #include "Func_meanSimplex.h"
 #include "RlSimplex.h"
@@ -49,7 +50,7 @@ Func_meanSimplex* Func_meanSimplex::clone( void ) const
 RevBayesCore::TypedFunction<double>* Func_meanSimplex::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* arg = static_cast<RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* >( this->args[0].getVariable()->getRevObject().getDagNode() );
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* arg = RevBayesCore::assumeNodeHolds<RevBayesCore::RbVector<double> >( this->args[0].getVariable()->getRevObject().getDagNode() );
     RevBayesCore::MeanFunction* f = new RevBayesCore::MeanFunction( arg );
     
     return f;

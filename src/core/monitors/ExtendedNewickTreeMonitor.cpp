@@ -101,7 +101,7 @@ void ExtendedNewickTreeMonitor::printFileHeader()
 void ExtendedNewickTreeMonitor::swapNode(DagNode *oldN, DagNode *newN)
 {
 
-    TypedDagNode< RbVector<double> >* nodeVar = dynamic_cast< TypedDagNode< RbVector<double> > *>(oldN);
+    TypedDagNode< RbVector<double> >* nodeVar = checkNodeOfType<RbVector<double> >(oldN);
     if ( oldN == tree )
     {
         replaceNodeReference(tree, newN);

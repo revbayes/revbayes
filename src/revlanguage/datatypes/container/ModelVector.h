@@ -1,6 +1,7 @@
 #ifndef ModelVector_H
 #define ModelVector_H
 
+#include "DagNodeTypeUtilities.h"
 #include "RlContainer.h"
 #include "ModelObject.h"
 #include "RbVector.h"
@@ -232,7 +233,7 @@ RevObject* ModelVector<rlType>::convertTo(const TypeSpec &type) const
             for ( std::vector<const RevBayesCore::DagNode*>::iterator i = args.begin(); i != args.end(); ++i )
             {
                 RevBayesCore::DagNode* node = const_cast<RevBayesCore::DagNode*>(*i);
-                RevBayesCore::TypedDagNode<elementType>* tnode = static_cast<RevBayesCore::TypedDagNode<elementType>* >( node );
+                RevBayesCore::TypedDagNode<elementType>* tnode = RevBayesCore::assumeNodeHolds<elementType>( node );
                 rlType orgElement = rlType( tnode );
                 theConvertedContainer->push_back( orgElement );
                 
