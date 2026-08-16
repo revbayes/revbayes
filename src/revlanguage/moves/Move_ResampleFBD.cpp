@@ -3,6 +3,7 @@
 #include <string>
 
 #include "ArgumentRule.h"
+#include "DagNodeTypeUtilities.h"
 #include "ArgumentRules.h"
 #include "FossilizedBirthDeathResampleAgeProposal.h"
 #include "RlMatrixReal.h"
@@ -69,14 +70,14 @@ void Move_ResampleFBD::constructInternalObject( void )
     if (fbd->getRevObject().isType( MatrixReal::getClassTypeSpec() ))
     {
     	RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* tmp = static_cast<const MatrixReal &>( fbd->getRevObject() ).getDagNode();
-		RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::MatrixReal> *>( tmp );
+		RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *n = RevBayesCore::assumeStochastic<RevBayesCore::MatrixReal>( tmp );
 
 		p = new RevBayesCore::FossilizedBirthDeathResampleAgeProposal<RevBayesCore::MatrixReal>(n);
     }
     else
     {
     	RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = static_cast<const TimeTree &>( fbd->getRevObject() ).getDagNode();
-    	RevBayesCore::StochasticNode<RevBayesCore::Tree> *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
+    	RevBayesCore::StochasticNode<RevBayesCore::Tree> *n = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
 
     	p = new RevBayesCore::FossilizedBirthDeathResampleAgeProposal<RevBayesCore::Tree>(n);
     }

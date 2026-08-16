@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "AbstractHomologousDiscreteCharacterData.h"
+#include "DagNodeTypeUtilities.h"
 #include "RlAbstractHomologousDiscreteCharacterData.h"
 #include "SSE_ODE.h"
 #include "CladogeneticSpeciationRateMatrix.h"
@@ -1949,7 +1950,7 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::setValue(Tree *v, boo
     
     if ( process_age != NULL && use_origin == false )
     {
-        const StochasticNode<double> *stoch_process_age = dynamic_cast<const StochasticNode<double>* >(process_age);
+        const StochasticNode<double> *stoch_process_age = RevBayesCore::checkStochastic<double>( process_age );
         if ( stoch_process_age != NULL )
         {
             const_cast<StochasticNode<double> *>(stoch_process_age)->setValue( new double( value->getRoot().getAge() ), f);

@@ -6,6 +6,7 @@
  */
 
 #include "Move_CorrelationMatrixSpecificElementBeta.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
 #include <string>
@@ -64,7 +65,7 @@ void Move_CorrelationMatrixSpecificElementBeta::constructInternalObject( void )
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     double r = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* tmp = static_cast<const MatrixReal &>( v->getRevObject() ).getDagNode();
-    RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::MatrixReal> *>( tmp );
+    RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *n = RevBayesCore::assumeStochastic<RevBayesCore::MatrixReal>( tmp );
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *p = new RevBayesCore::CorrelationMatrixSpecificElementBetaProposal(n,i,j,a,r);

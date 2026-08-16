@@ -1,4 +1,5 @@
 #include "Move_IndependentTopology.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
 #include <string>
@@ -63,7 +64,7 @@ void Move_IndependentTopology::constructInternalObject( void )
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     
     RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
-    RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
+    RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
 
     const Distribution& rlDistribution                        = static_cast<const Distribution &>( proposal_distribution->getRevObject() );
     RevBayesCore::TypedDistribution<RevBayesCore::Tree>* prop = static_cast<RevBayesCore::TypedDistribution<RevBayesCore::Tree>* >( rlDistribution.createDistribution() );
@@ -77,7 +78,7 @@ void Move_IndependentTopology::constructInternalObject( void )
         RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp = static_cast<const ModelVector<RealPos> &>( substitution_rates->getRevObject() ).getDagNode();
         if( tmp->isStochastic() == true )
         {
-            RevBayesCore::StochasticNode<RevBayesCore::RbVector<double> >* stoch = dynamic_cast<RevBayesCore::StochasticNode<RevBayesCore::RbVector<double> >* >( tmp );
+            RevBayesCore::StochasticNode<RevBayesCore::RbVector<double> >* stoch = RevBayesCore::checkStochastic<RevBayesCore::RbVector<double> >( tmp );
 
             p = new RevBayesCore::IndependentTopologyProposal(t, prop, stoch, c);
         }
@@ -88,7 +89,7 @@ void Move_IndependentTopology::constructInternalObject( void )
             std::vector< RevBayesCore::StochasticNode<double> *> n;
             for (std::vector<const RevBayesCore::DagNode*>::const_iterator it = parents.begin(); it != parents.end(); ++it)
             {
-                const RevBayesCore::StochasticNode<double> *the_node = dynamic_cast< const RevBayesCore::StochasticNode<double>* >( *it );
+                const RevBayesCore::StochasticNode<double> *the_node = RevBayesCore::checkStochastic<double>( *it );
                 if ( the_node != NULL )
                 {
                     n.push_back( const_cast< RevBayesCore::StochasticNode<double>* >( the_node ) );

@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "ArgumentRule.h"
+#include "DagNodeTypeUtilities.h"
 #include "ArgumentRules.h"
 #include "RlBoolean.h"
 #include "MetropolisHastingsMove.h"
@@ -55,7 +56,7 @@ void Move_BetaProbability::constructInternalObject( void )
     double o = static_cast<const RealPos &>( offset->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode< double >* tmp = static_cast<const Probability &>( x->getRevObject() ).getDagNode();
-    RevBayesCore::StochasticNode< double > *n = static_cast<RevBayesCore::StochasticNode< double > *>( tmp );
+    RevBayesCore::StochasticNode< double > *n = RevBayesCore::assumeStochastic< double >( tmp );
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
     double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
     

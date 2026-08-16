@@ -7,6 +7,7 @@
 //
 
 #include "Func_SampledCladogenesisRootFrequencies.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
 
@@ -65,7 +66,7 @@ RevBayesCore::TypedFunction< RevBayesCore::Simplex >* Func_SampledCladogenesisRo
     
     // tree
     RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = static_cast<const TimeTree &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
+    RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
     
     // clock
     RevBayesCore::TypedDagNode<double>* r = static_cast<const RealPos &>( this->args[3].getVariable()->getRevObject() ).getDagNode();

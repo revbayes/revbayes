@@ -3,6 +3,7 @@
 #include <string>
 
 #include "ArgumentRule.h"
+#include "DagNodeTypeUtilities.h"
 #include "ArgumentRules.h"
 #include "MetropolisHastingsMove.h"
 #include "ModelVector.h"
@@ -44,7 +45,7 @@ void Move_VectorSingleElementScale::constructInternalObject( void )
     double d = static_cast<const RealPos &>( lambda->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* tmp = static_cast<const ModelVector<RealPos> &>( x->getRevObject() ).getDagNode();
-    RevBayesCore::StochasticNode< RevBayesCore::RbVector<double> >* n = static_cast< RevBayesCore::StochasticNode<RevBayesCore::RbVector<double> > * >( tmp );
+    RevBayesCore::StochasticNode< RevBayesCore::RbVector<double> >* n = RevBayesCore::assumeStochastic<RevBayesCore::RbVector<double> >( tmp );
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
     double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
     

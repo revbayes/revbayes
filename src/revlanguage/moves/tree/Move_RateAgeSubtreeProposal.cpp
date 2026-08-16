@@ -1,4 +1,5 @@
 #include "ArgumentRule.h"
+#include "DagNodeTypeUtilities.h"
 #include "ArgumentRules.h"
 #include "MetropolisHastingsMove.h"
 #include "ModelVector.h"
@@ -66,7 +67,7 @@ RevPtr<RevVariable> Move_RateAgeSubtreeProposal::executeMethod(const std::string
         
         for (std::vector<const RevBayesCore::TypedDagNode<double>* >::const_iterator it = pars.begin(); it != pars.end(); ++it)
         {
-            rates.push_back( const_cast<RevBayesCore::StochasticNode<double>* >(static_cast<const RevBayesCore::StochasticNode<double>* >( *it ) ) );
+            rates.push_back( const_cast<RevBayesCore::StochasticNode<double>* >(RevBayesCore::assumeStochastic<double>( *it ) ) );
         }
 
         prop.addRates( rates );
@@ -149,7 +150,7 @@ void Move_RateAgeSubtreeProposal::constructInternalObject( void )
 
     // get the tree
     RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
-    RevBayesCore::StochasticNode<RevBayesCore::Tree> *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
+    RevBayesCore::StochasticNode<RevBayesCore::Tree> *n = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
 
     // finally create the internal move object
     RevBayesCore::RateAgeSubtreeProposal *prop = new RevBayesCore::RateAgeSubtreeProposal(n, a, r);

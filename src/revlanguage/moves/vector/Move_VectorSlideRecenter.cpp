@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "ArgumentRule.h"
+#include "DagNodeTypeUtilities.h"
 #include "ArgumentRules.h"
 #include "MetropolisHastingsMove.h"
 #include "ModelVector.h"
@@ -65,7 +66,7 @@ void Move_VectorSlideRecenter::constructInternalObject( void )
     std::vector< RevBayesCore::StochasticNode<double> *> n;
     for (std::vector<const RevBayesCore::DagNode*>::const_iterator it = p.begin(); it != p.end(); ++it)
     {
-        const RevBayesCore::StochasticNode<double> *the_node = dynamic_cast< const RevBayesCore::StochasticNode<double>* >( *it );
+        const RevBayesCore::StochasticNode<double> *the_node = RevBayesCore::checkStochastic<double>( *it );
         if ( the_node != NULL )
         {
             n.push_back( const_cast< RevBayesCore::StochasticNode<double>* >( the_node ) );
@@ -78,7 +79,7 @@ void Move_VectorSlideRecenter::constructInternalObject( void )
     
     // get the mean of the parameters
     RevBayesCore::TypedDagNode<double>  *tmp_m = static_cast<const Real &>( mean->getRevObject() ).getDagNode();
-    RevBayesCore::StochasticNode<double>    *m = static_cast<RevBayesCore::StochasticNode<double> *>( tmp_m );
+    RevBayesCore::StochasticNode<double>    *m = RevBayesCore::assumeStochastic<double>( tmp_m );
     
     // get the tuning
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();

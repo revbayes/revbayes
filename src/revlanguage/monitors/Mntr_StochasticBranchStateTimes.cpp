@@ -7,6 +7,7 @@
 //
 
 #include "Mntr_StochasticBranchStateTimes.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
 #include <string>
@@ -63,7 +64,7 @@ void Mntr_StochasticBranchStateTimes::constructInternalObject( void )
     bool               wv             = static_cast<const RlBoolean &>( version->getRevObject()            ).getValue();
     
     RevBayesCore::TypedDagNode<RevBayesCore::Tree>* cdbdp_tdn = static_cast<const RevLanguage::Tree&>( cdbdp->getRevObject() ).getDagNode();
-    RevBayesCore::StochasticNode<RevBayesCore::Tree>* cdbdp_sn  = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree>* >( cdbdp_tdn );
+    RevBayesCore::StochasticNode<RevBayesCore::Tree>* cdbdp_sn  = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( cdbdp_tdn );
     
     RevBayesCore::StateDependentSpeciationExtinctionProcess *sse_process = NULL;
     sse_process = dynamic_cast<RevBayesCore::StateDependentSpeciationExtinctionProcess*>( &cdbdp_sn->getDistribution() );
