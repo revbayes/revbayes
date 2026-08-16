@@ -1,4 +1,5 @@
 #include "AbstractPhyloContinuousCharacterProcess.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <string>
 
@@ -288,23 +289,23 @@ void AbstractPhyloContinuousCharacterProcess::swapParameterInternal(const DagNod
     
     if (oldP == homogeneous_clock_rate)
     {
-        homogeneous_clock_rate = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(homogeneous_clock_rate, newP);
     }
     else if (oldP == heterogeneous_clock_rates)
     {
-        heterogeneous_clock_rates = static_cast<const TypedDagNode< RbVector< double > >* >( newP );
+        replaceNodeReference(heterogeneous_clock_rates, newP);
     }
     else if (oldP == homogeneous_site_rate)
     {
-        homogeneous_site_rate = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(homogeneous_site_rate, newP);
     }
     else if (oldP == heterogeneous_site_rates)
     {
-        heterogeneous_site_rates = static_cast<const TypedDagNode< RbVector< double > >* >( newP );
+        replaceNodeReference(heterogeneous_site_rates, newP);
     }
     else if (oldP == tau)
     {
-        tau = static_cast<const TypedDagNode<Tree>* >( newP );
+        replaceNodeReference(tau, newP);
         num_nodes = tau->getValue().getNumberOfNodes();
     }
     

@@ -1,4 +1,5 @@
 #include "StairwayPlotDistribution.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <stddef.h>
 #include <cmath>
@@ -443,7 +444,7 @@ void StairwayPlotDistribution::swapParameterInternal(const DagNode *oldP, const 
     
     if (oldP == theta)
     {
-        theta = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(theta, newP);
     }
     
 }

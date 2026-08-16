@@ -1,4 +1,5 @@
 #include "DECRateMatrixFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cmath>
 #include <vector>
@@ -80,12 +81,12 @@ void DECRateMatrixFunction::update( void )
 
 void DECRateMatrixFunction::swapParameterInternal(const DagNode *oldP, const DagNode *newP) {
     if (oldP == dispersalRates) {
-        dispersalRates = static_cast<const TypedDagNode< RbVector<RbVector<double> > >* >( newP );
+        replaceNodeReference(dispersalRates, newP);
     }
     else if (oldP == extirpationRates) {
-        extirpationRates = static_cast<const TypedDagNode< RbVector<RbVector<double> > >* >( newP );
+        replaceNodeReference(extirpationRates, newP);
     }
     else if (oldP == rangeSize) {
-        rangeSize = static_cast<const TypedDagNode< Simplex >* >( newP );
+        replaceNodeReference(rangeSize, newP);
     }
 }

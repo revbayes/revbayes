@@ -23,6 +23,7 @@
 #define VectorIndexOperator_H
 
 #include "RbVector.h"
+#include "DagNodeTypeUtilities.h"
 #include "Simplex.h"
 #include "TypedFunction.h"
 
@@ -131,15 +132,15 @@ void RevBayesCore::VectorIndexOperator<valueType>::swapParameterInternal(const D
     
     if (oldP == value_vector)
     {
-        value_vector = static_cast<const TypedDagNode< RbVector<valueType> >* >( newP );
+        replaceNodeReference(value_vector, newP);
     }
     else if (oldP == value_simplex)
     {
-        value_simplex = static_cast<const TypedDagNode< Simplex >* >( newP );
+        replaceNodeReference(value_simplex, newP);
     }
     else if (oldP == index)
     {
-        index = static_cast<const TypedDagNode<std::int64_t>* >( newP );
+        replaceNodeReference(index, newP);
     }
     
 }

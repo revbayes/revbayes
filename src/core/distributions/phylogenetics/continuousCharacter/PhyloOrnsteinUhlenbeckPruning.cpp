@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "ConstantNode.h"
+#include "DagNodeTypeUtilities.h"
 #include "DistributionNormal.h"
 #include "PhyloOrnsteinUhlenbeckPruning.h"
 #include "RandomNumberFactory.h"
@@ -862,34 +863,34 @@ void PhyloOrnsteinUhlenbeckPruning::swapParameterInternal(const DagNode *oldP, c
     
     if (oldP == root_state)
     {
-        root_state = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(root_state, newP);
     }
     
     if (oldP == homogeneous_alpha)
     {
-        homogeneous_alpha = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(homogeneous_alpha, newP);
     }
     else if (oldP == heterogeneous_alpha)
     {
-        heterogeneous_alpha = static_cast<const TypedDagNode< RbVector< double > >* >( newP );
+        replaceNodeReference(heterogeneous_alpha, newP);
     }
     
     if (oldP == homogeneous_sigma)
     {
-        homogeneous_sigma = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(homogeneous_sigma, newP);
     }
     else if (oldP == heterogeneous_sigma)
     {
-        heterogeneous_sigma = static_cast<const TypedDagNode< RbVector< double > >* >( newP );
+        replaceNodeReference(heterogeneous_sigma, newP);
     }
     
     if (oldP == homogeneous_theta)
     {
-        homogeneous_theta = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(homogeneous_theta, newP);
     }
     else if (oldP == heterogeneous_theta)
     {
-        heterogeneous_theta = static_cast<const TypedDagNode< RbVector< double > >* >( newP );
+        replaceNodeReference(heterogeneous_theta, newP);
     }
     
     this->AbstractPhyloContinuousCharacterProcess::swapParameterInternal(oldP, newP);

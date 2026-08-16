@@ -1,4 +1,5 @@
 #include "OrnsteinUhlenbeckProcess.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cmath>
 
@@ -158,23 +159,23 @@ void OrnsteinUhlenbeckProcess::swapParameterInternal(const DagNode *oldP, const 
     
     if (oldP == x0)
     {
-        x0 = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(x0, newP);
     }
     if (oldP == theta)
     {
-        theta = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(theta, newP);
     }
     if (oldP == alpha)
     {
-        alpha = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(alpha, newP);
     }
     if (oldP == sigma)
     {
-        sigma = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(sigma, newP);
     }
     if (oldP == time)
     {
-        time = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(time, newP);
     }
     
 }

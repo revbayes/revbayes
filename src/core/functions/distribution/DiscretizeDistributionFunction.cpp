@@ -1,4 +1,5 @@
 #include "DiscretizeDistributionFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <vector>
 
@@ -86,7 +87,7 @@ void DiscretizeDistributionFunction::swapParameterInternal(const DagNode *oldP, 
     
     if (oldP == num_cats)
     {
-        num_cats = static_cast<const TypedDagNode<std::int64_t>* >( newP );
+        replaceNodeReference(num_cats, newP);
     }
     else
     {

@@ -15,6 +15,7 @@
 #include <vector>
 
 #include "MPEST.h"
+#include "DagNodeTypeUtilities.h"
 #include "RbMathCombinatorialFunctions.h"
 #include "RootedTripletDistribution.h"
 #include "Taxon.h"
@@ -190,11 +191,11 @@ void MPEST::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
     
     if (oldP == speciesTree)
     {
-        speciesTree = static_cast<const TypedDagNode< RootedTripletDistribution > * >( newP );
+        replaceNodeReference(speciesTree, newP);
     }
    /* else if ( oldP == geneTrees)
     {
-        geneTrees = static_cast<const TypedDagNode< RootedTripletDistribution > *  >( newP );
+        replaceNodeReference(geneTrees, newP);
         extractGeneTriplets();
         computeLnW();
     }*/

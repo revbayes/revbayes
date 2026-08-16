@@ -1,4 +1,5 @@
 #include "CodonSynonymousNonsynonymousRateMatrixFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <vector>
 
@@ -59,12 +60,12 @@ void CodonSynonymousNonsynonymousRateMatrixFunction::swapParameterInternal(const
     
     if (oldP == base_frequencies)
     {
-        base_frequencies = static_cast<const TypedDagNode< Simplex >* >( newP );
+        replaceNodeReference(base_frequencies, newP);
     }
     
     if (oldP == omega)
     {
-        omega = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(omega, newP);
     }
     
 }

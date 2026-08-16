@@ -1,4 +1,5 @@
 #include "ExponentialDistribution.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cassert>
 
@@ -95,11 +96,11 @@ void ExponentialDistribution::swapParameterInternal(const DagNode *oldP, const D
 {
     if (oldP == lambda)
     {
-        lambda = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(lambda, newP);
     }
     if (oldP == offset)
     {
-        offset = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(offset, newP);
     }
 }
 

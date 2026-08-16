@@ -2,6 +2,7 @@
 #define MixtureDistribution_H
 
 #include "MemberObject.h"
+#include "DagNodeTypeUtilities.h"
 #include "RbVector.h"
 #include "Simplex.h"
 #include "TypedDagNode.h"
@@ -247,11 +248,11 @@ void RevBayesCore::MixtureDistribution<mixtureType>::swapParameterInternal( cons
 {
     if (oldP == parameter_values)
     {
-        parameter_values = static_cast<const TypedDagNode< RbVector<mixtureType> >* >( newP );
+        replaceNodeReference(parameter_values, newP);
     }
     else if (oldP == probabilities)
     {
-        probabilities = static_cast<const TypedDagNode< Simplex >* >( newP );
+        replaceNodeReference(probabilities, newP);
     }
 }
 

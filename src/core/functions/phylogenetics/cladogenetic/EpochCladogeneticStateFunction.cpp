@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "CladogeneticProbabilityMatrix_Epoch.h"
+#include "DagNodeTypeUtilities.h"
 #include "EpochCladogeneticStateFunction.h"
 #include "CladogeneticProbabilityMatrix.h"
 #include "RbVector.h"
@@ -76,11 +77,11 @@ void EpochCladogeneticStateFunction::swapParameterInternal(const DagNode *oldP, 
     
     if (oldP == epochTimes)
     {
-        epochTimes = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(epochTimes, newP);
     }
     else if (oldP == cladoProbs)
     {
-        cladoProbs = static_cast<const TypedDagNode< RbVector<CladogeneticProbabilityMatrix> >* >( newP );
+        replaceNodeReference(cladoProbs, newP);
     }
     
 }

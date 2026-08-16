@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "RandomNumberFactory.h"
+#include "DagNodeTypeUtilities.h"
 #include "RandomNumberGenerator.h"
 #include "RbConstants.h"
 #include "StochasticNode.h"
@@ -985,23 +986,23 @@ void ConditionedBirthDeathShiftProcessContinuous::swapParameterInternal( const D
 {
     if (oldP == root_age)
     {
-        root_age = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(root_age, newP);
     }
     else if (oldP == root_speciation)
     {
-        root_speciation = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(root_speciation, newP);
     }
     else if (oldP == root_extinction)
     {
-        root_extinction = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(root_extinction, newP);
     }
     else if (oldP == shift_rate)
     {
-        shift_rate = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(shift_rate, newP);
     }
     else if (oldP == rho)
     {
-        rho = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(rho, newP);
     }
     
     if ( base_distribution_speciation != NULL )

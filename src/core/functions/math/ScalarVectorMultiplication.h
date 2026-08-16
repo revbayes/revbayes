@@ -2,6 +2,7 @@
 #define ScalarVectorMultiplication_H
 
 #include "RbVector.h"
+#include "DagNodeTypeUtilities.h"
 #include "StringUtilities.h"    // For string concatenation through Multiplication
 #include "TypedFunction.h"
 #include "TypedDagNode.h"
@@ -67,12 +68,12 @@ void RevBayesCore::ScalarVectorMultiplication<firstValueType, secondValueType, r
     
     if (oldP == a)
     {
-        a = static_cast<const TypedDagNode<firstValueType>* >( newP );
+        replaceNodeReference(a, newP);
     }
     
     if (oldP == b)
     {
-        b = static_cast<const TypedDagNode< RbVector<secondValueType> >* >( newP );
+        replaceNodeReference(b, newP);
     }
 }
 

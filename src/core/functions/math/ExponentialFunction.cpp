@@ -1,4 +1,5 @@
 #include "ExponentialFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cmath>
 
@@ -33,7 +34,7 @@ void ExponentialFunction::swapParameterInternal(const DagNode *oldP, const DagNo
     
     if (oldP == a) 
     {
-        a = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(a, newP);
     }
     
 }

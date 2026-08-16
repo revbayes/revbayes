@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "DistributionNormal.h"
+#include "DagNodeTypeUtilities.h"
 #include "PhyloBrownianProcessMultiSampleREML.h"
 #include "RandomNumberFactory.h"
 #include "RbException.h"
@@ -790,7 +791,7 @@ void PhyloBrownianProcessMultiSampleREML::swapParameterInternal(const DagNode *o
     }
     else if ( oldP == this->within_species_variances )
     {
-        within_species_variances = static_cast<const TypedDagNode< RbVector< double > >* >( newP );
+        replaceNodeReference(within_species_variances, newP);
     }
     else
     {

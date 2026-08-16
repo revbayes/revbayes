@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "RandomNumberFactory.h"
+#include "DagNodeTypeUtilities.h"
 #include "RandomNumberGenerator.h"
 #include "RbConstants.h"
 #include "RbMathCombinatorialFunctions.h"
@@ -316,7 +317,7 @@ void UniformTimeTreeDistribution::swapParameterInternal( const DagNode *oldP, co
 {
     if (oldP == root_age)
     {
-        root_age = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(root_age, newP);
     }
     
 }

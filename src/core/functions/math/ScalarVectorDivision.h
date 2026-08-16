@@ -3,6 +3,7 @@
 
 #include "StringUtilities.h"    // For string concatenation through Division
 #include "TypedFunction.h"
+#include "DagNodeTypeUtilities.h"
 #include "TypedDagNode.h"
 
 namespace RevBayesCore {
@@ -66,12 +67,12 @@ void RevBayesCore::ScalarVectorDivision<firstValueType, secondValueType, return_
     
     if (oldP == a)
     {
-        a = static_cast<const TypedDagNode<firstValueType>* >( newP );
+        replaceNodeReference(a, newP);
     }
     
     if (oldP == b)
     {
-        b = static_cast<const TypedDagNode< RbVector<secondValueType> >* >( newP );
+        replaceNodeReference(b, newP);
     }
 }
 

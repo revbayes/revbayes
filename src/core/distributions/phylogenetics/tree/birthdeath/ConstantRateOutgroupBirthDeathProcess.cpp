@@ -7,6 +7,7 @@
 //
 
 #include "ConstantRateOutgroupBirthDeathProcess.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cmath>
 #include <algorithm>
@@ -469,19 +470,19 @@ void ConstantRateOutgroupBirthDeathProcess::swapParameterInternal(const DagNode 
 {
     if (oldP == lambda)
     {
-        lambda = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(lambda, newP);
     }
     else if (oldP == mu)
     {
-        mu = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(mu, newP);
     }
     else if (oldP == rho_ingroup)
     {
-        rho_ingroup = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(rho_ingroup, newP);
     }
     else if (oldP == rho_outgroup)
     {
-        rho_outgroup = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(rho_outgroup, newP);
     }
     else
     {

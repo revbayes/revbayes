@@ -1,4 +1,5 @@
 #include "AvgDistanceMatrixFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <vector>
 
@@ -68,11 +69,11 @@ void AvgDistanceMatrixFunction::swapParameterInternal(const DagNode *oldP, const
     
     if (oldP == matrixVector)
     {
-        matrixVector = static_cast<const TypedDagNode< RbVector<DistanceMatrix> >* >( newP );
+        replaceNodeReference(matrixVector, newP);
     }
     else if (oldP == weightVector)
     {
-        weightVector = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(weightVector, newP);
     }
     
 }

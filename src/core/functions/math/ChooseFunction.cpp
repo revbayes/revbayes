@@ -1,4 +1,5 @@
 #include "ChooseFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include "RbMathCombinatorialFunctions.h"
 #include "Cloneable.h"
@@ -38,11 +39,11 @@ void ChooseFunction::swapParameterInternal(const DagNode *oldP, const DagNode *n
     
     if (oldP == n)
     {
-        n = static_cast<const TypedDagNode<std::int64_t>* >( newP );
+        replaceNodeReference(n, newP);
     }
     else if (oldP == k)
     {
-        k = static_cast<const TypedDagNode<std::int64_t>* >( newP );
+        replaceNodeReference(k, newP);
     }
     
 }

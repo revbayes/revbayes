@@ -1,4 +1,5 @@
 #include "CoalaFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
 
@@ -81,7 +82,7 @@ void CoalaFunction::swapParameterInternal(const DagNode *oldP, const DagNode *ne
     
     if ( oldP == coordinates ) 
     {
-        coordinates = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(coordinates, newP);
     }
 }
 

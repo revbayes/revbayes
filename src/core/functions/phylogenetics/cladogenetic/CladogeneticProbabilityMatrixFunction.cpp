@@ -6,6 +6,7 @@
 
 
 #include "CladogeneticProbabilityMatrixFunction.h"
+#include "DagNodeTypeUtilities.h"
 #include "CladogeneticProbabilityMatrix.h"
 #include "RbException.h"
 #include "Cloneable.h"
@@ -123,7 +124,7 @@ void CladogeneticProbabilityMatrixFunction::swapParameterInternal(const DagNode 
     
     if (oldP == probabilities)
     {
-        probabilities = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(probabilities, newP);
     }
     
 }

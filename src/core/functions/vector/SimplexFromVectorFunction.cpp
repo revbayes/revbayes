@@ -1,4 +1,5 @@
 #include "SimplexFromVectorFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
 
@@ -61,6 +62,6 @@ void SimplexFromVectorFunction::update( void )
 void SimplexFromVectorFunction::swapParameterInternal( const DagNode *oldP, const DagNode *newP )
 {
     if ( oldP == realPosVector )
-        realPosVector = static_cast< const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(realPosVector, newP);
 }
 

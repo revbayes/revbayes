@@ -13,6 +13,7 @@
  */
 
 #include "ChromosomesPloidyRateMatrixFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include "RateMatrix_ChromosomesPloidy.h"
 #include "Cloneable.h"
@@ -93,53 +94,53 @@ void ChromosomesPloidyRateMatrixFunction::swapParameterInternal(const DagNode *o
     
     if (oldP == gamma_d) 
     {
-        gamma_d = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(gamma_d, newP);
     }
     else if (oldP == delta_d) 
     {
-        delta_d = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(delta_d, newP);
     }
     else if (oldP == rho_d) 
     {
-        rho_d = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(rho_d, newP);
     } else if (oldP == eta_d) 
     {
-        eta_d = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(eta_d, newP);
     }
     else if (oldP == delta_dl) 
     {
-        delta_dl = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(delta_dl, newP);
     }
     else if (oldP == gamma_dl) 
     {
-        gamma_dl = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(gamma_dl, newP);
     }
     else if (oldP == gamma_p) 
     {
-        gamma_p = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(gamma_p, newP);
     }
     else if (oldP == delta_p) 
     {
-        delta_p = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(delta_p, newP);
     }
     else if (oldP == rho_p) 
     {
-        rho_p = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(rho_p, newP);
     } else if (oldP == eta_p) 
     {
-        eta_p = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(eta_p, newP);
     }
     else if (oldP == delta_pl) 
     {
-        delta_pl = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(delta_pl, newP);
     }
     else if (oldP == gamma_pl) 
     {
-        gamma_pl = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(gamma_pl, newP);
     }
     else if (oldP == beta) 
     {
-        beta = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(beta, newP);
     }
     
 }

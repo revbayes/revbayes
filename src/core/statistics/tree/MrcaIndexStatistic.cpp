@@ -1,4 +1,5 @@
 #include "MrcaIndexStatistic.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
 #include <iosfwd>
@@ -79,7 +80,7 @@ void MrcaIndexStatistic::swapParameterInternal(const DagNode *oldP, const DagNod
     
     if (oldP == tree)
     {
-        tree = static_cast<const TypedDagNode<Tree>* >( newP );
+        replaceNodeReference(tree, newP);
         index = -1;
     }
     

@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "DistributionExponential.h"
+#include "DagNodeTypeUtilities.h"
 #include "OccurrenceBirthDeathProcess.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
@@ -940,50 +941,50 @@ void OccurrenceBirthDeathProcess::swapParameterInternal(const DagNode *oldP, con
     // Rate parameters
     if (oldP == heterogeneous_lambda)
     {
-        heterogeneous_lambda = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(heterogeneous_lambda, newP);
     }
     else if (oldP == heterogeneous_mu)
     {
-        heterogeneous_mu     = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(heterogeneous_mu, newP);
     }
     else if (oldP == heterogeneous_psi)
     {
-        heterogeneous_psi    = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(heterogeneous_psi, newP);
     }
     else if (oldP == homogeneous_lambda)
     {
-        homogeneous_lambda   = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(homogeneous_lambda, newP);
     }
     else if (oldP == homogeneous_mu)
     {
-        homogeneous_mu       = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(homogeneous_mu, newP);
     }
     else if (oldP == homogeneous_psi)
     {
-        homogeneous_psi      = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(homogeneous_psi, newP);
     }
     // Treatment
     else if (oldP == heterogeneous_r)
     {
-        heterogeneous_r      = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(heterogeneous_r, newP);
     }
     else if (oldP == homogeneous_r)
     {
-        homogeneous_r        = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(homogeneous_r, newP);
     }
     //occurrence
     else if (oldP == heterogeneous_omega)
     {
-        heterogeneous_omega      = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(heterogeneous_omega, newP);
     }
     else if (oldP == homogeneous_omega)
     {
-        homogeneous_omega        = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(homogeneous_omega, newP);
     }
     // Event probability parameters
     else if (oldP == homogeneous_rho)
     {
-        homogeneous_rho      = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(homogeneous_rho, newP);
     }
     else
     {

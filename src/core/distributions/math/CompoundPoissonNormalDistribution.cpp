@@ -1,4 +1,5 @@
 #include "CompoundPoissonNormalDistribution.h"
+#include "DagNodeTypeUtilities.h"
 
 #include "DistributionCompoundPoissonNormal.h"
 #include "RandomNumberFactory.h"
@@ -74,14 +75,14 @@ void CompoundPoissonNormalDistribution::swapParameterInternal(const DagNode *old
     
     if (oldP == rate)
     {
-        rate = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(rate, newP);
     }
     else if (oldP == mu)
     {
-        mu = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(mu, newP);
     }
     else if (oldP == sigma)
     {
-        sigma = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(sigma, newP);
     }
 }

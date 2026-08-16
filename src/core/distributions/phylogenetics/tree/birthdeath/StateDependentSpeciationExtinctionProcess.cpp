@@ -3146,43 +3146,43 @@ void StateDependentSpeciationExtinctionProcess::swapParameterInternal(const DagN
     
     if ( oldP == process_age )
     {
-        process_age = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(process_age, newP);
     }
     if ( oldP == mu )
     {
-        mu = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+        replaceNodeReference(mu, newP);
     }
     if ( oldP == lambda )
     {
-        lambda = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+        replaceNodeReference(lambda, newP);
     }
     if ( oldP == phi )
     {
-        phi = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+        replaceNodeReference(phi, newP);
     }
     if ( oldP == Q )
     {
-        Q = static_cast<const TypedDagNode<RateGenerator>* >( newP );
+        replaceNodeReference(Q, newP);
     }
     if ( oldP == rate )
     {
-        rate = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(rate, newP);
     }
     if ( oldP == pi )
     {
-        pi = static_cast<const TypedDagNode<Simplex>* >( newP );
+        replaceNodeReference(pi, newP);
     }
     if ( oldP == rho )
     {
-        rho = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(rho, newP);
     }
     if ( oldP == rho_per_state )
     {
-        rho_per_state = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+        replaceNodeReference(rho_per_state, newP);
     }
     if ( oldP == cladogenesis_matrix )
     {
-        cladogenesis_matrix = static_cast<const TypedDagNode<CladogeneticSpeciationRateMatrix>* >( newP );
+        replaceNodeReference(cladogenesis_matrix, newP);
     }
     
 }

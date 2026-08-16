@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "DemographyCoalescent.h"
+#include "DagNodeTypeUtilities.h"
 #include "DistributionExponential.h"
 #include "RandomNumberFactory.h"
 #include "RbConstants.h"
@@ -393,7 +394,7 @@ void DemographyCoalescent::swapParameterInternal(const DagNode *oldP, const DagN
     bool found = false;
     if ( oldP == intervals )
     {
-        intervals = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(intervals, newP);
         found = true;
     }
     else

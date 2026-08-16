@@ -2,6 +2,7 @@
 #define ReferenceFunction_H
 
 #include "TypedFunction.h"
+#include "DagNodeTypeUtilities.h"
 #include "TypedDagNode.h"
 
 namespace RevBayesCore {
@@ -64,7 +65,7 @@ void RevBayesCore::ReferenceFunction<valType>::swapParameterInternal(const DagNo
     
     if (oldP == x)
     {
-        x = static_cast<const TypedDagNode<valType>* >( newP );
+        replaceNodeReference(x, newP);
     }
     
 }

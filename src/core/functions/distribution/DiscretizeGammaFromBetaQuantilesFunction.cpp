@@ -1,4 +1,5 @@
 #include "DiscretizeGammaFromBetaQuantilesFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include "DistributionBeta.h"
 #include "DistributionGamma.h"
@@ -36,27 +37,27 @@ void RevBayesCore::DiscretizeGammaFromBetaQuantilesFunction::swapParameterIntern
 
     if (oldP == alpha)
     {
-        alpha = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(alpha, newP);
     }
 
     if (oldP == beta)
     {
-        beta = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(beta, newP);
     }
 
     if (oldP == shape)
     {
-        shape = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(shape, newP);
     }
 
     if (oldP == rate)
     {
-        rate = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(rate, newP);
     }
 
     if (oldP == numCats)
     {
-        numCats = static_cast<const TypedDagNode<std::int64_t>* >( newP );
+        replaceNodeReference(numCats, newP);
     }
 
 }

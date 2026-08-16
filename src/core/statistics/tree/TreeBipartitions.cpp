@@ -1,4 +1,5 @@
 #include "TreeBipartitions.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <algorithm>
 #include <cstddef>
@@ -61,7 +62,7 @@ void TreeBipartitions::swapParameterInternal(const DagNode *oldP, const DagNode 
     
     if (oldP == tree)
     {
-        tree = static_cast<const TypedDagNode<Tree>* >( newP );
+        replaceNodeReference(tree, newP);
     }
     
 }

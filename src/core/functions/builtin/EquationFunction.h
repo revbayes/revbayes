@@ -23,6 +23,7 @@
 #define EquationFunction_H
 
 #include "RbBoolean.h"
+#include "DagNodeTypeUtilities.h"
 #include "TypedFunction.h"
 
 #include <vector>
@@ -96,11 +97,11 @@ void RevBayesCore::EquationFunction<leftValueType,rightValueType>::swapParameter
     
     if ( oldP == left )
     {
-        left = static_cast<const TypedDagNode<leftValueType>* >( newP );
+        replaceNodeReference(left, newP);
     }
     if ( oldP == right )
     {
-        right = static_cast<const TypedDagNode<rightValueType>* >( newP );
+        replaceNodeReference(right, newP);
     }
     
 }

@@ -1,5 +1,6 @@
 
 #include "HalfCauchyDistribution.h"
+#include "DagNodeTypeUtilities.h"
 
 #include "DistributionHalfCauchy.h"
 #include "RandomNumberFactory.h"
@@ -77,10 +78,10 @@ void HalfCauchyDistribution::swapParameterInternal(const DagNode *oldP, const Da
 {
     if (oldP == location)
     {
-        location = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(location, newP);
     }
     if (oldP == scale)
     {
-        scale = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(scale, newP);
     }
 }

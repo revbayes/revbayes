@@ -7,6 +7,7 @@
 //
 
 #include "GeneralRateGeneratorSequenceFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <string>
 
@@ -106,10 +107,10 @@ void GeneralRateGeneratorSequenceFunction::swapParameterInternal(const DagNode *
 {
     if (oldP == homogeneousRateMatrix)
     {
-        homogeneousRateMatrix = static_cast<const TypedDagNode<RateGenerator>* >( newP );
+        replaceNodeReference(homogeneousRateMatrix, newP);
     }
     else if (oldP == rateModifiers)
     {
-        rateModifiers = static_cast<const TypedDagNode<RbVector<CharacterHistoryRateModifier> >* >( newP );
+        replaceNodeReference(rateModifiers, newP);
     }
 }

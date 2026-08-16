@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "Clade.h"
+#include "DagNodeTypeUtilities.h"
 #include "DivergenceTimeCDF.h"
 #include "EpisodicBirthDeathProcess.h"
 #include "RandomNumberFactory.h"
@@ -521,19 +522,19 @@ void EpisodicBirthDeathProcess::swapParameterInternal(const DagNode *oldP, const
     
     if ( oldP == lambda_rates )
     {
-        lambda_rates = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(lambda_rates, newP);
     }
     else if ( oldP == lambda_times )
     {
-        lambda_times = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(lambda_times, newP);
     }
     else if ( oldP == mu_rates )
     {
-        mu_rates = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(mu_rates, newP);
     }
     else if ( oldP == mu_times )
     {
-        mu_times = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(mu_times, newP);
     }
     else
     {

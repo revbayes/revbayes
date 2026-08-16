@@ -1,4 +1,5 @@
 #include "GeometricDistribution.h"
+#include "DagNodeTypeUtilities.h"
 
 #include "DistributionGeometric.h"
 #include "RandomNumberFactory.h"
@@ -71,7 +72,7 @@ void GeometricDistribution::swapParameterInternal(const DagNode *oldP, const Dag
     
     if (oldP == p) 
     {
-        p = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(p, newP);
     }
 
 }

@@ -1,4 +1,5 @@
 #include "LnFunction.h"
+#include "DagNodeTypeUtilities.h"
 #include <cmath>
 #include "Cloneable.h"
 #include "TypedDagNode.h"
@@ -30,7 +31,7 @@ void LnFunction::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
 {
     if (oldP == a)
     {
-        a = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(a, newP);
     }
 }
 

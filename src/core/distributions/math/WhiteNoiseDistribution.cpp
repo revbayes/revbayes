@@ -1,4 +1,5 @@
 #include "WhiteNoiseDistribution.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cmath>
 
@@ -129,17 +130,17 @@ void WhiteNoiseDistribution::swapParameterInternal(const DagNode *oldP, const Da
     
     if ( oldP == mu )
     {
-        mu = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(mu, newP);
     }
     
     if ( oldP == sigma )
     {
-        sigma = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(sigma, newP);
     }
     
     if ( oldP == time )
     {
-        time = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(time, newP);
     }
 }
 

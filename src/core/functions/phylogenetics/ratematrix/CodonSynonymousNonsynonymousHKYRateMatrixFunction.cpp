@@ -1,4 +1,5 @@
 #include "CodonSynonymousNonsynonymousHKYRateMatrixFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <vector>
 
@@ -63,17 +64,17 @@ void CodonSynonymousNonsynonymousHKYRateMatrixFunction::swapParameterInternal(co
     
     if (oldP == base_frequencies)
     {
-        base_frequencies = static_cast<const TypedDagNode< Simplex >* >( newP );
+        replaceNodeReference(base_frequencies, newP);
     }
     
     if (oldP == kappa)
     {
-        kappa = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(kappa, newP);
     }
     
     if (oldP == omega)
     {
-        omega = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(omega, newP);
     }
     
 }

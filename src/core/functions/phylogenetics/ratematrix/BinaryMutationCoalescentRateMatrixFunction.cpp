@@ -1,4 +1,5 @@
 #include "BinaryMutationCoalescentRateMatrixFunction.h"
+#include "DagNodeTypeUtilities.h"
 #include "RateMatrix_BinaryMutationCoalescent.h"
 #include "RbException.h"
 
@@ -47,11 +48,11 @@ void BinaryMutationCoalescentRateMatrixFunction::swapParameterInternal(const Dag
     
     if (oldP == mu)
     {
-        mu = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(mu, newP);
     }
     else if (oldP == Ne)
     {
-        Ne = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(Ne, newP);
     }
     
 }

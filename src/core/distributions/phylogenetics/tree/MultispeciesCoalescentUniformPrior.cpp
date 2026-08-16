@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include "MultispeciesCoalescentUniformPrior.h"
+#include "DagNodeTypeUtilities.h"
 #include "DistributionUniform.h"
 #include "RandomNumberFactory.h"
 #include "RbConstants.h"
@@ -219,7 +220,7 @@ void MultispeciesCoalescentUniformPrior::swapParameterInternal(const DagNode *ol
 
     if ( oldP == max_theta )
     {
-        max_theta = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(max_theta, newP);
     }
 
     AbstractMultispeciesCoalescent::swapParameterInternal(oldP, newP);

@@ -2,6 +2,7 @@
 #define AbstractPhyloCTMCSiteHomogeneous_H
 
 #include "AbstractHomologousDiscreteCharacterData.h"
+#include "DagNodeTypeUtilities.h"
 #include "ConstantNode.h"
 #include "DiscreteTaxonData.h"
 #include "MatrixReal.h"
@@ -4065,57 +4066,57 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::swapParameterInte
 
     if (oldP == homogeneous_clock_rate)
     {
-        homogeneous_clock_rate = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(homogeneous_clock_rate, newP);
     }
     else if (oldP == heterogeneous_clock_rates)
     {
-        heterogeneous_clock_rates = static_cast<const TypedDagNode< RbVector< double > >* >( newP );
+        replaceNodeReference(heterogeneous_clock_rates, newP);
     }
     else if (oldP == mixture_model)
     {
-        mixture_model = static_cast<const TypedDagNode< SiteMixtureModel >* >( newP );
+        replaceNodeReference(mixture_model, newP);
     }
     else if (oldP == homogeneous_rate_matrix)
     {
-        homogeneous_rate_matrix = static_cast<const TypedDagNode< RateGenerator >* >( newP );
+        replaceNodeReference(homogeneous_rate_matrix, newP);
     }
     else if (oldP == heterogeneous_rate_matrices)
     {
-        heterogeneous_rate_matrices = static_cast<const TypedDagNode< RbVector< RateGenerator > >* >( newP );
+        replaceNodeReference(heterogeneous_rate_matrices, newP);
     }
     else if (oldP == observation_error_probability)
     {
-        observation_error_probability = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(observation_error_probability, newP);
     }
     else if (oldP == observation_error_frequencies)
     {
-        observation_error_frequencies = static_cast<const TypedDagNode< Simplex >* >( newP );
+        replaceNodeReference(observation_error_frequencies, newP);
     }
     else if (oldP == root_frequencies)
     {
-        root_frequencies = static_cast<const TypedDagNode< Simplex >* >( newP );
+        replaceNodeReference(root_frequencies, newP);
     }
     else if (oldP == site_matrix_probs)
     {
-        site_matrix_probs = static_cast<const TypedDagNode< Simplex >* >( newP );
+        replaceNodeReference(site_matrix_probs, newP);
     }
     else if (oldP == site_rates)
     {
-        site_rates = static_cast<const TypedDagNode< RbVector< double > >* >( newP );
+        replaceNodeReference(site_rates, newP);
     }
     else if (oldP == site_rates_probs)
     {
-        site_rates_probs = static_cast<const TypedDagNode< Simplex >* >( newP );
+        replaceNodeReference(site_rates_probs, newP);
     }
     else if (oldP == p_inv)
     {
-        p_inv = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(p_inv, newP);
     }
     else if (oldP == tau)
     {
         tau->getValue().getTreeChangeEventHandler().removeListener( this );
 
-        tau = static_cast<const TypedDagNode<Tree>* >( newP );
+        replaceNodeReference(tau, newP);
 
         tau->getValue().getTreeChangeEventHandler().addListener( this );
 

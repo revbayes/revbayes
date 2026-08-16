@@ -7,6 +7,7 @@
 //
 
 #include "DECStationaryFrequenciesFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 //#include "StationaryFrequencies_DECRateMatrix.h"
 #include "TransitionProbabilityMatrix.h"
@@ -64,6 +65,6 @@ void DECStationaryFrequenciesFunction::update( void ) {
 
 void DECStationaryFrequenciesFunction::swapParameterInternal(const DagNode *oldP, const DagNode *newP) {
     if (oldP == rateMatrix) {
-        rateMatrix = static_cast<const TypedDagNode<RateGenerator>* >( newP );
+        replaceNodeReference(rateMatrix, newP);
     }
 }

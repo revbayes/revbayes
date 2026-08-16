@@ -1,4 +1,5 @@
 #include "BirthDeathBurstProcess.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cmath>
 #include <string>
@@ -546,27 +547,27 @@ void BirthDeathBurstProcess::swapParameterInternal(const DagNode *oldP, const Da
 {
     if (oldP == lambda)
     {
-        lambda = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(lambda, newP);
     }
     
     if (oldP == mu)
     {
-        mu = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(mu, newP);
     }
     
     if (oldP == beta)
     {
-        beta = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(beta, newP);
     }
     
     if (oldP == time_burst)
     {
-        time_burst = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(time_burst, newP);
     }
     
     if (oldP == rho)
     {
-        rho = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(rho, newP);
     }
     
     // delegate the super-class

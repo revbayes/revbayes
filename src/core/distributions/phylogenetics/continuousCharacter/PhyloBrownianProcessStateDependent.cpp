@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "AbstractPhyloContinuousCharacterProcess.h"
+#include "DagNodeTypeUtilities.h"
 #include "BranchHistory.h"
 #include "ConstantNode.h"
 #include "DistributionNormal.h"
@@ -851,16 +852,16 @@ void PhyloBrownianProcessStateDependent::swapParameterInternal(const DagNode *ol
 
     if (oldP == homogeneous_sigma)
     {
-        homogeneous_sigma = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(homogeneous_sigma, newP);
     }
     else if (oldP == state_dependent_sigma)
     {
-        state_dependent_sigma = static_cast<const TypedDagNode< RbVector< double > >* >( newP );
+        replaceNodeReference(state_dependent_sigma, newP);
     }
 
     if (oldP == character_histories)
     {
-        character_histories = static_cast<const TypedDagNode< CharacterHistoryDiscrete >* >( newP );
+        replaceNodeReference(character_histories, newP);
     }
 
 }

@@ -1,4 +1,5 @@
 #include "GtrRateMatrixFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <vector>
 
@@ -65,11 +66,11 @@ void GtrRateMatrixFunction::swapParameterInternal(const DagNode *oldP, const Dag
 
     if (oldP == base_frequencies)
     {
-        base_frequencies = static_cast<const TypedDagNode< Simplex >* >( newP );
+        replaceNodeReference(base_frequencies, newP);
     }
     else if (oldP == exchangeability_rates)
     {
-        exchangeability_rates = static_cast<const TypedDagNode< Simplex >* >( newP );
+        replaceNodeReference(exchangeability_rates, newP);
     }
 
 }

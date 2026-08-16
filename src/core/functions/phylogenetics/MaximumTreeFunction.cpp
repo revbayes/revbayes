@@ -1,4 +1,5 @@
 #include "MaximumTreeFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <limits>
 #include <set>
@@ -50,7 +51,7 @@ void MaximumTreeFunction::update( void )
 void MaximumTreeFunction::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
 {
 
-        trees = static_cast<const TypedDagNode< RbVector<Tree> >* >( newP );
+        replaceNodeReference(trees, newP);
 
 }
 

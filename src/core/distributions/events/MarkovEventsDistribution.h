@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "TypedEventsDistribution.h"
+#include "DagNodeTypeUtilities.h"
 #include "OrderedEvents.h"
 #include "RbVector.h"
 #include "OrderedEventTimes.h"
@@ -358,7 +359,7 @@ void RevBayesCore::MarkovEventsDistribution<valueType>::swapParameterInternal(co
 {
     if (oldP == event_times)
     {
-        event_times = static_cast<const TypedDagNode< OrderedEventTimes > *>( newP );
+        replaceNodeReference(event_times, newP);
         this->redrawValue(); // I need to resimulate if the event times changed
     }
     else

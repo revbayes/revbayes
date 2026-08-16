@@ -1,4 +1,5 @@
 #include "AbstractFossilizedBirthDeathRangeProcess.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <algorithm>
 #include <cmath>
@@ -654,34 +655,34 @@ void AbstractFossilizedBirthDeathRangeProcess::swapParameterInternal(const DagNo
 {
     if (oldP == heterogeneous_lambda)
     {
-        heterogeneous_lambda = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(heterogeneous_lambda, newP);
     }
     else if (oldP == heterogeneous_mu)
     {
-        heterogeneous_mu = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(heterogeneous_mu, newP);
     }
     else if (oldP == heterogeneous_psi)
     {
-        heterogeneous_psi = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(heterogeneous_psi, newP);
     }
     else if (oldP == homogeneous_lambda)
     {
-        homogeneous_lambda = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(homogeneous_lambda, newP);
     }
     else if (oldP == homogeneous_mu)
     {
-        homogeneous_mu = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(homogeneous_mu, newP);
     }
     else if (oldP == homogeneous_psi)
     {
-        homogeneous_psi = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(homogeneous_psi, newP);
     }
     else if (oldP == homogeneous_rho)
     {
-        homogeneous_rho = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(homogeneous_rho, newP);
     }
     else if (oldP == timeline)
     {
-        timeline = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(timeline, newP);
     }
 }

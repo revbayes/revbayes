@@ -1,4 +1,5 @@
 #include "PhyloBrownianProcess.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
 #include <cmath>
@@ -130,17 +131,17 @@ void PhyloBrownianProcess::swapParameterInternal(const DagNode *oldP, const DagN
     
     if ( oldP == tau )
     {
-        tau = static_cast< const TypedDagNode<Tree> * >( newP );
+        replaceNodeReference(tau, newP);
     }
     
     if ( oldP == sigma )
     {
-        sigma = static_cast< const TypedDagNode<double> * >( newP );
+        replaceNodeReference(sigma, newP);
     }
     
     if ( oldP == drift )
     {
-        drift = static_cast< const TypedDagNode< double > * >( newP );
+        replaceNodeReference(drift, newP);
     }
     
 }

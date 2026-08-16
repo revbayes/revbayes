@@ -8,6 +8,7 @@
 #include <cassert>
 
 #include "AbstractBirthDeathProcess.h"
+#include "DagNodeTypeUtilities.h"
 #include "BirthDeathForwardSimulator.h"
 #include "BirthDeathSamplingTreatmentProcess.h"
 #include "Clade.h"
@@ -1901,110 +1902,110 @@ void BirthDeathSamplingTreatmentProcess::swapParameterInternal(const DagNode *ol
     // Rate parameters
     if (oldP == heterogeneous_lambda)
     {
-        heterogeneous_lambda = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(heterogeneous_lambda, newP);
     }
     
     if (oldP == heterogeneous_mu)
     {
-        heterogeneous_mu = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(heterogeneous_mu, newP);
     }
     
     if (oldP == heterogeneous_phi)
     {
-        heterogeneous_phi = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(heterogeneous_phi, newP);
     }
     
     if (oldP == homogeneous_lambda)
     {
-        homogeneous_lambda = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(homogeneous_lambda, newP);
     }
     
     if (oldP == homogeneous_mu)
     {
-        homogeneous_mu = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(homogeneous_mu, newP);
     }
     
     if (oldP == homogeneous_phi)
     {
-        homogeneous_phi = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(homogeneous_phi, newP);
     }
     
     if (oldP == heterogeneous_r)
     {
-        heterogeneous_r = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(heterogeneous_r, newP);
     }
     
     if (oldP == homogeneous_r)
     {
-        homogeneous_r = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(homogeneous_r, newP);
     }
     
     // Event probability parameters
     if (oldP == heterogeneous_Lambda)
     {
-        heterogeneous_Lambda = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(heterogeneous_Lambda, newP);
     }
     
     if (oldP == heterogeneous_Mu)
     {
-        heterogeneous_Mu = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(heterogeneous_Mu, newP);
     }
     
     if (oldP == heterogeneous_Phi)
     {
-        heterogeneous_Phi = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(heterogeneous_Phi, newP);
     }
     
     if (oldP == homogeneous_Phi)
     {
-        homogeneous_Phi = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(homogeneous_Phi, newP);
     }
     
     if (oldP == heterogeneous_R)
     {
-        heterogeneous_R = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(heterogeneous_R, newP);
     }
     
     // Rate timeline parameters
     if (oldP == interval_times_global)
     {
-        interval_times_global = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+        replaceNodeReference(interval_times_global, newP);
     }
     
     if (oldP == interval_times_speciation)
     {
-        interval_times_speciation = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+        replaceNodeReference(interval_times_speciation, newP);
     }
     
     if (oldP == interval_times_extinction)
     {
-        interval_times_extinction = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+        replaceNodeReference(interval_times_extinction, newP);
     }
     
     if (oldP == interval_times_sampling)
     {
-        interval_times_sampling = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+        replaceNodeReference(interval_times_sampling, newP);
     }
     
     if (oldP == interval_times_treatment)
     {
-        interval_times_treatment = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+        replaceNodeReference(interval_times_treatment, newP);
     }
         
     // Event timeline parameters
     if (oldP == interval_times_event_speciation)
     {
-        interval_times_event_speciation = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+        replaceNodeReference(interval_times_event_speciation, newP);
     }
     
     if (oldP == interval_times_event_extinction)
     {
-        interval_times_event_extinction = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+        replaceNodeReference(interval_times_event_extinction, newP);
     }
     
     if (oldP == interval_times_event_sampling)
     {
-        interval_times_event_sampling = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+        replaceNodeReference(interval_times_event_sampling, newP);
     }
     else
     {

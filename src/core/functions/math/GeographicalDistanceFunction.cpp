@@ -7,6 +7,7 @@
 //
 
 #include "GeographicalDistanceFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cmath>
 
@@ -55,19 +56,19 @@ void GeographicalDistanceFunction::swapParameterInternal(const DagNode *oldP, co
     
     if (oldP == latitude1)
     {
-        latitude1 = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(latitude1, newP);
     }
     else if (oldP == longitude1)
     {
-        longitude1 = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(longitude1, newP);
     }
     else if (oldP == latitude2)
     {
-        latitude2 = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(latitude2, newP);
     }
     else if (oldP == longitude2)
     {
-        longitude2 = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(longitude2, newP);
     }
     
 }

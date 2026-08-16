@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "AbstractRootedTreeDistribution.h"
+#include "DagNodeTypeUtilities.h"
 #include "UniformTopologyBranchLengthDistribution.h"
 #include "Clade.h"
 #include "TopologyConstrainedTreeDistribution.h"
@@ -1338,11 +1339,11 @@ void TopologyConstrainedTreeDistribution::swapParameterInternal( const DagNode *
     
     if ( oldP == backbone_topologies )
     {
-        backbone_topologies = static_cast<const TypedDagNode<RbVector<Tree> >* >( newP );
+        replaceNodeReference(backbone_topologies, newP);
     }
     else if ( oldP == backbone_topology )
     {
-        backbone_topology = static_cast<const TypedDagNode<Tree>* >( newP );
+        replaceNodeReference(backbone_topology, newP);
     }
     else
     {
