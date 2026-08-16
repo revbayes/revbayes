@@ -2,6 +2,7 @@
 #define Dist_markovEvents_H
 
 #include "OrderedEventTimes.h"
+#include "DistributionTypeUtilities.h"
 #include "RlOrderedEventTimes.h"
 #include "MarkovEventsDistribution.h"
 #include "RealPos.h"
@@ -85,7 +86,7 @@ RevBayesCore::MarkovEventsDistribution<typename valType::valueType>* RevLanguage
 
     // get the parameters
     const Distribution& rlDistribution									= static_cast<const Distribution &>( base_distribution->getRevObject() );
-    RevBayesCore::TypedDistribution<typename valType::valueType>* g0    = static_cast<RevBayesCore::TypedDistribution<typename valType::valueType>* >( rlDistribution.createDistribution() );
+    RevBayesCore::TypedDistribution<typename valType::valueType>* g0    = RevBayesCore::assumeDistributionOf<typename valType::valueType>( rlDistribution.createDistribution() );
     RevBayesCore::TypedDagNode<RevBayesCore::OrderedEventTimes>* oet    = static_cast<const RlOrderedEventTimes &>( event_times->getRevObject() ).getDagNode();
 
     RevBayesCore::MarkovEventsDistribution<typename valType::valueType>* d = new RevBayesCore::MarkovEventsDistribution<typename valType::valueType>(oet, g0);

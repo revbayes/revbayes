@@ -1,4 +1,5 @@
 #include "Move_IndependentTopology.h"
+#include "DistributionTypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
@@ -67,7 +68,7 @@ void Move_IndependentTopology::constructInternalObject( void )
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
 
     const Distribution& rlDistribution                        = static_cast<const Distribution &>( proposal_distribution->getRevObject() );
-    RevBayesCore::TypedDistribution<RevBayesCore::Tree>* prop = static_cast<RevBayesCore::TypedDistribution<RevBayesCore::Tree>* >( rlDistribution.createDistribution() );
+    RevBayesCore::TypedDistribution<RevBayesCore::Tree>* prop = RevBayesCore::assumeDistributionOf<RevBayesCore::Tree>( rlDistribution.createDistribution() );
 
     const RevBayesCore::Clade& c      = static_cast<const Clade&>( outgroup->getRevObject() ).getValue();
 

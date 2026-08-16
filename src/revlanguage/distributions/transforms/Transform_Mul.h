@@ -9,6 +9,7 @@
 
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
+#include "DistributionTypeUtilities.h"
 #include "Real.h"
 #include "RlSimplex.h"
 #include "StochasticNode.h"
@@ -124,7 +125,7 @@ namespace RevLanguage {
 
         // get the parameters
         const Distribution& rl_vp               = static_cast<const Distribution &>( base_distribution->getRevObject() );
-        Core::TypedDistribution<double>* vp     = static_cast<Core::TypedDistribution<double>* >( rl_vp.createDistribution() );
+        Core::TypedDistribution<double>* vp     = Core::assumeDistributionOf<double>( rl_vp.createDistribution() );
 
         Core::TypedDagNode<double>* l           = static_cast<const T &>( lambda->getRevObject() ).getDagNode();
 

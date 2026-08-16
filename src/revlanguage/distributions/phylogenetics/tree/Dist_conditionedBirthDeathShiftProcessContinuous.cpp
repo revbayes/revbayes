@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "ArgumentRule.h"
+#include "DistributionTypeUtilities.h"
 #include "ArgumentRules.h"
 #include "Dist_conditionedBirthDeathShiftProcessContinuous.h"
 #include "ModelVector.h"
@@ -82,14 +83,14 @@ RevBayesCore::ConditionedBirthDeathShiftProcessContinuous* Dist_conditionedBirth
     if ( speciation->getRevObject() != RevNullObject::getInstance() )
     {
         const Distribution& rl_distribution_speciation  = static_cast<const Distribution &>( speciation->getRevObject() );
-        distribution_speciation = static_cast<RevBayesCore::TypedDistribution<double>* >( rl_distribution_speciation.createDistribution() );
+        distribution_speciation = RevBayesCore::assumeDistributionOf<double>( rl_distribution_speciation.createDistribution() );
     }
     
     RevBayesCore::TypedDistribution<double>* distribution_extinction = NULL;
     if ( extinction->getRevObject() != RevNullObject::getInstance() )
     {
         const Distribution& rl_distribution_extinction  = static_cast<const Distribution &>( extinction->getRevObject() );
-        distribution_extinction = static_cast<RevBayesCore::TypedDistribution<double>* >( rl_distribution_extinction.createDistribution() );
+        distribution_extinction = RevBayesCore::assumeDistributionOf<double>( rl_distribution_extinction.createDistribution() );
     }
 
     RevBayesCore::TypedDagNode<double>* er   = static_cast<const RealPos &>( event_rate->getRevObject() ).getDagNode();

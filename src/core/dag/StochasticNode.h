@@ -212,7 +212,7 @@ RevBayesCore::TypedDistribution<valueType>& RevBayesCore::StochasticNode<valueTy
 template<class valueType>
 const RevBayesCore::TypedDistribution<valueType>& RevBayesCore::StochasticNode<valueType>::getDistribution(void) const
 {
-    return *static_cast<const TypedDistribution<valueType>*>( this->distribution );
+    return *assumeDistributionOf<valueType>( this->distribution );
 }
 
 
@@ -305,7 +305,7 @@ valueType& RevBayesCore::StochasticNode<valueType>::getValue(void)
 template<class valueType>
 const valueType& RevBayesCore::StochasticNode<valueType>::getValue(void) const
 {
-    return static_cast<const TypedDistribution<valueType>*>( this->distribution )->getValue();
+    return assumeDistributionOf<valueType>( this->distribution )->getValue();
 }
 
 
