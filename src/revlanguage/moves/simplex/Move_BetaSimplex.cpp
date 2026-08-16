@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "ArgumentRule.h"
+#include "DagNodeTypeUtilities.h"
 #include "ArgumentRules.h"
 #include "RlBoolean.h"
 #include "MetropolisHastingsMove.h"
@@ -58,7 +59,7 @@ void Move_BetaSimplex::constructInternalObject( void )
     double r = static_cast<const RealPos &>( tuneTarget->getRevObject() ).getValue();
 
     RevBayesCore::TypedDagNode< RevBayesCore::Simplex>* tmp = static_cast<const Simplex &>( x->getRevObject() ).getDagNode();
-    RevBayesCore::StochasticNode< RevBayesCore::Simplex> *n = static_cast<RevBayesCore::StochasticNode< RevBayesCore::Simplex > *>( tmp );
+    RevBayesCore::StochasticNode< RevBayesCore::Simplex> *n = RevBayesCore::assumeStochastic< RevBayesCore::Simplex >( tmp );
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *prop = new RevBayesCore::BetaSimplexProposal(n,a,r);

@@ -6,6 +6,7 @@
  */
 
 #include "Move_GraphFlipClique.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
 #include <string>
@@ -80,7 +81,7 @@ void Move_GraphFlipClique::constructInternalObject( void )
     RevBayesCore::Proposal *p = NULL;
     
     RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* tmp = static_cast<const MatrixRealSymmetric &>( v->getRevObject() ).getDagNode();
-    RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::MatrixReal> *>( tmp );
+    RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *n = RevBayesCore::assumeStochastic<RevBayesCore::MatrixReal>( tmp );
     
     bool symm = v->getRevObject().isType( MatrixRealSymmetric::getClassTypeSpec() );
     p = new RevBayesCore::GraphFlipCliqueProposal(n, e, rs, vp, ep, symm );

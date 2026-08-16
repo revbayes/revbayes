@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "RlMove.h"
+#include "DagNodeTypeUtilities.h"
 #include "RevObject.h"
 #include "RevPtr.h"
 #include "RevVariable.h"
@@ -90,7 +91,7 @@ void RevLanguage::Move_IndependentPriorSampler<rlValueType>::constructInternalOb
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     
     RevBayesCore::TypedDagNode<typename rlValueType::valueType>* tmp = static_cast<const rlValueType &>( x->getRevObject() ).getDagNode();
-    RevBayesCore::StochasticNode< typename rlValueType::valueType > *sn = static_cast<RevBayesCore::StochasticNode< typename rlValueType::valueType > *>( tmp );
+    RevBayesCore::StochasticNode< typename rlValueType::valueType > *sn = RevBayesCore::assumeStochastic< typename rlValueType::valueType >( tmp );
     
     RevBayesCore::Proposal *p = new RevBayesCore::IndependentPriorProposal< typename rlValueType::valueType >(sn);
     value = new RevBayesCore::MetropolisHastingsMove(p, w, false);

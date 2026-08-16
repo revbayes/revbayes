@@ -3,6 +3,7 @@
 #include <string>
 
 #include "ArgumentRule.h"
+#include "DagNodeTypeUtilities.h"
 #include "ArgumentRules.h"
 #include "MetropolisHastingsMove.h"
 #include "ModelVector.h"
@@ -59,12 +60,12 @@ void Move_TreeScale::constructInternalObject( void )
     if ( tree->getRevObject().isType( TimeTree::getClassTypeSpec() ) )
     {
         RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
-        t = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
+        t = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
     }
     else if ( tree->getRevObject().isType( ModelVector<TimeTree>::getClassTypeSpec() ) )
     {
         RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::Tree> > *tmp = static_cast<const ModelVector<TimeTree> &>( tree->getRevObject() ).getDagNode();
-        vec_t = static_cast<RevBayesCore::StochasticNode< RevBayesCore::RbVector<RevBayesCore::Tree> > *>( tmp );
+        vec_t = RevBayesCore::assumeStochastic< RevBayesCore::RbVector<RevBayesCore::Tree> >( tmp );
     }
     else
     {
@@ -75,7 +76,7 @@ void Move_TreeScale::constructInternalObject( void )
     if ( rootAge != NULL && rootAge->getRevObject() != RevNullObject::getInstance() )
     {
         RevBayesCore::TypedDagNode<double> *tmp = static_cast<const RealPos &>( rootAge->getRevObject() ).getDagNode();
-        ra = static_cast<RevBayesCore::StochasticNode<double> *>( tmp );
+        ra = RevBayesCore::assumeStochastic<double>( tmp );
     }
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     double l = static_cast<const RealPos &>( delta->getRevObject() ).getValue();

@@ -3,6 +3,7 @@
 #include <string>
 
 #include "ArgumentRule.h"
+#include "DagNodeTypeUtilities.h"
 #include "ArgumentRules.h"
 #include "ConjugateInverseWishartMove.h"
 #include "Move_ConjugateInverseWishart.h"
@@ -50,7 +51,7 @@ void Move_ConjugateInverseWishart::constructInternalObject( void )
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
 
     RevBayesCore::TypedDagNode< RevBayesCore::MatrixReal >* tmp = static_cast<const MatrixRealSymmetric &>( x->getRevObject() ).getDagNode();
-    RevBayesCore::StochasticNode< RevBayesCore::MatrixReal > *z = static_cast< RevBayesCore::StochasticNode< RevBayesCore::MatrixReal >* >( tmp );
+    RevBayesCore::StochasticNode< RevBayesCore::MatrixReal > *z = RevBayesCore::assumeStochastic< RevBayesCore::MatrixReal >( tmp );
     
     value = new RevBayesCore::ConjugateInverseWishartMove(z, w);
 }

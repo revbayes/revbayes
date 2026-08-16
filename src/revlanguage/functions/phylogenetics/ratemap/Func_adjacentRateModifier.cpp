@@ -7,6 +7,7 @@
 //
 
 #include "Func_adjacentRateModifier.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
 #include <ostream>
@@ -84,7 +85,7 @@ RevBayesCore::TypedFunction< RevBayesCore::CharacterHistoryRateModifier >* Func_
     if (matrix->getRevObject().isType( MatrixReal::getClassTypeSpec() ))
     {
         RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* tmp = static_cast<const MatrixReal &>( matrix->getRevObject() ).getDagNode();
-        RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::MatrixReal> *>( tmp );
+        RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *n = RevBayesCore::assumeStochastic<RevBayesCore::MatrixReal>( tmp );
         
         // validate input
         if (n != NULL) {

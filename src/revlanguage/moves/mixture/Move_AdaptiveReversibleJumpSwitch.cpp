@@ -1,4 +1,5 @@
 #include "AdaptiveReversibleJumpProposal.h"
+#include "DagNodeTypeUtilities.h"
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "MetropolisHastingsMove.h"
@@ -39,7 +40,7 @@ void Move_AdaptiveReversibleJumpSwitch::constructInternalObject( void )
     // now allocate a new vector-scale move
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode<double>* tmp = static_cast<const Real &>( x->getRevObject() ).getDagNode();
-    RevBayesCore::StochasticNode<double> *sn = static_cast<RevBayesCore::StochasticNode<double> *>( tmp );
+    RevBayesCore::StochasticNode<double> *sn = RevBayesCore::assumeStochastic<double>( tmp );
     long wbl = static_cast<const Natural &>( wait_before_learning->getRevObject() ).getValue();
     long wbu = static_cast<const Natural &>( wait_before_using->getRevObject() ).getValue();
     long ue  = static_cast<const Natural &>( update_every->getRevObject() ).getValue();

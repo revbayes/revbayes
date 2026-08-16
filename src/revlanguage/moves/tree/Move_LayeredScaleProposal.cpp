@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "ArgumentRule.h"
+#include "DagNodeTypeUtilities.h"
 #include "ArgumentRules.h"
 #include "MetropolisHastingsMove.h"
 #include "Move_LayeredScaleProposal.h"
@@ -81,7 +82,7 @@ void Move_LayeredScaleProposal::constructInternalObject( void )
      double r = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
 
      RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
-     RevBayesCore::StochasticNode<RevBayesCore::Tree> *st = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
+     RevBayesCore::StochasticNode<RevBayesCore::Tree> *st = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
 
      bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
 

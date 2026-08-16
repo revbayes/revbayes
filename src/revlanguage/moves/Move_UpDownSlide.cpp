@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "ArgumentRule.h"
+#include "DagNodeTypeUtilities.h"
 #include "ArgumentRules.h"
 #include "MetropolisHastingsMove.h"
 #include "ModelVector.h"
@@ -148,7 +149,7 @@ RevPtr<RevVariable> Move_UpDownSlide::executeMethod(const std::string& name, con
         
         if ( uReal != NULL )
         {
-            RevBayesCore::StochasticNode<double> *the_node = dynamic_cast< RevBayesCore::StochasticNode<double> * >( uReal->getDagNode() );
+            RevBayesCore::StochasticNode<double> *the_node = RevBayesCore::checkStochastic<double>( uReal->getDagNode() );
             RevBayesCore::MetropolisHastingsMove *m = static_cast<RevBayesCore::MetropolisHastingsMove*>(this->value);
             RevBayesCore::UpDownSlideProposal &prop = static_cast<RevBayesCore::UpDownSlideProposal&>( m->getProposal() );
             
@@ -163,7 +164,7 @@ RevPtr<RevVariable> Move_UpDownSlide::executeMethod(const std::string& name, con
         }
         else if ( uVector != NULL && uVector->getDagNode()->isStochastic() == true )
         {
-            RevBayesCore::StochasticNode<RevBayesCore::RbVector<double> > *the_node = dynamic_cast< RevBayesCore::StochasticNode<RevBayesCore::RbVector<double> > * >( uVector->getDagNode() );
+            RevBayesCore::StochasticNode<RevBayesCore::RbVector<double> > *the_node = RevBayesCore::checkStochastic<RevBayesCore::RbVector<double> >( uVector->getDagNode() );
             RevBayesCore::MetropolisHastingsMove *m = static_cast<RevBayesCore::MetropolisHastingsMove*>(this->value);
             RevBayesCore::UpDownSlideProposal &prop = static_cast<RevBayesCore::UpDownSlideProposal&>( m->getProposal() );
             
@@ -186,7 +187,7 @@ RevPtr<RevVariable> Move_UpDownSlide::executeMethod(const std::string& name, con
             for (std::vector<const RevBayesCore::DagNode*>::const_iterator it = parents.begin(); it != parents.end(); ++it)
             {
                 const RevBayesCore::DagNode *tmp_node = *it;
-                const RevBayesCore::StochasticNode<double> *the_node = dynamic_cast< const RevBayesCore::StochasticNode<double>* >( tmp_node );
+                const RevBayesCore::StochasticNode<double> *the_node = RevBayesCore::checkStochastic<double>( tmp_node );
                 if ( the_node != NULL )
                 {
                     prop.addVariable( const_cast<RevBayesCore::StochasticNode<double> *>( the_node ), up );
@@ -208,7 +209,7 @@ RevPtr<RevVariable> Move_UpDownSlide::executeMethod(const std::string& name, con
             for (std::vector<const RevBayesCore::DagNode*>::const_iterator it = parents.begin(); it != parents.end(); ++it)
             {
                 const RevBayesCore::DagNode *tmp_node = *it;
-                const RevBayesCore::StochasticNode<double> *the_node = dynamic_cast< const RevBayesCore::StochasticNode<double>* >( tmp_node );
+                const RevBayesCore::StochasticNode<double> *the_node = RevBayesCore::checkStochastic<double>( tmp_node );
                 if ( the_node != NULL )
                 {
                     prop.addVariable( const_cast<RevBayesCore::StochasticNode<double> *>( the_node ), up );
@@ -238,7 +239,7 @@ RevPtr<RevVariable> Move_UpDownSlide::executeMethod(const std::string& name, con
         
         if ( uReal != NULL )
         {
-            RevBayesCore::StochasticNode<double> *the_node = dynamic_cast< RevBayesCore::StochasticNode<double> * >( uReal->getDagNode() );
+            RevBayesCore::StochasticNode<double> *the_node = RevBayesCore::checkStochastic<double>( uReal->getDagNode() );
             RevBayesCore::MetropolisHastingsMove *m = static_cast<RevBayesCore::MetropolisHastingsMove*>(this->value);
             RevBayesCore::UpDownSlideProposal &prop = static_cast<RevBayesCore::UpDownSlideProposal&>( m->getProposal() );
             
@@ -253,7 +254,7 @@ RevPtr<RevVariable> Move_UpDownSlide::executeMethod(const std::string& name, con
         }
         else if ( uVector != NULL && uVector->getDagNode()->isStochastic() == true )
         {
-            RevBayesCore::StochasticNode<RevBayesCore::RbVector<double> > *the_node = dynamic_cast< RevBayesCore::StochasticNode<RevBayesCore::RbVector<double> > * >( uVector->getDagNode() );
+            RevBayesCore::StochasticNode<RevBayesCore::RbVector<double> > *the_node = RevBayesCore::checkStochastic<RevBayesCore::RbVector<double> >( uVector->getDagNode() );
             RevBayesCore::MetropolisHastingsMove *m = static_cast<RevBayesCore::MetropolisHastingsMove*>(this->value);
             RevBayesCore::UpDownSlideProposal &prop = static_cast<RevBayesCore::UpDownSlideProposal&>( m->getProposal() );
             
@@ -275,7 +276,7 @@ RevPtr<RevVariable> Move_UpDownSlide::executeMethod(const std::string& name, con
             std::vector<const RevBayesCore::DagNode*> parents = deterministic_vector->getParents();
             for (std::vector<const RevBayesCore::DagNode*>::const_iterator it = parents.begin(); it != parents.end(); ++it)
             {
-                const RevBayesCore::StochasticNode<double> *the_node = dynamic_cast< const RevBayesCore::StochasticNode<double>* >( *it );
+                const RevBayesCore::StochasticNode<double> *the_node = RevBayesCore::checkStochastic<double>( *it );
                 if ( the_node != NULL )
                 {
                     prop.removeVariable( const_cast<RevBayesCore::StochasticNode<double> *>( the_node ), up );
@@ -296,7 +297,7 @@ RevPtr<RevVariable> Move_UpDownSlide::executeMethod(const std::string& name, con
             std::vector<const RevBayesCore::DagNode*> parents = deterministic_vector->getParents();
             for (std::vector<const RevBayesCore::DagNode*>::const_iterator it = parents.begin(); it != parents.end(); ++it)
             {
-                const RevBayesCore::StochasticNode<double> *the_node = dynamic_cast< const RevBayesCore::StochasticNode<double>* >( *it );
+                const RevBayesCore::StochasticNode<double> *the_node = RevBayesCore::checkStochastic<double>( *it );
                 if ( the_node != NULL )
                 {
                     prop.removeVariable( const_cast<RevBayesCore::StochasticNode<double> *>( the_node ), up );

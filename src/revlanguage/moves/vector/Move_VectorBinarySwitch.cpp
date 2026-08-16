@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "ArgumentRule.h"
+#include "DagNodeTypeUtilities.h"
 #include "ArgumentRules.h"
 #include "MetropolisHastingsMove.h"
 #include "ModelVector.h"
@@ -75,7 +76,7 @@ void Move_VectorBinarySwitch::constructInternalObject( void )
     std::vector< RevBayesCore::StochasticNode<std::int64_t>* > stoch_nodes;
     for (std::vector<const RevBayesCore::DagNode*>::const_iterator it = dag_nodes.begin(); it != dag_nodes.end(); ++it)
     {
-        const RevBayesCore::StochasticNode<std::int64_t> *the_node = dynamic_cast< const RevBayesCore::StochasticNode<std::int64_t>* >( *it );
+        const RevBayesCore::StochasticNode<std::int64_t> *the_node = RevBayesCore::checkStochastic<std::int64_t>( *it );
         if ( the_node != NULL )
         {
             stoch_nodes.push_back( const_cast< RevBayesCore::StochasticNode<std::int64_t>* >( the_node ) );

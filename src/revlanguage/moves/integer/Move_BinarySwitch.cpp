@@ -3,6 +3,7 @@
 #include <string>
 
 #include "ArgumentRule.h"
+#include "DagNodeTypeUtilities.h"
 #include "ArgumentRules.h"
 #include "Integer.h"
 #include "MetropolisHastingsMove.h"
@@ -66,7 +67,7 @@ void Move_BinarySwitch::constructInternalObject( void )
     // now allocate a new binary-switch move
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode<std::int64_t>* tmp = static_cast<const Integer &>( x->getRevObject() ).getDagNode();
-    RevBayesCore::StochasticNode<std::int64_t> *n = static_cast<RevBayesCore::StochasticNode<std::int64_t> *>( tmp );
+    RevBayesCore::StochasticNode<std::int64_t> *n = RevBayesCore::assumeStochastic<std::int64_t>( tmp );
     
     // finally create the internal move object
     RevBayesCore::Proposal *prop = new RevBayesCore::BinarySwitchProposal(n);

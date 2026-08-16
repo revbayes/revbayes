@@ -3,6 +3,7 @@
 #include <string>
 
 #include "ArgumentRule.h"
+#include "DagNodeTypeUtilities.h"
 #include "ArgumentRules.h"
 #include "MetropolisHastingsMove.h"
 #include "ModelVector.h"
@@ -53,12 +54,12 @@ void Move_RootTimeSlideUniform::constructInternalObject( void )
     if ( tree->getRevObject().isType( TimeTree::getClassTypeSpec() ) )
     {
         RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
-        t = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
+        t = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
     }
     else if ( tree->getRevObject().isType( ModelVector<TimeTree>::getClassTypeSpec() ) )
     {
         RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::Tree> > *tmp = static_cast<const ModelVector<TimeTree> &>( tree->getRevObject() ).getDagNode();
-        vec_t = static_cast<RevBayesCore::StochasticNode< RevBayesCore::RbVector<RevBayesCore::Tree> > *>( tmp );
+        vec_t = RevBayesCore::assumeStochastic< RevBayesCore::RbVector<RevBayesCore::Tree> >( tmp );
     }
     else
     {
@@ -67,7 +68,7 @@ void Move_RootTimeSlideUniform::constructInternalObject( void )
     
 
     RevBayesCore::TypedDagNode<double> *tmp_double = static_cast<const RealPos &>( origin->getRevObject() ).getDagNode();
-    RevBayesCore::StochasticNode<double> *d = static_cast<RevBayesCore::StochasticNode<double> *>( tmp_double );
+    RevBayesCore::StochasticNode<double> *d = RevBayesCore::assumeStochastic<double>( tmp_double );
     
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     

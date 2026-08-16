@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "ArgumentRule.h"
+#include "DagNodeTypeUtilities.h"
 #include "ArgumentRules.h"
 #include "HSRFHyperpriorsGibbsMove.h"
 #include "HSRFOrder2HyperpriorsGibbsMove.h"
@@ -60,14 +61,14 @@ void Move_HSRFHyperpriorsGibbs::constructInternalObject( void )
     double p = static_cast<const RealPos &>( prop_global->getRevObject() ).getValue();
 
     RevBayesCore::TypedDagNode<double>* tmp = static_cast<const RealPos &>( gs->getRevObject() ).getDagNode();
-    RevBayesCore::StochasticNode<double> *g = static_cast< RevBayesCore::StochasticNode<double>* >( tmp );
+    RevBayesCore::StochasticNode<double> *g = RevBayesCore::assumeStochastic<double>( tmp );
 
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp1 = static_cast<const ModelVector<RealPos> &>( ls->getRevObject() ).getDagNode();
     std::vector<const RevBayesCore::DagNode*> p1 = tmp1->getParents();
     std::vector< RevBayesCore::StochasticNode<double> *> l;
     for (std::vector<const RevBayesCore::DagNode*>::const_iterator it = p1.begin(); it != p1.end(); ++it)
     {
-        const RevBayesCore::StochasticNode<double> *the_node = dynamic_cast< const RevBayesCore::StochasticNode<double>* >( *it );
+        const RevBayesCore::StochasticNode<double> *the_node = RevBayesCore::checkStochastic<double>( *it );
         if ( the_node != NULL )
         {
             l.push_back( const_cast< RevBayesCore::StochasticNode<double>* >( the_node ) );
@@ -83,7 +84,7 @@ void Move_HSRFHyperpriorsGibbs::constructInternalObject( void )
     std::vector< RevBayesCore::StochasticNode<double> *> n;
     for (std::vector<const RevBayesCore::DagNode*>::const_iterator it = p2.begin(); it != p2.end(); ++it)
     {
-        const RevBayesCore::StochasticNode<double> *the_node = dynamic_cast< const RevBayesCore::StochasticNode<double>* >( *it );
+        const RevBayesCore::StochasticNode<double> *the_node = RevBayesCore::checkStochastic<double>( *it );
         if ( the_node != NULL )
         {
             n.push_back( const_cast< RevBayesCore::StochasticNode<double>* >( the_node ) );

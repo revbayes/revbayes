@@ -83,7 +83,7 @@ StochasticCharacterMappingMonitor<characterType>::StochasticCharacterMappingMoni
 
     // the cdbdp is both the tree and character evolution model
     addVariable( cdbdp );
-    tree = static_cast< StochasticNode<Tree> *>( cdbdp );
+    tree = RevBayesCore::assumeStochastic<Tree>( cdbdp );
 
 }
 

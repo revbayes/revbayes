@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "ArgumentRule.h"
+#include "DagNodeTypeUtilities.h"
 #include "ArgumentRules.h"
 #include "RlBoolean.h"
 #include "MetropolisHastingsMove.h"
@@ -71,7 +72,7 @@ void Move_GammaScale::constructInternalObject( void )
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     double r = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode<double>* tmp = static_cast<const RealPos &>( x->getRevObject() ).getDagNode();
-    RevBayesCore::StochasticNode<double> *n = dynamic_cast<RevBayesCore::StochasticNode<double> *>( tmp );
+    RevBayesCore::StochasticNode<double> *n = RevBayesCore::requireStochastic<double>( tmp );
     p = new RevBayesCore::GammaScaleProposal(n, d, r);
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
     
@@ -218,5 +219,4 @@ void Move_GammaScale::setConstParameter(const std::string& name, const RevPtr<co
     }
     
 }
-
 

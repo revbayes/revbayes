@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "ArgumentRule.h"
+#include "DagNodeTypeUtilities.h"
 #include "ArgumentRules.h"
 #include "MetropolisHastingsMove.h"
 #include "Move_NodeRateTimeSlideUniform.h"
@@ -56,7 +57,7 @@ void Move_NodeRateTimeSlideUniform::constructInternalObject( void )
     
     // now allocate a new move
     RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
-    RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
+    RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
     
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     
@@ -65,7 +66,7 @@ void Move_NodeRateTimeSlideUniform::constructInternalObject( void )
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* r = static_cast<const ModelVector<RealPos> &>( rates->getRevObject() ).getDagNode();
     if( r->isStochastic() == true )
     {
-        RevBayesCore::StochasticNode<RevBayesCore::RbVector<double> >* stoch = dynamic_cast<RevBayesCore::StochasticNode<RevBayesCore::RbVector<double> >* >( r );
+        RevBayesCore::StochasticNode<RevBayesCore::RbVector<double> >* stoch = RevBayesCore::checkStochastic<RevBayesCore::RbVector<double> >( r );
 
         p = new RevBayesCore::NodeRateTimeSlideUniformProposal(t, stoch);
     }
@@ -76,7 +77,7 @@ void Move_NodeRateTimeSlideUniform::constructInternalObject( void )
         std::vector< RevBayesCore::StochasticNode<double> *> n;
         for (std::vector<const RevBayesCore::DagNode*>::const_iterator it = parents.begin(); it != parents.end(); ++it)
         {
-            const RevBayesCore::StochasticNode<double> *the_node = dynamic_cast< const RevBayesCore::StochasticNode<double>* >( *it );
+            const RevBayesCore::StochasticNode<double> *the_node = RevBayesCore::checkStochastic<double>( *it );
             if ( the_node != NULL )
             {
                 n.push_back( const_cast< RevBayesCore::StochasticNode<double>* >( the_node ) );

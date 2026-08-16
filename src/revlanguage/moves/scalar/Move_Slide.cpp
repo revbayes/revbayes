@@ -3,6 +3,7 @@
 #include <string>
 
 #include "ArgumentRule.h"
+#include "DagNodeTypeUtilities.h"
 #include "ArgumentRules.h"
 #include "RlBoolean.h"
 #include "ContinuousStochasticNode.h"
@@ -80,7 +81,7 @@ void Move_Slide::constructInternalObject( void )
     }
     else
     {
-        RevBayesCore::StochasticNode<double> *n2 = dynamic_cast<RevBayesCore::StochasticNode<double> *>( tmp );
+        RevBayesCore::StochasticNode<double> *n2 = RevBayesCore::requireStochastic<double>( tmp );
         p = new RevBayesCore::SlideProposal(n2,d,r);
         
     }
