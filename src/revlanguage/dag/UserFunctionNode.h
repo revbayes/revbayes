@@ -2,6 +2,7 @@
 #define UserFunctionNode_H
 
 #include "DynamicNode.h"
+#include "DagNodeTypeUtilities.h"
 #include "RevPtr.h"
 #include "RevVariable.h"
 #include "RbFileManager.h"
@@ -305,7 +306,7 @@ typename rlType::valueType& UserFunctionNode<rlType>::getValue( void )
     if ( this->touched )
         update();
     
-    return static_cast< RevBayesCore::TypedDagNode<typename rlType::valueType>* >( returnVariable->getRevObject().getDagNode() )->getValue();
+    return RevBayesCore::getValueOfType<typename rlType::valueType>( returnVariable->getRevObject().getDagNode() );
 }
 
 
@@ -321,7 +322,7 @@ const typename rlType::valueType& UserFunctionNode<rlType>::getValue( void ) con
     if ( this->touched )
         const_cast<UserFunctionNode<rlType>*>( this )->update();
     
-    return static_cast< RevBayesCore::TypedDagNode<typename rlType::valueType>* >( returnVariable->getRevObject().getDagNode() )->getValue();
+    return RevBayesCore::getValueOfType<typename rlType::valueType>( returnVariable->getRevObject().getDagNode() );
 }
 
 
