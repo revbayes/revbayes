@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "ArgumentRule.h"
+#include "DistributionTypeUtilities.h"
 #include "ArgumentRules.h"
 #include "Dist_uniformTopologyBranchLength.h"
 #include "ModelVector.h"
@@ -88,7 +89,7 @@ RevBayesCore::UniformTopologyBranchLengthDistribution* Dist_uniformTopologyBranc
     }
     
     const Distribution& rlDistribution              = static_cast<const Distribution &>( branch_length_prior->getRevObject() );
-    RevBayesCore::TypedDistribution<double>* blp    = static_cast<RevBayesCore::TypedDistribution<double>* >( rlDistribution.createDistribution() );
+    RevBayesCore::TypedDistribution<double>* blp    = RevBayesCore::assumeDistributionOf<double>( rlDistribution.createDistribution() );
     
     
     bool r = false;
