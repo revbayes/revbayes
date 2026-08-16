@@ -145,7 +145,7 @@ RevBayesCore::TypedFunction<valueType>& RevBayesCore::DeterministicNode<valueTyp
 template<class valueType>
 const RevBayesCore::TypedFunction<valueType>& RevBayesCore::DeterministicNode<valueType>::getFunction(void) const
 {
-    return *static_cast<const TypedFunction<valueType>*>( this->function );
+    return *assumeFunctionReturns<valueType>( this->function );
 }
 
 

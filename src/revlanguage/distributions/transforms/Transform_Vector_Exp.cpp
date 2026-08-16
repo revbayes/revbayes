@@ -2,6 +2,7 @@
 
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
+#include "DistributionTypeUtilities.h"
 #include "Real.h"
 #include "RlSimplex.h"
 #include "StochasticNode.h"
@@ -32,7 +33,7 @@ Core::TransformedVectorDistribution* RevLanguage::Transform_Vector_Exp::createDi
 
     // get the parameters
     const Distribution& rl_vp                      = static_cast<const Distribution &>( base_distribution->getRevObject() );
-    std::unique_ptr<Core::TypedDistribution<Core::RbVector<double>>> vp( static_cast<Core::TypedDistribution<Core::RbVector<double>>* >( rl_vp.createDistribution() ) );
+    std::unique_ptr<Core::TypedDistribution<Core::RbVector<double>>> vp( Core::assumeDistributionOf<Core::RbVector<double>>( rl_vp.createDistribution() ) );
 
     return new Core::TransformedVectorDistribution(vp, exp_transform, exp_inverse, log_exp_prime);
 }
@@ -112,4 +113,3 @@ void RevLanguage::Transform_Vector_Exp::setConstParameter(const std::string& nam
         TypedDistribution< ModelVector<RealPos> >::setConstParameter(name, var);
     }
 }
-

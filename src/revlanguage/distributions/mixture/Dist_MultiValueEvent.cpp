@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "ArgumentRule.h"
+#include "DistributionTypeUtilities.h"
 #include "ArgumentRules.h"
 #include "Dist_MultiValueEvent.h"
 #include "ModelVector.h"
@@ -91,12 +92,12 @@ RevBayesCore::MultiValueEventDistribution* Dist_MultiValueEvent::createDistribut
     std::vector<RevBayesCore::TypedDistribution<double>* > vp;
     for (size_t i=0; i<rl_vp.size();++i)
     {
-        RevBayesCore::TypedDistribution<double>* tmp = static_cast<RevBayesCore::TypedDistribution<double>* >( rl_vp[i].createDistribution() );
+        RevBayesCore::TypedDistribution<double>* tmp = RevBayesCore::assumeDistributionOf<double>( rl_vp[i].createDistribution() );
         vp.push_back( tmp );
     }
     
     const Distribution& rl_ep                                           = static_cast<const Distribution &>( event_number_prior->getRevObject() );
-    RevBayesCore::TypedDistribution<std::int64_t>* ep                           = static_cast<RevBayesCore::TypedDistribution<std::int64_t>* >( rl_ep.createDistribution() );
+    RevBayesCore::TypedDistribution<std::int64_t>* ep                           = RevBayesCore::assumeDistributionOf<std::int64_t>( rl_ep.createDistribution() );
 
     const std::vector<std::string>& n = static_cast<const ModelVector<RlString> &>( names->getRevObject() ).getValue();
     // offsets
