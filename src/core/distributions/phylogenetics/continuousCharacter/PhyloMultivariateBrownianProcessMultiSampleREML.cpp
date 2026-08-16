@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "DistributionNormal.h"
+#include "DagNodeTypeUtilities.h"
 #include "DistributionMultivariateNormal.h"
 #include "PhyloMultivariateBrownianProcessMultiSampleREML.h"
 #include "RandomNumberFactory.h"
@@ -761,7 +762,7 @@ void PhyloMultivariateBrownianProcessMultiSampleREML::swapParameterInternal(cons
     }
     else if (oldP == this->rate_matrix)
     {
-        rate_matrix = static_cast<const TypedDagNode< MatrixReal >* >( newP );
+        replaceNodeReference(rate_matrix, newP);
         active_matrix = 0;
         precision_matrices[0] = rate_matrix->getValue().computeInverse();
         precision_matrices[0].setCholesky(true);
@@ -771,7 +772,7 @@ void PhyloMultivariateBrownianProcessMultiSampleREML::swapParameterInternal(cons
     else if ( oldP == this->within_species_variances )
     {
 //        within_species_variances = static_cast<const TypedDagNode< RbVector< double > >* >( newP );
-        within_species_variances = static_cast<const TypedDagNode< RbVector< RbVector< double > > >* >( newP );
+        replaceNodeReference(within_species_variances, newP);
     }
 //    else if ( oldP == this->within_species_variances2 )
 //    {
@@ -783,4 +784,3 @@ void PhyloMultivariateBrownianProcessMultiSampleREML::swapParameterInternal(cons
     }
     
 }
-

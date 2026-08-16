@@ -6,6 +6,7 @@
 
 
 #include "CladogeneticSpeciationRateMatrixFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
 
@@ -118,7 +119,7 @@ void CladogeneticSpeciationRateMatrixFunction::swapParameterInternal(const DagNo
     
     if (oldP == speciation_rates)
     {
-        speciation_rates = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(speciation_rates, newP);
     }
     
 }

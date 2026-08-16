@@ -1,4 +1,5 @@
 #include "CovarionFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
 #include <vector>
@@ -151,15 +152,15 @@ void CovarionFunction::swapParameterInternal(const DagNode *oldP, const DagNode 
     
     if (oldP == rate_matrices)
     {
-        rate_matrices = static_cast<const TypedDagNode< RbVector<RateGenerator> >* >( newP );
+        replaceNodeReference(rate_matrices, newP);
     }
     else if (oldP == rate_scalars)
     {
-        rate_scalars = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(rate_scalars, newP);
     }
     else if (oldP == switch_rates)
     {
-        switch_rates = static_cast<const TypedDagNode< RbVector<RbVector<double> > >* >( newP );
+        replaceNodeReference(switch_rates, newP);
     }
     
 }

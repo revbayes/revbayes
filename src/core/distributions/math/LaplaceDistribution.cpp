@@ -1,5 +1,6 @@
 
 #include "LaplaceDistribution.h"
+#include "DagNodeTypeUtilities.h"
 
 #include "DistributionLaplace.h"
 #include "RandomNumberFactory.h"
@@ -84,10 +85,10 @@ void LaplaceDistribution::swapParameterInternal(const DagNode *oldP, const DagNo
 {
     if (oldP == mean)
     {
-        mean = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(mean, newP);
     }
     else if (oldP == scale)
     {
-        scale = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(scale, newP);
     }
 }

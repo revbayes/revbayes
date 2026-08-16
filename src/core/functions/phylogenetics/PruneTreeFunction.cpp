@@ -1,4 +1,5 @@
 #include "PruneTreeFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
 #include <algorithm>
@@ -69,7 +70,7 @@ void PruneTreeFunction::swapParameterInternal(const DagNode *oldP, const DagNode
     
     if (oldP == tau)
     {
-        tau = static_cast<const TypedDagNode<Tree>* >( newP );
+        replaceNodeReference(tau, newP);
     }
     
     std::vector<TopologyNode*> nodes = tau->getValue().getNodes();

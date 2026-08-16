@@ -6,6 +6,7 @@
  */
 
 #include "PhyloOrnsteinUhlenbeckProcess.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
 #include <cmath>
@@ -189,42 +190,42 @@ void PhyloOrnsteinUhlenbeckProcess::swapParameterInternal(const DagNode *oldP, c
     
     if ( oldP == tau )
     {
-        tau = static_cast< const TypedDagNode<Tree> * >( newP );
+        replaceNodeReference(tau, newP);
     }
     
     if ( oldP == homogeneousSigma )
     {
-        homogeneousSigma = static_cast< const TypedDagNode<double> * >( newP );
+        replaceNodeReference(homogeneousSigma, newP);
     }
     
     if ( oldP == homogeneousMean )
     {
-        homogeneousMean = static_cast< const TypedDagNode< double > * >( newP );
+        replaceNodeReference(homogeneousMean, newP);
     }
     
     if ( oldP == homogeneousPhi )
     {
-        homogeneousPhi = static_cast< const TypedDagNode< double > * >( newP );
+        replaceNodeReference(homogeneousPhi, newP);
     }
     
     if ( oldP == heterogeneousSigma )
     {
-        heterogeneousSigma = static_cast< const TypedDagNode< RbVector< double > > * >( newP );
+        replaceNodeReference(heterogeneousSigma, newP);
     }
     
     if ( oldP == heterogeneousMean )
     {
-        heterogeneousMean = static_cast< const TypedDagNode< RbVector< double > > * >( newP );
+        replaceNodeReference(heterogeneousMean, newP);
     }
     
     if ( oldP == heterogeneousPhi )
     {
-        heterogeneousPhi = static_cast< const TypedDagNode< RbVector< double > > * >( newP );
+        replaceNodeReference(heterogeneousPhi, newP);
     }
     
     if ( oldP == root )
     {
-        root = static_cast< const TypedDagNode<double> * >( newP );
+        replaceNodeReference(root, newP);
     }
     
 }

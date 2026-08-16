@@ -1,6 +1,7 @@
 #include <string>
 
 #include "RandomNumberFactory.h"
+#include "DagNodeTypeUtilities.h"
 #include "RandomNumberGenerator.h"
 #include "AbstractHomologousDiscreteCharacterData.h"
 #include "GeneralizedLineageHeterogeneousBirthDeathSamplingProcess.h"
@@ -1946,156 +1947,156 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::swapParameterInte
 {
 	if ( oldP == age )
 	{
-		age = static_cast<const TypedDagNode<double>* >( newP );
+		replaceNodeReference(age, newP);
 	}
 	if ( oldP == root_frequency )
 	{
-		root_frequency = static_cast<const TypedDagNode<Simplex>* >( newP );
+		replaceNodeReference(root_frequency, newP);
 		root_frequency_dirty = true;
 	}
 	if ( oldP == lambda_const )
 	{
-		lambda_const = static_cast<const TypedDagNode<RbVector<double>  >* >( newP );
+		replaceNodeReference(lambda_const, newP);
 		lambda_dirty = true;
 	}
 	if ( oldP == lambda_var )
 	{
-		lambda_var = static_cast<const TypedDagNode<RbVector<RbVector<double> > >* >( newP );
+		replaceNodeReference(lambda_var, newP);
 		lambda_dirty = true;
 	}
 	if ( oldP == lambda_times )
 	{
-		lambda_times = static_cast<const TypedDagNode<RbVector<double>  >* >( newP );
+		replaceNodeReference(lambda_times, newP);
 		lambda_dirty = true;
 	}
 	if ( oldP == mu_const )
 	{
-		mu_const = static_cast<const TypedDagNode<RbVector<double>  >* >( newP );
+		replaceNodeReference(mu_const, newP);
 		mu_dirty = true;
 	}
 	if ( oldP == mu_var )
 	{
-		mu_var = static_cast<const TypedDagNode<RbVector<RbVector<double> > >* >( newP );
+		replaceNodeReference(mu_var, newP);
 		mu_dirty = true;
 	}
 	if ( oldP == mu_times )
 	{
-		mu_times = static_cast<const TypedDagNode<RbVector<double>  >* >( newP );
+		replaceNodeReference(mu_times, newP);
 		mu_dirty = true;
 	}
 	if ( oldP == phi_const )
 	{
-		phi_const = static_cast<const TypedDagNode<RbVector<double>  >* >( newP );
+		replaceNodeReference(phi_const, newP);
 		phi_dirty = true;
 	}
 	if ( oldP == phi_var )
 	{
-		phi_var = static_cast<const TypedDagNode<RbVector<RbVector<double> > >* >( newP );
+		replaceNodeReference(phi_var, newP);
 		phi_dirty = true;
 	}
 	if ( oldP == phi_times )
 	{
-		phi_times = static_cast<const TypedDagNode<RbVector<double>  >* >( newP );
+		replaceNodeReference(phi_times, newP);
 		phi_dirty = true;
 	}
 	if ( oldP == delta_const )
 	{
-		delta_const = static_cast<const TypedDagNode<RbVector<double>  >* >( newP );
+		replaceNodeReference(delta_const, newP);
 		delta_dirty = true;
 	}
 	if ( oldP == delta_var )
 	{
-		delta_var = static_cast<const TypedDagNode<RbVector<RbVector<double> > >* >( newP );
+		replaceNodeReference(delta_var, newP);
 		delta_dirty = true;
 	}
 	if ( oldP == delta_times )
 	{
-		delta_times = static_cast<const TypedDagNode<RbVector<double>  >* >( newP );
+		replaceNodeReference(delta_times, newP);
 		delta_dirty = true;
 	}
 	if ( oldP == upsilon )
 	{
-		upsilon = static_cast<const TypedDagNode<RbVector<RbVector<double> > >* >( newP );
+		replaceNodeReference(upsilon, newP);
 		upsilon_dirty = true;
 	}
 	if ( oldP == upsilon_times )
 	{
-		upsilon_times = static_cast<const TypedDagNode<RbVector<double>  >* >( newP );
+		replaceNodeReference(upsilon_times, newP);
 		upsilon_dirty = true;
 	}
 	if ( oldP == gamma )
 	{
-		gamma = static_cast<const TypedDagNode<RbVector<RbVector<double> > >* >( newP );
+		replaceNodeReference(gamma, newP);
 		gamma_dirty = true;
 	}
 	if ( oldP == gamma_times )
 	{
-		gamma_times = static_cast<const TypedDagNode<RbVector<double>  >* >( newP );
+		replaceNodeReference(gamma_times, newP);
 		gamma_dirty = true;
 	}
 	if ( oldP == rho_simple )
 	{
-		rho_simple = static_cast<const TypedDagNode<double>* >( newP );
+		replaceNodeReference(rho_simple, newP);
 		rho_dirty = true;
 	}
 	if ( oldP == rho )
 	{
-		rho = static_cast<const TypedDagNode<RbVector<RbVector<double> > >* >( newP );
+		replaceNodeReference(rho, newP);
 		rho_dirty = true;
 	}
 	if ( oldP == rho_times )
 	{
-		rho_times = static_cast<const TypedDagNode<RbVector<double>  >* >( newP );
+		replaceNodeReference(rho_times, newP);
 		rho_dirty = true;
 	}
 	if ( oldP == xi )
 	{
-		xi = static_cast<const TypedDagNode<RbVector<RbVector<double> > >* >( newP );
+		replaceNodeReference(xi, newP);
 		xi_dirty = true;
 	}
 	if ( oldP == xi_times )
 	{
-		xi_times = static_cast<const TypedDagNode<RbVector<double>  >* >( newP );
+		replaceNodeReference(xi_times, newP);
 		xi_dirty = true;
 	}
 	if ( oldP == eta_const )
 	{
-		eta_const = static_cast<const TypedDagNode<RateGenerator >* >( newP );
+		replaceNodeReference(eta_const, newP);
 		eta_dirty = true;
 	}
 	if ( oldP == eta_simple )
 	{
-		eta_simple = static_cast<const TypedDagNode<double>* >( newP );
+		replaceNodeReference(eta_simple, newP);
 		eta_dirty = true;
 	}
 	if ( oldP == eta_var )
 	{
-		eta_var = static_cast<const TypedDagNode<RbVector<RateGenerator > >* >( newP );
+		replaceNodeReference(eta_var, newP);
 		eta_dirty = true;
 	}
 	if ( oldP == eta_times )
 	{
-		eta_times = static_cast<const TypedDagNode<RbVector<double>  >* >( newP );
+		replaceNodeReference(eta_times, newP);
 		eta_dirty = true;
 	}
 	if ( oldP == omega_const )
 	{
-		omega_const = static_cast<const TypedDagNode<CladogeneticProbabilityMatrix >* >( newP );
+		replaceNodeReference(omega_const, newP);
 		omega_dirty = true;
 	}
 	if ( oldP == omega_var )
 	{
-		omega_var = static_cast<const TypedDagNode<RbVector<CladogeneticProbabilityMatrix > >* >( newP );
+		replaceNodeReference(omega_var, newP);
 		omega_dirty = true;
 	}
 	if ( oldP == omega_times )
 	{
-		omega_times = static_cast<const TypedDagNode<RbVector<double>  >* >( newP );
+		replaceNodeReference(omega_times, newP);
 		omega_dirty = true;
 	}
 	if ( oldP == zeta )
 	{
-		zeta = static_cast<const TypedDagNode<RbVector<MatrixReal > >* >( newP );
+		replaceNodeReference(zeta, newP);
 		zeta_dirty = true;
 	}
 }

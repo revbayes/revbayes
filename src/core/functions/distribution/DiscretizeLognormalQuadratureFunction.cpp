@@ -1,4 +1,5 @@
 #include "DiscretizeLognormalQuadratureFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
 #include <cmath>
@@ -40,17 +41,17 @@ void RevBayesCore::DiscretizeLognormalQuadratureFunction::swapParameterInternal(
     
     if (oldP == mean) 
     {
-        mean = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(mean, newP);
     }
     
     if (oldP == sd)
     {
-        sd = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(sd, newP);
     }
     
     if (oldP == numCats)
     {
-        numCats = static_cast<const TypedDagNode<std::int64_t>* >( newP );
+        replaceNodeReference(numCats, newP);
     }
     
 }

@@ -1,4 +1,5 @@
 #include "ModuloFunction.h"
+#include "DagNodeTypeUtilities.h"
 #include "Cloneable.h"
 #include "TypedDagNode.h"
 
@@ -48,12 +49,12 @@ void ModuloFunction::swapParameterInternal(const DagNode *oldP, const DagNode *n
     
     if ( oldP == left )
     {
-        left = static_cast<const TypedDagNode<std::int64_t>* >( newP );
+        replaceNodeReference(left, newP);
     }
     
     if ( oldP == right )
     {
-        right = static_cast<const TypedDagNode<std::int64_t>* >( newP );
+        replaceNodeReference(right, newP);
     }
     
 }

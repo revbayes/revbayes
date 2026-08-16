@@ -1,4 +1,5 @@
 #include "PoMoRateMatrixFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include "RateMatrix_PoMo.h"
 #include "Cloneable.h"
@@ -82,11 +83,11 @@ void PoMoRateMatrixFunction::swapParameterInternal(const DagNode *oldP, const Da
     
     if (oldP == mutationRates)
     {
-        mutationRates = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(mutationRates, newP);
     }
     else if (oldP == selectionCoefficients)
     {
-        selectionCoefficients = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(selectionCoefficients, newP);
     }
     
 }

@@ -23,6 +23,7 @@
 #define ReplicateEventsFunction_H
 
 #include "OrderedEvents.h"
+#include "DagNodeTypeUtilities.h"
 #include "RbVector.h"
 #include "TypedFunction.h"
 
@@ -127,7 +128,7 @@ void RevBayesCore::ReplicateEventsFunction<valueType>::swapParameterInternal(con
     
     if ( oldP == value_param )
     {
-        value_param = static_cast<const TypedDagNode<OrderedEvents<valueType>>* >( newP );
+        replaceNodeReference(value_param, newP);
         this->update();
     }
     

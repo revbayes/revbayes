@@ -1,4 +1,5 @@
 #include "ExponentialDemographicFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cmath>
 
@@ -189,22 +190,22 @@ void ExponentialDemographicFunction::swapNodeInternal(const DagNode *old_node, c
 
     if (old_node == theta_ancient)
     {
-        theta_ancient = static_cast<const TypedDagNode<double>* >( new_node );
+        replaceNodeReference(theta_ancient, new_node);
     }
 
     if (old_node == theta_recent)
     {
-        theta_recent = static_cast<const TypedDagNode<double>* >( new_node );
+        replaceNodeReference(theta_recent, new_node);
     }
 
     if (old_node == time_ancient)
     {
-        time_ancient = static_cast<const TypedDagNode<double>* >( new_node );
+        replaceNodeReference(time_ancient, new_node);
     }
 
     if (old_node == time_recent)
     {
-        time_recent = static_cast<const TypedDagNode<double>* >( new_node );
+        replaceNodeReference(time_recent, new_node);
     }
 
 }

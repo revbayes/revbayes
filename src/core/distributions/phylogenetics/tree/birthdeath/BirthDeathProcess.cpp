@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "Clade.h"
+#include "DagNodeTypeUtilities.h"
 #include "BirthDeathProcess.h"
 #include "RbMathCombinatorialFunctions.h"
 #include "RbMathLogic.h"
@@ -416,7 +417,7 @@ void BirthDeathProcess::swapParameterInternal(const DagNode *oldP, const DagNode
     
     if ( oldP == rho ) 
     {
-        rho = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(rho, newP);
     }
     else
     {

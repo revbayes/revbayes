@@ -2,6 +2,7 @@
 #define GeneralTreeHistoryCtmcSiteIID_H
 
 #include "TreeHistoryCtmc.h"
+#include "DagNodeTypeUtilities.h"
 
 #include "ConstantNode.h"
 #include "DiscreteCharacterState.h"
@@ -859,15 +860,15 @@ void RevBayesCore::GeneralTreeHistoryCtmcSiteIID<charType>::swapParameterInterna
 
     if (oldP == homogeneousRateGenerator)
     {
-        homogeneousRateGenerator = static_cast<const TypedDagNode< RateGenerator >* >( newP );
+        replaceNodeReference(homogeneousRateGenerator, newP);
     }
     else if (oldP == heterogeneousRateGenerator)
     {
-        heterogeneousRateGenerator = static_cast<const TypedDagNode< RbVector< RateGenerator > >* >( newP );
+        replaceNodeReference(heterogeneousRateGenerator, newP);
     }
     else if (oldP == rootFrequencies)
     {
-        rootFrequencies = static_cast<const TypedDagNode< Simplex >* >( newP );
+        replaceNodeReference(rootFrequencies, newP);
     }
     else
     {

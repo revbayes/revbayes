@@ -1,4 +1,5 @@
 #include "ComputeWeightedNodeOrderConstraintsScoreFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
 #include <iostream>
@@ -125,11 +126,11 @@ void computeWeightedNodeOrderConstraintsScoreFunction::swapParameterInternal(con
 
     if (oldP == tau)
     {
-        tau = static_cast<const TypedDagNode<Tree>* >( newP );
+        replaceNodeReference(tau, newP);
     }
     else if (oldP == constraints)
     {
-        constraints = static_cast<const TypedDagNode<RelativeNodeAgeWeightedConstraints>* >( newP );
+        replaceNodeReference(constraints, newP);
         updateSetOfConstrainedNodes();
     }
 }

@@ -23,6 +23,7 @@
 #define ReplicateFunction_H
 
 #include "RbVector.h"
+#include "DagNodeTypeUtilities.h"
 #include "TypedFunction.h"
 
 #include <vector>
@@ -114,7 +115,7 @@ void RevBayesCore::ReplicateFunction<valueType>::swapParameterInternal(const Dag
     
     if ( oldP == value_param )
     {
-        value_param = static_cast<const TypedDagNode<valueType>* >( newP );
+        replaceNodeReference(value_param, newP);
     }
     
 }

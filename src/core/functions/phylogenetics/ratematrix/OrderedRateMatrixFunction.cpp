@@ -1,4 +1,5 @@
 #include "OrderedRateMatrixFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include "RateMatrix_FreeK.h"
 #include "Cloneable.h"
@@ -94,12 +95,12 @@ void OrderedRateMatrixFunction::swapParameterInternal(const DagNode *oldP, const
     
     if (oldP == lambda)
     {
-        lambda = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(lambda, newP);
     }
     
     if (oldP == mu)
     {
-        mu = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(mu, newP);
     }
     
     

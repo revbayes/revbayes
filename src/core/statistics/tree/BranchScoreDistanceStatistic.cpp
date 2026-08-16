@@ -1,4 +1,5 @@
 #include "BranchScoreDistanceStatistic.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cmath>
 #include <cstddef>
@@ -94,11 +95,11 @@ void BranchScoreDistanceStatistic::swapParameterInternal(const DagNode *oldP, co
     
     if (oldP == tree1)
     {
-        tree1 = static_cast<const TypedDagNode<Tree>* >( newP );
+        replaceNodeReference(tree1, newP);
     }
     if (oldP == tree2)
     {
-        tree2 = static_cast<const TypedDagNode<Tree>* >( newP );
+        replaceNodeReference(tree2, newP);
     }
     
 }

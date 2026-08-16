@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "ConstantNode.h"
+#include "DagNodeTypeUtilities.h"
 #include "PhyloBrownianProcessMVN.h"
 #include "DistributionMultivariateNormal.h"
 #include "RbException.h"
@@ -401,11 +402,11 @@ void PhyloBrownianProcessMVN::swapParameterInternal(const DagNode *oldP, const D
     
     if (oldP == homogeneous_root_state)
     {
-        homogeneous_root_state = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(homogeneous_root_state, newP);
     }
     else if (oldP == heterogeneous_root_state)
     {
-        heterogeneous_root_state = static_cast<const TypedDagNode< RbVector< double > >* >( newP );
+        replaceNodeReference(heterogeneous_root_state, newP);
     }
     else
     {

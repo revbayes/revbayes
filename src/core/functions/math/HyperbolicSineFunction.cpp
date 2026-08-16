@@ -1,4 +1,5 @@
 #include "HyperbolicSineFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cmath>
 
@@ -32,7 +33,7 @@ void HyperbolicSineFunction::swapParameterInternal(const DagNode *oldP, const Da
     
     if (oldP == x)
     {
-        x = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(x, newP);
     }
     
 }

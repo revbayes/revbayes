@@ -1,4 +1,5 @@
 #include "WattersonThetaFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
 
@@ -58,7 +59,7 @@ void WattersonThetaFunction::swapParameterInternal(const DagNode *oldP, const Da
     
     if (oldP == alignment)
     {
-        alignment = static_cast<const TypedDagNode< AbstractHomologousDiscreteCharacterData >* >( newP );
+        replaceNodeReference(alignment, newP);
     }
     
 }

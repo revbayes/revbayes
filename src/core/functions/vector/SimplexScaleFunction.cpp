@@ -7,6 +7,7 @@
 //
 
 #include "SimplexScaleFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
 
@@ -83,13 +84,13 @@ void SimplexScaleFunction::update( void )
 void SimplexScaleFunction::swapParameterInternal(const DagNode *oldP, const DagNode *newP) {
     
     if ( oldP == factor ) {
-        factor = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(factor, newP);
     }
     else if ( oldP == simplex ) {
-        simplex = static_cast<const TypedDagNode< RbVector< double > >* >( newP );
+        replaceNodeReference(simplex, newP);
     } 
     else if ( oldP == index ) {
-        index = static_cast<const TypedDagNode< std::int64_t >* >( newP );
+        replaceNodeReference(index, newP);
     }
     else {
         TypedFunction< RbVector< double> >::swapParameter( oldP, newP );

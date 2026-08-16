@@ -2,6 +2,7 @@
 #define BinarySubtraction_H
 
 #include "TypedFunction.h"
+#include "DagNodeTypeUtilities.h"
 #include "TypedDagNode.h"
 
 namespace RevBayesCore {
@@ -47,10 +48,10 @@ RevBayesCore::BinarySubtraction<firstValueType, secondValueType, return_type>* R
 template<class firstValueType, class secondValueType, class return_type>
 void RevBayesCore::BinarySubtraction<firstValueType, secondValueType, return_type>::swapParameterInternal(const DagNode *oldP, const DagNode *newP) {
     if (oldP == a) {
-        a = static_cast<const TypedDagNode<firstValueType>* >( newP );
+        replaceNodeReference(a, newP);
     }
     if (oldP == b) {
-        b = static_cast<const TypedDagNode<secondValueType>* >( newP );
+        replaceNodeReference(b, newP);
     }
 }
 

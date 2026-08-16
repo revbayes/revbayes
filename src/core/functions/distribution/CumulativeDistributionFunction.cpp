@@ -1,4 +1,5 @@
 #include "CumulativeDistributionFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include "ContinuousDistribution.h"
 #include "TypedDagNode.h"
@@ -41,7 +42,7 @@ void RevBayesCore::CumulativeDistributionFunction::swapParameterInternal(const D
 {
     if (oldP == x)
     {
-        x = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(x, newP);
     }
     else
     {

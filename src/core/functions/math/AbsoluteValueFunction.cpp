@@ -1,4 +1,5 @@
 #include "AbsoluteValueFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cmath>
 
@@ -33,7 +34,7 @@ void AbsoluteValueFunction::swapParameterInternal(const DagNode *oldP, const Dag
     
     if (oldP == a)
     {
-        a = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(a, newP);
     }
     
 }

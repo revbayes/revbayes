@@ -1,4 +1,5 @@
 #include "VarianceFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <vector>
 
@@ -72,7 +73,7 @@ void VarianceFunction::swapParameterInternal(const DagNode *oldP, const DagNode 
     
     if ( oldP == vals )
     {
-        vals = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(vals, newP);
     }
     
 }

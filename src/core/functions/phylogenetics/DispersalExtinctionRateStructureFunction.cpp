@@ -7,6 +7,7 @@
 //
 
 #include "DispersalExtinctionRateStructureFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cmath>
 #include <vector>
@@ -199,14 +200,14 @@ void DispersalExtinctionRateStructureFunction::swapParameterInternal(const DagNo
     
     if (oldP == dispersalRates)
     {
-        dispersalRates = static_cast<const TypedDagNode<RbVector<RbVector<double> > >* >( newP );
+        replaceNodeReference(dispersalRates, newP);
     }
     else if (oldP == extinctionRates)
     {
-        extinctionRates = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+        replaceNodeReference(extinctionRates, newP);
     }
     else if (oldP == maxRangeSize)
     {
-        maxRangeSize = static_cast<const TypedDagNode<std::int64_t>* >( newP );
+        replaceNodeReference(maxRangeSize, newP);
     }
 }

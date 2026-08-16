@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "PiecewiseCoalescent.h"
+#include "DagNodeTypeUtilities.h"
 #include "DistributionExponential.h"
 #include "RandomNumberFactory.h"
 #include "RbConstants.h"
@@ -603,11 +604,11 @@ void PiecewiseCoalescent::swapParameterInternal(const DagNode *old_p, const DagN
 {
     if (old_p == Nes)
     {
-        Nes = static_cast<const TypedDagNode<RbVector<double> >* >( new_p );
+        replaceNodeReference(Nes, new_p);
     }
     else if (old_p == interval_change_points_var)
     {
-        interval_change_points_var = static_cast<const TypedDagNode<RbVector<double> >* >( new_p );
+        replaceNodeReference(interval_change_points_var, new_p);
     }
 }
 

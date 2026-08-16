@@ -1,4 +1,5 @@
 #include "HkyRateMatrixFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <vector>
 
@@ -65,11 +66,11 @@ void HkyRateMatrixFunction::swapParameterInternal(const DagNode *oldP, const Dag
 
     if (oldP == base_frequencies)
     {
-        base_frequencies = static_cast<const TypedDagNode< Simplex >* >( newP );
+        replaceNodeReference(base_frequencies, newP);
     }
     else if (oldP == kappa)
     {
-        kappa = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(kappa, newP);
     }
     
 }

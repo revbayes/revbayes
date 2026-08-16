@@ -1,6 +1,7 @@
 
 
 #include "StudentTDistribution.h"
+#include "DagNodeTypeUtilities.h"
 
 #include "DistributionStudentT.h"
 #include "RandomNumberFactory.h"
@@ -90,7 +91,7 @@ void StudentTDistribution::swapParameterInternal(const DagNode *oldP, const DagN
     
     if (oldP == degrees)
     {
-        degrees = static_cast<const TypedDagNode<std::int64_t>* >( newP );
+        replaceNodeReference(degrees, newP);
     }
     
 }

@@ -1,4 +1,5 @@
 #include "PosteriorPredictiveProbabilityFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
 
@@ -93,11 +94,11 @@ void PosteriorPredictiveProbabilityFunction::swapParameterInternal(const DagNode
     
     if ( oldP == vals )
     {
-        vals = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(vals, newP);
     }
     
     if ( oldP == x )
     {
-        x = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(x, newP);
     }
 }

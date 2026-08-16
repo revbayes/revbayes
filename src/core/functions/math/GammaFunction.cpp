@@ -1,4 +1,5 @@
 #include "GammaFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include "RbMathFunctions.h"
 #include "Cloneable.h"
@@ -32,7 +33,7 @@ void GammaFunction::swapParameterInternal(const DagNode *oldP, const DagNode *ne
     
     if (oldP == a)
     {
-        a = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(a, newP);
     }
     
 }

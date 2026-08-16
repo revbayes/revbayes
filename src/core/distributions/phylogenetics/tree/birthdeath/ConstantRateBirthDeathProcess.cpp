@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "Clade.h"
+#include "DagNodeTypeUtilities.h"
 #include "ConstantRateBirthDeathProcess.h"
 #include "BirthDeathForwardSimulator.h"
 #include "BirthDeathProcess.h"
@@ -183,11 +184,11 @@ void ConstantRateBirthDeathProcess::swapParameterInternal(const DagNode *oldP, c
     
     if (oldP == speciation) 
     {
-        speciation = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(speciation, newP);
     }
     else if (oldP == extinction) 
     {
-        extinction = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(extinction, newP);
     }
     else 
     {

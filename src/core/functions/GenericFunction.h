@@ -1,6 +1,7 @@
 #ifndef GenericFunction_H
 #define GenericFunction_H
 
+#include "DagNodeTypeUtilities.h"
 #include "TypedDagNode.h"
 #include "TypedFunction.h"
 #include <boost/mp11.hpp>
@@ -206,10 +207,9 @@ namespace RevBayesCore
         void swapParameterInternal(const DagNode *oldP, const DagNode *newP)
         {
             auto F2 = [=](auto& arg) {
-                using TDN = typename std::remove_reference<decltype(arg)>::type;
                 if (arg == oldP)
-                    // We have to cast from `const DagNode*` to `const TypedDagNode<T>*`
-                    arg = static_cast<TDN>(newP);
+                    // Each tuple element retains its TypedDagNode<T> pointer type when rebound.
+                    replaceNodeReference(arg, newP);
             };
             boost::mp11::tuple_for_each(arguments, F2);
         }

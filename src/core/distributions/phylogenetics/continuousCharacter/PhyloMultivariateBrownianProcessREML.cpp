@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "DistributionMultivariateNormal.h"
+#include "DagNodeTypeUtilities.h"
 #include "PhyloMultivariateBrownianProcessREML.h"
 #include "RandomNumberFactory.h"
 #include "RbException.h"
@@ -584,7 +585,7 @@ void PhyloMultivariateBrownianProcessREML::swapParameterInternal(const DagNode *
     }
     if (oldP == this->rate_matrix)
     {
-        rate_matrix = static_cast<const TypedDagNode< MatrixReal >* >( newP );
+        replaceNodeReference(rate_matrix, newP);
         active_matrix = 0;
         precision_matrices[0] = rate_matrix->getValue().computeInverse();
         precision_matrices[0].setCholesky(true);

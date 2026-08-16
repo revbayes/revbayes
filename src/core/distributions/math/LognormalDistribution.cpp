@@ -1,4 +1,5 @@
 #include "LognormalDistribution.h"
+#include "DagNodeTypeUtilities.h"
 
 #include "DistributionLognormal.h"
 #include "RandomNumberFactory.h"
@@ -93,15 +94,15 @@ void LognormalDistribution::swapParameterInternal(const DagNode *oldP, const Dag
     
     if (oldP == mean)
     {
-        mean = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(mean, newP);
     }
     if (oldP == sd)
     {
-        sd = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(sd, newP);
     }
     if (oldP == offset)
     {
-        offset = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(offset, newP);
     }
     
 }

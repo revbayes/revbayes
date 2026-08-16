@@ -23,6 +23,7 @@
 #define BSPIntervalFunction_H
 
 #include "RbVector.h"
+#include "DagNodeTypeUtilities.h"
 #include "TypedFunction.h"
 
 #include <vector>
@@ -127,11 +128,11 @@ void RevBayesCore::BSPIntervalFunction<valueType>::swapParameterInternal(const D
 
     if ( oldP == value_param )
     {
-        value_param = static_cast<const TypedDagNode< RbVector<valueType> >* >( newP );
+        replaceNodeReference(value_param, newP);
     }
     if ( oldP == num_rep )
     {
-        num_rep = static_cast<const TypedDagNode< RbVector<std::int64_t> >* >( newP );
+        replaceNodeReference(num_rep, newP);
     }
 
     if ( value_param->getValue().size() != num_rep->getValue().size() )

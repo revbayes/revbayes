@@ -1,4 +1,5 @@
 #include "ChronoToPhyloFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
 
@@ -66,11 +67,11 @@ void ChronoToPhyloFunction::swapParameterInternal(const DagNode *oldP, const Dag
     
     if (oldP == chrono)
     {
-        chrono = static_cast<const TypedDagNode<Tree>* >( newP );
+        replaceNodeReference(chrono, newP);
     }
     else if ( rates == oldP )
     {
-        rates = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+        replaceNodeReference(rates, newP);
     }
     
 }

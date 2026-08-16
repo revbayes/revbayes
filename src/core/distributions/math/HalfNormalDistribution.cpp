@@ -1,5 +1,6 @@
 
 #include "HalfNormalDistribution.h"
+#include "DagNodeTypeUtilities.h"
 
 #include "DistributionNormal.h"
 #include "RandomNumberFactory.h"
@@ -103,11 +104,11 @@ void HalfNormalDistribution::swapParameterInternal(const DagNode *oldP, const Da
     
     if (oldP == offset)
     {
-        offset = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(offset, newP);
     }
     if (oldP == stDev)
     {
-        stDev = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(stDev, newP);
     }
     
 }

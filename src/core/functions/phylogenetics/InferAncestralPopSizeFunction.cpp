@@ -1,4 +1,5 @@
 #include "InferAncestralPopSizeFunction.h"
+#include "DagNodeTypeUtilities.h"
 #include "ComputeLikelihoodsLtMt.h"
 
 #include <vector>
@@ -178,38 +179,38 @@ void InferAncestralPopSizeFunction::swapParameterInternal( const DagNode *oldP, 
 {
     if (oldP == start_age)
     {
-        start_age    = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(start_age, newP);
     }
     else if (oldP == lambda)
     {
-        lambda       = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(lambda, newP);
     }
     else if (oldP == mu)
     {
-        mu           = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(mu, newP);
     }
     else if (oldP == psi)
     {
-        psi          = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(psi, newP);
     }
     else if (oldP == omega)
     {
-        omega        = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(omega, newP);
     }
     else if (oldP == rho)
     {
-        rho          = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(rho, newP);
     }
     else if (oldP == removalPr)
     {
-        removalPr    = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(removalPr, newP);
     }
     else if (oldP == maxHiddenLin)
     {
-        maxHiddenLin = static_cast<const TypedDagNode< std::int64_t >* >( newP );
+        replaceNodeReference(maxHiddenLin, newP);
     }
     else if (oldP == timeTree)
     {
-        timeTree     = static_cast<const TypedDagNode< Tree >* >( newP );
+        replaceNodeReference(timeTree, newP);
     }
 }

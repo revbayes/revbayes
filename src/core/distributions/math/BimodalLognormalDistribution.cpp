@@ -1,4 +1,5 @@
 #include "BimodalLognormalDistribution.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cmath>
 
@@ -151,23 +152,23 @@ void BimodalLognormalDistribution::swapParameterInternal(const DagNode *oldP, co
 
     if (oldP == mean1)
     {
-        mean1 = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(mean1, newP);
     }
     if (oldP == mean2)
     {
-        mean2 = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(mean2, newP);
     }
     if (oldP == stDev1)
     {
-        stDev1 = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(stDev1, newP);
     }
     if (oldP == stDev2)
     {
-        stDev2 = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(stDev2, newP);
     }
     if (oldP == p)
     {
-        p = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(p, newP);
     }
 
 }

@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "ModelVector.h"
+#include "DagNodeTypeUtilities.h"
 #include "MultispeciesCoalescentInverseGammaPrior.h"
 #include "DistributionInverseGamma.h"
 #include "RandomNumberFactory.h"
@@ -227,12 +228,12 @@ void MultispeciesCoalescentInverseGammaPrior::swapParameterInternal(const DagNod
 
     if ( oldP == scale )
     {
-        scale = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(scale, newP);
     }
 
     if ( oldP == shape )
     {
-        shape = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(shape, newP);
     }
 
     AbstractMultispeciesCoalescentGenewise::swapParameterInternal(oldP, newP);

@@ -1,4 +1,5 @@
 #include "revPoMo4NRateMatrixFunction.h"
+#include "DagNodeTypeUtilities.h"
 #include "RbException.h"
 
 using namespace RevBayesCore;
@@ -73,22 +74,22 @@ void revPoMo4NRateMatrixFunction::swapParameterInternal(const DagNode *oldP, con
 
     if (oldP == N)
     {
-        N =  static_cast<const TypedDagNode< std::int64_t >* >( newP );
+        replaceNodeReference(N, newP);
     }
 
     if (oldP == pi)
     {
-        pi = static_cast<const TypedDagNode< Simplex >* >( newP );
+        replaceNodeReference(pi, newP);
     }
 
     if (oldP == rho)
     {
-        rho = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(rho, newP);
     }
 
     if (oldP == phi)
     {
-        phi = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(phi, newP);
     }
 
 }

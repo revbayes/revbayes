@@ -1,4 +1,5 @@
 #include "BernoulliDistribution.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <cmath>
 
@@ -76,7 +77,7 @@ void BernoulliDistribution::swapParameterInternal(const DagNode *oldP, const Dag
     
     if (oldP == p) 
     {
-        p = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(p, newP);
     }
     
 }

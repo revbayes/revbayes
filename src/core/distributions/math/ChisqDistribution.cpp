@@ -1,4 +1,5 @@
 #include "ChisqDistribution.h"
+#include "DagNodeTypeUtilities.h"
 
 #include "DistributionChisq.h"
 #include "RandomNumberFactory.h"
@@ -89,7 +90,7 @@ void ChisqDistribution::swapParameterInternal(const DagNode *oldP, const DagNode
     
     if (oldP == degrees)
     {
-        degrees = static_cast<const TypedDagNode<std::int64_t>* >( newP );
+        replaceNodeReference(degrees, newP);
     }
     
 }

@@ -1,4 +1,5 @@
 #include "FreeBinaryRateMatrixFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <vector>
 
@@ -51,7 +52,7 @@ void FreeBinaryRateMatrixFunction::swapParameterInternal(const DagNode *oldP, co
 {
     if (oldP == transition_rates)
     {
-        transition_rates = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(transition_rates, newP);
     }
 }
 

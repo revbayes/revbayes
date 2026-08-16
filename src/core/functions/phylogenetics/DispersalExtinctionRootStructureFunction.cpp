@@ -1,4 +1,5 @@
 #include "DispersalExtinctionRootStructureFunction.h"
+#include "DagNodeTypeUtilities.h"
 
 #include <vector>
 #include <map>
@@ -140,10 +141,10 @@ void DispersalExtinctionRootStructureFunction::swapParameterInternal(const DagNo
 {
     if (oldP == root_frequencies)
     {
-        root_frequencies = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+        replaceNodeReference(root_frequencies, newP);
     }
     else if (oldP == rangeSize)
     {
-        rangeSize = static_cast<const TypedDagNode<Simplex>* >( newP );
+        replaceNodeReference(rangeSize, newP);
     }
 }

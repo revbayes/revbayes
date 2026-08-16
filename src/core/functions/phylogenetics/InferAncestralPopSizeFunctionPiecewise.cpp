@@ -1,4 +1,5 @@
 #include "InferAncestralPopSizeFunctionPiecewise.h"
+#include "DagNodeTypeUtilities.h"
 #include "ComputeLikelihoodsLtMt.h"
 
 #include <vector>
@@ -327,58 +328,58 @@ void InferAncestralPopSizeFunctionPiecewise::swapParameterInternal( const DagNod
 {
     if (oldP == start_age)
     {
-        start_age            = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(start_age, newP);
     }
 	else if (oldP == heterogeneous_lambda)
     {
-        heterogeneous_lambda = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(heterogeneous_lambda, newP);
     }
 	else if (oldP == homogeneous_lambda)
     {
-        homogeneous_lambda   = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(homogeneous_lambda, newP);
     }
 	else if (oldP == heterogeneous_mu)
     {
-        heterogeneous_mu     = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(heterogeneous_mu, newP);
     }
 	else if (oldP == homogeneous_mu)
     {
-        homogeneous_mu       = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(homogeneous_mu, newP);
     }
 	else if (oldP == heterogeneous_psi)
     {
-        heterogeneous_psi    = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(heterogeneous_psi, newP);
     }
 	else if (oldP == homogeneous_psi)
     {
-        homogeneous_psi      = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(homogeneous_psi, newP);
     }
 	else if (oldP == heterogeneous_o)
     {
-        heterogeneous_o      = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(heterogeneous_o, newP);
     }
     else if (oldP == homogeneous_o)
     {
-        homogeneous_o        = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(homogeneous_o, newP);
     }
     else if (oldP == homogeneous_rho)
     {
-        homogeneous_rho      = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(homogeneous_rho, newP);
     }
 	else if (oldP == heterogeneous_r)
     {
-        heterogeneous_r      = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(heterogeneous_r, newP);
     }
     else if (oldP == homogeneous_r)
     {
-        homogeneous_r        = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(homogeneous_r, newP);
     }
     else if (oldP == maxHiddenLin)
     {
-        maxHiddenLin         = static_cast<const TypedDagNode< std::int64_t >* >( newP );
+        replaceNodeReference(maxHiddenLin, newP);
     }
     else if (oldP == timeTree)
     {
-        timeTree             = static_cast<const TypedDagNode< Tree >* >( newP );
+        replaceNodeReference(timeTree, newP);
     }
 }

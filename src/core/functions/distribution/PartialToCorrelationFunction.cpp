@@ -2,6 +2,7 @@
 #include <cmath>
 
 #include "PartialToCorrelationFunction.h"
+#include "DagNodeTypeUtilities.h"
 #include "Cloner.h"
 #include "MatrixReal.h"
 #include "RbVector.h"
@@ -72,7 +73,7 @@ void PartialToCorrelation::swapParameterInternal(const DagNode *oldP, const DagN
     // check dimensions here
     if (oldP == partial_correlations)
     {
-        partial_correlations = static_cast<const TypedDagNode< MatrixReal >* >( newP );
+        replaceNodeReference(partial_correlations, newP);
     }
 
 }
