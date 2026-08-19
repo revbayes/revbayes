@@ -293,9 +293,6 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
     // variable declarations and initialization
     double lnProb = 0.0;
 
-    size_t num_rho_sampled = 0;
-    size_t num_rho_unsampled = 0;
-
     // add the fossil tip age terms
     for (size_t i = 0; i < taxa.size(); ++i)
     {
@@ -324,16 +321,6 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
         {
             return RbConstants::Double::neginf;
         }
-        // seeing a taxon at the present means it survived
-        if ( taxa[i].isExtinct() == false && ranges[i].survived == false )
-        {
-            return RbConstants::Double::neginf;
-        }
-
-        num_rho_sampled   += ( taxa[i].isExtinct() == false );          // l
-        // a marginalized range closes with p(), which already carries the survived-unseen branch
-        num_rho_unsampled += ( taxa[i].isExtinct() && ranges[i].survived && marginalizesExtinction() == false );    // n - m - l
-
         if ( dirty_taxa[i] == true || force )
         {
             partial_likelihood[i] = rangeLnProb( i );
@@ -343,20 +330,6 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
     }
 
     lnProb += originLnProb();
-
-    // Extant tip age terms. Status is data
-    double rho = homogeneous_rho->getValue();
-
-    if ( num_rho_sampled > 0 )                          // seen at the present, so rho > 0
-    {
-        if ( rho == 0.0 ) return RbConstants::Double::neginf;
-        lnProb += num_rho_sampled * log( rho );
-    }
-    if ( num_rho_unsampled > 0 )                        // survived unseen, so rho < 1
-    {
-        if ( rho == 1.0 ) return RbConstants::Double::neginf;
-        lnProb += num_rho_unsampled * log( 1.0 - rho );
-    }
 
     lnProb += conditionLnProb();
 
@@ -468,9 +441,22 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnFossilTotal()
 {
     prepareProbComputation();
 
+    size_t num_rho_sampled = 0;
+    size_t num_rho_unsampled = 0;
+
     double lnProb = 0.0;
     for ( size_t i = 0; i < taxa.size(); ++i )
     {
+        // status is data, so it is scored here and not by the bare range process
+        if ( taxa[i].isExtinct() == false && ranges[i].survived == false )
+        {
+            return RbConstants::Double::neginf;
+        }
+
+        num_rho_sampled   += ( taxa[i].isExtinct() == false );          // l
+        // a marginalized range closes with p(), which already carries the survived-unseen branch
+        num_rho_unsampled += ( taxa[i].isExtinct() && ranges[i].survived && marginalizesExtinction() == false );    // n - m - l
+
         // an extant taxon with no fossil sample carries no reporting term
         if ( taxa[i].getMaxAge() == times.front() ) continue;
 
@@ -481,6 +467,20 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnFossilTotal()
         }
         lnProb += r;
     }
+
+    double rho = homogeneous_rho->getValue();
+
+    if ( num_rho_sampled > 0 )                          // seen at the present, so rho > 0
+    {
+        if ( rho == 0.0 ) return RbConstants::Double::neginf;
+        lnProb += num_rho_sampled * log( rho );
+    }
+    if ( num_rho_unsampled > 0 )                        // survived unseen, so rho < 1
+    {
+        if ( rho == 1.0 ) return RbConstants::Double::neginf;
+        lnProb += num_rho_unsampled * log( 1.0 - rho );
+    }
+
     return lnProb;
 }
 
