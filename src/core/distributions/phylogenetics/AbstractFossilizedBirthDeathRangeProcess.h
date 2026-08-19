@@ -131,6 +131,7 @@ namespace RevBayesCore {
         size_t                                          findIndex(double t) const;                             //!< Find the index so that times[index-1] < t < times[index]
         double                                          p(size_t i, double t, bool survival = false) const;
         virtual double                                  q(size_t i, double t, bool tilde = false) const;
+        double                                          lnQTildeFromPresent(size_t i, double t) const;              //!< log q_tilde from the present up to t.
 
         virtual void                                    prepareProbComputation(void) const;
 

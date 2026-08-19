@@ -213,6 +213,14 @@ double FossilizedBirthDeathSpeciationProcess::rangeEndTerm( size_t i, size_t di,
 
     if ( species[i].ends_at_sa == true ) return 0.0;
 
+    // with no record node the status is not data, so both fates after tau_K are summed: leaving
+    // no sampled descendant, which p already covers including surviving unseen, and surviving to
+    // be sampled at the present. The shared q_tilde above tau_K cancels, so the sum lands here.
+    if ( has_reporting_node == false )
+    {
+        return log( p( di, d ) + homogeneous_rho->getValue() * exp( lnQTildeFromPresent( di, d ) ) );
+    }
+
     return log( p( di, d ) );
 }
 

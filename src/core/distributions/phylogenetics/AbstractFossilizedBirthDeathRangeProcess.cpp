@@ -638,6 +638,21 @@ size_t AbstractFossilizedBirthDeathRangeProcess::findIndex(double t) const
 /**
  * p_i(t)
  */
+/**
+ * log q_tilde from the present up to t, the factor for a lineage persisting there unsampled.
+ *
+ * The per-interval terms telescope, so this is the whole segment and not a per-interval piece.
+ */
+double AbstractFossilizedBirthDeathRangeProcess::lnQTildeFromPresent( size_t i, double t ) const
+{
+    double s = q( i, t, true );
+
+    for ( size_t j = 0; j < i; ++j ) s += q_tilde_i[j];
+
+    return s;
+}
+
+
 double AbstractFossilizedBirthDeathRangeProcess::p( size_t i, double t, bool survival ) const
 {
     // get the parameters
