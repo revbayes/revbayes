@@ -590,8 +590,11 @@ double ContinuousCharacterData::getMeanDifference( size_t index ) const
                     double b = taxon_j.getCharacter( index );
                     double diff = fabs( a-b );
                     
-                    mean += diff;
-                    ++n_samples;
+                    if ( RbMath::isFinite(diff) == true )
+                    {
+                        mean += diff;
+                        ++n_samples;
+                    }
                     
                 }
                 
@@ -641,8 +644,13 @@ double ContinuousCharacterData::getMeanSpeciesDifference( size_t char_index ) co
         const std::string &name = t.getSpeciesName();
         size_t index = species_to_index[ name ];
         
-        ++samples_per_species[index];
-        species_mean[index] += getTaxonData( t.getName() ).getCharacter( char_index );
+        double trait_value = getTaxonData( t.getName() ).getCharacter( char_index );
+
+        if ( RbMath::isFinite(trait_value) == true )
+        {
+            ++samples_per_species[index];
+            species_mean[index] += trait_value;
+        }
         
     }
     
@@ -707,8 +715,11 @@ double ContinuousCharacterData::getMeanValue( size_t index ) const
             const ContinuousTaxonData& taxon_i = getTaxonData( i );
             double a = taxon_i.getCharacter( index );
                     
-            mean += a;
-            ++n_samples;
+            if ( RbMath::isFinite(a) == true )
+            {
+                mean += a;
+                ++n_samples;
+            }
             
         }
         
@@ -1109,8 +1120,11 @@ double ContinuousCharacterData::getVarDifference( size_t index ) const
                     double b = taxon_j.getCharacter( index );
                     double diff = fabs( a-b );
                     
-                    var += ((diff-mean)*(diff-mean));
-                    ++n_samples;
+                    if ( RbMath::isFinite(diff) == true )
+                    {
+                        var += ((diff-mean)*(diff-mean));
+                        ++n_samples;
+                    }
                     
                 }
                 
@@ -1160,8 +1174,13 @@ double ContinuousCharacterData::getVarSpeciesDifference( size_t char_index ) con
         const std::string &name = t.getSpeciesName();
         size_t index = species_to_index[ name ];
         
-        ++samples_per_species[index];
-        species_mean[index] += getTaxonData( t.getName() ).getCharacter( char_index );
+        double trait_value = getTaxonData( t.getName() ).getCharacter( char_index );
+
+        if ( RbMath::isFinite(trait_value) == true )
+        {
+            ++samples_per_species[index];
+            species_mean[index] += trait_value;
+        }
         
     }
     
@@ -1260,8 +1279,11 @@ double ContinuousCharacterData::getVarValue( size_t index ) const
             const ContinuousTaxonData& taxon_i = getTaxonData( i );
             double a = taxon_i.getCharacter( index );
             
-            var += ((a-mean)*(a-mean));
-            ++n_samples;
+            if ( RbMath::isFinite(a) == true )
+            {
+                var += ((a-mean)*(a-mean));
+                ++n_samples;
+            }
             
         }
         
@@ -1306,10 +1328,11 @@ double ContinuousCharacterData::getSpeciesMean(size_t species, size_t site) cons
         const std::string &name = t.getSpeciesName();
         size_t index = species_to_index[ name ];
         
-        if ( index == species )
+        double trait_value = getTaxonData( t.getName() ).getCharacter( site );
+        if ( index == species && RbMath::isFinite(trait_value) == true)
         {
             ++samples_per_species;
-            species_mean += getTaxonData( t.getName() ).getCharacter( site );
+            species_mean += trait_value;
         }
         
     }
@@ -1356,9 +1379,14 @@ double ContinuousCharacterData::getWithinSpeciesVariance(size_t species, size_t 
         
         if ( index == species )
         {
-            ++samples_per_species;
             double value = getTaxonData( t.getName() ).getCharacter( site );
-            species_var += (mean-value)*(mean-value);
+            
+            if ( RbMath::isFinite(value) == true )
+            {
+                species_var += (mean-value)*(mean-value);
+                ++samples_per_species;
+            }
+
         }
         
     }
@@ -1533,5 +1561,3 @@ void ContinuousCharacterData::writeToFile(const path &dir, const std::string &fn
     nw.closeStream();
     
 }
-
-

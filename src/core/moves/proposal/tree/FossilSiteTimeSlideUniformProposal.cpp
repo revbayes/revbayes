@@ -207,13 +207,13 @@ double FossilSiteTimeSlideUniformProposal::doProposal( void )
     }
 
     max_age = *std::min_element(max_ages.begin(), max_ages.end());
+
+    // Abort the move if we don't have a valid interval
+    if (not (min_age < max_age))
+        throw RbException(RbException::SKIP_PROPOSAL);
     
     double size = max_age - min_age;
-
-    if (max_age < min_age)
-    {
-        throw RbException("FossilSiteTimeSlideUniformProposal: invalid age bounds: min_age > max_age");
-    }
+    assert(size >= 0); // sanity check
 
     double u      = rng->uniform01();
     double delta  = ( lambda * ( u - 0.5 ) );

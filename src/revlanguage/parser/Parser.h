@@ -95,7 +95,7 @@ namespace RevLanguage {
 
         // Regular functions
         int                 execute(SyntaxElement* root, const std::shared_ptr<Environment>& env) const;  //!< Execute the syntax tree
-        void                getline(char* buf, size_t maxsize);                                     //!< Give flex one line to process
+        void                getline(char* buf, size_t maxsize);                                     //!< Give flex the next chunk of the current Rev line (long lines are returned in multiple calls)
         int                 help(const std::string& symbol) const;                                  //!< Get help for a symbol
         int                 help(const std::string& baseSymbol, const std::string& symbol) const;   //!< Get help for a symbol
         int                 help(const SyntaxFunctionCall* root) const;                             //!< Get help for a function call

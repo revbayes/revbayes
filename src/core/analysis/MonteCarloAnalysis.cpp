@@ -25,6 +25,8 @@
 #include "RbVector.h"
 #include "RbVectorImpl.h"
 #include "StoppingRule.h"
+#include "MaxIterationStoppingRule.h"
+#include "MaxTimeStoppingRule.h"
 #include "Trace.h"
 
 
@@ -567,6 +569,42 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
 #endif
 {
     
+    // When the 'generations' argument was omitted but the user supplied at least one srMaxIteration stopping rule, use it
+    // as the planned run length so that monitors (especially the "ETA" column of mnScreen) treat it as equivalent to
+    // .run(generations=N). We would not expect more than one srMaxIteration rule to be supplied, but if it does happen for
+    // whatever reason, we will use the most restrictive rule (i.e., the one specifying the shortest run).
+    if ( kIterations == 0 )
+    {
+        for (size_t i = 0; i < rules.size(); ++i)
+        {
+            const MaxIterationStoppingRule* max_iter = dynamic_cast<const MaxIterationStoppingRule*>( &rules[i] );
+            if ( max_iter != NULL )
+            {
+                size_t rule_max = max_iter->getMaxGenerations();
+                if ( kIterations == 0 || rule_max < kIterations )
+                {
+                    kIterations = rule_max;
+                }
+            }
+        }
+    }
+
+    // Analogously, extract a wall-clock time target from any srMaxTime rules (again taking the most restrictive in the
+    // unexpected case of having more than one) and pass it to the monitors alongside the iteration target.
+    double max_seconds = 0.0;
+    for (size_t i = 0; i < rules.size(); ++i)
+    {
+        const MaxTimeStoppingRule* max_time = dynamic_cast<const MaxTimeStoppingRule*>( &rules[i] );
+        if ( max_time != NULL )
+        {
+            double rule_max = max_time->getMaxTime();
+            if ( max_seconds == 0.0 || rule_max < max_seconds )
+            {
+                max_seconds = rule_max;
+            }
+        }
+    }
+    
     // get the current generation
     size_t gen = 0;
     for (size_t i=0; i<replicates; ++i)
@@ -633,6 +671,38 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
                 ss << "    " << statement;
             }
         }
+
+        // If the analysis includes a screen monitor (which prints an ETA column by default) but neither an iteration nor a time target,
+        // (i.e., the 'generations' argument was not specified, and the stopping-rule vector contains neither MaxIteration nor MaxTime),
+        // we point out that ETA is going to be "??:??:??"
+        bool has_iteration_or_time_target = false;
+        for (size_t i = 0; i < rules.size(); ++i)
+        {
+            if ( dynamic_cast<const MaxIterationStoppingRule*>( &rules[i] ) != NULL ||
+                 dynamic_cast<const MaxTimeStoppingRule*>( &rules[i] ) != NULL )
+            {
+                has_iteration_or_time_target = true;
+                break;
+            }
+        }
+
+        bool has_screen_monitor = false;
+        RbVector<Monitor>& mons = runs[0]->getMonitors();
+        for (size_t i = 0; i < mons.size(); ++i)
+        {
+            if ( mons[i].isScreenMonitor() )
+            {
+                has_screen_monitor = true;
+                break;
+            }
+        }
+
+        if ( !has_iteration_or_time_target && has_screen_monitor )
+        {
+            ss << "\n";
+            ss << "NOTE: This run uses only convergence-based stopping rules, so there is no information\n";
+            ss << "      from which to estimate a time to completion (ETA).\n";
+        }
         
         RBOUT( ss.str() );
     }
@@ -651,7 +721,7 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
                 runs[i]->disableScreenMonitor(true, i);
             }
             
-            runs[i]->startMonitors( kIterations, runs[i]->getCurrentGeneration() > 0 );
+            runs[i]->startMonitors( kIterations, runs[i]->getCurrentGeneration() > 0, max_seconds );
             
         }
         

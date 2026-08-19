@@ -3,6 +3,7 @@
 
 #include <cstddef>
 #include <iosfwd>
+#include <optional>
 
 #include "Proposal.h"
 
@@ -13,14 +14,14 @@ template <class valueType> class RbVector;
 template <class variableType> class StochasticNode;
     
     /**
-     * The sliding operator.
+     * The single-element scaling operator for real-valued matrices.
      *
-     * This move randomly picks an element of a matrix of positive real numbers.
-     * That means, that we randomly pick the i-th row and j-th column with equal probability.
-     * Then, we propose a sliding distance and slide the value.
-     * The actual sliding distance is computed by delta = lambda * ( u - 0.5 )
-     * where u ~ Uniform(0,1).
-     * The proposal is thus m[i][j] += lambda * ( u - 0.5 )
+     * This move randomly picks an element of a matrix of real numbers. That means we randomly pick the i-th row and j-th column with equal probability,
+     * unless the .setRow() or .setColumn() methods are used to confine the move to just one row or one column, respectively.
+     * Then, we draw a random uniform number u ~ unif (-0.5,0.5)
+     * and scale the current value by a scaling factor
+     * sf = exp( lambda * u )
+     * where lambda is the tuning parameter of the proposal to influence its "boldness".
      *
      * @copyright Copyright 2009-
      * @author The RevBayes Development Core Team (Nicolas Lartillot)
@@ -30,10 +31,10 @@ template <class variableType> class StochasticNode;
     class MatrixRealSingleElementScaleProposal : public Proposal {
         
     public:
-        void                                    setRow(size_t r) { restrict_row = r; }      //!< Confine the move to one row
-        void                                    setColumn(size_t c) { restrict_col = c; }   //!< Confine the move to one column
-        MatrixRealSingleElementScaleProposal( StochasticNode<MatrixReal> *n, double l, bool s = false);                                                                      //!< Constructor
-        MatrixRealSingleElementScaleProposal( StochasticNode<RbVector<RbVector<double> > > *n, double l, bool s = false);                                                                      //!< Constructor
+        void                                    setRow(size_t r) { restrict_row = r; }                                              //!< Confine the move to one row
+        void                                    setColumn(size_t c) { restrict_col = c; }                                           //!< Confine the move to one column
+        MatrixRealSingleElementScaleProposal(StochasticNode<MatrixReal> *n, double l, bool s = false);                              //!< Constructor
+        MatrixRealSingleElementScaleProposal(StochasticNode<RbVector<RbVector<double> > > *n, double l, bool s = false);            //!< Constructor
 
         // Basic utility functions
         void                                    cleanProposal(void);                                                                //!< Clean up proposal
@@ -48,7 +49,7 @@ template <class variableType> class StochasticNode;
         void                                    undoProposal(void);                                                                 //!< Reject the proposal
         
     protected:
-        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes the Proposal is working on
+        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes the proposal is working on
         
     private:
         // parameters
@@ -56,14 +57,15 @@ template <class variableType> class StochasticNode;
         StochasticNode<RbVector<RbVector<double> > >* array;
         StochasticNode<MatrixReal>*                   matrix;
         
-        double                                  lambda;                                                                             //!< The Sliding parameter of the move (larger lambda -> larger proposals).
-        //!< The two indices of the last modified element.
-        size_t                                  restrict_row;                                   //!< 1-based row to confine the move to; 0 draws from the whole matrix
-        size_t                                  restrict_col;                                   //!< 1-based column to confine the move to; 0 draws from the whole matrix
-        size_t                                  indexa;
-        size_t                                  indexb;
-        double                                  storedValue;                                                                        //!< The value we propose.
-        bool                                    symmetric;
+        double                                        lambda;                                                                       //!< The tuning parameter of the move (larger lambda -> larger proposals).
+        std::optional<size_t>                         restrict_row;                                                                 //!< 1-based row to confine the move to; if not specified, we draw from the whole matrix
+        std::optional<size_t>                         restrict_col;                                                                 //!< 1-based column to confine the move to; if not specified, we draw from the whole matrix
+        
+        // The two indices of the last modified element.
+        size_t                                        indexa;
+        size_t                                        indexb;
+        double                                        storedValue;                                                                  //!< The value we propose.
+        bool                                          symmetric;
     };
     
 }

@@ -135,7 +135,7 @@ const MemberRules& Move_GraphFlipEdge::getParameterRules(void) const
         matTypes.push_back( MatrixRealSymmetric::getClassTypeSpec() );
         move_member_rules.push_back( new ArgumentRule( "x"     , matTypes, "The variable on which this move operates.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
         move_member_rules.push_back( new ArgumentRule( "p", Probability::getClassTypeSpec()   , "The probability of flipping each edge in edges (min flips == 1).", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new Probability(0.0) ) );
-        move_member_rules.push_back( new ArgumentRule( "edges" , ModelVector<ModelVector<Natural> >::getClassTypeSpec(), "A vector of [i,j] edges to target with this proposal. An empty vector is interpretted as the full list of edges.", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY, new ModelVector<Natural>() ) );
+        move_member_rules.push_back( new ArgumentRule( "edges" , ModelVector<ModelVector<Natural> >::getClassTypeSpec(), "A vector of [i,j] edges to target with this proposal. An empty vector is interpreted as the full list of edges.", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY, new ModelVector<Natural>() ) );
         
         move_member_rules.push_back( new ArgumentRule( "tune"  , RlBoolean::getClassTypeSpec() , "Should we tune the scaling factor during burnin?", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new RlBoolean( true ) ) );
         

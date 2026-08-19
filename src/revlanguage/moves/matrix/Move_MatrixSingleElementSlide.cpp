@@ -14,6 +14,7 @@
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "Natural.h"
+#include "RbException.h"
 #include "RlBoolean.h"
 #include "MatrixRealSingleElementSlideProposal.h"
 #include "MetropolisHastingsMove.h"
@@ -93,15 +94,24 @@ void Move_MatrixSingleElementSlide::constructInternalObject( void )
         p->setTargetAcceptanceRate(tt);
     }
 
-    // row= and col= are 1-based; omitting them leaves the whole matrix as the pool
+    // row= and col= are 1-based; omitting them leaves the whole matrix as the pool.
+    // Natural admits 0, which would wrap around when the index is made 0-based.
     if ( row->getRevObject() != RevNullObject::getInstance() )
     {
         long rval = static_cast<const Natural &>( row->getRevObject() ).getValue();
+        if ( rval < 1 )
+        {
+            throw RbException() << "mvMatrixElementSlide: row must be at least 1, but was " << rval << ".";
+        }
         static_cast<RevBayesCore::MatrixRealSingleElementSlideProposal*>(p)->setRow( size_t(rval) );
     }
     if ( col->getRevObject() != RevNullObject::getInstance() )
     {
         long cval = static_cast<const Natural &>( col->getRevObject() ).getValue();
+        if ( cval < 1 )
+        {
+            throw RbException() << "mvMatrixElementSlide: col must be at least 1, but was " << cval << ".";
+        }
         static_cast<RevBayesCore::MatrixRealSingleElementSlideProposal*>(p)->setColumn( size_t(cval) );
     }
 

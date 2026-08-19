@@ -47,6 +47,15 @@ MaxTimeStoppingRule* MaxTimeStoppingRule::clone( void ) const
 
 
 /**
+ * Get the maximum allowed wall-clock time in seconds.
+ */
+double MaxTimeStoppingRule::getMaxTime( void ) const
+{
+    return maxTime;
+}
+
+
+/**
  * Is this a stopping rule? No, this is a threshold rule.
  */
 bool MaxTimeStoppingRule::isConvergenceRule( void ) const

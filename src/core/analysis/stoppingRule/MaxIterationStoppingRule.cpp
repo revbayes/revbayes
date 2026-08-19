@@ -45,6 +45,15 @@ MaxIterationStoppingRule* MaxIterationStoppingRule::clone( void ) const
 
 
 /**
+ * Get the generation number at which this rule stops the run.
+ */
+size_t MaxIterationStoppingRule::getMaxGenerations( void ) const
+{
+    return maxGenerations;
+}
+
+
+/**
  * Is this a stopping rule? No, this is a threshold rule.
  */
 bool MaxIterationStoppingRule::isConvergenceRule( void ) const

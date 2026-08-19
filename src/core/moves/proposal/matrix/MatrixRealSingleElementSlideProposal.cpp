@@ -8,6 +8,7 @@
 #include "RandomNumberGenerator.h"
 #include "Cloneable.h"
 #include "MatrixReal.h"
+#include "RbException.h"
 #include "RbVector.h"
 #include "RbVectorImpl.h"
 #include "StochasticNode.h"
@@ -25,8 +26,6 @@ MatrixRealSingleElementSlideProposal::MatrixRealSingleElementSlideProposal( Stoc
     array(NULL),
     matrix( n ),
     delta( l ),
-    restrict_row( 0 ),
-    restrict_col( 0 ),
     indexa(0),
     indexb(0),
     storedValue( 0.0 ),
@@ -47,8 +46,6 @@ MatrixRealSingleElementSlideProposal::MatrixRealSingleElementSlideProposal( Stoc
     array( n ),
     matrix(NULL),
     delta( l ),
-    restrict_row( 0 ),
-    restrict_col( 0 ),
     indexa(0),
     indexb(0),
     storedValue( 0.0 ),
@@ -125,9 +122,20 @@ double MatrixRealSingleElementSlideProposal::doProposal( void )
     if (array != NULL)
     {
         RbVector<RbVector<double> >& v = array->getValue();
+
+        // the matrix is not known when the move is built, so its bounds are checked here
+        if ( restrict_row.has_value() && *restrict_row > v.size() )
+        {
+            throw RbException() << "mvMatrixElementSlide: row " << *restrict_row << " is outside the matrix, which has " << v.size() << " rows.";
+        }
+        if ( restrict_col.has_value() && *restrict_col > v.front().size() )
+        {
+            throw RbException() << "mvMatrixElementSlide: col " << *restrict_col << " is outside the matrix, which has " << v.front().size() << " columns.";
+        }
+
         // choose an index
-        indexa = ( restrict_row > 0 ? restrict_row - 1 : size_t( rng->uniform01() * v.size() ) );
-        indexb = ( restrict_col > 0 ? restrict_col - 1 : size_t( rng->uniform01() * v.front().size() ) );
+        indexa = ( restrict_row.has_value() ? *restrict_row - 1 : size_t( rng->uniform01() * v.size() ) );
+        indexb = ( restrict_col.has_value() ? *restrict_col - 1 : size_t( rng->uniform01() * v.front().size() ) );
 
         // copy value
         storedValue = v[indexa][indexb];
@@ -144,9 +152,20 @@ double MatrixRealSingleElementSlideProposal::doProposal( void )
     else
     {
         MatrixReal& v = matrix->getValue();
+
+        // the matrix is not known when the move is built, so its bounds are checked here
+        if ( restrict_row.has_value() && *restrict_row > v.getNumberOfRows() )
+        {
+            throw RbException() << "mvMatrixElementSlide: row " << *restrict_row << " is outside the matrix, which has " << v.getNumberOfRows() << " rows.";
+        }
+        if ( restrict_col.has_value() && *restrict_col > v.getNumberOfColumns() )
+        {
+            throw RbException() << "mvMatrixElementSlide: col " << *restrict_col << " is outside the matrix, which has " << v.getNumberOfColumns() << " columns.";
+        }
+
         // choose an index
-        indexa = ( restrict_row > 0 ? restrict_row - 1 : size_t( rng->uniform01() * v.getNumberOfRows() ) );
-        indexb = ( restrict_col > 0 ? restrict_col - 1 : size_t( rng->uniform01() * v.getNumberOfColumns() ) );
+        indexa = ( restrict_row.has_value() ? *restrict_row - 1 : size_t( rng->uniform01() * v.getNumberOfRows() ) );
+        indexb = ( restrict_col.has_value() ? *restrict_col - 1 : size_t( rng->uniform01() * v.getNumberOfColumns() ) );
 
         // copy value
         storedValue = v[indexa][indexb];

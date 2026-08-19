@@ -20,38 +20,34 @@
 using namespace RevBayesCore;
 
 
-namespace {
+/**
+ * Parse a numeric field, requiring the whole field to be consumed.
+ *
+ * Deliberately not `stringstream >> double`, which yields 0 for a field that does not parse
+ * and reports it only through failbit, and which does not recognize "Inf" -- a taxon file may
+ * use that for an occurrence whose age has no upper bound.
+ *
+ * \param[in]    s        The raw field.
+ * \param[in]    field    Field name, for the error message.
+ * \param[in]    line     1-based line number in the file, for the error message.
+ */
+double TaxonReader::parseNumericField(const std::string &s, const std::string &field, size_t line)
+{
+    const char *begin = s.c_str();
+    char *end = NULL;
 
-    /**
-     * Parse a numeric field, requiring the whole field to be consumed.
-     *
-     * Deliberately not `stringstream >> double`, which yields 0 for a field that does not parse
-     * and reports it only through failbit, and which does not recognize "Inf" -- a taxon file may
-     * use that for an occurrence whose age has no upper bound.
-     *
-     * \param[in]    s        The raw field.
-     * \param[in]    field    Field name, for the error message.
-     * \param[in]    line     1-based line number in the file, for the error message.
-     */
-    double parseNumericField(const std::string &s, const std::string &field, size_t line)
+    double v = std::strtod(begin, &end);
+
+    // strtod skips leading whitespace; skip trailing before checking for leftovers
+    while ( *end == ' ' || *end == '\t' || *end == '\r' || *end == '\n' ) ++end;
+
+    if ( end == begin || *end != '\0' )
     {
-        const char *begin = s.c_str();
-        char *end = NULL;
-
-        double v = std::strtod(begin, &end);
-
-        // strtod skips leading whitespace; skip trailing before checking for leftovers
-        while ( *end == ' ' || *end == '\t' || *end == '\r' || *end == '\n' ) ++end;
-
-        if ( end == begin || *end != '\0' )
-        {
-            throw RbException() << "Could not parse \'" << s << "\' as a number in the \"" << field
-                                << "\" field on line " << line << " of the taxon definition file.";
-        }
-
-        return v;
+        throw RbException() << "Could not parse \'" << s << "\' as a number in the \"" << field
+                            << "\" field on line " << line << " of the taxon definition file.";
     }
 
+    return v;
 }
 
 

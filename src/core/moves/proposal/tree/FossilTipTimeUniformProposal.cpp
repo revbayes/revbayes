@@ -249,6 +249,10 @@ double FossilTipTimeUniformProposal::doProposal( void )
         }
     }
 
+    // Abort the move if we don't have a valid interval
+    if (not (min_age < max_age))
+        throw RbException(RbException::SKIP_PROPOSAL);
+
     assert(max_age >= min_age); //sanity check
 
     // now we store all necessary values

@@ -259,8 +259,15 @@ void RevLanguage::Parser::executeBaseVariable(void)
     }
 }
 
-/** 
- * Give flex a line to parse
+/**
+ * Give flex a chunk of the current Rev line to parse.
+ *
+ * Flex calls this via YY_INPUT / rrinput with a fixed maxsize (YY_READ_BUF_SIZE,
+ * typically 8192). That is only a refill chunk size, not a limit on command
+ * length: if the line is longer than the chunk, we return a partial read without a
+ * synthetic newline so flex will call again for the remainder. We only append
+ * a newline when a real line terminator was consumed (or at end of file), which
+ * is what multiline incomplete-command handling relies on (foundNewline).
  */
 void RevLanguage::Parser::getline(char* buf, size_t maxsize)
 {
@@ -276,8 +283,20 @@ void RevLanguage::Parser::getline(char* buf, size_t maxsize)
     {
         foundNewline = false;
         rrcommand.getline(buf, std::int64_t(maxsize) - 3);
-        // Deal with line endings in case getline uses non-Unix endings
         size_t i = strlen(buf);
+
+        // Truncated mid-line: istream::getline hit the count limit without
+        // finding '\n', so failbit is set and the real newline remains unread.
+        // Clear failbit so subsequent YY_INPUT calls can continue; do not
+        // invent a newline or flex will treat the command as ended mid-token.
+        if (rrcommand.fail() && !rrcommand.eof())
+        {
+            rrcommand.clear(rrcommand.rdstate() & ~std::ios_base::failbit);
+            buf[i] = '\0';
+            return;
+        }
+
+        // Deal with line endings in case getline uses non-Unix endings
         if (i >= 1 && buf[i - 1] == '\r')
         {
             buf[i - 1] = '\n';
@@ -289,6 +308,7 @@ void RevLanguage::Parser::getline(char* buf, size_t maxsize)
         }
         else if (i == 0 || (i >= 1 && buf[i - 1] != '\n'))
         {
+            // getline strips the delimiter; restore '\n' so the lexer sees end of line
             buf[i++] = '\n';
         }
         buf[i] = '\0';
