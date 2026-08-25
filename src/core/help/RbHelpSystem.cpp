@@ -86,21 +86,31 @@ RbHelpSystem& RbHelpSystem::operator=( const RbHelpSystem &hs )
 }
 
 
+/**
+ * Append the constructor signature(s) of 'source' to those already stored in
+ * 'target'. This is used to merge several distributions that share the same Rev
+ * name (but operate on different types) into a single help entry, so that all of
+ * their constructors are listed together.
+ */
+void RbHelpSystem::appendConstructors( RbHelpType *target, const RbHelpType *source )
+{
+    std::vector<RbHelpFunction> constructors = target->getConstructors();
+    const std::vector<RbHelpFunction>& extra = source->getConstructors();
+    constructors.insert( constructors.end(), extra.begin(), extra.end() );
+    target->setConstructors( constructors );
+}
+
+
 void RbHelpSystem::addHelpDistribution( RbHelpDistribution *h)
 {
     
-//    helpForFunctions.insert( std::pair<std::string,RbHelpFunction>( h.getName() , h) );
-//    helpFunctionNames.insert( h.getName() );
-//    
-//    // also add all aliases
-//    const std::vector<std::string>& aliases = h.getAliases();
-//    for (std::vector<std::string>::const_iterator alias = aliases.begin(); alias != aliases.end(); ++alias)
-//    {
-//        helpForFunctions.insert( std::pair<std::string,RbHelpFunction>( *alias , h) );
-//    }
-
+    if ( h == NULL )
+    {
+        return;
+    }
     
-    if ( h != NULL && helpForTypes.find( h->getName() ) == helpForTypes.end() )
+    std::map<std::string, RbHelpType*>::iterator it = helpForTypes.find( h->getName() );
+    if ( it == helpForTypes.end() )
     {
         helpForTypes.insert( std::pair<std::string,RbHelpType*>( h->getName() , h ) );
         helpTypeNames.insert( h->getName() );
@@ -130,8 +140,32 @@ void RbHelpSystem::addHelpDistribution( RbHelpDistribution *h)
         }
 
     }
-    else if ( h != NULL )
+    else
     {
+        // A help entry under this (distribution) name already exists. This happens
+        // when several distributions share the same Rev name but differ in the
+        // types they operate on (e.g. dnConstrainedTopology, which applies to both
+        // rooted/time trees and unrooted/branch-length trees). Rather than
+        // discarding the additional overload, we merge its constructor signature(s)
+        // into the existing entry so that '?dnName' lists all of them.
+        appendConstructors( it->second, h );
+
+        // do the same for any alias entries
+        const std::vector<std::string>& aliases = h->getAliases();
+        for (std::vector<std::string>::const_iterator alias = aliases.begin(); alias != aliases.end(); ++alias)
+        {
+            std::map<std::string, RbHelpType*>::iterator a_it = helpForTypes.find( *alias );
+            if ( a_it != helpForTypes.end() )
+            {
+                appendConstructors( a_it->second, h );
+            }
+            else
+            {
+                helpForTypes.insert( std::pair<std::string,RbHelpType*>( *alias , h->clone() ) );
+                helpTypeNames.insert( *alias );
+            }
+        }
+
         delete h;
     }
 

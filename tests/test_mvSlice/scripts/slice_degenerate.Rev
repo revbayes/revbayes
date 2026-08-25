@@ -1,0 +1,15 @@
+# A conditional far narrower than the slice sampler's starting window: shrinking from the
+# window down to the slice takes many more than the 200 steps the search allows. The sampler
+# should keep the current value and carry on rather than abort the process.
+seed(1)
+
+y ~ dnNormal(0, 1E-100)
+y.setValue(0.0)
+
+moves = VectorMoves()
+moves.append( mvSlice(y, window = 1E100, weight = 1, search_method = "stepping_out") )
+
+mymcmc = mcmc(model(y), VectorMonitors(), moves)
+mymcmc.run(generations = 50)
+
+"analysis finished without aborting"

@@ -1,4 +1,4 @@
-# RevBayes 1.4.1 (unreleased)
+# RevBayes 1.4.2 (unreleased)
 
 ## Backwards-incompatible changes
 
@@ -9,6 +9,55 @@
 ## Documentation improvements
 
 ## Infrastructure
+
+# RevBayes 1.4.1 (Jul 17, 2026)
+
+## Speed & memory
+  * 4-fold speedup in analyses of DNA data when `useScaling=TRUE` (#1002).
+  
+## Features
+  * Add a `stop( )` function to halt Rev script execution with a user-specified message (#1019).
+  * Allow `rep( )` to take input of type `Probability` (#1035).
+  * Allow specifying a fixed burnin fraction in convergence rules (#1048).
+
+## Bug fixes
+  * DAG
+      - Fix a segfault when the model graph contains a cycle (#962).
+      - Make sure `Model::getOrderedStochasticNodes` inserts parents before children (#1050).
+  * Likelihood evaluation
+      - Avoid -inf log likelihoods in `fnF81( )` (#1002).
+      - Avoid -inf / NaN log likelihoods in `mvBetaSimplex` (#1002).
+  * MCMC
+      - Draw random numbers regardless of log likelihood difference to reduce test fragility (#1006).
+      - Make sure all MPI ranks finished writing to a trace file before convergence rules read it (#1029).
+      - Require the `frequency` argument of convergence rules to be strictly positive (#1044).
+      - Make it simpler to `exclude` vector variables from `mnModel` (#1052).
+  * Interface
+      - Do not print asterisks _ad infinitum_ when running `.burnin( )` for zero generations (#1049).
+      - Make sure help pages show the constructors, arguments, and domain types for all overloads of a given distribution (#1056).
+  * Misc
+      - Make sure `mnStochasticVariable` and `Mcmc::checkpoint` write out the hidden state (allocation index) of `dnMixture` (#987).
+      - Fix reading of RNA datasets (#1018).
+      - Fix handling of extant samples when `rho=0` and of purely extinct trees in `dnBDSTP` (#1032).
+      - Make sure the `.getStateDescriptions( )` method preserves the first-seen state order (#1036).
+      - Prevent `dnPhyloWhiteNoise` from taking the log of an already log-transformed density (#1054).
+      - Fix initialization issues with backbone-constrained nonclock analyses (#1056).
+      - Fix handling of parameter-specific timelines in `dnBDSTP` (#1059).
+
+## Refactor
+  * Refactor partial likelihood scaling (#1002).
+  * Remove pointer arithmetic (#1026).
+
+## Documentation improvements
+  * Expand documentation for `srGelmanRubin`, `srGeweke`, `srMinESS`, `srStationarity` (#1048).
+
+## Infrastructure
+  * Enable and improve support for the AVX instruction set (#1002).
+  * Add support for building and developing RevBayes using the Nix package manager (#1033).
+  
+## New contributors
+  * @sriram98v made their first contribution in #1033.
+  * @wnsplim made their first contribution in #1050.
 
 # RevBayes 1.4.0 (Apr 17, 2026)
 

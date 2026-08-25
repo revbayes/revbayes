@@ -43,6 +43,7 @@ namespace RevLanguage {
         
         virtual void                                setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);     //!< Set member variable
         
+        RevPtr<const RevVariable>                   burnin;
         RevPtr<const RevVariable>                   burninMethod;
         RevPtr<const RevVariable>                   filename;
         RevPtr<const RevVariable>                   frequency;

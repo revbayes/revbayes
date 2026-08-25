@@ -1,0 +1,41 @@
+################################################################################
+#
+# RevBayes Test-Script: Analysis under the fossilized birth-death model in which
+#                       the speciation and extinction rates (1) vary through 
+#                       time, (2) their timelines are specified by the same
+#                       variable, and (3) this variable gets re-assigned.
+#
+# authors: David Cerny
+#
+################################################################################
+
+seed(12345)
+
+# simulated data originally provided by Niklas Hohmann
+taxa <- readTaxonData("data/fossils_gappy_rho1.tsv")
+
+rho <- 1.0
+timeline <- v(0.4, 0.8, 1.2, 1.6)
+
+for(i in 1:(timeline.size()+1)) {
+    speciation_rate[i] ~ dnExponential(lambda = 1.0)
+}
+
+for(i in 1:(timeline.size()+1)) {
+    extinction_rate[i] ~ dnExponential(lambda = 3.3)
+}
+
+psi ~ dnExponential(lambda = 0.25)
+origin_time ~ dnExponential(lambda = 1.0, offset = 2.0)
+
+fbd_tree ~ dnBDSTP(origin=origin_time, lambda=speciation_rate, mu=extinction_rate,
+                   psi=psi, rho=rho, r=0, taxa=taxa, lambdaTimeline = timeline,
+                   muTimeline = timeline)
+fbd_tree.lnProbability()
+
+timeline <- v(0.3, 0.7, 1.1, 1.5)
+fbd_tree.lnProbability()
+
+clear()
+
+q()

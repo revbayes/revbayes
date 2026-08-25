@@ -19,6 +19,21 @@
    
    
    Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
+   Could not compute lnProb for node 'obs_root_age': lnProb = -inf
+   375000
+   
+   
+   Drawing new initial states ... 
    
    Running MCMC simulation
    This simulation runs 2 independent replicates.

@@ -47,7 +47,13 @@ void ProgressBar::update( size_t i )
     
     if ( process_active == true )
     {
+        if ( max <= offset )
+        {
+            return;
+        }
+
         size_t progress = 68 * double(i-offset) / double(max-offset);
+        
         if ( progress > num_stars )
         {
                 

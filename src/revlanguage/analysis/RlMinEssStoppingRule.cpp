@@ -10,7 +10,7 @@
 #include "RealPos.h"
 #include "RlString.h"
 #include "TypeSpec.h"
-#include "Natural.h"
+#include "IntegerPos.h"
 #include "RevObject.h"
 #include "RevPtr.h"
 #include "RevVariable.h"
@@ -49,7 +49,7 @@ void MinEssStoppingRule::constructInternalObject( void )
     
     // now allocate a new stopping rule
     double min = static_cast<const RealPos &>( minEss->getRevObject() ).getValue();
-    int fq = static_cast<const Natural &>( frequency->getRevObject() ).getValue();
+    int fq = static_cast<const IntegerPos &>( frequency->getRevObject() ).getValue();
     const std::string &fn = static_cast<const RlString &>( filename->getRevObject() ).getValue();
     
     RevBayesCore::BurninEstimatorContinuous *burninEst = constructBurninEstimator();

@@ -5,9 +5,9 @@
 
 [![Release](https://img.shields.io/github/v/release/revbayes/revbayes.svg?style=plastic)](https://github.com/revbayes/revbayes/releases/latest)
 [![Release date](https://img.shields.io/github/release-date/revbayes/revbayes.svg?style=plastic&color=orange)](https://github.com/revbayes/revbayes/releases/latest)
-[![New commits in last release](https://img.shields.io/badge/dynamic/json?url=https://api.github.com/repos/revbayes/revbayes/compare/v1.3.2...v1.4.0&query=$.ahead_by&label=commits%20v1.3.2–v1.4.0&color=yellow&style=plastic)](https://github.com/revbayes/revbayes/compare/v1.3.2...v1.4.0)
+[![New commits in last release](https://img.shields.io/badge/dynamic/json?url=https://api.github.com/repos/revbayes/revbayes/compare/v1.4.0...v1.4.1&query=$.ahead_by&label=commits%20v1.4.0–v1.4.1&color=yellow&style=plastic)](https://github.com/revbayes/revbayes/compare/v1.4.0...v1.4.1)
 [![Code size](https://img.shields.io/github/languages/code-size/revbayes/revbayes.svg?style=plastic&color=green)](https://github.com/revbayes/revbayes/archive/master.zip)
-[![Downloads](https://img.shields.io/github/downloads/revbayes/revbayes/v1.4.0/total.svg?style=plastic&color=darkgreen)](https://github.com/revbayes/revbayes/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/revbayes/revbayes/v1.4.1/total.svg?style=plastic&color=darkgreen)](https://github.com/revbayes/revbayes/releases/latest)
 
 [![Development branch](https://img.shields.io/badge/branch-development-134EA2)](https://github.com/revbayes/revbayes/tree/development)
 [![New commits since last release](https://img.shields.io/github/commits-since/revbayes/revbayes/latest/development?sort=semver&style=plastic&color=lightblue&label=commits%20since%20release)](https://github.com/revbayes/revbayes/commits/development)

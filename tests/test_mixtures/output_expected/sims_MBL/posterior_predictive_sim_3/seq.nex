@@ -1,0 +1,14 @@
+#NEXUS
+
+Begin data;
+Dimensions ntax=5 nchar=5;
+Format datatype=DNA missing=? gap=-;
+Matrix
+Alouatta_palliata   GTAGA
+Galago_senegalensis   CGAGG
+Lemur_catta   GTAGG
+Pan_paniscus   GTAGA
+Tarsius_syrichta   GTAGA
+;
+End;
+

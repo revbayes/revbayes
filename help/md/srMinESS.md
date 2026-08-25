@@ -17,16 +17,27 @@ of generations required to meet the ESS threshold, even though it may increase
 the number of indepedent samples in the final, pooled posterior sample.
 
 The number of samples to be removed as burnin before calculating the test
-statistic is determined using the `burninMethod`. Different burnin lengths are
-tested, increasing from 0 to 50% (for `ESS`) or 100% (for `SEM`) of the length
-of the trace in increments of 10 samples. If the `ESS` option is chosen
-(default), ESS is calculated for all monitored parameters after removing the
-number of samples corresponding to each candidate burnin length. The best
-burnin length for a given parameter is the one that maximizes its ESS value.
-If the `SEM` option is chosen, the standard error of the mean (SEM) is
-calculated instead, and the best burnin length for a given parameter is the one
-that minimizes its SEM value. In both cases, the final burnin length is set to
-the maximum of the parameter-specific burnin lengths.
+statistic is determined using the `burninMethod`. If the `"ESS"` (default) or
+`"SEM"` options are chosen, different burnin lengths are tested, increasing
+from 0 to 50% (for `"ESS"`) or 100% (for `"SEM"`) of the length of the trace in
+increments of 10 samples. The `"ESS"` option calculates effective sample sizes
+(ESS) for all monitored parameters after removing the number of samples
+corresponding to each candidate burnin length. The best burnin length for a
+given parameter is the one that maximizes its ESS value. The `"SEM"` option
+instead calculates the standard error of the mean (SEM), and the best burnin
+length for a given parameter is the one that minimizes its SEM value. In both
+cases, the final burnin length is set to the maximum of the parameter-specific
+burnin lengths.
+
+Alternatively, the user may set `burninMethod` to `"fixed"`, which discards a
+constant fraction of the samples collected up to that point. This fraction can
+be specified using the `burnin` argument, and is set to 0.25 by default. The
+`burnin` argument has no effect if the `"ESS"` or `"SEM"` options are chosen,
+and a corresponding warning is displayed if the user explicitly sets the
+argument without specifying `burninMethod="fixed"`. The `"fixed"` option is 
+appropriate for analyses with very long parameter traces and large numbers of
+monitored variables, for which the automatic burnin determination may be too
+computationally demanding.
 
 The [convergence assessment](https://revbayes.github.io/tutorials/convergence/)
 tutorial contains a discusson on the calculation and interpretation of the ESS

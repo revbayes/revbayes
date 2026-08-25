@@ -270,18 +270,21 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
             size_t nChars = v.getNumberOfCharacters();
             const RevBayesCore::AbstractDiscreteTaxonData& td = v.getTaxonData(0);
             
-            // get a union set of all state descriptions across all characters
-            std::set<std::string> unique_descriptions;
+            // get a union of all state descriptions across all characters,
+            // preserving the first-seen state order
+            std::set<std::string> seen_descriptions;
             
             for ( size_t i = 0; i < nChars; ++i )
             {
                 std::vector<std::string> char_desc = td.getCharacter(i).getStateDescriptions();
                 for ( const std::string& s : char_desc )
                 {
-                    unique_descriptions.insert(s);
+                    if ( seen_descriptions.insert(s).second )
+                    {
+                        descriptions.push_back(s);
+                    }
                 }
             }
-            descriptions.assign(unique_descriptions.begin(), unique_descriptions.end());
         }
 
         return new RevVariable( new ModelVector<RlString>(descriptions) );

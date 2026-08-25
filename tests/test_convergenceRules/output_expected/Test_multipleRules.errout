@@ -11,37 +11,37 @@
    
    
    Minimum effective sample size (ESS): 4.322936 (target: > 50)
-   Maximum value of the Gelman-Rubin statistic (PSRF): 1.030398 (target: < 1.01)
+   Maximum value of the Gelman-Rubin statistic (PSRF): 1.031482 (target: < 1.01)
    Comparisons in which the Geweke test statistic is < 0.0005 or > 0.9995: 10/20 (target: 0/20)
-   Comparisons in which the CI of a single-chain mean excludes the overall mean at p = 0.25: 5/20 (target: 0/20)
+   Comparisons in which the CI of a single-chain mean excludes the overall mean at p = 0.25: 6/20 (target: 0/20)
    
    
    Minimum effective sample size (ESS): 11.000000 (target: > 50)
-   Maximum value of the Gelman-Rubin statistic (PSRF): 1.001832 (target: < 1.01)
+   Maximum value of the Gelman-Rubin statistic (PSRF): 1.031441 (target: < 1.01)
    Comparisons in which the Geweke test statistic is < 0.0005 or > 0.9995: 0/20 (target: 0/20)
-   Comparisons in which the CI of a single-chain mean excludes the overall mean at p = 0.25: 2/20 (target: 0/20)
+   Comparisons in which the CI of a single-chain mean excludes the overall mean at p = 0.25: 4/20 (target: 0/20)
    
    
    Minimum effective sample size (ESS): 15.850371 (target: > 50)
-   Maximum value of the Gelman-Rubin statistic (PSRF): 0.993161 (target: < 1.01)
+   Maximum value of the Gelman-Rubin statistic (PSRF): 0.992524 (target: < 1.01)
    Comparisons in which the Geweke test statistic is < 0.0005 or > 0.9995: 1/20 (target: 0/20)
-   Comparisons in which the CI of a single-chain mean excludes the overall mean at p = 0.25: 0/20 (target: 0/20)
+   Comparisons in which the CI of a single-chain mean excludes the overall mean at p = 0.25: 1/20 (target: 0/20)
    
    
    Minimum effective sample size (ESS): 26.164988 (target: > 50)
-   Maximum value of the Gelman-Rubin statistic (PSRF): 0.992706 (target: < 1.01)
+   Maximum value of the Gelman-Rubin statistic (PSRF): 0.997423 (target: < 1.01)
    Comparisons in which the Geweke test statistic is < 0.0005 or > 0.9995: 0/20 (target: 0/20)
    Comparisons in which the CI of a single-chain mean excludes the overall mean at p = 0.25: 0/20 (target: 0/20)
    
    
    Minimum effective sample size (ESS): 40.212909 (target: > 50)
-   Maximum value of the Gelman-Rubin statistic (PSRF): 0.993523 (target: < 1.01)
-   Comparisons in which the Geweke test statistic is < 0.0005 or > 0.9995: 0/20 (target: 0/20)
+   Maximum value of the Gelman-Rubin statistic (PSRF): 0.995007 (target: < 1.01)
+   Comparisons in which the Geweke test statistic is < 0.0005 or > 0.9995: 1/20 (target: 0/20)
    Comparisons in which the CI of a single-chain mean excludes the overall mean at p = 0.25: 1/20 (target: 0/20)
    
    
    Minimum effective sample size (ESS): 51.000000 (target: > 50)
-   Maximum value of the Gelman-Rubin statistic (PSRF): 0.993101 (target: < 1.01)
+   Maximum value of the Gelman-Rubin statistic (PSRF): 0.987537 (target: < 1.01)
    Comparisons in which the Geweke test statistic is < 0.0005 or > 0.9995: 0/20 (target: 0/20)
    Comparisons in which the CI of a single-chain mean excludes the overall mean at p = 0.25: 0/20 (target: 0/20)
    

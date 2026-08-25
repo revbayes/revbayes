@@ -206,7 +206,8 @@ phyMorpho.clamp(morpho)
 mymodel = model(sf)
 
 # Add monitors
-monitors.append( mnModel(filename="output/mvFossilTimeSlideUniform_checkpointing.log", printgen=10) )
+monitors.append( mnModel(filename="output/mvFossilTimeSlideUniform_checkpointing.log", printgen=10,
+                         exclude=["branch_rates"]) )
 monitors.append( mnFile(filename="output/mvFossilTimeSlideUniform_checkpointing.trees", printgen=10, pruned_tree) )
 
 # Initialize the MCMC from a checkpoint

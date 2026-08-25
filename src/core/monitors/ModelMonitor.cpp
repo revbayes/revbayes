@@ -60,6 +60,34 @@ ModelMonitor* ModelMonitor::clone(void) const
 
 
 /**
+ * Check if a variable is excluded from monitoring. We use prefix matching to ensure that excluding
+ * a vector variable also excludes anything indexed under it (e.g., `x[1]` or even `x[1][1]` if `x`
+ * is excluded).
+ *
+ * \param[in]   name           The name of the variable to check.
+ * \param[in]   exclude_list   The list of variables to exclude.
+ * \return                     True if the variable is excluded, false otherwise.
+ */
+bool ModelMonitor::isExcluded(const std::string &name, const std::set<std::string> &exclude_list)
+{
+    if ( exclude_list.find(name) != exclude_list.end() )
+    {
+        return true;
+    }
+
+    for (const std::string &ex : exclude_list)
+    {
+        if ( name.size() > ex.size() && name.compare(0, ex.size(), ex) == 0 && name[ex.size()] == '[' )
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+/**
  * Reset the currently monitored DAG nodes by extracting the DAG nodes from the model again 
  * and store this in the set of DAG nodes.
  */
@@ -103,6 +131,7 @@ void ModelMonitor::resetDagNodes( void )
         
         // Step 2: check if we have all element variables for every vector, and if not, remove those element variables that
         // we do have and allow the vector itself to be monitored
+        std::set<std::string> effective_exclude;
         for (auto it = base_name_to_elements.begin(); it != base_name_to_elements.end(); ++it)
         {
             const std::string &base_name = it->first;
@@ -131,7 +160,7 @@ void ModelMonitor::resetDagNodes( void )
                     // exclude element variables for this base name
                     for (DagNode* elem_node : elements)
                     {
-                        exclude.insert( elem_node->getName() );
+                        effective_exclude.insert( elem_node->getName() );
                     }
                     
                     // remove base name so vector itself can be monitored
@@ -158,7 +187,7 @@ void ModelMonitor::resetDagNodes( void )
                 
                 if ( !the_node->isHidden() && ( condition || the_node->isStochastic() ) )
                 {
-                    if ( exclude.find(name) == exclude.end() && added_var_names.find(name) == added_var_names.end() )
+                    if ( !isExcluded(name, exclude) && effective_exclude.find(name) == effective_exclude.end() && added_var_names.find(name) == added_var_names.end() )
                     {
                         addVariable( the_node );
                         added_var_names.insert( name );

@@ -3610,6 +3610,82 @@ moves.append( mvFNPR(tree, weight=taxa.size()) ))");
 	help_references[string("mvFNPR")].push_back(RbHelpReference(R"(Höhna S, Defoin-Platel M, Drummond AJ (2008). Clock-constrained tree proposal operators in Bayesian phylogenetic inference. 1--7 in 8th IEEE International Conference on BioInformatics and BioEngineering (BIBE 2008). Athens, Greece, October 2008.)",R"(10.1109/BIBE.2008.4696663)",R"(https://alexeidrummond.org/assets/publications/2008-hoehna-clock-bibe.pdf )"));
 	help_arrays[string("mvFNPR")][string("see_also")].push_back(string(R"(mvSPR)"));
 	help_strings[string("mvFNPR")][string("title")] = string(R"(Fixed Node-height Prune and Regraft (FNPR) move.)");
+	help_arrays[string("mvFossilSiteTimeSlideUniform")][string("authors")].push_back(string(R"(Mario Schädel)"));
+	help_strings[string("mvFossilSiteTimeSlideUniform")][string("description")] = string(R"(Proposes simultaneous additive updates to the ages of fossil taxa that come
+from the same site and are therefore known to be contemporaneous, even if their
+exact age remains uncertain (King & Rücklin 2020).)");
+	help_strings[string("mvFossilSiteTimeSlideUniform")][string("details")] = string(R"(The move takes a vector of `Taxon` objects, representing the fossils whose ages
+are to be treated as linked. The minimum and maximum ages of the site that the
+fossils come from can either be supplied to the move via the `min` and `max`
+arguments, or taken directly from the `Taxon` objects. Internally, the minimum
+and maximum values are recomputed to account for the current tree topology,
+which may impose additional constraints beyond those provided by the age range
+of the site (since a node cannot be older than its parent, and a sampled
+ancestor cannot be younger than its oldest descendant). Like other slide moves,
+`mvFossilSiteSlideUniform` then draws a uniformly distributed random number and
+adds the draw to the current value. The width of the uniform distribution
+determines the "boldness" of the proposal; it can be specified by the `delta`
+argument and, if `tune=TRUE`, automatically adjusted to ensure that the
+acceptance rate of the move reaches `tuneTarget`. The minimum and maximum ages
+are used as reflection boundaries if the addition of the uniform draw to the
+current age produces a value that is too low or too high.
+
+Note that there are cases in which the ages of site-linked taxa may (seemingly)
+diverge even if they are updated using `mvFossilSiteSlideUniform`. This may
+occur when the ages of the taxa in question are also adjusted using moves that
+are not site-aware (`mvFossilTipTimeSlideUniform`, `mvFossilTipTimeUniform`).
+These moves can be used without specifying the `tip` argument, in which case
+they randomly pick a fossil every time they are performed, and may consequently
+update the age of one site-linked fossil but not of the others. Similarly, if
+an analysis also employs the `mvCollapseExpandFossilBranch` move, which turns
+tips into sampled ancestors and _vice versa_, the resulting summary trees may
+show the site-linked taxa to have different ages even if their ages are in fact
+exactly identical in every single individual MCMC sample. This is because the
+corresponding point estimates are averaged over different subsets of samples,
+determined by the status of a given fossil as a tip or a sampled ancestor. The
+behavior can be suppressed by specifying `conditionalAges=TRUE` in the tree
+summary functions (`mapTree()`, `mccTree()`), which ensures that the tip age
+point estimates are averaged across only those samples whose entire topology
+equals the summary tree.)");
+	help_strings[string("mvFossilSiteTimeSlideUniform")][string("example")] = string(R"(# Assume that the min/max ages of each taxon have been read from a TSV file
+# Extract all fossil taxa in the tree
+fossils = fbd_tree.getFossils()
+
+# Specify a uniform prior spanning the age uncertainty range of each fossil
+for(i in 1:fossils.size())
+{
+    t[i] := tmrca(fbd_tree, clade(fossils[i]))
+
+    a[i] = fossils[i].getMinAge()
+    b[i] = fossils[i].getMaxAge()
+
+    F[i] ~ dnUniform(t[i] - b[i], t[i] - a[i])
+    F[i].clamp( 0 )
+}
+
+# Create a vector including all fossils known from the same site
+sitelinked_fossils[1] = taxon("fossil_X")
+sitelinked_fossils[2] = taxon("fossil_Y")
+sitelinked_fossils[3] = taxon("fossil_Z")
+
+# Add a move to update the ages of these fossils simultaneously
+moves.append( mvFossilSiteSlideUniform(fbd_tree, origin_time, taxa=sitelinked_fossils,
+                                       weight=10.0) )
+
+# The ages of the remaining fossils should be updated independently
+nonsitelinked_fossils = fossils
+nonsitelinked_fossils.erase( sitelinked_fossils )
+
+for(i in 1:nonsitelinked_fossils.size())
+{
+    moves.append( mvFossilTimeSlideUniform(fbd_tree, origin_time,
+                                           tip=nonsitelinked_fossils[i], weight=5.0) )
+})");
+	help_strings[string("mvFossilSiteTimeSlideUniform")][string("name")] = string(R"(mvFossilSiteSlideUniform)");
+	help_references[string("mvFossilSiteTimeSlideUniform")].push_back(RbHelpReference(R"(King B, Rücklin M (2020). Tip dating with fossil sites and stratigraphic sequences. PeerJ, 8:e9368.)",R"(10.7717/peerj.9368)",R"(https://peerj.com/articles/9368/ )"));
+	help_arrays[string("mvFossilSiteTimeSlideUniform")][string("see_also")].push_back(string(R"(mvCollapseExpandFossilBranch)"));
+	help_arrays[string("mvFossilSiteTimeSlideUniform")][string("see_also")].push_back(string(R"(mvFossilTipTimeSlideUniform)"));
+	help_strings[string("mvFossilSiteTimeSlideUniform")][string("title")] = string(R"(Move to simultaneously update the ages of site-linked fossils)");
 	help_arrays[string("mvFossilTipTimeSlideUniform")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("mvFossilTipTimeSlideUniform")][string("description")] = string(R"(This moves either takes a specific fossil, or randomly picks a fossil, and then performs a sliding move on the tip age.)");
 	help_strings[string("mvFossilTipTimeSlideUniform")][string("details")] = string(R"(This sliding move uses the possible minimum and maximum ages as reflection boundaries.
@@ -3632,7 +3708,7 @@ for(i in 1:fossils.size())
     moves.append( mvFossilTipTimeSlideUniform(fbd_tree, origin_time, min=a[i], max=b[i], tip=fossils[i], weight=5.0) )
 })");
 	help_strings[string("mvFossilTipTimeSlideUniform")][string("name")] = string(R"(mvFossilTipTimeSlideUniform)");
-	help_arrays[string("mvFossilTipTimeSlideUniform")][string("see_also")].push_back(string(R"(mvFossilTipTimeSlideUniform)"));
+	help_arrays[string("mvFossilTipTimeSlideUniform")][string("see_also")].push_back(string(R"(mvFossilTipTimeUniform)"));
 	help_strings[string("mvFossilTipTimeSlideUniform")][string("title")] = string(R"(Sliding move to change a fossil tip age)");
 	help_arrays[string("mvFossilTipTimeUniform")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("mvFossilTipTimeUniform")][string("description")] = string(R"(This moves either takes a specific fossil, or randomly picks a fossil, and then draws the new ages randomly between the maximum and minimum ages.)");
@@ -4681,11 +4757,14 @@ ps.stdError(bootstrap=TRUE, replicates=50, printFiles=TRUE) # bootstrap (50 repl
 	help_arrays[string("powerPosterior")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_arrays[string("powerPosterior")][string("authors")].push_back(string(R"(Michael Landis)"));
 	help_arrays[string("powerPosterior")][string("authors")].push_back(string(R"(John Huelsenbeck)"));
+	help_arrays[string("powerPosterior")][string("authors")].push_back(string(R"(David Černý)"));
 	help_strings[string("powerPosterior")][string("description")] = string(R"(Samples from a series of "power posterior" distributions with the likelihood
 term raised to a power between 0 and 1. Such distributions are often used to
 estimate marginal likelihoods for model selection or hypothesis testing via
 Bayes factors (Gelman & Meng 1998; Friel & Pettitt 2008).)");
-	help_strings[string("powerPosterior")][string("details")] = string(R"(A power posterior analysis samples from a series of importance distributions of
+	help_strings[string("powerPosterior")][string("details")] = string(R"(Description
+
+A power posterior analysis samples from a series of importance distributions of
 the form:
     f_beta(theta | Y) = f(theta) x f(Y | theta)^beta
     
@@ -4714,32 +4793,174 @@ file with the suffix "_stone_<K>" will contain samples from the prior. For
 reasons of numerical stability, the beta of this final stone is not set exactly
 to 0 but to an extremely small positive number (~ 1.2e-302).
 
-The RevBayes implementation of power posterior analysis is fully parallelized
-(Hoehna et al. 2021). In general, after a common pre-burnin stage that should
-allow the sampler to converge to the posterior (see the `.burnin()` method),
-the `.run()` method will distribute the K stones among M available CPUs in such
-a way that each CPU handles floor(K/M) or ceiling(K/M) consecutive powers. This
-has the advantage of allowing the last sample for one power to be used as the
-starting state for the subsequent power. However, to account for the transition
-from one power to the next, each power posterior should still include a small
-burnin fraction (set to 0.25 by default and specified by the `burninFraction`
-argument to the `.run()` method). For example, with K = 50, M = 8, and a single
-CPU used for each likelihood computation (`procPerLikelihood=1`, by default),
-the individual power posteriors will be distributed among the CPUs as follows:
+Implementation
 
-    -----------------------------------------------------------------
-                        Filename suffix (= K - i)
-    -----------------------------------------------------------------
-    | CPU 1 | CPU 2 | CPU 3 | CPU 4 | CPU 5 | CPU 6 | CPU 7 | CPU 8 |
-    |-------|-------|-------|-------|-------|-------|-------|-------|
-    |   1   |   7   |   13  |   19  |   26  |   32  |   38  |   44  |
-    |   2   |   8   |   14  |   20  |   27  |   33  |   39  |   45  |
-    |  ...  |  ...  |  ...  |  ...  |  ...  |  ...  |  ...  |  ...  |
-    |   6   |   12  |   18  |   24  |   31  |   37  |   43  |   49  |
-    |       |       |       |   25  |       |       |       |   50  |
+A power posterior analysis consists of up to four distinct stages:
 
-More flexible strategies are enabled by the `.runOneStone()` method, which
-allows the user to execute a separate analysis for each power posterior.)");
+    1. Global pre-burnin
+    2. Stone-specific pre-burnin
+    3. Stone-specific burnin
+    4. Stone-specific sampling phase
+
+The global pre-burnin (1) is executed using the `.burnin()` method and is meant
+to allow the sampler to converge to the posterior. No samples are collected, 
+and a separate generation counter is used, much like with `mcmc.burnin()`. This
+stage is executed using a single worker, which corresponds either to a single
+process, or to a group of `procPerLikelihood` processes if this argument
+(controlling the number of processes used for each likelihood computation) is
+set to a value other than 1 (default).
+
+In contrast, the remaining three stages are executed using the `.run()` method
+and fully parallelized (see Höhna et al. 2021, though note that the current
+implementation diverges somewhat from that described therein). The K stones are
+distributed among M available workers in such a way that each worker handles
+floor(K/M) or ceiling(K/M) consecutive powers. This allows the last sample for
+one power to be used as the starting state for the next power. The assignment
+of stones to available workers is summarized in a table printed at the start of
+every analysis. For example, with K = 50, M = 8, and `procPerLikelihood=1`, the
+individual power posteriors will be distributed among processes as follows:
+
+    Process | Step 1 | Step 2 | Step 3 | Step 4 | Step 5 | Step 6 | Step 7
+    --------|--------|--------|--------|--------|--------|--------|--------
+          1 |      1 |      2 |      3 |      4 |      5 |      6 |
+          2 |      7 |      8 |      9 |     10 |     11 |     12 |
+          3 |     13 |     14 |     15 |     16 |     17 |     18 |
+          4 |     19 |     20 |     21 |     22 |     23 |     24 |     25
+          5 |     26 |     27 |     28 |     29 |     30 |     31 |
+          6 |     32 |     33 |     34 |     35 |     36 |     37 |
+          7 |     38 |     39 |     40 |     41 |     42 |     43 |
+          8 |     44 |     45 |     46 |     47 |     48 |     49 |     50
+
+To facilitate the transitions from one power to the next, which may require
+additional move tuning (since moves should become bolder for powers closer to
+0), a stone-specific pre-burnin (2) is performed. No samples are collected
+during this stage, and another separate generation counter is used. By default,
+this pre-burnin doubles the specified stone length, so if the user specifies
+`.run(generations=1000)`, it will consist of 1000 generations for each stone.
+This value can be changed by setting the `preburninGenerations` argument of the
+`.run()` method.
+
+Additionally, samples collected during the transition from one likelihood power
+to another can be discarded as a stone-specific burnin (3), which is set to 25%
+of the specified stone length by default. This value can be changed by setting
+the `burninFraction` argument of the `.run()` method. The burnin phase shares
+its generation counter with the sampling phase, so in the example above, the
+first logged iteration would actually be 250 (with iterations 0--240 discarded
+as burnin).
+
+Finally, during the stone-specific sampling phase (4), samples are drawn from
+a given power posterior. Its length is jointly determined by the `generations`
+and `burninFraction` arguments of the `.run()` method, so in the example above,
+it would consist of 750 generations for each stone (1000 specified generations
+minus the 25% reserved for burnin).
+
+In addition to the `.run()` method, which distributes stones among workers 
+automatically, `powerPosterior` also supports more flexible parallelization
+strategies via the `.runOneStone()` method, which allows the user to execute
+a separate analysis for each power posterior. This increased flexibility comes
+at the cost of lower-quality starting values: as `.runOneStone(index=<x>, ...)`
+is not guaranteed to have been called before `.runOneStone(index=<x+1>, ...)`, 
+the latter cannot be initialized with the output of the former, and will simply 
+start from whatever state the sampler happens to currently hold.
+
+Checkpointing
+
+Stages 1 (global pre-burnin), 3 (stone-specific burnin), and 4 (stone-specific
+sampling phase) can be checkpointed and resumed from a checkpoint. For highly
+parallelized analyses where each stone is assigned to a separate worker, the
+amount of time spent in stages 2--4 may be negligible compared to the amount
+of time required to converge to the posterior. In such a case, it may be useful
+to checkpoint and resume the global pre-burnin as follows:
+
+    pow_p.burnin(generations=10000, tuningInterval=100,
+                 checkpointFile="pow_p_burnin.ckp", checkpointInterval=100)
+    pow_p.initializeFromCheckpoint("pow_p_burnin.ckp")
+    pow_p.burnin(tuningInterval=100)
+
+The checkpointing mechanism automatically records the planned length specified
+in the first call to `.burnin()`. As a result, there is no need to specify the
+`generations` argument upon resumption. If, for example, the original analysis
+was interrupted at generation 7500, the second call to `.burnin()` will ensure
+that the resumed analysis completes the remaining 2500 generations. However,
+the `generations` argument can be set in the second call as well. In this case,
+it extends the pre-burnin by the specified number of generations:
+
+    pow_p.initializeFromCheckpoint("pow_p_burnin.ckp")
+    pow_p.burnin(generations=5000, tuningInterval=100)
+
+Note that the necessary checkpoint files can also be produced by regular MCMC
+or MCMCMC analyses, so the `powerPosterior` sampler makes it possible to re-use
+the output of such analyses without requiring a lengthy global pre-burnin stage
+of its own. The `generations` must be explicitly set in this scenario, as there
+is no planned length for the "resume-to-target" functionality to utilize.
+
+Individual stones can also be checkpointed and resumed from a checkpoint. To do
+so, the `.initializeFromCheckpoint()` method takes a `stones` argument that
+allows the user to specify exactly which power posteriors should be restarted.
+This can be a single index or a vector thereof. Following on the example above,
+if the original analysis was interrupted during the very last step (step 7), we
+may resume it as follows:
+
+    pow_p.run(generations=1000, checkpointFile="analysis.ckp",
+              checkpointInterval=100)
+    pow_p.initializeFromCheckpoint("analysis.ckp", [25, 50])
+    pow_p.run(generations=800)
+    
+When applied to individual stones, the checkpointing mechanism also records the
+planned burnin length. Therefore, if the original analysis was interrupted
+at generation 200 (i.e., still within the 250-generation-long burnin stage),
+the commands above will cause the resumed analysis to complete the remaining 50
+generations of burnin, followed by sampling for 750 generations (numbered 250
+through 1000) -- exactly as though no interruption had occurred in the first
+place. The `burninFraction` argument of the `.run()` call (which would normally
+cause the first 0.25 times 800 = 200 generations to be discarded as burnin) is
+ignored in this case, and a warning is printed to this effect.
+
+If the analysis was interrupted at an earlier step, we may have to resurrect
+entire sequences of stones. In this case, a nested vector (vector of vectors)
+of stone indices is passed to `.initializeFromCheckpoint()` via its `stones`
+argument. Each inner vector then corresponds to a sequence of stones to be
+executed by one parallel worker. Only the first stone from each sequence needs
+to have a checkpoint associated with it, as each subsequent stone will instead
+use the output of the previous stone as its starting state. For example, if the
+original analysis was interrupted during step 2, we could resume it as follows:
+
+    pow_p.initializeFromCheckpoint("analysis.ckp",
+              [ 2:6, 8:12, 14:18, 20:25, 27:31, 33:37, 39:43, 45:50 ])
+    pow_p.run(generations=800)
+    
+Or as follows if it was interrupted during step 6:
+
+    pow_p.initializeFromCheckpoint("analysis.ckp",
+              [ [6], [12], [18], 24:25, [31], [37], [43], 49:50 ])
+
+Note that in this case, the `.run()` call honors the assignment of stones to
+workers specified in `.initializeFromCheckpoint()`, instead of automatically
+generating an assignment of its own. An exception is thrown if the length of
+the outer vector (i.e., the number of parallel workers requested by the user
+for the resumed analysis) exceeds the number of workers available. Note also
+that when the `stones` argument is specified using the range-based notation,
+it makes a difference whether the range is enclosed in square brackets. The
+following:
+
+    pow_p.initializeFromCheckpoint( "analysis.ckp", 1:5 )
+    
+means "resurrect stones 1 through 5, and leave it up to the `.run()` method to
+decide how to assign them to available workers". Checkpoint files must be
+available for all 5 specified stones. In contrast,
+
+    pow_p.initializeFromCheckpoint( "analysis.ckp", [1:5] )
+    
+means "resurrect stone 1, and then run stones 2 through 5 on the same parallel
+worker, using the last sample from the previous stone as the starting point for
+the next". In this case, we only require checkpoint files for stone 1.
+
+Finally, checkpointing is also available for the `.runOneStone()` method:
+
+    pow_p.runOneStone(index=16, generations=500, checkpointFile="analysis.ckp",
+                      checkpointInterval=50)
+    pow_p.initializeFromCheckpoint("analysis.ckp", 16)
+    pow_p.runOneStone(index=16, generations=500))");
 	help_strings[string("powerPosterior")][string("example")] = string(R"(# Create a simple model (unclamped)
 a ~ dnExponential(1)
 mymodel = model(a)
@@ -5088,16 +5309,27 @@ be calculated when two or more independent runs are performed, and its value
 tends to unity (1) as the runs converge.
 
 The number of samples to be removed as burnin before calculating the test
-statistic is determined using the `burninMethod`. Different burnin lengths are
-tested, increasing from 0 to 50% (for `ESS`) or 100% (for `SEM`) of the length
-of the trace in increments of 10 samples. If the `ESS` option is chosen
-(default), effective sample sizes (ESS) are calculated for all monitored
-parameters after removing the number of samples corresponding to each candidate
-burnin length. The best burnin length for a given parameter is the one that
-maximizes its ESS value. If the `SEM` option is chosen, the standard error of
-the mean (SEM) is calculated instead, and the best burnin length for a given
-parameter is the one that minimizes its SEM value. In both cases, the final
-burnin length is set to the maximum of the parameter-specific burnin lengths.
+statistic is determined using the `burninMethod`. If the `"ESS"` (default) or
+`"SEM"` options are chosen, different burnin lengths are tested, increasing
+from 0 to 50% (for `"ESS"`) or 100% (for `"SEM"`) of the length of the trace in
+increments of 10 samples. The `"ESS"` option calculates effective sample sizes
+(ESS) for all monitored parameters after removing the number of samples
+corresponding to each candidate burnin length. The best burnin length for a
+given parameter is the one that maximizes its ESS value. The `"SEM"` option
+instead calculates the standard error of the mean (SEM), and the best burnin
+length for a given parameter is the one that minimizes its SEM value. In both
+cases, the final burnin length is set to the maximum of the parameter-specific
+burnin lengths.
+
+Alternatively, the user may set `burninMethod` to `"fixed"`, which discards a
+constant fraction of the samples collected up to that point. This fraction can
+be specified using the `burnin` argument, and is set to 0.25 by default. The
+`burnin` argument has no effect if the `"ESS"` or `"SEM"` options are chosen,
+and a corresponding warning is displayed if the user explicitly sets the
+argument without specifying `burninMethod="fixed"`. The `"fixed"` option is 
+appropriate for analyses with very long parameter traces and large numbers of
+monitored variables, for which the automatic burnin determination may be too
+computationally demanding.
 
 See also the tutorial on [convergence assessment](https://revbayes.github.io/tutorials/convergence/).)");
 	help_strings[string("srGelmanRubin")][string("example")] = string(R"(# Binomial example: estimate success probability given 7 successes out of 20 trials
@@ -5149,16 +5381,27 @@ asymptotically independent, which requires that the sum of `frac1` and `frac2`
 be strictly less than 1.
 
 The number of samples to be removed as burnin before calculating the test
-statistic is determined using the `burninMethod`. Different burnin lengths are
-tested, increasing from 0 to 50% (for `ESS`) or 100% (for `SEM`) of the length
-of the trace in increments of 10 samples. If the `ESS` option is chosen
-(default), effective sample sizes (ESS) are calculated for all monitored
-parameters after removing the number of samples corresponding to each candidate
-burnin length. The best burnin length for a given parameter is the one that
-maximizes its ESS value. If the `SEM` option is chosen, the standard error of
-the mean (SEM) is calculated instead, and the best burnin length for a given
-parameter is the one that minimizes its SEM value. In both cases, the final
-burnin length is set to the maximum of the parameter-specific burnin lengths.
+statistic is determined using the `burninMethod`. If the `"ESS"` (default) or
+`"SEM"` options are chosen, different burnin lengths are tested, increasing
+from 0 to 50% (for `"ESS"`) or 100% (for `"SEM"`) of the length of the trace in
+increments of 10 samples. The `"ESS"` option calculates effective sample sizes
+(ESS) for all monitored parameters after removing the number of samples
+corresponding to each candidate burnin length. The best burnin length for a
+given parameter is the one that maximizes its ESS value. The `"SEM"` option
+instead calculates the standard error of the mean (SEM), and the best burnin
+length for a given parameter is the one that minimizes its SEM value. In both
+cases, the final burnin length is set to the maximum of the parameter-specific
+burnin lengths.
+
+Alternatively, the user may set `burninMethod` to `"fixed"`, which discards a
+constant fraction of the samples collected up to that point. This fraction can
+be specified using the `burnin` argument, and is set to 0.25 by default. The
+`burnin` argument has no effect if the `"ESS"` or `"SEM"` options are chosen,
+and a corresponding warning is displayed if the user explicitly sets the
+argument without specifying `burninMethod="fixed"`. The `"fixed"` option is 
+appropriate for analyses with very long parameter traces and large numbers of
+monitored variables, for which the automatic burnin determination may be too
+computationally demanding.
 
 See also the tutorial on [convergence assessment](https://revbayes.github.io/tutorials/convergence/).
 
@@ -5266,16 +5509,27 @@ of generations required to meet the ESS threshold, even though it may increase
 the number of indepedent samples in the final, pooled posterior sample.
 
 The number of samples to be removed as burnin before calculating the test
-statistic is determined using the `burninMethod`. Different burnin lengths are
-tested, increasing from 0 to 50% (for `ESS`) or 100% (for `SEM`) of the length
-of the trace in increments of 10 samples. If the `ESS` option is chosen
-(default), ESS is calculated for all monitored parameters after removing the
-number of samples corresponding to each candidate burnin length. The best
-burnin length for a given parameter is the one that maximizes its ESS value.
-If the `SEM` option is chosen, the standard error of the mean (SEM) is
-calculated instead, and the best burnin length for a given parameter is the one
-that minimizes its SEM value. In both cases, the final burnin length is set to
-the maximum of the parameter-specific burnin lengths.
+statistic is determined using the `burninMethod`. If the `"ESS"` (default) or
+`"SEM"` options are chosen, different burnin lengths are tested, increasing
+from 0 to 50% (for `"ESS"`) or 100% (for `"SEM"`) of the length of the trace in
+increments of 10 samples. The `"ESS"` option calculates effective sample sizes
+(ESS) for all monitored parameters after removing the number of samples
+corresponding to each candidate burnin length. The best burnin length for a
+given parameter is the one that maximizes its ESS value. The `"SEM"` option
+instead calculates the standard error of the mean (SEM), and the best burnin
+length for a given parameter is the one that minimizes its SEM value. In both
+cases, the final burnin length is set to the maximum of the parameter-specific
+burnin lengths.
+
+Alternatively, the user may set `burninMethod` to `"fixed"`, which discards a
+constant fraction of the samples collected up to that point. This fraction can
+be specified using the `burnin` argument, and is set to 0.25 by default. The
+`burnin` argument has no effect if the `"ESS"` or `"SEM"` options are chosen,
+and a corresponding warning is displayed if the user explicitly sets the
+argument without specifying `burninMethod="fixed"`. The `"fixed"` option is 
+appropriate for analyses with very long parameter traces and large numbers of
+monitored variables, for which the automatic burnin determination may be too
+computationally demanding.
 
 The [convergence assessment](https://revbayes.github.io/tutorials/convergence/)
 tutorial contains a discusson on the calculation and interpretation of the ESS
@@ -5319,16 +5573,27 @@ constructed for the mean of each individual run. Accordingly, it can only be
 calculated when two or more independent runs are performed.
 
 The number of samples to be removed as burnin before calculating the test
-statistic is determined using the `burninMethod`. Different burnin lengths are
-tested, increasing from 0 to 50% (for `ESS`) or 100% (for `SEM`) of the length
-of the trace in increments of 10 samples. If the `ESS` option is chosen
-(default), effective sample sizes (ESS) are calculated for all monitored
-parameters after removing the number of samples corresponding to each candidate
-burnin length. The best burnin length for a given parameter is the one that
-maximizes its ESS value. If the `SEM` option is chosen, the standard error of
-the mean (SEM) is calculated instead, and the best burnin length for a given
-parameter is the one that minimizes its SEM value. In both cases, the final
-burnin length is set to the maximum of the parameter-specific burnin lengths.
+statistic is determined using the `burninMethod`. If the `"ESS"` (default) or
+`"SEM"` options are chosen, different burnin lengths are tested, increasing
+from 0 to 50% (for `"ESS"`) or 100% (for `"SEM"`) of the length of the trace in
+increments of 10 samples. The `"ESS"` option calculates effective sample sizes
+(ESS) for all monitored parameters after removing the number of samples
+corresponding to each candidate burnin length. The best burnin length for a
+given parameter is the one that maximizes its ESS value. The `"SEM"` option
+instead calculates the standard error of the mean (SEM), and the best burnin
+length for a given parameter is the one that minimizes its SEM value. In both
+cases, the final burnin length is set to the maximum of the parameter-specific
+burnin lengths.
+
+Alternatively, the user may set `burninMethod` to `"fixed"`, which discards a
+constant fraction of the samples collected up to that point. This fraction can
+be specified using the `burnin` argument, and is set to 0.25 by default. The
+`burnin` argument has no effect if the `"ESS"` or `"SEM"` options are chosen,
+and a corresponding warning is displayed if the user explicitly sets the
+argument without specifying `burninMethod="fixed"`. The `"fixed"` option is 
+appropriate for analyses with very long parameter traces and large numbers of
+monitored variables, for which the automatic burnin determination may be too
+computationally demanding.
 
 See also the tutorial on [convergence assessment](https://revbayes.github.io/tutorials/convergence/).)");
 	help_strings[string("srStationarity")][string("example")] = string(R"(# Binomial example: estimate success probability given 7 successes out of 20 trials

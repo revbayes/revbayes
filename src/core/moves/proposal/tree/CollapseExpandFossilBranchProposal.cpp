@@ -162,8 +162,9 @@ double CollapseExpandFossilBranchProposal::collapseBranch(TopologyNode &n)
         sibling = &parent.getChild( 1 );
     }
     
-    // determine lower and upper bound of backward move
-    double min_age = n.getTaxon().getAgeRange().getMax();
+    // determine lower and upper bound of backward move. The window has to contain the
+    // parent's current age, or expand cannot undo collapse; the age range maximum need not.
+    double min_age = n.getAge();
     double max_age = parent.getAge();
     if ( parent.isRoot() )
     {
@@ -178,12 +179,12 @@ double CollapseExpandFossilBranchProposal::collapseBranch(TopologyNode &n)
     }
     
     // test that the max age is larger than the min age
-    if ( max_age <= min_age || n.getAge() < sibling->getAge() )
+    if ( max_age <= min_age or n.getAge() <= sibling->getAge() or sibling->isSampledAncestorTip() )
     {
         failed = true;
         return RbConstants::Double::neginf;
     }
-    
+
     // store the old age of the parent
     storedAge = parent.getAge();
     
@@ -225,8 +226,9 @@ double CollapseExpandFossilBranchProposal::expandBranch(TopologyNode &n)
         sibling = &parent.getChild( 1 );
     }
     
-    // determine lower and upper bound of backward move
-    double min_age = n.getTaxon().getAgeRange().getMax();
+    // determine lower and upper bound of backward move. The window has to contain the
+    // parent's current age, or expand cannot undo collapse; the age range maximum need not.
+    double min_age = n.getAge();
     double max_age = parent.getAge();
     if ( parent.isRoot() )
     {

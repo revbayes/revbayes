@@ -2,4 +2,7 @@
    Successfully read one character matrix from file 'output/test_sameStateConcat.nex'
    Successfully read one character matrix from file 'output/test_differentStateConcat.nex'
    Successfully read one character matrix from file 'output/test_multipleConcat.nex'
-Test passed: Concatenated matrices were written and read properly.
+   Attempting to read the contents of file "primates.DEC.tre"
+   Successfully read file
+   Successfully read one character matrix from file 'data/primates_n3.DEC.nex'
+Test passed: State labels were handled properly.

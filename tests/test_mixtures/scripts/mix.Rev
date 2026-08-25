@@ -1,0 +1,32 @@
+seed(42)
+numCategories <- 2
+numSites      <- 5
+moves    = VectorMoves()
+monitors = VectorMonitors()
+
+for (i in 1:numCategories) {
+    rate[i] ~ dnExponential(1.0)
+    moves.append(mvScale(rate[i], weight=2.0))
+    val[i] := rate[i] * 3.14
+}
+mix ~ dnDirichlet(rep(1.0, numCategories))
+moves.append(mvBetaSimplex(mix, weight=4.0))
+
+obs <- v(0.9, -1.1, 1.0, -0.8, 0.95)
+for (j in 1:numSites) {
+    x[j] ~ dnMixture(val, mix)
+    moves.append(mvMixtureAllocation(x[j], weight=2.0))
+    moves.append(mvGibbsMixtureAllocation(x[j], weight=2.0))
+    y[j] ~ dnNormal(x[j], 0.5)
+    y[j].clamp(obs[j])
+}
+
+mymodel = model(mix)
+monitors.append(mnStochasticVariable(filename="output/mix.var", printgen=1))
+mymcmc = mcmc(mymodel, monitors, moves, nruns=1)
+mymcmc.run(generations=50)
+trace = readStochasticVariableTrace("output/mix.var")
+pps   = posteriorPredictiveSimulation(mymodel, directory="output/sims_mix", trace)
+pps.run(thinning=1)
+clear()
+q()

@@ -72,14 +72,13 @@ namespace RevBayesCore {
         void                                            addTimesToGlobalTimeline(std::set<double> &event_times, const TypedDagNode<RbVector<double> > *par_times) const;        //!< Adds timeline for parameter to set that we will use for global timeline
         void                                            checkVectorSizes(const TypedDagNode<RbVector<double> >* v1, const TypedDagNode<RbVector<double> >* v2, int v1_minus_v2, const std::string& param_name, bool is_rate) const;
         double                                          computeLnProbabilityTimes(void) const override;                         //!< Compute the log-transformed probability of the current value.
-        bool                                            countAllNodes(void) const;                                              //!< Count bifurcating nodes, count all heterochronous nodes as either phi- or Phi-sampled and as either sampled ancestors or sampled extinct tips
+        void                                            countAllNodes(void) const;                                              //!< Count bifurcating nodes, count all heterochronous nodes as either phi- or Phi-sampled and as either sampled ancestors or sampled extinct tips
         double                                          lnD(size_t i, double t) const;                                          //!< Branch-segment probability at time t with index i, using pre-computed vectors
         double                                          E(size_t i, double t, bool computeSurvival = false) const;                                       //!< Extinction probability at time t with index i, using pre-computed vectors
         void                                            expandNonGlobalProbabilityParameterVector(std::vector<double> &par, const std::vector<double> &par_times) const; //!< Updates vector par such that it matches the global timeline
         void                                            expandNonGlobalRateParameterVector(std::vector<double> &par, const std::vector<double> &par_times) const; //!< Updates vector par such that it matches the global timeline
         size_t                                          findIndex(double t) const;                                              //!< Find the index so that times[index-1] < t < times[index]
         size_t                                          findIndex(double t, const std::vector<double>& timeline) const;
-        void                                            getOffset(void) const;
         bool                                            isConstantRate(void) const;                                             //!< Checks if we have a constant-rate process
         double                                          lnProbNumTaxa(size_t n, double start, double end, bool MRCA) const override { throw RbException("Cannot compute P(nTaxa)."); }
         double                                          lnProbTreeShape(void) const override;
@@ -135,7 +134,6 @@ namespace RevBayesCore {
         mutable std::vector<double>                     serial_bifurcation_times;                              //!< The ages of all bifurcation events in the tree NOT at a burst event
         mutable std::vector<std::vector<double> >       event_bifurcation_times;                               //!< The ages of all bifurcation events in the tree at burst events
 
-        mutable double                                  offset;                                                //!< In the case there the most recent tip is at time y, we internally adjust by this time and treat y as the present; this does not affect the boundary times of the rate shifts
         int                                             num_extant_taxa;
 
         mutable std::vector<double>                     lambda;

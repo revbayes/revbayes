@@ -59,6 +59,39 @@ if (r1.getStateDescriptions().size() != 4) { print("FAIL: r1 should have 4 state
 if (r2.getStateDescriptions().size() != 6) { print("FAIL: r2 should have 6 states"); q() }
 if (r3.getStateDescriptions().size() != 6) { print("FAIL: r3 should have 6 states"); q() }
 
-print("Test passed: Concatenated matrices were written and read properly.")
+state_desc <- r3.getStateDescriptions()
+if (state_desc[1] != "0") { print("FAIL: r3 state 1 should be 0"); q() }
+if (state_desc[2] != "1") { print("FAIL: r3 state 2 should be 1"); q() }
+if (state_desc[3] != "2") { print("FAIL: r3 state 3 should be 2"); q() }
+if (state_desc[4] != "3") { print("FAIL: r3 state 4 should be 3"); q() }
+if (state_desc[5] != "4") { print("FAIL: r3 state 5 should be 4"); q() }
+if (state_desc[6] != "5") { print("FAIL: r3 state 6 should be 5"); q() }
+
+# for biogeographical data
+phy = readTrees("data/primates.DEC.tre")[1]
+dat_01 = readDiscreteCharacterData(file="data/primates_n3.DEC.nex")
+n_areas <- dat_01.nchar()
+n_states <- 2^n_areas
+dat_n = formatDiscreteCharacterData(dat_01, "DEC", n_states)
+state_desc <- dat_n.getStateDescriptions()
+if (state_desc[1] != "000") { print("FAIL: DEC state 1 should be 000"); q() }
+if (state_desc[2] != "100") { print("FAIL: DEC state 2 should be 100"); q() }
+if (state_desc[3] != "010") { print("FAIL: DEC state 3 should be 010"); q() }
+if (state_desc[4] != "001") { print("FAIL: DEC state 4 should be 001"); q() }
+if (state_desc[5] != "110") { print("FAIL: DEC state 5 should be 110"); q() }
+if (state_desc[6] != "101") { print("FAIL: DEC state 6 should be 101"); q() }
+if (state_desc[7] != "011") { print("FAIL: DEC state 7 should be 011"); q() }
+if (state_desc[8] != "111") { print("FAIL: DEC state 8 should be 111"); q() }
+dat_geosse = formatDiscreteCharacterData(dat_01, "GeoSSE", n_states - 1)
+geosse_state_desc <- dat_geosse.getStateDescriptions()
+if (geosse_state_desc[1] != "100") { print("FAIL: GeoSSE state 1 should be 100"); q() }
+if (geosse_state_desc[2] != "010") { print("FAIL: GeoSSE state 2 should be 010"); q() }
+if (geosse_state_desc[3] != "001") { print("FAIL: GeoSSE state 3 should be 001"); q() }
+if (geosse_state_desc[4] != "110") { print("FAIL: GeoSSE state 4 should be 110"); q() }
+if (geosse_state_desc[5] != "101") { print("FAIL: GeoSSE state 5 should be 101"); q() }
+if (geosse_state_desc[6] != "011") { print("FAIL: GeoSSE state 6 should be 011"); q() }
+if (geosse_state_desc[7] != "111") { print("FAIL: GeoSSE state 7 should be 111"); q() }
+
+print("Test passed: State labels were handled properly.")
 
 q()

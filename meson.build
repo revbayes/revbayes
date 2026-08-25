@@ -1,5 +1,5 @@
 project('RevBayes', ['cpp', 'c'],
-        version: '1.4.1-dev',
+        version: '1.4.2-preview',
         default_options: [
           'buildtype=release',
           'cpp_std=c++23',

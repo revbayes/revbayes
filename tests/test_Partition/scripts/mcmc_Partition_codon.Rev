@@ -137,7 +137,7 @@ for (i in 1:n_data_subsets) {
 mymodel = model(psi)
 
 # add monitors
-monitors[++mni] = mnModel(filename="output/PS_codon.log",printgen=10)
+monitors[++mni] = mnModel(filename="output/PS_codon.log",printgen=10,exclude=["gamma_rates"])
 monitors[++mni] = mnModel(filename="output/PS_codon.log.json",printgen=10,format="json")
 monitors[++mni] = mnFile(psi, filename="output/PS_codon.trees", printgen=100)
 
