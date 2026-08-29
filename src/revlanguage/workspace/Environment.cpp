@@ -241,7 +241,7 @@ void Environment::eraseVariable(const std::string& name)
 
     if ( it == variableTable.end() )
     {
-        throw RbException(RbException::MISSING_VARIABLE, "Variable " + name + " does not exist in environment");
+        throw RbMissingVariableError(name);
     }
     else
     {
@@ -410,7 +410,7 @@ RevPtr<RevVariable>& Environment::getVariable(const std::string& name)
         }
         else
         {
-            throw RbException(RbException::MISSING_VARIABLE, "Variable " + name + " does not exist");
+            throw RbMissingVariableError(name);
         }
         
     }
@@ -432,7 +432,7 @@ const RevPtr<RevVariable>& Environment::getVariable(const std::string& name) con
         }
         else
         {
-            throw RbException(RbException::MISSING_VARIABLE, "Variable " + name + " does not exist");
+            throw RbMissingVariableError(name);
         }
         
     }

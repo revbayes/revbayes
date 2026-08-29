@@ -25,7 +25,7 @@ RbException::RbException(const RbException& E)
     message.flags(E.message.flags());
     message.precision(E.message.precision());
     message.width(E.message.width());
-    // We haven't copies the locate.
+    // We haven't copied the locale.
 }
 
 RbException::ExceptionType RbException::getExceptionType(void) const
@@ -56,12 +56,6 @@ void RbException::print(std::ostream &o) const
             break;
         case MATH_ERROR:
             error_type = "Mathematical Error";
-            break;
-        case MISSING_VARIABLE:
-            error_type = "Missing Variable";
-            break;
-        case QUIT:
-            error_type = "Quit";
             break;
         case STOP:
             error_type = "Stop";
