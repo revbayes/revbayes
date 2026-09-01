@@ -2940,6 +2940,24 @@ Q3 := fndNdS(fnX3(fnGTR(er, nuc_pi)), omega)         # GTR + X3 + dNdS)");
 	help_strings[string("fndNdS")][string("title")] = string(R"(Add a dN/dS factor to a codon rate matrix.)");
 	help_strings[string("formatDiscreteCharacterData")][string("name")] = string(R"(formatDiscreteCharacterData)");
 	help_strings[string("gamma")][string("name")] = string(R"(gamma)");
+	help_arrays[string("getNumProcesses")][string("authors")].push_back(string(R"(David Černý)"));
+	help_strings[string("getNumProcesses")][string("description")] = string(R"(Returns the number of processes used by the current RevBayes session.)");
+	help_strings[string("getNumProcesses")][string("details")] = string(R"(In an MPI-enabled build (i.e., `rb-mpi`, launched as `mpirun -np N ./rb-mpi`),
+the function returns `N` (i.e., the size of the `MPI_COMM_WORLD` communicator).
+In a non-MPI build, it always returns 1. The value is the number of MPI ranks,
+not necessarily the number of hardware CPU cores.)");
+	help_strings[string("getNumProcesses")][string("example")] = string(R"(# For `mpirun -np 16 ./rb-mpi`, this prints 16:
+getNumProcesses()
+
+# Record the process count for reproducibility bookkeeping
+print("Running on " + getNumProcesses() + " process(es).")
+
+# Guard-check the launch configuration
+if (getNumProcesses() != 32) {
+    stop("Expected 32 processes, got " + getNumProcesses() + ".")
+})");
+	help_strings[string("getNumProcesses")][string("name")] = string(R"(getNumProcesses)");
+	help_strings[string("getNumProcesses")][string("title")] = string(R"(Get the number of MPI processes)");
 	help_arrays[string("getOption")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("getOption")][string("description")] = string(R"(Get a global option for RevBayes.)");
 	help_strings[string("getOption")][string("details")] = string(R"(Runtime options are used to personalize RevBayes and are stored on the local machine. See `setOption` for the list of available keys and their associated values.)");
