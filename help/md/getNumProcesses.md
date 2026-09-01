@@ -16,13 +16,11 @@ David Černý
     # For `mpirun -np 16 ./rb-mpi`, this prints 16:
     getNumProcesses()
     
-    # Set the number of MCMC replicates to the number of available processes,
-    # but at least to 4:
-    N_RUNS = max( [getNumProcesses(), 4] )
+    # Record the process count for reproducibility bookkeeping
+    print("Running on " + getNumProcesses() + " process(es).")
     
-    # Create a simple model (unclamped), and run the number of replicates
-    # specified above:
-    x ~ dnExp(10)
-    mymcmc = mcmc( model(x), [mvSlide(x, delta=0.1)], [mnScreen()], nruns=N_RUNS )
-    mymcmc.run(100)
+    # Guard-check the launch configuration
+    if (getNumProcesses() != 32) {
+        stop("Expected 32 processes, got " + getNumProcesses() + ".")
+    }
 ## references
