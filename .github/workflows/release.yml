@@ -144,6 +144,7 @@ jobs:
     - name: Install (macOS)
       if: runner.os == 'macOS'
       run: |
+          brew update --auto-update
           brew install boost ccache coreutils meson
 
     - name: Install meson
