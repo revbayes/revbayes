@@ -64,6 +64,7 @@ namespace RevBayesCore {
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 
+#include <cassert>
 #include <cmath>
 
 template <class mixtureType>
@@ -146,14 +147,13 @@ double RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::computeLnProbab
 {
     dirty = false;
     
+#ifndef NDEBUG
     mixtureType* val_ptr = this->value;
     for ( size_t i=0; i<base_distributions.size(); ++i )
     {
-        if ( val_ptr != (&base_distributions[i]->getValue()) )
-        {
-            throw RbException("Bug in AnalyticalMixture: Distributions work on different values!");
-        }
+        assert( val_ptr == &base_distributions[i]->getValue() );
     }
+#endif
     const Simplex &probs = probabilities->getValue();
     for ( size_t i=0; i<base_distributions.size(); ++i )
     {
