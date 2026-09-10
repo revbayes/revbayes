@@ -2,10 +2,13 @@
 #define PhyloMultivariateBrownianProcessREML_H
 
 #include "AbstractPhyloBrownianProcess.h"
+#include "MatrixReal.h"
+#include "MemberObject.h"
+#include "RbVector.h"
 #include "TreeChangeEventListener.h"
 
 namespace RevBayesCore {
-    
+
     /**
      * @brief Homogeneous distribution of character state evolution along a tree class (PhyloCTMC).
      *
@@ -15,22 +18,23 @@ namespace RevBayesCore {
      * @author The RevBayes Development Core Team (Sebastian Hoehna)
      * @since 2015-01-23, version 1.0
      */
-    class PhyloMultivariateBrownianProcessREML : public AbstractPhyloBrownianProcess, public TreeChangeEventListener {
-        
+    class PhyloMultivariateBrownianProcessREML : public AbstractPhyloBrownianProcess, public TreeChangeEventListener, public MemberObject< RbVector<RbVector<double> > > {
+
     public:
         // Note, we need the size of the alignment in the constructor to correctly simulate an initial state
         PhyloMultivariateBrownianProcessREML(const TypedDagNode<Tree> *t, const TypedDagNode<MatrixReal> *c, size_t nSites );
         virtual                                                            ~PhyloMultivariateBrownianProcessREML(void);                                                              //!< Virtual destructor
-        
+
         // public member functions
         // pure virtual
         virtual PhyloMultivariateBrownianProcessREML*                       clone(void) const;                                                                      //!< Create an independent clone
-        
+
         // non-virtual
         void                                                                fireTreeChangeEvent(const TopologyNode &n, const unsigned& m=0);                                             //!< The tree has changed and we want to know which part.
         double                                                              computeLnProbability(void);
         std::vector<std::vector<double> >                                   getContrasts(void);
         std::vector<double>                                                 getContrastStDevs(void){ return independent_contrasts_sds;}
+        void                                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<RbVector<double> > &rv) const;
         
     protected:
         
@@ -51,12 +55,14 @@ namespace RevBayesCore {
         // the likelihoods
         std::vector<std::vector<double> >                                   partial_likelihoods;
         std::vector<std::vector<std::vector<double> > >                     contrasts;
-        std::vector<std::vector<double> >                                   contrast_uncertainty;
+        std::vector<std::vector<MatrixReal> >                               contrast_uncertainty;
         std::vector<size_t>                                                 active_likelihood;
-        
+
         std::vector<std::vector<double> >                                   independent_contrasts;
         std::vector<double>                                                 independent_contrasts_sds;
-        
+        std::vector<std::vector<bool> >                                     observed_dims;
+        std::vector<bool>                                                   is_pristine;
+        std::vector<std::vector<double> >                                   pristine_time;
         // convenience variables available for derived classes too
         std::vector<bool>                                                   changed_nodes;
         std::vector<bool>                                                   dirty_nodes;

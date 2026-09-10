@@ -9,13 +9,16 @@
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "MatrixReal.h"
+#include "MethodTable.h"
 #include "ModelObject.h"
 #include "ModelVector.h"
 #include "RbException.h"
 #include "RbHelpReference.h"
 #include "RbVector.h"
+#include "Real.h"
 #include "RealPos.h"
 #include "RlDistribution.h"
+#include "RlDistributionMemberFunction.h"
 #include "RlMatrixReal.h"
 #include "StringUtilities.h"
 #include "Tree.h"
@@ -132,7 +135,18 @@ std::string Dist_PhyloMultivariateBrownianREML::getDistributionFunctionName( voi
 
 
 
-/** Return member rules (no members) */
+MethodTable Dist_PhyloMultivariateBrownianREML::getDistributionMethods( void ) const
+{
+
+    MethodTable methods = TypedDistribution< ContinuousCharacterData >::getDistributionMethods();
+
+    ArgumentRules* contrastsArgRules = new ArgumentRules();
+    methods.addFunction( new DistributionMemberFunction<Dist_PhyloMultivariateBrownianREML, ModelVector<ModelVector<Real> > >( "contrasts", variable, contrastsArgRules ) );
+
+    return methods;
+}
+
+
 const MemberRules& Dist_PhyloMultivariateBrownianREML::getParameterRules(void) const
 {
     

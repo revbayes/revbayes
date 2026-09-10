@@ -43,6 +43,7 @@ class TypeSpec;
         std::string                                     getDistributionFunctionName(void) const;                                                //!< Get the Rev-name for this distribution.
         const TypeSpec&                                 getTypeSpec(void) const;                                                                //!< Get the type spec of the instance
         const MemberRules&                              getParameterRules(void) const;                                                          //!< Get member rules (const)
+        virtual MethodTable                             getDistributionMethods(void) const;                                                     //!< Get the member methods (exposes "contrasts")
         void                                            printValue(std::ostream& o) const;                                                      //!< Print the general information on the function ('usage')
         
         
