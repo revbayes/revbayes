@@ -87,11 +87,15 @@ if [ ! -d "revbayes.github.io" ] ; then
 fi
 
 # Run the tutorial tests using the script from the website
+tutorial_status=0
 if [ ${#only_tests[@]} = 0 ] ; then
 (
     cd revbayes.github.io/tutorials
     ./run_tutorial_tests.sh ${rb_exec[@]}
-) || exit 1
+) || {
+    tutorial_status=$?
+    printf "\n${BOLD}#### ${RED}Tutorial tests failed with status $tutorial_status; continuing with integration tests.${CLEAR}\n\n"
+}
 fi
 
 if [ ${#only_tests[@]} -gt 0 ] ; then
@@ -260,10 +264,10 @@ while [  $i -lt ${#tests[@]} ]; do
 done
 
 
-if [ $failed -gt 0 ]; then
-    printf "\n\n${BOLD}#### ${MAGENTA}Warning!${CLEAR}${BOLD} unexpected failures: $failed   expected failures: $xfailed   total tests: $i${CLEAR}\n\n"
+if [ "$failed" -gt 0 ] || [ "$tutorial_status" -ne 0 ]; then
+    printf "\n\n${BOLD}#### ${MAGENTA}Warning!${CLEAR}${BOLD} tutorial status: $tutorial_status   unexpected failures: $failed   expected failures: $xfailed   total tests: $i${CLEAR}\n\n"
     exit 113
 else
-    printf "\n\n${BOLD}#### ${GREEN}Success!${CLEAR}${BOLD} unexpected failures: $failed   expected failures: $xfailed   total tests: $i${CLEAR}\n\n"
+    printf "\n\n${BOLD}#### ${GREEN}Success!${CLEAR}${BOLD} tutorial status: $tutorial_status   unexpected failures: $failed   expected failures: $xfailed   total tests: $i${CLEAR}\n\n"
     printf "\n\n${BOLD}#### All tests passed.${CLEAR}\n\n"
 fi

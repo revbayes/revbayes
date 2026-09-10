@@ -36,23 +36,28 @@ void DelimitedCharacterDataWriter::writeData(path const &fileName, const Homolog
     
     std::ofstream outStream( fileName.string() );
     
+    // The caller needs to guarantee this.
+    // Printing an error message is the responsibility of the caller, since the caller
+    //   has more context -- such as the caller's name.
+    assert(not del.empty());
+    
     const std::vector<Taxon> &taxa = data.getTaxa();
     for (std::vector<Taxon>::const_iterator it = taxa.begin();  it != taxa.end(); ++it)
     {
         
-        if ( data.isTaxonExcluded( it->getName() ) == false )
+        if ( not data.isTaxonExcluded( it->getName() ) )
         {
             
             const AbstractTaxonData &taxon = data.getTaxonData( it->getName() );
             
-            outStream << it->getName() << del;
+            outStream << it->getName();
             
             size_t nChars = taxon.getNumberOfCharacters();
             for (size_t i = 0; i < nChars; ++i)
             {
                 if ( !data.isCharacterExcluded( i ) )
                 {
-                    outStream << taxon.getStringRepresentation( i );
+                    outStream << del << taxon.getStringRepresentation( i );
                 }
                 
             }

@@ -1,0 +1,3 @@
+   Error:	Could not parse '3.O' as a number in the "max_age" field on line 2 of the taxon definition file.
+   Error:	Could not parse 'abc' as a number in the "min_age" field on line 2 of the taxon definition file.
+   inf

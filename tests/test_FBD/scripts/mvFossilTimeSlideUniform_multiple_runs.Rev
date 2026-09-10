@@ -133,7 +133,7 @@ moves.append( mvScaleBactrian(sigma, lambda=0.5, weight=10) )
 
 for (i in n_branches:1) {
     # Get branch duration in calendar time units
-    times[i] = fbd_tree.branchLength(i)
+    times[i] := fbd_tree.branchLength(i)
 
     # Relative branch-wise rates: these serve as multipliers to the global_rate_mean (c).
     # Each relative rate r_i is gamma distributed with mean = 1.0 and variance equal

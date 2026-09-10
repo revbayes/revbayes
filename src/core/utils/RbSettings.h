@@ -46,18 +46,18 @@ public:
     void                        setLogMCMC(int d);                                  //!< How much logging should we perform to check MCMC?
     
 private:
-    RbSettings(void);                                   //!< Default constructor
-    RbSettings(const RbSettings&) = delete;             //!< Prevent copy
-    ~RbSettings(void) {};                               //!< Delete function table
-    RbSettings&                 operator=(const RbSettings& s) = delete;                     //!< Prevent assignment
+    RbSettings(void);                                                               //!< Default constructor
+    RbSettings(const RbSettings&) = delete;                                         //!< Prevent copy
+    ~RbSettings(void) {};                                                           //!< Delete function table
+    RbSettings&                 operator=(const RbSettings& s) = delete;            //!< Prevent assignment
 
     // Variables that have user settings
     size_t                      lineWidth = 160;
     RevBayesCore::path          moduleDir = "modules";
     size_t                      outputPrecision = 7;
-    bool                        printNodeIndex = true;                                     //!< Should the node index of a tree be printed as a comment?
+    bool                        printNodeIndex = true;                              //!< Should the node index of a tree be printed as a comment?
     size_t                      scalingDensity = 1;
-    double                      tolerance=10e-10;                                          //!< Tolerance for comparison of doubles
+    double                      tolerance=1e-9;                                     //!< Tolerance for comparison of doubles
     bool                        useScaling=true;
     int                         debugMCMC = 0;
     int                         logMCMC = 0;
