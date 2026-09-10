@@ -1,7 +1,9 @@
 ################################################################################
 #
-# Short logMCMC/debugMCMC dump of the backbone+initialTree FBD clock test.
-# Purpose: compare the first two burn-in generations Mac vs Linux (same seed).
+# logMCMC/debugMCMC dump of the backbone+initialTree FBD clock test.
+# Purpose: find the first Mac vs Linux accept/reject fork (same seed).
+# Two generations match; the golden-file split is in burn-in generations 3-100.
+# Use the same burn-in length and tuningInterval as Test_backbone_binary_initial_TimeTree.
 # Do not keep this as a golden-file test; the expected errout is a placeholder
 # so Linux CI fails and uploads output/.
 #
@@ -149,7 +151,7 @@ print(alpha)
 
 mymodel = model(fbd_tree)
 mymcmc = mcmc(mymodel, monitors, moves)
-mymcmc.burnin(generations=2, tuningInterval=1000)
+mymcmc.burnin(generations=100, tuningInterval=5)
 
 print("LOGMCMC_DUMP_FINISHED")
 q()
