@@ -39,7 +39,7 @@ namespace RevLanguage {
         const TypeSpec&                                 getTypeSpec(void) const;                                    //!< Get the type spec of the instance
         
         // Function functions you have to override
-        RevBayesCore::TypedFunction<long>*               createFunction(void) const;                                 //!< Create a function object
+        RevBayesCore::TypedFunction<std::int64_t>*               createFunction(void) const;                                 //!< Create a function object
         const ArgumentRules&                            getArgumentRules(void) const;                               //!< Get argument rules
        
     };
@@ -76,7 +76,7 @@ RevLanguage::Func_numUniqueInVector<valType>* RevLanguage::Func_numUniqueInVecto
 }
 
 template <typename valType>
-RevBayesCore::TypedFunction<long>* RevLanguage::Func_numUniqueInVector<valType>::createFunction( void ) const
+RevBayesCore::TypedFunction<std::int64_t>* RevLanguage::Func_numUniqueInVector<valType>::createFunction( void ) const
 {
     
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<typename valType::valueType> >* vect = static_cast<const ModelVector<valType> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();

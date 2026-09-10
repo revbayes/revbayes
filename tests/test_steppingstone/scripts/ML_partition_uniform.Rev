@@ -1,0 +1,158 @@
+################################################################################
+#
+# RevBayes example: Power posterior analysis with checkpointed pre-burnin and
+#                   run phases, followed by marginal likelihood estimation using
+#                   the path-sampling and stepping-stone methods.
+#
+# authors: Michael Landis, Sebastian Hoehna, Tracy A. Heath, Brian R. Moore,
+#          and David Cerny
+#
+################################################################################
+
+seed(12345)
+
+###### This just defines a single model for all sites #######
+
+### Read in sequence data for both genes
+data_cox2 = readDiscreteCharacterData("data/primates_and_galeopterus_cox2.nex")
+data_cytb = readDiscreteCharacterData("data/primates_and_galeopterus_cytb.nex")
+
+### Create concatenated data matrix
+data = concatenate( data_cox2, data_cytb )
+
+# Get some useful variables from the data. We need these later on.
+n_species <- data.ntaxa()
+n_branches <- 2 * n_species - 3
+taxa <- data.taxa()
+
+mvi = 0 
+mni = 0
+
+
+######################
+# Substitution Model #
+######################
+
+#### specify the GTR+G+I substitution model applied uniformly to all sites ###
+er_prior <- v(1,1,1,1,1,1)
+er ~ dnDirichlet(er_prior)
+moves[++mvi] = mvSimplexElementScale(er, alpha=10.0, tune=true, weight=3.0)
+
+pi_prior <- v(1,1,1,1) 
+pi ~ dnDirichlet(pi_prior)
+moves[++mvi] = mvSimplexElementScale(pi, alpha=10.0, tune=true, weight=2.0)
+
+
+#### create a deterministic variable for the rate matrix ####
+Q := fnGTR(er,pi) 
+
+
+#############################
+# Among Site Rate Variation #
+#############################
+
+alpha_prior_mean <- ln(2.0)
+alpha_prior_sd <- 0.587405
+alpha ~ dnLognormal( alpha_prior_mean, alpha_prior_sd )
+
+# add moves for the stationary frequencies, exchangeability rates and the shape parameter
+moves[++mvi] = mvScale(alpha,weight=2)
+
+
+# the probability of a site being invariable
+pinvar ~ dnBeta(1,1)
+moves[++mvi] = mvScale(pinvar, lambda=0.1, tune=true, weight=2.0)
+moves[++mvi] = mvSlide(pinvar, delta=10.0, tune=true, weight=2.0)
+
+
+##############
+# Tree model #
+##############
+
+out_group = clade("Galeopterus_variegatus")
+# Prior distribution on the tree topology
+topology ~ dnUniformTopology(taxa, outgroup=out_group)
+moves[++mvi] = mvNNI(topology, weight=5.0)
+moves[++mvi] = mvSPR(topology, weight=1.0)
+
+# Branch length prior
+for (i in 1:n_branches) {
+    bl[i] ~ dnExponential(10.0)
+    moves[++mvi] = mvScale(bl[i])
+}
+
+TL := sum(bl)
+
+psi := treeAssembly(topology, bl)
+
+
+###################
+# PhyloCTMC Model #
+###################
+
+# the sequence evolution model
+phyloSeq ~ dnPhyloCTMC(tree=psi, Q=Q |> fnGammaASRV(alpha,4,false) |> fnInvASRV(pinvar), type="DNA")
+
+# attach the data
+phyloSeq.clamp(data)
+
+
+############
+# Analysis #
+############
+
+mymodel = model(psi)
+
+# add monitors
+monitors[++mni] = mnFile(psi, filename="output/model_uniform_run_all.trees", printgen=10)
+monitors[++mni] = mnModel(filename="output/model_uniform_run_all.log", printgen=10)
+
+# step 1: run the global pre-burnin stage with checkpointing (fresh start, planned length = 50)
+pow_p = powerPosterior(mymodel, moves, monitors, "output/model_uniform_run_all.out", cats=10, sampleFreq=1)
+pow_p.burnin(generations=50, tuningInterval=200, checkpointFile="output/model_uniform_run_all_burnin.ckp",
+             checkpointInterval=10)
+
+# simulate an interrupted longer pre-burnin: rewrite the planned length to 80 so that resume-to-target
+# still has work to do
+write("iter = 50\n", filename="output/model_uniform_run_all_burnin_burnin_info.ckp")
+write("planned_burnin = 80\n", filename="output/model_uniform_run_all_burnin_burnin_info.ckp", append=TRUE)
+
+# step 2: resume-to-target by not specifying the "generations" argument; the checkpointing mechanism
+# automatically determines that 30 generations still need to be run by subtracting completed generations
+# from the (rewritten) planned pre-burnin
+pow_p.initializeFromCheckpoint( "output/model_uniform_run_all_burnin.ckp" )
+pow_p.burnin(tuningInterval=200, checkpointFile="output/model_uniform_run_all_burnin.ckp",
+             checkpointInterval=10)
+
+# step 3: resume again with the "generations" argument explicitly set to extend past the target by 10
+pow_p.initializeFromCheckpoint( "output/model_uniform_run_all_burnin.ckp" )
+pow_p.burnin(generations=10, tuningInterval=200)
+
+# step 4: run 10 stones for 10 generations each, with checkpointing
+pow_p.run(generations=10, checkpointFile="output/model_uniform_run_all.ckp", checkpointInterval=1)
+
+# step 5: resume from checkpoint to extend all the 10 stones we have just run by an additional 10 generations
+pow_p.initializeFromCheckpoint( "output/model_uniform_run_all.ckp", 1:10 )
+pow_p.run(generations=10)
+
+
+###########
+# Summary #
+###########
+
+ss = steppingStoneSampler(file="output/model_uniform_run_all.out", powerColumnName="power",
+                          likelihoodColumnName="likelihood")
+
+print("\nMarginal likelihood estimates when running the stones all at once:\n")
+print("Stepping-stone estimate: ",       ss.marginal(), "\n")
+print("Stepping-stone standard error: ", ss.stdError(), "\n")
+
+ps = pathSampler(file="output/model_uniform_run_all.out", powerColumnName="power",
+                 likelihoodColumnName="likelihood")
+
+print("Path-sampling estimate: ",       ps.marginal() )
+print("Path-sampling standard error: ", ps.stdError() )
+
+
+# you may want to quit RevBayes now
+q()

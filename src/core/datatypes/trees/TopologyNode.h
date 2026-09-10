@@ -51,8 +51,11 @@
 namespace RevBayesCore {
     
     class Tree;
+    class CharacterHistory;
     
     class TopologyNode  {
+
+    friend Tree;
         
     public:
         TopologyNode();                                                                                                                 //!< Default constructor with no index
@@ -72,11 +75,13 @@ namespace RevBayesCore {
         void                                        addChild(TopologyNode* c, size_t pos = 0);                                          //!< Adds a child node
 
         void                                        addBranchParameter(const std::string &n, double p);
+        void                                        addBranchParameter_(const std::string &chunk);
         void                                        addBranchParameter(const std::string &n, const std::string &p);
         void                                        addBranchParameters(const std::string &n, const std::vector<double> &p, bool io);
         void                                        addBranchParameters(const std::string &n, const std::vector<std::string> &p, bool io);
 
         void                                        addNodeParameter(const std::string &n, double p);
+        void                                        addNodeParameter_(const std::string &chunk);
         void                                        addNodeParameter(const std::string &n, const std::string &p);
         void                                        addNodeParameter_(const std::string &n, const std::string &p);
         void                                        addNodeParameters(const std::string &n, const std::vector<double> &p, bool io);
@@ -86,7 +91,7 @@ namespace RevBayesCore {
         bool                                        setNodeParameter(const std::string& name, const std::string& value);                //!< Adds OR REPLACES a node parmaeter, returning true if it was already present.
         std::optional<std::string>                  getNodeParameter(const std::string& name) const;                                    //!< Gets the value of a node parameter if present.
         std::optional<std::string>                  eraseNodeParameter(const std::string& name);                                        //!< Erases a node parameter if present, returning the value.
-
+        //add comment member function?
 
         void                                        clearParameters(void);                                                              //!< Clear the node and branch parameters
         void                                        clearBranchParameters(void);
@@ -94,6 +99,7 @@ namespace RevBayesCore {
         virtual std::string                         computeNewick(bool round = true);                                                   //!< Compute the newick string for this clade
         std::string                                 computePlainNewick(void) const;                                                     //!< Compute the newick string for this clade as a plain string without branch length
         std::string                                 computeSimmapNewick(bool round = true);                                             //!< Compute the newick string compatible with SIMMAP and phytools
+        std::string                                 computeSimmapNewick(const CharacterHistory& h, bool round = true) const;            //!< Compute the newick string compatible with SIMMAP and phytools
         bool                                        containsClade(const TopologyNode* c, bool strict) const;
         bool                                        containsClade(const Clade &c, bool strict) const;
         bool                                        containsClade(const RbBitSet &c, bool strict) const;
@@ -113,7 +119,7 @@ namespace RevBayesCore {
         bool                                        hasIndex(void) const;                                                               //!< Does the node have an index
         size_t                                      getIndex(void) const;                                                               //!< Get index of node
         void                                        getIndicesOfNodesInSubtree(bool countTips, std::vector<size_t>* indices) const;                                                               //!< Get index of node
-        std::string                                 getIndividualName() const;                                                             //!< Get the species name for the node
+        std::string                                 getIndividualName() const;                                                          //!< Get the species name for the node
         double                                      getMaxDepth(void) const;                                                            //!< Get the maximum depth from this node (time between this node and most recent tip)
         const std::string&                          getName() const;                                                                    //!< Get name of node
         TopologyNode*                               getMrca(const Clade &c);
@@ -152,26 +158,28 @@ namespace RevBayesCore {
         bool                                        isSampledAncestorTipOrParent() const;                                               //!< Is node or child node a tip a sampled ancestor?
         bool                                        isSampledAncestorKnuckle() const;                                                   //!< Does this one have only one child?
         bool                                        isTip(void) const;                                                                  //!< Is node tip?
-        void                                        makeBifurcating(bool as_fossils);                                                   //!< Make this and all its descendants bifurcating.
         void                                        recomputeAge(bool recursive);                                                       //!< Recompute the age of this node based on the childs age and the branch length leading to it.
         void                                        recomputeBranchLength(void);                                                        //!< Recompute the length of this branch based on the ages.
         void                                        renameNodeParameter(const std::string &old_name, const std::string &new_name);
         void                                        removeAllChildren(void);                                                            //!< Removes all of the children of the node
         size_t                                      removeChild(TopologyNode* c);                                                       //!< Removes a specific child
         void                                        removeTree(Tree *t);                                                                //!< Removes the tree pointer
+        void                                        resolveMultifurcation(bool resolve_root = true);                                    //!< If node has more than 2 children, randomly resolve them into a bifurcating subtree
+        void                                        scaleAgesFromTaxonAgesMBL(double minbl);                                            //!< Sets the age of the parent to the age of the oldest of its children + minbl
         void                                        setAge(double a, bool propagate = true );                                           //!< Set the age of this node (should only be done for tips).
         void                                        setBranchLength(double b, bool flag_dirty=true);                                    //!< Set the length of the branch leading to this node.
         void                                        setIndex(size_t idx);                                                               //!< Set the index of the node
 
         void                                        setName(const std::string& n);                                                      //!< Set the name of this node
         void                                        setNumberOfShiftEvents(size_t n);                                                   //!< Set the number of shift events for stochastic character maps
-        void                                        setParent(TopologyNode* p);                                                         //!< Sets the node's parent
+        void                                        setParent(TopologyNode* p, bool recompute_branch_length = true);                    //!< Sets the node's parent
         void                                        setSampledAncestor(bool tf);                                                        //!< Set if the node is a sampled ancestor
         void                                        setSpeciesName(std::string const &n);                                               //!< Set the species name of this node
         void                                        setTaxon(Taxon const &t);                                                           //!< Set the taxon of this node
         void                                        setTimeInStates(std::vector<double> t);
         void                                        setTree(Tree *t);                                                                   //!< Sets the tree pointer
         void                                        setUseAges(bool tf, bool recursive);
+        void                                        suppressOutdegreeOneNodes(bool replace);                                            //!< If this node's outdegree = 1, turn it and its descendants into bifurcations, or remove it.
 
         // internal helper functions
         bool getBurstSpeciation(void) const { return burst_speciation; }
@@ -192,6 +200,7 @@ namespace RevBayesCore {
 
         // helper methods
         std::ostream&                               buildNewick(std::ostream&, bool simmap);                                            //!< compute the newick string for a tree rooting at this node
+        std::ostream&                               buildNewickSimmap(std::ostream&, const CharacterHistory& h) const;                  //!< compute the newick string for a tree rooting at this node
         std::string                                 buildNewickString(bool simmap, bool round);                                         //!< compute the newick string for a tree rooting at this node
 
         // protected members

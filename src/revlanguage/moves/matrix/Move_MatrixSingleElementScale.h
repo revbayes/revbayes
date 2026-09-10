@@ -42,6 +42,8 @@ class TypeSpec;
         RevPtr<const RevVariable>                   lambda;
         RevPtr<const RevVariable>                   weight;
         RevPtr<const RevVariable>                   tune;
+        RevPtr<const RevVariable>                   row;
+        RevPtr<const RevVariable>                   col;
         
     };
     

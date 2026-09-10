@@ -1,0 +1,6 @@
+   Successfully read one character matrix from file 'data/primates_cytb_small.nex'
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 8 different moves, with a single move picked randomly per iteration
+   

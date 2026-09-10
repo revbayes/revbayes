@@ -40,7 +40,7 @@ double SequentialMoveSchedule::getNumberMovesPerIteration( void ) const
 }
 
 
-Move& SequentialMoveSchedule::nextMove( unsigned long gen )
+Move& SequentialMoveSchedule::nextMove( std::uint64_t gen )
 {
     
     bool found = false;

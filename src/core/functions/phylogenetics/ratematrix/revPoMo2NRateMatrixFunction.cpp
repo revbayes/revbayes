@@ -4,7 +4,7 @@
 using namespace RevBayesCore;
 
 
-revPoMo2NRateMatrixFunction::revPoMo2NRateMatrixFunction(    const TypedDagNode< long > *ni, 
+revPoMo2NRateMatrixFunction::revPoMo2NRateMatrixFunction(    const TypedDagNode< std::int64_t > *ni, 
                                                              const TypedDagNode< Simplex > *bf,
                                                              const TypedDagNode< double > *ex, 
                                                              const TypedDagNode< RbVector<double> > *f ) : 
@@ -30,10 +30,10 @@ revPoMo2NRateMatrixFunction::~revPoMo2NRateMatrixFunction( void )
 }
 
 
-long revPoMo2NRateMatrixFunction::computeNumStates( long ni )
+std::int64_t revPoMo2NRateMatrixFunction::computeNumStates( std::int64_t ni )
 {
 
-    long numStates = ni+1;
+    std::int64_t numStates = ni+1;
     
     return numStates;
 
@@ -52,7 +52,7 @@ revPoMo2NRateMatrixFunction* revPoMo2NRateMatrixFunction::clone( void ) const
 void revPoMo2NRateMatrixFunction::update( void )
 {
     // get the information from the arguments for reading the file
-    long                        ni = N->getValue();
+    std::int64_t                        ni = N->getValue();
     const Simplex&              bf = pi->getValue();
     double                      ex = rho->getValue();
     const std::vector<double>&  f  = phi->getValue();
@@ -73,7 +73,7 @@ void revPoMo2NRateMatrixFunction::swapParameterInternal(const DagNode *oldP, con
 
     if (oldP == N)
     {
-        N =  static_cast<const TypedDagNode< long >* >( newP );
+        N =  static_cast<const TypedDagNode< std::int64_t >* >( newP );
     }
 
     if (oldP == pi)

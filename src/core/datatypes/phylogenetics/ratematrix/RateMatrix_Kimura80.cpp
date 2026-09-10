@@ -1,6 +1,6 @@
 #include "RateMatrix_Kimura80.h"
 
-#include <math.h>
+#include <cmath>
 #include <cstddef>
 
 #include "TransitionProbabilityMatrix.h"

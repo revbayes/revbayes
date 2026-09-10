@@ -4,7 +4,7 @@
 #include <iostream>
 #include <iterator>
 #include <map>
-#include <math.h>
+#include <cmath>
 #include <set>
 #include <string>
 #include <sstream>
@@ -12,7 +12,9 @@
 #include <vector>
 #include <limits>
 
+#include "BranchHistory.h"
 #include "Clade.h"
+#include "CharacterHistory.h"
 #include "RbException.h"
 #include "RbMathLogic.h"
 #include "RbSettings.h"
@@ -25,6 +27,8 @@
 #include "TreeChangeEventHandler.h"
 #include "RbConstants.h" // IWYU pragma: keep
 #include "StringUtilities.h"
+#include "RandomNumberFactory.h"
+#include "RandomNumberGenerator.h"
 
 using namespace RevBayesCore;
 
@@ -108,7 +112,7 @@ TopologyNode::~TopologyNode(void)
     {
         parent->removeChild(this);
     }
-    
+
 }
 
 
@@ -180,6 +184,11 @@ void TopologyNode::addBranchParameter(const std::string &n, const std::string &p
     std::string comment = n + "=" + p;
     branch_comments.push_back( comment );
 
+}
+
+void TopologyNode::addBranchParameter_(const std::string &chunk)
+{
+    branch_comments.push_back( chunk );
 }
 
 
@@ -308,7 +317,7 @@ void TopologyNode::addChild(TopologyNode* c, size_t pos )
     // fire tree change event
     if ( tree != NULL )
     {
-        tree->getTreeChangeEventHandler().fire( *c, RevBayesCore::TreeChangeEventMessage::TOPOLOGY );
+        tree->getTreeChangeEventHandler().fire( *this, RevBayesCore::TreeChangeEventMessage::TOPOLOGY );
     }
 }
 
@@ -347,6 +356,11 @@ void TopologyNode::addNodeParameter_(const std::string &n, const std::string &p)
 {
     std::string comment = n + "=" + p;
     node_comments.push_back( comment );
+}
+
+void TopologyNode::addNodeParameter_(const std::string &chunk)
+{
+    node_comments.push_back( chunk );
 }
 
 
@@ -393,6 +407,49 @@ void TopologyNode::addNodeParameters(std::string const &n, const std::vector<std
     }
 }
 
+/**
+ * This function will convert a raw string to a newick sting with escaped characters.
+ */
+std::string newickEscape(const std::string in_label)
+{
+    bool needs_quoting = false;
+    std::string escaped;
+
+    for (size_t i = 0; i < in_label.size(); ++i) {
+        char c = in_label[i];
+
+        // first check for any illegal characters or underscore
+        if (c == '\'' || c == '(' || c == ')' || c ==' ' ||
+            c == '[' || c ==']' || c == ':' || c == ';' || c ==',') {
+            needs_quoting = true;
+            // check for single quote
+            if (c == '\'') {
+                escaped += "''";
+            }
+            else {
+                escaped += c;
+            }
+        }
+
+        else{
+            escaped += c;
+        }
+    }
+
+    //return quoted string
+    if (needs_quoting) {
+        return "'" + escaped + "'";
+    } 
+    // convert blanks to underscores
+    else{
+        /*for (char& c : escaped) {
+            if (c == ' ') {
+                c = '_';
+            }
+        }*/
+        return escaped;
+    }
+}
 
 std::ostream& TopologyNode::buildNewick( std::ostream& o, bool simmap = false)
 {
@@ -419,7 +476,7 @@ std::ostream& TopologyNode::buildNewick( std::ostream& o, bool simmap = false)
 
     // 2. Write out the node name is there is any.
     if (children.size() < 2)
-        o << taxon.getName();
+        o << newickEscape(taxon.getName());
 
     // 3. Write out node comments if there are any and (simmap == false)
     if ( ( node_comments.size() > 0 or RbSettings::userSettings().getPrintNodeIndex() == true ) && simmap == false )
@@ -490,7 +547,6 @@ std::ostream& TopologyNode::buildNewick( std::ostream& o, bool simmap = false)
     // 5. Write ";" if we're done with the tree.
     if ( isRoot() )
     {
-        // FIXME - move to caller?
         o << ";";
     }
 
@@ -501,7 +557,7 @@ std::ostream& TopologyNode::buildNewick( std::ostream& o, bool simmap = false)
  * Build newick string.
  * If simmap = true build a newick string compatible with SIMMAP and phytools.
  */
-std::string TopologyNode::buildNewickString( bool simmap = false, bool round = true )
+std::string TopologyNode::buildNewickString( bool simmap, bool round )
 {
     // create the newick string
     std::stringstream o;
@@ -520,6 +576,70 @@ std::string TopologyNode::buildNewickString( bool simmap = false, bool round = t
     buildNewick(o, simmap);
 
     return o.str();
+}
+
+
+
+
+std::ostream& TopologyNode::buildNewickSimmap( std::ostream& o, const CharacterHistory& h) const
+{
+    // ensure we have an updated copy of branch_length variables
+    if ( not isRoot() )
+    {
+        const_cast<TopologyNode*>(this)->recomputeBranchLength();
+    }
+
+    // 1. Write out the child newicks if there are any.
+    if (not isTip())
+    {
+        o << "(";
+        for (size_t i=0; i< children.size(); i++)
+        {
+            if (i > 0)
+            {
+                o << ",";
+            }
+            children[i]->buildNewickSimmap(o, h);
+        }
+        o << ")";
+    }
+
+    // 2. Write out the node name is there is any.
+    if (children.size() < 2)
+        o << taxon.getName();
+
+    if ( isRoot() == false )
+    {
+
+        const BranchHistory& bh = h.getHistory( getIndex() );
+        const std::multiset<CharacterEvent*,CharacterEventCompare>& node_history = bh.getHistory();
+
+        double total_branch_length = getBranchLength();
+        double used_branch_length  = 0.0;
+        double end_age             = getAge();
+
+        // make SIMMAP string
+        o << ":{";
+        std::multiset<CharacterEvent*,CharacterEventCompare>::const_iterator it = node_history.begin();
+        for (; it != node_history.end(); ++it)
+        {
+            const CharacterEvent* this_event = *it;
+            o << this_event->getStateStr() << "," << (this_event->getAge() - end_age - used_branch_length);
+            used_branch_length += this_event->getAge() - end_age - used_branch_length;
+            o << ":";
+        }
+        const std::vector<CharacterEvent*>& parent_chars = bh.getParentCharacters();
+        o << parent_chars[0]->getStateStr() << "," << (total_branch_length - used_branch_length) << "}";
+
+    }
+
+    // 5. Write ";" if we're done with the tree.
+    if ( isRoot() )
+    {
+        o << ";";
+    }
+
+    return o;
 }
 
 
@@ -582,10 +702,10 @@ std::string TopologyNode::computePlainNewick( void ) const
 {
     /* NOTE: Representing a topology as with WITH NO ANNOTATIONS
      * means that we have to represent sampled ancestors as
-     * out-degree-1 nodes.
+     * outdegree-1 nodes.
      *
      * If you want to build a tree object from that, you may
-     * need to call tree->makeInternalNodesBifurcating(true,true).
+     * need to call tree->suppressOutdegreeOneNodes(true, true).
      */
 
     // test whether this is a internal or external node
@@ -621,6 +741,28 @@ std::string TopologyNode::computePlainNewick( void ) const
 std::string TopologyNode::computeSimmapNewick( bool round )
 {
     return buildNewickString( true, round );
+}
+
+std::string TopologyNode::computeSimmapNewick(const CharacterHistory& h, bool round) const
+{
+
+    // create the newick string
+    std::stringstream o;
+
+    std::fixed(o);
+    // depending on the value of round, get standard precision or maximum
+    if (round)
+    {
+        o.precision( 6 );
+    }
+    else
+    {
+        o.precision( std::numeric_limits<double>::digits10 );
+    }
+
+    buildNewickSimmap(o, h);
+
+    return o.str();
 }
 
 
@@ -834,7 +976,7 @@ RbBitSet TopologyNode::getAllClades(std::vector<RbBitSet> &all_clades, size_t nu
         int bit_index = tree->getTaxonBitSetMap().at(taxon.getName());
 
         this_bs.set( bit_index );
-        
+
         if ( internal_only == false )
         {
             all_clades.push_back( this_bs );
@@ -1048,7 +1190,7 @@ size_t TopologyNode::getIndex( void ) const
 
 /**
  * Get the indices of nodes contained in the subtree starting with this node as the root.
- * This either returns 1 if this is a tip node (or 0 if we do not count tipes)
+ * This either returns 1 if this is a tip node (or 0 if we do not count tips)
  * or computes recursively the number of nodes in both children plus one for this node.
  *
  * \param[in]   countTips   Shall we count tips?
@@ -1101,7 +1243,7 @@ double TopologyNode::getMaxDepth( void ) const
             m = node.getBranchLength() + node.getMaxDepth();
         }
 
-        if ( m > max )
+        if ( m > max or std::isnan(m))
         {
             max = m;
         }
@@ -1630,7 +1772,7 @@ bool TopologyNode::isSampledAncestorKnuckle() const
     // This function intentionally does NOT query the sampled_ancestor_tip flag.
     // One question is whether we should require there to be a Taxon present here to be
     //   considered a sampled ancestor.
-    
+
     return getNumberOfChildren() == 1;
 }
 
@@ -1642,84 +1784,6 @@ bool TopologyNode::isTip( void ) const
 }
 
 
-/**
- * Make this node an all its children bifurcating.
- * The root will not be changed. We throw an error if this node
- * has more than 2 children. If this node has only one child,
- * then we insert a dummy child.
- * This function is called recursively.
- */
-void TopologyNode::makeBifurcating( bool as_fossils )
-{
-
-    if ( isTip() == false )
-    {
-
-        // we need to be able to bifurcate sampled ancestor root nodes
-        //if ( isRoot() == false )
-        //{
-
-            if ( getNumberOfChildren() == 1 )
-            {
-
-                // should we remove the node or add it as a fossil?
-                if ( as_fossils == true )
-                {
-                    TopologyNode *new_fossil = new TopologyNode( getTaxon() );
-                    taxon = Taxon("");
-
-                    // connect to the old fossil
-                    addChild( new_fossil );
-                    new_fossil->setParent( this );
-
-                    // set the fossil flags
-                    setSampledAncestor( false );
-                    new_fossil->setSampledAncestor( true );
-
-                    // set the age and branch-length of the fossil
-                    new_fossil->setAge( age );
-                    new_fossil->setBranchLength( 0.0 );
-                }
-                else
-                {
-                    // we are going to delete myself by connect my parent and my child
-                    TopologyNode& parent = getParent();
-                    TopologyNode& child = getChild(0);
-                    
-                    // the new branch length needs to be the branch length of the parent and child
-                    double summ = getBranchLength() + child.getBranchLength();
-                    
-                    // now remove myself from the parent
-                    parent.removeChild( this );
-                    
-                    // and my child from me
-                    removeChild( &child );
-                    
-                    // and stich my parent and my child together
-                    parent.addChild( &child );
-                    child.setParent( &parent );
-                    
-                    // finally, adapt the branch lengths
-                    child.setBranchLength(summ);
-                    
-                }
-
-
-            }
-
-        //}
-
-        // call this function recursively for all its children
-        for (size_t i=0; i<getNumberOfChildren(); ++i)
-        {
-            getChild( i ).makeBifurcating( as_fossils );
-        }
-
-    }
-
-}
-
-
 void TopologyNode::recomputeAge( bool recursive )
 {
 
@@ -1727,7 +1791,7 @@ void TopologyNode::recomputeAge( bool recursive )
     {
         age = 0.0;
     }
-    else 
+    else
     {
         if ( recursive == true )
         {
@@ -1795,7 +1859,7 @@ size_t TopologyNode::removeChild(TopologyNode* c)
     // fire tree change event
     if ( tree != NULL )
     {
-        tree->getTreeChangeEventHandler().fire( *c, RevBayesCore::TreeChangeEventMessage::TOPOLOGY );
+        // tree->getTreeChangeEventHandler().fire( *c, RevBayesCore::TreeChangeEventMessage::TOPOLOGY );
         tree->getTreeChangeEventHandler().fire( *this, RevBayesCore::TreeChangeEventMessage::TOPOLOGY );
     }
 
@@ -1840,8 +1904,238 @@ void TopologyNode::renameNodeParameter(const std::string &old_name, const std::s
 }
 
 
+void TopologyNode::resolveMultifurcation(bool resolve_root)
+{
+    if (children.size() < 3) return;
+
+    // What if the root had 4 children?
+    if (isRoot() and not resolve_root) return;
+
+    // std::cerr<<"\n\nresolveMultifurcation:  children.size() = "<<children.size()<<"\n";
+    RandomNumberGenerator* rng = GLOBAL_RNG;
+    // "active" children are those that are younger than the child currently under consideration
+    std::vector<TopologyNode*> active_children;
+
+    if (use_ages)
+    {
+        // The following is adapted from UniformSerialSampledTimeTreeDistribution::simulateCoalescentAges()
+        std::vector<double> coalescence_times;
+
+        std::vector<TopologyNode*> sorted_children = children;
+        std::sort(sorted_children.begin(), sorted_children.end(), [](auto x, auto y) {return x->getAge() < y->getAge();});
+
+        // for each tip, simulate an age between max age and tip age
+        double max_age = getAge();
+
+        // Skip the youngest child, since it could pick an age that is older than any sibling to coalesce with.
+        // Skip the oldest child, since we only want n-2 coalescence events.
+        for(int i = 1; i < sorted_children.size()-1; ++i)
+        {
+            // get the age of the tip
+            double a = sorted_children[i]->getAge();
+
+            // simulate the age of a node
+            double new_age = a + rng->uniform01() * (max_age - a);
+
+            // add the age to the vector of coalescence_times
+            coalescence_times.push_back(new_age);
+        }
+
+        // sort the coalescence_times (from youngest to oldest)
+        std::sort(coalescence_times.begin(), coalescence_times.end());
+
+        // std::cerr<<"    child ages: ";
+        // for(auto& child: sorted_children)
+        //   std::cerr<<child->getAge()<<"  ";
+        // std::cerr<<"\n";
+        // std::cerr<<"    parent age: "<<getAge()<<"\n";
+
+        // The sorted_children from index `used_children` to the end have not been seen yet.
+        int used_children = 0;
+
+        // Apply the coalescence events
+        for (int i=0; i<coalescence_times.size();i++)
+        {
+            // std::cerr<<"i = "<<i<<"/"<<coalescence_times.size()<<"  active_children.size() = "<<active_children.size()<<"   children.size() = "<<children.size()<<"\n";
+            // get the age of the current child
+            double next_coal_time = coalescence_times[i];
+
+            // If the next event is adding a leaf instead of a coalescent, then add the next leaf.
+            for(;used_children < sorted_children.size() and sorted_children[used_children]->getAge() <= next_coal_time; used_children++)
+            {
+                active_children.push_back( sorted_children[used_children] );
+                // std::cerr<<"    event=LEAF  time = "<<sorted_children[used_children]->getAge()<<"  active_children.size() = "<<active_children.size()<<"\n";
+            }
+
+            assert(active_children.size() >= 2);
+
+            int old_size = children.size();
+
+            // randomly draw one child (arbitrarily called left) node from the list of active children
+            auto left = static_cast<int>( floor( rng->uniform01() * active_children.size() ) );
+            auto leftChild = active_children.at(left);
+
+            // remove the randomly drawn node from the active list and list of children.
+            auto iter_left = std::find(children.begin(), children.end(), leftChild);
+            if (iter_left == children.end())
+            {
+                std::cerr<<"left child not found!";
+                std::abort();
+            }
+            children.erase( iter_left );
+            active_children.erase( active_children.begin() + left );
+
+            // randomly draw one child (arbitrarily called right) node from the list of active children
+            auto right = static_cast<int>( floor( rng->uniform01() * active_children.size() ) );
+            auto rightChild = active_children.at(right);
+
+            // remove the randomly drawn node from the active list and list of children.
+            auto iter_right = std::find(children.begin(), children.end(), rightChild);
+            if (iter_right == children.end())
+            {
+                std::cerr<<"right child not found!";
+                std::abort();
+            }
+            children.erase( iter_right );
+            active_children.erase( active_children.begin() + right );
+
+            // create a parent for the two
+            TopologyNode* prnt = new TopologyNode(); // leave the new node without index
+            prnt->setAge( next_coal_time );
+            prnt->addChild( leftChild );
+            prnt->addChild( rightChild );
+            leftChild->setParent( prnt );
+            rightChild->setParent( prnt );
+            active_children.push_back( prnt );
+
+            // add the newly created parent to the list of the children of the current node
+            addChild( prnt );
+            prnt->setParent( this );
+
+            // std::cerr<<"    event=COAL  time = "<<next_coal_time<<"  active_children.size() = "<<active_children.size()<<"   children.size() = "<<children.size()<<"\n";
+            // std::cerr<<"          left = "<<leftChild->getAge()<<"  right = "<<rightChild->getAge()<<"   parent = "<<next_coal_time<<"\n";
+
+            assert(children.size()+1 == old_size);
+            assert(prnt->getAge() >= leftChild->getAge());
+            assert(prnt->getAge() >= rightChild->getAge());
+        }
+    }
+    else // use_ages == false
+    {
+        // The following is adapted from UniformTopologyDistribution::simulateClade()
+
+        while ( children.size() > 2 )
+        {
+            active_children = children;
+            // std::cerr<<"    branch-length tree:  active_children.size() = "<<active_children.size()<<"\n";
+
+            // randomly draw one child (arbitrarily called left) node from the list of active children
+            size_t left = static_cast<size_t>( floor( rng->uniform01() * active_children.size() ) );
+            TopologyNode* leftChild = active_children.at(left);
+
+            // remove the randomly drawn node from the list
+            active_children.erase( active_children.begin() + std::int64_t(left) );
+
+            // randomly draw one child (arbitrarily called right) node from the list of active children
+            size_t right = static_cast<size_t>( floor( rng->uniform01() * active_children.size() ) );
+            TopologyNode* rightChild = active_children.at(right);
+
+            // remove the randomly drawn node from the list
+            active_children.erase( active_children.begin() + std::int64_t(right) );
+
+            // remove the two also from the list of the children of the current node
+            int old_size = children.size();
+            children.erase( std::remove(children.begin(), children.end(), leftChild), children.end() );
+            children.erase( std::remove(children.begin(), children.end(), rightChild), children.end() );
+
+            // create a parent for the two
+            TopologyNode* prnt = new TopologyNode(); // leave the new node without index
+            
+            if (not std::isnan(branch_length))
+            {
+                prnt->setBranchLength(0.0);          // set the length of the branch subtending it to zero
+            }
+            
+            prnt->addChild( leftChild );
+            prnt->addChild( rightChild );
+            leftChild->setParent( prnt );
+            rightChild->setParent( prnt );
+            // we don't need active_children.push_back( prnt ) here because of the first line inside of this loop
+
+            // add the newly created parent to the list of the children of the current node
+            addChild( prnt );
+            prnt->setParent( this );
+            assert(children.size()+1 == old_size);
+        }
+    }
+    assert(children.size() == 2);
+    // std::cerr<<"DONE:  children.size() = "<<children.size()<<"\n";
+}
+
+
+void TopologyNode::scaleAgesFromTaxonAgesMBL(double minbl)
+{
+    //    1. get all my children
+    //    2. if (a child is a tip)
+    //           set its age based on the taxon it contains
+    //       else
+    //           call myself on the child
+    //    3. collect the ages of all my children
+    //    4. set my age to the age of the oldest of my children + min br. len.
+    //    5. recompute the branch lengths of all my children
+
+    const std::vector<TopologyNode*>& children = getChildren();
+    for (size_t i = 0; i < children.size(); i++)
+    {
+        if ( children[i]->isTip() )
+        {
+            double tip_age = ( children[i]->getTaxon().getMinAge() + children[i]->getTaxon().getMaxAge() ) / 2;
+            children[i]->setAge( tip_age );
+        }
+        else
+        {
+            children[i]->scaleAgesFromTaxonAgesMBL(minbl);
+        }
+    }
+
+    std::vector<double> ages;
+    for (size_t i = 0; i < children.size(); i++)
+    {
+        ages.push_back( children[i]->getAge() );
+    }
+
+    double max_age = *std::max_element(ages.begin(), ages.end());
+    setAge(max_age + minbl);
+
+    // now we need to recompute the branch lengths of my children
+    for (size_t i = 0; i < children.size(); i++)
+    {
+        children[i]->recomputeBranchLength();
+    }
+}
+
+
 void TopologyNode::setAge(double a, bool propagate)
 {
+    if(getTaxon().getName() != "" && getTaxon().getMinAge() != getTaxon().getMaxAge()) {
+        if(a < getTaxon().getMinAge() || a > getTaxon().getMaxAge()) {
+            std::cerr << "Attempting to set new age of taxon " << getTaxon().getName() << " incompatible with age range" << std::endl;
+
+            // NOTE: This code intentionally constructs trees with different ages for sampled-ancestors-parents and sampled-ancestor-tips.
+	    //
+	    // If we try to set the age of a sampled-ancestor parent to an age outside of the age rate, then this code will leave the
+	    // sampled-ancestor-parent and sampled-ancestor-top with different ages.
+	    //
+            // If a proposal is setting the age, then the proposed should have a -Inf probability and be rejected.
+	    //
+            // However, if this occurs somewhere else (such as during undoProposal), then this can leave the tree in an inconsistent state
+	    // So: AVOID situations where undoProposal tries to set the age of a sampled-ancestor-parent to an age outside of the age
+	    //     range.
+
+            return;
+            //throw RbException() << "New age of taxa " << getTaxon().getName() << " incompatible with age range";
+        }
+    }
     if ( sampled_ancestor_tip == true && propagate == true )
     {
         parent->setAge(a);
@@ -1849,16 +2143,10 @@ void TopologyNode::setAge(double a, bool propagate)
     }
 
     age = a;
-    
-//    // we should also update the taxon age if this is a tip node
-//    if ( isTip() == true )
-//    {
-//        getTaxon().setAge( a );
-//    }
 
     // we need to recompute my branch-length
     recomputeBranchLength();
-    
+
     // fire tree change event
     // we need to also flag this node as dirty (instead of only its children) as
     // 1) this node can be a tip, and
@@ -1895,15 +2183,15 @@ void TopologyNode::setBranchLength(double b, bool flag_dirty)
 {
 
     branch_length = b;
-    
+
     // we need to mark that we are not using ages but branch lengths
     // otherwise, this code would need to reformat the branch length into ages!!!
     // Sebastian (20200819): For some forgotten reason this has been commented out.
     // I think there are issues if not all ages or branch lengths are set yet.
     // So the caller needs to make sure of what type of trees are used (unfortunately).
 //    setUseAges( false, false);
-    
-    
+
+
     // fire tree change event
     if ( flag_dirty == true && tree != NULL )
     {
@@ -1935,7 +2223,8 @@ void TopologyNode::setNumberOfShiftEvents(size_t n)
     num_shift_events = n;
 }
 
-void TopologyNode::setParent(TopologyNode* p)
+
+void TopologyNode::setParent(TopologyNode* p, bool recompute_branch_length)
 {
 
     // we only do something if this isn't already our parent
@@ -1944,47 +2233,27 @@ void TopologyNode::setParent(TopologyNode* p)
         // we do not own the parent so we do not have to delete it
         parent = p;
 
-        // we need to recompute our branch length
-        recomputeBranchLength();
-
-        // fire tree change event
-        if ( tree != NULL )
+        if (recompute_branch_length == true)
         {
-            tree->getTreeChangeEventHandler().fire( *this, RevBayesCore::TreeChangeEventMessage::DEFAULT );
-        }
+            // we need to recompute our branch length
+            recomputeBranchLength();
 
-    }
-}
-
-void TopologyNode::setUseAges(bool tf, bool recursive)
-{
-
-    // if this node did use ages before but not we do not anymore
-    if ( use_ages == true && tf == false )
-    {
-
-        // check if we need to call the recursion
-        if ( recursive == true )
-        {
-
-            // call all our children
-            for (size_t i=0; i<children.size(); ++i)
+            // fire tree change event
+            if ( tree != NULL )
             {
-                children[i]->setUseAges(tf, recursive);
+                tree->getTreeChangeEventHandler().fire( *this, RevBayesCore::TreeChangeEventMessage::DEFAULT );
             }
-
+        }
+        else
+        {
+            // fire tree change event
+            if ( tree != NULL && parent != NULL )
+            {
+                tree->getTreeChangeEventHandler().fire( *parent, RevBayesCore::TreeChangeEventMessage::TOPOLOGY );
+            }
         }
 
-        // now we need to compute the branch lengths
-        recomputeBranchLength();
-
-        // make the age not usable to be safe
-        age = RbConstants::Double::nan;
-
     }
-    // finally set our internal flag
-    use_ages = tf;
-
 }
 
 
@@ -2029,6 +2298,116 @@ void TopologyNode::setTree(Tree *t)
     }
 
 }
+
+
+void TopologyNode::setUseAges(bool tf, bool recursive)
+{
+
+    // if this node did use ages before but not we do not anymore
+    if ( use_ages == true && tf == false )
+    {
+
+        // check if we need to call the recursion
+        if ( recursive == true )
+        {
+
+            // call all our children
+            for (size_t i=0; i<children.size(); ++i)
+            {
+                children[i]->setUseAges(tf, recursive);
+            }
+
+        }
+
+        // now we need to compute the branch lengths
+        recomputeBranchLength();
+
+        // make the age not usable to be safe
+        age = RbConstants::Double::nan;
+
+    }
+    // finally set our internal flag
+    use_ages = tf;
+
+}
+
+
+/**
+ * If this node has an outdegree of 1 (i.e., only one descendant), either replace it
+ * by a bifurcation where one child is subtended by a zero-length branch, and do
+ * the same for all its children by calling this function recursively, or remove the
+ * node entirely.
+ */
+void TopologyNode::suppressOutdegreeOneNodes( bool replace )
+{
+
+    if ( getNumberOfChildren() == 1 )
+    {
+
+        /* Should we remove the node or replace it by a bifurcation with a zero-length branch instead?
+         * I.e.,
+         *
+         *    A                   A                 A
+         *    |                   |                 |
+         *    B      -->      B --+--\      or      |
+         *    |                      |              |
+         *    C                      C              C
+         *
+         *                 (replace = true)  (replace = false)
+         */
+        if (replace) // this solution is general enough to handle sampled ancestor root nodes
+        {
+            TopologyNode *new_fossil = new TopologyNode( getTaxon() );
+            taxon = Taxon("");
+
+            // connect to the old sampled ancestor
+            addChild( new_fossil );
+            new_fossil->setParent( this );
+
+            // set the sampled ancestor flags
+            setSampledAncestor( false );
+            new_fossil->setSampledAncestor( true );
+
+            // set the age and branch length of the newly added tip
+            new_fossil->setAge( age );
+            new_fossil->setBranchLength( 0.0 );
+        }
+        else // this only works for non-root nodes; the root is handled at the Tree level instead
+        {
+            // we are going to delete myself by connecting my parent and my child
+            TopologyNode& parent = getParent();
+            TopologyNode& child = getChild(0);
+
+            // the new branch length needs to be the branch length of the parent and child
+            double summ = getBranchLength() + child.getBranchLength();
+
+            // now remove myself from the parent
+            parent.removeChild( this );
+
+            // and my child from me
+            removeChild( &child );
+
+            // and stich my parent and my child together
+            parent.addChild( &child );
+            child.setParent( &parent );
+
+            // finally, adapt the branch lengths
+            child.setBranchLength(summ);
+        }
+
+    }
+
+    if (replace)
+    {
+        // call this function recursively for all children of this node
+        for (size_t i = 0; i < getNumberOfChildren(); ++i)
+        {
+            getChild( i ).suppressOutdegreeOneNodes( true );
+        }
+    }
+
+}
+
 
 std::pair<double,double> getStartEndAge(const RevBayesCore::TopologyNode& node)
 {

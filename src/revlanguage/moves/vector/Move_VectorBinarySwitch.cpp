@@ -64,36 +64,35 @@ void Move_VectorBinarySwitch::constructInternalObject( void )
     delete value;
     
     // now allocate a new vector-slide move
-    const RevBayesCore::RbVector<long> &e = static_cast<const ModelVector<Natural> &>( indices->getRevObject() ).getValue();
+    const RevBayesCore::RbVector<std::int64_t> &e = static_cast<const ModelVector<Natural> &>( indices->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     double p = static_cast<const Probability &>( switch_probability->getRevObject() ).getValue();
     
-    
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<long> >* tmp = static_cast<const ModelVector<Natural> &>( x->getRevObject() ).getDagNode();
-//    RevBayesCore::StochasticNode<RevBayesCore::RbVector<long> > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::RbVector<long> > *>( tmp );
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<std::int64_t> >* tmp = static_cast<const ModelVector<Natural> &>( x->getRevObject() ).getDagNode();
+//    RevBayesCore::StochasticNode<RevBayesCore::RbVector<std::int64_t> > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::RbVector<std::int64_t> > *>( tmp );
     
     std::vector<const RevBayesCore::DagNode*> dag_nodes = tmp->getParents();
-    std::vector< RevBayesCore::StochasticNode<long>* > stoch_nodes;
+    std::vector< RevBayesCore::StochasticNode<std::int64_t>* > stoch_nodes;
     for (std::vector<const RevBayesCore::DagNode*>::const_iterator it = dag_nodes.begin(); it != dag_nodes.end(); ++it)
     {
-        const RevBayesCore::StochasticNode<long> *the_node = dynamic_cast< const RevBayesCore::StochasticNode<long>* >( *it );
+        const RevBayesCore::StochasticNode<std::int64_t> *the_node = dynamic_cast< const RevBayesCore::StochasticNode<std::int64_t>* >( *it );
         if ( the_node != NULL )
         {
-            stoch_nodes.push_back( const_cast< RevBayesCore::StochasticNode<long>* >( the_node ) );
+            stoch_nodes.push_back( const_cast< RevBayesCore::StochasticNode<std::int64_t>* >( the_node ) );
         }
         else
         {
             throw RbException("Could not create a mvShrinkExpand because the node isn't a vector of stochastic nodes.");
         }
     }
-
-    
-    
     
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
     
-    RevBayesCore::Proposal *prop = new RevBayesCore::VectorBinarySwitchProposal(stoch_nodes,e,p);
-    value = new RevBayesCore::MetropolisHastingsMove(prop,w,t);
+    RevBayesCore::Proposal *prop = new RevBayesCore::VectorBinarySwitchProposal(stoch_nodes, e, p);
+    prop->setTargetAcceptanceRate(tt);
+    
+    value = new RevBayesCore::MetropolisHastingsMove(prop, w, t);
 }
 
 

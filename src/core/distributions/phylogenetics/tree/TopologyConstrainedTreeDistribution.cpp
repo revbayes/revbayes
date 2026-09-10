@@ -30,6 +30,7 @@
 #include "TreeUtilities.h"
 #include "TypedDagNode.h"
 #include "TypedDistribution.h"
+#include "RbSettings.h"
 
 namespace RevBayesCore { class DagNode; }
 namespace RevBayesCore { template <class valueType> class RbOrderedSet; }
@@ -48,7 +49,7 @@ using namespace RevBayesCore;
 TopologyConstrainedTreeDistribution::TopologyConstrainedTreeDistribution(TypedDistribution<Tree>* base_dist,
                                                                           const std::vector<Clade> &c,
                                                                           Tree *t,
-                                                                          long age_check_precision) : TypedDistribution<Tree>( NULL ),
+                                                                          std::int64_t age_check_precision) : TypedDistribution<Tree>( NULL ),
 //    active_backbone_clades( base_dist->getValue().getNumberOfInteriorNodes(), RbBitSet() ),
     active_clades( base_dist->getValue().getNumberOfInteriorNodes(), RbBitSet() ),
     backbone_topology(NULL),
@@ -160,6 +161,14 @@ TopologyConstrainedTreeDistribution::TopologyConstrainedTreeDistribution(const T
         this->addParameter( *it );
     }
     
+    if ( num_backbones > 0 )
+    {
+        std::fill( dirty_nodes.begin(), dirty_nodes.end(), true );
+        recursivelyUpdateClades( value->getRoot() );
+        stored_clades = active_clades;
+        stored_backbone_clades = active_backbone_clades;
+    }
+    
 }
 
 
@@ -235,17 +244,20 @@ TopologyConstrainedTreeDistribution* TopologyConstrainedTreeDistribution::clone(
  */
 double TopologyConstrainedTreeDistribution::computeLnProbability( void )
 {
+    using namespace RbConstants;
+
+    std::fill( dirty_nodes.begin(), dirty_nodes.end(), true );
     recursivelyUpdateClades( value->getRoot() );
     
     // first check if the current tree matches the clade constraints
     if ( matchesConstraints() == false )
     {
-        return RbConstants::Double::neginf;
+        return withReason(Double::neginf)<<"Pr(tree)=0: clade constraints do not match";
     }
     
     if ( matchesBackbone() == false )
     {
-        return RbConstants::Double::neginf;
+        return withReason(Double::neginf)<<"Pr(tree)=0: backbone constraints do not match";
     }
     
     double lnProb = base_distribution->computeLnProbability();
@@ -270,7 +282,7 @@ void TopologyConstrainedTreeDistribution::initializeBitSets(void)
                 std::map<std::string, size_t>::const_iterator it = taxon_map.find( name );
                 if ( it == taxon_map.end() )
                 {
-                    throw RbException("Could not find taxon with name '" + name + "'.");
+                    throw RbException() << "Could not find taxon with name '" << name << "'.";
                 }
                 size_t k = it->second;
                 
@@ -292,7 +304,7 @@ void TopologyConstrainedTreeDistribution::initializeBitSets(void)
                     std::map<std::string, size_t>::const_iterator it = taxon_map.find( name );
                     if ( it == taxon_map.end() )
                     {
-                        throw RbException("Could not find taxon with name '" + name + "'.");
+                        throw RbException() << "Could not find taxon with name '" << name << "'.";
                     }
                     size_t s = it->second;
                     
@@ -492,7 +504,7 @@ RbBitSet TopologyConstrainedTreeDistribution::recursivelyAddBackboneConstraints(
         std::map<std::string, size_t>::const_iterator it = taxon_map.find(name);
         if (it == taxon_map.end()) {
             
-            throw RbException("Taxon named " + it->first + " not found in tree's taxon map!");
+            throw RbException() << "Taxon named " << it->first << " not found in tree's taxon map!";
         }
         tmp.set( it->second );
     }
@@ -580,9 +592,7 @@ void TopologyConstrainedTreeDistribution::redrawValue( SimulationCondition c )
     {
         if ( rooting_known == false )
         {
-//            base_distribution->redrawValue();
-//            is_rooted = base_distribution->getValue().isRooted();
-            is_rooted = true;
+            is_rooted = base_distribution->getValue().isRooted();
             rooting_known = true;
             value = NULL;
         }
@@ -600,6 +610,14 @@ void TopologyConstrainedTreeDistribution::redrawValue( SimulationCondition c )
     else
     {
         new_value = starting_tree->clone();
+        
+        // If the cast of the base_distribution to UniformTopologyBranchLengthDistributions succeeds, replace any NaN or zero branch
+        // lengths in the starting tree
+        UniformTopologyBranchLengthDistribution* bl_dist = dynamic_cast<UniformTopologyBranchLengthDistribution*>( base_distribution );
+        if ( bl_dist != NULL )
+        {
+            bl_dist->assignBranchLengths( *new_value );
+        }
     }
     
     if ( value != NULL )
@@ -607,20 +625,26 @@ void TopologyConstrainedTreeDistribution::redrawValue( SimulationCondition c )
         value->getTreeChangeEventHandler().removeListener( this );
     }
     new_value->getTreeChangeEventHandler().addListener( this );
-    
+
     // if we don't own the tree, then we just replace the current pointer with the pointer
     // to the new value of the base distribution
     value = new_value;
     base_distribution->setValue( value );
-    
+
     // recompute the active clades
     dirty_nodes = std::vector<bool>( value->getNumberOfNodes(), true );
     active_clades = std::vector<RbBitSet>(value->getNumberOfInteriorNodes(), RbBitSet());
+    
+    for (size_t i = 0; i < num_backbones; ++i)
+    {
+        active_backbone_clades[i].assign(value->getNumberOfInteriorNodes(), RbBitSet());
+    }
 
     recursivelyUpdateClades( value->getRoot() );
     
     stored_clades          = active_clades;
     stored_backbone_clades = active_backbone_clades;
+
 }
 
 void TopologyConstrainedTreeDistribution::redrawValue( void )
@@ -815,8 +839,6 @@ Tree* TopologyConstrainedTreeDistribution::simulateRootedTree( bool alwaysReturn
 
     // complain if we have conflicts
     checkCladesConsistent(sorted_clades);
-
-    size_t num_clades = sorted_clades.size();
     std::sort(sorted_clades.begin(), sorted_clades.end(), cladeSmaller);
 
     /*
@@ -971,17 +993,8 @@ Tree* TopologyConstrainedTreeDistribution::simulateRootedTree( bool alwaysReturn
 }
 
 
-/**
- *
- */
 Tree* TopologyConstrainedTreeDistribution::simulateUnrootedTree( void )
 {
-    
-    // the time tree object (topology & times)
-    Tree *psi = new Tree();
-    
-    // internally we treat unrooted topologies the same as rooted
-    psi->setRooted( false );
     
     UniformTopologyBranchLengthDistribution* tree_base_distribution = dynamic_cast<UniformTopologyBranchLengthDistribution*>( base_distribution );
     if ( tree_base_distribution == NULL )
@@ -991,22 +1004,9 @@ Tree* TopologyConstrainedTreeDistribution::simulateUnrootedTree( void )
     const std::vector<Taxon> &taxa = tree_base_distribution->getTaxa();
     size_t num_taxa = taxa.size();
     
-    // create the tip nodes
-    std::vector<TopologyNode*> nodes;
-    for (size_t i=0; i<num_taxa; ++i)
-    {
-        
-        // create the i-th taxon
-        TopologyNode* node = new TopologyNode( taxa[i], i );
-        
-        // add the new node to the list
-        nodes.push_back( node );
-        
-    }
-    
     if ( backbone_topology != NULL )
     {
-        psi = backbone_topology->getValue().clone();
+        Tree *psi = backbone_topology->getValue().clone();
         std::vector<TopologyNode*> inserted_nodes = psi->getNodes();
         
         for (size_t i=0; i<num_taxa; ++i)
@@ -1070,10 +1070,72 @@ Tree* TopologyConstrainedTreeDistribution::simulateUnrootedTree( void )
             
         }
         
+        // At this point the cloned backbone may still contain multifurcations.
+        // Because the downstream phylogenetic likelihood (e.g. dnPhyloCTMC) only
+        // accepts (nearly) binary trees, we randomly resolve any remaining
+        // polytomies. Resolving a polytomy only adds structure *within* it, so
+        // every split already present in the backbone is retained and none of the
+        // backbone constraints are violated.
+        
+        // Resolve all multifurcations below the root into bifurcations.
+        psi->resolveMultifurcations( false );
+        
+        // For an unrooted tree we keep the basal trifurcation, but a polytomy at
+        // the root (degree > 3) must still be broken up into a series of
+        // bifurcations until only three children remain.
+        TopologyNode& root_node = psi->getRoot();
+        while ( root_node.getNumberOfChildren() > 3 )
+        {
+            std::vector<TopologyNode*> root_children = root_node.getChildren();
+            
+            size_t left = size_t( GLOBAL_RNG->uniform01() * root_children.size() );
+            TopologyNode* left_child = root_children[left];
+            root_children.erase( root_children.begin() + left );
+            
+            size_t right = size_t( GLOBAL_RNG->uniform01() * root_children.size() );
+            TopologyNode* right_child = root_children[right];
+            
+            TopologyNode* new_parent = new TopologyNode();
+            // a branch length of zero is redrawn from the prior in assignBranchLengths()
+            new_parent->setBranchLength( 0.0 );
+            
+            root_node.removeChild( left_child );
+            root_node.removeChild( right_child );
+            
+            new_parent->addChild( left_child );
+            new_parent->addChild( right_child );
+            left_child->setParent( new_parent );
+            right_child->setParent( new_parent );
+            
+            root_node.addChild( new_parent );
+            new_parent->setParent( &root_node );
+        }
+        
         // initialize the topology by setting the root
         psi->setRoot(&psi->getRoot(), true);
         
+        tree_base_distribution->assignBranchLengths( *psi );
+        
         return psi;
+    }
+    
+    // the time tree object (topology & times)
+    Tree *psi = new Tree();
+    
+    // internally we treat unrooted topologies the same as rooted
+    psi->setRooted( false );
+    
+    // create the tip nodes
+    std::vector<TopologyNode*> nodes;
+    for (size_t i=0; i<num_taxa; ++i)
+    {
+        
+        // create the i-th taxon
+        TopologyNode* node = new TopologyNode( taxa[i], i );
+        
+        // add the new node to the list
+        nodes.push_back( node );
+        
     }
     
     // we need a sorted vector of constraints, starting with the smallest
@@ -1106,11 +1168,13 @@ Tree* TopologyConstrainedTreeDistribution::simulateUnrootedTree( void )
         
     }
     
-    
     // create a clade that contains all species
     Clade all_species = Clade(taxa);
     sorted_clades.push_back(all_species);
 
+    // complain if we have conflicts
+    checkCladesConsistent(sorted_clades);
+    std::sort(sorted_clades.begin(), sorted_clades.end(), cladeSmaller);
     
     std::vector<Clade> virtual_taxa;
     int i = -1;
@@ -1209,6 +1273,8 @@ Tree* TopologyConstrainedTreeDistribution::simulateUnrootedTree( void )
     // initialize the topology by setting the root
     psi->setRoot(root, true);
     
+    tree_base_distribution->assignBranchLengths( *psi );
+    
     return psi;
 }
 
@@ -1256,6 +1322,7 @@ void TopologyConstrainedTreeDistribution::setValue(Tree *v, bool f )
     
     stored_clades          = active_clades;
     stored_backbone_clades = active_backbone_clades;
+
 }
 
 
@@ -1283,7 +1350,6 @@ void TopologyConstrainedTreeDistribution::swapParameterInternal( const DagNode *
     }
     
 }
-
 
 /**
  * Touch the current value and reset some internal flags.

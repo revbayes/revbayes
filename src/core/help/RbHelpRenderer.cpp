@@ -12,6 +12,7 @@
 #include "RbHelpFunction.h"
 #include "RbHelpReference.h"
 #include "RbHelpType.h"
+#include "RbHelpDatabase.h"
 
 using namespace RevBayesCore;
 
@@ -207,17 +208,21 @@ std::string HelpRenderer::renderConstructors(const RbHelpType &typeHelp, size_t 
         }
         result.append( section_break );
         
+        // First list every constructor signature together, so that all overloads
+        // (e.g. the time-tree and branch-length-tree forms of dnConstrainedTopology)
+        // are clearly grouped under the "Constructors" heading rather than being
+        // interleaved with their argument blocks.
         for (std::vector<RbHelpFunction>::const_iterator it = ctors.begin(); it != ctors.end(); ++it)
         {
-            const RbHelpFunction &functionHelp = *it;
-            
-            result.append( StringUtilities::formatTabWrap(functionHelp.getUsage(),1,w,true) );
+            result.append( StringUtilities::formatTabWrap(it->getUsage(),1,w,true) );
             result.append( line_break );
-            result.append( section_break );
-            
-            // arguments
-            result.append( renderArguments( functionHelp, w ) );
-            
+        }
+        result.append( section_break );
+        
+        // Then render the arguments of each constructor.
+        for (std::vector<RbHelpFunction>::const_iterator it = ctors.begin(); it != ctors.end(); ++it)
+        {
+            result.append( renderArguments( *it, w ) );
         }
         
     }
@@ -371,8 +376,45 @@ std::string HelpRenderer::renderHelp(const RbHelpType &typeHelp, size_t w)
 
     if ( dynamic_cast< const RbHelpDistribution *>( &typeHelp ) != NULL)
     {
-        // domain type
-        result.append( renderReturnType( typeHelp.getConstructors().front(), w, true ) );
+        // domain type(s): a distribution may be registered under a single Rev name
+        // for several underlying value types (e.g. dnConstrainedTopology applies to
+        // both time trees and branch-length trees), so list every distinct return
+        // type instead of only the first constructor's.
+        const std::vector<RbHelpFunction> &ctors = typeHelp.getConstructors();
+        std::vector<std::string> domain_types;
+        for (std::vector<RbHelpFunction>::const_iterator it = ctors.begin(); it != ctors.end(); ++it)
+        {
+            const std::string &rt = it->getReturnType();
+            if ( rt.size() == 0 )
+            {
+                continue;
+            }
+            bool seen = false;
+            for (std::vector<std::string>::const_iterator d = domain_types.begin(); d != domain_types.end(); ++d)
+            {
+                if ( *d == rt )
+                {
+                    seen = true;
+                    break;
+                }
+            }
+            if ( seen == false )
+            {
+                domain_types.push_back( rt );
+            }
+        }
+        
+        if ( domain_types.size() > 0 )
+        {
+            result.append( TerminalFormatter::makeUnderlined("Domain Type") );
+            result.append( section_break );
+            for (std::vector<std::string>::const_iterator d = domain_types.begin(); d != domain_types.end(); ++d)
+            {
+                result.append( StringUtilities::formatTabWrap(*d, 1, w) );
+                result.append( line_break );
+            }
+            result.append( section_break );
+        }
     }
         
     // details
@@ -392,6 +434,99 @@ std::string HelpRenderer::renderHelp(const RbHelpType &typeHelp, size_t w)
     
     // see also
     result.append( renderSeeAlso( typeHelp, w ) );
+    
+    
+    return result;
+}
+
+
+// For rendering general database entries
+std::string HelpRenderer::renderHelp(const RbHelpDatabase &hd, std::string entry_name, size_t w)
+{
+    std::string result = "";
+    
+    const std::string &title_prelim = RbHelpDatabase::getHelpDatabase().getHelpString(entry_name, "title");
+    const std::string &description_prelim = RbHelpDatabase::getHelpDatabase().getHelpString(entry_name, "description");
+    const std::string &details_prelim = RbHelpDatabase::getHelpDatabase().getHelpString(entry_name, "details");
+    const std::string &example_prelim = RbHelpDatabase::getHelpDatabase().getHelpString(entry_name, "example");
+    const std::vector<std::string> &authors_prelim = RbHelpDatabase::getHelpDatabase().getHelpStringVector(entry_name, "authors");
+    const std::vector<std::string> &see_also_prelim = RbHelpDatabase::getHelpDatabase().getHelpStringVector(entry_name, "see_also");
+    
+    std::string title = "";
+    std::string description = "";
+    std::string details = "";
+    std::string example = "";
+    std::string authors = "";
+    std::string see_also = "";
+
+    if ( title_prelim.size() > 0 )
+    {
+        title.append( title_prelim );
+        title.append( line_break );
+        title.append( section_break );
+    }
+    
+    if ( description_prelim.size() > 0 )
+    {
+        description.append( TerminalFormatter::makeUnderlined("Description") );
+        description.append( section_break );
+    
+        description.append( StringUtilities::formatTabWrap(description_prelim, 1, w, false) );
+        description.append( line_break );
+        description.append( section_break );
+    }
+    
+    if ( details_prelim.size() > 0)
+    {
+        details.append( TerminalFormatter::makeUnderlined("Details") );
+        details.append( section_break );
+        
+        details.append( StringUtilities::formatTabWrap(details_prelim, 1, w, false) );
+        details.append( line_break );
+        details.append( section_break );
+    }
+    
+    if ( example_prelim.size() > 0 )
+    {
+        example.append( TerminalFormatter::makeUnderlined("Example") );
+        example.append( section_break );
+
+        example.append( StringUtilities::formatTabWrap(example_prelim, 1, w, false) );
+        example.append( section_break );
+    }
+    
+    if ( authors_prelim.size() > 0 )
+    {
+        authors.append( TerminalFormatter::makeUnderlined("Author") );
+        authors.append( section_break );
+    
+        for (std::vector<std::string>::const_iterator it = authors_prelim.begin(); it != authors_prelim.end(); ++it)
+        {
+            authors.append( StringUtilities::formatTabWrap(*it, 1, w, false) );
+            authors.append( line_break );
+        }
+        authors.append( section_break );
+    }
+    
+    if ( see_also_prelim.size() > 0 )
+    {
+        see_also.append( TerminalFormatter::makeUnderlined("See also") );
+        see_also.append( section_break );
+        
+        for (std::vector<std::string>::const_iterator it = see_also_prelim.begin(); it != see_also_prelim.end(); ++it)
+        {
+            see_also.append( StringUtilities::formatTabWrap(*it, 1, w) );
+            see_also.append( line_break );
+        }
+        see_also.append(line_break);
+    }
+    
+    result.append( title );
+    result.append( description );
+    result.append( details );
+    result.append( example );
+    result.append( authors );
+    result.append( see_also );
     
     
     return result;

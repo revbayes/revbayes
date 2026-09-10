@@ -51,8 +51,8 @@ void Move_DPPGibbsConcentration::constructInternalObject( void )
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     RevBayesCore::TypedDagNode<double>* tmp = static_cast<const RealPos &>( cp->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode< double > *sn = static_cast<RevBayesCore::StochasticNode<double> *>( tmp );
-    RevBayesCore::TypedDagNode<long>* tmpNC = static_cast<const Integer &>( numCats->getRevObject() ).getDagNode();
-    RevBayesCore::DeterministicNode<long> *nc = static_cast<RevBayesCore::DeterministicNode<long> *>( tmpNC );
+    RevBayesCore::TypedDagNode<std::int64_t>* tmpNC = static_cast<const Integer &>( numCats->getRevObject() ).getDagNode();
+    RevBayesCore::DeterministicNode<std::int64_t> *nc = static_cast<RevBayesCore::DeterministicNode<std::int64_t> *>( tmpNC );
     RevBayesCore::TypedDagNode<double>* gS = static_cast<const RealPos &>( gammaShape->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode<double>* gR = static_cast<const RealPos &>( gammaRate->getRevObject() ).getDagNode();
 
@@ -110,9 +110,15 @@ const MemberRules& Move_DPPGibbsConcentration::getParameterRules(void) const
         dppMove.push_back( new ArgumentRule( "gammaRate"    , RealPos::getClassTypeSpec(), "", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         dppMove.push_back( new ArgumentRule( "numElements"  , RealPos::getClassTypeSpec(), "", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
        
-        /* Inherit weight from Move, put it after variable */
+        /* Inherit weight (but not tuneTarget!) from Move and put it after the arguments created above */
         const MemberRules& inheritedRules = Move::getParameterRules();
-        dppMove.insert( dppMove.end(), inheritedRules.begin(), inheritedRules.end() ); 
+        for (size_t i = 0; i < inheritedRules.size(); ++i)
+        {
+            if ( inheritedRules[i].getArgumentLabel() == "weight" )
+            {
+                dppMove.push_back( inheritedRules[i].clone() );
+            }
+        }
         
         rules_set = true;
     }

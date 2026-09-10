@@ -10,7 +10,7 @@
  * @param nc number of categories to usen
  */
 
-RevBayesCore::BetaBrokenStickFunction::BetaBrokenStickFunction(const TypedDagNode<double> *a, const TypedDagNode<double> *b, const TypedDagNode<long> *nc) : TypedFunction< Simplex >( new Simplex() ),
+RevBayesCore::BetaBrokenStickFunction::BetaBrokenStickFunction(const TypedDagNode<double> *a, const TypedDagNode<double> *b, const TypedDagNode<std::int64_t> *nc) : TypedFunction< Simplex >( new Simplex() ),
 alpha( a ),
 beta( b ),
 numCats(nc)
@@ -45,7 +45,7 @@ void RevBayesCore::BetaBrokenStickFunction::swapParameterInternal(const DagNode 
 
     if (oldP == numCats)
     {
-        numCats = static_cast<const TypedDagNode<long>* >( newP );
+        numCats = static_cast<const TypedDagNode<std::int64_t>* >( newP );
     }
 
 }

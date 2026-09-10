@@ -24,7 +24,8 @@ class TraceNumeric;
     public:
         GewekeTest(double p=0.01, double f1=0.1, double f2=0.5);
     
-        // implementen functions from convergence diagnostic
+        // implement functions from convergence diagnostic
+        double      getStatistic(const TraceNumeric& trace);
         bool        assessConvergence(const TraceNumeric& trace);
     
         // setters

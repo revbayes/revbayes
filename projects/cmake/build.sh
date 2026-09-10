@@ -14,7 +14,7 @@
 # 2. Generate cmake variables from command-line flags.
 # 3. Create the build/ directory (if missing).
 # 4. Update the version number            --> src/revlanguage/utils/GitVersion.cpp
-# 5. Update the help database (if asked)  --> src/core/help/RbHelpDatabase.cpp
+# 5. Update the help database --> src/core/help/RbHelpDatabase.cpp
 # 6. Run ./regenerate.sh
 # 7. Run cmake <--- This is where the configuration actually happens
 # 8. Run make or ninja to do the build.
@@ -31,15 +31,10 @@ all_args="$@"
 # command line options
 # set default values
 debug="false"
-travis="false"
 mpi="false"
 cmd="false"
-help2yml="false"
 boost_root=""
-boost_lib=""
-boost_include=""
 boost_verbose=""
-boost_debug=""
 static_boost="false"
 j=4
 
@@ -55,23 +50,19 @@ while echo $1 | grep ^- > /dev/null; do
 -ninja          <true|false>    : set to true to build with ninja instead of make
 -mpi            <true|false>    : set to true if you want to build the MPI version. Defaults to false.
 -cmd            <true|false>    : set to true if you want to build RevStudio with GTK2+. Defaults to false.
--help2yml       <true|false>    : update the help database and build the YAML help generator. Defaults to false.
 -boost_root     string          : specify directory containing Boost headers and libraries (e.g. `/usr/`). Defaults to unset.
--boost_lib      string          : specify directory containing Boost libraries. (e.g. `/usr/lib`). Defaults to unset.
--boost_include  string          : specify directory containing Boost libraries. (e.g. `/usr/include`). Defaults to unset.
 -boost_verbose  <true|false>    : log some info about finding Boost
--boost_debug    <true|false>    : log MORE info about finding Boost
 -static_boost	<true|false>    : link using static Boost libraries. Defaults to false.
 -j              integer         : the number of threads to use when compiling RevBayes. Defaults to 4.
+clean                           : delete the build directory and start from scratch.
 
 You can also specify cmake variables as -DCMAKE_VAR1=value1 -DCMAKE_VAR2=value2
 
 Examples:
-  ./build.sh -mpi true -help2yml true
-  ./build.sh -boost_root /home/santa/installed-boost-1.72
-  ./build.sh -boost_include /home/santa/boost_1_72_0/ -boost_lib /home/santa/boost_1_72_0/stage/lib
-  ./build.sh -DBOOST_ROOT=/home/santa/installed-boost_1.72
-  ./build.sh -mpi true -DHELP=ON -DBOOST_ROOT=/home/santa/installed-boost_1.72'
+  ./build.sh -mpi true 
+  ./build.sh -ninja true -debug true
+  ./build.sh -boost_root /home/santa/installed-boost-1.89.0
+  ./build.sh -DCMAKE_PREFIX_PATH=/home/santa/installed-boost_1.89.0'
         exit
     fi
 
@@ -87,15 +78,17 @@ Examples:
     esac
 
     # parse pairs
-    eval $( echo $1 | sed 's/-//g' | tr -d '\012')=$2
+    eval $( echo $1 | sed 's/^-//g' | sed 's/-/_/g' | tr -d '\012')=$2
     shift
     shift
 done
 
-if [ "$mpi" = "true" ] ; then
-    BUILD_DIR="build-mpi"
-else
-    BUILD_DIR="build"
+if [ -z "${BUILD_DIR}" ] ; then
+    if [ "$mpi" = "true" ] ; then
+        BUILD_DIR="build-mpi"
+    else
+        BUILD_DIR="build"
+    fi
 fi
 
 if [ -z "${exec_name}" ] ; then
@@ -104,14 +97,6 @@ if [ -z "${exec_name}" ] ; then
     else
         exec_name=rb
     fi
-fi
-
-if [ "$travis" = "true" ]; then
-    BUILD_DIR="build"
-    export CC=${C_COMPILER}
-    export CXX=${CXX_COMPILER}
-    exec_name=rb
-    help2yml=true
 fi
 
 if [ "$debug" = "true" ] ; then
@@ -130,10 +115,6 @@ if [ "$cmd" = "true" ] ; then
     cmake_args="-DCMD_GTK=ON $cmake_args"
 fi
 
-if [ "$travis" = "true" ] ; then
-    cmake_args="-DCONTINUOUS_INTEGRATION=TRUE $cmake_args"
-fi
-
 if [ -n "$jupyter" ] ; then
     echo "There is no longer a -jupyter <true|false> option to '$0'."
     echo "Jupyter functionality is now part of the standard rb application."
@@ -142,38 +123,33 @@ if [ -n "$jupyter" ] ; then
     exit 1
 fi
 
-if [ -n "$boost_lib" ] && [ -n "$boost_include" ] ; then
-    export BOOST_INCLUDEDIR="${boost_include}"
-    export BOOST_LIBRARYDIR="${boost_lib}"
-    unset BOOST_ROOT
-    if [ -n "$boost_root" ] ; then
-        echo "If you specify -boost_lib or -boost_include, then you cannot also specify -boost_root."
+if [ -n "${boost_root}" ] ; then
+    
+    if [ ! -e "${boost_root}" ] ; then
+        echo "Error: path '$boost_root' does not exist!"
+        exit 1
+    elif [ ! -e "${boost_root}/lib" ]  ; then
+        echo "Error: path '$boost_root' does not contain a 'lib' directory.  Is it an installed boost directory?"
+        exit 1
+    elif [ ! -e "${boost_root}/include" ] ; then
+        echo "Error: path '$boost_root' does not contain an 'include' directory.  Is it an installed boost directory?"
         exit 1
     fi
-elif [ -n "$boost_lib" ] || [ -n "$boost_include" ] ; then
-    echo "The flags -boost_lib and -boost_include must be given together"
-    exit 1
-elif [ -n "$boost_root" ] ; then
-    export BOOST_ROOT="${boost_root}"
-    unset BOOST_INCLUDEDIR
-    unset BOOST_LIBRARYDIR
+
+    cmake_args="-DCMAKE_PREFIX_PATH=${boost_root} $cmake_args"
 fi
 
 if [ "$boost_verbose" = "true" ] ; then
     cmake_args="-DBoost_VERBOSE=ON $cmake_args"
 fi
 
-if [ "$boost_debug" = "true" ] ; then
-    cmake_args="-DBoost_DEBUG=ON $cmake_args"
-fi
-
 if [ "$static_boost" = "true" ] ; then
     cmake_args="-DSTATIC_BOOST=ON $cmake_args"
 fi
 
-if [ "$help2yml" = "true" ] ; then
-    cmake_args="-DHELP=ON $cmake_args"
-fi
+# generate rb-help2yml executable
+# manually set DHELP=OFF to avoid
+cmake_args="-DHELP=ON $cmake_args"
 
 echo "RevBayes executable is '${exec_name}'"
 cmake_args="-DRB_EXEC_NAME=${exec_name} $cmake_args"
@@ -199,14 +175,8 @@ mv GitVersion.cpp ../../src/revlanguage/utils/
 
 
 ######### Generate help database
-if [ "$help2yml" = "true" ]
-then
-    (
-        cd ../../src
-        echo "Generating help database"
-        perl ../help/md2help.pl ../help/md/*.md > core/help/RbHelpDatabase.cpp
-    )
-fi
+../generate_help.sh
+
 
 ######## Generate some files for cmake
 echo "Running './regenerate.sh $(pwd)/$BUILD_DIR"
@@ -220,7 +190,7 @@ echo
 # * This can alert the user if some weird values have been set.
 # * This also helps us replicate the call to cmake.
 echo "Note these environment variables:"
-for var in CC CXX CFLAGS CPPFLAGS CXXFLAGS LDFLAGS BOOST_ROOT BOOST_INCLUDEDIR BOOST_LIBRARYDIR ; do
+for var in CC CXX CFLAGS CPPFLAGS CXXFLAGS LDFLAGS BOOST_ROOT BOOST_INCLUDEDIR BOOST_LIBRARYDIR CMAKE_PREFIX_PATH ; do
     cmd="if [ -n \"\${$var}\" ] ; then echo \"  ${var}=\${$var}\"; fi"
     eval $cmd
 done

@@ -1,5 +1,5 @@
-#ifndef AbsoluteValueVectorFunction_H
-#define AbsoluteValueVectorFunction_H
+#ifndef ExponentialVectorFunction_H
+#define ExponentialVectorFunction_H
 
 #include "RbVector.h"
 #include "TypedFunction.h"
@@ -7,8 +7,8 @@
 namespace RevBayesCore {
 class DagNode;
 template <class valueType> class TypedDagNode;
-    
-    
+
+
     /**
      * @brief Absolute value of a vector real number.
      *
@@ -17,16 +17,16 @@ template <class valueType> class TypedDagNode;
      *
      */
     class ExponentialVectorFunction : public TypedFunction< RbVector<double> > {
-        
+
     public:
     	ExponentialVectorFunction(const TypedDagNode<RbVector<double> > *a);
-        
+
     	ExponentialVectorFunction*                clone(void) const;                                                  //!< Create a clon.
         void                                        update(void);                                                       //!< Recompute the value
-        
+
     protected:
         void                                        swapParameterInternal(const DagNode *oldP, const DagNode *newP);    //!< Implementation of swaping parameters
-        
+
     private:
         const TypedDagNode<RbVector<double> >*      a;
     };

@@ -53,11 +53,11 @@ FixedNodeheightPruneAndRegraftProposal* FixedNodeheightPruneAndRegraftProposal::
 }
 
 
-
+// Recursively walk the tree to find a node n that is younger than p and whose parent is older than p.
 void FixedNodeheightPruneAndRegraftProposal::findNewBrothers(std::vector<TopologyNode *> &b, TopologyNode &p, TopologyNode *n)
 {
     // security check that I'm not a tip
-    if ( (n->isTip() == false) && (&p != n) )
+    if ( (n->isTip() == false) && (&p != n) and n->getAge() > p.getAge())
     {
         // check the first child
         std::vector<TopologyNode*> children = n->getChildren();
@@ -133,7 +133,7 @@ double FixedNodeheightPruneAndRegraftProposal::doProposal( void )
     if ( tau.getNumberOfTips() < 3 )
     {
         failed = true;
-        return RbConstants::Double::neginf;
+        return RbConstants::Double::neginf; // fail proposal
     }
     
     // pick a random node which is neither the root nor the direct descendant of the root
@@ -158,10 +158,23 @@ double FixedNodeheightPruneAndRegraftProposal::doProposal( void )
     findNewBrothers(new_brothers, *parent, &tau.getRoot());
 
     // we only need to propose a new tree if there are any other re-attachement points
-    if ( new_brothers.size() < 1 )
+    if ( new_brothers.size() < 1)
     {
         failed = true;
-        return RbConstants::Double::neginf;
+        return RbConstants::Double::neginf; // fail proposal
+    }
+
+    if (brother->isSampledAncestorTip())
+    {
+        // If the brother is a sampled-ancestor, then we are moving its descendant away.
+        // It would no longer be a sampled-ancestor.
+
+        // However, the real problem is that the reverse move would be to find a bifurcating
+        // parent which at the exact height of a tip, and then merge the two nodes.
+        // Since we don't do this, the reverse move is impossible, so we can't do the forward move.
+
+        failed = true;
+        return RbConstants::Double::neginf; // fail proposal
     }
     
     size_t index = size_t(rng->uniform01() * new_brothers.size());
@@ -270,25 +283,3 @@ void FixedNodeheightPruneAndRegraftProposal::swapNodeInternal(DagNode *oldN, Dag
     }
     
 }
-
-
-void FixedNodeheightPruneAndRegraftProposal::setProposalTuningParameter(double tp)
-{
-    // this proposal has no tuning parameter: nothing to do
-}
-
-
-/**
- * Tune the Proposal to accept the desired acceptance ratio.
- *
- * The acceptance ratio for this Proposal should be around 0.44.
- * If it is too large, then we increase the proposal size,
- * and if it is too small, then we decrease the proposal size.
- */
-void FixedNodeheightPruneAndRegraftProposal::tune( double rate )
-{
-    
-    // nothing to tune
-    
-}
-

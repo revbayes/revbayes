@@ -25,11 +25,11 @@ monitors  = VectorMonitors()
 ####################
 
 
-NUM_VARS = 3
+NUM_VARS = 5
 NUM_OBS = 10
 
 
-gm_p ~ dnBeta(2,8)
+gm_p ~ dnBeta(4,4)
 p ~ dnBeta(4,2)
 moves.append( mvBetaProbability(gm_p, weight=5) )
 moves.append( mvBetaProbability(p, weight=5) )
@@ -48,21 +48,13 @@ for ( j in 1:NUM_VARS ) {
 }
 
 
-#for ( j in 1:NUM_VARS ) {
-#
-#  x[j] ~ dnGeometric(gm_p)
-#  x[j].clamp( x[j] )
-#
-#}
-
-
 #############
 # THE Model #
 #############
 
 # We define our model.
 # We can use any node of our model as a handle, here we chose to use the rate matrix.
-mymodel = model(gm_p)
+mymodel = model(p)
 
 
 

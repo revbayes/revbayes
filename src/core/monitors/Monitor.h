@@ -5,6 +5,7 @@
 #include "MonteCarloAnalysisOptions.h"
 
 #include <vector>
+#include <cstdint>
 
 namespace RevBayesCore {
 
@@ -21,9 +22,9 @@ namespace RevBayesCore {
     
     public:
         // Constructors and Destructors
-        Monitor(unsigned long printgen);
-        Monitor(unsigned long printgen, DagNode *n);
-        Monitor(unsigned long printgen, const std::vector<DagNode *> &n);
+        Monitor(std::uint64_t printgen);
+        Monitor(std::uint64_t printgen, DagNode *n);
+        Monitor(std::uint64_t printgen, const std::vector<DagNode *> &n);
         Monitor(const Monitor &x);
         virtual ~Monitor(void);
 
@@ -32,7 +33,7 @@ namespace RevBayesCore {
             
         // pure virtual member functions
         virtual Monitor*                            clone(void) const = 0;
-        virtual void                                monitor(unsigned long gen) = 0;  //!< Print one sample
+        virtual void                                monitor(std::uint64_t gen) = 0;  //!< Print one sample
 
         // methods you may want to overwrite
         virtual void                                addVariable(DagNode *n); //!< Add variable to monitor
@@ -48,7 +49,7 @@ namespace RevBayesCore {
         virtual void                                printHeader(void);  //!< Print header
         virtual void                                swapNode(DagNode *oldN, DagNode *newN);  //!< Replace attached node
         virtual void                                removeVariable(DagNode *n);  //!< Stop monitoring variable
-        virtual void                                reset(size_t numCycles);  //!< Reset the monitored variables.
+        virtual void                                reset(size_t numCycles, double maxSeconds = 0.0);  //!< Reset the monitored variables.
 
         // getters and setters
         virtual void                                setModel(Model* m);
@@ -58,11 +59,11 @@ namespace RevBayesCore {
 
     protected:
     
-        void                                        sortNodesByName(void);  //!< Sort the nodes by name
+        void                                        sortNodesByName(bool natural=false);  //!< Sort the nodes by name
         
         // parameters
         bool                                        enabled; //!< is the monitor enabled
-        unsigned long                               printgen;  //!< prints every printgen iterations
+        std::uint64_t                               printgen;  //!< prints every printgen iterations
         Mcmc*                                       mcmc;  //!< pointer to analysis this monitor is part of
         std::vector<DagNode *>                      nodes;  //!< vector of monitored nodes
         const Model*                                model;  //!< model containing the monitored nodes

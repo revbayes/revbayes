@@ -2,6 +2,7 @@
 #define RandomIntegerWalkProposal_H
 
 #include <iosfwd>
+#include <cstdint>
 
 #include "Proposal.h"
 
@@ -24,7 +25,7 @@ template <class variableType> class StochasticNode;
     class RandomIntegerWalkProposal : public Proposal {
         
     public:
-        RandomIntegerWalkProposal( StochasticNode<long> *n);                                                                    //!<  constructor
+        RandomIntegerWalkProposal( StochasticNode<std::int64_t> *n);                                                            //!< Constructor
         
         // Basic utility functions
         void                                cleanProposal(void);                                                                //!< Clean up proposal
@@ -33,21 +34,19 @@ template <class variableType> class StochasticNode;
         const std::string&                  getProposalName(void) const;                                                        //!< Get the name of the proposal for summary printing
         double                              getProposalTuningParameter(void) const;
         void                                prepareProposal(void);                                                              //!< Prepare the proposal
-        void                                printParameterSummary(std::ostream &o, bool name_only) const;                                       //!< Print the parameter summary
-        void                                setProposalTuningParameter(double tp);
-        void                                tune(double r);                                                                     //!< Tune the proposal to achieve a better acceptance/rejection ratio
+        void                                printParameterSummary(std::ostream &o, bool name_only) const;                       //!< Print the parameter summary
         void                                undoProposal(void);                                                                 //!< Reject the proposal
         
     protected:
         
-        void                                swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes on which the Proposal is working on
+        void                                swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes the Proposal is working on
         
         
     private:
         // parameters
         
-        StochasticNode<long>*               variable;                                                                           //!< The variable the Proposal is working on
-        long                                stored_value;                                                                        //!< The stored value of the Proposal used for rejections.
+        StochasticNode<std::int64_t>*       variable;                                                                           //!< The variable the Proposal is working on
+        std::int64_t                        stored_value;                                                                       //!< The stored value of the Proposal used for rejections.
     };
     
 }

@@ -5,8 +5,8 @@
 using namespace RevBayesCore;
 
 
-revPoMoNeutralM4NRateMatrixFunction::revPoMoNeutralM4NRateMatrixFunction( const TypedDagNode< long > *n, 
-                                                                          const TypedDagNode< long > *m, 
+revPoMoNeutralM4NRateMatrixFunction::revPoMoNeutralM4NRateMatrixFunction( const TypedDagNode< std::int64_t > *n, 
+                                                                          const TypedDagNode< std::int64_t > *m, 
                                                                           const TypedDagNode< Simplex > *bf,
                                                                           const TypedDagNode< RbVector<double> > *ex  ) : 
 TypedFunction<RateGenerator>( new RateMatrix_revPoMoNeutralM4N( computeNumStates( m->getValue() ),  m->getValue()  ) ), 
@@ -31,10 +31,10 @@ revPoMoNeutralM4NRateMatrixFunction::~revPoMoNeutralM4NRateMatrixFunction( void 
 }
 
 
-long revPoMoNeutralM4NRateMatrixFunction::computeNumStates( long mi )
+std::int64_t revPoMoNeutralM4NRateMatrixFunction::computeNumStates( std::int64_t mi )
 {
 
-    long numStates = 4+6*(mi-1);
+    std::int64_t numStates = 4+6*(mi-1);
     
     return numStates;
 
@@ -49,8 +49,8 @@ revPoMoNeutralM4NRateMatrixFunction* revPoMoNeutralM4NRateMatrixFunction::clone(
 
 void revPoMoNeutralM4NRateMatrixFunction::update( void )
 {   
-    long n = N ->getValue();
-    long m = M ->getValue();  
+    std::int64_t n = N ->getValue();
+    std::int64_t m = M ->getValue();  
     const std::vector<double>& bf = pi->getValue();
     const std::vector<double>& ex = rho->getValue();
 
@@ -67,12 +67,12 @@ void revPoMoNeutralM4NRateMatrixFunction::swapParameterInternal(const DagNode *o
 {
     if (oldP == N )
     {
-        N = static_cast< const TypedDagNode< long >* >( newP );
+        N = static_cast< const TypedDagNode< std::int64_t >* >( newP );
     }
 
     else if (oldP == M )
     {
-        M = static_cast< const TypedDagNode< long >* >( newP );
+        M = static_cast< const TypedDagNode< std::int64_t >* >( newP );
     }
 
     else if (oldP == pi)

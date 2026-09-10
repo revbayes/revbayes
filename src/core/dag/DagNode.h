@@ -37,7 +37,7 @@ template <class valueType> class RbOrderedSet;
         const static unsigned REINITIALIZE_FLAG                     = 3;
         const static unsigned RESTORE_FLAG                          = 4;
 
-        virtual                                                    ~DagNode(void);                                                                                      //!< Virtual destructor
+        virtual                                                    ~DagNode(void);                                                                              //!< Virtual destructor
         
         // pure virtual methods
         virtual void                                                bootstrap(void) = 0;                                                                        //!< Bootstrap the current value of the node (applies only to stochastic nodes)
@@ -49,13 +49,13 @@ template <class valueType> class RbOrderedSet;
         virtual double                                              getLnProbabilityRatio(void) = 0;
         virtual size_t                                              getNumberOfElements(void) const = 0;                                                        //!< Get the number of elements for this value
         virtual std::string                                         getValueAsString(void) const = 0;                                                           //!< Get value as a string.
-        virtual json                                                getValueAsJSON(void) const = 0;                                                           //!< Get value as a string.
+        virtual json                                                getValueAsJSON(void) const = 0;                                                             //!< Get value as a string.
         virtual void                                                printName(std::ostream &o, const std::string &sep, int l=-1, bool left=true, bool fv=true) const = 0;       //!< Monitor/Print this variable
         virtual void                                                printStructureInfo(std::ostream &o, bool verbose=false) const = 0;                          //!< Print the structural information (e.g. name, value-type, distribution/function, children, parents, etc.)
         virtual void                                                printValue(std::ostream &o, const std::string &sep, int l=-1, bool left=true, bool user=true, bool simple=true, bool flatten=true) const = 0;    //!< Monitor/Print this variable
         virtual void                                                redraw(SimulationCondition c = SimulationCondition::MCMC) = 0;                                                                           //!< Redraw the current value of the node (applies only to stochastic nodes)
         virtual void                                                setMcmcMode(bool tf) = 0;                                                                   //!< Set the modus of the DAG node to MCMC mode.
-        virtual void                                                setValueFromFile(const path &dir) = 0;                                               //!< Set value from string.
+        virtual void                                                setValueFromFile(const path &dir) = 0;                                                      //!< Set value from string.
         virtual void                                                setValueFromString(const std::string &v) = 0;                                               //!< Set value from string.
         virtual void                                                writeToFile(const path &dir) const = 0;                                                     //!< Write the value of this node to a file within the given directory.
 
@@ -69,6 +69,7 @@ template <class valueType> class RbOrderedSet;
         void                                                        clearVisitFlagVector(const size_t &flagType, std::vector<DagNode *>& nodes);
         DagNode*                                                    cloneDownstreamDag(std::map<const DagNode*, DagNode*> &nodesMap) const;                     //!< Clone the DAG which is downstream to this node (all children)
         size_t                                                      decrementReferenceCount(void) const;                                                        //!< Decrement the reference count for reference counting in smart pointers
+        static bool                                                 dependsOn(const DagNode* node, const DagNode* target);                                      //!< Does `node` transitively depend on `target` through its parents? Uses the Pearce-Kelly topological order for an O(1) fast path and a region-restricted upward search otherwise.
         void                                                        executeMethod(const std::string &n, const std::vector<const DagNode*> &args, double &rv) const; //!< Map the member methods to internal function calls
         void                                                        findUniqueDescendants(RbOrderedSet<DagNode *>& descendants);
         void                                                        findUniqueDescendantsVector(RbOrderedSet<DagNode *>& descendants, std::vector<DagNode *>& nodes);
@@ -83,26 +84,30 @@ template <class valueType> class RbOrderedSet;
         virtual std::vector<double>                                 getMixtureProbabilities(void) const;
         const std::vector<Monitor*>&                                getMonitors(void) const;                                                                    //!< Get the set of monitors
         const std::vector<Move*>&                                   getMoves(void) const;                                                                       //!< Get the set of moves
-        const std::string&                                          getName(void) const;                                                                        //!< Get the of the node
+        const std::string&                                          getName(void) const;                                                                        //!< Get the name of the node
+        static std::string                                          getNodeDisplayName(const DagNode* n);                                                       //!< Return the node's name if set, or "<unnamed> (node type)" otherwise
         size_t                                                      getNumberOfChildren(void) const;                                                            //!< Get the number of children for this node
-        virtual size_t                                              getNumberOfMixtureElements(void) const;                                                        //!< Get the number of elements for this value
+        virtual size_t                                              getNumberOfMixtureElements(void) const;                                                     //!< Get the number of elements for this value
         virtual std::vector<const DagNode*>                         getParents(void) const;                                                                     //!< Get the set of parents (empty set here)
+        virtual double                                              getPrevLnProbability(void) const;
         size_t                                                      getReferenceCount(void) const;                                                              //!< Get the reference count for reference counting in smart pointers
+        std::size_t                                                 getTopologicalOrder(void) const;                                                            //!< Return this node's pseudo-topological level. Equal levels are allowed.
         const std::set<size_t>&                                     getTouchedElementIndices(void) const;                                                       //!< Get the indices of the touches elements. If the set is empty, then all elements might have changed.
         bool                                                        getVisitFlag(const size_t flagType) const;
         void                                                        incrementReferenceCount(void) const;                                                        //!< Increment the reference count for reference counting in smart pointers
-        void                                                        initiateGetAffectedNodes(RbOrderedSet<DagNode *>& affected);                                        //!< get affected nodes
+        void                                                        initiateGetAffectedNodes(RbOrderedSet<DagNode *>& affected);                                //!< get affected nodes
         void                                                        initiateGetAffectedNodesVector(RbOrderedSet<DagNode *>& affected, std::vector<DagNode *>& nodes);
         bool                                                        isAssignable(void) const;                                                                   //!< Is this DAG node modifiable by user?
         virtual bool                                                isClamped(void) const;                                                                      //!< Is this node clamped? Only stochastic nodes might be clamped.
         virtual bool                                                isConstant(void) const;                                                                     //!< Is this DAG node constant?
-        virtual bool                                                isElementVariable(void) const;                                                              //!< Is this DAG node hidden from the autogenerated graphviz model graph? (true for Element-lookup and Type-converter nodes)
-        virtual bool                                                isHidden(void) const;                                                                       //!< Is this DAG node hidden from the autogenerated graphviz model graph? (true for Element-lookup and Type-converter nodes)
+        virtual bool                                                isElementVariable(void) const;                                                              //!< Is this DAG node an element of a vector?
+        bool                                                        isHidden(void) const;                                                                       //!< Is this DAG node hidden from the autogenerated graphviz model graph? (true for Element-lookup and Type-converter nodes)
+        virtual bool                                                isIgnoredData(void) const;                                                                  //!< Is this node clamped? Only stochastic nodes might be clamped.
         virtual bool                                                isIntegratedOut(void) const;
         virtual bool                                                isSimpleNumeric(void) const;                                                                //!< Is this variable a simple numeric variable? Currently only integer and real number are.
         virtual bool                                                isStochastic(void) const;                                                                   //!< Is this DAG node stochastic?
         void                                                        keep(void);
-        virtual void                                                keepAffected(void);                                                                         //!< Keep value of affected nodes
+        void                                                        keepAffected(void);                                                                         //!< Keep value of affected nodes
         void                                                        keepVector(std::vector<DagNode *>& nodes);
         virtual void                                                reInitialized(void);                                                                        //!< The DAG was re-initialized so maybe you want to reset some stuff
         virtual void                                                reInitializeAffected(void);                                                                 //!< The DAG was re-initialized so maybe you want to reset some stuff
@@ -113,18 +118,18 @@ template <class valueType> class RbOrderedSet;
         void                                                        removeMove(Move *m);                                                                        //!< Remove this move from our set.
         void                                                        replace(DagNode *n);                                                                        //!< Replace this node with node p.
         void                                                        restore(void);
-        virtual void                                                restoreAffected(void);                                                                      //!< Restore value of affected nodes recursively
+        void                                                        restoreAffected(void);                                                                      //!< Restore value of affected nodes recursively
         void                                                        restoreVector(std::vector<DagNode *>& nodes);
         void                                                        setElementVariable(bool tf);                                                                //!< Set if this variable is hidden from printing.
         void                                                        setHidden(bool tf);                                                                         //!< Set if this variable is hidden from printing.
         virtual void                                                setIntegrationIndex( size_t i );
-        virtual void                                                setName(const std::string &n);                                                              //!< Set the name of this variable for identification purposes.
+        void                                                        setName(const std::string &n);                                                              //!< Set the name of this variable for identification purposes.
         void                                                        setParentNamePrefix(const std::string &p);
-        virtual void                                                setPriorOnly(bool tf);                                                                      //!< Set whether we want to have the probability of the prior only.
+        virtual void                                                setIgnoreData(bool tf);                                                                     //!< Set whether we want to have the probability of the prior only.
         void                                                        setVisitFlag(bool tf, const size_t flagType);
         virtual void                                                swapParent(const DagNode *oldP, const DagNode *newP);                                       //!< Exchange the parent node which includes setting myself as a child of the new parent and removing myself from my old parents children list
         void                                                        touch(bool touchAll=false);
-        virtual void                                                touchAffected(bool touchAll=false);                                                         //!< Touch affected nodes (flag for recalculation)
+        void                                                        touchAffected(bool touchAll=false);                                                         //!< Touch affected nodes (flag for recalculation)
 
     protected:
                                                                     DagNode(const std::string &n);                                                              //!< Constructor
@@ -150,15 +155,17 @@ template <class valueType> class RbOrderedSet;
         std::vector<Monitor*>                                       monitors;
         std::vector<Move*>                                          moves;
         std::string                                                 name;
-        bool                                                        prior_only;
         std::set<size_t>                                            touched_elements;
         DagNodeTypes                                                type;
 
 
     private:
 
+        static void                                                 bfgtAddEdge(const DagNode* parent, const DagNode* child);                                           //!< BGFT online edge insertion: repair the topological pseudo-order or throw if the new edge would close a cycle.
+
+        mutable std::size_t                                         topo_level;                                                                                   //!< This node's level (rank in the topological pseudo-ordering of the DAG).
         mutable size_t                                              ref_count;
-        mutable std::vector<bool>                                   visit_flags; // in order: affected, find, keep, reinitialize, restore
+        mutable std::vector<bool>                                   visit_flags;                                                                                //!< In order: affected, find, keep, reinitialize, restore
     };
 
 }

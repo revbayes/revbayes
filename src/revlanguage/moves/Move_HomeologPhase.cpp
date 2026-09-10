@@ -138,9 +138,15 @@ const MemberRules& RevLanguage::Move_HomeologPhase::getParameterRules(void) cons
         memberRules.push_back( new ArgumentRule( "tip1", RlString::getClassTypeSpec(), "Tip 1 to switch.", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY ) );
         memberRules.push_back( new ArgumentRule( "tip2", RlString::getClassTypeSpec(), "Tip 2 to switch.", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY ) );
         
-        /* Inherit weight from Move, put it after variable */
+        /* Inherit weight (but not tuneTarget!) from Move and put it after the arguments created above */
         const MemberRules& inheritedRules = Move::getParameterRules();
-        memberRules.insert( memberRules.end(), inheritedRules.begin(), inheritedRules.end() );
+        for (size_t i = 0; i < inheritedRules.size(); ++i)
+        {
+            if ( inheritedRules[i].getArgumentLabel() == "weight" )
+            {
+                memberRules.push_back( inheritedRules[i].clone() );
+            }
+        }
         
         rulesSet = true;
     }

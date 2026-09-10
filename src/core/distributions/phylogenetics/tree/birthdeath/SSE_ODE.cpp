@@ -70,14 +70,16 @@ void SSE_ODE::operator()(const std::vector< double > &x, std::vector< double > &
         
         // no event
         double no_event_rate = mu[i] + lambda_sum;
-        for (size_t j = 0; j < num_states; ++j)
-        {
-            if ( i != j && allow_rate_shifts_extinction == true )
+        if (allow_rate_shifts_extinction ){
+            for (size_t j = 0; j < num_states; ++j)
             {
-                no_event_rate += Q->getRate(i, j, age, rate);
+                if ( i != j )
+                {
+                    no_event_rate += Q->getRate(i, j, age, rate);
+                }
             }
         }
-        
+       
         if (psi.empty() == false)
         {
             no_event_rate += psi[i];
@@ -105,13 +107,16 @@ void SSE_ODE::operator()(const std::vector< double > &x, std::vector< double > &
         }
         
         // anagenetic state change
-        for (size_t j = 0; j < num_states; ++j)
-        {
-            if ( i != j && allow_rate_shifts_extinction == true )
+        if ( allow_rate_shifts_extinction == true ) {
+            for (size_t j = 0; j < num_states; ++j)
             {
-                dxdt[i] += Q->getRate(i, j, age, rate) * safe_x[j];
+                if ( i != j )
+                {
+                    dxdt[i] += Q->getRate(i, j, age, rate) * safe_x[j];
+                }
             }
         }
+        
 
         if ( backward_time == false )
         {
@@ -120,6 +125,16 @@ void SSE_ODE::operator()(const std::vector< double > &x, std::vector< double > &
         
         if ( extinction_only == false )
         {
+            if (allow_rate_shifts_extinction == false){
+                for (size_t j = 0; j < num_states; ++j)
+                {
+                    if ( i != j )
+                    {
+                        no_event_rate += Q->getRate(i, j, age, rate);
+                    }
+                }
+            }
+                
             /**** Observation ****/
             /**** equation A1 ****/
         

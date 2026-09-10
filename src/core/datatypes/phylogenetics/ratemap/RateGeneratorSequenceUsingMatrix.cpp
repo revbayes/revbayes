@@ -224,7 +224,7 @@ std::vector<double> RateGeneratorSequenceUsingMatrix::getStationaryFrequencies(v
 
 }
 
-double RateGeneratorSequenceUsingMatrix::getSumOfRates(std::vector<CharacterEvent*> from, std::vector<size_t> counts, double age, double rate) const
+double RateGeneratorSequenceUsingMatrix::getSumOfRates(const std::vector<CharacterEvent*>& from, const std::vector<size_t>& counts, double age, double rate) const
 {
     
     // get rate matrix
@@ -268,7 +268,7 @@ double RateGeneratorSequenceUsingMatrix::getSumOfRates(std::vector<CharacterEven
     return sum;
 }
 
-double RateGeneratorSequenceUsingMatrix::getSumOfRates(std::vector<CharacterEvent*> from, double age, double rate) const
+double RateGeneratorSequenceUsingMatrix::getSumOfRates(const std::vector<CharacterEvent*>& from, double age, double rate) const
 {
 
     std::vector<std::set<size_t> > sites_with_states(this->num_states);
@@ -285,7 +285,7 @@ double RateGeneratorSequenceUsingMatrix::getSumOfRates(std::vector<CharacterEven
     return getSumOfRates( from, sites_with_states, age, rate);
 }
 
-double RateGeneratorSequenceUsingMatrix::getSumOfRates(std::vector<CharacterEvent*> from, std::vector<std::set<size_t> > sites_with_states, double age, double rate) const
+double RateGeneratorSequenceUsingMatrix::getSumOfRates(const std::vector<CharacterEvent*>& from, const std::vector<std::set<size_t> >& sites_with_states, double age, double rate) const
 {
     
     // get rate matrix
@@ -332,7 +332,7 @@ double RateGeneratorSequenceUsingMatrix::getSumOfRates(std::vector<CharacterEven
 }
 
 
-double RateGeneratorSequenceUsingMatrix::getSumOfRatesDifferential(std::vector<CharacterEvent*> from, CharacterEventDiscrete* to, std::vector<std::set<size_t> > sites_with_states, double age, double rate) const
+double RateGeneratorSequenceUsingMatrix::getSumOfRatesDifferential(std::vector<CharacterEvent*> from, CharacterEventDiscrete* to, const std::vector<std::set<size_t> >& sites_with_states, double age, double rate) const
 {
     double r = 0.0;
     

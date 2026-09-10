@@ -114,9 +114,6 @@ monitors.append( mnModel(filename="output/ASRV_pipe.log", printgen=10) )
 # 2. the tree #
 monitors.append( mnFile(filename="output/ASRV_pipe.trees", printgen=10, phylogeny) )
 
-# 3. and a few select parameters to be printed to the screen #
-monitors.append( mnScreen(printgen=10) )
-
 # Initialize the MCMC object #
 mymcmc = mcmc(mymodel, monitors, moves)
 

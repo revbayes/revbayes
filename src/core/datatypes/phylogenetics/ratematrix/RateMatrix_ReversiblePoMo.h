@@ -32,7 +32,6 @@
 namespace RevBayesCore {
 
     class TransitionProbabilityMatrix;
-    class Assignable;
 
     class RateMatrix_ReversiblePoMo : public AbstractRateMatrix {
 

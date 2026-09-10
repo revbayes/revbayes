@@ -25,24 +25,22 @@ namespace RevBayesCore {
     class NodeRateTimeSlideUniformProposal : public Proposal {
         
     public:
-        NodeRateTimeSlideUniformProposal( StochasticNode<Tree> *n, StochasticNode< RbVector<double> > *r);         //!<  constructor
-        NodeRateTimeSlideUniformProposal( StochasticNode<Tree> *n, std::vector<StochasticNode<double>* > r);       //!<  constructor
+        NodeRateTimeSlideUniformProposal( StochasticNode<Tree> *n, StochasticNode< RbVector<double> > *r);    //!< Constructor
+        NodeRateTimeSlideUniformProposal( StochasticNode<Tree> *n, std::vector<StochasticNode<double>* > r);  //!< Constructor
         
         // Basic utility functions
-        void                                    cleanProposal(void);                                        //!< Clean up proposal
-        NodeRateTimeSlideUniformProposal*              clone(void) const;                                             //!< Clone object
-        double                                  doProposal(void);                                           //!< Perform proposal
-        const std::string&                      getProposalName(void) const;                                //!< Get the name of the proposal for summary printing
+        void                                    cleanProposal(void);                                          //!< Clean up proposal
+        NodeRateTimeSlideUniformProposal*       clone(void) const;                                            //!< Clone object
+        double                                  doProposal(void);                                             //!< Perform proposal
+        const std::string&                      getProposalName(void) const;                                  //!< Get the name of the proposal for summary printing
         double                                  getProposalTuningParameter(void) const;
-        void                                    prepareProposal(void);                                      //!< Prepare the proposal
-        void                                    printParameterSummary(std::ostream &o, bool name_only) const;               //!< Print the parameter summary
-        void                                    setProposalTuningParameter(double tp);
-        void                                    tune(double r);                                             //!< Tune the proposal to achieve a better acceptance/rejection ratio
-        void                                    undoProposal(void);                                         //!< Reject the proposal
+        void                                    prepareProposal(void);                                        //!< Prepare the proposal
+        void                                    printParameterSummary(std::ostream &o, bool name_only) const; //!< Print the parameter summary
+        void                                    undoProposal(void);                                           //!< Reject the proposal
         
     protected:
         
-        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);             //!< Swap the DAG nodes on which the Proposal is working on
+        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);               //!< Swap the DAG nodes the Proposal is working on
         
         
     private:
@@ -50,7 +48,7 @@ namespace RevBayesCore {
         // parameters
         StochasticNode< RbVector<double> >*     rates_node;
         std::vector<StochasticNode<double>* >   rates_vector;
-        StochasticNode<Tree>*                   variable;                                                   //!< The variable the Proposal is working on
+        StochasticNode<Tree>*                   variable;                                                     //!< The variable the Proposal is working on
 
         // stored objects to undo proposal
         double                                  storedAge;

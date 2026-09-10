@@ -25,7 +25,7 @@ namespace RevBayesCore {
     class MirrorMultiplierProposal : public Proposal {
 
     public:
-        MirrorMultiplierProposal( StochasticNode<double> *n, double l, double m0, double n0, double c0, double m, bool a, double p=0.44);                                                                      //!<  constructor
+        MirrorMultiplierProposal( StochasticNode<double> *n, double l, double m0, double n0, double c0, double m, bool a, double p=0.44);                                                                      //!< Constructor
 
         // Basic utility functions
         void                                    cleanProposal(void);                                                                //!< Clean up proposal
@@ -40,7 +40,7 @@ namespace RevBayesCore {
         void                                    undoProposal(void);                                                                 //!< Reject the proposal
 
     protected:
-        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes on which the Proposal is working on
+        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes the Proposal is working on
 
     private:
         // parameters
@@ -53,8 +53,8 @@ namespace RevBayesCore {
         double                                  sigmaHat;                                                                           //!< The currently used estimated sd of the variable from MCMC samples so far
         double                                  learnedSigmaHat;                                                                    //!< The estimated sd of the variable from MCMC samples so far
 
-        size_t                                  waitBeforeLearning;                                                                 //!< How long to wait before tracking empirical covariances
-        size_t                                  waitBeforeUsing;                                                                    //!< How long to wait before using the empirical covariances
+        size_t                                  waitBeforeLearning;                                                                 //!< How std::int64_t to wait before tracking empirical covariances
+        size_t                                  waitBeforeUsing;                                                                    //!< How std::int64_t to wait before using the empirical covariances
         size_t                                  nTried;                                                                             //!< How many times has this move been used?
         size_t                                  updates;                                                                            //!< How many updates have been tried?
         size_t                                  maxUpdates;                                                                         //!< How many updates until we stop monitoring the covariances?

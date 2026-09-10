@@ -29,33 +29,33 @@ template <class variableType> class StochasticNode;
     class CorrelationMatrixSpecificElementBetaProposal : public Proposal {
         
     public:
-        CorrelationMatrixSpecificElementBetaProposal( StochasticNode<MatrixReal> *n, size_t i, size_t j, double a, double p=0.234);                                                                      //!<  constructor
+        CorrelationMatrixSpecificElementBetaProposal( StochasticNode<MatrixReal> *n, size_t i, size_t j, double a, double p=0.234);  //!< Constructor
         
         // Basic utility functions
         void                                     cleanProposal(void);                                                                //!< Clean up proposal
-        CorrelationMatrixSpecificElementBetaProposal*    clone(void) const;                                                                  //!< Clone object
+        CorrelationMatrixSpecificElementBetaProposal*    clone(void) const;                                                          //!< Clone object
         double                                   doProposal(void);                                                                   //!< Perform proposal
         const std::string&                       getProposalName(void) const;                                                        //!< Get the name of the proposal for summary printing
         double                                   getProposalTuningParameter(void) const;
-        void                                     printParameterSummary(std::ostream &o, bool name_only) const;                                       //!< Print the parameter summary
+        void                                     printParameterSummary(std::ostream &o, bool name_only) const;                       //!< Print the parameter summary
         void                                     prepareProposal(void);                                                              //!< Prepare the proposal
         void                                     setProposalTuningParameter(double tp);
         void                                     tune(double r);                                                                     //!< Tune the proposal to achieve a better acceptance/rejection ratio
         void                                     undoProposal(void);                                                                 //!< Reject the proposal
         
     protected:
-        void                                     swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes on which the Proposal is working on
+        void                                     swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes the Proposal is working on
         
     private:
         // parameters
         
         StochasticNode<MatrixReal >*             variable;
         
-        double                                   alpha;                                                                             //!< The Beta parameter of the move (larger lambda -> larger proposals).
+        double                                   alpha;                                                                              //!< The scale parameter of the proposal (smaller alpha -> smaller a and b -> larger beta distr. variance -> larger proposals)
         //!< The two indices of the last modified SpecificElement.
         size_t                                   indexa;
         size_t                                   indexb;
-        double                                   storedValue;                                                                          //!< The value we propose.
+        double                                   storedValue;                                                                        //!< The value we propose.
     
     };
     

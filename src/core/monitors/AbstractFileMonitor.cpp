@@ -1,5 +1,6 @@
 #include "AbstractFileMonitor.h"
 
+#include <filesystem>
 #include <string>
 
 #include "RbFileManager.h"
@@ -10,7 +11,7 @@ namespace RevBayesCore { class DagNode; }
 using namespace RevBayesCore;
 
 
-AbstractFileMonitor::AbstractFileMonitor(DagNode *n, unsigned long g, const path &fname, bool ap, bool wv) : Monitor(g,n),
+AbstractFileMonitor::AbstractFileMonitor(DagNode *n, std::uint64_t g, const path &fname, bool ap, bool wv) : Monitor(g,n),
     out_stream(),
     filename( fname ),
     working_file_name( fname ),
@@ -20,7 +21,7 @@ AbstractFileMonitor::AbstractFileMonitor(DagNode *n, unsigned long g, const path
 {}
 
 
-AbstractFileMonitor::AbstractFileMonitor(const std::vector<DagNode *> &n, unsigned long g, const path &fname, bool ap, bool wv) : Monitor(g,n),
+AbstractFileMonitor::AbstractFileMonitor(const std::vector<DagNode *> &n, std::uint64_t g, const path &fname, bool ap, bool wv) : Monitor(g,n),
     out_stream(),
     filename( fname ),
     working_file_name( fname ),
@@ -72,6 +73,12 @@ void AbstractFileMonitor::closeStream()
 }
 
 
+path AbstractFileMonitor::getMonitorFileName( void ) const
+{
+    return working_file_name;
+}
+
+
 bool AbstractFileMonitor::isFileMonitor( void ) const
 {
     return true;
@@ -94,6 +101,12 @@ void AbstractFileMonitor::openStream( bool reopen )
         out_stream.open( working_file_name.string(), std::fstream::in | std::fstream::out);
     }
         
+}
+
+
+void AbstractFileMonitor::truncateAfterGeneration(std::uint64_t lastGen)
+{
+    truncateMonitorFileAfterGeneration( working_file_name, lastGen );
 }
 
 

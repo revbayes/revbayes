@@ -41,16 +41,16 @@ using namespace RevBayesCore;
  * \return Returns the natural log of the probability.
  * \throws Does not throw an error.
  */
-double RbStatistics::BivariatePoisson::lnPdf(double theta1, double theta2, double theta0, std::vector<long> x) {
+double RbStatistics::BivariatePoisson::lnPdf(double theta1, double theta2, double theta0, std::vector<std::int64_t> x) {
 
-  long x1, x2;
+  std::int64_t x1, x2;
   x1 = x[0];
   x2 = x[1];
   double result = - ( theta1 + theta2 + theta0 ) + x1 * std::log( theta1 ) + x2 * std::log( theta2 ) - (RbMath::lnGamma( x1 + 1 ) + RbMath::lnGamma( x2 + 1 ));
 
 
   double theta_ratio = theta0 / (theta1 * theta2);
-  long min_x1x2 = std::min(x1, x2);
+  std::int64_t min_x1x2 = std::min(x1, x2);
   double tmp = 0;
 
   for (int i = 0; i <= min_x1x2; i++) {
@@ -61,13 +61,13 @@ double RbStatistics::BivariatePoisson::lnPdf(double theta1, double theta2, doubl
 }
 
 
-std::vector<long> RbStatistics::BivariatePoisson::rv(double theta1, double theta2, double theta0, RandomNumberGenerator& rng)
+std::vector<std::int64_t> RbStatistics::BivariatePoisson::rv(double theta1, double theta2, double theta0, RandomNumberGenerator& rng)
 {
-  long a, b, c;
+  std::int64_t a, b, c;
   a = RbStatistics::Poisson::rv(theta1, rng);
   b = RbStatistics::Poisson::rv(theta2, rng);
   c = RbStatistics::Poisson::rv(theta0, rng);
-  std::vector<long> x;
+  std::vector<std::int64_t> x;
   x.push_back(a + c);
   x.push_back(b + c);
   return x;

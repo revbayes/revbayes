@@ -20,14 +20,14 @@ template <class variableType> class StochasticNode;
     public:
         
         // Constructors and Destructors
-        StochasticBranchStateTimesMonitor(StochasticNode<Tree>* ch, unsigned long g, const std::string &fname, const std::string &del);
+        StochasticBranchStateTimesMonitor(StochasticNode<Tree>* ch, std::uint64_t g, const std::string &fname, const std::string &del);
         StochasticBranchStateTimesMonitor(const StochasticBranchStateTimesMonitor &m);
         virtual ~StochasticBranchStateTimesMonitor(void);
         
         StochasticBranchStateTimesMonitor*                  clone(void) const;                                                  //!< Clone the object
         
         // Monitor functions
-        void                                                monitorVariables(unsigned long gen);                                 //!< Monitor at generation gen
+        void                                                monitorVariables(std::uint64_t gen);                                 //!< Monitor at generation gen
         void                                                printFileHeader(void);                                              //!< Print header
         
         // getters and setters

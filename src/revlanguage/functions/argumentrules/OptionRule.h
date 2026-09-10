@@ -35,7 +35,7 @@ class OptionRule : public ArgumentRule {
         // Basic utility functions
         OptionRule*                         clone(void) const;                                                                  //!< Clone object
         const std::vector<std::string>&     getOptions(void) const;                                                             //!< Get the options
-        virtual double                      isArgumentValid(Argument &arg, bool once) const;                                    //!< Is var a valid argument?
+        virtual double                      isArgumentValid(Argument &arg) const;                                               //!< Is var a valid argument?
         void                                printValue(std::ostream& o) const;                                                  //!< Print value for user
 
     protected:

@@ -1,3 +1,425 @@
+# RevBayes 1.4.2 (unreleased)
+
+## Backwards-incompatible changes
+
+## Features
+
+## Bug fixes
+
+## Documentation improvements
+
+## Infrastructure
+
+# RevBayes 1.4.1 (Jul 17, 2026)
+
+## Speed & memory
+  * 4-fold speedup in analyses of DNA data when `useScaling=TRUE` (#1002).
+  
+## Features
+  * Add a `stop( )` function to halt Rev script execution with a user-specified message (#1019).
+  * Allow `rep( )` to take input of type `Probability` (#1035).
+  * Allow specifying a fixed burnin fraction in convergence rules (#1048).
+
+## Bug fixes
+  * DAG
+      - Fix a segfault when the model graph contains a cycle (#962).
+      - Make sure `Model::getOrderedStochasticNodes` inserts parents before children (#1050).
+  * Likelihood evaluation
+      - Avoid -inf log likelihoods in `fnF81( )` (#1002).
+      - Avoid -inf / NaN log likelihoods in `mvBetaSimplex` (#1002).
+  * MCMC
+      - Draw random numbers regardless of log likelihood difference to reduce test fragility (#1006).
+      - Make sure all MPI ranks finished writing to a trace file before convergence rules read it (#1029).
+      - Require the `frequency` argument of convergence rules to be strictly positive (#1044).
+      - Make it simpler to `exclude` vector variables from `mnModel` (#1052).
+  * Interface
+      - Do not print asterisks _ad infinitum_ when running `.burnin( )` for zero generations (#1049).
+      - Make sure help pages show the constructors, arguments, and domain types for all overloads of a given distribution (#1056).
+  * Misc
+      - Make sure `mnStochasticVariable` and `Mcmc::checkpoint` write out the hidden state (allocation index) of `dnMixture` (#987).
+      - Fix reading of RNA datasets (#1018).
+      - Fix handling of extant samples when `rho=0` and of purely extinct trees in `dnBDSTP` (#1032).
+      - Make sure the `.getStateDescriptions( )` method preserves the first-seen state order (#1036).
+      - Prevent `dnPhyloWhiteNoise` from taking the log of an already log-transformed density (#1054).
+      - Fix initialization issues with backbone-constrained nonclock analyses (#1056).
+      - Fix handling of parameter-specific timelines in `dnBDSTP` (#1059).
+
+## Refactor
+  * Refactor partial likelihood scaling (#1002).
+  * Remove pointer arithmetic (#1026).
+
+## Documentation improvements
+  * Expand documentation for `srGelmanRubin`, `srGeweke`, `srMinESS`, `srStationarity` (#1048).
+
+## Infrastructure
+  * Enable and improve support for the AVX instruction set (#1002).
+  * Add support for building and developing RevBayes using the Nix package manager (#1033).
+  
+## New contributors
+  * @sriram98v made their first contribution in #1033.
+  * @wnsplim made their first contribution in #1050.
+
+# RevBayes 1.4.0 (Apr 17, 2026)
+
+## Backwards-incompatible changes
+  * Remove the `tuneTarget` argument from those moves that are not capable of being tuned (#947).
+  * Remove `dnPhyloCTMCDollo` (#997).
+  * Temporarily disable the uniform partitioning distribution (`dnUPP`) (#999).
+
+## Speed & memory
+  * Slight speedup in analyses employing `dnPhyloCTMC` when `useScaling=TRUE` (#816).
+  * Much faster merging of log files with `mcmc(..., combine="mixed")` (#981).
+
+## New models/analyses
+  * Model selection via leave-one-out cross-validation (#460).
+  * StairwayPlot method for inferring demographic histories from site frequency spectra (#460).
+  * State-dependent Brownian motion (BM) and Ornstein-Uhlenbeck (OU) processes (#904).
+
+## Features
+  * Add functions for folding site frequency spectra and creating StairwayPlot vectors (#460).
+  * Add function for reading stochastic character maps (#904).
+  * Allow vector input to `ln( )` and `log( )` (#948).
+  * Add an `.isRooted( )` method to `Tree` (#952).
+  * Add `-p` flag to print commands from `-e` expression or script (#978).
+  * Make stochastic mapping and ancestral state monitors work for all types of discrete characters (#994).
+
+## Bug fixes
+  * Tree handling
+      - Fix handling of quoted labels and tree-level comments when reading Newick trees (#799).
+      - Treat unrooted trees as such when generating summaries (#932).
+      - Fix parsing of nested comments in Newick trees (#946).
+      - Make sure the `mrcaIndex( )` function and `.unroot( )` method work on rooted nonclock trees (#952).
+      - Refactor the `.reroot( )` method of `Tree` objects (#966).
+  * Moves
+      - Fixes to `mvRateAgeProposal` and `mvRateAgeSubtreeProposal` (#908, #940).
+      - Make sure the `tuneTarget` argument is honored when present (#947).
+  * Checkpointing
+      - Prevent checkpoint file corruption by partial overwrites (#935).
+      - Prevent duplicated iterations when resuming from a checkpoint (#970).
+      - Add serialization support to `MatrixReal` for checkpoint use (#983).
+  * Crash / NaN
+      - Fix a segfault in the help2yml executable built with MPI (#937).
+  * Misc
+      - Fix issues with missing values in multisample BM and OU processes (#905).
+      - Fix handling of the `burnin` argument in posterior predictive simulations (#923).
+      - Correct reasoning about return types for `max( )`, `median( )`, `min( )`, `sum( )` (#938).
+      - Check for mismatches in the number of states between an SSE model and underlying data (#974).
+      - Make sure `writeNexus( )` keeps all state labels when concatenating character matrices (#975, #995).
+      - Make sure we start the interactive loop when `-i` is given even if there is an error (#977).
+  * Non-user-facing
+      - Clean up partial likelihood caching in `dnPhyloCTMC` (#816).
+      - Switch from C++17 to C++23, supporting those features that are available in GCC 12 (#927).
+      - Add assertion checks to `Tree::getNode( )` (#972).
+      - Fix hidden virtual functions (#976, #984).
+      - Fix various compiler warnings (#998).
+
+## Documentation improvements
+  * `ConditionalPosteriorOrdinate`, `dnStairwayPlot`, `fnBSPInterval`, `fnFoldSFS`, `mvAdaptiveRJSwitch`, `mvRandomCategoryWalk` (#460).
+  * Expand documentation for `dnMultinomial`, `mvRandomGeometricWalk`, `mvRandomIntegerWalk`, `mvRandomNaturalWalk` (#460).
+  * `CharacterHistory`, `dnPhyloBrownianProcessStateDependent`, `dnPhyloCTMCDASiteIID`, `dnPhyloOrnsteinUhlenbeckStateDependent`, `mvCharacterHistory`, `readCharacterHistory` (#904).
+  * `mrcaIndex` (#952).
+
+## Infrastructure
+  * Fix continuous-integration (CI) tests on macOS where boost 1.90 is broken (#924).
+  * Update `build.sh` for setting boost location with modern CMake (#925).
+  * Make sure the CI test script fails when tutorial tests fail (#940).
+  * Allow tests that require TensorPhylo (#941).
+  * Make sure the CMake build script does not drop extra arguments if `-boost_root` is given (#951).
+  * Fix compile cache misses (#959).
+  * Help database cleanup (#989).
+  * Make meson always build the help2yml executable (#990).
+
+## New contributors
+  * @HaoqingDu made their first contribution in #905.
+
+# RevBayes 1.3.2 (Dec 11, 2025)
+
+## Backwards-incompatible changes
+  * Restructure the command-line interface following Rscript syntax (#803, #827).
+  * Change the name of the first argument of `TraceTree.getUniqueTrees( )` from `credibleTreeSetSize` to `minCladeProbability` (#819).
+  * Change the name of the first argument of `TraceTree.isTreeCovered( )` from `ci_size` to `credibleTreeSetSize` (#819).
+  * Remove the argument `num_taxa` from `TraceTree.computeEntropy( )` (#819).
+  * Remove `mvAddRemoveTip` (#862).
+
+## Features
+  * Allow executing Rev expressions from the command line (#803).
+  * Allow handling partial ambiguities involving a gap state (#838).
+  * Add function for writing alignments to Phylip format (#882).
+  * Add arguments to `dnPhyloCTMC` to account for observational error (#901).
+
+## Bug fixes
+  * Summary trees
+      - Prevent `.reroot( )` from incorrectly reassigning node and branch annotations (#804).
+      - Report 95% HPD intervals for the ages of sampled ancestors (#810).
+      - Fix majority-rule consensus trees with sampled ancestors (#859).
+  * MCMC
+      - Do not print confusing messages about tip age adjustments on initialization (#821).
+      - Allow specifying `tuningInterval = 0` in `mcmc.burnin( )` (#843) and `powerPosterior.burnin( )` (#878).
+      - Make sure `mnModel` extracts the right nodes from the model graph (#900).
+  * Moves
+      - Safely undo node time moves if there are no nodes for them to operate on (#829).
+      - Make sure tip time moves use the right node index in each MCMC run (#895).
+  * Crash / NaN
+      - Fix the block bootstrap when the number of samples is small (#842).
+      - Fix a segfault in FBD analyses with multiple parameter-specific timelines (#861).
+  * Misc
+      - Multiple fixes for `TraceTree` methods (#819).
+      - Fix FBD analyses with a single parameter-specific timeline (#845).
+      - Allow subscripting arrays by any variable that can be typecast to `Natural` (#856).
+      - Fix printing `Simplex` objects in validation analyses (#876).
+      - Fix the ODE solver used in `dnCDBDP` and `dnTVSSE` (#883).
+      - Remove null terminators from `.methods( )` output (#886).
+      - Ensure compiler-independent output in complex FBD analyses (#895).
+      - Fix `dnPhyloBrownian` (#897).
+      - Fix `dnGeometric` (#907, #915).
+
+## Documentation improvements
+  * Expand documentation for `mvSlice` (#614).
+  * Expand documentation for `TraceTree` (#819).
+  * `args` (#830, #851).
+  * `dnPhyloCTMC`
+      - Add a description of the `coding` argument (#832).
+      - Expand the provided example to show how to simulate characters (#868).
+      - Formatting fixes (#867, #871).
+      - Add a description of the new `observationErrorProbability` and `observationErrorFrequencies` arguments (#901).
+  * `mvFNPR` (#839).
+  * Minor fixes to `write` (#852) and `dnBeta` (#900).
+  * Corrections to `srGeweke` and multispecies coalescent distributions (#871).
+  * Add a description of the `burninMethod` argument of convergence rules (#871).
+  * Miscellaneous formatting fixes (#871).
+
+## Infrastructure
+  * Do not require the `system` boost library in `CMakeLists.txt` (#831).
+  * Increase the minimum CMake version from 3.5 to 3.10.2 (#834).
+  * Sync the Nexus Class Library (NCL) with the upstream repo (#837)
+  * GitHub Actions updates (#841, #892).
+  * Update meson build instructions (#857).
+  * Remove a duplicated test file to suppress a `git clone` warning (#873).
+  
+## New contributors
+  * @mcranium made their first contribution in #839.
+  * @curiosusJR made their first contribution in #873.
+
+# RevBayes 1.3.1 (Aug 14, 2025)
+
+## Backwards-incompatible changes
+  * Change the distribution name of the sampled-speciation birth-death model from `dnSBBDP` to `dnSSBDP` (#714).
+
+## Features
+  * Distributions
+      - Add a topologically constrained distribution for the state-dependent speciation and extinction process (#693).
+      - Allow nonzero `rho` values in FBD analyses without extant tips (#788).
+      - Make `dnGLHBDSP` faster and allow reporting stochastic mappings (#693).
+  * Methods / arguments
+      - Add an `.nbranches( )` method to `Tree` (#759).
+      - Add a method for calculating the standard error of marginal likelihood estimates (#779).
+      - Add a nanoseconds option to `time( )` (#796).
+  * Interface
+      - Nicer printing of member method lists (#800).
+  * Misc
+      - Biogeography: allow regional features and non-existent regions (#693).
+
+## Bug fixes
+  * **Regression fixes**
+      - **Fix posterior predictive simulations that were broken in 1.3.0 (#778).**
+      - **Fix validation analyses that were broken in 1.3.0 (#814).**
+  * Member procedures
+      - Fix `.getTopologyFrequency( )` behavior for tree traces (#750).
+      - Fix `.resolveMultifurcations( )` behavior in edge cases (#771, #780).
+  * Nexus I/O
+      - Make sure `writeNexus( )` can handle `BranchLengthTree` vectors (#758).
+      - Fix parsing of the `STATELABELS` block in Nexus files (#760).
+      - Allow reading Nexus files with an `ASSUMPTIONS` block (#764).
+  * MPI / MC^3
+      - Fix segfault in MPI + MC^3 (#763).
+      - Fix logging and progress monitoring for `.runOneStone( )` + MPI (#782).
+  * Moves
+      - Fix argument name mismatch in `mvUpDownSlide` (#766).
+      - Fix `mvEllipticalSliceSamplingSimple` to not require strict equality of likelihoods (#773).
+      - Reject tree moves if there are no nodes for them to operate on (#798, #802).
+  * Misc
+      - Synchronize dirty flagging for nodes and transition probability matrices (#773).
+      - Fix caching to avoid crashes when using `dnReversibleJumpMixture` (#773).
+  * Partial
+      - Avoid subscripting by `-1` in `dnAutocorrelatedEvent` (#773).
+
+## Documentation improvements
+  * Basic data types: `Integer`, `Natural`, `Probability`, `Real` (#714).
+  * Birth-death models: `dnCBDSP`, `dnCDBDP`, `dnSSBDP` (#714).
+  * Marginal likelihood estimators: `pathSampler`, `steppingStoneSampler` (#779).
+  * Expand documentation for `TraceTree` (#800).
+
+## Infrastructure
+  * Update DLLs to allow running RevStudio on Windows (#751).
+  * Don't print operator summaries in coalescent tests, and only run 1 generation (#770).
+  * Enable testing with assertions to detect out-of-bounds indices in `std::vector` (#773).
+  * Don't skip remaining scripts in a test if one fails, and combine error message from multiple failing scripts in a test (#773).
+  * Allow specifying a required exit code to allow/require failure (#773).
+  * Fix check for missing output files (#773).
+  * Make test runner output clearer and more informative (#773).
+  * Replace `boost::filesystem` with `std::filesystem` (#807).
+
+## New contributors
+  * @prilau made their first contribution in #796.
+
+# RevBayes 1.3.0 (May 2, 2025)
+
+## Backwards-incompatible changes
+  * Change the name of the tuning argument of `mvUpDownSlide` from `lambda` to `delta`.
+  * Change the name of the first argument of `Tree.reroot( )` from `clade` to `outgroup`.
+  * In `powerPosterior( )`, specifying `cats=N` sets up N analyses numbered 1--N, rather than N+1 analyses numbered 0--N.
+
+## Features
+  * Interface
+      - Print convergence statistics during MCMC runs with stopping rules if `verbose=2` (#645, #657, #739).
+      - Better progress monitoring for power posterior analyses (#673).
+  * Methods / arguments
+      - Add member procedure for randomly resolving multifurcations (#641).
+      - Add an `nruns` argument to `readTrace( )` (#736).
+  * Functions
+      - Add function for minimum branch length time-scaling (#641).
+      - Add trigonometric functions (#647, #648).
+
+## Bug fixes
+  * Checkpointing
+      - Fix segfault when attempting to resume an MPI analysis (#646).
+      - Fix mismatch of chain states and chain heats when resuming an MC^3 analysis (#670).
+      - Don't skip iterations when logging a resumed MC^3 analysis (#727).
+  * MPI / MC^3
+      - Fix NaN heats in MC^3 (#661).
+      - Make sure MPI runs the specified number of independent replicates (#662).
+  * Model graph
+      - Only convert deterministic nodes to constant nodes if they really are constant (#678).
+      - Fix crash in user functions (#687).
+      - Make sure indexing by a deterministic variable creates a deterministic node (#719).
+      - Only type-convert variables based on value if they are constant (#721).
+  * Moves
+      - Fix `mvRateAgeBetaShift` (#688).
+      - Allow moves to propose out-of-range indices (#709).
+      - Allow moves with low probability ratio and high Jacobian/Hastings ratio (#728).
+  * Member procedures
+      - Fix `.dropTip( )` behavior for multifurcations (#640).
+      - Fix `.getStateDescriptions( )` behavior when subsetting by state space (#696).
+      - Fix `.reroot( )` behavior when specifying an outgroup by its name string (#742).
+  * Misc
+      - Fix stochastic character mapping when there are excluded characters (#636).
+      - Fix handling of large integers on Windows (#708).
+      - Don't ignore negative clade constraints (#711).
+      - Allow for machine uncertainty in `dnEpisodicBirthDeath` with empirical sampling (#713).
+      - Fix partial likelihood caching in `dnPhyloCTMC` (#729).
+      - Allow reading multiple trees from a string (`readTrees(text = ...)`) (#735).
+  * Partial
+      - Prevent some instances of clamped values from being modified (#600).
+
+## Documentation improvements
+  * `Simplex` (#606).
+  * Moves
+      - `mvBetaSimplex`, `mvDirichletSimplex`, `mvElementSwapSimplex` (#606).
+      - `mvDPPValueBetaSimplex`, `mvDPPValueScaling`, `mvDPPValueSliding` (#666).
+      - `mvNNI`, `mvSPR`, `mvScale`, `mvScaleBactrian`, `mvSlide`, `mvSlideBactrian`, `mvTreeScale`, `mvUpDownScale`, `mvUpDownSlide` (#683).
+  * `sin` (#648, #683).
+  * Substitution models
+      - `fnJC` (#649).
+      - `fnF81`, `fnGTR`, `fnHKY`, `fnK80`, `fnK81`, `fnT92`, `fnTrN` (#653, #656).
+      - `fnLG`, `fnWAG` (#655).
+      - `fnFreeK` (#667).
+      - `fnCovarion` (#704).
+      - `fnFreeBinary` (#706).
+  * `exp` (#653).
+  * Complete and standardize documentation for `dnBernoulli`, `dnBeta`, `dnBimodalLognormal`, `dnBimodalNormal`, `dnBinomial`, `dnCategorical`, `dnCauchy`, `dnChisq`, `dnDirichlet`, `dnExponential`, `dnGamma` (#663).
+  * `dnUniformInteger`, `fnReadVCF`, `vectorFlatten` (#667).
+  * Expand documentation for `powerPosterior` (#673).
+  * `matrix`, `var` (#681).
+  * `floor`, `mnModel`, `reverse`, `sinh` (#683).
+  * `power`, `write` (#690).
+  * Analysis output types and I/O functions
+      - `readTrace` (#702, #723, #736).
+      - `readTreeTrace` (#703, #722, #723, #736).
+      - `Trace`, `TraceTree` (#723).
+  * Discretization functions: `fnDiscretizeDistribution`, `fnDiscretizeGamma` (#707).
+
+## Infrastructure
+  * Update validation tests (#473).
+  * Fix continuous-integration builds by dropping openlibm (#644).
+  * Change build files to streamline updates to the help database (#659).
+  * Make tutorial tests more flexible (#674).
+  * Make sure the test runner can handle tutorial checkpoint tests (#676).
+  * Add integration tests for revised coalescent classes (#689).
+  * Change website submodule to pull from source rather than master (#692).
+
+## New contributors
+  * @sigibrock made their first contribution in #648.
+  * @raymondcast18 made their first contribution in #649.
+  * @PhyloevoTi made their first contribution in #655.
+  * @ixchelgzlzr made their first contribution in #703.
+  * @basantakhakurel made their first contribution in #704.
+  * @Levi-Raskin made their first contribution in #711.
+
+# RevBayes 1.2.5 (Dec 19, 2024)
+
+## Backwards-incompatible changes
+  * Remove `underPrior` argument to `mcmc.run( )` and `mcmcmc.run( )`.  You can use `model.ignoreAllData()` instead.
+  * Remove `dnLogexponential`. You can use `dnExponential(l) |> tnLog()` instead.
+  * Remove `tree.makeBifurcating()` in favor of `tree.suppressOutdegreeOneNodes()`.  To resolve a trifurcation
+    at the root you can use `reroot(..., makeBifurcating=TRUE)` instead.
+
+## Features
+  * Allow fossil age sampling with an initial tree in `dnConstrainedTopology` (#481).
+  * Transformed distributions:
+      - Add shift/scale/exp/log/logit/invlogit-transformed distributions (e.g. `dnExp(1) |> tnShift(2)`). (#466, #500)
+      - Allow `C + dist`, `C - dist`, `dist - C`, and `C*dist` for a constant `C` and distribution `dist`. (#617)
+  * Allow ignoring data from specific nodes with `model.ignoreData(seqData,morphData)` (#628)
+  * Extend `type( )` to optionally show the full type-spec (#504).
+
+## Bug fixes
+  * Multiple fixes for building, especially on Windows (#490, #491, #493, #494, #495, #496, #498).
+  * Checkpointing
+      - Fix FBD checkpointing bugs related to `dnBDSTP` (#484) and fossil time moves (#502, #517).
+      - Fix MC^3 checkpointing bug (#553).
+  * Types
+      - Fix type conversion to integer so that it employs deterministic nodes (#545).
+      - Make `RealPos` coherent between conversion and construction (#554).
+      - Make `vectorFlatten` work on more types (#514).
+  * Crash / NaN
+      - Fix `dnMixture` of rate matrices and other `Cloneable` objects (#501).
+      - Fix `treeAssembly` sometimes failing to initialize branch lengths (#509).
+      - Fix crash if a file changes while we are `source( )`-ing it (#510).
+      - Fix segfault with `dnConstrainedTopology` + `dnUniformTimeTree` (#513).
+      - Fix a segfault in `Model::getOrderedStochasticNodes` (#569).
+  * MCMC: initialization
+      - Fix fossil age sampling with an initial tree in `dnBDSTP` (#480).
+      - Fix FBD initialization issues (#537, #561).
+      - Extend the starting tree simulator to account for origin/root age (#561).
+  * MCMC
+      - Fix recalculation of likelihoods for Brownian motion distributions (#596).
+      - Fix recalculation of likelihoods with `mvRootTimeSlideUniform` (#594).
+      - Fix recalculation of likelihood with `treeAssembly` (#549).
+      - Fix Gelman-Rubin (PSRF) and stationarity stopping rules (#555).
+      - Don't move fossil tips outside their age ranges (#559).
+      - Fix operator summary for MC^3 when moves are tuned (#522).
+  * Debug:
+      - Log reason for -Inf and NaN probabilities (#592).
+      - Add options `debugMCMC` and `logMCMC` for investigating likelihood recalculation bugs (#570, #575, #593).
+      - More informative error message in `treeAssembly` when number of branch lengths is wrong (#605).
+  * Misc
+      - Allow reading non-square matrices (#564).
+      - Allow checking `args.size()` when no arguments are given. (#479).
+      - Balance braces when printing `Matrix<Real>` (#615).
+
+## Documentation improvements
+  * `dnPhyloCTMC( )` (#487).
+  * `fnDiscretizeBeta( )` (#625).
+  * `model( )` (#538).
+  * `time( )` (#572, #574)
+  * `--setOption` / `setOption()` / `getOption()` (#583)
+  * Clarify differences between `.clamp()` and `.setValue()` (#599).
+  * Stopping and convergence rules (#488).
+  * `mcmc` and `mcmcmc`
+      - `.run( )` (#485, #488).
+      - `.initializeFromCheckpoint( )` (#505).
+      - `moveschedule` parameter and the `weight` parameter of moves (#506).
+  * Corrections to `dnBivariatePoisson` (#539) and `mcmcmc` (#541).
+
 # RevBayes 1.2.4 (May 29, 2024)
 
 ## Features

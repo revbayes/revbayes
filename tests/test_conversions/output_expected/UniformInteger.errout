@@ -1,0 +1,50 @@
+   Could not compute lnProb for node 'y[6]': lnProb = -inf
+   1
+   
+   
+   Could not compute lnProb for node 'y[9]': lnProb = -inf
+   1
+   
+   
+   Could not compute lnProb for node 'y[12]': lnProb = -inf
+   1
+   
+   
+   Could not compute lnProb for node 'y[15]': lnProb = -inf
+   1
+   
+   
+   Could not compute lnProb for node 'y[16]': lnProb = -inf
+   1
+   
+   
+   Could not compute lnProb for node 'y[29]': lnProb = -inf
+   1
+   
+   
+   Could not compute lnProb for node 'y[43]': lnProb = -inf
+   1
+   
+   
+   Could not compute lnProb for node 'y[60]': lnProb = -inf
+   1
+   
+   
+   Could not compute lnProb for node 'y[66]': lnProb = -inf
+   1
+   
+   
+   Could not compute lnProb for node 'y[94]': lnProb = -inf
+   1
+   
+   
+   Could not compute lnProb for node 'y[99]': lnProb = -inf
+   1
+   
+   
+   Drawing new initial states ... 
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 1 different moves in a random move schedule with 1 moves per iteration
+   

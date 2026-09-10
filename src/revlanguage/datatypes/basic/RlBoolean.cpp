@@ -60,58 +60,11 @@ RlBoolean* RlBoolean::clone(void) const {
 RevObject* RlBoolean::convertTo(const TypeSpec& type) const
 {
 
-    if (type == Natural::getClassTypeSpec())
-    {
-        
-        if ( dag_node->getValue() == true )
-        {
-            return new Natural( long(1) );
-        }
-        else
-        {
-            return new Natural( long(0) );
-        }
-        
-    }
-    else if (type == Integer::getClassTypeSpec())
-    {
-        
-        if ( dag_node->getValue() == true )
-        {
-            return new Integer( long(1) );
-        }
-        else
-        {
-            return new Integer( long(0) );
-        }
-            
-    }
-    else if (type == Real::getClassTypeSpec())
-    {
-        
-        if ( dag_node->getValue() == true )
-        {
-            return new Real(1.0);
-        }
-        else
-        {
-            return new Real(0.0);
-        }
-        
-    }
-    else if (type == RealPos::getClassTypeSpec())
-    {
-        
-        if ( dag_node->getValue() == true )
-        {
-            return new RealPos(1.0);
-        }
-        else
-        {
-            return new RealPos(0.0);
-        }
-        
-    }
+    if (type == Natural::getClassTypeSpec()) return RlUtils::RlTypeConverter::convertTo<RlBoolean,Natural>(this);  
+    if (type == Integer::getClassTypeSpec()) return RlUtils::RlTypeConverter::convertTo<RlBoolean,Integer>(this);
+
+    if (type == Real::getClassTypeSpec()) return RlUtils::RlTypeConverter::convertTo<RlBoolean,Real>(this);
+    if (type == RealPos::getClassTypeSpec()) return RlUtils::RlTypeConverter::convertTo<RlBoolean,RealPos>(this);
 
     return RevObject::convertTo(type);
 }
@@ -148,7 +101,7 @@ const TypeSpec& RlBoolean::getTypeSpec( void ) const
 
 
 /** Is convertible to type? */
-double RlBoolean::isConvertibleTo(const TypeSpec& type, bool once) const
+double RlBoolean::isConvertibleTo(const TypeSpec& type, bool convert_by_value) const
 {
 
     if ( type == Natural::getClassTypeSpec() )
@@ -168,7 +121,7 @@ double RlBoolean::isConvertibleTo(const TypeSpec& type, bool once) const
         return 0.4;
     }
     
-    return RevObject::isConvertibleTo(type, once);
+    return RevObject::isConvertibleTo(type, convert_by_value);
 }
 
 

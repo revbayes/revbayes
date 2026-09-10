@@ -48,7 +48,7 @@ namespace RevLanguage {
         
         void                                        setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);           //!< Set member variable
         
-        RevPtr<const RevVariable>                   lambda;                                                                                     //!< The tuning parameter
+        RevPtr<const RevVariable>                   delta;                                                                                      //!< The tuning parameter
         RevPtr<const RevVariable>                   tune;                                                                                       //!< The variable on which the move works
         
     };

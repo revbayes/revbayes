@@ -1113,8 +1113,8 @@ case 29:
 YY_RULE_SETUP
 #line 160 "./lex.l"
 {
-                                            yylval.longIntValue = strtol(yytext,NULL,10);
-                                            if ((yylval.longIntValue == LONG_MIN || yylval.longIntValue == LONG_MAX) && errno == ERANGE) {
+                                            yylval.longIntValue = strtoll(yytext,NULL,10);
+                                            if ((yylval.longIntValue == LLONG_MIN || yylval.longIntValue == LLONG_MAX) && errno == ERANGE) {
                                                 yy_fatal_error("Integer value out of range.");
                                             }
                                             return INT;
@@ -1680,7 +1680,7 @@ static int yy_get_next_buffer (void)
 
 #ifndef YY_NO_UNPUT
 
-    static void yyunput (int c, char * yy_bp )
+[[maybe_unused]] static void yyunput (int c, char * yy_bp )
 {
 	char *yy_cp;
     
@@ -2350,5 +2350,3 @@ void yyfree (void * ptr )
 #define YYTABLES_NAME "yytables"
 
 #line 264 "./lex.l"
-
-

@@ -17,6 +17,7 @@
 
 #include "StringUtilities.h"
 
+#include <cctype>
 #include <cstdio>
 #include <cstdint>
 #include <iomanip>
@@ -33,12 +34,21 @@ using std::string;
 using std::vector;
 
 
-/** Convert the string s to a number */
+/** Convert the string s to a floating-point number */
+double StringUtilities::asDoubleNumber(const std::string& s)
+{
+    
+    return std::atof( s.c_str() );
+}
+
+
+/** Convert the string s to an integer */
 int StringUtilities::asIntegerNumber(const std::string& s)
 {
     
     return std::atoi( s.c_str() );
 }
+
 
 /**
  * Fill this string with spaces so that it has the required length.
@@ -373,7 +383,64 @@ bool StringUtilities::isNumber(const std::string& s)
 
 
 /**
- * Utility function for getting a one-line summary being max maxLen long.
+ * Perform natural sort, i.e., one that treats digits numerically and other
+ * characters lexicographically: "a10" goes after rather than before "a2", etc.
+ * */
+bool StringUtilities::naturalSort(const std::string& a, const std::string& b)
+{
+    size_t i = 0;
+    size_t j = 0;
+        
+    while (i < a.size() && j < b.size())
+    {
+        // numerical comparison if both are digits
+        if (std::isdigit(a[i]) && std::isdigit(b[j]))
+        {
+            // parse integer substrings
+            size_t i2 = i;
+            size_t j2 = j;
+            
+            while ( i2 < a.size() && std::isdigit(a[i2]) ) i2++;
+            while ( j2 < b.size() && std::isdigit(b[j2]) ) j2++;
+            
+            std::int64_t numA = std::stoll( a.substr(i, i2 - i) );
+            std::int64_t numB = std::stoll( b.substr(j, j2 - j) );
+            
+            if (numA != numB)
+            {
+                return numA < numB;
+            }
+            
+            // if numbers are equal but differently "spelled" (e.g., 02 vs. 2), fall back on lexicographic
+            // comparison (i.e., shorter sequence comes first) to get a strict ordering
+            if ( (i2 - i) != (j2 - j) )
+            {
+                return (i2 - i) < (j2 - j);
+            }
+            
+            i = i2;
+            j = j2;
+        }
+        // regular lexicographic comparison for non-digits
+        else
+        {
+            if (a[i] != b[j])
+            {
+                return a[i] < b[j];
+            }
+            
+            i++;
+            j++;
+        }
+    }
+    
+    // what if one is a prefix of the other
+    return i == a.size() && j != b.size();
+}
+
+
+/**
+ * Utility function for getting a one-line summary being max maxLen std::int64_t.
  * We find the first non-empty line in the input. If it is longer than maxLen,
  * we truncate it at maxLen - 3 and add "..." at the end. If it is shorter, we
  * just return the complete line (without line break).
@@ -428,8 +495,11 @@ std::string StringUtilities::oneLiner( const std::string& input, size_t maxLen )
         
         if ( i < input.size() )
         {
-            if ( maxLen - oneLiner.size() < 3 )
+            if ( oneLiner.size() + 3 > maxLen)
             {
+                if (oneLiner.size() < maxLen)
+                    oneLiner += std::string(' ', maxLen - oneLiner.size());
+
                 oneLiner[ maxLen - 1 ] = '.';
                 oneLiner[ maxLen - 2 ] = '.';
                 oneLiner[ maxLen - 3 ] = '.';

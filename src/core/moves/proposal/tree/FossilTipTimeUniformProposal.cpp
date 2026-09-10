@@ -39,13 +39,12 @@ FossilTipTimeUniformProposal::FossilTipTimeUniformProposal( StochasticNode<Tree>
     if ( tip_taxon == "" )
     {
         use_index = false;
-        node_index = -1;
     }
     else
     {
         use_index = true;
-        node_index = tree->getValue().getTipIndex( tip_taxon );
     }
+    
 }
 
 
@@ -112,7 +111,12 @@ double FossilTipTimeUniformProposal::doProposal( void )
     
     Tree& tau = tree->getValue();
     
-    if ( use_index == false )
+    if ( use_index )
+    {
+        // Always recompute node_index
+        node_index = tree->getValue().getTipIndex( tip_taxon );
+    }
+    else
     {
         std::vector<size_t> tips;
         for (size_t i = 0; i < tau.getNumberOfTips(); ++i)
@@ -143,7 +147,7 @@ double FossilTipTimeUniformProposal::doProposal( void )
     double parent_age   = parent.getAge();
     double my_age       = node.getAge();
     double min_age      = 0;
-    double max_age      = parent_age;
+    double max_age;
     
     // adjust min and max age, either given taxon data or given provided ages
     if ( min == NULL )
@@ -162,19 +166,13 @@ double FossilTipTimeUniformProposal::doProposal( void )
         // adjust max age given taxon data
         Taxon& taxon = node.getTaxon();
         double taxon_max_age = taxon.getMaxAge();
-        if ( taxon_max_age < max_age )
-        {
-            max_age = taxon_max_age;
-        }
+        max_age = taxon_max_age;
     }
     else
     {
         // adjust max age given provided variable
         double provided_max_age = max->getValue();
-        if ( provided_max_age < max_age )
-        {
-            max_age = provided_max_age;
-        }
+        max_age = provided_max_age;
     }
 
     if ( node.isSampledAncestorTip() == true )
@@ -209,8 +207,16 @@ double FossilTipTimeUniformProposal::doProposal( void )
             // set the max age either to the boundary or the parent max age
             max_age = fmin(max_age, grandparent_age);
         }
+    } else {
+        max_age = fmin(max_age, parent_age);
     }
     
+    // Abort the move if we don't have a valid interval
+    if (not (min_age < max_age))
+        throw RbException(RbException::SKIP_PROPOSAL);
+
+    assert(max_age >= min_age); //sanity check
+
     // now we store all necessary values
     stored_age = my_age;
     
@@ -293,24 +299,5 @@ void FossilTipTimeUniformProposal::swapNodeInternal(DagNode *oldN, DagNode *newN
     {
         min = static_cast<TypedDagNode<double>* >(newN) ;
     }
-    
-}
-
-
-void FossilTipTimeUniformProposal::setProposalTuningParameter(double tp)
-{
-    // this proposal has no tuning parameter: nothing to do
-}
-
-
-/**
- * Tune the Proposal to accept the desired acceptance ratio.
- *
- * The acceptance ratio for this Proposal should be around 0.44.
- * If it is too large, then we increase the proposal size,
- * and if it is too small, then we decrease the proposal size.
- */
-void FossilTipTimeUniformProposal::tune( double rate )
-{
     
 }

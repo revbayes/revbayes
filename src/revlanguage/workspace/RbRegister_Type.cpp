@@ -28,7 +28,7 @@
 #include <vector>
 #include <cstdlib>
 #include <cstdio>
-#include <math.h>
+#include <cmath>
 
 /* Files including helper classes */
 #include "RbException.h"
@@ -69,6 +69,7 @@
 /* Container types (in folder "distributions/phylogenetics") */
 
 /* Evolution types (in folder "datatypes/phylogenetics") */
+#include "RlCoalescentSFSSimulator.h"
 
 /* Character state types (in folder "datatypes/phylogenetics/character") */
 
@@ -83,6 +84,7 @@
 /* Inference types (in folder "analysis") */
 #include "RlBootstrapAnalysis.h"
 #include "RlBurninEstimationConvergenceAssessment.h"
+#include "RlConditionalPosteriorOrdinate.h"
 #include "RlHillClimber.h"
 #include "RlMcmc.h"
 #include "RlMcmcmc.h"
@@ -144,6 +146,7 @@ void RevLanguage::Workspace::initializeTypeGlobalWorkspace(void)
         /* Add inference types (in folder "datatypes/inference") (alphabetic order) */
         addType( new BootstrapAnalysis()                             );
         addType( new BurninEstimationConvergenceAssessment()         );
+        addType( new ConditionalPosteriorOrdinate()                  );
         addType( new HillClimber()                                   );
         addType( new Mcmc()                                          );
         addType( new Mcmcmc()                                        );
@@ -154,14 +157,22 @@ void RevLanguage::Workspace::initializeTypeGlobalWorkspace(void)
         addType( new PowerPosteriorAnalysis()                        );
         addType( new SteppingStoneSampler()                          );
         addType( new ValidationAnalysis()                            );
+        
+        /* Add output types (in folder "analysis/mcmc/output") (alphabetic order) */
+        addType( new Trace()                                     );
+        addType( new TraceTree()                                 );
 
-        /* Add stopping rules (in folder "analysis/stoppingRules") (alphabetic order) */
+        /* Add stopping rules (in folder "analysis/stoppingRule") (alphabetic order) */
         addType( new GelmanRubinStoppingRule()                   );
         addType( new GewekeStoppingRule()                        );
         addType( new MaxIterationStoppingRule()                  );
         addType( new MaxTimeStoppingRule()                       );
         addType( new MinEssStoppingRule()                        );
         addType( new StationarityStoppingRule()                  );
+        
+        
+        /* Add types (in folder "datatypes/phylogenetics") (alphabetic order) */
+        addType( new CoalescentSFSSimulator()                    );
 
     }
     catch(RbException& rbException)

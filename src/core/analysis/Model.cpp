@@ -2,6 +2,7 @@
 
 #include <map>
 #include <ostream>
+#include <queue>
 #include <string>
 
 #include "DagNode.h"
@@ -272,68 +273,47 @@ const DagNodeMap& Model::getNodesMap() const
 }
 
 
-/**
- * Creates a vector of stochastic nodes in parent-children order,
- * starting from the first node of the model
- */
 std::vector<DagNode*> Model::getOrderedStochasticNodes()
-{
-    
-    std::vector<DagNode *> ordered_nodes;
-    std::set< const DagNode *> visited;
-    getOrderedStochasticNodes(nodes[0], ordered_nodes, visited );
-    
-    return ordered_nodes;
-}
+{ // Use Kahn's algorithm for topological sorting
+    std::set<const DagNode*> in_model(nodes.begin(), nodes.end());
+    std::map<DagNode*, size_t> indegree;
 
-
-/**
- * Creates a vector of stochastic nodes,
- * starting with the parents of the called node, then the node, then its children
- *
- * @param dagNode called node
- * @param[out] orderedStochasticNodes vector to store the nodes in
- * @param visitedNodes nodes that have already been added to the vector
- */
-void Model::getOrderedStochasticNodes(const DagNode* the_dag_node, std::vector<DagNode*>& orderedStochasticNodes, std::set<const DagNode*>& visitedNodes)
-{
-    
-    if (visitedNodes.find(the_dag_node) != visitedNodes.end())
+    for (auto node : nodes)
     {
-        //The node has been visited before
-        //we do nothing
-        return;
+        size_t deg = 0;
+        for (auto parent : node->getParents())
+            if (in_model.count(parent)) ++deg;
+        indegree[node] = deg;
     }
-    
-    if ( the_dag_node->isConstant() == false )
+
+    std::queue<DagNode*> ready;
+    for (auto node : nodes)
+        if (indegree[node] == 0) ready.push(node);
+
+    std::vector<DagNode*> ordered;
+    size_t processed = 0;
+
+    while (!ready.empty())
     {
-        // First I have to visit my parents
-        std::vector<const DagNode *> parents = the_dag_node->getParents() ;
-        std::vector<const DagNode *>::const_iterator it;
-        for ( it=parents.begin() ; it != parents.end(); it++ )
+        DagNode* node = ready.front();
+        ready.pop();
+        ++processed;
+
+        if (node->isStochastic())
+            ordered.push_back(node);
+
+        for (auto child : node->getChildren())
         {
-            getOrderedStochasticNodes(*it, orderedStochasticNodes, visitedNodes);
+            auto it = indegree.find(child);
+            if (it != indegree.end() && --(it->second) == 0)
+                ready.push(child);
         }
-        
     }
 
-    // Then I can add myself to the nodes visited, and to the ordered vector of stochastic nodes
-    if ( the_dag_node->isStochastic() && (visitedNodes.find(the_dag_node) == visitedNodes.end()) ) //if the node is stochastic
-    {
-        orderedStochasticNodes.push_back( const_cast<DagNode*>( the_dag_node ) );
-    }
-    
-    // add myself here for safety reasons
-    visitedNodes.insert( the_dag_node );
+    if (processed != nodes.size())
+        throw RbException("Cycle detected while ordering stochastic DAG nodes.");
 
-    // Finally I will visit my children
-    std::vector<DagNode*> children = the_dag_node->getChildren() ;
-    std::vector<DagNode*>::iterator it;
-    for ( it = children.begin() ; it != children.end(); it++ )
-    {
-        getOrderedStochasticNodes(*it, orderedStochasticNodes, visitedNodes);
-    }
-    
+    return ordered;
 }
 
 

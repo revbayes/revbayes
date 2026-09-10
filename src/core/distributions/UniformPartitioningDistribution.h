@@ -27,7 +27,7 @@ namespace RevBayesCore {
      *
      */
     template <class valueType>
-    class UniformPartitioningDistribution : public TypedDistribution< RbVector<valueType> >, public MemberObject<long> {
+    class UniformPartitioningDistribution : public TypedDistribution< RbVector<valueType> >, public MemberObject<std::int64_t> {
         
     public:
         // constructor(s)
@@ -37,14 +37,14 @@ namespace RevBayesCore {
         // public member functions
         UniformPartitioningDistribution*                    clone(void) const;                                                                      //!< Create an independent clone
         double                                              computeLnProbability(void);
-        void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, long &rv) const;     //!< Map the member methods to internal function calls
+        void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, std::int64_t &rv) const;     //!< Map the member methods to internal function calls
         int                                                 getCurrentIndex(void) const;
         RbVector<valueType>*                                getPartition(void);
         std::vector<int>                                    getValueAssignments(void);
 
         void                                                redrawValue(void);
         void                                                setCurrentIndex(int i);
-        void                                                setValue(valueType *v, bool f=false);
+     // void                                                setValue(valueType *v, bool f=false);
         void                                                setValueAssignments(std::vector<int> v);
         
     protected:
@@ -191,16 +191,16 @@ double RevBayesCore::UniformPartitioningDistribution<valueType>::computeLnProbab
 
 
 template <class valueType>
-void RevBayesCore::UniformPartitioningDistribution<valueType>::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, long &rv) const
+void RevBayesCore::UniformPartitioningDistribution<valueType>::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, std::int64_t &rv) const
 {
     
     if ( n == "getAllocationIndex" )
     {
-        rv = long(index) + 1;
+        rv = std::int64_t(index) + 1;
     }
     else
     {
-        throw RbException("A uniform partitions distribution does not have a member method called '" + n + "'.");
+        throw RbException() << "A uniform partitions distribution does not have a member method called '" << n << "'.";
     }
     
 }
@@ -389,24 +389,31 @@ void RevBayesCore::UniformPartitioningDistribution<valueType>::swapParameterInte
 }
 
 
-template <class valueType>
-void RevBayesCore::UniformPartitioningDistribution<valueType>::setValue(valueType *v, bool force)
-{
-    
-    const RbVector<valueType> &vals = parameter_values->getValue();
-    // we need to catch the value and increment the index
-    for (index = 0; index < vals.size(); ++index)
-    {
-        if ( vals[index] == *v )
-        {
-            break;
-        }
-    }
-    
-    // delegate class
-    TypedDistribution<valueType>::setValue( v, force );
-}
+/**
+ * The setValue() override below suffers from two problems. First, it tries to delegate to the wrong class: the UPP distribution does not inherit
+ * from TypedDistribution<valueType>, but rather from TypedDistribution< RbVector<valueType> >. This would constitute undefined behavior, and
+ * the only thing that prevented it from causing a compile error is the second problem: the function was never actually dispatched to, either
+ * from its own Rev wrapper (Dist_UPP) or from UPPAllocationProposal.h, which is the only other header file that #include's it. Instead, calls to
+ * setValue() or clamp() simply propagated to the implementation in the base class, and the index-setting code below was never executed.
+ */
 
+// template <class valueType>
+// void RevBayesCore::UniformPartitioningDistribution<valueType>::setValue(valueType *v, bool force)
+// {
+//
+//     const RbVector<valueType> &vals = parameter_values->getValue();
+//     // we need to catch the value and increment the index
+//     for (index = 0; index < vals.size(); ++index)
+//     {
+//         if ( vals[index] == *v )
+//         {
+//             break;
+//         }
+//     }
+//
+//     // delegate class
+//     TypedDistribution<valueType>::setValue( v, force );
+// }
 
 
 #endif

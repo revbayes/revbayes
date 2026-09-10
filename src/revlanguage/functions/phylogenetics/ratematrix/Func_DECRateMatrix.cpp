@@ -136,14 +136,7 @@ RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_DECRateMatrix::
     }
     bool uc = false;
     RevBayesCore::DECRateMatrixFunction* f = new RevBayesCore::DECRateMatrixFunction( dr, er, rs, cs, ex,uc, mrs );
-    
-//    RevBayesCore::TransitionProbabilityMatrix P(f->getValue().getNumberOfStates());
-    
-//    f->getValue().calculateTransitionProbabilities(5.111, 0.92, 0.02, P);
-//    
-//    std::cout << P << "\n";
-////    rm->calculateTransitionProbabilities( start_age, end_age,  rate, this->transition_prob_matrices[0] );
-    
+       
     return f;
 }
 
@@ -170,7 +163,7 @@ const ArgumentRules& Func_DECRateMatrix::getArgumentRules( void ) const
         
 //        argumentRules.push_back( new ArgumentRule( "orderStatesByBinary", RlBoolean::getClassTypeSpec(), "Order states by binary value?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ));
 //        
-        argumentRules.push_back( new ArgumentRule( "maxRangeSize", Natural::getClassTypeSpec(), "Maximum range size.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0L) ));
+        argumentRules.push_back( new ArgumentRule( "maxRangeSize", Natural::getClassTypeSpec(), "Maximum range size.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(0) ));
         
 
         rules_set = true;

@@ -1,0 +1,26 @@
+   
+   Running MCMC simulation
+   This simulation runs 4 independent replicates.
+   The simulator uses 1 different moves in a random move schedule with 1 moves per iteration
+   
+   Stopping rule:
+       Target value for effective sample size (ESS): > 50
+   
+   
+   Minimum effective sample size (ESS): 4.322936 (target: > 50)
+   
+   
+   Minimum effective sample size (ESS): 11.000000 (target: > 50)
+   
+   
+   Minimum effective sample size (ESS): 15.850371 (target: > 50)
+   
+   
+   Minimum effective sample size (ESS): 26.164988 (target: > 50)
+   
+   
+   Minimum effective sample size (ESS): 40.212909 (target: > 50)
+   
+   
+   Minimum effective sample size (ESS): 51.000000 (target: > 50)
+   

@@ -177,19 +177,3 @@ void AbstractGibbsMove::printSummary(std::ostream &o, bool current_period) const
 
 
 }
-
-
-void AbstractGibbsMove::setMoveTuningParameter(double tp)
-{
-    // Gibbs move has no tuning parameter: nothing to do
-}
-
-
-/**
- * Tune the move.
- * This is a dummy implementation because Gibbs move cannot be tuned.
- */
-void AbstractGibbsMove::tune( void )
-{
-
-}

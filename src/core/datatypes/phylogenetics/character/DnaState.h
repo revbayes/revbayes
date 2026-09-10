@@ -31,39 +31,49 @@ namespace RevBayesCore {
                                         DnaState(const std::string &s);                     //!< Constructor with nucleotide observation
                                         DnaState(const RbBitSet& bs);                       //!< Constructor with which letters are observed.
 
-        bool                            operator==(const CharacterState& x) const;
+        bool                            operator==(const CharacterState& x) const override;
         bool                            operator==(const DnaState& x) const;
 //        bool                            operator<(const DnaState& x) const;
-        void                            operator+=(int);
-        void                            operator-=(int);
+        void                            operator+=(int) override;
+        void                            operator-=(int) override;
 
-        bool                            isAmbiguous(void) const;
-        size_t                          getStateIndex(void) const;                          //!< Get the index of the current state
+        bool                            isAmbiguous(void) const override;
+        size_t                          getStateIndex(void) const override;                 //!< Get the index of the current state
 
-        DnaState*                       clone(void) const;                                  //!< Get a copy of this object
+        DnaState*                       clone(void) const override;                         //!< Get a copy of this object
 
         // Discrete character observation functions
 
-        void                            addState(const std::string &symbol);                //!< Add a character state to the set of character states
-        size_t                          getNumberOfStates(void) const;                      //!< Get the number of discrete states for the character
-        RbBitSet                        getState(void) const;                               //!< Get the state (as the bitset)
-        void                            setToFirstState(void);                              //!< Set this character state to the first (lowest) possible state
-        void                            setStateByIndex(size_t index);                      //!< Set the discrete observation
-        std::string                     getDataType(void) const;                            //!< Get the datatype as a common string.
-        std::string                     getStateLabels(void) const;                         //!< Get valid state labels
-        std::string                     getStringValue(void) const;                         //!< Get a representation of the character as a string
-        void                            setState(const std::string &symbol);                //!< Compute the internal state value for this character.
-        bool                            isGapState(void) const;                             //!< Get whether this is a gapped character state
-        bool                            isMissingState(void) const;                         //!< Get whether this is a missing character state
-        void                            setGapState(bool tf);                               //!< set whether this is a gapped character
-        void                            setMissingState(bool tf);                           //!< set whether this is a missing character
+        void                            addState(const std::string &symbol) override;       //!< Add a character state to the set of character states
+        size_t                          getNumberOfStates(void) const override;             //!< Get the number of discrete states for the character
+        RbBitSet                        getState(void) const override;                      //!< Get the state (as the bitset)
+        void                            setToFirstState(void) override;                     //!< Set this character state to the first (lowest) possible state
+        void                            setStateByIndex(size_t index) override;             //!< Set the discrete observation
+        std::string                     getDataType(void) const override;                   //!< Get the datatype as a common string.
+        std::string                     getStateLabels(void) const override;                //!< Get valid state labels
+        std::string                     getStringValue(void) const override;                //!< Get a representation of the character as a string
+        void                            setState(const std::string &symbol) override;       //!< Compute the internal state value for this character.
+        bool                            isGapState(void) const override;                    //!< Get whether this is a gapped character state
+        bool                            isMissingState(void) const override;                //!< Get whether this is a missing character state
+        void                            setGapState(bool tf) override;                      //!< set whether this is a gapped character
+        void                            setMissingState(bool tf) override;                  //!< set whether this is a missing character
         
     private:
         
         char                            state;
     
     };
-    
+
+    inline bool operator==(const DiscreteCharacterState& lhs, const DnaState& rhs)
+    {
+        return rhs.operator==(lhs);
+    }
+
+    inline bool operator==(const DnaState& rhs, const DiscreteCharacterState& lhs)
+    {
+        return lhs.operator==(rhs);
+    }
+
 }
 
 #endif

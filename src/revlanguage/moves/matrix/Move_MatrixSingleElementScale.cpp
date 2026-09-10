@@ -13,13 +13,17 @@
 
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
+#include "Natural.h"
+#include "RbException.h"
 #include "RlBoolean.h"
 #include "MatrixRealSingleElementScaleProposal.h"
 #include "MetropolisHastingsMove.h"
 #include "ModelVector.h"
+#include "Probability.h"
 #include "Real.h"
 #include "RealPos.h"
 #include "RevObject.h"
+#include "RevNullObject.h"
 #include "RlMatrixReal.h"
 #include "RlMatrixRealSymmetric.h"
 #include "TypedDagNode.h"
@@ -64,6 +68,7 @@ void Move_MatrixSingleElementScale::constructInternalObject( void )
     double l = static_cast<const RealPos &>( lambda->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
 
     RevBayesCore::Proposal *p = NULL;
 
@@ -71,21 +76,45 @@ void Move_MatrixSingleElementScale::constructInternalObject( void )
     {
         RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* tmp = static_cast<const MatrixReal &>( v->getRevObject() ).getDagNode();
         RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::MatrixReal> *>( tmp );
-        p = new RevBayesCore::MatrixRealSingleElementScaleProposal(n,l, v->getRevObject().isType( MatrixRealSymmetric::getClassTypeSpec() ) );
+        p = new RevBayesCore::MatrixRealSingleElementScaleProposal(n, l, v->getRevObject().isType( MatrixRealSymmetric::getClassTypeSpec() ) );
+        p->setTargetAcceptanceRate(tt);
     }
     else if (v->getRevObject().isType( ModelVector<ModelVector<RealPos> >::getClassTypeSpec() ))
     {
         RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* tmp = static_cast<const ModelVector<ModelVector<RealPos> > &>( v->getRevObject() ).getDagNode();
         RevBayesCore::StochasticNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > > *>( tmp );
-        p = new RevBayesCore::MatrixRealSingleElementScaleProposal(n,l);
+        p = new RevBayesCore::MatrixRealSingleElementScaleProposal(n, l);
+        p->setTargetAcceptanceRate(tt);
     }
     else if (v->getRevObject().isType( ModelVector<ModelVector<Real> >::getClassTypeSpec() ))
     {
         RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* tmp = static_cast<const ModelVector<ModelVector<Real> > &>( v->getRevObject() ).getDagNode();
         RevBayesCore::StochasticNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > > *>( tmp );
-        p = new RevBayesCore::MatrixRealSingleElementScaleProposal(n,l);
+        p = new RevBayesCore::MatrixRealSingleElementScaleProposal(n, l);
+        p->setTargetAcceptanceRate(tt);
     }
     
+    // row= and col= are 1-based; omitting them leaves the whole matrix as the pool.
+    // Natural admits 0, which would wrap around when the index is made 0-based.
+    if ( row->getRevObject() != RevNullObject::getInstance() )
+    {
+        long rval = static_cast<const Natural &>( row->getRevObject() ).getValue();
+        if ( rval < 1 )
+        {
+            throw RbException() << "mvMatrixElementScale: row must be at least 1, but was " << rval << ".";
+        }
+        static_cast<RevBayesCore::MatrixRealSingleElementScaleProposal*>(p)->setRow( size_t(rval) );
+    }
+    if ( col->getRevObject() != RevNullObject::getInstance() )
+    {
+        long cval = static_cast<const Natural &>( col->getRevObject() ).getValue();
+        if ( cval < 1 )
+        {
+            throw RbException() << "mvMatrixElementScale: col must be at least 1, but was " << cval << ".";
+        }
+        static_cast<RevBayesCore::MatrixRealSingleElementScaleProposal*>(p)->setColumn( size_t(cval) );
+    }
+
     value = new RevBayesCore::MetropolisHastingsMove(p,w,t);
 
 }
@@ -141,6 +170,8 @@ const MemberRules& Move_MatrixSingleElementScale::getParameterRules(void) const
         move_member_rules.push_back( new ArgumentRule( "x"     , matTypes, "The variable on which this move operates.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
         move_member_rules.push_back( new ArgumentRule( "lambda", RealPos::getClassTypeSpec()   , "The scaling factor (strength) of the proposal.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new Real(1.0) ) );
         move_member_rules.push_back( new ArgumentRule( "tune"  , RlBoolean::getClassTypeSpec() , "Should we tune the scaling factor during burnin?", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new RlBoolean( true ) ) );
+        move_member_rules.push_back( new ArgumentRule( "row", Natural::getClassTypeSpec(), "Confine the move to this row; omit to use every element.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
+        move_member_rules.push_back( new ArgumentRule( "col", Natural::getClassTypeSpec(), "Confine the move to this column; omit to use every element.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
         
         /* Inherit weight from Move, put it after variable */
         const MemberRules& inheritedRules = Move::getParameterRules();
@@ -195,6 +226,12 @@ void Move_MatrixSingleElementScale::setConstParameter(const std::string& name, c
     }
     else if ( name == "tune" ) {
         tune = var;
+    }
+    else if ( name == "row" ) {
+        row = var;
+    }
+    else if ( name == "col" ) {
+        col = var;
     }
     else {
         Move::setConstParameter(name, var);

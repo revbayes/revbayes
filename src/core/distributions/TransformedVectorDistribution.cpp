@@ -9,12 +9,12 @@ using namespace RevBayesCore;
 
 TransformedVectorDistribution::func_t combine(TransformedVectorDistribution::scalar_func_t f)
 {
-    return [=](const RbVector<double>& x) -> std::optional<RbVector<double>>
+    return [=](const std::vector<const DagNode*>& params, const RbVector<double>& x) -> std::optional<RbVector<double>>
     {
 	RbVector<double> y(x.size());
 	for(int i=0;i<y.size();i++)
 	{
-	    if (auto yi = f(x[i]))
+	    if (auto yi = f(params, x[i]))
 		y[i] = *yi;
 	    else
 		return {};
@@ -25,12 +25,12 @@ TransformedVectorDistribution::func_t combine(TransformedVectorDistribution::sca
 
 TransformedVectorDistribution::jacobian_t combine_deriv(TransformedVectorDistribution::scalar_func_t fp)
 {
-    return [=](const RbVector<double>& x) -> std::optional<double>
+    return [=](const std::vector<const DagNode*>& params, const RbVector<double>& x) -> std::optional<double>
     {
 	double log_J = 0;
 	for(int i=0;i<x.size();i++)
 	{
-	    if (auto fpi = fp(x[i]))
+	    if (auto fpi = fp(params, x[i]))
 		log_J += *fpi;
 	    else
 		return {};
@@ -45,7 +45,8 @@ TransformedVectorDistribution::TransformedVectorDistribution(std::unique_ptr<Typ
       f(F),
       f_inverse(FI),
       log_f_prime(LFP),
-      base_dist( std::move(d) )
+      base_dist( std::move(d) ),
+      transform_params(p)
 {
     // add the parameters to our set (in the base class)
     // in that way other class can easily access the set of our parameters
@@ -55,7 +56,7 @@ TransformedVectorDistribution::TransformedVectorDistribution(std::unique_ptr<Typ
     for (auto& parameter: base_dist->getParameters())
         this->addParameter( parameter );
 
-    for (auto& parameter: p)
+    for (auto& parameter: transform_params)
         this->addParameter( parameter );
 
     simulate();
@@ -116,19 +117,32 @@ double TransformedVectorDistribution::computeLnProbability( void )
     RbVector<double> y = *value;
 
     // 2. Compute probability density
-    if (auto x = f_inverse(y))
+    if (auto x = f_inverse(transform_params, y))
     {
 	base_dist->setValue( new RbVector<double>( std::move(*x) ) );
 
-	// If x = f_inverse(y) is defined, the log_f_prime(*x) should be defined.
+	// If x = f_inverse(y) is defined, then log_f_prime(*x) should be defined.
 
-	double ln_pdf = base_dist->computeLnProbability() - log_f_prime( base_dist->getValue() ).value();
+	double ln_pdf = base_dist->computeLnProbability() - log_f_prime( transform_params, base_dist->getValue() ).value();
 
 	// 3. Return value
 	return ln_pdf;
     }
     else
 	return RbConstants::Double::neginf;
+}
+
+void TransformedVectorDistribution::setValue(RbVector<double> *y, bool force)
+{
+    if (auto x = f_inverse(transform_params, *y))
+    {
+	base_dist->setValue( new RbVector<double>( std::move(*x) ), force);
+
+	// free memory
+	if (y != value) delete value;
+
+	value = y;
+    }
 }
 
 
@@ -138,7 +152,7 @@ void TransformedVectorDistribution::simulate()
 
     auto x = base_dist->getValue();
 
-    auto y = f(x);
+    auto y = f(transform_params, x);
 
     if (not y)
 	throw RbException()<<"TransformedVectorDistribution::simulated(): f(x) is not defined for simulated value from base distribution!";
@@ -153,9 +167,37 @@ void TransformedVectorDistribution::redrawValue( void )
 }
 
 
+// Further investigation into this latter case may yield a better solution.
+void TransformedVectorDistribution::touchSpecialization(const DagNode *affecter, bool touchAll)
+{
+    base_dist->touch(affecter, touchAll);
+}
+
+void TransformedVectorDistribution::restoreSpecialization( const DagNode *restorer )
+{
+    base_dist->restore(restorer);
+}
+
+void TransformedVectorDistribution::keepSpecialization( const DagNode* affecter )
+{
+    base_dist->keep(affecter);
+}
+
+void TransformedVectorDistribution::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode* affecter)
+{
+    base_dist->getAffected(affected, affecter);
+}
+
 /** Swap a parameter of the distribution */
 void TransformedVectorDistribution::swapParameterInternal( const DagNode *oldP, const DagNode *newP )
 {
+    for(auto& param: transform_params)
+        if (param == oldP)
+        {
+            param = newP;
+            return;
+        }
+
     base_dist->swapParameter(oldP,newP);
 }
 

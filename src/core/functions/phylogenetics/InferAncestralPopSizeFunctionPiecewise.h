@@ -41,7 +41,7 @@ namespace RevBayesCore {
                                                         const DagNode *inoccurrence,
                                                         const DagNode *ineventsampling,
                                                         const DagNode *intreatment,
-                                                        const TypedDagNode<long> *n,
+                                                        const TypedDagNode<std::int64_t> *n,
                                                         const std::string& cdt,
                                                         const TypedDagNode< RevBayesCore::RbVector<double> > *O,
                                                         const std::vector<double> &tau,
@@ -76,7 +76,7 @@ namespace RevBayesCore {
 
 
         const TypedDagNode< double > *                  start_age;                                   //!< Start age of the process.
-        const TypedDagNode< long > *                    maxHiddenLin;                                //!< The maximal number of hidden lineages.
+        const TypedDagNode< std::int64_t > *                    maxHiddenLin;                                //!< The maximal number of hidden lineages.
         const std::string&                              cond;                                        //!< Condition of the process ("time" or "survival")
         const std::vector<double>                       time_points;                                 //!< Times at which density is computed
         const TypedDagNode< RbVector<double> > *        occurrences;                                 //!< Occurrence ages of incomplete fossils

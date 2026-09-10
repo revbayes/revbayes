@@ -22,8 +22,8 @@ namespace RevBayesCore {
     class TransformedDistribution : public TypedDistribution< double >
     {
 
-	// Allow returning nothing in case the input value is invalid.
-	typedef std::function<std::optional<double>(double)> func_t;
+        // Allow returning nothing in case the input value is invalid.
+        typedef std::function<std::optional<double>(const std::vector<const DagNode*>& params, double)> func_t;
 
     public:
         // constructor(s)
@@ -31,29 +31,36 @@ namespace RevBayesCore {
         TransformedDistribution(const TransformedDistribution &d);
 
         // public member functions
-        TransformedDistribution*                            clone(void) const;                                                                                  //!< Create an independent clone
-        double                                              computeLnProbability(void);
-        void                                                redrawValue(void);
+        TransformedDistribution*                            clone(void) const override;                                                             //!< Create an independent clone
+        double                                              computeLnProbability(void) override;
+        void                                                redrawValue(void) override;
+        void                                                getAffected(RbOrderedSet<DagNode *> &affected, const DagNode* affecter) override;
+        void                                                setValue(double *v, bool f=false) override;                                             //!< Set the current value, e.g. attach an observation (clamp)
 
     protected:
         // Parameter management functions
-        void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);                        //!< Swap a parameter
-        
-        
+        void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP) override;               //!< Swap a parameter
+
+        // keep specialization for derived classes
+        void                                                keepSpecialization(const DagNode* affecter) override;
+        void                                                restoreSpecialization(const DagNode *restorer) override;
+        void                                                touchSpecialization(const DagNode *toucher, bool touchAll) override;
+
     private:
-        
+
         // helper methods
         void                                                simulate();
 
 	// the transformation
-	func_t                                              f = nullptr;
-	func_t                                              f_inverse = nullptr;
-	func_t                                              log_f_prime = nullptr;
+        func_t                                              f = nullptr;
+        func_t                                              f_inverse = nullptr;
+        func_t                                              log_f_prime = nullptr;
+        std::vector<const DagNode*>                         transform_params;                                                                       //!< Parameters used by the transformation.
 
         // the base distribution
 	std::unique_ptr<TypedDistribution<double>>          base_dist;
     };
-    
+
 }
 
 #endif

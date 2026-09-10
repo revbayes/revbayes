@@ -209,7 +209,7 @@ void TreeScaleProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
     {
         tree = static_cast<StochasticNode<Tree>* >(newN);
     }
-    else if ( oldN == rootAge )
+    else if ( oldN == vector_variable )
     {
         vector_variable = static_cast<StochasticNode< RbVector<Tree> >* >(newN);
     }
@@ -228,22 +228,23 @@ void TreeScaleProposal::setProposalTuningParameter(double tp)
 
 
 /**
- * Tune the Proposal to accept the desired acceptance ratio.
+ * Tune the Proposal to accept at the desired acceptance ratio.
  *
- * The acceptance ratio for this Proposal should be around 0.44.
+ * The acceptance ratio for this Proposal should be around 0.234.
  * If it is too large, then we increase the proposal size,
  * and if it is too small, then we decrease the proposal size.
  */
 void TreeScaleProposal::tune( double rate )
 {
     
-    if ( rate > 0.234 )
+    double p = this->targetAcceptanceRate;
+    if ( rate > p )
     {
-        delta *= (1.0 + ((rate-0.234)/0.766) );
+        delta *= (1.0 + ((rate - p)/(1.0 - p)) );
     }
     else
     {
-        delta /= (2.0 - rate/0.234 );
+        delta /= (2.0 - rate/p);
     }
     
 }

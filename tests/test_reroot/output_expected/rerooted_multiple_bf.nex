@@ -1,0 +1,5 @@
+#NEXUS
+
+Begin trees;
+tree TREE1 = [&U]((Melursus_ursinus[&index=22],Ursus_abstrusus[&index=21])[&index=23],((((Ursus_americanus[&index=20],Ursus_thibetanus[&index=19])[&index=24],Helarctos_malayanus[&index=18])[&index=25],((Ursus_arctos[&index=17],Ursus_maritimus[&index=16])[&index=26],Ursus_spelaeus[&index=15])[&index=27])[&index=28],((Arctodus_simus[&index=14],Tremarctos_ornatus[&index=13])[&index=29],((((((((Ailuropoda_melanoleuca[&index=12],Indarctos_arctoides[&index=11])[&index=30],Indarctos_punjabiensis[&index=10])[&index=31],Indarctos_vireti[&index=9])[&index=32],(Ailurarctos_lufengensis[&index=8],Agriarctos_spp[&index=7])[&index=33])[&index=34],Kretzoiarctos_beatrix[&index=6])[&index=35],Ursavus_primaevus[&index=5])[&index=36],Ursavus_brevirhinus[&index=4])[&index=37],(Ballusia_elmensis[&index=3],(Zaragocyon_daamsi[&index=2],Parictis_montanus[&index=1])[&index=38])[&index=39])[&index=40])[&index=41])[&index=42])[&index=43]:0.000000;
+End;

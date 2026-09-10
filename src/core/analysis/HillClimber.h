@@ -25,9 +25,9 @@ namespace RevBayesCore {
     public:
         HillClimber(const Model &m, const RbVector<Move> &moves, const RbVector<Monitor> &mons);
         HillClimber(const HillClimber &m);
-        virtual                                            ~HillClimber(void);                                                                             //!< Virtual destructor
+        virtual                                            ~HillClimber(void);                                                                      //!< Virtual destructor
         
-        HillClimber&                                        operator=(const HillClimber &m);                                                               //!< Overloaded assignment operator
+        HillClimber&                                        operator=(const HillClimber &m);                                                        //!< Overloaded assignment operator
         
         // public methods
 //        void                                                addFileMonitorExtension(const std::string &s, bool dir);
@@ -46,21 +46,21 @@ namespace RevBayesCore {
         std::string                                         getStrategyDescription(void) const;                                                     //!< Get the description of the strategy used here.
         bool                                                hasConverged(double m);
         void                                                initializeSampler(void);                                                                //!< Initialize objects for HillClimber sampling
-        void                                                monitor(unsigned long g);
+        void                                                monitor(std::uint64_t g);
         void                                                nextCycle(void);
         void                                                removeMonitors(void);
         void                                                reset(void);                                                                            //!< Reset the sampler and set all the counters back to 0.
         void                                                setModel(Model *m);
         void                                                setNumberOfProcesses(size_t i);                                                         //!< Set the number of processes for this HillClimber simulation.
         void                                                setScheduleType(const std::string &s);                                                  //!< Set the type of the move schedule
-        void                                                startMonitors(size_t num_cycles, bool reopen);                                          //!< Start the monitors
+        void                                                startMonitors(size_t num_cycles, bool reopen, double maxSeconds);                       //!< Start the monitors
         void                                                tune(void);                                                                             //!< Tune the sampler and its moves.
         void                                                writeMonitorHeaders(void);                                                              //!< Write the headers of the monitors
 
     protected:
         void                                                initializeMonitors(void);                                                               //!< Assign model and HillClimber ptrs to monitors
         void                                                replaceDag(const RbVector<Move> &mvs, const RbVector<Monitor> &mons);
-        void                                                setActivePIDSpecialized(size_t i, size_t n);                                                      //!< Set the number of processes for this class.
+        void                                                setActivePIDSpecialized(size_t i, size_t n);                                            //!< Set the number of processes for this class.
         
         
         Model*                                              model;

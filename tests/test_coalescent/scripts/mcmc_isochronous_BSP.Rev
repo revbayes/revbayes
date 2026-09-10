@@ -1,0 +1,146 @@
+##########################################################################
+#
+# RevBayes Example: Coalescent process applied to isochronous horse data
+#
+# authors: Sebastian Hoehna, Ronja Billenstein
+#
+##########################################################################
+
+## Global settings
+
+seed(1234)
+NUM_REPLICATES      = 2
+NUM_MCMC_ITERATIONS = 1
+THINNING            = 1
+
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
+
+#######################
+# Reading in the Data #
+#######################
+
+# Read in sequence data
+sequences <- readDiscreteCharacterData("data/horses_isochronous_sequences.fasta")
+taxa <- sequences.taxa()
+
+# Get the number of taxa. We need it later on.
+n_taxa <- taxa.size()
+
+
+##############
+# Tree model #
+##############
+
+ESTIMATED_ROOT_AGE <- 375000
+
+NUM_INTERVALS = ceil((n_taxa - 1) / 5)
+pop_size[1] ~ dnLoguniform(1E-2,1E8)
+pop_size[1].setValue( ESTIMATED_ROOT_AGE/2 )
+moves.append( mvScale(pop_size[1], lambda=0.1, tune=true, weight=2.0) )
+
+for (i in 2:NUM_INTERVALS) {
+
+    pop_size[i] ~ dnExponential( 1/pop_size[i-1] )
+    pop_size[i].setValue( ESTIMATED_ROOT_AGE/2 )
+    moves.append( mvScale(pop_size[i], lambda=0.1, tune=true, weight=2.0) )
+
+}
+
+num_events_pi <- rep(1, NUM_INTERVALS)
+num_e_simplex_init <- rep(1, NUM_INTERVALS)
+
+num_e_simplex <- simplex(num_e_simplex_init)
+n_multi <- n_taxa-1-NUM_INTERVALS
+
+number_events_pi ~ dnMultinomial(p=num_e_simplex, size=n_multi)
+final_number_events_pi := num_events_pi + number_events_pi
+
+moves.append( mvIidPrior(x=number_events_pi) )
+
+### the time tree is a stochastic node modeled by the coalescent skyline process (dnCoalescentSkyline)
+psi ~ dnCoalescentSkyline(theta=pop_size, method="events", events_per_interval=final_number_events_pi, taxa=taxa)
+
+root_age := psi.rootAge()
+
+diff <- (500000 - 250000)/2.0
+obs_root_age ~ dnNormal(mean = root_age, sd = 60000, min = root_age - diff, max = root_age + diff)
+obs_root_age.clamp(375000)
+
+interval_times := psi.getIntervalAges()
+
+### add some moves that change the tree
+moves.append( mvNarrow(psi, weight=n_taxa) )
+moves.append( mvNNI(psi, weight=n_taxa) )
+moves.append( mvFNPR(psi, weight=n_taxa/4.0) )
+moves.append( mvSubtreeScale(psi, weight=n_taxa/5.0) )
+moves.append( mvNodeTimeSlideUniform(psi, weight=n_taxa) )
+moves.append( mvRootTimeScaleBactrian(psi, weight=n_taxa/5.0) )
+moves.append( mvTreeScale(psi, weight=n_taxa/5.0) )
+
+#############
+# Sequences #
+#############
+
+er_prior <- v(1,1,1,1,1,1)
+pi_prior <- v(1,1,1,1)
+er ~ dnDirichlet(er_prior)
+pi ~ dnDirichlet(pi_prior)
+
+moves.append( mvBetaSimplex(er, weight=3) )
+moves.append( mvDirichletSimplex(er, weight=1) )
+moves.append( mvBetaSimplex(pi, weight=2) )
+moves.append( mvDirichletSimplex(pi, weight=1) )
+
+Q := fnGTR(er,pi)
+
+alpha ~ dnUniform( 0.0, 1E6 )
+alpha.setValue( 1.0 )
+sr := fnDiscretizeGamma( alpha, alpha, 4 )
+moves.append( mvScale(alpha, weight=2.0) )
+
+p_inv ~ dnBeta(1,1)
+moves.append( mvSlide(p_inv) )
+
+clock ~ dnLoguniform(1e-12,1e-4)
+clock.setValue(4.68e-8)
+moves.append( mvScale(clock, weight=2.0) )
+
+up_down_move = mvUpDownScale(weight=5.0)
+up_down_move.addVariable(clock,up=TRUE)
+up_down_move.addVariable(psi,up=FALSE)
+moves.append( up_down_move )
+
+seq ~ dnPhyloCTMC(tree=psi, Q=Q, siteRates=sr, pInv=p_inv, type="DNA", branchRates=clock)
+seq.clamp(sequences)
+
+
+#############
+# The Model #
+#############
+
+
+### workspace model wrapper ###
+mymodel = model(psi)
+
+
+
+################
+# The Analysis #
+################
+
+#add monitors
+monitors.append( mnModel(filename="output/horses_iso_BSP.log",printgen=THINNING) )
+monitors.append( mnFile(filename="output/horses_iso_BSP.trees",psi,printgen=THINNING) )
+monitors.append( mnFile(filename="output/horses_iso_BSP_NEs.log",pop_size,printgen=THINNING) )
+monitors.append( mnFile(filename="output/horses_iso_BSP_times.log",interval_times,printgen=THINNING) )
+
+mymcmc = mcmc(mymodel, monitors, moves, nruns=NUM_REPLICATES, combine="mixed")
+mymcmc.run(NUM_MCMC_ITERATIONS, tuning = 100)
+
+
+################
+
+# you may want to quit RevBayes now
+q()

@@ -65,7 +65,7 @@ RevBayesCore::TypedFunction< RevBayesCore::RbVector<double> >* Func_DECRates::cr
     
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* dr = static_cast<const ModelVector<ModelVector<RealPos> > &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* er = static_cast<const ModelVector<RealPos> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<long>* rs = static_cast<const Natural&>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<std::int64_t>* rs = static_cast<const Natural&>( this->args[2].getVariable()->getRevObject() ).getDagNode();
     
     if (dr->getValue().size() != er->getValue().size())
     {

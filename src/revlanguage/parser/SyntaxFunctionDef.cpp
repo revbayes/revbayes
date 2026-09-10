@@ -114,7 +114,7 @@ SyntaxFunctionDef* SyntaxFunctionDef::clone( void ) const
  * @todo Deal with local variables hiding external variables. Ask if user wants to replace
  *       an existing function or procedure.
  */
-RevPtr<RevVariable> SyntaxFunctionDef::evaluateContent( Environment& env, bool dynamic )
+RevPtr<RevVariable> SyntaxFunctionDef::evaluateContent( const std::shared_ptr<Environment>& env, bool dynamic )
 {
     // Get argument rules from the formals
     ArgumentRules* argRules = new ArgumentRules();
@@ -135,7 +135,7 @@ RevPtr<RevVariable> SyntaxFunctionDef::evaluateContent( Environment& env, bool d
         // Now check that all statements are function-safe
         for( std::list<SyntaxElement*>::const_iterator it = code->begin(); it != code->end(); ++it )
         {
-            if ( !(*it)->isFunctionSafe( env, localVars ) )
+            if ( !(*it)->isFunctionSafe( *env, localVars ) )
             {
                 std::ostringstream msg;
                 msg << "The code of the function includes statements that modify or potentially modify" << std::endl;
@@ -147,7 +147,7 @@ RevPtr<RevVariable> SyntaxFunctionDef::evaluateContent( Environment& env, bool d
 
         // Finally check whether last statement (if there is one) retrieves an external variable
         std::list<SyntaxElement*>::const_reverse_iterator rit = code->rbegin();
-        if ( rit != code->rend() && (*rit)->retrievesExternVar( env, localVars, false ) )
+       if ( rit != code->rend() && (*rit)->retrievesExternVar( *env, localVars, false ) )
             throw RbException( "The code is not function-safe." );
     }
 
@@ -169,7 +169,7 @@ RevPtr<RevVariable> SyntaxFunctionDef::evaluateContent( Environment& env, bool d
         the_function = new UserFunction( functionDef );
     
     // Insert the function/procedure in the (user) workspace
-    if ( env.getFunctionTable().existsFunctionInFrame( function_name, *argRules ) )
+    if ( env->getFunctionTable().existsFunctionInFrame( function_name, *argRules ) )
     {
         bool ok;
         if ( is_procedure_def )
@@ -179,7 +179,7 @@ RevPtr<RevVariable> SyntaxFunctionDef::evaluateContent( Environment& env, bool d
 
         if ( ok )
         {
-            env.getFunctionTable().replaceFunction( function_name, the_function );
+            env->getFunctionTable().replaceFunction( function_name, the_function );
         }
         else
         {
@@ -191,7 +191,7 @@ RevPtr<RevVariable> SyntaxFunctionDef::evaluateContent( Environment& env, bool d
     }
     else
     {
-        env.addFunction( the_function );
+        env->addFunction( the_function );
     }
 
     // No return value 

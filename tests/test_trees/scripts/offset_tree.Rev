@@ -1,0 +1,17 @@
+#######################
+# Reading in the Data #
+#######################
+
+### Read in the "observed" tree
+T1 <- readTrees("data/test_offset.tre")[1]
+T1_org = T1
+T1.offset(40.4)
+abs( T1.treeLength() - T1_org.treeLength() ) < 1E-4
+T1.treeLength()
+T1_org.treeLength()
+write(T1,file="output/offset_1.tre")
+
+
+
+## quit ##
+q()

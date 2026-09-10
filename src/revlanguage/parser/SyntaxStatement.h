@@ -42,10 +42,10 @@ namespace RevLanguage {
         SyntaxStatement*                            clone() const;                                                                  //!< Clone object
         
         // Regular functions
-        RevPtr<RevVariable>                         evaluateContent(Environment& env, bool dynamic=false);                          //!< Get semantic value
+        RevPtr<RevVariable>                         evaluateContent(const std::shared_ptr<Environment>& env, bool dynamic=false);   //!< Get semantic value
 
     protected:
-        bool                                        isTrue(SyntaxElement* expression, Environment& env) const;                      //!< Does expression evaluate to true?
+        bool                                        isTrue(SyntaxElement* expression, const std::shared_ptr<Environment>& env) const;  //!< Does expression evaluate to true?
 
         enum statementT                             statementType;                                                                  //!< The type of statement
         SyntaxElement*                              expression;                                                                     //!< Expression, conditional expr, or for condition

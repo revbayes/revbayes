@@ -26,7 +26,7 @@
 #include <sstream>
 #include <vector>
 #include <cstdlib>
-#include <math.h>
+#include <cmath>
 #include <cstdio>
 #include <string>
 
@@ -133,13 +133,15 @@
 #include "Dist_EmpiricalSample.h"
 #include "Dist_WeightedSample.h"
 
+/* Phylogenetic models (in folder "distributions/phylogenetics/") */
+// #include "Dist_PhyloCharacterEvent.h"
+
 /* Character evolution models (in folder "distributions/phylogenetics/character") */
 #include "Dist_CTMC.h"
 #include "Dist_phyloCTMC.h"
 #include "Dist_phyloCTMCDASequence.h"
 #include "Dist_phyloCTMCDASiteIID.h"
 #include "Dist_phyloCTMCClado.h"
-#include "Dist_phyloCTMCDollo.h"
 
 /* Branch rate priors (in folder "distributions/phylogenetics/tree") */
 
@@ -149,6 +151,7 @@
 #include "Dist_PhyloBrownianMVN.h"
 #include "Dist_PhyloBrownianREML.h"
 #include "Dist_PhyloBrownianMultiSampleREML.h"
+#include "Dist_PhyloBrownianProcessStateDependent.h"
 #include "Dist_PhyloMvtBrownian.h"
 #include "Dist_PhyloMultiSampleOrnsteinUhlenbeck.h"
 #include "Dist_PhyloMultiSampleOrnsteinUhlenbeckREML.h"
@@ -158,6 +161,7 @@
 #include "Dist_PhyloOrnsteinUhlenbeckMVN.h"
 #include "Dist_PhyloOrnsteinUhlenbeckPruning.h"
 #include "Dist_PhyloOrnsteinUhlenbeckThreePoint.h"
+#include "Dist_PhyloOrnsteinUhlenbeckStateDependent.h"
 #include "Dist_PhyloWhiteNoise.h"
 
 /* Tree priors (in folder "distributions/phylogenetics/tree") */
@@ -173,6 +177,7 @@
 #include "Dist_CoalescentSkyline.h"
 #include "Dist_conditionedBirthDeathShiftProcessContinuous.h"
 #include "Dist_ConstrainedTopology.h"
+#include "Dist_ConstrainedTopologySSE.h"
 #include "Dist_ConstrainedUnrootedTopology.h"
 #include "Dist_ConstrainedNodeAge.h"
 #include "Dist_ConstrainedNodeOrder.h"
@@ -200,6 +205,9 @@
 #include "Dist_uniformSerialSampledTimeTree.h"
 #include "Dist_uniformTopology.h"
 #include "Dist_uniformTopologyBranchLength.h"
+
+/* Branch rate priors (in folder "distributions/popgen") */
+#include "Dist_StairwayPlot.h"
 
 /* Distributions on simple variables (in folder "distributions/math") */
 #include "Dist_bernoulli.h"
@@ -275,11 +283,11 @@
 #include "Transform_Log.h"
 #include "Transform_Logit.h"
 #include "Transform_InvLogit.h"
-#include "Transform_Shift.h"
-#include "Transform_Shift_Pos.h"
-#include "Transform_Scale.h"
-#include "Transform_Scale_Pos.h"
-#include "Transform_Scale_Prob.h"
+
+#include "Transform_Add.h"
+#include "Transform_Sub1.h"
+#include "Transform_Sub2.h"
+#include "Transform_Mul.h"
 
 #include "Transform_Vector_Exp.h"
 #include "Transform_Vector_Log.h"
@@ -309,10 +317,12 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
         /* Evolutionary processes (in folder "distributions/phylogenetics") */
 
+//        AddDistribution< CharacterHistory           >( new Dist_PhyloCharacterEvent()                           );
+
         /* Branch rate processes (in folder "distributions/phylogenetics/branchrate") */
 
         // white noise process
-        AddDistribution< ModelVector<RealPos>       >( new Dist_PhyloWhiteNoise()          );
+        AddDistribution< ModelVector<RealPos>       >( new Dist_PhyloWhiteNoise()                               );
 
         /* trait evolution (in folder "distributions/phylogenetics/branchrate") */
 
@@ -323,6 +333,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< ContinuousCharacterData    >( new Dist_PhyloBrownianREML()                             );
         AddDistribution< ContinuousCharacterData    >( new Dist_PhyloBrownianMVN()                              );
         AddDistribution< ContinuousCharacterData    >( new Dist_PhyloBrownianMultiSampleREML()                  );
+        AddDistribution< ContinuousCharacterData    >( new Dist_PhyloBrownianProcessStateDependent()            );
         AddDistribution< ContinuousCharacterData    >( new Dist_PhyloMultiSampleOrnsteinUhlenbeck()             );
         AddDistribution< ContinuousCharacterData    >( new Dist_PhyloMultiSampleOrnsteinUhlenbeckREML()         );
         AddDistribution< ContinuousCharacterData    >( new Dist_PhyloMultivariateBrownianREML()                 );
@@ -331,6 +342,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< ContinuousCharacterData    >( new Dist_PhyloOrnsteinUhlenbeckMVN()                     );
         AddDistribution< ContinuousCharacterData    >( new Dist_PhyloOrnsteinUhlenbeckPruning()                 );
         AddDistribution< ContinuousCharacterData    >( new Dist_PhyloOrnsteinUhlenbeckThreePoint()              );
+        AddDistribution< ContinuousCharacterData    >( new Dist_PhyloOrnsteinUhlenbeckStateDependent()          );
 
         // multivariate brownian motion
         AddDistribution< ModelVector< ModelVector<Real> > >( new Dist_PhyloMvtBrownian() );
@@ -346,7 +358,6 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         addDistribution( new Dist_phyloCTMCDASequence() );
         addDistribution( new Dist_phyloCTMCDASiteIID() );
         addDistribution( new Dist_phyloCTMCClado() );
-        addDistribution( new Dist_phyloCTMCDollo() );
 
         /* Tree distributions (in folder "distributions/phylogenetics/tree") */
 
@@ -381,7 +392,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
         // coalescent (constant population sizes)
         AddDistribution< TimeTree                   >( new Dist_Coalescent() );
-        
+
         // coalescent (population sizes via demography functions)
         AddDistribution< TimeTree                   >( new Dist_CoalescentDemography() );
 
@@ -410,6 +421,9 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< TimeTree                   >( new Dist_ConstrainedTopology() );
 
         // constrained topology distribution
+        AddDistribution< TimeTree                   >( new Dist_ConstrainedTopologySSE() );
+
+        // constrained topology distribution
         AddDistribution< BranchLengthTree           >( new Dist_ConstrainedUnrootedTopology() );
 
         // uniform time tree distribution
@@ -427,8 +441,8 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         // uniform topology with branch lengths distribution
         AddDistribution< BranchLengthTree           >( new Dist_uniformTopologyBranchLength() );
 
-		// empirical tree distributions
-		AddDistribution< Tree                       >( new Dist_empiricalTree() );
+        // empirical tree distributions
+        AddDistribution< Tree                       >( new Dist_empiricalTree() );
 
         // ultrametric tree distributions
         AddDistribution< TimeTree                   >( new Dist_UltrametricTree() );
@@ -438,6 +452,13 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
 		// Distance Matrix Gamma distribution
 		AddDistribution< DistanceMatrix             >( new Dist_phyloDistanceGamma() );
+        
+        
+                
+        /* Popgen distributions (in folder "distributions/popgen") */
+
+        AddDistribution< ModelVector<RealPos>       >( new Dist_StairwayPlot()       );
+
 
 
         /* Statistical distributions on simple variables (in folder "distributions/math") */
@@ -585,10 +606,10 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
         // dirichlet process prior distribution
         AddDistribution< ModelVector<Real>          >( new Dist_dpp<Real>()         );
-		AddDistribution< ModelVector<RealPos>       >( new Dist_dpp<RealPos>()      );
-		AddDistribution< ModelVector<Natural>       >( new Dist_dpp<Natural>()      );
-		AddDistribution< ModelVector<Integer>       >( new Dist_dpp<Integer>()      );
-		AddDistribution< ModelVector<Probability>   >( new Dist_dpp<Probability>()  );
+        AddDistribution< ModelVector<RealPos>       >( new Dist_dpp<RealPos>()      );
+        AddDistribution< ModelVector<Natural>       >( new Dist_dpp<Natural>()      );
+        AddDistribution< ModelVector<Integer>       >( new Dist_dpp<Integer>()      );
+        AddDistribution< ModelVector<Probability>   >( new Dist_dpp<Probability>()  );
         AddDistribution< ModelVector<Simplex>       >( new Dist_dpp<Simplex>()      );
 
         // event distribution
@@ -613,11 +634,19 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< Real                       >( new Transform_Log()          );
         AddDistribution< Real                       >( new Transform_Logit()        );
         AddDistribution< Probability                >( new Transform_InvLogit()     );
-        AddDistribution< RealPos                    >( new Transform_Shift_Pos()    );
-        AddDistribution< Real                       >( new Transform_Shift()        );
-        AddDistribution< Probability                >( new Transform_Scale_Prob()   );
-        AddDistribution< RealPos                    >( new Transform_Scale_Pos()    );
-        AddDistribution< Real                       >( new Transform_Scale()        );
+        AddDistribution< RealPos                    >( new Transform_Add<RealPos    , false>() );
+        AddDistribution< Real                       >( new Transform_Add<Real       , false>() );
+        AddDistribution< Probability                >( new Transform_Mul<Probability, false>() );
+        AddDistribution< RealPos                    >( new Transform_Mul<RealPos    , false>() );
+        AddDistribution< Real                       >( new Transform_Mul<Real       , false>() );
+
+        AddDistribution< Real                       >( new Transform_Sub1()        );
+        AddDistribution< Real                       >( new Transform_Sub2()        );
+        AddDistribution< RealPos                    >( new Transform_Add<RealPos>()     );
+        AddDistribution< Real                       >( new Transform_Add<Real>()        );
+        AddDistribution< Probability                >( new Transform_Mul<Probability>() );
+        AddDistribution< RealPos                    >( new Transform_Mul<RealPos>()     );
+        AddDistribution< Real                       >( new Transform_Mul<Real>()        );
 
         AddDistribution< ModelVector<RealPos>       >( new Transform_Vector_Exp()   );
         AddDistribution< ModelVector<Real>          >( new Transform_Vector_Log()   );
@@ -629,9 +658,9 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
         // mixture distribution
         AddDistribution< Real                       >( new Dist_mixture<Real>() );
-		AddDistribution< RealPos                    >( new Dist_mixture<RealPos>() );
-		AddDistribution< Natural                    >( new Dist_mixture<Natural>() );
-		AddDistribution< Integer                    >( new Dist_mixture<Integer>() );
+        AddDistribution< RealPos                    >( new Dist_mixture<RealPos>() );
+        AddDistribution< Natural                    >( new Dist_mixture<Natural>() );
+        AddDistribution< Integer                    >( new Dist_mixture<Integer>() );
         AddDistribution< Probability                >( new Dist_mixture<Probability>() );
         AddDistribution< Simplex                    >( new Dist_mixture<Simplex>() );
         AddDistribution< ModelVector<Real>          >( new Dist_mixture< ModelVector<Real> >() );

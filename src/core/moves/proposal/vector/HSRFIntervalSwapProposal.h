@@ -31,22 +31,20 @@ template <class variableType> class StochasticNode;
     class HSRFIntervalSwapProposal : public Proposal {
 
     public:
-        HSRFIntervalSwapProposal(std::vector<StochasticNode<double> *> d, std::vector<StochasticNode<double> *> s);                             //!< Constructor
+        HSRFIntervalSwapProposal(std::vector<StochasticNode<double> *> d, std::vector<StochasticNode<double> *> s);                     //!< Constructor
 
         void                                        cleanProposal(void);                                                                //!< Clean up proposal
-        HSRFIntervalSwapProposal*                       clone(void) const;                                                                  //!< Clone object
+        HSRFIntervalSwapProposal*                   clone(void) const;                                                                  //!< Clone object
         double                                      doProposal(void);                                                                   //!< Perform proposal
         const std::string&                          getProposalName(void) const;                                                        //!< Get the name of the proposal for summary printing
         double                                      getProposalTuningParameter(void) const;
-        void                                        printParameterSummary(std::ostream &o, bool name_only) const;                                       //!< Print the parameter summary
+        void                                        printParameterSummary(std::ostream &o, bool name_only) const;                       //!< Print the parameter summary
         void                                        prepareProposal(void);                                                              //!< Prepare the proposal
-        void                                        setProposalTuningParameter(double tp);
-        void                                        tune(double r);                                                                     //!< Tune the proposal to achieve a better acceptance/rejection ratio
         void                                        undoProposal(void);                                                                 //!< Reject the proposal
 
     protected:
 
-        void                                        swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes on which the Proposal is working on
+        void                                        swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes the Proposal is working on
 
 
     private:
@@ -54,7 +52,7 @@ template <class variableType> class StochasticNode;
 
         std::vector<StochasticNode<double> *>       delta;
         std::vector<StochasticNode<double> *>       sigma;
-        size_t                                      stored_index;                                                                        //!< The stored value of the last modified element.
+        size_t                                      stored_index;                                                                       //!< The stored value of the last modified element.
 
 
     };

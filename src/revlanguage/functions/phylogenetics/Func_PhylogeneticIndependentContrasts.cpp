@@ -60,7 +60,7 @@ RevBayesCore::TypedFunction<RevBayesCore::RbVector<double> >* Func_PhylogeneticI
 {
     const RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = static_cast<const TimeTree &>( args[0].getVariable()->getRevObject() ).getDagNode();
     const RevBayesCore::TypedDagNode<RevBayesCore::ContinuousCharacterData>* data = static_cast<const ContinuousCharacterData &>( args[1].getVariable()->getRevObject() ).getDagNode();
-    const RevBayesCore::TypedDagNode<long>* site = static_cast<const Natural &>( args[2].getVariable()->getRevObject() ).getDagNode();
+    const RevBayesCore::TypedDagNode<std::int64_t>* site = static_cast<const Natural &>( args[2].getVariable()->getRevObject() ).getDagNode();
     const bool& normalized = static_cast<const RlBoolean &>( args[3].getVariable()->getRevObject() ).getValue();
     
     RevBayesCore::PhylogeneticIndependentContrastsFunction* f = new RevBayesCore::PhylogeneticIndependentContrastsFunction( tau, data, site, normalized );

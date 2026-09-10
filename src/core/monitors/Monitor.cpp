@@ -18,13 +18,13 @@ namespace RevBayesCore { class Model; }
 using namespace RevBayesCore;
 
 
-Monitor::Monitor(unsigned long g) :
+Monitor::Monitor(std::uint64_t g) :
     enabled( true ),
     printgen( g ),
     model( nullptr )
 {}
 
-Monitor::Monitor(unsigned long g, DagNode *n) :
+Monitor::Monitor(std::uint64_t g, DagNode *n) :
     enabled( true ),
     printgen( g ),
     model( nullptr )
@@ -40,7 +40,7 @@ Monitor::Monitor(unsigned long g, DagNode *n) :
 }
 
 
-Monitor::Monitor(unsigned long g, const std::vector<DagNode *> &n) :
+Monitor::Monitor(std::uint64_t g, const std::vector<DagNode *> &n) :
     enabled( true ),
     printgen( g ),
     nodes( n ),
@@ -267,7 +267,9 @@ void Monitor::openStream( bool reopen )
  * Overwrite this method for specialized behavior.
  */
 void Monitor::printHeader( void )
-{}
+{
+    
+}
 
 
 
@@ -362,8 +364,10 @@ void Monitor::setMcmc(Mcmc *m)
 
 /**
  * Sort the nodes by name so that the order is guaranteed of replicated runs.
+ *
+ * @param natural should we sort digits numerically ("x2" goes before "x10") or lexicographically ("x10" goes before "x2")?
  */
-void Monitor::sortNodesByName( void )
+void Monitor::sortNodesByName( bool natural )
 {
     
     std::vector<std::string> names;
@@ -378,7 +382,15 @@ void Monitor::sortNodesByName( void )
     }
     
     nodes.clear();
-    std::sort (names.begin(), names.end());
+    
+    if (natural)
+    {
+        std::sort(names.begin(), names.end(), StringUtilities::naturalSort);
+    }
+    else
+    {
+        std::sort(names.begin(), names.end());
+    }
     
     for (std::vector<std::string>::iterator it = names.begin(); it != names.end(); ++it)
     {
@@ -402,7 +414,7 @@ void Monitor::swapNode(DagNode *oldN, DagNode *newN)
 
     if (it == nodes.end())
     {
-        throw RbException("Cannot replace DAG node with name\"" + oldN->getName() + "\" in this monitor because the monitor doesn't hold this DAG node.");
+        throw RbException() << "Cannot replace DAG node with name\"" << oldN->getName() << "\" in this monitor because the monitor doesn't hold this DAG node.";
     }
     
     // remove myself from the old node and add myself to the new node
@@ -423,11 +435,13 @@ void Monitor::swapNode(DagNode *oldN, DagNode *newN)
 
 /**
  * Reset the variables for the monitor.
- * Overwrite this method for specialized behavior.
+ * This is a no-op that never uses its own arguments; we keep the types to match the signature, but suppress the names
+ * to avoid compiler warnings under -Wunused-parameter. Overwrite this method for specialized behavior.
  *
- * @param numCycles target number of iterations
+ * @param numCycles target number of iterations (0 if unknown)
+ * @param maxSeconds maximum wall-clock time in seconds (0 if unknown)
  */
-void Monitor::reset(size_t numCycles)
+void Monitor::reset(size_t /*numCycles*/, double /*maxSeconds*/)
 {}
 
 

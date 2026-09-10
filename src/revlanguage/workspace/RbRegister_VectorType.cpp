@@ -95,6 +95,7 @@
 #include "RlAbstractDiscreteTaxonData.h"
 #include "RlAbstractHomologousDiscreteCharacterData.h"
 #include "RlContinuousCharacterData.h"
+#include "RlCharacterHistory.h"
 
 /* Tree types (in folder "datatypes/phylogenetics/trees") */
 #include "RlClade.h"
@@ -126,7 +127,6 @@ void RevLanguage::Workspace::initializeVectorTypeGlobalWorkspace(void)
     
     try
     {
-        
         AddWorkspaceVectorType<Taxon,4>::addTypeToWorkspace( *this, new Taxon() );
         AddWorkspaceVectorType<RateGenerator,3>::addTypeToWorkspace( *this, new RateGenerator() );
         AddWorkspaceVectorType<CladogeneticProbabilityMatrix,3>::addTypeToWorkspace( *this, new CladogeneticProbabilityMatrix() );
@@ -141,6 +141,7 @@ void RevLanguage::Workspace::initializeVectorTypeGlobalWorkspace(void)
         AddWorkspaceVectorType<AbstractDiscreteTaxonData,3>::addTypeToWorkspace( *this, new AbstractDiscreteTaxonData() );
         AddWorkspaceVectorType<AbstractHomologousDiscreteCharacterData,3>::addTypeToWorkspace( *this, new AbstractHomologousDiscreteCharacterData() );
         AddWorkspaceVectorType<ContinuousCharacterData,3>::addTypeToWorkspace( *this, new ContinuousCharacterData() );
+        AddWorkspaceVectorType<CharacterHistory,3>::addTypeToWorkspace( *this, new CharacterHistory() );
         AddWorkspaceVectorType<CharacterHistoryRateModifier,3>::addTypeToWorkspace( *this, new CharacterHistoryRateModifier() );
         AddWorkspaceVectorType<TimeTree,3>::addTypeToWorkspace( *this, new TimeTree() );
         AddWorkspaceVectorType<BranchLengthTree,3>::addTypeToWorkspace( *this, new BranchLengthTree() );
@@ -153,15 +154,15 @@ void RevLanguage::Workspace::initializeVectorTypeGlobalWorkspace(void)
 
 //        AddWorkspaceVectorType<Dist_unif,1>::addTypeToWorkspace( *this, new Dist_unif() );
 //        this->addFunction(new Func_workspaceVector<Dist_unif>() );
-        addFunction(new Func_workspaceVector<Distribution>() );
+        addFunction( new Func_workspaceVector<Distribution>() );
         addFunction( new Func_workspaceVector<TypedDistribution<Natural> >() );
-        addFunction(new Func_workspaceVector<TypedDistribution<Real> >() );
-        addFunction(new Func_workspaceVector<TypedDistribution<RealPos> >() );
-        addFunction(new Func_workspaceVector<TypedDistribution<Probability> >() );
-        addFunction(new Func_workspaceVector<TypedDistribution<ModelVector<Natural> > >() );
-        addFunction(new Func_workspaceVector<TypedDistribution<ModelVector<Real> > >() );
-        addFunction(new Func_workspaceVector<TypedDistribution<ModelVector<RealPos> > >() );
-        addFunction(new Func_workspaceVector<TypedDistribution<ModelVector<Probability> > >() );
+        addFunction( new Func_workspaceVector<TypedDistribution<Real> >() );
+        addFunction( new Func_workspaceVector<TypedDistribution<RealPos> >() );
+        addFunction( new Func_workspaceVector<TypedDistribution<Probability> >() );
+        addFunction( new Func_workspaceVector<TypedDistribution<ModelVector<Natural> > >() );
+        addFunction( new Func_workspaceVector<TypedDistribution<ModelVector<Real> > >() );
+        addFunction( new Func_workspaceVector<TypedDistribution<ModelVector<RealPos> > >() );
+        addFunction( new Func_workspaceVector<TypedDistribution<ModelVector<Probability> > >() );
         addFunction( new Func_workspaceVector<TypedDistribution<TimeTree> >() );
 //        this->addFunction(new Func_workspaceVector<ContinuousDistribution>() );
 //        AddWorkspaceVectorType<Distribution,1>::addTypeToWorkspace( *this, new Distribution() );

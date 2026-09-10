@@ -48,7 +48,8 @@ ExponentialErrorDistribution::ExponentialErrorDistribution(const TypedDagNode<Di
     redrawValue();
 }
 
-ExponentialErrorDistribution* ExponentialErrorDistribution::clone(void) const   {
+ExponentialErrorDistribution* ExponentialErrorDistribution::clone(void) const
+{
 
     return new ExponentialErrorDistribution(*this);
 }
@@ -74,7 +75,8 @@ void ExponentialErrorDistribution::swapParameterInternal(const DagNode *oldP, co
     
 }
 
-double ExponentialErrorDistribution::computeLnProbability(void)   {
+double ExponentialErrorDistribution::computeLnProbability(void)
+{
     
     double ret = 0;
     
@@ -95,7 +97,8 @@ double ExponentialErrorDistribution::computeLnProbability(void)   {
 
 }
 
-void ExponentialErrorDistribution::redrawValue(void)   {
+void ExponentialErrorDistribution::redrawValue(void)
+{
 
     RandomNumberGenerator* rng = GLOBAL_RNG;
     

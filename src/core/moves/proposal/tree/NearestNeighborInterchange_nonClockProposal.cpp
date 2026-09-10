@@ -186,8 +186,8 @@ double NearestNeighborInterchange_nonClockProposal::doProposal( void )
         node->removeChild( node_A );
         parent.addChild( node_A );
         node->addChild( node_B );
-        node_A->setParent( &parent );
-        node_B->setParent( node );
+        node_A->setParent( &parent, false );
+        node_B->setParent( node, false );
     }
     else if ( picked_root_branch == false && picked_uncle == false )
     {
@@ -197,9 +197,9 @@ double NearestNeighborInterchange_nonClockProposal::doProposal( void )
         node_B->addChild( node );
         node->addChild( &parent );
         parent.addChild( node_A );
-        node->setParent( node_B );
-        parent.setParent( node );
-        node_A->setParent( &parent );
+        node->setParent( node_B, false );
+        parent.setParent( node, false );
+        node_A->setParent( &parent, false );
         
     }
     else if ( picked_root_branch == true  )
@@ -210,8 +210,8 @@ double NearestNeighborInterchange_nonClockProposal::doProposal( void )
         node->removeChild( node_A );
         parent.addChild( node_A );
         node->addChild( node_B );
-        node_A->setParent( &parent );
-        node_B->setParent( node );
+        node_A->setParent( &parent, false );
+        node_B->setParent( node, false );
     }
     
     return 0.0;
@@ -274,8 +274,8 @@ void NearestNeighborInterchange_nonClockProposal::undoProposal( void )
         node->removeChild( node_B );
         parent->addChild( node_B );
         node->addChild( node_A );
-        node_A->setParent( node );
-        node_B->setParent( parent );
+        node_A->setParent( node, false );
+        node_B->setParent( parent, false );
     }
     else if ( picked_root_branch == false && picked_uncle == false )
     {
@@ -287,9 +287,9 @@ void NearestNeighborInterchange_nonClockProposal::undoProposal( void )
         node_B->addChild( parent );
         node->addChild( node_A );
         parent->addChild( node );
-        parent->setParent( node_B );
-        node->setParent( parent );
-        node_A->setParent( node );
+        parent->setParent( node_B, false );
+        node->setParent( parent, false );
+        node_A->setParent( node, false );
         
     }
     else if ( picked_root_branch == true  )
@@ -300,8 +300,8 @@ void NearestNeighborInterchange_nonClockProposal::undoProposal( void )
         node->removeChild( node_B );
         parent->addChild( node_B );
         node->addChild( node_A );
-        node_A->setParent( node );
-        node_B->setParent( parent );
+        node_A->setParent( node, false );
+        node_B->setParent( parent, false );
     }
     
 }
@@ -319,25 +319,3 @@ void NearestNeighborInterchange_nonClockProposal::swapNodeInternal(DagNode *oldN
     tree = static_cast<StochasticNode<Tree>* >(newN) ;
     
 }
-
-
-void NearestNeighborInterchange_nonClockProposal::setProposalTuningParameter(double tp)
-{
-    // this proposal has no tuning parameter: nothing to do
-}
-
-
-/**
- * Tune the Proposal to accept the desired acceptance ratio.
- *
- * The acceptance ratio for this Proposal should be around 0.44.
- * If it is too large, then we increase the proposal size,
- * and if it is too small, then we decrease the proposal size.
- */
-void NearestNeighborInterchange_nonClockProposal::tune( double rate )
-{
-    
-    // nothing to tune
-    
-}
-

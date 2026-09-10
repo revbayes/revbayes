@@ -71,23 +71,23 @@ Func_range* Func_range::clone( void ) const
 RevPtr<RevVariable> Func_range::execute( void )
 {
     
-    long f = static_cast<const Integer &>( args[0].getVariable()->getRevObject() ).getValue();
-    long l = static_cast<const Integer &>( args[1].getVariable()->getRevObject() ).getValue();
+    std::int64_t f = static_cast<const Integer &>( args[0].getVariable()->getRevObject() ).getValue();
+    std::int64_t l = static_cast<const Integer &>( args[1].getVariable()->getRevObject() ).getValue();
     
     if ( f >= 0 && l >= 0 )
     {
 
-        ModelVector<Natural> *range = new ModelVector<Natural>( RevBayesCore::RbVector<long>() );
+        ModelVector<Natural> *range = new ModelVector<Natural>( RevBayesCore::RbVector<std::int64_t>() );
         if (f < l)
         {
-            for ( long i = f; i <= l; i++ )
+            for ( std::int64_t i = f; i <= l; i++ )
             {
                 range->push_back( Natural(i) );
             }
         }
         else
         {
-            for ( long i = f; i >= l; i-- )
+            for ( std::int64_t i = f; i >= l; i-- )
             {
                 range->push_back( Natural(i) );
             }
@@ -99,17 +99,17 @@ RevPtr<RevVariable> Func_range::execute( void )
     else
     {
 
-        ModelVector<Integer> *range = new ModelVector<Integer>( RevBayesCore::RbVector<long>() );
+        ModelVector<Integer> *range = new ModelVector<Integer>( RevBayesCore::RbVector<std::int64_t>() );
         if (f < l)
         {
-            for ( long i = f; i <= l; i++ )
+            for ( std::int64_t i = f; i <= l; i++ )
             {
                 range->push_back( Integer(i) );
             }
         }
         else
         {
-            for ( long i = f; i >= l; i-- )
+            for ( std::int64_t i = f; i >= l; i-- )
             {
                 range->push_back( Integer(i) );
             }

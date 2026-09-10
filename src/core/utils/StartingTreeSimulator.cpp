@@ -12,7 +12,6 @@
 #include "DistributionExponential.h"
 #include "RandomNumberGenerator.h"
 #include "RandomNumberFactory.h"
-#include "RbConstants.h"
 #include "TopologyNode.h"
 #include "Clade.h"
 #include "RbException.h"
@@ -20,6 +19,8 @@
 #include "Taxon.h"
 #include "TimeInterval.h"
 #include "Tree.h"
+#include "TreeUtilities.h"
+#include "RbOrderedSet.h"
 
 using namespace RevBayesCore;
 
@@ -30,9 +31,6 @@ StartingTreeSimulator::StartingTreeSimulator( void )
 }
 
 
-/**
- *
- */
 Tree* StartingTreeSimulator::simulateTree( const std::vector<Taxon> &taxa, const std::vector<Clade> &constraints ) const
 {
     std::vector<Clade> my_constraints = constraints;
@@ -108,7 +106,7 @@ Tree* StartingTreeSimulator::simulateTree( const std::vector<Taxon> &taxa, const
         } // finished with the optional constrains, if they exist
         
         // populate sorted clades vector
-        if ( my_constraints[i].size() > 1 && my_constraints[i].size() < num_taxa )
+        if ( my_constraints[i].size() > 1 && my_constraints[i].size() <= num_taxa )
         {
             
             if ( my_constraints[i].hasOptionalConstraints() == true )
@@ -124,15 +122,16 @@ Tree* StartingTreeSimulator::simulateTree( const std::vector<Taxon> &taxa, const
         }
         
     }
-    
-    
-    // create a clade that contains all species
-    Clade all_species = Clade(taxa);
-    all_species.setAge( RbConstants::Double::inf );
-    sorted_clades.push_back(all_species);
-    
+
     // DO WE NEED TO SORT THE TAXA?
     std::sort(sorted_clades.begin(), sorted_clades.end(), cladeBefore);
+
+    if(sorted_clades.back().size() < num_taxa) {
+        // create a clade that contains all species
+        Clade all_species = Clade(taxa);
+        all_species.setAge( RbConstants::Double::inf );
+        sorted_clades.push_back(all_species);
+    }
     
     std::vector<Clade> virtual_taxa;
     int i = -1;
@@ -195,7 +194,7 @@ Tree* StartingTreeSimulator::simulateTree( const std::vector<Taxon> &taxa, const
         }
         
         
-        std::set<TopologyNode*> nodes_in_clade;
+        RbOrderedSet<TopologyNode*> nodes_in_clade;
         
         
         for (size_t k = 0; k < taxa.size(); ++k)
@@ -230,32 +229,30 @@ Tree* StartingTreeSimulator::simulateTree( const std::vector<Taxon> &taxa, const
             nodes_in_clade.insert( missing_node );
         }
         
-//        double clade_age = c.getAge();
-//
-//        double max_node_age = 0;
-//        for (size_t j = 0; j < nodes_in_clade.size(); ++j)
-//        {
-//            if ( nodes_in_clade[j]->getAge() > max_node_age )
-//            {
-//                max_node_age = nodes_in_clade[j]->getAge();
-//            }
-//        }
+        simulateClade(nodes_in_clade, c.getAge());
         
-//        if ( clade_age <= max_node_age )
-//        {
-//            // Get the rng
-//            RandomNumberGenerator* rng = GLOBAL_RNG;
-//
-//            clade_age = rng->uniform01() * max_node_age + max_node_age;
-//        }
+        // Get the remaining node deterministically by sorting the set
+        TopologyNode *remaining_node = nullptr;
         
-        simulateClade(nodes_in_clade);
-        TopologyNode *remaining_node = *(nodes_in_clade.begin());
-        nodes.push_back( remaining_node );
+        if (nodes_in_clade.size() > 0) {
+            // Sort by smallest tip name in subtree for deterministic selection
+            std::sort(nodes_in_clade.begin(), nodes_in_clade.end(), [](const TopologyNode* a, const TopologyNode* b)
+            {
+                return TreeUtilities::getSmallestTipName(a) < TreeUtilities::getSmallestTipName(b);
+            });
+            
+            remaining_node = nodes_in_clade[0];
+            nodes.push_back( remaining_node );
+        }
+        
+        if (remaining_node == nullptr) {
+            throw RbException("No remaining node after simulateClade");
+        }
         
         std::vector<Taxon> v_taxa;
         remaining_node->getTaxa(v_taxa);
         Clade new_clade = Clade(v_taxa);
+        remaining_node -> setAge(c.getAge());
         new_clade.setAge( remaining_node->getAge() );
         virtual_taxa.push_back( new_clade );
     }
@@ -269,7 +266,7 @@ Tree* StartingTreeSimulator::simulateTree( const std::vector<Taxon> &taxa, const
 }
 
 
-void StartingTreeSimulator::simulateClade( std::set<TopologyNode*> &nodes) const
+void StartingTreeSimulator::simulateClade( RbOrderedSet<TopologyNode*> &nodes, double max_clade_age) const
 {
     
     // Get the rng
@@ -282,9 +279,8 @@ void StartingTreeSimulator::simulateClade( std::set<TopologyNode*> &nodes) const
     size_t num_taxa_at_present = 0;
     
     double min_age = RbConstants::Double::inf;
-    for (std::set<TopologyNode*>::const_iterator it=nodes.begin(); it!=nodes.end(); ++it)
+    for (TopologyNode* this_node : nodes)
     {
-        TopologyNode *this_node = *it;
         double a = this_node->getAge();
         if ( min_age > a )
         {
@@ -292,11 +288,11 @@ void StartingTreeSimulator::simulateClade( std::set<TopologyNode*> &nodes) const
         }
     }
 
-    std::set<TopologyNode*> current_nodes;
+    double max_tip_age = 0;
+    RbOrderedSet<TopologyNode*> current_nodes;
     std::multimap<double,TopologyNode*> serial_nodes;
-    for (std::set<TopologyNode*>::const_iterator it=nodes.begin(); it!=nodes.end(); ++it)
+    for (TopologyNode* this_node : nodes)
     {
-        TopologyNode *this_node = *it;
         double a = this_node->getAge();
         if ( this_node->isTip() == true )
         {
@@ -306,6 +302,7 @@ void StartingTreeSimulator::simulateClade( std::set<TopologyNode*> &nodes) const
         {
             serial_times.push_back(a);
             serial_nodes.insert( std::pair<double, TopologyNode*>(a, this_node) );
+            if(a > max_tip_age) max_tip_age = a;
         }
         else
         {
@@ -313,16 +310,18 @@ void StartingTreeSimulator::simulateClade( std::set<TopologyNode*> &nodes) const
             current_nodes.insert( this_node );
         }
     }
+
+    if(max_tip_age >= max_clade_age) throw RbException() << "Specified clade age " << max_clade_age << " lower than max tip age";
     
     size_t index_serial_time = 0;
     if (num_taxa_at_present == num_taxa)
     {
-        serial_times.push_back(RbConstants::Double::inf);
+        serial_times.push_back(max_clade_age);
     }
     else
     {
         std::sort(serial_times.begin(), serial_times.end());
-        serial_times.push_back(RbConstants::Double::inf);
+        serial_times.push_back(max_clade_age);
     }
     
     // now simulate the ages
@@ -345,46 +344,64 @@ void StartingTreeSimulator::simulateClade( std::set<TopologyNode*> &nodes) const
             double nPairs = j * (j-1) / 2.0;
             double lambda = nPairs / theta;
             double u = RbStatistics::Exponential::rv( lambda, *rng);
-            sim_age += u;
-            valid = sim_age < serial_times[index_serial_time] && j > 1;
-            if ( valid == false )
-            {
-                // If j is 1 and we are still simulating coalescent events, we have >= 1 serial sample left to coalesce.
-                // There are no samples to coalesce now, but we cannot exit, thus, we advance to the next serial sample
-                // Alternately, when we cross a serial sampling time, the number of active lineages changes
-                // it is necessary to discard any "excess" time, which is drawn from an incorrect distribution
-                // then we can draw a new time according to the correct number of active lineages.
-                // Either we advance or go back, but in both situations we set the time to the current serial sample.
-                sim_age = serial_times[index_serial_time];
-                ++index_serial_time;
-                ++j;
-                
-                std::multimap<double,TopologyNode*>::iterator it = serial_nodes.begin();
-                current_nodes.insert( it->second );
-                serial_nodes.erase( it );
-                
+
+            if(sim_age + u > max_clade_age && j > 1) {
+                valid = false;
+                theta /= 2; //we're simulating branch lengths that are too std::int64_t, so decreasing Ne
+            } else {
+                sim_age += u;
+                valid = sim_age < serial_times[index_serial_time] && j > 1;
+                if ( valid == false )
+                {
+                    // If j is 1 and we are still simulating coalescent events, we have >= 1 serial sample left to coalesce.
+                    // There are no samples to coalesce now, but we cannot exit, thus, we advance to the next serial sample
+                    // Alternately, when we cross a serial sampling time, the number of active lineages changes
+                    // it is necessary to discard any "excess" time, which is drawn from an incorrect distribution
+                    // then we can draw a new time according to the correct number of active lineages.
+                    // Either we advance or go back, but in both situations we set the time to the current serial sample.
+                    sim_age = serial_times[index_serial_time];
+                    ++index_serial_time;
+                    ++j;
+                    
+                    std::multimap<double,TopologyNode*>::iterator it = serial_nodes.begin();
+                    current_nodes.insert( it->second );
+                    serial_nodes.erase( it );
+                    
+                }
             }
         } while ( valid == false );
         
+        // Sort to ensure node selection is deterministic
+        std::sort(current_nodes.begin(), current_nodes.end(), [](const TopologyNode* a, const TopologyNode* b)
+        {
+            return TreeUtilities::getSmallestTipName(a) < TreeUtilities::getSmallestTipName(b);
+        });
+        
         size_t left_index = size_t( current_nodes.size() * rng->uniform01() );
-        std::set<TopologyNode*>::iterator left_it = current_nodes.begin();
-        std::advance(left_it, left_index);
-        TopologyNode *left = *left_it;
-        current_nodes.erase( left_it );
-        
+        TopologyNode *left = current_nodes[left_index];
+        current_nodes.erase( left );
+
         size_t right_index = size_t( current_nodes.size() * rng->uniform01() );
-        std::set<TopologyNode*>::iterator right_it = current_nodes.begin();
-        std::advance(right_it, right_index);
-        TopologyNode *right = *right_it;
-        current_nodes.erase( right_it );
-        
+        TopologyNode *right = current_nodes[right_index];
+        current_nodes.erase( right );
+
+        // Make the left/right assignment deterministic to ensure that fillNodesByPhylogeneticTraversal() will visit the
+        // children in consistent order
         TopologyNode *parent = new TopologyNode();
-        parent->addChild( left );
-        parent->addChild( right );
+        
+        if (TreeUtilities::getSmallestTipName(left) < TreeUtilities::getSmallestTipName(right)) {
+            parent->addChild( left );
+            parent->addChild( right );
+        } else {
+            parent->addChild( right );
+            parent->addChild( left );
+        }
+        
         left->setParent( parent );
         right->setParent( parent );
-        
         parent->setAge( sim_age );
+        
+        // Update current_nodes set with remaining nodes plus new parent
         current_nodes.insert( parent );
 
         --j;
@@ -394,5 +411,4 @@ void StartingTreeSimulator::simulateClade( std::set<TopologyNode*> &nodes) const
     
     nodes.clear();
     nodes.insert( *(current_nodes.begin()) );
-    
 }

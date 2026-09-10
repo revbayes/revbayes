@@ -51,13 +51,6 @@ DispersalExtinctionRootStructureFunction* DispersalExtinctionRootStructureFuncti
 }
 
 
-void DispersalExtinctionRootStructureFunction::keep(const DagNode *affecter)
-{
-    //delegate to base class
-    TypedFunction< Simplex >::keep( affecter );
-    
-}
-
 void DispersalExtinctionRootStructureFunction::makeBits(void)
 {
     bits = std::vector<std::vector<unsigned> >(num_states, std::vector<unsigned>(numCharacters, 0));
@@ -93,22 +86,6 @@ void DispersalExtinctionRootStructureFunction::makeIdxByRangeSize(void)
 void DispersalExtinctionRootStructureFunction::reInitialized( void )
 {
     ;//    *value = tau->getValue();
-}
-
-
-void DispersalExtinctionRootStructureFunction::restore( const DagNode *restorer )
-{
-    //delegate to base class
-    TypedFunction< Simplex >::restore( restorer );
-}
-
-
-void DispersalExtinctionRootStructureFunction::touch( const DagNode *toucher )
-{
-    
-    //delegate to base class
-    TypedFunction< Simplex >::touch( toucher );
-    
 }
 
 

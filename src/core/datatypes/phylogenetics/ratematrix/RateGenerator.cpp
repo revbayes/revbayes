@@ -44,7 +44,18 @@ size_t RateGenerator::getNumberOfStates( void ) const
     return num_states;
 }
 
-double RateGenerator::getSumOfRates(std::vector<CharacterEvent*> from, const std::vector<size_t> &counts, double age, double rate) const
+RbVector<std::string> RateGenerator::getStateDescriptions( void ) const
+{
+    RbVector<std::string> state_descriptions;
+    for (size_t i = 0; i < num_states; i++) {
+        std::stringstream ss;
+        ss << i;
+        state_descriptions.push_back(ss.str());
+    }
+    return state_descriptions;
+}
+
+double RateGenerator::getSumOfRates(const std::vector<CharacterEvent*>& from, const std::vector<size_t> &counts, double age, double rate) const
 {
 
     // get the rate of leaving the sequence-state
@@ -57,7 +68,7 @@ double RateGenerator::getSumOfRates(std::vector<CharacterEvent*> from, const std
     return sum;
 }
 
-double RateGenerator::getSumOfRates(std::vector<CharacterEvent*> from, double age, double rate) const
+double RateGenerator::getSumOfRates(const std::vector<CharacterEvent*>& from, double age, double rate) const
 {
 
     // need dynamic allocation
@@ -147,7 +158,7 @@ void RateGenerator::executeMethod(const std::string &n, const std::vector<const 
         //    rv.resize(n_states);
         rv.clear();
         
-        size_t from_idx = static_cast<const TypedDagNode<long> *>( args[0] )->getValue()-1;
+        size_t from_idx = static_cast<const TypedDagNode<std::int64_t> *>( args[0] )->getValue()-1;
         
         for (size_t to_idx = 0; to_idx < n_states; to_idx++)
         {
@@ -185,7 +196,7 @@ void RateGenerator::executeMethod(const std::string &n, const std::vector<const 
 ////    rv.resize(n_states);
 //    rv.clear();
 //
-//    size_t from_idx = static_cast<const TypedDagNode<long> *>( args[0] )->getValue()-1;
+//    size_t from_idx = static_cast<const TypedDagNode<std::int64_t> *>( args[0] )->getValue()-1;
 //
 //    for (size_t to_idx = 0; to_idx < n_states; to_idx++)
 //    {

@@ -41,12 +41,12 @@ namespace RevBayesCore {
         
         virtual std::vector<double>         getStationaryFrequencies(void) const;
         
-        virtual double                      getSumOfRates(std::vector<CharacterEvent*> from, double age=0.0, double rate=1.0) const;
-        virtual double                      getSumOfRates(std::vector<CharacterEvent*> from, std::vector<size_t> counts, double age=0.0, double rate=1.0) const;
-        virtual double                      getSumOfRates(std::vector<CharacterEvent*> from, std::vector<std::set<size_t> > sites_with_states, double age=0.0, double rate=1.0) const;
+        virtual double                      getSumOfRates(const std::vector<CharacterEvent*>& from, double age=0.0, double rate=1.0) const;
+        virtual double                      getSumOfRates(const std::vector<CharacterEvent*>& from, const std::vector<size_t>& counts, double age=0.0, double rate=1.0) const;
+        virtual double                      getSumOfRates(const std::vector<CharacterEvent*>& from, const std::vector<std::set<size_t> >& sites_with_states, double age=0.0, double rate=1.0) const;
         
         virtual double                      getSumOfRatesDifferential(std::vector<CharacterEvent*> from, CharacterEventDiscrete* to, double age=0.0, double rate=1.0) const;
-        virtual double                      getSumOfRatesDifferential(std::vector<CharacterEvent*> from, CharacterEventDiscrete* to,  std::vector<std::set<size_t> > sites_with_states, double age=0.0, double rate=1.0) const;
+        virtual double                      getSumOfRatesDifferential(std::vector<CharacterEvent*> from, CharacterEventDiscrete* to,  const std::vector<std::set<size_t> >& sites_with_states, double age=0.0, double rate=1.0) const;
         
         void                                setRateMatrix(const RateGenerator *rm);
         void                                setRateModifiers(const RbVector<CharacterHistoryRateModifier>* rm);

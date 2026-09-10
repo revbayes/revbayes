@@ -160,7 +160,6 @@ const MemberRules& Move_FossilTipTimeSlideUniform::getParameterRules(void) const
         tip_index_arg_types.push_back( RlString::getClassTypeSpec() );
         tip_index_arg_types.push_back( Taxon::getClassTypeSpec() );
         move_member_rules.push_back( new ArgumentRule( "tip", tip_index_arg_types, "The name of a specific tip/taxon.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RlString("") ) );
-
         move_member_rules.push_back( new ArgumentRule( "delta" , RealPos::getClassTypeSpec()  , "The window size parameter.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY       , new RealPos(1.0) ) );
         move_member_rules.push_back( new ArgumentRule( "tune"  , RlBoolean::getClassTypeSpec(), "Should we tune the window size during burnin?", ArgumentRule::BY_VALUE    , ArgumentRule::ANY       , new RlBoolean( true ) ) );
         

@@ -29,7 +29,7 @@ template <class variableType> class StochasticNode;
         
     public:
         // Constructors and Destructors
-        CharacterHistoryPosteriorPredictiveMonitor(TypedDagNode<Tree> *t, std::vector< StochasticNode< BranchHistory >* > bh, unsigned long g, const path &fname, const std::string &del, bool pp=true, bool l=true, bool pr=true, bool ap=false, bool sm=true, bool sr=true);
+        CharacterHistoryPosteriorPredictiveMonitor(TypedDagNode<Tree> *t, std::vector< StochasticNode< BranchHistory >* > bh, std::uint64_t g, const path &fname, const std::string &del, bool pp=true, bool l=true, bool pr=true, bool ap=false, bool sm=true, bool sr=true);
         
         // new CharacterHistoryPosteriorPredictiveMonitor( tau, bh_vector_stochastic, 10, filepath + "rb.tree_chars.txt", "\t"));
         
@@ -39,7 +39,7 @@ template <class variableType> class StochasticNode;
         CharacterHistoryPosteriorPredictiveMonitor*          clone(void) const;                                                  //!< Clone the object
         
         // Monitor functions
-        void                                monitor(unsigned long gen);                                                  //!< Monitor at generation gen
+        void                                monitor(std::uint64_t gen);                                                  //!< Monitor at generation gen
         void                                swapNode(DagNode *oldN, DagNode *newN);
         
         // FileMonitor functions

@@ -21,7 +21,7 @@ namespace RevBayesCore {
     class LevyJumpProposal : public Proposal {
         
     public:
-        LevyJumpProposal( ContinuousStochasticNode *n, double d);                                                                   //!<  constructor
+        LevyJumpProposal( ContinuousStochasticNode *n, double d);                                                                   //!< Constructor
         
         // Basic utility functions
         void                                    cleanProposal(void);                                                                //!< Clean up proposal
@@ -36,7 +36,7 @@ namespace RevBayesCore {
         void                                    undoProposal(void);                                                                 //!< Reject the proposal
         
     protected:
-        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes on which the Proposal is working on
+        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes the Proposal is working on
         
     private:
         // parameters

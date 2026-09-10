@@ -34,6 +34,8 @@ public:
     operator                                    ptrType*(void) const { return mPtr; }
     static bool                                 decrementCountForAddress(ptrType* qPtr);
     static void                                 incrementCountForAddress(ptrType* qPtr);
+
+                                                operator RevPtr<const ptrType> () const;
     
 private:
     //size_t                                      countForAddress(const ptrType* qPtr);
@@ -63,6 +65,12 @@ RevLanguage::RevPtr<ptrType>::RevPtr(const RevPtr<ptrType>& src) : mPtr( NULL )
 {
     
     initializePointer(src.mPtr);
+}
+
+template <typename ptrType>
+RevLanguage::RevPtr<ptrType>::operator RevPtr<const ptrType> () const
+{
+    return RevPtr<const ptrType>(mPtr);
 }
 
 template <typename ptrType>

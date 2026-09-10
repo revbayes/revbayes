@@ -19,7 +19,7 @@ namespace RevBayesCore { class DagNode; }
 using namespace RevBayesCore;
 
 /* Constructor */
-PhylowoodNhxMonitor::PhylowoodNhxMonitor(TypedDagNode<Tree>* t,  std::vector<StochasticNode<BranchHistory>* > bh, std::vector<std::vector<double> > gc, unsigned long g, unsigned long mg, int b, const path &fname, const std::string &del, bool pp, bool l, bool pr, bool ap, bool sm, bool sr) : Monitor(g,t), outStream(), tree( t ), branchHistories(bh),  geographicCoordinates(gc), filename( fname ), separator( del ), posterior( pp ), prior( pr ), likelihood( l ), append(ap), showMetadata(sm), showRates(sr), numSamples(0), maxGen(mg), burn(b) {
+PhylowoodNhxMonitor::PhylowoodNhxMonitor(TypedDagNode<Tree>* t,  std::vector<StochasticNode<BranchHistory>* > bh, std::vector<std::vector<double> > gc, std::uint64_t g, std::uint64_t mg, int b, const path &fname, const std::string &del, bool pp, bool l, bool pr, bool ap, bool sm, bool sr) : Monitor(g,t), outStream(), tree( t ), branchHistories(bh),  geographicCoordinates(gc), filename( fname ), separator( del ), posterior( pp ), prior( pr ), likelihood( l ), append(ap), showMetadata(sm), showRates(sr), numSamples(0), maxGen(mg), burn(b) {
     
     std::cout << g << " " << mg << "\n";
     
@@ -171,10 +171,10 @@ std::string PhylowoodNhxMonitor::buildExtendedNewick( TopologyNode* n ) {
 
 
 /** Monitor value at generation gen */
-void PhylowoodNhxMonitor::monitor(unsigned long gen) {
+void PhylowoodNhxMonitor::monitor(std::uint64_t gen) {
     
     // get the printing frequency
-    unsigned long samplingFrequency = printgen;
+    std::uint64_t samplingFrequency = printgen;
     
     if (gen % samplingFrequency == 0 && gen != maxGen) { // && gen >= burn) {
         
@@ -321,7 +321,7 @@ std::vector<unsigned int> PhylowoodNhxMonitor::getParentCharacterCounts(size_t i
     return parentCharacterCounts[idx];
 }
 
-long PhylowoodNhxMonitor::getNumSamples(void)
+std::int64_t PhylowoodNhxMonitor::getNumSamples(void)
 {
     return numSamples;
 }
@@ -329,31 +329,31 @@ long PhylowoodNhxMonitor::getNumSamples(void)
 void PhylowoodNhxMonitor::swapNode(DagNode *oldN, DagNode *newN)
 {
     
-    bool found = false;
+    // bool found = false;
     if ( oldN == tree )
     {
         tree = static_cast< TypedDagNode< Tree > *>( newN );
-        found = true;
+        // found = true;
     }
     for (size_t i = 0; i < branchHistories.size(); i++)
     {
         if (oldN == branchHistories[i])
         {
             branchHistories[i] = static_cast<StochasticNode<BranchHistory>* >(newN);
-            found = true;
+            // found = true;
         }
     }
     
     /*
      if (found == false)
      {
-     // error catching
-     if ( nodeVariables.find(oldN) == nodeVariables.end() ) {
-     throw RbException("Cannot replace DAG node in this monitor because the monitor doesn't hold this DAG node.");
-     }
+         // error catching
+         if ( nodeVariables.find(oldN) == nodeVariables.end() ) {
+             throw RbException("Cannot replace DAG node in this monitor because the monitor doesn't hold this DAG node.");
+         }
      
-     nodeVariables.erase( oldN );
-     nodeVariables.insert( newN );
+         nodeVariables.erase( oldN );
+         nodeVariables.insert( newN );
      }
      */
     

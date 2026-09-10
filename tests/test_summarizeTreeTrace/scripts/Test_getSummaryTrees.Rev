@@ -1,0 +1,37 @@
+################################################################################
+#
+# RevBayes Test-Script: Summarizing tree traces
+#
+#
+# authors: David Cerny
+#
+################################################################################
+
+seed(12345)
+
+
+# testing the methods for generating MCC, MAP, and consensus trees
+
+# first read in a toy vector of 102 5-tip trees originally provided by Frederik Hartmann
+# (see https://github.com/revbayes/revbayes/issues/361)
+
+trees = readTrees("data/myposterior.posterior.trees")
+
+# convert this vector to a tree trace
+
+tree_trace = treeTrace(trees, burnin=0)
+
+# generate the 50% majority-rule consensus tree
+
+ct = consensusTree(tree_trace, file = "output/myposterior.con.tre")
+
+# generate the maximum clade credibility (MCC) tree
+
+mcc = mccTree(tree_trace, file = "output/myposterior.mcc.tre")
+
+# generate the maximum a posteriori (MAP) tree
+
+map = mapTree(tree_trace, file = "output/myposterior.map.tre")
+
+
+q()

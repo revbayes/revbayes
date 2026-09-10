@@ -85,11 +85,6 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
     {
         siteRatesNode = static_cast<const ModelVector<RealPos> &>( siteRates->getRevObject() ).getDagNode();
     }
-    RevBayesCore::TypedDagNode< double >* pInvNode = NULL;
-    if ( pInv != NULL && pInv->getRevObject() != RevNullObject::getInstance() )
-    {
-        pInvNode = static_cast<const Probability &>( pInv->getRevObject() ).getDagNode();
-    }
     
     RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharacterData > *d = NULL;
     const RevBayesCore::TypedDagNode< RevBayesCore::Simplex > *rf = NULL;

@@ -42,6 +42,7 @@ class TypeSpec;
         void                                        setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);               //!< Set member variable
 
         RevPtr<const RevVariable>                   x;                                                                                              //!< The variable holding the real valued vector.
+
     };
     
 }

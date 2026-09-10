@@ -25,6 +25,8 @@
 #include "RbVector.h"
 #include "RbVectorImpl.h"
 #include "StoppingRule.h"
+#include "MaxIterationStoppingRule.h"
+#include "MaxTimeStoppingRule.h"
 #include "Trace.h"
 
 
@@ -162,9 +164,9 @@ void MonteCarloAnalysis::addMonitor(const Monitor &m)
 
 /** Run burnin and auto-tune */
 #ifdef RB_MPI
-void MonteCarloAnalysis::burnin(size_t generations, const MPI_Comm &analysis_comm, size_t tuningInterval, bool underPrior, bool verbose)
+void MonteCarloAnalysis::burnin(size_t generations, const MPI_Comm &analysis_comm, size_t tuningInterval, int verbose)
 #else
-void MonteCarloAnalysis::burnin(size_t generations, size_t tuningInterval, bool underPrior, bool verbose)
+void MonteCarloAnalysis::burnin(size_t generations, size_t tuningInterval, int verbose)
 #endif
 {
     
@@ -174,7 +176,7 @@ void MonteCarloAnalysis::burnin(size_t generations, size_t tuningInterval, bool 
         
         if ( runs[i] != NULL )
         {
-            runs[i]->initializeSampler(underPrior);
+            runs[i]->initializeSampler();
         }
         
     }
@@ -194,7 +196,7 @@ void MonteCarloAnalysis::burnin(size_t generations, size_t tuningInterval, bool 
     // start the progress bar
     ProgressBar progress = ProgressBar(generations, 0);
 
-    if ( verbose == true && runs[0] != NULL && process_active == true )
+    if ( verbose >= 1 && runs[0] != NULL && process_active == true )
     {
         // Let user know what we are doing
         std::stringstream ss;
@@ -213,7 +215,7 @@ void MonteCarloAnalysis::burnin(size_t generations, size_t tuningInterval, bool 
     for (size_t k=1; k<=generations; ++k)
     {
         
-        if ( verbose == true && process_active == true)
+        if ( verbose >= 1 && process_active == true)
         {
             progress.update(k);
         }
@@ -226,7 +228,7 @@ void MonteCarloAnalysis::burnin(size_t generations, size_t tuningInterval, bool 
                 runs[i]->nextCycle(false);
                 
                 // check for autotuning
-                if ( k % tuningInterval == 0 && k != generations )
+                if ( tuningInterval != 0 && (k % tuningInterval) == 0 && k != generations )
                 {
                     runs[i]->tune();
                 }
@@ -241,7 +243,7 @@ void MonteCarloAnalysis::burnin(size_t generations, size_t tuningInterval, bool 
     MPI_Barrier(MPI_COMM_WORLD);
 #endif
     
-    if ( verbose == true && process_active == true )
+    if ( verbose >= 1 && process_active == true )
     {
         progress.finish();
     }
@@ -317,75 +319,30 @@ void MonteCarloAnalysis::initializeFromCheckpoint(const path &checkpoint_file)
     
     for (size_t i = 0; i < replicates; ++i)
     {
-        // first, set the checkpoint filename for the run
-        if ( replicates > 1 && checkpoint_file != "" )
+        if ( runs[i] != NULL )
         {
-            
-            // create the run specific appendix
-            std::stringstream ss;
-            ss << "_run_" << (i+1);
-            
-            // assemble the new filename
-            path run_checkpoint_file = appendToStem( checkpoint_file, ss.str() );
-            
-            // set the filename for the MCMC object
-            runs[i]->setCheckpointFile( run_checkpoint_file );
-        }
-        else if ( not checkpoint_file.empty() )
-        {
-            // set the filename for the MCMC object
-            runs[i]->setCheckpointFile( checkpoint_file );
-        }
-        
-        // then, initialize the sample for that replicate
-        runs[i]->initializeSamplerFromCheckpoint();
-    }
-}
-
-
-void MonteCarloAnalysis::initializeFromTrace( RbVector<ModelTrace> traces )
-{
-    size_t n_samples = traces[0].size();
-    size_t last_generation = 0;
-    size_t n_traces = traces.size();
-    
-    std::vector<DagNode*> nodes = getModel().getDagNodes();
-    
-    for ( size_t i = 0; i < n_traces; ++i )
-    {
-        std::string parameter_name = traces[i].getParameterName();
-        
-        if (parameter_name == "Iteration")
-        {
-            last_generation = std::atoi( traces[i].objectAt( n_samples - 1 ).c_str() );
-        }
-        
-        // iterate over all DAG nodes (variables)
-        for ( size_t j = 0; j < nodes.size(); ++j )
-        {
-            if ( nodes[j]->getName() == parameter_name )
+            // first, set the checkpoint filename for the run
+            if ( replicates > 1 && checkpoint_file != "" )
             {
-                // set the value for the variable with the last sample in the trace
-                nodes[j]->setValueFromString( traces[i].objectAt( n_samples - 1 ) );
-                break;
+                
+                // create the run specific appendix
+                std::stringstream ss;
+                ss << "_run_" << (i+1);
+                
+                // assemble the new filename
+                path run_checkpoint_file = appendToStem( checkpoint_file, ss.str() );
+                
+                // set the filename for the MCMC object
+                runs[i]->setCheckpointFile( run_checkpoint_file );
             }
-        }
-    }
-    
-    for (size_t i = 0; i < replicates; ++i)
-    {
-        // set iteration num for all runs
-        runs[i]->setCurrentGeneration( last_generation );
-        
-        RbVector<Monitor>& monitors = runs[i]->getMonitors();
-        for (size_t j = 0; j < monitors.size(); ++j)
-        {
-            if ( monitors[j].isFileMonitor() )
+            else if ( not checkpoint_file.empty() )
             {
-                // set file monitors to append
-                AbstractFileMonitor* m = dynamic_cast< AbstractFileMonitor *>( &monitors[j] );
-                m->setAppend(true);
+                // set the filename for the MCMC object
+                runs[i]->setCheckpointFile( checkpoint_file );
             }
+            
+            // then, initialize the sample for that replicate
+            runs[i]->initializeSamplerFromCheckpoint();
         }
     }
 }
@@ -562,8 +519,7 @@ void MonteCarloAnalysis::resetReplicates( void )
     size_t replicate_start = size_t(floor( (double(pid-active_PID) / num_processes ) * replicates ) ) + active_PID;
     
     RandomNumberGenerator *rng = GLOBAL_RNG;
-    for (size_t j=0; j<(2*replicate_start); ++j) rng->uniform01();
-    
+    if(replicate_start > 0) rng->setSeed(rng->getSeed() + 2*replicate_start);    
     
     // redraw initial states for replicates
     for (size_t i = 0; i < replicates; ++i)
@@ -596,7 +552,7 @@ void MonteCarloAnalysis::resetReplicates( void )
     
     // to be safe, we should synchronize the random number generators
     // Sebastian: We cannot re-synchronize the RNG after we just shifted it.
-    // If an anlysis has all values preset, then each replicate would be identical!!!
+    // If an analysis had all values preset, then each replicate would be identical!!!
 //#ifdef RB_MPI
 //    MpiUtilities::synchronizeRNG( analysis_comm );
 //#else
@@ -607,11 +563,47 @@ void MonteCarloAnalysis::resetReplicates( void )
 
 
 #ifdef RB_MPI
-void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, const MPI_Comm &analysis_comm, size_t tuning_interval, const path &checkpoint_file, size_t checkpoint_interval, bool verbose )
+void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, const MPI_Comm &analysis_comm, size_t tuning_interval, const path &checkpoint_file, size_t checkpoint_interval, int verbose )
 #else
-void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, size_t tuning_interval, const path &checkpoint_file, size_t checkpoint_interval, bool verbose )
+void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, size_t tuning_interval, const path &checkpoint_file, size_t checkpoint_interval, int verbose )
 #endif
 {
+    
+    // When the 'generations' argument was omitted but the user supplied at least one srMaxIteration stopping rule, use it
+    // as the planned run length so that monitors (especially the "ETA" column of mnScreen) treat it as equivalent to
+    // .run(generations=N). We would not expect more than one srMaxIteration rule to be supplied, but if it does happen for
+    // whatever reason, we will use the most restrictive rule (i.e., the one specifying the shortest run).
+    if ( kIterations == 0 )
+    {
+        for (size_t i = 0; i < rules.size(); ++i)
+        {
+            const MaxIterationStoppingRule* max_iter = dynamic_cast<const MaxIterationStoppingRule*>( &rules[i] );
+            if ( max_iter != NULL )
+            {
+                size_t rule_max = max_iter->getMaxGenerations();
+                if ( kIterations == 0 || rule_max < kIterations )
+                {
+                    kIterations = rule_max;
+                }
+            }
+        }
+    }
+
+    // Analogously, extract a wall-clock time target from any srMaxTime rules (again taking the most restrictive in the
+    // unexpected case of having more than one) and pass it to the monitors alongside the iteration target.
+    double max_seconds = 0.0;
+    for (size_t i = 0; i < rules.size(); ++i)
+    {
+        const MaxTimeStoppingRule* max_time = dynamic_cast<const MaxTimeStoppingRule*>( &rules[i] );
+        if ( max_time != NULL )
+        {
+            double rule_max = max_time->getMaxTime();
+            if ( max_seconds == 0.0 || rule_max < max_seconds )
+            {
+                max_seconds = rule_max;
+            }
+        }
+    }
     
     // get the current generation
     size_t gen = 0;
@@ -647,10 +639,10 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
         
     }
     
-    // Let user know what we are doing
-    std::stringstream ss;
-    if ( process_active == true && runs[0] != NULL && verbose == true )
+    if ( process_active == true && runs[0] != NULL && verbose >= 1 )
     {
+        // Let user know what we are doing
+        std::stringstream ss;
         
         if ( runs[0]->getCurrentGeneration() == 0 )
         {
@@ -663,6 +655,55 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
         }
         ss << "This simulation runs " << replicates << " independent replicate" << (replicates > 1 ? "s" : "") << ".\n";
         ss << runs[0]->getStrategyDescription();
+        
+        // Print the target values of stopping rules only if we have more than one or if the only one we have is not MaxIteration
+        if (rules.size() > 1 or rules[0].printAsStatement(0, true) != "")
+        {
+            ss << "\n";
+            ss << "Stopping rule" << (rules.size() > 1 ? "s" : "") << ":\n";
+            for (size_t i=0; i<rules.size(); ++i)
+            {
+                std::string statement = rules[i].printAsStatement(0, true);
+                if (statement == "")
+                {
+                    continue;
+                }
+                ss << "    " << statement;
+            }
+        }
+
+        // If the analysis includes a screen monitor (which prints an ETA column by default) but neither an iteration nor a time target,
+        // (i.e., the 'generations' argument was not specified, and the stopping-rule vector contains neither MaxIteration nor MaxTime),
+        // we point out that ETA is going to be "??:??:??"
+        bool has_iteration_or_time_target = false;
+        for (size_t i = 0; i < rules.size(); ++i)
+        {
+            if ( dynamic_cast<const MaxIterationStoppingRule*>( &rules[i] ) != NULL ||
+                 dynamic_cast<const MaxTimeStoppingRule*>( &rules[i] ) != NULL )
+            {
+                has_iteration_or_time_target = true;
+                break;
+            }
+        }
+
+        bool has_screen_monitor = false;
+        RbVector<Monitor>& mons = runs[0]->getMonitors();
+        for (size_t i = 0; i < mons.size(); ++i)
+        {
+            if ( mons[i].isScreenMonitor() )
+            {
+                has_screen_monitor = true;
+                break;
+            }
+        }
+
+        if ( !has_iteration_or_time_target && has_screen_monitor )
+        {
+            ss << "\n";
+            ss << "NOTE: This run uses only convergence-based stopping rules, so there is no information\n";
+            ss << "      from which to estimate a time to completion (ETA).\n";
+        }
+        
         RBOUT( ss.str() );
     }
     
@@ -680,7 +721,7 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
                 runs[i]->disableScreenMonitor(true, i);
             }
             
-            runs[i]->startMonitors( kIterations, runs[i]->getCurrentGeneration() > 0 );
+            runs[i]->startMonitors( kIterations, runs[i]->getCurrentGeneration() > 0, max_seconds );
             
         }
         
@@ -693,24 +734,6 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
     // wait until all chains opened the monitor
     MPI_Barrier( analysis_comm );
 #endif
-    
-    // Write headers and print first line
-    for (size_t i=0; i<replicates; ++i)
-    {
-        
-        if ( runs[i] != NULL && runs[i]->getCurrentGeneration() == 0 )
-        {
-            
-            runs[i]->writeMonitorHeaders( false );
-            runs[i]->monitor(0);
-            
-        }
-        else if ( runs[i] != NULL )
-        {
-            runs[i]->writeMonitorHeaders( runs[i]->getCurrentGeneration() > 0 );
-        }
-        
-    }
     
     // reset the counters for the move schedules
     for (size_t i=0; i<replicates; ++i)
@@ -729,6 +752,41 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
         
         rules[i].setNumberOfRuns( replicates );
         rules[i].runStarted();
+        
+    }
+    
+    // If the conditions above are satisfied and we are resuming from a checkpoint, print the current stopping rule values too
+    if ( runs[0] != NULL and runs[0]->getCurrentGeneration() != 0 and (rules.size() > 1 or rules[0].printAsStatement(0, true) != ""))
+    {
+        std::stringstream ss;
+        ss << "Current value" << (rules.size() > 1 ? "s" : "") << ":\n";
+        
+        for (size_t i=0; i<rules.size(); ++i)
+        {
+            std::string to_parse = rules[i].printAsStatement( runs[0]->getCurrentGeneration() );
+            // Delete the target info, which is redundant with respect to what we have already printed above
+            std::string out = to_parse.substr(0, to_parse.find(" (target", 0));
+            ss << "    " << out << "\n";
+        }
+        
+        RBOUT( ss.str() );
+    }
+    
+    // Write headers and print first line
+    for (size_t i=0; i<replicates; ++i)
+    {
+        
+        if ( runs[i] != NULL && runs[i]->getCurrentGeneration() == 0 )
+        {
+            
+            runs[i]->writeMonitorHeaders( false );
+            runs[i]->monitor(0);
+            
+        }
+        else if ( runs[i] != NULL )
+        {
+            runs[i]->writeMonitorHeaders( runs[i]->getCurrentGeneration() > 0 );
+        }
         
     }
     
@@ -757,33 +815,84 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
                     runs[i]->tune();                   
                 }
                 
-                // check for autotuning
+                // check for checkpointing
                 if ( checkpoint_interval != 0 && (gen % checkpoint_interval) == 0 )
                 {                    
                     runs[i]->checkpoint();                    
                 }             
             }           
         }
+
+#ifdef RB_MPI
+        // Convergence rules re-read trace files; ensure all ranks finished this generation's
+        // monitor output before any rank reads (also matches verbose>1 printing paths).
+        bool any_convergence_check_this_gen = false;
+        for (size_t ri = 0; ri < rules.size(); ++ri)
+        {
+            if ( rules[ri].isConvergenceRule() && rules[ri].checkAtIteration(gen) )
+            {
+                any_convergence_check_this_gen = true;
+                break;
+            }
+        }
+        if ( any_convergence_check_this_gen )
+        {
+            MPI_Barrier( analysis_comm );
+        }
+#endif
         
         converged = true;
         size_t numConvergenceRules = 0;
-        // do the stopping test
+        
+        // run the stopping test
         for (size_t i=0; i<rules.size(); ++i)
-        {         
+        {
             if ( rules[i].isConvergenceRule() )
             {
-                converged &= rules[i].checkAtIteration(gen) && rules[i].stop( gen );
+                converged &= rules[i].checkAtIteration(gen) && rules[i].stop(gen);
                 ++numConvergenceRules;
             }
             else
             {
-                if ( rules[i].checkAtIteration(gen) && rules[i].stop( gen ) )
+                if ( rules[i].checkAtIteration(gen) && rules[i].stop(gen) )
                 {
                     finished = true;
                     break;
                 }
-            }          
+            }
         }
+        
+        if (verbose > 1)
+        {
+            bool checkNow = false;
+            
+            for (size_t i=0; i<rules.size(); ++i)
+            {
+                if ( rules[i].isConvergenceRule() )
+                {
+                    // The non-convergence stopping rules (MaxTime and MaxIteration) are checked every single iteration.
+                    // To avoid printing an enormous number of lines if these (either one of them or both) are the only rules we have,
+                    // we will only print when at least one convergence rule wants us to.
+                    checkNow |= rules[i].checkAtIteration(gen);
+                }
+            }
+            
+            if (checkNow)
+            {
+                std::stringstream ssConv;
+                for (size_t i=0; i<rules.size(); ++i)
+                {
+                    // Prettify: insert a blank line before printing out the first stopping rule statement
+                    if (i == 0)
+                    {
+                        ssConv << "\n";
+                    }
+                    ssConv << rules[i].printAsStatement(gen);
+                }
+                RBOUT( ssConv.str() );
+            }
+        }
+        
         converged &= numConvergenceRules > 0;
         
     } while ( finished == false && converged == false);
@@ -814,193 +923,6 @@ void MonteCarloAnalysis::run( size_t kIterations, RbVector<StoppingRule> rules, 
 #else
     MpiUtilities::synchronizeRNG(  );
 #endif
-    
-}
-
-
-
-void MonteCarloAnalysis::runPriorSampler( size_t kIterations, RbVector<StoppingRule> rules, size_t tuning_interval )
-{
-    
-    // get the current generation
-    size_t gen = 0;
-    for (size_t i=0; i<replicates; ++i)
-    {
-        
-        if ( runs[i] != NULL )
-        {
-            gen = runs[i]->getCurrentGeneration();
-        }
-        
-    }
-    
-    // Let user know what we are doing
-    if ( process_active == true && runs[0] != NULL )
-    {
-        std::stringstream ss;
-        if ( runs[0]->getCurrentGeneration() == 0 )
-        {
-            ss << "\n";
-            ss << "Running prior MCMC simulation\n";
-        }
-        else
-        {
-            ss << "Appending to previous MCMC simulation of " << runs[0]->getCurrentGeneration() << " iterations\n";
-        }
-        ss << "This simulation runs " << replicates << " independent replicate" << (replicates > 1 ? "s" : "") << ".\n";
-        ss << runs[0]->getStrategyDescription();
-        RBOUT( ss.str() );
-    }
-    
-    // Initialize objects needed by chain
-    for (size_t i=0; i<replicates; ++i)
-    {
-        
-        if ( runs[i] != NULL )
-        {
-            runs[i]->initializeSampler(true);
-        }
-        
-    }
-    
-    
-    // Start monitor(s)
-    for (size_t i=0; i<replicates; ++i)
-    {
-        
-        // Sebastian (2016/04/16): We should always reset the monitors so that the ETA starts fresh
-        // if ( runs[i] != NULL && runs[i]->getCurrentGeneration() == 0 )
-        if ( runs[i] != NULL )
-        {
-            
-            if ( i > 0 )
-            {
-                runs[i]->disableScreenMonitor(true, i);
-            }
-            
-            runs[i]->startMonitors( kIterations, runs[i]->getCurrentGeneration() > 0 );
-            
-        }
-        
-    }
-    
-    // Sebastian: This is very important here!
-    // We need to wait first for all processes and chains to have opened the filestreams
-    // before we start printing (e.g., the headers) anything.
-#ifdef RB_MPI
-    // wait until all chains opened the monitor
-    MPI_Barrier(MPI_COMM_WORLD);
-#endif
-    
-    // Write headers and print first line
-    for (size_t i=0; i<replicates; ++i)
-    {
-        
-        if ( runs[i] != NULL && runs[i]->getCurrentGeneration() == 0 )
-        {
-            
-            runs[i]->writeMonitorHeaders( false );
-            runs[i]->monitor(0);
-            
-        }
-        
-    }
-    
-    
-    // reset the counters for the move schedules
-    for (size_t i=0; i<replicates; ++i)
-    {
-        if ( runs[i] != NULL )
-        {
-            runs[i]->reset();
-        }
-    }
-    
-    // reset the stopping rules
-    for (size_t i=0; i<rules.size(); ++i)
-    {
-        rules[i].setNumberOfRuns( replicates );
-        rules[i].runStarted();
-    }
-    
-    
-    // Run the chain
-    bool finished = false;
-    bool converged = false;
-    do {
-        ++gen;
-        for (size_t i=0; i<replicates; ++i)
-        {
-            if ( runs[i] != NULL )
-            {
-                runs[i]->nextCycle(true);
-                
-                // Monitor
-                runs[i]->monitor(gen);
-                
-                // check for autotuning
-                if ( tuning_interval != 0 && (gen % tuning_interval) == 0 )
-                {
-                    
-                    runs[i]->tune();
-                    
-                }
-            }
-
-        }
-        
-        converged = true;
-        size_t numConvergenceRules = 0;
-        // do the stopping test
-        for (size_t i=0; i<rules.size(); ++i)
-        {
-            
-            if ( rules[i].isConvergenceRule() )
-            {
-                converged &= rules[i].checkAtIteration(gen) && rules[i].stop( gen );
-                ++numConvergenceRules;
-            }
-            else
-            {
-                if ( rules[i].checkAtIteration(gen) && rules[i].stop( gen ) )
-                {
-                    finished = true;
-                    break;
-                }
-            }
-            
-        }
-        converged &= numConvergenceRules > 0;
-        
-    } while ( finished == false && converged == false);
-    
-#ifdef RB_MPI
-    // wait until all replicates complete
-    MPI_Barrier( MPI_COMM_WORLD );
-#endif
-    
-    // Monitor
-    for (size_t i=0; i<replicates; ++i)
-    {
-        
-        if ( runs[i] != NULL )
-        {
-            runs[i]->finishMonitors( replicates, trace_combination );
-        }
-        
-    }
-    
-    
-#ifdef RB_MPI
-    // wait until all replicates complete
-    MPI_Barrier( MPI_COMM_WORLD );
-    
-    // to be safe, we should synchronize the random number generators
-    MpiUtilities::synchronizeRNG( MPI_COMM_WORLD );
-#else
-    MpiUtilities::synchronizeRNG(  );
-#endif
-    
     
 }
 

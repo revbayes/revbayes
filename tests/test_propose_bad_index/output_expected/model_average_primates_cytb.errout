@@ -1,0 +1,22 @@
+   Successfully read one character matrix from file 'data/primates_and_galeopterus_cytb.nex'
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 51 different moves in a random move schedule with 101.8 moves per iteration
+   
+   Processing file "output/primates_and_galeopterus_cytb_RJ_tree_samples.trees"
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+   Compiling maximum a posteriori tree from 39 trees.
+   
+   Summarizing clades ...
+   
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+   Annotating tree ...

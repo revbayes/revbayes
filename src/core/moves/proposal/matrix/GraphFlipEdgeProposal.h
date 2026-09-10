@@ -32,7 +32,7 @@ template <class variableType> class StochasticNode;
     class GraphFlipEdgeProposal : public Proposal {
         
     public:
-        GraphFlipEdgeProposal( StochasticNode<MatrixReal> *n, const RbVector<RbVector<long> >& ind, double l, bool s = false);                                                                      //!<  constructor
+        GraphFlipEdgeProposal( StochasticNode<MatrixReal> *n, const RbVector<RbVector<std::int64_t> >& ind, double l, bool s = false);                                                                      //!< Constructor
         
         // Basic utility functions
         void                                    cleanProposal(void);                                                                //!< Clean up proposal
@@ -47,7 +47,7 @@ template <class variableType> class StochasticNode;
         void                                    undoProposal(void);                                                                 //!< Reject the proposal
         
     protected:
-        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes on which the Proposal is working on
+        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes the Proposal is working on
         
     private:
         // parameters
@@ -57,7 +57,7 @@ template <class variableType> class StochasticNode;
         
         double                                  sampling_probability;
         //!< The two indices of the last modified element.
-        RbVector<RbVector<long> >               edges;
+        RbVector<RbVector<std::int64_t> >               edges;
         size_t                                  edge_list_length;
         double                                  storedValue;                                                                       //!< The value we propose.
         bool                                    symmetric;

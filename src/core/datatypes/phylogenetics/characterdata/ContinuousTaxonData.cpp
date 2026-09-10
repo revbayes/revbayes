@@ -193,7 +193,7 @@ std::string ContinuousTaxonData::getJsonRepresentation(void) const {
     for (int i=0; i<sequence.size(); i++)
         {
         char tempCStr[20];
-        sprintf(tempCStr, "%.10e", sequence[i]);
+        snprintf(tempCStr, sizeof(tempCStr), "%.10e", sequence[i]);
         std::string tempStr = tempCStr;
         jsonStr += tempStr;
         if (i + 1 < sequence.size())
@@ -251,7 +251,7 @@ std::string ContinuousTaxonData::getStringRepresentation(size_t idx) const
     }
     
     char tempCStr[20];
-    sprintf(tempCStr, "%1.2lf", sequence[idx]);
+    snprintf(tempCStr, sizeof(tempCStr), "%1.2lf", sequence[idx]);
     std::string tempStr = tempCStr;
     return tempStr;
 }

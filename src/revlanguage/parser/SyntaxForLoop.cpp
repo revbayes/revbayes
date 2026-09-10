@@ -76,7 +76,7 @@ SyntaxElement* SyntaxForLoop::clone( void ) const
 
 
 /** Get semantic value (not applicable so return NULL) */
-RevPtr<RevVariable> SyntaxForLoop::evaluateContent( Environment& env, bool dynamic )
+RevPtr<RevVariable> SyntaxForLoop::evaluateContent( const std::shared_ptr<Environment>& env, bool dynamic )
 {
     return NULL;
 }
@@ -122,7 +122,7 @@ void SyntaxForLoop::getNextLoopState( void )
  * use the first dimension of the container to get the values for
  * the loop variable. We also add the loop variable to the environment.
  */
-void SyntaxForLoop::initializeLoop( Environment& env )
+void SyntaxForLoop::initializeLoop( const std::shared_ptr<Environment>& env )
 {
     
     assert ( nextIndex == 0 );  // Check that we are not running already
@@ -139,13 +139,13 @@ void SyntaxForLoop::initializeLoop( Environment& env )
     }
     
     // Add the loop variable to the environment, if it is not already there
-    if ( env.existsVariable( varName ) == false )
+    if ( env->existsVariable( varName ) == false )
     {
-        env.addVariable( varName, new RevVariable( NULL) );
+        env->addVariable( varName, new RevVariable( NULL) );
     }
     
     // Set the local smart pointer to the loop variable
-    loopVariable = env.getVariable( varName );
+    loopVariable = env->getVariable( varName );
     
     // Initialize nextValue
     nextIndex = 1;

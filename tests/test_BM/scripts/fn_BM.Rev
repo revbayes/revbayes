@@ -1,0 +1,23 @@
+################################################################################
+#
+# RevBayes Validation Test: Brownian-Motion distribution on Phylogenies
+# 
+################################################################################
+
+seed(12345)
+
+###### This just defines a simple tree #######
+tree <- readTrees(text="((A:1,B:1):1,C:2);")[1]
+
+traits_bm ~ dnPhyloBrownian(tree=tree, sigma=0.5)
+traits_bm
+traits_bm ~ dnPhyloBrownian(tree=tree, sigma=0)
+traits_bm
+
+traits_brbm ~ dnPhyloBranchRateBM(tree, rootState=1, sigma=0.5)
+traits_brbm
+traits_brbm ~ dnPhyloBranchRateBM(tree, rootState=0, sigma=0.5)
+traits_brbm
+traits_brbm ~ dnPhyloBranchRateBM(tree, rootState=1.2, sigma=0)
+traits_brbm
+

@@ -27,7 +27,7 @@ namespace RevBayesCore {
         
     public:
 
-        revPoMoBalance4NRateMatrixFunction( const TypedDagNode< long > *n,const TypedDagNode< Simplex  > *p, const TypedDagNode< RbVector<double> > *r, const TypedDagNode< RbVector<double> > *s, const TypedDagNode< RbVector<double> > *b, const TypedDagNode< RbVector<long> > *Bf  );
+        revPoMoBalance4NRateMatrixFunction( const TypedDagNode< std::int64_t > *n,const TypedDagNode< Simplex  > *p, const TypedDagNode< RbVector<double> > *r, const TypedDagNode< RbVector<double> > *s, const TypedDagNode< RbVector<double> > *b, const TypedDagNode< RbVector<std::int64_t> > *Bf  );
 
         virtual                                            ~revPoMoBalance4NRateMatrixFunction(void);                                                    //!< Virtual destructor
         
@@ -42,12 +42,12 @@ namespace RevBayesCore {
     private:
         
         // members
-        const TypedDagNode<long>*                            N;
+        const TypedDagNode<std::int64_t>*                            N;
         const TypedDagNode< Simplex >*                      pi;
         const TypedDagNode< RbVector<double> >*             rho;
         const TypedDagNode< RbVector<double> >*             phi;
         const TypedDagNode< RbVector<double> >*             beta;
-        const TypedDagNode< RbVector<long> >*                B;
+        const TypedDagNode< RbVector<std::int64_t> >*                B;
 
 
     };

@@ -106,7 +106,7 @@ SyntaxElement* SyntaxBinaryExpr::clone () const
  *
  * @todo Support this evaluation context better
  */
-RevPtr<RevVariable> SyntaxBinaryExpr::evaluateContent( Environment& env, bool dynamic )
+RevPtr<RevVariable> SyntaxBinaryExpr::evaluateContent( const std::shared_ptr<Environment>& env, bool dynamic )
 {
     
     // Package the arguments
@@ -127,15 +127,15 @@ RevPtr<RevVariable> SyntaxBinaryExpr::evaluateContent( Environment& env, bool dy
     }
     
     func_name += opCode[ operation ];
-    Function* the_function = Workspace::globalWorkspace().getFunction( func_name, args, false ).clone();
-    the_function->processArguments( args, !dynamic );
+    Function* the_function = Workspace::globalWorkspace().getFunction( func_name, args ).clone();
+    the_function->processArguments( args );
     
     RevPtr<RevVariable> the_return_value = the_function->execute();
     
     // Free the memory of our copy
     delete the_function;
     
-    if ( dynamic == false || isConstExpression() == true )
+    if ( isConstExpression() == true )
     {
         // Return the return value of the function after making it constant
         if ( the_return_value != NULL )

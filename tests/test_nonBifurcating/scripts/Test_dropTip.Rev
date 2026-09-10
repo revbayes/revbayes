@@ -1,0 +1,51 @@
+################################################################################
+#
+# RevBayes Test-Script: Dropping tips from trees with multifurcations
+#
+# authors: David Cerny
+#
+################################################################################
+
+print("=============================================")
+print("Dropping tips from a multifurcating time tree")
+print("=============================================\n")
+
+tt <- readTrees("data/multifurcating_time_tree.tre")[1]
+tt_copy <- tt
+tt_ntip = tt.ntips()
+print( "\nTree type: " + type(tt) )
+print( "Number of tips: " + tt_ntip + "\n" )
+
+print("Dropping a tip from a multifurcation at the root...")
+tt.dropTip("taxon0")
+print("New number of tips (expecting " + (tt_ntip - 1) + "): " + tt.ntips() + "\n")
+writeNexus(filename="output/time_tree_dropped_root_child.nex", tt)
+
+print("Dropping a tip from a multifurcation at a non-root internal node...")
+tt_copy.dropTip("taxon4")
+print("New number of tips (expecting " + (tt_ntip - 1) + "): " + tt_copy.ntips() + "\n")
+writeNexus(filename="output/time_tree_dropped_nonroot_child.nex", tt_copy)
+
+print("======================================================")
+print("Dropping tips from a multifurcating branch length tree")
+print("======================================================\n")
+
+blt <- readTrees("data/multifurcating_branch_length_tree.tre", treetype="non-clock")[1]
+blt_copy <- blt
+blt_ntip = blt.ntips()
+print( "\nTree type: " + type(blt) )
+print( "Number of tips: " + blt_ntip + "\n" )
+
+print("Dropping a tip from a multifurcation at the root...")
+blt.dropTip("taxon0")
+print("New number of tips (expecting " + (blt_ntip - 1) + "): " + blt.ntips() + "\n")
+writeNexus(filename="output/branch_length_tree_dropped_root_child.nex", blt)
+
+print("Dropping a tip from a multifurcation at a non-root internal node...")
+blt_copy.dropTip("taxon4")
+print("New number of tips (expecting " + (blt_ntip - 1) + "): " + blt_copy.ntips() + "\n")
+writeNexus(filename="output/branch_length_tree_dropped_nonroot_child.nex", blt_copy)
+
+clear()
+
+q()

@@ -3,6 +3,7 @@
 #include <set>
 
 #include "RbException.h"
+#include "RevNullObject.h"
 #include "SyntaxAssignment.h"
 #include "Environment.h"
 #include "RevObject.h"
@@ -66,7 +67,7 @@ SyntaxAssignment& SyntaxAssignment::operator=( const SyntaxAssignment& x )
  * contexts. For instance, it might be used in a chain assignment or in passing a
  * variable to a function.
  */
-RevPtr<RevVariable> SyntaxAssignment::evaluateContent( Environment& env, bool dynamic )
+RevPtr<RevVariable> SyntaxAssignment::evaluateContent( const std::shared_ptr<Environment>& env, bool dynamic )
 {
     
     // Get the rhs expression wrapped and executed into a variable.
@@ -80,23 +81,24 @@ RevPtr<RevVariable> SyntaxAssignment::evaluateContent( Environment& env, bool dy
     // Get variable slot from lhs
     RevPtr<RevVariable> the_slot = lhsExpression->evaluateLHSContent( env, the_variable->getRevObject().getType() );
     
-//    // let us remove all potential indexed variables
-//    removeElementVariables(env, the_slot);
-    
+    // Remember whether the slot already held a value before the assignment.
+    // If it did, a failed assignment should leave it intact rather than erasing it.
+    bool slot_was_occupied = ( &the_slot->getRevObject() != &RevNullObject::getInstance() );
+
     try
     {
         // now we delegate to the derived class
         assign(the_slot, the_variable);
-        
-//        if ( the_slot->isElementVariable() == true )
-//        {
-//            static_cast< SyntaxIndexOperation *>( lhsExpression )->updateVariable( env, the_slot->getName() );
-//        }
     }
     catch (RbException &e)
     {
-        // we need to remove the variable
-        env.eraseVariable( the_slot->getName() );
+        // Only erase the variable if it was a freshly created (empty) slot.
+        // Pre-existing variables must be preserved so the old value remains
+        // accessible after a failed assignment (e.g. cycle detection).
+        if ( !slot_was_occupied )
+        {
+            env->eraseVariable( the_slot->getName() );
+        }
         throw e;
     }
     
@@ -158,7 +160,7 @@ bool SyntaxAssignment::isFunctionSafe( const Environment& env, std::set<std::str
 //        const std::set<int>& indices = the_var->getElementIndices();
 //        if ( indices.empty() )
 //        {
-//            throw RbException("Cannot remove a vector variable with name '" + the_var->getName() + "' because it doesn't have elements.");
+//            throw RbException() << "Cannot remove a vector variable with name '" << the_var->getName() << "' because it doesn't have elements.";
 //        }
 //        // iterate over all elements
 //        for (std::set<int>::const_iterator it = indices.begin(); it != indices.end(); ++it)

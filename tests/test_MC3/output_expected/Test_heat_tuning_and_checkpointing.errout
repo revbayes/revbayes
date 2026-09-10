@@ -1,0 +1,26 @@
+   Successfully read one character matrix from file 'data/project950.neo.nex'
+   Successfully read one character matrix from file 'data/project950.trans.nex'
+   There are 5 characters in partition with 2 states
+   There are 1 characters in partition with 3 states
+   
+   Running burn-in phase of Monte Carlo sampler for 1000 iterations.
+   This simulation runs 2 independent replicates.
+   The MCMCMC simulator runs 1 cold chain and 7 heated chains.
+   The simulator uses 7 different moves in a random move schedule with 14.375 moves per iteration
+   
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+   
+   Running MCMC simulation
+   This simulation runs 2 independent replicates.
+   The MCMCMC simulator runs 1 cold chain and 7 heated chains.
+   The simulator uses 7 different moves in a random move schedule with 14.375 moves per iteration
+   
+   Appending to previous MCMC simulation of 1000 iterations
+   This simulation runs 2 independent replicates.
+   The MCMCMC simulator runs 1 cold chain and 7 heated chains.
+   The simulator uses 7 different moves in a random move schedule with 14.375 moves per iteration
+   

@@ -79,7 +79,6 @@ mymodel = model( root )
 
 
 monitors.append( mnModel(filename="output/primates_BDP.log",printgen=1, separator = TAB) )
-monitors.append( mnScreen(diversification, turnover, printgen=NUM_MCMC_ITERATIONS/10) )
 
 mymcmc = mcmc(mymodel, monitors, moves)
 mymcmc.run(generations=NUM_MCMC_ITERATIONS)

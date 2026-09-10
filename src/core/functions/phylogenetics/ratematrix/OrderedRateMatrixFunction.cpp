@@ -18,7 +18,7 @@ using namespace RevBayesCore;
  * @param allow_zero_state Should state '0' be allowed? (May not be appropriate for some counts)
  */
 
-OrderedRateMatrixFunction::OrderedRateMatrixFunction(const TypedDagNode<long> *n, const TypedDagNode<double> *l, const TypedDagNode<double> *m, bool allow_zero_state, bool rescale, std::string method) : TypedFunction<RateGenerator>( new RateMatrix_FreeK( n->getValue(), rescale, method ) ),
+OrderedRateMatrixFunction::OrderedRateMatrixFunction(const TypedDagNode<std::int64_t> *n, const TypedDagNode<double> *l, const TypedDagNode<double> *m, bool allow_zero_state, bool rescale, std::string method) : TypedFunction<RateGenerator>( new RateMatrix_FreeK( n->getValue(), rescale, method ) ),
     lambda( l ),
     mu( m ),
     zero( allow_zero_state )

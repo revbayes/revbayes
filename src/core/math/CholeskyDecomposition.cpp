@@ -1,6 +1,6 @@
 #include "CholeskyDecomposition.h"
 
-#include <math.h>
+#include <cmath>
 
 #include "MatrixReal.h"
 #include "RbMathMatrix.h"

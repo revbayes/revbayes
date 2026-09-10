@@ -18,6 +18,8 @@
 #ifndef DistributionChisq_H
 #define DistributionChisq_H
 
+#include <cstdint>
+
 namespace RevBayesCore {
     
     class RandomNumberGenerator;
@@ -27,11 +29,11 @@ namespace RevBayesCore {
         namespace ChiSquare {
         
             double                      pdf(double df, double x);                                              /*!< Chi-Square(v) probability density */
-            double                      lnPdf(long df, double x);                                              /*!< Chi-Square(v) log_e probability density */
+            double                      lnPdf(std::int64_t df, double x);                                              /*!< Chi-Square(v) log_e probability density */
             double                      lnPdf(double df, double x);                                            /*!< Chi-Square(v) log_e probability density */
             double                      cdf(double df, double x);                                              /*!< Chi-Square(v) cumulative probability */
             double                      quantile(double prob, double df);                                      /*!< Chi-Square(v) quantile */
-            double                      rv(long df, RandomNumberGenerator& rng);                               /*!< Chi-Square(v) random variable */
+            double                      rv(std::int64_t df, RandomNumberGenerator& rng);                               /*!< Chi-Square(v) random variable */
             double                      rv(double df, RandomNumberGenerator& rng);                             /*!< Chi-Square(v) random variable */
         }
     }

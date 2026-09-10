@@ -17,7 +17,7 @@
 namespace RevBayesCore {
 class AbstractCharacterData;
 class DagNode;
-    
+
     /**
      * Class for all Continuous character data objects.
      *
@@ -33,19 +33,19 @@ class DagNode;
 
     public:
                                                         ContinuousCharacterData(void);                                              //!< Default constructor
-        
+
         // Overloaded operators
         const ContinuousTaxonData&                      operator[](size_t i) const;                                                 //!< Subscript operator (const)
         ContinuousTaxonData&                            operator[](size_t i);                                                       //!< Subscript operator (const)
-        
+
         // implemented methods of the Cloneable interface
         ContinuousCharacterData*                        clone(void) const;
-        
+
         // implemented methods of the Serializable interface
         void                                            initFromFile( const path &dir, const std::string &fn );              //!< Read and resurrect this object from a file in its default format.
         void                                            initFromString( const std::string &s );                                     //!< Serialize (resurrect) the object from a string value
         void                                            writeToFile(const path &dir, const std::string &fn) const;           //!< Write this object into a file in its default format.
-	json                                            toJSON() const;
+	    json                                            toJSON() const;
         void                                            printForUser( std::ostream &o, const std::string &sep, int l, bool left ) const;                                  //!< print object for user (in user-formatted way)
         void                                            printForSimpleStoring( std::ostream &o, const std::string &sep, int l, bool left, bool flatten ) const;           //!< print object with standard rounding
         void                                            printForComplexStoring( std::ostream &o, const std::string &sep, int l, bool left, bool flatten ) const;          //!< print object with maximum precision
@@ -54,7 +54,7 @@ class DagNode;
         void                                            concatenate(const ContinuousCharacterData &d, std::string type = "");                              //!< Concatenate data matrices
         void                                            concatenate(const HomologousCharacterData &d, std::string type = "");                              //!< Concatenate data matrices
         void                                            concatenate(const AbstractCharacterData &d, std::string type = "");                                //!< Concatenate data matrices
-        DiscretizedContinuousCharacterData*             discretizeCharacter(double error, long num_bins, double cushion_width) const; //!< Discretize the ith character into k bins
+        DiscretizedContinuousCharacterData*             discretizeCharacter(double error, std::int64_t num_bins, double cushion_width) const; //!< Discretize the ith character into k bins
         void                                            excludeAllCharacters(void);                                                 //!< Exclude all characters
         void                                            excludeCharacter(size_t i);                                                 //!< Exclude character
         void                                            executeMethod(const std::string &n, const std::vector<const DagNode*> &args, double &rv) const;     //!< Map the member methods to internal function calls
@@ -86,14 +86,13 @@ class DagNode;
         void                                            removeExcludedCharacters(void);                                             //!< Remove all the excluded characters
         void                                            restoreCharacter(size_t i);                                                 //!< Restore character
 
-        
+
     protected:
         std::set<size_t>                                deleted_characters;                                                          //!< Set of deleted characters
 
     };
-    
-    
+
+
 }
 
 #endif
-

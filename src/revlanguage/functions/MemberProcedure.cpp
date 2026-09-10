@@ -83,21 +83,15 @@ RevPtr<RevVariable> MemberProcedure::execute( void )
     
     if ( found == false )
     {
-        throw RbException("Couldn't find member procedure called '" + getFunctionName() + "'");
+        throw RbException() << "Couldn't find member procedure called '" << getFunctionName() << "'";
     }
     
-    try
+    if (object->getRevObject().hasDagNode())
     {
         RevBayesCore::DagNode* the_node = object->getRevObject().getDagNode();
-        
-        if ( the_node != NULL )
-        {
-            the_node->touch();
-        }
-    }
-    catch (RbException &e)
-    {
-        // we do nothing ...
+	assert(the_node);
+
+	the_node->touch();
     }
     
     return retValue;

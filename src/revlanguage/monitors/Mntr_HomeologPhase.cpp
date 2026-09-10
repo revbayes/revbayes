@@ -61,7 +61,7 @@ void Mntr_HomeologPhase::constructInternalObject( void )
     
     delete value;
     RevBayesCore::HomeologPhaseMonitor *m;
-    m = new RevBayesCore::HomeologPhaseMonitor(ctmc_sn, (unsigned long)g, fn, sep);
+    m = new RevBayesCore::HomeologPhaseMonitor(ctmc_sn, (std::uint64_t)g, fn, sep);
     m->setAppend( ap );
     m->setPrintVersion(wv);
     value = m;

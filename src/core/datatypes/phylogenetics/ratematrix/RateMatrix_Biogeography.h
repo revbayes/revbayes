@@ -28,6 +28,7 @@ namespace RevBayesCore {
         void                                calculateTransitionProbabilities(double startAge, double endAge, double rate, TransitionProbabilityMatrix& P) const;   //!< Calculate the transition matrix
         RateMatrix_Biogeography*            clone(void) const;
         void                                fillRateMatrix(void);
+        virtual RbVector<std::string>       getStateDescriptions(void) const;
         const RbVector<RbVector<double> >&  getDispersalRates(void) const;
         const RbVector<double>&             getExtirpationRates(void) const;                                                   //!< Return the extirpation rates
         virtual std::vector<double>         getStationaryFrequencies(void) const;                                              //!< Return the stationary frequencies
@@ -51,9 +52,11 @@ namespace RevBayesCore {
         void                                updateEigenSystem(void);                                                            //!< Update the system of eigenvalues and eigenvectors
         
         
-        size_t                                              numBitsOn(std::vector<unsigned> v);
-        void                                                makeBits(void);
-        void                                                makeTransitions(void);
+        size_t                          numBitsOn(std::vector<unsigned> v);
+        void                            makeBits(void);
+        void                            makeTransitions(void);
+        std::string                     bitsToString( std::vector<unsigned> b ) const;
+        std::string                     getStateDescriptions(void);
         
         std::vector<std::vector<unsigned> >                 bits;
         std::map<std::vector<unsigned>, unsigned>           inverseBits;

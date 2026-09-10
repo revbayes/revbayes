@@ -39,7 +39,7 @@ namespace RevLanguage {
         virtual void                        printValue(std::ostream& o) const;                                              //!< Print value for user
 
         // ArgumentRule functions
-        Argument                            fitArgument( Argument& arg, bool once ) const;                                  //!< Fit a passed argument into a slot using the rule
+        Argument                            fitArgument( Argument& arg ) const;                                             //!< Fit a passed argument into a slot using the rule
         const std::vector<std::string>&     getArgumentAliases(void) const;                                                 //!< Get aliases of argument
         DagNodeType                         getArgumentDagNodeType(void) const;                                             //!< Get the DAG node type
         const std::string&                  getArgumentLabel(void) const;                                                   //!< Get label of argument
@@ -48,7 +48,7 @@ namespace RevLanguage {
         const std::string&                  getArgumentDescription(void) const;                                             //!< Get label of argument
         EvaluationType                      getEvaluationType(void) const;                                                  //!< Get the evaluation type
         bool                                hasDefault(void) const;                                                         //!< Does the rule have a default value?
-        virtual double                      isArgumentValid(Argument &arg, bool once) const;                                //!< Is var a valid argument?
+        virtual double                      isArgumentValid(Argument &arg) const;                                           //!< Is var a valid argument?
         virtual bool                        isEllipsis(void) const;                                                         //!< Is this an ellipsis?
     
 

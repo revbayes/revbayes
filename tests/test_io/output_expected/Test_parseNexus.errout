@@ -1,0 +1,25 @@
+   Successfully read one character matrix from file 'data/nextest_statelabels_end_comma.nex'
+   Taxa: 5
+   Characters: 3
+
+   Successfully read one character matrix from file 'data/nextest_statelabels_no_end_comma.nex'
+   Taxa: 5
+   Characters: 3
+
+   An ASSUMPTIONS block was found and will be ignored.
+   Successfully read one character matrix from file 'data/nextest_assumptions.nex'
+   Taxa: 5
+   Characters: 3
+
+   Partial ambiguity involving a gap state (-) detected for taxon B at character 2.
+   Replacing by missing data (?).
+   Successfully read one character matrix from file 'data/ambig-inapp.nex'
+   Taxa: 2
+   Characters: 2
+
+   A:
+   01
+   
+   B:
+   (0 1)?
+   

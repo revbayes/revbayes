@@ -17,25 +17,23 @@ template <class variableType> class StochasticNode;
     class CorrelationMatrixReparameterizationMove : public AbstractMove {
         
     public:
-        CorrelationMatrixReparameterizationMove( StochasticNode<MatrixReal> *cm, TypedDagNode<RbVector<double> > *v, StochasticNode<ContinuousCharacterData>* mv, bool t, double w);                                                         //!<  constructor
-        virtual                                ~CorrelationMatrixReparameterizationMove(void);                                                             //!< Destructor
+        CorrelationMatrixReparameterizationMove( StochasticNode<MatrixReal> *cm, TypedDagNode<RbVector<double> > *v, StochasticNode<ContinuousCharacterData>* mv, bool t, double w);                                                                                     //!< Constructor
+        virtual                                ~CorrelationMatrixReparameterizationMove(void);                         //!< Destructor
         
         // Basic utility functions
-        CorrelationMatrixReparameterizationMove*   clone(void) const;                                                                  //!< Clone object
-        const std::string&                         getMoveName(void) const;                                                            //!< Get the name of the move for summary printing
+        CorrelationMatrixReparameterizationMove*   clone(void) const;                                                  //!< Clone object
+        const std::string&                         getMoveName(void) const;                                            //!< Get the name of the move for summary printing
         double                                     getMoveTuningParameter(void) const;
         size_t                                     getNumberAcceptedCurrentPeriod(void) const;                         //!< Get update weight of InferenceMove
         size_t                                     getNumberAcceptedTotal(void) const;
         void                                       printSummary(std::ostream &o, bool current_period) const;                                                //!< Print the move summary
-        void                                       setMoveTuningParameter(double tp);
         void                                       setNumberAcceptedCurrentPeriod(size_t na);
         void                                       setNumberAcceptedTotal(size_t na);
         
     protected:
-        void                                       performMcmcMove(double prHeat, double lHeat, double pHeat);                                        //!< Perform move
-        void                                       resetMoveCounters(void);                                                            //!< Reset the counters such as numAccepted.
-        void                                       swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the pointers to the variable on which the move works on.
-        void                                       tune(void);
+        void                                       performMcmcMove(double prHeat, double lHeat, double pHeat);         //!< Perform move
+        void                                       resetMoveCounters(void);                                            //!< Reset the counters such as numAccepted.
+        void                                       swapNodeInternal(DagNode *oldN, DagNode *newN);                     //!< Swap the pointers to the variable on which the move works on.
         
     private:
         void                                       reject(void);

@@ -25,7 +25,8 @@ namespace RevLanguage {
         Real(void);                                                                                             //!< Default constructor (0.0)
         Real(RevBayesCore::TypedDagNode<double> *v);                                                            //!< Construct from DAG node
         Real(double v);                                                                                         //!< Construct from double
-        Real(long v);                                                                                           //!< Construct from int
+        Real(std::int64_t v);                                                                                           //!< Construct from int
+        Real(bool v);                                                                                           //!< Construct from bool
         Real(const Real& x);                                                                                    //!< Copy constructor
         
         // Basic operator functions
@@ -50,7 +51,7 @@ namespace RevLanguage {
         static const std::string&       getClassType(void);                                                     //!< Get Rev type
         static const TypeSpec&          getClassTypeSpec(void);                                                 //!< Get class type spec
         virtual const TypeSpec&         getTypeSpec(void) const;                                                //!< Get language type of the object
-        virtual double                  isConvertibleTo(const TypeSpec& type, bool once) const;                 //!< Is convertible to type?
+        virtual double                  isConvertibleTo(const TypeSpec& type, bool convert_by_value) const;                 //!< Is convertible to type?
     
         std::string                     getGuiName(void) { return "Real"; }
         std::string                     getGuiUnicodeSymbol(void) { return "R"; }

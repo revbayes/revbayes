@@ -1,0 +1,20 @@
+   Successfully read one character matrix from file 'data/primates_small.nex'
+   
+   Running burn-in phase of Monte Carlo sampler for 2000 iterations.
+   This simulation runs 1 independent replicate.
+   The simulator uses 33 different moves in a random move schedule with 65 moves per iteration
+   
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 33 different moves in a random move schedule with 65 moves per iteration
+   
+   Appending to previous MCMC simulation of 10 iterations
+   This simulation runs 1 independent replicate.
+   The simulator uses 33 different moves in a random move schedule with 65 moves per iteration
+   

@@ -14,7 +14,7 @@
 using namespace RevBayesCore;
 
 /* Constructor */
-ProbabilityMonitor::ProbabilityMonitor(unsigned long g, const std::string &fname, const std::string &del) : VariableMonitor(std::vector<DagNode *>(),g,fname,del)
+ProbabilityMonitor::ProbabilityMonitor(std::uint64_t g, const std::string &fname, const std::string &del) : VariableMonitor(std::vector<DagNode *>(),g,fname,del)
 {
     
     flatten = false;
@@ -46,7 +46,7 @@ ProbabilityMonitor* ProbabilityMonitor::clone(void) const
 /**
  * Monitor value at generation gen
  */
-void ProbabilityMonitor::monitorVariables(unsigned long gen)
+void ProbabilityMonitor::monitorVariables(std::uint64_t gen)
 {
     auto& separator = to<SeparatorFormat>(format)->separator;
 

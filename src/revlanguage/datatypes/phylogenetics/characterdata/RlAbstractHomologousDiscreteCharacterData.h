@@ -22,9 +22,10 @@
 
 
 namespace RevLanguage {
-class Argument;
-class RevVariable;
-class TypeSpec;
+
+    class Argument;
+    class RevVariable;
+    class TypeSpec;
     
     
     class AbstractHomologousDiscreteCharacterData : public ModelObject<RevBayesCore::AbstractHomologousDiscreteCharacterData>, public HomologousCharacterData {

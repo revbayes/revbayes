@@ -129,7 +129,7 @@ SyntaxFunctionCall* SyntaxFunctionCall::clone( void ) const
  *
  * @todo Support this function call context better
  */
-RevPtr<RevVariable> SyntaxFunctionCall::evaluateContent( Environment& env, bool dynamic )
+RevPtr<RevVariable> SyntaxFunctionCall::evaluateContent( const std::shared_ptr<Environment>& env, bool dynamic )
 {
     
     // Package arguments
@@ -153,15 +153,15 @@ RevPtr<RevVariable> SyntaxFunctionCall::evaluateContent( Environment& env, bool 
         // We can do this first because user-defined variables are not allowed to mask function names
         // Skip if we're not in UserWorkspace, because functions can only be user-defined in UserWorkspace
         bool found = false;
-        if ( env.existsVariable( function_name ) && &env == &Workspace::userWorkspace() )
+        if ( env->existsVariable( function_name ) && env == Workspace::userWorkspacePtr() )
         {
-            RevObject &the_object = env.getRevObject( function_name );
+            RevObject &the_object = env->getRevObject( function_name );
             
             if ( the_object.isType( Function::getClassTypeSpec() ) )
             {
                 func = static_cast<Function*>( the_object.clone() );
                 std::vector<bool> arg_mapped(args.size(), false);
-                found = func->checkArguments(args, NULL, arg_mapped, !dynamic);
+                found = func->checkArguments(args, NULL, arg_mapped);
             }
         }
         
@@ -169,14 +169,14 @@ RevPtr<RevVariable> SyntaxFunctionCall::evaluateContent( Environment& env, bool 
         // This call will throw a relevant message if the function is not found
         if ( found == false )
         {
-            func = env.getFunction(function_name, args, !dynamic).clone();
+            func = env->getFunction(function_name, args).clone();
         }
         
         // Allow the function to process the arguments
-        func->processArguments( args, !dynamic );
+        func->processArguments( args );
         
         // Set the execution environment of the function
-        func->setExecutionEnviroment( &env );
+        func->setExecutionEnviroment( env );
     }
     else
     {
@@ -190,7 +190,7 @@ RevPtr<RevVariable> SyntaxFunctionCall::evaluateContent( Environment& env, bool 
         
         const MethodTable& mt = the_member_object.getMethods();
         
-        const Function* the_const_function = mt.findFunction( function_name, args, !dynamic );
+        const Function* the_const_function = mt.findFunction( function_name, args );
 
         Function* the_function;
         if ( the_const_function != NULL )
@@ -202,7 +202,7 @@ RevPtr<RevVariable> SyntaxFunctionCall::evaluateContent( Environment& env, bool 
             throw RbException()<<"Variable of type '"<<the_member_object.getType()<<"' has no method called '"<<function_name<<"'.  You can use '.methods()' to find available methods.";
         }
         
-        the_function->processArguments(args, !dynamic);
+        the_function->processArguments(args );
         
         MemberMethod* the_member_method = dynamic_cast<MemberMethod*>( the_function );
         if ( the_member_method != NULL )
@@ -224,7 +224,7 @@ RevPtr<RevVariable> SyntaxFunctionCall::evaluateContent( Environment& env, bool 
     // free the memory of our copy
     delete func;
     
-    if ( dynamic == false || isConstExpression() == true )
+    if ( isConstExpression() == true )
     {
         // Return the value, which is typically a deterministic variable with the function
         // inside it, although many functions return constant values or NULL (void).

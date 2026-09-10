@@ -19,7 +19,7 @@ using namespace RevBayesCore;
  *
  */
 
-BernoulliDistribution::BernoulliDistribution(const TypedDagNode<double> *p) : TypedDistribution<long>( new long( 0 ) ),
+BernoulliDistribution::BernoulliDistribution(const TypedDagNode<double> *p) : TypedDistribution<std::int64_t>( new std::int64_t( 0 ) ),
     p( p )
 {
     // add the parameters to our set (in the base class)
@@ -61,7 +61,8 @@ double BernoulliDistribution::computeLnProbability( void )
 }
 
 
-void BernoulliDistribution::redrawValue( void ) {
+void BernoulliDistribution::redrawValue( void )
+{
     
     double u = GLOBAL_RNG->uniform01();
     *value = u > p->getValue() ? 0 : 1;
@@ -70,7 +71,8 @@ void BernoulliDistribution::redrawValue( void ) {
 
 
 /** Swap a parameter of the distribution */
-void BernoulliDistribution::swapParameterInternal(const DagNode *oldP, const DagNode *newP) {
+void BernoulliDistribution::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
+{
     
     if (oldP == p) 
     {

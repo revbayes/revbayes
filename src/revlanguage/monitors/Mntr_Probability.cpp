@@ -52,7 +52,7 @@ void Mntr_Probability::constructInternalObject( void )
     bool                                pr      = static_cast<const RlBoolean &>( prior->getRevObject() ).getValue();
     bool                                ap      = static_cast<const RlBoolean &>( append->getRevObject() ).getValue();
     bool                                wv      = static_cast<const RlBoolean &>( version->getRevObject() ).getValue();
-    RevBayesCore::ProbabilityMonitor *m = new RevBayesCore::ProbabilityMonitor((unsigned long)g, fn, sep);
+    RevBayesCore::ProbabilityMonitor *m = new RevBayesCore::ProbabilityMonitor((std::uint64_t)g, fn, sep);
     
     // now set the flags
     m->setAppend( ap );

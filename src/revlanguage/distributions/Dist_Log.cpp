@@ -6,6 +6,7 @@
 #include "RlSimplex.h"
 #include "StochasticNode.h"
 #include "TypedDistribution.h"
+#include "Transforms.h"
 
 Dist_Log::Dist_Log() : TypedDistribution< RealPos >(),
     log_distribution( NULL )
@@ -23,14 +24,10 @@ Dist_Log* RevLanguage::Dist_Log::clone( void ) const
     return new Dist_Log(*this);
 }
 
-// Declare transformation defined in Transform_Exp.cpp
-std::optional<double> exp_transform(double x);
-std::optional<double> exp_inverse(double x);
-std::optional<double> log_exp_prime(double x);
-
 RevBayesCore::TransformedDistribution* RevLanguage::Dist_Log::createDistribution( void ) const
 {
-    
+    using namespace Transforms;
+
     // get the parameters
     const Distribution& rl_vp                      = static_cast<const Distribution &>( log_distribution->getRevObject() );
     RevBayesCore::TypedDistribution<double>* vp    = static_cast<RevBayesCore::TypedDistribution<double>* >( rl_vp.createDistribution() );

@@ -18,16 +18,16 @@ class DagNode;
         
     public:
         // Constructors and Destructors
-        ScreenMonitor(DagNode *n, unsigned long g, bool pp=true, bool l=true, bool pr=true);  //!< Constructor with single DAG node
-        ScreenMonitor(const std::vector<DagNode *> &n, unsigned long g, bool pp=true, bool l=true, bool pr=true);  //!< Constructor with vector of DAG nodes
+        ScreenMonitor(DagNode *n, std::uint64_t g, bool pp=true, bool l=true, bool pr=true);  //!< Constructor with single DAG node
+        ScreenMonitor(const std::vector<DagNode *> &n, std::uint64_t g, bool pp=true, bool l=true, bool pr=true);  //!< Constructor with vector of DAG nodes
         
         // basic methods
         ScreenMonitor*                      clone(void) const;
         
         // Monitor functions
         bool                                isScreenMonitor(void) const;
-        void                                monitor(unsigned long gen);
-        void                                reset(size_t numCycles);
+        void                                monitor(std::uint64_t gen);
+        void                                reset(size_t numCycles, double maxSeconds) override;
         void                                setReplicateIndex(size_t idx);
         
         // ScreenMonitor functions
@@ -46,6 +46,7 @@ class DagNode;
         size_t                              headerPrintingInterval; //!< print the header each n iterations
         time_t                              startTime; //!< time of start of the run
         size_t                              numCycles; //!< planned number of iterations                                                       //!< Total number of cycles to monitor
+        double                              maxSeconds; //!< planned wall-clock time in seconds (0 if unknown)
         size_t                              currentGen; //!< current generation of the run
         size_t                              startGen; //!< start generation of the run
         size_t                              replicateIndex; //!< replicate index of the monitored run

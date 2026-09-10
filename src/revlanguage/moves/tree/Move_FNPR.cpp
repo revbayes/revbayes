@@ -78,7 +78,7 @@ void Move_FNPR::constructInternalObject( void )
     }
     else
     {
-        throw RbException("Wrong tree type '" + tree->getRevObject().getType() + "'.");
+        throw RbException() << "Wrong tree type '" << tree->getRevObject().getType() << "'.";
     }
     
     RevBayesCore::Proposal *p = new RevBayesCore::FixedNodeheightPruneAndRegraftProposal(t, vec_t);
@@ -151,9 +151,15 @@ const MemberRules& Move_FNPR::getParameterRules(void) const
         
         member_rules.push_back( new ArgumentRule( "tree", tree_var_types, "The time-tree variable on which this move operates.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
         
-        /* Inherit weight from Move, put it after variable */
+        /* Inherit weight (but not tuneTarget!) from Move and put it after the arguments created above */
         const MemberRules& inherited_rules = Move::getParameterRules();
-        member_rules.insert( member_rules.end(), inherited_rules.begin(), inherited_rules.end() );
+        for (size_t i = 0; i < inherited_rules.size(); ++i)
+        {
+            if ( inherited_rules[i].getArgumentLabel() == "weight" )
+            {
+                member_rules.push_back( inherited_rules[i].clone() );
+            }
+        }
         
         rules_set = true;
     }

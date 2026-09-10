@@ -18,7 +18,7 @@ using namespace RevBayesCore;
 
 
 /* Constructor */
-ExtendedNewickTreeMonitor::ExtendedNewickTreeMonitor(TypedDagNode<Tree> *t, const std::vector<DagNode*> &n, bool np, unsigned long g, const std::string &fname,
+ExtendedNewickTreeMonitor::ExtendedNewickTreeMonitor(TypedDagNode<Tree> *t, const std::vector<DagNode*> &n, bool np, std::uint64_t g, const std::string &fname,
                                                      const std::string &del, bool pp, bool l, bool pr, bool ap) :
     VariableMonitor(t,g,fname,del,pp,l,pr,ap),
     isNodeParameter( np ),
@@ -46,7 +46,7 @@ ExtendedNewickTreeMonitor* ExtendedNewickTreeMonitor::clone(void) const
 
 
 /** Monitor value at generation gen */
-void ExtendedNewickTreeMonitor::monitorVariables(unsigned long gen)
+void ExtendedNewickTreeMonitor::monitorVariables(std::uint64_t gen)
 {
     auto& separator = to<SeparatorFormat>(format)->separator;
 
@@ -114,7 +114,7 @@ void ExtendedNewickTreeMonitor::swapNode(DagNode *oldN, DagNode *newN)
         std::vector<DagNode*>::iterator it = find(nodeVariables.begin(), nodeVariables.end(), nodeVar);
         if (it == nodeVariables.end())
         {
-            throw RbException("Cannot replace DAG node with name\"" + oldN->getName() + "\" in this extended newick monitor because the monitor doesn't hold this DAG node.");
+            throw RbException() << "Cannot replace DAG node with name\"" << oldN->getName() << "\" in this extended newick monitor because the monitor doesn't hold this DAG node.";
         }
         *it = static_cast< TypedDagNode< RbVector<double> > *>(newN);
 //        nodeVariables.erase( nodeVar );

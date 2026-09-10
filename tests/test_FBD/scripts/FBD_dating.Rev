@@ -152,9 +152,6 @@ monitors.append( mnModel(filename="output/bears_FBD.log", printgen=10) )
 monitors.append( mnFile(filename="output/bears_FBD_all.trees", printgen=10, timetree) )
 monitors.append( mnFile(filename="output/bears_FBD_extant.trees", printgen=10, pruned_tree) )
 
-# 3. and a few select parameters to be printed to the screen #
-monitors.append( mnScreen(printgen=100, origin_time) )
-
 # Initialize the MCMC object #
 mymcmc = mcmc(mymodel, monitors, moves, nruns=1, combine="mixed")
 

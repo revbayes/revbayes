@@ -131,7 +131,7 @@ void DistanceMatrix::setTaxon(const RevBayesCore::Taxon &t, size_t i)
 {
     if ( taxa.size() <= i )
     {
-        throw RbException("Cannot set taxon object in distance matrix because of index '"+StringUtilities::to_string(i)+"' out of bounds.");
+        throw RbException() << "Cannot set taxon object in distance matrix because of index '" << i << "' out of bounds."; 
     }
     taxa[i] = t;
 }

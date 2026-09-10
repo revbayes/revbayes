@@ -1,2 +1,2 @@
-trees = readTreeTrace("data/trees1.trees")
-q()
+trees_from_file = readTreeTrace("data/trees1.trees")
+trees_from_file.size()

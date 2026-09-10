@@ -8,6 +8,7 @@
 #include "RandomNumberGenerator.h"
 #include "Cloneable.h"
 #include "MatrixReal.h"
+#include "RbException.h"
 #include "RbVector.h"
 #include "RbVectorImpl.h"
 #include "StochasticNode.h"
@@ -121,9 +122,20 @@ double MatrixRealSingleElementSlideProposal::doProposal( void )
     if (array != NULL)
     {
         RbVector<RbVector<double> >& v = array->getValue();
+
+        // the matrix is not known when the move is built, so its bounds are checked here
+        if ( restrict_row.has_value() && *restrict_row > v.size() )
+        {
+            throw RbException() << "mvMatrixElementSlide: row " << *restrict_row << " is outside the matrix, which has " << v.size() << " rows.";
+        }
+        if ( restrict_col.has_value() && *restrict_col > v.front().size() )
+        {
+            throw RbException() << "mvMatrixElementSlide: col " << *restrict_col << " is outside the matrix, which has " << v.front().size() << " columns.";
+        }
+
         // choose an index
-        indexa = size_t( rng->uniform01() * v.size() );
-        indexb = size_t( rng->uniform01() * v.front().size() );
+        indexa = ( restrict_row.has_value() ? *restrict_row - 1 : size_t( rng->uniform01() * v.size() ) );
+        indexb = ( restrict_col.has_value() ? *restrict_col - 1 : size_t( rng->uniform01() * v.front().size() ) );
 
         // copy value
         storedValue = v[indexa][indexb];
@@ -135,14 +147,25 @@ double MatrixRealSingleElementSlideProposal::doProposal( void )
             v[indexb][indexa] += scalingFactor;
         }
 
-        array->addTouchedElementIndex(indexa*v.size() + indexb);
+        array->addTouchedElementIndex(indexa*v.front().size() + indexb);
     }
     else
     {
         MatrixReal& v = matrix->getValue();
+
+        // the matrix is not known when the move is built, so its bounds are checked here
+        if ( restrict_row.has_value() && *restrict_row > v.getNumberOfRows() )
+        {
+            throw RbException() << "mvMatrixElementSlide: row " << *restrict_row << " is outside the matrix, which has " << v.getNumberOfRows() << " rows.";
+        }
+        if ( restrict_col.has_value() && *restrict_col > v.getNumberOfColumns() )
+        {
+            throw RbException() << "mvMatrixElementSlide: col " << *restrict_col << " is outside the matrix, which has " << v.getNumberOfColumns() << " columns.";
+        }
+
         // choose an index
-        indexa = size_t( rng->uniform01() * v.getNumberOfRows() );
-        indexb = size_t( rng->uniform01() * v.getNumberOfColumns() );
+        indexa = ( restrict_row.has_value() ? *restrict_row - 1 : size_t( rng->uniform01() * v.getNumberOfRows() ) );
+        indexb = ( restrict_col.has_value() ? *restrict_col - 1 : size_t( rng->uniform01() * v.getNumberOfColumns() ) );
 
         // copy value
         storedValue = v[indexa][indexb];
@@ -154,7 +177,7 @@ double MatrixRealSingleElementSlideProposal::doProposal( void )
             v[indexb][indexa] += scalingFactor;
         }
 
-        matrix->addTouchedElementIndex(indexa*v.getNumberOfRows() + indexb);
+        matrix->addTouchedElementIndex(indexa*v.getNumberOfColumns() + indexb);
     }
     
     // this is a symmetric proposal so the hasting ratio is 0.0
@@ -251,7 +274,7 @@ void MatrixRealSingleElementSlideProposal::setProposalTuningParameter(double tp)
 
 
 /**
- * Tune the Proposal to accept the desired acceptance ratio.
+ * Tune the Proposal to accept at the desired acceptance ratio.
  *
  * The acceptance ratio for this Proposal should be around 0.44.
  * If it is too large, then we increase the proposal size,
@@ -260,13 +283,14 @@ void MatrixRealSingleElementSlideProposal::setProposalTuningParameter(double tp)
 void MatrixRealSingleElementSlideProposal::tune( double rate )
 {
     
-    if ( rate > 0.44 )
+    double p = this->targetAcceptanceRate;
+    if ( rate > p )
     {
-        delta *= (1.0 + ((rate-0.44)/0.56) );
+        delta *= (1.0 + ((rate - p)/(1.0 - p)) );
     }
     else
     {
-        delta /= (2.0 - rate/0.44 );
+        delta /= (2.0 - rate/p);
     }
     
     delta = fmin(10000, delta);

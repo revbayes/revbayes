@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <iostream>
+#include <set>
 
 #include "RlAbstractDiscreteTaxonData.h"
 #include "RlDistanceMatrix.h"
@@ -84,7 +85,7 @@ void AbstractHomologousDiscreteCharacterData::concatenate(const RevObject &d, st
     }
     else
     {
-        throw RbException("Cannot add an object of type '" + d.getType() + "' to a character data object.");
+        throw RbException() << "Cannot add an object of type '" << d.getType() << "' to a character data object.";
     }
 
 }
@@ -204,7 +205,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
             ambig_treat = RevBayesCore::AbstractHomologousDiscreteCharacterData::SFS_AMBIGUITY_TREATMENT::RESCALE;
         }
 
-        std::vector<long> sfs = this->dag_node->getValue().computeSiteFrequencySpectrum(folded, ambig_treat);
+        std::vector<std::int64_t> sfs = this->dag_node->getValue().computeSiteFrequencySpectrum(folded, ambig_treat);
 
         return new RevVariable( new ModelVector<Natural>(sfs) );
     }
@@ -221,7 +222,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
         found = true;
 
         const RevObject& argument = args[0].getVariable()->getRevObject();
-        long n = static_cast<const Natural&>( argument ).getValue();
+        std::int64_t n = static_cast<const Natural&>( argument ).getValue();
 
         RevBayesCore::AbstractHomologousDiscreteCharacterData *trans_data = this->dag_node->getValue().expandCharacters( n );
 
@@ -243,7 +244,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
         bool excl = static_cast<const RlBoolean&>( argument ).getValue();
 
         std::vector<size_t> tmp = this->dag_node->getValue().getInvariantSiteIndices( excl );
-        std::vector<long> inv_vect(begin(tmp), end(tmp));
+        std::vector<std::int64_t> inv_vect(begin(tmp), end(tmp));
 
         return new RevVariable( new ModelVector<Natural>(inv_vect) );
     }
@@ -262,7 +263,29 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
     {
         found = true;
 
-        std::vector<std::string> descriptions = this->dag_node->getValue().getTaxonData(0).getCharacter(0).getStateDescriptions();
+        std::vector<std::string> descriptions;
+        const RevBayesCore::AbstractHomologousDiscreteCharacterData& v = this->dag_node->getValue();
+        if ( v.getNumberOfTaxa() > 0 )
+        {
+            size_t nChars = v.getNumberOfCharacters();
+            const RevBayesCore::AbstractDiscreteTaxonData& td = v.getTaxonData(0);
+            
+            // get a union of all state descriptions across all characters,
+            // preserving the first-seen state order
+            std::set<std::string> seen_descriptions;
+            
+            for ( size_t i = 0; i < nChars; ++i )
+            {
+                std::vector<std::string> char_desc = td.getCharacter(i).getStateDescriptions();
+                for ( const std::string& s : char_desc )
+                {
+                    if ( seen_descriptions.insert(s).second )
+                    {
+                        descriptions.push_back(s);
+                    }
+                }
+            }
+        }
 
         return new RevVariable( new ModelVector<RlString>(descriptions) );
     }
@@ -602,6 +625,13 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
                 if (max + 1 == n)
                 {
                     v.includeCharacter(i);
+                    for (size_t j = 0; j < nTaxa; j++)
+                    {
+                        RevBayesCore::AbstractDiscreteTaxonData& td = v.getTaxonData(j);
+                        std::string labels = td.getCharacter(i).getStateLabels();
+                        labels = labels.substr(0,n);
+                        td.getCharacter(i).setStateLabels(labels);
+                    }
                 }
                 else
                 {

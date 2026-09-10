@@ -56,6 +56,7 @@ namespace RevLanguage {
         const std::string&      getName(void) const;                                    //!< Get the name of the variable
         RevObject&              getRevObject(void) const;                               //!< Get the value of the variable (non-const to return non-const value)
         const TypeSpec&         getRequiredTypeSpec(void) const;                        //!< Get the required Rev object type spec
+        RevPtr<RevVariable>     getElementVariable(int i) const;                        //!< Look up the ith element.
         bool                    isAssignable(void) const;                               //!< Is variable or upstream members assignable?
         bool                    isHiddenVariable(void) const;                           //!< Is this a hidden variable?
         bool                    isElementVariable(void) const;                          //!< Is this a variable an element of a vector?

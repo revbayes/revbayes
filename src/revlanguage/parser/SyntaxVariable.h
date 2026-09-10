@@ -38,8 +38,8 @@ namespace RevLanguage {
         SyntaxVariable*                     clone(void) const;                                                                      //!< Clone object
         
         // Regular functions
-        RevPtr<RevVariable>                 evaluateContent(Environment& env, bool dynamic=false);                                  //!< Get semantic rhs value
-        RevPtr<RevVariable>                 evaluateLHSContent(Environment& env, const std::string& varType);                       //!< Get semantic lhs value
+        RevPtr<RevVariable>                 evaluateContent(const std::shared_ptr<Environment>& env, bool dynamic=false);           //!< Get semantic rhs value
+        RevPtr<RevVariable>                 evaluateLHSContent(const std::shared_ptr<Environment>& env, const std::string& varType);//!< Get semantic lhs value
         const std::string&                  getIdentifier(void) { return identifier; }                                              //!< Get identifier
         std::string                         getFullName(Environment& env) const;                                                    //!< Get full name, with indices and base obj
         bool                                isFunctionSafe(const Environment&       env,

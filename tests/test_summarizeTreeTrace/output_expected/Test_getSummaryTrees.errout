@@ -1,0 +1,32 @@
+   Attempting to read the contents of file "myposterior.posterior.trees"
+   Successfully read file
+   Compiling majority rule consensus tree (cutoff = 0.5) from 102 trees.
+   
+   Summarizing clades ...
+   
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+   Annotating tree ...
+   Compiling maximum clade credibility tree from 102 trees.
+   
+   Summarizing clades ...
+   
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+   Annotating tree ...
+   Compiling maximum a posteriori tree from 102 trees.
+   
+   Summarizing clades ...
+   
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+   Annotating tree ...

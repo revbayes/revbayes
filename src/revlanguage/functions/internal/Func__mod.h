@@ -45,7 +45,7 @@ class TypeSpec;
         bool                                        isInternal(void) const { return true; }                     //!< Is this an internal function?
 
         // Regular functions
-        RevBayesCore::TypedFunction<long>*           createFunction(void) const;                                                     //!< Create internal function object
+        RevBayesCore::TypedFunction<std::int64_t>*           createFunction(void) const;                                                     //!< Create internal function object
         const ArgumentRules&                        getArgumentRules(void) const;                               //!< Get argument rules
         
     };

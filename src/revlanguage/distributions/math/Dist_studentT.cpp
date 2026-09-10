@@ -52,7 +52,7 @@ RevBayesCore::StudentTDistribution* Dist_studentT::createDistribution( void ) co
 {
     
     // get the parameters
-    RevBayesCore::TypedDagNode<long>*    df = static_cast<const Natural     &>( degrees->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<std::int64_t>*    df = static_cast<const Natural     &>( degrees->getRevObject() ).getDagNode();
     RevBayesCore::StudentTDistribution* d  = new RevBayesCore::StudentTDistribution( df );
     
     return d;

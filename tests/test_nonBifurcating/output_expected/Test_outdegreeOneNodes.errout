@@ -1,0 +1,16 @@
+   Attempting to read the contents of file "outdegree_one_internal.nex"
+   Successfully read file
+Number of taxa: 37
+Number of tips: 17
+Replacing outdegree-1 nodes by bifurcations
+Number of taxa (should stay the same): 37
+Removing outdegree-1 nodes entirely
+Number of taxa (should be equal to the number of tips): 17
+   Attempting to read the contents of file "outdegree_one_root.nex"
+   Successfully read file
+Number of taxa: 35
+Number of tips: 17
+Replacing outdegree-1 nodes by bifurcations
+Number of taxa (should stay the same): 35
+Removing outdegree-1 nodes entirely
+Number of taxa (should be equal to the number of tips): 17

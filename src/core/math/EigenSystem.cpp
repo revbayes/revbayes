@@ -29,7 +29,7 @@
 #include "EigenSystem.h"
 
 #include <cassert>
-#include <math.h>
+#include <cmath>
 #include <vector>
 
 #include "MatrixReal.h"

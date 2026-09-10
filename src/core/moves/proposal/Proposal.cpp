@@ -15,7 +15,7 @@ using namespace RevBayesCore;
 
 Proposal::Proposal(double p) :
     nodes(),
-    move( NULL ),
+    move( nullptr ),
     targetAcceptanceRate(p)
 {
     
@@ -24,7 +24,7 @@ Proposal::Proposal(double p) :
 
 Proposal::Proposal(const Proposal &p)  :
     nodes( p.nodes ),
-    move( NULL ),
+    move( nullptr ),
     targetAcceptanceRate( p.targetAcceptanceRate )
 {
     
@@ -84,7 +84,6 @@ Proposal& Proposal::operator=(const Proposal &p)
 }
 
 
-
 /**
  * Add this node to our set of nodes.
  */
@@ -102,8 +101,14 @@ void Proposal::addNode( DagNode *n )
     }
     
     // only add the node if it doesn't exist already
-    if ( n != NULL && exists == false )
+    if ( n != nullptr && exists == false )
     {
+        if (n->isClamped() && this->allowClamped() == false)
+        {
+            std::cout << "! In class defined as: " << typeid(*this).name() << std::endl;
+            throw RbException("Cannot add the clamped node '" + n->getName() + "' to proposal" + 
+            (this->getProposalName() == "" ? "." : (" " + this->getLongProposalName())));
+        }
         nodes.push_back( n );
     
         // increment reference count
@@ -111,11 +116,21 @@ void Proposal::addNode( DagNode *n )
     }
     
     // delegate to the move
-    if ( move != NULL )
+    if ( move != nullptr )
     {
         move->addNode( n );
     }
     
+}
+
+
+std::string Proposal::getLongProposalName() const
+{
+    std::vector<std::string> node_names;
+    for(auto node: nodes)
+    node_names.push_back(node->getName());
+
+    return getProposalName() + "(" + StringUtilities::join(node_names,",") +")";
 }
 
 
@@ -124,7 +139,6 @@ const Move* Proposal::getMove( void ) const
     
     return move;
 }
-
 
 
 /**
@@ -144,7 +158,6 @@ std::vector<DagNode*> Proposal::identifyNodesToTouch(void)
 
     return nodes;
 }
-
 
 
 /**
@@ -177,10 +190,22 @@ void Proposal::removeNode( RevBayesCore::DagNode *n )
 
 void Proposal::setMove(Move *m)
 {
-    
     move = m;
-    
 }
+
+
+void Proposal::setProposalTuningParameter(double tp)
+{
+    // We assume by default that the proposal has no tuning parameter, and do nothing. If there is a tuning parameter,
+    // this function needs to be overridden.
+}
+
+
+void Proposal::setTargetAcceptanceRate(double p)
+{
+    targetAcceptanceRate = p;
+}
+
 
 /**
  * Swap the old node with a new one.
@@ -216,7 +241,14 @@ void Proposal::swapNode(DagNode *oldP, DagNode *newP)
     }
     else
     {
-        throw RbException("Could not find the Proposal parameter to be swapped: " + oldP->getName());
+        throw RbException() << "Could not find the Proposal parameter to be swapped: " << oldP->getName();
     }
     
+}
+
+
+void Proposal::tune(double r)
+{
+    // We assume by default that the proposal is not capable of being tuned, and do nothing. If the proposal can
+    // be tuned, this function needs to be overridden.
 }

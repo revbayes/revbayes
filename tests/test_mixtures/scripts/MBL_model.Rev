@@ -1,0 +1,68 @@
+# test
+seed(1234)
+data <- readDiscreteCharacterData("data/primates_small.nex")
+n_taxa <- data.ntaxa()
+taxa <- data.taxa()
+n_branches <- 2 * n_taxa - 3
+names <- data.names()
+
+numCategories <- 2
+
+moves = VectorMoves()
+monitors = VectorMonitors()
+
+Q := fnJC(4)
+
+topology ~ dnUniformTopology(names)
+moves.append(mvNNI(topology, weight=10.0))
+moves.append(mvSPR(topology, weight=5.0))
+
+# category-specific exponential rates
+for (i in 1:numCategories) {
+    rate_cat[i] ~ dnExponential(1.0)
+    moves.append(mvScale(rate_cat[i], lambda=1.0, tune=true, weight=2.0))
+}
+
+mix_prior <- rep(1.0, numCategories)
+mix ~ dnDirichlet(mix_prior)
+moves.append(mvBetaSimplex(mix, weight=4.0))
+
+# per-branch mixture
+for (j in 1:n_branches) {
+
+    for (i in 1:numCategories) {
+        br_lens_cat[j][i] ~ dnExponential(rate_cat[i])
+        moves.append(mvScale(br_lens_cat[j][i], lambda=1.0, tune=true, weight=1.0))
+    }
+
+    br_lens[j] ~ dnMixture(br_lens_cat[j], mix)
+    moves.append(mvMixtureAllocation(br_lens[j], weight=2.0))
+    moves.append(mvGibbsMixtureAllocation(br_lens[j], weight=2.0))
+}
+
+TL := sum(br_lens)
+
+phylogeny := treeAssembly(topology, br_lens)
+
+seq ~ dnPhyloCTMC(tree=phylogeny, Q=Q, type="DNA")
+seq.clamp(data)
+
+mymodel = model(seq)
+
+monitors.append(mnModel(filename="output/MBL.log", printgen=2, separator=TAB))
+monitors.append(mnFile(filename="output/MBL.trees", printgen=2, separator=TAB, phylogeny))
+monitors.append(mnStochasticVariable(filename="output/MBL.var", printgen=2))
+
+mymcmc = mcmc(mymodel, monitors, moves, nruns=1, combine="mixed")
+mymcmc.burnin(generations=2000, tuningInterval=200)
+mymcmc.run(generations=10, checkpointFile="output/p.ckp", checkpointInterval=5)
+mymcmc.initializeFromCheckpoint( "output/p.ckp")
+mymcmc.run(generations=5) 
+
+trace = readStochasticVariableTrace("output/MBL.var")
+pps = posteriorPredictiveSimulation(mymodel, directory="output/sims_MBL", trace)
+
+pps.run(thinning=1)
+
+clear()
+q()

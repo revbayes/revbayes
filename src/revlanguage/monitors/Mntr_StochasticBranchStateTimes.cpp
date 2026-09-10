@@ -69,7 +69,7 @@ void Mntr_StochasticBranchStateTimes::constructInternalObject( void )
     sse_process = dynamic_cast<RevBayesCore::StateDependentSpeciationExtinctionProcess*>( &cdbdp_sn->getDistribution() );
     sse_process->setSampleCharacterHistory( true );
     
-    RevBayesCore::StochasticBranchStateTimesMonitor *m = new RevBayesCore::StochasticBranchStateTimesMonitor( cdbdp_sn, (unsigned long)print_gen, file_name, sep );
+    RevBayesCore::StochasticBranchStateTimesMonitor *m = new RevBayesCore::StochasticBranchStateTimesMonitor( cdbdp_sn, (std::uint64_t)print_gen, file_name, sep );
     m->setAppend( app );
     m->setPrintVersion( wv );
     

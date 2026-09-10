@@ -74,7 +74,7 @@ double RbStatistics::Multinomial::pdf(const std::vector<double> &p, const std::v
  * \return Returns the probability.
  * \throws Throws an MbException::ERROR.
  */
-double RbStatistics::Multinomial::pdf(const std::vector<double> &p, const std::vector<long> &x)
+double RbStatistics::Multinomial::pdf(const std::vector<double> &p, const std::vector<std::int64_t> &x)
 {
 	
     double lnP = RbStatistics::Multinomial::lnPdf(p, x);
@@ -158,7 +158,7 @@ double RbStatistics::Multinomial::lnPdf(const std::vector<double> &p, const std:
  * \return Returns the natural log of the probability.
  * \throws Does not throw an error.
  */
-double RbStatistics::Multinomial::lnPdf(const std::vector<double> &p, const std::vector<long> &x)
+double RbStatistics::Multinomial::lnPdf(const std::vector<double> &p, const std::vector<std::int64_t> &x)
 {
     
     if ( p.size() != x.size() )
@@ -192,11 +192,11 @@ double RbStatistics::Multinomial::lnPdf(const std::vector<double> &p, const std:
  * \return Returns a vector of integers containing the random variable.
  * \throws Does not throw an error.
  */
-std::vector<long> RbStatistics::Multinomial::rv(const std::vector<double> &p, size_t n, RandomNumberGenerator& rng)
+std::vector<std::int64_t> RbStatistics::Multinomial::rv(const std::vector<double> &p, size_t n, RandomNumberGenerator& rng)
 {
     size_t nCats = p.size();
     
-    std::vector<long> x(nCats,0);
+    std::vector<std::int64_t> x(nCats,0);
     for (size_t i=0; i<n; ++i)
     {
         double u = rng.uniform01();

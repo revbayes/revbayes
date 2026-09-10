@@ -349,14 +349,10 @@ void HillClimber::initializeSampler( void )
     // Get initial lnProbability of model
 
     // first we touch all nodes so that the likelihood is dirty
-    for (std::vector<DagNode *>::iterator i=dagNodes.begin(); i!=dagNodes.end(); i++)
+    for (auto the_node: dagNodes)
     {
-
-        DagNode *the_node = *i;
         the_node->setMcmcMode( true );
-        the_node->setPriorOnly( false );
         the_node->touch();
-
     }
 
 
@@ -467,7 +463,7 @@ void HillClimber::initializeMonitors(void)
 }
 
 
-void HillClimber::monitor(unsigned long g)
+void HillClimber::monitor(std::uint64_t g)
 {
 
     if ( process_active == true )
@@ -526,7 +522,7 @@ void HillClimber::replaceDag(const RbVector<Move> &mvs, const RbVector<Monitor> 
             // error checking
             if ( the_node->getName() == "" )
             {
-                throw RbException( "Unable to connect move '" + the_move->getMoveName() + "' to DAG copy because variable name was lost");
+                throw RbException() << "Unable to connect move '" << the_move->getMoveName() << "' to DAG copy because variable name was lost"; 
             }
 
             DagNode* theNewNode = NULL;
@@ -541,7 +537,7 @@ void HillClimber::replaceDag(const RbVector<Move> &mvs, const RbVector<Monitor> 
             // error checking
             if ( theNewNode == NULL )
             {
-                throw RbException("Cannot find node with name '" + the_node->getName() + "' in the model but received a move working on it.");
+                throw RbException() << "Cannot find node with name '" << the_node->getName() << "' in the model but received a move working on it.";
             }
 
             // now swap the node
@@ -578,7 +574,7 @@ void HillClimber::replaceDag(const RbVector<Move> &mvs, const RbVector<Monitor> 
             // error checking
             if ( theNewNode == NULL )
             {
-                throw RbException("Cannot find node with name '" + the_node->getName() + "' in the model but received a monitor working on it.");
+                throw RbException() << "Cannot find node with name '" << the_node->getName() << "' in the model but received a monitor working on it.";
             }
 
             // now swap the node
@@ -656,7 +652,7 @@ void HillClimber::setScheduleType(const std::string &s)
 /**
  * Start the monitors which will open the output streams.
  */
-void HillClimber::startMonitors( size_t num_cycles, bool reopen )
+void HillClimber::startMonitors( size_t num_cycles, bool reopen, double max_seconds )
 {
 
     // Open the output file and print headers
@@ -664,7 +660,7 @@ void HillClimber::startMonitors( size_t num_cycles, bool reopen )
     {
 
         // reset the monitor
-        monitors[i].reset( num_cycles );
+        monitors[i].reset( num_cycles, max_seconds );
 
         // if this chain is active, print the header
         if ( process_active == true )

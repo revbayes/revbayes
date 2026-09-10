@@ -1,0 +1,32 @@
+=============================================
+Dropping tips from a multifurcating time tree
+=============================================
+
+   Attempting to read the contents of file "multifurcating_time_tree.tre"
+   Successfully read file
+
+Tree type: TimeTree
+Number of tips: 10
+
+Dropping a tip from a multifurcation at the root...
+New number of tips (expecting 9): 9
+
+Dropping a tip from a multifurcation at a non-root internal node...
+New number of tips (expecting 9): 9
+
+======================================================
+Dropping tips from a multifurcating branch length tree
+======================================================
+
+   Attempting to read the contents of file "multifurcating_branch_length_tree.tre"
+   Successfully read file
+
+Tree type: BranchLengthTree
+Number of tips: 10
+
+Dropping a tip from a multifurcation at the root...
+New number of tips (expecting 9): 9
+
+Dropping a tip from a multifurcation at a non-root internal node...
+New number of tips (expecting 9): 9
+

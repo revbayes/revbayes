@@ -106,14 +106,12 @@ double EventBirthDeathFromAgeProposal::doProposal( void )
     double u = rng->uniform01();
     
     double p_birth = 1.0;
-    double p_death = 0.0;
     
     size_t num_events = history.getNumberEvents();
     
     if ( num_events > 0 )
     {
         p_birth = 0.5;
-        p_death = 0.5;
     }
     
     double proposal_prob = 0.0;
@@ -140,7 +138,7 @@ double EventBirthDeathFromAgeProposal::doBirthProposal( void )
     
     size_t num_events_before = history.getNumberEvents();
     size_t num_branches = history.getNumberBranches();
-    size_t num_states   = history.getNumberStates();
+    size_t num_states   = history.getNumberOfStates();
     
     // randomly pick a branch
     size_t branch_index = size_t( std::floor(num_branches * rng->uniform01()) );
@@ -177,7 +175,7 @@ double EventBirthDeathFromAgeProposal::doDeathProposal( void )
     
     size_t num_events_before = history.getNumberEvents();
     size_t num_branches = history.getNumberBranches();
-    size_t num_states   = history.getNumberStates();
+    size_t num_states   = history.getNumberOfStates();
     
     size_t branch_index = 0;
     CharacterEvent *event = history.pickRandomEvent( branch_index );
@@ -188,16 +186,13 @@ double EventBirthDeathFromAgeProposal::doDeathProposal( void )
     stored_branch_index = branch_index;
     
     double branch_length = distribution->getValue().getNode(branch_index).getBranchLength();
-//    double age = distribution->getValue().getNode(branch_index).getParent().getAge() - event->getTime();
     
     double log_death_move_prob = log(0.5);
     double log_birth_move_prob = log((num_events_before == 1 ? 1.0 : 0.5));
     double p_forward  = log_death_move_prob - log(num_events_before);
     double p_backward = log_birth_move_prob - log(num_branches) - log(num_states) - log(branch_length);
     double proposal_ratio = p_backward - p_forward;
-    
-//    std::cout << "D\ta:" << age << "\tl:" << branch_length << "\t(" << num_events_before << "->" << num_events_before-1 << ")" << "\n";
-    
+        
     return proposal_ratio;
 }
 
@@ -269,32 +264,3 @@ void EventBirthDeathFromAgeProposal::swapNodeInternal(DagNode *oldN, DagNode *ne
         throw RbException("Wrong type of variable for BirthDeathEvent move.");
     }
 }
-
-
-void EventBirthDeathFromAgeProposal::setProposalTuningParameter(double tp)
-{
-    // this proposal has no tuning parameter: nothing to do
-}
-
-
-/**
- * Tune the Proposal to accept the desired acceptance ratio.
- *
- * The acceptance ratio for this Proposal should be around 0.44.
- * If it is too large, then we increase the proposal size,
- * and if it is too small, then we decrease the proposal size.
- */
-void EventBirthDeathFromAgeProposal::tune( double rate )
-{
-    
-    //    if ( rate > 0.44 )
-    //    {
-    //        delta *= (1.0 + ((rate-0.44)/0.56) );
-    //    }
-    //    else
-    //    {
-    //        delta /= (2.0 - rate/0.44 );
-    //    }
-    
-}
-

@@ -17,9 +17,9 @@ RbException::RbException(ExceptionType type, const std::string& msg) :
 {
 }
 
-/** Copy constructor: this is used when we throw the exception, but should not be used otherwise **/
+/** Copy constructor **/
 RbException::RbException(const RbException& E)
-    :message(E.message.str())
+    :exception_type(E.exception_type), message(E.message.str())
 {
     // Copy formatting flags.
     message.flags(E.message.flags());
@@ -63,7 +63,10 @@ void RbException::print(std::ostream &o) const
         case QUIT:
             error_type = "Quit";
             break;
-            
+        case STOP:
+            error_type = "Stop";
+            break;
+
         default:
             error_type = "Error";
     }

@@ -30,8 +30,8 @@ namespace RevBayesCore {
         virtual void                        executeMethod(const std::string &n, const std::vector<const DagNode*> &args, Simplex &rv) const;                          //!< Map the member methods to internal function calls
         virtual double                      getRate(size_t from, size_t to, double age, double rate) const = 0;                                                       //!< Calculate the rate from state i to state j over the given time interval scaled by a rate
         virtual void                        initFromString( const std::string &s ) { throw RbException("Sebastians (29/6/2016): Missing derived implementations!!!"); }                                                 //!< Serialize (resurrect) the object from a string value
-        virtual double                      getSumOfRates(std::vector<CharacterEvent*> from, double age=0.0, double rate=1.0) const;
-        virtual double                      getSumOfRates(std::vector<CharacterEvent*> from, const std::vector<size_t> &counts, double age=0.0, double rate=1.0) const;
+        virtual double                      getSumOfRates(const std::vector<CharacterEvent*>& from, double age=0.0, double rate=1.0) const;
+        virtual double                      getSumOfRates(const std::vector<CharacterEvent*>& from, const std::vector<size_t> &counts, double age=0.0, double rate=1.0) const;
         virtual double                      getSumOfRatesDifferential(std::vector<CharacterEvent*> from, CharacterEventDiscrete* to, double age=0.0, double rate=1.0) const;
 
         // virtual methods that may need to overwritten
@@ -41,6 +41,7 @@ namespace RevBayesCore {
         // public methods
         void                                calculateTransitionProbabilities(double t, TransitionProbabilityMatrix& P) const;           //!< Calculate the transition probabilities for the rate matrix
         size_t                              getNumberOfStates(void) const;                                                              //!< Return the number of states
+        virtual RbVector<std::string>       getStateDescriptions( void ) const;                         //!< Return state descriptions
         size_t                              size(void) const;                                                                           //!< Get the size of the rate matrix, which is the same as the number of states
 
 	json                                toJSON() const;

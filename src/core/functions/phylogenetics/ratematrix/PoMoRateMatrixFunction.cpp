@@ -9,7 +9,7 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
-PoMoRateMatrixFunction::PoMoRateMatrixFunction(const TypedDagNode< long > *ps, const TypedDagNode< RbVector<double> > *mr, const TypedDagNode< RbVector<double>  > *sc) : TypedFunction<RateGenerator>( new RateMatrix_PoMo(4 + 6*(ps->getValue() - 1), ps->getValue(), mr->getValue(), sc->getValue()) ),
+PoMoRateMatrixFunction::PoMoRateMatrixFunction(const TypedDagNode< std::int64_t > *ps, const TypedDagNode< RbVector<double> > *mr, const TypedDagNode< RbVector<double>  > *sc) : TypedFunction<RateGenerator>( new RateMatrix_PoMo(4 + 6*(ps->getValue() - 1), ps->getValue(), mr->getValue(), sc->getValue()) ),
     populationSize( ps ),
     mutationRates( mr ),
     selectionCoefficients ( sc )
@@ -26,7 +26,7 @@ PoMoRateMatrixFunction::PoMoRateMatrixFunction(const TypedDagNode< long > *ps, c
 
 
  //MJL 140822: caused compile error
-PoMoRateMatrixFunction::PoMoRateMatrixFunction(const TypedDagNode< long > *ps, const TypedDagNode< RateGenerator > *mm, const TypedDagNode< RbVector<double>  > *sc) : TypedFunction<RateGenerator>( new RateMatrix_PoMo(4 + 6*(ps->getValue() - 1), ps->getValue(), mm->getValue(), sc->getValue()) ), populationSize( ps ), mutationMatrix( mm ), selectionCoefficients ( sc ) {
+PoMoRateMatrixFunction::PoMoRateMatrixFunction(const TypedDagNode< std::int64_t > *ps, const TypedDagNode< RateGenerator > *mm, const TypedDagNode< RbVector<double>  > *sc) : TypedFunction<RateGenerator>( new RateMatrix_PoMo(4 + 6*(ps->getValue() - 1), ps->getValue(), mm->getValue(), sc->getValue()) ), populationSize( ps ), mutationMatrix( mm ), selectionCoefficients ( sc ) {
     useMutationMatrix = true;
     // add the lambda parameter as a parent
     addParameter( populationSize );

@@ -26,7 +26,7 @@
 using namespace RevBayesCore;
 
 /* Constructor */
-CharacterHistoryPosteriorPredictiveMonitor::CharacterHistoryPosteriorPredictiveMonitor(TypedDagNode<Tree>* t,  std::vector<StochasticNode<BranchHistory>* > bh, unsigned long g, const path &fname, const std::string &del, bool pp, bool l, bool pr, bool ap, bool sm, bool sr) : Monitor(g,t),
+CharacterHistoryPosteriorPredictiveMonitor::CharacterHistoryPosteriorPredictiveMonitor(TypedDagNode<Tree>* t,  std::vector<StochasticNode<BranchHistory>* > bh, std::uint64_t g, const path &fname, const std::string &del, bool pp, bool l, bool pr, bool ap, bool sm, bool sr) : Monitor(g,t),
     outStream(),
     tree( t ),
     branchHistories(bh),
@@ -157,10 +157,10 @@ std::string CharacterHistoryPosteriorPredictiveMonitor::buildExtendedNewick( Top
 
 
 /** Monitor value at generation gen */
-void CharacterHistoryPosteriorPredictiveMonitor::monitor(unsigned long gen) {
+void CharacterHistoryPosteriorPredictiveMonitor::monitor(std::uint64_t gen) {
     
     // get the printing frequency
-    unsigned long samplingFrequency = printgen;
+    std::uint64_t samplingFrequency = printgen;
     
     if (gen % samplingFrequency == 0) {
         // print the iteration number first
@@ -267,31 +267,31 @@ void CharacterHistoryPosteriorPredictiveMonitor::printHeader() {
 void CharacterHistoryPosteriorPredictiveMonitor::swapNode(DagNode *oldN, DagNode *newN)
 {
     
-    bool found = false;
+    // bool found = false;
     if ( oldN == tree )
     {
         tree = static_cast< TypedDagNode< Tree > *>( newN );
-        found = true;
+        // found = true;
     }
     for (size_t i = 0; i < branchHistories.size(); i++)
     {
         if (oldN == branchHistories[i])
         {
             branchHistories[i] = static_cast<StochasticNode<BranchHistory>* >(newN);
-            found = true;
+            // found = true;
         }
     }
     
     /*
      if (found == false)
      {
-     // error catching
-     if ( nodeVariables.find(oldN) == nodeVariables.end() ) {
-     throw RbException("Cannot replace DAG node in this monitor because the monitor doesn't hold this DAG node.");
-     }
+         // error catching
+         if ( nodeVariables.find(oldN) == nodeVariables.end() ) {
+             throw RbException("Cannot replace DAG node in this monitor because the monitor doesn't hold this DAG node.");
+         }
      
-     nodeVariables.erase( oldN );
-     nodeVariables.insert( newN );
+         nodeVariables.erase( oldN );
+         nodeVariables.insert( newN );
      }
      */
     

@@ -57,7 +57,7 @@ SyntaxConstant* SyntaxConstant::clone ( void ) const
 
 
 /** Get semantic value of element */
-RevPtr<RevVariable> SyntaxConstant::evaluateContent( Environment& env, bool dynamic )
+RevPtr<RevVariable> SyntaxConstant::evaluateContent( const std::shared_ptr<Environment>& env, bool dynamic )
 {
     // We return a clone in case this function is called repeatedly.
     if ( value == NULL )

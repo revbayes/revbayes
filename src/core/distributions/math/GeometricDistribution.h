@@ -16,7 +16,7 @@ template <class valueType> class TypedDagNode;
      *
      *
      */
-    class GeometricDistribution : public TypedDistribution<long> {
+    class GeometricDistribution : public TypedDistribution<std::int64_t> {
         
     public:
         GeometricDistribution(const TypedDagNode<double> *p);

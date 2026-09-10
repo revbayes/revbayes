@@ -74,13 +74,27 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> BranchLengthTree::executeMethod(st
 {
     if (name == "makeUltrametric")
     {
-
         found = true;
 
         RevBayesCore::Tree *tree = dag_node->getValue().clone();
         RevBayesCore::TreeUtilities::makeUltrametric(*tree);
         
         return new RevVariable( new TimeTree( tree ) );
+    }
+    else if (name == "unroot")
+    {
+        found = true;
+        
+        RevBayesCore::Tree &tree = dag_node->getValue();
+        
+        if ( not tree.isRooted() )
+        {
+            throw RbException("The tree is already unrooted.");
+        }
+        
+        tree.unroot();
+        
+        return NULL;
     }
     
     return Tree::executeMethod( name, args, found );
@@ -119,11 +133,9 @@ const TypeSpec& BranchLengthTree::getTypeSpec( void ) const
  */
 void BranchLengthTree::initMethods( void )
 {
-    ArgumentRules* rerootArgRules = new ArgumentRules();
-    rerootArgRules->push_back( new ArgumentRule("leaf", RlString::getClassTypeSpec(), "The outgroup leaf.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-
-    methods.addFunction( new MemberProcedure( "reroot", RlUtils::Void,  rerootArgRules       ) );
-
     ArgumentRules* makeUltraArgRules = new ArgumentRules();
     methods.addFunction( new MemberProcedure( "makeUltrametric", RlUtils::Void, makeUltraArgRules ) );
+    
+    ArgumentRules* unrootArgRules = new ArgumentRules();
+    methods.addFunction( new MemberProcedure( "unroot", RlUtils::Void, unrootArgRules ) );
 }

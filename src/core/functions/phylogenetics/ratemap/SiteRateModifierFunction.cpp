@@ -17,8 +17,8 @@ namespace RevBayesCore { class DagNode; }
 using namespace RevBayesCore;
 
 SiteRateModifierFunction::SiteRateModifierFunction(const TypedDagNode<RbVector<RbVector<double> > >* rm,
-                                                   const TypedDagNode<RbVector<RbVector<long> > >* ec,
-                                                   const TypedDagNode<RbVector<long> >* sc) :
+                                                   const TypedDagNode<RbVector<RbVector<std::int64_t> > >* ec,
+                                                   const TypedDagNode<RbVector<std::int64_t> >* sc) :
     TypedFunction<CharacterHistoryRateModifier>( new SiteRateModifier(ec->getValue().size(), sc->getValue().size() ) ),
     rate_multipliers(rm),
     event_classes(ec),
@@ -60,8 +60,8 @@ void SiteRateModifierFunction::update( void )
     
     // get values to update
     const RbVector<RbVector<double> >& rm = rate_multipliers->getValue();
-    const RbVector<RbVector<long> >& ec    = event_classes->getValue();
-    const RbVector<long>& sc               = site_classes->getValue();
+    const RbVector<RbVector<std::int64_t> >& ec    = event_classes->getValue();
+    const RbVector<std::int64_t>& sc               = site_classes->getValue();
     
     // apply updates to SiteRateModifier
     static_cast<SiteRateModifier*>(value)->setRateMultipliers(rm);
@@ -80,10 +80,10 @@ void SiteRateModifierFunction::swapParameterInternal(const DagNode *oldP, const 
     }
     else if (oldP == event_classes)
     {
-        event_classes = static_cast<const TypedDagNode<RbVector<RbVector<long> > >* >( newP );
+        event_classes = static_cast<const TypedDagNode<RbVector<RbVector<std::int64_t> > >* >( newP );
     }
     else if (oldP == site_classes)
     {
-        site_classes = static_cast<const TypedDagNode<RbVector<long> >* >( newP );
+        site_classes = static_cast<const TypedDagNode<RbVector<std::int64_t> >* >( newP );
     }
 }

@@ -1,0 +1,13 @@
+################################################################################
+#
+# RevBayes Test-Script: Write a nexus alignment as delimited text
+#
+# authors: Benjamin Redelings
+#
+################################################################################
+
+data = readDiscreteCharacterData("data/bears_cytb.nex")
+
+writeDelimitedCharacterData( "output/bears_cytb.ssv", data)
+writeDelimitedCharacterData( "output/bears_cytb.csv", data, "," )
+writeDelimitedCharacterData( "output/bears_cytb.tsv", data, "\t" )

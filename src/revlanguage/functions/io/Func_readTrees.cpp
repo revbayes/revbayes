@@ -91,10 +91,11 @@ RevPtr<RevVariable> Func_readTrees::execute( void )
                     if (unroot_nonclock)
                     {
                         tree->removeRootIfDegree2();
-//                      Perhaps we should mark the tree unrooted, since we have removed the old root,
-//                        and chosen a neighbor as the now root.
-//                      However, RevBayes has bugs with unrooted trees and may crash.
-//                        tree->setRooted(false);
+                        tree->setRooted(false);
+                    }
+                    else
+                    {
+                        tree->setRooted(true);
                     }
 
                     trees->push_back( BranchLengthTree(*tree) );
@@ -118,9 +119,14 @@ RevPtr<RevVariable> Func_readTrees::execute( void )
             ModelVector<TimeTree> *trees = new ModelVector<TimeTree>();
             while (RevBayesCore::safeGetline(iss, aux))
             {
+                if (aux.length() == 0)
+                {
+                    continue;
+                }
+
                 RevBayesCore::Tree *blTree = c.convertFromNewick( aux );
                 trees->push_back( TimeTree(*blTree) );
-                
+
                 delete blTree;
             }
             return new RevVariable( trees );
@@ -130,6 +136,11 @@ RevPtr<RevVariable> Func_readTrees::execute( void )
             ModelVector<BranchLengthTree> *trees = new ModelVector<BranchLengthTree>();
             while (RevBayesCore::safeGetline(iss, aux))
             {
+                if (aux.length() == 0)
+                {
+                    continue;
+                }
+
                 RevBayesCore::Tree *blTree = c.convertFromNewick( aux );
 
                 if (unroot_nonclock)
@@ -137,17 +148,18 @@ RevPtr<RevVariable> Func_readTrees::execute( void )
                     blTree->removeRootIfDegree2();
                     blTree->setRooted(false);
                 }
+                else
+                {
+                    blTree->setRooted(true);
+                }
 
                 trees->push_back( BranchLengthTree(*blTree) );
-                
+
                 delete blTree;
             }
             return new RevVariable( trees );
-            
         }
 
-        
-        
     }
 
 

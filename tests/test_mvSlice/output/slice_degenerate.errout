@@ -1,0 +1,13 @@
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 1 different moves in a random move schedule with 1 moves per iteration
+   
+   Warning: slice sampler could not locate the slice after 100 steps
+            This is not a bug, but it is inefficient.
+   Warning: slice sampler could not locate the slice after 100 steps
+            This is not a bug, but it is inefficient.
+   Warning: slice sampler could not locate the slice after 100 steps
+            This is not a bug, but it is inefficient.
+            Future warnings like this are suppressed.
+   analysis finished without aborting

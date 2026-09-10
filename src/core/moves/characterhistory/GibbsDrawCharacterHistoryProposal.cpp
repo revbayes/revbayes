@@ -118,17 +118,3 @@ void GibbsDrawCharacterHistoryProposal::swapNodeInternal(DagNode *oldN, DagNode 
         throw RbException("The GibbsDrawCharacterHistoryProposal is currently only implemented for CDBDP distributions.");
     }
 }
-
-
-void GibbsDrawCharacterHistoryProposal::setProposalTuningParameter(double tp)
-{
-    // this proposal has no tuning parameter: nothing to do
-}
-
-
-void GibbsDrawCharacterHistoryProposal::tune( double rate )
-{
-    
-    
-}
-

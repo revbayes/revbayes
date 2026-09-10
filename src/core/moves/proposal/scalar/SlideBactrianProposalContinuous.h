@@ -25,7 +25,7 @@ namespace RevBayesCore {
     class SlideBactrianProposalContinuous : public Proposal {
         
     public:
-        SlideBactrianProposalContinuous( ContinuousStochasticNode *n, double l, double r=0.44);                                                                      //!<  constructor
+        SlideBactrianProposalContinuous( ContinuousStochasticNode *n, double l, double r=0.44);                                                                      //!< Constructor
         
         // Basic utility functions
         void                                    cleanProposal(void);                                                                //!< Clean up proposal
@@ -40,7 +40,7 @@ namespace RevBayesCore {
         void                                    undoProposal(void);                                                                 //!< Reject the proposal
         
     protected:
-        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes on which the Proposal is working on
+        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes the Proposal is working on
         
     private:
         // parameters

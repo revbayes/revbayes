@@ -19,7 +19,7 @@ using namespace RevBayesCore;
  *
  * Here we simply allocate and initialize the Proposal object.
  */
-GraphFlipEdgeProposal::GraphFlipEdgeProposal( StochasticNode<MatrixReal> *n, const RbVector<RbVector<long> >& e, double l, bool s) : Proposal(),
+GraphFlipEdgeProposal::GraphFlipEdgeProposal( StochasticNode<MatrixReal> *n, const RbVector<RbVector<std::int64_t> >& e, double l, bool s) : Proposal(),
 array(NULL),
 matrix( n ),
 edges( e ),
@@ -33,7 +33,7 @@ symmetric( s )
         
         for (size_t i = 0; i < n->getValue().size(); i++) {
             for (size_t j = i+1; j < n->getValue().size(); j++) {
-                std::vector<long> tmp;
+                std::vector<std::int64_t> tmp;
                 tmp.push_back(i+1);
                 tmp.push_back(j+1);
                 edges.push_back( tmp );
@@ -235,7 +235,7 @@ void GraphFlipEdgeProposal::setProposalTuningParameter(double tp)
 
 
 /**
- * Tune the Proposal to accept the desired acceptance ratio.
+ * Tune the Proposal to accept at the desired acceptance ratio.
  *
  * The acceptance ratio for this Proposal should be around 0.44.
  * If it is too large, then we increase the proposal size,
@@ -244,13 +244,14 @@ void GraphFlipEdgeProposal::setProposalTuningParameter(double tp)
 void GraphFlipEdgeProposal::tune( double rate )
 {
     
-    if ( rate > 0.44 )
+    double p = this->targetAcceptanceRate;
+    if ( rate > p )
     {
-        sampling_probability *= (1.0 + ((rate-0.44)/0.56) );
+        sampling_probability *= (1.0 + ((rate - p)/(1.0 - p)) );
     }
     else
     {
-        sampling_probability /= (2.0 - rate/0.44 );
+        sampling_probability /= (2.0 - rate/p);
     }
     
     // bound value s.t. 0 < switch_probability <= 1.0

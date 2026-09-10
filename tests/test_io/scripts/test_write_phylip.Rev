@@ -1,0 +1,14 @@
+################################################################################
+#
+# RevBayes Test-Script: Write a nexus alignment to phylip format
+#
+# authors: Sebastian Hoehna
+#
+################################################################################
+
+data = readDiscreteCharacterData("data/bears_cytb.nex")
+writePhylip( data, "output/bears_cytb.phy" )
+
+clear()
+
+q()

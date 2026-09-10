@@ -28,27 +28,30 @@ namespace RevBayesCore {
         virtual                                                ~Proposal(void);                                                                         //!< Destructor
         
         // public methods
-        const std::vector<DagNode*>&                            getNodes(void) const;                                                                   //!< Get the vector of nodes for which the proposal is drawing new values.
-        void                                                    swapNode(DagNode *oldN, DagNode *newN);                                                 //!< Swap the pointers to the variable on which the move works on.
-        void                                                    setMove(Move *m);                                                                       //!< Set the pointer to move object holding this proposal
+        virtual bool                                            allowClamped() const { return false; }                                                  //!< Allow proposal to operate on clamped nodes; see #600
         const Move*                                             getMove(void) const;                                                                    //!< Get the pointer to move object holding this proposal
+        const std::vector<DagNode*>&                            getNodes(void) const;                                                                   //!< Get the vector of nodes for which the proposal is drawing new values
+        void                                                    setMove(Move *m);                                                                       //!< Set the pointer to move object holding this proposal
+        virtual void                                            setProposalTuningParameter(double tp);                                                  //!< Set the tuning parameter of the proposal, if applicable
+        void                                                    setTargetAcceptanceRate(double p);                                                      //!< Set the target acceptance rate
+        void                                                    swapNode(DagNode *oldN, DagNode *newN);                                                 //!< Swap the pointers to the variable on which the move works on
+        virtual void                                            tune(double r);                                                                         //!< Tune the parameters of the proposal, if applicable
 
         // pure virtual public methods
         virtual void                                            cleanProposal(void) = 0;                                                                //!< Cleanup proposal
         virtual Proposal*                                       clone(void) const = 0;                                                                  //!< Make a deep copy
         virtual double                                          doProposal(void) = 0;                                                                   //!< Actually do the proposal.
         virtual const std::string&                              getProposalName(void) const = 0;                                                        //!< Get the name of this proposal used for printing out info.
+        virtual std::string                                     getLongProposalName(void) const;                                                        //!< Get the name of this proposal used for printing out info.
         virtual double                                          getProposalTuningParameter(void) const = 0;
         virtual std::vector<DagNode*>                           identifyNodesToTouch(void);
         virtual void                                            prepareProposal(void) = 0;                                                              //!< Propose a new state
         virtual void                                            printParameterSummary(std::ostream &o, bool name_only) const = 0;                       //!< Print the parameter summary
-        virtual void                                            setProposalTuningParameter(double tp) = 0;
-        virtual void                                            tune(double r) = 0;                                                                     //!< Tune the parameters of the proposal.
         virtual void                                            undoProposal(void) = 0;                                                                 //!< Undo the proposal.
         
         
     protected:
-        Proposal(double p=0.44);                                                                                                                                 //!< Default constructor
+        Proposal(double p=0.44);                                                                                                                        //!< Default constructor
         Proposal(const Proposal &p);                                                                                                                    //!< Copy constructor
         Proposal&                                               operator=(const Proposal &p);                                                           //!< Assignment operator
         

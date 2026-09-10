@@ -1,7 +1,7 @@
 #ifndef Dist_PhyloMultiSampleOrnsteinUhlenbeck_H
 #define Dist_PhyloMultiSampleOrnsteinUhlenbeck_H
 
-#include <math.h>
+#include <cmath>
 #include <iosfwd>
 #include <string>
 #include <vector>

@@ -9,7 +9,10 @@ Not to be confused with integers which are whole numbers, or
 ## details
 ## authors
 ## see_also
-`RealPos`, `Integer`, `Natural`, `Probability`
+Integer
+Natural
+Probability
+RealPos
 ## example
     a = 1.1
     b = 1.3

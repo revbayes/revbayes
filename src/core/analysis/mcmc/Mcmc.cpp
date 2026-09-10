@@ -30,10 +30,16 @@
 #include "RbIteratorImpl.h"
 #include "RbVector.h"
 #include "RbVectorImpl.h"
+#include "RbSettings.h" // for logMCMC setting
+#include "RlUserInterface.h"
 #include "StringUtilities.h"
 
 #ifdef RB_MPI
 #include <mpi.h>
+#endif
+
+#ifdef _WIN32
+#include <windows.h>
 #endif
 
 
@@ -198,105 +204,6 @@ Mcmc* Mcmc::clone( void ) const
 }
 
 
-void Mcmc::checkpoint( void ) const
-{
-    // initialize variables
-    std::string separator = "\t";
-    bool flatten = false;
-    
-    createDirectoryForFile( checkpoint_file_name );
-    
-    // open the stream to the file
-    std::ofstream out_stream( checkpoint_file_name.string() );
-
-    // first, we write the names of the variables
-    for (std::vector<DagNode *>::const_iterator it=variable_nodes.begin(); it!=variable_nodes.end(); ++it)
-    {
-        // add a separator before every new element
-        if ( it != variable_nodes.begin() )
-        {
-            out_stream << separator;
-        }
-        
-        const DagNode* the_node = *it;
-        
-        // print the header
-        if (the_node->getName() != "")
-        {
-            the_node->printName(out_stream,separator, -1, true, flatten);
-        }
-        else
-        {
-            out_stream << "Unnamed";
-        }
-        
-    }
-    out_stream << std::endl;
-    
-    
-    // second, we write the values of the variables
-    for (std::vector<DagNode*>::const_iterator it = variable_nodes.begin(); it != variable_nodes.end(); ++it)
-    {
-        // add a separator before every new element
-        if ( it != variable_nodes.begin() )
-        {
-            out_stream << separator;
-        }
-        
-        // get the node
-        DagNode *node = *it;
-        
-        // print the value
-        node->printValue(out_stream, separator, -1, false, false, false, flatten);
-    }
-    
-    
-    // clean up
-    out_stream.close();
-    
-    
-    /////////
-    // Now we also write the MCMC information into a file
-    /////////
-
-    // assemble the new filename
-    path mcmc_checkpoint_file_name = appendToStem(checkpoint_file_name, "_mcmc");
-    
-    // open the stream to the file
-    std::ofstream out_stream_mcmc( mcmc_checkpoint_file_name.string() );
-    out_stream_mcmc << "iter = " << generation << std::endl;
-    
-    // clean up
-    out_stream_mcmc.close();
-    
-    
-    /////////
-    // Next we also write the moves information into a file
-    /////////
-    
-    // assemble the new filename
-    path moves_checkpoint_file_name = appendToStem(checkpoint_file_name, "_moves");
-    
-    // open the stream to the file
-    std::ofstream out_stream_moves( moves_checkpoint_file_name.string() );
-    
-    for (size_t i = 0; i < moves.size(); ++i)
-    {
-        out_stream_moves << moves[i].getMoveName();
-        out_stream_moves << "(variable="                << moves[i].getDagNodes()[0]->getName();
-        out_stream_moves << ",num_tried_current="       << moves[i].getNumberTriedCurrentPeriod();
-        out_stream_moves << ",num_tried_total="         << moves[i].getNumberTriedTotal();
-        out_stream_moves << ",num_accepted_current="    << moves[i].getNumberAcceptedCurrentPeriod();
-        out_stream_moves << ",num_accepted_total="      << moves[i].getNumberAcceptedTotal();
-        out_stream_moves << ",tuning_value="            << moves[i].getMoveTuningParameter();
-        out_stream_moves << ")" << std::endl;
-    }
-    
-    // clean up
-    out_stream_moves.close();
-}
-
-
 /**
  * Disable all screen monitors. This means we simply delete it.
  */
@@ -323,29 +230,113 @@ void Mcmc::disableScreenMonitor( bool all, size_t rep )
 }
 
 
-/**
- * Finish the monitors which will close the output streams.
- */
-void Mcmc::finishMonitors( size_t n_reps, MonteCarloAnalysisOptions::TraceCombinationTypes tc )
+void Mcmc::fullCheckpoint( void )
 {
+
+    if ( process_active == true )
+    {
+        /////////
+        // We also write the MCMC information into a file
+        /////////
+
+        // assemble the new filename
+        path mcmc_checkpoint_file_name = appendToStem(checkpoint_file_name, "_mcmc");
+        
+        path tmp_mcmc_checkpoint_file_name = mcmc_checkpoint_file_name.parent_path() / ("." + mcmc_checkpoint_file_name.filename().string() + ".tmp");
+        // open the stream to the file
+        std::ofstream out_stream_mcmc( tmp_mcmc_checkpoint_file_name.string() );
+        out_stream_mcmc << "iter = " << generation << std::endl;
+        
+        // clean up
+        out_stream_mcmc.close();
+        const bool ok_mcmc = out_stream_mcmc.good();
+        if ( !ok_mcmc )
+        {
+            RBOUT( "Warning: failed to write checkpoint file \"" + mcmc_checkpoint_file_name.string() + "\"; keeping existing file." );
+            std::error_code ec;
+            std::filesystem::remove(tmp_mcmc_checkpoint_file_name, ec);
+        }
+        else
+#ifdef _WIN32
+        if ( MoveFileExW(tmp_mcmc_checkpoint_file_name.wstring().c_str(), mcmc_checkpoint_file_name.wstring().c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH) == 0 )
+        {
+            throw RbException() << "Could not replace checkpoint file " << mcmc_checkpoint_file_name;
+        }
+#else
+        std::filesystem::rename(tmp_mcmc_checkpoint_file_name, mcmc_checkpoint_file_name);
+#endif
+    }
     
-    // iterate over all monitors
-    for (size_t i=0; i<monitors.size(); ++i)
+}
+
+
+void Mcmc::fullInitializeSamplerFromCheckpoint( void )
+{
+    size_t last_generation = 0;
+
+    // assemble the new filename
+    path mcmc_checkpoint_file_name = appendToStem( checkpoint_file_name, "_mcmc");
+
+    // Open file
+    std::ifstream in_file_mcmc( mcmc_checkpoint_file_name.string() );
+
+    std::string line_mcmc;
+    std::map<std::string, std::string> mcmc_pars;
+    // Command-processing loop
+    while ( in_file_mcmc.good() )
     {
         
-        // if this chain is active, then close the stream
-        if ( chain_active == true && process_active == true )
+        // Read a line
+        safeGetline( in_file_mcmc, line_mcmc );
+        
+        if ( line_mcmc != "" )
         {
-            monitors[i].closeStream();
-            
-            // combine results if we used more than one replicate
-            if ( n_reps > 1 && tc != MonteCarloAnalysisOptions::NONE )
-            {
-                monitors[i].combineReplicates( n_reps, tc );
-            }
-            
+            std::vector<std::string> key_value;
+            StringUtilities::stringSplit(line_mcmc, " = ", key_value);
+
+            mcmc_pars.insert( std::pair<std::string, std::string>(key_value[0],key_value[1]) );
         }
         
+    }
+    last_generation = StringUtilities::asIntegerNumber( mcmc_pars["iter"] );
+    
+    // clean up
+    in_file_mcmc.close();
+    
+    
+    // we also need to tell our monitors to append after the last sample
+    // set iteration num
+    setCurrentGeneration( last_generation );
+        
+    for (size_t j = 0; j < monitors.size(); ++j)
+    {
+        if ( monitors[j].isFileMonitor() )
+        {
+            AbstractFileMonitor* m = dynamic_cast< AbstractFileMonitor *>( &monitors[j] );
+            std::ifstream monitorFile( m->getMonitorFileName().string() );
+
+            // if there is no file yet at the location specified by the monitor, create one and write the header to it
+            if ( !monitorFile )
+            {
+                monitors[j].openStream(false);
+                monitors[j].printHeader();
+                monitors[j].closeStream();
+            }
+            else
+            {
+                monitorFile.close();
+
+                if ( last_generation == 0 )
+                {
+                    throw RbException() << "Failed to read iteration number from checkpoint file '" << mcmc_checkpoint_file_name << "'. The file may be empty or corrupted.";
+                }
+
+                m->truncateAfterGeneration(last_generation);
+            }
+
+            // set file monitors to append
+            m->setAppend(true);
+        }
     }
     
 }
@@ -384,6 +375,12 @@ double Mcmc::getChainPriorHeat(void) const
 size_t Mcmc::getChainIndex(void) const
 {
     return chain_idx;
+}
+
+
+path Mcmc::getCheckpointFile(void) const
+{
+    return checkpoint_file_name;
 }
 
 
@@ -533,40 +530,32 @@ std::string Mcmc::getStrategyDescription( void ) const
 }
 
 
-void Mcmc::initializeSampler( bool prior_only )
+void Mcmc::initializeSampler()
 {
-    
     std::vector<DagNode *> &dag_nodes = model->getDagNodes();
     std::vector<DagNode *> ordered_stoch_nodes = model->getOrderedStochasticNodes(  );
-    
+
     // Get rid of previous move schedule, if any
     if ( schedule != NULL )
     {
         delete schedule;
     }
     schedule = NULL;
-    
+
     // Get initial ln_probability of model
-    
+
     // first we touch all nodes so that the likelihood is dirty
-    for (std::vector<DagNode *>::iterator i=dag_nodes.begin(); i!=dag_nodes.end(); ++i)
+    for (auto the_node: dag_nodes)
     {
-        
-        DagNode *the_node = *i;
         the_node->setMcmcMode( true );
-        the_node->setPriorOnly( prior_only );
         the_node->touch();
-        
     }
-    
-    
+
     if ( chain_active == false )
     {
 
-        for (std::vector<DagNode *>::iterator i=ordered_stoch_nodes.begin(); i!=ordered_stoch_nodes.end(); ++i)
+        for (auto the_node: ordered_stoch_nodes)
         {
-            DagNode *the_node = (*i);
-            
             if ( the_node->isClamped() == false && the_node->isStochastic() == true )
             {
 
@@ -583,23 +572,23 @@ void Mcmc::initializeSampler( bool prior_only )
         }
         
     }
-    
-    
+
+
     int num_tries     = 0;
     double ln_probability = 0.0;
     for ( ; num_tries < num_init_attempts; ++num_tries )
     {
         // a flag if we failed to find a valid starting value
         bool failed = false;
-        
+
         ln_probability = 0.0;
-        for (std::vector<DagNode *>::iterator i=dag_nodes.begin(); i!=dag_nodes.end(); ++i)
-        {
-            DagNode* the_node = (*i);
+        for (auto the_node: dag_nodes)
             the_node->touch();
-            
+
+        for (auto the_node: dag_nodes)
+        {
             double ln_prob = the_node->getLnProbability();
-            
+
             if ( RbMath::isAComputableNumber(ln_prob) == false )
             {
                 std::stringstream ss;
@@ -607,34 +596,29 @@ void Mcmc::initializeSampler( bool prior_only )
                 std::ostringstream o1;
                 the_node->printValue( o1, "," );
                 ss << StringUtilities::oneLiner( o1.str(), 54 ) << std::endl;
-                
+
                 ss << std::endl;
                 RBOUT( ss.str() );
-                
+
                 // set the flag
                 failed = true;
-                
-                break;
             }
             ln_probability += ln_prob;
-            
         }
-        
+
         // now we keep all nodes so that the likelihood is stored
-        for (std::vector<DagNode *>::iterator i=dag_nodes.begin(); i!=dag_nodes.end(); ++i)
+        for (auto the_node: dag_nodes)
         {
-            (*i)->keep();
+            the_node->keep();
         }
-        
+
         if ( failed == true )
         {
             RBOUT( "Drawing new initial states ... " );
-            for (std::vector<DagNode *>::iterator i=ordered_stoch_nodes.begin(); i!=ordered_stoch_nodes.end(); ++i)
+            for (auto the_node: ordered_stoch_nodes)
             {
-                DagNode *the_node = *i;
-                if ( the_node->isClamped() == false && (*i)->isStochastic() == true )
+                if ( the_node->isClamped() == false && the_node->isStochastic() == true )
                 {
-                    
                     the_node->redraw();
                     the_node->reInitialized();
                     
@@ -645,14 +629,17 @@ void Mcmc::initializeSampler( bool prior_only )
                     the_node->reInitialized();
                     the_node->touch();
                 }
-                
             }
+
+            for (auto the_node: ordered_stoch_nodes)
+		if (the_node->isClamped())
+		    the_node->keep();
         }
         else
         {
             break;
         }
-        
+
     }
     
     if ( num_tries == num_init_attempts )
@@ -687,228 +674,6 @@ void Mcmc::initializeSampler( bool prior_only )
 }
 
 
-void Mcmc::initializeSamplerFromCheckpoint( void )
-{
-    
-    //    size_t n_samples = traces[0].size();
-    size_t last_generation = 0;
-    //    size_t n_traces = traces.size();
-    
-    std::vector<std::string> parameter_names;
-    std::vector<std::string> parameter_values;
-    
-    
-    // check that the file/path name has been correctly specified
-    if ( not is_regular_file( checkpoint_file_name) )
-    {
-        std::string errorStr = "";
-        formatError( checkpoint_file_name, errorStr );
-        throw RbException(errorStr);
-    }
-    
-    // Open file
-    std::ifstream inFile( checkpoint_file_name.string() );
-    
-    if ( !inFile )
-    {
-        throw RbException()<<"Could not open file "<<checkpoint_file_name;
-    }
-    
-    // Initialize
-    std::string commandLine;
-    std::string delimiter = "\t";
-    
-    // our variable to store the current line of the file
-    std::string line;
-    
-    // Command-processing loop
-    while ( inFile.good() )
-    {
-        
-        // Read a line
-        safeGetline( inFile, line );
-        
-        // skip empty lines
-        //line = stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-        if (line.length() == 0)
-        {
-            continue;
-        }
-        
-        
-        // removing comments
-        if (line[0] == '#')
-        {
-            continue;
-        }
-        
-        break;
-        
-    }
-    
-    // we assume the parameter names at the first line of the file
-    StringUtilities::stringSplit(line, delimiter, parameter_names);
-    
-    // Read a line
-    safeGetline( inFile, line );
-    
-    // we assume the parameter values at the second line of the file
-    StringUtilities::stringSplit(line, delimiter, parameter_values);
-    
-    // clean up
-    inFile.close();
-    
-    
-    
-    size_t n_parameters = parameter_names.size();
-    std::vector<DagNode*> nodes = getModel().getDagNodes();
-    
-    for ( size_t i = 0; i < n_parameters; ++i )
-    {
-        std::string parameter_name = parameter_names[i];
-        
-        // iterate over all DAG nodes (variables)
-        for ( size_t j = 0; j < nodes.size(); ++j )
-        {
-            if ( nodes[j]->getName() == parameter_name )
-            {
-                // set the value for the variable with the last sample in the trace
-                nodes[j]->setValueFromString( parameter_values[i] );
-                nodes[j]->keep();
-                break;
-            }
-        }
-    }
-
-    // We need to touch these so that their probabilities get recomputed.
-    for(auto& node: nodes)
-    {
-        node->touch();
-    }
-
-    // assemble the new filename
-    path mcmc_checkpoint_file_name = appendToStem( checkpoint_file_name, "_mcmc");
-
-    // Open file
-    std::ifstream in_file_mcmc( mcmc_checkpoint_file_name.string() );
-
-    std::string line_mcmc;
-    std::map<std::string, std::string> mcmc_pars;
-    // Command-processing loop
-    while ( in_file_mcmc.good() )
-    {
-        
-        // Read a line
-        safeGetline( in_file_mcmc, line_mcmc );
-        
-        if ( line_mcmc != "" )
-        {
-            std::vector<std::string> key_value;
-            StringUtilities::stringSplit(line_mcmc, " = ", key_value);
-
-            mcmc_pars.insert( std::pair<std::string, std::string>(key_value[0],key_value[1]) );
-        }
-        
-    }
-    last_generation = StringUtilities::asIntegerNumber( mcmc_pars["iter"] );
-    
-    // clean up
-    in_file_mcmc.close();
-    
-    
-    // we also need to tell our monitors to append after the last sample
-    // set iteration num
-    setCurrentGeneration( last_generation );
-        
-    for (size_t j = 0; j < monitors.size(); ++j)
-    {
-        if ( monitors[j].isFileMonitor() )
-        {
-            // set file monitors to append
-            AbstractFileMonitor* m = dynamic_cast< AbstractFileMonitor *>( &monitors[j] );
-            m->setAppend(true);
-        }
-    }
-    
-    
-    /////////
-    // Next we also write the moves information into a file
-    /////////
-    path moves_checkpoint_file_name = appendToStem( checkpoint_file_name, "_moves" );
-    
-    // Open file
-    std::ifstream in_file_moves( moves_checkpoint_file_name.string() );
-    
-    std::string line_moves;
-    std::vector<std::string> stored_move_info;
-    // Command-processing loop
-    while ( in_file_moves.good() )
-    {
-        
-        // Read a line
-        safeGetline( in_file_moves, line_moves );
-        
-        if ( line_moves != "" )
-        {
-            stored_move_info.push_back( line_moves );
-        }
-        
-    }
-    
-    if ( moves.size() != stored_move_info.size() )
-    {
-        throw RbException("The number of stored moves from the checkpoint file doesn't match the number of moves for this MCMC analysis.");
-    }
-    
-    for (size_t i = 0; i < moves.size(); ++i)
-    {
-        std::vector<std::string> tokens;
-        StringUtilities::stringSplit( stored_move_info[i], "(", tokens);
-        
-        if ( moves[i].getMoveName() != tokens[0] )
-        {
-            throw RbException("The order of the moves from the checkpoint file does not match.");
-        }
-        
-        std::string tmp_values = tokens[1].substr(0,tokens[1].size()-1);
-        std::vector<std::string> values;
-        StringUtilities::stringSplit( tmp_values, ",", values);
-        
-        std::vector<std::string> key_value;
-        StringUtilities::stringSplit( values[0], "=", key_value);
-        if ( moves[i].getDagNodes()[0]->getName() != key_value[1] )
-        {
-            throw RbException("The order of the moves from the checkpoint file does not match. A move working on node '" + moves[i].getDagNodes()[0]->getName() + "' received a stored counterpart working on node '" + values[0] + "'.");
-        }
-        
-        key_value.clear();
-        StringUtilities::stringSplit( values[1], "=", key_value);
-        moves[i].setNumberTriedCurrentPeriod( StringUtilities::asIntegerNumber(key_value[1]) );
-        
-        key_value.clear();
-        StringUtilities::stringSplit( values[2], "=", key_value);
-        moves[i].setNumberTriedTotal( StringUtilities::asIntegerNumber(key_value[1]) );
-        
-        key_value.clear();
-        StringUtilities::stringSplit( values[3], "=", key_value);
-        moves[i].setNumberAcceptedCurrentPeriod( StringUtilities::asIntegerNumber(key_value[1]) );
-        
-        key_value.clear();
-        StringUtilities::stringSplit( values[4], "=", key_value);
-        moves[i].setNumberAcceptedTotal( StringUtilities::asIntegerNumber(key_value[1]) );
-        
-        key_value.clear();
-        StringUtilities::stringSplit( values[5], "=", key_value);
-        moves[i].setMoveTuningParameter( atof(key_value[1].c_str()) );
-        
-    }
-
-    // clean up
-    in_file_moves.close();
-    
-}
-
-
 void Mcmc::initializeMonitors(void)
 {
     
@@ -920,7 +685,7 @@ void Mcmc::initializeMonitors(void)
 }
 
 
-void Mcmc::monitor(unsigned long g)
+void Mcmc::monitor(std::uint64_t g)
 {
     
     if ( chain_active == true && process_active == true )
@@ -940,14 +705,24 @@ void Mcmc::monitor(unsigned long g)
 
 void Mcmc::nextCycle(bool advance_cycle)
 {
+    int logMCMC = RbSettings::userSettings().getLogMCMC();
 
     size_t proposals = size_t( round( schedule->getNumberMovesPerIteration() ) );
     
     for (size_t i=0; i<proposals; ++i)
     {
-        
+
         // Get the move
         Move& the_move = schedule->nextMove( generation );
+
+	if (logMCMC >= 1)
+	{
+	    std::vector<std::string> node_names;
+	    for(auto node: the_move.getDagNodes())
+		node_names.push_back(node->getName());
+
+	    std::cerr<<"\ngeneration = "<<generation<<"    proposal = "<<i+1<<"/"<<proposals<<"    "<<the_move.getMoveName()<<"("<<StringUtilities::join(node_names,",")<<")\n";
+	}
 
         // Perform the move
         the_move.performMcmcStep( chain_prior_heat, chain_likelihood_heat, chain_posterior_heat );
@@ -1007,7 +782,7 @@ void Mcmc::replaceDag(const RbVector<Move> &mvs, const RbVector<Monitor> &mons)
             // error checking
             if ( the_node->getName() == "" )
             {
-                throw RbException( "Unable to connect move '" + the_move->getMoveName() + "' to DAG copy because variable name was lost");
+                throw RbException() << "Unable to connect move '" << the_move->getMoveName() << "' to DAG copy because variable name was lost"; 
             }
             
             DagNode* the_new_node = NULL;
@@ -1022,7 +797,7 @@ void Mcmc::replaceDag(const RbVector<Move> &mvs, const RbVector<Monitor> &mons)
             // error checking
             if ( the_new_node == NULL )
             {
-                throw RbException("Cannot find node with name '" + the_node->getName() + "' in the model but received a move working on it.");
+                throw RbException() << "Cannot find node with name '" << the_node->getName() << "' in the model but received a move working on it.";
             }
             
             // now swap the node
@@ -1059,7 +834,7 @@ void Mcmc::replaceDag(const RbVector<Move> &mvs, const RbVector<Monitor> &mons)
             // error checking
             if ( the_new_node == NULL )
             {
-                throw RbException("Cannot find node with name '" + the_node->getName() + "' in the model but received a monitor working on it.");
+                throw RbException() << "Cannot find node with name '" << the_node->getName() << "' in the model but received a monitor working on it.";
             }
             
             // now swap the node
@@ -1230,6 +1005,7 @@ void Mcmc::setChainActive(bool tf)
  */
 void Mcmc::setChainLikelihoodHeat(double h)
 {
+    assert(0 <= h);
     chain_likelihood_heat = h;
 }
 
@@ -1248,6 +1024,7 @@ void Mcmc::setCheckpointFile(const path &f)
  */
 void Mcmc::setLikelihoodHeat(double h)
 {
+    assert(0 <= h);
     chain_likelihood_heat = h;
 }
 
@@ -1259,12 +1036,14 @@ void Mcmc::setLikelihoodHeat(double h)
  */
 void Mcmc::setChainPosteriorHeat(double h)
 {
+    assert(0 <= h);
     chain_posterior_heat = h;
 }
 
 
 void Mcmc::setChainPriorHeat(double h)
 {
+    assert(0 <= h);
     chain_prior_heat = h;
 }
 
@@ -1356,7 +1135,7 @@ void Mcmc::setScheduleType(const std::string &s)
 /**
  * Start the monitors which will open the output streams.
  */
-void Mcmc::startMonitors( size_t num_cycles, bool reopen )
+void Mcmc::startMonitors( size_t num_cycles, bool reopen, double max_seconds )
 {
     
     // Open the output file and print headers
@@ -1367,11 +1146,33 @@ void Mcmc::startMonitors( size_t num_cycles, bool reopen )
         monitors[i].openStream( reopen );
         
         // reset the monitor
-        monitors[i].reset( num_cycles );
+        monitors[i].reset( num_cycles, max_seconds );
         
     }
     
 }
+
+/**
+ * Finish the monitors which will close the output streams.
+ */
+void Mcmc::finishMonitors( size_t n_reps, MonteCarloAnalysisOptions::TraceCombinationTypes tc )
+{
+    
+    // iterate over all monitors
+    for (size_t i=0; i<monitors.size(); ++i)
+    {
+        // close filestream for each monitor
+        monitors[i].closeStream();
+            
+        // combine results if we used more than one replicate
+        if ( n_reps > 1 && tc != MonteCarloAnalysisOptions::NONE )
+        {
+            monitors[i].combineReplicates( n_reps, tc );
+        }
+    }
+    
+}
+
 
 /**
  * Write the header for each of the monitors.
@@ -1413,4 +1214,3 @@ void Mcmc::tune( void )
     }
     
 }
-

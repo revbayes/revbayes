@@ -12,7 +12,7 @@ namespace RevBayesCore {
     
     class Clade;
     
-    class ConditionedBirthDeathShiftProcessContinuous : public AbstractCharacterHistoryBirthDeathProcess, public MemberObject< RbVector<long> >, public MemberObject< RbVector<double> > {
+    class ConditionedBirthDeathShiftProcessContinuous : public AbstractCharacterHistoryBirthDeathProcess, public MemberObject< RbVector<std::int64_t> >, public MemberObject< RbVector<double> > {
         
     public:
         ConditionedBirthDeathShiftProcessContinuous(const TypedDagNode<double> *a,
@@ -30,7 +30,7 @@ namespace RevBayesCore {
         // public member functions
         ConditionedBirthDeathShiftProcessContinuous*        clone(void) const;                                                                                              //!< Create an independent clone
         double                                              computeLnProbability(void);                                                                                     //!< Compute ln prob of current value
-        void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<long> &rv) const;         //!< Map the member methods to internal function calls
+        void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<std::int64_t> &rv) const;         //!< Map the member methods to internal function calls
         void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const;       //!< Map the member methods to internal function calls
         CharacterHistoryContinuous&                         getCharacterHistory(void);                                                                                      //!< Get the character histories
         const CharacterHistoryContinuous&                   getCharacterHistory(void) const;                                                                                //!< Get the character histories

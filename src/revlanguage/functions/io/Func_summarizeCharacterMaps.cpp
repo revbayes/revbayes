@@ -1,6 +1,6 @@
 #include "Func_summarizeCharacterMaps.h"
 
-#include <math.h>
+#include <cmath>
 #include <cstddef>
 #include <sstream>
 #include <vector>
@@ -9,6 +9,7 @@
 #include "Delimiter.h"
 #include "JointAncestralStateTrace.h"
 #include "Probability.h"
+#include "RbException.h"
 #include "RevNullObject.h"
 #include "RlString.h"
 #include "RlTraceTree.h"
@@ -95,13 +96,18 @@ RevPtr<RevVariable> Func_summarizeCharacterMaps::execute( void )
     
     const std::string& sep = static_cast<const RlString  &>( args[5].getVariable()->getRevObject() ).getValue();
 
+    if (sep.empty())
+        throw RbException()<<"summarizeCharacterMaps: the separator may not be empty!";
+
     bool verbose = static_cast<const RlBoolean &>( args[6].getVariable()->getRevObject() ).getValue();
+    
+    bool bwd_time = static_cast<const RlBoolean &>( args[7].getVariable()->getRevObject() ).getValue();
     
     // summarize stochastic character maps
     RevBayesCore::JointAncestralStateTrace joint_trace(ancestralstate_traces, tree_trace);
     joint_trace.setBurnin(burnin);
 
-    joint_trace.summarizeCharacterMaps(input_tree, filename, verbose, sep);
+    joint_trace.summarizeCharacterMaps(input_tree, filename, verbose, sep, bwd_time);
 
     return NULL;
 }
@@ -126,8 +132,9 @@ const ArgumentRules& Func_summarizeCharacterMaps::getArgumentRules( void ) const
         burninTypes.push_back( Probability::getClassTypeSpec() );
         burninTypes.push_back( Integer::getClassTypeSpec() );
         argumentRules.push_back( new ArgumentRule( "burnin"   , burninTypes  , "The fraction/number of samples to discard as burnin.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability(0.25) ) );
-        argumentRules.push_back( new Delimiter() );
+        argumentRules.push_back( new WriteDelimiter("\t") );
         argumentRules.push_back( new ArgumentRule( "verbose"   , RlBoolean::getClassTypeSpec()  , "Printing verbose output", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
+        argumentRules.push_back( new ArgumentRule( "use_simmap_default"   , RlBoolean::getClassTypeSpec()  , "Was the default SIMMAP/phytools event ordering (i.e., young/left -> old/right) used with mnStochasticCharacterMap()? True by default.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(true) ) );
         
         rules_set = true;
     }
@@ -185,4 +192,3 @@ const TypeSpec& Func_summarizeCharacterMaps::getReturnType( void ) const
     static TypeSpec return_typeSpec = Tree::getClassTypeSpec();
     return return_typeSpec;
 }
-

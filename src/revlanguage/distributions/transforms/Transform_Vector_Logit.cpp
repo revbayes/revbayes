@@ -6,6 +6,7 @@
 #include "RlSimplex.h"
 #include "StochasticNode.h"
 #include "TypedDistribution.h"
+#include "Transforms.h"
 
 namespace Core = RevBayesCore;
 
@@ -25,12 +26,10 @@ Transform_Vector_Logit* RevLanguage::Transform_Vector_Logit::clone( void ) const
     return new Transform_Vector_Logit(*this);
 }
 
-std::optional<double> logit_transform(double x);
-std::optional<double> logit_inverse(double x);
-std::optional<double> log_logit_prime(double x);
-
 Core::TransformedVectorDistribution* RevLanguage::Transform_Vector_Logit::createDistribution( void ) const
 {
+    using namespace Transforms;
+
     // get the parameters
     const Distribution& rl_vp                      = static_cast<const Distribution &>( base_distribution->getRevObject() );
     std::unique_ptr<Core::TypedDistribution<Core::RbVector<double>>> vp( static_cast<Core::TypedDistribution<Core::RbVector<double>>* >( rl_vp.createDistribution() ) );

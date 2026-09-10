@@ -6,18 +6,20 @@
 
 #include <ostream>
 #include <string>
+#include <cstdint>
 
 namespace RevLanguage {
     
     class Real;
 
-    class Integer : public ModelObject<long> {
+    class Integer : public ModelObject<std::int64_t> {
 
     public:
         Integer(void);                                                                                          //!< Default constructor
-        Integer(RevBayesCore::TypedDagNode<long> *v);                                                           //!< Constructor from DAG node
-        Integer(long v);                                                                                        //!< Constructor from long
-//        Integer(unsigned long v);                                                                               //!< Constructor from unsigned long
+        Integer(RevBayesCore::TypedDagNode<std::int64_t> *v);                                                   //!< Constructor from DAG node
+        Integer(std::int64_t v);                                                                                //!< Constructor from std::int64_t
+        template <typename T, typename U=std::enable_if_t<std::is_integral_v<T>,T>> Integer(T v):               //!< Constructor from T
+           Integer(std::int64_t(v)) {}
 
         // Basic operator functions
         virtual RevObject*              add(const RevObject &rhs) const;                                        //!< Addition operator used for example in '+=' statements
@@ -41,7 +43,7 @@ namespace RevLanguage {
         static const std::string&       getClassType(void);                                                     //!< Get Rev type
         static const TypeSpec&          getClassTypeSpec(void);                                                 //!< Get class type spec
         virtual const TypeSpec&         getTypeSpec(void) const;                                                //!< Get language type of the object
-        virtual double                  isConvertibleTo(const TypeSpec& type, bool once) const;                 //!< Is convertible to type?
+        virtual double                  isConvertibleTo(const TypeSpec& type, bool convert_by_value) const;                 //!< Is convertible to type?
         
         std::string                     getGuiName(void) { return "Integer"; }
         std::string                     getGuiUnicodeSymbol(void) { return "Z"; }

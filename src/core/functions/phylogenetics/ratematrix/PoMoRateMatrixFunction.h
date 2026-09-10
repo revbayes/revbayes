@@ -35,8 +35,8 @@ template <class valueType> class TypedDagNode;
     class PoMoRateMatrixFunction : public TypedFunction<RateGenerator> {
 
     public:
-        PoMoRateMatrixFunction(const TypedDagNode< long > *ps, const TypedDagNode< RbVector<double> > *mr, const TypedDagNode< RbVector<double>  > *sc);
-        PoMoRateMatrixFunction(const TypedDagNode< long > *ps, const TypedDagNode< RateGenerator > *mm, const TypedDagNode< RbVector<double>  > *sc);
+        PoMoRateMatrixFunction(const TypedDagNode< std::int64_t > *ps, const TypedDagNode< RbVector<double> > *mr, const TypedDagNode< RbVector<double>  > *sc);
+        PoMoRateMatrixFunction(const TypedDagNode< std::int64_t > *ps, const TypedDagNode< RateGenerator > *mm, const TypedDagNode< RbVector<double>  > *sc);
 
         virtual                                            ~PoMoRateMatrixFunction(void);                                                    //!< Virtual destructor
         
@@ -51,7 +51,7 @@ template <class valueType> class TypedDagNode;
         
         // members
 
-        const TypedDagNode< long >*                          populationSize;
+        const TypedDagNode< std::int64_t >*                          populationSize;
         const TypedDagNode< RbVector<double> >*             mutationRates;
         const TypedDagNode< RateGenerator >*                mutationMatrix;
         const TypedDagNode< RbVector<double> >*             selectionCoefficients;

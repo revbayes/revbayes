@@ -17,18 +17,18 @@ class DagNode;
 
     public:
         // Constructors and Destructors
-        VariableMonitor(DagNode *n, unsigned long g, const path &fname, const SampleFormat& f, bool pp=true, bool l=true, bool pr=true, bool ap=false, bool wv=true);                                                                //!< Constructor with single DAG node
-        VariableMonitor(const std::vector<DagNode *> &n, unsigned long g, const path &fname, const SampleFormat& f, bool pp=true, bool l=true, bool pr=true, bool ap=false, bool wv=true);                                              //!< Constructor with vector of DAG node
+        VariableMonitor(DagNode *n, std::uint64_t g, const path &fname, const SampleFormat& f, bool pp=true, bool l=true, bool pr=true, bool ap=false, bool wv=true);                                                                //!< Constructor with single DAG node
+        VariableMonitor(const std::vector<DagNode *> &n, std::uint64_t g, const path &fname, const SampleFormat& f, bool pp=true, bool l=true, bool pr=true, bool ap=false, bool wv=true);                                              //!< Constructor with vector of DAG node
 
         // basic methods
         VariableMonitor*                        clone(void) const;                                                  //!< Clone the object
         
         // monitor methods
         virtual void                            printHeader();
-        virtual void                            monitor(unsigned long gen);
+        virtual void                            monitor(std::uint64_t gen);
 
         virtual void                            printFileHeader();
-        virtual void                            monitorVariables(unsigned long gen);
+        virtual void                            monitorVariables(std::uint64_t gen);
         void                                    combineReplicates(size_t n_reps, MonteCarloAnalysisOptions::TraceCombinationTypes tc);
 
         // setters

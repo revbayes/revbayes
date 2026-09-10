@@ -4,6 +4,7 @@
 #include <ostream>
 #include <vector>
 #include <cstddef>
+#include <cstdint>
 #include <set>
 
 #include "Proposal.h"
@@ -26,7 +27,7 @@ template <class variableType> class StochasticNode;
     class VectorBinarySwitchProposal : public Proposal {
         
     public:
-        VectorBinarySwitchProposal( std::vector< StochasticNode<long>* > n, const std::vector<long> &i, double sp);                                 //!< Constructor
+        VectorBinarySwitchProposal( std::vector< StochasticNode<std::int64_t>* > n, const std::vector<std::int64_t> &i, double sp);                                 //!< Constructor
         
         void                                        cleanProposal(void);                                                                //!< Clean up proposal
         VectorBinarySwitchProposal*                 clone(void) const;                                                                  //!< Clone object
@@ -34,7 +35,7 @@ template <class variableType> class StochasticNode;
         const std::string&                          getProposalName(void) const;                                                        //!< Get the name of the proposal for summary printing
         double                                      getProposalTuningParameter(void) const;
         std::vector<DagNode*>                       identifyNodesToTouch(void);
-        void                                        printParameterSummary(std::ostream &o, bool name_only) const;                                       //!< Print the parameter summary
+        void                                        printParameterSummary(std::ostream &o, bool name_only) const;                       //!< Print the parameter summary
         void                                        prepareProposal(void);                                                              //!< Prepare the proposal
         void                                        setProposalTuningParameter(double tp);
         void                                        tune(double r);                                                                     //!< Tune the proposal to achieve a better acceptance/rejection ratio
@@ -42,13 +43,13 @@ template <class variableType> class StochasticNode;
         
     protected:
         
-        void                                        swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes on which the Proposal is working on
+        void                                        swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes the Proposal is working on
         
         
     private:
         // parameters
-        std::vector<StochasticNode<long>* >         variables;
-        std::vector<long>                           indices;
+        std::vector<StochasticNode<std::int64_t>* > variables;
+        std::vector<std::int64_t>                   indices;
         size_t                                      length;
         double                                      switch_probability;
         std::set<size_t>                            update_set;

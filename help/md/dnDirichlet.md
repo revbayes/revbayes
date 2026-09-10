@@ -3,9 +3,9 @@ dnDirichlet
 ## title
 Dirichlet Distribution
 ## description
-Dirichlet probability distribution on a simplex.
+The Dirichlet distribution is a generalization of the Beta distribution for multiple variables.
 ## details
-The Dirichlet probability distribution is the generalization of the Beta distribution. A random variable from a Dirichlet distribution is a simplex, i.e., a vector of probabilities that sum to 1.
+The Dirichlet distribution takes one parameter, alpha, a vector of numbers representing the concentration of the distribution on each variable. It then returns a simplex (i.e. a vector whose elements sum to 1) representing the relative probability of each variable. Note that when every element of alpha is 1, the distribution is equivalent to a uniform on each element. 
 ## authors
 Sebastian Hoehna
 ## see_also

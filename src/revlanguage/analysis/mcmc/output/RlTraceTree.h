@@ -33,7 +33,6 @@ namespace RevLanguage {
         
         
         void                                        initMethods(void);
-        void                                        setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);          //!< Set member variable
     };
     
 }

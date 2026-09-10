@@ -132,7 +132,7 @@ std::vector<int> RevBayesCore::operator+(const std::vector<int>& x, const std::v
 }
 
 
-std::vector<long> RevBayesCore::operator+(const std::vector<long>& x, const std::vector<long>& y)
+std::vector<std::int64_t> RevBayesCore::operator+(const std::vector<std::int64_t>& x, const std::vector<std::int64_t>& y)
 {
     
     size_t n = x.size();
@@ -142,7 +142,7 @@ std::vector<long> RevBayesCore::operator+(const std::vector<long>& x, const std:
         throw RbException("Can only add vectors of same size!");
     }
     
-    std::vector<long> z(n,0);
+    std::vector<std::int64_t> z(n,0);
     
     for (size_t i = 0; i < n; ++i)
     {
@@ -195,7 +195,7 @@ std::vector<int> RevBayesCore::operator-(const std::vector<int>& x, const std::v
 }
 
 
-std::vector<long> RevBayesCore::operator-(const std::vector<long>& x, const std::vector<long>& y)
+std::vector<std::int64_t> RevBayesCore::operator-(const std::vector<std::int64_t>& x, const std::vector<std::int64_t>& y)
 {
     
     size_t n = x.size();
@@ -205,7 +205,7 @@ std::vector<long> RevBayesCore::operator-(const std::vector<long>& x, const std:
         throw RbException("Can only subtract vectors of same size!");
     }
     
-    std::vector<long> z(n,0);
+    std::vector<std::int64_t> z(n,0);
     
     for (size_t i = 0; i < n; ++i)
     {
@@ -258,7 +258,7 @@ std::vector<int> RevBayesCore::operator*(const std::vector<int>& x, const std::v
 }
 
 
-std::vector<long> RevBayesCore::operator*(const std::vector<long>& x, const std::vector<long>& y)
+std::vector<std::int64_t> RevBayesCore::operator*(const std::vector<std::int64_t>& x, const std::vector<std::int64_t>& y)
 {
     
     size_t n = x.size();
@@ -268,7 +268,7 @@ std::vector<long> RevBayesCore::operator*(const std::vector<long>& x, const std:
         throw RbException("Can only multiply vectors of same size!");
     }
     
-    std::vector<long> z(n,0);
+    std::vector<std::int64_t> z(n,0);
     
     for (size_t i = 0; i < n; ++i)
     {
@@ -321,7 +321,7 @@ std::vector<double> RevBayesCore::operator/(const std::vector<int>& x, const std
 }
 
 
-std::vector<double> RevBayesCore::operator/(const std::vector<long>& x, const std::vector<long>& y)
+std::vector<double> RevBayesCore::operator/(const std::vector<std::int64_t>& x, const std::vector<std::int64_t>& y)
 {
     
     size_t n = x.size();
@@ -363,7 +363,7 @@ std::vector<double> RevBayesCore::operator/(const std::vector<int>& x, const std
 }
 
 
-std::vector<double> RevBayesCore::operator/(const std::vector<long>& x, const std::vector<double>& y)
+std::vector<double> RevBayesCore::operator/(const std::vector<std::int64_t>& x, const std::vector<double>& y)
 {
     
     size_t n = x.size();
@@ -405,7 +405,7 @@ std::vector<double> RevBayesCore::operator/(const std::vector<double>& x, const 
 }
 
 
-std::vector<double> RevBayesCore::operator/(const std::vector<double>& x, const std::vector<long>& y)
+std::vector<double> RevBayesCore::operator/(const std::vector<double>& x, const std::vector<std::int64_t>& y)
 {
     
     size_t n = x.size();

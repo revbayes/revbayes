@@ -31,7 +31,7 @@ template <class valueType> class TypedDagNode;
     class SimplexScaleFunction : public TypedFunction< RbVector<double> > {
         
     public:
-        SimplexScaleFunction(const TypedDagNode< RbVector<double> > *s, const TypedDagNode< double > *f, const TypedDagNode< long > *i);
+        SimplexScaleFunction(const TypedDagNode< RbVector<double> > *s, const TypedDagNode< double > *f, const TypedDagNode< std::int64_t > *i);
         SimplexScaleFunction(const SimplexScaleFunction &n);                                                                            //!< Copy constructor
         virtual                                            ~SimplexScaleFunction(void);                                                 //!< Virtual destructor
         
@@ -47,7 +47,7 @@ template <class valueType> class TypedDagNode;
         // members
         const TypedDagNode< RbVector< double > >*           simplex;
         const TypedDagNode< double >*                       factor;
-        const TypedDagNode< long >*                          index;
+        const TypedDagNode< std::int64_t >*                          index;
     };
     
 }

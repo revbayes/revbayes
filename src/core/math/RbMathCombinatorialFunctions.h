@@ -19,6 +19,7 @@
 #define RbMathCombinatorialFunctions_H
 
 #include <vector>
+#include <cstdint>
 
 namespace RevBayesCore {
 
@@ -35,7 +36,7 @@ namespace RevBayesCore {
 		// These stirling functions all have problems with overflow
 		int                         stirlingSecond(int n, int k);                                                   //!< Calculate the Stirling number of the second kind
 		int                         bell(int n);                                                                    //!< Calculate the Bell number
-		unsigned long				stirlingFirst(int n, int k);                                                    //!< Calculate the Stirling number of the first kind
+		std::uint64_t				stirlingFirst(int n, int k);                                                    //!< Calculate the Stirling number of the first kind
 		double						lnStirlingFirst(int n, int k);                                                  //!< Calculate the log Stirling number of the first kind
 		int							signedStirlingFirst(int n, int k);                                              //!< Calculate the SIGNED Stirling number of the first kind
 

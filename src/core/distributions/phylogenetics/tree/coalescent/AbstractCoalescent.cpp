@@ -69,7 +69,7 @@ void AbstractCoalescent::attachAges(Tree *psi, std::vector<TopologyNode *> &tips
         psi->getNode( parent->getIndex() ).setAge( ages[ages.size()-index-1] );
         
         // remove the randomly drawn node from the list
-        tips.erase(tips.begin()+ long(tip_index) );
+        tips.erase(tips.begin()+ std::int64_t(tip_index) );
         
         // add a left child
         TopologyNode* leftChild = &parent->getChild(0);
@@ -113,7 +113,7 @@ void AbstractCoalescent::buildRandomBinaryTree(std::vector<TopologyNode*> &tips)
         TopologyNode* parent = tips.at(index);
         
         // remove the randomly drawn node from the list
-        tips.erase(tips.begin()+long(index));
+        tips.erase(tips.begin()+std::int64_t(index));
         
         // add a left child
         TopologyNode* leftChild = new TopologyNode();
@@ -161,14 +161,14 @@ void AbstractCoalescent::buildHeterochronousRandomBinaryTree(Tree *psi, std::vec
             TopologyNode* leftChild = active.at(left);
             
             // remove the randomly drawn node from the list
-            active.erase(active.begin()+long(left));
+            active.erase(active.begin()+std::int64_t(left));
             
             // randomly draw one child (arbitrarily called left) node from the list of active nodes
             size_t right = static_cast<size_t>( floor(rng->uniform01()*active.size()) );
             TopologyNode* rightChild = active.at(right);
             
             // remove the randomly drawn node from the list
-            active.erase(active.begin()+long(right));
+            active.erase(active.begin()+std::int64_t(right));
             
             // check that we aren't trying to coalesce nodes before they exist
             if ( (leftChild->getAge() < ages[i]) && (rightChild->getAge() < ages[i]))
@@ -298,6 +298,7 @@ bool AbstractCoalescent::matchesConstraints( void )
  */
 void AbstractCoalescent::redrawValue( void )
 {
+
     simulateTree();
 
 }
@@ -408,13 +409,13 @@ void AbstractCoalescent::simulateHomochronousTree( void )
         TopologyNode* node = nodes.at(index);
         
         // remove the randomly drawn node from the list
-        nodes.erase( nodes.begin()+long(index) );
+        nodes.erase( nodes.begin()+std::int64_t(index) );
         
         // set name
         const std::string& name = taxa[i].getName();
         node->setName(name);
         node->setSpeciesName(taxa[i].getSpeciesName());
-        
+
     }
     
     // initialize the topology by setting the root
@@ -459,3 +460,4 @@ void AbstractCoalescent::simulateHomochronousTree( void )
     value = psi;
     
 }
+

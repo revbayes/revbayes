@@ -34,7 +34,7 @@ RevBayesCore::TypedFunction<RevBayesCore::Simplex>* Func_betaBrokenStick::create
 
     RevBayesCore::TypedDagNode<double>* alpha = static_cast<const Real &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode<double>* beta = static_cast<const Real &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<long>* numCats = static_cast<const Integer &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<std::int64_t>* numCats = static_cast<const Integer &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
 
     RevBayesCore::BetaBrokenStickFunction *func = new RevBayesCore::BetaBrokenStickFunction( alpha, beta, numCats );
 

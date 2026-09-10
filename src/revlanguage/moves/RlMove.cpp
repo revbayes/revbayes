@@ -93,7 +93,7 @@ const MemberRules& Move::getParameterRules(void) const
     
     if ( !rules_set )
     {
-        move_member_rules.push_back( new ArgumentRule( "weight", RealPos::getClassTypeSpec(), "The weight how often on average this move will be used per iteration.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RealPos( 1.0 ) ) );
+        move_member_rules.push_back( new ArgumentRule( "weight", RealPos::getClassTypeSpec(), "The weight determines the relative frequency with which this move will be attempted. For details, see the description of the 'moveschedule' parameter on the documentation page for 'mcmc()'.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RealPos( 1.0 ) ) );
         move_member_rules.push_back( new ArgumentRule( "tuneTarget", Probability::getClassTypeSpec(), "The acceptance probability targeted by auto-tuning.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability( 0.44 ) ) );
 
         

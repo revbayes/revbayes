@@ -1,0 +1,8 @@
+   Attempting to read the contents of file "aristolochia.tree"
+   Successfully read file
+   -204.09
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 22 different moves, with a single move picked randomly per iteration
+   

@@ -1,4 +1,4 @@
-#include <math.h>
+#include <cmath>
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -75,7 +75,7 @@ RevBayesCore::HeterogeneousRateBirthDeath* Dist_heterogeneousRateBirthDeath::cre
     
     // Get the parameters
     RevBayesCore::TypedDagNode<double>* ra   = static_cast<const RealPos &>( root_age->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<long>*    rs   = static_cast<const Natural &>( root_state->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<std::int64_t>*    rs   = static_cast<const Natural &>( root_state->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* sp   = static_cast<const ModelVector<RealPos> &>( speciation->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* ex   = static_cast<const ModelVector<RealPos> &>( extinction->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode<double>* er   = static_cast<const RealPos &>( event_rate->getRevObject() ).getDagNode();

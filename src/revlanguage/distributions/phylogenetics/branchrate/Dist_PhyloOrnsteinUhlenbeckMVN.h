@@ -1,7 +1,7 @@
 #ifndef Dist_PhyloOrnsteinUhlenbeckMVN_H
 #define Dist_PhyloOrnsteinUhlenbeckMVN_H
 
-#include <math.h>
+#include <cmath>
 #include <iosfwd>
 #include <string>
 #include <vector>

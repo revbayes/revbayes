@@ -12,7 +12,7 @@ namespace RevBayesCore {
     
     class Clade;
     
-    class SampledSpeciationBirthDeathProcess : public AbstractCharacterHistoryBirthDeathProcess, public MemberObject< RbVector<long> >, public MemberObject<RbVector<RbVector<double> > > {
+    class SampledSpeciationBirthDeathProcess : public AbstractCharacterHistoryBirthDeathProcess, public MemberObject< RbVector<std::int64_t> >, public MemberObject<RbVector<RbVector<double> > > {
         
     public:
         SampledSpeciationBirthDeathProcess(const TypedDagNode<double> *a, const TypedDagNode<double> *s, const TypedDagNode<double> *e, const TypedDagNode<double> *r, const std::vector<Taxon> &n);                                                                                  //!< Constructor
@@ -22,7 +22,7 @@ namespace RevBayesCore {
         // public member functions
         SampledSpeciationBirthDeathProcess*                 clone(void) const;                                          //!< Create an independent clone
         double                                              computeLnProbability(void);                                 //!< Compute ln prob of current value
-        void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<long> &rv) const;     //!< Map the member methods to internal function calls
+        void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<std::int64_t> &rv) const;     //!< Map the member methods to internal function calls
         void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<RbVector<double> > &rv) const;     //!< Map the member methods to internal function calls
 
         CharacterHistoryDiscrete&                           getCharacterHistory(void);                                  //!< Get the character histories

@@ -16,7 +16,7 @@ using namespace RevBayesCore;
  *
  */
 
-StudentTDistribution::StudentTDistribution(const TypedDagNode<long> *df) : ContinuousDistribution( new double( 0.0 ) ),
+StudentTDistribution::StudentTDistribution(const TypedDagNode<std::int64_t> *df) : ContinuousDistribution( new double( 0.0 ) ),
 degrees( df )
 {
     // add the parameters to our set (in the base class)
@@ -90,7 +90,7 @@ void StudentTDistribution::swapParameterInternal(const DagNode *oldP, const DagN
     
     if (oldP == degrees)
     {
-        degrees = static_cast<const TypedDagNode<long>* >( newP );
+        degrees = static_cast<const TypedDagNode<std::int64_t>* >( newP );
     }
     
 }

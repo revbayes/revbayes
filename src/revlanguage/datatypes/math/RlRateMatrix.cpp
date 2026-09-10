@@ -72,7 +72,7 @@ RevPtr<RevVariable> RateMatrix::executeMethod(std::string const &name, const std
     {
         found = true;
 
-        long n = this->dag_node->getValue().getNumberOfStates();
+        std::int64_t n = this->dag_node->getValue().getNumberOfStates();
         return new RevVariable( new Natural(n) );
     }
 

@@ -12,11 +12,11 @@ namespace RevBayesCore {
     
     class Clade;
     
-    class HeterogeneousRateBirthDeath : public AbstractCharacterHistoryBirthDeathProcess, public MemberObject< RbVector<long> >, public MemberObject< RbVector<double> > {
+    class HeterogeneousRateBirthDeath : public AbstractCharacterHistoryBirthDeathProcess, public MemberObject< RbVector<std::int64_t> >, public MemberObject< RbVector<double> > {
         
     public:
         HeterogeneousRateBirthDeath(const TypedDagNode<double> *a,
-                                    const TypedDagNode<long> *rs,
+                                    const TypedDagNode<std::int64_t> *rs,
                                     const TypedDagNode<RbVector<double> > *s,
                                     const TypedDagNode<RbVector<double> > *e,
                                     const TypedDagNode<double> *ev,
@@ -30,7 +30,7 @@ namespace RevBayesCore {
         // public member functions
         HeterogeneousRateBirthDeath*                        clone(void) const;                                          //!< Create an independent clone
         double                                              computeLnProbability(void);                                 //!< Compute ln prob of current value
-        void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<long> &rv) const;     //!< Map the member methods to internal function calls
+        void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<std::int64_t> &rv) const;     //!< Map the member methods to internal function calls
         void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const;     //!< Map the member methods to internal function calls
         CharacterHistoryDiscrete&                           getCharacterHistory(void);                                  //!< Get the character histories
         const CharacterHistoryDiscrete&                     getCharacterHistory(void) const;                                  //!< Get the character histories
@@ -63,7 +63,7 @@ namespace RevBayesCore {
 
         // members
         const TypedDagNode<double>*                         root_age;
-        const TypedDagNode<long>*                           root_state;
+        const TypedDagNode<std::int64_t>*                           root_state;
         const TypedDagNode< RbVector<double> >*             speciation;
         const TypedDagNode< RbVector<double> >*             extinction;
         const TypedDagNode<double>*                         event_rate;

@@ -10,6 +10,7 @@
 #include "Move_UpDownSlideBactrian.h"
 #include "UpDownSlideBactrianProposal.h"
 #include "RbException.h"
+#include "Probability.h"
 #include "RealPos.h"
 #include "RevObject.h"
 #include "RlBoolean.h"
@@ -121,11 +122,15 @@ void Move_UpDownSlideBactrian::constructInternalObject( void )
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
     
     // finally create the internal move object
     RevBayesCore::UpDownSlideBactrianProposal *prop = new RevBayesCore::UpDownSlideBactrianProposal(l);
     
-    value = new RevBayesCore::MetropolisHastingsMove(prop,w,t);
+    // set the target acceptance rate after construction
+    prop->setTargetAcceptanceRate(tt);
+    
+    value = new RevBayesCore::MetropolisHastingsMove(prop, w, t);
     
 }
 
@@ -218,7 +223,7 @@ RevPtr<RevVariable> Move_UpDownSlideBactrian::executeMethod(const std::string& n
         }
         else
         {
-            throw RbException("A problem occured when trying to add " + args[0].getVariable()->getName() + " to the move.");
+            throw RbException() << "A problem occured when trying to add " << args[0].getVariable()->getName() << " to the move.";
         }
         
         return NULL;
@@ -306,7 +311,7 @@ RevPtr<RevVariable> Move_UpDownSlideBactrian::executeMethod(const std::string& n
         }
         else
         {
-            throw RbException("A problem occured when trying to add " + args[0].getVariable()->getName() + " to the move.");
+            throw RbException() << "A problem occured when trying to add " << args[0].getVariable()->getName() << " to the move.";
         }
         
         return NULL;

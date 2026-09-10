@@ -1,4 +1,4 @@
-#include <math.h>
+#include <cmath>
 #include <cstdlib>
 #include <boost/functional/hash/extensions.hpp>
 #include <algorithm>
@@ -35,6 +35,7 @@
 #include "Taxon.h"
 #include "TopologyNode.h"
 #include "boost/unordered_set.hpp"
+#include "boost/algorithm/string/trim.hpp"
 
 using namespace RevBayesCore;
 
@@ -550,6 +551,10 @@ void RevBayesCore::TreeUtilities::constructTimeTreeRecursively(TopologyNode& tn,
  */
 RevBayesCore::Tree* RevBayesCore::TreeUtilities::convertTree(const Tree& t, bool reset_index)
 {
+    // FIXME: This routine duplicates most of the machinery to copy trees.
+    //        Eventually stop doing that.  Instead just copy the tree and modify the copy.
+    // Tree *tt = new Tree(t);
+    
     // create time tree object (topology + times)
     Tree *tt = new Tree();
 
@@ -583,6 +588,10 @@ RevBayesCore::Tree* RevBayesCore::TreeUtilities::convertTree(const Tree& t, bool
 
     // copy the root edge
     root->setBranchLength( bln.getBranchLength() );
+
+    // copy the tree comments
+    for(auto& chunk: t.getTreeParameters())
+        tt->addTreeParameter_(chunk);
 
     return tt;
 }
@@ -1167,6 +1176,35 @@ std::vector<double> RevBayesCore::TreeUtilities::getPSSP(const Tree& tree, const
     return branch_lengths;
 }
 
+
+/**
+ * Helper function to find the tip name that comes alphabetically first (or more accurately, is lexicographically smallest) in the subtree
+ * originating with a given node. This is useful for deterministically setting left vs. right child of a node.
+ * @param node node whose smallest tip we want to find
+ * @return lexicographically smallest tip name in the subtree originating with node
+ */
+std::string RevBayesCore::TreeUtilities::getSmallestTipName(const TopologyNode* node)
+{
+    if (node->isTip())
+    {
+        return node->getName();
+    }
+    
+    std::string smallest = "";
+    
+    for (size_t i = 0; i < node->getNumberOfChildren(); ++i)
+    {
+        std::string child_name = getSmallestTipName(&node->getChild(i));
+        if (smallest.empty() || child_name < smallest)
+        {
+            smallest = child_name;
+        }
+    }
+    
+    return smallest;
+}
+
+
 /**
  * Get all tips below specified node, recursively
  * @param n current node
@@ -1193,30 +1231,10 @@ void RevBayesCore::TreeUtilities::getTaxaInSubtree(TopologyNode& n, std::vector<
 
 }
 
-/**
- * Check if the two trees are connected by a single NNI move
- */
-bool RevBayesCore::TreeUtilities::isConnectedNNI(const Tree& a, const Tree& b)
-{
-    
-    size_t num_nodes = a.getNumberOfNodes();
-    
-//    // now exchange the two nodes
-//    parent.removeChild( node_B );
-//    node->removeChild( node_A );
-//    parent.addChild( node_A );
-//    node->addChild( node_B );
-//    node_A->setParent( &parent );
-//    node_B->setParent( node );
-    
-    return false;
-}
-
-
 
 /**
  * Make tree ultrametric by extending terminal branches to the present
- * @param t tree to be modified
+ * @param tree tree to be modified
  */
 void RevBayesCore::TreeUtilities::makeUltrametric(Tree& tree)
 {
@@ -1258,6 +1276,53 @@ void RevBayesCore::TreeUtilities::makeUltrametric(Tree& tree)
 }
 
 
+Tree* RevBayesCore::TreeUtilities::minBLTimeScaling(Tree& treeToScale, const std::vector<Taxon>& taxa, const double minBrLen)
+{
+    // Check that the user-supplied tree contains the same number of tips as the vector of taxa
+    size_t tip_num = treeToScale.getNumberOfTips();
+    size_t tax_num = taxa.size();
+    
+    if (tip_num != tax_num)
+    {
+        throw RbException("Number of tips in the initial tree does not match the number of taxa.");
+    }
+    
+    // Check that the tip labels of the user-supplied tree match those of the vector of taxa
+    std::vector<std::string> tip_names;
+    for (size_t i = 0; i < tip_num; ++i)
+    {
+        const TopologyNode& n = treeToScale.getTipNode( i );
+        tip_names.push_back( n.getTaxon().getName() );
+    }
+
+    std::vector<std::string> taxon_names;
+    for (size_t i = 0; i < tax_num; ++i)
+    {
+        taxon_names.push_back( taxa[i].getName() );
+    }
+    
+    std::sort(tip_names.begin(), tip_names.end());
+    std::sort(taxon_names.begin(), taxon_names.end());
+    if (tip_names != taxon_names)
+    {
+        throw RbException("Tip names of the initial tree do not match the taxon names.");
+    }
+    
+    // Alter the tip age values of treeToScale in place
+    for (size_t i = 0; i < tax_num; ++i)
+    {
+        std::string tip_name = taxa[i].getName();
+        treeToScale.setTaxonObject( tip_name, taxa[i] );
+    }
+    
+    // The algorithm starts at the root
+    TopologyNode& root_node = treeToScale.getRoot();
+    root_node.scaleAgesFromTaxonAgesMBL( minBrLen );
+    
+    RevBayesCore::Tree *p = &treeToScale;
+    return p;
+}
+
 
 /**
  * Offset the age of a node and its children by a factor
@@ -1267,18 +1332,89 @@ void RevBayesCore::TreeUtilities::makeUltrametric(Tree& tree)
  */
 void RevBayesCore::TreeUtilities::offsetTree(TopologyNode& node, double factor)
 {
-    // rescale the time of the node
-    double new_age = node.getAge() + factor;
-    node.setAge( new_age );
 
+    // 1. offset the children
+    // 2. offset myself
+    // the order is important so that sampled ancestors don't get set multiple times.
+    
     // offset all children
     const std::vector<TopologyNode*>& children = node.getChildren();
     for (size_t i = 0; i < children.size(); i++)
     {
         offsetTree( *children[i], factor);
     }
+    
+    // rescale the time of the node
+    double new_age = node.getAge() + factor;
+    node.setAge( new_age, false );              // make sure we do not offset the sampled ancestors again!
 
 }
+
+
+/*
+ * Helper function that parses a SIMMAP character history for a single branch.
+ * These strings represent character histories for a single branch in the form
+ * {state_2,time_in_state_2:state_1,time_in_state_1} where the states are
+ * listed left to right from the tip to the root (backward time). We loop through
+ * the string from right to left to store events in forward time (root to tip).
+ * Returns vector of events: [<state_1, time_in_state_1>, <state_2, time_in_state_2>]
+ */
+std::vector< std::pair<size_t, double> > RevBayesCore::TreeUtilities::parseSIMMAPForNode(std::string character_history)
+{
+    
+    boost::trim(character_history);
+    
+    // Now parse the sampled SIMMAP string:
+    bool parsed_time = false;
+    std::vector< std::pair<size_t, double> > this_branch_map = std::vector< std::pair<size_t, double> >();
+    std::pair<size_t, double> this_event = std::pair<size_t, double>();
+    std::string state = "";
+    std::string time = "";
+    size_t k = character_history.size();
+    
+    while (true)
+    {
+        
+        if ( k == (character_history.size() - 1) &&
+            std::string(1, character_history[0]).compare("{") != 0 &&
+            std::string(1, character_history[k]).compare("}") != 0 )
+        {
+            throw RbException("Error while summarizing character maps: trace does not contain valid SIMMAP string.");
+        }
+        else if ( std::string(1, character_history[k]).compare(",") == 0 )
+        {
+            parsed_time = true;
+            this_event.second = std::atof( time.c_str() );
+        }
+        else if ( std::string(1, character_history[k]).compare(":") == 0 || k == 0 )
+        {
+            this_event.first = std::atoi( state.c_str() );
+            this_branch_map.push_back( this_event );
+            if (k == 0)
+            {
+                break;
+            }
+            else
+            {
+                state = "";
+                time = "";
+                parsed_time = false;
+            }
+        }
+        else if ( parsed_time == false )
+        {
+            time = std::string(1, character_history[k]) + time;
+        }
+        else
+        {
+            state = std::string(1, character_history[k]) + state;
+        }
+        k--;
+    }
+    
+    return this_branch_map;
+}
+
 
 
 /**
@@ -1471,8 +1607,8 @@ std::set<size_t> TreeUtilities::recursivelyGetPSSP(const TopologyNode& node, con
 */
 void TreeUtilities::rescaleSubtree(TopologyNode& node, double factor, bool verbose)
 {
-    // we only rescale internal nodes
-    if ( node.isTip() == false )
+    // we only rescale internal nodes which have no SA as children
+    if ( !node.isTip() && !node.isSampledAncestorParent())
     {
         // rescale the age of the node
         double new_age = node.getAge() * factor;
@@ -1587,7 +1723,7 @@ void RevBayesCore::TreeUtilities::setAgesRecursively(TopologyNode& node, double 
  * @param taxaToCopy vector of Taxon objects corresponding to the tips of the tree
  * @param agePrecision how many decimal places to use when checking for compatibility between the tip ages from treeToChange and taxaToCopy
  */
-Tree* RevBayesCore::TreeUtilities::startingTreeInitializer(Tree& treeToChange, std::vector<Taxon>& taxaToCopy, long agePrecision)
+Tree* RevBayesCore::TreeUtilities::startingTreeInitializer(Tree& treeToChange, std::vector<Taxon>& taxaToCopy, std::int64_t agePrecision)
 {
     // Check that the user-supplied tree contains the same number of tips as the vector of taxa
     size_t tip_num = treeToChange.getNumberOfTips();

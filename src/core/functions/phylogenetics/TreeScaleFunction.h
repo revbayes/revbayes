@@ -28,10 +28,7 @@ template <class valueType> class TypedDagNode;
         
         // public member functions
         TreeScaleFunction*                                  clone(void) const;                                                                  //!< Create an independent clone
-        void                                                keep(const DagNode* affecter);
-        void                                                restore(const DagNode *restorer);
         void                                                reInitialized(void);                                                                //!< The arguments have been re-initialized
-        void                                                touch(const DagNode *toucher );
         void                                                update(void);
         
     protected:

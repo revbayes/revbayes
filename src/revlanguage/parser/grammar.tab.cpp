@@ -131,12 +131,12 @@
 #include <list>
 #include <sstream>
 #include <string>
+#include <cstdint>
 
 using namespace RevLanguage;
 
 extern int yylex(void);
 extern char *yytext;
-extern Environment *executionEnvironment;
 
 /* The function yyerror handles errors. It is defined below. */
 int yyerror(const char *);
@@ -2041,7 +2041,7 @@ yyreduce:
 #ifdef DEBUG_BISON_FLEX
                     printf("Bison trying to execute statement or expression\n");
 #endif
-                    int rv = parser.execute((yyvsp[-1].syntaxElement), *executionEnvironment);
+                    int rv = parser.execute((yyvsp[-1].syntaxElement), executionEnvironment);
                     delete (yyvsp[-1].syntaxElement);
                     return rv;
                 }
@@ -2054,7 +2054,7 @@ yyreduce:
 #ifdef DEBUG_BISON_FLEX
                     printf("Bison trying to execute statement or expression\n");
 #endif
-                    int rv =  parser.execute((yyvsp[-1].syntaxElement), *executionEnvironment);
+                    int rv =  parser.execute((yyvsp[-1].syntaxElement), executionEnvironment);
                     delete (yyvsp[-1].syntaxElement);
                     return rv;
                 }
@@ -2067,7 +2067,7 @@ yyreduce:
 #ifdef DEBUG_BISON_FLEX
                     printf("Bison trying to execute declaration\n");
 #endif
-                    int rv =  parser.execute((yyvsp[-1].syntaxElement), *executionEnvironment);
+                    int rv =  parser.execute((yyvsp[-1].syntaxElement), executionEnvironment);
                     delete (yyvsp[-1].syntaxElement);
                     return rv;
                 }
@@ -2080,7 +2080,7 @@ yyreduce:
 #ifdef DEBUG_BISON_FLEX
                     printf("Bison trying to execute declaration\n");
 #endif
-                    int rv =  parser.execute((yyvsp[-1].syntaxElement), *executionEnvironment);
+                    int rv =  parser.execute((yyvsp[-1].syntaxElement), executionEnvironment);
                     delete (yyvsp[-1].syntaxElement);
                     return rv;
                 }

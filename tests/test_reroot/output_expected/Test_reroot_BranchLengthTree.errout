@@ -1,0 +1,22 @@
+   Attempting to read the contents of file "bears_tree.tre"
+   Successfully read file
+
+   Rerooting on '"Melursus_ursinus"', makeBifurcating = FALSE
+   Tips: 22, nodes: 42
+
+   Rerooting on 'clade("Melursus_ursinus")', makeBifurcating = FALSE
+   Tips: 22, nodes: 42
+   Does it have the same topology as the previous tree? TRUE
+
+   Rerooting on '"Melursus_ursinus"', makeBifurcating = TRUE
+   Tips: 22, nodes: 43
+
+   Rerooting on 'clade("Melursus_ursinus")', makeBifurcating = TRUE
+   Tips: 22, nodes: 43
+   Does it have the same topology as the previous tree? TRUE
+
+   Rerooting on 'clade("Melursus_ursinus", "Ursus_abstrusus")', makeBifurcating = FALSE
+   Tips: 22, nodes: 42
+
+   Rerooting on 'clade("Melursus_ursinus", "Ursus_abstrusus")', makeBifurcating = TRUE
+   Tips: 22, nodes: 43

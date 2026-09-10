@@ -251,7 +251,7 @@ void EpisodicBirthDeathProcess::prepareProbComputation( void ) const
 }
 
 
-void EpisodicBirthDeathProcess::prepareSurvivalProbability(double end, double r)
+void EpisodicBirthDeathProcess::prepareSurvivalProbability(double end, double r) const
 {
     // do the integration of int_{start}^{end} ( mu(s) exp(rate(t,s)) ds )
     // where rate(t,s) = int_{t}^{s} ( mu(x)-lambda(x) dx ) - sum_{for all t < m_i < s in massExtinctionTimes }( log(massExtinctionSurvivalProbability[i]) )
@@ -337,7 +337,7 @@ void EpisodicBirthDeathProcess::prepareSurvivalProbability(double end, double r)
 }
 
 
-void EpisodicBirthDeathProcess::prepareRateIntegral(double end)
+void EpisodicBirthDeathProcess::prepareRateIntegral(double end) const
 {
     
     double accummulated_rate_time = 0.0;
@@ -497,13 +497,13 @@ double EpisodicBirthDeathProcess::simulateDivergenceTime(double origin, double p
         
         t = present;
         
-        double p_0_T_low = 1.0 - pSurvival(present,age,r)  * exp( rateIntegral(present,age) ) / r;
+        double p_0_T_low = 1.0 - pSurvival(present,age,r) * exp( rateIntegral(present,age) ) / r;
         double p_0_t_low = 1.0 - pSurvival(age-t,age,r) * exp( rateIntegral(age-t,age) ) / r;
         double F_t_low   = p_0_t / p_0_T;
         
         t = age;
         
-        double p_0_T_high = 1.0 - pSurvival(present,age,r)  * exp( rateIntegral(present,age) ) / r;
+        double p_0_T_high = 1.0 - pSurvival(present,age,r) * exp( rateIntegral(present,age) ) / r;
         double p_0_t_high = 1.0 - pSurvival(age-t,age,r) * exp( rateIntegral(age-t,age) ) / r;
         double F_t_high   = p_0_t / p_0_T;
     }

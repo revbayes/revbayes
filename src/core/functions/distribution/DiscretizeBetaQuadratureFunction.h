@@ -29,7 +29,7 @@ template <class valueType> class TypedDagNode;
     class DiscretizeBetaQuadratureFunction : public TypedFunction< MatrixReal >{
         
     public:
-        DiscretizeBetaQuadratureFunction(const TypedDagNode<double> *a, const TypedDagNode<double> *b, const TypedDagNode<long> *nc);
+        DiscretizeBetaQuadratureFunction(const TypedDagNode<double> *a, const TypedDagNode<double> *b, const TypedDagNode<std::int64_t> *nc);
         
         DiscretizeBetaQuadratureFunction*   clone(void) const;                                                  //!< Create a clon.
         void                                update(void);                                                       //!< Recompute the value
@@ -40,7 +40,7 @@ template <class valueType> class TypedDagNode;
     private:
         const TypedDagNode<double>*         alpha;
         const TypedDagNode<double>*         beta;
-        const TypedDagNode<long>*           numCats;
+        const TypedDagNode<std::int64_t>*           numCats;
     };
 }
 

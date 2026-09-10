@@ -35,8 +35,8 @@ namespace RevLanguage {
         SyntaxIndexOperation*               clone(void) const;                                                                      //!< Clone object
         
         // Regular functions
-        RevPtr<RevVariable>                 evaluateLHSContent(Environment& env, const std::string& varType);                       //!< Get semantic lhs value
-        RevPtr<RevVariable>                 evaluateContent(Environment& env, bool dynamic=false);                                  //!< Get semantic value
+        RevPtr<RevVariable>                 evaluateLHSContent(const std::shared_ptr<Environment>& env, const std::string& varType);   //!< Get semantic lhs value
+        RevPtr<RevVariable>                 evaluateContent(const std::shared_ptr<Environment>& env, bool dynamic=false);           //!< Get semantic value
         SyntaxElement*                      getBaseVariable(void);                                                                  //!< Get the base variable for this expression
         void                                updateVariable(Environment& env, const std::string &n);                                 //!< Update the composite variables
         

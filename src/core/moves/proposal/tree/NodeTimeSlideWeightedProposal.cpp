@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 
+#include "DebugMove.h"
 #include "DistributionBeta.h"
 #include "NodeTimeSlideWeightedProposal.h"
 #include "RandomNumberFactory.h"
@@ -10,6 +11,7 @@
 #include "DagNode.h"
 #include "Proposal.h"
 #include "RbOrderedSet.h"
+#include "RbSettings.h"  // for debugMCMC setting
 #include "StochasticNode.h"
 #include "TopologyNode.h"
 #include "Tree.h"
@@ -95,20 +97,26 @@ double NodeTimeSlideWeightedProposal::getProposalTuningParameter( void ) const
  */
 double NodeTimeSlideWeightedProposal::doProposal( void )
 {
+    int logMCMC = RbSettings::userSettings().getLogMCMC();
+    int debugMCMC = RbSettings::userSettings().getDebugMCMC();
     
-    // Get random number generator
-    RandomNumberGenerator* rng     = GLOBAL_RNG;
+    // get random number generator
+    RandomNumberGenerator* rng = GLOBAL_RNG;
     
     Tree& tau = variable->getValue();
     
-    // pick a random node which is not the root and neithor the direct descendant of the root
-    TopologyNode* node;
-    do
+    // pick a random node which is not the root, a tip, or the parent of a sampled ancestor
+    TopologyNode* node = tau.pickRandomInternalNode(rng);
+    if (node == NULL)
     {
-        double u = rng->uniform01();
-        size_t index = size_t( std::floor(tau.getNumberOfNodes() * u) );
-        node = &tau.getNode(index);
-    } while ( node->isRoot() || node->isTip() );
+        if (logMCMC >=1 or debugMCMC >=1)
+        {
+            std::cerr << "mvNodeTimeSlide has no effect; the tree only contains the root, tips, and sampled ancestors." << std::endl;
+        }
+        
+        storedNode = nullptr;
+        return RbConstants::Double::neginf;
+    }
     
     TopologyNode& parent = node->getParent();
     
@@ -247,10 +255,10 @@ void NodeTimeSlideWeightedProposal::printParameterSummary(std::ostream &o, bool 
  */
 void NodeTimeSlideWeightedProposal::undoProposal( void )
 {
+    if (storedNode == nullptr) return;
     
     // undo the proposal
     variable->getValue().getNode(storedNode->getIndex()).setAge( storedAge );
-    
 }
 
 
@@ -266,23 +274,3 @@ void NodeTimeSlideWeightedProposal::swapNodeInternal(DagNode *oldN, DagNode *new
     variable = static_cast<StochasticNode<Tree>* >(newN) ;
     
 }
-
-
-void NodeTimeSlideWeightedProposal::setProposalTuningParameter(double tp)
-{
-    // this proposal has no tuning parameter: nothing to do
-}
-
-
-/**
- * Tune the Proposal to accept the desired acceptance ratio.
- *
- * The acceptance ratio for this Proposal should be around 0.44.
- * If it is too large, then we increase the proposal size,
- * and if it is too small, then we decrease the proposal size.
- */
-void NodeTimeSlideWeightedProposal::tune( double rate )
-{
-    
-}
-

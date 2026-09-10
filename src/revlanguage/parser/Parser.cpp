@@ -11,6 +11,7 @@
 #include "RbException.h"
 #include "RbHelpRenderer.h"
 #include "RbHelpSystem.h"
+#include "RbHelpDatabase.h"
 #include "RbSettings.h"
 #include "RbUtil.h"
 #include "RevNullObject.h"
@@ -25,6 +26,7 @@
 #include "RevObject.h"
 #include "RlFunction.h"
 #include "SyntaxFormal.h" // IWYU pragma: keep
+#include "RevClient.h"    // for RevClient::shutdown()
 
 #ifdef RB_MPI
 #include <mpi.h>
@@ -45,7 +47,7 @@ bool foundEOF;
 std::stringstream rrcommand;
 
 
-RevLanguage::Environment *executionEnvironment;
+std::shared_ptr<RevLanguage::Environment> executionEnvironment;
 
 /** Constructor. Here we set the parser mode to executing. */
 RevLanguage::Parser::Parser(void) {
@@ -76,9 +78,26 @@ RevLanguage::ParserInfo RevLanguage::Parser::breakIntoLines(const std::string& c
         std::stringstream temp;
         bool escaped = false;
 
+        // A comment never spans more than a single line, so we always start a new
+        // line outside of any comment.
+        inComment = false;
+
         while (buf.good()) {
 
             char c = char( buf.get());
+
+            // Everything from an (unquoted) '#' to the end of the line is a comment.
+            // We drop those characters here instead of retaining them. If they were
+            // kept, an incomplete line ending in a comment would later be spliced
+            // onto the following line (see processCommand, which replaces the
+            // trailing newline with a space), and flex's comment rule '#.*' would
+            // then greedily swallow the real code that followed -- silently breaking
+            // multi-line function calls that comment out an argument. Line
+            // terminators must still be processed below so the line breaks correctly.
+            if ( inComment == true && c != '\n' && c != '\r' && c != EOF && c != '\377' )
+            {
+                continue;
+            }
 
             if (c == EOF && inQuote == true) {
                 if (validate) {
@@ -92,8 +111,10 @@ RevLanguage::ParserInfo RevLanguage::Parser::breakIntoLines(const std::string& c
                 else if (inComment == false)
                     inQuote = true;
             } else if (c == '#' && inQuote == false) {
-                /* we are now in comment */
+                /* the rest of the line is a comment: enter comment mode and drop the
+                   '#' itself (the remaining characters are skipped above) */
                 inComment = true;
+                continue;
             } else if (c == ';' && inQuote == false && inComment == false) {
                 /* break line here */
                 break;
@@ -134,10 +155,11 @@ RevLanguage::ParserInfo RevLanguage::Parser::breakIntoLines(const std::string& c
 
 /**
  * This function causes recursive execution of a syntax tree by calling the root to get its value.
- * As long as we return to the bison code, bison takes care of deleting the syntax tree. However,
+ * As std::int64_t as we return to the bison code, bison takes care of deleting the syntax tree. However,
  * if we encounter a quit() call, we delete the syntax tree ourselves and exit immediately.
  */
-int RevLanguage::Parser::execute(SyntaxElement* root, Environment &env) const {
+int RevLanguage::Parser::execute(SyntaxElement* root, const std::shared_ptr<Environment>& env) const
+{
 
     // don't execute command if we are in checking mode
     if (RevLanguage::Parser::getParser().isChecking())
@@ -163,14 +185,8 @@ int RevLanguage::Parser::execute(SyntaxElement* root, Environment &env) const {
         {
             delete( root);
             
-            Workspace::userWorkspace().clear();
-            Workspace::globalWorkspace().clear();
-            
-#ifdef RB_MPI
-            MPI_Barrier(MPI_COMM_WORLD);
-            MPI_Finalize();
-#endif
-            
+            RevClient::shutdown();
+
             exit(0);
         }
 
@@ -239,12 +255,19 @@ void RevLanguage::Parser::executeBaseVariable(void)
 {
     if (base_variable_expr != NULL)
     {
-        base_variable = base_variable_expr->evaluateContent(Workspace::userWorkspace());
+        base_variable = base_variable_expr->evaluateContent(Workspace::userWorkspacePtr());
     }
 }
 
-/** 
- * Give flex a line to parse
+/**
+ * Give flex a chunk of the current Rev line to parse.
+ *
+ * Flex calls this via YY_INPUT / rrinput with a fixed maxsize (YY_READ_BUF_SIZE,
+ * typically 8192). That is only a refill chunk size, not a limit on command
+ * length: if the line is longer than the chunk, we return a partial read without a
+ * synthetic newline so flex will call again for the remainder. We only append
+ * a newline when a real line terminator was consumed (or at end of file), which
+ * is what multiline incomplete-command handling relies on (foundNewline).
  */
 void RevLanguage::Parser::getline(char* buf, size_t maxsize)
 {
@@ -259,9 +282,21 @@ void RevLanguage::Parser::getline(char* buf, size_t maxsize)
     else
     {
         foundNewline = false;
-        rrcommand.getline(buf, long(maxsize) - 3);
-        // Deal with line endings in case getline uses non-Unix endings
+        rrcommand.getline(buf, std::int64_t(maxsize) - 3);
         size_t i = strlen(buf);
+
+        // Truncated mid-line: istream::getline hit the count limit without
+        // finding '\n', so failbit is set and the real newline remains unread.
+        // Clear failbit so subsequent YY_INPUT calls can continue; do not
+        // invent a newline or flex will treat the command as ended mid-token.
+        if (rrcommand.fail() && !rrcommand.eof())
+        {
+            rrcommand.clear(rrcommand.rdstate() & ~std::ios_base::failbit);
+            buf[i] = '\0';
+            return;
+        }
+
+        // Deal with line endings in case getline uses non-Unix endings
         if (i >= 1 && buf[i - 1] == '\r')
         {
             buf[i - 1] = '\n';
@@ -273,6 +308,7 @@ void RevLanguage::Parser::getline(char* buf, size_t maxsize)
         }
         else if (i == 0 || (i >= 1 && buf[i - 1] != '\n'))
         {
+            // getline strips the delimiter; restore '\n' so the lexer sees end of line
             buf[i++] = '\n';
         }
         buf[i] = '\0';
@@ -287,11 +323,22 @@ int RevLanguage::Parser::help(const std::string& symbol) const
     
     // Get some help
     RevBayesCore::RbHelpSystem& hs = RevBayesCore::RbHelpSystem::getHelpSystem();
+    RevBayesCore::RbHelpDatabase& hd = RevBayesCore::RbHelpDatabase::getHelpDatabase();
+    const std::string& help_title = hd.getHelpString(symbol, "name");
+    
     if ( hs.isHelpAvailableForQuery(symbol) )
     {
         const RevBayesCore::RbHelpEntry& h = hs.getHelp( symbol );
         RevBayesCore::HelpRenderer hRenderer;
         std::string hStr = hRenderer.renderHelp(h, RbSettings::userSettings().getLineWidth() - RevBayesCore::RbUtils::PAD.size());
+        UserInterface::userInterface().output("\n", true);
+        UserInterface::userInterface().output("\n", true);
+        UserInterface::userInterface().output(hStr, true);
+    }
+    else if ( not hs.isHelpAvailableForQuery(symbol) and help_title.size() > 0 )
+    {
+        RevBayesCore::HelpRenderer hRenderer;
+        std::string hStr = hRenderer.renderHelp(hd, symbol, RbSettings::userSettings().getLineWidth() - RevBayesCore::RbUtils::PAD.size());
         UserInterface::userInterface().output("\n", true);
         UserInterface::userInterface().output("\n", true);
         UserInterface::userInterface().output(hStr, true);
@@ -380,7 +427,7 @@ void RevLanguage::Parser::setParserMode(ParserMode mode)
  *       signal is set to 2. Any remaining part of the command buffer
  *       is discarded.
  */
-int RevLanguage::Parser::processCommand(std::string& command, Environment* env)
+int RevLanguage::Parser::processCommand(std::string& command, const std::shared_ptr<Environment>& env)
 {
 
     // make sure mode is not checking
@@ -443,13 +490,7 @@ int RevLanguage::Parser::processCommand(std::string& command, Environment* env)
             // Catch a quit request in case it was not caught before
             if (rbException.getExceptionType() == RbException::QUIT)
             {
-                Workspace::userWorkspace().clear();
-                Workspace::globalWorkspace().clear();
-                
-#ifdef RB_MPI
-                MPI_Finalize();
-#endif
-                
+                RevClient::shutdown();
                 exit(0);
             }
             // All other uncaught exceptions
@@ -568,7 +609,7 @@ int RevLanguage::Parser::processCommand(std::string& command, Environment* env)
     return 0;
 }
 
-ParserInfo Parser::checkCommand(std::string& command, Environment* env)
+ParserInfo Parser::checkCommand(std::string& command, const std::shared_ptr<Environment>& env)
 {
 
     setParserMode(CHECKING);

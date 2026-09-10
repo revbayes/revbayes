@@ -11,7 +11,7 @@
 
 using namespace RevBayesCore;
 
-MultiValueEventDistribution::MultiValueEventDistribution(TypedDistribution<long> *ep, const std::vector< TypedDistribution<double> *> &vp, const std::vector< std::string > &n, const std::vector< long > &min) : TypedDistribution< MultiValueEvent >( new MultiValueEvent() ),
+MultiValueEventDistribution::MultiValueEventDistribution(TypedDistribution<std::int64_t> *ep, const std::vector< TypedDistribution<double> *> &vp, const std::vector< std::string > &n, const std::vector< std::int64_t > &min) : TypedDistribution< MultiValueEvent >( new MultiValueEvent() ),
     event_prior( ep ),
     min_events( min ),
     names( n ),
@@ -134,7 +134,7 @@ MultiValueEventDistribution* MultiValueEventDistribution::clone( void ) const
 
 double MultiValueEventDistribution::computeLnProbability( void )
 {
-    event_prior->setValue( new long( value->getNumberOfEvents() ) );
+    event_prior->setValue( new std::int64_t( value->getNumberOfEvents() ) );
     
     double ln_prob = event_prior->computeLnProbability();
     
@@ -143,7 +143,7 @@ double MultiValueEventDistribution::computeLnProbability( void )
 
         const std::vector<double> &these_values = this->value->getValues(j);
         
-        long this_num_values = these_values.size();
+        std::int64_t this_num_values = these_values.size();
         
         if ( (value->getNumberOfEvents()+min_events[j]) != this_num_values )
         {
@@ -187,14 +187,14 @@ void MultiValueEventDistribution::executeMethod(const std::string &n, const std:
     }
     else
     {
-        throw RbException("The multi-value event does not have a member method called '" + n + "'.");
+        throw RbException() << "The multi-value event does not have a member method called '" << n << "'.";
     }
     
 }
 
 
 
-void MultiValueEventDistribution::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, long &rv) const
+void MultiValueEventDistribution::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, std::int64_t &rv) const
 {
     
     if ( n == "getNumberOfEvents" )
@@ -209,12 +209,12 @@ void MultiValueEventDistribution::executeMethod(const std::string &n, const std:
     //    }
     else
     {
-        throw RbException("The multi-value event does not have a member method called '" + n + "'.");
+        throw RbException() << "The multi-value event does not have a member method called '" << n << "'.";
     }
     
 }
 
-const std::vector<long>& MultiValueEventDistribution::getMinimumNumberOfEvents(void) const
+const std::vector<std::int64_t>& MultiValueEventDistribution::getMinimumNumberOfEvents(void) const
 {
     return min_events;
 }
@@ -240,13 +240,13 @@ void MultiValueEventDistribution::simulate()
     for (int j = 0; j < value_priors.size(); ++j)
     {
         
-        long this_num_values = min_events[j] + value->getNumberOfEvents();
+        std::int64_t this_num_values = min_events[j] + value->getNumberOfEvents();
         
         std::vector<double>      these_values   = std::vector<double>(this_num_values, 0.0);
         const std::string       &this_name      = names[j];
         TypedDistribution<double>   *this_prior = value_priors[j];
 
-        for (long i = 0; i < this_num_values; ++i)
+        for (std::int64_t i = 0; i < this_num_values; ++i)
         {
         
             // we also need to multiply with the probability of the value for this table
@@ -306,7 +306,7 @@ void MultiValueEventDistribution::swapParameterInternal( const DagNode *oldP, co
     
     if ( found == false )
     {
-        throw RbException("Could not find the distribution parameter to be swapped: " + oldP->getName() + " to " + newP->getName()) ;
+        throw RbException() << "Could not find the distribution parameter to be swapped: " << oldP->getName() << " to " << newP->getName(); 
     }
     
 }

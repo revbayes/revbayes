@@ -16,7 +16,7 @@ namespace RevBayesCore {
         
     public:
 
-        CharacterHistoryContinuous(Tree *t, size_t nc, bool rb = false);
+        CharacterHistoryContinuous(const Tree *t, size_t nc, bool rb = false);
         virtual ~CharacterHistoryContinuous(void);
         
         BranchHistoryContinuous&                operator[](size_t i);
@@ -24,7 +24,7 @@ namespace RevBayesCore {
         
         CharacterHistoryContinuous*             clone(void) const;
         CharacterEventContinuous*               pickRandomEvent(size_t &bi);
-        void                                    setTree(Tree *t);
+        void                                    setTree(const Tree *t);
         
         
     private:

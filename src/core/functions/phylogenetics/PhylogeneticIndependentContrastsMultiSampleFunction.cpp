@@ -13,7 +13,7 @@ namespace RevBayesCore { class DagNode; }
 
 using namespace RevBayesCore;
 
-PhylogeneticIndependentContrastsMultiSampleFunction::PhylogeneticIndependentContrastsMultiSampleFunction(const TypedDagNode<Tree> *t, const TypedDagNode<ContinuousCharacterData> *d, const TypedDagNode<long> *s, const std::vector<Taxon> &ta, bool n ) : TypedFunction< RbVector<double> >( new RbVector<double>() ),
+PhylogeneticIndependentContrastsMultiSampleFunction::PhylogeneticIndependentContrastsMultiSampleFunction(const TypedDagNode<Tree> *t, const TypedDagNode<ContinuousCharacterData> *d, const TypedDagNode<std::int64_t> *s, const std::vector<Taxon> &ta, bool n ) : TypedFunction< RbVector<double> >( new RbVector<double>() ),
     tau( t ),
     data( d ),
     site( s ),
@@ -267,7 +267,7 @@ void PhylogeneticIndependentContrastsMultiSampleFunction::swapParameterInternal(
     }
     else if (oldP == site)
     {
-        site = static_cast<const TypedDagNode<long>* >( newP );
+        site = static_cast<const TypedDagNode<std::int64_t>* >( newP );
     }
 }
 

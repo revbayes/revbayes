@@ -24,8 +24,7 @@ using namespace RevBayesCore;
  */
 DiscreteEventBirthDeathProposal::DiscreteEventBirthDeathProposal( StochasticNode<Tree> *n) : EventBirthDeathProposal( n )
 {
-
-
+    initialize();
 }
 
 
@@ -44,9 +43,9 @@ DiscreteEventBirthDeathProposal* DiscreteEventBirthDeathProposal::clone( void ) 
 
 
 /**
- * Get Proposals' name of object
+ * Get name of Proposal object
  *
- * \return The Proposals' name.
+ * \return The Proposal's name.
  */
 const std::string& DiscreteEventBirthDeathProposal::getProposalName( void ) const
 {
@@ -66,7 +65,7 @@ double DiscreteEventBirthDeathProposal::computeEventProposalProbability(Characte
     
     CharacterHistoryDiscrete &history = static_cast<CharacterHistoryDiscrete&>(distribution->getCharacterHistory());
     
-    size_t num_states         = history.getNumberStates();
+    size_t num_states         = history.getNumberOfStates();
     
     return -log( num_states );
 }
@@ -77,7 +76,7 @@ CharacterEvent* DiscreteEventBirthDeathProposal::drawNewEvent(double event_time)
 
     CharacterHistoryDiscrete &history = static_cast<CharacterHistoryDiscrete&>(distribution->getCharacterHistory());
     
-    size_t num_states         = history.getNumberStates();
+    size_t num_states         = history.getNumberOfStates();
     
     RandomNumberGenerator *rng = GLOBAL_RNG;
     

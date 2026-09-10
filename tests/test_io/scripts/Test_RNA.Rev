@@ -1,0 +1,18 @@
+################################################################################
+#
+# RevBayes Test-Script: Reading in an RNA alignment
+#
+# authors: David Cerny
+#
+################################################################################
+
+# read in an interleaved RNA dataset from Aberer et al. (2015), Syst. Biol.
+# 65(1): 161-176.
+
+data = readDiscreteCharacterData("data/Aberer_et_al_2015_dataset_150.phy")
+print( "\nCharacter type: " + data.chartype() )
+print( "Character state labels: " )
+data.getStateDescriptions()
+
+clear()
+q()

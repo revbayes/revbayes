@@ -30,32 +30,32 @@ namespace RevBayesCore {
         enum BoundarySearchMethod { search_stepping_out, search_doubling };
 
         SliceSamplingMove(StochasticNode<double> *p, boost::optional<double>, boost::optional<double>, double window_, double weight_, BoundarySearchMethod, bool autoTune = false);        //!< Constructor
-        virtual                                                 ~SliceSamplingMove(void);                           //!< Destructor
+        virtual                                                 ~SliceSamplingMove(void);                                   //!< Destructor
 
         // public methods
         virtual SliceSamplingMove*                              clone(void) const;
-        const std::string&                                      getMoveName(void) const;                            //!< Get the name of the move for summary printing
+        const std::string&                                      getMoveName(void) const;                                    //!< Get the name of the move for summary printing
         double                                                  getMoveTuningParameter(void) const;
-        void                                                    printSummary(std::ostream &o, bool current_period) const;                //!< Print the move summary
+        void                                                    printSummary(std::ostream &o, bool current_period) const;   //!< Print the move summary
         void                                                    setMoveTuningParameter(double tp);
-        void                                                    tune(void);                                         //!< Specific tuning of the move
+        void                                                    tune(void);                                                 //!< Specific tuning of the move
 
     protected:
         //protected methods that are overwritten from the base class
-        void                                                    performMcmcMove(double prHeat, double lHeat, double pHeat);            //!< Perform the move.
-        void                                                    resetMoveCounters(void);                            //!< Reset the counters such as numAccepted.
+        void                                                    performMcmcMove(double prHeat, double lHeat, double pHeat); //!< Perform the move.
+        void                                                    resetMoveCounters(void);                                    //!< Reset the counters such as numAccepted.
         virtual void                                            swapNodeInternal(DagNode *oldN, DagNode *newN);             //!< Swap the pointers to the variable on which the move works on.
         
     private:
 
         // parameters
-        StochasticNode<double>*                                 variable;                                           //!< The variable the Proposal is working on
-        boost::optional<double>                                 lower_bound;                                        //!< Optional lower bound for variable
-        boost::optional<double>                                 upper_bound;                                        //!< Optional upper bound for variable
-        double                                                  window;                                             //!< Window width for slice sampling
-        double                                                  total_movement;                                     //!< total distance moved under auto-tuning
-        int                                                     numPr;                                              //!< Number of probability evaluations
-        BoundarySearchMethod                                    search_method;                                      //!< Method of searching for the slice boundary.
+        StochasticNode<double>*                                 variable;                                                   //!< The variable the Proposal is working on
+        boost::optional<double>                                 lower_bound;                                                //!< Optional lower bound for variable
+        boost::optional<double>                                 upper_bound;                                                //!< Optional upper bound for variable
+        double                                                  window;                                                     //!< Window width for slice sampling
+        double                                                  total_movement;                                             //!< total distance moved under auto-tuning
+        int                                                     numPr;                                                      //!< Number of probability evaluations
+        BoundarySearchMethod                                    search_method;                                              //!< Method of searching for the slice boundary.
     };
 }
 

@@ -102,7 +102,7 @@ SyntaxUnaryExpr* SyntaxUnaryExpr::clone () const
  *
  * @todo Support this evaluation context better
  */
-RevPtr<RevVariable> SyntaxUnaryExpr::evaluateContent( Environment& env, bool dynamic )
+RevPtr<RevVariable> SyntaxUnaryExpr::evaluateContent( const std::shared_ptr<Environment>& env, bool dynamic )
 {
     // Package the argument
     std::vector<Argument> arg;
@@ -110,8 +110,8 @@ RevPtr<RevVariable> SyntaxUnaryExpr::evaluateContent( Environment& env, bool dyn
     
     // Find the function
     std::string funcName = "_" + opCode[ operation ];
-    Function* func = Workspace::globalWorkspace().getFunction( funcName, arg, !dynamic ).clone();
-    func->processArguments( arg, false );
+    Function* func = Workspace::globalWorkspace().getFunction( funcName, arg ).clone();
+    func->processArguments( arg );
     
     RevPtr<RevVariable> funcReturnValue = func->execute();
     

@@ -61,7 +61,7 @@ RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_reversiblePoMo:
 
   //RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator >* q = static_cast<const RateMatrix &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
 
-    RevBayesCore::TypedDagNode< long >* n = static_cast<const Natural &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< std::int64_t >* n = static_cast<const Natural &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
 
     RevBayesCore::ReversiblePoMoRateMatrixFunction* f = new RevBayesCore::ReversiblePoMoRateMatrixFunction( n, er, bf );
 

@@ -1,0 +1,7 @@
+   Successfully read one character matrix from file 'data/bears_cytb.nex'
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The MCMCMC simulator runs 1 cold chain and 0 heated chains.
+   The simulator uses 1 different moves in a random move schedule with 1 moves per iteration
+   

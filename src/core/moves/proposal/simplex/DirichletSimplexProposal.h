@@ -29,7 +29,7 @@ template <class variableType> class StochasticNode;
     class DirichletSimplexProposal : public Proposal {
         
     public:
-        DirichletSimplexProposal( StochasticNode<Simplex> *n, double a, size_t nc, double o, double k=0.0, double p=0.234);                                                                    //!<  constructor
+        DirichletSimplexProposal( StochasticNode<Simplex> *n, double a, size_t nc, double o, double k=0.0, double p=0.234);         //!< Constructor
         
         // Basic utility functions
         void                                    cleanProposal(void);                                                                //!< Clean up proposal
@@ -38,14 +38,14 @@ template <class variableType> class StochasticNode;
         const std::string&                      getProposalName(void) const;                                                        //!< Get the name of the proposal for summary printing
         double                                  getProposalTuningParameter(void) const;
         void                                    prepareProposal(void);                                                              //!< Prepare the proposal
-        void                                    printParameterSummary(std::ostream &o, bool name_only) const;                                       //!< Print the parameter summary
+        void                                    printParameterSummary(std::ostream &o, bool name_only) const;                       //!< Print the parameter summary
         void                                    setProposalTuningParameter(double tp);
         void                                    tune(double r);                                                                     //!< Tune the proposal to achieve a better acceptance/rejection ratio
         void                                    undoProposal(void);                                                                 //!< Reject the proposal
         
     protected:
         
-        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes on which the Proposal is working on
+        void                                    swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes the Proposal is working on
         
         
     private:
@@ -53,7 +53,7 @@ template <class variableType> class StochasticNode;
         
         StochasticNode<Simplex>*                variable;                                                                           //!< The variable the Proposal is working on
         Simplex                                 storedValue;                                                                        //!< The stored value of the Proposal used for rejections.
-        double                                  alpha;                                                                             //!< The scaling parameter of the Proposal
+        double                                  alpha;                                                                              //!< The scaling parameter of the proposal (smaller alpha -> larger proposals)
         size_t                                  nCategories;
         double                                  offset;
         double									kappa;

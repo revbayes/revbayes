@@ -77,7 +77,7 @@ void TreeBipartitions::computeBipartitions()
     {
         nameToIndex[tipNames[i]] = i;
     }
-    std::map <const TopologyNode*, unsigned long> nodeToBitVectorIndex;
+    std::map <const TopologyNode*, std::uint64_t> nodeToBitVectorIndex;
     computeBipartitions(&(tree->getValue().getRoot()), nodeToBitVectorIndex, nameToIndex );
     /*  const std::vector<TopologyNode*> &nodes = tree->getValue().getNodes();
      size_t numTaxons = tree->getValue().getNumberOfTips() ;*/
@@ -104,13 +104,13 @@ void TreeBipartitions::computeBipartitions()
 }
 
 
-void TreeBipartitions::computeBipartitions(const TopologyNode* node, std::map <const TopologyNode*, unsigned long>& nodeToBitVectorIndex, const std::map<std::string, size_t>& nameToIndex )
+void TreeBipartitions::computeBipartitions(const TopologyNode* node, std::map <const TopologyNode*, std::uint64_t>& nodeToBitVectorIndex, const std::map<std::string, size_t>& nameToIndex )
 {
 
     if ( ! node->isTip() )
     {
         std::vector< TopologyNode*> children = node->getChildren();
-        std::map <const TopologyNode*, unsigned long>::iterator it;
+        std::map <const TopologyNode*, std::uint64_t>::iterator it;
         for (size_t i = 0 ; i < children.size(); ++i)
         {
             it = nodeToBitVectorIndex.find( children[i] );

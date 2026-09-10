@@ -74,7 +74,7 @@ void Move_GraphFlipClique::constructInternalObject( void )
     double vp = static_cast<const Probability &>( vertex_prob->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    const RevBayesCore::RbVector<long>& e = static_cast<const ModelVector<Natural> &>( vertices->getRevObject() ).getValue();
+    const RevBayesCore::RbVector<std::int64_t>& e = static_cast<const ModelVector<Natural> &>( vertices->getRevObject() ).getValue();
     
     
     RevBayesCore::Proposal *p = NULL;
@@ -141,9 +141,15 @@ const MemberRules& Move_GraphFlipClique::getParameterRules(void) const
         move_member_rules.push_back( new ArgumentRule( "vertices" , ModelVector<Natural>::getClassTypeSpec(), "A vector of vertices to target with this proposal. An empty vector is interpretted as the full list of vertices.", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY, new ModelVector<Natural>() ) );
         move_member_rules.push_back( new ArgumentRule( "tune"  , RlBoolean::getClassTypeSpec() , "Should we tune the scaling factor during burnin?", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new RlBoolean( true ) ) );
         
-        /* Inherit weight from Move, put it after variable */
+        /* Inherit weight (but not tuneTarget!) from Move and put it after the arguments created above */
         const MemberRules& inheritedRules = Move::getParameterRules();
-        move_member_rules.insert( move_member_rules.end(), inheritedRules.begin(), inheritedRules.end() );
+        for (size_t i = 0; i < inheritedRules.size(); ++i)
+        {
+            if ( inheritedRules[i].getArgumentLabel() == "weight" )
+            {
+                move_member_rules.push_back( inheritedRules[i].clone() );
+            }
+        }
         
         rules_set = true;
     }

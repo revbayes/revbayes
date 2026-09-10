@@ -1,0 +1,25 @@
+   Successfully read one character matrix from file 'data/ceratosauria_morphology.nex'
+   Attempting to read the contents of file "etrigansauria_backbone_incomplete_binary.tre"
+   Successfully read file
+   Attempting to read the contents of file "etrigansauria_initial.tre"
+   Successfully read file
+   NOTE: setNumStatesPartition() partitions by the maximum observed state, not the total number of observed states.
+   NOTE: setNumStatesPartition() partitions by the maximum observed state, not the total number of observed states.
+   NOTE: setNumStatesPartition() partitions by the maximum observed state, not the total number of observed states.
+   NOTE: setNumStatesPartition() partitions by the maximum observed state, not the total number of observed states.
+   NOTE: setNumStatesPartition() partitions by the maximum observed state, not the total number of observed states.
+   
+   Running burn-in phase of Monte Carlo sampler for 100 iterations.
+   This simulation runs 1 independent replicate.
+   The simulator uses 4 different moves in a random move schedule with 141.8 moves per iteration
+   
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 4 different moves in a random move schedule with 141.8 moves per iteration
+   

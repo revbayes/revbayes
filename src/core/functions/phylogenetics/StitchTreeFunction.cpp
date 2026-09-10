@@ -137,13 +137,6 @@ void StitchTreeFunction::initTaxonGroups(void)
     return;
 }
 
-void StitchTreeFunction::keep( const DagNode *affecter )
-{
-    //delegate to base class
-    TypedFunction< Tree >::keep( affecter );
-    
-}
-
 void StitchTreeFunction::recursivelyCleanPatchClade(TopologyNode* node, TopologyNode*& newRoot, std::set<Taxon>& remainingTaxa, size_t& index, size_t patchIndex)
 {
     
@@ -272,22 +265,6 @@ void StitchTreeFunction::reInitialized( void )
 }
 
 
-void StitchTreeFunction::restore( const DagNode *restorer )
-{
-    //delegate to base class
-    TypedFunction< Tree >::restore( restorer );
-}
-
-
-void StitchTreeFunction::touch(const DagNode *toucher)
-{
-    
-    //delegate to base class
-    TypedFunction< Tree >::touch( toucher );
-    
-}
-
-
 // NB: Could be vastly improved with TreeListener events and touchSpecialization
 void StitchTreeFunction::update( void )
 {
@@ -296,7 +273,7 @@ void StitchTreeFunction::update( void )
 
 void StitchTreeFunction::updateStitchTree( void )
 {
-    
+  
     delete value;
     
     // start with backbone tree

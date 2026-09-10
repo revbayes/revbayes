@@ -128,7 +128,7 @@ const std::string& MultiValueEvent::getName(size_t i) const
 
 
 
-long MultiValueEvent::getNumberOfEvents(void) const
+std::int64_t MultiValueEvent::getNumberOfEvents(void) const
 {
     return num_events;
 }
@@ -170,7 +170,7 @@ RbVector<double>& MultiValueEvent::getValues(const std::string &n)
     
     if ( index == names.size() )
     {
-        throw RbException( "Could not find values with name '" + n + "'.");
+        throw RbException() << "Could not find values with name '" << n << "'."; 
     }
     
     return values[index];
@@ -192,14 +192,14 @@ const RbVector<double>& MultiValueEvent::getValues(const std::string &n) const
     
     if ( index == names.size() )
     {
-        throw RbException( "Could not find values with name '" + n + "'.");
+        throw RbException() << "Could not find values with name '" << n << "'."; 
     }
     
     return values[index];
 }
 
 
-void MultiValueEvent::setNumberOfEvents(long n)
+void MultiValueEvent::setNumberOfEvents(std::int64_t n)
 {
     num_events = n;
 }
@@ -221,7 +221,7 @@ void MultiValueEvent::setValues(const RbVector<double> &v, const std::string &n)
     
     if ( index == names.size() )
     {
-        throw RbException( "Could not find values with name '" + n + "'.");
+        throw RbException() << "Could not find values with name '" << n << "'."; 
     }
     
     values[index] = v;

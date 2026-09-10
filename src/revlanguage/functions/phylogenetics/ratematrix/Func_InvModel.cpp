@@ -32,7 +32,7 @@ namespace Core = RevBayesCore;
 Core::SiteMixtureModel* InvModelFunc(const Core::SiteMixtureModel& sub_model, double p)
 {
     if (p < 0 or p > 1)
-        throw RbException()<<"fnInv: pInv should be in [0,1], but pInv = "<<p;
+        throw RbException(RbException::MATH_ERROR)<<"fnInv: pInv should be in [0,1], but pInv = "<<p;
 
     int n = sub_model.getNumberOfStates();
 

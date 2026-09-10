@@ -93,7 +93,7 @@ RevBayesCore::AbstractDiscreteTaxonData* CharacterTranslator::translateCharacter
     }
     else
     {
-        throw RbException("Cannot translate character data object of type \""+ d.getCharacter(0).getDataType() +"\" into type \"" + type + "\"" );
+        throw RbException() << "Cannot translate character data object of type \""<< d.getCharacter(0).getDataType() <<"\" into type \"" << type << "\"" ;
     }
     
     return trans_taxon_data;
@@ -102,7 +102,7 @@ RevBayesCore::AbstractDiscreteTaxonData* CharacterTranslator::translateCharacter
 
 DiscreteTaxonData<DnaState>* CharacterTranslator::translateToDna(const AbstractDiscreteTaxonData &d)
 {
-    throw RbException("Cannot translate character data object of type \""+ d.getCharacter(0).getDataType() +"\" into type \"DNA\"" );
+    throw RbException() << "Cannot translate character data object of type \"" << d.getCharacter(0).getDataType() << "\" into type \"DNA\"" ; 
     
     return NULL;
 }
@@ -110,7 +110,7 @@ DiscreteTaxonData<DnaState>* CharacterTranslator::translateToDna(const AbstractD
 
 DiscreteTaxonData<RnaState>* CharacterTranslator::translateToRna(const AbstractDiscreteTaxonData &d)
 {
-    throw RbException("Cannot translate character data object of type \""+ d.getCharacter(0).getDataType() +"\" into type \"RNA\"" );
+    throw RbException() << "Cannot translate character data object of type \"" << d.getCharacter(0).getDataType() << "\" into type \"RNA\"" ; 
     
     return NULL;
 }
@@ -118,7 +118,7 @@ DiscreteTaxonData<RnaState>* CharacterTranslator::translateToRna(const AbstractD
 
 DiscreteTaxonData<AminoAcidState>* CharacterTranslator::translateToAa(const AbstractDiscreteTaxonData &d)
 {
-    throw RbException("Cannot translate character data object of type \""+ d.getCharacter(0).getDataType() +"\" into type \"AA\"" );
+    throw RbException() << "Cannot translate character data object of type \"" << d.getCharacter(0).getDataType() << "\" into type \"AA\"" ; 
     
     return NULL;
 }
@@ -126,7 +126,7 @@ DiscreteTaxonData<AminoAcidState>* CharacterTranslator::translateToAa(const Abst
 
 DiscreteTaxonData<CodonState>* CharacterTranslator::translateToCodon(const AbstractDiscreteTaxonData &d)
 {
-    throw RbException("Cannot translate character data object of type \""+ d.getCharacter(0).getDataType() +"\" into type \"Codon\"" );
+    throw RbException() << "Cannot translate character data object of type \"" << d.getCharacter(0).getDataType() << "\" into type \"Codon\"" ; 
     
     return NULL;
 }
@@ -134,7 +134,7 @@ DiscreteTaxonData<CodonState>* CharacterTranslator::translateToCodon(const Abstr
 
 DiscreteTaxonData<CodonState>* CharacterTranslator::translateToDoublet(const AbstractDiscreteTaxonData &d)
 {
-    throw RbException("Cannot translate character data object of type \""+ d.getCharacter(0).getDataType() +"\" into type \"Doublet\"" );
+    throw RbException() << "Cannot translate character data object of type \"" << d.getCharacter(0).getDataType() << "\" into type \"Doublet\"" ; 
 
     return NULL;
 }

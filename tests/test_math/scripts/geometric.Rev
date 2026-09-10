@@ -1,0 +1,16 @@
+################################################################################
+#
+# RevBayes Test-Script: Check that the mean of a geometric distribution
+#                       parameterized by p approaches (1-p)/p
+#
+# authors: Wenjie Zhu, David Cerny
+#
+################################################################################
+
+seed(12345)
+
+a <- rgeom(10000, 0.01)
+mean(a)
+
+clear()
+q()

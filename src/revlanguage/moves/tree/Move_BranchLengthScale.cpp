@@ -13,6 +13,7 @@
 #include "BranchLengthScaleProposal.h"
 #include "TypeSpec.h"
 #include "Move.h"
+#include "Probability.h"
 #include "RbBoolean.h"
 #include "RevPtr.h"
 #include "RevVariable.h"
@@ -57,8 +58,11 @@ void Move_BranchLengthScale::constructInternalObject( void )
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     double l = static_cast<const RealPos &>( delta->getRevObject() ).getValue();
     bool tune = static_cast<const RlBoolean &>( tuning->getRevObject() ).getValue();
+    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *p = new RevBayesCore::BranchLengthScaleProposal(t, l);
+    p->setTargetAcceptanceRate(tt);
+    
     value = new RevBayesCore::MetropolisHastingsMove(p, w, tune);
 }
 
@@ -109,9 +113,18 @@ const MemberRules& Move_BranchLengthScale::getParameterRules(void) const
         move_member_rules.push_back( new ArgumentRule( "delta"  , RealPos::getClassTypeSpec()  , "The scaling factor (strength) of the proposal.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY       , new RealPos( 1.0 ) ) );
         move_member_rules.push_back( new ArgumentRule( "tune"   , RlBoolean::getClassTypeSpec(), "Should we tune the scaling factor during burnin?", ArgumentRule::BY_VALUE    , ArgumentRule::ANY       , new RlBoolean( true ) ) );
         
-        /* Inherit weight from Move, put it after variable */
+        /* Inherit weight (but not tuneTarget!) from Move and put it after the arguments created above */
         const MemberRules& inheritedRules = Move::getParameterRules();
-        move_member_rules.insert( move_member_rules.end(), inheritedRules.begin(), inheritedRules.end() );
+        for (size_t i = 0; i < inheritedRules.size(); ++i)
+        {
+            if ( inheritedRules[i].getArgumentLabel() == "weight" )
+            {
+                move_member_rules.push_back( inheritedRules[i].clone() );
+            }
+        }
+        
+        /* Provide our own default value for tuneTarget */
+        move_member_rules.push_back( new ArgumentRule( "tuneTarget", Probability::getClassTypeSpec(), "The acceptance probability targeted by auto-tuning.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability( 0.234 ) ) );
         
         rules_set = true;
     }

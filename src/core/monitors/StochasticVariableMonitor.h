@@ -29,20 +29,23 @@ class Model;
         
     public:
         // Constructors and Destructors
-        StochasticVariableMonitor(unsigned long g, const path &fname, const std::string &del);           //!< Constructor
+        StochasticVariableMonitor(std::uint64_t g, const path &fname, const std::string &del);           //!< Constructor
         virtual ~StochasticVariableMonitor(void);
         
         
         
         // basic methods
-        StochasticVariableMonitor*          clone(void) const;                                                  //!< Clone the object
-        
+        StochasticVariableMonitor*          clone(void) const override;                                  //!< Clone the object
+
+        // monitor methods
+        void                                monitorVariables(std::uint64_t gen) override;
+
         // getters and setters
-        void                                setModel(Model* m);
+        void                                setModel(Model* m) override;
         
     private:
         // helper methods
-        void                                resetDagNodes(void);                                                //!< Extract the variable to be monitored again.
+        void                                resetDagNodes(void);                                         //!< Extract the variable to be monitored again.
         
     };
     

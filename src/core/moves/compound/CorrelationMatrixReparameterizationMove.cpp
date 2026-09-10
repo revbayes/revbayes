@@ -361,12 +361,6 @@ void CorrelationMatrixReparameterizationMove::swapNodeInternal(DagNode *oldN, Da
 }
 
 
-void CorrelationMatrixReparameterizationMove::setMoveTuningParameter(double tp)
-{
-    // this move has no tuning parameter: nothing to do
-}
-
-
 void CorrelationMatrixReparameterizationMove::setNumberAcceptedCurrentPeriod( size_t na )
 {
     num_accepted_current_period = na;
@@ -376,23 +370,6 @@ void CorrelationMatrixReparameterizationMove::setNumberAcceptedCurrentPeriod( si
 void CorrelationMatrixReparameterizationMove::setNumberAcceptedTotal( size_t na )
 {
     num_accepted_total = na;
-}
-
-
-void CorrelationMatrixReparameterizationMove::tune( void )
-{
-
-//    double rate = numAccepted / double(num_tried);
-//    
-//    if ( rate > 0.44 )
-//    {
-//        delta /= (1.0 + ((rate-0.44)/0.56) );
-//    }
-//    else
-//    {
-//        delta *= (2.0 - rate/0.44 );
-//    }
-    
 }
 
 

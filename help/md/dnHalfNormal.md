@@ -3,7 +3,7 @@ dnHalfNormal
 ## title
 half-Normal Distribution
 ## description
-half-normal (gaussian) distribution with offset equal to ‘offset’ and standard deviation equal to ‘sd’.
+half-normal (gaussian) distribution with offset equal to `offset` and standard deviation equal to `sd`.
 ## details
 The half-normal distribution has density:
 

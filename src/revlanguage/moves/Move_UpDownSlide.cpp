@@ -10,6 +10,7 @@
 #include "Move_UpDownSlide.h"
 #include "UpDownSlideProposal.h"
 #include "RbException.h"
+#include "Probability.h"
 #include "RealPos.h"
 #include "RevObject.h"
 #include "RlBoolean.h"
@@ -116,13 +117,17 @@ void Move_UpDownSlide::constructInternalObject( void )
     delete value;
     
     // now allocate a new up-down-scale move
-    double l = static_cast<const RealPos &>( lambda->getRevObject() ).getValue();
+    double l = static_cast<const RealPos &>( delta->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
     
     // finally create the internal move object
     RevBayesCore::UpDownSlideProposal *prop = new RevBayesCore::UpDownSlideProposal(l);
+    
+    // set the target acceptance rate after construction
+    prop->setTargetAcceptanceRate(tt);
     
     value = new RevBayesCore::MetropolisHastingsMove(prop,w,t);
     
@@ -217,7 +222,7 @@ RevPtr<RevVariable> Move_UpDownSlide::executeMethod(const std::string& name, con
         }
         else
         {
-            throw RbException("A problem occured when trying to add " + args[0].getVariable()->getName() + " to the move.");
+            throw RbException() << "A problem occured when trying to add " << args[0].getVariable()->getName() << " to the move.";
         }
         
         return NULL;
@@ -305,7 +310,7 @@ RevPtr<RevVariable> Move_UpDownSlide::executeMethod(const std::string& name, con
         }
         else
         {
-            throw RbException("A problem occured when trying to add " + args[0].getVariable()->getName() + " to the move.");
+            throw RbException() << "A problem occured when trying to add " << args[0].getVariable()->getName() << " to the move.";
         }
         
         return NULL;
@@ -374,8 +379,8 @@ const MemberRules& Move_UpDownSlide::getParameterRules(void) const
     if ( !rules_set )
     {
         
-        memberRules.push_back( new ArgumentRule( "lambda"      , RealPos::getClassTypeSpec()  , "The scaling factor (strength) of the proposal.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new RealPos(1.0) ) );
-        memberRules.push_back( new ArgumentRule( "tune"        , RlBoolean::getClassTypeSpec(), "Should we tune the scaling factor during burnin?", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new RlBoolean( true ) ) );
+        memberRules.push_back( new ArgumentRule( "delta", RealPos::getClassTypeSpec()  , "The scaling factor (strength) of the proposal.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new RealPos(1.0) ) );
+        memberRules.push_back( new ArgumentRule( "tune" , RlBoolean::getClassTypeSpec(), "Should we tune the scaling factor during burnin?", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new RlBoolean( true ) ) );
         
         /* Inherit weight from Move, put it after variable */
         const MemberRules& inheritedRules = Move::getParameterRules();
@@ -424,9 +429,9 @@ void Move_UpDownSlide::printValue(std::ostream &o) const
 void Move_UpDownSlide::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
 {
     
-    if ( name == "lambda" )
+    if ( name == "delta" )
     {
-        lambda = var;
+        delta = var;
     }
     else if ( name == "tune" )
     {

@@ -46,6 +46,7 @@
 #include "TypedDagNode.h"
 #include "TypedDistribution.h"
 #include "boost/numeric/odeint.hpp" // IWYU pragma: keep
+#include "RlUserInterface.h"  // for RBOUT
 
 namespace RevBayesCore { class DagNode; }
 namespace RevBayesCore { template <class valueType> class RbOrderedSet; }
@@ -89,7 +90,7 @@ StateDependentSpeciationExtinctionProcess::StateDependentSpeciationExtinctionPro
     sample_character_history( false ),
     average_speciation( std::vector<double>(5, 0.0) ),
     average_extinction( std::vector<double>(5, 0.0) ),
-    num_shift_events( std::vector<long>(5, 0.0) ),
+    num_shift_events( std::vector<std::int64_t>(5, 0.0) ),
     time_in_states( std::vector<double>(ext->getValue().size(), 0.0) ),    
     simmap( "" ),
     cladogenesis_matrix( NULL ),
@@ -318,15 +319,14 @@ double StateDependentSpeciationExtinctionProcess::computeLnProbability( void )
 
 void StateDependentSpeciationExtinctionProcess::computeNodeProbability(const RevBayesCore::TopologyNode &node, size_t node_index) const
 {
-    
+    std::vector<double> &node_likelihood  = node_partial_likelihoods[node_index][active_likelihood[node_index]];
+
     // check for recomputation
     if ( dirty_nodes[node_index] == true || sample_character_history == true )
     {
         // mark as computed
         dirty_nodes[node_index] = false;
         
-        std::vector<double> &node_likelihood  = node_partial_likelihoods[node_index][active_likelihood[node_index]];
-
         if ( node.isTip() == true )
         {
             // this is a tip node
@@ -374,11 +374,21 @@ void StateDependentSpeciationExtinctionProcess::computeNodeProbability(const Rev
                 gap = (state.isMissingState() == true || state.isGapState() == true);
             }
 
+            if (obs_state.size() > num_states)
+                throw RbException()<<"SSE model has "<<num_states<<" states, but observed data set has "<<obs_state.size()<<" states!";
+            else if (obs_state.size() < num_states)
+            {
+                std::ostringstream o;
+                o<<"Warning: SSE model has "<<num_states<<" states, but observed data set has only "<<obs_state.size()<<" states!";
+                RBOUT(o.str());
+            }
+
+            double all_states_impossible = true;
             for (size_t j = 0; j < num_states; ++j)
             {
-                
+
                 node_likelihood[j] = extinction[j];
-                
+
                 if ( obs_state.test( j ) == true || gap == true )
                 {
                 	if ( node.isFossil() )
@@ -394,8 +404,12 @@ void StateDependentSpeciationExtinctionProcess::computeNodeProbability(const Rev
                 {
                     node_likelihood[num_states+j] = 0.0;
                 }
+
+                if (node_likelihood[num_states+j] > 0) all_states_impossible = false;
             }
-            
+
+            // Should we print something here?  Possibly this never happens.
+            assert(not all_states_impossible);
         }
         else
         {
@@ -521,23 +535,27 @@ void StateDependentSpeciationExtinctionProcess::computeNodeProbability(const Rev
                 }
             }
 //            max *= num_states;
-            
-            for (size_t i=0; i<num_states; ++i)
+
+            if (max > 0)
             {
-                node_likelihood[num_states+i] /= max;
+                assert(std::isfinite(max) and std::isfinite(1/max));
+                for (size_t i=0; i<num_states; ++i)
+                {
+                    node_likelihood[num_states+i] /= max;
+                }
+
+                scaling_factors[node_index][active_likelihood[node_index]] = log(max);
+
+                if ( node.isTip() == false )
+                {
+                    const TopologyNode          &left           = node.getChild(0);
+                    size_t                      left_index      = left.getIndex();
+                    const TopologyNode          &right          = node.getChild(1);
+                    size_t                      right_index     = right.getIndex();
+                    scaling_factors[node_index][active_likelihood[node_index]] += scaling_factors[left_index][active_likelihood[left_index]] + scaling_factors[right_index][active_likelihood[right_index]];
+                }
             }
 
-            scaling_factors[node_index][active_likelihood[node_index]] = log(max);
-
-            if ( node.isTip() == false )
-            {
-                const TopologyNode          &left           = node.getChild(0);
-                size_t                      left_index      = left.getIndex();
-                const TopologyNode          &right          = node.getChild(1);
-                size_t                      right_index     = right.getIndex();
-                scaling_factors[node_index][active_likelihood[node_index]] += scaling_factors[left_index][active_likelihood[left_index]] + scaling_factors[right_index][active_likelihood[right_index]];
-            }
-            
         }
         
     }
@@ -1023,7 +1041,7 @@ void StateDependentSpeciationExtinctionProcess::recursivelyFlagNodeDirty( const 
 }
 
 
-void StateDependentSpeciationExtinctionProcess::drawStochasticCharacterMap(std::vector<std::string>& character_histories, bool set_amb_char_data)
+void StateDependentSpeciationExtinctionProcess::drawStochasticCharacterMap(std::vector<std::string>& character_histories, bool set_amb_char_data, bool use_simmap_default)
 {
     // first populate partial likelihood vectors along all the branches
     sample_character_history = true;
@@ -1128,8 +1146,8 @@ void StateDependentSpeciationExtinctionProcess::drawStochasticCharacterMap(std::
             character_histories[node_index] = simmap_string;
             
             // recurse towards tips
-            bool success_l = recursivelyDrawStochasticCharacterMap(left, l, character_histories, set_amb_char_data);
-            bool success_r = recursivelyDrawStochasticCharacterMap(right, r, character_histories, set_amb_char_data);
+            bool success_l = recursivelyDrawStochasticCharacterMap(left, l, character_histories, set_amb_char_data, use_simmap_default);
+            bool success_r = recursivelyDrawStochasticCharacterMap(right, r, character_histories, set_amb_char_data, use_simmap_default);
             success = success_l && success_r;
         }
         
@@ -1147,7 +1165,7 @@ void StateDependentSpeciationExtinctionProcess::drawStochasticCharacterMap(std::
 }
 
 
-bool StateDependentSpeciationExtinctionProcess::recursivelyDrawStochasticCharacterMap(const TopologyNode &node, size_t start_state, std::vector<std::string>& character_histories, bool set_amb_char_data)
+bool StateDependentSpeciationExtinctionProcess::recursivelyDrawStochasticCharacterMap(const TopologyNode &node, size_t start_state, std::vector<std::string>& character_histories, bool set_amb_char_data, bool use_simmap_default)
 {
     size_t node_index = node.getIndex();
     std::vector<double> speciation_rates = calculateTotalSpeciationRatePerState();
@@ -1321,12 +1339,27 @@ bool StateDependentSpeciationExtinctionProcess::recursivelyDrawStochasticCharact
         
         // make SIMMAP string
         std::string simmap_string = "{";
-        for (size_t i = transition_times.size(); i > 0; i--)
+
+        if (use_simmap_default == true)
         {
-            simmap_string = simmap_string + StringUtilities::toString(transition_states[i - 1]) + "," + StringUtilities::toString(transition_times[i - 1]);
-            if (i != 1)
+            for (size_t i = transition_times.size(); i > 0; i--)
             {
-                simmap_string = simmap_string + ":";
+                simmap_string = simmap_string + StringUtilities::toString(transition_states[i - 1]) + "," + StringUtilities::toString(transition_times[i - 1]);
+                if (i != 1)
+                {
+                    simmap_string = simmap_string + ":";
+                }
+            }
+        }
+        else
+        {
+            for (size_t i = 0; i < transition_times.size(); i++)
+            {
+                if (i != 0)
+                {
+                    simmap_string = simmap_string + ":";
+                }
+                simmap_string = simmap_string + StringUtilities::toString(transition_states[i]) + "," + StringUtilities::toString(transition_times[i]);
             }
         }
         simmap_string = simmap_string + "}";
@@ -1473,8 +1506,8 @@ bool StateDependentSpeciationExtinctionProcess::recursivelyDrawStochasticCharact
         average_extinction[node_index] = total_extinction_rate / num_dts;
         
         // recurse towards tips
-        bool success_l = recursivelyDrawStochasticCharacterMap(left, l, character_histories, set_amb_char_data);
-        bool success_r = recursivelyDrawStochasticCharacterMap(right, r, character_histories, set_amb_char_data);
+        bool success_l = recursivelyDrawStochasticCharacterMap(left, l, character_histories, set_amb_char_data, use_simmap_default);
+        bool success_r = recursivelyDrawStochasticCharacterMap(right, r, character_histories, set_amb_char_data, use_simmap_default);
         return success_l && success_r;
     }
     return true;
@@ -1542,7 +1575,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> StateDependentSpeciationExtinction
 }
 
 
-void StateDependentSpeciationExtinctionProcess::executeMethod(const std::string &name, const std::vector<const DagNode *> &args, RbVector<long> &rv) const
+void StateDependentSpeciationExtinctionProcess::executeMethod(const std::string &name, const std::vector<const DagNode *> &args, RbVector<std::int64_t> &rv) const
 {
    
     if ( name == "numberEvents" )
@@ -1551,7 +1584,7 @@ void StateDependentSpeciationExtinctionProcess::executeMethod(const std::string 
     }
     else
     {
-        throw RbException("The state dependent birth-death process does not have a member method called '" + name + "'.");
+        throw RbException() << "The state dependent birth-death process does not have a member method called '" << name << "'.";
     }
 
 }
@@ -1574,7 +1607,7 @@ void StateDependentSpeciationExtinctionProcess::executeMethod(const std::string 
     }
     else
     {
-        throw RbException("The state dependent birth-death process does not have a member method called '" + name + "'.");
+        throw RbException() << "The state dependent birth-death process does not have a member method called '" << name << "'.";
     }
 
 }
@@ -1650,7 +1683,7 @@ std::vector<double> StateDependentSpeciationExtinctionProcess::getAverageSpeciat
 }
 
 
-std::vector<long> StateDependentSpeciationExtinctionProcess::getNumberOfShiftEventsPerBranch( void ) const
+std::vector<std::int64_t> StateDependentSpeciationExtinctionProcess::getNumberOfShiftEventsPerBranch( void ) const
 {
     return num_shift_events;
 }
@@ -3281,6 +3314,6 @@ void StateDependentSpeciationExtinctionProcess::resizeVectors(size_t num_nodes)
     scaling_factors = std::vector<std::vector<double> >(num_nodes, std::vector<double>(2,0.0) );
     average_speciation = std::vector<double>(num_nodes, 0.0);
     average_extinction = std::vector<double>(num_nodes, 0.0);
-    num_shift_events = std::vector<long>(num_nodes, 0.0);
+    num_shift_events = std::vector<std::int64_t>(num_nodes, 0.0);
     time_in_states = std::vector<double>(num_states, 0.0);    
 }

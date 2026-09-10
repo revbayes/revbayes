@@ -31,31 +31,31 @@ template <class variableType> class StochasticNode;
     class ElementScaleProposal : public Proposal {
         
     public:
-        ElementScaleProposal(std::vector<StochasticNode<double> *> n, double l);                                 //!< Constructor
+        ElementScaleProposal(std::vector<StochasticNode<double> *> n, double l);                                  //!< Constructor
         
-        void                                        cleanProposal(void);                                                                //!< Clean up proposal
-        ElementScaleProposal*                       clone(void) const;                                                                  //!< Clone object
-        double                                      doProposal(void);                                                                   //!< Perform proposal
-        const std::string&                          getProposalName(void) const;                                                        //!< Get the name of the proposal for summary printing
+        void                                        cleanProposal(void);                                          //!< Clean up proposal
+        ElementScaleProposal*                       clone(void) const;                                            //!< Clone object
+        double                                      doProposal(void);                                             //!< Perform proposal
+        const std::string&                          getProposalName(void) const;                                  //!< Get the name of the proposal for summary printing
         double                                      getProposalTuningParameter(void) const;
-        void                                        printParameterSummary(std::ostream &o, bool name_only) const;                                       //!< Print the parameter summary
-        void                                        prepareProposal(void);                                                              //!< Prepare the proposal
+        void                                        printParameterSummary(std::ostream &o, bool name_only) const; //!< Print the parameter summary
+        void                                        prepareProposal(void);                                        //!< Prepare the proposal
         void                                        setProposalTuningParameter(double tp);
-        void                                        tune(double r);                                                                     //!< Tune the proposal to achieve a better acceptance/rejection ratio
-        void                                        undoProposal(void);                                                                 //!< Reject the proposal
+        void                                        tune(double r);                                               //!< Tune the proposal to achieve a better acceptance/rejection ratio
+        void                                        undoProposal(void);                                           //!< Reject the proposal
         
     protected:
         
-        void                                        swapNodeInternal(DagNode *oldN, DagNode *newN);                                     //!< Swap the DAG nodes on which the Proposal is working on
+        void                                        swapNodeInternal(DagNode *oldN, DagNode *newN);               //!< Swap the DAG nodes the Proposal is working on
         
         
     private:
         // parameters
         
         std::vector<StochasticNode<double> *>       variables;
-        double                                      lambda;                                                                             //!< The scale parameter of the Proposal (larger lambda -> larger proposals).
+        double                                      lambda;                                                       //!< The scale parameter of the Proposal (larger lambda -> larger proposals).
         size_t                                      length;
-        double                                      storedScalingFactor;                                                                        //!< The stored value of the last modified element.
+        double                                      storedScalingFactor;                                          //!< The stored value of the last modified element.
         
         
         

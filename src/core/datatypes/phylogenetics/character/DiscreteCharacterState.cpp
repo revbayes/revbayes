@@ -263,6 +263,12 @@ size_t DiscreteCharacterState::getNumberOfStates(void) const
 }
 
 
+void DiscreteCharacterState::setStateLabels(const std::string &l)
+{
+    
+}
+
+
 const std::vector<double>& DiscreteCharacterState::getWeights() const
 {
     // PoMo has weights.

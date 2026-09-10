@@ -24,33 +24,35 @@ namespace RevBayesCore {
      * @since 2014-11-18, version 1.0
      */
     template <class mixtureType>
-    class MixtureDistribution : public TypedDistribution<mixtureType>, public MemberObject<long> {
+    class MixtureDistribution : public TypedDistribution<mixtureType>, public MemberObject<std::int64_t> {
         
     public:
         // constructor(s)
         MixtureDistribution(const TypedDagNode< RbVector<mixtureType> > *v, const TypedDagNode< Simplex > *p);
         
         // public member functions
-        MixtureDistribution*                                clone(void) const;                                                                      //!< Create an independent clone
-        double                                              computeLnProbability(void);
-        void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, long &rv) const;     //!< Map the member methods to internal function calls
-        const RevBayesCore::RbVector<mixtureType>&          getParameterValues(void) const;
+        MixtureDistribution*                                clone(void) const override;                                                             //!< Create an independent clone
+        double                                              computeLnProbability(void) override;
+        void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, std::int64_t &rv) const override;     //!< Map the member methods to internal function calls
+        const RevBayesCore::RbVector<mixtureType>&          getParameterValues(void) const override;
         size_t                                              getCurrentIndex(void) const;
-        std::vector<double>                                 getMixtureProbabilities(void) const;
-        size_t                                              getNumberOfMixtureElements(void) const;                                                        //!< Get the number of elements for this value
-        void                                                redrawValue(void);
+        std::string                                         getHiddenStateString(void) const override;
+        void                                                setHiddenStateFromString(const std::string &s) override;
+        std::vector<double>                                 getMixtureProbabilities(void) const override;
+        size_t                                              getNumberOfMixtureElements(void) const override;                                        //!< Get the number of elements for this value
+        void                                                redrawValue(void) override;
         void                                                setCurrentIndex(size_t i);
-        void                                                setValue(mixtureType *v, bool f=false);
+        void                                                setValue(mixtureType *v, bool f=false) override;
         
         // special handling of state changes
-        void                                                getAffected(RbOrderedSet<DagNode *>& affected, const DagNode* affecter);                          //!< get affected nodes
-        void                                                keepSpecialization(const DagNode* affecter);
-        void                                                restoreSpecialization(const DagNode *restorer);
-        void                                                touchSpecialization(const DagNode *toucher, bool touchAll);
+        void                                                getAffected(RbOrderedSet<DagNode *>& affected, const DagNode* affecter) override;       //!< Get affected nodes
+        void                                                keepSpecialization(const DagNode* affecter) override;
+        void                                                restoreSpecialization(const DagNode *restorer) override;
+        void                                                touchSpecialization(const DagNode *toucher, bool touchAll) override;
 
     protected:
-        // Parameter management functions
-        void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);                        //!< Swap a parameter
+        // parameter management functions
+        void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP) override;               //!< Swap a parameter
         
         
     private:
@@ -83,7 +85,7 @@ RevBayesCore::MixtureDistribution<mixtureType>::MixtureDistribution(const TypedD
     this->addParameter( parameter_values );
     this->addParameter( probabilities );
     
-    *this->value = simulate();
+    redrawValue();
 }
 
 
@@ -106,16 +108,16 @@ double RevBayesCore::MixtureDistribution<mixtureType>::computeLnProbability( voi
 
 
 template <class mixtureType>
-void RevBayesCore::MixtureDistribution<mixtureType>::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, long &rv) const
+void RevBayesCore::MixtureDistribution<mixtureType>::executeMethod(const std::string &n, const std::vector<const DagNode *> &args, std::int64_t &rv) const
 {
     
     if ( n == "getAllocationIndex" )
     {
-        rv = long(index) + 1;
+        rv = std::int64_t(index) + 1;
     }
     else
     {
-        throw RbException("A mixture distribution does not have a member method called '" + n + "'.");
+        throw RbException() << "A mixture distribution does not have a member method called '" << n << "'.";
     }
     
 }
@@ -138,6 +140,20 @@ size_t RevBayesCore::MixtureDistribution<mixtureType>::getCurrentIndex( void ) c
 {
 
     return index;
+}
+
+
+template <class mixtureType>
+std::string RevBayesCore::MixtureDistribution<mixtureType>::getHiddenStateString( void ) const
+{
+    return std::to_string( getCurrentIndex() );
+}
+
+
+template <class mixtureType>
+void RevBayesCore::MixtureDistribution<mixtureType>::setHiddenStateFromString( const std::string &s )
+{
+    setCurrentIndex( std::stoul(s) );
 }
 
 
@@ -189,7 +205,7 @@ const mixtureType& RevBayesCore::MixtureDistribution<mixtureType>::simulate()
         u -= probs[index];
         ++index;
     }
-    
+
     return parameter_values->getValue()[index];
 }
 
@@ -277,7 +293,15 @@ void RevBayesCore::MixtureDistribution<mixtureType>::setValue(mixtureType *v, bo
             break;
         }
     }
-    
+
+    if ( index >= vals.size() )
+    {
+        throw RbException() << "Mixture allocation index could not be reconstructed from the value. "
+                            << "This usually means the trace or checkpoint file was written by an older "
+                            << "version of RevBayes that did not record the mixture allocation index. "
+                            << "Please regenerate it with the current version of RevBayes.";
+    }
+
     // delegate class
     TypedDistribution<mixtureType>::setValue( v, force );
 }
