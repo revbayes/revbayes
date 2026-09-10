@@ -1,0 +1,133 @@
+################################################################################
+#
+# RevBayes Validation Test
+#
+# Model: Ornstein-Uhlenbeck relaxed clock model (fixed tree).
+#
+#
+# authors: Sebastian Hoehna
+#
+################################################################################
+
+## Global settings
+
+NUM_VALIDATION_REPLICATES = 100
+NUM_MCMC_ITERATIONS       = 5000
+
+OUTPUT_DIR = "validation_RC_OU_Node_State"
+
+
+#######################
+# Reading in the Data #
+#######################
+
+# Import the molecular sequences #
+# this file contains only the taxa for which sequence data are available #
+cytb <- readDiscreteCharacterData("data/bears_small.nex")
+
+## helpers
+n_taxa <- cytb.size()
+taxa <- cytb.taxa()
+num_branches <- 2*n_taxa-2
+
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
+
+
+
+##############
+# Tree model #
+##############
+
+timetree <- readTrees("data/bears_extant.tre")[1]
+
+
+
+######################################################
+# Ornstein-Uhlenbeck model on molecular branch rates #
+######################################################
+
+H = 0.587405
+n_branches <- 2 * n_taxa - 2
+root_age := timetree.rootAge()
+
+# We assume that clock rates are between 1E-7 and 1E-9 per year
+# since our time is per million years, we multiply by 1E6
+MEAN_CLOCK <- 1E-2
+
+#OU_theta <- MEAN_CLOCK
+OU_theta ~ dnLognormal(ln(MEAN_CLOCK), sd=H)
+moves.append( mvScale(OU_theta, lambda=0.5, tune=true, weight=5.0) )
+
+OU_ln_theta := ln(OU_theta)
+
+# The rate along each branch is drawn from an exponential prior #
+OU_root_rate ~ dnLognormal(OU_ln_theta, sd=H)
+moves.append( mvScale(OU_root_rate, lambda=0.5, tune=true, weight=5.0) )
+
+ln_clock_mean := ln( OU_root_rate )
+
+#t_half <- root_age/2.0
+t_half ~ dnLognormal( ln( root_age/2.0 ), sd=2.0*H )
+moves.append( mvScale(t_half, lambda=0.5, tune=true, weight=5.0) )
+moves.append( mvSlide(t_half, delta=0.5, tune=true, weight=5.0) )
+
+OU_alpha := abs(ln(2.0) / t_half)
+
+#tip_var <- 0.1
+tip_var ~ dnExponential( 10.0 )
+moves.append( mvScale(tip_var, lambda=0.5, tune=true, weight=5.0) )
+
+OU_sigma := sqrt( 2.0*OU_alpha*tip_var )
+#OU_sigma <- 0.5
+
+
+p_th := 1 - (1 - exp(-2.0*OU_alpha*root_age)) / (2.0*OU_alpha*root_age)
+
+
+clock_node ~ dnPhyloNodeStateOU(timetree, rootState=ln_clock_mean, sigma=OU_sigma, alpha=OU_alpha, theta=OU_ln_theta)
+
+# add a move on the branch rate vector #
+moves.append( mvVectorSlide(clock_node, delta=0.5, tune=true, weight=4.0) )
+moves.append( mvVectorSingleElementSlide(clock_node, lambda=0.5, tune=true, weight=5*num_branches) )
+
+branch_rates := fnPhyloBranchRates( timetree, clock_node, asLog=TRUE )
+
+
+####################################
+# JC nucleotide substitution model #
+####################################
+
+# Initialize the parameters of substitution matrix #
+
+# Create the matrix #
+Q_cytb <- fnJC(4)
+
+# Create the substitution model and clamp with our observed DNA data #
+phySeq ~ dnPhyloCTMC(tree=timetree, Q=Q_cytb, branchRates=branch_rates, type="DNA")
+phySeq.clamp(cytb)
+
+
+
+#############
+# The Model #
+#############
+
+# We define our model.
+# We can use any node of our model as a handle, here we chose to use the rate matrix.
+mymodel = model( timetree )
+
+
+mymcmc = mcmc(mymodel, monitors, moves)
+
+
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory=OUTPUT_DIR )
+validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
+validation.run(generations=NUM_MCMC_ITERATIONS)
+validation.summarize(coverageProbability=0.9)
+validation.summarize(coverageProbability=0.5)
+
+
+# you may want to quit RevBayes now
+q()
