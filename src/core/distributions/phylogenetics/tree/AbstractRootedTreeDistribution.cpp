@@ -520,7 +520,7 @@ void AbstractRootedTreeDistribution::redrawValue( void )
     if ( starting_tree == NULL )
     {
         // if no condition is specified, assume the most restrictive
-        redrawValue(SimulationCondition::VALIDATION);
+        redrawValue(SimulationCondition::MCMC);
     }
 }
 
@@ -762,8 +762,7 @@ void AbstractRootedTreeDistribution::simulateTree( bool alwaysReturn )
     psi->setRoot(root, true);
 
     // finally store the new value
-    delete value;
-    value = psi;
+    setValue( psi );
 
 }
 
@@ -783,8 +782,6 @@ void AbstractRootedTreeDistribution::setValue(Tree *v, bool f )
         }
         else
         {
-            //            double factor = process_age->getValue() / value->getRoot().getAge();
-            //            TreeUtilities::rescaleTree( value, &value->getRoot(), factor);
             
             size_t output_precision = RbSettings::userSettings().getOutputPrecision();
             output_precision = output_precision <= 2 ? 0 : output_precision - 2;

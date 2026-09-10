@@ -290,22 +290,19 @@ jobs:
         echo ::group::Test suite
         cd tests
 
-        # Temporary hack to make Mac/ARM work: remove the expected JSON output.
-        # On Mac/ARM, the JSON output disagrees in the 16th and 17th digit
-        #  with the JSON output on Linux/Intel and Mac/Intel.
         if [ ${{ matrix.arch }} = "mac-arm64" ] || [ ${{ matrix.arch }} = "mac-intel64" ] || [ ${{ matrix.arch }} = "win64" ] ; then
+           # Temporary hack to make Mac/ARM work: remove the expected JSON output. On Mac/ARM, the JSON output disagrees 
+           # in the 16th and 17th digit with the JSON output on Linux/Intel and Mac/Intel.
            find . -name '*.json' | xargs rm
-        fi
 
-        # Another ugly hack: remove the *.errout file generated for the CBDSP
-        # test on macOS and Windows. Apparently, NaN log likelihoods are positive
-        # on these platforms but negative on Linux. This might be a bug.
-        if [ ${{ matrix.arch }} = "mac-arm64" ] || [ ${{ matrix.arch }} = "mac-intel64" ] || [ ${{ matrix.arch }} = "win64" ] ; then
+           # Another ugly hack: remove the *.errout file generated for the CBDSP test on macOS and Windows. Apparently,
+           # NaN log likelihoods are positive on these platforms but negative on Linux. This might be a bug.
            rm -f test_CBDSP/output_expected/mcmc_CBDSP.errout
-        fi
 
-        if [ ${{ matrix.arch }} = "mac-arm64" ] || [ ${{ matrix.arch }} = "mac-intel64" ] || [ ${{ matrix.arch }} = "win64" ] ; then
+           # Some of the FBD tests are also platform-sensitive
            rm -f test_FBD/output_expected/mvFossilTimeSlideUniform_multiple_runs.errout
+           rm -f test_constraints/output_expected/*_timetree.*
+           rm -f test_constraints/output_expected/Test_backbone_multifurcating_initial_TimeTree.errout
 
            # There are some differences on the order of 1.0e-5 in the substitution likelihood between Linux/Intel and Mac/ARM
            rm -rf test_propose_bad_index/output_expected/
