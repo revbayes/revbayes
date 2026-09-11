@@ -1,11 +1,9 @@
 ################################################################################
 #
-# Hypothesis D: Mkv coding="variable" is required for the Mac/Linux accept/reject
-# fork. Same model/seed/burn-in as logMCMC_backbone_binary.Rev, except every
-# dnPhyloCTMC uses coding="all".
-#
-# If accept/reject now matches through burn-in generation 69, the Mkv correction
-# caused the golden-file split.
+# Hypothesis E: the Mac/Linux fork is pruning (P v), not Mkv and not gamma.
+# Same moves/seed/burn-in as logMCMC_backbone_binary.Rev, but every dnPhyloCTMC
+# uses coding="all" and site rates 1+0*alpha (alpha stays in the DAG so the
+# move schedule is unchanged; no fnDiscretizeGamma / incompleteGamma).
 #
 ################################################################################
 
@@ -104,7 +102,10 @@ order.includeCharacter(ordered_vect)
 
 alpha ~ dnUniform(0, 1E6)
 moves.append( mvScale(alpha, weight=9.0) )
-char_rates := fnDiscretizeGamma(alpha, alpha, 4)
+# Flat site rates, but keep a DAG edge from alpha so the move stays in the model.
+for (k in 1:4) {
+    char_rates[k] := 1.0 + 0.0 * alpha
+}
 
 idx = 1
 
