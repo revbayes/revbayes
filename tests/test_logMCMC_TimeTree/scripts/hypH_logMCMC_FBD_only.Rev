@@ -1,8 +1,9 @@
 ################################################################################
 #
-# Hypothesis F: JC (unordered) pruning is enough for the Mac/Linux fork.
-# Same as hypE but only unordered dnPhyloCTMC nodes. Creating fewer CTMCs
-# consumes extra RNG at construction, so the fork need not be at generation 80.
+# Hypothesis H: the Mac/Linux fork does not need a phyloCTMC. Same seed, FBD
+# tree, and tree moves as hypF/G, but no morphology, no UCLN, no site rates.
+# If accept/reject still diverges, the split is in FBD/age arithmetic.
+# If it does not, CTMC pruning is required.
 #
 ################################################################################
 
@@ -13,10 +14,6 @@ setOption("debugMCMC", "1", false)
 setOption("logMCMC", "2", false)
 
 taxa <- readTaxonData("data/ceratosauria_tip_ages.tsv")
-morpho <- readDiscreteCharacterData("data/ceratosauria_morphology.nex")
-
-n_taxa <- morpho.ntaxa()
-n_branches <- 2 * n_taxa - 2
 
 moves = VectorMoves()
 monitors = VectorMonitors()
@@ -67,66 +64,10 @@ for(i in 1:fossils.size())
     moves.append( mvFossilTimeSlideUniform(fbd_tree, origin_time, fossils[i], weight = 1.0) )
 }
 
-ucln_mean ~ dnLoguniform(1e-5, 1e-1)
-ucln_sigma ~ dnExponential(1 / 1.17481)
-ucln_mu := ln(ucln_mean) - (0.5 * ucln_sigma^2)
-
-moves.append( mvScale(ucln_mean, weight=10, tune=true) )
-moves.append( mvScaleBactrian(ucln_mean, weight=10, tune=true) )
-moves.append( mvScale(ucln_sigma, weight=10, tune=true) )
-moves.append( mvScaleBactrian(ucln_sigma, weight=10, tune=true) )
-
-for (i in 1:n_branches) {
-    branch_rates[i] ~ dnLognormal(ucln_mu, ucln_sigma)
-    moves.append( mvScale(branch_rates[i], weight=1, tune=true) )
-}
-
-moves.append( mvVectorScale(branch_rates, weight=2, tune=true) )
-moves.append( mvVectorSingleElementScale(branch_rates, weight=1, tune=true) )
-
-n_max_states = 4
-
-inv_ix = morpho.getInvariantSiteIndices(excludeAmbiguous=TRUE)
-morpho.excludeCharacter( inv_ix )
-morpho.removeExcludedCharacters()
-
-ordered_vect = [28, 29, 33, 100, 102, 123, 139, 148, 152, 160, 166, 177, 180, 192]
-
-unord <- morpho
-unord.excludeCharacter(ordered_vect)
-
-alpha ~ dnUniform(0, 1E6)
-moves.append( mvScale(alpha, weight=9.0) )
-for (k in 1:4) {
-    char_rates[k] := 1.0 + 0.0 * alpha
-}
-
-idx = 1
-
-for (i in 2:n_max_states) {
-    unordered[i - 1] <- unord
-    unordered[i - 1].setNumStatesPartition(i)
-    nc = unordered[i - 1].nchar()
-    if (nc > 0) {
-        Qu[idx] <- fnJC(i)
-        unord_ctmc[idx] ~ dnPhyloCTMC(tree=fbd_tree, Q=Qu[idx], branchRates=branch_rates,
-                                      siteRates=char_rates, type="Standard",
-                                      coding="all")
-        unord_ctmc[idx].clamp(unordered[i - 1])
-        idx = idx + 1
-    }
-}
-
 print("INIT_FINGERPRINT origin_time=")
 print(origin_time)
-print("INIT_FINGERPRINT ucln_mean=")
-print(ucln_mean)
-print("INIT_FINGERPRINT ucln_sigma=")
-print(ucln_sigma)
 print("INIT_FINGERPRINT diversification=")
 print(diversification)
-print("INIT_FINGERPRINT alpha=")
-print(alpha)
 
 mymodel = model(fbd_tree)
 mymcmc = mcmc(mymodel, monitors, moves)
