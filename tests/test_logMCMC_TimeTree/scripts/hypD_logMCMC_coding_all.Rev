@@ -1,11 +1,11 @@
 ################################################################################
 #
-# Hypothesis B: the Mac/Linux accept/reject fork is caused by ordered-eigen P(t).
-# Same model/seed/burn-in as logMCMC_backbone_binary.Rev, except ordered Q uses
-# matrixExponentialMethod="scalingAndSquaring" instead of the default "eigen".
+# Hypothesis D: Mkv coding="variable" is required for the Mac/Linux accept/reject
+# fork. Same model/seed/burn-in as logMCMC_backbone_binary.Rev, except every
+# dnPhyloCTMC uses coding="all".
 #
-# If accept/reject now matches through burn-in generation 69, ordered eigen
-# caused the golden-file split. Do not keep as a golden-file test.
+# If accept/reject now matches through burn-in generation 69, the Mkv correction
+# caused the golden-file split.
 #
 ################################################################################
 
@@ -116,7 +116,7 @@ for (i in 2:n_max_states) {
         Qu[idx] <- fnJC(i)
         unord_ctmc[idx] ~ dnPhyloCTMC(tree=fbd_tree, Q=Qu[idx], branchRates=branch_rates,
                                       siteRates=char_rates, type="Standard",
-                                      coding="variable")
+                                      coding="all")
         unord_ctmc[idx].clamp(unordered[i - 1])
         idx = idx + 1
     }
@@ -129,10 +129,10 @@ for (i in 3:n_max_states) {
     ordered[i - 2].setNumStatesPartition(i)
     nco = ordered[i - 2].nchar()
     if (nco > 0) {
-        Qo[ix] <- fnOrderedRateMatrix(i, lambda=1, mu=1, matrixExponentialMethod="scalingAndSquaring")
+        Qo[ix] <- fnOrderedRateMatrix(i, lambda=1, mu=1)
         order_ctmc[ix] ~ dnPhyloCTMC(tree=fbd_tree, Q=Qo[ix], branchRates=branch_rates,
                                      siteRates=char_rates, type="Standard",
-                                     coding="variable")
+                                     coding="all")
         order_ctmc[ix].clamp(ordered[i - 2])
         ix = ix + 1
     }
