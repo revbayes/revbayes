@@ -1957,7 +1957,7 @@ generation = 0    proposal = 109/276    FossilTipTimeSlideUniform(fbd_tree,origi
   The move was ACCEPTED.
 
 generation = 0    proposal = 110/276    Scaling(alpha)
-    log(posterior_ratio) = -4.00052e-05  log(likelihood_ratio) = -4.00052e-05   log(prior_ratio) = 0
+    log(posterior_ratio) = -4.00053e-05  log(likelihood_ratio) = -4.00053e-05   log(prior_ratio) = 0
     log(acceptance_ratio) = 0.0969356  log(hastings_ratio) = 0.0969756
   The move was ACCEPTED.
 
@@ -111206,7 +111206,7 @@ generation = 0    proposal = 61/276    NodeTimeSlideUniform(fbd_tree)
   The move was ACCEPTED.
 
 generation = 0    proposal = 62/276    Scaling(alpha)
-    log(posterior_ratio) = 1.90539e-07  log(likelihood_ratio) = 1.90539e-07   log(prior_ratio) = 0
+    log(posterior_ratio) = 1.9054e-07  log(likelihood_ratio) = 1.9054e-07   log(prior_ratio) = 0
     log(acceptance_ratio) = -0.00374729  log(hastings_ratio) = -0.00374748
   The move was ACCEPTED.
 
@@ -136045,7 +136045,7 @@ generation = 0    proposal = 48/276    FNPR(fbd_tree)
   The move was REJECTED.
 
 generation = 0    proposal = 49/276    Scaling(alpha)
-    log(posterior_ratio) = 9.40694e-07  log(likelihood_ratio) = 9.40694e-07   log(prior_ratio) = 0
+    log(posterior_ratio) = 9.40695e-07  log(likelihood_ratio) = 9.40695e-07   log(prior_ratio) = 0
     log(acceptance_ratio) = -0.00581199  log(hastings_ratio) = -0.00581293
   The move was ACCEPTED.
 

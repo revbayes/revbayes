@@ -1,0 +1,751 @@
+PT method=JC n=3 t=1e-08 i=1 j=1
+0.99999999000000006
+PT method=JC n=3 t=1e-08 i=1 j=2
+4.9999999696126451e-09
+PT method=JC n=3 t=1e-08 i=1 j=3
+4.9999999696126451e-09
+PT method=JC n=3 t=1e-08 i=2 j=1
+4.9999999696126451e-09
+PT method=JC n=3 t=1e-08 i=2 j=2
+0.99999999000000006
+PT method=JC n=3 t=1e-08 i=2 j=3
+4.9999999696126451e-09
+PT method=JC n=3 t=1e-08 i=3 j=1
+4.9999999696126451e-09
+PT method=JC n=3 t=1e-08 i=3 j=2
+4.9999999696126451e-09
+PT method=JC n=3 t=1e-08 i=3 j=3
+0.99999999000000006
+PT method=JC n=3 t=1e-06 i=1 j=1
+0.99999900000075004
+PT method=JC n=3 t=1e-06 i=1 j=2
+4.9999962499954376e-07
+PT method=JC n=3 t=1e-06 i=1 j=3
+4.9999962499954376e-07
+PT method=JC n=3 t=1e-06 i=2 j=1
+4.9999962499954376e-07
+PT method=JC n=3 t=1e-06 i=2 j=2
+0.99999900000075004
+PT method=JC n=3 t=1e-06 i=2 j=3
+4.9999962499954376e-07
+PT method=JC n=3 t=1e-06 i=3 j=1
+4.9999962499954376e-07
+PT method=JC n=3 t=1e-06 i=3 j=2
+4.9999962499954376e-07
+PT method=JC n=3 t=1e-06 i=3 j=3
+0.99999900000075004
+PT method=JC n=3 t=0.0001 i=1 j=1
+0.99990000749962504
+PT method=JC n=3 t=0.0001 i=1 j=2
+4.9996250187496941e-05
+PT method=JC n=3 t=0.0001 i=1 j=3
+4.9996250187496941e-05
+PT method=JC n=3 t=0.0001 i=2 j=1
+4.9996250187496941e-05
+PT method=JC n=3 t=0.0001 i=2 j=2
+0.99990000749962504
+PT method=JC n=3 t=0.0001 i=2 j=3
+4.9996250187496941e-05
+PT method=JC n=3 t=0.0001 i=3 j=1
+4.9996250187496941e-05
+PT method=JC n=3 t=0.0001 i=3 j=2
+4.9996250187496941e-05
+PT method=JC n=3 t=0.0001 i=3 j=3
+0.99990000749962504
+PT method=JC n=3 t=0.01 i=1 j=1
+0.9900746264020418
+PT method=JC n=3 t=0.01 i=1 j=2
+0.0049626867989791172
+PT method=JC n=3 t=0.01 i=1 j=3
+0.0049626867989791172
+PT method=JC n=3 t=0.01 i=2 j=1
+0.0049626867989791172
+PT method=JC n=3 t=0.01 i=2 j=2
+0.9900746264020418
+PT method=JC n=3 t=0.01 i=2 j=3
+0.0049626867989791172
+PT method=JC n=3 t=0.01 i=3 j=1
+0.0049626867989791172
+PT method=JC n=3 t=0.01 i=3 j=2
+0.0049626867989791172
+PT method=JC n=3 t=0.01 i=3 j=3
+0.9900746264020418
+PT method=JC n=3 t=1 i=1 j=1
+0.48208677343228656
+PT method=JC n=3 t=1 i=1 j=2
+0.25895661328385672
+PT method=JC n=3 t=1 i=1 j=3
+0.25895661328385672
+PT method=JC n=3 t=1 i=2 j=1
+0.25895661328385672
+PT method=JC n=3 t=1 i=2 j=2
+0.48208677343228656
+PT method=JC n=3 t=1 i=2 j=3
+0.25895661328385672
+PT method=JC n=3 t=1 i=3 j=1
+0.25895661328385672
+PT method=JC n=3 t=1 i=3 j=2
+0.25895661328385672
+PT method=JC n=3 t=1 i=3 j=3
+0.48208677343228656
+PT method=ordered_eigen n=3 t=1e-08 i=1 j=1
+0.99999999250000005
+PT method=ordered_eigen n=3 t=1e-08 i=1 j=2
+7.4999998989078165e-09
+PT method=ordered_eigen n=3 t=1e-08 i=1 j=3
+0
+PT method=ordered_eigen n=3 t=1e-08 i=2 j=1
+7.4999998989078165e-09
+PT method=ordered_eigen n=3 t=1e-08 i=2 j=2
+0.9999999850000002
+PT method=ordered_eigen n=3 t=1e-08 i=2 j=3
+7.4999999544189677e-09
+PT method=ordered_eigen n=3 t=1e-08 i=3 j=1
+0
+PT method=ordered_eigen n=3 t=1e-08 i=3 j=2
+7.4999998433966669e-09
+PT method=ordered_eigen n=3 t=1e-08 i=3 j=3
+0.99999999250000027
+PT method=ordered_eigen n=3 t=1e-06 i=1 j=1
+0.99999925000056256
+PT method=ordered_eigen n=3 t=1e-06 i=1 j=2
+7.4999915627982361e-07
+PT method=ordered_eigen n=3 t=1e-06 i=1 j=3
+2.8121949213755215e-13
+PT method=ordered_eigen n=3 t=1e-06 i=2 j=1
+7.4999915627982361e-07
+PT method=ordered_eigen n=3 t=1e-06 i=2 j=2
+0.99999850000168744
+PT method=ordered_eigen n=3 t=1e-06 i=2 j=3
+7.4999915633533476e-07
+PT method=ordered_eigen n=3 t=1e-06 i=3 j=1
+2.812194921375522e-13
+PT method=ordered_eigen n=3 t=1e-06 i=3 j=2
+7.4999915622431267e-07
+PT method=ordered_eigen n=3 t=1e-06 i=3 j=3
+0.99999925000056256
+PT method=ordered_eigen n=3 t=0.0001 i=1 j=1
+0.99992500562464848
+PT method=ordered_eigen n=3 t=0.0001 i=1 j=2
+7.4991563132786876e-05
+PT method=ordered_eigen n=3 t=0.0001 i=1 j=3
+2.8122187356593997e-09
+PT method=ordered_eigen n=3 t=0.0001 i=2 j=1
+7.4991563132786876e-05
+PT method=ordered_eigen n=3 t=0.0001 i=2 j=2
+0.99985001687373443
+PT method=ordered_eigen n=3 t=0.0001 i=2 j=3
+7.4991563132842387e-05
+PT method=ordered_eigen n=3 t=0.0001 i=3 j=1
+2.8122187356593997e-09
+PT method=ordered_eigen n=3 t=0.0001 i=3 j=2
+7.4991563132731365e-05
+PT method=ordered_eigen n=3 t=0.0001 i=3 j=3
+0.99992500562464848
+PT method=ordered_eigen n=3 t=0.01 i=1 j=1
+0.99255590027512541
+PT method=ordered_eigen n=3 t=0.01 i=1 j=2
+0.0074162542688878674
+PT method=ordered_eigen n=3 t=0.01 i=1 j=3
+2.7845455986830192e-05
+PT method=ordered_eigen n=3 t=0.01 i=2 j=1
+0.0074162542688878674
+PT method=ordered_eigen n=3 t=0.01 i=2 j=2
+0.98516749146222427
+PT method=ordered_eigen n=3 t=0.01 i=2 j=3
+0.0074162542688879229
+PT method=ordered_eigen n=3 t=0.01 i=3 j=1
+2.7845455986830199e-05
+PT method=ordered_eigen n=3 t=0.01 i=3 j=2
+0.0074162542688878137
+PT method=ordered_eigen n=3 t=0.01 i=3 j=3
+0.99255590027512541
+PT method=ordered_eigen n=3 t=1 i=1 j=1
+0.58708314713081799
+PT method=ordered_eigen n=3 t=1 i=1 j=2
+0.2982002584793787
+PT method=ordered_eigen n=3 t=1 i=1 j=3
+0.11471659438980339
+PT method=ordered_eigen n=3 t=1 i=2 j=1
+0.29820025847937853
+PT method=ordered_eigen n=3 t=1 i=2 j=2
+0.40359948304124288
+PT method=ordered_eigen n=3 t=1 i=2 j=3
+0.29820025847937864
+PT method=ordered_eigen n=3 t=1 i=3 j=1
+0.11471659438980339
+PT method=ordered_eigen n=3 t=1 i=3 j=2
+0.29820025847937853
+PT method=ordered_eigen n=3 t=1 i=3 j=3
+0.58708314713081811
+PT method=ordered_scalingAndSquaring n=3 t=1e-08 i=1 j=1
+0.99999999250000016
+PT method=ordered_scalingAndSquaring n=3 t=1e-08 i=1 j=2
+7.499999915625001e-09
+PT method=ordered_scalingAndSquaring n=3 t=1e-08 i=1 j=3
+2.8124999718750005e-17
+PT method=ordered_scalingAndSquaring n=3 t=1e-08 i=2 j=1
+7.499999915625001e-09
+PT method=ordered_scalingAndSquaring n=3 t=1e-08 i=2 j=2
+0.9999999850000002
+PT method=ordered_scalingAndSquaring n=3 t=1e-08 i=2 j=3
+7.499999915625001e-09
+PT method=ordered_scalingAndSquaring n=3 t=1e-08 i=3 j=1
+2.8124999718750005e-17
+PT method=ordered_scalingAndSquaring n=3 t=1e-08 i=3 j=2
+7.499999915625001e-09
+PT method=ordered_scalingAndSquaring n=3 t=1e-08 i=3 j=3
+0.99999999250000016
+PT method=ordered_scalingAndSquaring n=3 t=1e-06 i=1 j=1
+0.99999925000056256
+PT method=ordered_scalingAndSquaring n=3 t=1e-06 i=1 j=2
+7.4999915625063284e-07
+PT method=ordered_scalingAndSquaring n=3 t=1e-06 i=1 j=3
+2.8124971875017143e-13
+PT method=ordered_scalingAndSquaring n=3 t=1e-06 i=2 j=1
+7.4999915625063284e-07
+PT method=ordered_scalingAndSquaring n=3 t=1e-06 i=2 j=2
+0.99999850000168755
+PT method=ordered_scalingAndSquaring n=3 t=1e-06 i=2 j=3
+7.4999915625063284e-07
+PT method=ordered_scalingAndSquaring n=3 t=1e-06 i=3 j=1
+2.8124971875017143e-13
+PT method=ordered_scalingAndSquaring n=3 t=1e-06 i=3 j=2
+7.4999915625063284e-07
+PT method=ordered_scalingAndSquaring n=3 t=1e-06 i=3 j=3
+0.99999925000056256
+PT method=ordered_scalingAndSquaring n=3 t=0.0001 i=1 j=1
+0.99992500562464848
+PT method=ordered_scalingAndSquaring n=3 t=0.0001 i=1 j=2
+7.4991563132776928e-05
+PT method=ordered_scalingAndSquaring n=3 t=0.0001 i=1 j=3
+2.8122187671386728e-09
+PT method=ordered_scalingAndSquaring n=3 t=0.0001 i=2 j=1
+7.4991563132776928e-05
+PT method=ordered_scalingAndSquaring n=3 t=0.0001 i=2 j=2
+0.99985001687373454
+PT method=ordered_scalingAndSquaring n=3 t=0.0001 i=2 j=3
+7.4991563132776928e-05
+PT method=ordered_scalingAndSquaring n=3 t=0.0001 i=3 j=1
+2.8122187671386728e-09
+PT method=ordered_scalingAndSquaring n=3 t=0.0001 i=3 j=2
+7.4991563132776928e-05
+PT method=ordered_scalingAndSquaring n=3 t=0.0001 i=3 j=3
+0.99992500562464848
+PT method=ordered_scalingAndSquaring n=3 t=0.01 i=1 j=1
+0.99255590027512541
+PT method=ordered_scalingAndSquaring n=3 t=0.01 i=1 j=2
+0.0074162542688878622
+PT method=ordered_scalingAndSquaring n=3 t=0.01 i=1 j=3
+2.7845455986852764e-05
+PT method=ordered_scalingAndSquaring n=3 t=0.01 i=2 j=1
+0.0074162542688878648
+PT method=ordered_scalingAndSquaring n=3 t=0.01 i=2 j=2
+0.98516749146222438
+PT method=ordered_scalingAndSquaring n=3 t=0.01 i=2 j=3
+0.0074162542688878648
+PT method=ordered_scalingAndSquaring n=3 t=0.01 i=3 j=1
+2.7845455986852767e-05
+PT method=ordered_scalingAndSquaring n=3 t=0.01 i=3 j=2
+0.0074162542688878631
+PT method=ordered_scalingAndSquaring n=3 t=0.01 i=3 j=3
+0.99255590027512541
+PT method=ordered_scalingAndSquaring n=3 t=1 i=1 j=1
+0.58708314713081811
+PT method=ordered_scalingAndSquaring n=3 t=1 i=1 j=2
+0.29820025847937848
+PT method=ordered_scalingAndSquaring n=3 t=1 i=1 j=3
+0.11471659438980346
+PT method=ordered_scalingAndSquaring n=3 t=1 i=2 j=1
+0.29820025847937848
+PT method=ordered_scalingAndSquaring n=3 t=1 i=2 j=2
+0.40359948304124299
+PT method=ordered_scalingAndSquaring n=3 t=1 i=2 j=3
+0.29820025847937853
+PT method=ordered_scalingAndSquaring n=3 t=1 i=3 j=1
+0.1147165943898034
+PT method=ordered_scalingAndSquaring n=3 t=1 i=3 j=2
+0.29820025847937853
+PT method=ordered_scalingAndSquaring n=3 t=1 i=3 j=3
+0.58708314713081811
+PT method=JC n=4 t=1e-08 i=1 j=1
+0.99999999000000006
+PT method=JC n=4 t=1e-08 i=1 j=2
+3.3333333038232382e-09
+PT method=JC n=4 t=1e-08 i=1 j=3
+3.3333333038232382e-09
+PT method=JC n=4 t=1e-08 i=1 j=4
+3.3333333038232382e-09
+PT method=JC n=4 t=1e-08 i=2 j=1
+3.3333333038232382e-09
+PT method=JC n=4 t=1e-08 i=2 j=2
+0.99999999000000006
+PT method=JC n=4 t=1e-08 i=2 j=3
+3.3333333038232382e-09
+PT method=JC n=4 t=1e-08 i=2 j=4
+3.3333333038232382e-09
+PT method=JC n=4 t=1e-08 i=3 j=1
+3.3333333038232382e-09
+PT method=JC n=4 t=1e-08 i=3 j=2
+3.3333333038232382e-09
+PT method=JC n=4 t=1e-08 i=3 j=3
+0.99999999000000006
+PT method=JC n=4 t=1e-08 i=3 j=4
+3.3333333038232382e-09
+PT method=JC n=4 t=1e-08 i=4 j=1
+3.3333333038232382e-09
+PT method=JC n=4 t=1e-08 i=4 j=2
+3.3333333038232382e-09
+PT method=JC n=4 t=1e-08 i=4 j=3
+3.3333333038232382e-09
+PT method=JC n=4 t=1e-08 i=4 j=4
+0.99999999000000006
+PT method=JC n=4 t=1e-06 i=1 j=1
+0.99999900000066666
+PT method=JC n=4 t=1e-06 i=1 j=2
+3.3333311111327646e-07
+PT method=JC n=4 t=1e-06 i=1 j=3
+3.3333311111327646e-07
+PT method=JC n=4 t=1e-06 i=1 j=4
+3.3333311111327646e-07
+PT method=JC n=4 t=1e-06 i=2 j=1
+3.3333311111327646e-07
+PT method=JC n=4 t=1e-06 i=2 j=2
+0.99999900000066666
+PT method=JC n=4 t=1e-06 i=2 j=3
+3.3333311111327646e-07
+PT method=JC n=4 t=1e-06 i=2 j=4
+3.3333311111327646e-07
+PT method=JC n=4 t=1e-06 i=3 j=1
+3.3333311111327646e-07
+PT method=JC n=4 t=1e-06 i=3 j=2
+3.3333311111327646e-07
+PT method=JC n=4 t=1e-06 i=3 j=3
+0.99999900000066666
+PT method=JC n=4 t=1e-06 i=3 j=4
+3.3333311111327646e-07
+PT method=JC n=4 t=1e-06 i=4 j=1
+3.3333311111327646e-07
+PT method=JC n=4 t=1e-06 i=4 j=2
+3.3333311111327646e-07
+PT method=JC n=4 t=1e-06 i=4 j=3
+3.3333311111327646e-07
+PT method=JC n=4 t=1e-06 i=4 j=4
+0.99999900000066666
+PT method=JC n=4 t=0.0001 i=1 j=1
+0.99990000666637036
+PT method=JC n=4 t=0.0001 i=1 j=2
+3.33311112098722e-05
+PT method=JC n=4 t=0.0001 i=1 j=3
+3.33311112098722e-05
+PT method=JC n=4 t=0.0001 i=1 j=4
+3.33311112098722e-05
+PT method=JC n=4 t=0.0001 i=2 j=1
+3.33311112098722e-05
+PT method=JC n=4 t=0.0001 i=2 j=2
+0.99990000666637036
+PT method=JC n=4 t=0.0001 i=2 j=3
+3.33311112098722e-05
+PT method=JC n=4 t=0.0001 i=2 j=4
+3.33311112098722e-05
+PT method=JC n=4 t=0.0001 i=3 j=1
+3.33311112098722e-05
+PT method=JC n=4 t=0.0001 i=3 j=2
+3.33311112098722e-05
+PT method=JC n=4 t=0.0001 i=3 j=3
+0.99990000666637036
+PT method=JC n=4 t=0.0001 i=3 j=4
+3.33311112098722e-05
+PT method=JC n=4 t=0.0001 i=4 j=1
+3.33311112098722e-05
+PT method=JC n=4 t=0.0001 i=4 j=2
+3.33311112098722e-05
+PT method=JC n=4 t=0.0001 i=4 j=3
+3.33311112098722e-05
+PT method=JC n=4 t=0.0001 i=4 j=4
+0.99990000666637036
+PT method=JC n=4 t=0.01 i=1 j=1
+0.99006637135539677
+PT method=JC n=4 t=0.01 i=1 j=2
+0.0033112095482010773
+PT method=JC n=4 t=0.01 i=1 j=3
+0.0033112095482010773
+PT method=JC n=4 t=0.01 i=1 j=4
+0.0033112095482010773
+PT method=JC n=4 t=0.01 i=2 j=1
+0.0033112095482010773
+PT method=JC n=4 t=0.01 i=2 j=2
+0.99006637135539677
+PT method=JC n=4 t=0.01 i=2 j=3
+0.0033112095482010773
+PT method=JC n=4 t=0.01 i=2 j=4
+0.0033112095482010773
+PT method=JC n=4 t=0.01 i=3 j=1
+0.0033112095482010773
+PT method=JC n=4 t=0.01 i=3 j=2
+0.0033112095482010773
+PT method=JC n=4 t=0.01 i=3 j=3
+0.99006637135539677
+PT method=JC n=4 t=0.01 i=3 j=4
+0.0033112095482010773
+PT method=JC n=4 t=0.01 i=4 j=1
+0.0033112095482010773
+PT method=JC n=4 t=0.01 i=4 j=2
+0.0033112095482010773
+PT method=JC n=4 t=0.01 i=4 j=3
+0.0033112095482010773
+PT method=JC n=4 t=0.01 i=4 j=4
+0.99006637135539677
+PT method=JC n=4 t=1 i=1 j=1
+0.44769785358679509
+PT method=JC n=4 t=1 i=1 j=2
+0.18410071547106832
+PT method=JC n=4 t=1 i=1 j=3
+0.18410071547106832
+PT method=JC n=4 t=1 i=1 j=4
+0.18410071547106832
+PT method=JC n=4 t=1 i=2 j=1
+0.18410071547106832
+PT method=JC n=4 t=1 i=2 j=2
+0.44769785358679509
+PT method=JC n=4 t=1 i=2 j=3
+0.18410071547106832
+PT method=JC n=4 t=1 i=2 j=4
+0.18410071547106832
+PT method=JC n=4 t=1 i=3 j=1
+0.18410071547106832
+PT method=JC n=4 t=1 i=3 j=2
+0.18410071547106832
+PT method=JC n=4 t=1 i=3 j=3
+0.44769785358679509
+PT method=JC n=4 t=1 i=3 j=4
+0.18410071547106832
+PT method=JC n=4 t=1 i=4 j=1
+0.18410071547106832
+PT method=JC n=4 t=1 i=4 j=2
+0.18410071547106832
+PT method=JC n=4 t=1 i=4 j=3
+0.18410071547106832
+PT method=JC n=4 t=1 i=4 j=4
+0.44769785358679509
+PT method=ordered_eigen n=4 t=1e-08 i=1 j=1
+0.99999999333333356
+PT method=ordered_eigen n=4 t=1e-08 i=1 j=2
+6.6666664133574521e-09
+PT method=ordered_eigen n=4 t=1e-08 i=1 j=3
+0
+PT method=ordered_eigen n=4 t=1e-08 i=1 j=4
+7.4014867653088047e-25
+PT method=ordered_eigen n=4 t=1e-08 i=2 j=1
+6.6666666354020537e-09
+PT method=ordered_eigen n=4 t=1e-08 i=2 j=2
+0.99999998666666667
+PT method=ordered_eigen n=4 t=1e-08 i=2 j=3
+6.6666666076464765e-09
+PT method=ordered_eigen n=4 t=1e-08 i=2 j=4
+2.7755575615628914e-17
+PT method=ordered_eigen n=4 t=1e-08 i=3 j=1
+5.5511148270663133e-17
+PT method=ordered_eigen n=4 t=1e-08 i=3 j=2
+6.6666664411130252e-09
+PT method=ordered_eigen n=4 t=1e-08 i=3 j=3
+0.99999998666666701
+PT method=ordered_eigen n=4 t=1e-08 i=3 j=4
+6.6666665798908984e-09
+PT method=ordered_eigen n=4 t=1e-08 i=4 j=1
+0
+PT method=ordered_eigen n=4 t=1e-08 i=4 j=2
+5.5511154191852533e-17
+PT method=ordered_eigen n=4 t=1e-08 i=4 j=3
+6.6666666631576277e-09
+PT method=ordered_eigen n=4 t=1e-08 i=4 j=4
+0.99999999333333334
+PT method=ordered_eigen n=4 t=1e-06 i=1 j=1
+0.999999333333778
+PT method=ordered_eigen n=4 t=1e-06 i=1 j=2
+6.6666599979337036e-07
+PT method=ordered_eigen n=4 t=1e-06 i=1 j=3
+2.2221113834171771e-13
+PT method=ordered_eigen n=4 t=1e-06 i=1 j=4
+0
+PT method=ordered_eigen n=4 t=1e-06 i=2 j=1
+6.6666600001541465e-07
+PT method=ordered_eigen n=4 t=1e-06 i=2 j=2
+0.99999866666799997
+PT method=ordered_eigen n=4 t=1e-06 i=2 j=3
+6.6666577777652059e-07
+PT method=ordered_eigen n=4 t=1e-06 i=2 j=4
+2.2221113837872508e-13
+PT method=ordered_eigen n=4 t=1e-06 i=3 j=1
+2.2223889365828149e-13
+PT method=ordered_eigen n=4 t=1e-06 i=3 j=2
+6.6666577760998734e-07
+PT method=ordered_eigen n=4 t=1e-06 i=3 j=3
+0.99999866666800019
+PT method=ordered_eigen n=4 t=1e-06 i=3 j=4
+6.6666599995990307e-07
+PT method=ordered_eigen n=4 t=1e-06 i=4 j=1
+0
+PT method=ordered_eigen n=4 t=1e-06 i=4 j=2
+2.2229440540163119e-13
+PT method=ordered_eigen n=4 t=1e-06 i=4 j=3
+6.6666600004317001e-07
+PT method=ordered_eigen n=4 t=1e-06 i=4 j=4
+0.99999933333377755
+PT method=ordered_eigen n=4 t=0.0001 i=1 j=1
+0.99993333777753113
+PT method=ordered_eigen n=4 t=0.0001 i=1 j=2
+6.6660000444168684e-05
+PT method=ordered_eigen n=4 t=0.0001 i=1 j=3
+2.2219753537074586e-09
+PT method=ordered_eigen n=4 t=0.0001 i=1 j=4
+4.9349420845581642e-14
+PT method=ordered_eigen n=4 t=0.0001 i=2 j=1
+6.6660000444390701e-05
+PT method=ordered_eigen n=4 t=0.0001 i=2 j=2
+0.99986667999906176
+PT method=ordered_eigen n=4 t=0.0001 i=2 j=3
+6.6657778518441901e-05
+PT method=ordered_eigen n=4 t=0.0001 i=2 j=4
+2.2219753537111586e-09
+PT method=ordered_eigen n=4 t=0.0001 i=3 j=1
+2.2219753814371307e-09
+PT method=ordered_eigen n=4 t=0.0001 i=3 j=2
+6.6657778518275395e-05
+PT method=ordered_eigen n=4 t=0.0001 i=3 j=3
+0.99986667999906198
+PT method=ordered_eigen n=4 t=0.0001 i=3 j=4
+6.6660000444390661e-05
+PT method=ordered_eigen n=4 t=0.0001 i=4 j=1
+4.9349406043594788e-14
+PT method=ordered_eigen n=4 t=0.0001 i=4 j=2
+2.2219753814963382e-09
+PT method=ordered_eigen n=4 t=0.0001 i=4 j=3
+6.6660000444473955e-05
+PT method=ordered_eigen n=4 t=0.0001 i=4 j=4
+0.9999333377775308
+PT method=ordered_eigen n=4 t=0.01 i=1 j=1
+0.99337753201186829
+PT method=ordered_eigen n=4 t=0.01 i=1 j=2
+0.0066004421497580287
+PT method=ordered_eigen n=4 t=0.01 i=1 j=3
+2.1976946643853164e-05
+PT method=ordered_eigen n=4 t=0.01 i=1 j=4
+4.8891729915359351e-08
+PT method=ordered_eigen n=4 t=0.01 i=2 j=1
+0.0066004421497582472
+PT method=ordered_eigen n=4 t=0.01 i=2 j=2
+0.98679906680875351
+PT method=ordered_eigen n=4 t=0.01 i=2 j=3
+0.0065785140948443344
+PT method=ordered_eigen n=4 t=0.01 i=2 j=4
+2.1976946643909034e-05
+PT method=ordered_eigen n=4 t=0.01 i=3 j=1
+2.1976946643933859e-05
+PT method=ordered_eigen n=4 t=0.01 i=3 j=2
+0.0065785140948441713
+PT method=ordered_eigen n=4 t=0.01 i=3 j=3
+0.98679906680875384
+PT method=ordered_eigen n=4 t=0.01 i=3 j=4
+0.0066004421497582438
+PT method=ordered_eigen n=4 t=0.01 i=4 j=1
+4.8891729886133267e-08
+PT method=ordered_eigen n=4 t=0.01 i=4 j=2
+2.1976946643939727e-05
+PT method=ordered_eigen n=4 t=0.01 i=4 j=3
+0.006600442149758327
+PT method=ordered_eigen n=4 t=0.01 i=4 j=4
+0.99337753201186774
+PT method=ordered_eigen n=4 t=1 i=1 j=1
+0.61221845991671298
+PT method=ordered_eigen n=4 t=1 i=1 j=2
+0.28557450708910159
+PT method=ordered_eigen n=4 t=1 i=1 j=3
+0.082626923853034953
+PT method=ordered_eigen n=4 t=1 i=1 j=4
+0.019580109141150385
+PT method=ordered_eigen n=4 t=1 i=2 j=1
+0.28557450708910143
+PT method=ordered_eigen n=4 t=1 i=2 j=2
+0.40927087668064693
+PT method=ordered_eigen n=4 t=1 i=2 j=3
+0.2225276923772167
+PT method=ordered_eigen n=4 t=1 i=2 j=4
+0.082626923853035134
+PT method=ordered_eigen n=4 t=1 i=3 j=1
+0.082626923853034884
+PT method=ordered_eigen n=4 t=1 i=3 j=2
+0.22252769237721692
+PT method=ordered_eigen n=4 t=1 i=3 j=3
+0.40927087668064649
+PT method=ordered_eigen n=4 t=1 i=3 j=4
+0.28557450708910159
+PT method=ordered_eigen n=4 t=1 i=4 j=1
+0.019580109141150225
+PT method=ordered_eigen n=4 t=1 i=4 j=2
+0.082626923853035356
+PT method=ordered_eigen n=4 t=1 i=4 j=3
+0.28557450708910143
+PT method=ordered_eigen n=4 t=1 i=4 j=4
+0.61221845991671298
+PT method=ordered_scalingAndSquaring n=4 t=1e-08 i=1 j=1
+0.99999999333333345
+PT method=ordered_scalingAndSquaring n=4 t=1e-08 i=1 j=2
+6.6666666000000015e-09
+PT method=ordered_scalingAndSquaring n=4 t=1e-08 i=1 j=3
+2.2222221975308648e-17
+PT method=ordered_scalingAndSquaring n=4 t=1e-08 i=1 j=4
+4.9382715555555554e-26
+PT method=ordered_scalingAndSquaring n=4 t=1e-08 i=2 j=1
+6.6666666000000015e-09
+PT method=ordered_scalingAndSquaring n=4 t=1e-08 i=2 j=2
+0.9999999866666669
+PT method=ordered_scalingAndSquaring n=4 t=1e-08 i=2 j=3
+6.6666665777777795e-09
+PT method=ordered_scalingAndSquaring n=4 t=1e-08 i=2 j=4
+2.2222221975308648e-17
+PT method=ordered_scalingAndSquaring n=4 t=1e-08 i=3 j=1
+2.2222221975308648e-17
+PT method=ordered_scalingAndSquaring n=4 t=1e-08 i=3 j=2
+6.6666665777777795e-09
+PT method=ordered_scalingAndSquaring n=4 t=1e-08 i=3 j=3
+0.9999999866666669
+PT method=ordered_scalingAndSquaring n=4 t=1e-08 i=3 j=4
+6.6666666000000015e-09
+PT method=ordered_scalingAndSquaring n=4 t=1e-08 i=4 j=1
+4.9382715555555548e-26
+PT method=ordered_scalingAndSquaring n=4 t=1e-08 i=4 j=2
+2.2222221975308645e-17
+PT method=ordered_scalingAndSquaring n=4 t=1e-08 i=4 j=3
+6.6666666000000007e-09
+PT method=ordered_scalingAndSquaring n=4 t=1e-08 i=4 j=4
+0.99999999333333334
+PT method=ordered_scalingAndSquaring n=4 t=1e-06 i=1 j=1
+0.99999933333377777
+PT method=ordered_scalingAndSquaring n=4 t=1e-06 i=1 j=2
+6.666660000004444e-07
+PT method=ordered_scalingAndSquaring n=4 t=1e-06 i=1 j=3
+2.2222197530880655e-13
+PT method=ordered_scalingAndSquaring n=4 t=1e-06 i=1 j=4
+4.9382666666666653e-20
+PT method=ordered_scalingAndSquaring n=4 t=1e-06 i=2 j=1
+6.666660000004444e-07
+PT method=ordered_scalingAndSquaring n=4 t=1e-06 i=2 j=2
+0.99999866666800008
+PT method=ordered_scalingAndSquaring n=4 t=1e-06 i=2 j=3
+6.6666577777851842e-07
+PT method=ordered_scalingAndSquaring n=4 t=1e-06 i=2 j=4
+2.2222197530880655e-13
+PT method=ordered_scalingAndSquaring n=4 t=1e-06 i=3 j=1
+2.2222197530880655e-13
+PT method=ordered_scalingAndSquaring n=4 t=1e-06 i=3 j=2
+6.6666577777851842e-07
+PT method=ordered_scalingAndSquaring n=4 t=1e-06 i=3 j=3
+0.99999866666800008
+PT method=ordered_scalingAndSquaring n=4 t=1e-06 i=3 j=4
+6.666660000004444e-07
+PT method=ordered_scalingAndSquaring n=4 t=1e-06 i=4 j=1
+4.9382666666666653e-20
+PT method=ordered_scalingAndSquaring n=4 t=1e-06 i=4 j=2
+2.2222197530880655e-13
+PT method=ordered_scalingAndSquaring n=4 t=1e-06 i=4 j=3
+6.666660000004444e-07
+PT method=ordered_scalingAndSquaring n=4 t=1e-06 i=4 j=4
+0.99999933333377777
+PT method=ordered_scalingAndSquaring n=4 t=0.0001 i=1 j=1
+0.99993333777753091
+PT method=ordered_scalingAndSquaring n=4 t=0.0001 i=1 j=2
+6.6660000444421398e-05
+PT method=ordered_scalingAndSquaring n=4 t=0.0001 i=1 j=3
+2.221975325102881e-09
+PT method=ordered_scalingAndSquaring n=4 t=0.0001 i=1 j=4
+4.9377777777777791e-14
+PT method=ordered_scalingAndSquaring n=4 t=0.0001 i=2 j=1
+6.6660000444421412e-05
+PT method=ordered_scalingAndSquaring n=4 t=0.0001 i=2 j=2
+0.99986667999906187
+PT method=ordered_scalingAndSquaring n=4 t=0.0001 i=2 j=3
+6.6657778518474089e-05
+PT method=ordered_scalingAndSquaring n=4 t=0.0001 i=2 j=4
+2.2219753251028814e-09
+PT method=ordered_scalingAndSquaring n=4 t=0.0001 i=3 j=1
+2.221975325102881e-09
+PT method=ordered_scalingAndSquaring n=4 t=0.0001 i=3 j=2
+6.6657778518474075e-05
+PT method=ordered_scalingAndSquaring n=4 t=0.0001 i=3 j=3
+0.99986667999906176
+PT method=ordered_scalingAndSquaring n=4 t=0.0001 i=3 j=4
+6.6660000444421398e-05
+PT method=ordered_scalingAndSquaring n=4 t=0.0001 i=4 j=1
+4.9377777777777791e-14
+PT method=ordered_scalingAndSquaring n=4 t=0.0001 i=4 j=2
+2.221975325102881e-09
+PT method=ordered_scalingAndSquaring n=4 t=0.0001 i=4 j=3
+6.6660000444421398e-05
+PT method=ordered_scalingAndSquaring n=4 t=0.0001 i=4 j=4
+0.99993333777753091
+PT method=ordered_scalingAndSquaring n=4 t=0.01 i=1 j=1
+0.99337753201186785
+PT method=ordered_scalingAndSquaring n=4 t=0.01 i=1 j=2
+0.0066004421497582524
+PT method=ordered_scalingAndSquaring n=4 t=0.01 i=1 j=3
+2.1976946643887774e-05
+PT method=ordered_scalingAndSquaring n=4 t=0.01 i=1 j=4
+4.8891729958711391e-08
+PT method=ordered_scalingAndSquaring n=4 t=0.01 i=2 j=1
+0.0066004421497582524
+PT method=ordered_scalingAndSquaring n=4 t=0.01 i=2 j=2
+0.98679906680875351
+PT method=ordered_scalingAndSquaring n=4 t=0.01 i=2 j=3
+0.0065785140948443231
+PT method=ordered_scalingAndSquaring n=4 t=0.01 i=2 j=4
+2.1976946643887767e-05
+PT method=ordered_scalingAndSquaring n=4 t=0.01 i=3 j=1
+2.1976946643887764e-05
+PT method=ordered_scalingAndSquaring n=4 t=0.01 i=3 j=2
+0.0065785140948443205
+PT method=ordered_scalingAndSquaring n=4 t=0.01 i=3 j=3
+0.98679906680875351
+PT method=ordered_scalingAndSquaring n=4 t=0.01 i=3 j=4
+0.0066004421497582498
+PT method=ordered_scalingAndSquaring n=4 t=0.01 i=4 j=1
+4.8891729958711397e-08
+PT method=ordered_scalingAndSquaring n=4 t=0.01 i=4 j=2
+2.197694664388777e-05
+PT method=ordered_scalingAndSquaring n=4 t=0.01 i=4 j=3
+0.0066004421497582524
+PT method=ordered_scalingAndSquaring n=4 t=0.01 i=4 j=4
+0.99337753201186785
+PT method=ordered_scalingAndSquaring n=4 t=1 i=1 j=1
+0.61221845991671298
+PT method=ordered_scalingAndSquaring n=4 t=1 i=1 j=2
+0.28557450708910154
+PT method=ordered_scalingAndSquaring n=4 t=1 i=1 j=3
+0.082626923853035175
+PT method=ordered_scalingAndSquaring n=4 t=1 i=1 j=4
+0.019580109141150347
+PT method=ordered_scalingAndSquaring n=4 t=1 i=2 j=1
+0.28557450708910148
+PT method=ordered_scalingAndSquaring n=4 t=1 i=2 j=2
+0.40927087668064677
+PT method=ordered_scalingAndSquaring n=4 t=1 i=2 j=3
+0.22252769237721667
+PT method=ordered_scalingAndSquaring n=4 t=1 i=2 j=4
+0.082626923853035106
+PT method=ordered_scalingAndSquaring n=4 t=1 i=3 j=1
+0.082626923853035134
+PT method=ordered_scalingAndSquaring n=4 t=1 i=3 j=2
+0.22252769237721662
+PT method=ordered_scalingAndSquaring n=4 t=1 i=3 j=3
+0.40927087668064682
+PT method=ordered_scalingAndSquaring n=4 t=1 i=3 j=4
+0.28557450708910148
+PT method=ordered_scalingAndSquaring n=4 t=1 i=4 j=1
+0.01958010914115034
+PT method=ordered_scalingAndSquaring n=4 t=1 i=4 j=2
+0.082626923853035092
+PT method=ordered_scalingAndSquaring n=4 t=1 i=4 j=3
+0.28557450708910148
+PT method=ordered_scalingAndSquaring n=4 t=1 i=4 j=4
+0.61221845991671309
+HYPA_PT_FINISHED

@@ -318,6 +318,7 @@ jobs:
            # Some of the FBD tests are also platform-sensitive
            rm -f test_FBD/output_expected/mvFossilTimeSlideUniform_multiple_runs.errout
            rm -f test_constraints/output_expected/*_timetree.*
+           rm -f test_constraints/output_expected/Test_backbone_binary_initial_TimeTree.errout
            rm -f test_constraints/output_expected/Test_backbone_multifurcating_initial_TimeTree.errout
 
            # There are some differences on the order of 1.0e-5 in the substitution likelihood between Linux/Intel and Mac/ARM
