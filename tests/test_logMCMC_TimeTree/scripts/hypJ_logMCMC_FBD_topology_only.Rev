@@ -1,10 +1,9 @@
 ################################################################################
 #
-# Hypothesis I: FBD density on the initial tree is enough for the Mac/Linux
-# fork. Same seed and FBD model as hypH, but no topology or age moves — only
-# diversification, relative extinction, fossil_prob, and origin_time.
-# If accept/reject still diverges, the split is in FBD probability arithmetic.
-# If it does not, tree-move age/topology updates are required.
+# Hypothesis J: FNPR + CollapseExpandFossilBranch are enough for the Mac/Linux
+# fork. Same FBD model as hypI, plus topology/sampled-ancestor moves only (no
+# node-age or fossil-age slides). If it forks, rewriting topology/SA structure
+# + FBD is sufficient. If it does not, an age-slide move is required.
 #
 ################################################################################
 
@@ -46,6 +45,9 @@ scaled_init_tree <- fnMinBLTimeScaling(init_tree, taxa, 5)
 
 fbd_tree ~ dnConstrainedTopology(tree_dist, backbone=backbone_tree,
                                  initialTree=scaled_init_tree)
+
+moves.append( mvFNPR(fbd_tree, weight=15.0) )
+moves.append( mvCollapseExpandFossilBranch(fbd_tree, origin_time, weight=6.0) )
 
 fossils = fbd_tree.getFossils()
 for(i in 1:fossils.size())
