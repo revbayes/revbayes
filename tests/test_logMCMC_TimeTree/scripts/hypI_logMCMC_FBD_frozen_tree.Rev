@@ -1,9 +1,10 @@
 ################################################################################
 #
-# Hypothesis H: the Mac/Linux fork does not need a phyloCTMC. Same seed, FBD
-# tree, and tree moves as hypF/G, but no morphology, no UCLN, no site rates.
-# If accept/reject still diverges, the split is in FBD/age arithmetic.
-# If it does not, CTMC pruning is required.
+# Hypothesis I: FBD density on the initial tree is enough for the Mac/Linux
+# fork. Same seed and FBD model as hypH, but no topology or age moves — only
+# diversification, relative extinction, fossil_prob, and origin_time.
+# If accept/reject still diverges, the split is in FBD probability arithmetic.
+# If it does not, tree-move age/topology updates are required.
 #
 ################################################################################
 
@@ -46,10 +47,6 @@ scaled_init_tree <- fnMinBLTimeScaling(init_tree, taxa, 5)
 fbd_tree ~ dnConstrainedTopology(tree_dist, backbone=backbone_tree,
                                  initialTree=scaled_init_tree)
 
-moves.append( mvFNPR(fbd_tree, weight=15.0) )
-moves.append( mvCollapseExpandFossilBranch(fbd_tree, origin_time, weight=6.0) )
-moves.append( mvNodeTimeSlideUniform(fbd_tree, weight=40.0) )
-
 fossils = fbd_tree.getFossils()
 for(i in 1:fossils.size())
 {
@@ -60,8 +57,6 @@ for(i in 1:fossils.size())
 
     F[i] ~ dnUniform(t[i] - b[i], t[i] - a[i])
     F[i].clamp( 0 )
-
-    moves.append( mvFossilTimeSlideUniform(fbd_tree, origin_time, fossils[i], weight = 1.0) )
 }
 
 print("INIT_FINGERPRINT origin_time=")
