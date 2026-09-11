@@ -1,9 +1,9 @@
 ################################################################################
 #
-# Hypothesis L: NodeTimeSlideUniform is enough for the Mac/Linux fork.
-# Same FBD model as hypI, plus internal node-age slides only (no FNPR,
-# collapse, or fossil-age slides). If it forks, the (parent-child)*u+child
-# draw + FBD is sufficient. If it does not, a different tree move is required.
+# Hypothesis M: CollapseExpand + fossil-age slides are enough. Same FBD model
+# as hypI. CollapseExpand creates sampled ancestors; FossilTipTimeSlideUniform
+# then uses the SA path (bounds from sibling/grandparent, setAge propagates to
+# the parent). If it forks, that interaction is sufficient.
 #
 ################################################################################
 
@@ -46,7 +46,7 @@ scaled_init_tree <- fnMinBLTimeScaling(init_tree, taxa, 5)
 fbd_tree ~ dnConstrainedTopology(tree_dist, backbone=backbone_tree,
                                  initialTree=scaled_init_tree)
 
-moves.append( mvNodeTimeSlideUniform(fbd_tree, weight=40.0) )
+moves.append( mvCollapseExpandFossilBranch(fbd_tree, origin_time, weight=6.0) )
 
 fossils = fbd_tree.getFossils()
 for(i in 1:fossils.size())
@@ -58,6 +58,8 @@ for(i in 1:fossils.size())
 
     F[i] ~ dnUniform(t[i] - b[i], t[i] - a[i])
     F[i].clamp( 0 )
+
+    moves.append( mvFossilTimeSlideUniform(fbd_tree, origin_time, fossils[i], weight = 1.0) )
 }
 
 print("INIT_FINGERPRINT origin_time=")
