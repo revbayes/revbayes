@@ -1,9 +1,8 @@
 ################################################################################
 #
-# Hypothesis E: the Mac/Linux fork is pruning (P v), not Mkv and not gamma.
-# Same moves/seed/burn-in as logMCMC_backbone_binary.Rev, but every dnPhyloCTMC
-# uses coding="all" and site rates 1+0*alpha (alpha stays in the DAG so the
-# move schedule is unchanged; no fnDiscretizeGamma / incompleteGamma).
+# Hypothesis G: ordered-matrix pruning is enough for the Mac/Linux fork.
+# Same as hypE but only ordered dnPhyloCTMC nodes. Creating fewer CTMCs
+# consumes extra RNG at construction, so the fork need not be at generation 80.
 #
 ################################################################################
 
@@ -93,34 +92,14 @@ morpho.removeExcludedCharacters()
 
 ordered_vect = [28, 29, 33, 100, 102, 123, 139, 148, 152, 160, 166, 177, 180, 192]
 
-unord <- morpho
-unord.excludeCharacter(ordered_vect)
-
 order <- morpho
 order.excludeCharacter(1:morpho.nchar())
 order.includeCharacter(ordered_vect)
 
 alpha ~ dnUniform(0, 1E6)
 moves.append( mvScale(alpha, weight=9.0) )
-# Flat site rates, but keep a DAG edge from alpha so the move stays in the model.
 for (k in 1:4) {
     char_rates[k] := 1.0 + 0.0 * alpha
-}
-
-idx = 1
-
-for (i in 2:n_max_states) {
-    unordered[i - 1] <- unord
-    unordered[i - 1].setNumStatesPartition(i)
-    nc = unordered[i - 1].nchar()
-    if (nc > 0) {
-        Qu[idx] <- fnJC(i)
-        unord_ctmc[idx] ~ dnPhyloCTMC(tree=fbd_tree, Q=Qu[idx], branchRates=branch_rates,
-                                      siteRates=char_rates, type="Standard",
-                                      coding="all")
-        unord_ctmc[idx].clamp(unordered[i - 1])
-        idx = idx + 1
-    }
 }
 
 ix = 1
