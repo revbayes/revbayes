@@ -1,9 +1,8 @@
 ################################################################################
 #
-# Hypothesis N: node-age + fossil-age slides are enough, with no topology/SA
-# moves. Same FBD model as hypI. NodeTimeSlideUniform moves parents;
-# FossilTipTimeSlideUniform then slides against those parent ages. If it forks,
-# coupled age bounds are sufficient.
+# Post-fix check: node-age + fossil-age slides (the pair that forked as hypN
+# before replacing FossilTipTimeSlideUniform wrap/reflect with a uniform draw
+# on the legal interval). Same FBD model as hypI.
 #
 ################################################################################
 
