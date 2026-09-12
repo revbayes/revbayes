@@ -140,7 +140,7 @@ double BurstEventProposal::doProposal( void )
     {
         
         // draw new ages and compute the hastings ratio at the same time
-        double my_new_age = (parent_age-child_Age) * rng->uniform01() + child_Age;
+        double my_new_age = std::fma(parent_age - child_Age, rng->uniform01(), child_Age);
         
         // set the age
         stored_node->setAge( my_new_age );

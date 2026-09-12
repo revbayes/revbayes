@@ -159,7 +159,7 @@ double NodeRateTimeSlideUniformProposal::doProposal( void )
     double prev_childB_time = my_age - childB_age;
 
     // draw new ages and compute the hastings ratio at the same time
-    double my_new_age = (parent_age-child_Age) * rng->uniform01() + child_Age;
+    double my_new_age = std::fma(parent_age - child_Age, rng->uniform01(), child_Age);
     
     double node_time   = parent_age - my_new_age;
     double childA_time = my_new_age - childA_age;

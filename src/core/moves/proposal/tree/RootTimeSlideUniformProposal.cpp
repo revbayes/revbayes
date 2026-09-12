@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cmath>
 
 #include "DistributionUniform.h"
 #include "RootTimeSlideUniformProposal.h"
@@ -118,7 +119,7 @@ double RootTimeSlideUniformProposal::doProposal( void )
     double child_Age   = std::max( root->getChild( 0 ).getAge(), root->getChild( 1 ).getAge() );
     
     // draw new ages and compute the hastings ratio at the same time
-    double my_new_age = (origin->getValue() - child_Age) * rng->uniform01() + child_Age;
+    double my_new_age = std::fma(origin->getValue() - child_Age, rng->uniform01(), child_Age);
     
     // set the age
     if (not root->isSampledAncestorTipOrParent())
