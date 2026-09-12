@@ -9,6 +9,7 @@
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RbException.h"
+#include "RbMathHelper.h"
 #include "TypedDagNode.h"
 #include "Proposal.h"
 #include "StochasticNode.h"
@@ -217,24 +218,28 @@ double FossilSiteTimeSlideUniformProposal::doProposal( void )
 
     double u      = rng->uniform01();
     double delta  = ( lambda * ( u - 0.5 ) );
-    
-    if ( fabs(delta) > 2.0*size )
+
+    // Slide the current age by delta, then bounce back into [min_age, max_age].
+    // If |delta| is larger than twice the window, first wrap delta into that range.
+    // std::fma makes delta - n*two_size a single rounding, so Mac and Linux do not
+    // disagree on the wrap. reflectIntoInterval then does the bounce; if rounding
+    // leaves the age still outside the window, it uses min_age or max_age rather
+    // than bouncing one more time.
+    double two_size = size + size;
+    if ( fabs(delta) > two_size )
     {
-        delta -= floor(delta / (2.0*size)) * (2.0*size);
+        double n = std::floor(delta / two_size);
+        delta = std::fma(-n, two_size, delta);
+        if ( delta < 0.0 )
+        {
+            delta += two_size;
+        }
+        else if ( delta >= two_size )
+        {
+            delta -= two_size;
+        }
     }
-    double new_age = my_age + delta;
-    
-    /* reflect the new value */
-    do {
-        if ( new_age < min_age )
-        {
-            new_age = 2.0 * min_age - new_age;
-        }
-        else if ( new_age > max_age )
-        {
-            new_age = 2.0 * max_age - new_age;
-        }
-    } while ( new_age < min_age || new_age > max_age );
+    double new_age = RbMath::Helper::reflectIntoInterval(my_age + delta, min_age, max_age);
     
     // set the ages to all tips from site
     for (int i = 0; i < taxa.size(); i++) {
