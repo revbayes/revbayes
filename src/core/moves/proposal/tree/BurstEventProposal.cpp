@@ -139,8 +139,9 @@ double BurstEventProposal::doProposal( void )
     if ( dist->isBurstSpeciation(node_index) == true )
     {
         
-        // draw new ages and compute the hastings ratio at the same time
-        double my_new_age = (parent_age-child_Age) * rng->uniform01() + child_Age;
+        // Draw uniformly between the oldest child and the parent. std::fma makes (parent - child)*u + child
+        // a single rounding, so that macOS and Linux match.
+        double my_new_age = std::fma(parent_age - child_Age, rng->uniform01(), child_Age);
         
         // set the age
         stored_node->setAge( my_new_age );

@@ -150,8 +150,9 @@ double NodeTimeSlideUniformAgeConstrainedProposal::doProposal( void )
     // now we store all necessary values
     stored_age = our_age;
     
-    // draw new ages and compute the hastings ratio at the same time
-    double our_new_age = (max_age-min_age) * rng->uniform01() + min_age;
+    // Draw new ages and compute the Hastings ratio at the same time. std::fma makes (max - min)*u + min
+    // a single rounding, so that macOS and Linux match.
+    double our_new_age = std::fma(max_age - min_age, rng->uniform01(), min_age);
     
     
     // set the age

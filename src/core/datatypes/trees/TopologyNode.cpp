@@ -1815,7 +1815,8 @@ void TopologyNode::recomputeBranchLength( void )
     }
     else if ( RbMath::isFinite( age ) == true )
     {
-        branch_length = parent->getAge() - age;
+        // std::fma makes parent - age = age*(-1) + parent a single rounding, so that macOS and Linux match
+        branch_length = std::fma(-1.0, age, parent->getAge());
     }
 
 }
