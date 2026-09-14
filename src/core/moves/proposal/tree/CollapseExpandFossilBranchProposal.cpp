@@ -8,6 +8,7 @@
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RbConstants.h"
+#include "RbMathHelper.h"
 #include "TypedDagNode.h"
 #include "Proposal.h"
 #include "StochasticNode.h"
@@ -252,8 +253,9 @@ double CollapseExpandFossilBranchProposal::expandBranch(TopologyNode &n)
     // store the old age of the parent
     storedAge = parent.getAge();
     
-    // draw the new age for the parent node
-    double new_age = (max_age-min_age) * rng->uniform01() + min_age;
+    // Draw the new age for the parent node. Helper::fma makes (max - min)*u + min
+    // a single rounding so platforms match.
+    double new_age = RbMath::Helper::fma(max_age - min_age, rng->uniform01(), min_age);
     
     // set the age of the parent node equal to the new age
     n.setSampledAncestor( false );

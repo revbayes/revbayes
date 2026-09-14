@@ -14,7 +14,7 @@ seed(12345)
 # The dataset used here comes from Pol et al. (2024), Cladistics 40(3): 307-356.
 # The paper shows that nonclock analyses favor the Abelisauroidea topology and clock
 # analyses favor the Etrigansauria topology, so we will enforce Etrigansauria in the
-# nonclock analysis.
+# nonclock analysis and Abelisauroidea in the clock analysis.
 
 #######################
 # Reading in the data #
