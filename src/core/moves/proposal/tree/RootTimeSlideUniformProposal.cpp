@@ -5,6 +5,7 @@
 #include "RootTimeSlideUniformProposal.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
+#include "RbMathHelper.h"
 #include "Proposal.h"
 #include "StochasticNode.h"
 #include "TopologyNode.h"
@@ -118,9 +119,9 @@ double RootTimeSlideUniformProposal::doProposal( void )
     // we need to work with the times
     double child_Age   = std::max( root->getChild( 0 ).getAge(), root->getChild( 1 ).getAge() );
     
-    // Draw uniformly between the oldest child and the origin. std::fma makes (origin - child)*u + child
-    // a single rounding, so that macOS and Linux match.
-    double my_new_age = std::fma(origin->getValue() - child_Age, rng->uniform01(), child_Age);
+    // Draw uniformly between the oldest child and the origin. Helper::fma makes (origin - child)*u + child
+    // a single rounding so platforms match.
+    double my_new_age = RbMath::Helper::fma(origin->getValue() - child_Age, rng->uniform01(), child_Age);
     
     // set the age
     if (not root->isSampledAncestorTipOrParent())

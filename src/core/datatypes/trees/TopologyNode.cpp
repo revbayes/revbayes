@@ -16,6 +16,7 @@
 #include "Clade.h"
 #include "CharacterHistory.h"
 #include "RbException.h"
+#include "RbMathHelper.h"
 #include "RbMathLogic.h"
 #include "RbSettings.h"
 #include "Taxon.h"
@@ -1815,8 +1816,8 @@ void TopologyNode::recomputeBranchLength( void )
     }
     else if ( RbMath::isFinite( age ) == true )
     {
-        // std::fma makes parent - age = age*(-1) + parent a single rounding, so that macOS and Linux match
-        branch_length = std::fma(-1.0, age, parent->getAge());
+        // Helper::fma makes parent - age = age*(-1.0) + parent a single rounding so platforms match
+        branch_length = RbMath::Helper::fma(-1.0, age, parent->getAge());
     }
 
 }

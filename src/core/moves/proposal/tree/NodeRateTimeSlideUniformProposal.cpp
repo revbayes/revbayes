@@ -9,6 +9,7 @@
 #include "NodeRateTimeSlideUniformProposal.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
+#include "RbMathHelper.h"
 #include "RbSettings.h"  // for debugMCMC setting
 #include "Proposal.h"
 #include "RbVector.h"
@@ -158,9 +159,9 @@ double NodeRateTimeSlideUniformProposal::doProposal( void )
     double prev_childA_time = my_age - childA_age;
     double prev_childB_time = my_age - childB_age;
 
-    // Draw uniformly between the oldest child and the parent. std::fma makes (parent - child)*u + child
-    // a single rounding, so that macOS and Linux match.
-    double my_new_age = std::fma(parent_age - child_Age, rng->uniform01(), child_Age);
+    // Draw uniformly between the oldest child and the parent. Helper::fma makes (parent - child)*u + child
+    // a single rounding so platforms match.
+    double my_new_age = RbMath::Helper::fma(parent_age - child_Age, rng->uniform01(), child_Age);
     
     double node_time   = parent_age - my_new_age;
     double childA_time = my_new_age - childA_age;

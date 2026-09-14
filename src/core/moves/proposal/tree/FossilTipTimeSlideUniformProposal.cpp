@@ -235,14 +235,14 @@ double FossilTipTimeSlideUniformProposal::doProposal( void )
     
     // Slide the current age by delta, then bounce back into [min_age, max_age].
     // If |delta| is larger than twice the window, first wrap delta into that range.
-    // std::fma makes delta - n*two_size a single rounding, so macOS and Linux do not
+    // Helper::fma makes delta - n*two_size a single rounding so platforms do not
     // disagree on the wrap. reflectIntoInterval then does the bounce; if rounding
     // leaves the age still outside the window, it uses min_age or max_age rather
     // than bouncing one more time.
     if ( fabs(delta) > two_size )
     {
         double n = std::floor(delta / two_size);
-        delta = std::fma(-n, two_size, delta);
+        delta = RbMath::Helper::fma(-n, two_size, delta);
         
         if ( delta < 0.0 )
         {

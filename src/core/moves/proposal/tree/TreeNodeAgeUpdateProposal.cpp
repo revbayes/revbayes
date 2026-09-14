@@ -7,6 +7,7 @@
 #include "DebugMove.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
+#include "RbMathHelper.h"
 #include "RbSettings.h"  // for debugMCMC setting
 #include "TreeUtilities.h"
 #include "Cloneable.h"
@@ -151,9 +152,9 @@ double TreeNodeAgeUpdateProposal::doProposal( void )
     storedNode = node;
     storedAge = my_age;
 
-    // Draw uniformly between the oldest child and the parent. std::fma makes (parent - child)*u + child
-    // a single rounding, so that macOS and Linux match.
-    double my_new_age = std::fma(parent_age - child_Age, rng->uniform01(), child_Age);
+    // Draw uniformly between the oldest child and the parent. Helper::fma makes (parent - child)*u + child
+    // a single rounding so platforms match.
+    double my_new_age = RbMath::Helper::fma(parent_age - child_Age, rng->uniform01(), child_Age);
 
     // Sebastian: This is for debugging to test if the proposal's acceptance rate is 1.0 as it should be!
 //    my_new_age = my_age;

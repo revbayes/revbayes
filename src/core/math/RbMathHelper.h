@@ -19,6 +19,7 @@ namespace RevBayesCore {
         namespace Helper {
             double          fmax2(double x, double y);
             double          fmin2(double x, double y);
+            double          fma(double x, double y, double z);                      //!< x*y + z with one rounding
             double          reflectIntoInterval(double x, double lo, double hi);    //!< Bounce x into [lo, hi] by reflection
         }
         

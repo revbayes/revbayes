@@ -6,6 +6,7 @@
 #include "NodeTimeSlideUniformProposal.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
+#include "RbMathHelper.h"
 #include "Proposal.h"
 #include "StochasticNode.h"
 #include "TopologyNode.h"
@@ -130,9 +131,9 @@ double NodeTimeSlideUniformProposal::doProposal( void )
     storedNode = node;
     storedAge = my_age;
 
-    // Draw uniformly between the oldest child and the parent. std::fma makes (parent - child)*u + child
-    // a single rounding, so that macOS and Linux match.
-    double my_new_age = std::fma(parent_age - child_Age, rng->uniform01(), child_Age);
+    // Draw uniformly between the oldest child and the parent. Helper::fma makes (parent - child)*u + child
+    // a single rounding so platforms match.
+    double my_new_age = RbMath::Helper::fma(parent_age - child_Age, rng->uniform01(), child_Age);
 
     // set the age
     tau.getNode(node->getIndex()).setAge( my_new_age );
