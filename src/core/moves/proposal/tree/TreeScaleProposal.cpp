@@ -209,7 +209,7 @@ void TreeScaleProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
     {
         tree = static_cast<StochasticNode<Tree>* >(newN);
     }
-    else if ( oldN == rootAge )
+    else if ( oldN == vector_variable )
     {
         vector_variable = static_cast<StochasticNode< RbVector<Tree> >* >(newN);
     }

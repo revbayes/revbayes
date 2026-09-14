@@ -27,7 +27,7 @@ class DagNode;
         // Monitor functions
         bool                                isScreenMonitor(void) const;
         void                                monitor(std::uint64_t gen);
-        void                                reset(size_t numCycles);
+        void                                reset(size_t numCycles, double maxSeconds) override;
         void                                setReplicateIndex(size_t idx);
         
         // ScreenMonitor functions
@@ -46,6 +46,7 @@ class DagNode;
         size_t                              headerPrintingInterval; //!< print the header each n iterations
         time_t                              startTime; //!< time of start of the run
         size_t                              numCycles; //!< planned number of iterations                                                       //!< Total number of cycles to monitor
+        double                              maxSeconds; //!< planned wall-clock time in seconds (0 if unknown)
         size_t                              currentGen; //!< current generation of the run
         size_t                              startGen; //!< start generation of the run
         size_t                              replicateIndex; //!< replicate index of the monitored run

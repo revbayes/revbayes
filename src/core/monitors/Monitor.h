@@ -49,7 +49,7 @@ namespace RevBayesCore {
         virtual void                                printHeader(void);  //!< Print header
         virtual void                                swapNode(DagNode *oldN, DagNode *newN);  //!< Replace attached node
         virtual void                                removeVariable(DagNode *n);  //!< Stop monitoring variable
-        virtual void                                reset(size_t numCycles);  //!< Reset the monitored variables.
+        virtual void                                reset(size_t numCycles, double maxSeconds = 0.0);  //!< Reset the monitored variables.
 
         // getters and setters
         virtual void                                setModel(Model* m);

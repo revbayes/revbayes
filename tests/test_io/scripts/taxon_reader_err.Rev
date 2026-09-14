@@ -1,0 +1,9 @@
+## continue-on-error
+# A letter O in place of a zero: the old stringstream extraction stopped at the O and
+# silently returned 3.0. A field that does not parse at all returned 0.
+readTaxonData("data/taxa_bad_number.tsv")
+readTaxonData("data/taxa_unparseable_number.tsv")
+
+# Inf is a valid upper bound for an occurrence age
+taxa = readTaxonData("data/taxa_inf_age.tsv")
+taxa[1].getMaxAge()

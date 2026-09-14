@@ -719,6 +719,12 @@ static int fd_read(struct current *current) {
                         return SPECIAL_PAGE_UP;
                     case VK_NEXT:
                         return SPECIAL_PAGE_DOWN;
+                    case VK_RETURN:
+                        /* Numpad Enter is reported as enhanced VK_RETURN; main
+                         * Return is non-enhanced and arrives as AsciiChar '\r'
+                         * below. Without this, numpad Enter is silently ignored
+                         * (https://github.com/revbayes/revbayes/issues/529). */
+                        return '\r';
                 }
             }/* Note that control characters are already translated in AsciiChar */
             else {

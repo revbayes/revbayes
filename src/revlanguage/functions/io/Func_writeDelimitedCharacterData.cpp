@@ -67,6 +67,9 @@ RevPtr<RevVariable> Func_writeDelimitedCharacterData::execute( void )
     
     const std::string& del = static_cast<const RlString&>( args[2].getVariable()->getRevObject() ).getValue();
     
+    if (del.empty())
+        throw RbException()<<"writeDelimitedCharacterData: the delimiter may not be empty!";
+
     RevBayesCore::DelimitedCharacterDataWriter writer;
     writer.writeData(fn.getValue(), *data, del);
     
@@ -97,7 +100,7 @@ const ArgumentRules& Func_writeDelimitedCharacterData::getArgumentRules( void ) 
         data_arg_types.push_back( AbstractHomologousDiscreteCharacterData::getClassTypeSpec() );
         data_arg_types.push_back( ContinuousCharacterData::getClassTypeSpec() );
         argument_rules.push_back( new ArgumentRule( "data"    , data_arg_types, "The character data object.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
-        argument_rules.push_back( new Delimiter() );
+        argument_rules.push_back( new WriteDelimiter(" ") );
         rules_set = true;
     }
     

@@ -435,11 +435,13 @@ void Monitor::swapNode(DagNode *oldN, DagNode *newN)
 
 /**
  * Reset the variables for the monitor.
- * Overwrite this method for specialized behavior.
+ * This is a no-op that never uses its own arguments; we keep the types to match the signature, but suppress the names
+ * to avoid compiler warnings under -Wunused-parameter. Overwrite this method for specialized behavior.
  *
- * @param numCycles target number of iterations
+ * @param numCycles target number of iterations (0 if unknown)
+ * @param maxSeconds maximum wall-clock time in seconds (0 if unknown)
  */
-void Monitor::reset(size_t numCycles)
+void Monitor::reset(size_t /*numCycles*/, double /*maxSeconds*/)
 {}
 
 

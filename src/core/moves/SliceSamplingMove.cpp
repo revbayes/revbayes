@@ -17,6 +17,7 @@
 #include "RbOrderedSet.h"
 #include "StochasticNode.h"
 #include "RbSettings.h" // for debugMCMC setting
+#include "RlUserInterface.h" // for RBOUT
 
 using boost::optional;
 
@@ -342,7 +343,7 @@ find_slice_boundaries_doubling(double x0,slice_function& g,double logy, double w
     assert( L < (L+R)/2 and (L+R)/2 < R);
 
     if (logMCMC >= 1)
-	std::cerr<<"     L0 = "<<L<<"   x0 = "<<x0<<"   R0 = "<<R<<"\n";
+        std::cerr<<"      L0 = "<<L<<" (g(L) = "<<gL()<<")  x0 = "<<x0<<"   R0 = "<<R<<" (g(R) = "<<gR()<<")\n";
 
     return {L,R,gL_cached,gR_cached};
 }
@@ -362,7 +363,7 @@ double search_interval(double x0,double& L, double& R, slice_function& g,double 
 
     //double L0 = L, R0 = R;
 
-    for (int i=0;i<200;i++)
+    for (int i=0;i<100;i++)
     {
         double x1 = L + uniform()*(R-L);
 
@@ -379,7 +380,42 @@ double search_interval(double x0,double& L, double& R, slice_function& g,double 
             L = x1;
     }
 
-    std::abort();
+    // x0 is the initial value of x, so returning it rejects the move.
+    // The loop left the variable at the last trial point, so we need to restore it first.
+
+    // Set the parameter back to x0, and ALSO compute the probability at x0.
+    double gx0 = g(x0);
+
+    // In a debug build the asserts above will fire, but in a release build we can get here.
+    // The slice as defined as the set of xs where g(x) >= y = g(x0)*U, where U~Uniform(0,1).
+    // If gx0 < logy, then g(x0) has changed since we first evaluated it, which means that
+    // (i) there is a likelihood caching bug.
+    // (ii) no matter how small we shrink the slice, we will never find anything, and
+    static int warned_err = 3;
+    if (gx0 < logy and warned_err > 0)
+    {
+        RBOUT("Warning: slice sampled failed to locate the slice because of an");
+        RBOUT("         incorrect likelihood inherited from a different move.");
+        RBOUT("");
+        RBOUT("To identify which move is responsible for the incorrect likelihood,");
+        RBOUT("  consider running with '-o debugMCMC=1 -o logMCMC=1' (or 2 or 3)");
+        RBOUT("  and see the help for setOption");
+        warned_err--;
+        if (warned_err==0)
+            RBOUT("         Future warnings like this are suppressed.");
+    }
+
+    // If gx0 >= logy, then the slice might be very small, but it is not empty.
+    // This case is not a bug, just inefficient.
+    static int warned = 3;
+    if (gx0 >= logy and warned > 0)
+    {
+        RBOUT("Warning: slice sampler could not locate the slice after 100 steps");
+        RBOUT("         This is not a bug, but it is inefficient.");
+        warned--;
+        if (warned==0)
+            RBOUT("         Future warnings like this are suppressed.");
+    }
 
     return x0;
 }
@@ -468,7 +504,7 @@ double slice_sample_stepping_out(double x0, slice_function& g,double w, int m)
     int debugMCMC = RbSettings::userSettings().getDebugMCMC();
     int logMCMC = RbSettings::userSettings().getLogMCMC();
     if (logMCMC >= 1)
-	std::cerr<<"mvSlice("<<g.name()<<",stepping_out):  x0 = "<<x0<<"  g(x0) = "<<gx0<<"   logy = "<<logy<<"\n";
+	std::cerr<<"mvSlice("<<g.name()<<", stepping_out):  x0 = "<<x0<<"  g(x0) = "<<gx0<<"   logy = "<<logy<<"\n";
 
     if (debugMCMC >= 1) g.checkPrs();
 
@@ -496,7 +532,7 @@ double slice_sample_doubling(double x0, slice_function& g, double w, int m)
 
     int debugMCMC = RbSettings::userSettings().getDebugMCMC();
     int logMCMC = RbSettings::userSettings().getLogMCMC();
-    if (logMCMC >= 1) std::cerr<<"mvSlice("<<g.name()<<",stepping_out):  x0 = "<<x0<<"  g(x0) = "<<gx0<<"   logy = "<<logy<<"\n";
+    if (logMCMC >= 1) std::cerr<<"mvSlice("<<g.name()<<", doubling):  x0 = "<<x0<<"  g(x0) = "<<gx0<<"   logy = "<<logy<<"\n";
 
     if (debugMCMC >= 1) g.checkPrs();
 

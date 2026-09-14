@@ -1,5 +1,6 @@
 #include "ScreenMonitor.h"
 
+#include <algorithm>
 #include <cmath>
 #include <iomanip>
 #include <iostream>
@@ -24,6 +25,7 @@ ScreenMonitor::ScreenMonitor(DagNode *n, std::uint64_t g, bool pp, bool l, bool 
     headerPrintingInterval( 20 ),
     startTime( 0 ),
     numCycles( 0 ),
+    maxSeconds( 0.0 ),
     currentGen( 0 ),
     startGen( 0 ),
     replicateIndex( 0 )
@@ -41,6 +43,7 @@ ScreenMonitor::ScreenMonitor(const std::vector<DagNode *> &n, std::uint64_t g, b
     headerPrintingInterval( 20 ),
     startTime( 0 ),
     numCycles( 0 ),
+    maxSeconds( 0.0 ),
     currentGen( 0 ),
     startGen( 0 ),
     replicateIndex( 0 )
@@ -183,28 +186,70 @@ void ScreenMonitor::monitor(std::uint64_t gen)
             
             if ( printWaitingTime )
             {
+                // "--:--:--" = too early to extrapolate from generations
+                // "??:??:??" = no iteration or time target to calculate ETA from
+                bool too_early = (gen - startGen) <= samplingFrequency;
+                size_t timeUsed = time(NULL) - startTime;
+                bool have_iter_target = numCycles > startGen;
+                bool have_time_target = maxSeconds > 0.0;
 
-                if ( (gen-startGen) <= samplingFrequency )
+                bool have_eta = false;
+                size_t waitTime = 0;
+
+                if ( have_iter_target && !too_early )
                 {
-                    std::cout << prefixSeparator << "--:--:--" << suffixSeparator;
+                    double done = double(gen - startGen);
+                    double total = double(numCycles - startGen);
+                    double progress = done / total;
+                    waitTime = size_t( double(timeUsed) / progress - double(timeUsed) );
+                    have_eta = true;
+                }
+
+                if ( have_time_target )
+                {
+                    size_t time_eta = size_t( std::max(0.0, maxSeconds - double(timeUsed)) );
+
+                    if ( have_eta )
+                    {
+                        // If we have both an iteration and a wall-clock time target, use the more restrictive of the two
+                        if ( time_eta < waitTime )
+                        {
+                            waitTime = time_eta;
+                        }
+                    }
+                    else if ( !have_iter_target )
+                    {
+                        // Time target only: the remaining wall-clock time is exact, so use it even before we would be
+                        // willing to extrapolate from generations
+                        waitTime = time_eta;
+                        have_eta = true;
+                    }
+                    
+                    // else: we have an iteration target, but it is still too early to extrapolate. We do not print the
+                    // (possibly much larger) time target alone, but fall through to "--:--:--" until both can be compared.
+                }
+
+                if ( !have_eta )
+                {
+                    if ( too_early )
+                    {
+                        std::cout << prefixSeparator << "--:--:--" << suffixSeparator;
+                    }
+                    else
+                    {
+                        std::cout << prefixSeparator << "??:??:??" << suffixSeparator;
+                    }
                 }
                 else
                 {
-                    double done = gen - startGen;
-                    double total = numCycles - startGen;
-                    double progress = done / total;
-                    size_t timeUsed = time(NULL) - startTime;
-                
-                    size_t waitTime = double( timeUsed ) / progress - double( timeUsed );
-                    
                     size_t hours   = waitTime / 3600;
                     size_t minutes = waitTime / 60 - hours * 60;
                     size_t seconds = waitTime - minutes * 60 - hours * 3600;
-                
+
                     ss << std::setw( 2 ) << std::setfill( '0' ) << hours << ":";
                     ss << std::setw( 2 ) << std::setfill( '0' ) << minutes << ":";
                     ss << std::setw( 2 ) << std::setfill( '0' ) << seconds;
-                
+
                     std::cout << prefixSeparator << ss.str() << suffixSeparator;
                 }
             
@@ -316,10 +361,11 @@ void ScreenMonitor::printHeader( void )
 }
 
 
-void ScreenMonitor::reset( size_t n )
+void ScreenMonitor::reset( size_t n, double max_seconds )
 {
     startGen = currentGen;
     numCycles = n;
+    maxSeconds = max_seconds;
     startTime = time( NULL );
     printWaitingTime = true;
 }

@@ -1,0 +1,195 @@
+################################################################################
+#
+# Simple FBD analysis with joint moves for multiple coeval extinct taxa
+#
+# original authors: Tracy A. Heath, Josh Justison, Joëlle Barido-Sottani, and Walker Pett
+#
+# adapted from the simplified FBD analysis tutorial by Mario Schädel
+#
+################################################################################
+
+seed(12345)
+
+#######################
+# Reading in the Data #
+#######################
+# Read the full list of taxa (including all fossils and extant species #
+taxa <- readTaxonData("data/bears_taxa.tsv")
+
+# Import the morphological character matrix #
+# this file contains only the taxa for which morphological characters are available #
+morpho <- readDiscreteCharacterData("data/bears_morphology.nex")
+morpho.addMissingTaxa( taxa )
+
+## helpers
+n_taxa <- taxa.size()
+moves = VectorMoves()
+
+##########################################################################################
+# Joint Fossilized Birth-Death Process prior on the topology and fossil occurrence times #
+##########################################################################################
+
+# Define exponential priors on the birth rate and death rate #
+speciation_rate ~ dnExponential(10)
+extinction_rate ~ dnExponential(10)
+
+# Specify a scale move on the speciation_rate parameter #
+# This move will be applied with 3 different tuning values (lambda) to help improve mixing # 
+moves.append( mvScale(speciation_rate, weight=1) )
+
+# Specify a scale move on the extinction_rate parameter #
+# This move will be applied with 3 different tuning values (lambda) to help improve mixing # 
+moves.append( mvScale(extinction_rate, weight=1) )
+
+# Create deterministic nodes for the diversification and turnover rates so that they can be monitored #
+diversification := speciation_rate - extinction_rate
+turnover := extinction_rate/speciation_rate
+
+
+# Fix the probability of sampling parameter (rho) to 1, #
+# because all extant bears are represented in this analysis #
+rho <- 1.0
+
+# Assume an exponential prior on the rate of sampling fossils (psi) #
+psi ~ dnExponential(10) 
+
+# Specify a scale move on the psi parameter #
+# This move will be applied with 3 different tuning values (lambda) to help improve mixing # 
+moves.append( mvScale(psi, weight=1) )
+
+
+# The FBD is conditioned on a starting time for the process, which is the origin time #
+# Specify a uniform prior on the origin #
+origin_time ~ dnUnif(37.0, 55.0)
+
+# Specify a sliding-window move on the origin_time parameter #
+# This move will be applied with 3 different window widths (delta) to help improve mixing # 
+moves.append( mvSlide(origin_time, weight=10.0) )
+
+
+### Define the tree-prior distribution as the fossilized birth-death process ###
+fbd_tree ~ dnFBDP(origin=origin_time, lambda=speciation_rate, mu=extinction_rate, psi=psi, rho=rho, taxa=taxa)
+
+# Specify moves on the tree and node times #
+# These moves update the tree topology 
+moves.append( mvFNPR(fbd_tree, weight=15.0) )
+
+# Here, I disable sampling of ancestors for easier inspection
+# moves.append( mvCollapseExpandFossilBranch(fbd_tree, origin_time, weight=6.0) )
+
+# These moves update the node ages #
+# Because we are conditioning on the origin time, we must also sample the root node age #
+moves.append( mvNodeTimeSlideUniform(fbd_tree, weight=40.0) )
+moves.append( mvRootTimeSlideUniform(fbd_tree, origin_time, weight=5.0) )
+
+
+### Use stratigraphic range data to explicitly sample the fossil occurence times ###
+# Use a for loop to create a uniform distribution on the occurence time for each fossil #
+# The boundaries of the uniform distribution are specified in the tsv file #
+fossils = fbd_tree.getFossils()
+for(i in 1:fossils.size())
+{
+    t[i] := tmrca(fbd_tree, clade(fossils[i]))
+
+    a[i] = fossils[i].getMinAge()
+    b[i] = fossils[i].getMaxAge()
+
+    F[i] ~ dnUniform(t[i] - b[i], t[i] - a[i])
+    F[i].clamp( 0 )
+}
+
+# Create a vector of taxon objects for each fossil site with more than one species (made up example)
+imaginary_fossil_site[1] = taxon("Indarctos_arctoides")
+imaginary_fossil_site[2] = taxon("Indarctos_punjabiensis")
+
+
+# Add a move to sample the fossil times
+
+## All fossil site clades are moved individually
+moves.append( mvFossilSiteSlideUniform(fbd_tree, origin=origin_time, taxa=imaginary_fossil_site, weight=10.0) )
+
+
+
+## Then, for the taxa not included in any of such fossil sites, all tips have to be moved independently by specifying tips
+# This is to avoid moving some of the already jointly moved taxa again
+nonsitelinked_fossils = fossils
+nonsitelinked_fossils.erase( imaginary_fossil_site )
+
+for(i in 1:nonsitelinked_fossils.size())
+{
+    moves.append( mvFossilTimeSlideUniform(fbd_tree, origin_time,
+                                           tip=nonsitelinked_fossils[i],
+                                           weight=5.0) )
+}
+
+
+
+### Create deterministic nodes to monitor various tree statistics ###
+# Monitor the number of sampled ancestors in the FBD-tree #
+num_samp_anc := fbd_tree.numSampledAncestors();
+
+                    
+# Monitor the age of the extant bears #
+
+# Monitor the ages of the two jointly moved fossils
+age_Indarctos_arctoides := tmrca(fbd_tree, clade("Indarctos_arctoides"))
+age_Indarctos_punjabiensis := tmrca(fbd_tree, clade("Indarctos_punjabiensis"))
+within_site_age_diff := age_Indarctos_arctoides - age_Indarctos_punjabiensis
+
+###########################################
+# Binary morphological substitution model #
+###########################################
+#Create the Q matrix. These data are binary, so we initialize the Jukes-Cantor matrix with
+# two states
+Q_morpho <- fnJC(2)
+
+#Set up Gamma-distributed rate variation.
+alpha_morpho ~ dnExponential( 1.0 )
+rates_morpho := fnDiscretizeGamma( alpha_morpho, alpha_morpho, 4 )
+
+#Moves on the parameters to the Gamma distribution.
+moves.append( mvScale(alpha_morpho, weight=5.0) )
+
+# We assume a strict morphological clock rate, drawn from an exponential prior #
+clock_morpho ~ dnExponential(1.0)
+
+moves.append( mvScale(clock_morpho, weight=4.0) )
+
+### Create the substitution model and clamp with our observed Standard data ###
+# Here we use the option siteMatrices=true specify that the vector Q #
+# represents a site-specific mixture of rate matrices #
+# We also condition on observing only variable characters using coding="variable" #
+phyMorpho ~ dnPhyloCTMC(tree=fbd_tree, siteRates=rates_morpho, branchRates=clock_morpho, Q=Q_morpho, type="Standard", coding="variable")
+phyMorpho.clamp(morpho)
+
+
+########
+# MCMC #
+########
+
+# initialize the model object #
+mymodel = model(fbd_tree)
+
+monitors = VectorMonitors()
+
+# Create a vector of monitors #
+# 1. for the full model #
+monitors.append( mnModel(filename="output/bears_mvFossilSiteTimeSlideUniform.log", printgen=1, exclude = ["F"]) )
+
+# 2. the tree #
+monitors.append( mnFile(filename="output/bears_mvFossilSiteTimeSlideUniform.trees", printgen=1, fbd_tree) )
+
+
+# Initialize the MCMC object #
+mymcmc = mcmc(mymodel, monitors, moves)
+
+# Run the MCMC #
+mymcmc.run(generations=100)
+
+# Create MCC Tree
+trace = readTreeTrace("output/bears_mvFossilSiteTimeSlideUniform.trees")
+mapTree(trace, file="output/bears_mvFossilSiteTimeSlideUniform.map.tre")
+
+
+# Quit RevBayes #
+q()

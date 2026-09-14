@@ -1,0 +1,56 @@
+Both boundaries are soft; distribution parameterized by normal-tail probability mass
+
+   -2.488397
+   -2.484907
+   -2.484907
+   -2.484907
+   -2.484907
+   -2.488397
+   TRUE
+
+Both boundaries are soft; distribution parameterized by normal-tail standard deviation
+
+   -2.48165
+   -2.47665
+   -2.47665
+   -2.47665
+   -2.47665
+   -2.48165
+
+Upper boundary is soft; distribution parameterized by normal-tail probability mass
+
+   -inf
+   -inf
+   -2.484907
+   -2.484907
+   -2.484907
+   -2.485779
+   TRUE
+
+Upper boundary is soft; distribution parameterized by normal-tail standard deviation
+
+   -inf
+   -inf
+   -2.455363
+   -2.455363
+   -2.455364
+   -2.460363
+
+Lower boundary is soft; distribution parameterized by normal-tail probability mass
+
+   -2.485779
+   -2.484907
+   -2.484907
+   -2.484907
+   -inf
+   -inf
+   TRUE
+
+Lower boundary is soft; distribution parameterized by normal-tail standard deviation
+
+   -2.460363
+   -2.455364
+   -2.455363
+   -2.455363
+   -inf
+   -inf
