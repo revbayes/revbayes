@@ -654,8 +654,8 @@ void PowerPosteriorAnalysis::printStoneAssignmentToWorkers( void )
                 
                 size_t m = resurrection_indices.size();
                 
-                bs = size_t( floor( ( floor(i / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * m ) );
-                be = size_t( floor( ( ceil((i + 1) / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * m ) );
+                bs = size_t( floor(i / double(processors_per_likelihood)) ) * m / worker_count;
+                be = size_t( ceil((i + 1) / double(processors_per_likelihood)) ) * m / worker_count;
                 
                 for (size_t j = bs; j < be; ++j)
                 {
@@ -664,8 +664,8 @@ void PowerPosteriorAnalysis::printStoneAssignmentToWorkers( void )
             }
             else
             {
-                bs = size_t( floor( ( floor(i / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * powers.size() ) );
-                be = size_t( floor( ( ceil((i + 1) / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * powers.size() ) );
+                bs = size_t( floor(i / double(processors_per_likelihood)) ) * powers.size() / worker_count;
+                be = size_t( ceil((i + 1) / double(processors_per_likelihood)) ) * powers.size() / worker_count;
                 
                 for (size_t j = bs; j < be; ++j)
                 {
@@ -801,8 +801,8 @@ void PowerPosteriorAnalysis::runAll(size_t gen, double burnin_fraction, size_t p
             
             size_t m = resurrection_indices.size();
 
-            size_t stone_block_start = size_t( floor( ( floor( pid / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * m ) );
-            size_t stone_block_end   = size_t( floor( ( ceil( (pid + 1) / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * m ) );
+            size_t stone_block_start = size_t( floor( pid / double(processors_per_likelihood)) ) * m / worker_count;
+            size_t stone_block_end   = size_t( ceil( (pid + 1) / double(processors_per_likelihood)) ) * m / worker_count;
             
             printStoneAssignmentToWorkers();
             
@@ -818,8 +818,9 @@ void PowerPosteriorAnalysis::runAll(size_t gen, double burnin_fraction, size_t p
         //    size_t stone_block_start = size_t(floor( (double(pid)   / num_processes ) * powers.size()) );
         //    size_t stone_block_end   = size_t(floor( (double(pid+1) / num_processes ) * powers.size()) );
         
-        size_t stone_block_start = size_t( floor( ( floor( pid / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * powers.size() ) );
-        size_t stone_block_end   = size_t( floor( ( ceil( (pid + 1) / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * powers.size() ) );
+        // Multiply, then divide in integer arithmetic; floor((pid / nproc) * n) in double is not the same ratio.
+        size_t stone_block_start = size_t( floor( pid / double(processors_per_likelihood)) ) * powers.size() / worker_count;
+        size_t stone_block_end   = size_t( ceil( (pid + 1) / double(processors_per_likelihood)) ) * powers.size() / worker_count;
         
         printStoneAssignmentToWorkers();
         
@@ -894,8 +895,8 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
             
             size_t m = resurrection_indices.size();
             
-            size_t bs = size_t( floor( ( floor(i / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * m ) );
-            size_t be = size_t( floor( ( ceil((i + 1) / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * m ) );
+            size_t bs = size_t( floor(i / double(processors_per_likelihood)) ) * m / worker_count;
+            size_t be = size_t( ceil((i + 1) / double(processors_per_likelihood)) ) * m / worker_count;
             std::vector<size_t> tmp;
             
             for (size_t j = bs; j < be; ++j)
@@ -907,8 +908,8 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
         }
         else
         {
-            size_t bs = size_t( floor( ( floor(i / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * powers.size() ) );
-            size_t be = size_t( floor( ( ceil((i + 1) / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * powers.size() ) );
+            size_t bs = size_t( floor(i / double(processors_per_likelihood)) ) * powers.size() / worker_count;
+            size_t be = size_t( ceil((i + 1) / double(processors_per_likelihood)) ) * powers.size() / worker_count;
             std::vector<size_t> tmp;
             
             for (size_t j = bs; j < be; ++j)
