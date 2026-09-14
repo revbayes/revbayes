@@ -35,6 +35,7 @@ namespace RevBayesCore {
         double                                                  computeLnProbability(void);
         void                                                    executeMethod(const std::string &n, const std::vector<const DagNode*> &args, Simplex &rv) const;     //!< Map the member methods to internal function calls
         void                                                    redrawValue(void);
+        void                                                    redrawValue(SimulationCondition c);
         void                                                    setValue(mixtureType *v, bool f=false, bool o=true);
         
         // special handling of state changes
@@ -242,7 +243,6 @@ template <class mixtureType>
 void RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::getAffected(RbOrderedSet<DagNode *> &affected, const DagNode* affecter)
 {
     
-    
     // also delegate to different base distributions
     for (int j = 0; j < base_distributions.size(); ++j)
     {
@@ -255,14 +255,7 @@ void RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::getAffected(RbOrd
 template <class mixtureType>
 void RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::keepSpecialization( const DagNode* affecter )
 {
-    // only do this when the toucher was our parameters
-    //    if ( affecter == parameterValues && this->dag_node != NULL )
-    //    {
-    //        this->dag_node->keepAffected();
-    //    }
-    
-    
-    
+
     // also delegate to different base distributions
     for (int j = 0; j < base_distributions.size(); ++j)
     {
@@ -291,22 +284,40 @@ void RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::redrawValue( void
     TypedDistribution<mixtureType> *selected_base_dist = base_distributions[index];
     selected_base_dist->redrawValue();
 
-    if constexpr (std::is_base_of_v<Cloneable, mixtureType>)
+    (*this->value) = selected_base_dist->getValue();
+        
+    for (int i = 0; i< base_distributions.size(); ++i)
     {
-        delete this->value;
-        this->value = selected_base_dist->getValue().clone();
+        base_distributions[i]->setValue( this->value, true );
     }
-    else
+    
+}
+
+
+template <class mixtureType>
+void RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::redrawValue( SimulationCondition c )
+{
+    
+    const Simplex &probs = probabilities->getValue();
+    
+    RandomNumberGenerator *rng = GLOBAL_RNG;
+    double u = rng->uniform01();
+    size_t index = 0;
+    while ( u > probs[index] )
     {
-        (*this->value) = selected_base_dist->getValue();
+        u -= probs[index];
+        ++index;
     }
+    
+    TypedDistribution<mixtureType> *selected_base_dist = base_distributions[index];
+    selected_base_dist->redrawValue( c );
+    
+    (*this->value) = selected_base_dist->getValue();
     
     for (int i = 0; i< base_distributions.size(); ++i)
     {
         base_distributions[i]->setValue( this->value, true );
     }
-
-    //    Assign<mixtureType, IsDerivedFrom<mixtureType, Assignable>::Is >::doAssign( (*this->value), simulate() );
     
 }
 
