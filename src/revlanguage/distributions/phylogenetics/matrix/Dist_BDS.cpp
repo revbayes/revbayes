@@ -79,7 +79,10 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_BDS::createDistribution( vo
     // reporting term)
     double pres = static_cast<const RealPos &>( present->getRevObject() ).getValue();
 
-    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::BirthDeathWithRateshifts(l, m, p, r, rt, cond, t, true, NULL, pres);
+    // optional prior on the origin, which is the oldest birth
+    RevBayesCore::TypedDistribution<double>* op = createOriginPrior();
+
+    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::BirthDeathWithRateshifts(l, m, p, r, rt, cond, t, true, NULL, op, pres);
 
     return d;
 }
@@ -96,6 +99,8 @@ const MemberRules& Dist_BDS::getParameterRules(void) const
 
     if ( !rules_set )
     {
+        dist_member_rules.push_back( originPriorRule() );
+
         const MemberRules &parentRules = FossilizedBirthDeathRangeProcess<MatrixReal>::getCoreParameterRules();
         dist_member_rules.insert(dist_member_rules.end(), parentRules.begin(), parentRules.end());
 

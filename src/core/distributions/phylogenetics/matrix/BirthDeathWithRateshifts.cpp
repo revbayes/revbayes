@@ -22,8 +22,9 @@ BirthDeathWithRateshifts::BirthDeathWithRateshifts(const DagNode *inspeciation,
                                                    const std::vector<Taxon> &intaxa,
                                                    bool complete_record,
                                                    const TypedDagNode<double> *inorigin,
+                                                   TypedDistribution<double> *inoriginprior,
                                                    double inpresent) :
-    FossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, complete_record, inorigin, NULL, true, inpresent)
+    FossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, complete_record, inorigin, inoriginprior, true, inpresent)
 {
 
 }
@@ -32,6 +33,13 @@ BirthDeathWithRateshifts::BirthDeathWithRateshifts(const DagNode *inspeciation,
 BirthDeathWithRateshifts* BirthDeathWithRateshifts::clone( void ) const
 {
     return new BirthDeathWithRateshifts( *this );
+}
+
+
+/** Without an origin prior every birth is a speciation, as in PyRate. With one the oldest is the origin, as for dnFBDRP. */
+double BirthDeathWithRateshifts::originLnProb( void )
+{
+    return origin_prior ? AbstractFossilizedBirthDeathRangeProcess::originLnProb() : 0.0;
 }
 
 
