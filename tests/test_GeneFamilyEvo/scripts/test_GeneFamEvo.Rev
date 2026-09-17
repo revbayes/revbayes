@@ -1,0 +1,92 @@
+#########################################################################################################
+#
+# RevBayes Validation Test: Gene Family Evolution
+#
+#
+# authors: Haoqing Du
+#
+#########################################################################################################
+
+seed(12345)
+
+#########################
+# Read in the data
+#########################
+
+# Read in the phylogeny.
+phylogeny <- readTrees( "data/Drosophila.tre" )[1]
+
+# Create some vector for the moves and monitors of this analysis
+moves    = VectorMoves()
+monitors = VectorMonitors()
+
+# We need to limit the maximum number of gene copies
+max_genes = 10000
+
+gene_evo_data = readCharacterDataDelimited("data/test_GeneFamEvo.csv", stateLabels=(max_genes + 1), type="NaturalNumbers", delimiter=",", header=FALSE)
+
+
+#########################
+# Gene Family Model
+#########################
+
+
+# We'll use exponential priors to model the rates of gain and
+# loss events along the branches of the phylogeny
+
+# rate of chromosome gains
+gain_rate ~ dnExponential(10.0)
+
+# rate of chromosome losses
+loss_rate ~ dnExponential(10.0)
+
+# rate of polyploidization
+genome_duplication_rate <- 0.0
+
+# Add MCMC moves for each of the rates.
+moves.append( mvScale(gain_rate, lambda=0.1, weight=1) )
+moves.append( mvScale(loss_rate, lambda=0.1, weight=1) )
+
+up_down_scale = mvUpDownScale(weight=2)
+up_down_scale.addVariable( gain_rate, up=TRUE )
+up_down_scale.addVariable( loss_rate, up=TRUE )
+moves.append( up_down_scale )
+
+
+# Now we create the rate matrix for the gene family evolution model.
+# Here we will use a simple model that includes
+# only the rate of gene gain, loss, and duplication.
+# "scalingAndSquaring", "scalingAndSquaringPade", "scalingAndSquaringTaylor", "uniformization", "eigen"
+Q := fnGeneGainLoss(max_genes, gain_rate, loss_rate, method="eigen")
+
+# Here we assume the frequency of gene numbers at the root of the tree are equal.
+root_frequencies <- simplex(rep(1, max_genes + 1))
+
+"ctmc"
+# Now create the stochastic node for the chromosome evolution continuous-time Markov chain (CTMC).
+gene_evo_ctmc ~ dnPhyloCTMC(Q=Q, tree=phylogeny, rootFreq=root_frequencies, type="NaturalNumbers", nSites=1)
+
+"clamp"
+# and clamp the observed chromosome counts data.
+gene_evo_ctmc.clamp(gene_evo_data)
+
+"model"
+# Finally we wrap our model into a single model object.
+mymodel = model(phylogeny)
+
+
+#########################
+# MCMC
+#########################
+
+
+# Create the MCMC monitors:
+mni = 0
+monitors[++mni] = mnModel(filename="output/test_GeneFamEvo.log",printgen=10, separator = TAB)
+
+mymcmc = mcmc(mymodel, monitors, moves)
+mymcmc.burnin(generations=500,tuningInterval=100)
+mymcmc.run(generations=500)
+
+
+q()
