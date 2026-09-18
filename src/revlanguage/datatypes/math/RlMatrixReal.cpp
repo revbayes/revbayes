@@ -177,10 +177,17 @@ const TypeSpec& MatrixReal::getClassTypeSpec(void)
 /** Get type spec */
 const TypeSpec& MatrixReal::getTypeSpec( void ) const
 {
-    
+
     static TypeSpec type_spec = getClassTypeSpec();
-    
+
     return type_spec;
+}
+
+
+/** Print the value of the matrix. */
+void MatrixReal::printValue(std::ostream& o, bool user) const
+{
+    this->getDagNode()->printValue( o, ",", -1, true, true, true );
 }
 
 
