@@ -129,10 +129,18 @@ const TypeSpec& CladogeneticSpeciationRateMatrix::getClassTypeSpec(void) {
 
 /** Get the type spec of this class. We return a member variable because instances might have different element types. */
 const TypeSpec& CladogeneticSpeciationRateMatrix::getTypeSpec(void) const {
-    
+
     static TypeSpec type_spec = getClassTypeSpec();
     return type_spec;
 }
+
+
+/* Print the value of the matrix. */
+void CladogeneticSpeciationRateMatrix::printValue(std::ostream& o, bool user) const
+{
+    this->getDagNode()->printValue( o, ",", -1, true, true, true );
+}
+
 
 void CladogeneticSpeciationRateMatrix::initMethods(void) {
     
