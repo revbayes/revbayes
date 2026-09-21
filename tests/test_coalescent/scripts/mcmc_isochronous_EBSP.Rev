@@ -33,7 +33,7 @@ n_taxa <- taxa.size()
 # Tree model #
 ##############
 
-ESTIMATED_ROOT_AGE <- 375000
+ESTIMATED_ROOT_AGE <- 375000.0
 
 NUM_INTERVALS = (n_taxa - 1)
 pop_size[1] ~ dnExponential( 2/ESTIMATED_ROOT_AGE )
