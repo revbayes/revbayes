@@ -27,11 +27,11 @@ Progress:
 0---------------25---------------50---------------75--------------100
 ********************************************************************
 
-The 10 requested stones will be executed in 10 steps using 1 process as follows:
+The 10 requested stones will be executed in 10 steps using 1 parallel worker as follows:
 
-Process | Step 1 | Step 2 | Step 3 | Step 4 | Step 5 | Step 6 | Step 7 | Step 8 | Step 9 | Step 10
---------|--------|--------|--------|--------|--------|--------|--------|--------|--------|---------
-      1 |      1 |      2 |      3 |      4 |      5 |      6 |      7 |      8 |      9 |      10
+Worker | Step 1 | Step 2 | Step 3 | Step 4 | Step 5 | Step 6 | Step 7 | Step 8 | Step 9 | Step 10
+-------|--------|--------|--------|--------|--------|--------|--------|--------|--------|---------
+     1 |      1 |      2 |      3 |      4 |      5 |      6 |      7 |      8 |      9 |      10
 
 Running power posterior analysis ...
 Stone pre-burnin: -, burnin: +, sampling phase: *
@@ -46,11 +46,11 @@ Step  8 / 10		----------+++*******
 Step  9 / 10		----------+++*******
 Step 10 / 10		----------+++*******
 
-The 10 requested stones will be executed in 10 steps using 1 process as follows:
+The 10 requested stones will be executed in 10 steps using 1 parallel worker as follows:
 
-Process | Step 1 | Step 2 | Step 3 | Step 4 | Step 5 | Step 6 | Step 7 | Step 8 | Step 9 | Step 10
---------|--------|--------|--------|--------|--------|--------|--------|--------|--------|---------
-      1 |      1 |      2 |      3 |      4 |      5 |      6 |      7 |      8 |      9 |      10
+Worker | Step 1 | Step 2 | Step 3 | Step 4 | Step 5 | Step 6 | Step 7 | Step 8 | Step 9 | Step 10
+-------|--------|--------|--------|--------|--------|--------|--------|--------|--------|---------
+     1 |      1 |      2 |      3 |      4 |      5 |      6 |      7 |      8 |      9 |      10
 
 Appending to previous power posterior analysis ...
 Stone pre-burnin: -, burnin: +, sampling phase: *
@@ -64,6 +64,7 @@ Step  7 / 10		**********
 Step  8 / 10		**********
 Step  9 / 10		**********
 Step 10 / 10		**********
+
 
 Marginal likelihood estimates when running the stones all at once:
 

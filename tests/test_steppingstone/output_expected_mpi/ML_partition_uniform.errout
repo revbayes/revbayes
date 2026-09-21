@@ -27,43 +27,44 @@ Progress:
 0---------------25---------------50---------------75--------------100
 ********************************************************************
 
-The 10 requested stones will be executed in 1 step using 10 processes as follows:
+The 10 requested stones will be executed in 1 step using 10 parallel workers as follows:
 
-Process | Step 1
---------|--------
-      1 |      1
-      2 |      2
-      3 |      3
-      4 |      4
-      5 |      5
-      6 |      6
-      7 |      7
-      8 |      8
-      9 |      9
-     10 |     10
+Worker | Step 1
+-------|--------
+     1 |      1
+     2 |      2
+     3 |      3
+     4 |      4
+     5 |      5
+     6 |      6
+     7 |      7
+     8 |      8
+     9 |      9
+    10 |     10
 
 Running power posterior analysis ...
 Stone pre-burnin: -, burnin: +, sampling phase: *
 Step 1 / 1		----------+++*******
 
-The 10 requested stones will be executed in 1 step using 10 processes as follows:
+The 10 requested stones will be executed in 1 step using 10 parallel workers as follows:
 
-Process | Step 1
---------|--------
-      1 |      1
-      2 |      2
-      3 |      3
-      4 |      4
-      5 |      5
-      6 |      6
-      7 |      7
-      8 |      8
-      9 |      9
-     10 |     10
+Worker | Step 1
+-------|--------
+     1 |      1
+     2 |      2
+     3 |      3
+     4 |      4
+     5 |      5
+     6 |      6
+     7 |      7
+     8 |      8
+     9 |      9
+    10 |     10
 
 Appending to previous power posterior analysis ...
 Stone pre-burnin: -, burnin: +, sampling phase: *
 Step 1 / 1		**********
+
 
 Marginal likelihood estimates when running the stones all at once:
 
