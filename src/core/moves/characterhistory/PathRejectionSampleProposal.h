@@ -57,6 +57,7 @@ namespace RevBayesCore {
         PathRejectionSampleProposal*                                clone(void) const;                                                              //!< Clone object
         double                                                      doProposal(void);                                                               //!< Perform proposal
         virtual const std::string&                                  getProposalName(void) const;                                                    //!< Get the name of the proposal for summary printing
+        bool                                                        allowClamped(void) const override { return true; }                             //!< Resamples the latent history of the clamped CTMC, not its observed tip states; ref #600
         double                                                      getProposalTuningParameter(void) const;
         const double                                                getRootBranchLength(void);                                     //!< get the length of the root branch
         void                                                        printParameterSummary(std::ostream &o, bool name_only) const;                                   //!< Print the parameter summary
