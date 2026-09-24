@@ -6,6 +6,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <filesystem>
 
 #include "RevPtr.h"
 #include "RevVariable.h"
@@ -25,6 +26,13 @@ namespace RevLanguage {
         RevPtr<RevVariable> base_variable;
     };
     
+    struct LocInfo
+    {
+        std::filesystem::path filename;
+        int line;
+        LocInfo(const std::filesystem::path& p, int l):filename(p),line(l) {}
+    };
+
     class Environment;
     class SyntaxElement;
     class SyntaxFunctionCall;
@@ -99,7 +107,7 @@ namespace RevLanguage {
         int                 help(const std::string& symbol) const;                                  //!< Get help for a symbol
         int                 help(const std::string& baseSymbol, const std::string& symbol) const;   //!< Get help for a symbol
         int                 help(const SyntaxFunctionCall* root) const;                             //!< Get help for a function call
-        int                 processCommand(std::string& command, const std::shared_ptr<Environment>& env);     //!< Process command with help from Bison
+        int                 processCommand(std::string& command, const std::shared_ptr<Environment>& env, const std::optional<LocInfo>& locinfo = {});     //!< Process command with help from Bison
 
         // State checking functions
         bool                isChecking(void) { return parser_mode == CHECKING; }                     //!< Are we in state-checking mode?
