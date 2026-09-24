@@ -134,8 +134,10 @@ const TypeSpec& CladogeneticSpeciationRateMatrix::getTypeSpec(void) const {
     return type_spec;
 }
 
-
-/* Print the value of the matrix. */
+/** Print the value of the matrix.
+    The 'user' flag is delibrately ignored, we always print in the user-facing
+format so that print and write produces the same output as auto-print
+**/
 void CladogeneticSpeciationRateMatrix::printValue(std::ostream& o, bool user) const
 {
     this->getDagNode()->printValue( o, ",", -1, true, true, true );
