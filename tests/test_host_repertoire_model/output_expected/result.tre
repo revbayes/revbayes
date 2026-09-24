@@ -1,0 +1,12 @@
+Iteration	Posterior	Likelihood	Prior	parasite_tree
+0	-18.2613140768567	-19.4531132387738	1.19179916191711	(Polygonia_satyrus[&index=3]:2.670726,(Polygonia_interrogationis[&index=2]:1.970068,Polygonia_comma[&index=1]:1.970068)[&index=4]:0.700658)[&index=5]:0.000000;
+10	-20.3441545938735	-17.1969683623237	-3.14718623154983	(Polygonia_satyrus[&index=3]:2.670726,(Polygonia_interrogationis[&index=2]:1.970068,Polygonia_comma[&index=1]:1.970068)[&index=4]:0.700658)[&index=5]:0.000000;
+20	-8.12691212419396	-7.21032473407451	-0.916587390119451	(Polygonia_satyrus[&index=3]:2.670726,(Polygonia_interrogationis[&index=2]:1.970068,Polygonia_comma[&index=1]:1.970068)[&index=4]:0.700658)[&index=5]:0.000000;
+30	-13.7289268131055	-12.8309165083715	-0.898010304733992	(Polygonia_satyrus[&index=3]:2.670726,(Polygonia_interrogationis[&index=2]:1.970068,Polygonia_comma[&index=1]:1.970068)[&index=4]:0.700658)[&index=5]:0.000000;
+40	-11.9922292091386	-11.3132117457785	-0.679017463360112	(Polygonia_satyrus[&index=3]:2.670726,(Polygonia_interrogationis[&index=2]:1.970068,Polygonia_comma[&index=1]:1.970068)[&index=4]:0.700658)[&index=5]:0.000000;
+50	-24.0144595630881	-15.364735127968	-8.64972443512016	(Polygonia_satyrus[&index=3]:2.670726,(Polygonia_interrogationis[&index=2]:1.970068,Polygonia_comma[&index=1]:1.970068)[&index=4]:0.700658)[&index=5]:0.000000;
+60	-15.4949179296055	-11.5624679049838	-3.93245002462161	(Polygonia_satyrus[&index=3]:2.670726,(Polygonia_interrogationis[&index=2]:1.970068,Polygonia_comma[&index=1]:1.970068)[&index=4]:0.700658)[&index=5]:0.000000;
+70	-14.1264304122569	-14.7782160015027	0.651785589245808	(Polygonia_satyrus[&index=3]:2.670726,(Polygonia_interrogationis[&index=2]:1.970068,Polygonia_comma[&index=1]:1.970068)[&index=4]:0.700658)[&index=5]:0.000000;
+80	-14.8358052309818	-16.5927761073135	1.75697087633176	(Polygonia_satyrus[&index=3]:2.670726,(Polygonia_interrogationis[&index=2]:1.970068,Polygonia_comma[&index=1]:1.970068)[&index=4]:0.700658)[&index=5]:0.000000;
+90	-13.2047580052899	-14.5902379988233	1.38547999353335	(Polygonia_satyrus[&index=3]:2.670726,(Polygonia_interrogationis[&index=2]:1.970068,Polygonia_comma[&index=1]:1.970068)[&index=4]:0.700658)[&index=5]:0.000000;
+100	-5.12904968555659	-7.30173549152823	2.17268580597165	(Polygonia_satyrus[&index=3]:2.670726,(Polygonia_interrogationis[&index=2]:1.970068,Polygonia_comma[&index=1]:1.970068)[&index=4]:0.700658)[&index=5]:0.000000;

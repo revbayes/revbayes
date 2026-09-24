@@ -1,0 +1,129 @@
+#! /bin/env rb
+
+# Based on Infer_simulation.Rev from https://doi.org/10.5061/dryad.x95x69pdw 
+
+seed = 1234
+
+seed(seed)
+out_str = "result"
+
+data_fp = "data/"
+out_fp = "output/"
+
+host_tree_fn = data_fp + "host_tree.phy"
+parasite_tree_fn = data_fp + "parasite_tree.phy"
+interactions_fn = data_fp + "interactions.nex"
+out_prefix = out_fp + out_str
+out_log_fn = out_prefix + ".log"
+out_tree_fn = out_prefix + ".tre"
+out_ch_hist_fn = out_prefix + ".history.txt"
+
+host_tree <- readTrees(host_tree_fn)[1]
+parasite_tree <- readTrees(parasite_tree_fn)[1]
+interactions <- readDiscreteCharacterData(interactions_fn)
+
+# analysis variables
+mni = 1
+mvi = 1
+n_gen = 1e2
+n_burn = 0
+sample_freq = 10
+
+# get the dataset dimensions
+n_host_tips <- host_tree.ntips()
+n_host_branches <- 2 * n_host_tips - 2
+n_parasite_branches <- 2 * parasite_tree.ntips() - 2
+n_sites <- interactions.nchar()
+
+# build model
+switch_rates_pos ~ dnDirichlet( [1,1,1,1] )
+switch_rate_0_to_1 := switch_rates_pos[1]
+switch_rate_0_to_2 := 0.
+switch_rate_1_to_0 := switch_rates_pos[2]
+switch_rate_1_to_2 := switch_rates_pos[3]
+switch_rate_2_to_0 := 0.
+switch_rate_2_to_1 := switch_rates_pos[4]
+
+switch_rates := v( switch_rate_0_to_1, switch_rate_0_to_2, switch_rate_1_to_0, switch_rate_1_to_2, switch_rate_2_to_0, switch_rate_2_to_1 )
+
+Q_char := fnFreeK( switch_rates, false )
+
+phy_scale[1] ~ dnExp(1)
+phy_scale[2] := phy_scale[1]
+
+rate_modifiers[1] := fnHostSwitchRateModifier(tree=host_tree, gainScale=phy_scale)
+
+Q_host := fnRateGeneratorSequence(Q=Q_char,
+                                   numChars=n_host_tips,
+                                   rateModifiers=rate_modifiers)
+
+clock_host ~ dnExp(10)
+
+rf_host <- simplex(1,1,1)
+
+m_host ~ dnPhyloCTMCDASequence(tree=parasite_tree,
+                               Q=Q_host,
+                               branchRates=clock_host,
+                               rootFrequencies=rf_host,
+                               nSites=n_host_tips,
+                               type="Standard")
+
+
+# we observe the parasite-host relationships
+m_host.clamp(interactions)
+
+# add MCMC proposals
+mv[mvi++] = mvScale( phy_scale[1], weight=1 )
+mv[mvi++] = mvSimplex(switch_rates_pos, alpha=10, weight=2, tune=false)
+mv[mvi++] = mvScale(clock_host, weight=2)
+mv[mvi++] = mvCharacterHistory(ctmc=m_host,
+                               qmap_seq=Q_host,
+                               lambda=0.2,
+                               graph="node",
+                               proposal="rejection",
+                               weight=n_parasite_branches)
+mv[mvi++] = mvCharacterHistory(ctmc=m_host,
+                               qmap_seq=Q_host,
+                               lambda=0.2,
+                               graph="branch",
+                               proposal="rejection",
+                               weight=n_parasite_branches*2)
+
+mv[mvi++] = mvSimplex(switch_rates_pos, alpha=25, weight=5, tune=false)
+mv[mvi++] = mvScale(clock_host, weight=5, lambda = 0.2)
+mv[mvi++] = mvCharacterHistory(ctmc=m_host,
+                               qmap_seq=Q_host,
+                               lambda=0.75,
+                               graph="node",
+                               proposal="rejection",
+                               weight=n_parasite_branches/2)
+mv[mvi++] = mvCharacterHistory(ctmc=m_host,
+                               qmap_seq=Q_host,
+                               lambda=0.75,
+                               graph="branch",
+                               proposal="rejection",
+                               weight=n_parasite_branches)
+
+
+# add monitors to save MCMC states
+mn[mni++] = mnScreen(clock_host, phy_scale, printgen=sample_freq)
+mn[mni++] = mnModel(printgen=sample_freq, filename=out_log_fn)
+mn[mni++] = mnCharacterHistorySummary( filename=out_ch_hist_fn,
+                                       ctmc=m_host,
+                                       tree=parasite_tree,
+                                       printgen=sample_freq )
+mn[mni++] = mnFile( parasite_tree, filename=out_tree_fn, printgen=sample_freq)
+
+
+# create model object from model variable
+mdl = model(m_host)
+
+# create MCMC from model, moves, and monitors
+ch = mcmc(mdl, mn, mv)
+ch.run(n_gen)
+
+# run completed
+ch.operatorSummary()
+
+# done!
+quit()
