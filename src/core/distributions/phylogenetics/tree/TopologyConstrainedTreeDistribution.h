@@ -35,7 +35,7 @@ namespace RevBayesCore {
         
         void                                                setBackbone( const TypedDagNode<Tree> *backbone_one=NULL, const TypedDagNode<RbVector<Tree> > *backbone_many=NULL);
         virtual void                                        setStochasticNode(StochasticNode<Tree> *n);                                                         //!< Set the stochastic node holding this distribution
-        virtual void                                        setValue(Tree *v, bool f=false);                                                                    //!< Set the current value, e.g. attach an observation (clamp)
+        virtual void                                        setValue(Tree *v, bool f=false, bool o=false);                                                                    //!< Set the current value, e.g. attach an observation (clamp)
         virtual bool                                        allowsSA(void) { return base_distribution->allowsSA(); }                                            //!< Checks if distribution is compatible with sampled ancestors
         
     protected:

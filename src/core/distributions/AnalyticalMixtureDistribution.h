@@ -383,7 +383,7 @@ void RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::setValue( mixture
 {
     
     // delegate to base class
-    TypedDistribution<mixtureType>::setValue(v, force, owns);
+    TypedDistribution<mixtureType>::setValue(v, force);
     
     // also delegate to different base distributions
     for (int j = 0; j < base_distributions.size(); ++j)
