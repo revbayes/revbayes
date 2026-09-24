@@ -1,43 +1,45 @@
 ################################################################################
 #
 # RevBayes Test-Script: print()/write() formatting for matrices and
-# cladogenetic event matrices
-# 
+#
 # authors: Basanta Khakurel
 ################################################################################
 
-seed(200456)
-
-# Numeric Vector
+print("\n vector")
 v <- [1.0, 2.0, 3.0]
 v
+print("\n")
 print(v)
 
-# MatrixReal
+print("\n MatrixReal")
 a <- matrix([[1,2,3],[4,5,6],[7,8,9]])
 a
+print("\n")
 print(a)
 
-# MatrixRealSymmetric
+print("\n MatrixRealSymmetric")
 b <- fnDecompVarCovar([1.0,1.0,1.0], matrix([[1.0,0.4,0.2],[0.4,1.0,0.3],[0.2,0.3,1.0]]))
 b
+print("\n")
 print(b)
 
 # since print() is just an alias of write()
 # it also should produce properly formatted output
 write(a, filename = "output/matrix_write_test.csv")
 
-# cladogenetic speciation rate matrix
+print("\ncladogenetic speciation rate matrix")
 clado_events = [[0, 0, 1], [0, 1, 0], [1, 0, 1], [1, 1, 0]]
 num_states = 2
 speciation_rates <- rep(0.1, 4)
 clado_matrix <- fnCladogeneticSpeciationRateMatrix(clado_events, speciation_rates, num_states)
 clado_matrix
+print("\n")
 print(clado_matrix)
 
-# cladogenetic probability matrix built from the same event map
+print("\n cladogenetic probability matrix")
 clado_probs <- fnCladogeneticProbabilityMatrix(clado_events, speciation_rates / sum(speciation_rates), num_states)
 clado_probs
+print("\n")
 print(clado_probs)
 
 clear()
