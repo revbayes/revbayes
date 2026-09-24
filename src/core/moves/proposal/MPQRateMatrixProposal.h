@@ -90,7 +90,7 @@ template <class variableType> class StochasticNode;
                                                                changes. */
         void                                                setPolyhedronAlpha(double x);
         double                                              getPolyhedronAlpha(void) const { return poly.getAlphaT(); }
-                                                            /* Where to centre the draw from the polyhedron.
+                                                            /* Where to center the draw from the polyhedron.
 
                                                                Establish it with a short run confined to the non-reversible model,
                                                                monitoring Q.getU(), and pass the posterior mean of the three
@@ -221,7 +221,7 @@ template <class variableType> class StochasticNode;
 
                                                                This is easy to miss because it fails silently: the move still works,
                                                                it simply runs at the default concentration of one about the
-                                                               time-reversible centre, which is exactly the configuration one is
+                                                               time-reversible center, which is exactly the configuration one is
                                                                trying to change. */
         double                                              poly_alpha;
         double                                              poly_center[3];
