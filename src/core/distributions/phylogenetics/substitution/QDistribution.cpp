@@ -1,6 +1,7 @@
 #include "QDistribution.h"
 
 #include <cmath>
+#include <iostream>
 #include "RateMatrix_MPQ.h"
 #include "DistributionDirichlet.h"
 #include "RandomNumberFactory.h"
@@ -10,8 +11,8 @@ using namespace RevBayesCore;
 
 
 
-QDistribution::QDistribution (const TypedDagNode<RbVector<double> >* a, double lrr, double lrnr) : 
-    TypedDistribution<RateGenerator>(new RateMatrix_MPQ()), alpha(a), log_rho_reversible(lrr), log_rho_non_reversible(lrnr) {
+QDistribution::QDistribution (const TypedDagNode<RbVector<double> >* a, double lrr, double lrnr, FIXED_MODEL fm) : 
+    TypedDistribution<RateGenerator>(new RateMatrix_MPQ()), alpha(a), log_rho_reversible(lrr), log_rho_non_reversible(lrnr), fixed_model(fm) {
 
     addParameter(alpha);
     
@@ -30,10 +31,6 @@ QDistribution* QDistribution::clone(void) const {
 double QDistribution::computeLnProbability(void) {
 
     RateMatrix_MPQ& myRateMatrix = static_cast<RateMatrix_MPQ&>(*this->value);
-    
-    /* Read reversibility from the rate matrix itself.  This class used to keep
-       its own isReversible flag, which was never assigned anywhere, so the
-       polytope volume below was being chosen by an uninitialized bool. */
     bool is_reversible = myRateMatrix.getIsReversible();
 
     // get the current value for alpha (prior on stationary frequencies)
@@ -49,31 +46,39 @@ double QDistribution::computeLnProbability(void) {
     else
         lnProb += log_rho_non_reversible;
 
-    /* Given pi, the weights w_ij = pi_i q_ij are uniform on the polytope of the
-       current model, so the density is the reciprocal of that polytope's volume
-       measured in the same free coordinates the reversible-jump Jacobian is taken
-       in: (w_AC, w_AG, w_AT, w_CG, w_CT) for the time-reversible model, a 5-simplex
-       of volume 1/(5! 2^5) = 1/3840, and (w_AC, w_AG, w_AT, w_CA, w_CG, w_CT, w_GA,
-       w_GC) for the non-reversible model, the circulation polytope of K4 with volume
-       1/(48 8!) = 1/1935360.  Both are constants.  There is no dependence on the
-       stationary frequencies and none on the rates: the pairing of a flat prior in
-       w with a Jacobian taken in w is what makes the acceptance probability well
-       defined, and a mismatched pairing is easy to introduce and hard to notice. */
     if (is_reversible == true)
         lnProb += std::log(3840.0);
     else
         lnProb += std::log(1935360.0);
 
+#   ifdef MPQ_DEBUG_PRIOR
+        {
+        static long n_rev = 0;
+        static long n_non = 0;
+        long& n = ( is_reversible ? n_rev : n_non );
+        n++;
+        if ( n <= 3 )
+            {
+            std::cerr << "QDistribution prior [" << (is_reversible ? "reversible" : "non-reversible") << "]"
+                      << "  Dirichlet = " << RbStatistics::Dirichlet::lnPdf(currentAlpha, bf)
+                      << "  lnRho = "     << (is_reversible ? log_rho_reversible : log_rho_non_reversible)
+                      << "  lnInvVolume = " << (is_reversible ? std::log(3840.0) : std::log(1935360.0))
+                      << "  total = "     << lnProb << std::endl;
+            std::cerr << "    alpha =";
+            for (size_t i=0; i<currentAlpha.size(); i++)
+                std::cerr << " " << currentAlpha[i];
+            std::cerr << "    pi =";
+            for (size_t i=0; i<bf.size(); i++)
+                std::cerr << " " << bf[i];
+            std::cerr << std::endl;
+            }
+        }
+#   endif
+
     return lnProb;
 }
 
-/* Set the prior odds log(rho_R / rho_N) while keeping rho_R + rho_N = 1.
-
-   Only the difference of the two matters to the MCMC, so the normalization is
-   for reporting, but it has to be done in a form that survives a large tilt:
-   the whole point of tuning is that delta may have to reach into the tens or
-   hundreds before a strongly supported model stops monopolizing the chain, and
-   exp(delta) overflows long before log1p of it does. */
+/* Set the prior odds log(rho_R / rho_N) while keeping rho_R + rho_N = 1 */
 void QDistribution::setLnPriorOdds(double delta) {
 
     if (delta > 0.0)
@@ -121,6 +126,29 @@ void QDistribution::executeMethod(const std::string &n, const std::vector<const 
         RateMatrix_MPQ& my_rate_matrix = static_cast<RateMatrix_MPQ&>(*this->value);
         rv = my_rate_matrix.getRates();
         }
+    else if (n == "getU")
+        {
+        // where in the polyhedron the current non-reversible model sits.
+        RateMatrix_MPQ& my_rate_matrix = static_cast<RateMatrix_MPQ&>(*this->value);
+        mpq_class u1, u2, u3;
+        rv.clear();
+        if ( my_rate_matrix.getIsReversible() == true )
+            {
+            rv.push_back( 0.5 );
+            rv.push_back( 0.5 );
+            rv.push_back( 0.5 );
+            }
+        else if ( my_rate_matrix.recoverU(u1, u2, u3) == true )
+            {
+            rv.push_back( u1.get_d() );
+            rv.push_back( u2.get_d() );
+            rv.push_back( u3.get_d() );
+            }
+        else
+            {
+            throw RbException("Could not recover the point in the polyhedron from the rate matrix.");
+            }
+        }
     else
         {
         throw RbException("The Q-Distribution does not have a member method called '" + n + "'.");
@@ -131,7 +159,7 @@ void QDistribution::executeMethod(const std::string &n, const std::vector<const 
 /* The prior on the model indicator, exposed so that it can be monitored.
 
    This has to be logged whenever the prior is tuned, because the sampled model
-   frequencies mean nothing on their own: the Bayes factor is recovered from them
+   frequencies mean nothing on their own. The Bayes factor is recovered from them
    together with the prior odds that produced them,
 
        BF_NR = (p_N / p_R) * exp(lnPriorOdds)
@@ -166,11 +194,6 @@ void QDistribution::swapParameterInternal(const DagNode *oldP, const DagNode *ne
         }
 }
 
-
-//void QDistribution::keepSpecialization(DagNode *toucher);
-//void QDistribution::restoreSpecialization(DagNode *toucher);
-//void QDistribution::touchSpecialization(DagNode *toucher, bool touchAll);
-
 void QDistribution::redrawValue(void) {
     
     // implement how to draw a new value from the prior
@@ -180,9 +203,17 @@ void QDistribution::redrawValue(void) {
 
     const std::vector<double>& curr_alpha = alpha->getValue();
     
-    double u = log( rng->uniform01() );
-    
-    if ( u < log_rho_reversible )
+    /* When the distribution is confined to one model, start there; otherwise draw
+       the model from its prior. */
+    bool start_reversible;
+    if ( fixed_model == REVERSIBLE_ONLY )
+        start_reversible = true;
+    else if ( fixed_model == NON_REVERSIBLE_ONLY )
+        start_reversible = false;
+    else
+        start_reversible = ( log( rng->uniform01() ) < log_rho_reversible );
+
+    if ( start_reversible == true )
         {
         my_rate_matrix.initializeTimeReversibleModel(curr_alpha, rng);
         }

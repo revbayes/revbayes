@@ -6,6 +6,7 @@
 
 #include "DagNode.h"
 #include "MetropolisHastingsMove.h"
+
 #include "Proposal.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
@@ -264,13 +265,7 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     const std::vector<DagNode*> nodes = getDagNodes();
 
 
-
-    // --------------------------
-    //
-    //     DEBUG (BEGIN)
-    //
-    // --------------------------
-#ifdef DEBUG_MCMC
+#   ifdef DEBUG_MCMC
     double ln_posterior_before_move = 0.0;
     for (size_t i = 0; i < nodes.size(); ++i)
     {
@@ -321,17 +316,7 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     {
         throw RbException()<<"Issue before executing '" << proposal->getProposalName() << "' on '" << nodes[0]->getName() << "' before move because posterior didn't match when re-touching: " << ln_posterior_before_move << " and " << ln_posterior_before_move_after_touch << ".";
     }
-#endif
-    // --------------------------
-    //
-    //     DEBUG (END)
-    //
-    // --------------------------
-
-
-
-
-
+#   endif
 
     // Propose a new value
     proposal->prepareProposal();

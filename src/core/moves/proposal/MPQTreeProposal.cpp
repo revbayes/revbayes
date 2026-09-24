@@ -187,6 +187,44 @@ void MPQTreeProposal::printParameterSummary(std::ostream &o, bool name_only) con
  * where complex undo operations are known/implement, we need to revert
  * the value of the variable/DAG-node to its original value.
  */
+
+/* Re-announce every branch touched by a re-rooting, once the tree is in its final
+   shape.
+
+   Why this is needed. The rotation of the tree is done with addChild, removeChild,
+   setParent and setBranchLength, and each of those fires a change event as it goes.
+   The likelihood listens to those events and marks partial likelihoods dirty from
+   the announced node up to the root, stopping as soon as it meets a node that is
+   already dirty. Fired mid-rotation, an event walks whatever parent chain exists at
+   that moment, which is not the chain that will exist when the likelihood is
+   finally computed; and a node that is already dirty stops the walk before a
+   parent it acquired later. On top of that the likelihood deliberately does NOT
+   recompute a node's transition probability matrix on a topology event, because
+   for its own topology moves a branch never changes direction. A re-rooting
+   reverses every branch on the path, and under a non-reversible model a reversed
+   branch needs a new matrix: P(t) is not P(t) transposed.
+
+   Firing a branch-length event on every touched node after the surgery is complete
+   fixes both. Each such event flags the node's matrix for recomputation and walks
+   the final parent chain. Nodes already dirty are skipped, which is harmless. The
+   cost is a handful of events on the path, and no new likelihood calculation.
+
+   The symptom this cures is silent: a likelihood that is cached against the wrong
+   transition matrices and then carried forward as the current state, so that every
+   full recomputation afterwards disagrees with it by several log units. DEBUG_MCMC
+   catches it as "posterior didn't match when re-touching". */
+static void reannounceBranches( const std::vector<TopologyNode*>& touched )
+{
+    for (size_t i=0; i<touched.size(); i++)
+    {
+        TopologyNode* n = touched[i];
+        if ( n != NULL && n->isRoot() == false )
+        {
+            n->setBranchLength( n->getBranchLength(), true );
+        }
+    }
+}
+
 void MPQTreeProposal::undoProposal( void ) 
 {
     
@@ -304,6 +342,13 @@ void MPQTreeProposal::undoProposal( void )
             node.setBranchLength( stored_first_root_branch_length );
             marked_nodes[1]->setBranchLength( stored_second_root_branch_length );
         }
+
+        // as in the forward move: announce the final shape, not the intermediate ones
+        std::vector<TopologyNode*> touched( marked_nodes );
+        touched.push_back( new_root_node );
+        touched.push_back( &current_root->getChild(0) );
+        touched.push_back( &current_root->getChild(1) );
+        reannounceBranches( touched );
 
         /* The root move is the only proposal here that rearranges topology, and
            the reversal above is written by hand rather than restored from a copy.
@@ -597,13 +642,18 @@ double MPQTreeProposal::updateRootPosition(void)
 //        ln_hastings_ratio -= log(new_total_root_branch_length);
     }
     
-    
-    
-//    tau.debugPrint();
-//    std::cerr << tau.getNewickRepresentation() << std::endl << std::endl;
+    /* The tree is now in its final shape. Announce every branch the rotation
+       touched once more, so the likelihood's dirty flags and transition matrices
+       are set against this shape and not the intermediate ones; see
+       reannounceBranches. The touched set is the whole marked path plus both
+       children of the root, which covers every branch whose length or direction
+       changed. */
+    std::vector<TopologyNode*> touched( marked_nodes );
+    touched.push_back( stored_root_node );
+    touched.push_back( &current_root->getChild(0) );
+    touched.push_back( &current_root->getChild(1) );
+    reannounceBranches( touched );
 
-//    return RbConstants::Double::neginf;
-//    return ln_hastings_ratio;
     return 0.0;
 }
 

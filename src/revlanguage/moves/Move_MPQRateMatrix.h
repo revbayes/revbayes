@@ -36,6 +36,9 @@ class TypeSpec;
         RevPtr<const RevVariable>                   weight;
         RevPtr<const RevVariable>                   tune;
         RevPtr<const RevVariable>                   tune_model_prior;
+        RevPtr<const RevVariable>                   polyhedron_alpha;
+        RevPtr<const RevVariable>                   polyhedron_center;
+        RevPtr<const RevVariable>                   tune_polyhedron_alpha;
         
     };
     
