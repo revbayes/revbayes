@@ -16,41 +16,26 @@ namespace RevBayesCore {
     /**
      * @brief Distribution on a rate matrix.
      *
-     * The ....
-     *
-     *
      * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Sebastian Hoehna)
+     * @author The RevBayes Development Core Team (Sebastian Hoehna and John Huelsenbeck)
      * @since 2014-03-18, version 1.0
      *
      */
     class QDistribution : public TypedDistribution<RateGenerator>, public MemberObject< Boolean >, public MemberObject< Simplex >, public MemberObject< RbVector<double> >, public MemberObject< double > {
 
     public:
-                                                QDistribution (const TypedDagNode<RbVector<double> >* alpha, double log_rho_rev, double log_rho_nr);                                                                        //!< Constructor
+        enum FIXED_MODEL { FREE, REVERSIBLE_ONLY, NON_REVERSIBLE_ONLY };
+
+                                                QDistribution (const TypedDagNode<RbVector<double> >* alpha, double log_rho_rev, double log_rho_nr, FIXED_MODEL fm = FREE);   //!< Constructor
         
                                                 // public member functions
         QDistribution*                          clone(void) const;                                                                         //!< Create an independent clone
-
-        /* The prior on the model indicator.
-
-           These are ordinary data members rather than DAG parameters, so that a
-           move can retune them: with a large Bayes factor the chain would
-           otherwise never visit the disfavoured model and its posterior
-           probability could not be estimated at all. Tilting the prior until the
-           chain splits its time evenly between the two models fixes that, and
-           costs nothing, because
-
-               BF_NR  =  (p_N / p_R) * (rho_R / rho_N)
-
-           recovers the Bayes factor from any prior odds whatsoever. Only the
-           variance of that estimate depends on the tilt, and it is smallest at
-           50:50. Whatever tilt is used has to be reported, which is what the
-           getters below are for. */
         double                                  getLnRhoReversible(void) const { return log_rho_reversible; }
         double                                  getLnRhoNonReversible(void) const { return log_rho_non_reversible; }
         double                                  getLnPriorOdds(void) const { return log_rho_reversible - log_rho_non_reversible; }
         void                                    setLnPriorOdds(double delta);                                                              //!< Set log(rho_R/rho_N), keeping rho_R + rho_N = 1
+        FIXED_MODEL                             getFixedModel(void) const { return fixed_model; }
+        bool                                    isModelFixed(void) const { return fixed_model != FREE; }
 
     protected:
 
@@ -68,8 +53,9 @@ namespace RevBayesCore {
         void                                    redrawValue(void);
 
         const TypedDagNode<RbVector<double> >*  alpha;                          //!< parameter for the prior on the stationary frequencies
-        double                                  log_rho_reversible;             //!< log of the prior probability of the time-reversible model
-        double                                  log_rho_non_reversible;         //!< log of the prior probability of the non-reversible model
+        double                                  log_rho_reversible;               //!< log of the prior probability of the time-reversible model
+        double                                  log_rho_non_reversible;            //!< log of the prior probability of the non-reversible model
+        FIXED_MODEL                             fixed_model;                     //!< confine the chain to one model, for measuring them separately
     };
 }
 

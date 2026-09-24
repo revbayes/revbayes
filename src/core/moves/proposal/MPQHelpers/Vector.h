@@ -20,29 +20,32 @@ namespace RevBayesCore {
          */
         
     public:
-                        Vector(void);
-                        Vector(const Vector& v);
-                        Vector(int xI, int yI, int zI);
-                        Vector(double xD, double yD, double zD);
-                        Vector(mpq_class& xQ, mpq_class& yQ, mpq_class& zQ);
-        bool            operator==(Vector& rhs);
-        bool            operator!=(Vector& rhs);
-        Vector&         operator+=(Vector& rhs);
-        Vector          cross(Vector& rhs);
-        mpq_class       distanceSquared(const Vector& vec) const;
-        mpq_class&      getX(void) { return x; }
-        mpq_class&      getY(void) { return y; }
-        mpq_class&      getZ(void) { return z; }
-        std::string     getStr(void);
-        double          length(void);
-        void            normalize(void);
-        void            set(mpq_class& xQ, mpq_class& yQ, mpq_class& zQ);
-        void            setX(mpq_class& xQ) { x = xQ; }
-        void            setY(mpq_class& yQ) { y = yQ; }
-        void            setZ(mpq_class& zQ) { z = zQ; }
-        mpq_class       x;
-        mpq_class       y;
-        mpq_class       z;
+                            Vector(void);
+                            Vector(const Vector& v);
+                            Vector(int xI, int yI, int zI);
+                            Vector(double xD, double yD, double zD);
+                            Vector(mpq_class& xQ, mpq_class& yQ, mpq_class& zQ);
+        bool                operator==(Vector& rhs);
+        bool                operator!=(Vector& rhs);
+        Vector&             operator+=(Vector& rhs);
+        Vector              cross(Vector& rhs);
+        mpq_class           distanceSquared(const Vector& vec) const;
+        mpq_class&          getX(void) { return x; }
+        mpq_class&          getY(void) { return y; }
+        mpq_class&          getZ(void) { return z; }
+        const mpq_class&    getX(void) const { return x; }
+        const mpq_class&    getY(void) const { return y; }
+        const mpq_class&    getZ(void) const { return z; }
+        std::string         getStr(void);
+        double              length(void);
+        void                normalize(void);
+        void                set(mpq_class& xQ, mpq_class& yQ, mpq_class& zQ);
+        void                setX(mpq_class& xQ) { x = xQ; }
+        void                setY(mpq_class& yQ) { y = yQ; }
+        void                setZ(mpq_class& zQ) { z = zQ; }
+        mpq_class           x;
+        mpq_class           y;
+        mpq_class           z;
         
         friend std::ostream& operator<<(std::ostream& os, const Vector& pt);
     };

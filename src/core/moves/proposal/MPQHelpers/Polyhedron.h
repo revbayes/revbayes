@@ -156,6 +156,52 @@ namespace RevBayesCore {
         Polyhedron&         operator=(const Polyhedron& p) = delete;
         void                certify(void);
         void                setAlphaT(double x) { alphaT = x; }
+                            /* The point every tetrahedron of the triangulation shares.
+
+                               It is (1/2,1/2,1/2) by default, which is the time reversible
+                               matrix: the one point guaranteed to lie inside the polyhedron
+                               whatever the weights are, since there every w_ij equals its
+                               backbone weight. Raising alphaT concentrates the draw about
+                               it, and about THAT point concentrating is the wrong thing to
+                               do whenever the data favour non-reversibility, because it is
+                               exactly where the non-reversible likelihood equals the
+                               reversible one.
+
+                               setCenter moves it somewhere the data actually like. The
+                               polyhedron changes shape with every proposal, so a point that
+                               was inside when it was chosen need not be inside now; rather
+                               than give up, the point is pulled back along the straight line
+                               joining it to (1/2,1/2,1/2) until it is inside again, and then
+                               a little further to keep it off the facet. Every constraint of
+                               the polyhedron is affine in (u1,u2,u3), so where that line
+                               crosses the boundary is a rational number and is computed
+                               exactly, not searched for. The pull-back applies to that
+                               proposal only: the requested centre is kept and tried afresh
+                               each time. */
+        void                setCenter(const Vector& v);
+        void                setCenter(double x, double y, double z);
+        void                useReversibleCenter(void);
+        const Vector&       getCenter(void) const { return center; }
+        bool                getUsingReversibleCenter(void) const { return useDesiredCenter == false; }
+        long                getNumCenterClipped(void) const { return numCenterClipped; }
+        const mpq_class&    getSumJacobians(void) const { return sumJacobians; }
+        double              getAlphaT(void) const { return alphaT; }
+
+        /* Failure reporting.
+
+           Every path below that cannot produce a valid proposal density returns
+           negative infinity rather than throwing, so the move is rejected cleanly,
+           and increments one of these counters. A rejection caused by a failure is
+           indistinguishable at the MCMC level from a rejection caused by the data,
+           which is exactly how a broken jump can masquerade as overwhelming
+           evidence: the chain simply never enters one of the models and the tuned
+           prior odds run away without bound. Counting them separately is what tells
+           the two apart. */
+        long                getNumDegenerateWeights(void) const { return num_degenerate_weights; }
+        long                getNumPointNotValid(void) const { return num_point_not_valid; }
+        long                getNumPointNotLocated(void) const { return num_point_not_located; }
+        long                getNumBadAlphaC(void) const { return num_bad_alpha_c; }
+        long                getNumFailures(void) const { return num_degenerate_weights + num_point_not_valid + num_point_not_located + num_bad_alpha_c; }
         double              lnProbabilityForward(std::vector<mpq_class>& W, Vector& pt);
         double              lnProbabilityReverse(std::vector<mpq_class>& W, Vector& pt);
         
@@ -172,6 +218,10 @@ namespace RevBayesCore {
         bool                intersect(Plane& plane1, Plane& plane2, Plane& plane3, Vector& intersection);
         bool                isInTetrahedron(Vector* pt, Vector* center, Vector* v1, Vector* v2, Vector* v3, mpq_class& b1, mpq_class& b2, mpq_class& b3, mpq_class& b4);
         bool                isValid(Vector& pt);
+        bool                weightsAreUsable(std::vector<mpq_class>& W);
+        void                chooseCenter(void);
+        void                constraintValues(const Vector& pt, std::vector<mpq_class>& g) const;
+        static void         reportFailure(const char* what, long count);
         void                sampleTetrahedron(Plane* pln, Vector* center, Vector* v1, Vector* v2, Vector* v3, Vector& pt, VectorInfo& info);
         void                setWeights(std::vector<mpq_class>& W);
         
@@ -210,7 +260,23 @@ namespace RevBayesCore {
         mpq_class           hQ;
         mpq_class           iQ;
         
+        /* The common vertex of every tetrahedron of the triangulation. It is fixed at
+           (1/2, 1/2, 1/2) and must stay there. That point is the time reversible
+           matrix, whose weights are the backbone weights themselves, so it is a
+           valid point of the polyhedron for ANY weights; no other point can be
+           guaranteed that, because the shape of the polyhedron changes with every
+           proposal. The volumes of the tetrahedra, and hence the proposal density,
+           are all measured from here. */
         Vector              center;                   // vectors representing the constraints directly used
+        Vector              reversibleCenter;         // (1/2,1/2,1/2); always inside, whatever the weights
+        Vector              desiredCenter;            // where the user asked the centre to be
+        bool                useDesiredCenter;         // has a centre been asked for?
+        mpq_class           centerShrink;             // how far back from the facet to stop, as a fraction
+        long                numCenterClipped;         // proposals on which the requested centre lay outside
+        long                num_degenerate_weights;
+        long                num_point_not_valid;
+        long                num_point_not_located;
+        long                num_bad_alpha_c;
         Vector              xzMinA_Zero_Zero;         // for initializing the planes for those constraints
         Vector              xzMaxA_Zero_Zero;
         Vector              xzMinA_One_Zero;
