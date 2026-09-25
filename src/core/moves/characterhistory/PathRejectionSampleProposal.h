@@ -242,7 +242,8 @@ double RevBayesCore::PathRejectionSampleProposal<charType>::computeLnProposal(co
 
         // get the new transition rate
         double tr = rm.getRate( static_cast<CharacterEventDiscrete*>(currState[ (*it_h)->getSiteIndex() ])->getState(), static_cast<CharacterEventDiscrete*>(*it_h)->getState(), currAge, branchRate);
-        double sr = rm.getSumOfRates(currState, counts, currAge, branchRate);
+        // unmodified rates, which are used to simulate the path
+        double sr = rm.getSumOfUnmodifiedRates(counts, currAge, branchRate);
 
         // lnP for stepwise events for p(x->y)
         lnP += log(tr) - (sr * dt);
@@ -258,7 +259,7 @@ double RevBayesCore::PathRejectionSampleProposal<charType>::computeLnProposal(co
     }
 
     // lnL for final non-event
-    double sr = rm.getSumOfRates(currState, counts, currAge, branchRate);
+    double sr = rm.getSumOfUnmodifiedRates(counts, currAge, branchRate);
     lnP -= sr * (currAge - endAge);
 
     return lnP;
