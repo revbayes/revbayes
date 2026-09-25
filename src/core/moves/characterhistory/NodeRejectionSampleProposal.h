@@ -427,6 +427,15 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::prepareProposal( void 
 
     const double root_branch_length = p->getRootBranchLength();
 
+    // sample characters to be updated and pass to proposals before they store their own history
+    sampledCharacters = chooseCharactersToSample(lambda);
+    if ( not ( node->isRoot() && root_branch_length == 0 ) )
+    {
+        nodeProposal->setSampledCharacters(sampledCharacters);
+    }
+    leftProposal->setSampledCharacters(sampledCharacters);
+    rightProposal->setSampledCharacters(sampledCharacters);
+
     nodeProposal->assignNode(node);
     if ( not ( node->isRoot() && root_branch_length == 0 ) ) {
         nodeProposal->prepareProposal();
@@ -462,16 +471,6 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::prepareProposal( void 
             storedSubrootState[site_index] = s;
         }
     }
-
-
-    // sample characters to be updated and pass to proposals
-    sampledCharacters = chooseCharactersToSample(lambda);
-    if ( not ( node->isRoot() && root_branch_length == 0 ) )
-    {
-        nodeProposal->setSampledCharacters(sampledCharacters);
-    }
-    leftProposal->setSampledCharacters(sampledCharacters);
-    rightProposal->setSampledCharacters(sampledCharacters);
 }
 
 
@@ -953,7 +952,11 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::undoProposal( void )
 
 
     // restore path state
-    nodeProposal->undoProposal();
+    const double root_branch_length = p->getRootBranchLength();
+    if ( not ( node->isRoot() && root_branch_length == 0 ) )
+    {
+        nodeProposal->undoProposal();
+    }
     rightProposal->undoProposal();
     leftProposal->undoProposal();
 

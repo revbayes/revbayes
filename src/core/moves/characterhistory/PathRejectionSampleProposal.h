@@ -473,18 +473,12 @@ void RevBayesCore::PathRejectionSampleProposal<charType>::prepareProposal( void 
     }
 
     // make sure the stored history is properly cleaned (no memory leaks)
+    // stored_history only ever holds clones owned by this proposal, so all of them can be deleted
     std::multiset<CharacterEvent*,CharacterEventCompare>::reverse_iterator it_h;
     std::vector<CharacterEvent*> old_events;
     for (it_h = stored_history.rbegin(); it_h != stored_history.rend(); ++it_h)
     {
-        if (lambda == 1.0)
-        {
-            old_events.push_back( *it_h );
-        }
-        else if (sampledCharacters.find( (*it_h)->getSiteIndex() ) != sampledCharacters.end())
-        {
-            old_events.push_back( *it_h );
-        }
+        old_events.push_back( *it_h );
     }
     for ( size_t i=0; i<old_events.size(); ++i )
     {
@@ -518,6 +512,11 @@ void RevBayesCore::PathRejectionSampleProposal<charType>::prepareProposal( void 
         }
     }
 
+    // determine sampled characters
+    if (!sampled_characters_assigned)
+    {
+        sampledCharacters = sampleCharacters(lambda);
+    }
 
     BranchHistory* bh = &p->getHistory(*node);
     //    stored_history = history;
@@ -532,13 +531,6 @@ void RevBayesCore::PathRejectionSampleProposal<charType>::prepareProposal( void 
         {
             stored_history.insert( (*it_h)->clone() );
         }
-    }
-
-
-    // determine sampled characters
-    if (!sampled_characters_assigned)
-    {
-        sampledCharacters = sampleCharacters(lambda);
     }
 
     // flag node as dirty
@@ -708,34 +700,37 @@ void RevBayesCore::PathRejectionSampleProposal<charType>::undoProposal( void )
         throw RbException("Failed cast.");
     }
 
-    // delete new events
     BranchHistory* bh = &p->getHistory(*node);
 
-    std::multiset<CharacterEvent*,CharacterEventCompare> proposed_history = bh->getHistory();
-    std::multiset<CharacterEvent*,CharacterEventCompare>::reverse_iterator it_h;
-    std::vector<CharacterEvent*> events;
-    for (it_h = proposed_history.rbegin(); it_h != proposed_history.rend(); ++it_h)
+    std::multiset<CharacterEvent*,CharacterEventCompare> proposed_history;
+
+    if (lambda == 1.0)
     {
-        if (lambda == 1.0)
+        // delete new events
+        proposed_history = bh->getHistory();
+        std::multiset<CharacterEvent*,CharacterEventCompare>::reverse_iterator it_h;
+        std::vector<CharacterEvent*> events;
+        for (it_h = proposed_history.rbegin(); it_h != proposed_history.rend(); ++it_h)
         {
             events.push_back( *it_h );
         }
-        else if (sampledCharacters.find( (*it_h)->getSiteIndex() ) != sampledCharacters.end())
+        for ( size_t i=0; i<events.size(); ++i )
         {
-            events.push_back( *it_h );
+            CharacterEvent* e = events[i];
+            delete e;
         }
+
+        // swap current value and stored value
+        bh->setHistory(stored_history);
     }
-    for ( size_t i=0; i<events.size(); ++i )
+    else
     {
-        CharacterEvent* e = events[i];
-        delete e;
+        // updateHistory erases and deletes the sampled sites' current events, then inserts the stored ones
+        bh->updateHistory(stored_history, sampledCharacters);
     }
 
     // flag node as dirty
     const_cast<TopologyNode*>(node)->fireTreeChangeEvent(RevBayesCore::TreeChangeEventMessage::CHARACTER_HISTORY);
-
-    // swap current value and stored value
-    bh->setHistory(stored_history);
 
     // clear old histories
     proposed_history.clear();
