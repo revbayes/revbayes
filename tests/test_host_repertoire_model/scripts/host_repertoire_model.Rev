@@ -1,5 +1,3 @@
-#! /bin/env rb
-
 # Based on Infer_simulation.Rev from https://doi.org/10.5061/dryad.x95x69pdw 
 
 seed = 1234
@@ -106,7 +104,6 @@ mv[mvi++] = mvCharacterHistory(ctmc=m_host,
 
 
 # add monitors to save MCMC states
-mn[mni++] = mnScreen(clock_host, phy_scale, printgen=sample_freq)
 mn[mni++] = mnModel(printgen=sample_freq, filename=out_log_fn)
 mn[mni++] = mnCharacterHistorySummary( filename=out_ch_hist_fn,
                                        ctmc=m_host,
@@ -126,4 +123,5 @@ ch.run(n_gen)
 ch.operatorSummary()
 
 # done!
+clear()
 quit()
