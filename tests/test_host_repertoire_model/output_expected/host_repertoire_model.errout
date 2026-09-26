@@ -1,0 +1,23 @@
+   Attempting to read the contents of file "host_tree.phy"
+   Successfully read file
+   Attempting to read the contents of file "parasite_tree.phy"
+   Successfully read file
+   Successfully read one character matrix from file 'data/interactions.nex'
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 9 different moves in a random move schedule with 33 moves per iteration
+   
+
+                  Name                  | Param              |  Weight  |  Tried   | Accepted | Acc. Ratio| Parameters
+===============================================================================================================================
+Scaling                                  phy_scale[1]             1.0000        120        101      0.8417 lambda = 1.0000
+DirichletSimplex                         switch_rates_pos         2.0000        209        107      0.5120 alpha = 10.0000
+Scaling                                  clock_host               2.0000        211        172      0.8152 lambda = 1.0000
+NodeRejectionSampleProposal              m_host                   4.0000        406        331      0.8153 lambda = 0.2000
+PathRejectionSampleProposal              m_host                   8.0000        799        764      0.9562 
+DirichletSimplex                         switch_rates_pos         5.0000        479        346      0.7223 alpha = 25.0000
+Scaling                                  clock_host               5.0000        467        453      0.9700 lambda = 0.2000
+NodeRejectionSampleProposal              m_host                   2.0000        189        144      0.7619 lambda = 0.7500
+PathRejectionSampleProposal              m_host                   4.0000        420        390      0.9286 
+

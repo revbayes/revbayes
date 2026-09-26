@@ -1,0 +1,12 @@
+Iteration	Posterior	Likelihood	Prior	parasite_tree
+0	-18.26131	-19.45311	1.191799	(Polygonia_satyrus[&index=3]:2.670726,(Polygonia_interrogationis[&index=2]:1.970068,Polygonia_comma[&index=1]:1.970068)[&index=4]:0.700658)[&index=5]:0.000000;
+10	-20.34415	-17.19697	-3.147186	(Polygonia_satyrus[&index=3]:2.670726,(Polygonia_interrogationis[&index=2]:1.970068,Polygonia_comma[&index=1]:1.970068)[&index=4]:0.700658)[&index=5]:0.000000;
+20	-8.126912	-7.210325	-0.9165874	(Polygonia_satyrus[&index=3]:2.670726,(Polygonia_interrogationis[&index=2]:1.970068,Polygonia_comma[&index=1]:1.970068)[&index=4]:0.700658)[&index=5]:0.000000;
+30	-13.72893	-12.83092	-0.8980103	(Polygonia_satyrus[&index=3]:2.670726,(Polygonia_interrogationis[&index=2]:1.970068,Polygonia_comma[&index=1]:1.970068)[&index=4]:0.700658)[&index=5]:0.000000;
+40	-11.99223	-11.31321	-0.6790175	(Polygonia_satyrus[&index=3]:2.670726,(Polygonia_interrogationis[&index=2]:1.970068,Polygonia_comma[&index=1]:1.970068)[&index=4]:0.700658)[&index=5]:0.000000;
+50	-24.01446	-15.36474	-8.649724	(Polygonia_satyrus[&index=3]:2.670726,(Polygonia_interrogationis[&index=2]:1.970068,Polygonia_comma[&index=1]:1.970068)[&index=4]:0.700658)[&index=5]:0.000000;
+60	-15.49492	-11.56247	-3.93245	(Polygonia_satyrus[&index=3]:2.670726,(Polygonia_interrogationis[&index=2]:1.970068,Polygonia_comma[&index=1]:1.970068)[&index=4]:0.700658)[&index=5]:0.000000;
+70	-14.12643	-14.77822	0.6517856	(Polygonia_satyrus[&index=3]:2.670726,(Polygonia_interrogationis[&index=2]:1.970068,Polygonia_comma[&index=1]:1.970068)[&index=4]:0.700658)[&index=5]:0.000000;
+80	-14.83581	-16.59278	1.756971	(Polygonia_satyrus[&index=3]:2.670726,(Polygonia_interrogationis[&index=2]:1.970068,Polygonia_comma[&index=1]:1.970068)[&index=4]:0.700658)[&index=5]:0.000000;
+90	-13.20476	-14.59024	1.38548	(Polygonia_satyrus[&index=3]:2.670726,(Polygonia_interrogationis[&index=2]:1.970068,Polygonia_comma[&index=1]:1.970068)[&index=4]:0.700658)[&index=5]:0.000000;
+100	-5.12905	-7.301735	2.172686	(Polygonia_satyrus[&index=3]:2.670726,(Polygonia_interrogationis[&index=2]:1.970068,Polygonia_comma[&index=1]:1.970068)[&index=4]:0.700658)[&index=5]:0.000000;

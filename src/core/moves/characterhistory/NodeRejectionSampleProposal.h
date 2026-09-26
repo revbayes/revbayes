@@ -54,6 +54,7 @@ namespace RevBayesCore {
         double                                                      doProposal(void);                                               //!< Perform proposal
         size_t                                                      getNodeStateIndex(TopologyNode* nd);                            // get the index of the node state of the first character                                    //!< Get the name of the proposal for summary printing
         const std::string&                                          getProposalName(void) const;                                    //!< Get the name of the proposal for summary printing
+        bool                                                        allowClamped(void) const override { return true; }             //!< Resamples the latent history of the clamped CTMC, not its observed tip states; ref #600
         double                                                      getProposalTuningParameter(void) const;
         void                                                        printParameterSummary(std::ostream &o, bool name_only) const;                   //!< Print the parameter summary
         void                                                        prepareProposal(void);                                          //!< Prepare the proposal
