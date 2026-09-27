@@ -76,12 +76,6 @@ double BirthDeathWithRateshifts::rangeLnProb( size_t i )
     // include speciation density
     double lnProb = log( birth[bi] );
 
-    // skip the rest for extant taxa with no fossil samples
-    if ( taxa[i].getMaxAge() == present )
-    {
-        return lnProb;
-    }
-
     // include extinction density
     if ( ranges[i].survived == false ) lnProb += log( death[di] );
 
@@ -101,7 +95,9 @@ double BirthDeathWithRateshifts::rangeLnProb( size_t i )
     // fossil non-sampling normalization over [d,b]
     lnProb -= psi_b_d;
 
-    if ( condition == "sampling" )
+    // an extant taxon with no fossil still pays exposure over [present,b], but has no fossil to
+    // condition on: the present sample observes it
+    if ( condition == "sampling" && taxa[i].getMaxAge() != present )
     {
         lnProb -= log(-expm1(-psi_b_d));
     }
