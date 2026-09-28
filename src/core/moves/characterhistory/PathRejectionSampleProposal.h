@@ -73,6 +73,7 @@ namespace RevBayesCore {
     protected:
 
         void                                                        swapNodeInternal(DagNode *oldN, DagNode *newN);                                 //!< Swap the DAG nodes the Proposal is working on
+        bool                                                        allCharactersSampled(void) const;                                               //!< Are all characters updated by this proposal?
         void                                                        fillStateCounts(std::vector<CharacterEvent*> s, std::vector<size_t> &counts);
         double                                                      getBranchRate(size_t index) const;
 
@@ -154,7 +155,7 @@ void RevBayesCore::PathRejectionSampleProposal<charType>::cleanProposal( void )
     std::vector<CharacterEvent*> events;
     for (it_h = stored_history.rbegin(); it_h != stored_history.rend(); ++it_h)
     {
-        if (lambda == 1.0)
+        if ( allCharactersSampled() )
         {
             events.push_back( *it_h );
         }
@@ -389,7 +390,7 @@ double RevBayesCore::PathRejectionSampleProposal<charType>::doProposal( void )
     }
 
     // assign values back to model for likelihood
-    if (lambda == 1.0)
+    if ( allCharactersSampled() )
     {
         bh->setHistory(proposed_histories);
     }
@@ -404,6 +405,19 @@ double RevBayesCore::PathRejectionSampleProposal<charType>::doProposal( void )
     return storedLnProb - proposedLnProb;
 }
 
+
+
+/**
+ * Check whether every character is updated by the current proposal.
+ *
+ * Used instead of checking lambda == 1.0, as the lambda we sample characters
+ * with might come from a parent proposal (e.g. NodeRejectionSampleProposal)
+ */
+template<class charType>
+bool RevBayesCore::PathRejectionSampleProposal<charType>::allCharactersSampled( void ) const
+{
+    return sampledCharacters.size() == numCharacters;
+}
 
 
 template<class charType>
@@ -523,7 +537,7 @@ void RevBayesCore::PathRejectionSampleProposal<charType>::prepareProposal( void 
     const std::multiset<CharacterEvent*,CharacterEventCompare>& history = bh->getHistory();
     for (it_h = history.rbegin(); it_h != history.rend(); ++it_h)
     {
-        if (lambda == 1.0)
+        if ( allCharactersSampled() )
         {
             stored_history.insert( (*it_h)->clone() );
         }
@@ -704,7 +718,7 @@ void RevBayesCore::PathRejectionSampleProposal<charType>::undoProposal( void )
 
     std::multiset<CharacterEvent*,CharacterEventCompare> proposed_history;
 
-    if (lambda == 1.0)
+    if ( allCharactersSampled() )
     {
         // delete new events
         proposed_history = bh->getHistory();
