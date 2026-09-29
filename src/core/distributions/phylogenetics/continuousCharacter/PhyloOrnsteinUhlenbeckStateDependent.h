@@ -37,8 +37,8 @@ namespace RevBayesCore {
         void                                                                setSigma(const TypedDagNode< RbVector< double > >* s);
         void                                                                setTheta(const TypedDagNode< double >* t);
         void                                                                setTheta(const TypedDagNode< RbVector< double > >* t);
-        void                                                                setWithinSpeciesVariance(const TypedDagNode< RbVector< RbVector< double > > > *wsv);
-        void                                                                setNumberOfSamplesPerSpecies(const TypedDagNode< RbVector< RbVector< double > > > *nsp);
+        void                                                                setWithinSpeciesVariance(const TypedDagNode< RbVector< double > > *wsv);
+        void                                                                setNumberOfSamplesPerSpecies(const TypedDagNode< RbVector< double > > *nsp);
         void                                                                setValue(ContinuousCharacterData *v, bool f=false);                                     //!< Set the current value, e.g. attach an observation (clamp)
         void                                                                setRootTreatment(ROOT_TREATMENT rt);
         ROOT_TREATMENT                                                      getRootTreatment() const { return root_treatment; }
@@ -60,7 +60,7 @@ namespace RevBayesCore {
         virtual void                                                        restoreSpecialization(const DagNode *restorer);
         void                                                                simulateRecursively(const TopologyNode& node, std::vector< ContinuousTaxonData > &t);
 
-        std::vector<double>                                                 simulateRootCharacters(size_t n);
+        double                                                              simulateRootCharacters(size_t n=0);
         void                                                                simulateTipSamples( const std::vector< ContinuousTaxonData > &taxon_data );
         double                                                              sumRootLikelihood(void);
         virtual void                                                        touchSpecialization(const DagNode *toucher, bool touchAll);
@@ -114,8 +114,8 @@ namespace RevBayesCore {
         const TypedDagNode< RbVector< double > >*                           state_dependent_alpha;
         const TypedDagNode< RbVector< double > >*                           state_dependent_sigma;
         const TypedDagNode< RbVector< double > >*                           state_dependent_theta;
-        const TypedDagNode< RbVector< RbVector< double > > >*               within_species_variance;
-        const TypedDagNode< RbVector< RbVector< double > > >*               number_of_samples_per_species;
+        const TypedDagNode< RbVector< double > >*                           within_species_variance;
+        const TypedDagNode< RbVector< double > >*                           number_of_samples_per_species;
 
     };
 

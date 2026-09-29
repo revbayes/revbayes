@@ -53,7 +53,11 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
 
     // get the parameters
     size_t n = size_t( static_cast<const Natural &>( n_sites->getRevObject() ).getValue() );
-
+    if ( n != 1 )
+    {
+         throw RbException("The state-dependent OU model only supports univariate continuous character. To infer multiple univariate continuous characters under the same character history, please create multiple OUSD distributions.");
+    }
+    
     const CharacterHistory& rl_char_hist = static_cast<const RevLanguage::CharacterHistory&>( character_history->getRevObject() );
     RevBayesCore::TypedDagNode<RevBayesCore::CharacterHistoryDiscrete>* char_hist   =  rl_char_hist.getDagNode();
     size_t number_states = char_hist->getValue().getNumberOfStates();
@@ -186,16 +190,16 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
 
         }
 
-        RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double>>>* sp_var  = static_cast<const ModelVector<ModelVector<RealPos>>&>( species_var->getRevObject() ).getDagNode();
-
-        if (sp_var->getValue().size() != n)
-        {
-            throw RbException()<< "The number of sites (" << n << ") specified doesn't match the size of the within-species variance matrix (" << sp_var->getValue().size() << ")";
-        }
-        else
-        {
-            dist->setWithinSpeciesVariance( sp_var );
-        }
+        RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double>>* sp_var  = static_cast<const ModelVector<RealPos>&>( species_var->getRevObject() ).getDagNode();
+// 
+//         if (sp_var->getValue().size() != n)
+//         {
+//             throw RbException()<< "The number of sites (" << n << ") specified doesn't match the size of the within-species variance matrix (" << sp_var->getValue().size() << ")";
+//         }
+//         else
+//         {
+        dist->setWithinSpeciesVariance( sp_var );
+        // }
 
     }
 
@@ -208,16 +212,16 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
         }
         else
         {
-            RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double>>>* n_samples  = static_cast<const ModelVector<ModelVector<RealPos>>&>( num_samples_per_species->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double>>* n_samples  = static_cast<const ModelVector<RealPos>&>( num_samples_per_species->getRevObject() ).getDagNode();
 
-            if (n_samples->getValue().size() != n)
-            {
-                throw RbException()<< "The number of sites (" << n << ") specified doesn't match the size of the number-of-samples-per-species matrix (" << n_samples->getValue().size() << ")";
-            }
-            else
-            {
-                dist->setNumberOfSamplesPerSpecies( n_samples );
-            }
+            // if (n_samples->getValue().size() != n)
+            // {
+            //     throw RbException()<< "The number of sites (" << n << ") specified doesn't match the size of the number-of-samples-per-species matrix (" << n_samples->getValue().size() << ")";
+            // }
+            // else
+            // {
+            dist->setNumberOfSamplesPerSpecies( n_samples );
+            // }
         }
 
     }
@@ -316,9 +320,9 @@ const MemberRules& Dist_PhyloOrnsteinUhlenbeckStateDependent::getParameterRules(
         dist_member_rules.push_back( new OptionRule ("rootTreatment", new RlString("optimum"), rootTreatmentTypes, "Whether the root value should be assumed to be equal to the optimum at the root (the default), assumed to be a random variable distributed according to the equilibrium state of the OU process, or whether to estimate the ancestral value as an independent parameter.") );
 
 
-        dist_member_rules.push_back( new ArgumentRule( "withinSpeciesVariance" , ModelVector<ModelVector<RealPos>>::getClassTypeSpec(), "The within-species variance for each species at each site.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        dist_member_rules.push_back( new ArgumentRule( "withinSpeciesVariance" , ModelVector<RealPos>::getClassTypeSpec(), "The within-species variance for each species.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
-        dist_member_rules.push_back( new ArgumentRule( "numberOfSamplesPerSpecies" , ModelVector<ModelVector<RealPos>>::getClassTypeSpec(), "The number of samples for each species at each site.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        dist_member_rules.push_back( new ArgumentRule( "numberOfSamplesPerSpecies" , ModelVector<RealPos>::getClassTypeSpec(), "The number of samples for each species.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
         std::vector<std::string> singleSampleTreatmentTypes;
         singleSampleTreatmentTypes.push_back( "mean" );
@@ -326,7 +330,7 @@ const MemberRules& Dist_PhyloOrnsteinUhlenbeckStateDependent::getParameterRules(
         singleSampleTreatmentTypes.push_back( "as_is" );
         dist_member_rules.push_back( new OptionRule ("singleSampleTreatment", new RlString("mean"), singleSampleTreatmentTypes, "What to be input as the variance of species mean at the tip is the species contains one sample only. Options \"mean\" and \"median\" calculate the mean/median of the variance of species mean for species with multiple sample. Option \"as_is\" uses the value provided in the vector of \"withinSpeciesVariance\" directly.") );
 
-        dist_member_rules.push_back( new ArgumentRule( "nSites",  Natural::getClassTypeSpec(), "The number of sites which is used for the initialized (random draw) from this distribution.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1) ) );
+        dist_member_rules.push_back( new ArgumentRule( "nSites",  Natural::getClassTypeSpec(), "The number of continuous character.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(1) ) );
 
         rules_set = true;
     }

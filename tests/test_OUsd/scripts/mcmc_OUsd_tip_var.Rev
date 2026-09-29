@@ -14,8 +14,7 @@ seed(12345)
 #######################
 # Reading in the Data #
 #######################
-getwd()
-setwd("../../tests")
+
 # The phylogeny and character data were taken from Toljagić et al. (2018). Millions of Years Behind: Slow Adaptation of Ruminants to Grasslands.
 
 
@@ -69,13 +68,13 @@ for (i in 1:num_disc_states){
 ##########################################################
 # Option 2: get within species variance from data matrix #
 ##########################################################
-within_species_var <- [fnGetContinuousCharacterAsVector(cont, 2)]
+within_species_var <- fnGetContinuousCharacterAsVector(cont, 2)
 
 
 #########################################
 # specify number of samples for species #
 #########################################
-num_samples_per_species <- [fnGetContinuousCharacterAsVector(cont, 3)]
+num_samples_per_species <- fnGetContinuousCharacterAsVector(cont, 3)
 
 
 Y ~ dnPhyloOUSD(characterHistory=char_hist, alpha=alpha, theta=theta, sigma=sigma2^0.5, nSites=1,
@@ -92,7 +91,7 @@ Y.clamp(cont)
 
 mymodel = model(Y)
 
-#monitors.append( mnModel(filename="output/artiodactyla_OUsd_tip_var.log", printgen=100) )
+monitors.append( mnModel(filename="output/artiodactyla_OUsd_tip_var.log", printgen=100) )
 
 
 ################
@@ -104,7 +103,7 @@ mymcmc = mcmc(mymodel, monitors, moves, nruns=1, combine="none")
 
 ### run the MCMC ###
 mymcmc.run(generations=100)
-#
-#
-## you may want to quit RevBayes now
-#q()
+
+
+# you may want to quit RevBayes now
+q()
