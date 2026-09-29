@@ -186,7 +186,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
 
         }
 
-        RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal>* sp_var  = static_cast<const MatrixReal&>( species_var->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double>>>* sp_var  = static_cast<const ModelVector<ModelVector<RealPos>>&>( species_var->getRevObject() ).getDagNode();
 
         if (sp_var->getValue().size() != n)
         {
@@ -208,7 +208,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
         }
         else
         {
-            RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal>* n_samples  = static_cast<const MatrixReal&>( num_samples_per_species->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double>>>* n_samples  = static_cast<const ModelVector<ModelVector<RealPos>>&>( num_samples_per_species->getRevObject() ).getDagNode();
 
             if (n_samples->getValue().size() != n)
             {
@@ -316,9 +316,9 @@ const MemberRules& Dist_PhyloOrnsteinUhlenbeckStateDependent::getParameterRules(
         dist_member_rules.push_back( new OptionRule ("rootTreatment", new RlString("optimum"), rootTreatmentTypes, "Whether the root value should be assumed to be equal to the optimum at the root (the default), assumed to be a random variable distributed according to the equilibrium state of the OU process, or whether to estimate the ancestral value as an independent parameter.") );
 
 
-        dist_member_rules.push_back( new ArgumentRule( "withinSpeciesVariance" , MatrixReal::getClassTypeSpec(), "The within-species variance for each species at each site.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        dist_member_rules.push_back( new ArgumentRule( "withinSpeciesVariance" , ModelVector<ModelVector<RealPos>>::getClassTypeSpec(), "The within-species variance for each species at each site.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
-        dist_member_rules.push_back( new ArgumentRule( "numberOfSamplesPerSpecies" , MatrixReal::getClassTypeSpec(), "The number of samples for each species at each site.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        dist_member_rules.push_back( new ArgumentRule( "numberOfSamplesPerSpecies" , ModelVector<ModelVector<RealPos>>::getClassTypeSpec(), "The number of samples for each species at each site.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
         std::vector<std::string> singleSampleTreatmentTypes;
         singleSampleTreatmentTypes.push_back( "mean" );
