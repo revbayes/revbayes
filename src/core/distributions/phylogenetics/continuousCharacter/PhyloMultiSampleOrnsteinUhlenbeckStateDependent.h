@@ -1,5 +1,5 @@
-#ifndef PhyloOrnsteinUhlenbeckStateDependent_H
-#define PhyloOrnsteinUhlenbeckStateDependent_H
+#ifndef PhyloMultiSampleOrnsteinUhlenbeckStateDependent_H
+#define PhyloMultiSampleOrnsteinUhlenbeckStateDependent_H
 
 #include "AbstractPhyloBrownianProcess.h"
 #include "CharacterHistoryDiscrete.h"
@@ -17,18 +17,19 @@ namespace RevBayesCore {
      * @author The RevBayes Development Core Team (Sebastian Hoehna)
      * @since 2015-01-23, version 1.0
      */
-    class PhyloOrnsteinUhlenbeckStateDependent : public TypedDistribution< ContinuousCharacterData > {
+    class PhyloMultiSampleOrnsteinUhlenbeckStateDependent : public TypedDistribution< ContinuousCharacterData > {
 
     public:
         enum                                                                ROOT_TREATMENT { OPTIMUM, EQUILIBRIUM, PARAMETER };
-        enum                                                                SINGLE_SAMPLE_TREATMENT { MEAN, MEDIAN, AS_IS };
+        // enum                                                                SINGLE_SAMPLE_TREATMENT { MEAN, MEDIAN, AS_IS };
         // Note, we need the size of the alignment in the constructor to correctly simulate an initial state
-        PhyloOrnsteinUhlenbeckStateDependent(const TypedDagNode<CharacterHistoryDiscrete> *bh, size_t n_sites, ROOT_TREATMENT rt, SINGLE_SAMPLE_TREATMENT st);
-        virtual                                                            ~PhyloOrnsteinUhlenbeckStateDependent(void);                                             //!< Virtual destructor
+        // PhyloMultiSampleOrnsteinUhlenbeckStateDependent(const TypedDagNode<CharacterHistoryDiscrete> *bh, size_t n_sites, ROOT_TREATMENT rt, SINGLE_SAMPLE_TREATMENT st, const std::vector<Taxon> &ta, const TypedDagNode< RbVector< double > > *wsv);
+        PhyloMultiSampleOrnsteinUhlenbeckStateDependent(const TypedDagNode<CharacterHistoryDiscrete> *bh, size_t n_sites, ROOT_TREATMENT rt, const std::vector<Taxon> &ta, const TypedDagNode< RbVector< double > > *wsv);
+        virtual                                                            ~PhyloMultiSampleOrnsteinUhlenbeckStateDependent(void);                                             //!< Virtual destructor
 
         // public member functions
         // virtual
-        virtual PhyloOrnsteinUhlenbeckStateDependent*                       clone(void) const;                                                                      //!< Create an independent clone
+        virtual PhyloMultiSampleOrnsteinUhlenbeckStateDependent*                       clone(void) const;                                                                      //!< Create an independent clone
 
         void                                                                setAlpha(const TypedDagNode< double >* a);
         void                                                                setAlpha(const TypedDagNode< RbVector< double > >* a);
@@ -37,15 +38,11 @@ namespace RevBayesCore {
         void                                                                setSigma(const TypedDagNode< RbVector< double > >* s);
         void                                                                setTheta(const TypedDagNode< double >* t);
         void                                                                setTheta(const TypedDagNode< RbVector< double > >* t);
-        void                                                                setWithinSpeciesVariance(const TypedDagNode< RbVector< double > > *wsv);
-        void                                                                setNumberOfSamplesPerSpecies(const TypedDagNode< RbVector< double > > *nsp);
+        // void                                                                setWithinSpeciesVariance(const TypedDagNode< RbVector< double > > *wsv);
+        // void                                                                setNumberOfSamplesPerSpecies(const TypedDagNode< RbVector< double > > *nsp);
         void                                                                setValue(ContinuousCharacterData *v, bool f=false);                                     //!< Set the current value, e.g. attach an observation (clamp)
         void                                                                setRootTreatment(ROOT_TREATMENT rt);
-        ROOT_TREATMENT                                                      getRootTreatment() const { return root_treatment; }
-        void                                                                setSingleSampleTreatment(SINGLE_SAMPLE_TREATMENT st);
-        SINGLE_SAMPLE_TREATMENT                                             getSingleSampleTreatment() const { return single_sample_treatment; }
-        double                                                              getVarianceOfSpeciesMean(const std::string &n) const;
-
+        // void                                                                setSingleSampleTreatment(SINGLE_SAMPLE_TREATMENT st);
         // non-virtual
         virtual void                                                        redrawValue(void);
         double                                                              computeLnProbability(void);
@@ -65,13 +62,19 @@ namespace RevBayesCore {
         double                                                              sumRootLikelihood(void);
         virtual void                                                        touchSpecialization(const DagNode *toucher, bool touchAll);
 
+        double                                                              computeMeanForSpecies(const std::string &n, size_t i);
+        double                                                              getNumberOfSamplesForSpecies(const std::string &n);
+        ROOT_TREATMENT                                                      getRootTreatment() const { return root_treatment; }
+        // SINGLE_SAMPLE_TREATMENT                                             getSingleSampleTreatment() const { return single_sample_treatment; }
+        double                                                              getVarianceOfSpeciesMean(const std::string &n) const;
+        double                                                              getWithinSpeciesVariance(const std::string &n);
+
         // Parameter management functions.
         virtual void                                                        swapParameterInternal(const DagNode *oldP, const DagNode *newP);                         //!< Swap a parameter
 
         double                                                              ln_prob;
         size_t                                                              num_nodes;
         size_t                                                              num_sites;
-        size_t                                                              num_taxa;
         std::vector< std::string >                                          alphabetical_species_names;
 
         // the likelihoods
@@ -89,14 +92,13 @@ namespace RevBayesCore {
 
         double                                                              mean_var_species_mean;
         double                                                              median_var_species_mean;
-        std::vector<double>                                                 variance_of_species_mean;
-        
+        // std::vector<double>                                                 variance_of_species_mean;
     private:
         double                                                              computeRootValue( void ) const;
         double                                                              computeStateDependentAlpha(size_t idx) const;
         double                                                              computeStateDependentSigma(size_t idx) const;
         double                                                              computeStateDependentTheta(size_t idx) const;
-        double                                                              computeVarianceOfSpeciesMean(size_t tip_idx) const;
+        // double                                                              computeVarianceOfSpeciesMean(size_t tip_idx) const;
         void                                                                computeMeanVarianceOfSpeciesMean();
         void                                                                computeMedianVarianceOfSpeciesMean();
         double                                                              simulateEpisode(size_t state_index, double delta_t, double ancestral_value);
@@ -105,9 +107,14 @@ namespace RevBayesCore {
         double                                                              computeEpisodeVariance(double var, size_t state_index, double time);
 
         ROOT_TREATMENT                                                      root_treatment;
-        SINGLE_SAMPLE_TREATMENT                                             single_sample_treatment;
-        const TypedDagNode<CharacterHistoryDiscrete>*                       character_histories;
+        // SINGLE_SAMPLE_TREATMENT                                             single_sample_treatment;
+        std::vector<Taxon>                                                  taxon_map;
+        std::vector<size_t>                                                 number_of_samples_per_species;
+        size_t                                                              num_total_samples;
+        size_t                                                              num_taxa;
+        std::vector<size_t>                                                 site_indices;
 
+        const TypedDagNode<CharacterHistoryDiscrete>*                       character_histories;
         const TypedDagNode< double >*                                       root_value;
         const TypedDagNode< double >*                                       homogeneous_alpha;
         const TypedDagNode< double >*                                       homogeneous_sigma;
@@ -116,7 +123,7 @@ namespace RevBayesCore {
         const TypedDagNode< RbVector< double > >*                           state_dependent_sigma;
         const TypedDagNode< RbVector< double > >*                           state_dependent_theta;
         const TypedDagNode< RbVector< double > >*                           within_species_variance;
-        const TypedDagNode< RbVector< double > >*                           number_of_samples_per_species;
+        
 
     };
 

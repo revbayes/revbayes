@@ -155,6 +155,7 @@
 #include "Dist_PhyloMvtBrownian.h"
 #include "Dist_PhyloMultiSampleOrnsteinUhlenbeck.h"
 #include "Dist_PhyloMultiSampleOrnsteinUhlenbeckREML.h"
+#include "Dist_PhyloMultiSampleOrnsteinUhlenbeckStateDependent.h"
 #include "Dist_PhyloMultivariateBrownianREML.h"
 #include "Dist_PhyloMultivariateBrownianMultiSampleREML.h"
 #include "Dist_PhyloOrnsteinUhlenbeck.h"
@@ -322,27 +323,28 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         /* Branch rate processes (in folder "distributions/phylogenetics/branchrate") */
 
         // white noise process
-        AddDistribution< ModelVector<RealPos>       >( new Dist_PhyloWhiteNoise()                               );
+        AddDistribution< ModelVector<RealPos>       >( new Dist_PhyloWhiteNoise()                                 );
 
         /* trait evolution (in folder "distributions/phylogenetics/branchrate") */
 
-        AddDistribution< ModelVector<RealPos>       >( new Dist_PhyloBranchRateBM()                             );
+        AddDistribution< ModelVector<RealPos>       >( new Dist_PhyloBranchRateBM()                               );
 
         // brownian motion
-        AddDistribution< ModelVector<Real>          >( new Dist_PhyloBrownian()                                 );
-        AddDistribution< ContinuousCharacterData    >( new Dist_PhyloBrownianREML()                             );
-        AddDistribution< ContinuousCharacterData    >( new Dist_PhyloBrownianMVN()                              );
-        AddDistribution< ContinuousCharacterData    >( new Dist_PhyloBrownianMultiSampleREML()                  );
-        AddDistribution< ContinuousCharacterData    >( new Dist_PhyloBrownianProcessStateDependent()            );
-        AddDistribution< ContinuousCharacterData    >( new Dist_PhyloMultiSampleOrnsteinUhlenbeck()             );
-        AddDistribution< ContinuousCharacterData    >( new Dist_PhyloMultiSampleOrnsteinUhlenbeckREML()         );
-        AddDistribution< ContinuousCharacterData    >( new Dist_PhyloMultivariateBrownianREML()                 );
-        AddDistribution< ContinuousCharacterData    >( new Dist_PhyloMultivariateBrownianMultiSampleREML()      );
-        AddDistribution< ModelVector<Real>          >( new Dist_PhyloOrnsteinUhlenbeck()                        );
-        AddDistribution< ContinuousCharacterData    >( new Dist_PhyloOrnsteinUhlenbeckMVN()                     );
-        AddDistribution< ContinuousCharacterData    >( new Dist_PhyloOrnsteinUhlenbeckPruning()                 );
-        AddDistribution< ContinuousCharacterData    >( new Dist_PhyloOrnsteinUhlenbeckThreePoint()              );
-        AddDistribution< ContinuousCharacterData    >( new Dist_PhyloOrnsteinUhlenbeckStateDependent()          );
+        AddDistribution< ModelVector<Real>          >( new Dist_PhyloBrownian()                                   );
+        AddDistribution< ContinuousCharacterData    >( new Dist_PhyloBrownianREML()                               );
+        AddDistribution< ContinuousCharacterData    >( new Dist_PhyloBrownianMVN()                                );
+        AddDistribution< ContinuousCharacterData    >( new Dist_PhyloBrownianMultiSampleREML()                    );
+        AddDistribution< ContinuousCharacterData    >( new Dist_PhyloBrownianProcessStateDependent()              );
+        AddDistribution< ContinuousCharacterData    >( new Dist_PhyloMultiSampleOrnsteinUhlenbeck()               );
+        AddDistribution< ContinuousCharacterData    >( new Dist_PhyloMultiSampleOrnsteinUhlenbeckREML()           );
+        AddDistribution< ContinuousCharacterData    >( new Dist_PhyloMultiSampleOrnsteinUhlenbeckStateDependent() );
+        AddDistribution< ContinuousCharacterData    >( new Dist_PhyloMultivariateBrownianREML()                   );
+        AddDistribution< ContinuousCharacterData    >( new Dist_PhyloMultivariateBrownianMultiSampleREML()        );
+        AddDistribution< ModelVector<Real>          >( new Dist_PhyloOrnsteinUhlenbeck()                          );
+        AddDistribution< ContinuousCharacterData    >( new Dist_PhyloOrnsteinUhlenbeckMVN()                       );
+        AddDistribution< ContinuousCharacterData    >( new Dist_PhyloOrnsteinUhlenbeckPruning()                   );
+        AddDistribution< ContinuousCharacterData    >( new Dist_PhyloOrnsteinUhlenbeckThreePoint()                );
+        AddDistribution< ContinuousCharacterData    >( new Dist_PhyloOrnsteinUhlenbeckStateDependent()            );
 
         // multivariate brownian motion
         AddDistribution< ModelVector< ModelVector<Real> > >( new Dist_PhyloMvtBrownian() );
