@@ -108,10 +108,10 @@ namespace RevBayesCore {
 
         ROOT_TREATMENT                                                      root_treatment;
         // SINGLE_SAMPLE_TREATMENT                                             single_sample_treatment;
-        std::vector<Taxon>                                                  taxon_map;
+        std::vector<Taxon>                                                  taxa;
         std::vector<size_t>                                                 number_of_samples_per_species;
         size_t                                                              num_total_samples;
-        size_t                                                              num_taxa;
+        size_t                                                              num_species;
         std::vector<size_t>                                                 site_indices;
 
         const TypedDagNode<CharacterHistoryDiscrete>*                       character_histories;

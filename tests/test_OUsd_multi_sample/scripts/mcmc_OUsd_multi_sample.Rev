@@ -1,0 +1,138 @@
+################################################################################
+#
+# RevBayes Validation Test: Ornstein-Uhlenbeck model with multiple samples
+#
+# This test verifies that two datasets,
+#
+# i) a six-species phylogeny, with 25 missing data and 10 observations
+#
+# ii) a three-species phylogeny with 10 observations
+#
+# give the same likelihood score given the same parameter values.
+#
+#
+# authors: Priscilla Lau
+#
+################################################################################
+
+seed(12345)
+
+#######################
+# Reading in the Data #
+#######################
+
+### Select the character to analyze
+characterDisc = 1
+characterCont = 1
+
+### Read in sequence data for both genes
+
+cont = readContinuousCharacterData( "data/Drosophila_tpm.nex" )
+cont.excludeAll()
+cont.includeCharacter(characterCont)
+# original data Drosophila_27936_BF.nex
+
+disc = readDiscreteCharacterData( "data/Drosophila_binary.nex" )
+disc.excludeAll()
+disc.includeCharacter(characterDisc)
+num_disc_states = disc.getStateDescriptions().size()
+
+
+### Read in tree
+tree <- readTrees( "data/Drosophila.tre" )[1]
+root_age := tree.rootAge()
+
+# Create some vector for the moves and monitors of this analysis
+moves    = VectorMoves()
+monitors = VectorMonitors()
+
+
+################################
+# CTMC DA IID-Model Parameters #
+################################
+
+# make the Q matrix
+
+rates ~ dnDirichlet([1,1])
+moves.append( mvBetaSimplex( rates, weight=2 ) )
+moves.append( mvDirichletSimplex( rates, weight=2 ) )
+
+lambda ~ dnUniform(0, 0.1)
+
+Q := fnFreeK(lambda*rates, rescaled=FALSE)
+
+# set root frequencies
+rf <- simplex( [0.5, 0.5] )
+
+X ~ dnPhyloCTMCDASiteIID(tree, Q, branchRates=1, type="Standard", rootFrequencies=rf, nSites=1)
+X.setValue(disc)
+
+# include proposals for the discrete character history
+moves.append( mvCharacterHistory(ctmc=X, qmap_site=Q, graph="node",   proposal="rejection", weight=1.0) )
+moves.append( mvCharacterHistory(ctmc=X, qmap_site=Q, graph="branch", proposal="rejection", weight=1.0) )
+
+char_hist := X.characterHistories()
+
+#######################
+# OU-Model Parameters #
+#######################
+
+vy <- cont.var(characterCont)
+
+# OU parameter values
+for (i in 1:num_disc_states){
+  theta[i] ~ dnUniform(-10, 10)
+  moves.append(mvSlide(theta[i], weight = 1.0) )
+
+  a <- ln(2)
+
+  alpha[i] ~ dnLognormal(ln(a), 0.587405)
+  moves.append(mvScale(alpha[i], weight = 1.0) )
+
+  s <- 2 * 2 * a
+  sigma2[i] ~ dnLognormal(ln(s), 0.587405)
+  moves.append(mvScale(sigma2[i], weight = 1.0) )
+
+}
+
+### Within-species variances
+taxon_map = readTaxonData("data/Drosophila_species_map.txt")
+
+# Assume one variance parameter per species
+for (i in 1:tree.ntips()) {
+
+    species_sd[i] ~ dnLognormal(ln(1.0), 0.587)
+    moves.append( mvScale(species_sd[i], weight=2.0) )
+    species_var[i] := species_sd[i] * species_sd[i]
+
+}
+
+###################
+# PhyloCTMC Model #
+###################
+
+Y ~ dnPhyloMultiSampleOrnsteinUhlenbeckStateDependent(characterHistory=char_hist, alpha=alpha, theta=theta, sigma=sigma2^0.5, nSites=1,
+  withinSpeciesVariance=species_var, taxa = taxon_map, rootTreatment = "optimum")
+Y.clamp(cont)
+
+
+#############
+# THE Model #
+#############
+
+# We define our model.
+# We can use any node of our model as a handle, here we chose to use the rate matrix.
+mymodel = model(Y)
+
+
+monitors.append( mnModel(filename="output/test_OUsd_multi_sample.log", printgen=10) )
+
+### workspace mcmc ###
+mymcmc = mcmc(mymodel, monitors, moves, nruns=1, combine="none")
+
+### run the MCMC ###
+mymcmc.run(generations=100)
+
+
+# you may want to quit RevBayes now
+q()

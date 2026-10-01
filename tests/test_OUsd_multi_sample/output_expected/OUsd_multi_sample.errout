@@ -1,0 +1,9 @@
+   Successfully read one character matrix from file 'data/Drosophila_tpm.nex'
+   Successfully read one character matrix from file 'data/Drosophila_binary.nex'
+   Attempting to read the contents of file "Drosophila.tre"
+   Successfully read file
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 16 different moves in a random move schedule with 24 moves per iteration
+   

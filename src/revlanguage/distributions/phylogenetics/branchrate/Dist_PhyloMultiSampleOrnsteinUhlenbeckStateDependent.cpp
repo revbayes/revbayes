@@ -330,7 +330,7 @@ const MemberRules& Dist_PhyloMultiSampleOrnsteinUhlenbeckStateDependent::getPara
 
         dist_member_rules.push_back( new ArgumentRule( "withinSpeciesVariance" , ModelVector<RealPos>::getClassTypeSpec(), "The within-species variance for each species.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
-        dist_member_rules.push_back( new ArgumentRule( "numberOfSamplesPerSpecies" , ModelVector<RealPos>::getClassTypeSpec(), "The number of samples for each species.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        // dist_member_rules.push_back( new ArgumentRule( "numberOfSamplesPerSpecies" , ModelVector<RealPos>::getClassTypeSpec(), "The number of samples for each species.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
         // std::vector<std::string> singleSampleTreatmentTypes;
         // singleSampleTreatmentTypes.push_back( "mean" );
