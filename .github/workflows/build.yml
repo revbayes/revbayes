@@ -160,7 +160,38 @@ jobs:
       if: runner.os == 'macOS'
       run: |
           brew update --auto-update
-          brew install boost ccache coreutils meson
+          # Intel has no bottles for boost or ccache, so Homebrew builds a compiler
+          # to compile them. Build boost below, and install a ccache binary before
+          # ccache-action: that action runs `brew install ccache` if it finds none.
+          if [ "${{ matrix.arch }}" = "mac-intel64" ]; then
+            ver=$(brew info --json=v2 boost | jq -r '.formulae[0].versions.stable')
+            echo "BOOST_VER=$ver" >> "$GITHUB_ENV"
+            echo "BOOST_FROM_SOURCE=true" >> "$GITHUB_ENV"
+          else
+            brew install boost ccache coreutils meson
+          fi
+
+    - name: Cache boost
+      if: runner.os == 'macOS' && env.BOOST_FROM_SOURCE == 'true'
+      id: boost-cache
+      uses: actions/cache@v4
+      with:
+        path: ~/boost
+        key: boost-${{ env.BOOST_VER }}-${{ runner.os }}-${{ runner.arch }}
+
+    - name: Build boost from source
+      if: runner.os == 'macOS' && env.BOOST_FROM_SOURCE == 'true' && steps.boost-cache.outputs.cache-hit != 'true'
+      run: |
+          set -o pipefail
+          u=${BOOST_VER//./_}
+          curl -fL "https://archives.boost.io/release/${BOOST_VER}/source/boost_${u}.tar.gz" | tar xz
+          cd "boost_${u}"
+          ./bootstrap.sh --prefix="$HOME/boost" --with-libraries=regex,thread,date_time,serialization
+          ./b2 -j"$(sysctl -n hw.ncpu)" toolset=clang link=shared threading=multi variant=release cxxflags="-mmacosx-version-min=11.0" linkflags="-mmacosx-version-min=11.0" install
+
+    - name: Point build at source-built boost
+      if: runner.os == 'macOS' && env.BOOST_FROM_SOURCE == 'true'
+      run: echo "BOOST_ROOT=$HOME/boost" >> "$GITHUB_ENV"
 
     - name: Install meson
       run: |
@@ -168,6 +199,37 @@ jobs:
 
     # Caches for different branches are isolated, so we don't need to put the branch name into the key.
     # The total size for all caches in a repository is 5Gb.
+
+    - name: Install ccache (macOS Intel)
+      if: runner.os == 'macOS' && matrix.arch == 'mac-intel64'
+      run: |
+          set -euo pipefail
+          rel=$(curl -fsSL \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ github.token }}" \
+            https://api.github.com/repos/ccache/ccache/releases/latest)
+          case "$(uname -m)" in
+            x86_64) arch=x86_64 ;;
+            arm64) arch=arm64 ;;
+            *) echo "unsupported arch: $(uname -m)" >&2; exit 1 ;;
+          esac
+          url=$(printf '%s\n' "$rel" | jq -r --arg arch "$arch" '
+            (
+              [.assets[] | select(.name | endswith("-darwin.tar.gz"))] +
+              [.assets[] | select(.name | endswith("-darwin-" + $arch + ".tar.gz"))]
+            )[0].browser_download_url // empty
+          ')
+          if [ -z "$url" ]; then
+            echo "No macOS ccache archive in $(printf '%s\n' "$rel" | jq -r .tag_name)" >&2
+            exit 1
+          fi
+          archive=$(basename "$url")
+          echo "Installing $archive from $(printf '%s\n' "$rel" | jq -r .tag_name)"
+          curl -fL "$url" | tar xz
+          mkdir -p "$HOME/.local/bin"
+          cp "${archive%.tar.gz}/ccache" "$HOME/.local/bin/ccache"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          "$HOME/.local/bin/ccache" --version
 
     - name: ccache
       uses: hendrikmuhs/ccache-action@v1.2
