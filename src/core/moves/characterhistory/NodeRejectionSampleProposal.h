@@ -54,6 +54,7 @@ namespace RevBayesCore {
         double                                                      doProposal(void);                                               //!< Perform proposal
         size_t                                                      getNodeStateIndex(TopologyNode* nd);                            // get the index of the node state of the first character                                    //!< Get the name of the proposal for summary printing
         const std::string&                                          getProposalName(void) const;                                    //!< Get the name of the proposal for summary printing
+        bool                                                        allowClamped(void) const override { return true; }             //!< Resamples the latent history of the clamped CTMC, not its observed tip states; ref #600
         double                                                      getProposalTuningParameter(void) const;
         void                                                        printParameterSummary(std::ostream &o, bool name_only) const;                   //!< Print the parameter summary
         void                                                        prepareProposal(void);                                          //!< Prepare the proposal
@@ -426,6 +427,15 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::prepareProposal( void 
 
     const double root_branch_length = p->getRootBranchLength();
 
+    // sample characters to be updated and pass to proposals before they store their own history
+    sampledCharacters = chooseCharactersToSample(lambda);
+    if ( not ( node->isRoot() && root_branch_length == 0 ) )
+    {
+        nodeProposal->setSampledCharacters(sampledCharacters);
+    }
+    leftProposal->setSampledCharacters(sampledCharacters);
+    rightProposal->setSampledCharacters(sampledCharacters);
+
     nodeProposal->assignNode(node);
     if ( not ( node->isRoot() && root_branch_length == 0 ) ) {
         nodeProposal->prepareProposal();
@@ -461,16 +471,6 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::prepareProposal( void 
             storedSubrootState[site_index] = s;
         }
     }
-
-
-    // sample characters to be updated and pass to proposals
-    sampledCharacters = chooseCharactersToSample(lambda);
-    if ( not ( node->isRoot() && root_branch_length == 0 ) )
-    {
-        nodeProposal->setSampledCharacters(sampledCharacters);
-    }
-    leftProposal->setSampledCharacters(sampledCharacters);
-    rightProposal->setSampledCharacters(sampledCharacters);
 }
 
 
@@ -952,7 +952,11 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::undoProposal( void )
 
 
     // restore path state
-    nodeProposal->undoProposal();
+    const double root_branch_length = p->getRootBranchLength();
+    if ( not ( node->isRoot() && root_branch_length == 0 ) )
+    {
+        nodeProposal->undoProposal();
+    }
     rightProposal->undoProposal();
     leftProposal->undoProposal();
 

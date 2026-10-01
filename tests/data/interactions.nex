@@ -1,0 +1,12 @@
+#NEXUS
+
+Begin data;
+Dimensions ntax=3 nchar=3;
+Format datatype=Standard symbols="0123456789" missing=? gap=-;
+Matrix
+Polygonia_satyrus              202
+Polygonia_interrogationis      210
+Polygonia_comma                220
+;
+End;
+

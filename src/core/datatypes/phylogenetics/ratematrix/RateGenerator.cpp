@@ -57,6 +57,12 @@ RbVector<std::string> RateGenerator::getStateDescriptions( void ) const
 
 double RateGenerator::getSumOfRates(const std::vector<CharacterEvent*>& from, const std::vector<size_t> &counts, double age, double rate) const
 {
+    // We do not have any modification of the rates by default (but we might in subclasses)
+    return getSumOfUnmodifiedRates(counts, age, rate);
+}
+
+double RateGenerator::getSumOfUnmodifiedRates(const std::vector<size_t> &counts, double age, double rate) const
+{
 
     // get the rate of leaving the sequence-state
     double sum = 0.0;
