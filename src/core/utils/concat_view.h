@@ -2,11 +2,12 @@
 #define RB_CONCAT_VIEW_H
 
 #include <concepts>
+#include <cstddef>
 #include <iterator>
-#include <memory>
 #include <ranges>
 #include <tuple>
 #include <type_traits>
+#include <utility>
 #include <variant>
 
 namespace RevBayesCore {
@@ -30,26 +31,32 @@ concept concat_compatible_ranges = sizeof...(R) > 0 && (std::ranges::forward_ran
 
 // A C++23 substitute for the forward-traversal part of C++26 concat_view:
 // https://eel.is/c++draft/range.concat
-// Borrow one or more lvalue ranges; neither containers nor elements are copied. All ranges must
-// outlive traversal, and their iterator-invalidation rules apply. Unlike the standard view, this
-// omits temporary ownership, proxy references, reverse traversal, and indexing. Replace it when
-// C++26 concat is available.
-template <class... R>
-    requires detail::concat_compatible_ranges<R...>
-class concat_view : public std::ranges::view_interface<concat_view<R...>> {
-    std::tuple<R*...> ranges_;
+// Adapt inputs with views::all: borrow lvalue containers, own movable temporary containers, and
+// copy or move existing views. Owning a non-owning view does not extend its underlying data's
+// lifetime. Input iterator-invalidation rules still apply; moving or destroying this view
+// invalidates its iterators because they refer back to it. Traversal does not copy elements or allocate.
+// Unlike the standard view, this omits proxy references, reverse traversal, and indexing.
+// Replace it when C++26 concat is available.
+template <std::ranges::view... Views>
+    requires detail::concat_compatible_ranges<Views...>
+class concat_view : public std::ranges::view_interface<concat_view<Views...>> {
+    std::tuple<Views...> ranges_;
 
 public:
+    template <bool Const>
     class iterator {
         friend class concat_view;
 
-        const concat_view* parent_ = nullptr;
-        std::variant<std::ranges::iterator_t<R>...> current_;
-        static constexpr std::size_t last = sizeof...(R) - 1;
+        template <class T>
+        using maybe_const = std::conditional_t<Const, const T, T>;
+
+        maybe_const<concat_view>* parent_ = nullptr;
+        std::variant<std::ranges::iterator_t<maybe_const<Views>>...> current_;
+        static constexpr std::size_t last = sizeof...(Views) - 1;
 
         // Start in the first range, skipping it and any following empty ranges.
-        explicit iterator(const concat_view* parent)
-            : parent_(parent), current_(std::in_place_index<0>, std::ranges::begin(*std::get<0>(parent->ranges_)))
+        explicit iterator(maybe_const<concat_view>* parent)
+            : parent_(parent), current_(std::in_place_index<0>, std::ranges::begin(std::get<0>(parent->ranges_)))
         {
             satisfy<0>();
         }
@@ -61,9 +68,9 @@ public:
         void satisfy()
         {
             if constexpr (I < last)
-                if (std::get<I>(current_) == std::ranges::end(*std::get<I>(parent_->ranges_)))
+                if (std::get<I>(current_) == std::ranges::end(std::get<I>(parent_->ranges_)))
                 {
-                    current_.template emplace<I + 1>(std::ranges::begin(*std::get<I + 1>(parent_->ranges_)));
+                    current_.template emplace<I + 1>(std::ranges::begin(std::get<I + 1>(parent_->ranges_)));
                     satisfy<I + 1>();
                 }
         }
@@ -84,9 +91,9 @@ public:
     public:
         using iterator_concept = std::forward_iterator_tag;
         using iterator_category = std::forward_iterator_tag;
-        using value_type = std::common_type_t<std::ranges::range_value_t<R>...>;
-        using difference_type = std::common_type_t<std::ranges::range_difference_t<R>...>;
-        using reference = std::common_reference_t<std::ranges::range_reference_t<R>...>;
+        using value_type = std::common_type_t<std::ranges::range_value_t<maybe_const<Views>>...>;
+        using difference_type = std::common_type_t<std::ranges::range_difference_t<maybe_const<Views>>...>;
+        using reference = std::common_reference_t<std::ranges::range_reference_t<maybe_const<Views>>...>;
 
         iterator() = default;
 
@@ -117,21 +124,26 @@ public:
         bool operator==(std::default_sentinel_t) const
         {
             return current_.index() == last &&
-                   std::get<last>(current_) == std::ranges::end(*std::get<last>(parent_->ranges_));
+                   std::get<last>(current_) == std::ranges::end(std::get<last>(parent_->ranges_));
         }
     };
 
-    // Deducing lvalue arguments rejects temporaries even with explicit const range template arguments.
-    template <class... Args>
-        requires std::same_as<std::tuple<Args...>, std::tuple<R...>>
-    explicit concat_view(Args&... ranges) : ranges_(std::addressof(ranges)...) {}
+    explicit concat_view(Views... ranges) : ranges_(std::move(ranges)...) {}
 
-    iterator begin() const { return iterator(this); }
+    iterator<false> begin() { return iterator<false>(this); }
+
+    // Const borrowing views can expose mutable elements; const owning views generally cannot.
+    // Only instantiate the const iterator when every const input still meets our range requirements.
+    auto begin() const requires detail::concat_compatible_ranges<const Views...>
+    {
+        return iterator<true>(this);
+    }
+
     std::default_sentinel_t end() const { return {}; }
 };
 
-template <class... R>
-concat_view(R&...) -> concat_view<R...>;
+template <std::ranges::viewable_range... R>
+concat_view(R&&...) -> concat_view<std::views::all_t<R>...>;
 
 }
 
