@@ -54,7 +54,7 @@ RevBayesCore::TypedFunction< RevBayesCore::CladogeneticSpeciationRateMatrix >* F
     const ModelVector<ModelVector<Integer> >& tmp_events  = static_cast<const ModelVector<ModelVector<Integer> > &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     
     for (size_t i = 0; i < tmp_events.size(); i++) {
-        for (size_t j = 0; j < tmp_events.size(); j++) {
+        for (size_t j = 0; j < tmp_events[i].size(); j++) {
             assert(tmp_events[i][j] >= 0);
         }
     }
