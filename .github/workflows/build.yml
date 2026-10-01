@@ -177,7 +177,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ~/boost
-        key: boost-${{ env.BOOST_VER }}-${{ runner.os }}-${{ runner.arch }}
+        key: boost-${{ env.BOOST_VER }}-${{ runner.os }}-${{ runner.arch }}-headerpad
 
     - name: Build boost from source
       if: runner.os == 'macOS' && env.BOOST_FROM_SOURCE == 'true' && steps.boost-cache.outputs.cache-hit != 'true'
@@ -187,11 +187,33 @@ jobs:
           curl -fL "https://archives.boost.io/release/${BOOST_VER}/source/boost_${u}.tar.gz" | tar xz
           cd "boost_${u}"
           ./bootstrap.sh --prefix="$HOME/boost" --with-libraries=regex,thread,date_time,serialization
-          ./b2 -j"$(sysctl -n hw.ncpu)" toolset=clang link=shared threading=multi variant=release cxxflags="-mmacosx-version-min=11.0" linkflags="-mmacosx-version-min=11.0" install
+          ./b2 -j"$(sysctl -n hw.ncpu)" toolset=clang link=shared threading=multi variant=release cxxflags="-mmacosx-version-min=11.0" linkflags="-mmacosx-version-min=11.0 -Wl,-headerpad_max_install_names" install
 
     - name: Point build at source-built boost
       if: runner.os == 'macOS' && env.BOOST_FROM_SOURCE == 'true'
-      run: echo "BOOST_ROOT=$HOME/boost" >> "$GITHUB_ENV"
+      run: |
+        set -euo pipefail
+        echo "BOOST_ROOT=$HOME/boost" >> "$GITHUB_ENV"
+        # b2 records @rpath as the dylib id, and the linker copies that into rb.
+        # Homebrew's libraries use an absolute id, which is what dyld opens.
+        shopt -s nullglob
+        libs=( "$HOME/boost/lib"/libboost_*.dylib )
+        if [ ${#libs[@]} -eq 0 ]; then
+          echo "No Boost dylibs in $HOME/boost/lib" >&2
+          exit 1
+        fi
+        for lib in "${libs[@]}"; do
+          install_name_tool -id "$lib" "$lib"
+          while IFS= read -r dep; do
+            case "$dep" in
+              @rpath/libboost_*.dylib)
+                install_name_tool -change "$dep" "$HOME/boost/lib/${dep#@rpath/}" "$lib"
+                ;;
+            esac
+          done < <(otool -L "$lib" | awk 'NR>1 {print $1}')
+          codesign --force --sign - "$lib"
+        done
+        otool -D "$HOME/boost/lib/libboost_serialization.dylib"
 
     - name: Install meson
       run: |
