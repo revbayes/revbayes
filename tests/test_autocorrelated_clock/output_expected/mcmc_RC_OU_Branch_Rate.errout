@@ -1,0 +1,8 @@
+   Successfully read one character matrix from file 'data/bears_small.nex'
+   Attempting to read the contents of file "bears_extant.tre"
+   Successfully read file
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 7 different moves in a random move schedule with 58 moves per iteration
+   

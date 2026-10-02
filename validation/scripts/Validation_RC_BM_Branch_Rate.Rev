@@ -1,0 +1,109 @@
+################################################################################
+#
+# RevBayes Validation Test
+#
+# Model: (Geometric) Brownian motion relaxed clock model (fixed tree).
+#
+#
+# authors: Sebastian Hoehna
+#
+################################################################################
+
+## Global settings
+
+NUM_VALIDATION_REPLICATES = 100
+NUM_MCMC_ITERATIONS       = 5000
+
+OUTPUT_DIR = "validation_RC_BM_Branch_Rate"
+
+
+#######################
+# Reading in the Data #
+#######################
+
+# Import the molecular sequences #
+# this file contains only the taxa for which sequence data are available #
+cytb <- readDiscreteCharacterData("data/bears_small.nex")
+
+## helpers
+n_taxa <- cytb.size()
+taxa <- cytb.taxa()
+num_branches <- 2*n_taxa-2
+
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
+
+
+
+##############
+# Tree model #
+##############
+
+timetree <- readTrees("data/bears_extant.tre")[1]
+
+
+
+###################################################
+# Brownian motion model on molecular branch rates #
+###################################################
+
+# We assume that clock rates are between 1E-7 and 1E-9 per year
+# since our time is per million years, we multiply by 1E6
+CLOCK_MEAN <- 1E-2
+
+H = 0.587405
+n_branches <- 2 * n_taxa - 2
+root_age := timetree.rootAge()
+
+# The rate at the root is drawn from a lognormal distribution #
+BM_root_rate ~ dnLognormal(ln(CLOCK_MEAN), sd=1.0*H)
+moves.append( mvScale(BM_root_rate, lambda=0.5, tune=true, weight=5.0) )
+
+BM_sigma ~ dnLognormal(ln(4*H/root_age), sd=2.0*H)
+moves.append( mvScale(BM_sigma, lambda=0.5, tune=true, weight=5.0) )
+
+
+branch_rates ~ dnPhyloBranchRateBM(timetree, rootState=BM_root_rate, sigma=BM_sigma)
+
+moves.append( mvVectorSingleElementScale(branch_rates, lambda=0.5, tune=true, weight=2*n_branches) )
+moves.append( mvVectorScale(branch_rates, lambda=0.5, tune=true, weight=5) )
+
+
+
+####################################
+# JC nucleotide substitution model #
+####################################
+
+# Initialize the parameters of substitution matrix #
+
+# Create the matrix #
+Q_cytb <- fnJC(4)
+
+# Create the substitution model and clamp with our observed DNA data #
+phySeq ~ dnPhyloCTMC(tree=timetree, Q=Q_cytb, branchRates=branch_rates, type="DNA")
+phySeq.clamp(cytb)
+
+
+
+#############
+# The Model #
+#############
+
+# We define our model.
+# We can use any node of our model as a handle, here we chose to use the rate matrix.
+mymodel = model( timetree )
+
+
+mymcmc = mcmc(mymodel, monitors, moves)
+
+
+validation = validationAnalysis( mymcmc, NUM_VALIDATION_REPLICATES, directory=OUTPUT_DIR )
+validation.burnin(generations=0.1*NUM_MCMC_ITERATIONS,tuningInterval=100)
+validation.run(generations=NUM_MCMC_ITERATIONS)
+validation.summarize(coverageProbability=0.9)
+validation.summarize(coverageProbability=0.5)
+
+
+# you may want to quit RevBayes now
+q()

@@ -3421,6 +3421,7 @@ moves.append( mvAdaptiveRJSwitch(theta,
 	help_strings[string("mvBirthDeathEventContinuous")][string("name")] = string(R"(mvBirthDeathEventContinuous)");
 	help_strings[string("mvBirthDeathFromAgeEvent")][string("name")] = string(R"(mvBirthDeathFromAgeEvent)");
 	help_strings[string("mvBranchLengthScale")][string("name")] = string(R"(mvBranchLengthScale)");
+	help_strings[string("mvBranchRateNodeValueScale")][string("name")] = string(R"(mvBranchLengthScale)");
 	help_strings[string("mvBurstEvent")][string("name")] = string(R"(mvBurstEvent)");
 	help_arrays[string("mvCharacterHistory")][string("authors")].push_back(string(R"(Priscilla Lau)"));
 	help_strings[string("mvCharacterHistory")][string("description")] = string(R"(A proposal to change the (discrete) character history, at a node or along a
