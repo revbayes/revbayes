@@ -32,6 +32,7 @@ namespace RevBayesCore {
         virtual void                        initFromString( const std::string &s ) { throw RbException("Sebastians (29/6/2016): Missing derived implementations!!!"); }                                                 //!< Serialize (resurrect) the object from a string value
         virtual double                      getSumOfRates(const std::vector<CharacterEvent*>& from, double age=0.0, double rate=1.0) const;
         virtual double                      getSumOfRates(const std::vector<CharacterEvent*>& from, const std::vector<size_t> &counts, double age=0.0, double rate=1.0) const;
+        double                              getSumOfUnmodifiedRates(const std::vector<size_t> &counts, double age=0.0, double rate=1.0) const;                         //!< Sum of per-site rates leaving the given state counts, without any potential rate modifiers
         virtual double                      getSumOfRatesDifferential(std::vector<CharacterEvent*> from, CharacterEventDiscrete* to, double age=0.0, double rate=1.0) const;
 
         // virtual methods that may need to overwritten
