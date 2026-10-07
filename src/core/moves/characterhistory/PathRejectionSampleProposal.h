@@ -48,31 +48,31 @@ namespace RevBayesCore {
     friend class FixedNodeheightPruneAndRegraftCharacterHistoryProposal;
 
     public:
-        PathRejectionSampleProposal( StochasticNode<AbstractHomologousDiscreteCharacterData> *n, double l=1.0, double r=0.234);   //!< Constructor
+        PathRejectionSampleProposal( StochasticNode<AbstractHomologousDiscreteCharacterData> *n, double l=1.0, double r=0.234);                     //!< Constructor
 
         // Basic utility functions
         void                                                        assignNode(TopologyNode* nd);
         virtual double                                              computeLnProposal(const TopologyNode& nd, const BranchHistory& bh);
-        void                                                        cleanProposal(void);
-        PathRejectionSampleProposal*                                clone(void) const;                                                              //!< Clone object
-        double                                                      doProposal(void);                                                               //!< Perform proposal
-        virtual const std::string&                                  getProposalName(void) const;                                                    //!< Get the name of the proposal for summary printing
-        bool                                                        allowClamped(void) const override { return true; }                             //!< Resamples the latent history of the clamped CTMC, not its observed tip states; ref #600
-        double                                                      getProposalTuningParameter(void) const;
-        const double                                                getRootBranchLength(void);                                     //!< get the length of the root branch
-        void                                                        printParameterSummary(std::ostream &o, bool name_only) const;                                   //!< Print the parameter summary
-        void                                                        prepareProposal(void);                                                          //!< Prepare the proposal
+        void                                                        cleanProposal(void) override;
+        PathRejectionSampleProposal*                                clone(void) const override;                                                     //!< Clone object
+        double                                                      doProposal(void) override;                                                      //!< Perform proposal
+        virtual const std::string&                                  getProposalName(void) const override;                                           //!< Get the name of the proposal for summary printing
+        bool                                                        allowClamped(void) const override { return true; }                              //!< Resamples the latent history of the clamped CTMC, not its observed tip states; ref #600
+        double                                                      getProposalTuningParameter(void) const override;
+        const double                                                getRootBranchLength(void);                                                      //!< Get the length of the root branch
+        void                                                        printParameterSummary(std::ostream &o, bool name_only) const override;          //!< Print the parameter summary
+        void                                                        prepareProposal(void) override;                                                 //!< Prepare the proposal
         std::set<size_t>                                            sampleCharacters(double p);
         void                                                        setSampledCharacters(const std::set<size_t>& s);
         void                                                        setRateGenerator(const TypedDagNode<RateGenerator> *d);                         //!< Set the rate generator.
         void                                                        setRateGenerator(const TypedDagNode<RateGeneratorSequence> *d);                 //!< Set the rate generator.
-        void                                                        setProposalTuningParameter(double tp);
-        void                                                        tune(double r);                                                                 //!< Tune the proposal to achieve a better acceptance/rejection ratio
-        void                                                        undoProposal(void);                                                             //!< Reject the proposal
+        void                                                        setProposalTuningParameter(double tp) override;
+        void                                                        tune(double r) override;                                                        //!< Tune the proposal to achieve a better acceptance/rejection ratio
+        void                                                        undoProposal(void) override;                                                    //!< Reject the proposal
 
     protected:
 
-        void                                                        swapNodeInternal(DagNode *oldN, DagNode *newN);                                 //!< Swap the DAG nodes the Proposal is working on
+        void                                                        swapNodeInternal(DagNode *oldN, DagNode *newN) override;                        //!< Swap the DAG nodes the Proposal is working on
         bool                                                        allCharactersSampled(void) const;                                               //!< Are all characters updated by this proposal?
         void                                                        fillStateCounts(std::vector<CharacterEvent*> s, std::vector<size_t> &counts);
         double                                                      getBranchRate(size_t index) const;
