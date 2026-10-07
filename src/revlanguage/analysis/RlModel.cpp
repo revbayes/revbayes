@@ -29,6 +29,8 @@
 #include "Workspace.h"
 #include "WorkspaceToCoreWrapperObject.h"
 
+#include <map>
+
 using namespace RevLanguage;
 
 using std::vector;
@@ -85,6 +87,31 @@ void Model::constructInternalObject( void )
 //    printModelDotGraph();
 }
 
+
+/**
+ * DOT node identifiers must not be heap addresses, since those are not reproducible. Instead, we let
+ * named nodes keep their names, and number unnamed nodes in the order in which cloneDAG() stores
+ * node copies in DagNodeMap (i.e., the node itself, then its parents, then its children).
+ */
+std::map<const RevBayesCore::DagNode*, std::string> Model::dotIdsForNodes(const std::vector<RevBayesCore::DagNode*>& nodes)
+{
+    std::map<const RevBayesCore::DagNode*, std::string> ids;
+    size_t unnamed = 0;
+    for ( auto* n : nodes )
+    {
+        if ( n->getName() != "" )
+        {
+            ids[n] = StringUtilities::sanitizeNodeID( n->getName() );
+        }
+        else
+        {
+            ids[n] = "unnamed_" + std::to_string( unnamed++ );
+        }
+    }
+    return ids;
+}
+
+
 vector<RevPtr<const RevVariable>> getElementVariables(RevPtr<const RevVariable> var)
 {
     if (not var->isVectorVariable())
@@ -100,6 +127,7 @@ vector<RevPtr<const RevVariable>> getElementVariables(RevPtr<const RevVariable> 
 
     return elems;
 }
+
 
 /* Map calls to member methods */
 RevPtr<RevVariable> Model::executeMethod(std::string const &name, const std::vector<Argument> &args, bool &found)
@@ -143,6 +171,7 @@ RevPtr<RevVariable> Model::executeMethod(std::string const &name, const std::vec
     return RevObject::executeMethod( name, args, found );
 }
 
+
 /** Get Rev type of object */
 const std::string& Model::getClassType(void)
 {
@@ -151,6 +180,7 @@ const std::string& Model::getClassType(void)
     
 	return rev_type; 
 }
+
 
 /** Get class type spec describing type of object */
 const TypeSpec& Model::getClassTypeSpec(void)
@@ -296,27 +326,21 @@ void Model::printModelDotGraph(const RevBayesCore::path &fn, bool vb, const std:
     o << "/*    To view graph:                                                              */\n";
     o << "/*       open this file in the program Graphviz: http://www.graphviz.org          */\n";
     o << "/*       or paste contents into an online viewer: http://stamm-wilbrandt.de/GraphvizFiddle */\n\n";
-	o << "digraph REVDAG {\n";
+    o << "digraph REVDAG {\n";
     std::string nrank = "   {rank=same";
+    std::map<const RevBayesCore::DagNode*, std::string> dot_id = dotIdsForNodes( theNodes );
     for ( it=theNodes.begin(); it!=theNodes.end(); ++it ){
         if ( !(*it)->isHidden() || vb){
-            std::stringstream nname;
-            if ( (*it)->getName() != "" )
-                nname << (*it)->getName();
-            else
-                nname << (*it);
-            std::string stname = nname.str();
-            std::replace( stname.begin(), stname.end(), '[', '_');
-			std::replace( stname.begin(), stname.end(), '.', '_');
-
-            stname.erase(std::remove(stname.begin(), stname.end(), ']'), stname.end());  
+            std::string stname = dot_id[*it];
                   
             std::stringstream rl;
 			if ((*it)->getName() == "" && !vb){
 				rl << "function" ;
 			}
-			else
-				rl << nname.str() ;
+			else if ( (*it)->getName() != "" )
+				rl << (*it)->getName() ;
+            else
+                rl << stname ;
            
             // only print values of constant nodes (only simple numeric values)
             if ( (*it)->getDagNodeType() == RevBayesCore::DagNode::CONSTANT )
@@ -410,19 +434,7 @@ void Model::printModelDotGraph(const RevBayesCore::path &fn, bool vb, const std:
             (*it)->printValue(trl,",", true);
             if (trl.str() != "" || vb)
             {
-                std::stringstream nname;
-                if ( (*it)->getName() != "" )
-                {
-                    nname << (*it)->getName() ;
-                }
-                else
-                {
-                    nname << (*it);
-                }
-                std::string stname = nname.str();
-                std::replace( stname.begin(), stname.end(), '[', '_');
-				std::replace( stname.begin(), stname.end(), '.', '_');
-                stname.erase(std::remove(stname.begin(), stname.end(), ']'), stname.end());  
+                std::string stname = dot_id[*it];
 
                 if ((*it)->getNumberOfChildren() > 0)
                 {
@@ -437,14 +449,7 @@ void Model::printModelDotGraph(const RevBayesCore::path &fn, bool vb, const std:
                             {
                                 ch = ch->getFirstChild();
                             }
-                            std::stringstream cn;
-                            if ( ch->getName() != "" )
-                                cn << ch->getName();
-                            else
-                                cn << ch;
-                            std::string stcn = cn.str();
-                            std::replace( stcn.begin(), stcn.end(), '[', '_');
-                            stcn.erase(std::remove(stcn.begin(), stcn.end(), ']'), stcn.end());  
+                            std::string stcn = dot_id[ch];
                             
                             o << "   n_" << stname << " -> n_";
                             o << stcn;
@@ -454,18 +459,7 @@ void Model::printModelDotGraph(const RevBayesCore::path &fn, bool vb, const std:
                         }
                         else
                         {
-                            std::stringstream cn;
-                            if ( (*ci)->getName() != "" )
-                            {
-                                cn << (*ci)->getName();
-                            }
-                            else
-                            {
-                                cn << (*ci);
-                            }
-                            std::string stcn = cn.str();
-                            std::replace( stcn.begin(), stcn.end(), '[', '_');
-                            stcn.erase(std::remove(stcn.begin(), stcn.end(), ']'), stcn.end());  
+                            std::string stcn = dot_id[*ci];
 
                             o << "   n_" << stname << " -> n_";
                             o << stcn;
@@ -493,6 +487,7 @@ void Model::printModelDotGraph(const RevBayesCore::path &fn, bool vb, const std:
     o.close();
 }
 
+
 void Model::ignoreDataAtNodes(const set<string>& namesToIgnore)
 {
     auto& graphNodes = value->getDagNodes();
@@ -509,6 +504,7 @@ void Model::ignoreDataAtNodes(const set<string>& namesToIgnore)
             nodeForName.at(name)->setIgnoreData(true);
     }
 }
+
 
 void Model::ignoreAllData()
 {

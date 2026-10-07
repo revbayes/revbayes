@@ -565,6 +565,19 @@ string StringUtilities::join(const vector<string>& ss, const string& sep)
     return o.str();
 }
 
+/**
+ * Utility function for converting DAG node IDs to identifiers that are valid in Graphviz's DOT language: leading dots
+ * (which can result from assigning default values to parameters) are prohibited and replaced by underscores, while
+ * brackets (denoting vector elements) would be misinterpreted as attribute lists, so we replace `x[1]` by `x_1`.
+ */
+std::string StringUtilities::sanitizeNodeID(std::string s)
+{
+    std::replace( s.begin(), s.end(), '[', '_' );
+    std::replace( s.begin(), s.end(), '.', '_' );
+    s.erase( std::remove( s.begin(), s.end(), ']' ), s.end() );
+    return s;
+}
+
 /*!
  * Utility function for index sorting, inspired by the following Stack Overflow posts:
  * Lukasz Wiklendt, https://stackoverflow.com/a/12399290 and
