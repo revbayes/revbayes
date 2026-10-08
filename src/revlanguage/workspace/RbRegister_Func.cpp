@@ -95,15 +95,18 @@
 #include "Func_constructRootedTripletDistribution.h"
 #include "Func_earlyBurstRates.h"
 #include "Func_extantTree.h"
+#include "Func_boundaryCrosserRates.h"
 #include "Func_formatDiscreteCharacterData.h"
 #include "Func_inferAncestralPopSize.h"
 #include "Func_maximumTree.h"
 #include "Func_MinBLTimeScaling.h"
 #include "Func_mrcaIndex.h"
 #include "Func_nodeAgeByID.h"
+#include "Func_perCapitaRates.h"
 #include "Func_phyloDiversity.h"
 #include "Func_PhylogeneticIndependentContrasts.h"
 #include "Func_PhylogeneticIndependentContrastsMultiSample.h"
+#include "Func_threeTimerRates.h"
 #include "Func_pomoState4Converter.h"
 #include "Func_pomoRootFrequencies.h"
 #include "Func_pruneTree.h"
@@ -452,6 +455,7 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_concatenateContinuousCharacterData()              );
         addFunction( new Func_concatenateFromVector()                           );
         addFunction( new Func_constructRootedTripletDistribution()              );
+        addFunction( new Func_boundaryCrosserRates()                            );
         addFunction( new Func_formatDiscreteCharacterData()                     );
         addFunction( new Func_EarlyBurstRates()                                 );
         addFunction( new Func_extantTree()                                      );
@@ -460,9 +464,11 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_MinBLTimeScaling()                                );
         addFunction( new Func_mrcaIndex()                                       );
         addFunction( new Func_nodeAgeByID()                                     );
+        addFunction( new Func_perCapitaRates()                                  );
         addFunction( new Func_phyloDiversity()                                  );
         addFunction( new Func_PhylogeneticIndependentContrasts()                );
         addFunction( new Func_PhylogeneticIndependentContrastsMultiSample()     );
+        addFunction( new Func_threeTimerRates()                                 );
         addFunction( new Func_pomoState4Converter()                             );
         addFunction( new Func_pomoRootFrequencies()                             );
         addFunction( new Func_pruneTree()                                       );

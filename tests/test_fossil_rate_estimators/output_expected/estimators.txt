@@ -1,0 +1,18 @@
+per-taxon, speciation then extinction:
+[ [ 0.0333, 0.0200, 0.0333, nan ] ,
+  [ 0.1000, 0.0600, 0.0333, nan ] ]	
+boundary-crosser:
+[ [ nan, 0.0693, 0.0288, nan ] ,
+  [ nan, 0.1386, 0.0288, nan ] ]	
+three-timer:
+[ [ nan, nan, 0.0000, nan ] ,
+  [ nan, nan, 0.0000, nan ] ]	
+per-taxon, oldest interval bounded at 40:
+[ [ 0.0333, 0.0200, 0.0333, 0.1000 ] ,
+  [ 0.1000, 0.0600, 0.0333, 0.0000 ] ]	
+boundary-crosser, oldest interval bounded at 40:
+[ [ nan, 0.0693, 0.0288, nan ] ,
+  [ nan, 0.1386, 0.0288, nan ] ]	
+boundary-crosser speciation, intervals 2 and 3 in full:
+0.06931472	
+0.02876821	
