@@ -14,6 +14,7 @@
 #include "RbMathCombinatorialFunctions.h"
 #include "RbMathLogic.h"
 #include "RbMathFunctions.h"
+#include "RbMathLogic.h"
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "StochasticNode.h"

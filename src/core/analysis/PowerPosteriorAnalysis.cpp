@@ -552,24 +552,6 @@ void PowerPosteriorAnalysis::printStoneAssignmentToWorkers( void )
     
     if ( process_active )
     {
-        std::string worker_name;
-        if (processors_per_likelihood == 1 and worker_count == 1)
-        {
-            worker_name = " process";
-        }
-        else if (processors_per_likelihood == 1 and worker_count > 1)
-        {
-            worker_name = " processes";
-        }
-        else if (processors_per_likelihood > 1 and worker_count == 1)
-        {
-            worker_name = " group of processes";
-        }
-        else
-        {
-            worker_name = " groups of processes";
-        }
-        
         size_t stone_count = 0;
         if ( resume_from_checkpoint and !resume_stone_sequences.empty() )
         {
@@ -588,14 +570,14 @@ void PowerPosteriorAnalysis::printStoneAssignmentToWorkers( void )
         }
         
         std::cout << "The " << stone_count << " requested stones will be executed in " << step_count << (step_count > 1 ? " steps" : " step");
-        std::cout << " using " << worker_count << worker_name;
+        std::cout << " using " << worker_count << (worker_count == 1 ? " parallel worker" : " parallel workers");
         if (processors_per_likelihood > 1)
         {
-            std::cout << " (" << processors_per_likelihood << " processes per stone)";
+            std::cout << " (" << processors_per_likelihood << " processes per worker)";
         }
         std::cout << " as follows:" << std::endl;
         std::cout << std::endl;
-        std::cout << (processors_per_likelihood > 1 ? "Group of processes " : "Process ") << "|";
+        std::cout << "Worker |";
         
         // An arbitrary threshold: if there is more than n = 12 steps, we will only print steps 1, 2, n - 1, and n, and use ranges in between
         if (step_count > 12)
@@ -604,7 +586,7 @@ void PowerPosteriorAnalysis::printStoneAssignmentToWorkers( void )
             std::cout << step_count << std::endl;
             
             size_t tmp0 = std::to_string(step_count - 2).size() + 11; // 11 is the number of chars in " Steps 3--" and " "
-            std::cout << (processors_per_likelihood > 1 ? std::string(19, '-') : std::string(8, '-')) << "|";
+            std::cout << std::string(7, '-') << "|";
             std::cout << "--------|--------|" << std::string(tmp0, '-') << "|" << std::string( std::to_string(step_count - 1).size() + 7, '-' );
             std::cout << "|" << std::string( std::to_string(step_count).size() + 7, '-' ) << std::endl;
         }
@@ -616,7 +598,7 @@ void PowerPosteriorAnalysis::printStoneAssignmentToWorkers( void )
             }
             std::cout << " Step " << step_count << std::endl;
             
-            std::cout << (processors_per_likelihood > 1 ? std::string(19, '-') : std::string(8, '-')) << "|";
+            std::cout << std::string(7, '-') << "|";
             for (size_t i = 0; i < step_count - 1; ++i)
             {
                 std::string tmp = " Step " + std::to_string(i + 1) + " ";
@@ -627,7 +609,7 @@ void PowerPosteriorAnalysis::printStoneAssignmentToWorkers( void )
         
         for (size_t i = 0; i < worker_count; ++i)
         {
-            // Process-agnostic versions of the stone sequences defined in runAll(): we use a shared iterator rather than a PID
+            // i is a worker index (0 .. worker_count-1), not an MPI rank. runAll() maps pid -> worker with pid / processors_per_likelihood.
             std::vector<size_t> stone_sequence;
             size_t bs;
             size_t be;
@@ -635,12 +617,11 @@ void PowerPosteriorAnalysis::printStoneAssignmentToWorkers( void )
             if ( resume_from_checkpoint and !resume_stone_sequences.empty() )
             {
                 // Nested layout may supply fewer sequences than workers; leftover ranks are idle (see runAll()).
-                size_t worker_rank = size_t( floor(i / double(processors_per_likelihood)) );
                 bs = 0;
-                if ( worker_rank < resume_stone_sequences.size() )
+                if ( i < resume_stone_sequences.size() )
                 {
-                    be = resume_stone_sequences[worker_rank].size();
-                    stone_sequence = resume_stone_sequences[worker_rank];
+                    be = resume_stone_sequences[i].size();
+                    stone_sequence = resume_stone_sequences[i];
                 }
                 else
                 {
@@ -654,8 +635,8 @@ void PowerPosteriorAnalysis::printStoneAssignmentToWorkers( void )
                 
                 size_t m = resurrection_indices.size();
                 
-                bs = size_t( floor( ( floor(i / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * m ) );
-                be = size_t( floor( ( ceil((i + 1) / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * m ) );
+                bs = i * m / worker_count;
+                be = (i + 1) * m / worker_count;
                 
                 for (size_t j = bs; j < be; ++j)
                 {
@@ -664,8 +645,8 @@ void PowerPosteriorAnalysis::printStoneAssignmentToWorkers( void )
             }
             else
             {
-                bs = size_t( floor( ( floor(i / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * powers.size() ) );
-                be = size_t( floor( ( ceil((i + 1) / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * powers.size() ) );
+                bs = i * powers.size() / worker_count;
+                be = (i + 1) * powers.size() / worker_count;
                 
                 for (size_t j = bs; j < be; ++j)
                 {
@@ -676,7 +657,7 @@ void PowerPosteriorAnalysis::printStoneAssignmentToWorkers( void )
             // Width of the worker number in characters
             size_t work_num_char = std::to_string(i + 1).size();
             
-            std::cout << (processors_per_likelihood > 1 ? std::string(18 - work_num_char, ' ') : std::string(7 - work_num_char, ' ')) << (i + 1) << " |";
+            std::cout << std::string(6 - work_num_char, ' ') << (i + 1) << " |";
             
             // Idle leftover worker under nested layout (no stone sequence assigned)
             if ( stone_sequence.empty() )
@@ -782,15 +763,16 @@ void PowerPosteriorAnalysis::runAll(size_t gen, double burnin_fraction, size_t p
                                       << worker_count << ( (worker_count > 1) ? " parallel workers are" : " parallel worker is" ) << " available.";
             }
 
-            size_t worker_rank = size_t( floor( pid / double(processors_per_likelihood) ) );
+            // Worker index, not MPI rank. Ranks for which pid % processors_per_likelihood != 0 share this worker's stones.
+            size_t worker = size_t(pid) / processors_per_likelihood;
             
             printStoneAssignmentToWorkers();
             
-            if ( worker_rank < resume_stone_sequences.size() )
+            if ( worker < resume_stone_sequences.size() )
             {
-                for (size_t j = 0; j < resume_stone_sequences[worker_rank].size(); ++j)
+                for (size_t j = 0; j < resume_stone_sequences[worker].size(); ++j)
                 {
-                    runStone( resume_stone_sequences[worker_rank][j], gen, burnin_fraction, pre_burnin_generations, tuning_interval, false, checkpoint_file, checkpoint_interval );
+                    runStone( resume_stone_sequences[worker][j], gen, burnin_fraction, pre_burnin_generations, tuning_interval, false, checkpoint_file, checkpoint_interval );
                 }
             }
         }
@@ -800,9 +782,14 @@ void PowerPosteriorAnalysis::runAll(size_t gen, double burnin_fraction, size_t p
             for (auto& [k, v] : ckp_stone_file) resurrection_indices.push_back(k);
             
             size_t m = resurrection_indices.size();
-
-            size_t stone_block_start = size_t( floor( ( floor( pid / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * m ) );
-            size_t stone_block_end   = size_t( floor( ( ceil( (pid + 1) / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * m ) );
+            size_t worker = size_t(pid) / processors_per_likelihood;
+            size_t stone_block_start = 0;
+            size_t stone_block_end   = 0;
+            if ( worker < worker_count )
+            {
+                stone_block_start = worker * m / worker_count;
+                stone_block_end   = (worker + 1) * m / worker_count;
+            }
             
             printStoneAssignmentToWorkers();
             
@@ -814,23 +801,22 @@ void PowerPosteriorAnalysis::runAll(size_t gen, double burnin_fraction, size_t p
     }
     else
     {
-        // compute which block of the data this process needs to compute
-        //    size_t stone_block_start = size_t(floor( (double(pid)   / num_processes ) * powers.size()) );
-        //    size_t stone_block_end   = size_t(floor( (double(pid+1) / num_processes ) * powers.size()) );
-        
-        size_t stone_block_start = size_t( floor( ( floor( pid / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * powers.size() ) );
-        size_t stone_block_end   = size_t( floor( ( ceil( (pid + 1) / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * powers.size() ) );
+        // Same worker-index formula as in printStoneAssignmentToWorkers() and runStone().
+        // Leftover MPI ranks (pid / processors_per_likelihood >= worker_count) run no stones.
+        size_t worker = size_t(pid) / processors_per_likelihood;
+        size_t stone_block_start = 0;
+        size_t stone_block_end   = 0;
+        if ( worker < worker_count )
+        {
+            stone_block_start = worker * powers.size() / worker_count;
+            stone_block_end   = (worker + 1) * powers.size() / worker_count;
+        }
         
         printStoneAssignmentToWorkers();
         
         for (size_t i = stone_block_start; i < stone_block_end; ++i)
         {
             runStone( i, gen, burnin_fraction, pre_burnin_generations, tuning_interval, false, checkpoint_file, checkpoint_interval );
-        }
-        
-        if ( process_active )
-        {
-            std::cout << std::endl;
         }
     }
     
@@ -843,6 +829,11 @@ void PowerPosteriorAnalysis::runAll(size_t gen, double burnin_fraction, size_t p
 #else
     MpiUtilities::synchronizeRNG(  );
 #endif
+    
+    if ( process_active )
+    {
+        std::cout << std::endl;
+    }
     
     summarizeStones();
     
@@ -869,13 +860,14 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
     size_t printInterval = size_t( round( fmax(1, gen/40.0) ) );
     
     /* Print output for users.
-     * First, we will find the smallest PID such that the number of stones assigned to the corresponding process is equal to
-     * getStepNumber(). This will be the process that gets to print its status to the standard output. Note that process_active
-     * has a PID of 0, and does not always satisfy this condition.
+     * First, we will find the first MPI rank of the lowest-index worker whose stone count equals getStepNumber() (the longest
+     * lane). This will be the rank that gets to print its status to the standard output. Note that the rabk is computed as
+     * worker * processors_per_likelihood, so it will only coincide with the worker index when processors_per_likelihood == 1.
+     * process_active has a PID of 0, and is not always assigned the longest lane.
      */
     size_t worker_count = size_t( floor( double(num_processes) / processors_per_likelihood ) );
     std::vector< std::vector<size_t> > stone_sequences( worker_count );
-    std::vector<size_t> ceil_pids;
+    std::vector<size_t> workers_with_full_lane;
     
     for (size_t i = 0; i < worker_count; ++i)
     {
@@ -894,8 +886,8 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
             
             size_t m = resurrection_indices.size();
             
-            size_t bs = size_t( floor( ( floor(i / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * m ) );
-            size_t be = size_t( floor( ( ceil((i + 1) / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * m ) );
+            size_t bs = i * m / worker_count;
+            size_t be = (i + 1) * m / worker_count;
             std::vector<size_t> tmp;
             
             for (size_t j = bs; j < be; ++j)
@@ -907,8 +899,8 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
         }
         else
         {
-            size_t bs = size_t( floor( ( floor(i / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * powers.size() ) );
-            size_t be = size_t( floor( ( ceil((i + 1) / double(processors_per_likelihood)) / (double(num_processes) / processors_per_likelihood) ) * powers.size() ) );
+            size_t bs = i * powers.size() / worker_count;
+            size_t be = (i + 1) * powers.size() / worker_count;
             std::vector<size_t> tmp;
             
             for (size_t j = bs; j < be; ++j)
@@ -924,19 +916,19 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
     {
         if ( stone_sequences[i].size() == getStepNumber() )
         {
-            ceil_pids.push_back( i );
+            workers_with_full_lane.push_back( i );
         }
     }
     
-    size_t pid_to_print = *std::min_element(ceil_pids.begin(), ceil_pids.end());
+    size_t worker_to_print = *std::min_element(workers_with_full_lane.begin(), workers_with_full_lane.end());
 
-    // runAll(): every rank runs its own unique set of stones; pid_to_print is used for printing the console progress.
+    // runAll(): every rank runs its own unique set of stones; worker_to_print's first MPI rank prints console progress.
     // runOneStone(): every rank executes the same stone; process_active is used for checkpoint and sampler file I/O.
-    // Flat initializeFromCheckpoint(single stone) can make pid_to_print != active rank (the stone "belongs" to one worker slot in
+    // Flat initializeFromCheckpoint(single stone) can make worker_to_print != active rank (the stone "belongs" to one worker slot in
     // stone_sequences). Monitors, the per-stone likelihood table, and console progress must then follow process_active; otherwise
     // the likelihood file is written by a different process than wrote the checkpoint, which breaks resumption.
     const bool writer_rank_one_stone = ( not one_only ) || process_active;
-    const bool stone_console = one_only ? process_active : ( pid == pid_to_print );
+    const bool stone_console = one_only ? process_active : ( size_t(pid) == worker_to_print * processors_per_likelihood );
 
     auto ckp_it = ckp_stone_file.find( idx );
     const bool stone_resumes_from_checkpoint = ( ckp_it != ckp_stone_file.end() );
@@ -957,8 +949,8 @@ void PowerPosteriorAnalysis::runStone(size_t idx, size_t gen, double burnin_frac
         else
         {
             // We need to figure out where within our current stone sequence we are
-            auto it = std::find(stone_sequences[pid_to_print].begin(), stone_sequences[pid_to_print].end(), idx);
-            size_t step = std::distance(stone_sequences[pid_to_print].begin(), it);
+            auto it = std::find(stone_sequences[worker_to_print].begin(), stone_sequences[worker_to_print].end(), idx);
+            size_t step = std::distance(stone_sequences[worker_to_print].begin(), it);
 
             // Figure out how much whitespace the lines should be padded out with to keep everything neatly aligned
             size_t digits = std::to_string( getStepNumber() ).size();

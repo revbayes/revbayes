@@ -30,7 +30,7 @@ The currently available keys and their associated values are as follows:
 
     tolerance=<numeric>          Tolerance for comparing doubles.
 
-        DEFAULT: 10e-10
+        DEFAULT: 1e-09
 
     debugMCMC=<0,1>              How much work to perform to check MCMC?
 
@@ -57,13 +57,13 @@ Sebastian Hoehna
 ## see_also
 getOption
 ## example
-	# compute the absolute value of a real number
-	getOption("linewidth")
+	# find out what the current line width is
+	getOption("lineWidth")
 	
-	# let us set the linewidth to a new value
-	setOption("linewidth", 200)
+	# let's set the line width to a new value
+	setOption("lineWidth", 200)
 	
 	# now let's check what the value is
-	getOption("linewidth")
+	getOption("lineWidth")
 	
 ## references

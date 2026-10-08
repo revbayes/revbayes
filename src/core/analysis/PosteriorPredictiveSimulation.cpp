@@ -23,6 +23,7 @@
 #include "RbVector.h"
 #include "RbVectorImpl.h"
 #include "StringUtilities.h"
+#include "StochasticNodeBase.h"
 #include "Taxon.h"
 #include "Trace.h"
 #include "Tree.h"

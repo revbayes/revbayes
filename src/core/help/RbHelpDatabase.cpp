@@ -1801,20 +1801,33 @@ sum(x))");
 	help_strings[string("dnScaledDirichlet")][string("title")] = string(R"(Scaled Dirichlet Distribution)");
 	help_strings[string("dnSerialSampledBirthDeath")][string("name")] = string(R"(dnSerialSampledBirthDeath)");
 	help_arrays[string("dnSoftBoundUniformNormal")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
-	help_strings[string("dnSoftBoundUniformNormal")][string("description")] = string(R"(A softbound uniform distribution with normally distributed tails outside the interval of the uniform distribution.)");
-	help_strings[string("dnSoftBoundUniformNormal")][string("details")] = string(R"(The center piece of this distribution a uniform distribution defined between the given interval. A variable is drawn from that uniform distribution with probability p and with probability 1-p outside the interval. The probability density outside the interval is described by a normal distribution with standard deviation sd.)");
-	help_strings[string("dnSoftBoundUniformNormal")][string("example")] = string(R"(p ~ dnBeta(1.0,1.0)
-x ~ dnBernoulli(p)
-x.clamp(1)
-moves[1] = mvSlide(p, delta=0.1, weight=1.0)
-monitors[1] = screenmonitor(printgen=1000, separator = "        ", speciation)
-mymodel = model(p)
-mymcmc = mcmc(mymodel, monitors, moves)
-mymcmc.burnin(generations=20000,tuningInterval=100)
-mymcmc.run(generations=200000))");
+	help_strings[string("dnSoftBoundUniformNormal")][string("description")] = string(R"(A soft-bounded uniform distribution with one or two normally distributed tails
+outside the domain of the uniform component.)");
+	help_strings[string("dnSoftBoundUniformNormal")][string("details")] = string(R"(Draws from a uniform distribution defined between the `min` and `max` values
+with probability `p`. The tail probability (1 - `p`) is assigned to values
+smaller than `min` (if `boundary="lower"`), values larger than `max` (if
+`boundary="upper"`), or apportioned equally between the lower and upper tails
+(by default, when `boundary="both"`). The probability density outside the
+[`min`, `max`] interval is that of a normal distribution whose standard
+deviation can be either automatically computed from `p` or directly specified
+using the `sd` argument. Exactly one of `sd` and `p` must be specified, with
+the unspecified value automatically computed so that the density is continuous
+at `min` and `max`.)");
+	help_strings[string("dnSoftBoundUniformNormal")][string("example")] = string(R"(    # Create a simple model (unclamped)
+calib ~ dnSoftBoundUniformNormal( 13.6, 25, p=0.95, "upper" )
+mymodel = model(calib)
+
+# Create a move vector and a monitor vector
+    moves[1] = mvSlide(calib, delta=0.1, weight=1.0)
+    monitors[1] = mnScreen(calib, printgen=1000)
+
+# Use MCMC to draw samples from the specified distribution
+    mymcmc = mcmc(mymodel, monitors, moves)
+    mymcmc.run(generations=200000))");
 	help_strings[string("dnSoftBoundUniformNormal")][string("name")] = string(R"(dnSoftBoundUniformNormal)");
+	help_arrays[string("dnSoftBoundUniformNormal")][string("see_also")].push_back(string(R"(dnNormal)"));
 	help_arrays[string("dnSoftBoundUniformNormal")][string("see_also")].push_back(string(R"(dnUniform)"));
-	help_strings[string("dnSoftBoundUniformNormal")][string("title")] = string(R"(Softbound Uniform Distribution with Normal distributed tails.)");
+	help_strings[string("dnSoftBoundUniformNormal")][string("title")] = string(R"(Soft-bounded uniform-normal distribution)");
 	help_arrays[string("dnStairwayPlot")][string("authors")].push_back(string(R"(Sebastian Höhna)"));
 	help_strings[string("dnStairwayPlot")][string("description")] = string(R"(Bayesian StairwayPlot for inferring single population demographic histories
 from site frequency spectra.)");
@@ -3005,6 +3018,24 @@ Q3 := fndNdS(fnX3(fnGTR(er, nuc_pi)), omega)         # GTR + X3 + dNdS)");
 	help_strings[string("fndNdS")][string("title")] = string(R"(Add a dN/dS factor to a codon rate matrix.)");
 	help_strings[string("formatDiscreteCharacterData")][string("name")] = string(R"(formatDiscreteCharacterData)");
 	help_strings[string("gamma")][string("name")] = string(R"(gamma)");
+	help_arrays[string("getNumProcesses")][string("authors")].push_back(string(R"(David Černý)"));
+	help_strings[string("getNumProcesses")][string("description")] = string(R"(Returns the number of processes used by the current RevBayes session.)");
+	help_strings[string("getNumProcesses")][string("details")] = string(R"(In an MPI-enabled build (i.e., `rb-mpi`, launched as `mpirun -np N ./rb-mpi`),
+the function returns `N` (i.e., the size of the `MPI_COMM_WORLD` communicator).
+In a non-MPI build, it always returns 1. The value is the number of MPI ranks,
+not necessarily the number of hardware CPU cores.)");
+	help_strings[string("getNumProcesses")][string("example")] = string(R"(# For `mpirun -np 16 ./rb-mpi`, this prints 16:
+getNumProcesses()
+
+# Record the process count for reproducibility bookkeeping
+print("Running on " + getNumProcesses() + " process(es).")
+
+# Guard-check the launch configuration
+if (getNumProcesses() != 32) {
+    stop("Expected 32 processes, got " + getNumProcesses() + ".")
+})");
+	help_strings[string("getNumProcesses")][string("name")] = string(R"(getNumProcesses)");
+	help_strings[string("getNumProcesses")][string("title")] = string(R"(Get the number of MPI processes)");
 	help_arrays[string("getOption")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("getOption")][string("description")] = string(R"(Get a global option for RevBayes.)");
 	help_strings[string("getOption")][string("details")] = string(R"(Runtime options are used to personalize RevBayes and are stored on the local machine. See `setOption` for the list of available keys and their associated values.)");
@@ -5251,7 +5282,7 @@ The currently available keys and their associated values are as follows:
 
     tolerance=<numeric>          Tolerance for comparing doubles.
 
-        DEFAULT: 10e-10
+        DEFAULT: 1e-09
 
     debugMCMC=<0,1>              How much work to perform to check MCMC?
 
@@ -5272,14 +5303,14 @@ The currently available keys and their associated values are as follows:
         4: Writes out additional details about the mvSlice move (if present).
 
         DEFAULT: 0)");
-	help_strings[string("setOption")][string("example")] = string(R"(# compute the absolute value of a real number
-getOption("linewidth")
+	help_strings[string("setOption")][string("example")] = string(R"(# find out what the current line width is
+getOption("lineWidth")
 
-# let us set the linewidth to a new value
-setOption("linewidth", 200)
+# let's set the line width to a new value
+setOption("lineWidth", 200)
 
 # now let's check what the value is
-getOption("linewidth"))");
+getOption("lineWidth"))");
 	help_strings[string("setOption")][string("name")] = string(R"(setOption)");
 	help_arrays[string("setOption")][string("see_also")].push_back(string(R"(getOption)"));
 	help_strings[string("setOption")][string("title")] = string(R"(Set a global RevBayes option)");

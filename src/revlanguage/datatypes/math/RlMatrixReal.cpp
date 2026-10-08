@@ -177,10 +177,19 @@ const TypeSpec& MatrixReal::getClassTypeSpec(void)
 /** Get type spec */
 const TypeSpec& MatrixReal::getTypeSpec( void ) const
 {
-    
+
     static TypeSpec type_spec = getClassTypeSpec();
-    
+
     return type_spec;
+}
+
+
+/** Print the value of the matrix.
+    The 'user' flag is delibrately ignored, we always print in the user-facing format so that print and write produces the same output as auto-print
+**/
+void MatrixReal::printValue(std::ostream& o, bool user) const
+{
+    this->getDagNode()->printValue( o, ",", -1, true, true, true );
 }
 
 

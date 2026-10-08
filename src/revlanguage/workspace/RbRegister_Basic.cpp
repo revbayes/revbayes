@@ -134,6 +134,7 @@
 #include "Func_appendVector.h"
 #include "Func_clear.h"
 #include "Func_exists.h"
+#include "Func_getNumProcesses.h"
 #include "Func_getOption.h"
 #include "Func_getwd.h"
 #include "Func_help.h"
@@ -323,6 +324,7 @@ void RevLanguage::Workspace::initializeBasicGlobalWorkspace(void)
         addFunction( new Func_clear()                       );
         addFunction( new Func_exists()                      );
         addFunction( new Func_getwd()                       );
+        addFunction( new Func_getNumProcesses()             );
         addFunction( new Func_getOption()                   );
         addFunction( new Func_help()                        );
         addFunction( new Func_ifelse<Natural>()             );

@@ -73,7 +73,7 @@ std::string bool_to_string(bool b)
 
 std::string RbSettings::getOption(const std::string &key) const
 {
-    if ( key == "moduledir" )
+    if ( key == "moduleDir" )
     {
         return moduleDir.string();
     }
@@ -89,7 +89,8 @@ std::string RbSettings::getOption(const std::string &key) const
     {
         return StringUtilities::to_string(tolerance);
     }
-    else if ( key == "linewidth" )
+    // maintain the non-camel-case alias for backward compatibility
+    else if ( key == "lineWidth" or key == "linewidth" )
     {
         return StringUtilities::to_string(lineWidth);
     }
@@ -170,11 +171,11 @@ void RbSettings::readUserSettings(void)
 
 void RbSettings::listOptions() const
 {
-    std::cout << "moduledir = " << moduleDir << std::endl;
+    std::cout << "moduleDir = " << moduleDir << std::endl;
     std::cout << "outputPrecision = " << outputPrecision << std::endl;
     std::cout << "printNodeIndex = " << (printNodeIndex ? "true" : "false") << std::endl;
     std::cout << "tolerance = " << tolerance << std::endl;
-    std::cout << "linewidth = " << lineWidth << std::endl;
+    std::cout << "lineWidth = " << lineWidth << std::endl;
     std::cout << "useScaling = " << (useScaling ? "true" : "false") << std::endl;
     std::cout << "scalingDensity = " << scalingDensity << std::endl;
     std::cout << "debugMCMC = " << debugMCMC << std::endl;
@@ -260,7 +261,7 @@ void RbSettings::setOption(const std::string &key, const std::string &v, bool wr
     std::string value = v;
     std::transform(value.begin(), value.end(), value.begin(), ::tolower);
 
-    if ( key == "moduledir" )
+    if ( key == "moduleDir" )
     {
         // Read from stream to handle quotes.
         std::istringstream input(value);
@@ -278,7 +279,8 @@ void RbSettings::setOption(const std::string &key, const std::string &v, bool wr
     {
         tolerance = boost::lexical_cast<double>(value);
     }
-    else if ( key == "linewidth" )
+    // maintain the non-camel-case alias for backward compatibility
+    else if ( key == "lineWidth" or key == "linewidth" )
     {
         lineWidth = boost::lexical_cast<int>(value);
     }
@@ -352,11 +354,11 @@ void RbSettings::writeUserSettings( void )
 
     std::ofstream writeStream( settings_file_name.string() );
     assert( moduleDir == "modules" or is_directory(moduleDir) );
-    writeStream << "moduledir=" << moduleDir << std::endl;
+    writeStream << "moduleDir=" << moduleDir << std::endl;
     writeStream << "outputPrecision=" << outputPrecision << std::endl;
     writeStream << "printNodeIndex=" << (printNodeIndex ? "true" : "false") << std::endl;
     writeStream << "tolerance=" << tolerance << std::endl;
-    writeStream << "linewidth=" << lineWidth << std::endl;
+    writeStream << "lineWidth=" << lineWidth << std::endl;
     writeStream << "useScaling=" << (useScaling ? "true" : "false") << std::endl;
     writeStream << "scalingDensity=" << scalingDensity << std::endl;
 

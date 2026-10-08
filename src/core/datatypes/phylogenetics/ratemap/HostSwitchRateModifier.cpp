@@ -50,48 +50,61 @@ double HostSwitchRateModifier::computeRateMultiplier(std::vector<CharacterEvent*
     size_t to_state = newState->getState();
     
     double r = 1.0;
-
     
-    // loss event (independent of other hosts)
+    // Loss event
     if (from_state > to_state)
     {
-        return 1.0;
+        // Braga et al. (2020) allow only repertoires holding at least one actual
+        // host (2), so any transition to such a state should have rate zero.
+        if (from_state == 2 && sites_with_states[2].size() == 1)
+        {
+            return 0.0;
+        }
+        else 
+        {
+            // The loss rate is otherwise unaffected by the rest of the repertoire
+            return 1.0;
+        }
     }
+    // Gain event
     else if (from_state < to_state)
     {
-        // rate of leaving 0/1-repertoire equals zero
+        // A repertoire without any actual hosts (2s) is unreachable from any 
+        // valid repertoire. This ensures that invalid repertoires sampled at the root
+        // propagate will be invalid at the leaves, and are rejected by the MCMC
         size_t num_two = sites_with_states[2].size();
-        
         if (num_two == 0) {
             return 0.0;
         }
         
-        // gain event
-        double scaler_value = scale[ to_state - 1 ];
+        // Read the current value of beta
+        double beta = scale[ to_state - 1 ];
         
-        // if the gain event level's scaling factor equals zero, then there's no effect
-        if ( scaler_value == 0.0 )
+        // If the gain event level's scaling factor equals zero, then there's no effect
+        if ( beta == 0.0 )
         {
             return 1.0;
         }
         
-        // sum of phylo.distance-scaled rates
+        // The phylogenetic factor enters as the average normalized phylogenetic
+        // distance to the the set of potentials and/or actual hosts.
+        // Normalization of the host phylogeny is performed by setTree().
         double delta = 0.0;
         size_t n_on = 0;
         for (size_t from_index = 0; from_index < this->num_characters; from_index++)
         {
             size_t s = static_cast<CharacterEventDiscrete*>(currState[from_index])->getState();
-            if (s != 0) {
+            // For a 0 -> 1 transition all potential (1) and actual (2) hosts affect the rate
+            // For a 1 -> 2 transition only the actual (2) hosts affect the rate
+            bool include = (to_state == 2) ? (s == 2) : (s != 0);
+            if (include) {
                 delta += distance[from_index][to_index];
                 n_on += 1;
-            } else {
-                ; // do nothing
             }
         }
-        
+
         double delta_mean = delta / n_on;
-        r = std::pow( delta_mean, -scaler_value);
-//        r = std::exp( -scaler_value * delta_mean );
+        r = std::exp( -beta * delta_mean );
     }
     else {
         throw RbException("Self-transitions not allowed");
