@@ -132,7 +132,24 @@ bool Taxon::operator>=(const RevBayesCore::Taxon &t) const
  */
 void Taxon::addOccurrence( const TimeInterval &d )
 {
-    occurrences[d]++;
+    // keep the bins ordered and one entry per distinct bin. TimeInterval::operator< compares
+    // only the maximum, so a map would have merged two bins that share one, losing the minimum
+    // of whichever arrived second.
+    std::vector<std::pair<TimeInterval, size_t> >::iterator it = occurrences.begin();
+    while ( it != occurrences.end() && ( it->first.getMax() < d.getMax() ||
+            ( it->first.getMax() == d.getMax() && it->first.getMin() < d.getMin() ) ) )
+    {
+        it++;
+    }
+
+    if ( it != occurrences.end() && it->first == d )
+    {
+        it->second++;
+    }
+    else
+    {
+        occurrences.insert( it, std::make_pair( d, size_t(1) ) );
+    }
 
     if ( d.getMax() > age_range.getMax() )
     {
@@ -170,9 +187,9 @@ double Taxon::getAge( void ) const
 /**
  * Get the occurrences for this taxon.
  *
- * \return    A map of occurrence age ranges to counts.
+ * \return    The reported bins and their counts, ordered by the bin.
  */
-const std::map<TimeInterval, size_t>& Taxon::getOccurrences( void ) const
+const std::vector<std::pair<TimeInterval, size_t> >& Taxon::getOccurrences( void ) const
 {
     return occurrences;
 }

@@ -2,7 +2,8 @@
 #define Taxon_H
 
 #include <ostream>
-#include <map>
+#include <utility>
+#include <vector>
 
 #include "TimeInterval.h"
 
@@ -44,7 +45,7 @@ namespace RevBayesCore {
         double                                getMaxAge(void) const;                      //!< Get the max age for this taxon.
         double                                getMinAge(void) const;                      //!< Get the min age for this taxon.
         const std::string&                    getName(void) const;                        //!< Get the name for this taxon.
-        const std::map<TimeInterval, size_t>& getOccurrences(void) const;                 //!< Get the occurrence ages and counts.
+        const std::vector<std::pair<TimeInterval, size_t> >& getOccurrences(void) const;  //!< Get the reported occurrence bins and their counts, oldest last.
         const std::string&                    getSpeciesName(void) const;                 //!< Get the name of the species.
 
         void                                  setAge(double a);                           //!< Set the age.
@@ -59,7 +60,9 @@ namespace RevBayesCore {
         
         // private members
         TimeInterval                          age_range;
-        std::map<TimeInterval, size_t>        occurrences;
+        //!< The reported bins and how many specimens fell in each, ordered by the bin. A list
+        //!< rather than a keyed lookup: nothing looks an occurrence up, everything walks them.
+        std::vector<std::pair<TimeInterval, size_t> > occurrences;
         std::string                           name;
         std::string                           species_name;
         bool                                  extinct;
