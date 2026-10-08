@@ -1,6 +1,7 @@
 ## name
 dnBirthDeathRateShifts
 ## title
+Birth-death with rate shifts
 ## description
 The birth death with rate shifts (BDS) model describes the distribution of a matrix of species origination and extinction times under complete species sampling and incomplete fossil sampling.
 ## details

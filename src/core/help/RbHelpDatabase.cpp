@@ -582,6 +582,21 @@ mymcmc.run(generations=200000))");
 	help_strings[string("dnBinomial")][string("title")] = string(R"(Binomial Distribution)");
 	help_strings[string("dnBirthDeath")][string("name")] = string(R"(dnBirthDeath)");
 	help_strings[string("dnBirthDeathBurstProcess")][string("name")] = string(R"(dnBirthDeathBurstProcess)");
+	help_arrays[string("dnBirthDeathRateShifts")][string("authors")].push_back(string(R"(June Walker)"));
+	help_strings[string("dnBirthDeathRateShifts")][string("description")] = string(R"(The birth death with rate shifts (BDS) model describes the distribution of a matrix of species origination and extinction times under complete species sampling and incomplete fossil sampling.)");
+	help_strings[string("dnBirthDeathRateShifts")][string("details")] = string(R"(Fossil species are represented by a collection of fossil occurrences with uncertainty. Speciation, extinction and sampling rates may be time-homogeneous or piecewise time-heterogeneous. If time-heterogeneous rates are provided, then a vector of rate change time-points musts also be provided. If only a subset of fossil occurrences is provided for each species (e.g. only first and last occurrencces), then the remaining number of fossil samples may be marginalized by specifying `complete=FALSE`.)");
+	help_strings[string("dnBirthDeathRateShifts")][string("example")] = string(R"(lambda ~ dnExp(10)
+mu ~ dnExp(10)
+psi ~ dnExp(10)
+
+bd ~ dnBDS(lambda=lambda, mu=mu, psi=psi, rho=1, taxa=taxa, complete=FALSE)
+
+moves.append( mvMatrixElementScale(bd, weight=taxa.size()) )
+moves.append( mvMatrixElementSlide(bd, weight=taxa.size()) ))");
+	help_strings[string("dnBirthDeathRateShifts")][string("name")] = string(R"(dnBirthDeathRateShifts)");
+	help_references[string("dnBirthDeathRateShifts")].push_back(RbHelpReference(R"(Improved estimation of macroevolutionary rates from fossil data using a Bayesian framework. Silvestro, Daniele et al. Paleobiology, 45:546-570.)",R"(https://doi.org/10.1017/pab.2019.23)",R"(https://www.cambridge.org/core/journals/paleobiology/article/improved-estimation-of-macroevolutionary-rates-from-fossil-data-using-a-bayesian-framework/334F08A74A6C92F1FEAD91A71FE59A1C )"));
+	help_arrays[string("dnBirthDeathRateShifts")][string("see_also")].push_back(string(R"(dnFossilizedBirthDeathRange)"));
+	help_strings[string("dnBirthDeathRateShifts")][string("title")] = string(R"(Birth-death with rate shifts)");
 	help_strings[string("dnBirthDeathSamplingTreatment")][string("name")] = string(R"(dnBirthDeathSamplingTreatment)");
 	help_arrays[string("dnBivariatePoisson")][string("authors")].push_back(string(R"(Alexander Zarebski)"));
 	help_arrays[string("dnBivariatePoisson")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
