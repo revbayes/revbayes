@@ -383,18 +383,11 @@ void execute_file(const fs::path& filename, bool echo, bool continue_on_error)
         }
 
         // Process the line and record result
-        result = Parser::getParser().processCommand( commandLine, Workspace::userWorkspacePtr() );
-        if ( result == 2 )
-        {
-            if (not continue_on_error)
-                throw RbException() << "Problem processing line " << lineNumber << " in file " << filename;
-            else
-            {
-                std::ostringstream err;
-                err<<"Error:\tProblem processing line " << lineNumber << " in file " << filename;
-                RBOUT(err.str());
-            }
-        }
+        result = Parser::getParser().processCommand( commandLine, Workspace::userWorkspacePtr(), LocInfo(filename, lineNumber) );
+
+        // Stop executing the file on errors, unless we are told to continue.
+        if (result == 2 and not continue_on_error)
+            break;
     }
 }
 
