@@ -22,6 +22,7 @@ FossilRateEstimatorFunction::FossilRateEstimatorFunction(const TypedDagNode< RbV
     max_age( mx ),
     method( m ),
     ambiguous( a ),
+    warned_max_age( false ),
     warned_widths( false ),
     warned_outside( false )
 {
@@ -105,9 +106,14 @@ void FossilRateEstimatorFunction::update( void )
     size_t num_intervals = boundaries.size();
 
     double top = ( max_age != NULL ? max_age->getValue() : RbConstants::Double::inf );
-    if ( top <= boundaries[num_intervals-1] )
+
+    // A record that stops short of the oldest rate shift leaves that interval no width. Every
+    // other undefined case returns NaN, and a column of NaN is easier to act on mid-analysis
+    // than an abort, so warn once and let the width test below catch it.
+    if ( warned_max_age == false && top <= boundaries[num_intervals-1] )
     {
-        throw RbException("max_age must be older than the oldest rate shift time.");
+        RBOUT("Warning: max_age is not older than the oldest rate shift, so that interval has no rate.\n");
+        warned_max_age = true;
     }
 
     // anything older than the oldest edge falls outside every interval and is not counted

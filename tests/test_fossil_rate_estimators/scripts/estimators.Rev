@@ -66,6 +66,12 @@ print(filename=out, append=TRUE, fnBoundaryCrosserRates(taxa, timeline, max_age=
 
 # The vectors above print to three decimals, so check the two interesting values at full
 # precision as well: log(2)/10 and log(4/3)/10.
+# A max_age no older than the oldest rate shift leaves that interval no width. That is a
+# record too short for the timeline asked of it, which warns and returns NaN for the interval
+# rather than aborting, so the other intervals are still usable.
+print(filename=out, append=TRUE, "per-taxon, max_age below the oldest shift:\n")
+print(filename=out, append=TRUE, fnPerCapitaRates(taxa, timeline, max_age=25), "\n")
+
 bc <- fnBoundaryCrosserRates(taxa, timeline)
 print(filename=out, append=TRUE, "boundary-crosser speciation, intervals 2 and 3 in full:\n")
 print(filename=out, append=TRUE, bc[1][2], "\n")
