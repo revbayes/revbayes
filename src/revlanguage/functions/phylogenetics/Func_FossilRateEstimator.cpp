@@ -32,7 +32,7 @@ const ArgumentRules& Func_FossilRateEstimator::getArgumentRules( void ) const
         argument_rules.push_back( new ArgumentRule( "taxa", ModelVector<Taxon>::getClassTypeSpec(), "The taxa with fossil occurrence information.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         argument_rules.push_back( new ArgumentRule( "timeline", ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the piecewise constant process.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new ModelVector<RealPos>() ) );
         argument_rules.push_back( new ArgumentRule( "present", RealPos::getClassTypeSpec(), "The time defining the present. Minimum age of the process.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
-        argument_rules.push_back( new ArgumentRule( "max_age", RealPos::getClassTypeSpec(), "The older edge of the oldest interval. Left out, that interval is unbounded and has no rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        argument_rules.push_back( new ArgumentRule( "max_age", RealPos::getClassTypeSpec(), "The older edge of the oldest interval. Left out, or not older than the oldest rate shift, that interval has no rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
         std::vector<std::string> ambiguous_options;
         ambiguous_options.push_back( "midpoint" );

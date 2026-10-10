@@ -13,6 +13,9 @@ per-taxon, oldest interval bounded at 40:
 boundary-crosser, oldest interval bounded at 40:
 [ [ nan, 0.0693, 0.0288, nan ] ,
   [ nan, 0.1386, 0.0288, nan ] ]	
+per-taxon, max_age below the oldest shift:
+[ [ 0.0667, 0.1000, nan, nan ] ,
+  [ 0.1000, 0.0750, nan, nan ] ]	
 boundary-crosser speciation, intervals 2 and 3 in full:
 0.06931472	
 0.02876821	

@@ -32,8 +32,9 @@ namespace RevBayesCore {
      * no rate for it.
      *
      * An interval with no information returns NaN rather than throwing: the oldest interval,
-     * which is unbounded and so has no width, the youngest under the three-timer method, which
-     * needs both neighbours, and any interval whose denominator is empty.
+     * which is unbounded and so has no width, or bounded by a max_age no older than the shift
+     * below it, the youngest under the three-timer method, which needs both neighbours, and
+     * any interval whose denominator is empty.
      */
     class FossilRateEstimatorFunction : public TypedFunction< MatrixReal > {
 
@@ -61,6 +62,7 @@ namespace RevBayesCore {
         const TypedDagNode< double >*           max_age;                                               //!< NULL leaves the oldest interval unbounded.
         Method                                  method;
         FossilAgeAmbiguity                      ambiguous;
+        mutable bool                            warned_max_age;
         mutable bool                            warned_widths;
         mutable bool                            warned_outside;
     };

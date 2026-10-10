@@ -1951,7 +1951,7 @@ The value is a two by l matrix, speciation in the first row and extinction in th
 
 Intervals follow the range processes: `timeline` holds the rate shift times youngest first and `present` the minimum age, so `timeline = v(10, 20, 30)` defines the intervals [0,10) [10,20) [20,30) and an unbounded oldest interval. An interval with no information returns NaN rather than an error, and the unbounded oldest interval never has a rate.
 
-The oldest interval is unbounded unless `max_age` bounds it. These estimators divide a per-interval proportion by the interval's duration, so an unbounded interval has no rate. Occurrences older than `max_age` fall outside every interval and are not counted, which the function warns about once.
+The oldest interval is unbounded unless `max_age` bounds it. These estimators divide a per-interval proportion by the interval's duration, so an unbounded interval has no rate. Occurrences older than `max_age` fall outside every interval and are not counted, which the function warns about once. A `max_age` no older than the oldest rate shift leaves that interval no width, so it too returns NaN, with a warning, rather than an error: a record that stops short of the timeline asked of it still yields rates for the intervals it does cover.
 
 An occurrence whose reported bin straddles a boundary is counted at the interval holding the bin's midpoint, which is what the comparison literature does. `ambiguous="overlap"` counts it in every interval the bin touches and `ambiguous="exclude"` drops it.)");
 	help_strings[string("fnBoundaryCrosserRates")][string("example")] = string(R"(taxa <- readTaxonData("fossils.tsv")
@@ -2748,7 +2748,7 @@ The value is a two by l matrix, speciation in the first row and extinction in th
 
 Intervals follow the range processes: `timeline` holds the rate shift times youngest first and `present` the minimum age, so `timeline = v(10, 20, 30)` defines the intervals [0,10) [10,20) [20,30) and an unbounded oldest interval. An interval with no information returns NaN rather than an error, and the unbounded oldest interval never has a rate.
 
-The oldest interval is unbounded unless `max_age` bounds it. These estimators divide a per-interval proportion by the interval's duration, so an unbounded interval has no rate. Occurrences older than `max_age` fall outside every interval and are not counted, which the function warns about once.
+The oldest interval is unbounded unless `max_age` bounds it. These estimators divide a per-interval proportion by the interval's duration, so an unbounded interval has no rate. Occurrences older than `max_age` fall outside every interval and are not counted, which the function warns about once. A `max_age` no older than the oldest rate shift leaves that interval no width, so it too returns NaN, with a warning, rather than an error: a record that stops short of the timeline asked of it still yields rates for the intervals it does cover.
 
 An occurrence whose reported bin straddles a boundary is counted at the interval holding the bin's midpoint, which is what the comparison literature does. `ambiguous="overlap"` counts it in every interval the bin touches and `ambiguous="exclude"` drops it.)");
 	help_strings[string("fnPerCapitaRates")][string("example")] = string(R"(taxa <- readTaxonData("fossils.tsv")
@@ -2872,7 +2872,7 @@ The value is a two by l matrix, speciation in the first row and extinction in th
 
 Intervals follow the range processes: `timeline` holds the rate shift times youngest first and `present` the minimum age, so `timeline = v(10, 20, 30)` defines the intervals [0,10) [10,20) [20,30) and an unbounded oldest interval. An interval with no information returns NaN rather than an error, and the unbounded oldest interval never has a rate.
 
-The oldest interval is unbounded unless `max_age` bounds it. These estimators divide a per-interval proportion by the interval's duration, so an unbounded interval has no rate. Occurrences older than `max_age` fall outside every interval and are not counted, which the function warns about once.
+The oldest interval is unbounded unless `max_age` bounds it. These estimators divide a per-interval proportion by the interval's duration, so an unbounded interval has no rate. Occurrences older than `max_age` fall outside every interval and are not counted, which the function warns about once. A `max_age` no older than the oldest rate shift leaves that interval no width, so it too returns NaN, with a warning, rather than an error: a record that stops short of the timeline asked of it still yields rates for the intervals it does cover.
 
 An occurrence whose reported bin straddles a boundary is counted at the interval holding the bin's midpoint, which is what the comparison literature does. `ambiguous="overlap"` counts it in every interval the bin touches and `ambiguous="exclude"` drops it.)");
 	help_strings[string("fnThreeTimerRates")][string("example")] = string(R"(taxa <- readTaxonData("fossils.tsv")
