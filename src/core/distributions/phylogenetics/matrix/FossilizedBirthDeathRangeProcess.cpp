@@ -52,12 +52,11 @@ FossilizedBirthDeathRangeProcess::FossilizedBirthDeathRangeProcess(const DagNode
                                                                      const std::string &incondition,
                                                                      const std::vector<Taxon> &intaxa,
                                                                      bool complete_record,
-                                                                                                                                          const TypedDagNode<double> *inorigin,
-                                                                     TypedDistribution<double> *inoriginprior,
+                                                                     const TypedDagNode<double> *inorigin,
                                                                      bool insurvivors,
                                                                      double inpresent) :
     TypedDistribution<MatrixReal>(new MatrixReal(intaxa.size(), 4)),
-    AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, complete_record, inorigin, inoriginprior, insurvivors, inpresent)
+    AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, complete_record, inorigin, insurvivors, inpresent)
 {
 
     dirty_gamma = std::vector<bool>(taxa.size(), true);
@@ -237,13 +236,29 @@ void FossilizedBirthDeathRangeProcess::updateRanges( void )
         if ( ranges[i].birth > ranges[max_birth].birth ) max_birth = i;
     }
 
-    if ( origin_age != NULL )
-    {
-        origin = origin_age->getValue();
-    }
-    else
+    if ( origin_age == NULL )
     {
         origin = ranges[max_birth].birth;
+        return;
+    }
+
+    origin = origin_age->getValue();
+
+    // The oldest birth is where the record begins, not a speciation event, so it follows the
+    // origin instead of being sampled.
+    if ( ranges[max_birth].birth != origin )
+    {
+        // only a proposal has a write to undo; a redraw or an externally set value has none
+        if ( touched == true )
+        {
+            stored_repairs.push_back( std::make_pair( max_birth*4 + 3, (*this->value)[max_birth][3] ) );
+        }
+
+        (*this->value)[max_birth][3] = origin;
+        ranges[max_birth].birth      = origin;
+
+        dirty_gamma[max_birth] = true;
+        dirty_taxa[max_birth]  = true;
     }
 }
 

@@ -22,8 +22,9 @@ mvMatrixElementScale
 mvMatrixElementSlide
 
 ## example
-bd ~ dnFBDRP(lambda=lambda, mu=mu, psi=psi, rho=1, taxa=taxa, origin_prior=dnUniform(9,15))
-# column 4 holds the birth times
+origin ~ dnUniform(9, 15)
+bd ~ dnFBDRP(lambda=lambda, mu=mu, psi=psi, rho=1, taxa=taxa, origin=origin)
+# column 4 holds the birth times, and the oldest of them is the origin
 moves.append( mvMatrixElementSwap(bd, col=4, weight=taxa.size()) )
 
 ## references

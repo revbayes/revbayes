@@ -45,8 +45,8 @@ namespace RevLanguage {
 
         const MemberRules&                                  getCoreParameterRules(void) const;                                              //!< Get member rules (const), without the reporting args
         static void                                         appendParameterRules(MemberRules &rules, bool include_reporting);                   //!< Build the member rules, with or without the reporting args
-        static ArgumentRule*                                originPriorRule(void);                                                              //!< The optional origin prior argument, for the processes that take one
-        RevBayesCore::TypedDistribution<double>*            createOriginPrior(void) const;                                                      //!< Build the core origin prior, or NULL if none was given
+        static ArgumentRule*                                originRule(void);                                                                   //!< The optional origin argument, for the processes that take one
+        RevBayesCore::TypedDagNode<double>*                 createOrigin(void) const;                                                           //!< The given origin node, or NULL if none was given
         
         void                                                setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);   //!< Set member variable
     
@@ -60,7 +60,7 @@ namespace RevLanguage {
         RevPtr<const RevVariable>                           taxa;                                                                               //!< The taxa
         RevPtr<const RevVariable>                           condition;                                                                          //!< The condition of the process
         RevPtr<const RevVariable>                           complete;                                                                           //!< Is the fossil record complete?
-        RevPtr<const RevVariable>                           origin_prior;                                                                       //!< Optional prior on the origin, which is the oldest birth
+        RevPtr<const RevVariable>                           origin;                                                                             //!< Optional process start, which the oldest birth follows
 
     };
     
@@ -163,27 +163,25 @@ void RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::appendParameterRules
 
 
 /**
- * The optional origin prior argument. The origin is the oldest birth, so the prior is evaluated
- * there rather than on a parameter of its own.
+ * The optional origin argument. Left out, the oldest birth is the process start under no prior and
+ * is sampled by the matrix moves. Supplied, it is a node the oldest birth follows.
  */
 template <typename rlType>
-ArgumentRule* RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::originPriorRule(void)
+ArgumentRule* RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::originRule(void)
 {
-    return new ArgumentRule( "origin_prior", TypedDistribution<RealPos>::getClassTypeSpec(), "A prior on the origin of the process, which is the oldest birth.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL );
+    return new ArgumentRule( "origin", RealPos::getClassTypeSpec(), "The start of the process. Left out, it is the oldest birth and carries no prior.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL );
 }
 
 
 template <typename rlType>
-RevBayesCore::TypedDistribution<double>* RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::createOriginPrior(void) const
+RevBayesCore::TypedDagNode<double>* RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::createOrigin(void) const
 {
-    if ( origin_prior == NULL || origin_prior->getRevObject() == RevNullObject::getInstance() )
+    if ( origin == NULL || origin->getRevObject() == RevNullObject::getInstance() )
     {
         return NULL;
     }
 
-    const Distribution &rl_op = static_cast<const Distribution &>( origin_prior->getRevObject() );
-
-    return static_cast<RevBayesCore::TypedDistribution<double>* >( rl_op.createDistribution() );
+    return static_cast<const RealPos &>( origin->getRevObject() ).getDagNode();
 }
 
 
@@ -293,9 +291,9 @@ void RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::setConstParameter(co
     {
         complete = var;
     }
-    else if ( name == "origin_prior" )
+    else if ( name == "origin" )
     {
-        origin_prior = var;
+        origin = var;
     }
     else
     {

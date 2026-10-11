@@ -115,8 +115,8 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRP::createDistribution( 
     // a bare range process reports complete until a dnFossilRecord node pushes its own model on;
     // that governs the constructor's initial augmented age draw
 
-    // optional origin time of the process
-    RevBayesCore::TypedDistribution<double>* op = createOriginPrior();
+    // optional process start, which the oldest birth follows
+    RevBayesCore::TypedDagNode<double>* oa = createOrigin();
 
     // the bare range process: the fossil-record term belongs to a dnFossilRecord node
     // may a taxon reported extinct have survived to the present unseen
@@ -124,7 +124,7 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRP::createDistribution( 
 
     double pres = static_cast<const RealPos &>( present->getRevObject() ).getValue();
 
-    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, true, NULL, op, surv, pres);
+    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, true, oa, surv, pres);
 
     return d;
 }
@@ -205,7 +205,7 @@ const MemberRules& Dist_FBDRP::getParameterRules(void) const
     
     if ( !rules_set )
     {
-        dist_member_rules.push_back( originPriorRule() );
+        dist_member_rules.push_back( originRule() );
 
         dist_member_rules.push_back( new ArgumentRule( "survivors", RlBoolean::getClassTypeSpec(), "Allow unsampled survivors?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( true ) ) );
 

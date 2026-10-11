@@ -25,7 +25,6 @@ namespace RevBayesCore {
                                   const std::vector<Taxon> &taxa,
                                   bool complete_record,
                                   const TypedDagNode<double>* origin = NULL,
-                                  TypedDistribution<double>* origin_prior = NULL,
                                   double present = 0.0);
 
         BirthDeathWithRateshifts*                       clone(void) const override;
@@ -33,7 +32,7 @@ namespace RevBayesCore {
     protected:
         double                                          computeLnProbability(void) override;
         double                                          rangeLnProb(size_t i) override;                 //!< Waiting times and a Poisson record, with no p(t).
-        double                                          originLnProb(void) override;                    //!< The origin term, only once a prior makes the oldest birth the origin.
+        double                                          originLnProb(void) override;                    //!< The origin term, only once a given origin makes the oldest birth the process start.
         //!< Conditioning on sampling is per range here, inside rangeLnProb.
         double                                          conditionLnProb(void) const override
                                                         {

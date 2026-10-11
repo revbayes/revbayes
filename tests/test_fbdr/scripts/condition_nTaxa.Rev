@@ -4,16 +4,17 @@
 #   beta  = lambda (1 - e^-(lambda-mu)x) / (lambda - mu e^-(lambda-mu)x)
 #
 # so P(0) = alpha, P(n) = (1 - alpha)(1 - beta) beta^(n-1), and the conditioning pays -log P(n).
-# Six taxa, three of them extant. The origin is latent, so each check takes it from the process
-# rather than hardcoding it. Every line printed must be TRUE.
+# Six taxa, three of them extant. Each check takes the origin from the process rather than
+# hardcoding it, so the identities hold at any origin. Every line printed must be TRUE.
 taxa <- readTaxonData("data/fbdr_condition.tsv")
 
 lambda ~ dnExponential(1); lambda.setValue(0.4)
 mu     ~ dnExponential(1); mu.setValue(0.1)
 psi    ~ dnExponential(1); psi.setValue(0.5)
+origin ~ dnUniform(8, 30);  origin.setValue(20)
 
 bd_t ~ dnFBDRP(taxa=taxa, lambda=lambda, mu=mu, psi=psi, rho=1.0, present=0.0,
-               condition="time", origin_prior=dnUniform(8, 30), survivors=true)
+               condition="time", origin=origin, survivors=true)
 rec_t ~ dnFossilRecord(ranges=bd_t, complete=true)
 rec_t.clamp(taxa)
 
@@ -22,7 +23,7 @@ config <- bd_t
 ori <- bd_t.getOrigin()
 
 bd_c ~ dnFBDRP(taxa=taxa, lambda=lambda, mu=mu, psi=psi, rho=1.0, present=0.0,
-               condition="nTaxa", origin_prior=dnUniform(8, 30), survivors=true)
+               condition="nTaxa", origin=origin, survivors=true)
 bd_c.setValue(config)
 rec_c ~ dnFossilRecord(ranges=bd_c, complete=true)
 rec_c.clamp(taxa)
@@ -45,7 +46,7 @@ mv := v(mu, mu, mu, mu, mu)
 pv := v(psi, psi, psi, psi, psi)
 
 bd_s ~ dnFBDRP(taxa=taxa, lambda=lv, mu=mv, psi=pv, rho=1.0, present=0.0, timeline=timeline,
-               condition="nTaxa", origin_prior=dnUniform(8, 30), survivors=true)
+               condition="nTaxa", origin=origin, survivors=true)
 bd_s.setValue(config)
 rec_s ~ dnFossilRecord(ranges=bd_s, complete=true)
 rec_s.clamp(taxa)
@@ -55,13 +56,13 @@ print(filename=out, append=TRUE, abs(bd_s.lnProbability() - bd_c.lnProbability()
 
 # rho thins the survivors, so the factor cannot rise
 bd_r ~ dnFBDRP(taxa=taxa, lambda=lambda, mu=mu, psi=psi, rho=0.5, present=0.0,
-               condition="nTaxa", origin_prior=dnUniform(8, 30), survivors=true)
+               condition="nTaxa", origin=origin, survivors=true)
 bd_r.setValue(config)
 rec_r ~ dnFossilRecord(ranges=bd_r, complete=true)
 rec_r.clamp(taxa)
 
 bd_rt ~ dnFBDRP(taxa=taxa, lambda=lambda, mu=mu, psi=psi, rho=0.5, present=0.0,
-                condition="time", origin_prior=dnUniform(8, 30), survivors=true)
+                condition="time", origin=origin, survivors=true)
 bd_rt.setValue(config)
 rec_rt ~ dnFossilRecord(ranges=bd_rt, complete=true)
 rec_rt.clamp(taxa)
@@ -71,14 +72,14 @@ print(filename=out, append=TRUE, (bd_r.lnProbability() - bd_rt.lnProbability()) 
 
 # dnBDS pays the same factor
 bds_t ~ dnBDS(taxa=taxa, lambda=lambda, mu=mu, psi=psi, rho=1.0, present=0.0,
-              condition="time", origin_prior=dnUniform(8, 30))
+              condition="time", origin=origin)
 rs_t ~ dnFossilRecord(ranges=bds_t, complete=true)
 rs_t.clamp(taxa)
 bds_cfg <- bds_t
 bds_ori <- bds_t.getOrigin()
 
 bds_c ~ dnBDS(taxa=taxa, lambda=lambda, mu=mu, psi=psi, rho=1.0, present=0.0,
-              condition="nTaxa", origin_prior=dnUniform(8, 30))
+              condition="nTaxa", origin=origin)
 bds_c.setValue(bds_cfg)
 rs_c ~ dnFossilRecord(ranges=bds_c, complete=true)
 rs_c.clamp(taxa)

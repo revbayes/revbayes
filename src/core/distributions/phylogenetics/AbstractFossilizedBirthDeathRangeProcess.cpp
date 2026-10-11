@@ -46,7 +46,6 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
                                                                          const std::vector<Taxon> &intaxa,
                                                                          bool comp,
                                                                          const TypedDagNode<double> *inorigin,
-                                                                         TypedDistribution<double> *inoriginprior,
                                                                          bool survivors,
                                                                          double inpresent) :
     taxa(intaxa),
@@ -54,7 +53,6 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
     homogeneous_rho(inrho),
     timeline( intimes ),
     origin_age( inorigin ),
-    origin_prior( inoriginprior ),
     origin(0.0),
     max_birth(0),
     resampled(false),
@@ -81,16 +79,6 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
     // add the parameters to the model
     range_parameters.push_back( timeline );
     range_parameters.push_back( origin_age );
-
-    // the prior's own parameters have to reach the DAG
-    if ( origin_prior != NULL )
-    {
-        const std::vector<const DagNode*> &pars = origin_prior->getParameters();
-        for (std::vector<const DagNode*>::const_iterator it = pars.begin(); it != pars.end(); it++)
-        {
-            range_parameters.push_back( *it );
-        }
-    }
     range_parameters.push_back( homogeneous_rho );
     range_parameters.push_back( homogeneous_lambda );
     range_parameters.push_back( heterogeneous_lambda );
@@ -284,10 +272,14 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
     // prepare the probability computation
     prepareProbComputation();
 
-    // the origin is the oldest birth; a supplied one pins it
-    if ( origin_age != NULL && ranges[max_birth].birth != origin )
+    // The record begins at the origin, so no range may be born above it. Only the matrix
+    // parameterization can reach such a state; a tree bounds its births by the root.
+    if ( origin_age != NULL )
     {
-        return RbConstants::Double::neginf;
+        for (size_t i = 0; i < taxa.size(); ++i)
+        {
+            if ( ranges[i].birth > origin ) return RbConstants::Double::neginf;
+        }
     }
 
     // variable declarations and initialization
@@ -401,19 +393,10 @@ double AbstractFossilizedBirthDeathRangeProcess::rangeLnProb( size_t i )
 }
 
 
-/** The origin is the oldest birth and not a speciation event, so its rate divides out. */
+/** The oldest birth is where the record begins, not a speciation event, so its rate divides out. */
 double AbstractFossilizedBirthDeathRangeProcess::originLnProb( void )
 {
-    double lnProb = -log( birth[ findIndex(origin) ] );
-
-    // a supplied prior applies to the oldest birth, which is the origin
-    if ( origin_prior != NULL )
-    {
-        origin_prior->setValue( new double(origin) );
-        lnProb += origin_prior->computeLnProbability();
-    }
-
-    return lnProb;
+    return -log( birth[ findIndex(origin) ] );
 }
 
 
@@ -947,6 +930,7 @@ void AbstractFossilizedBirthDeathRangeProcess::warnIfNoReportingNode( void ) con
 }
 
 
+
 /** Flip taxon i between surviving and dying. The caller sets the death time to match. */
 void AbstractFossilizedBirthDeathRangeProcess::switchSurvived(size_t i)
 {
@@ -1023,30 +1007,10 @@ void AbstractFossilizedBirthDeathRangeProcess::drawRanges()
 
     double present = times.front();
 
-    // The origin comes first, and every appearance is drawn under it. Drawing the appearances
-    // first and then hunting an origin above them fails whenever one lands above the prior's
-    // support, which a reported bin reaching past it allows.
-    double floor_age = 0.0;
-    for (size_t i = 0; i < taxa.size(); i++)
-    {
-        floor_age = std::max( floor_age, ranges[i].first_min );
-    }
-
+    // The origin comes first and every appearance is drawn under it.
     if ( origin_age != NULL )
     {
         max = origin_age->getValue();
-    }
-    else if ( origin_prior != NULL )
-    {
-        // rejected against a bound the record fixes, so the acceptance rate does not depend on
-        // an age drawn earlier in this same pass
-        origin_prior->redrawValue();
-        for (size_t t = 0; t < 1000 && origin_prior->getValue() <= floor_age; t++)
-        {
-            origin_prior->redrawValue();
-        }
-
-        max = origin_prior->getValue();
     }
 
     for (size_t i = 0; i < taxa.size(); i++)
@@ -1112,7 +1076,7 @@ void AbstractFossilizedBirthDeathRangeProcess::drawRanges()
         // the oldest birth is the origin, already drawn above and bounding every appearance
         if ( k == 0 )
         {
-            ranges[i].birth = ( origin_age != NULL || origin_prior != NULL )
+            ranges[i].birth = ( origin_age != NULL )
                               ? max
                               : ranges[i].first + rng->uniform01()*(max - ranges[i].first);
 

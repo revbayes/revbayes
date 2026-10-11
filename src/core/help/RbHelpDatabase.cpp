@@ -4131,8 +4131,9 @@ mymcmc.operatorSummary())");
 Note that the meaningful margin depends on the matrix. For the birth/death matrix of `dnFBDRP`, whose rows are taxa, only column swaps are meaningful: swapping within a row would exchange a taxon's own birth and death, and every such proposal is rejected.
 
 The proposal permutes the value, so it is symmetric and carries no Hastings ratio. It is useful where a random walk on individual elements mixes poorly between orderings, for example over which range of a `dnFBDRP` matrix holds the oldest birth.)");
-	help_strings[string("mvMatrixElementSwap")][string("example")] = string(R"(bd ~ dnFBDRP(lambda=lambda, mu=mu, psi=psi, rho=1, taxa=taxa, origin_prior=dnUniform(9,15))
-# column 4 holds the birth times
+	help_strings[string("mvMatrixElementSwap")][string("example")] = string(R"(origin ~ dnUniform(9, 15)
+bd ~ dnFBDRP(lambda=lambda, mu=mu, psi=psi, rho=1, taxa=taxa, origin=origin)
+# column 4 holds the birth times, and the oldest of them is the origin
 moves.append( mvMatrixElementSwap(bd, col=4, weight=taxa.size()) ))");
 	help_strings[string("mvMatrixElementSwap")][string("name")] = string(R"(mvMatrixElementSwap)");
 	help_arrays[string("mvMatrixElementSwap")][string("see_also")].push_back(string(R"(mvMatrixElementScale)"));
