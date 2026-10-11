@@ -272,13 +272,16 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
     // prepare the probability computation
     prepareProbComputation();
 
-    // The record begins at the origin, so no range may be born above it. Only the matrix
-    // parameterization can reach such a state; a tree bounds its births by the root.
+    // Exactly one range begins at the origin and it is the oldest, so every other one is born
+    // strictly below it. A tie would leave two rows claiming the origin with only the argmax
+    // exempt from the gamma check, which the next pull could hand to either of them.
     if ( origin_age != NULL )
     {
+        if ( ranges[max_birth].birth != origin ) return RbConstants::Double::neginf;
+
         for (size_t i = 0; i < taxa.size(); ++i)
         {
-            if ( ranges[i].birth > origin ) return RbConstants::Double::neginf;
+            if ( i != max_birth && ranges[i].birth >= origin ) return RbConstants::Double::neginf;
         }
     }
 
@@ -1115,6 +1118,7 @@ void AbstractFossilizedBirthDeathRangeProcess::keepSpecialization(const DagNode 
     resampled = false;
     switched = false;
     touched = false;
+    weld_origin = true;
 }
 
 
@@ -1141,6 +1145,7 @@ void AbstractFossilizedBirthDeathRangeProcess::restoreSpecialization(const DagNo
     resampled = false;
     switched = false;
     touched = false;
+    weld_origin = true;
 }
 
 

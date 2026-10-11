@@ -246,8 +246,9 @@ void FossilizedBirthDeathRangeProcess::updateRanges( void )
     origin = origin_age->getValue();
 
     // The oldest birth is where the record begins, not a speciation event, so it follows the
-    // origin instead of being sampled.
-    if ( ranges[max_birth].birth != origin )
+    // origin instead of being sampled. Only the origin node drags it: welding a row a matrix
+    // move touched would overwrite that element, and its own undo then fights this repair.
+    if ( weld_origin == true && ranges[max_birth].birth != origin )
     {
         // only a proposal has a write to undo; a redraw or an externally set value has none
         if ( touched == true )
@@ -354,6 +355,9 @@ void FossilizedBirthDeathRangeProcess::restoreSpecialization(const DagNode *touc
 
 void FossilizedBirthDeathRangeProcess::touchSpecialization(const DagNode *toucher, bool touchAll)
 {
+    // a matrix move writes the element itself, so it owns the undo for it
+    weld_origin = ( toucher != dag_node );
+
     if ( toucher == dag_node )
     {
         if ( touched == false )

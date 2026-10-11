@@ -189,6 +189,10 @@ namespace RevBayesCore {
         bool                                            stored_survived = false;                                //!< Taken in the proposal, before the pull, like the two ages above.
         bool                                            switched = false;                                       //!< That undo is armed.
 
+        //!< A matrix move may not drag the origin: welding the row it touched would overwrite
+        //!< the element whose own undo then fights the repair. Only the origin node drags it.
+        bool                                            weld_origin = true;
+
         std::vector<RangeEntry>                         stored_ranges;                                          //!< The table as the proposal found it, restored when it is rejected.
 
         std::vector<double>                             partial_likelihood;                                     //!< Partial likelihood for each taxon
