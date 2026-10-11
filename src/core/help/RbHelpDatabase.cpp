@@ -2034,7 +2034,7 @@ fnBSPInterval( a, b ))");
 	help_strings[string("fnBlosum62")][string("name")] = string(R"(fnBlosum62)");
 	help_arrays[string("fnBoundaryCrosserRates")][string("authors")].push_back(string(R"(June Walker)"));
 	help_strings[string("fnBoundaryCrosserRates")][string("description")] = string(R"(Foote's boundary-crosser rates for each interval, estimated from the taxa that cross an interval boundary.)");
-	help_strings[string("fnBoundaryCrosserRates")][string("details")] = string(R"(Taxa confined to a single interval are dropped, which removes much of the bias incomplete sampling introduces but discards data: the method improves as sampling improves, and does worst when sampling is poor. An interval with no taxa ranging through it has no estimate and returns NaN.
+	help_strings[string("fnBoundaryCrosserRates")][string("details")] = string(R"(Taxa confined to a single interval are dropped. An interval with no taxa ranging through it has no estimate and returns NaN. No taxon crosses the outer boundary of the youngest or the oldest interval of a timeline, so those two never have an estimate.
 
 Follows Foote (2000) equations 22 and 23, in the form given by Warnock et al. (2020) equation 8.
 
@@ -2831,7 +2831,7 @@ Q := fnMutSelAA(fnX3(fnGTR(er, nuc_pi)), F))");
 	help_strings[string("fnPattersonsD")][string("name")] = string(R"(fnPattersonsD)");
 	help_arrays[string("fnPerCapitaRates")][string("authors")].push_back(string(R"(June Walker)"));
 	help_strings[string("fnPerCapitaRates")][string("description")] = string(R"(Foote's per-taxon rates for each interval: the proportion of taxa whose first or last appearance falls in that interval.)");
-	help_strings[string("fnPerCapitaRates")][string("details")] = string(R"(This estimator takes no steps to account for incomplete sampling, and every taxon contributes, including those confined to a single interval. It is the baseline the other two improve on, and it is the one that does worst when sampling is good.
+	help_strings[string("fnPerCapitaRates")][string("details")] = string(R"(Every taxon contributes, including those confined to a single interval, and no correction for incomplete sampling is applied.
 
 Follows Foote (2000) equations 12 and 13, in the form given by Warnock et al. (2020) equation 7.
 
@@ -2955,7 +2955,7 @@ Q := fnT92(kappa, gc))");
 	help_strings[string("fnThreeTimerRates")][string("details")] = string(R"(A taxon counts toward an interval only if it was sampled in that interval's neighbours as well, so the oldest and youngest intervals have no estimate and return NaN. The sampling probability is the three-timer count over the three-timer plus part-timer count, summed across every interval.
 
 The method assumes intervals of equal length, and warns once if they are not.
-Warnock's fbdR, the implementation behind Warnock et al. (2020), floors a negative three-timer rate at zero. This function returns it as it comes, since a negative estimate says the correction has outrun the counts and that is worth seeing.
+Warnock's fbdR, the implementation behind Warnock et al. (2020), floors a negative three-timer rate at zero. This function returns it unchanged; a negative value means the sampling correction exceeded the counts it was applied to.
 
 Follows Alroy (2008), in the form given by Warnock et al. (2020) equations 9 and 10.
 

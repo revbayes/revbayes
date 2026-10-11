@@ -5,7 +5,7 @@ Boundary-crosser speciation and extinction rates
 ## description
 Foote's boundary-crosser rates for each interval, estimated from the taxa that cross an interval boundary.
 ## details
-Taxa confined to a single interval are dropped, which removes much of the bias incomplete sampling introduces but discards data: the method improves as sampling improves, and does worst when sampling is poor. An interval with no taxa ranging through it has no estimate and returns NaN.
+Taxa confined to a single interval are dropped. An interval with no taxa ranging through it has no estimate and returns NaN. No taxon crosses the outer boundary of the youngest or the oldest interval of a timeline, so those two never have an estimate.
 
 Follows Foote (2000) equations 22 and 23, in the form given by Warnock et al. (2020) equation 8.
 

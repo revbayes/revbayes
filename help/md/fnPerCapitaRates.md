@@ -5,7 +5,7 @@ Per-taxon speciation and extinction rates
 ## description
 Foote's per-taxon rates for each interval: the proportion of taxa whose first or last appearance falls in that interval.
 ## details
-This estimator takes no steps to account for incomplete sampling, and every taxon contributes, including those confined to a single interval. It is the baseline the other two improve on, and it is the one that does worst when sampling is good.
+Every taxon contributes, including those confined to a single interval, and no correction for incomplete sampling is applied.
 
 Follows Foote (2000) equations 12 and 13, in the form given by Warnock et al. (2020) equation 7.
 
