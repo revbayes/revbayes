@@ -7,7 +7,7 @@ Alroy's three-timer rates for each interval, with the counts corrected by a samp
 ## details
 A taxon counts toward an interval only if it was sampled in that interval's neighbours as well, so the oldest and youngest intervals return NaN. The sampling probability is the three-timer count over the three-timer plus part-timer count, summed across every interval. Part-timers are taxa sampled on both sides of an interval but not within it.
 
-The method assumes intervals of equal length, and warns once if they are not. A negative rate is returned as it is, where fbdR, the implementation behind Warnock et al. (2020), floors it at zero.
+The method assumes intervals of equal length, and warns once if they are not. A negative rate is not set to zero.
 
 Follows Alroy (2008), in the form given by Warnock et al. (2020) equations 9 and 10.
 
