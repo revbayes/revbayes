@@ -50,7 +50,7 @@ moves[1] = mvSlide(x[1])
 
 mymodel = model(x[1])
 
-# mymodel.graph("temp.dot",verbose=true,bg="honeydew2")
+# mymodel.graph("output/order-two-v2.dot",verbose=true,bg="honeydew2")
 
 # make the monitors
 monitors[1] = mnModel(printgen = 10, filename = "output/order-two-v2.log")
