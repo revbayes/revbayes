@@ -15,7 +15,7 @@ namespace RevLanguage {
     public:
         Func_threeTimerRates( void );
 
-        Func_threeTimerRates*                                  clone(void) const override;
+        Func_threeTimerRates*                   clone(void) const override;
         static const std::string&               getClassType(void);
         static const TypeSpec&                  getClassTypeSpec(void);
         std::string                             getFunctionName(void) const override;

@@ -15,7 +15,7 @@ namespace RevLanguage {
     public:
         Func_perCapitaRates( void );
 
-        Func_perCapitaRates*                                  clone(void) const override;
+        Func_perCapitaRates*                    clone(void) const override;
         static const std::string&               getClassType(void);
         static const TypeSpec&                  getClassTypeSpec(void);
         std::string                             getFunctionName(void) const override;

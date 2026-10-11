@@ -20,8 +20,7 @@
 
 namespace RevBayesCore {
 
-    //!< Where an occurrence bin that straddles an interval boundary is counted.
-    enum FossilAgeAmbiguity { FOSSIL_AGE_MIDPOINT, FOSSIL_AGE_OVERLAP, FOSSIL_AGE_EXCLUDE };
+    enum FossilAgeAmbiguity { FOSSIL_AGE_MIDPOINT, FOSSIL_AGE_OVERLAP, FOSSIL_AGE_EXCLUDE };    //!< Where a bin straddling an interval boundary is counted
 
     /**
      * @brief Counts of the taxon categories in each interval, Foote's four and then Alroy's.
@@ -37,12 +36,7 @@ namespace RevBayesCore {
         std::vector<double> part_timer;                                                 //!< N_pt, sampled in both neighbours but not here
     };
 
-    /*
-     * Boundaries are the interval start ages, youngest first, as the fossilized birth-death
-     * processes take them: the present, then each rate shift time. Interval j is
-     * [boundaries[j], boundaries[j+1]), half-open at its older edge, and the oldest interval
-     * runs to top, which is infinite unless the caller bounds it.
-     */
+    // boundaries are the interval start ages, youngest first, and the oldest interval ends at top
     std::vector<std::vector<bool> > fossilIntervalPresence(const std::vector<Taxon> &taxa,
                                                            const std::vector<double> &boundaries,
                                                            double top,
@@ -50,7 +44,7 @@ namespace RevBayesCore {
     FossilIntervalCounts            countFossilIntervals(const std::vector<std::vector<bool> > &presence);           //!< The category counts, from that presence matrix.
     size_t                          fossilIntervalOf(double age, const std::vector<double> &boundaries, double top); //!< The interval holding an age, or the interval count if it falls outside.
     void                            checkFossilIntervals(const std::vector<double> &boundaries);                     //!< Throws unless the boundaries are finite and ascending.
-    bool                            fossilIntervalsEqualWidth(const std::vector<double> &boundaries, double top);    //!< The three-timer method assumes they are.
+    bool                            fossilIntervalsEqualWidth(const std::vector<double> &boundaries, double top);    //!< Whether the bounded intervals all have the same width.
 
 }
 

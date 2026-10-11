@@ -12,11 +12,8 @@ using namespace RevBayesCore;
 
 
 /**
- * The interval holding an age.
- *
- * Intervals are half-open at their older edge, so an age sitting exactly on a boundary belongs
- * to the younger interval. An age outside the boundaries belongs to no interval, which the
- * callers read as "not sampled".
+ * The interval holding an age, or the number of intervals if it falls outside them.
+ * An age on a boundary belongs to the older interval.
  */
 size_t RevBayesCore::fossilIntervalOf(double age, const std::vector<double> &boundaries, double top)
 {
@@ -87,9 +84,7 @@ bool RevBayesCore::fossilIntervalsEqualWidth(const std::vector<double> &boundari
 
 
 /**
- * Which intervals each taxon was sampled in, from its reported occurrence bins.
- *
- * A bin lying inside one interval counts there. A bin straddling a boundary is counted by the
+ * Which intervals each taxon was sampled in. A bin straddling a boundary is counted by the
  * policy: at the interval holding its midpoint, in every interval it touches, or nowhere.
  */
 std::vector<std::vector<bool> > RevBayesCore::fossilIntervalPresence(const std::vector<Taxon> &taxa,
@@ -148,10 +143,8 @@ std::vector<std::vector<bool> > RevBayesCore::fossilIntervalPresence(const std::
 
 
 /**
- * The category counts, all from the presence matrix.
- *
- * A taxon's first appearance is the oldest interval it was sampled in and its last appearance
- * the youngest, which is how the counting methods read a binned record.
+ * The category counts. A taxon's first appearance is the oldest interval it was sampled in
+ * and its last appearance the youngest.
  */
 RevBayesCore::FossilIntervalCounts RevBayesCore::countFossilIntervals(const std::vector<std::vector<bool> > &presence)
 {
