@@ -930,6 +930,18 @@ void AbstractFossilizedBirthDeathRangeProcess::warnIfNoReportingNode( void ) con
 }
 
 
+// At rho = 0 no survivor is observed whatever the true count, so the conditioning event has
+// probability one and nTaxa is exactly condition="time".
+void AbstractFossilizedBirthDeathRangeProcess::warnIfInertNTaxaCondition( void ) const
+{
+    if ( condition == "nTaxa" && homogeneous_rho->getValue() == 0.0 && warned_inert_ntaxa == false )
+    {
+        warned_inert_ntaxa = true;
+        RBOUT("Warning: condition=\"nTaxa\" is inert at rho=0, where no survivor is observed.");
+    }
+}
+
+
 
 /** Flip taxon i between surviving and dying. The caller sets the death time to match. */
 void AbstractFossilizedBirthDeathRangeProcess::switchSurvived(size_t i)

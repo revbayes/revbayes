@@ -86,6 +86,7 @@ void FossilizedBirthDeathRangeProcess::setMcmcMode(bool tf)
     // the appearances live in the value here, where the element moves reach them, so only
     // the tree process needs to warn that nothing samples them
     if ( tf == true ) warnIfNoReportingNode();
+    if ( tf == true ) warnIfInertNTaxaCondition();
 }
 
 FossilizedBirthDeathRangeProcess* FossilizedBirthDeathRangeProcess::clone( void ) const

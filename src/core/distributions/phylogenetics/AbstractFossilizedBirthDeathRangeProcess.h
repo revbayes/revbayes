@@ -101,6 +101,7 @@ namespace RevBayesCore {
         void                                            switchSurvived(size_t i);                                   //!< Flip that status, arming the undo. Only mvExtinctionRJSwitch may.
         void                                            warnIfNoResampleMove(void) const;                           //!< Warn once when the appearances have no move.
         void                                            warnIfNoReportingNode(void) const;                          //!< Warn once when psi has no data.
+        void                                            warnIfInertNTaxaCondition(void) const;                      //!< Warn once when rho leaves nTaxa conditioning inert.
         void                                            initializeFirstLast(size_t i);                              //!< Draw taxon i's appearances, nested within the range and its reported bins.
         void                                            drawRanges();                                               //!< Draw an initial range and appearances for every taxon.
         double                                          computeLnFossilTotal();                                     //!< Total fossil-record log-density, for a dnFossilRecord node.
@@ -200,6 +201,7 @@ namespace RevBayesCore {
         bool                                            has_reporting_node = false;                             //!< Set by dnFossilRecord when it attaches.
         mutable bool                                    warned_no_resample = false;                             //!< setMcmcMode fires more than once per run.
         mutable bool                                    warned_no_reporting = false;
+        mutable bool                                    warned_inert_ntaxa = false;
         bool                                            resampled;                                              //!< The undo above is armed.
         //!< False forbids the point mass, leaving a continuous extinction time.
         bool                                            survivors = true;
