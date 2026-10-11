@@ -153,7 +153,19 @@ std::vector<std::vector<bool> > RevBayesCore::fossilIntervalPresence(const std::
  * A taxon's first appearance is the oldest interval it was sampled in and its last appearance
  * the youngest, which is how the counting methods read a binned record.
  */
-RevBayesCore::FossilIntervalCounts RevBayesCore::countFossilIntervals(const std::vector<std::vector<bool> > &presence)
+std::vector<bool> RevBayesCore::fossilExtantStatus(const std::vector<Taxon> &taxa)
+{
+    std::vector<bool> extant( taxa.size(), false );
+    for (size_t i = 0; i < taxa.size(); i++)
+    {
+        extant[i] = ( taxa[i].isExtinct() == false );
+    }
+    return extant;
+}
+
+
+RevBayesCore::FossilIntervalCounts RevBayesCore::countFossilIntervals(const std::vector<std::vector<bool> > &presence,
+                                                                      const std::vector<bool> &extant)
 {
     size_t num_intervals = ( presence.empty() ? 0 : presence[0].size() );
 
@@ -191,16 +203,24 @@ RevBayesCore::FossilIntervalCounts RevBayesCore::countFossilIntervals(const std:
             continue;
         }
 
+        // A taxon the record reports as still alive ranges through to the present, so it
+        // crosses the younger edge of every interval it occupies, the youngest one included,
+        // and its last appearance is never inside an interval. Without this the youngest
+        // interval has nothing crossing out of it and so no boundary-crosser estimate, and
+        // every survivor's youngest occurrence counts as an extinction.
+        bool alive = ( i < extant.size() && extant[i] == true );
+
         for (size_t j = 0; j < num_intervals; j++)
         {
             bool crosses_older   = ( first > j );
-            bool crosses_younger = ( last < j );
+            bool crosses_younger = ( alive == true ) || ( last < j );
+            bool last_inside     = ( alive == false && last == j );
 
-            if ( first == j && last == j )
+            if ( first == j && last_inside )
             {
                 c.singleton[j]++;
             }
-            else if ( crosses_older && last == j )
+            else if ( crosses_older && last_inside )
             {
                 c.bottom_last[j]++;
             }

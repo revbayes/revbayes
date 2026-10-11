@@ -5,7 +5,9 @@ Boundary-crosser speciation and extinction rates
 ## description
 Foote's boundary-crosser rates for each interval, estimated from the taxa that cross an interval boundary.
 ## details
-Taxa confined to a single interval are dropped. An interval with no taxa ranging through it has no estimate and returns NaN. No taxon crosses the outer boundary of the youngest or the oldest interval of a timeline, so those two never have an estimate.
+Taxa confined to a single interval are dropped. An interval with no taxa ranging through it has no estimate and returns NaN. With `extant=FALSE` no taxon crosses the outer boundary of the youngest or the oldest interval of a timeline, so those two never have an estimate.
+
+A record can report a taxon as extant, and `extant=TRUE` reads that: such a taxon ranges through to the present whether or not it was sampled there, so it crosses the younger edge of every interval it is in, including the youngest. The default is FALSE, because a taxon whose status was never set reads as still alive, which would turn a whole fossil record into survivors. `readTaxonData` sets the status from a status column, or, with no such column, from whether the taxon was sampled at the present. Warnock et al. (2020) assume complete knowledge of extant diversity for these methods.
 
 Follows Foote (2000) equations 22 and 23, in the form given by Warnock et al. (2020) equation 8.
 

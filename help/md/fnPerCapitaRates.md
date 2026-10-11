@@ -7,6 +7,8 @@ Foote's per-taxon rates for each interval: the proportion of taxa whose first or
 ## details
 Every taxon contributes, including those confined to a single interval, and no correction for incomplete sampling is applied.
 
+A record can report a taxon as extant, and `extant=TRUE` reads that: such a taxon ranges through to the present whether or not it was sampled there, so it crosses the younger edge of every interval it is in, including the youngest. The default is FALSE, because a taxon whose status was never set reads as still alive, which would turn a whole fossil record into survivors. `readTaxonData` sets the status from a status column, or, with no such column, from whether the taxon was sampled at the present. Warnock et al. (2020) assume complete knowledge of extant diversity for these methods.
+
 Follows Foote (2000) equations 12 and 13, in the form given by Warnock et al. (2020) equation 7.
 
 The record enters as the taxa read with `readTaxonData`. A taxon's first and last appearance are the oldest and youngest intervals it was sampled in, which is how these methods read a binned record.

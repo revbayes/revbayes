@@ -2034,7 +2034,9 @@ fnBSPInterval( a, b ))");
 	help_strings[string("fnBlosum62")][string("name")] = string(R"(fnBlosum62)");
 	help_arrays[string("fnBoundaryCrosserRates")][string("authors")].push_back(string(R"(June Walker)"));
 	help_strings[string("fnBoundaryCrosserRates")][string("description")] = string(R"(Foote's boundary-crosser rates for each interval, estimated from the taxa that cross an interval boundary.)");
-	help_strings[string("fnBoundaryCrosserRates")][string("details")] = string(R"(Taxa confined to a single interval are dropped. An interval with no taxa ranging through it has no estimate and returns NaN. No taxon crosses the outer boundary of the youngest or the oldest interval of a timeline, so those two never have an estimate.
+	help_strings[string("fnBoundaryCrosserRates")][string("details")] = string(R"(Taxa confined to a single interval are dropped. An interval with no taxa ranging through it has no estimate and returns NaN. With `extant=FALSE` no taxon crosses the outer boundary of the youngest or the oldest interval of a timeline, so those two never have an estimate.
+
+A record can report a taxon as extant, and `extant=TRUE` reads that: such a taxon ranges through to the present whether or not it was sampled there, so it crosses the younger edge of every interval it is in, including the youngest. The default is FALSE, because a taxon whose status was never set reads as still alive, which would turn a whole fossil record into survivors. `readTaxonData` sets the status from a status column, or, with no such column, from whether the taxon was sampled at the present. Warnock et al. (2020) assume complete knowledge of extant diversity for these methods.
 
 Follows Foote (2000) equations 22 and 23, in the form given by Warnock et al. (2020) equation 8.
 
@@ -2833,6 +2835,8 @@ Q := fnMutSelAA(fnX3(fnGTR(er, nuc_pi)), F))");
 	help_strings[string("fnPerCapitaRates")][string("description")] = string(R"(Foote's per-taxon rates for each interval: the proportion of taxa whose first or last appearance falls in that interval.)");
 	help_strings[string("fnPerCapitaRates")][string("details")] = string(R"(Every taxon contributes, including those confined to a single interval, and no correction for incomplete sampling is applied.
 
+A record can report a taxon as extant, and `extant=TRUE` reads that: such a taxon ranges through to the present whether or not it was sampled there, so it crosses the younger edge of every interval it is in, including the youngest. The default is FALSE, because a taxon whose status was never set reads as still alive, which would turn a whole fossil record into survivors. `readTaxonData` sets the status from a status column, or, with no such column, from whether the taxon was sampled at the present. Warnock et al. (2020) assume complete knowledge of extant diversity for these methods.
+
 Follows Foote (2000) equations 12 and 13, in the form given by Warnock et al. (2020) equation 7.
 
 The record enters as the taxa read with `readTaxonData`. A taxon's first and last appearance are the oldest and youngest intervals it was sampled in, which is how these methods read a binned record.
@@ -2952,7 +2956,9 @@ Q := fnT92(kappa, gc))");
 	help_strings[string("fnTajimasPi")][string("name")] = string(R"(fnTajimasPi)");
 	help_arrays[string("fnThreeTimerRates")][string("authors")].push_back(string(R"(June Walker)"));
 	help_strings[string("fnThreeTimerRates")][string("description")] = string(R"(Alroy's three-timer rates for each interval, with the counts corrected by a sampling probability pooled over the record.)");
-	help_strings[string("fnThreeTimerRates")][string("details")] = string(R"(A taxon counts toward an interval only if it was sampled in that interval's neighbours as well, so the oldest and youngest intervals have no estimate and return NaN. The sampling probability is the three-timer count over the three-timer plus part-timer count, summed across every interval.
+	help_strings[string("fnThreeTimerRates")][string("details")] = string(R"(A taxon counts toward an interval only if it was sampled in that interval's neighbours as well, so the oldest and youngest intervals have no estimate and return NaN.
+
+A record can report a taxon as extant, and `extant=TRUE` reads that: such a taxon ranges through to the present whether or not it was sampled there, so it crosses the younger edge of every interval it is in, including the youngest. The default is FALSE, because a taxon whose status was never set reads as still alive, which would turn a whole fossil record into survivors. `readTaxonData` sets the status from a status column, or, with no such column, from whether the taxon was sampled at the present. Warnock et al. (2020) assume complete knowledge of extant diversity for these methods. The sampling probability is the three-timer count over the three-timer plus part-timer count, summed across every interval.
 
 The method assumes intervals of equal length, and warns once if they are not.
 Warnock's fbdR, the implementation behind Warnock et al. (2020), floors a negative three-timer rate at zero. This function returns it unchanged; a negative value means the sampling correction exceeded the counts it was applied to.

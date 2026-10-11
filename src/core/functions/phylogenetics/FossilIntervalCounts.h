@@ -47,7 +47,9 @@ namespace RevBayesCore {
                                                            const std::vector<double> &boundaries,
                                                            double top,
                                                            FossilAgeAmbiguity policy);  //!< Which intervals each taxon was sampled in.
-    FossilIntervalCounts            countFossilIntervals(const std::vector<std::vector<bool> > &presence);           //!< The category counts, from that presence matrix.
+    FossilIntervalCounts            countFossilIntervals(const std::vector<std::vector<bool> > &presence,
+                                                         const std::vector<bool> &extant);                        //!< The category counts, from that presence matrix.
+    std::vector<bool>               fossilExtantStatus(const std::vector<Taxon> &taxa);                            //!< Which taxa the record reports as still alive.
     size_t                          fossilIntervalOf(double age, const std::vector<double> &boundaries, double top); //!< The interval holding an age, or the interval count if it falls outside.
     void                            checkFossilIntervals(const std::vector<double> &boundaries);                     //!< Throws unless the boundaries are finite and ascending.
     bool                            fossilIntervalsEqualWidth(const std::vector<double> &boundaries, double top);    //!< The three-timer method assumes they are.

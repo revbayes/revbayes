@@ -5,7 +5,9 @@ Three-timer speciation and extinction rates
 ## description
 Alroy's three-timer rates for each interval, with the counts corrected by a sampling probability pooled over the record.
 ## details
-A taxon counts toward an interval only if it was sampled in that interval's neighbours as well, so the oldest and youngest intervals have no estimate and return NaN. The sampling probability is the three-timer count over the three-timer plus part-timer count, summed across every interval.
+A taxon counts toward an interval only if it was sampled in that interval's neighbours as well, so the oldest and youngest intervals have no estimate and return NaN.
+
+A record can report a taxon as extant, and `extant=TRUE` reads that: such a taxon ranges through to the present whether or not it was sampled there, so it crosses the younger edge of every interval it is in, including the youngest. The default is FALSE, because a taxon whose status was never set reads as still alive, which would turn a whole fossil record into survivors. `readTaxonData` sets the status from a status column, or, with no such column, from whether the taxon was sampled at the present. Warnock et al. (2020) assume complete knowledge of extant diversity for these methods. The sampling probability is the three-timer count over the three-timer plus part-timer count, summed across every interval.
 
 The method assumes intervals of equal length, and warns once if they are not.
 Warnock's fbdR, the implementation behind Warnock et al. (2020), floors a negative three-timer rate at zero. This function returns it unchanged; a negative value means the sampling correction exceeded the counts it was applied to.
