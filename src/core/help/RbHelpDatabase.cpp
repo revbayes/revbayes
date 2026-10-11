@@ -1941,19 +1941,17 @@ fnBSPInterval( a, b ))");
 	help_strings[string("fnBlosum62")][string("name")] = string(R"(fnBlosum62)");
 	help_arrays[string("fnBoundaryCrosserRates")][string("authors")].push_back(string(R"(June Walker)"));
 	help_strings[string("fnBoundaryCrosserRates")][string("description")] = string(R"(Foote's boundary-crosser rates for each interval, estimated from the taxa that cross an interval boundary.)");
-	help_strings[string("fnBoundaryCrosserRates")][string("details")] = string(R"(Taxa confined to a single interval are dropped, which removes much of the bias incomplete sampling introduces but discards data: the method improves as sampling improves, and does worst when sampling is poor. An interval with no taxa ranging through it has no estimate and returns NaN.
+	help_strings[string("fnBoundaryCrosserRates")][string("details")] = string(R"(Taxa confined to a single interval are dropped. An interval with no taxa ranging through it returns NaN.
 
 Follows Foote (2000) equations 22 and 23, in the form given by Warnock et al. (2020) equation 8.
 
-The record enters as the taxa read with `readTaxonData`. A taxon's first and last appearance are the oldest and youngest intervals it was sampled in, which is how these methods read a binned record.
+A taxon's first and last appearance are the oldest and youngest intervals it was sampled in. The value is a two by l matrix, speciation in the first row and extinction in the second.
 
-The value is a two by l matrix, speciation in the first row and extinction in the second, since both rates come from one pass over the same counts.
+`timeline` holds the rate shift times youngest first and `present` the minimum age, so `timeline = v(10, 20, 30)` defines the intervals [0,10) [10,20) [20,30) and an unbounded oldest interval. An interval whose rate is undefined returns NaN.
 
-Intervals follow the range processes: `timeline` holds the rate shift times youngest first and `present` the minimum age, so `timeline = v(10, 20, 30)` defines the intervals [0,10) [10,20) [20,30) and an unbounded oldest interval. An interval with no information returns NaN rather than an error, and the unbounded oldest interval never has a rate.
+The oldest interval has no rate unless `max_age` bounds it. Occurrences older than `max_age` are not counted, and a `max_age` no older than the oldest rate shift leaves that interval NaN. Both cases warn once.
 
-The oldest interval is unbounded unless `max_age` bounds it. These estimators divide a per-interval proportion by the interval's duration, so an unbounded interval has no rate. Occurrences older than `max_age` fall outside every interval and are not counted, which the function warns about once. A `max_age` no older than the oldest rate shift leaves that interval no width, so it too returns NaN, with a warning, rather than an error: a record that stops short of the timeline asked of it still yields rates for the intervals it does cover.
-
-An occurrence whose reported bin straddles a boundary is counted at the interval holding the bin's midpoint, which is what the comparison literature does. `ambiguous="overlap"` counts it in every interval the bin touches and `ambiguous="exclude"` drops it.)");
+An occurrence whose reported bin straddles a boundary is counted at the interval holding the bin's midpoint. `ambiguous="overlap"` counts it in every interval the bin touches and `ambiguous="exclude"` drops it.)");
 	help_strings[string("fnBoundaryCrosserRates")][string("example")] = string(R"(taxa <- readTaxonData("fossils.tsv")
 timeline <- v(10, 20, 30)
 
@@ -1961,8 +1959,7 @@ rates := fnBoundaryCrosserRates(taxa, timeline)
 speciation := rates[1]
 extinction := rates[2]
 
-# The estimates are fixed by the record, so log them once with mnFile rather than
-# monitoring them.
+# mnModel skips a node that depends only on constants, so log it with mnFile
 monitors.append( mnFile(filename="output/rates.log", rates, printgen=1) ))");
 	help_strings[string("fnBoundaryCrosserRates")][string("name")] = string(R"(fnBoundaryCrosserRates)");
 	help_references[string("fnBoundaryCrosserRates")].push_back(RbHelpReference(R"(Origination and extinction components of taxonomic diversity: general problems. Foote, Mike. 2000. Paleobiology, 26:74-102.)",R"(https://doi.org/10.1017/S0094837300026890 )",R"()"));
@@ -2738,19 +2735,17 @@ Q := fnMutSelAA(fnX3(fnGTR(er, nuc_pi)), F))");
 	help_strings[string("fnPattersonsD")][string("name")] = string(R"(fnPattersonsD)");
 	help_arrays[string("fnPerCapitaRates")][string("authors")].push_back(string(R"(June Walker)"));
 	help_strings[string("fnPerCapitaRates")][string("description")] = string(R"(Foote's per-taxon rates for each interval: the proportion of taxa whose first or last appearance falls in that interval.)");
-	help_strings[string("fnPerCapitaRates")][string("details")] = string(R"(This estimator takes no steps to account for incomplete sampling, and every taxon contributes, including those confined to a single interval. It is the baseline the other two improve on, and it is the one that does worst when sampling is good.
+	help_strings[string("fnPerCapitaRates")][string("details")] = string(R"(This estimator does not account for incomplete sampling, and every taxon contributes, including those confined to a single interval.
 
 Follows Foote (2000) equations 12 and 13, in the form given by Warnock et al. (2020) equation 7.
 
-The record enters as the taxa read with `readTaxonData`. A taxon's first and last appearance are the oldest and youngest intervals it was sampled in, which is how these methods read a binned record.
+A taxon's first and last appearance are the oldest and youngest intervals it was sampled in. The value is a two by l matrix, speciation in the first row and extinction in the second.
 
-The value is a two by l matrix, speciation in the first row and extinction in the second, since both rates come from one pass over the same counts.
+`timeline` holds the rate shift times youngest first and `present` the minimum age, so `timeline = v(10, 20, 30)` defines the intervals [0,10) [10,20) [20,30) and an unbounded oldest interval. An interval whose rate is undefined returns NaN.
 
-Intervals follow the range processes: `timeline` holds the rate shift times youngest first and `present` the minimum age, so `timeline = v(10, 20, 30)` defines the intervals [0,10) [10,20) [20,30) and an unbounded oldest interval. An interval with no information returns NaN rather than an error, and the unbounded oldest interval never has a rate.
+The oldest interval has no rate unless `max_age` bounds it. Occurrences older than `max_age` are not counted, and a `max_age` no older than the oldest rate shift leaves that interval NaN. Both cases warn once.
 
-The oldest interval is unbounded unless `max_age` bounds it. These estimators divide a per-interval proportion by the interval's duration, so an unbounded interval has no rate. Occurrences older than `max_age` fall outside every interval and are not counted, which the function warns about once. A `max_age` no older than the oldest rate shift leaves that interval no width, so it too returns NaN, with a warning, rather than an error: a record that stops short of the timeline asked of it still yields rates for the intervals it does cover.
-
-An occurrence whose reported bin straddles a boundary is counted at the interval holding the bin's midpoint, which is what the comparison literature does. `ambiguous="overlap"` counts it in every interval the bin touches and `ambiguous="exclude"` drops it.)");
+An occurrence whose reported bin straddles a boundary is counted at the interval holding the bin's midpoint. `ambiguous="overlap"` counts it in every interval the bin touches and `ambiguous="exclude"` drops it.)");
 	help_strings[string("fnPerCapitaRates")][string("example")] = string(R"(taxa <- readTaxonData("fossils.tsv")
 timeline <- v(10, 20, 30)
 
@@ -2758,8 +2753,7 @@ rates := fnPerCapitaRates(taxa, timeline)
 speciation := rates[1]
 extinction := rates[2]
 
-# The estimates are fixed by the record, so log them once with mnFile rather than
-# monitoring them.
+# mnModel skips a node that depends only on constants, so log it with mnFile
 monitors.append( mnFile(filename="output/rates.log", rates, printgen=1) ))");
 	help_strings[string("fnPerCapitaRates")][string("name")] = string(R"(fnPerCapitaRates)");
 	help_references[string("fnPerCapitaRates")].push_back(RbHelpReference(R"(Origination and extinction components of taxonomic diversity: general problems. Foote, Mike. 2000. Paleobiology, 26:74-102.)",R"(https://doi.org/10.1017/S0094837300026890 )",R"()"));
@@ -2859,22 +2853,19 @@ Q := fnT92(kappa, gc))");
 	help_strings[string("fnTajimasPi")][string("name")] = string(R"(fnTajimasPi)");
 	help_arrays[string("fnThreeTimerRates")][string("authors")].push_back(string(R"(June Walker)"));
 	help_strings[string("fnThreeTimerRates")][string("description")] = string(R"(Alroy's three-timer rates for each interval, with the counts corrected by a sampling probability pooled over the record.)");
-	help_strings[string("fnThreeTimerRates")][string("details")] = string(R"(A taxon counts toward an interval only if it was sampled in that interval's neighbours as well, so the oldest and youngest intervals have no estimate and return NaN. The sampling probability is the three-timer count over the three-timer plus part-timer count, summed across every interval.
+	help_strings[string("fnThreeTimerRates")][string("details")] = string(R"(A taxon counts toward an interval only if it was sampled in that interval's neighbours as well, so the oldest and youngest intervals return NaN. The sampling probability is the three-timer count over the three-timer plus part-timer count, summed across every interval. Part-timers are taxa sampled on both sides of an interval but not within it.
 
-The method assumes intervals of equal length, and warns once if they are not.
-Warnock's fbdR, the implementation behind Warnock et al. (2020), floors a negative three-timer rate at zero. This function returns it as it comes, since a negative estimate says the correction has outrun the counts and that is worth seeing.
+The method assumes intervals of equal length, and warns once if they are not. A negative rate is returned as it is, where fbdR, the implementation behind Warnock et al. (2020), floors it at zero.
 
 Follows Alroy (2008), in the form given by Warnock et al. (2020) equations 9 and 10.
 
-The record enters as the taxa read with `readTaxonData`. A taxon's first and last appearance are the oldest and youngest intervals it was sampled in, and the correction is estimated from part-timers, taxa sampled on both sides of an interval but not within it.
+A taxon's first and last appearance are the oldest and youngest intervals it was sampled in. The value is a two by l matrix, speciation in the first row and extinction in the second.
 
-The value is a two by l matrix, speciation in the first row and extinction in the second, since both rates come from one pass over the same counts.
+`timeline` holds the rate shift times youngest first and `present` the minimum age, so `timeline = v(10, 20, 30)` defines the intervals [0,10) [10,20) [20,30) and an unbounded oldest interval. An interval whose rate is undefined returns NaN.
 
-Intervals follow the range processes: `timeline` holds the rate shift times youngest first and `present` the minimum age, so `timeline = v(10, 20, 30)` defines the intervals [0,10) [10,20) [20,30) and an unbounded oldest interval. An interval with no information returns NaN rather than an error, and the unbounded oldest interval never has a rate.
+The oldest interval has no rate unless `max_age` bounds it. Occurrences older than `max_age` are not counted, and a `max_age` no older than the oldest rate shift leaves that interval NaN. Both cases warn once.
 
-The oldest interval is unbounded unless `max_age` bounds it. These estimators divide a per-interval proportion by the interval's duration, so an unbounded interval has no rate. Occurrences older than `max_age` fall outside every interval and are not counted, which the function warns about once. A `max_age` no older than the oldest rate shift leaves that interval no width, so it too returns NaN, with a warning, rather than an error: a record that stops short of the timeline asked of it still yields rates for the intervals it does cover.
-
-An occurrence whose reported bin straddles a boundary is counted at the interval holding the bin's midpoint, which is what the comparison literature does. `ambiguous="overlap"` counts it in every interval the bin touches and `ambiguous="exclude"` drops it.)");
+An occurrence whose reported bin straddles a boundary is counted at the interval holding the bin's midpoint. `ambiguous="overlap"` counts it in every interval the bin touches and `ambiguous="exclude"` drops it.)");
 	help_strings[string("fnThreeTimerRates")][string("example")] = string(R"(taxa <- readTaxonData("fossils.tsv")
 timeline <- v(10, 20, 30)
 
@@ -2882,8 +2873,7 @@ rates := fnThreeTimerRates(taxa, timeline)
 speciation := rates[1]
 extinction := rates[2]
 
-# The estimates are fixed by the record, so log them once with mnFile rather than
-# monitoring them.
+# mnModel skips a node that depends only on constants, so log it with mnFile
 monitors.append( mnFile(filename="output/rates.log", rates, printgen=1) ))");
 	help_strings[string("fnThreeTimerRates")][string("name")] = string(R"(fnThreeTimerRates)");
 	help_references[string("fnThreeTimerRates")].push_back(RbHelpReference(R"(Dynamics of origination and extinction in the marine fossil record. Alroy, John. 2008. Proceedings of the National Academy of Sciences, 105:11536-11542.)",R"(https://doi.org/10.1073/pnas.0802597105 )",R"()"));
