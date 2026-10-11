@@ -130,6 +130,9 @@ namespace RevBayesCore {
         // helper functions
         size_t                                          findIndex(double t) const;                             //!< Find the index so that times[index-1] < t < times[index]
         double                                          p(size_t i, double t, bool survival = false) const;
+        void                                            numTaxaGeometric(double &alpha, double &beta) const;       //!< The count at the present: geometric with an atom at alpha.
+        size_t                                          getNumberOfTaxaAtPresent(void) const;                      //!< The taxa the record reports as extant.
+        double                                          lnProbNumTaxa(size_t n) const;                             //!< log P(n taxa at the present).
         virtual double                                  q(size_t i, double t, bool tilde = false) const;
         double                                          lnQTildeFromPresent(size_t i, double t) const;              //!< log q_tilde from the present up to t.
 

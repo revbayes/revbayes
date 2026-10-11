@@ -34,7 +34,12 @@ namespace RevBayesCore {
         double                                          computeLnProbability(void) override;
         double                                          rangeLnProb(size_t i) override;                 //!< Waiting times and a Poisson record, with no p(t).
         double                                          originLnProb(void) override;                    //!< The origin term, only once a prior makes the oldest birth the origin.
-        double                                          conditionLnProb(void) const override { return 0.0; } //!< Conditioning on sampling is per range here, inside rangeLnProb.
+        //!< Conditioning on sampling is per range here, inside rangeLnProb.
+        double                                          conditionLnProb(void) const override
+                                                        {
+                                                            if ( condition == "nTaxa" ) return -lnProbNumTaxa( getNumberOfTaxaAtPresent() );
+                                                            return 0.0;
+                                                        }
     };
 }
 

@@ -1,0 +1,8 @@
+the factor matches its closed form at the record's own count of 3:
+TRUE	
+five intervals of one rate match one interval:
+TRUE	
+rho below one does not raise the factor:
+TRUE	
+dnBDS pays the same factor:
+TRUE	

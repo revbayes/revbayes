@@ -417,6 +417,116 @@ double AbstractFossilizedBirthDeathRangeProcess::originLnProb( void )
 }
 
 
+// The count at the present, as a geometric distribution with an atom at alpha. Fossil sampling
+// does not remove a lineage, so this comes from the birth-death alone.
+void AbstractFossilizedBirthDeathRangeProcess::numTaxaGeometric( double &alpha, double &beta ) const
+{
+    // (A z + B) / (C z + D), composed from the present up to the origin
+    double A = 1.0, B = 0.0, C = 0.0, D = 1.0;
+
+    size_t ori = findIndex(origin);
+
+    for (size_t i = 0; i <= ori; i++)
+    {
+        double b  = birth[i];
+        double d  = death[i];
+        double dt = ( i < ori ? times[i+1] : origin ) - times[i];
+
+        if ( dt <= 0.0 )
+        {
+            continue;
+        }
+
+        double diff = b - d;
+        double a_i, b_i;
+
+        // b == d leaves the closed form singular
+        if ( fabs(diff) * dt < 1E-10 )
+        {
+            a_i = d * dt / (1.0 + d * dt);
+            b_i = b * dt / (1.0 + b * dt);
+        }
+        else
+        {
+            double e   = -expm1(-diff * dt);
+            double den = diff - d * expm1(-diff * dt);
+            a_i = d * e / den;
+            b_i = b * e / den;
+        }
+
+        // this interval's map, a + (1-a)(1-b) z / (1 - b z)
+        double fA = (1.0 - a_i) * (1.0 - b_i) - a_i * b_i;
+        double fB = a_i;
+        double fC = -b_i;
+
+        double nA = fA * A + fB * C;
+        double nB = fA * B + fB * D;
+        double nC = fC * A + C;
+        double nD = fC * B + D;
+
+        // defined up to scale, so normalise to keep the entries bounded
+        double s = std::max( std::max(fabs(nA), fabs(nB)), std::max(fabs(nC), fabs(nD)) );
+        if ( s > 0.0 )
+        {
+            nA /= s; nB /= s; nC /= s; nD /= s;
+        }
+
+        A = nA; B = nB; C = nC; D = nD;
+    }
+
+    // rho thins each survivor: z -> (1-rho) + rho z
+    double r = homogeneous_rho->getValue();
+
+    double tB = A * (1.0 - r) + B;
+    double tC = C * r;
+    double tD = C * (1.0 - r) + D;
+
+    alpha = tB / tD;
+    beta  = -tC / tD;
+}
+
+
+// The taxa the record reports as extant.
+size_t AbstractFossilizedBirthDeathRangeProcess::getNumberOfTaxaAtPresent( void ) const
+{
+    size_t n = 0;
+    for (size_t i = 0; i < taxa.size(); i++)
+    {
+        n += ( taxa[i].isExtinct() == false );
+    }
+
+    return n;
+}
+
+
+// log P(n taxa at the present).
+double AbstractFossilizedBirthDeathRangeProcess::lnProbNumTaxa( size_t n ) const
+{
+    double alpha = 0.0, beta = 0.0;
+    numTaxaGeometric(alpha, beta);
+
+    if ( n == 0 )
+    {
+        return ( alpha > 0.0 ? log(alpha) : RbConstants::Double::neginf );
+    }
+
+    if ( alpha >= 1.0 || beta >= 1.0 || beta < 0.0 )
+    {
+        return RbConstants::Double::neginf;
+    }
+
+    double lnProb = log(1.0 - alpha) + log(1.0 - beta);
+
+    // beta == 0 forbids more than one survivor, so 0 * log(0) is never evaluated
+    if ( n > 1 )
+    {
+        lnProb += (n - 1) * log(beta);
+    }
+
+    return lnProb;
+}
+
+
 /** Conditioning that applies to the process as a whole rather than range by range. */
 double AbstractFossilizedBirthDeathRangeProcess::conditionLnProb( void ) const
 {
@@ -429,6 +539,10 @@ double AbstractFossilizedBirthDeathRangeProcess::conditionLnProb( void ) const
     if ( condition == "survival" )
     {
         return -log( 1.0 - p(ori, origin, true) );
+    }
+    if ( condition == "nTaxa" )
+    {
+        return -lnProbNumTaxa( getNumberOfTaxaAtPresent() );
     }
 
     return 0.0;

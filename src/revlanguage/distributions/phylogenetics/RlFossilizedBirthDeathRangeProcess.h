@@ -5,7 +5,6 @@
 #include "ModelVector.h"
 #include "RealPos.h"
 #include "RlDistributionMemberFunction.h"
-#include "Natural.h"
 #include "OptionRule.h"
 #include "RlDistribution.h"
 #include "RevNullObject.h"
@@ -151,6 +150,7 @@ void RevLanguage::FossilizedBirthDeathRangeProcess<rlType>::appendParameterRules
     optionsCondition.push_back( "time" );
     optionsCondition.push_back( "sampling" );
     optionsCondition.push_back( "survival" );
+    optionsCondition.push_back( "nTaxa" );
     rules.push_back( new OptionRule( "condition", new RlString("time"), optionsCondition, "The condition of the process." ) );
     rules.push_back( new ArgumentRule( "taxa"  , ModelVector<Taxon>::getClassTypeSpec(), "The taxa with fossil occurrence information.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
