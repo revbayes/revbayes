@@ -23,7 +23,7 @@ mvMatrixElementSlide
 
 ## example
 bd ~ dnFBDRP(lambda=lambda, mu=mu, psi=psi, rho=1, taxa=taxa, origin_prior=dnUniform(9,15))
-# column 1 holds the birth times
-moves.append( mvMatrixElementSwap(bd, col=1, weight=taxa.size()) )
+# column 4 holds the birth times
+moves.append( mvMatrixElementSwap(bd, col=4, weight=taxa.size()) )
 
 ## references
