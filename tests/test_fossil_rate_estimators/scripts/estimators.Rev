@@ -51,6 +51,22 @@ print(filename=out, append=TRUE, fnBoundaryCrosserRates(taxa, timeline, max_age=
 print(filename=out, append=TRUE, "per-taxon, max_age below the oldest shift:\n")
 print(filename=out, append=TRUE, fnPerTaxonRates(taxa, timeline, max_age=25), "\n")
 
+# present moves the youngest boundary, so interval 0 is [5,10) and its rates double
+print(filename=out, append=TRUE, "per-taxon, present at 5:\n")
+print(filename=out, append=TRUE, fnPerTaxonRates(taxa, timeline, present=5, max_age=40), "\n")
+
+# t4's only occurrence is now the bin [12,24], which spans the boundary at 20:
+#   midpoint  t4 is a singleton in interval 1
+#   overlap   t4 is in intervals 1 and 2
+#   exclude   t4 is not sampled
+binned <- readTaxonData("data/fossil_rate_estimators_bin.tsv")
+print(filename=out, append=TRUE, "per-taxon, ambiguous=midpoint:\n")
+print(filename=out, append=TRUE, fnPerTaxonRates(binned, timeline, max_age=40), "\n")
+print(filename=out, append=TRUE, "per-taxon, ambiguous=overlap:\n")
+print(filename=out, append=TRUE, fnPerTaxonRates(binned, timeline, max_age=40, ambiguous="overlap"), "\n")
+print(filename=out, append=TRUE, "per-taxon, ambiguous=exclude:\n")
+print(filename=out, append=TRUE, fnPerTaxonRates(binned, timeline, max_age=40, ambiguous="exclude"), "\n")
+
 # log(2)/10 and log(4/3)/10 at full precision
 bc <- fnBoundaryCrosserRates(taxa, timeline)
 print(filename=out, append=TRUE, "boundary-crosser speciation, intervals 2 and 3 in full:\n")
