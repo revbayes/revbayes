@@ -170,6 +170,19 @@ for t in ${TESTS}; do
 
     done
 
+    # A script that writes outside output/ leaves the file in the source tree, where it can be
+    # committed by accident and where two scripts can overwrite each other. Nothing tracked
+    # lives at the root of a test directory, so anything here is a stray.
+    strays="$(ls -A | grep -vxE 'scripts|output|output_expected|output_expected_mpi|exit_expected|data' | tr '\n' ' ')"
+    if [ -n "${strays% }" ] ; then
+        printf "\n   ${RED}FAIL${CLEAR}: wrote outside output/: ${strays}\n\n"
+        if [ "${test_result}" = 0 ] ; then
+            test_result="\twrote outside output/: ${strays}\n"
+        else
+            test_result="${test_result}\twrote outside output/: ${strays}\n"
+        fi
+    fi
+
     # store the exit status
     status+=("${test_result}")
 
