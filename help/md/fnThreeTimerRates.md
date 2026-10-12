@@ -5,28 +5,25 @@ Three-timer speciation and extinction rates
 ## description
 Alroy's three-timer rates for each interval, with the counts corrected by a sampling probability pooled over the record.
 ## details
-A taxon counts toward an interval only if it was sampled in that interval's neighbours as well, so the oldest and youngest intervals have no estimate and return NaN.
+A taxon counts toward an interval only if it was sampled in that interval's neighbours as well, so the oldest and youngest intervals return NaN. The sampling probability is the three-timer count over the three-timer plus part-timer count, summed across every interval. Part-timers are taxa sampled on both sides of an interval but not within it.
 
-A record can report a taxon as extant, and `extant=TRUE` reads that: such a taxon ranges through to the present whether or not it was sampled there, so it crosses the younger edge of every interval it is in, including the youngest. The default is FALSE, because a taxon whose status was never set reads as still alive, which would turn a whole fossil record into survivors. `readTaxonData` sets the status from a status column, or, with no such column, from whether the taxon was sampled at the present. Warnock et al. (2020) assume complete knowledge of extant diversity for these methods. The sampling probability is the three-timer count over the three-timer plus part-timer count, summed across every interval.
+`extant=TRUE` reads the record's extant status, so a taxon reported as alive ranges to the present and crosses the younger edge of every interval it occupies, the youngest included. The default is FALSE, because a taxon whose status was never set reads as alive. `readTaxonData` takes the status from a status column, or from whether the taxon was sampled at the present. Warnock et al. (2020) assume complete knowledge of extant diversity for these methods.
 
-The method assumes intervals of equal length, and warns once if they are not.
-Warnock's fbdR, the implementation behind Warnock et al. (2020), floors a negative three-timer rate at zero. This function returns it unchanged; a negative value means the sampling correction exceeded the counts it was applied to.
+The method assumes intervals of equal length, and warns once if they are not. A negative rate is not set to zero.
 
 Follows Alroy (2008), in the form given by Warnock et al. (2020) equations 9 and 10.
 
-The record enters as the taxa read with `readTaxonData`. A taxon's first and last appearance are the oldest and youngest intervals it was sampled in, and the correction is estimated from part-timers, taxa sampled on both sides of an interval but not within it.
+A taxon's first and last appearance are the oldest and youngest intervals it was sampled in. The value is a two by l matrix, speciation in the first row and extinction in the second.
 
-The value is a two by l matrix, speciation in the first row and extinction in the second, since both rates come from one pass over the same counts.
+`timeline` holds the rate shift times youngest first and `present` the minimum age, so `timeline = v(10, 20, 30)` defines the intervals [0,10) [10,20) [20,30) and an unbounded oldest interval. An interval whose rate is undefined returns NaN.
 
-Intervals follow the range processes: `timeline` holds the rate shift times youngest first and `present` the minimum age, so `timeline = v(10, 20, 30)` defines the intervals [0,10) [10,20) [20,30) and an unbounded oldest interval. An interval with no information returns NaN rather than an error, and the unbounded oldest interval never has a rate.
+The oldest interval has no rate unless `max_age` bounds it. Occurrences older than `max_age` are not counted, and a `max_age` no older than the oldest rate shift leaves that interval NaN. Both cases warn once.
 
-The oldest interval is unbounded unless `max_age` bounds it. These estimators divide a per-interval proportion by the interval's duration, so an unbounded interval has no rate. Occurrences older than `max_age` fall outside every interval and are not counted, which the function warns about once. A `max_age` no older than the oldest rate shift leaves that interval no width, so it too returns NaN, with a warning, rather than an error: a record that stops short of the timeline asked of it still yields rates for the intervals it does cover.
-
-An occurrence whose reported bin straddles a boundary is counted at the interval holding the bin's midpoint, which is what the comparison literature does. `ambiguous="overlap"` counts it in every interval the bin touches and `ambiguous="exclude"` drops it.
+An occurrence whose reported bin straddles a boundary is counted at the interval holding the bin's midpoint. `ambiguous="overlap"` counts it in every interval the bin touches and `ambiguous="exclude"` drops it.
 ## authors
 June Walker
 ## see_also
-fnPerCapitaRates
+fnPerTaxonRates
 fnBoundaryCrosserRates
 ## example
 taxa <- readTaxonData("fossils.tsv")
@@ -36,8 +33,7 @@ rates := fnThreeTimerRates(taxa, timeline)
 speciation := rates[1]
 extinction := rates[2]
 
-# The estimates are fixed by the record, so log them once with mnFile rather than
-# monitoring them.
+# mnModel skips a node that depends only on constants, so log it with mnFile
 monitors.append( mnFile(filename="output/rates.log", rates, printgen=1) )
 ## references
 	- citation: Dynamics of origination and extinction in the marine fossil record. Alroy, John. 2008. Proceedings of the National Academy of Sciences, 105:11536-11542.

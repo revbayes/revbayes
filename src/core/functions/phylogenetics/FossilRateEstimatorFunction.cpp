@@ -93,8 +93,7 @@ double FossilRateEstimatorFunction::rate(const FossilIntervalCounts &c, size_t j
 
 void FossilRateEstimatorFunction::update( void )
 {
-    // the process timeline convention: the present, then each rate shift time, youngest first,
-    // and the oldest interval unbounded
+    // the present, then each rate shift time, youngest first
     const std::vector<double> &shifts = timeline->getValue();
     std::vector<double> boundaries( 1, present->getValue() );
     for (size_t j = 0; j < shifts.size(); j++)
@@ -108,16 +107,12 @@ void FossilRateEstimatorFunction::update( void )
 
     double top = ( max_age != NULL ? max_age->getValue() : RbConstants::Double::inf );
 
-    // A record that stops short of the oldest rate shift leaves that interval no width. Every
-    // other undefined case returns NaN, and a column of NaN is easier to act on mid-analysis
-    // than an abort, so warn once and let the width test below catch it.
     if ( warned_max_age == false && top <= boundaries[num_intervals-1] )
     {
         RBOUT("Warning: max_age is not older than the oldest rate shift, so that interval has no rate.\n");
         warned_max_age = true;
     }
 
-    // anything older than the oldest edge falls outside every interval and is not counted
     if ( warned_outside == false )
     {
         const RbVector<Taxon> &t = taxa->getValue();

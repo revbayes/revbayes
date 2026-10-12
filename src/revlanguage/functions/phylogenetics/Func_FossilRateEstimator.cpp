@@ -32,15 +32,15 @@ const ArgumentRules& Func_FossilRateEstimator::getArgumentRules( void ) const
     {
         argument_rules.push_back( new ArgumentRule( "taxa", ModelVector<Taxon>::getClassTypeSpec(), "The taxa with fossil occurrence information.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         argument_rules.push_back( new ArgumentRule( "timeline", ModelVector<RealPos>::getClassTypeSpec(), "The rate interval change times of the piecewise constant process.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new ModelVector<RealPos>() ) );
-        argument_rules.push_back( new ArgumentRule( "present", RealPos::getClassTypeSpec(), "The time defining the present. Minimum age of the process.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
-        argument_rules.push_back( new ArgumentRule( "max_age", RealPos::getClassTypeSpec(), "The older edge of the oldest interval. Left out, or not older than the oldest rate shift, that interval has no rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
+        argument_rules.push_back( new ArgumentRule( "present", RealPos::getClassTypeSpec(), "The age of the present.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
+        argument_rules.push_back( new ArgumentRule( "max_age", RealPos::getClassTypeSpec(), "The maximum age of the oldest interval.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
         std::vector<std::string> ambiguous_options;
         ambiguous_options.push_back( "midpoint" );
         ambiguous_options.push_back( "overlap" );
         ambiguous_options.push_back( "exclude" );
-        argument_rules.push_back( new OptionRule( "ambiguous", new RlString("midpoint"), ambiguous_options, "Where an occurrence whose reported bin straddles an interval boundary is counted. Taxa only." ) );
-        argument_rules.push_back( new ArgumentRule( "extant", RlBoolean::getClassTypeSpec(), "Read the record's extant status, so a taxon reported as still alive ranges through to the present. Off by default, because a taxon whose status was never set reads as still alive.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
+        argument_rules.push_back( new OptionRule( "ambiguous", new RlString("midpoint"), ambiguous_options, "How to count an occurrence that spans an interval boundary." ) );
+        argument_rules.push_back( new ArgumentRule( "extant", RlBoolean::getClassTypeSpec(), "Read the record's extant status, so a taxon reported as alive ranges to the present.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
 
         rules_set = true;
     }

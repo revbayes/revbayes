@@ -16,25 +16,9 @@ namespace RevBayesCore {
     /**
      * @brief Classical per-interval speciation and extinction rate estimators.
      *
-     * Three methods, all reading the same per-interval taxon counts: per-taxon rates and the
-     * boundary-crosser method of Foote (2000), and the three-timer method of Alroy (2008), in
-     * the form Warnock et al. (2020) compare them in.
-     *
-     * The value is a two by l matrix, speciation in the first row and extinction in the
-     * second, since both rates come from one pass over the same counts.
-     *
-     * A taxon's first and last appearance are the oldest and youngest intervals it was sampled
-     * in, which is how these methods read a binned record.
-     *
-     * Intervals follow the range processes: the present, then each rate shift time, youngest
-     * first. The oldest interval is unbounded unless max_age bounds it, and an unbounded
-     * interval has no duration, so these estimators, which divide a proportion by one, have
-     * no rate for it.
-     *
-     * An interval with no information returns NaN rather than throwing: the oldest interval,
-     * which is unbounded and so has no width, or bounded by a max_age no older than the shift
-     * below it, the youngest under the three-timer method, which needs both neighbours, and
-     * any interval whose denominator is empty.
+     * The per-taxon and boundary-crosser rates of Foote (2000) and the three-timer rates of
+     * Alroy (2008). The value is a two by l matrix, speciation in the first row and extinction
+     * in the second, with NaN wherever an interval's rate is undefined.
      */
     class FossilRateEstimatorFunction : public TypedFunction< MatrixReal > {
 

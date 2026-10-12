@@ -132,9 +132,7 @@ bool Taxon::operator>=(const RevBayesCore::Taxon &t) const
  */
 void Taxon::addOccurrence( const TimeInterval &d )
 {
-    // keep the bins ordered and one entry per distinct bin. TimeInterval::operator< compares
-    // only the maximum, so a map would have merged two bins that share one, losing the minimum
-    // of whichever arrived second.
+    // not a map: TimeInterval::operator< compares only the maximum
     std::vector<std::pair<TimeInterval, size_t> >::iterator it = occurrences.begin();
     while ( it != occurrences.end() && ( it->first.getMax() < d.getMax() ||
             ( it->first.getMax() == d.getMax() && it->first.getMin() < d.getMin() ) ) )

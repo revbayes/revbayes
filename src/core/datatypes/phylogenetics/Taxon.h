@@ -60,8 +60,6 @@ namespace RevBayesCore {
         
         // private members
         TimeInterval                          age_range;
-        //!< The reported bins and how many specimens fell in each, ordered by the bin. A list
-        //!< rather than a keyed lookup: nothing looks an occurrence up, everything walks them.
         std::vector<std::pair<TimeInterval, size_t> > occurrences;
         std::string                           name;
         std::string                           species_name;
