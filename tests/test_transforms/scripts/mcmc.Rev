@@ -7,7 +7,7 @@ x2 ~ dnNormal(0,1)*sigma
 m = model(sigma)
 
 moves = [mvSlice(sigma), mvSlice(x1), mvSlice(x2)]
-monitors = [mnModel(filename="test.log")]
+monitors = [mnModel(filename="output/mcmc_test.log")]
 analysis = mcmc(m,monitors,moves)
 
 analysis.burnin(100,1)
