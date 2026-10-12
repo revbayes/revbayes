@@ -1964,7 +1964,7 @@ monitors.append( mnFile(filename="output/rates.log", rates, printgen=1) ))");
 	help_strings[string("fnBoundaryCrosserRates")][string("name")] = string(R"(fnBoundaryCrosserRates)");
 	help_references[string("fnBoundaryCrosserRates")].push_back(RbHelpReference(R"(Origination and extinction components of taxonomic diversity: general problems. Foote, Mike. 2000. Paleobiology, 26:74-102.)",R"(https://doi.org/10.1017/S0094837300026890 )",R"()"));
 	help_references[string("fnBoundaryCrosserRates")].push_back(RbHelpReference(R"(Assessing the impact of incomplete species sampling on estimates of speciation and extinction rates. Warnock, Rachel C. M., Heath, Tracy A. and Stadler, Tanja. 2020. Paleobiology, 46:137-157.)",R"(https://doi.org/10.1017/pab.2020.12 )",R"()"));
-	help_arrays[string("fnBoundaryCrosserRates")][string("see_also")].push_back(string(R"(fnPerCapitaRates)"));
+	help_arrays[string("fnBoundaryCrosserRates")][string("see_also")].push_back(string(R"(fnPerTaxonRates)"));
 	help_arrays[string("fnBoundaryCrosserRates")][string("see_also")].push_back(string(R"(fnThreeTimerRates)"));
 	help_strings[string("fnBoundaryCrosserRates")][string("title")] = string(R"(Boundary-crosser speciation and extinction rates)");
 	help_strings[string("fnChromosomes")][string("name")] = string(R"(fnChromosomes)");
@@ -2733,9 +2733,9 @@ Q := fnMutSelAA(fnX3(fnGTR(er, nuc_pi)), F))");
 	help_strings[string("fnPD")][string("name")] = string(R"(fnPD)");
 	help_strings[string("fnPartialToCorr")][string("name")] = string(R"(fnPartialToCorr)");
 	help_strings[string("fnPattersonsD")][string("name")] = string(R"(fnPattersonsD)");
-	help_arrays[string("fnPerCapitaRates")][string("authors")].push_back(string(R"(June Walker)"));
-	help_strings[string("fnPerCapitaRates")][string("description")] = string(R"(Foote's per-taxon rates for each interval: the proportion of taxa whose first or last appearance falls in that interval.)");
-	help_strings[string("fnPerCapitaRates")][string("details")] = string(R"(This estimator does not account for incomplete sampling, and every taxon contributes, including those confined to a single interval.
+	help_arrays[string("fnPerTaxonRates")][string("authors")].push_back(string(R"(June Walker)"));
+	help_strings[string("fnPerTaxonRates")][string("description")] = string(R"(Foote's per-taxon rates for each interval: the proportion of taxa whose first or last appearance falls in that interval.)");
+	help_strings[string("fnPerTaxonRates")][string("details")] = string(R"(This estimator does not account for incomplete sampling, and every taxon contributes, including those confined to a single interval.
 
 Follows Foote (2000) equations 12 and 13, in the form given by Warnock et al. (2020) equation 7.
 
@@ -2746,21 +2746,21 @@ A taxon's first and last appearance are the oldest and youngest intervals it was
 The oldest interval has no rate unless `max_age` bounds it. Occurrences older than `max_age` are not counted, and a `max_age` no older than the oldest rate shift leaves that interval NaN. Both cases warn once.
 
 An occurrence whose reported bin straddles a boundary is counted at the interval holding the bin's midpoint. `ambiguous="overlap"` counts it in every interval the bin touches and `ambiguous="exclude"` drops it.)");
-	help_strings[string("fnPerCapitaRates")][string("example")] = string(R"(taxa <- readTaxonData("fossils.tsv")
+	help_strings[string("fnPerTaxonRates")][string("example")] = string(R"(taxa <- readTaxonData("fossils.tsv")
 timeline <- v(10, 20, 30)
 
-rates := fnPerCapitaRates(taxa, timeline)
+rates := fnPerTaxonRates(taxa, timeline)
 speciation := rates[1]
 extinction := rates[2]
 
 # mnModel skips a node that depends only on constants, so log it with mnFile
 monitors.append( mnFile(filename="output/rates.log", rates, printgen=1) ))");
-	help_strings[string("fnPerCapitaRates")][string("name")] = string(R"(fnPerCapitaRates)");
-	help_references[string("fnPerCapitaRates")].push_back(RbHelpReference(R"(Origination and extinction components of taxonomic diversity: general problems. Foote, Mike. 2000. Paleobiology, 26:74-102.)",R"(https://doi.org/10.1017/S0094837300026890 )",R"()"));
-	help_references[string("fnPerCapitaRates")].push_back(RbHelpReference(R"(Assessing the impact of incomplete species sampling on estimates of speciation and extinction rates. Warnock, Rachel C. M., Heath, Tracy A. and Stadler, Tanja. 2020. Paleobiology, 46:137-157.)",R"(https://doi.org/10.1017/pab.2020.12 )",R"()"));
-	help_arrays[string("fnPerCapitaRates")][string("see_also")].push_back(string(R"(fnBoundaryCrosserRates)"));
-	help_arrays[string("fnPerCapitaRates")][string("see_also")].push_back(string(R"(fnThreeTimerRates)"));
-	help_strings[string("fnPerCapitaRates")][string("title")] = string(R"(Per-taxon speciation and extinction rates)");
+	help_strings[string("fnPerTaxonRates")][string("name")] = string(R"(fnPerTaxonRates)");
+	help_references[string("fnPerTaxonRates")].push_back(RbHelpReference(R"(Origination and extinction components of taxonomic diversity: general problems. Foote, Mike. 2000. Paleobiology, 26:74-102.)",R"(https://doi.org/10.1017/S0094837300026890 )",R"()"));
+	help_references[string("fnPerTaxonRates")].push_back(RbHelpReference(R"(Assessing the impact of incomplete species sampling on estimates of speciation and extinction rates. Warnock, Rachel C. M., Heath, Tracy A. and Stadler, Tanja. 2020. Paleobiology, 46:137-157.)",R"(https://doi.org/10.1017/pab.2020.12 )",R"()"));
+	help_arrays[string("fnPerTaxonRates")][string("see_also")].push_back(string(R"(fnBoundaryCrosserRates)"));
+	help_arrays[string("fnPerTaxonRates")][string("see_also")].push_back(string(R"(fnThreeTimerRates)"));
+	help_strings[string("fnPerTaxonRates")][string("title")] = string(R"(Per-taxon speciation and extinction rates)");
 	help_strings[string("fnPhylogeneticIndependentContrasts")][string("name")] = string(R"(fnPhylogeneticIndependentContrasts)");
 	help_strings[string("fnPhylogeneticIndependentContrastsMultiSample")][string("name")] = string(R"(fnPhylogeneticIndependentContrastsMultiSample)");
 	help_strings[string("fnPoMo")][string("name")] = string(R"(fnPoMo)");
@@ -2878,7 +2878,7 @@ monitors.append( mnFile(filename="output/rates.log", rates, printgen=1) ))");
 	help_strings[string("fnThreeTimerRates")][string("name")] = string(R"(fnThreeTimerRates)");
 	help_references[string("fnThreeTimerRates")].push_back(RbHelpReference(R"(Dynamics of origination and extinction in the marine fossil record. Alroy, John. 2008. Proceedings of the National Academy of Sciences, 105:11536-11542.)",R"(https://doi.org/10.1073/pnas.0802597105 )",R"()"));
 	help_references[string("fnThreeTimerRates")].push_back(RbHelpReference(R"(Assessing the impact of incomplete species sampling on estimates of speciation and extinction rates. Warnock, Rachel C. M., Heath, Tracy A. and Stadler, Tanja. 2020. Paleobiology, 46:137-157.)",R"(https://doi.org/10.1017/pab.2020.12 )",R"()"));
-	help_arrays[string("fnThreeTimerRates")][string("see_also")].push_back(string(R"(fnPerCapitaRates)"));
+	help_arrays[string("fnThreeTimerRates")][string("see_also")].push_back(string(R"(fnPerTaxonRates)"));
 	help_arrays[string("fnThreeTimerRates")][string("see_also")].push_back(string(R"(fnBoundaryCrosserRates)"));
 	help_strings[string("fnThreeTimerRates")][string("title")] = string(R"(Three-timer speciation and extinction rates)");
 	help_strings[string("fnTrN")][string("description")] = string(R"(DNA evolution model proposed in Tamura & Nei (1993).)");

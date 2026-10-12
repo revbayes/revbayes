@@ -35,7 +35,7 @@ timeline <- v(10, 20, 30)
 
 out = "output/estimators.txt"
 print(filename=out, append=FALSE, "per-taxon, speciation then extinction:\n")
-print(filename=out, append=TRUE, fnPerCapitaRates(taxa, timeline), "\n")
+print(filename=out, append=TRUE, fnPerTaxonRates(taxa, timeline), "\n")
 print(filename=out, append=TRUE, "boundary-crosser:\n")
 print(filename=out, append=TRUE, fnBoundaryCrosserRates(taxa, timeline), "\n")
 print(filename=out, append=TRUE, "three-timer:\n")
@@ -43,13 +43,13 @@ print(filename=out, append=TRUE, fnThreeTimerRates(taxa, timeline), "\n")
 
 # max_age bounds the oldest interval, giving the four 10 Myr intervals of the table above
 print(filename=out, append=TRUE, "per-taxon, oldest interval bounded at 40:\n")
-print(filename=out, append=TRUE, fnPerCapitaRates(taxa, timeline, max_age=40), "\n")
+print(filename=out, append=TRUE, fnPerTaxonRates(taxa, timeline, max_age=40), "\n")
 print(filename=out, append=TRUE, "boundary-crosser, oldest interval bounded at 40:\n")
 print(filename=out, append=TRUE, fnBoundaryCrosserRates(taxa, timeline, max_age=40), "\n")
 
 # a max_age no older than the oldest rate shift warns and returns NaN for that interval
 print(filename=out, append=TRUE, "per-taxon, max_age below the oldest shift:\n")
-print(filename=out, append=TRUE, fnPerCapitaRates(taxa, timeline, max_age=25), "\n")
+print(filename=out, append=TRUE, fnPerTaxonRates(taxa, timeline, max_age=25), "\n")
 
 # log(2)/10 and log(4/3)/10 at full precision
 bc <- fnBoundaryCrosserRates(taxa, timeline)

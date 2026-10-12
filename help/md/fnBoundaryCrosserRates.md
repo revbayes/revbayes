@@ -19,7 +19,7 @@ An occurrence whose reported bin straddles a boundary is counted at the interval
 ## authors
 June Walker
 ## see_also
-fnPerCapitaRates
+fnPerTaxonRates
 fnThreeTimerRates
 ## example
 taxa <- readTaxonData("fossils.tsv")

@@ -1,5 +1,5 @@
 ## name
-fnPerCapitaRates
+fnPerTaxonRates
 ## title
 Per-taxon speciation and extinction rates
 ## description
@@ -25,7 +25,7 @@ fnThreeTimerRates
 taxa <- readTaxonData("fossils.tsv")
 timeline <- v(10, 20, 30)
 
-rates := fnPerCapitaRates(taxa, timeline)
+rates := fnPerTaxonRates(taxa, timeline)
 speciation := rates[1]
 extinction := rates[2]
 
