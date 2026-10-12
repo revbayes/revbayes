@@ -2956,7 +2956,7 @@ Q := fnT92(kappa, gc))");
 
 `extant=TRUE` reads the record's extant status, so a taxon reported as alive ranges to the present and crosses the younger edge of every interval it occupies, the youngest included. The default is FALSE, because a taxon whose status was never set reads as alive. `readTaxonData` takes the status from a status column, or from whether the taxon was sampled at the present. Warnock et al. (2020) assume complete knowledge of extant diversity for these methods.
 
-The method assumes intervals of equal length, and warns once if they are not. A negative rate is not set to zero.
+The method assumes intervals of equal length, and warns once if they are not. A rate can come out negative, where the sampling correction exceeds the counts it was applied to, and is returned unchanged.
 
 Follows Alroy (2008), in the form given by Warnock et al. (2020) equations 9 and 10.
 
