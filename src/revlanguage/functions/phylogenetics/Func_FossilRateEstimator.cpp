@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "ArgumentRule.h"
+#include "RlBoolean.h"
 #include "ArgumentRules.h"
 #include "FossilIntervalCounts.h"
 #include "ModelVector.h"
@@ -39,6 +40,7 @@ const ArgumentRules& Func_FossilRateEstimator::getArgumentRules( void ) const
         ambiguous_options.push_back( "overlap" );
         ambiguous_options.push_back( "exclude" );
         argument_rules.push_back( new OptionRule( "ambiguous", new RlString("midpoint"), ambiguous_options, "How to count an occurrence that spans an interval boundary." ) );
+        argument_rules.push_back( new ArgumentRule( "extant", RlBoolean::getClassTypeSpec(), "Read the record's extant status, so a taxon reported as alive ranges to the present.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
 
         rules_set = true;
     }
@@ -68,5 +70,7 @@ RevBayesCore::TypedFunction< RevBayesCore::MatrixReal >* Func_FossilRateEstimato
     if ( ambiguous == "overlap" )      policy = RevBayesCore::FOSSIL_AGE_OVERLAP;
     else if ( ambiguous == "exclude" ) policy = RevBayesCore::FOSSIL_AGE_EXCLUDE;
 
-    return new RevBayesCore::FossilRateEstimatorFunction( taxa, timeline, present, max_age, method(), policy );
+    bool extant = static_cast<const RlBoolean &>( this->args[5].getVariable()->getRevObject() ).getValue();
+
+    return new RevBayesCore::FossilRateEstimatorFunction( taxa, timeline, present, max_age, method(), policy, extant );
 }

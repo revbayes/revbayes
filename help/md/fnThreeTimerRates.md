@@ -7,6 +7,8 @@ Alroy's three-timer rates for each interval, with the counts corrected by a samp
 ## details
 A taxon counts toward an interval only if it was sampled in that interval's neighbours as well, so the oldest and youngest intervals return NaN. The sampling probability is the three-timer count over the three-timer plus part-timer count, summed across every interval. Part-timers are taxa sampled on both sides of an interval but not within it.
 
+`extant=TRUE` reads the record's extant status, so a taxon reported as alive ranges to the present and crosses the younger edge of every interval it occupies, the youngest included. The default is FALSE, because a taxon whose status was never set reads as alive. `readTaxonData` takes the status from a status column, or from whether the taxon was sampled at the present. Warnock et al. (2020) assume complete knowledge of extant diversity for these methods.
+
 The method assumes intervals of equal length, and warns once if they are not. A negative rate is not set to zero.
 
 Follows Alroy (2008), in the form given by Warnock et al. (2020) equations 9 and 10.

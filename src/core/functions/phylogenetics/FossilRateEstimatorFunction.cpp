@@ -14,7 +14,7 @@ FossilRateEstimatorFunction::FossilRateEstimatorFunction(const TypedDagNode< RbV
                                                          const TypedDagNode< RbVector<double> > *b,
                                                          const TypedDagNode< double > *p,
                                                          const TypedDagNode< double > *mx,
-                                                         Method m, FossilAgeAmbiguity a) :
+                                                         Method m, FossilAgeAmbiguity a, bool e ) :
     TypedFunction< MatrixReal >( new MatrixReal( 2, b->getValue().size() + 1 ) ),
     taxa( t ),
     timeline( b ),
@@ -22,6 +22,7 @@ FossilRateEstimatorFunction::FossilRateEstimatorFunction(const TypedDagNode< RbV
     max_age( mx ),
     method( m ),
     ambiguous( a ),
+    use_extant( e ),
     warned_max_age( false ),
     warned_widths( false ),
     warned_outside( false )
@@ -126,7 +127,11 @@ void FossilRateEstimatorFunction::update( void )
         }
     }
 
-    FossilIntervalCounts c = countFossilIntervals( fossilIntervalPresence( taxa->getValue(), boundaries, top, ambiguous ) );
+    // without the status column every taxon reads as not extinct, so the caller has to ask
+    std::vector<bool> extant = ( use_extant ? fossilExtantStatus( taxa->getValue() )
+                                            : std::vector<bool>( taxa->getValue().size(), false ) );
+    FossilIntervalCounts c = countFossilIntervals( fossilIntervalPresence( taxa->getValue(), boundaries, top, ambiguous ),
+                                                   extant );
 
     // the three-timer sampling probability is pooled over the whole record
     double p_s = RbConstants::Double::nan;

@@ -29,7 +29,7 @@ namespace RevBayesCore {
                                     const TypedDagNode< RbVector<double> > *b,
                                     const TypedDagNode< double > *p,
                                     const TypedDagNode< double > *mx,
-                                    Method m, FossilAgeAmbiguity a);
+                                    Method m, FossilAgeAmbiguity a, bool e );
         virtual                                ~FossilRateEstimatorFunction(void);                     //!< Virtual destructor
 
         FossilRateEstimatorFunction*            clone(void) const override;                            //!< Virtual copy constructor
@@ -46,6 +46,7 @@ namespace RevBayesCore {
         const TypedDagNode< double >*           max_age;                                               //!< NULL leaves the oldest interval unbounded.
         Method                                  method;
         FossilAgeAmbiguity                      ambiguous;
+        bool                                    use_extant;
         mutable bool                            warned_max_age;
         mutable bool                            warned_widths;
         mutable bool                            warned_outside;
