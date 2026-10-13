@@ -231,6 +231,14 @@ TopologyConstrainedTreeDistribution& TopologyConstrainedTreeDistribution::operat
 }
 
 
+bool TopologyConstrainedTreeDistribution::allowsSampledAncestors( void ) const
+{
+    const TreeDistributionProperties *p = dynamic_cast<const TreeDistributionProperties *>( base_distribution );
+
+    return p != NULL && p->allowsSampledAncestors();
+}
+
+
 TopologyConstrainedTreeDistribution* TopologyConstrainedTreeDistribution::clone( void ) const
 {
     

@@ -4,6 +4,7 @@
 #include "Taxon.h"
 #include "Tree.h"
 #include "TypedDagNode.h"
+#include "TreeDistributionProperties.h"
 #include "TypedDistribution.h"
 
 namespace RevBayesCore {
@@ -12,7 +13,7 @@ namespace RevBayesCore {
      * Constant rate Birth-Death process.
      *
      */
-    class AbstractRootedTreeDistribution : public TypedDistribution<Tree> {
+    class AbstractRootedTreeDistribution : public TypedDistribution<Tree>, public TreeDistributionProperties {
         
     public:
         AbstractRootedTreeDistribution(const TypedDagNode<double> *ra, const std::vector<Taxon> &tn, bool uo, Tree *t );
