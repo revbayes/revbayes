@@ -1,0 +1,74 @@
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 1 different moves in a random move schedule with 1 moves per iteration
+   
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 1 different moves in a random move schedule with 1 moves per iteration
+   
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 1 different moves in a random move schedule with 1 moves per iteration
+   
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 1 different moves in a random move schedule with 1 moves per iteration
+   
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 1 different moves in a random move schedule with 1 moves per iteration
+   
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 1 different moves in a random move schedule with 1 moves per iteration
+   
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 1 different moves in a random move schedule with 1 moves per iteration
+   
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 1 different moves in a random move schedule with 1 moves per iteration
+   
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 1 different moves in a random move schedule with 1 moves per iteration
+   
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 1 different moves in a random move schedule with 1 moves per iteration
+   
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 1 different moves in a random move schedule with 1 moves per iteration
+   
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 1 different moves in a random move schedule with 1 moves per iteration
+   
+   Error:	mvMatrixElementScale: row 5 is outside the matrix, which has 4 rows.
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 1 different moves in a random move schedule with 1 moves per iteration
+   
+   Error:	mvMatrixElementSlide: col 5 is outside the matrix, which has 4 columns.
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 1 different moves in a random move schedule with 1 moves per iteration
+   
+   Error:	mvMatrixElementSwap: col 5 is outside the matrix, which has 4 columns.
+   Error:	mvMatrixElementSwap takes a margin, a row or a column, not more than one.

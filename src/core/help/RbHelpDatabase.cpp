@@ -3871,8 +3871,59 @@ mymcmc.operatorSummary())");
 	help_strings[string("mvLayeredScaleProposal")][string("title")] = string(R"(Rescales all the subtrees below some age.)");
 	help_strings[string("mvLevyJump")][string("name")] = string(R"(mvLevyJump)");
 	help_strings[string("mvLevyJumpSum")][string("name")] = string(R"(mvLevyJumpSum)");
+	help_arrays[string("mvMatrixElementScale")][string("authors")].push_back(string(R"(Nicolas Lartillot)"));
+	help_arrays[string("mvMatrixElementScale")][string("authors")].push_back(string(R"(June Walker)"));
+	help_strings[string("mvMatrixElementScale")][string("description")] = string(R"(Proposes a multiplicative update to one element of a matrix.)");
+	help_strings[string("mvMatrixElementScale")][string("details")] = string(R"(The `mvMatrixElementScale` move picks one element of a matrix at random and
+multiplies it with a randomly chosen factor, as `mvScale` does for a single
+parameter. The size of the scaling factor is set by `lambda`. When the `tune`
+argument is set to `TRUE`, the value of `lambda` is automatically adjusted so
+that the acceptance rate of the move reaches `tuneTarget`. Since multiplicative
+updates do not change the sign, the move is most often applied to matrices
+whose elements are constrained to be positive.
+
+By default the element is drawn from the whole matrix. The `row` and `col`
+arguments confine the move to one row or one column, counting from 1, and
+giving both pins a single element. This is useful when the rows or columns of
+a matrix hold different quantities, so that one proposal size does not suit
+them all.)");
+	help_strings[string("mvMatrixElementScale")][string("example")] = string(R"(moves = VectorMoves()
+x ~ dnDecomposedInvWishart(df=10, kappa=2.0, dim=4)
+# any element of the matrix
+moves.append( mvMatrixElementScale(x, lambda=0.1, weight=1) )
+# only the elements of column 2
+moves.append( mvMatrixElementScale(x, lambda=0.1, col=2, weight=1) ))");
 	help_strings[string("mvMatrixElementScale")][string("name")] = string(R"(mvMatrixElementScale)");
+	help_arrays[string("mvMatrixElementScale")][string("see_also")].push_back(string(R"(mvMatrixElementSlide)"));
+	help_arrays[string("mvMatrixElementScale")][string("see_also")].push_back(string(R"(mvMatrixElementSwap)"));
+	help_arrays[string("mvMatrixElementScale")][string("see_also")].push_back(string(R"(mvScale)"));
+	help_strings[string("mvMatrixElementScale")][string("title")] = string(R"(Matrix Element Scaling Move)");
+	help_arrays[string("mvMatrixElementSlide")][string("authors")].push_back(string(R"(Nicolas Lartillot)"));
+	help_arrays[string("mvMatrixElementSlide")][string("authors")].push_back(string(R"(June Walker)"));
+	help_strings[string("mvMatrixElementSlide")][string("description")] = string(R"(Proposes an additive update to one element of a matrix.)");
+	help_strings[string("mvMatrixElementSlide")][string("details")] = string(R"(The `mvMatrixElementSlide` move picks one element of a matrix at random, draws
+a random number from a uniform distribution and adds the draw to the element,
+as `mvSlide` does for a single parameter. The "window size", i.e., the width of
+the uniform distribution, is set by `delta`. When the `tune` argument is set to
+`TRUE`, the value of `delta` is automatically adjusted so that the acceptance
+rate of the move reaches `tuneTarget`.
+
+By default the element is drawn from the whole matrix. The `row` and `col`
+arguments confine the move to one row or one column, counting from 1, and
+giving both pins a single element. This is useful when the rows or columns of
+a matrix hold different quantities, so that one proposal size does not suit
+them all.)");
+	help_strings[string("mvMatrixElementSlide")][string("example")] = string(R"(moves = VectorMoves()
+x ~ dnDecomposedInvWishart(df=10, kappa=2.0, dim=4)
+# any element of the matrix
+moves.append( mvMatrixElementSlide(x, delta=0.1, weight=1) )
+# only the elements of column 2
+moves.append( mvMatrixElementSlide(x, delta=0.1, col=2, weight=1) ))");
 	help_strings[string("mvMatrixElementSlide")][string("name")] = string(R"(mvMatrixElementSlide)");
+	help_arrays[string("mvMatrixElementSlide")][string("see_also")].push_back(string(R"(mvMatrixElementScale)"));
+	help_arrays[string("mvMatrixElementSlide")][string("see_also")].push_back(string(R"(mvMatrixElementSwap)"));
+	help_arrays[string("mvMatrixElementSlide")][string("see_also")].push_back(string(R"(mvSlide)"));
+	help_strings[string("mvMatrixElementSlide")][string("title")] = string(R"(Matrix Element Sliding-Window Move)");
 	help_arrays[string("mvMatrixElementSwap")][string("authors")].push_back(string(R"(June Walker)"));
 	help_strings[string("mvMatrixElementSwap")][string("description")] = string(R"(Proposes exchanging two elements of a matrix.)");
 	help_strings[string("mvMatrixElementSwap")][string("details")] = string(R"(The `mvMatrixElementSwap` move picks two elements of a matrix at random and
