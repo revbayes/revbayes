@@ -3,9 +3,9 @@ fnBoundaryCrosserRates
 ## title
 Boundary-crosser speciation and extinction rates
 ## description
-Foote's boundary-crosser rates for each interval, also called per-capita rates, estimated from the taxa that cross an interval boundary.
+Foote's boundary-crosser rates for each interval, estimated from the taxa that cross an interval boundary.
 ## details
-`fnPerCapitaRates` is an alias. Taxa confined to a single interval are dropped. An interval with no taxa ranging through it returns NaN. With `extant=FALSE` nothing crosses the outer edge of the youngest or the oldest interval, so neither has an estimate.
+Taxa confined to a single interval are dropped. An interval with no taxa ranging through it returns NaN. With `extant=FALSE` nothing crosses the outer edge of the youngest or the oldest interval, so neither has an estimate.
 
 `extant=TRUE` reads the record's extant status, so a taxon reported as alive ranges to the present and crosses the younger edge of every interval it occupies, the youngest included. The default is FALSE, because a taxon whose status was never set reads as alive. `readTaxonData` takes the status from a status column, or from whether the taxon was sampled at the present. Warnock et al. (2020) assume complete knowledge of extant diversity for these methods.
 

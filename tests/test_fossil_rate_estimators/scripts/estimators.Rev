@@ -37,8 +37,6 @@ print("per-taxon, speciation then extinction:")
 fnPerTaxonRates(taxa, timeline)
 print("boundary-crosser:")
 fnBoundaryCrosserRates(taxa, timeline)
-print("per-capita, an alias of boundary-crosser:")
-fnPerCapitaRates(taxa, timeline)
 print("three-timer:")
 fnThreeTimerRates(taxa, timeline)
 
