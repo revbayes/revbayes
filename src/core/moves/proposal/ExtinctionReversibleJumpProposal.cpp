@@ -26,6 +26,7 @@ ExtinctionReversibleJumpProposal::ExtinctionReversibleJumpProposal( StochasticNo
     }
 
     collectEligible();
+    rangeProcess().setHasSurvivalMove();
 }
 
 
@@ -47,6 +48,7 @@ ExtinctionReversibleJumpProposal::ExtinctionReversibleJumpProposal( StochasticNo
     }
 
     collectEligible();
+    rangeProcess().setHasSurvivalMove();
 }
 
 

@@ -46,7 +46,6 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
                                                                          const std::vector<Taxon> &intaxa,
                                                                          bool comp,
                                                                          const TypedDagNode<double> *inorigin,
-                                                                         bool survivors,
                                                                          double inpresent) :
     taxa(intaxa),
     condition(incondition),
@@ -57,7 +56,6 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
     max_birth(0),
     resampled(false),
     touched(false),
-    survivors(survivors),
     present_time(inpresent)
 {
     // initialize all the pointers to NULL
@@ -308,11 +306,6 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
         }
         // a survivor ends at the present, so a continuous move that walks d off it is rejected here
         if ( ranges[i].survived == true && d != present )
-        {
-            return RbConstants::Double::neginf;
-        }
-        // survivors = false forbids the point mass outright
-        if ( ranges[i].survived == true && survivors == false )
         {
             return RbConstants::Double::neginf;
         }
@@ -945,6 +938,24 @@ void AbstractFossilizedBirthDeathRangeProcess::warnIfInertNTaxaCondition( void )
 }
 
 
+/** Below rho = 1 only mvExtinctionRJSwitch moves a taxon on or off the present; warn once. */
+void AbstractFossilizedBirthDeathRangeProcess::warnIfNoSurvivalMove( void ) const
+{
+    if ( has_survival_move == true || warned_no_survival == true ) return;
+    if ( marginalizesExtinction() == true || homogeneous_rho->getValue() == 1.0 ) return;
+
+    for (size_t i = 0; i < taxa.size(); i++)
+    {
+        if ( taxa[i].isExtinct() == true )
+        {
+            warned_no_survival = true;
+            RBOUT("Warning: rho < 1 and no mvExtinctionRJSwitch move. Survival will not be sampled.");
+            return;
+        }
+    }
+}
+
+
 
 /** Flip taxon i between surviving and dying. The caller sets the death time to match. */
 void AbstractFossilizedBirthDeathRangeProcess::switchSurvived(size_t i)
@@ -1048,7 +1059,7 @@ void AbstractFossilizedBirthDeathRangeProcess::drawRanges()
             bool   exponential = ( m > 0.0 && RbMath::isFinite(L) == true );
 
             double p_survived = 0.0;
-            if ( survivors == true && exponential == true )
+            if ( exponential == true )
             {
                 double reach = exp( -m * L );
                 p_survived = ( 1.0 - homogeneous_rho->getValue() ) * reach;

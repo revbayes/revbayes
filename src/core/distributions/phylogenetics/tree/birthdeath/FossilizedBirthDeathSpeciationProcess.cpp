@@ -65,7 +65,7 @@ FossilizedBirthDeathSpeciationProcess::FossilizedBirthDeathSpeciationProcess(con
                                                            bool ext,
                                                            double inpresent) :
     AbstractBirthDeathProcess(ra, incondition, intaxa, true, NULL),
-    AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, comp, NULL, true, inpresent),
+    AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, comp, NULL, inpresent),
     extended( ext )
 {
 
@@ -498,6 +498,7 @@ void FossilizedBirthDeathSpeciationProcess::setMcmcMode(bool tf)
     if ( tf == true ) warnIfNoResampleMove();
     if ( tf == true ) warnIfNoReportingNode();
     if ( tf == true ) warnIfInertNTaxaCondition();
+    if ( tf == true ) warnIfNoSurvivalMove();
 }
 
 

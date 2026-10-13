@@ -83,13 +83,13 @@ namespace RevBayesCore {
                                             const std::vector<Taxon> &taxa,
                                             bool complete_record,
                                             const TypedDagNode<double>* origin = NULL,
-                                            bool survivors = true,
                                             double present = 0.0);  //!< Constructor
 
         virtual ~AbstractFossilizedBirthDeathRangeProcess(){};
 
         void                                            setHasResampleMove(void) { has_resample_move = true; }       //!< Registered by mvStratigraphicRange.
         void                                            setHasReportingNode(void) { has_reporting_node = true; }     //!< Registered by dnFossilRecord.
+        void                                            setHasSurvivalMove(void) { has_survival_move = true; }       //!< Registered by mvExtinctionRJSwitch.
 
         void                                            executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const;   //!< Expose the appearances and the origination/extinction times.
         void                                            executeMethod(const std::string &n, const std::vector<const DagNode*> &args, double &rv) const;              //!< Expose the origin.
@@ -102,11 +102,11 @@ namespace RevBayesCore {
         void                                            warnIfNoResampleMove(void) const;                           //!< Warn once when the appearances have no move.
         void                                            warnIfNoReportingNode(void) const;                          //!< Warn once when psi has no data.
         void                                            warnIfInertNTaxaCondition(void) const;                      //!< Warn once when rho leaves nTaxa conditioning inert.
+        void                                            warnIfNoSurvivalMove(void) const;                           //!< Warn once when rho < 1 and no move samples survival.
         void                                            initializeFirstLast(size_t i);                              //!< Draw taxon i's appearances, nested within the range and its reported bins.
         void                                            drawRanges();                                               //!< Draw an initial range and appearances for every taxon.
         double                                          computeLnFossilTotal();                                     //!< Total fossil-record log-density, for a dnFossilRecord node.
         void                                            setCompleteRecord(bool comp) { record_complete = comp; }    //!< The reporting model, pushed here by dnFossilRecord.
-        bool                                            unsampledSurvivors(void) const { return survivors; }        //!< False forbids the point mass outright.
 
         virtual void                                    setOccurrences(const std::vector<Taxon> &t);                //!< Adopt a clamped record's occurrences as the data.
         const std::vector<const DagNode*>&              getRangeParameters(void) const { return range_parameters; } //!< The rate and timeline nodes a dnFossilRecord adopts as parents.
@@ -203,13 +203,12 @@ namespace RevBayesCore {
         bool                                            touched;                                               //!< Indicates whether any terms need updating
         bool                                            has_resample_move = false;                              //!< Set by mvStratigraphicRange when it attaches.
         bool                                            has_reporting_node = false;                             //!< Set by dnFossilRecord when it attaches.
+        bool                                            has_survival_move = false;                              //!< Set by mvExtinctionRJSwitch when it attaches.
         mutable bool                                    warned_no_resample = false;                             //!< setMcmcMode fires more than once per run.
         mutable bool                                    warned_no_reporting = false;
         mutable bool                                    warned_inert_ntaxa = false;
+        mutable bool                                    warned_no_survival = false;
         bool                                            resampled;                                              //!< The undo above is armed.
-        //!< False forbids the point mass, leaving a continuous extinction time.
-        bool                                            survivors = true;
-
         //!< The time defining the present, and the minimum age of the process. The timeline
         //!< starts here rather than at zero.
         double                                          present_time = 0.0;

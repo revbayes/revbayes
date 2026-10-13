@@ -53,10 +53,9 @@ FossilizedBirthDeathRangeProcess::FossilizedBirthDeathRangeProcess(const DagNode
                                                                      const std::vector<Taxon> &intaxa,
                                                                      bool complete_record,
                                                                      const TypedDagNode<double> *inorigin,
-                                                                     bool insurvivors,
                                                                      double inpresent) :
     TypedDistribution<MatrixReal>(new MatrixReal(intaxa.size(), 4)),
-    AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, complete_record, inorigin, insurvivors, inpresent)
+    AbstractFossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, complete_record, inorigin, inpresent)
 {
 
     dirty_gamma = std::vector<bool>(taxa.size(), true);
@@ -87,6 +86,7 @@ void FossilizedBirthDeathRangeProcess::setMcmcMode(bool tf)
     // the tree process needs to warn that nothing samples them
     if ( tf == true ) warnIfNoReportingNode();
     if ( tf == true ) warnIfInertNTaxaCondition();
+    if ( tf == true ) warnIfNoSurvivalMove();
 }
 
 FossilizedBirthDeathRangeProcess* FossilizedBirthDeathRangeProcess::clone( void ) const

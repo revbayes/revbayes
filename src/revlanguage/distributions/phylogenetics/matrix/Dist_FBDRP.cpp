@@ -33,7 +33,6 @@
 #include "RevObject.h"
 #include "RevPtr.h"
 #include "RevVariable.h"
-#include "RlBoolean.h"
 #include "RlDagMemberFunction.h"
 #include "RlDeterministicNode.h"
 #include "RlMatrixReal.h"
@@ -119,12 +118,9 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRP::createDistribution( 
     RevBayesCore::TypedDagNode<double>* oa = createOrigin();
 
     // the bare range process: the fossil-record term belongs to a dnFossilRecord node
-    // may a taxon reported extinct have survived to the present unseen
-    bool surv = static_cast<const RlBoolean &>( survivors->getRevObject() ).getValue();
-
     double pres = static_cast<const RealPos &>( present->getRevObject() ).getValue();
 
-    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, true, oa, surv, pres);
+    RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, true, oa, pres);
 
     return d;
 }
@@ -207,8 +203,6 @@ const MemberRules& Dist_FBDRP::getParameterRules(void) const
     {
         dist_member_rules.push_back( originRule() );
 
-        dist_member_rules.push_back( new ArgumentRule( "survivors", RlBoolean::getClassTypeSpec(), "Allow unsampled survivors?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( true ) ) );
-
         // add the rules from the base class, without the reporting args
         const MemberRules &parentRules = FossilizedBirthDeathRangeProcess<MatrixReal>::getCoreParameterRules();
         dist_member_rules.insert(dist_member_rules.end(), parentRules.begin(), parentRules.end());
@@ -231,31 +225,6 @@ const TypeSpec& Dist_FBDRP::getTypeSpec( void ) const
     static TypeSpec ts = getClassTypeSpec();
     
     return ts;
-}
-
-
-/**
- * Set a member variable.
- *
- * Sets a member variable with the given name and store the pointer to the variable.
- * The value of the variable might still change but this function needs to be called again if the pointer to
- * the variable changes. The current values will be used to create the distribution object.
- *
- * \param[in]    name     Name of the member variable.
- * \param[in]    var      Pointer to the variable.
- */
-void Dist_FBDRP::setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var)
-{
-
-    if ( name == "survivors" )
-    {
-        survivors = var;
-    }
-    else
-    {
-           FossilizedBirthDeathRangeProcess<MatrixReal>::setConstParameter(name,var);
-    }
-
 }
 
 

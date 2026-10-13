@@ -14,7 +14,7 @@ psi    ~ dnExponential(1); psi.setValue(0.5)
 origin ~ dnUniform(8, 30);  origin.setValue(20)
 
 bd_t ~ dnFBDRP(taxa=taxa, lambda=lambda, mu=mu, psi=psi, rho=1.0, present=0.0,
-               condition="time", origin=origin, survivors=true)
+               condition="time", origin=origin)
 rec_t ~ dnFossilRecord(ranges=bd_t, complete=true)
 rec_t.clamp(taxa)
 
@@ -23,7 +23,7 @@ config <- bd_t
 ori <- bd_t.getOrigin()
 
 bd_c ~ dnFBDRP(taxa=taxa, lambda=lambda, mu=mu, psi=psi, rho=1.0, present=0.0,
-               condition="nTaxa", origin=origin, survivors=true)
+               condition="nTaxa", origin=origin)
 bd_c.setValue(config)
 rec_c ~ dnFossilRecord(ranges=bd_c, complete=true)
 rec_c.clamp(taxa)
@@ -46,7 +46,7 @@ mv := v(mu, mu, mu, mu, mu)
 pv := v(psi, psi, psi, psi, psi)
 
 bd_s ~ dnFBDRP(taxa=taxa, lambda=lv, mu=mv, psi=pv, rho=1.0, present=0.0, timeline=timeline,
-               condition="nTaxa", origin=origin, survivors=true)
+               condition="nTaxa", origin=origin)
 bd_s.setValue(config)
 rec_s ~ dnFossilRecord(ranges=bd_s, complete=true)
 rec_s.clamp(taxa)
@@ -56,13 +56,13 @@ print(filename=out, append=TRUE, abs(bd_s.lnProbability() - bd_c.lnProbability()
 
 # rho thins the survivors, so the factor cannot rise
 bd_r ~ dnFBDRP(taxa=taxa, lambda=lambda, mu=mu, psi=psi, rho=0.5, present=0.0,
-               condition="nTaxa", origin=origin, survivors=true)
+               condition="nTaxa", origin=origin)
 bd_r.setValue(config)
 rec_r ~ dnFossilRecord(ranges=bd_r, complete=true)
 rec_r.clamp(taxa)
 
 bd_rt ~ dnFBDRP(taxa=taxa, lambda=lambda, mu=mu, psi=psi, rho=0.5, present=0.0,
-                condition="time", origin=origin, survivors=true)
+                condition="time", origin=origin)
 bd_rt.setValue(config)
 rec_rt ~ dnFossilRecord(ranges=bd_rt, complete=true)
 rec_rt.clamp(taxa)

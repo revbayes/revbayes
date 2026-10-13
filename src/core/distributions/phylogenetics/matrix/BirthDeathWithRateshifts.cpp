@@ -23,7 +23,7 @@ BirthDeathWithRateshifts::BirthDeathWithRateshifts(const DagNode *inspeciation,
                                                    bool complete_record,
                                                    const TypedDagNode<double> *inorigin,
                                                    double inpresent) :
-    FossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, complete_record, inorigin, true, inpresent)
+    FossilizedBirthDeathRangeProcess(inspeciation, inextinction, inpsi, inrho, intimes, incondition, intaxa, complete_record, inorigin, inpresent)
 {
 
 }
