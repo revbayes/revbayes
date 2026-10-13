@@ -8,7 +8,7 @@
 namespace RevLanguage {
 
     /**
-     * @brief Alroy's three-timer rates, which correct the counts by a pooled sampling probability.
+     * @brief Alroy's three-timer rates, which correct the counts by a neighbouring interval's sampling probability.
      */
     class Func_threeTimerRates : public Func_FossilRateEstimator {
 

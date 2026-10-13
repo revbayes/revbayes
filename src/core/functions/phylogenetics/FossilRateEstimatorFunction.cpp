@@ -51,8 +51,9 @@ FossilRateEstimatorFunction* FossilRateEstimatorFunction::clone( void ) const
 /**
  * One interval's rate.
  *
- * Foote (2000) eqs 12-13 and 22-23, and Alroy (2008) as given by Warnock et al. (2020) eqs 7-10.
- * An empty denominator, or a zero inside a logarithm, leaves the interval undefined.
+ * Foote (2000) eqs 12-13 and 22-23 as given by Warnock et al. (2020) eqs 7-8, and the corrected
+ * three-timer rates of Alroy (2008). An empty denominator, or a zero inside a logarithm, leaves
+ * the interval undefined.
  */
 double FossilRateEstimatorFunction::rate(const FossilIntervalCounts &c, size_t j, double width, double p_s, bool speciation) const
 {
@@ -85,7 +86,7 @@ double FossilRateEstimatorFunction::rate(const FossilIntervalCounts &c, size_t j
     // three-timer
     double three = c.three_timer[j];
     double two = ( speciation ? c.two_timer_younger[j] : c.two_timer_older[j] );
-    if ( three == 0.0 || two == 0.0 || p_s <= 0.0 ) return nan;
+    if ( three == 0.0 || two == 0.0 || !( p_s > 0.0 ) ) return nan;
 
     return ( log( two / three ) + log( p_s ) ) / width;
 }
@@ -133,18 +134,15 @@ void FossilRateEstimatorFunction::update( void )
     FossilIntervalCounts c = countFossilIntervals( fossilIntervalPresence( taxa->getValue(), boundaries, top, ambiguous ),
                                                    extant );
 
-    // the three-timer sampling probability is pooled over the whole record
-    double p_s = RbConstants::Double::nan;
+    // each interval's three-timer sampling probability
+    std::vector<double> p_s( num_intervals, RbConstants::Double::nan );
     if ( method == THREE_TIMER )
     {
-        double three = 0.0;
-        double part = 0.0;
         for (size_t j = 0; j < num_intervals; j++)
         {
-            three += c.three_timer[j];
-            part += c.part_timer[j];
+            double sampled = c.three_timer[j] + c.part_timer[j];
+            if ( sampled > 0.0 ) p_s[j] = c.three_timer[j] / sampled;
         }
-        p_s = ( three + part > 0.0 ? three / ( three + part ) : RbConstants::Double::nan );
 
         if ( warned_widths == false && fossilIntervalsEqualWidth( boundaries, top ) == false )
         {
@@ -159,12 +157,14 @@ void FossilRateEstimatorFunction::update( void )
         v = MatrixReal( 2, num_intervals );
     }
 
+    double nan = RbConstants::Double::nan;
     for (size_t j = 0; j < num_intervals; j++)
     {
         double width = ( j + 1 < num_intervals ? boundaries[j+1] : top ) - boundaries[j];
 
-        v[0][j] = rate( c, j, width, p_s, true );
-        v[1][j] = rate( c, j, width, p_s, false );
+        // speciation is corrected by the older neighbour's sampling probability, extinction by the younger's
+        v[0][j] = rate( c, j, width, ( j + 1 < num_intervals ? p_s[j+1] : nan ), true );
+        v[1][j] = rate( c, j, width, ( j > 0 ? p_s[j-1] : nan ), false );
     }
 }
 

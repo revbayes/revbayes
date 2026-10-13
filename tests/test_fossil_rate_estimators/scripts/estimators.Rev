@@ -21,12 +21,12 @@
 # Boundary-crosser: log((through + entering) / through) / width, undefined where nothing ranges through
 #   speciation  nan      log(2)/10   log(4/3)/10   nan
 #   extinction  nan      log(4)/10   log(4/3)/10   nan
-# Three-timer: needs both neighbours, so only intervals 1 and 2 can have a value. Interval 1
-# has no three-timer. Interval 2 has one three-timer (t2) and one part-timer (t8), so the
-# sampling probability is 1/2 and both rates are log(2/1) + log(1/2) = 0.
+# Three-timer: needs both neighbours, and the sampling probability of the next interval out, so
+# four intervals are too few for any rate. It is tested on a longer record below.
 
-# These match fbdR (github.com/rachelwarnock/fbdR, f917635), the implementation used by
-# Warnock et al. (2020), with the oldest interval bounded at 40.
+# The per-taxon and boundary-crosser rates match fbdR (github.com/rachelwarnock/fbdR, f917635),
+# the implementation used by Warnock et al. (2020), with the oldest interval bounded at 40.
+# In divDyn 0.8.3 they are oriProp, extProp and oriPC, extPC, divided by the interval length.
 
 taxa <- readTaxonData("data/fossil_rate_estimators.tsv")
 
@@ -66,6 +66,28 @@ print(filename=out, append=TRUE, "per-taxon, ambiguous=overlap:\n")
 print(filename=out, append=TRUE, fnPerTaxonRates(binned, timeline, max_age=40, ambiguous="overlap"), "\n")
 print(filename=out, append=TRUE, "per-taxon, ambiguous=exclude:\n")
 print(filename=out, append=TRUE, fnPerTaxonRates(binned, timeline, max_age=40, ambiguous="exclude"), "\n")
+
+# Six intervals of 10 Myr, boundaries 0 10 20 30 40 50 60, and eight taxa sampled in
+#
+#   a 1,2,3,4   b 2,3,4,5   c 1,3   d 2,4   e 0,1,2   f 3,5   g 0,2   h 2,3
+#
+#   interval              0    1    2    3    4    5
+#   two-timer, older      1    2    3    2    1    -     e | a e | a b h | a b | b
+#   two-timer, younger    -    1    2    3    2    1     e | a e | a b h | a b | b
+#   three-timer           -    1    1    2    1    -     e | a | a b | b
+#   part-timer            -    1    1    1    1    -     g | c | d | f
+#   sampling probability  -    1/2  1/2  2/3  1/2  -
+#
+# Speciation is log(two-timer younger / three-timer) + log(sampling probability of the next
+# older interval), extinction log(two-timer older / three-timer) + log(sampling probability of
+# the next younger interval), each over the width:
+#   speciation  nan   log(1/2)/10   log(4/3)/10   log(3/4)/10   nan           nan
+#   extinction  nan   nan           log(3/2)/10   log(1/2)/10   log(2/3)/10   nan
+# These are oriC3t and extC3t of divDyn 0.8.3, divided by the interval length.
+long <- readTaxonData("data/fossil_rate_estimators_3t.tsv")
+long_timeline <- v(10, 20, 30, 40, 50)
+print(filename=out, append=TRUE, "three-timer, six intervals:\n")
+print(filename=out, append=TRUE, fnThreeTimerRates(long, long_timeline, max_age=60), "\n")
 
 # log(2)/10 and log(4/3)/10 at full precision
 bc <- fnBoundaryCrosserRates(taxa, timeline)
