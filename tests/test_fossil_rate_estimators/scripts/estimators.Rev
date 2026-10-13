@@ -33,41 +33,40 @@ taxa <- readTaxonData("data/fossil_rate_estimators.tsv")
 # intervals [0,10) [10,20) [20,30) [30,Inf), and the unbounded one has no rate
 timeline <- v(10, 20, 30)
 
-out = "output/estimators.txt"
-print(filename=out, append=FALSE, "per-taxon, speciation then extinction:\n")
-print(filename=out, append=TRUE, fnPerTaxonRates(taxa, timeline), "\n")
-print(filename=out, append=TRUE, "boundary-crosser:\n")
-print(filename=out, append=TRUE, fnBoundaryCrosserRates(taxa, timeline), "\n")
-print(filename=out, append=TRUE, "per-capita, an alias of boundary-crosser:\n")
-print(filename=out, append=TRUE, fnPerCapitaRates(taxa, timeline), "\n")
-print(filename=out, append=TRUE, "three-timer:\n")
-print(filename=out, append=TRUE, fnThreeTimerRates(taxa, timeline), "\n")
+print("per-taxon, speciation then extinction:")
+fnPerTaxonRates(taxa, timeline)
+print("boundary-crosser:")
+fnBoundaryCrosserRates(taxa, timeline)
+print("per-capita, an alias of boundary-crosser:")
+fnPerCapitaRates(taxa, timeline)
+print("three-timer:")
+fnThreeTimerRates(taxa, timeline)
 
 # max_age bounds the oldest interval, giving the four 10 Myr intervals of the table above
-print(filename=out, append=TRUE, "per-taxon, oldest interval bounded at 40:\n")
-print(filename=out, append=TRUE, fnPerTaxonRates(taxa, timeline, max_age=40), "\n")
-print(filename=out, append=TRUE, "boundary-crosser, oldest interval bounded at 40:\n")
-print(filename=out, append=TRUE, fnBoundaryCrosserRates(taxa, timeline, max_age=40), "\n")
+print("per-taxon, oldest interval bounded at 40:")
+fnPerTaxonRates(taxa, timeline, max_age=40)
+print("boundary-crosser, oldest interval bounded at 40:")
+fnBoundaryCrosserRates(taxa, timeline, max_age=40)
 
 # a max_age no older than the oldest rate shift warns and returns NaN for that interval
-print(filename=out, append=TRUE, "per-taxon, max_age below the oldest shift:\n")
-print(filename=out, append=TRUE, fnPerTaxonRates(taxa, timeline, max_age=25), "\n")
+print("per-taxon, max_age below the oldest shift:")
+fnPerTaxonRates(taxa, timeline, max_age=25)
 
 # present moves the youngest boundary, so interval 0 is [5,10) and its rates double
-print(filename=out, append=TRUE, "per-taxon, present at 5:\n")
-print(filename=out, append=TRUE, fnPerTaxonRates(taxa, timeline, present=5, max_age=40), "\n")
+print("per-taxon, present at 5:")
+fnPerTaxonRates(taxa, timeline, present=5, max_age=40)
 
 # t4's only occurrence is now the bin [12,24], which spans the boundary at 20:
 #   midpoint  t4 is a singleton in interval 1
 #   overlap   t4 is in intervals 1 and 2
 #   exclude   t4 is not sampled
 binned <- readTaxonData("data/fossil_rate_estimators_bin.tsv")
-print(filename=out, append=TRUE, "per-taxon, ambiguous=midpoint:\n")
-print(filename=out, append=TRUE, fnPerTaxonRates(binned, timeline, max_age=40), "\n")
-print(filename=out, append=TRUE, "per-taxon, ambiguous=overlap:\n")
-print(filename=out, append=TRUE, fnPerTaxonRates(binned, timeline, max_age=40, ambiguous="overlap"), "\n")
-print(filename=out, append=TRUE, "per-taxon, ambiguous=exclude:\n")
-print(filename=out, append=TRUE, fnPerTaxonRates(binned, timeline, max_age=40, ambiguous="exclude"), "\n")
+print("per-taxon, ambiguous=midpoint:")
+fnPerTaxonRates(binned, timeline, max_age=40)
+print("per-taxon, ambiguous=overlap:")
+fnPerTaxonRates(binned, timeline, max_age=40, ambiguous="overlap")
+print("per-taxon, ambiguous=exclude:")
+fnPerTaxonRates(binned, timeline, max_age=40, ambiguous="exclude")
 
 # Six intervals of 10 Myr, boundaries 0 10 20 30 40 50 60, and eight taxa sampled in
 #
@@ -88,13 +87,13 @@ print(filename=out, append=TRUE, fnPerTaxonRates(binned, timeline, max_age=40, a
 # These are oriC3t and extC3t of divDyn 0.8.3, divided by the interval length.
 long <- readTaxonData("data/fossil_rate_estimators_3t.tsv")
 long_timeline <- v(10, 20, 30, 40, 50)
-print(filename=out, append=TRUE, "three-timer, six intervals:\n")
-print(filename=out, append=TRUE, fnThreeTimerRates(long, long_timeline, max_age=60), "\n")
+print("three-timer, six intervals:")
+fnThreeTimerRates(long, long_timeline, max_age=60)
 
 # log(2)/10 and log(4/3)/10 at full precision
 bc <- fnBoundaryCrosserRates(taxa, timeline)
-print(filename=out, append=TRUE, "boundary-crosser speciation, intervals 2 and 3 in full:\n")
-print(filename=out, append=TRUE, bc[1][2], "\n")
-print(filename=out, append=TRUE, bc[1][3], "\n")
+print("boundary-crosser speciation, intervals 2 and 3 in full:")
+bc[1][2]
+bc[1][3]
 
 q()
