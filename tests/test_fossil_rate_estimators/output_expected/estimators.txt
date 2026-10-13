@@ -4,6 +4,9 @@ per-taxon, speciation then extinction:
 boundary-crosser:
 [ [ nan, 0.0693, 0.0288, nan ] ,
   [ nan, 0.1386, 0.0288, nan ] ]	
+per-capita, an alias of boundary-crosser:
+[ [ nan, 0.0693, 0.0288, nan ] ,
+  [ nan, 0.1386, 0.0288, nan ] ]	
 three-timer:
 [ [ nan, nan, nan, nan ] ,
   [ nan, nan, nan, nan ] ]	

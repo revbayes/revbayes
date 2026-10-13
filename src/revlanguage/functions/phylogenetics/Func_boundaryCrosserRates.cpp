@@ -44,6 +44,13 @@ std::string Func_boundaryCrosserRates::getFunctionName( void ) const
 }
 
 
+std::vector<std::string> Func_boundaryCrosserRates::getFunctionNameAliases( void ) const
+{
+    // Foote's name for these rates
+    return { "fnPerCapitaRates" };
+}
+
+
 const TypeSpec& Func_boundaryCrosserRates::getTypeSpec( void ) const
 {
     static TypeSpec type_spec = getClassTypeSpec();

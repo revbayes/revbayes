@@ -1940,8 +1940,8 @@ fnBSPInterval( a, b ))");
 	help_strings[string("fnBiogeographyCladoEventsBD")][string("name")] = string(R"(fnBiogeographyCladoEventsBD)");
 	help_strings[string("fnBlosum62")][string("name")] = string(R"(fnBlosum62)");
 	help_arrays[string("fnBoundaryCrosserRates")][string("authors")].push_back(string(R"(June Walker)"));
-	help_strings[string("fnBoundaryCrosserRates")][string("description")] = string(R"(Foote's boundary-crosser rates for each interval, estimated from the taxa that cross an interval boundary.)");
-	help_strings[string("fnBoundaryCrosserRates")][string("details")] = string(R"(Taxa confined to a single interval are dropped. An interval with no taxa ranging through it returns NaN. With `extant=FALSE` nothing crosses the outer edge of the youngest or the oldest interval, so neither has an estimate.
+	help_strings[string("fnBoundaryCrosserRates")][string("description")] = string(R"(Foote's boundary-crosser rates for each interval, also called per-capita rates, estimated from the taxa that cross an interval boundary.)");
+	help_strings[string("fnBoundaryCrosserRates")][string("details")] = string(R"(`fnPerCapitaRates` is an alias. Taxa confined to a single interval are dropped. An interval with no taxa ranging through it returns NaN. With `extant=FALSE` nothing crosses the outer edge of the youngest or the oldest interval, so neither has an estimate.
 
 `extant=TRUE` reads the record's extant status, so a taxon reported as alive ranges to the present and crosses the younger edge of every interval it occupies, the youngest included. The default is FALSE, because a taxon whose status was never set reads as alive. `readTaxonData` takes the status from a status column, or from whether the taxon was sampled at the present. Warnock et al. (2020) assume complete knowledge of extant diversity for these methods.
 

@@ -2,6 +2,7 @@
 #define Func_boundaryCrosserRates_H
 
 #include <string>
+#include <vector>
 
 #include "Func_FossilRateEstimator.h"
 
@@ -19,6 +20,7 @@ namespace RevLanguage {
         static const std::string&               getClassType(void);
         static const TypeSpec&                  getClassTypeSpec(void);
         std::string                             getFunctionName(void) const override;
+        std::vector<std::string>                getFunctionNameAliases(void) const override;
         const TypeSpec&                         getTypeSpec(void) const override;
 
     protected:

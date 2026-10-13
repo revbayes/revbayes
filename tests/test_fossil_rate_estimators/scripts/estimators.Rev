@@ -38,6 +38,8 @@ print(filename=out, append=FALSE, "per-taxon, speciation then extinction:\n")
 print(filename=out, append=TRUE, fnPerTaxonRates(taxa, timeline), "\n")
 print(filename=out, append=TRUE, "boundary-crosser:\n")
 print(filename=out, append=TRUE, fnBoundaryCrosserRates(taxa, timeline), "\n")
+print(filename=out, append=TRUE, "per-capita, an alias of boundary-crosser:\n")
+print(filename=out, append=TRUE, fnPerCapitaRates(taxa, timeline), "\n")
 print(filename=out, append=TRUE, "three-timer:\n")
 print(filename=out, append=TRUE, fnThreeTimerRates(taxa, timeline), "\n")
 
