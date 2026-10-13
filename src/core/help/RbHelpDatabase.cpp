@@ -2951,14 +2951,14 @@ Q := fnT92(kappa, gc))");
 	help_strings[string("fnTajimasD")][string("name")] = string(R"(fnTajimasD)");
 	help_strings[string("fnTajimasPi")][string("name")] = string(R"(fnTajimasPi)");
 	help_arrays[string("fnThreeTimerRates")][string("authors")].push_back(string(R"(June Walker)"));
-	help_strings[string("fnThreeTimerRates")][string("description")] = string(R"(Alroy's three-timer rates for each interval, with the counts corrected by a sampling probability pooled over the record.)");
-	help_strings[string("fnThreeTimerRates")][string("details")] = string(R"(A taxon counts toward an interval only if it was sampled in that interval's neighbours as well, so the oldest and youngest intervals return NaN. The sampling probability is the three-timer count over the three-timer plus part-timer count, summed across every interval. Part-timers are taxa sampled on both sides of an interval but not within it.
+	help_strings[string("fnThreeTimerRates")][string("description")] = string(R"(Alroy's three-timer rates for each interval, with the counts corrected by the sampling probability of a neighbouring interval.)");
+	help_strings[string("fnThreeTimerRates")][string("details")] = string(R"(A taxon counts toward an interval only if it was sampled in that interval's neighbours as well, so the oldest and youngest intervals return NaN. An interval's sampling probability is its three-timer count over its three-timer plus part-timer count. Part-timers are taxa sampled on both sides of an interval but not within it. Speciation is corrected by the sampling probability of the next older interval and extinction by that of the next younger, so a rate is NaN where that neighbour has neither three-timers nor part-timers.
 
 `extant=TRUE` reads the record's extant status, so a taxon reported as alive ranges to the present and crosses the younger edge of every interval it occupies, the youngest included. The default is FALSE, because a taxon whose status was never set reads as alive. `readTaxonData` takes the status from a status column, or from whether the taxon was sampled at the present. Warnock et al. (2020) assume complete knowledge of extant diversity for these methods.
 
 The method assumes intervals of equal length, and warns once if they are not. A rate can come out negative, where the sampling correction exceeds the counts it was applied to, and is returned unchanged.
 
-Follows Alroy (2008), in the form given by Warnock et al. (2020) equations 9 and 10.
+Follows the corrected formulas of Alroy (2008).
 
 A taxon's first and last appearance are the oldest and youngest intervals it was sampled in. The value is a two by l matrix, speciation in the first row and extinction in the second.
 
