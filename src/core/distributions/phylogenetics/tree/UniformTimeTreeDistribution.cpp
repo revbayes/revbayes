@@ -311,7 +311,6 @@ void UniformTimeTreeDistribution::restoreSpecialization(const DagNode *affecter)
     
 }
 
-
 /** Swap a parameter of the distribution */
 void UniformTimeTreeDistribution::swapParameterInternal( const DagNode *oldP, const DagNode *newP )
 {
