@@ -9,9 +9,8 @@
 
 namespace RevBayesCore {
     
-    class TransitionProbabilityMatrix;
-    class Assignable;
-
+    class TransitionProbabilityMatrix;    
+    
     /**
      * \brief Abstract class for general rate matrices.
      *
@@ -39,11 +38,13 @@ namespace RevBayesCore {
         virtual std::vector<double>         getStationaryFrequencies(void) const;                                                       //!< Return the stationary frequencies
         bool                                isTimeReversible(void);                                                                     //!< Return whether the rate matrix is time reversible
         void                                setTransitionRates(const std::vector<double> &tr);
+//        void                                setStationaryFrequencies(const std::vector<double>& f);                                     //!< Directly set the stationary frequencies
         virtual void                        update(void);                                                                               //!< Update the rate entries of the matrix (is needed if stationarity freqs or similar have changed)
 
     protected:
 
         // members
+//        std::vector<double>                 stationary_freqs;
         std::vector<double>                 transition_rates;
         bool                                rescale_to_one;
         
