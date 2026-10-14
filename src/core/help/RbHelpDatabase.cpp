@@ -3682,7 +3682,7 @@ moves.append( mvCharacterHistory(ctmc=X, qmap_site=Q, graph="tip",
 	help_strings[string("mvCharacterHistory")][string("name")] = string(R"(mvCharacterHistory)");
 	help_strings[string("mvCharacterHistory")][string("title")] = string(R"(Character history move)");
 	help_strings[string("mvCollapseExpandFossilBranch")][string("name")] = string(R"(mvCollapseExpandFossilBranch)");
-	help_strings[string("mvCollapseExpandFossilBranch")][string("title")] = string(R"(Collapse a fossil tip onto its parent, or expand it back)");
+	help_strings[string("mvCollapseExpandFossilBranch")][string("title")] = string(R"(Move to collapse or expand a fossil branch)");
 	help_strings[string("mvConjugateInverseWishart")][string("name")] = string(R"(mvConjugateInverseWishart)");
 	help_strings[string("mvContinuousCharacterDataSlide")][string("name")] = string(R"(mvContinuousCharacterDataSlide)");
 	help_strings[string("mvContinuousEventScale")][string("name")] = string(R"(mvContinuousEventScale)");

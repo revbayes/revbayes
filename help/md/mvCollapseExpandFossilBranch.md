@@ -1,7 +1,7 @@
 ## name
 mvCollapseExpandFossilBranch
 ## title
-Collapse a fossil tip onto its parent, or expand it back
+Move to collapse or expand a fossil branch
 ## description
 ## details
 ## authors
