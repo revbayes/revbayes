@@ -394,7 +394,7 @@ double search_interval(double x0,double& L, double& R, slice_function& g,double 
     static int warned_err = 3;
     if (gx0 < logy and warned_err > 0)
     {
-        RBOUT("Warning: slice sampled failed to locate the slice because of an");
+        RBOUT("Warning: slice sampler failed to locate the slice because of an");
         RBOUT("         incorrect likelihood inherited from a different move.");
         RBOUT("");
         RBOUT("To identify which move is responsible for the incorrect likelihood,");
