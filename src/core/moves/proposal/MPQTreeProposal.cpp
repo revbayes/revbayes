@@ -463,7 +463,6 @@ double MPQTreeProposal::updateRootPosition(void)
     
 //    std::cerr << tau.getNewickRepresentation() << std::endl;
 //    std::cerr << std::endl;
-//    tau.debugPrint();
 //    std::cerr << std::endl;
 
     
