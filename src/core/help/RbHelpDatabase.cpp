@@ -4031,9 +4031,15 @@ moves.append( mvResampleFBD(bd, weight=taxa.size()) ))");
 	help_arrays[string("mvResampleFBD")][string("see_also")].push_back(string(R"(dnFossilizedBirthDeathRangeMatrix)"));
 	help_strings[string("mvRootTimeScaleBactrian")][string("name")] = string(R"(mvRootTimeScaleBactrian)");
 	help_strings[string("mvRootTimeSlideUniform")][string("name")] = string(R"(mvRootTimeSlideUniform)");
+	help_arrays[string("mvSPR")][string("authors")].push_back(string(R"(June Walker)"));
 	help_strings[string("mvSPR")][string("description")] = string(R"(Tree topology move that performs a Subtree Prune and Regraft (SPR) on
-an unrooted tree.)");
-	help_strings[string("mvSPR")][string("details")] = string(R"(`mvSPR` changes tree topology by cutting off a subtree and reattaching it
+a rooted (clock) or unrooted tree.)");
+	help_strings[string("mvSPR")][string("details")] = string(R"(On an unrooted tree the move detaches a subtree and reattaches it on another branch, leaving every branch length alone.
+
+A rooted tree needs an age for the node joining the subtree to its new branch, and the move draws one uniformly over the ages that branch admits. Only that age changes: every age inside the moved subtree is left where it was, unlike `mvNNI`, which rescales the subtree it moves. That matters for a process whose node ages are constrained by data, such as the fossilized birth-death range process, where a tip is an extinction and an internal node a speciation bounded by the occurrences.
+
+Pruning the subtree out of either state leaves the same tree, so the branch is drawn from the same set in both directions and that term cancels from the Hastings ratio. What remains is the choice of subtree, whose pool a regraft can change, and the two uniform age draws.
+`mvSPR` changes tree topology by cutting off a subtree and reattaching it
 elsewhere in the original tree using the same subtree branch that was
 originally cut. Every unrooted tree of n taxa has 2(n - 3)(2n - 7) SPR
 "neighbors" that are one SPR move away (Allen & Steel 2001). This neighborhood
