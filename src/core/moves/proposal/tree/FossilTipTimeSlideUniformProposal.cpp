@@ -256,14 +256,8 @@ double FossilTipTimeSlideUniformProposal::doProposal( void )
     stored_age = my_age;
     
     double size = max_age - min_age;
-
-    // an inverted window makes the reflection below bounce forever
-    if ( size <= 0.0 )
-    {
-        failed = true;
-        return RbConstants::Double::neginf;
-    }
-
+    assert(size >= 0); //otherwise the while will hang forever
+    
     double u      = rng->uniform01();
     double delta  = ( lambda * ( u - 0.5 ) );
     
