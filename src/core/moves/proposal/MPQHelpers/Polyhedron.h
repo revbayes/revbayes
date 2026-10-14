@@ -1,7 +1,7 @@
 #ifndef Polyhedron_hpp
 #define Polyhedron_hpp
 
-#include <gmpxx.h>   // a C++ wrapper around the GMP C implementation
+#include "RbRational.h"   // GMP's mpq_class with -DRB_USE_GMP, otherwise a Boost equivalent
 #include <map>
 #include <string>
 #include <vector>
@@ -154,7 +154,6 @@ namespace RevBayesCore {
                            ~Polyhedron(void);
                             Polyhedron(const Polyhedron& p) = delete;
         Polyhedron&         operator=(const Polyhedron& p) = delete;
-        void                certify(void);
         void                setAlphaT(double x) { alphaT = x; }
                             /* The point every tetrahedron of the triangulation shares.
 
@@ -172,12 +171,9 @@ namespace RevBayesCore {
                                was inside when it was chosen need not be inside now; rather
                                than give up, the point is pulled back along the straight line
                                joining it to (1/2,1/2,1/2) until it is inside again, and then
-                               a little further to keep it off the facet. Every constraint of
-                               the polyhedron is affine in (u1,u2,u3), so where that line
+                               a little further to keep it off the facet. Where that line
                                crosses the boundary is a rational number and is computed
-                               exactly, not searched for. The pull-back applies to that
-                               proposal only: the requested centre is kept and tried afresh
-                               each time. */
+                               exactly. */
         void                setCenter(const Vector& v);
         void                setCenter(double x, double y, double z);
         void                useReversibleCenter(void);
@@ -187,16 +183,13 @@ namespace RevBayesCore {
         const mpq_class&    getSumJacobians(void) const { return sumJacobians; }
         double              getAlphaT(void) const { return alphaT; }
 
-        /* Failure reporting.
+                            /* Failure reporting.
 
-           Every path below that cannot produce a valid proposal density returns
-           negative infinity rather than throwing, so the move is rejected cleanly,
-           and increments one of these counters. A rejection caused by a failure is
-           indistinguishable at the MCMC level from a rejection caused by the data,
-           which is exactly how a broken jump can masquerade as overwhelming
-           evidence: the chain simply never enters one of the models and the tuned
-           prior odds run away without bound. Counting them separately is what tells
-           the two apart. */
+                               Every path below that cannot produce a valid proposal density returns
+                               negative infinity rather than throwing, so the move is rejected cleanly,
+                               and increments one of these counters. A rejection caused by a failure is
+                               indistinguishable at the MCMC level from a rejection caused by the data,
+                               so we keep track of these failures. */
         long                getNumDegenerateWeights(void) const { return num_degenerate_weights; }
         long                getNumPointNotValid(void) const { return num_point_not_valid; }
         long                getNumPointNotLocated(void) const { return num_point_not_located; }
@@ -260,19 +253,19 @@ namespace RevBayesCore {
         mpq_class           hQ;
         mpq_class           iQ;
         
-        /* The common vertex of every tetrahedron of the triangulation. It is fixed at
-           (1/2, 1/2, 1/2) and must stay there. That point is the time reversible
-           matrix, whose weights are the backbone weights themselves, so it is a
-           valid point of the polyhedron for ANY weights; no other point can be
-           guaranteed that, because the shape of the polyhedron changes with every
-           proposal. The volumes of the tetrahedra, and hence the proposal density,
-           are all measured from here. */
+                            /* The common vertex of every tetrahedron of the triangulation. It is fixed at
+                               (1/2, 1/2, 1/2) and must stay there. That point is the time reversible
+                               matrix, whose weights are the backbone weights themselves, so it is a
+                               valid point of the polyhedron for ANY weights; no other point can be
+                               guaranteed that, because the shape of the polyhedron changes with every
+                               proposal. The volumes of the tetrahedra, and hence the proposal density,
+                               are all measured from here. */
         Vector              center;                   // vectors representing the constraints directly used
         Vector              reversibleCenter;         // (1/2,1/2,1/2); always inside, whatever the weights
-        Vector              desiredCenter;            // where the user asked the centre to be
-        bool                useDesiredCenter;         // has a centre been asked for?
+        Vector              desiredCenter;            // where the user asked the center to be
+        bool                useDesiredCenter;         // has a center been asked for?
         mpq_class           centerShrink;             // how far back from the facet to stop, as a fraction
-        long                numCenterClipped;         // proposals on which the requested centre lay outside
+        long                numCenterClipped;         // proposals on which the requested center lay outside
         long                num_degenerate_weights;
         long                num_point_not_valid;
         long                num_point_not_located;

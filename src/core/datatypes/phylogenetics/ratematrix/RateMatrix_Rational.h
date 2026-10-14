@@ -3,11 +3,9 @@
 
 #include <cstddef>
 #include <vector>
-
-#include <gmpxx.h>
-
 #include "MatrixReal.h"
 #include "RateMatrix.h"
+#include "RbRational.h"
 
 
 namespace RevBayesCore {

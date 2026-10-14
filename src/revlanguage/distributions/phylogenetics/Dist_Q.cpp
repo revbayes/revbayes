@@ -57,53 +57,27 @@ RevBayesCore::QDistribution* Dist_Q::createDistribution(void) const {
     // get the parameters
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* a = static_cast<const ModelVector<RealPos> &>(alpha->getRevObject()).getDagNode();
         
-    double logRhoReversible    = 0.0;
-    double logRhoNonReversible = 0.0;
-
+    /* The prior odds on the two models, given as log(rho_R / rho_N). The two
+       log weights are recovered from it in a form that stays accurate at any
+       magnitude: writing them as log(1/(1+e^-d)) and log(e^-d/(1+e^-d)) and
+       using log1p avoids the underflow that would occur if the log of one
+       weight were recovered from the other by log1p(-exp(.)), which fails once
+       the prior bias passes about 36 log units. That matters because the tuning of
+       the model prior during burn-in can drive the odds far from even. */
     double delta = static_cast<const Real &>( lnPriorOdds->getRevObject() ).getDagNode()->getValue();
 
-    if (delta != 0.0)
+    double logRhoReversible, logRhoNonReversible;
+    if (delta > 0.0)
         {
-        /* The prior odds given directly, as log(rho_R / rho_N).
-
-           This route exists because rho cannot express a large tilt. rho is
-           log(rho_R), and log(rho_N) has to be recovered from it as
-           log1p(-exp(rho)); but for a tilt beyond about 36, rho_R differs from one
-           by less than a double can represent, exp(rho) is exactly 1, and the
-           recovery is log(0). Working with the odds instead keeps both weights
-           accurate at any magnitude, which matters when a fixed prior is being set
-           deliberately far from even. */
-        if (delta > 0.0)
-            {
-            logRhoReversible    = -log1p( exp(-delta) );
-            logRhoNonReversible = -delta - log1p( exp(-delta) );
-            }
-        else
-            {
-            logRhoReversible    = delta - log1p( exp(delta) );
-            logRhoNonReversible = -log1p( exp(delta) );
-            }
+        logRhoReversible    = -log1p( exp(-delta) );
+        logRhoNonReversible = -delta - log1p( exp(-delta) );
         }
     else
         {
-        /* rho is the LOG of the prior probability of the time-reversible model, so it
-           must be negative. Passing a probability rather than its log, say rho=0.5,
-           silently produced log(1 - exp(0.5)) = log of a negative number and seeded
-           the whole analysis with a NaN model prior, which then made every acceptance
-           ratio NaN. Catch it here instead. */
-        double tmp = static_cast<const Real &>( rho->getRevObject() ).getDagNode()->getValue();
-        if ( tmp >= 0.0 )
-            {
-            throw RbException("The 'rho' argument of dnQ is the LOG of the prior probability of the time-reversible model, so it must be negative. Use rho=ln(0.5) rather than rho=0.5.");
-            }
-        if ( tmp < -36.0 )
-            {
-            throw RbException("The 'rho' argument of dnQ cannot express a prior tilt beyond about 36 log units, because log(rho_N) has to be recovered from it and the recovery underflows. Use the 'lnPriorOdds' argument instead.");
-            }
-        logRhoReversible    = tmp;
-        logRhoNonReversible = log1p( -exp(logRhoReversible) );
+        logRhoReversible    = delta - log1p( exp(delta) );
+        logRhoNonReversible = -log1p( exp(delta) );
         }
-        
+
     /* Confining the chain to one model is how the two are measured separately, which
        is the only way to compare their likelihoods with none of the reversible-jump
        machinery involved. It also switches the jump moves off, because
@@ -170,12 +144,8 @@ MethodTable Dist_Q::getDistributionMethods(void) const {
     ArgumentRules* get_rates_arg_rules = new ArgumentRules();
     methods.addFunction( new DistributionMemberFunction<Dist_Q, ModelVector<RealPos> >( "getRates", this->variable, get_rates_arg_rules, true ) );
 
-    /* Where in the polyhedron the non-reversible model sits: the three coordinates
-       are one half exactly at time reversibility. Monitor these to find out whether
-       the polyhedron draw of mvMPQRateMatrix should be concentrated toward the center
-       or spread toward the facets, which is what polyhedronAlpha controls. */
     ArgumentRules* get_u_arg_rules = new ArgumentRules();
-    methods.addFunction( new DistributionMemberFunction<Dist_Q, ModelVector<RealPos> >( "getU", this->variable, get_u_arg_rules, true ) );
+    methods.addFunction( new DistributionMemberFunction<Dist_Q, ModelVector<Probability> >( "getU", this->variable, get_u_arg_rules, true ) );
 
     /* The prior on the model indicator. These matter when the prior is being
        tuned by mvMPQRateMatrix(tuneModelPrior=TRUE), because the sampled model
@@ -207,9 +177,8 @@ const MemberRules& Dist_Q::getParameterRules(void) const {
     if (!rulesSet)
         {
         distQMemberRules.push_back( new ArgumentRule( "alpha",  ModelVector<RealPos>::getClassTypeSpec(), "The alpha shape parameter.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        distQMemberRules.push_back( new ArgumentRule( "rho" , Real::getClassTypeSpec(), "The log probability of the reversible model. Must be negative, and cannot express a tilt beyond about 36 log units; use lnPriorOdds for anything larger.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Real( -0.6931471805599453 ) ) );
         distQMemberRules.push_back( new ArgumentRule( "fixedModel" , RlString::getClassTypeSpec(), "Confine the chain to one model: \"free\" (the default) lets the reversible jump operate, while \"reversible\" or \"nonreversible\" starts the chain in that model and suppresses the jump moves entirely. Use this to measure the two models separately.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString( "free" ) ) );
-        distQMemberRules.push_back( new ArgumentRule( "lnPriorOdds" , Real::getClassTypeSpec(), "The prior odds on the model indicator, given directly as log(rho_R/rho_N). When this is nonzero it is used and 'rho' is ignored. Unlike 'rho' it stays accurate at any magnitude, so it is the argument to use when setting a deliberately extreme prior.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Real( 0.0 ) ) );
+        distQMemberRules.push_back( new ArgumentRule( "lnPriorOdds" , Real::getClassTypeSpec(), "The prior odds on the model indicator, as log(rho_R/rho_N), where rho_R and rho_N are the prior probabilities of the time-reversible and non-reversible models. The default of zero gives the two models equal prior probability. A positive value favours the time-reversible model. The odds are held fixed unless the move is given tuneModelPrior=TRUE, in which case they are adapted during burn-in and then frozen.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Real( 0.0 ) ) );
         rulesSet = true;
         }
     
@@ -234,10 +203,10 @@ void Dist_Q::printValue(std::ostream& o) const {
         {
         o << "?";
         }
-    o << ", prob=";
-    if ( rho != NULL )
+    o << ", lnPriorOdds=";
+    if ( lnPriorOdds != NULL )
         {
-        o << rho->getName();
+        o << lnPriorOdds->getName();
         }
     else
         {
@@ -252,10 +221,6 @@ void Dist_Q::setConstParameter(const std::string& name, const RevPtr<const RevVa
     if (name == "alpha")
         {
         alpha = var;
-        }
-    else if (name == "rho")
-        {
-        rho = var;
         }
     else if (name == "lnPriorOdds")
         {

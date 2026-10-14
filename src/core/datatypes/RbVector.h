@@ -3,13 +3,12 @@
 
 #include "IsAbstract.h"
 #include "RbVectorImpl.h"
+#include "RbRational.h"
 #include "RbIterator.h"
 #include "RbConstIterator.h"
 #include "StringUtilities.h"
 
 #include <boost/dynamic_bitset.hpp>
-
-#include <gmpxx.h>
 
 
 #include <vector>

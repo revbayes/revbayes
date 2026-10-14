@@ -106,10 +106,15 @@ void Vector::normalize(void) {
     if (dist == 0)
         return; // or return *this
 
+#ifdef RB_USE_GMP
     mpf_class distInv = 1 / dist;
     mpf_class rDistInv = distInv;
     mpf_class invLength = sqrt(rDistInv);
     mpq_class invLengthQ(invLength);
+#else
+    // there is no GMP float type without GMP, and the inverse length is generally irrational anyway
+    mpq_class invLengthQ( 1.0 / std::sqrt( dist.get_d() ) );
+#endif
     
     x *= invLengthQ;
     y *= invLengthQ;

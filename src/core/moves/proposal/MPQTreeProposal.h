@@ -3,7 +3,7 @@
 
 #include <cstddef>
 #include <iosfwd>
-#include <gmpxx.h>
+#include "RbRational.h"
 #include <set>
 #include <string>
 
