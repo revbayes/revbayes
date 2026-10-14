@@ -4,7 +4,7 @@
 # 
 # This file: Runs the full MCMC ...
 #
-# authors: Tracy A. Heath, Walker C. Pett, April M. Wright
+# authors: Tracy A. Heath, June Walker, April M. Wright
 #
 ################################################################################
 seed(1236)
