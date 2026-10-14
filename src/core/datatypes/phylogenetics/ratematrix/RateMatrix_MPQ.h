@@ -1,7 +1,7 @@
 #ifndef RateMatrix_MPQ_h
 #define RateMatrix_MPQ_h
 
-#include <gmpxx.h>
+#include "RbRational.h"
 #include <iomanip>
 #include <iostream>
 #include <vector>
@@ -100,10 +100,6 @@ namespace RevBayesCore {
         
         void                                moveToDouble(void) const;
         void                                updateIfNeeded(void) const;
-#ifdef MPQ_VERIFY_TIPROBS
-        void                                verifyTransitionProbabilities(double t, TransitionProbabilityMatrix& P) const;   //!< compare against exp(Qt); see the .cpp
-#endif                                      //!< Recompute the eigensystem, but only if the matrix has changed since it was last computed
-
         void                                calculateCijk(void);                                                                //!< Do precalculations on eigenvectors and their inverse
         void                                tiProbsExpm(double t, TransitionProbabilityMatrix& P) const;                        //!< Transition probabilities by scaling and squaring; the default. See the .cpp
         void                                tiProbsEigens(double t, TransitionProbabilityMatrix& P) const;                      //!< Calculate transition probabilities for real case

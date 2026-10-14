@@ -19,7 +19,6 @@
 #define MIN_FREQ    10e-4
 #define MAX_LN_PRIOR_ODDS  1000.0
 #define MIN_TUNE_STEP      0.001
-#define MPQ_DEBUG_JUMP_LIMIT  200
 #define MAX_TUNE_STEP      256.0
 #define MIN_CONCENTRATION  1.0
 #define MAX_CONCENTRATION  1.0e6
@@ -96,16 +95,6 @@ variable(n) {
 
     num_failed_to_reversible    = 0;
     num_failed_to_nonreversible = 0;
-#   ifdef MPQ_DEBUG_JUMPS
-    dbg_ln_jacobian = 0.0;
-    dbg_ln_poly     = 0.0;
-    dbg_ln_hastings = 0.0;
-    dbg_u[0]        = 0.0;
-    dbg_u[1]        = 0.0;
-    dbg_u[2]        = 0.0;
-    dbg_direction   = 0;
-    dbg_printed     = 0;
-#   endif
     
     W.resize( 6 );
 
@@ -163,9 +152,6 @@ MPQRateMatrixProposal::MPQRateMatrixProposal( const MPQRateMatrixProposal& p ) :
  */
 void MPQRateMatrixProposal::cleanProposal(void) {
 
-#   ifdef MPQ_DEBUG_JUMPS
-    dbgReport("ACCEPTED");
-#   endif
 }
 
 void MPQRateMatrixProposal::reportProposalFailure(const char* what, long count) {
@@ -183,37 +169,6 @@ void MPQRateMatrixProposal::reportProposalFailure(const char* what, long count) 
         std::cerr << " (occurrence " << count << ")";
     std::cerr << std::endl;
 }
-
-#ifdef MPQ_DEBUG_JUMPS
-void MPQRateMatrixProposal::dbgReport(const char* outcome) {
-
-    if ( dbg_direction == 0 || dbg_printed >= MPQ_DEBUG_JUMP_LIMIT )
-        {
-        dbg_direction = 0;
-        return;
-        }
-    dbg_printed++;
-
-    /* The point in the polyhedron is printed with the rest: on a jump to the
-       non-reversible model it is the point that was proposed, and on a jump back it
-       is the point the chain was sitting at. All three coordinates are one half
-       exactly at time reversibility, so how far they sit from a half says how
-       non-reversible the proposal was, which is what polyhedronCenter and
-       polyhedronAlpha exist to control. */
-    std::cerr << "JUMP " << (dbg_direction > 0 ? "R->N" : "N->R")
-              << "  u = ("           << dbg_u[0] << ", " << dbg_u[1] << ", " << dbg_u[2] << ")"
-              << "  lnJacobian = "   << dbg_ln_jacobian
-              << "  lnPolyDensity = "<< dbg_ln_poly
-              << "  lnHastings = "   << dbg_ln_hastings
-              << "  lnPriorOdds = "  << currentLnPriorOdds()
-              << "  -> "             << outcome << std::endl;
-
-    if ( dbg_printed == MPQ_DEBUG_JUMP_LIMIT )
-        std::cerr << "JUMP (further jump reports suppressed)" << std::endl;
-
-    dbg_direction = 0;
-}
-#endif
 
 double MPQRateMatrixProposal::currentLnPriorOdds(void) const {
 
@@ -236,26 +191,6 @@ void MPQRateMatrixProposal::setPolyhedronCenter(double u1, double u2, double u3)
     poly_center[2]  = u3;
     poly_center_set = true;
     poly.setCenter(u1, u2, u3);
-}
-
-double MPQRateMatrixProposal::lastMoveMaxRelativeChange(void) const {
-
-    const RateMatrix_MPQ& Q = static_cast<const RateMatrix_MPQ&>(variable->getValue());
-    double worst = 0.0;
-    for (int i=0; i<4; i++)
-        {
-        for (int j=0; j<4; j++)
-            {
-            if (i == j)
-                continue;
-            double a = Q(i,j).get_d();
-            double b = stored_Q(i,j).get_d();
-            double d = fabs(a - b) / ( fabs(b) > 1e-300 ? fabs(b) : 1e-300 );
-            if (d > worst)
-                worst = d;
-            }
-        }
-    return worst;
 }
 
 MPQRateMatrixProposal* MPQRateMatrixProposal::clone(void) const {
@@ -360,18 +295,12 @@ double MPQRateMatrixProposal::applySubMove(SUB_MOVE m) {
     switch (m)
         {
         case PI_ALL:
-            /* Holds all twelve weights fixed and moves only pi. Legal in both
-               models: reversibility and stationarity are properties of the
-               weights alone, so there is deliberately no reversibility guard. */
             return Q.updateStationaryFrequencies(rng, tuning[PI_ALL], 0.5);
 
         case PI_SINGLE:
             return Q.updateStationaryFrequenciesSingle(rng, tuning[PI_SINGLE], 0.5);
 
         case REV_BB_ALL:
-            /* The backbone is a state coordinate of the time-reversible model and
-               the prior is flat on it, so the Hastings ratio is the Dirichlet
-               proposal ratio alone. */
             return Q.updateBackboneWeights(rng, tuning[REV_BB_ALL], 0.5);
 
         case REV_BB_SINGLE:
@@ -468,10 +397,6 @@ void MPQRateMatrixProposal::undoProposal(void)  {
     
     n_rejected[last_sub_move]++;
     n_rejected_total[last_sub_move]++;
-
-#   ifdef MPQ_DEBUG_JUMPS
-    dbgReport("rejected");
-#   endif
 
     RateMatrix_MPQ& v = static_cast<RateMatrix_MPQ&>( variable->getValue() );
 
@@ -575,13 +500,6 @@ void MPQRateMatrixProposal::tune(double rate) {
             else
                 tuning[i] = tuneConcentration( tuning[i], r, tune_target[i] );
 
-#           ifdef MPQ_DEBUG_TUNING
-            std::cerr << "TUNE interval " << tune_calls_total
-                      << "  " << getSubMoveName( (SUB_MOVE)i )
-                      << "  tried " << n_tried[i] << "  accepted " << (n_tried[i] - n_rejected[i])
-                      << "  rate " << r << "  target " << tune_target[i]
-                      << "  tuning " << before << " -> " << tuning[i] << std::endl;
-#           endif
             }
         }
 
@@ -601,8 +519,6 @@ void MPQRateMatrixProposal::tune(double rate) {
     QDistribution* q_dist = dynamic_cast<QDistribution*>( &variable->getDistribution() );
     if ( q_dist == NULL || q_dist->isModelFixed() == true )
         {
-        /* Not a dnQ node, or one confined to a single model. Either way there is no
-           model indicator to balance, and adapting its prior would be meaningless. */
         n_reversible = 0;
         n_visits     = 0;
         return;
@@ -630,11 +546,6 @@ void MPQRateMatrixProposal::tune(double rate) {
 
         ln_prior_odds  = q_dist->getLnPriorOdds() + dir * tune_step;
         tune_last_dir  = dir;
-#       ifdef MPQ_DEBUG_TUNING
-        std::cerr << "TUNE interval " << tune_calls_total << "  lnPriorOdds SEARCH  reversible visits "
-                  << n_reversible << " of " << n_visits << "  step " << tune_step
-                  << "  tilt -> " << ln_prior_odds << std::endl;
-#       endif
 
         n_tuning_calls = 0;
         }
@@ -648,11 +559,6 @@ void MPQRateMatrixProposal::tune(double rate) {
 
         double gamma = 1.0 / sqrt( (double)n_tuning_calls );
         ln_prior_odds = q_dist->getLnPriorOdds() - gamma * observed_ln_odds;
-#       ifdef MPQ_DEBUG_TUNING
-        std::cerr << "TUNE interval " << tune_calls_total << "  lnPriorOdds REFINE  reversible visits "
-                  << n_reversible << " of " << n_visits << "  p_R " << p_rev
-                  << "  tilt -> " << ln_prior_odds << std::endl;
-#       endif
         }
 
     // a hard stop, in case the data are so decisive that no reachable tilt evens
@@ -728,9 +634,6 @@ double MPQRateMatrixProposal::updateToNonReversible(void) {
     double wCT = piC * stored_Q(C,T).get_d();
     double wGT = piG * stored_Q(G,T).get_d();
 
-    /* The Jacobian takes the logarithm of three of the backbone weights, so a
-       weight of zero would make it negative infinity and the jump would be refused
-       every time, silently. Refuse it explicitly instead, and say so. */
     if (wCG <= 0.0 || wCT <= 0.0 || wGT <= 0.0)
         {
         num_failed_to_nonreversible++;
@@ -789,15 +692,6 @@ double MPQRateMatrixProposal::updateToNonReversible(void) {
 #   endif
     
     double lnProb = lnRv + lnJacobian;
-#   ifdef MPQ_DEBUG_JUMPS
-    dbg_direction   = 1;
-    dbg_ln_jacobian = lnJacobian;
-    dbg_ln_poly     = lnRv;
-    dbg_ln_hastings = lnProb;
-    dbg_u[0]        = u1.get_d();
-    dbg_u[1]        = u2.get_d();
-    dbg_u[2]        = u3.get_d();
-#   endif
     if (std::isfinite(lnProb) == false)
         {
         num_failed_to_nonreversible++;
@@ -893,15 +787,6 @@ double MPQRateMatrixProposal::updateToReversible(void) {
     double lnRv = poly.lnProbabilityReverse(W, pt);
 
     double lnProb = lnRv + lnJacobian;
-#   ifdef MPQ_DEBUG_JUMPS
-    dbg_direction   = -1;
-    dbg_ln_jacobian = lnJacobian;
-    dbg_ln_poly     = lnRv;
-    dbg_ln_hastings = lnProb;
-    dbg_u[0]        = u1.get_d();
-    dbg_u[1]        = u2.get_d();
-    dbg_u[2]        = u3.get_d();
-#   endif
     if (std::isfinite(lnProb) == false)
         {
         num_failed_to_reversible++;

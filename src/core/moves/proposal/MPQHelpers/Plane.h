@@ -1,7 +1,7 @@
 #ifndef PLANE_H
 #define PLANE_H
 
-#include <gmpxx.h>
+#include "RbRational.h"
 #include "Vector.h"
 
 

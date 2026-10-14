@@ -15,13 +15,10 @@
 
 #define MIN_FREQ    10e-8
 
-/* Smallest component of a Dirichlet draw we are willing to build a reverse
-   concentration parameter from; see isDrawUsable below. */
+// smallest component of a Dirichlet draw we are willing to build a reverse concentration parameter from
 #define MIN_DIRICHLET_DRAW  1.0e-290
 
-/* Draws needed to land inside the polyhedron when initializing the non-reversible
-   model. About one draw in five is admissible, so this is a very loose bound whose
-   only purpose is to fail loudly instead of hanging. */
+// number of draws needed to land inside the polyhedron when initializing the non-reversible model
 #define MAX_INITIALIZATION_ATTEMPTS  100000
 #define A           0
 #define C           1
@@ -37,34 +34,31 @@
 #define W_GT        5
 
 
-/* ---------------------------------------------------------------------------
-   Weight coordinates
-   ------------------
+/* Weight coordinates
 
    The state of this rate matrix is the pair (pi, w), where w_ij = pi_i q_ij is
-   the average rate of change from nucleotide i to nucleotide j.  In these
+   the average rate of change from nucleotide i to nucleotide j. In these
    coordinates every constraint of the model is linear and, crucially, free of
-   pi:
+   pi,
 
        sum_{i != j} w_ij  =  1                        (average rate is one)
        sum_{i != j} w_ij  =  sum_{k != j} w_jk        (pi is stationary)
-       w_ij >= 0                                      (validity)
+       w_ij >= 0                                      
 
-   so the non-reversible model is the polytope of non-negative unit circulations
-   on the complete digraph K4 (dimension 8), and the time-reversible model is
-   its "no net circulation" face w_ij = w_ji (dimension 5).  Neither polytope
-   moves when pi moves.  The prior is therefore flat on each polytope, with
-   density 1/V_R = 3840 and 1/V_N = 1935360 respectively, and the reversible
+   The non-reversible model is the polytope with vertices determined by the 20
+   loops of flow among the nucleotides. The time-reversible model has vertices 
+   composed of only six of those loops, with flow between pairs of nucleotides.
+   Neither polytope moves when pi moves.  The prior is therefore flat on each 
+   polytope, with density 1/V_R = 3840 and 1/V_N = 1935360 respectively. The reversible
    jump Jacobian J_RN = 64 w_CG w_CT w_GT is taken in the same free coordinates.
+   
+   Note that the weights taken as "free" (or coordinates) are crucial. The density
+   of the non-reversible model, and of course, the Jacobian, depends on the choice
+   of coordinates. That is not true for the time-reversible model.
 
-   Every move below is written as a move on (pi, w).  This matters: a move
+   Every move below is written as a move on (pi, w). This matters: a move
    written in terms of the exchangeability rates r, or of the raw q_ij, changes
-   w through a non-linear map and needs the corresponding reparameterization
-   Jacobian.  Omitting it does not show up in the acceptance rate, only as a
-   quiet skew in the sampled weights.  Working directly in w removes the whole
-   class of error, and removes every power of pi from the prior and from the
-   jump Jacobian.
-   --------------------------------------------------------------------------- */
+   w through a non-linear map and needs a Jacobian. */
 
 
 using namespace RevBayesCore;
@@ -75,7 +69,7 @@ RateMatrix_MPQ::RateMatrix_MPQ(void) : RateMatrix(4) {
     endBuffer = q + 16;
     
     the_rate_matrix = new MatrixReal(4);
-    theEigenSystem  = new EigenSystem(the_rate_matrix);
+    theEigenSystem = new EigenSystem(the_rate_matrix);
     c_ijk.resize(num_states * num_states * num_states);
     cc_ijk.resize(num_states * num_states * num_states);
     
@@ -83,11 +77,7 @@ RateMatrix_MPQ::RateMatrix_MPQ(void) : RateMatrix(4) {
     r.resize(6);
     isReversible = false;
 
-    /* needs_update was never initialized. It was also never set and never read,
-       so the eigensystem was recomputed on every single call to
-       calculateTransitionProbabilities: once per branch per site-rate category
-       per likelihood evaluation, where once per accepted move would do. */
-    needs_update       = true;
+    needs_update = true;
     eigenUpdateCount = 0;
 }
 
@@ -99,9 +89,9 @@ RateMatrix_MPQ::RateMatrix_MPQ(const RateMatrix_MPQ& m) : RateMatrix(m) {
     endBuffer = q + 16;
     
     the_rate_matrix = new MatrixReal(4);
-    theEigenSystem       = new EigenSystem( *m.theEigenSystem );
-    c_ijk                = m.c_ijk;
-    cc_ijk               = m.cc_ijk;
+    theEigenSystem = new EigenSystem( *m.theEigenSystem );
+    c_ijk = m.c_ijk;
+    cc_ijk = m.cc_ijk;
     theEigenSystem->setRateMatrixPtr(the_rate_matrix);
     
     pi.resize(4);
@@ -120,11 +110,7 @@ RateMatrix_MPQ::RateMatrix_MPQ(const RateMatrix_MPQ& m) : RateMatrix(m) {
     
     moveToDouble();
 
-    /* Take the source's staleness, not a blanket "stale". We copied its c_ijk, so
-       if the source's cache was valid ours is too. This is what makes a rejected
-       proposal free: undoProposal assigns the stored matrix back, and the stored
-       matrix was clean, so no eigendecomposition is needed to resume. */
-    needs_update       = m.needs_update;
+    needs_update = m.needs_update;
     eigenUpdateCount = 0;
 }
 
@@ -143,9 +129,9 @@ RateMatrix_MPQ& RateMatrix_MPQ::operator=(const RateMatrix_MPQ& rhs) {
             
         delete theEigenSystem;
             
-        theEigenSystem       = new EigenSystem( *rhs.theEigenSystem );
-        c_ijk                = rhs.c_ijk;
-        cc_ijk               = rhs.cc_ijk;
+        theEigenSystem = new EigenSystem( *rhs.theEigenSystem );
+        c_ijk = rhs.c_ijk;
+        cc_ijk = rhs.cc_ijk;
             
         theEigenSystem->setRateMatrixPtr(the_rate_matrix);
             
@@ -248,7 +234,7 @@ double RateMatrix_MPQ::averageRate(void) const {
     mpq_class tmp;
     calculateAverageRate( tmp );
     return tmp.get_d();
-}                                                                //!< Calculate the average rate
+}
 
 void RateMatrix_MPQ::calculateAverageRate(mpq_class& ave) const {
 
@@ -339,23 +325,20 @@ void RateMatrix_MPQ::calculateTransitionProbabilities(double startAge, double en
     double t = rate * (startAge - endAge);
 
 #   ifdef MPQ_TIPROBS_EIGEN
-        /* The eigensystem route, kept for comparison. Do not use it for production
-           on large trees; see tiProbsExpm. */
-        if ( theEigenSystem->isComplex() == false )
-            {
-            tiProbsEigens(t, P);
-            }
-        else
-            {
-            tiProbsComplexEigens(t, P);
-            }
+    /* The eigensystem route, kept for comparison. Do not use it for production
+       on large trees; see tiProbsExpm. */
+    if ( theEigenSystem->isComplex() == false )
+        {
+        tiProbsEigens(t, P);
+        }
+    else
+        {
+        tiProbsComplexEigens(t, P);
+        }
 #   else
         tiProbsExpm(t, P);
 #   endif
 
-#   ifdef MPQ_VERIFY_TIPROBS
-        verifyTransitionProbabilities(t, P);
-#   endif
 }
 
 /* All twelve weights w_ij = pi_i q_ij, laid out as a 4 X 4 array with zeros on
@@ -376,7 +359,7 @@ void RateMatrix_MPQ::calculateAllWeights(std::vector<mpq_class>& w) const {
         }
 }
 
-/* Install a full set of twelve weights: q_ij = w_ij / pi_i, with the diagonal
+/* Set the twelve weights: q_ij = w_ij / pi_i, with the diagonal
    set so that each row sums to zero.  Returns false if any off-diagonal weight
    is negative, which puts the point outside the polytope and so outside the
    support of the prior. */
@@ -409,7 +392,7 @@ bool RateMatrix_MPQ::setRatesFromAllWeights(const std::vector<mpq_class>& w) {
     return true;
 }
 
-/* Install a time-reversible rate matrix from the six backbone weights, which
+/* Set a time-reversible rate matrix from the six backbone weights, which
    are assumed to sum to one half. */
 void RateMatrix_MPQ::setReversibleRatesFromBackbone(const std::vector<mpq_class>& wR) {
 
@@ -437,7 +420,7 @@ void RateMatrix_MPQ::setReversibleRatesFromBackbone(const std::vector<mpq_class>
     setExchangeabilityRates();
 }
 
-/* The map h_RN from the time-reversible backbone and (u1,u2,u3) to the twelve
+/* The map from the time-reversible backbone and random variables (u1,u2,u3) to the twelve
    non-reversible weights.  Writing a_k = 2 u_k - 1,
 
        w_AC = w^R_AC + w^R_CG a1 + w^R_CT a2      w_CA = w^R_AC - w^R_CG a1 - w^R_CT a2
@@ -445,12 +428,7 @@ void RateMatrix_MPQ::setReversibleRatesFromBackbone(const std::vector<mpq_class>
        w_AT = w^R_AT - w^R_CT a2 - w^R_GT a3      w_TA = w^R_AT + w^R_CT a2 + w^R_GT a3
        w_CG = 2 w^R_CG u1                         w_GC = 2 w^R_CG (1 - u1)
        w_CT = 2 w^R_CT u2                         w_TC = 2 w^R_CT (1 - u2)
-       w_GT = 2 w^R_GT u3                         w_TG = 2 w^R_GT (1 - u3)
-
-   Each pair sums to twice the corresponding backbone weight, so the total flow
-   is preserved at one and every node stays balanced.  Returns false when the
-   point lies outside the polyhedron of admissible (u1,u2,u3), that is, when
-   some weight would go negative. */
+       w_GT = 2 w^R_GT u3                         w_TG = 2 w^R_GT (1 - u3) */
 bool RateMatrix_MPQ::buildNonReversibleFromBackbone(const std::vector<mpq_class>& wR, const mpq_class& u1, const mpq_class& u2, const mpq_class& u3) {
 
     mpq_class a1 = 2 * u1 - 1;
@@ -499,26 +477,7 @@ bool RateMatrix_MPQ::recoverU(mpq_class& u1, mpq_class& u2, mpq_class& u3) const
     return true;
 }
 
-/* Turn a vector of doubles into exact rationals summing to target.  A double is
-   itself a binary rational, so the conversion is exact and the rescaling by a
-   single common factor keeps the state exactly proportional to what was drawn.
-   The alternative of building the last component as a residual, target minus the
-   sum of the others, lets that component drift away from the drawn value and,
-   when the concentration is small enough for a draw to underflow, go negative
-   outright.  Returns false on a degenerate draw so the caller can reject. */
-/* Is a Dirichlet draw safe to build a reverse concentration parameter from?
-
-   A Dirichlet variate is generated as a ratio of gamma variates, and a gamma
-   variate with a small shape parameter underflows: at shape 0.005, a quarter of
-   a percent of draws come back as denormals and two and a half percent as exact
-   zeros.  A denormal passes a plain "> 0" test and then reappears, multiplied by
-   the concentration, as the argument to lnGamma, which refuses anything below
-   about 1e-300.  Keeping every concentration parameter at or above the proposal
-   offset is what actually prevents this, but the check is cheap and it stops a
-   future retuning that sets the offset to zero from reintroducing the failure.
-
-   Rejecting here removes proposals of probability on the order of 1e-1000 once
-   the offset is in place, which is far below anything the sampler can resolve. */
+// is a Dirichlet draw safe to build a reverse concentration parameter from?
 bool RateMatrix_MPQ::isDrawUsable(const std::vector<double>& x) {
 
     for (size_t i=0; i<x.size(); i++)
@@ -663,26 +622,14 @@ std::vector<double> RateMatrix_MPQ::getStationaryFrequencies(void) const {
 /* Draw a time-reversible rate matrix from the prior.
 
    The prior is Dirichlet(alpha) on the stationary frequencies, independently of a
-   uniform draw on the polytope of the model. Those really are independent: pi and
-   w are separate coordinates, because reversibility (w_ij = w_ji) and stationarity
-   (the circulation condition) are both properties of the weights alone and say
-   nothing about pi.
-
-   In weight coordinates the time-reversible polytope is
+   uniform draw on the polytope of the model. In weight coordinates the time-reversible polytope is
 
        { w_ij = w_ji >= 0,  sum of the six backbone weights = 1/2 }
 
-   which is a 5-simplex, so a uniform draw on it is a flat Dirichlet rescaled to
+   which is a simplex, so a uniform draw on it is a flat Dirichlet rescaled to
    sum to one half. No rejection is needed. Its volume is (1/2)^5/5! = 1/3840,
    which is the constant computeLnProbability uses, so the two agree by
-   construction rather than by coincidence.
-
-   The previous version drew the exchangeability rates from a flat Dirichlet, which
-   is NOT uniform on the backbone: r and w are related through a non-linear map
-   with a non-constant Jacobian. That only affected where the chain started, so it
-   could not bias the posterior, but it did mean this class could not be used with
-   the Validation analysis, which starts each replicate from a draw taken by this
-   function and checks that the posterior covers the value it started from. */
+   construction rather than by coincidence. */
 void RateMatrix_MPQ::initializeTimeReversibleModel(const std::vector<double>& alpha, RandomNumberGenerator* rng) {
 
     isReversible = true;
@@ -722,14 +669,7 @@ void RateMatrix_MPQ::initializeTimeReversibleModel(const std::vector<double>& al
    rejection: multiplying a flat Dirichlet by w_CG w_CT w_GT gives a Dirichlet with
    those three concentrations raised by one, so drawing the backbone from
    Dirichlet(1,1,1,2,2,2) and (u1,u2,u3) uniformly on the cube reproduces the
-   target up to the admissibility indicator alone.
-
-   What is left to reject is therefore only the points where some weight would go
-   negative, which is about four draws in five. The alternative, rejecting on the
-   Jacobian as well, would have thrown away about ninety-nine in a hundred.
-
-   The previous version drew the twelve rates from a flat Dirichlet and derived pi
-   from them. That is neither uniform on the polytope nor independent of pi. */
+   target up to the admissibility indicator alone. */
 void RateMatrix_MPQ::initializeNonReversibleModel(const std::vector<double>& alpha, RandomNumberGenerator* rng) {
 
     isReversible = false;
@@ -912,7 +852,6 @@ void RateMatrix_MPQ::tiProbsExpm(double t, TransitionProbabilityMatrix& P) const
             expmNorm = expmRowSum;
         }
 
-    // expmScale so that the infinity norm is at most one quarter
     int expmSquarings = 0;
     while (expmNorm > 0.25)
         {
@@ -928,7 +867,6 @@ void RateMatrix_MPQ::tiProbsExpm(double t, TransitionProbabilityMatrix& P) const
             expmQt[i] *= expmScale;
         }
 
-    // exp(A) by its Taylor series, accumulated term by term
     double expmRes[16], expmTerm[16], expmTmp[16];
     for (int i=0; i<4; i++)
         for (int j=0; j<4; j++)
@@ -973,7 +911,6 @@ void RateMatrix_MPQ::tiProbsExpm(double t, TransitionProbabilityMatrix& P) const
         *expmOut++ = expmRes[i];
 }
 
-
 void RateMatrix_MPQ::tiProbsEigens(double t, TransitionProbabilityMatrix& P) const {
     
     // get a reference to the eigenvalues
@@ -1015,14 +952,14 @@ void RateMatrix_MPQ::tiProbsEigens(double t, TransitionProbabilityMatrix& P) con
         if (rowErr > worstRowSumError)
             worstRowSumError = rowErr;
 
-        // Normalize transition probabilities for row to sum to 1.0
+        // normalize transition probabilities for row to sum to 1.0
         double* p2 = p - num_states;
         for (size_t j=0; j<num_states; j++, ++p2)
             *p2 /= rowsum;
         }
 }
 
-/** Calculate the transition probabilities for the complex case */
+/** calculate the transition probabilities for the complex case */
 void RateMatrix_MPQ::tiProbsComplexEigens(double t, TransitionProbabilityMatrix& P) const {
     
     // get a reference to the eigenvalues
@@ -1066,7 +1003,7 @@ void RateMatrix_MPQ::transposeMatrix(const RateMatrix_MPQ& a, RateMatrix_MPQ& t)
             t(j,i) = a(i,j);
 }
 
-/** Update the eigen system */
+/** update the eigen system */
 void RateMatrix_MPQ::updateEigenSystem(void) {
     
     theEigenSystem->update();
@@ -1079,121 +1016,6 @@ void RateMatrix_MPQ::update(void) {
 }
 
 
-#ifdef MPQ_VERIFY_TIPROBS
-void RateMatrix_MPQ::verifyTransitionProbabilities(double t, TransitionProbabilityMatrix& P) const {
-
-    static long numChecked   = 0;
-    static long numBad       = 0;
-    static long numComplex   = 0;
-
-    numChecked++;
-    bool isComplexEigen = theEigenSystem->isComplex();
-    if (isComplexEigen == true)
-        numComplex++;
-
-    // reference: exp(Q t) by scaling and squaring, with no eigendecomposition
-    double Qt[16];
-    for (int i=0; i<4; i++)
-        for (int j=0; j<4; j++)
-            Qt[i*4+j] = (*the_rate_matrix)[i][j] * t;
-
-    double nrm = 0.0;
-    for (int i=0; i<4; i++)
-        {
-        double rs = 0.0;
-        for (int j=0; j<4; j++)
-            rs += fabs(Qt[i*4+j]);
-        if (rs > nrm)
-            nrm = rs;
-        }
-
-    int s = 0;
-    while (nrm > 0.5)
-        {
-        nrm *= 0.5;
-        s++;
-        }
-    double scale = 1.0;
-    for (int k=0; k<s; k++)
-        scale *= 0.5;
-    for (int i=0; i<16; i++)
-        Qt[i] *= scale;
-
-    double Ref[16], Trm[16], Tmp[16];
-    for (int i=0; i<4; i++)
-        for (int j=0; j<4; j++)
-            {
-            Ref[i*4+j] = (i == j) ? 1.0 : 0.0;
-            Trm[i*4+j] = (i == j) ? 1.0 : 0.0;
-            }
-    for (int k=1; k<=30; k++)
-        {
-        for (int i=0; i<4; i++)
-            for (int j=0; j<4; j++)
-                {
-                double sum = 0.0;
-                for (int m=0; m<4; m++)
-                    sum += Trm[i*4+m] * Qt[m*4+j];
-                Tmp[i*4+j] = sum / k;
-                }
-        for (int i=0; i<16; i++)
-            {
-            Trm[i] = Tmp[i];
-            Ref[i] += Trm[i];
-            }
-        }
-    for (int k=0; k<s; k++)
-        {
-        for (int i=0; i<4; i++)
-            for (int j=0; j<4; j++)
-                {
-                double sum = 0.0;
-                for (int m=0; m<4; m++)
-                    sum += Ref[i*4+m] * Ref[m*4+j];
-                Tmp[i*4+j] = sum;
-                }
-        for (int i=0; i<16; i++)
-            Ref[i] = Tmp[i];
-        }
-
-    double worst = 0.0;
-    for (int i=0; i<4; i++)
-        for (int j=0; j<4; j++)
-            {
-            double d = fabs(P[i][j] - Ref[i*4+j]);
-            if (d > worst)
-                worst = d;
-            }
-
-    if (worst > 1.0e-6)
-        {
-        numBad++;
-        long p = 1;
-        while (p < numBad)
-            p *= 10;
-        if (p == numBad)
-            {
-            std::cerr << "RateMatrix_MPQ: transition probabilities disagree with exp(Qt) by "
-                      << worst << " at t = " << t
-                      << ", reversible = " << (isReversible ? "yes" : "no")
-                      << ", complex eigenvalues = " << (isComplexEigen ? "yes" : "no")
-                      << "  (" << numBad << " bad of " << numChecked << " checked, "
-                      << numComplex << " complex)" << std::endl;
-            for (int i=0; i<4; i++)
-                {
-                std::cerr << "    eigen:";
-                for (int j=0; j<4; j++)
-                    std::cerr << " " << P[i][j];
-                std::cerr << "   expm:";
-                for (int j=0; j<4; j++)
-                    std::cerr << " " << Ref[i*4+j];
-                std::cerr << std::endl;
-                }
-            }
-        }
-}
-#endif
-
 // diagnostics on the eigensystem route, accumulated over every matrix in the run
 long   RateMatrix_MPQ::numClampedTiProbs   = 0;
 double RateMatrix_MPQ::worstNegativeTiProb = 0.0;
@@ -1203,7 +1025,7 @@ void RateMatrix_MPQ::updateIfNeeded(void) const {
 
     RateMatrix_MPQ* self = const_cast<RateMatrix_MPQ*>(this);
 
-    if ( needs_update == true )
+    if (needs_update == true)
         {
         moveToDouble();
         self->updateEigenSystem();
@@ -1211,32 +1033,6 @@ void RateMatrix_MPQ::updateIfNeeded(void) const {
         needs_update = false;
         return;
         }
-
-#   ifdef MPQ_VERIFY_EIGEN_CACHE
-        {
-        std::vector<double> cachedCijk   = c_ijk;
-        std::vector<std::complex<double> > cachedComplexCijk = cc_ijk;
-        bool cachedIsComplex = theEigenSystem->isComplex();
-
-        moveToDouble();
-        self->updateEigenSystem();
-        eigenUpdateCount++;
-
-        if ( theEigenSystem->isComplex() != cachedIsComplex )
-            throw(RbException("Stale eigensystem cache: the eigenvalues changed from real to complex or back while the matrix was believed unchanged."));
-
-        for (size_t i=0; i<cachedCijk.size(); i++)
-            {
-            if ( fabs(cachedCijk[i] - c_ijk[i]) > 1e-12 )
-                throw(RbException("Stale eigensystem cache: a real c_ijk entry changed while the matrix was believed unchanged. Some code is modifying the rate matrix without going through operator()."));
-            }
-        for (size_t i=0; i<cachedComplexCijk.size(); i++)
-            {
-            if ( std::abs(cachedComplexCijk[i] - cc_ijk[i]) > 1e-12 )
-                throw(RbException("Stale eigensystem cache: a complex c_ijk entry changed while the matrix was believed unchanged. Some code is modifying the rate matrix without going through operator()."));
-            }
-        }
-#   endif
 }
 
 /* Moves.
@@ -1277,29 +1073,6 @@ double RateMatrix_MPQ::updateStationaryFrequencies(RandomNumberGenerator* rng, d
         return RbConstants::Double::neginf;
     for (int i=0; i<4; i++)
         alphaReverse[i] = newFreqs[i] * alpha0 + offset;
-
-#   ifdef MPQ_DEBUG_DRAWS
-        {
-        static long nCalls = 0;
-        if ( ++nCalls % 500 == 0 )
-            {
-            double worst = 0.0;
-            for (int i=0; i<4; i++)
-                {
-                double d = fabs(newFreqs[i] - oldFreqs[i]) / oldFreqs[i];
-                if (d > worst)
-                    worst = d;
-                }
-            std::cerr << "DRAW pi  alpha0 = " << alpha0
-                      << "  alphaForward = (" << alphaForward[0] << ", " << alphaForward[1] << ", " << alphaForward[2] << ", " << alphaForward[3] << ")"
-                      << "  old = (" << oldFreqs[0] << ", " << oldFreqs[1] << ", " << oldFreqs[2] << ", " << oldFreqs[3] << ")"
-                      << "  new = (" << newFreqs[0] << ", " << newFreqs[1] << ", " << newFreqs[2] << ", " << newFreqs[3] << ")"
-                      << "  maxRelChangePi = " << worst
-                      << "  expected ~ " << sqrt(oldFreqs[0]*(1.0-oldFreqs[0])/alpha0)/oldFreqs[0]
-                      << std::endl;
-            }
-        }
-#   endif
 
     pi = newPi;
     if (setRatesFromAllWeights(w) == false)
@@ -1401,7 +1174,7 @@ double RateMatrix_MPQ::updateBackboneWeights(RandomNumberGenerator* rng, double 
 }
 
 /* The single-element version: redraw one backbone weight and scale the other five
-   to keep the sum at one half.  Jacobian factor^(6-2). */
+   to keep the sum at one half. Jacobian factor^(6-2). */
 double RateMatrix_MPQ::updateBackboneWeightsSingle(RandomNumberGenerator* rng, double alpha0, double offset) {
 
     if (isReversible == false)
@@ -1452,8 +1225,7 @@ double RateMatrix_MPQ::updateBackboneWeightsSingle(RandomNumberGenerator* rng, d
     return lnProposalProb;
 }
 
-/* Propose a new backbone for a non-reversible matrix, holding (u1,u2,u3) and pi
-   fixed. */
+// Propose a new backbone for a non-reversible matrix, holding (u1,u2,u3) and pi fixed.
 double RateMatrix_MPQ::updateNonReversibleBackbone(RandomNumberGenerator* rng, double alpha0, double offset) {
 
     if (isReversible == true)
@@ -1499,8 +1271,7 @@ double RateMatrix_MPQ::updateNonReversibleBackbone(RandomNumberGenerator* rng, d
     return lnProposalProb;
 }
 
-/* Propose a new point (u1,u2,u3) in the polyhedron, holding the backbone and pi
-   fixed. */
+// Propose a new point (u1,u2,u3) in the polyhedron, holding the backbone and pi fixed.
 double RateMatrix_MPQ::updateNonReversibleU(RandomNumberGenerator* rng, double delta) {
 
     if (isReversible == true)

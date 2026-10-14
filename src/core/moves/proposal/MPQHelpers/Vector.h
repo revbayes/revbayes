@@ -1,7 +1,7 @@
 #ifndef Vector_hpp
 #define Vector_hpp
 
-#include <gmpxx.h>
+#include "RbRational.h"
 #include <iostream>
 
 

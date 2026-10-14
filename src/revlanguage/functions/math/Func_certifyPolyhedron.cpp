@@ -40,8 +40,7 @@ Func_certifyPolyhedron* Func_certifyPolyhedron::clone( void ) const
 RevPtr<RevVariable> Func_certifyPolyhedron::execute( void )
 {
     
-    RevBayesCore::Polyhedron poly;
-    poly.certify();
+    throw RbException("certpoly() is unavailable: Polyhedron::certify() is not in the current Polyhedron class.");
     
     return NULL;
 }

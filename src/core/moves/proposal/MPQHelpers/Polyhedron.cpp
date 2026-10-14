@@ -55,7 +55,7 @@ Polyhedron::Polyhedron(void) {
     /* The center vertex is constant and must remain so; see the note in the header.
        (1/2,1/2,1/2) is the time reversible matrix, which is a valid point of the
        polyhedron whatever the weights are, so measuring every tetrahedron from here
-       cannot produce a degenerate volume. */
+       cannot produce a bogus volume. */
     reversibleCenter.setX(oneHalfQ);
     reversibleCenter.setY(oneHalfQ);
     reversibleCenter.setZ(oneHalfQ);
@@ -64,7 +64,7 @@ Polyhedron::Polyhedron(void) {
     useDesiredCenter = false;
     numCenterClipped = 0;
 
-    // stop this fraction of the way to the boundary, so the centre is never on a facet
+    // stop this fraction of the way to the boundary, so the center is never on a facet
     centerShrink  = 99;
     centerShrink /= 100;
 
@@ -184,10 +184,7 @@ void Polyhedron::calculateTetrahedronVolume(Vector* v1, Vector* v2, Vector* v3, 
     /* The fourth vertex of every tetrahedron is the center of the polyhedron, so the
        volume is one sixth of the determinant of the three edge vectors leading away
        from it. This used to subtract oneHalfQ, which is the same thing only as long
-       as the center is the time reversible point. It is not any more, and getting
-       this wrong would not throw: the tetrahedra would simply be measured about the
-       wrong apex, sumJacobians would be wrong, and the proposal density used in the
-       Hastings ratio would be quietly wrong with it. */
+       as the center is the time reversible point. It is neccessarily any more. */
     aQ = v1->getX() - center.getX();
     bQ = v2->getX() - center.getX();
     cQ = v3->getX() - center.getX();
@@ -203,33 +200,6 @@ void Polyhedron::calculateTetrahedronVolume(Vector* v1, Vector* v2, Vector* v3, 
     //vol /= 6;                  // this will be taken care of in the probability density with a Gamma factor of 3! = 6
     if (vol < 0)
         vol = -vol;
-}
-
-void Polyhedron::certify(void) {
-
-    RandomNumberGenerator* rng = GLOBAL_RNG;
-    
-    std::vector<double> alphaPi(4, 0.25);
-    std::vector<double> alphaR(6, 1.0);
-    
-    std::vector<double> r = RbStatistics::Dirichlet::rv(alphaR, *rng);
-    std::vector<double> pi = RbStatistics::Dirichlet::rv(alphaPi, *rng);
-    std::vector<mpq_class> wts(6);
-    mpq_class sum = 0;
-    for (int i=0, k=0; i<4; i++)
-        {
-        for (int j=i+1; j<4; j++)
-            {
-            wts[k] = (pi[i] * r[k] + pi[j] * r[k]) / 2.0;
-            sum += wts[k];
-            k++;
-            }
-        }
-    sum *= 2;
-    for (int i=0; i<6; i++)
-        wts[i] /= sum;
-    setWeights(wts);
-    std::cout << sumJacobians.get_d() << std::endl;
 }
 
 void Polyhedron::clearTetrahedraMap(void) {
@@ -462,7 +432,6 @@ void Polyhedron::initializePlanes(void) {
                 }
             }
         }
-        
 
     // set up facets
     initializeFacets();
@@ -697,11 +666,7 @@ bool Polyhedron::isValid(Vector& pt) {
 
    Returns negative infinity, rather than throwing, on every path that cannot
    produce a valid density. The caller treats that as a refusal to propose, which
-   the MCMC turns into a rejection. Throwing was the wrong behaviour here for two
-   reasons: RevBayes rethrows any exception that is not a MATH_ERROR, so a point
-   landing on a facet could abort an analysis hours into a run; and an exception
-   caught and turned into a rejection is invisible, which is precisely how a
-   systematically failing jump can look like overwhelming evidence. */
+   the MCMC turns into a rejection. */
 double Polyhedron::lnProbabilityForward(std::vector<mpq_class>& W, Vector& pt) {
 
     if (weightsAreUsable(W) == false)
@@ -721,10 +686,6 @@ double Polyhedron::lnProbabilityForward(std::vector<mpq_class>& W, Vector& pt) {
         reportFailure("the randomly drawn point is not inside the polyhedron", num_point_not_valid);
         return RbConstants::Double::neginf;
         }
-    /* Note there is deliberately no check on pointFoundInPolyhedron here. That flag
-       belongs to the reverse direction, where a supplied point has to be located in
-       the triangulation; in the forward direction the point is drawn from a
-       tetrahedron that was chosen first, so there is nothing to locate. */
     if (sumJacobians <= 0)
         {
         num_degenerate_weights++;
@@ -736,11 +697,6 @@ double Polyhedron::lnProbabilityForward(std::vector<mpq_class>& W, Vector& pt) {
     double lnProb = -log(sumJacobians.get_d());
     lnProb += RbMath::lnGamma(alphaT + 3.0) - RbMath::lnGamma(alphaT);
 
-    /* The barycentric weight on the center vertex is zero for any point lying on a
-       facet, and log(0) is negative infinity. With the default alphaT of one the
-       coefficient is zero, and in IEEE arithmetic zero times negative infinity is
-       NaN, not zero: the term would silently poison the density rather than drop
-       out of it. So the term is only formed when it is actually needed. */
     if (alphaT != 1.0)
         {
         if (alphaC <= 0.0)
@@ -761,16 +717,7 @@ double Polyhedron::lnProbabilityForward(std::vector<mpq_class>& W, Vector& pt) {
     return lnProb;
 }
 
-/* The log density that the forward move would have drawn the point pt. See the note
-   on lnProbabilityForward for why this returns negative infinity rather than
-   throwing.
-
-   This is the direction that matters most. A failure here refuses the jump from the
-   non-reversible model back to the time-reversible one; if it fails systematically,
-   the chain can enter the non-reversible model and never leave, the tuning pushes
-   the prior odds further and further toward reversibility trying to balance a chain
-   that cannot be balanced, and the result looks exactly like evidence for
-   non-reversibility of unbounded strength. */
+/* The log density that the forward move would have drawn the point pt.  */
 double Polyhedron::lnProbabilityReverse(std::vector<mpq_class>& W, Vector& pt) {
 
     if (weightsAreUsable(W) == false)
@@ -865,13 +812,7 @@ void Polyhedron::reportFailure(const char* what, long count) {
     std::cerr << std::endl;
 }
 
-/* Are the current weights capable of defining a non-degenerate polyhedron?
-
-   Every backbone weight has to be strictly positive. If one is zero, say w_CG, then
-   both w_CG and w_GC are zero for every value of u1, the corresponding coordinate
-   drops out of the map entirely, and the polyhedron is degenerate: it has no volume
-   in that direction and the point that generated it cannot be located. The
-   reversible jump is not defined in that case and the proposal has to be refused. */
+/* Are the current weights capable of defining a non-degenerate polyhedron? */
 bool Polyhedron::weightsAreUsable(std::vector<mpq_class>& W) {
 
     if (W.size() != 6)
@@ -912,8 +853,7 @@ void Polyhedron::useReversibleCenter(void) {
 
 /* The twelve constraints that define the polyhedron, as values that must all be at
    or above zero. Six are the unit cube and six are the two-sided bounds on the three
-   weight sums; see isValid, which tests the same quantities. Each is affine in
-   (u1,u2,u3), which is what makes the centre clipping below exact. */
+   weight sums; see isValid, which tests the same quantities. */
 void Polyhedron::constraintValues(const Vector& pt, std::vector<mpq_class>& g) const {
 
     if (g.size() != 12)
@@ -941,28 +881,24 @@ void Polyhedron::constraintValues(const Vector& pt, std::vector<mpq_class>& g) c
     g[11] = 2 * wAT - v3;
 }
 
-/* Decide where the centre of the triangulation goes for the polyhedron the current
+/* Decide where the center of the triangulation goes for the polyhedron the current
    weights describe.
 
-   The requested centre may lie outside it, because the shape depends on the weights
+   The requested center may lie outside it, because the shape depends on the weights
    and they move with every proposal. Rather than refuse, walk the point back along
    the straight line joining it to (1/2,1/2,1/2), which is always inside, and stop
    just short of where that line leaves the polyhedron.
 
-   Writing C for the reversible centre and P for the requested one, the line is
-   X(t) = C + t (P - C), and every constraint g is affine, so along the line
+   Writing C for the reversible center and P for the requested one, the line is
+   X(t) = C + t (P - C), so along the line
 
        g(t) = g(C) + t ( g(P) - g(C) )
 
    Each constraint that decreases along the line gives an upper bound on t of
    g(C) / (g(C) - g(P)), and the smallest of those bounds is where the line leaves.
    All of it is rational arithmetic, so the crossing is found exactly rather than by
-   bisection, and multiplying by centerShrink then keeps the centre off the facet,
-   where the barycentric weight would be zero and the proposal density undefined.
-
-   This has to be a deterministic function of the weights, and it is: both directions
-   of the reversible jump call setWeights with the same backbone, so both build the
-   same triangulation about the same centre and their densities remain comparable. */
+   bisection, and multiplying by centerShrink then keeps the center off the facet,
+   where the barycentric weight would be zero and the proposal density undefined. */
 void Polyhedron::chooseCenter(void) {
 
     if (useDesiredCenter == false)
@@ -981,7 +917,7 @@ void Polyhedron::chooseCenter(void) {
         {
         if (gC[i] <= 0)
             {
-            /* The reversible centre is itself on the boundary, which means a backbone
+            /* The reversible center is itself on the boundary, which means a backbone
                weight is zero and the polyhedron is degenerate. weightsAreUsable
                refuses the move before this is reached, so this is only a safety net. */
             center = reversibleCenter;
@@ -1021,7 +957,7 @@ void Polyhedron::setWeights(std::vector<mpq_class>& W) {
     this->wCT = W[4];
     this->wGT = W[5];
     
-    // the centre depends on the weights just assigned, so it is chosen here
+    // the center depends on the weights just assigned, so it is chosen here
     chooseCenter();
     
     // construct the polyhedron
