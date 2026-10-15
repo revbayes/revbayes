@@ -76,7 +76,8 @@ TopologyConstrainedTreeDistribution::TopologyConstrainedTreeDistribution(TypedDi
     }
     
     value = &base_distribution->getValue();
-    
+    base_distribution->setOwnsValue( false );
+
     // Are there any fossils in the starting tree?
     if (starting_tree != NULL)
     {
@@ -91,7 +92,8 @@ TopologyConstrainedTreeDistribution::TopologyConstrainedTreeDistribution(TypedDi
         
         if (!no_fossil)
         {
-            delete value;
+            // SH (20260211): Do not delete the value because our base distribution doesn't know about this!!!
+            // delete value;
             
             AbstractRootedTreeDistribution* tree_base_distribution = dynamic_cast<AbstractRootedTreeDistribution*>( base_distribution );
             std::vector<Taxon> taxa = tree_base_distribution->getTaxa();
@@ -99,7 +101,13 @@ TopologyConstrainedTreeDistribution::TopologyConstrainedTreeDistribution(TypedDi
             try
             {
                 RevBayesCore::Tree *my_tree = TreeUtilities::startingTreeInitializer( *t, taxa, age_check_precision );
-                value = my_tree->clone();
+                // SH (20260211): We need to give the value to the base distribution!!!
+                // SH (20260924): This was the old version where we created a copy. Let's try and see if it works without creating a copy of the tree
+//                Tree* my_copy_of_starting_tree = my_tree->clone();
+//                base_distribution->setValue( my_copy_of_starting_tree );
+//                value = my_copy_of_starting_tree;
+                value = my_tree;
+                base_distribution->setValue( value );
             }
             catch (RbException &e)
             {
@@ -150,7 +158,8 @@ TopologyConstrainedTreeDistribution::TopologyConstrainedTreeDistribution(const T
     
     // and then set it to the value of the base distribution
     value = &base_distribution->getValue();
-    
+    base_distribution->setOwnsValue( false );
+
     value->getTreeChangeEventHandler().addListener( this );
     
     
@@ -184,7 +193,8 @@ TopologyConstrainedTreeDistribution::~TopologyConstrainedTreeDistribution()
     // the base distribution is the actual owner of the value!!!
     // we simply avoid the deletion of the value by setting its pointer to NULL
     // our base class, the TypedDistribution thinks that it owns the value and thus deletes it
-    value = NULL;
+    // SH (20260924): Since we now own the value and the base distribution doesn't anymore (based on flags), it should be safe to delete the value (no need to set it to NULL)
+//    value = NULL;
     
     delete starting_tree;
 }
@@ -626,8 +636,8 @@ void TopologyConstrainedTreeDistribution::redrawValue( SimulationCondition c )
     }
     new_value->getTreeChangeEventHandler().addListener( this );
 
-    // if we don't own the tree, then we just replace the current pointer with the pointer
-    // to the new value of the base distribution
+    // we own the tree, then we just replace the current pointer with the pointer
+    // the base distribution should know we own it
     value = new_value;
     base_distribution->setValue( value );
 
@@ -967,10 +977,6 @@ Tree* TopologyConstrainedTreeDistribution::simulateRootedTree( bool alwaysReturn
 
         if ( clade_age <= max_node_age )
         {
-            // Get the rng
-//            RandomNumberGenerator* rng = GLOBAL_RNG;
-
-//            clade_age = rng->uniform01() * ( max_age - max_node_age ) + max_node_age;
             clade_age = tree_base_distribution->simulateCladeAge(nodes_in_clade.size(), max_age, 0, max_node_age, alwaysReturn);
         }
 
@@ -1299,7 +1305,7 @@ void TopologyConstrainedTreeDistribution::setStochasticNode( StochasticNode<Tree
 /**
  * Set the current value.
  */
-void TopologyConstrainedTreeDistribution::setValue(Tree *v, bool f )
+void TopologyConstrainedTreeDistribution::setValue(Tree *v, bool f, bool owns )
 {
     value->getTreeChangeEventHandler().removeListener( this );
     
@@ -1309,7 +1315,7 @@ void TopologyConstrainedTreeDistribution::setValue(Tree *v, bool f )
     
     // and the we can set it for both ourselves and the base distribution
     TypedDistribution<Tree>::setValue(v, f);
-    base_distribution->setValue(v, f);
+    base_distribution->setValue(v, f); // we own the tree
     
     value->getTreeChangeEventHandler().addListener( this );
     
