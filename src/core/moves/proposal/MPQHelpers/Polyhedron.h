@@ -4,6 +4,7 @@
 #include "RbRational.h"   // GMP's mpq_class with -DRB_USE_GMP, otherwise a Boost equivalent
 #include <map>
 #include <string>
+#include <utility>
 #include <vector>
 #include "Plane.h"
 
@@ -40,8 +41,7 @@ namespace RevBayesCore {
     // use a short-hand version? I thought so.
     typedef std::map<Plane*,std::vector<Vertex*> >                     plane_vertex_map;
     typedef std::map< std::pair<Plane*,Plane*>, std::vector<Vertex*> > line_vertex_map;
-    typedef std::map<Vector*,VectorInfo>                               vector_volume_map;
-
+    typedef std::vector<std::pair<Vector*,VectorInfo>>                 vector_volume_map;
 
 
     class Polyhedron {

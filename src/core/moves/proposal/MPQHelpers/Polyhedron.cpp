@@ -1,3 +1,5 @@
+#include <algorithm>
+#include <functional>
 #include <iomanip>
 #include <iostream>
 #include <map>
@@ -136,7 +138,7 @@ void Polyhedron::calculateFacetVolume(Plane* pln, std::vector<Vertex*>& vertices
             VectorInfo info;
             info.volume = tetrahedronVolume;
             sampleTetrahedron(pln, &center, v1, v2, v3, *newV, info);
-            tetrahedra.insert( std::make_pair(newV,info) );
+            tetrahedra.push_back( std::make_pair(newV,info) );
             //tetrahedra.insert( std::make_pair(newV,tetrahedronVolume) );
             }
         else
@@ -227,33 +229,31 @@ mpq_class Polyhedron::det(MpqMatrix& m) {
 
 Vertex* Polyhedron::findOtherVertex(Vertex* from, Vertex* v, Plane* pln) {
 
-    for (auto lne : linesMap)
+    for (Plane* other : planes)
         {
-        if (lne.first.first == pln || lne.first.second == pln)
-            {
-            bool inList = false;
-            for (int i=0, n=(int)lne.second.size(); i<n; i++)
-                {
-                if (lne.second[i] == v)
-                    {
-                    inList = true;
-                    break;
-                    }
-                }
-                
-            if (inList == true)
-                {
-                if (lne.second[0] != from && lne.second[1] != from)
-                    {
-                    if (v == lne.second[0])
-                        return lne.second[1];
-                    else
-                        return lne.second[0];
-                    }
-                }
-            
-            }
+        if (other == pln)
+            continue;
+
+        std::pair<Plane*,Plane*> key(pln, other);
+        if (std::less<Plane*>{}(other, pln))
+            key = std::make_pair(other, pln);
+
+        auto edge = linesMap.find(key);
+        if (edge == linesMap.end())
+            continue;
+
+        const auto& vertices = edge->second;
+        if (std::find(vertices.begin(), vertices.end(), v) == vertices.end())
+            continue;
+        if (vertices.size() != 2)
+            throw RbException("Polyhedron: Expected two vertices on an edge");
+
+        if (vertices[0] == v && vertices[1] != from)
+            return vertices[1];
+        if (vertices[1] == v && vertices[0] != from)
+            return vertices[0];
         }
+
     return nullptr;
 }
 
@@ -270,8 +270,13 @@ void Polyhedron::initializeFacets(void) {
     mpq_class vol;
     sumJacobians = 0.0;
     // loop over all planes/facets of the polyhedron
-    for (auto pln : verticesMap)
+    for (Plane* plane : planes)
         {
+        auto facet = verticesMap.find(plane);
+        if (facet == verticesMap.end())
+            continue;
+        auto pln = *facet;
+
         // clean vertices
         for (int i=0, n=(int)pln.second.size(); i<n; i++)
             {
@@ -443,7 +448,7 @@ void Polyhedron::initializePlanes(void) {
 void Polyhedron::insertVertex(Plane* p1, Plane* p2, Vertex* v) {
 
     std::pair<Plane*,Plane*> key(p1, p2);
-    if (p2 < p1)
+    if (std::less<Plane*>{}(p2, p1))
         key = std::make_pair(p2, p1);
         
     line_vertex_map::iterator it = linesMap.find(key);
