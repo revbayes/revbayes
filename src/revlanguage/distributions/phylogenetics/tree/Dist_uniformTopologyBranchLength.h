@@ -20,8 +20,8 @@ namespace RevLanguage {
      * @since 2014-01-26, version 1.0
      *
      */
-    class Dist_uniformTopologyBranchLength : public TypedDistribution<Tree> {
-        
+    class Dist_uniformTopologyBranchLength : public TypedDistribution<BranchLengthTree> {
+
     public:
         Dist_uniformTopologyBranchLength( void );                                                                                                                   //!< Default constructor
         

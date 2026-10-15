@@ -46,7 +46,7 @@ using namespace RevLanguage;
  *
  * The default constructor does nothing except allocating the object.
  */
-Dist_uniformTopologyBranchLength::Dist_uniformTopologyBranchLength() : TypedDistribution<Tree>()
+Dist_uniformTopologyBranchLength::Dist_uniformTopologyBranchLength() : TypedDistribution<BranchLengthTree>()
 {
     
 }
