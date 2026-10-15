@@ -1,0 +1,48 @@
+## continue-on-error
+# Each matrix element move alone on a short chain, started from a matrix of distinct values.
+# The last chains name a row or column the matrix does not have.
+seed(12345)
+
+x ~ dnDecomposedInvWishart(df=10, kappa=2.0, dim=4)
+x.setValue( matrix([[1.0, 0.1, 0.2, 0.3],
+                    [0.1, 1.1, 0.4, 0.5],
+                    [0.2, 0.4, 1.2, 0.6],
+                    [0.3, 0.5, 0.6, 1.3]]) )
+
+names = [ "scale", "scale_row", "scale_col", "scale_element",
+          "slide", "slide_row", "slide_col", "slide_element",
+          "swap", "swap_rows", "swap_col" ]
+
+moves = VectorMoves()
+moves.append( mvMatrixElementScale(x, lambda=0.1, tune=FALSE) )
+moves.append( mvMatrixElementScale(x, lambda=0.1, tune=FALSE, row=2) )
+moves.append( mvMatrixElementScale(x, lambda=0.1, tune=FALSE, col=2) )
+moves.append( mvMatrixElementScale(x, lambda=0.1, tune=FALSE, row=2, col=3) )
+moves.append( mvMatrixElementSlide(x, delta=0.1, tune=FALSE) )
+moves.append( mvMatrixElementSlide(x, delta=0.1, tune=FALSE, row=2) )
+moves.append( mvMatrixElementSlide(x, delta=0.1, tune=FALSE, col=2) )
+moves.append( mvMatrixElementSlide(x, delta=0.1, tune=FALSE, row=2, col=3) )
+moves.append( mvMatrixElementSwap(x) )
+moves.append( mvMatrixElementSwap(x, margin=1) )
+moves.append( mvMatrixElementSwap(x, col=2) )
+
+for (i in 1:names.size()) {
+    monitors = [ mnFile(x, filename="output/" + names[i] + ".log", printgen=10, posterior=FALSE, likelihood=FALSE, prior=FALSE) ]
+    mymcmc = mcmc(model(x), monitors, [ moves[i] ])
+    mymcmc.run(100)
+}
+
+monitors = VectorMonitors()
+mymcmc = mcmc(model(x), monitors, [ mvMatrixElementScale(x, row=5) ])
+mymcmc.run(1)
+
+mymcmc = mcmc(model(x), monitors, [ mvMatrixElementSlide(x, col=5) ])
+mymcmc.run(1)
+
+mymcmc = mcmc(model(x), monitors, [ mvMatrixElementSwap(x, col=5) ])
+mymcmc.run(1)
+
+# a swap takes a margin, a row or a column, not more than one
+mvMatrixElementSwap(x, margin=1, col=2)
+
+q()
