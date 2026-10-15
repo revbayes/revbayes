@@ -99,13 +99,13 @@ RevBayesCore::WeightedSampleDistribution<typename valType::valueType>* RevLangua
         for (size_t i = 0; i < ns; i++)
         {
             const Distribution& rlDistribution = static_cast<const Distribution &>( obj_vector[i] );
-            g0_vector[i] = RevBayesCore::assumeDistributionOf<typename valType::valueType>( rlDistribution.createDistribution() );
+            g0_vector[i] = RevBayesCore::assumeTypedDistribution<typename valType::valueType>( rlDistribution.createDistribution() );
         }
     }
     else {
         ns                                 = size_t( static_cast<const Natural &>( numSamples->getRevObject() ).getValue() );
         const Distribution& rlDistribution = static_cast<const Distribution &>( baseDistribution->getRevObject() );
-        g0                                 = RevBayesCore::assumeDistributionOf<typename valType::valueType>( rlDistribution.createDistribution() );
+        g0                                 = RevBayesCore::assumeTypedDistribution<typename valType::valueType>( rlDistribution.createDistribution() );
 //        d = new RevBayesCore::WeightedSampleDistribution<typename valType::valueType>(g0, ns);
     }
     

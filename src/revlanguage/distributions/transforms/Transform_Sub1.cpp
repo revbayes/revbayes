@@ -31,7 +31,7 @@ RevBayesCore::TransformedDistribution* Transform_Sub1::createDistribution( void 
 
     // get the parameters
     const Distribution& rl_vp                      = static_cast<const Distribution &>( first_distribution->getRevObject() );
-    RevBayesCore::TypedDistribution<double>* vp    = RevBayesCore::assumeDistributionOf<double>( rl_vp.createDistribution() );
+    RevBayesCore::TypedDistribution<double>* vp    = RevBayesCore::assumeTypedDistribution<double>( rl_vp.createDistribution() );
 
     RevBayesCore::TypedDagNode<double>* sec        = static_cast<const Real &>( second->getRevObject() ).getDagNode();
 

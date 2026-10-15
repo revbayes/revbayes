@@ -34,7 +34,7 @@ Core::TransformedVectorDistribution* RevLanguage::Dist_MultivariateLog::createDi
 
     // get the parameters
     const Distribution& rl_vp                      = static_cast<const Distribution &>( log_distribution->getRevObject() );
-    std::unique_ptr<Core::TypedDistribution<Core::RbVector<double>>> vp( Core::assumeDistributionOf<Core::RbVector<double>>( rl_vp.createDistribution() ) );;
+    std::unique_ptr<Core::TypedDistribution<Core::RbVector<double>>> vp( Core::assumeTypedDistribution<Core::RbVector<double>>( rl_vp.createDistribution() ) );;
 
     return new Core::TransformedVectorDistribution( vp,
 						    exp_transform,

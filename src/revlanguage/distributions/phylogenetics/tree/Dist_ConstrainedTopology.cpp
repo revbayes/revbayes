@@ -85,7 +85,7 @@ RevBayesCore::TopologyConstrainedTreeDistribution* Dist_ConstrainedTopology::cre
 
     const RevBayesCore::RbVector<RevBayesCore::Clade>& c      = static_cast<const ModelVector<Clade> &>( constraints->getRevObject() ).getValue();
     const Distribution& rlDistribution                        = static_cast<const Distribution &>( base_distribution->getRevObject() );
-    RevBayesCore::TypedDistribution<RevBayesCore::Tree>* base = RevBayesCore::assumeDistributionOf<RevBayesCore::Tree>( rlDistribution.createDistribution() );
+    RevBayesCore::TypedDistribution<RevBayesCore::Tree>* base = RevBayesCore::assumeTypedDistribution<RevBayesCore::Tree>( rlDistribution.createDistribution() );
     
     // tree for initialization
     RevBayesCore::Tree* init = NULL;

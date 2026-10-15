@@ -32,7 +32,7 @@ RevBayesCore::TransformedDistribution* Transform_Logit::createDistribution( void
 
     // get the parameters
     const Distribution& rl_vp                      = static_cast<const Distribution &>( base_distribution->getRevObject() );
-    RevBayesCore::TypedDistribution<double>* vp    = RevBayesCore::assumeDistributionOf<double>( rl_vp.createDistribution() );
+    RevBayesCore::TypedDistribution<double>* vp    = RevBayesCore::assumeTypedDistribution<double>( rl_vp.createDistribution() );
 
     RevBayesCore::TransformedDistribution* d = new RevBayesCore::TransformedDistribution(*vp, logit_transform, logit_inverse, log_logit_prime);
 

@@ -82,7 +82,7 @@ RevBayesCore::EmpiricalSampleDistribution<typename valType::valueType>* RevLangu
     
     // get the parameters
     const Distribution& rlDistribution                                          = static_cast<const Distribution &>( baseDistribution->getRevObject() );
-    RevBayesCore::TypedDistribution<typename valType::valueType>* g0            = RevBayesCore::assumeDistributionOf<typename valType::valueType>( rlDistribution.createDistribution() );
+    RevBayesCore::TypedDistribution<typename valType::valueType>* g0            = RevBayesCore::assumeTypedDistribution<typename valType::valueType>( rlDistribution.createDistribution() );
 
     RevBayesCore::EmpiricalSampleDistribution<typename valType::valueType>* d   = new RevBayesCore::EmpiricalSampleDistribution<typename valType::valueType>(g0);
     

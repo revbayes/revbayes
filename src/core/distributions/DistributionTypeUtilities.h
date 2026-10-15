@@ -7,9 +7,11 @@
 
 namespace RevBayesCore {
 
-    /** Recover a distribution's known value type, checking the invariant in debug builds. */
+    /** Recover TypedDistribution<valueType>, checking the invariant in debug builds.
+     * The object must inherit from this exact specialization; value-type inheritance is insufficient.
+     */
     template <typename valueType>
-    TypedDistribution<valueType>* assumeDistributionOf(Distribution *distribution)
+    TypedDistribution<valueType>* assumeTypedDistribution(Distribution *distribution)
     {
 #ifndef NDEBUG
         TypedDistribution<valueType> *typedDistribution = dynamic_cast<TypedDistribution<valueType>*>( distribution );
@@ -23,9 +25,11 @@ namespace RevBayesCore {
 #endif
     }
 
-    /** Recover a distribution's known value type, checking the invariant in debug builds. */
+    /** Recover TypedDistribution<valueType>, checking the invariant in debug builds.
+     * The object must inherit from this exact specialization; value-type inheritance is insufficient.
+     */
     template <typename valueType>
-    const TypedDistribution<valueType>* assumeDistributionOf(const Distribution *distribution)
+    const TypedDistribution<valueType>* assumeTypedDistribution(const Distribution *distribution)
     {
 #ifndef NDEBUG
         const TypedDistribution<valueType> *typedDistribution = dynamic_cast<const TypedDistribution<valueType>*>( distribution );

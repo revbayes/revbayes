@@ -89,7 +89,7 @@ RevBayesCore::UniformTopologyBranchLengthDistribution* Dist_uniformTopologyBranc
     }
     
     const Distribution& rlDistribution              = static_cast<const Distribution &>( branch_length_prior->getRevObject() );
-    RevBayesCore::TypedDistribution<double>* blp    = RevBayesCore::assumeDistributionOf<double>( rlDistribution.createDistribution() );
+    RevBayesCore::TypedDistribution<double>* blp    = RevBayesCore::assumeTypedDistribution<double>( rlDistribution.createDistribution() );
     
     
     bool r = false;

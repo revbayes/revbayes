@@ -102,7 +102,7 @@ RevBayesCore::VectorMixtureDistribution< typename valType::valueType >* RevLangu
     std::vector<RevBayesCore::TypedDistribution<typename valType::valueType>* > bd;
     for (size_t i=0; i<rl_bd.size();++i)
     {
-        RevBayesCore::TypedDistribution<typename valType::valueType>* tmp = RevBayesCore::assumeDistributionOf<typename valType::valueType>( rl_bd[i].createDistribution() );
+        RevBayesCore::TypedDistribution<typename valType::valueType>* tmp = RevBayesCore::assumeTypedDistribution<typename valType::valueType>( rl_bd[i].createDistribution() );
         bd.push_back( tmp );
     }
 

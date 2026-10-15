@@ -123,7 +123,7 @@ namespace RevLanguage {
 
         // get the parameters
         const Distribution& rl_vp                      = static_cast<const Distribution &>( base_distribution->getRevObject() );
-        RevBayesCore::TypedDistribution<double>* vp    = RevBayesCore::assumeDistributionOf<double>( rl_vp.createDistribution() );
+        RevBayesCore::TypedDistribution<double>* vp    = RevBayesCore::assumeTypedDistribution<double>( rl_vp.createDistribution() );
 
         RevBayesCore::TypedDagNode<double>* d           = static_cast<const T &>( delta->getRevObject() ).getDagNode();
 

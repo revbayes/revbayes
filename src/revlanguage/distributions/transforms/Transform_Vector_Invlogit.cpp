@@ -33,7 +33,7 @@ Core::TransformedVectorDistribution* RevLanguage::Transform_Vector_InvLogit::cre
 
     // get the parameters
     const Distribution& rl_vp                      = static_cast<const Distribution &>( base_distribution->getRevObject() );
-    std::unique_ptr<Core::TypedDistribution<Core::RbVector<double>>> vp( Core::assumeDistributionOf<Core::RbVector<double>>( rl_vp.createDistribution() ) );
+    std::unique_ptr<Core::TypedDistribution<Core::RbVector<double>>> vp( Core::assumeTypedDistribution<Core::RbVector<double>>( rl_vp.createDistribution() ) );
 
     return new Core::TransformedVectorDistribution(vp, invlogit_transform, invlogit_inverse, log_invlogit_prime);
 }

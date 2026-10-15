@@ -31,7 +31,7 @@ RevBayesCore::TransformedDistribution* RevLanguage::Dist_Log::createDistribution
 
     // get the parameters
     const Distribution& rl_vp                      = static_cast<const Distribution &>( log_distribution->getRevObject() );
-    RevBayesCore::TypedDistribution<double>* vp    = RevBayesCore::assumeDistributionOf<double>( rl_vp.createDistribution() );
+    RevBayesCore::TypedDistribution<double>* vp    = RevBayesCore::assumeTypedDistribution<double>( rl_vp.createDistribution() );
 
     RevBayesCore::TransformedDistribution* d = new RevBayesCore::TransformedDistribution(*vp, exp_transform, exp_inverse, log_exp_prime);
 
