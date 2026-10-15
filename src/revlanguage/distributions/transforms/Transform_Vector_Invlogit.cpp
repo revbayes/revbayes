@@ -4,7 +4,7 @@
 #include "ArgumentRules.h"
 #include "DistributionTypeUtilities.h"
 #include "Real.h"
-#include "RlSimplex.h"
+#include "Probability.h"
 #include "StochasticNode.h"
 #include "TypedDistribution.h"
 #include "Transforms.h"

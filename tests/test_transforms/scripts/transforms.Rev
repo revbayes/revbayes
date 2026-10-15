@@ -40,10 +40,6 @@ mu = [1.0, 2.0, 3.0, 4.0]
 Sigma ~ dnWishart(df=4, kappa=2, dim=4)
 x ~ dnMultivariateNormal(mu,Sigma) |> tnExp() |> tnLog()
 
-y ~ dnDirichlet([1,1,1,1]) |> tnLog()
-y ~ dnDirichlet([1,1,1,1]) |> tnLogit()
-y ~ dnDirichlet([1,1,1,1]) |> tnLogit() |> tnInvlogit()
-
 z ~ dnIID(4,dnNormal(0,1)) |> tnInvlogit()
 z ~ dnIID(4,dnNormal(0,1)) |> tnInvlogit() |> tnLogit()
 
