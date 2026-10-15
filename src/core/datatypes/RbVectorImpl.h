@@ -13,6 +13,7 @@
 #include "Serializer.h"
 #include "StringUtilities.h"
 
+#include <boost/dynamic_bitset.hpp>
 #include <vector>
 #include <algorithm>
 #include <iostream>
@@ -105,6 +106,14 @@ namespace RevBayesCore {
 	    {
 		if constexpr (std::is_base_of_v<Printable,valueType>)
 		    j.push_back(this->operator[](i).toJSON());
+        else if constexpr (std::is_same_v<valueType, boost::dynamic_bitset<>>)
+        {
+            const auto& bits = this->operator[](i);
+            json bitArray = json::array();
+            for (size_t k = 0; k < bits.size(); ++k)
+                bitArray.push_back(static_cast<bool>(bits[k]));
+            j.push_back(bitArray);
+        }
 		else if constexpr (std::is_convertible_v<valueType,json>)
 		    j.push_back(this->operator[](i));
 		else

@@ -26,6 +26,7 @@ namespace RevBayesCore {
     namespace RbMath {
     
         void                        normalize(std::vector<double>& x, double sum);                                      //!< Normalize a vector so that its sum is sum
+        void                        normalizeToMin(std::vector<double>& x, double sum);                                      //!< Normalize a vector so that its sum is sum
 
     }
     
