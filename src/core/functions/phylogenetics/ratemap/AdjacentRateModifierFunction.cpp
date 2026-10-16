@@ -6,6 +6,7 @@
 //  Copyright © 2017 Michael Landis. All rights reserved.
 //
 
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "AdjacentRateModifierFunction.h"
 
@@ -93,25 +94,25 @@ void AdjacentRateModifierFunction::update( void )
 {
     
     double gf = gainFactor->getValue();
-    static_cast<AdjacentRateModifier*>(value)->setGainFactor(gf);
+    assume_cast<AdjacentRateModifier*>(value)->setGainFactor(gf);
     
     double lf = lossFactor->getValue();
-    static_cast<AdjacentRateModifier*>(value)->setLossFactor(lf);
+    assume_cast<AdjacentRateModifier*>(value)->setLossFactor(lf);
     
     if (context_type == "width")
     {
         size_t w = width->getValue();
-        static_cast<AdjacentRateModifier*>(value)->setWidth(w);
+        assume_cast<AdjacentRateModifier*>(value)->setWidth(w);
     }
     else if (context_type=="array")
     {
         RbVector<RbVector<std::int64_t> > c = context_array->getValue();
-        static_cast<AdjacentRateModifier*>(value)->setContextMatrix(c);
+        assume_cast<AdjacentRateModifier*>(value)->setContextMatrix(c);
     }
     else if (context_type=="matrix")
     {
         MatrixReal c = context_matrix->getValue();
-        static_cast<AdjacentRateModifier*>(value)->setContextMatrix(c);
+        assume_cast<AdjacentRateModifier*>(value)->setContextMatrix(c);
     }
     
 }

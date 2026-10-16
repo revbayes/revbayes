@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "revPoMoThree4RateMatrixFunction.h"
 #include "RateMatrix_revPoMoThree4.h"
@@ -41,10 +42,10 @@ void revPoMoThree4RateMatrixFunction::update( void )
     const std::vector<double>& fc = phi->getValue();
 
     // set parameters
-    static_cast< RateMatrix_revPoMoThree4* >(value)->setPi( bf );
-    static_cast< RateMatrix_revPoMoThree4* >(value)->setRho( ex );
-    static_cast< RateMatrix_revPoMoThree4* >(value)->setPhi( fc );
-    static_cast< RateMatrix_revPoMoThree4* >(value)->update();
+    assume_cast< RateMatrix_revPoMoThree4* >(value)->setPi( bf );
+    assume_cast< RateMatrix_revPoMoThree4* >(value)->setRho( ex );
+    assume_cast< RateMatrix_revPoMoThree4* >(value)->setPhi( fc );
+    assume_cast< RateMatrix_revPoMoThree4* >(value)->update();
 }
 
 

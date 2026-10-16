@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include <algorithm>
 #include <cmath>
@@ -575,7 +576,7 @@ void UltrametricTreeDistribution::executeMethod(const std::string &n, const std:
     if ( n == "getSampleProbabilities" )
     {
 
-        bool log_transorm = static_cast<const TypedDagNode<Boolean>* >( args[0] )->getValue();
+        bool log_transorm = assume_cast<const TypedDagNode<Boolean>* >( args[0] )->getValue();
 
         rv.clear();
         rv.resize(num_samples);
@@ -587,7 +588,7 @@ void UltrametricTreeDistribution::executeMethod(const std::string &n, const std:
     else if ( n == "getBranchRates" )
     {
 
-        int index = static_cast<const TypedDagNode<std::int64_t>* >( args[0] )->getValue();
+        int index = assume_cast<const TypedDagNode<std::int64_t>* >( args[0] )->getValue();
 
         Tree &this_tree = *value;
         size_t num_branches = this_tree.getNumberOfNodes() - 1;

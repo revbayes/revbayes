@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include <string>
 
@@ -323,7 +324,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::recursivelyFlagNo
 
 const RevBayesCore::AbstractHomologousDiscreteCharacterData& GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::getCharacterData() const
 {
-    return static_cast<TreeDiscreteCharacterData*>(this->value)->getCharacterData();
+    return assume_cast<TreeDiscreteCharacterData*>(this->value)->getCharacterData();
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::redrawValue(void)
@@ -770,7 +771,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::setValue(Tree *v,
     value->getTreeChangeEventHandler().removeListener( this );
 
     // set the tree
-    static_cast<TreeDiscreteCharacterData *>(this->value)->setTree( *v );
+    assume_cast<TreeDiscreteCharacterData *>(this->value)->setTree( *v );
 
     // clear memory
 //    delete v; // MRM 1/31/2024: why are we deleting this? we should never be responsible for deleting a pointer from outside
@@ -941,7 +942,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::initializeEmptyCh
     }
 
     // store the new value for the discrete data
-    static_cast<TreeDiscreteCharacterData*>(this->value)->setCharacterData(tip_data);
+    assume_cast<TreeDiscreteCharacterData*>(this->value)->setCharacterData(tip_data);
 
     // update the kernel
     updateData(true);
@@ -2114,7 +2115,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> GeneralizedLineageHeterogeneousBir
         found = true;
 
     	// get the incoming data
-        const AbstractHomologousDiscreteCharacterData& v = static_cast<const TypedDagNode<AbstractHomologousDiscreteCharacterData > *>( args[0] )->getValue();
+        const AbstractHomologousDiscreteCharacterData& v = assume_cast<const TypedDagNode<AbstractHomologousDiscreteCharacterData > *>( args[0] )->getValue();
 
         // check the number of states
         if(v.getNumberOfStates() != num_states)
@@ -2151,7 +2152,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> GeneralizedLineageHeterogeneousBir
         }
 
         // copy the input data
-        static_cast<TreeDiscreteCharacterData*>(this->value)->setCharacterData( v.clone() );
+        assume_cast<TreeDiscreteCharacterData*>(this->value)->setCharacterData( v.clone() );
 
         // update the kernel
         updateData(true);
