@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -59,13 +60,13 @@ void Move_RateAgeBetaShift::constructInternalObject( void )
     delete value;
     
     // now allocate a new sliding move
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = static_cast<const Tree &>( tree->getRevObject() ).getDagNode();
-    double d = static_cast<const RealPos &>( delta->getRevObject() ).getValue();
-    bool at = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = dagNodeForRevType<Tree>(tree);
+    double d = valueForRevType<RealPos>(delta);
+    bool at = valueForRevType<RlBoolean>(tune);
+    double w = valueForRevType<RealPos>(weight);
+    double tt = valueForRevType<Probability>(tuneTarget);
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* tmpRates = static_cast<const ModelVector<RealPos> &>( rates->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* tmpRates = dagNodeForRevType<ModelVector<RealPos>>(rates);
     std::vector< RevBayesCore::StochasticNode<double> *> rates;
     RevBayesCore::StochasticNode< RevBayesCore::RbVector<double> >* snode_rates = dynamic_cast<RevBayesCore::StochasticNode< RevBayesCore::RbVector<double> > *>( tmpRates );
     if ( tmpRates->isStochastic() == false )

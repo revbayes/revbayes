@@ -71,8 +71,8 @@ void Move_SliceSampling::constructInternalObject( void )
     delete value;
 
     // now allocate a new sliding move
-    double window_ = objectForRevType<RealPos>(window).getValue();
-    double weight_ = objectForRevType<RealPos>(weight).getValue();
+    double window_ = valueForRevType<RealPos>(window);
+    double weight_ = valueForRevType<RealPos>(weight);
 
     boost::optional<double> lower_bound_;
     boost::optional<double> upper_bound_;
@@ -85,11 +85,11 @@ void Move_SliceSampling::constructInternalObject( void )
             lower_bound_ = 0.0;
     }
 
-    RevBayesCore::TypedDagNode<double>* tmp = objectForRevType<Real>(x).getDagNode();
+    RevBayesCore::TypedDagNode<double>* tmp = dagNodeForRevType<Real>(x);
     auto* node_ = assume_cast<RevBayesCore::StochasticNode<double>*>(tmp);
-    bool tune_ = objectForRevType<RlBoolean>(tune).getValue();
+    bool tune_ = valueForRevType<RlBoolean>(tune);
 
-    auto search_method_ = objectForRevType<RlString>(search_method).getValue();
+    auto search_method_ = valueForRevType<RlString>(search_method);
     typedef RevBayesCore::SliceSamplingMove::BoundarySearchMethod search_method_t;
     search_method_t search_method__;
     if (search_method_ == "doubling")

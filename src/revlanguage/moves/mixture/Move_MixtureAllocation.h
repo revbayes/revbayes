@@ -1,6 +1,7 @@
 #ifndef Move_MixtureAllocation_H
 #define Move_MixtureAllocation_H
 
+#include "RevTypeUtilities.h"
 #include "RlMove.h"
 #include "TypedDagNode.h"
 
@@ -87,9 +88,9 @@ void RevLanguage::Move_MixtureAllocation<rlValueType>::constructInternalObject( 
     delete value;
     
     // now allocate a new vector-scale move
-    size_t d = size_t( static_cast<const Natural &>( delta->getRevObject() ).getValue() );
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<typename rlValueType::valueType>* tmp = static_cast<const rlValueType &>( x->getRevObject() ).getDagNode();
+    size_t d = size_t( valueForRevType<Natural>(delta) );
+    double w = valueForRevType<RealPos>(weight);
+    RevBayesCore::TypedDagNode<typename rlValueType::valueType>* tmp = dagNodeForRevType<rlValueType>(x);
     RevBayesCore::StochasticNode< typename rlValueType::valueType > *sn = static_cast<RevBayesCore::StochasticNode< typename rlValueType::valueType > *>( tmp );
     
     RevBayesCore::Proposal *p = new RevBayesCore::MixtureAllocationProposal<typename rlValueType::valueType>( sn, d );
