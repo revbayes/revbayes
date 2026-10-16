@@ -100,7 +100,7 @@ RevBayesCore::AnalyticalMixtureDistribution< typename valType::valueType >* RevL
 {
     
     // get the parameters
-    const WorkspaceVector<Distribution>& rl_bd = objectFor<WorkspaceVector<Distribution >>(base_distributions);
+    const auto& rl_bd = objectFor<WorkspaceVector<TypedDistribution<valType>>>(base_distributions);
     std::vector<RevBayesCore::TypedDistribution<typename valType::valueType>* > bd;
     for (size_t i=0; i<rl_bd.size();++i)
     {
