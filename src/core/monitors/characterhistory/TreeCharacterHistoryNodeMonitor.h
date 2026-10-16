@@ -102,7 +102,7 @@ num_states(0)
 //    nodes.push_back(t);
     s->incrementReferenceCount();
     
-    num_states = static_cast<const DiscreteCharacterState&>(s->getValue().getCharacter(0,0)).getNumberOfStates();
+    num_states = s->getValue().getCharacter(0,0).getNumberOfStates();
 }
 
 template<class charType>

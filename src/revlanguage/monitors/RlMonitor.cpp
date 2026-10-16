@@ -54,7 +54,7 @@ RevPtr<RevVariable> Monitor::executeMethod(const std::string& name, const std::v
         
         RevBayesCore::DagNode* node = args[0].getVariable()->getRevObject().getDagNode();
         
-        RevBayesCore::Monitor *m = static_cast<RevBayesCore::Monitor*>(this->value);
+        RevBayesCore::Monitor *m = this->value;
         m->addVariable( node );
         
         return NULL;
@@ -65,7 +65,7 @@ RevPtr<RevVariable> Monitor::executeMethod(const std::string& name, const std::v
         
         RevBayesCore::DagNode* node = args[0].getVariable()->getRevObject().getDagNode();
         
-        RevBayesCore::Monitor *m = static_cast<RevBayesCore::Monitor*>(this->value);
+        RevBayesCore::Monitor *m = this->value;
         m->removeVariable( node );
         
         return NULL;
