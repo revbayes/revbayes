@@ -61,7 +61,7 @@ void Move_SynchronizedVectorFixedSingleElementSlide::constructInternalObject( vo
     double l = static_cast<const RealPos &>( lambda->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* tmp = static_cast<const ModelVector<ModelVector<RealPos> > &>( v->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* tmp = static_cast<const ModelVector<ModelVector<Real> >&>( v->getRevObject() ).getDagNode();
     std::vector<const RevBayesCore::DagNode*> par = tmp->getParents();
     std::vector< RevBayesCore::StochasticNode<RevBayesCore::RbVector<double> > *> n;
     for (std::vector<const RevBayesCore::DagNode*>::const_iterator it = par.begin(); it != par.end(); ++it)
