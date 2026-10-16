@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "LKJDistribution.h"
 
 #include "RandomNumberFactory.h"
@@ -41,7 +42,7 @@ void LKJDistribution::swapParameterInternal(const DagNode *oldP, const DagNode *
     
     if (oldP == eta)
     {
-        eta = static_cast<const TypedDagNode<double>* >(newP);
+        replaceNodeReference(eta, newP);
     }
 
 }

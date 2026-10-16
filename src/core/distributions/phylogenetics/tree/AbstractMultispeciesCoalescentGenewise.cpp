@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include <cstddef>
 #include <cmath>
 #include <iostream>
@@ -593,7 +594,7 @@ void AbstractMultispeciesCoalescentGenewise::swapParameterInternal(const DagNode
 
     if ( oldP == species_tree )
     {
-        species_tree = static_cast<const TypedDagNode< Tree >* >( newP );
+        replaceNodeReference(species_tree, newP);
     }
 
     // if ( oldP == gene_trees )

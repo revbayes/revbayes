@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include <cstddef>
 #include <algorithm>
 #include <cmath>
@@ -821,7 +822,7 @@ void AbstractRootedTreeDistribution::swapParameterInternal( const DagNode *oldP,
     
     if ( oldP == process_age )
     {
-        process_age = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(process_age, newP);
     }
     
 }

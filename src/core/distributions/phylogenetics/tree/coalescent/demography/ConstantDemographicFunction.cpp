@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "ConstantDemographicFunction.h"
 
 #include "TypedDagNode.h"
@@ -107,7 +108,7 @@ void ConstantDemographicFunction::swapNodeInternal(const DagNode *old_node, cons
 
     if (old_node == theta)
     {
-        theta = static_cast<const TypedDagNode<double>* >( new_node );
+        replaceNodeReference(theta, new_node);
     }
     
 }
