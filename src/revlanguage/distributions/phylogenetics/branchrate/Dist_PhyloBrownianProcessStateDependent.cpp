@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "Dist_PhyloBrownianProcessStateDependent.h"
 
 #include <stddef.h>
@@ -47,9 +48,9 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
 {
 
     // get the parameters
-    size_t n = size_t( static_cast<const Natural &>( n_sites->getRevObject() ).getValue() );
+    size_t n = size_t( valueForRevType<Natural>(n_sites) );
 
-    const CharacterHistory& rl_char_hist = static_cast<const RevLanguage::CharacterHistory&>( character_history->getRevObject() );
+    const CharacterHistory& rl_char_hist = objectForRevType<RevLanguage::CharacterHistory>(character_history);
     RevBayesCore::TypedDagNode<RevBayesCore::CharacterHistoryDiscrete>* char_hist   =  rl_char_hist.getDagNode();
 
     RevBayesCore::PhyloBrownianProcessStateDependent *dist = new RevBayesCore::PhyloBrownianProcessStateDependent(char_hist, n);
@@ -58,16 +59,16 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
     // set sigma
     if ( sigma->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
     {
-        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* s = static_cast<const ModelVector<RealPos> &>( sigma->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* s = dagNodeForRevType<ModelVector<RealPos>>(sigma);
         dist->setSigma( s );
     }
     else
     {
-        RevBayesCore::TypedDagNode< double >* s = static_cast<const RealPos &>( sigma->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< double >* s = dagNodeForRevType<RealPos>(sigma);
         dist->setSigma( s );
     }
 
-    RevBayesCore::TypedDagNode< double >* rvl = static_cast<const Real &>( root_value->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< double >* rvl = dagNodeForRevType<Real>(root_value);
     dist->setRootValue( rvl );
 
     return dist;

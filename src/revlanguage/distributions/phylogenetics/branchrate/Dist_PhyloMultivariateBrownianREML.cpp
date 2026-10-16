@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "Dist_PhyloMultivariateBrownianREML.h"
 
 #include <cstddef>
@@ -47,11 +48,11 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
 {
     
     // get the parameters
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = static_cast<const Tree &>( tree->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = dagNodeForRevType<Tree>(tree);
 //    size_t n = size_t( static_cast<const Natural &>( nSites->getRevObject() ).getValue() );
     size_t n_nodes = tau->getValue().getNumberOfNodes();
     
-    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal>* vcv = static_cast<const MatrixReal&>( rate_matrix->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal>* vcv = dagNodeForRevType<MatrixReal>(rate_matrix);
 
     size_t n = vcv->getValue().getDim();
     
@@ -60,7 +61,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
     // set the clock rates
     if ( branchRates->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
     {
-        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* br = static_cast<const ModelVector<RealPos> &>( branchRates->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* br = dagNodeForRevType<ModelVector<RealPos>>(branchRates);
         
         // sanity check
         size_t n_rates = br->getValue().size();
@@ -74,7 +75,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
     }
     else
     {
-        RevBayesCore::TypedDagNode< double >* br = static_cast<const RealPos &>( branchRates->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< double >* br = dagNodeForRevType<RealPos>(branchRates);
         
         dist->setBranchRate( br );
     }

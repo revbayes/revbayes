@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "Dist_PhyloOrnsteinUhlenbeckThreePoint.h"
 
 #include <cstddef>
@@ -46,8 +47,8 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
 {
     
     // get the parameters
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = static_cast<const Tree &>( tree->getRevObject() ).getDagNode();
-    size_t n = size_t( static_cast<const Natural &>( n_sites->getRevObject() ).getValue() );
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = dagNodeForRevType<Tree>(tree);
+    size_t n = size_t( valueForRevType<Natural>(n_sites) );
     size_t n_nodes = tau->getValue().getNumberOfNodes();
     
     RevBayesCore::PhyloOrnsteinUhlenbeckThreePoint *dist = new RevBayesCore::PhyloOrnsteinUhlenbeckThreePoint(tau, n);
@@ -55,36 +56,36 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
     // set alpha
     if ( alpha->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
     {
-        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* a = static_cast<const ModelVector<RealPos> &>( alpha->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* a = dagNodeForRevType<ModelVector<RealPos>>(alpha);
         dist->setAlpha( a );
     }
     else
     {
-        RevBayesCore::TypedDagNode< double >* a = static_cast<const RealPos &>( alpha->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< double >* a = dagNodeForRevType<RealPos>(alpha);
         dist->setAlpha( a );
     }
     
     // set theta
     if ( theta->getRevObject().isType( ModelVector<Real>::getClassTypeSpec() ) )
     {
-        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* t = static_cast<const ModelVector<Real> &>( theta->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* t = dagNodeForRevType<ModelVector<Real>>(theta);
         dist->setTheta( t );
     }
     else
     {
-        RevBayesCore::TypedDagNode< double >* t = static_cast<const Real &>( theta->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< double >* t = dagNodeForRevType<Real>(theta);
         dist->setTheta( t );
     }
     
     // set sigma
     if ( sigma->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
     {
-        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* s = static_cast<const ModelVector<RealPos> &>( sigma->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* s = dagNodeForRevType<ModelVector<RealPos>>(sigma);
         dist->setSigma( s );
     }
     else
     {
-        RevBayesCore::TypedDagNode< double >* s = static_cast<const RealPos &>( sigma->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< double >* s = dagNodeForRevType<RealPos>(sigma);
         dist->setSigma( s );
     }
     

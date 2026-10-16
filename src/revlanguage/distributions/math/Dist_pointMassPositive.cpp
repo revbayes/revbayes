@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "ContinuousStochasticNode.h"
@@ -30,7 +31,7 @@ Dist_pointMassPositive* Dist_pointMassPositive::clone( void ) const
 RevBayesCore::PointMassDistribution* Dist_pointMassPositive::createDistribution( void ) const
 {
     // get the parameters
-    RevBayesCore::TypedDagNode<double>* l   = static_cast<const RealPos &>( value->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* l   = dagNodeForRevType<RealPos>(value);
     RevBayesCore::PointMassDistribution* d    = new RevBayesCore::PointMassDistribution(l);
 
     return d;

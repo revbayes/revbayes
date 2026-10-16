@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cmath>
 #include <cstddef>
 #include <iosfwd>
@@ -92,26 +93,26 @@ RevBayesCore::UltrametricTreeDistribution* Dist_UltrametricTree::createDistribut
 {
     
     // get the parameters
-    const Distribution& rl_tree_prior                           = static_cast<const Distribution &>( tree_prior->getRevObject() );
+    const Distribution& rl_tree_prior                           = objectForRevType<Distribution>(tree_prior);
     RevBayesCore::TypedDistribution<RevBayesCore::Tree>* tp     = dynamic_cast<RevBayesCore::TypedDistribution<RevBayesCore::Tree>* >( rl_tree_prior.createDistribution() );
     
-    const Distribution& rl_rate_prior                           = static_cast<const Distribution &>( rate_prior->getRevObject() );
+    const Distribution& rl_rate_prior                           = objectForRevType<Distribution>(rate_prior);
     RevBayesCore::TypedDistribution<double>* rp                 = dynamic_cast<RevBayesCore::TypedDistribution<double>* >( rl_rate_prior.createDistribution() );
     
-    RevBayesCore::TypedDagNode<double>* ra                      = static_cast<const RealPos &>( root_age->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* ra                      = dagNodeForRevType<RealPos>(root_age);
     
     RevBayesCore::TypedDagNode<double>* rbf = NULL;
     if( root_branch_fraction->getRevObject() != RevNullObject::getInstance() )
     {
-        rbf = static_cast<const Probability &>( root_branch_fraction->getRevObject() ).getDagNode();
+        rbf = dagNodeForRevType<Probability>(root_branch_fraction);
     }
 
-    const RevBayesCore::TraceTree& tt                           = static_cast<const TraceTree &>( trees->getRevObject() ).getValue();
+    const RevBayesCore::TraceTree& tt                           = valueForRevType<TraceTree>(trees);
 
     RevBayesCore::Trace<double>* sample_prior = NULL;
     if( density->getRevObject() != RevNullObject::getInstance() )
     {
-        sample_prior = static_cast<const Trace &>( density->getRevObject() ).getValue().clone();
+        sample_prior = valueForRevType<Trace>(density).clone();
     }
 
     // create the internal distribution object
