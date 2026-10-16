@@ -193,7 +193,7 @@ RevPtr<RevVariable> AverageDistanceMatrix::executeMethod(std::string const &name
                 throw RbException("Index j out of bounds in getElement");
             }
 
-            std::pair<double, bool> element = static_cast< RevBayesCore::AverageDistanceMatrix& >( this->dag_node->getValue() ).getElement(size_t(i.getValue()) - 1, size_t(j.getValue()) - 1);
+            std::pair<double, bool> element = this->dag_node->getValue().getElement(size_t(i.getValue()) - 1, size_t(j.getValue()) - 1);
             
             ModelVector<RlString> *n = new ModelVector<RlString>();
             
