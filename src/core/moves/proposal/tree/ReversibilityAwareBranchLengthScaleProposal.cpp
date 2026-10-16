@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "ReversibilityAwareBranchLengthScaleProposal.h"
 
 #include <cmath>
@@ -211,7 +212,7 @@ void ReversibilityAwareBranchLengthScaleProposal::swapNodeInternal(DagNode *oldN
     
     if ( oldN == tree )
     {
-        tree = static_cast<StochasticNode<Tree>* >(newN);
+        replaceNodeReference(tree, newN);
     }
     
 }
