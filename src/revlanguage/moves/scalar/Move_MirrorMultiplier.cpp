@@ -74,11 +74,11 @@ void Move_MirrorMultiplier::constructInternalObject( void )
     double d  = RevBayesCore::assume_cast<const RealPos &>( sigma->getRevObject() ).getValue();
     double w  = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
     double r  = RevBayesCore::assume_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
-    double m0 = RevBayesCore::assume_cast<const Probability &>( mu0->getRevObject() ).getValue();
+    double m0 = RevBayesCore::assume_cast<const Real &>( mu0->getRevObject() ).getValue();
     int n0    = RevBayesCore::assume_cast<const Natural &>( waitBeforeLearning->getRevObject() ).getValue();
     int c0    = RevBayesCore::assume_cast<const Natural &>( waitBeforeUsing->getRevObject() ).getValue();
     int m     = RevBayesCore::assume_cast<const Natural &>( maxUpdates->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<double>* tmp = RevBayesCore::assume_cast<const RealPos &>( x->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* tmp = RevBayesCore::assume_cast<const Real &>( x->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<double> *n = RevBayesCore::requireStochastic<double>( tmp );
     bool a = RevBayesCore::assume_cast<const RlBoolean &>( adaptOnly->getRevObject() ).getValue();
     p = new RevBayesCore::MirrorMultiplierProposal(n,d,m0,n0,c0,m,a,r);
