@@ -63,7 +63,7 @@ void Move_VectorSlideRecenter::constructInternalObject( void )
     double w = valueFor<RealPos>(weight);
     double r = valueFor<RealPos>(tuneTarget);
     
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp = dagNodeFor<ModelVector<RealPos>>(x);
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp = dagNodeFor<ModelVector<Real>>(x);
     std::vector<const RevBayesCore::DagNode*> p = tmp->getParents();
     std::vector< RevBayesCore::StochasticNode<double> *> n;
     for (std::vector<const RevBayesCore::DagNode*>::const_iterator it = p.begin(); it != p.end(); ++it)

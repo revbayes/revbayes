@@ -60,7 +60,7 @@ void Move_GMRFUnevenGridHyperpriorGibbs::constructInternalObject( void )
     RevBayesCore::TypedDagNode<double>* tmp = dagNodeFor<RealPos>(x);
     RevBayesCore::StochasticNode<double> *g = RevBayesCore::assumeStochastic<double>( tmp );
     
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp2 = dagNodeFor<ModelVector<RealPos>>(normals);
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp2 = dagNodeFor<ModelVector<Real>>(normals);
     std::vector<const RevBayesCore::DagNode*> p = tmp2->getParents();
     std::vector< RevBayesCore::StochasticNode<double> *> n;
     for (std::vector<const RevBayesCore::DagNode*>::const_iterator it = p.begin(); it != p.end(); ++it)

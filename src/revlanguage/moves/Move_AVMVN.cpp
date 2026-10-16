@@ -119,7 +119,7 @@ void Move_AVMVN::constructInternalObject( void )
     // now allocate a new up-down-scale move
     double s = valueFor<RealPos>(sigmaSquared);
     double w = valueFor<RealPos>(weight);
-    double e = valueFor<Probability>(epsilon);
+    double e = valueFor<RealPos>(epsilon);
     int n0   = valueFor<Natural>(waitBeforeLearning);
     int c0   = valueFor<Natural>(waitBeforeUsing);
     int m    = valueFor<Natural>(maxUpdates);

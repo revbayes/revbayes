@@ -75,7 +75,7 @@ void Move_Mirror::constructInternalObject( void )
     double d  = valueFor<RealPos>(sigma);
     double w  = valueFor<RealPos>(weight);
     double r  = valueFor<Probability>(tuneTarget);
-    double m0 = valueFor<Probability>(mu0);
+    double m0 = valueFor<Real>(mu0);
     int n0    = valueFor<Natural>(waitBeforeLearning);
     int c0    = valueFor<Natural>(waitBeforeUsing);
     int m     = valueFor<Natural>(maxUpdates);
