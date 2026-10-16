@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cmath>
 #include <iosfwd>
 #include <string>
@@ -75,9 +76,9 @@ Dist_bivariatePoisson* Dist_bivariatePoisson::clone( void ) const
 RevBayesCore::BivariatePoissonDistribution* Dist_bivariatePoisson::createDistribution( void ) const
 {
     // get the parameters
-  RevBayesCore::TypedDagNode<double>* theta1x = static_cast<const RealPos &>( theta1->getRevObject() ).getDagNode();
-  RevBayesCore::TypedDagNode<double>* theta2x = static_cast<const RealPos &>( theta2->getRevObject() ).getDagNode();
-  RevBayesCore::TypedDagNode<double>* theta0x = static_cast<const RealPos &>( theta0->getRevObject() ).getDagNode();
+  RevBayesCore::TypedDagNode<double>* theta1x = dagNodeForRevType<RealPos>(theta1);
+  RevBayesCore::TypedDagNode<double>* theta2x = dagNodeForRevType<RealPos>(theta2);
+  RevBayesCore::TypedDagNode<double>* theta0x = dagNodeForRevType<RealPos>(theta0);
   RevBayesCore::BivariatePoissonDistribution* d        = new RevBayesCore::BivariatePoissonDistribution( theta1x, theta2x, theta0x );
 
     return d;

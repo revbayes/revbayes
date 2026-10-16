@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -29,11 +30,11 @@ RevBayesCore::PhyloBranchRatesBM* Dist_PhyloBranchRateBM::createDistribution( vo
 {
     // get the parameters
 
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = dagNodeForRevType<TimeTree>(tree);
     
-    RevBayesCore::TypedDagNode<double>* r  = static_cast<const RealPos&>( root_state->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* s  = static_cast<const RealPos&>( sigma->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* dr  = static_cast<const Real&>( drift->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* r  = dagNodeForRevType<RealPos>(root_state);
+    RevBayesCore::TypedDagNode<double>* s  = dagNodeForRevType<RealPos>(sigma);
+    RevBayesCore::TypedDagNode<double>* dr  = dagNodeForRevType<Real>(drift);
     
     RevBayesCore::PhyloBranchRatesBM* d    = new RevBayesCore::PhyloBranchRatesBM( tau, r, s, dr );
     

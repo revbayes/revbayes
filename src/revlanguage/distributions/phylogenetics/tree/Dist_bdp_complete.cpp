@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -62,23 +63,23 @@ RevBayesCore::ConstantRateCompleteBirthDeathProcess* Dist_bdp_complete::createDi
     // get the parameters
     
     // the root age
-    RevBayesCore::TypedDagNode<double>* ra = static_cast<const RealPos &>( start_age->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* ra = dagNodeForRevType<RealPos>(start_age);
 
     // the start condition
     bool uo = ( startCondition == "originAge" ? true : false );
     bool mr = ( startCondition == "mrcaAge" ? true : false );
 
     // speciation rate
-    RevBayesCore::TypedDagNode<double>* s       = static_cast<const RealPos &>( lambda->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* s       = dagNodeForRevType<RealPos>(lambda);
 
     // extinction rate
-    RevBayesCore::TypedDagNode<double>* e       = static_cast<const RealPos &>( mu->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* e       = dagNodeForRevType<RealPos>(mu);
 
     // condition
-    const std::string& cond                     = static_cast<const RlString &>( condition->getRevObject() ).getValue();
+    const std::string& cond                     = valueForRevType<RlString>(condition);
 
     // get the taxa to simulate either from a vector of rev taxon objects or a vector of names
-    std::vector<RevBayesCore::Taxon> t = static_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
+    std::vector<RevBayesCore::Taxon> t = valueForRevType<ModelVector<Taxon>>(taxa);
     
     // create the internal distribution object
     RevBayesCore::ConstantRateCompleteBirthDeathProcess* d = new RevBayesCore::ConstantRateCompleteBirthDeathProcess(ra, s, e, cond, t, uo, mr);

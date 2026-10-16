@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cmath>
 #include <cstddef>
 #include <iosfwd>
@@ -87,7 +88,7 @@ RevBayesCore::AutocorrelatedEventDistribution* Dist_AutocorrelatedEvent::createD
 {
     // get the parameters
 //    const WorkspaceVector<TypedDistribution<Real> >& rl_vp                   = static_cast<const WorkspaceVector<TypedDistribution<Real> > &>( value_priors->getRevObject() );
-    const WorkspaceVector<Distribution>& rl_vp                   = static_cast<const WorkspaceVector<Distribution > &>( value_priors->getRevObject() );
+    const WorkspaceVector<Distribution>& rl_vp                   = objectForRevType<WorkspaceVector<Distribution >>(value_priors);
     std::vector<RevBayesCore::TypedDistribution<double>* > vp;
     for (size_t i=0; i<rl_vp.size();++i)
     {
@@ -95,15 +96,15 @@ RevBayesCore::AutocorrelatedEventDistribution* Dist_AutocorrelatedEvent::createD
         vp.push_back( tmp );
     }
     
-    const Distribution& rl_ep                                           = static_cast<const Distribution &>( event_number_prior->getRevObject() );
+    const Distribution& rl_ep                                           = objectForRevType<Distribution>(event_number_prior);
     RevBayesCore::TypedDistribution<std::int64_t>* ep                           = static_cast<RevBayesCore::TypedDistribution<std::int64_t>* >( rl_ep.createDistribution() );
 
-    const std::vector<std::string>& n = static_cast<const ModelVector<RlString> &>( names->getRevObject() ).getValue();
+    const std::vector<std::string>& n = valueForRevType<ModelVector<RlString>>(names);
     // offsets
-    const std::vector<std::int64_t> & m = static_cast<const ModelVector<Natural> &>( min_elements->getRevObject() ).getValue();
+    const std::vector<std::int64_t> & m = valueForRevType<ModelVector<Natural>>(min_elements);
 
     
-    const std::vector<std::string>& ac_type_names = static_cast<const ModelVector<RlString> &>( autocorrelation_types->getRevObject() ).getValue();
+    const std::vector<std::string>& ac_type_names = valueForRevType<ModelVector<RlString>>(autocorrelation_types);
     std::vector< RevBayesCore::AutocorrelatedEventDistribution::Autocorrelation > ac_types = std::vector< RevBayesCore::AutocorrelatedEventDistribution::Autocorrelation >( ac_type_names.size(), RevBayesCore::AutocorrelatedEventDistribution::NONE );
     for ( size_t i=0; i<ac_type_names.size(); ++i )
     {
@@ -121,12 +122,12 @@ RevBayesCore::AutocorrelatedEventDistribution* Dist_AutocorrelatedEvent::createD
         }
     }
     
-    const std::vector<std::string>& ac_dep_var = static_cast<const ModelVector<RlString> &>( autocorrelation_dep_var->getRevObject() ).getValue();
+    const std::vector<std::string>& ac_dep_var = valueForRevType<ModelVector<RlString>>(autocorrelation_dep_var);
     
     
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* ac_sd = static_cast<const ModelVector<RealPos> &>( autocorrelation_sigmas->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* ac_sd = dagNodeForRevType<ModelVector<RealPos>>(autocorrelation_sigmas);
     
-    const std::string& sort_by = static_cast<const RlString &>( name_of_var_to_sort_by->getRevObject() ).getValue();
+    const std::string& sort_by = valueForRevType<RlString>(name_of_var_to_sort_by);
 
     RevBayesCore::AutocorrelatedEventDistribution* d    = new RevBayesCore::AutocorrelatedEventDistribution(ep, vp, ac_types, ac_dep_var, ac_sd, n, m, sort_by);
     
