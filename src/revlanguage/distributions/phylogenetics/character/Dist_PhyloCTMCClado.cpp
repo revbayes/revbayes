@@ -137,7 +137,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
     }
     if ( cladoProbs->getRevObject().isType( ModelVector<CladogeneticProbabilityMatrix>::getClassTypeSpec() ) )
     {
-        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::CladogeneticProbabilityMatrix> >* cp = dagNodeFor<ModelVector<CladogeneticProbabilityMatrix>>(q);
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::CladogeneticProbabilityMatrix> >* cp = dagNodeFor<ModelVector<CladogeneticProbabilityMatrix>>(cladoProbs);
         nCharsClado = cp->getValue()[0].getNumberOfStates();
     }
     else
