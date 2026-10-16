@@ -1,4 +1,5 @@
 
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <vector>
 #include <string>
@@ -74,9 +75,9 @@ void CorrespondenceAnalysis::constructInternalObject( void )
     delete value;
     
     // now allocate a CorrespondenceAnalysis
-    RevBayesCore::MatrixReal d  = static_cast<const MatrixReal &>( data->getRevObject() ).getValue();
-    unsigned int na             = (unsigned int)static_cast<const Natural &>( num_axes->getRevObject() ).getValue();
-    double tol                  = static_cast<const RealPos &>( tolerance->getRevObject() ).getValue();
+    RevBayesCore::MatrixReal d  = valueForRevType<MatrixReal>(data);
+    unsigned int na             = (unsigned int)valueForRevType<Natural>(num_axes);
+    double tol                  = valueForRevType<RealPos>(tolerance);
     
     value = new RevBayesCore::CorrespondenceAnalysis( d, na, tol );
     
