@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
@@ -76,10 +77,10 @@ void Move_NarrowExchangeCharacterHistory::constructInternalObject( void )
     // now allocate a new sliding move
     double w = valueForRevType<RealPos>(weight);
     RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = dagNodeForRevType<TimeTree>(tree);
-    RevBayesCore::StochasticNode<RevBayesCore::Tree> *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
+    RevBayesCore::StochasticNode<RevBayesCore::Tree> *n = assume_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
 
     RevBayesCore::TypedDagNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_tdn   = dagNodeForRevType<RevLanguage::AbstractHomologousDiscreteCharacterData>(ctmc);
-    RevBayesCore::StochasticNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_sn  = static_cast<RevBayesCore::StochasticNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* >(ctmc_tdn);
+    RevBayesCore::StochasticNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_sn  = assume_cast<RevBayesCore::StochasticNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* >(ctmc_tdn);
     RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* qmap_tdn                             = dagNodeForRevType<RateGenerator>(rate_generator);
 
     std::string mt = ctmc_sn->getValue().getDataType();

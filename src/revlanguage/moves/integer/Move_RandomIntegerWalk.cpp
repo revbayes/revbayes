@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
@@ -67,7 +68,7 @@ void Move_RandomIntegerWalk::constructInternalObject( void )
     // now allocate a new random-integer-walk move
     double w = valueForRevType<RealPos>(weight);
     RevBayesCore::TypedDagNode<std::int64_t>* tmp = dagNodeForRevType<Integer>(x);
-    RevBayesCore::StochasticNode<std::int64_t> *n = static_cast<RevBayesCore::StochasticNode<std::int64_t> *>( tmp );
+    RevBayesCore::StochasticNode<std::int64_t> *n = assume_cast<RevBayesCore::StochasticNode<std::int64_t> *>( tmp );
     
     // finally create the internal move object
     RevBayesCore::Proposal *prop = new RevBayesCore::RandomIntegerWalkProposal(n);

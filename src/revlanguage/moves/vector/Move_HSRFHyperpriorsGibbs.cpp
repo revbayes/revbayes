@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
@@ -61,7 +62,7 @@ void Move_HSRFHyperpriorsGibbs::constructInternalObject( void )
     double p = valueForRevType<RealPos>(prop_global);
 
     RevBayesCore::TypedDagNode<double>* tmp = dagNodeForRevType<RealPos>(gs);
-    RevBayesCore::StochasticNode<double> *g = static_cast< RevBayesCore::StochasticNode<double>* >( tmp );
+    RevBayesCore::StochasticNode<double> *g = assume_cast< RevBayesCore::StochasticNode<double>* >( tmp );
 
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp1 = dagNodeForRevType<ModelVector<RealPos>>(ls);
     std::vector<const RevBayesCore::DagNode*> p1 = tmp1->getParents();

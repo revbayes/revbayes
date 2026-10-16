@@ -6,6 +6,7 @@
 //  Copyright (c) 2016 will freyman. All rights reserved.
 //
 
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include "Mntr_StochasticCharacterMapping.h"
 
@@ -85,12 +86,12 @@ void Mntr_StochasticCharacterMapping::constructInternalObject( void )
     if ( ctmc->getRevObject().isModelObject() )
     {
         ctmc_tdn = dagNodeForRevType<RevLanguage::AbstractHomologousDiscreteCharacterData>(ctmc);
-        ctmc_sn  = static_cast<Core::StochasticNode<Core::AbstractHomologousDiscreteCharacterData>* >(ctmc_tdn);
+        ctmc_sn  = assume_cast<Core::StochasticNode<Core::AbstractHomologousDiscreteCharacterData>* >(ctmc_tdn);
     }
     else if ( cdbdp->getRevObject().isModelObject() )
     {
         cdbdp_tdn = dagNodeForRevType<RevLanguage::Tree>(cdbdp);
-        cdbdp_sn  = static_cast<Core::StochasticNode<Core::Tree>* >( cdbdp_tdn );
+        cdbdp_sn  = assume_cast<Core::StochasticNode<Core::Tree>* >( cdbdp_tdn );
 
         Core::StateDependentSpeciationExtinctionProcess *sse_process = NULL;
         sse_process = dynamic_cast<Core::StateDependentSpeciationExtinctionProcess*>( &cdbdp_sn->getDistribution() );
@@ -99,7 +100,7 @@ void Mntr_StochasticCharacterMapping::constructInternalObject( void )
     else if ( glhbdsp->getRevObject().isModelObject() )
     {
     	glhbdsp_tdn = dagNodeForRevType<RevLanguage::Tree>(glhbdsp);
-    	glhbdsp_sn  = static_cast<Core::StochasticNode<Core::Tree>* >( glhbdsp_tdn );
+    	glhbdsp_sn  = assume_cast<Core::StochasticNode<Core::Tree>* >( glhbdsp_tdn );
     }
     else
     {

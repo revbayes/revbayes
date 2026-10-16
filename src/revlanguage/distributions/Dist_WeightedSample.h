@@ -1,6 +1,7 @@
 #ifndef Dist_WeightedSample_H
 #define Dist_WeightedSample_H
 
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include "WeightedSampleDistribution.h"
 #include "ModelVector.h"
@@ -91,21 +92,21 @@ RevBayesCore::WeightedSampleDistribution<typename valType::valueType>* RevLangua
 
         // get the workspace vector
         const RevObject& obj = baseDistribution->getRevObject();
-        const WorkspaceVector<TypedDistribution<valType> >& obj_vector = static_cast<const WorkspaceVector<TypedDistribution<valType> >& >( obj );
+        const WorkspaceVector<TypedDistribution<valType> >& obj_vector = assume_cast<const WorkspaceVector<TypedDistribution<valType> >& >( obj );
         ns = obj_vector.size();
         
         // build our vector of typed distributions
         g0_vector = std::vector< RevBayesCore::TypedDistribution<typename valType::valueType>* >( ns, NULL );
         for (size_t i = 0; i < ns; i++)
         {
-            const Distribution& rlDistribution = static_cast<const Distribution &>( obj_vector[i] );
-            g0_vector[i] = static_cast<RevBayesCore::TypedDistribution<typename valType::valueType>* >( rlDistribution.createDistribution() );
+            const Distribution& rlDistribution = assume_cast<const Distribution &>( obj_vector[i] );
+            g0_vector[i] = assume_cast<RevBayesCore::TypedDistribution<typename valType::valueType>* >( rlDistribution.createDistribution() );
         }
     }
     else {
         ns                                 = size_t( valueForRevType<Natural>(numSamples) );
         const Distribution& rlDistribution = objectForRevType<Distribution>(baseDistribution);
-        g0                                 = static_cast<RevBayesCore::TypedDistribution<typename valType::valueType>* >( rlDistribution.createDistribution() );
+        g0                                 = assume_cast<RevBayesCore::TypedDistribution<typename valType::valueType>* >( rlDistribution.createDistribution() );
 //        d = new RevBayesCore::WeightedSampleDistribution<typename valType::valueType>(g0, ns);
     }
     

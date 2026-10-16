@@ -1,6 +1,7 @@
 #ifndef Move_MixtureAllocation_H
 #define Move_MixtureAllocation_H
 
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include "RlMove.h"
 #include "TypedDagNode.h"
@@ -91,7 +92,7 @@ void RevLanguage::Move_MixtureAllocation<rlValueType>::constructInternalObject( 
     size_t d = size_t( valueForRevType<Natural>(delta) );
     double w = valueForRevType<RealPos>(weight);
     RevBayesCore::TypedDagNode<typename rlValueType::valueType>* tmp = dagNodeForRevType<rlValueType>(x);
-    RevBayesCore::StochasticNode< typename rlValueType::valueType > *sn = static_cast<RevBayesCore::StochasticNode< typename rlValueType::valueType > *>( tmp );
+    RevBayesCore::StochasticNode< typename rlValueType::valueType > *sn = assume_cast<RevBayesCore::StochasticNode< typename rlValueType::valueType > *>( tmp );
     
     RevBayesCore::Proposal *p = new RevBayesCore::MixtureAllocationProposal<typename rlValueType::valueType>( sn, d );
     value = new RevBayesCore::MetropolisHastingsMove(p, w, false);

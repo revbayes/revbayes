@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
@@ -70,12 +71,12 @@ void Move_NarrowExchange::constructInternalObject( void )
     if ( tree->getRevObject().isType( TimeTree::getClassTypeSpec() ) )
     {
         RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = dagNodeForRevType<TimeTree>(tree);
-        t = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
+        t = assume_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
     }
     else if ( tree->getRevObject().isType( ModelVector<TimeTree>::getClassTypeSpec() ) )
     {
         RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::Tree> > *tmp = dagNodeForRevType<ModelVector<TimeTree>>(tree);
-        vec_t = static_cast<RevBayesCore::StochasticNode< RevBayesCore::RbVector<RevBayesCore::Tree> > *>( tmp );
+        vec_t = assume_cast<RevBayesCore::StochasticNode< RevBayesCore::RbVector<RevBayesCore::Tree> > *>( tmp );
     }
     else
     {

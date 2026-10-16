@@ -1,6 +1,7 @@
 #ifndef Transform_Mul_H
 #define Transform_Mul_H
 
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include "ModelVector.h"
 #include "RealPos.h"
@@ -125,7 +126,7 @@ namespace RevLanguage {
 
         // get the parameters
         const Distribution& rl_vp               = objectForRevType<Distribution>(base_distribution);
-        Core::TypedDistribution<double>* vp     = static_cast<Core::TypedDistribution<double>* >( rl_vp.createDistribution() );
+        Core::TypedDistribution<double>* vp     = assume_cast<Core::TypedDistribution<double>* >( rl_vp.createDistribution() );
 
         Core::TypedDagNode<double>* l           = dagNodeForRevType<T>(lambda);
 

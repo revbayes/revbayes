@@ -1,6 +1,7 @@
 #ifndef Dist_event_H
 #define Dist_event_H
 
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include "EventDistribution.h"
 #include "ModelVector.h"
@@ -81,10 +82,10 @@ RevBayesCore::EventDistribution<typename valType::valueType>* RevLanguage::Dist_
     
     // get the parameters
     const Distribution& rl_vp                                           = objectForRevType<Distribution>(value_distribution);
-    RevBayesCore::TypedDistribution<typename valType::valueType>* vp    = static_cast<RevBayesCore::TypedDistribution<typename valType::valueType>* >( rl_vp.createDistribution() );
+    RevBayesCore::TypedDistribution<typename valType::valueType>* vp    = assume_cast<RevBayesCore::TypedDistribution<typename valType::valueType>* >( rl_vp.createDistribution() );
     
     const Distribution& rl_ep                                           = objectForRevType<Distribution>(event_distribution);
-    RevBayesCore::TypedDistribution<std::int64_t>* ep                           = static_cast<RevBayesCore::TypedDistribution<std::int64_t>* >( rl_ep.createDistribution() );
+    RevBayesCore::TypedDistribution<std::int64_t>* ep                           = assume_cast<RevBayesCore::TypedDistribution<std::int64_t>* >( rl_ep.createDistribution() );
     
     RevBayesCore::EventDistribution<typename valType::valueType>* d        = new RevBayesCore::EventDistribution<typename valType::valueType>(ep, vp);
     

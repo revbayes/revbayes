@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include <iostream>
 #include <list>
 #include <cstddef>
@@ -115,11 +116,11 @@ RevPtr<RevVariable> SyntaxVariableDecl::evaluateContent( const std::shared_ptr<E
             
             size_t theLength;
             if ( value.isType( Natural::getClassTypeSpec() ) )
-                theLength = size_t( static_cast<const Natural&>( value ).getValue() );
+                theLength = size_t( assume_cast<const Natural&>( value ).getValue() );
             else if ( value.isConvertibleTo( Natural::getClassTypeSpec(), true ) )
             {
                 RevObject* convObj = value.convertTo( Natural::getClassTypeSpec() );
-                theLength = size_t( static_cast<Natural*>( convObj )->getValue() );
+                theLength = size_t( assume_cast<Natural*>( convObj )->getValue() );
                 delete convObj;
             }
             else

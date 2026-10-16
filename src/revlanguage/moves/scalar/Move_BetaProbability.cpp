@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
@@ -56,7 +57,7 @@ void Move_BetaProbability::constructInternalObject( void )
     double o = valueForRevType<RealPos>(offset);
     double w = valueForRevType<RealPos>(weight);
     RevBayesCore::TypedDagNode< double >* tmp = dagNodeForRevType<Probability>(x);
-    RevBayesCore::StochasticNode< double > *n = static_cast<RevBayesCore::StochasticNode< double > *>( tmp );
+    RevBayesCore::StochasticNode< double > *n = assume_cast<RevBayesCore::StochasticNode< double > *>( tmp );
     bool t = valueForRevType<RlBoolean>(tune);
     double tt = valueForRevType<Probability>(tuneTarget);
     

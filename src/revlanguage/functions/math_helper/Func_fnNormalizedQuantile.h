@@ -1,6 +1,7 @@
 #ifndef Func_fnNormalizedQuantile_H
 #define Func_fnNormalizedQuantile_H
 
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include <memory>
 #include "ModelVector.h"
@@ -69,7 +70,7 @@ RevBayesCore::TypedFunction< RevBayesCore::RbVector<double> >* Func_fnNormalized
     
     const auto& rlDistribution = objectForRevType<TypedDistribution<valType>>(this->args[0].getVariable());
     std::unique_ptr<RevBayesCore::ContinuousDistribution> dist(
-        static_cast<RevBayesCore::ContinuousDistribution*>(rlDistribution.createDistribution()) );    
+        assume_cast<RevBayesCore::ContinuousDistribution*>(rlDistribution.createDistribution()) );    
     
     int nc = (int)valueForRevType<Integer>(this->args[1].getVariable());
     

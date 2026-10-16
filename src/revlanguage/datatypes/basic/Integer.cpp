@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include <sstream>
 #include <string>
 #include <vector>
@@ -58,10 +59,10 @@ RevObject* Integer::add( const RevObject& rhs ) const
 {
     
     if ( rhs.getTypeSpec().isDerivedOf( Real::getClassTypeSpec() ) )
-        return add( static_cast<const Real&>( rhs ) );
+        return add( assume_cast<const Real&>( rhs ) );
     
     if ( rhs.getTypeSpec().isDerivedOf(  Integer::getClassTypeSpec() ) )
-        return add( static_cast<const Integer&>( rhs ) );
+        return add( assume_cast<const Integer&>( rhs ) );
     
     return ModelObject<std::int64_t>::add( rhs );
 }
@@ -158,10 +159,10 @@ RevObject* Integer::divide( const RevObject& rhs ) const
 {
     
     if ( rhs.getTypeSpec().isDerivedOf( Real::getClassTypeSpec() ) )
-        return divide( static_cast<const Real&>( rhs ) );
+        return divide( assume_cast<const Real&>( rhs ) );
     
     if ( rhs.getTypeSpec().isDerivedOf(  Integer::getClassTypeSpec() ) )
-        return divide( static_cast<const Integer&>( rhs ) );
+        return divide( assume_cast<const Integer&>( rhs ) );
     
     return ModelObject<std::int64_t>::divide( rhs );
 }
@@ -305,12 +306,12 @@ RevObject* Integer::multiply( const RevObject& rhs ) const
     
     if ( rhs.getTypeSpec().isDerivedOf( Real::getClassTypeSpec() ) )
     {
-        return multiply( static_cast<const Real&>( rhs ) );
+        return multiply( assume_cast<const Real&>( rhs ) );
     }
     
     if ( rhs.getTypeSpec().isDerivedOf(  Integer::getClassTypeSpec() ) )
     {
-        return multiply( static_cast<const Integer&>( rhs ) );
+        return multiply( assume_cast<const Integer&>( rhs ) );
     }
     
     return ModelObject<std::int64_t>::multiply( rhs );
@@ -364,12 +365,12 @@ RevObject* Integer::subtract( const RevObject& rhs ) const
     
     if ( rhs.getTypeSpec().isDerivedOf( Real::getClassTypeSpec() ) )
     {
-        return subtract( static_cast<const Real&>( rhs ) );
+        return subtract( assume_cast<const Real&>( rhs ) );
     }
     
     if ( rhs.getTypeSpec().isDerivedOf(  Integer::getClassTypeSpec() ) )
     {
-        return subtract( static_cast<const Integer&>( rhs ) );
+        return subtract( assume_cast<const Integer&>( rhs ) );
     }
     
     return ModelObject<std::int64_t>::subtract( rhs );

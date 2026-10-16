@@ -5723,7 +5723,7 @@ x ~ dnMultivariateNormal(mu,Sigma) |> tnInvlogit())");
 	help_strings[string("tnLog")][string("details")] = string(R"(If X ~ dist then tnLog(dist) is the distribution of log(X).
 
 The distribution `dist` can be either univariate (dnExponential) or
-multivariate (dnDirichlet).
+multivariate (dnIID).
 
 This is NOT the same as dnLog(dist), which provides a distribution
 that has distribution `dist` on the log-scale.)");
@@ -5731,9 +5731,9 @@ that has distribution `dist` on the log-scale.)");
 x ~ dnExponential(1) |> tnLog()   # Expressed using pipes.
 
 y ~ dnExponential(1)
-x := log(y)                       # This is also equivalent.
+x := ln(y)                        # This is also equivalent.
 
-x ~ dnDirichlet([1,1,1,1]) |> tnLog())");
+xs ~ dnIID(4, dnExponential(1)) |> tnLog())");
 	help_strings[string("tnLog")][string("name")] = string(R"(tnLog)");
 	help_arrays[string("tnLog")][string("see_also")].push_back(string(R"(tnExp, tnLogit, tnInvlogit)"));
 	help_strings[string("tnLog")][string("title")] = string(R"(Log-transformed distribution)");
@@ -5742,14 +5742,14 @@ x ~ dnDirichlet([1,1,1,1]) |> tnLog())");
 	help_strings[string("tnLogit")][string("details")] = string(R"(If P ~ dist then tnLogit(dist) is the distribution of log(P/(1-P)).
 
 The distribution `dist` can be either univariate (dnBeta) or
-multivariate (dnDirichlet).)");
+multivariate (dnIID).)");
 	help_strings[string("tnLogit")][string("example")] = string(R"(x ~ tnLogit(dnBeta(1,2))         # The log-odds of an Beta random variable.
 x ~ dnBeta(1,2)|> tnLogit()      # Expressed using pipes.
 
 p ~ dnBeta(1,2)
 x := logit(p)                    # Expressed as a deterministic function of the probability.
 
-xs ~ dnDirichlet([1,1,1,1]) |> tnLogit())");
+xs ~ dnIID(4, dnBeta(1,2)) |> tnLogit())");
 	help_strings[string("tnLogit")][string("name")] = string(R"(tnLogit)");
 	help_arrays[string("tnLogit")][string("see_also")].push_back(string(R"(logit, tnExp, tnLog, tnInvlogitit)"));
 	help_strings[string("tnLogit")][string("title")] = string(R"(Logit-transformed distribution)");

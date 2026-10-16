@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include <cstddef>
 #include <set>
@@ -148,7 +149,7 @@ RevPtr<RevVariable> Func_readContinuousCharacterData::execute( void )
                 
                 if ( data_type == "Continuous" )
                 {
-                    RevBayesCore::ContinuousCharacterData *coreM = static_cast<RevBayesCore::ContinuousCharacterData *>( *it );
+                    RevBayesCore::ContinuousCharacterData *coreM = assume_cast<RevBayesCore::ContinuousCharacterData *>( *it );
                     
                     ContinuousCharacterData mCC = ContinuousCharacterData (coreM );
                     m->push_back( mCC );

@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
@@ -75,7 +76,7 @@ void Move_NarrowExchangeRateMatrix::constructInternalObject( void )
     // now allocate a new sliding move
     double w = valueForRevType<RealPos>(weight);
     RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = dagNodeForRevType<TimeTree>(tree);
-    RevBayesCore::StochasticNode<RevBayesCore::Tree> *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
+    RevBayesCore::StochasticNode<RevBayesCore::Tree> *n = assume_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
 //    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = static_cast<const ModelVector<RateGenerator> &>( rate_matrices->getRevObject() ).getDagNode();
 
     std::vector< RevBayesCore::StochasticNode<RevBayesCore::RateGenerator> *> rm;

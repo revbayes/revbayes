@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include <cstddef>
 #include <sstream>
@@ -160,7 +161,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> TimeTree::executeMethod(std::strin
             const RevObject& new_value = args[1].getVariable()->getRevObject();
             if ( new_value.isType( RealPos::getClassTypeSpec() ) )
             {
-                double value = static_cast<const RealPos&>( new_value ).getValue();
+                double value = assume_cast<const RealPos&>( new_value ).getValue();
                 RevBayesCore::Tree &tree = dag_node->getValue();
                 tree.getNode(index).setAge(value);
             }
