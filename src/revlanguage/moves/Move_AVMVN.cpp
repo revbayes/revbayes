@@ -116,7 +116,7 @@ void Move_AVMVN::constructInternalObject( void )
     // now allocate a new up-down-scale move
     double s = static_cast<const RealPos &>( sigmaSquared->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    double e = static_cast<const Probability &>( epsilon->getRevObject() ).getValue();
+    double e = static_cast<const RealPos&>( epsilon->getRevObject() ).getValue();
     int n0   = static_cast<const Natural &>( waitBeforeLearning->getRevObject() ).getValue();
     int c0   = static_cast<const Natural &>( waitBeforeUsing->getRevObject() ).getValue();
     int m    = static_cast<const Natural &>( maxUpdates->getRevObject() ).getValue();
