@@ -76,8 +76,7 @@ RevPtr<RevVariable> Func_ancestralStateTree::execute( void )
     if (args[2].getVariable()->getRevObject() != RevNullObject::getInstance())
     {
         // Read the optional trace only after checking that it was supplied.
-        const TraceTree& tt = objectForRevType<TraceTree>(args[2].getVariable());
-        tree_trace = tt.getValue();
+        tree_trace = valueForRevType<TraceTree>(args[2].getVariable());
     }
     
     // should we annotate start states?
