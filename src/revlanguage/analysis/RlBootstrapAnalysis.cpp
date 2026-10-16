@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -54,8 +55,8 @@ void BootstrapAnalysis::constructInternalObject( void )
     delete value;
     
     // now allocate a new sliding move
-    const RevBayesCore::MaximumLikelihoodAnalysis&  s   = static_cast<const MaximumLikelihoodAnalysis &>( sampler->getRevObject() ).getValue();
-    int                                             n   = static_cast<const Natural &>( simulations->getRevObject() ).getValue();
+    const RevBayesCore::MaximumLikelihoodAnalysis&  s   = valueForRevType<MaximumLikelihoodAnalysis>(sampler);
+    int                                             n   = valueForRevType<Natural>(simulations);
     
     value = new RevBayesCore::BootstrapAnalysis( s, size_t(n) );
     
@@ -86,7 +87,7 @@ RevPtr<RevVariable> BootstrapAnalysis::executeMethod(std::string const &name, co
         found = true;
         
         // get the member with give index
-        double e = static_cast<const RealPos &>( args[0].getVariable()->getRevObject() ).getValue();
+        double e = valueForRevType<RealPos>(args[0].getVariable());
         value->runAll( e );
         
         return NULL;

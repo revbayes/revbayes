@@ -1,4 +1,5 @@
 
+#include "RevTypeUtilities.h"
 #include <ostream>
 #include <string>
 #include <vector>
@@ -46,8 +47,8 @@ void MaxTimeStoppingRule::constructInternalObject( void )
     delete value;
     
     // now allocate a new stopping rule
-    double mt = static_cast<const RealPos &>( maxTime->getRevObject() ).getValue();
-    const std::string &u = static_cast<const RlString &>( unit->getRevObject() ).getValue();
+    double mt = valueForRevType<RealPos>(maxTime);
+    const std::string &u = valueForRevType<RlString>(unit);
     if ( u == "minutes" )
     {
         mt *= 60;
