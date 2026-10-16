@@ -8,6 +8,7 @@
 
 
 
+#include "TypeUtilities.h"
 #include "Func_treeTrace.h"
 
 #include <cmath>
@@ -52,7 +53,7 @@ RevPtr<RevVariable> Func_treeTrace::execute( void )
     RevObject& ro = args[0].getVariable()->getRevObject();
 
     // All accepted tree-vector wrappers share this core value type.
-    const auto& trees = static_cast<const ModelObject<RevBayesCore::RbVector<RevBayesCore::Tree>>&>( ro ).getValue();
+    const auto& trees = assume_cast<const ModelObject<RevBayesCore::RbVector<RevBayesCore::Tree>>&>( ro ).getValue();
 
     if ( ro.isType( ModelVector<TimeTree>::getClassTypeSpec() ) )
     {
@@ -69,11 +70,11 @@ RevPtr<RevVariable> Func_treeTrace::execute( void )
     RevObject& b = args[1].getVariable()->getRevObject();
     if ( b.isType( Integer::getClassTypeSpec() ) )
     {
-        burnin = (int)static_cast<const Integer &>(b).getValue();
+        burnin = (int)assume_cast<const Integer &>(b).getValue();
     }
     else
     {
-        double burninFrac = static_cast<const Probability &>(b).getValue();
+        double burninFrac = assume_cast<const Probability &>(b).getValue();
         burnin = int( floor( trees.size()*burninFrac ) );
     }
 

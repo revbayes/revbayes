@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
@@ -56,7 +57,7 @@ void Move_ContinuousCharacterDataSlide::constructInternalObject( void )
     double l = valueForRevType<RealPos>(delta);
     double w = valueForRevType<RealPos>(weight);
     RevBayesCore::TypedDagNode<RevBayesCore::ContinuousCharacterData>* tmp = dagNodeForRevType<ContinuousCharacterData>(x);
-    RevBayesCore::StochasticNode<RevBayesCore::ContinuousCharacterData> *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::ContinuousCharacterData> *>( tmp );
+    RevBayesCore::StochasticNode<RevBayesCore::ContinuousCharacterData> *n = assume_cast<RevBayesCore::StochasticNode<RevBayesCore::ContinuousCharacterData> *>( tmp );
     bool t = valueForRevType<RlBoolean>(tune);
     double tt = valueForRevType<Probability>(tuneTarget);
     

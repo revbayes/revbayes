@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
@@ -60,12 +61,12 @@ void Move_TreeScale::constructInternalObject( void )
     if ( tree->getRevObject().isType( TimeTree::getClassTypeSpec() ) )
     {
         RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = dagNodeForRevType<TimeTree>(tree);
-        t = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
+        t = assume_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
     }
     else if ( tree->getRevObject().isType( ModelVector<TimeTree>::getClassTypeSpec() ) )
     {
         RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::Tree> > *tmp = dagNodeForRevType<ModelVector<TimeTree>>(tree);
-        vec_t = static_cast<RevBayesCore::StochasticNode< RevBayesCore::RbVector<RevBayesCore::Tree> > *>( tmp );
+        vec_t = assume_cast<RevBayesCore::StochasticNode< RevBayesCore::RbVector<RevBayesCore::Tree> > *>( tmp );
     }
     else
     {
@@ -76,13 +77,13 @@ void Move_TreeScale::constructInternalObject( void )
     if ( rootAge != NULL && rootAge->getRevObject() != RevNullObject::getInstance() )
     {
         RevBayesCore::TypedDagNode<double> *tmp = dagNodeForRevType<RealPos>(rootAge);
-        ra = static_cast<RevBayesCore::StochasticNode<double> *>( tmp );
+        ra = assume_cast<RevBayesCore::StochasticNode<double> *>( tmp );
     }
     RevBayesCore::StochasticNode<double>* oa = NULL;
     if (originAge != NULL and originAge->getRevObject() != RevNullObject::getInstance())
     {
         auto* tmp = dagNodeForRevType<RealPos>(originAge);
-        oa = static_cast<RevBayesCore::StochasticNode<double>*>(tmp);
+        oa = assume_cast<RevBayesCore::StochasticNode<double>*>(tmp);
     }
     double w = valueForRevType<RealPos>(weight);
     double l = valueForRevType<RealPos>(delta);

@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include "Mntr_JointConditionalAncestralState.h"
 
@@ -82,7 +83,7 @@ void Mntr_JointConditionalAncestralState::constructInternalObject( void )
     if ( ctmc->getRevObject().isModelObject() )
     {
         ctmc_tdn = dagNodeForRevType<RevLanguage::AbstractHomologousDiscreteCharacterData>(ctmc);
-        ctmc_sn  = static_cast<Core::StochasticNode<Core::AbstractHomologousDiscreteCharacterData>* >(ctmc_tdn);
+        ctmc_sn  = assume_cast<Core::StochasticNode<Core::AbstractHomologousDiscreteCharacterData>* >(ctmc_tdn);
         
         if ( ctmc_sn->getValue().getDataType() != character_type )
         {
@@ -92,12 +93,12 @@ void Mntr_JointConditionalAncestralState::constructInternalObject( void )
     else if ( cdbdp->getRevObject().isModelObject() )
     {
         cdbdp_tdn = dagNodeForRevType<RevLanguage::Tree>(cdbdp);
-        cdbdp_sn  = static_cast<Core::StochasticNode<Core::Tree>* >( cdbdp_tdn );
+        cdbdp_sn  = assume_cast<Core::StochasticNode<Core::Tree>* >( cdbdp_tdn );
     }
     else if ( glhbdsp->getRevObject().isModelObject() )
     {
     	glhbdsp_tdn = dagNodeForRevType<RevLanguage::Tree>(glhbdsp);
-    	glhbdsp_sn  = static_cast<Core::StochasticNode<Core::Tree>* >( glhbdsp_tdn );
+    	glhbdsp_sn  = assume_cast<Core::StochasticNode<Core::Tree>* >( glhbdsp_tdn );
     }
     else
     {

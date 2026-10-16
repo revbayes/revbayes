@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
@@ -66,7 +67,7 @@ void Mntr_CharacterHistoryNewickFile::constructInternalObject( void )
     RevBayesCore::TypedDagNode<RevBayesCore::Tree> *t = dagNodeForRevType<TimeTree>(tree);
 
     RevBayesCore::TypedDagNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_tdn   = dagNodeForRevType<RevLanguage::AbstractHomologousDiscreteCharacterData>(ctmc);
-    RevBayesCore::StochasticNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_sn  = static_cast<RevBayesCore::StochasticNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* >(ctmc_tdn);
+    RevBayesCore::StochasticNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_sn  = assume_cast<RevBayesCore::StochasticNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* >(ctmc_tdn);
     
     bool pp = valueForRevType<RlBoolean>(posterior);
     bool l = valueForRevType<RlBoolean>(likelihood);

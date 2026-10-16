@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include <cstddef>
 #include <iosfwd>
@@ -74,7 +75,7 @@ RevObject* RlString::add( const RevObject& rhs ) const
     
     if ( rhs.getTypeSpec() == RlString::getClassTypeSpec() )
     {
-        return add( static_cast<const RlString&>( rhs ) );
+        return add( assume_cast<const RlString&>( rhs ) );
     }
     
     return ModelObject<std::string>::add( rhs );

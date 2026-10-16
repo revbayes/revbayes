@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
@@ -54,7 +55,7 @@ void Move_NodeTimeSlidePathTruncatedNormal::constructInternalObject( void )
     
     // now allocate a new move
     RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = dagNodeForRevType<TimeTree>(tree);
-    RevBayesCore::StochasticNode<RevBayesCore::Tree> *tau = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
+    RevBayesCore::StochasticNode<RevBayesCore::Tree> *tau = assume_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
 
     double s = valueForRevType<RealPos>(sigma);
     bool a = valueForRevType<RlBoolean>(scaleByAge);

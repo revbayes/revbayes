@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include "Move_MPQTree.h"
 
@@ -54,7 +55,7 @@ void Move_MPQTree::constructInternalObject( void ) {
     // now allocate a new sliding move
     double w = valueForRevType<RealPos>(weight);
     RevBayesCore::TypedDagNode<RevBayesCore::Tree >* tmp_tree = dagNodeForRevType<Tree>(tree);
-    RevBayesCore::StochasticNode<RevBayesCore::Tree > *t = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp_tree );
+    RevBayesCore::StochasticNode<RevBayesCore::Tree > *t = assume_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp_tree );
 
     bool ur = valueForRevType<RlBoolean>(update_root);
     

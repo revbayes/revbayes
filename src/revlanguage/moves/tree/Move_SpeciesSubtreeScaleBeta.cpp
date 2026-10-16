@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
@@ -82,7 +83,7 @@ void Move_SpeciesSubtreeScaleBeta::constructInternalObject( void )
     double w = valueForRevType<RealPos>(weight);
     double a = valueForRevType<RealPos>(alpha);
     RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = dagNodeForRevType<TimeTree>(speciesTree);
-    RevBayesCore::StochasticNode<RevBayesCore::Tree> *st = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
+    RevBayesCore::StochasticNode<RevBayesCore::Tree> *st = assume_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
     double tt = valueForRevType<Probability>(tuneTarget);
 
     RevBayesCore::Proposal *p = new RevBayesCore::SpeciesSubtreeScaleBetaProposal(st, a);
@@ -102,10 +103,10 @@ RevPtr<RevVariable> Move_SpeciesSubtreeScaleBeta::executeMethod(const std::strin
         found = true;
 
         RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = dagNodeForRevType<TimeTree>(args[0].getVariable());
-        RevBayesCore::StochasticNode<RevBayesCore::Tree> *gt = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
+        RevBayesCore::StochasticNode<RevBayesCore::Tree> *gt = assume_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
 
-        RevBayesCore::MetropolisHastingsMove *m = static_cast<RevBayesCore::MetropolisHastingsMove*>(this->value);
-        RevBayesCore::SpeciesSubtreeScaleBetaProposal &p = static_cast<RevBayesCore::SpeciesSubtreeScaleBetaProposal&>( m->getProposal() );
+        RevBayesCore::MetropolisHastingsMove *m = assume_cast<RevBayesCore::MetropolisHastingsMove*>(this->value);
+        RevBayesCore::SpeciesSubtreeScaleBetaProposal &p = assume_cast<RevBayesCore::SpeciesSubtreeScaleBetaProposal&>( m->getProposal() );
         p.addGeneTree( gt );
 
         return NULL;
@@ -115,10 +116,10 @@ RevPtr<RevVariable> Move_SpeciesSubtreeScaleBeta::executeMethod(const std::strin
         found = true;
 
         RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = dagNodeForRevType<TimeTree>(args[0].getVariable());
-        RevBayesCore::StochasticNode<RevBayesCore::Tree> *gt = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
+        RevBayesCore::StochasticNode<RevBayesCore::Tree> *gt = assume_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
 
-        RevBayesCore::MetropolisHastingsMove *m = static_cast<RevBayesCore::MetropolisHastingsMove*>(this->value);
-        RevBayesCore::SpeciesSubtreeScaleBetaProposal &p = static_cast<RevBayesCore::SpeciesSubtreeScaleBetaProposal&>( m->getProposal() );
+        RevBayesCore::MetropolisHastingsMove *m = assume_cast<RevBayesCore::MetropolisHastingsMove*>(this->value);
+        RevBayesCore::SpeciesSubtreeScaleBetaProposal &p = assume_cast<RevBayesCore::SpeciesSubtreeScaleBetaProposal&>( m->getProposal() );
         p.removeGeneTree( gt );
 
         return NULL;

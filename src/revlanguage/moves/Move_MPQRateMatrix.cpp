@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include "Move_MPQRateMatrix.h"
 
@@ -55,7 +56,7 @@ void Move_MPQRateMatrix::constructInternalObject( void ) {
 //    double l = static_cast<const RealPos &>( lambda->getRevObject() ).getValue();
     double w = valueForRevType<RealPos>(weight);
     RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator >* tmp = dagNodeForRevType<RateGenerator>(Q);
-    RevBayesCore::StochasticNode<RevBayesCore::RateGenerator > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::RateGenerator> *>( tmp );
+    RevBayesCore::StochasticNode<RevBayesCore::RateGenerator > *n = assume_cast<RevBayesCore::StochasticNode<RevBayesCore::RateGenerator> *>( tmp );
     bool t = valueForRevType<RlBoolean>(tune);
     
     bool tmp_prior = valueForRevType<RlBoolean>(tune_model_prior);

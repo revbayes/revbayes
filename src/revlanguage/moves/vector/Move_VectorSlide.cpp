@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
@@ -69,7 +70,7 @@ void Move_VectorSlide::constructInternalObject( void )
     double l = valueForRevType<RealPos>(delta);
     double w = valueForRevType<RealPos>(weight);
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp = dagNodeForRevType<ModelVector<Real>>(x);
-    RevBayesCore::StochasticNode<RevBayesCore::RbVector<double> > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::RbVector<double> > *>( tmp );
+    RevBayesCore::StochasticNode<RevBayesCore::RbVector<double> > *n = assume_cast<RevBayesCore::StochasticNode<RevBayesCore::RbVector<double> > *>( tmp );
     
     bool t = valueForRevType<RlBoolean>(tune);
     double tt = valueForRevType<Probability>(tuneTarget);
