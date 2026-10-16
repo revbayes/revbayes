@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -46,11 +47,11 @@ Func_sigmoid* Func_sigmoid::clone( void ) const
 RevBayesCore::TypedFunction<double>* Func_sigmoid::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<double>* x = static_cast<const Real&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* min   = static_cast<const RealPos&>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* max = static_cast<const RealPos&>( this->args[2].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* mid  = static_cast<const Real&>( this->args[3].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* slope   = static_cast<const Real&>( this->args[4].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* x = dagNodeForRevType<Real>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode<double>* min   = dagNodeForRevType<RealPos>(this->args[1].getVariable());
+    RevBayesCore::TypedDagNode<double>* max = dagNodeForRevType<RealPos>(this->args[2].getVariable());
+    RevBayesCore::TypedDagNode<double>* mid  = dagNodeForRevType<Real>(this->args[3].getVariable());
+    RevBayesCore::TypedDagNode<double>* slope   = dagNodeForRevType<Real>(this->args[4].getVariable());
 
     RevBayesCore::SigmoidFunction* f = new RevBayesCore::SigmoidFunction( x, min, max, mid, slope );
     

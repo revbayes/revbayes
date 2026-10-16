@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "Func_inferAncestralPopSize.h"
 #include "InferAncestralPopSizeFunction.h"
 #include "InferAncestralPopSizeFunctionPiecewise.h"
@@ -42,30 +43,30 @@ RevBayesCore::TypedFunction< RevBayesCore::MatrixReal >* Func_inferAncestralPopS
 {
     /**first we get parameters that are shared by the piecewise and constant rate models */
 
-    RevBayesCore::TypedDagNode< double >*                           sa              = static_cast<const RealPos &>( start_age->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< double >*                           sa              = dagNodeForRevType<RealPos>(start_age);
 
     // sampling condition
-    const std::string&                                              cdt             = static_cast<const RlString &>( condition->getRevObject() ).getValue();
+    const std::string&                                              cdt             = valueForRevType<RlString>(condition);
 
     // occurrence ages
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> > *  occAges         = static_cast<const ModelVector<Real> &>( occurrence_ages->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> > *  occAges         = dagNodeForRevType<ModelVector<Real>>(occurrence_ages);
 
-    std::vector<double>                                             tau             = static_cast<const ModelVector<Real> &>( time_points->getRevObject() ).getValue();
+    std::vector<double>                                             tau             = valueForRevType<ModelVector<Real>>(time_points);
 
     // verbose
-    bool                                                            vb              = static_cast<const RlBoolean &>( verbose->getRevObject() ).getValue();
+    bool                                                            vb              = valueForRevType<RlBoolean>(verbose);
 
-    RevBayesCore::TypedDagNode< double >*                           rh              = static_cast<const RealPos &>( rho->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< double >*                           rh              = dagNodeForRevType<RealPos>(rho);
 
-    RevBayesCore::TypedDagNode< std::int64_t >*                             n               = static_cast<const Natural &>( maxHiddenLin->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< std::int64_t >*                             n               = dagNodeForRevType<Natural>(maxHiddenLin);
 
-    RevBayesCore::TypedDagNode< RevBayesCore::Tree >*               tr              = static_cast<const TimeTree &>( timeTree->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::Tree >*               tr              = dagNodeForRevType<TimeTree>(timeTree);
 
     /**If a timeline is provided, go to the piecwise version*/
 
     if ( timeline->getRevObject() != RevNullObject::getInstance() )
     {
-        RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >*time            = static_cast<const ModelVector<RealPos> &>( timeline->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >*time            = dagNodeForRevType<ModelVector<RealPos>>(timeline);
 
         RevBayesCore::DagNode*                                      l               = ( lambda->getRevObject() ).getDagNode();
 
@@ -82,15 +83,15 @@ RevBayesCore::TypedFunction< RevBayesCore::MatrixReal >* Func_inferAncestralPopS
         return fxn;
     }
 
-    RevBayesCore::TypedDagNode< double >*                           l               = static_cast<const RealPos &>( lambda->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< double >*                           l               = dagNodeForRevType<RealPos>(lambda);
 
-    RevBayesCore::TypedDagNode< double >*                           m               = static_cast<const RealPos &>( mu->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< double >*                           m               = dagNodeForRevType<RealPos>(mu);
 
-    RevBayesCore::TypedDagNode< double >*                           p               = static_cast<const RealPos &>( psi->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< double >*                           p               = dagNodeForRevType<RealPos>(psi);
 
-    RevBayesCore::TypedDagNode< double >*                           o               = static_cast<const RealPos &>( omega->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< double >*                           o               = dagNodeForRevType<RealPos>(omega);
 
-    RevBayesCore::TypedDagNode< double >*                           r               = static_cast<const RealPos &>( removalPr->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< double >*                           r               = dagNodeForRevType<RealPos>(removalPr);
 
     RevBayesCore::InferAncestralPopSizeFunction* fxn = new RevBayesCore::InferAncestralPopSizeFunction( sa, l, m, p, o, rh, r, n, cdt, occAges, tau, vb, tr );
 

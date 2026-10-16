@@ -1,6 +1,7 @@
 #ifndef Func_trunc_H
 #define Func_trunc_H
 
+#include "RevTypeUtilities.h"
 #include "RlTypedFunction.h"
 
 #include <string>
@@ -75,7 +76,7 @@ template <typename valType, typename retType>
 RevBayesCore::TypedFunction< typename retType::valueType >* RevLanguage::Func_trunc<valType, retType>::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<double>* arg = static_cast<const valType &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* arg = dagNodeForRevType<valType>(this->args[0].getVariable());
     RevBayesCore::TruncateFunction* f = new RevBayesCore::TruncateFunction( arg );
     
     return f;

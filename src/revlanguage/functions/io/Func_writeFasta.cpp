@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <iosfwd>
 #include <vector>
@@ -47,8 +48,8 @@ RevPtr<RevVariable> Func_writeFasta::execute( void )
 {
     
     // get the information from the arguments for reading the file
-    const RlString& fn = static_cast<const RlString&>( args[0].getVariable()->getRevObject() );
-    const RevBayesCore::AbstractHomologousDiscreteCharacterData &data = static_cast< const AbstractHomologousDiscreteCharacterData & >( args[1].getVariable()->getRevObject() ).getValue();
+    const RlString& fn = objectForRevType<RlString>(args[0].getVariable());
+    const RevBayesCore::AbstractHomologousDiscreteCharacterData &data = valueForRevType<AbstractHomologousDiscreteCharacterData>(args[1].getVariable());
     
     RevBayesCore::FastaWriter fw;
     fw.writeData(fn.getValue(), data);

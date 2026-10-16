@@ -6,6 +6,7 @@
 //  Copyright © 2017 Michael Landis. All rights reserved.
 //
 
+#include "RevTypeUtilities.h"
 #include "Func_stateCountRateModifier.h"
 
 #include <cstddef>
@@ -51,9 +52,9 @@ Func_stateCountRateModifier* Func_stateCountRateModifier::clone( void ) const {
 RevBayesCore::TypedFunction< RevBayesCore::CharacterHistoryRateModifier >* Func_stateCountRateModifier::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* sf = static_cast<const ModelVector<Real> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* sf = dagNodeForRevType<ModelVector<Real>>(this->args[0].getVariable());
    
-    size_t nc = static_cast<const Natural&>( this->args[1].getVariable()->getRevObject() ).getValue();
+    size_t nc = valueForRevType<Natural>(this->args[1].getVariable());
     
     RevBayesCore::StateCountRateModifierFunction* f = new RevBayesCore::StateCountRateModifierFunction(sf, nc);
     

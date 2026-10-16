@@ -4,6 +4,7 @@
 //  Created by Will Freyman on 8/1/17.
 //
 
+#include "RevTypeUtilities.h"
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -55,9 +56,9 @@ Func_cladogeneticProbabilityMatrix* Func_cladogeneticProbabilityMatrix::clone( v
 RevBayesCore::TypedFunction< RevBayesCore::CladogeneticProbabilityMatrix >* Func_cladogeneticProbabilityMatrix::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<std::int64_t> > >* events = static_cast<const ModelVector<ModelVector<Integer> > &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* spec_rates = static_cast<const ModelVector<RealPos> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    int n_states = (int)static_cast<const Natural &>( this->args[2].getVariable()->getRevObject() ).getValue();
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<std::int64_t> > >* events = dagNodeForRevType<ModelVector<ModelVector<Integer> >>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* spec_rates = dagNodeForRevType<ModelVector<RealPos>>(this->args[1].getVariable());
+    int n_states = (int)valueForRevType<Natural>(this->args[2].getVariable());
     
     RevBayesCore::CladogeneticProbabilityMatrixFunction* f = new RevBayesCore::CladogeneticProbabilityMatrixFunction( events, spec_rates, n_states );
     

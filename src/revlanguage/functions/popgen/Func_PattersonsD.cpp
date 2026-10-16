@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -47,12 +48,12 @@ Func_PattersonsD* Func_PattersonsD::clone( void ) const
 
 RevBayesCore::TypedFunction< double >* Func_PattersonsD::createFunction( void ) const
 {
-    std::string p1 = static_cast<const RlString &>( this->args[0].getVariable()->getRevObject() ).getValue();
-    std::string p2 = static_cast<const RlString &>( this->args[1].getVariable()->getRevObject() ).getValue();
-    std::string p3 = static_cast<const RlString &>( this->args[2].getVariable()->getRevObject() ).getValue();
-    std::string og = static_cast<const RlString &>( this->args[3].getVariable()->getRevObject() ).getValue();
+    std::string p1 = valueForRevType<RlString>(this->args[0].getVariable());
+    std::string p2 = valueForRevType<RlString>(this->args[1].getVariable());
+    std::string p3 = valueForRevType<RlString>(this->args[2].getVariable());
+    std::string og = valueForRevType<RlString>(this->args[3].getVariable());
     
-    RevBayesCore::TypedDagNode<RevBayesCore::AbstractHomologousDiscreteCharacterData >* d = static_cast<const AbstractHomologousDiscreteCharacterData &>( this->args[4].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::AbstractHomologousDiscreteCharacterData >* d = dagNodeForRevType<AbstractHomologousDiscreteCharacterData>(this->args[4].getVariable());
     
     RevBayesCore::PattersonsDFunction* f = new RevBayesCore::PattersonsDFunction( p1, p2, p3, og, d );
     

@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <sstream>
 #include <string>
@@ -55,10 +56,10 @@ RevPtr<RevVariable> Func_readTrees::execute( void )
 {
 
     // get the information from the arguments for reading the file
-    const std::string&  fn = static_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
-    const std::string&  text = static_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
-    const std::string&  treetype = static_cast<const RlString&>( args[2].getVariable()->getRevObject() ).getValue();
-    bool unroot_nonclock = static_cast<const RlBoolean&>( args[3].getVariable()->getRevObject() ).getValue();
+    const std::string&  fn = valueForRevType<RlString>(args[0].getVariable());
+    const std::string&  text = valueForRevType<RlString>(args[1].getVariable());
+    const std::string&  treetype = valueForRevType<RlString>(args[2].getVariable());
+    bool unroot_nonclock = valueForRevType<RlBoolean>(args[3].getVariable());
 
     if (fn != "")
     {

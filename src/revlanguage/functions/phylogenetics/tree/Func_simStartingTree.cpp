@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <iosfwd>
 #include <vector>
 
@@ -58,8 +59,8 @@ Func_simStartingTree* Func_simStartingTree::clone( void ) const
 RevPtr<RevVariable> Func_simStartingTree::execute( void )
 {
     
-    const std::vector<RevBayesCore::Taxon> &taxa               = static_cast<const ModelVector<Taxon> &>( args[0].getVariable()->getRevObject() ).getValue();
-    const RevBayesCore::RbVector<RevBayesCore::Clade>& constr  = static_cast<const ModelVector<Clade> &>( args[1].getVariable()->getRevObject() ).getValue();
+    const std::vector<RevBayesCore::Taxon> &taxa               = valueForRevType<ModelVector<Taxon>>(args[0].getVariable());
+    const RevBayesCore::RbVector<RevBayesCore::Clade>& constr  = valueForRevType<ModelVector<Clade>>(args[1].getVariable());
 
     RevBayesCore::StartingTreeSimulator simulator;
 

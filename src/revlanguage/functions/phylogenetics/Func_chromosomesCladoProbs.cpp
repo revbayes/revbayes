@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "Func_chromosomesCladoProbs.h"
 
 #include "CladogeneticProbabilityMatrix.h"
@@ -40,9 +41,9 @@ Func_chromosomesCladoProbs* Func_chromosomesCladoProbs::clone( void ) const {
 RevBayesCore::TypedFunction< RevBayesCore::CladogeneticProbabilityMatrix >* Func_chromosomesCladoProbs::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<RevBayesCore::Simplex>* ep = static_cast<const Simplex &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Simplex>* ep = dagNodeForRevType<Simplex>(this->args[0].getVariable());
 
-    int ns = (int)static_cast<const Natural &>( this->args[1].getVariable()->getRevObject() ).getValue();
+    int ns = (int)valueForRevType<Natural>(this->args[1].getVariable());
     
     RevBayesCore::ChromosomesCladogenicStateFunction* f = new RevBayesCore::ChromosomesCladogenicStateFunction( ep, ns );
     

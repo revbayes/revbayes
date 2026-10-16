@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "Func_readTrace.h"
 
 #include <cmath>
@@ -53,13 +54,13 @@ Func_readTrace* Func_readTrace::clone( void ) const
 RevPtr<RevVariable> Func_readTrace::execute( void )
 {
     // get the column delimiter
-    const std::string& delimiter       = static_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
+    const std::string& delimiter       = valueForRevType<RlString>(args[1].getVariable());
     // get burnin
     RevObject&         b               = args[2].getVariable()->getRevObject();
     // get the thinning frequency
-    std::int64_t       thinning        = static_cast<const Natural&>( args[3].getVariable()->getRevObject() ).getValue();
+    std::int64_t       thinning        = valueForRevType<Natural>(args[3].getVariable());
     // get the number of runs
-    std::int64_t       nruns           = static_cast<const Natural&>( args[4].getVariable()->getRevObject() ).getValue();
+    std::int64_t       nruns           = valueForRevType<Natural>(args[4].getVariable());
     
     std::vector<RevBayesCore::path> vectorOfFileNames;
     
@@ -70,7 +71,7 @@ RevPtr<RevVariable> Func_readTrace::execute( void )
             throw RbException("Specify only a single base filename when nruns > 1");
         }
 
-        const ModelVector<RlString>& fn = static_cast<const ModelVector<RlString> &>( args[0].getVariable()->getRevObject() ).getValue();
+        const ModelVector<RlString>& fn = valueForRevType<ModelVector<RlString>>(args[0].getVariable());
         std::vector<RevBayesCore::path> tmp;
         for (size_t i = 0; i < fn.size(); i++)
         {
@@ -102,7 +103,7 @@ RevPtr<RevVariable> Func_readTrace::execute( void )
     }
     else
     {
-        RevBayesCore::path trace_file_name = static_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
+        RevBayesCore::path trace_file_name = valueForRevType<RlString>(args[0].getVariable());
         
         for (size_t i = 0; i < nruns; i++)
         {

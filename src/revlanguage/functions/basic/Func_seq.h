@@ -1,6 +1,7 @@
 #ifndef Func_seq_H
 #define Func_seq_H
 
+#include "RevTypeUtilities.h"
 #include "Procedure.h"
 #include <string>
 
@@ -82,9 +83,9 @@ template <typename valType>
 RevLanguage::RevPtr<RevLanguage::RevVariable> RevLanguage::Func_seq<valType>::execute( void )
 {
     
-    typename valType::valueType from = static_cast<const valType &>( args[0].getVariable()->getRevObject() ).getValue();
-    typename valType::valueType to   = static_cast<const valType &>( args[1].getVariable()->getRevObject() ).getValue();
-    typename valType::valueType by   = static_cast<const valType &>( args[2].getVariable()->getRevObject() ).getValue();
+    typename valType::valueType from = valueForRevType<valType>(args[0].getVariable());
+    typename valType::valueType to   = valueForRevType<valType>(args[1].getVariable());
+    typename valType::valueType by   = valueForRevType<valType>(args[2].getVariable());
     
     typename valType::valueType val = from;
     
