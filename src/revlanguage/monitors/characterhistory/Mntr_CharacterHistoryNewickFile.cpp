@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
 #include <set>
@@ -58,31 +59,31 @@ void Mntr_CharacterHistoryNewickFile::constructInternalObject( void )
     delete value;
     
     // now allocate a new sliding move
-    const std::string& fn = static_cast<const RlString &>( filename->getRevObject() ).getValue();
-    const std::string& sep = static_cast<const RlString &>( separator->getRevObject() ).getValue();
-    unsigned int g = (int)static_cast<const Natural &>( printgen->getRevObject() ).getValue();
+    const std::string& fn = valueForRevType<RlString>(filename);
+    const std::string& sep = valueForRevType<RlString>(separator);
+    unsigned int g = (int)valueForRevType<Natural>(printgen);
    
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree> *t = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree> *t = dagNodeForRevType<TimeTree>(tree);
 
-    RevBayesCore::TypedDagNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_tdn   = static_cast<const RevLanguage::AbstractHomologousDiscreteCharacterData&>( ctmc->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_tdn   = dagNodeForRevType<RevLanguage::AbstractHomologousDiscreteCharacterData>(ctmc);
     RevBayesCore::StochasticNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_sn  = static_cast<RevBayesCore::StochasticNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* >(ctmc_tdn);
     
-    bool pp = static_cast<const RlBoolean &>( posterior->getRevObject() ).getValue();
-    bool l = static_cast<const RlBoolean &>( likelihood->getRevObject() ).getValue();
-    bool pr = static_cast<const RlBoolean &>( prior->getRevObject() ).getValue();
+    bool pp = valueForRevType<RlBoolean>(posterior);
+    bool l = valueForRevType<RlBoolean>(likelihood);
+    bool pr = valueForRevType<RlBoolean>(prior);
 //    bool sc = static_cast<const RlBoolean &>( counts->getRevObject() ).getValue();
 //    bool se = static_cast<const RlBoolean &>( events->getRevObject() ).getValue();
     bool sm = true; // show metadata disabled for now
     bool ap = false; //static_cast<const RlBoolean &>( append->getRevObject() ).getValue();
 
     
-    std::string ms = static_cast<const RlString&>( style->getRevObject() ).getValue();
+    std::string ms = valueForRevType<RlString>(style);
     bool sc = false;
     if (ms == "counts")
         sc = true;
     bool se = !sc;
     
-    std::string mt = static_cast<const RlString&>( type->getRevObject() ).getValue();
+    std::string mt = valueForRevType<RlString>(type);
     if (mt == "std")
         ; // value = XXXXXX
     else if (mt == "biogeo")
