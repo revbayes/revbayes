@@ -20,6 +20,7 @@
 #include "RbBoolean.h"
 #include "RevPtr.h"
 #include "RevVariable.h"
+#include "RevTypeUtilities.h"
 #include "RlMove.h"
 #include "RlString.h"
 
@@ -70,8 +71,8 @@ void Move_SliceSampling::constructInternalObject( void )
     delete value;
 
     // now allocate a new sliding move
-    double window_ = static_cast<const RealPos &>( window->getRevObject() ).getValue();
-    double weight_ = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double window_ = objectForRevType<RealPos>(window).getValue();
+    double weight_ = objectForRevType<RealPos>(weight).getValue();
 
     boost::optional<double> lower_bound_;
     boost::optional<double> upper_bound_;
@@ -84,11 +85,11 @@ void Move_SliceSampling::constructInternalObject( void )
             lower_bound_ = 0.0;
     }
 
-    RevBayesCore::TypedDagNode<double>* tmp = static_cast<const Real &>( x->getRevObject() ).getDagNode();
-    auto* node_ = static_cast<RevBayesCore::StochasticNode<double>*>(tmp);
-    bool tune_ = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    RevBayesCore::TypedDagNode<double>* tmp = objectForRevType<Real>(x).getDagNode();
+    auto* node_ = assume_cast<RevBayesCore::StochasticNode<double>*>(tmp);
+    bool tune_ = objectForRevType<RlBoolean>(tune).getValue();
 
-    auto search_method_ = dynamic_cast<const RlString&>( search_method->getRevObject() ).getValue();
+    auto search_method_ = objectForRevType<RlString>(search_method).getValue();
     typedef RevBayesCore::SliceSamplingMove::BoundarySearchMethod search_method_t;
     search_method_t search_method__;
     if (search_method_ == "doubling")
