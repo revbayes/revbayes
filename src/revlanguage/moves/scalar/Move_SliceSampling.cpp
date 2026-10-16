@@ -89,7 +89,7 @@ void Move_SliceSampling::constructInternalObject( void )
     RevBayesCore::StochasticNode<double> *node_ = RevBayesCore::requireStochastic<double>( tmp );
     bool tune_ = valueFor<RlBoolean>(tune);
 
-    auto search_method_ = dynamic_cast<const RlString&>( search_method->getRevObject() ).getValue();
+    auto search_method_ = valueFor<RlString>(search_method);
     typedef RevBayesCore::SliceSamplingMove::BoundarySearchMethod search_method_t;
     search_method_t search_method__;
     if (search_method_ == "doubling")

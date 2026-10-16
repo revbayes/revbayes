@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "Func_GammaRateModel.h"
 
 #include "RealPos.h"
@@ -111,10 +112,10 @@ Func_GammaRateModel* Func_GammaRateModel::clone( void ) const
 
 Core::TypedFunction< Core::SiteMixtureModel >* Func_GammaRateModel::createFunction( void ) const
 {
-    Core::TypedDagNode< Core::SiteMixtureModel >* submodel = dynamic_cast<const SiteMixtureModel &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    Core::TypedDagNode< double >* a = dynamic_cast<const RealPos &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    Core::TypedDagNode< std::int64_t >* nCats = dynamic_cast<const Integer &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
-    Core::TypedDagNode< Core::Boolean >* median = dynamic_cast<const RlBoolean &>( this->args[3].getVariable()->getRevObject() ).getDagNode();
+    Core::TypedDagNode< Core::SiteMixtureModel >* submodel = dagNodeFor<SiteMixtureModel>(this->args[0].getVariable());
+    Core::TypedDagNode< double >* a = dagNodeFor<RealPos>(this->args[1].getVariable());
+    Core::TypedDagNode< std::int64_t >* nCats = dagNodeFor<Integer>(this->args[2].getVariable());
+    Core::TypedDagNode< Core::Boolean >* median = dagNodeFor<RlBoolean>(this->args[3].getVariable());
 
     return Core::generic_function_ptr< Core::SiteMixtureModel >( GammaRateModelFunc, submodel, a, nCats, median);
 }

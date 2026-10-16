@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "Func_ConvertRateMatrix.h"
 
 #include "RealPos.h"
@@ -65,7 +66,7 @@ Func_ConvertRateMatrix* Func_ConvertRateMatrix::clone( void ) const
 
 Core::TypedFunction< Core::SiteMixtureModel >* Func_ConvertRateMatrix::createFunction( void ) const
 {
-    Core::TypedDagNode< Core::RateGenerator >* model = dynamic_cast<const RateMatrix &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    Core::TypedDagNode< Core::RateGenerator >* model = dagNodeFor<RateMatrix>(this->args[0].getVariable());
 
     return Core::generic_function_ptr< Core::SiteMixtureModel >( ConvertRateMatrixFunc, model);
 }

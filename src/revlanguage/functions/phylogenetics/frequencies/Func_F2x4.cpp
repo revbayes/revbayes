@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "Func_F2x4.h"
 #include "CppDoubletFuncs.h"
 
@@ -41,8 +42,8 @@ CSimplex* F2x4(const CSimplex& nuc_pi1, const CSimplex& nuc_pi2)
 
 RevBayesCore::TypedFunction< CSimplex >* Func_F2x4::createFunction( void ) const
 {
-    RevBayesCore::TypedDagNode< CSimplex >* bf1 = dynamic_cast<const Simplex &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< CSimplex >* bf2 = dynamic_cast<const Simplex &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< CSimplex >* bf1 = dagNodeFor<Simplex>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode< CSimplex >* bf2 = dagNodeFor<Simplex>(this->args[1].getVariable());
 
     return RevBayesCore::generic_function_ptr< CSimplex >( F2x4, bf1, bf2 );
 }
