@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -58,11 +59,11 @@ void Move_VectorSlideRecenter::constructInternalObject( void )
     delete value;
     
     // now allocate a new vector-scale move
-    double d = RevBayesCore::assume_cast<const RealPos &>( delta->getRevObject() ).getValue();
-    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    double r = RevBayesCore::assume_cast<const RealPos &>( tuneTarget->getRevObject() ).getValue();
+    double d = valueFor<RealPos>(delta);
+    double w = valueFor<RealPos>(weight);
+    double r = valueFor<RealPos>(tuneTarget);
     
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( x->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp = dagNodeFor<ModelVector<RealPos>>(x);
     std::vector<const RevBayesCore::DagNode*> p = tmp->getParents();
     std::vector< RevBayesCore::StochasticNode<double> *> n;
     for (std::vector<const RevBayesCore::DagNode*>::const_iterator it = p.begin(); it != p.end(); ++it)
@@ -79,11 +80,11 @@ void Move_VectorSlideRecenter::constructInternalObject( void )
     }
     
     // get the mean of the parameters
-    RevBayesCore::TypedDagNode<double>  *tmp_m = RevBayesCore::assume_cast<const Real &>( mean->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>  *tmp_m = dagNodeFor<Real>(mean);
     RevBayesCore::StochasticNode<double>    *m = RevBayesCore::assumeStochastic<double>( tmp_m );
     
     // get the tuning
-    bool t = RevBayesCore::assume_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    bool t = valueFor<RlBoolean>(tune);
     
     RevBayesCore::Proposal *prop = new RevBayesCore::VectorSlideRecenterProposal(n,m,d,r);
     value = new RevBayesCore::MetropolisHastingsMove(prop,w,t);

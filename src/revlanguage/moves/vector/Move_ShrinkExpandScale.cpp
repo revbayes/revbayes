@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -59,10 +60,10 @@ void Move_ShrinkExpandScale::constructInternalObject( void )
     delete value;
     
     // now allocate a new vector-scale move
-    double l = RevBayesCore::assume_cast<const RealPos &>( lambda->getRevObject() ).getValue();
-    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double l = valueFor<RealPos>(lambda);
+    double w = valueFor<RealPos>(weight);
     
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( x->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp = dagNodeFor<ModelVector<RealPos>>(x);
     std::vector<const RevBayesCore::DagNode*> p = tmp->getParents();
     std::vector< RevBayesCore::StochasticNode<double> *> n;
     for (std::vector<const RevBayesCore::DagNode*>::const_iterator it = p.begin(); it != p.end(); ++it)
@@ -82,13 +83,13 @@ void Move_ShrinkExpandScale::constructInternalObject( void )
     RevBayesCore::StochasticNode<double> *s = NULL;
     if ( sd != NULL && sd->getRevObject() != RevNullObject::getInstance() )
     {
-        RevBayesCore::TypedDagNode<double> *tmp = RevBayesCore::assume_cast<const RealPos &>( sd->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<double> *tmp = dagNodeFor<RealPos>(sd);
         s = RevBayesCore::assumeStochastic<double>( tmp );
     }
     
     // get the tuning
-    bool t = RevBayesCore::assume_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double tt = RevBayesCore::assume_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    bool t = valueFor<RlBoolean>(tune);
+    double tt = valueFor<Probability>(tuneTarget);
     
     RevBayesCore::Proposal *prop = new RevBayesCore::ShrinkExpandScaleProposal(n, s, l);
     prop->setTargetAcceptanceRate(tt);

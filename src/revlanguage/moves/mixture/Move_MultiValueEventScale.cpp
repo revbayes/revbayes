@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -69,14 +70,14 @@ void Move_MultiValueEventScale::constructInternalObject( void )
     delete value;
     
     // now allocate a new random-geometric-walk move
-    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<RevBayesCore::MultiValueEvent>* tmp = RevBayesCore::assume_cast<const MultiValueEvent &>( x->getRevObject() ).getDagNode();
+    double w = valueFor<RealPos>(weight);
+    RevBayesCore::TypedDagNode<RevBayesCore::MultiValueEvent>* tmp = dagNodeFor<MultiValueEvent>(x);
     RevBayesCore::StochasticNode<RevBayesCore::MultiValueEvent> *n = RevBayesCore::assumeStochastic<RevBayesCore::MultiValueEvent>( tmp );
     
-    const std::string &v_name = RevBayesCore::assume_cast<const RlString &>( val_name->getRevObject() ).getValue();
-    bool tuning               = RevBayesCore::assume_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double l                  = RevBayesCore::assume_cast<const RealPos &>( lambda->getRevObject() ).getValue();
-    double tt                 = RevBayesCore::assume_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    const std::string &v_name = valueFor<RlString>(val_name);
+    bool tuning               = valueFor<RlBoolean>(tune);
+    double l                  = valueFor<RealPos>(lambda);
+    double tt                 = valueFor<Probability>(tuneTarget);
     
     // finally create the internal move object
     RevBayesCore::Proposal *prop = new RevBayesCore::MultiValueEventScaleProposal(n, v_name, l);

@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -69,8 +70,8 @@ void Move_OrderedEventBirthDeath::constructInternalObject( void )
     delete value;
     
     // now allocate a new random-geometric-walk move
-    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<RevBayesCore::OrderedEventTimes>* tmp = RevBayesCore::assume_cast<const RlOrderedEventTimes &>( x->getRevObject() ).getDagNode();
+    double w = valueFor<RealPos>(weight);
+    RevBayesCore::TypedDagNode<RevBayesCore::OrderedEventTimes>* tmp = dagNodeFor<RlOrderedEventTimes>(x);
     RevBayesCore::StochasticNode<RevBayesCore::OrderedEventTimes> *n = RevBayesCore::assumeStochastic<RevBayesCore::OrderedEventTimes>( tmp );
     
     // finally create the internal move object

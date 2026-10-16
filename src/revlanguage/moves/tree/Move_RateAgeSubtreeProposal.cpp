@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "ArgumentRule.h"
 #include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
@@ -55,7 +56,7 @@ RevPtr<RevVariable> Move_RateAgeSubtreeProposal::executeMethod(const std::string
         RevBayesCore::MetropolisHastingsMove *m = RevBayesCore::assume_cast<RevBayesCore::MetropolisHastingsMove*>(this->value);
         RevBayesCore::RateAgeSubtreeProposal &prop = RevBayesCore::assume_cast<RevBayesCore::RateAgeSubtreeProposal&>( m->getProposal() );
 
-        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* tmpRates = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( args[0].getVariable()->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* tmpRates = dagNodeFor<ModelVector<RealPos>>(args[0].getVariable());
         std::vector< RevBayesCore::StochasticNode<double> *> rates;
         RevBayesCore::DeterministicNode< RevBayesCore::RbVector<double> >*dnode = RevBayesCore::assume_cast< RevBayesCore::DeterministicNode< RevBayesCore::RbVector<double> > *>( tmpRates );
         
@@ -144,13 +145,13 @@ void Move_RateAgeSubtreeProposal::constructInternalObject( void )
     delete value;
     
     // now allocate a new element scaling move
-    double a = RevBayesCore::assume_cast<const RealPos &>( alpha->getRevObject() ).getValue();
-    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    double r = RevBayesCore::assume_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
-    bool t = RevBayesCore::assume_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    double a = valueFor<RealPos>(alpha);
+    double w = valueFor<RealPos>(weight);
+    double r = valueFor<Probability>(tuneTarget);
+    bool t = valueFor<RlBoolean>(tune);
 
     // get the tree
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = RevBayesCore::assume_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = dagNodeFor<TimeTree>(tree);
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *n = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
 
     // finally create the internal move object

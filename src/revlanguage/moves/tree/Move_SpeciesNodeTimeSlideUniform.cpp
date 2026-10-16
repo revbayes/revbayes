@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -77,8 +78,8 @@ void Move_SpeciesNodeTimeSlideUniform::constructInternalObject( void )
     delete value;
 
     // now allocate a new move
-    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = RevBayesCore::assume_cast<const TimeTree &>( speciesTree->getRevObject() ).getDagNode();
+    double w = valueFor<RealPos>(weight);
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = dagNodeFor<TimeTree>(speciesTree);
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *st = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
 
     RevBayesCore::Proposal *p = new RevBayesCore::TreeNodeAgeUpdateProposal(st);
@@ -185,7 +186,7 @@ RevPtr<RevVariable> Move_SpeciesNodeTimeSlideUniform::executeMethod(const std::s
     {
         found = true;
 
-        RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = RevBayesCore::assume_cast<const TimeTree &>( args[0].getVariable()->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = dagNodeFor<TimeTree>(args[0].getVariable());
         RevBayesCore::StochasticNode<RevBayesCore::Tree> *gt = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
 
         RevBayesCore::MetropolisHastingsMove *m = RevBayesCore::assume_cast<RevBayesCore::MetropolisHastingsMove*>(this->value);
@@ -198,7 +199,7 @@ RevPtr<RevVariable> Move_SpeciesNodeTimeSlideUniform::executeMethod(const std::s
     {
         found = true;
 
-        RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = RevBayesCore::assume_cast<const TimeTree &>( args[0].getVariable()->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = dagNodeFor<TimeTree>(args[0].getVariable());
         RevBayesCore::StochasticNode<RevBayesCore::Tree> *gt = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
 
         RevBayesCore::MetropolisHastingsMove *m = RevBayesCore::assume_cast<RevBayesCore::MetropolisHastingsMove*>(this->value);

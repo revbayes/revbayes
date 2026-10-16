@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -52,9 +53,9 @@ void Move_WeightedNodeTimeSlide::constructInternalObject( void )
     delete value;
     
     // now allocate a new sliding move
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = RevBayesCore::assume_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
-    size_t b = RevBayesCore::assume_cast<const Natural &>( blocks->getRevObject() ).getValue();
-    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = dagNodeFor<TimeTree>(tree);
+    size_t b = valueFor<Natural>(blocks);
+    double w = valueFor<RealPos>(weight);
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
     
     RevBayesCore::Proposal *p = new RevBayesCore::NodeTimeSlideWeightedProposal(t, b);

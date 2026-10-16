@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -63,8 +64,8 @@ void Move_GibbsDrawCharacterHistory::constructInternalObject( void )
 {
     delete value;
     
-    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = RevBayesCore::assume_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
+    double w = valueFor<RealPos>(weight);
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = dagNodeFor<TimeTree>(tree);
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *n = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
 
     RevBayesCore::Proposal *p = new RevBayesCore::GibbsDrawCharacterHistoryProposal(n);

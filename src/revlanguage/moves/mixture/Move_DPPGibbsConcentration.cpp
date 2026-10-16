@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -49,14 +50,14 @@ void Move_DPPGibbsConcentration::constructInternalObject( void )
     delete value;
     
     // now allocate a new vector-scale move
-    double ne = RevBayesCore::assume_cast<const RealPos &>( numElements->getRevObject() ).getValue();
-    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<double>* tmp = RevBayesCore::assume_cast<const RealPos &>( cp->getRevObject() ).getDagNode();
+    double ne = valueFor<RealPos>(numElements);
+    double w = valueFor<RealPos>(weight);
+    RevBayesCore::TypedDagNode<double>* tmp = dagNodeFor<RealPos>(cp);
     RevBayesCore::StochasticNode< double > *sn = RevBayesCore::assumeStochastic<double>( tmp );
-    RevBayesCore::TypedDagNode<std::int64_t>* tmpNC = RevBayesCore::assume_cast<const Integer &>( numCats->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<std::int64_t>* tmpNC = dagNodeFor<Integer>(numCats);
     RevBayesCore::DeterministicNode<std::int64_t> *nc = RevBayesCore::assume_cast<RevBayesCore::DeterministicNode<std::int64_t> *>( tmpNC );
-    RevBayesCore::TypedDagNode<double>* gS = RevBayesCore::assume_cast<const RealPos &>( gammaShape->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* gR = RevBayesCore::assume_cast<const RealPos &>( gammaRate->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* gS = dagNodeFor<RealPos>(gammaShape);
+    RevBayesCore::TypedDagNode<double>* gR = dagNodeFor<RealPos>(gammaRate);
 
     
     value = new RevBayesCore::DPPGibbsConcentrationMove(sn, nc, gS, gR, ne, w);

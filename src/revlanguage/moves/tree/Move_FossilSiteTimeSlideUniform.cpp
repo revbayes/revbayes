@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -59,18 +60,18 @@ void Move_FossilSiteTimeSlideUniform::constructInternalObject( void )
     delete value;
     
     // now allocate a new move
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = RevBayesCore::assume_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = dagNodeFor<TimeTree>(tree);
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
     
-    double de = RevBayesCore::assume_cast<const RealPos &>( delta->getRevObject() ).getValue();
-    double we = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    bool   tu = RevBayesCore::assume_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double tt = RevBayesCore::assume_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double de = valueFor<RealPos>(delta);
+    double we = valueFor<RealPos>(weight);
+    bool   tu = valueFor<RlBoolean>(tune);
+    double tt = valueFor<Probability>(tuneTarget);
     
     RevBayesCore::TypedDagNode<double> *org = NULL;
     if ( origin != NULL && origin->getRevObject() != RevNullObject::getInstance() )
     {
-        org = RevBayesCore::assume_cast<const RealPos &>( origin->getRevObject() ).getDagNode();
+        org = dagNodeFor<RealPos>(origin);
     }
     
     // use NULL as defaults
@@ -79,14 +80,14 @@ void Move_FossilSiteTimeSlideUniform::constructInternalObject( void )
     
     if ( max->getRevObject() != RevLanguage::RevNullObject::getInstance() )
     {
-        ma = RevBayesCore::assume_cast<const RealPos &>( max->getRevObject() ).getDagNode();
+        ma = dagNodeFor<RealPos>(max);
     }
     if ( min->getRevObject() != RevLanguage::RevNullObject::getInstance() )
     {
-        mi = RevBayesCore::assume_cast<const RealPos &>( min->getRevObject() ).getDagNode();
+        mi = dagNodeFor<RealPos>(min);
     }
     
-    const RevBayesCore::RbVector<RevBayesCore::Taxon>& taxa_vec = RevBayesCore::assume_cast<const ModelVector<Taxon>&>( taxa->getRevObject() ).getValue();
+    const RevBayesCore::RbVector<RevBayesCore::Taxon>& taxa_vec = valueFor<ModelVector<Taxon>>(taxa);
 
     RevBayesCore::FossilSiteTimeSlideUniformProposal *p = new RevBayesCore::FossilSiteTimeSlideUniformProposal( t, org, ma, mi, taxa_vec, de, tt );
 

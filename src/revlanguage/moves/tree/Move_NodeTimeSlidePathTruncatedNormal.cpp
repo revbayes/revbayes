@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -54,14 +55,14 @@ void Move_NodeTimeSlidePathTruncatedNormal::constructInternalObject( void )
     delete value;
     
     // now allocate a new move
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = RevBayesCore::assume_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = dagNodeFor<TimeTree>(tree);
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *tau = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
 
-    double s = RevBayesCore::assume_cast<const RealPos &>( sigma->getRevObject() ).getValue();
-    bool a = RevBayesCore::assume_cast<const RlBoolean &>( scaleByAge->getRevObject() ).getValue();
-    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    bool t = RevBayesCore::assume_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double tt = RevBayesCore::assume_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double s = valueFor<RealPos>(sigma);
+    bool a = valueFor<RlBoolean>(scaleByAge);
+    double w = valueFor<RealPos>(weight);
+    bool t = valueFor<RlBoolean>(tune);
+    double tt = valueFor<Probability>(tuneTarget);
 
     RevBayesCore::Proposal *p = new RevBayesCore::NodeTimeSlidePathTruncatedNormalProposal(tau, s, a);
     p->setTargetAcceptanceRate(tt);

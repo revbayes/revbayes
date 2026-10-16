@@ -6,6 +6,7 @@
 //  Copyright (c) 2015 will freyman. All rights reserved.
 //
 
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -63,12 +64,12 @@ void Move_NodeTimeScale::constructInternalObject( void )
     delete value;
     
     // now allocate a new sliding move
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = RevBayesCore::assume_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = dagNodeFor<TimeTree>(tree);
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *tr = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
-    double l = RevBayesCore::assume_cast<const RealPos &>( lambda->getRevObject() ).getValue();
-    bool t = RevBayesCore::assume_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    double tt = RevBayesCore::assume_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double l = valueFor<RealPos>(lambda);
+    bool t = valueFor<RlBoolean>(tune);
+    double w = valueFor<RealPos>(weight);
+    double tt = valueFor<Probability>(tuneTarget);
     
     RevBayesCore::Proposal *p = new RevBayesCore::NodeTimeScaleProposal(tr, l);
     p->setTargetAcceptanceRate(tt);

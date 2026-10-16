@@ -5,6 +5,7 @@
  * Created on 13 juillet 2014, 18:13
  */
 
+#include "RevVariableUtilities.h"
 #include "Move_MatrixSingleElementScale.h"
 #include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
@@ -67,30 +68,30 @@ void Move_MatrixSingleElementScale::constructInternalObject( void )
     delete value;
     
     // now allocate a new sliding move
-    double l = RevBayesCore::assume_cast<const RealPos &>( lambda->getRevObject() ).getValue();
-    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    bool t = RevBayesCore::assume_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double tt = RevBayesCore::assume_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double l = valueFor<RealPos>(lambda);
+    double w = valueFor<RealPos>(weight);
+    bool t = valueFor<RlBoolean>(tune);
+    double tt = valueFor<Probability>(tuneTarget);
 
     RevBayesCore::Proposal *p = NULL;
 
     if (v->getRevObject().isType( MatrixReal::getClassTypeSpec() ))
     {
-        RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* tmp = RevBayesCore::assume_cast<const MatrixReal &>( v->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* tmp = dagNodeFor<MatrixReal>(v);
         RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *n = RevBayesCore::assumeStochastic<RevBayesCore::MatrixReal>( tmp );
         p = new RevBayesCore::MatrixRealSingleElementScaleProposal(n, l, v->getRevObject().isType( MatrixRealSymmetric::getClassTypeSpec() ) );
         p->setTargetAcceptanceRate(tt);
     }
     else if (v->getRevObject().isType( ModelVector<ModelVector<RealPos> >::getClassTypeSpec() ))
     {
-        RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* tmp = RevBayesCore::assume_cast<const ModelVector<ModelVector<RealPos> > &>( v->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* tmp = dagNodeFor<ModelVector<ModelVector<RealPos> >>(v);
         RevBayesCore::StochasticNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > > *n = RevBayesCore::assumeStochastic<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >( tmp );
         p = new RevBayesCore::MatrixRealSingleElementScaleProposal(n, l);
         p->setTargetAcceptanceRate(tt);
     }
     else if (v->getRevObject().isType( ModelVector<ModelVector<Real> >::getClassTypeSpec() ))
     {
-        RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* tmp = RevBayesCore::assume_cast<const ModelVector<ModelVector<Real> > &>( v->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* tmp = dagNodeFor<ModelVector<ModelVector<Real> >>(v);
         RevBayesCore::StochasticNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > > *n = RevBayesCore::assumeStochastic<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >( tmp );
         p = new RevBayesCore::MatrixRealSingleElementScaleProposal(n, l);
         p->setTargetAcceptanceRate(tt);
@@ -100,7 +101,7 @@ void Move_MatrixSingleElementScale::constructInternalObject( void )
     // Natural admits 0, which would wrap around when the index is made 0-based.
     if ( row->getRevObject() != RevNullObject::getInstance() )
     {
-        long rval = RevBayesCore::assume_cast<const Natural &>( row->getRevObject() ).getValue();
+        long rval = valueFor<Natural>(row);
         if ( rval < 1 )
         {
             throw RbException() << "mvMatrixElementScale: row must be at least 1, but was " << rval << ".";
@@ -109,7 +110,7 @@ void Move_MatrixSingleElementScale::constructInternalObject( void )
     }
     if ( col->getRevObject() != RevNullObject::getInstance() )
     {
-        long cval = RevBayesCore::assume_cast<const Natural &>( col->getRevObject() ).getValue();
+        long cval = valueFor<Natural>(col);
         if ( cval < 1 )
         {
             throw RbException() << "mvMatrixElementScale: col must be at least 1, but was " << cval << ".";

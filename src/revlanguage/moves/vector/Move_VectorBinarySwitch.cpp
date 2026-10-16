@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -66,11 +67,11 @@ void Move_VectorBinarySwitch::constructInternalObject( void )
     delete value;
     
     // now allocate a new vector-slide move
-    const RevBayesCore::RbVector<std::int64_t> &e = RevBayesCore::assume_cast<const ModelVector<Natural> &>( indices->getRevObject() ).getValue();
-    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    double p = RevBayesCore::assume_cast<const Probability &>( switch_probability->getRevObject() ).getValue();
+    const RevBayesCore::RbVector<std::int64_t> &e = valueFor<ModelVector<Natural>>(indices);
+    double w = valueFor<RealPos>(weight);
+    double p = valueFor<Probability>(switch_probability);
     
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<std::int64_t> >* tmp = RevBayesCore::assume_cast<const ModelVector<Natural> &>( x->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<std::int64_t> >* tmp = dagNodeFor<ModelVector<Natural>>(x);
 //    RevBayesCore::StochasticNode<RevBayesCore::RbVector<std::int64_t> > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::RbVector<std::int64_t> > *>( tmp );
     
     std::vector<const RevBayesCore::DagNode*> dag_nodes = tmp->getParents();
@@ -88,8 +89,8 @@ void Move_VectorBinarySwitch::constructInternalObject( void )
         }
     }
     
-    bool t = RevBayesCore::assume_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double tt = RevBayesCore::assume_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    bool t = valueFor<RlBoolean>(tune);
+    double tt = valueFor<Probability>(tuneTarget);
     
     RevBayesCore::Proposal *prop = new RevBayesCore::VectorBinarySwitchProposal(stoch_nodes, e, p);
     prop->setTargetAcceptanceRate(tt);

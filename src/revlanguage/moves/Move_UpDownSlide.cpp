@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -119,11 +120,11 @@ void Move_UpDownSlide::constructInternalObject( void )
     delete value;
     
     // now allocate a new up-down-scale move
-    double l = RevBayesCore::assume_cast<const RealPos &>( delta->getRevObject() ).getValue();
-    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double l = valueFor<RealPos>(delta);
+    double w = valueFor<RealPos>(weight);
     
-    bool t = RevBayesCore::assume_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double tt = RevBayesCore::assume_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    bool t = valueFor<RlBoolean>(tune);
+    double tt = valueFor<Probability>(tuneTarget);
     
     // finally create the internal move object
     RevBayesCore::UpDownSlideProposal *prop = new RevBayesCore::UpDownSlideProposal(l);

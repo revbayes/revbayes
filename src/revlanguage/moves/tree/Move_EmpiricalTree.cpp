@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "Move_EmpiricalTree.h"
 #include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
@@ -52,12 +53,12 @@ void Move_EmpiricalTree::constructInternalObject( void )
     delete value;
     
     // now allocate a new empirical tree move
-    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double w = valueFor<RealPos>(weight);
     
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = RevBayesCore::assume_cast<const Tree &>( tree->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = dagNodeFor<Tree>(tree);
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
     
-    bool mh = RevBayesCore::assume_cast<const RlBoolean &>( metropolisHastings->getRevObject() ).getValue();
+    bool mh = valueFor<RlBoolean>(metropolisHastings);
 
     RevBayesCore::Proposal *p = new RevBayesCore::IndependentPriorProposal<RevBayesCore::Tree>(t, mh);
     value = new RevBayesCore::MetropolisHastingsMove(p, w, false);

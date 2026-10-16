@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -54,13 +55,13 @@ void Move_BranchLengthScale::constructInternalObject( void )
     delete value;
     
     // now allocate a new tree scale move
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = RevBayesCore::assume_cast<const BranchLengthTree &>( tree->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = dagNodeFor<BranchLengthTree>(tree);
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
     
-    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    double l = RevBayesCore::assume_cast<const RealPos &>( delta->getRevObject() ).getValue();
-    bool tune = RevBayesCore::assume_cast<const RlBoolean &>( tuning->getRevObject() ).getValue();
-    double tt = RevBayesCore::assume_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double w = valueFor<RealPos>(weight);
+    double l = valueFor<RealPos>(delta);
+    bool tune = valueFor<RlBoolean>(tuning);
+    double tt = valueFor<Probability>(tuneTarget);
     
     RevBayesCore::Proposal *p = new RevBayesCore::BranchLengthScaleProposal(t, l);
     p->setTargetAcceptanceRate(tt);

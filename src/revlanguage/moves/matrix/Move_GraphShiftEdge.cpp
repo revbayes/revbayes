@@ -5,6 +5,7 @@
  * Created on 13 juillet 2014, 18:13
  */
 
+#include "RevVariableUtilities.h"
 #include "Move_GraphShiftEdge.h"
 #include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
@@ -71,15 +72,15 @@ void Move_GraphShiftEdge::constructInternalObject( void )
     delete value;
     
     // now allocate a new sliding move
-    double l = RevBayesCore::assume_cast<const Probability &>( prob->getRevObject() ).getValue();
-    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    bool t = RevBayesCore::assume_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    const RevBayesCore::RbVector<std::int64_t>& e = RevBayesCore::assume_cast<const ModelVector<Natural> &>( vertices->getRevObject() ).getValue();
-    double tt = RevBayesCore::assume_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double l = valueFor<Probability>(prob);
+    double w = valueFor<RealPos>(weight);
+    bool t = valueFor<RlBoolean>(tune);
+    const RevBayesCore::RbVector<std::int64_t>& e = valueFor<ModelVector<Natural>>(vertices);
+    double tt = valueFor<Probability>(tuneTarget);
     
     RevBayesCore::Proposal *p = NULL;
     
-    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* tmp = RevBayesCore::assume_cast<const MatrixRealSymmetric &>( v->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* tmp = dagNodeFor<MatrixRealSymmetric>(v);
     RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *n = RevBayesCore::assumeStochastic<RevBayesCore::MatrixReal>( tmp );
     bool symm = v->getRevObject().isType( MatrixRealSymmetric::getClassTypeSpec() );
     

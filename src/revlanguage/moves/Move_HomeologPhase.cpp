@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <ostream>
 #include "TypeUtilities.h"
 #include <string>
@@ -65,13 +66,13 @@ void RevLanguage::Move_HomeologPhase::constructInternalObject( void )
     delete value;
     
     // move/proposal arguments
-    double w        = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double w        = valueFor<RealPos>(weight);
     
     // move/proposal parameters
-    RevBayesCore::TypedDagNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_tdn   = RevBayesCore::assume_cast<const RevLanguage::AbstractHomologousDiscreteCharacterData&>( ctmc->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_tdn   = dagNodeFor<RevLanguage::AbstractHomologousDiscreteCharacterData>(ctmc);
     RevBayesCore::StochasticNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_sn  = RevBayesCore::assumeStochastic<RevBayesCore::AbstractHomologousDiscreteCharacterData>( ctmc_tdn );
-    std::string t1  = RevBayesCore::assume_cast<const RlString &>( tip1->getRevObject() ).getValue();
-    std::string t2  = RevBayesCore::assume_cast<const RlString &>( tip2->getRevObject() ).getValue();
+    std::string t1  = valueFor<RlString>(tip1);
+    std::string t2  = valueFor<RlString>(tip2);
     
     // create the proposal
     RevBayesCore::HomeologPhaseProposal *p = new RevBayesCore::HomeologPhaseProposal(ctmc_sn, t1, t2);

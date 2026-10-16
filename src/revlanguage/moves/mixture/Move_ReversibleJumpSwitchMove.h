@@ -1,6 +1,7 @@
 #ifndef Move_ReversibleJumpSwitch_H
 #define Move_ReversibleJumpSwitch_H
 
+#include "RevVariableUtilities.h"
 #include "RlMove.h"
 #include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
@@ -88,8 +89,8 @@ void RevLanguage::Move_ReversibleJumpSwitch<rlValueType>::constructInternalObjec
     delete value;
     
     // now allocate a new vector-scale move
-    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<typename rlValueType::valueType>* tmp = RevBayesCore::assume_cast<const rlValueType &>( x->getRevObject() ).getDagNode();
+    double w = valueFor<RealPos>(weight);
+    RevBayesCore::TypedDagNode<typename rlValueType::valueType>* tmp = dagNodeFor<rlValueType>(x);
     RevBayesCore::StochasticNode< typename rlValueType::valueType > *sn = RevBayesCore::assumeStochastic< typename rlValueType::valueType >( tmp );
     
     RevBayesCore::ReversibleJumpMixtureProposal< typename rlValueType::valueType > *p = new RevBayesCore::ReversibleJumpMixtureProposal< typename rlValueType::valueType >(sn);

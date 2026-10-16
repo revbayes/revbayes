@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "Move_IndependentTopology.h"
 #include "TypeUtilities.h"
 #include "DistributionTypeUtilities.h"
@@ -63,21 +64,21 @@ void Move_IndependentTopology::constructInternalObject( void )
     delete value;
     
     // now allocate a new empirical tree move
-    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double w = valueFor<RealPos>(weight);
     
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = RevBayesCore::assume_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = dagNodeFor<TimeTree>(tree);
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
 
-    const Distribution& rlDistribution                        = RevBayesCore::assume_cast<const Distribution &>( proposal_distribution->getRevObject() );
+    const Distribution& rlDistribution                        = objectFor<Distribution>(proposal_distribution);
     RevBayesCore::TypedDistribution<RevBayesCore::Tree>* prop = RevBayesCore::assumeTypedDistribution<RevBayesCore::Tree>( rlDistribution.createDistribution() );
 
-    const RevBayesCore::Clade& c      = RevBayesCore::assume_cast<const Clade&>( outgroup->getRevObject() ).getValue();
+    const RevBayesCore::Clade& c      = valueFor<Clade>(outgroup);
 
     RevBayesCore::Proposal *p;
 
     if( substitution_rates->getRevObject() != RevNullObject::getInstance() )
     {
-        RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( substitution_rates->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp = dagNodeFor<ModelVector<RealPos>>(substitution_rates);
         if( tmp->isStochastic() == true )
         {
             RevBayesCore::StochasticNode<RevBayesCore::RbVector<double> >* stoch = RevBayesCore::checkStochastic<RevBayesCore::RbVector<double> >( tmp );

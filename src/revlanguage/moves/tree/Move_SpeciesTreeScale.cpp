@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -79,15 +80,15 @@ void Move_SpeciesTreeScale::constructInternalObject( void )
     delete value;
 
     // now allocate a new move
-    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = RevBayesCore::assume_cast<const TimeTree &>( speciesTree->getRevObject() ).getDagNode();
+    double w = valueFor<RealPos>(weight);
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = dagNodeFor<TimeTree>(speciesTree);
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *st = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
 
-    RevBayesCore::TypedDagNode<double>* tmp_a = RevBayesCore::assume_cast<const RealPos &>( rootAge->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* tmp_a = dagNodeFor<RealPos>(rootAge);
     RevBayesCore::StochasticNode<double> *ra = RevBayesCore::assumeStochastic<double>( tmp_a );
-    double d = RevBayesCore::assume_cast<const RealPos &>( delta->getRevObject() ).getValue();
-    bool tune = RevBayesCore::assume_cast<const RlBoolean &>( tuning->getRevObject() ).getValue();
-    double tt = RevBayesCore::assume_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double d = valueFor<RealPos>(delta);
+    bool tune = valueFor<RlBoolean>(tuning);
+    double tt = valueFor<Probability>(tuneTarget);
 
     RevBayesCore::Proposal *p = new RevBayesCore::SpeciesTreeScaleProposal(st, ra, d);
     p->setTargetAcceptanceRate(tt);
@@ -104,7 +105,7 @@ RevPtr<RevVariable> Move_SpeciesTreeScale::executeMethod(const std::string& name
     {
         found = true;
 
-        RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = RevBayesCore::assume_cast<const TimeTree &>( args[0].getVariable()->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = dagNodeFor<TimeTree>(args[0].getVariable());
         RevBayesCore::StochasticNode<RevBayesCore::Tree> *gt = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
 
         RevBayesCore::MetropolisHastingsMove *m = RevBayesCore::assume_cast<RevBayesCore::MetropolisHastingsMove*>(this->value);
@@ -117,7 +118,7 @@ RevPtr<RevVariable> Move_SpeciesTreeScale::executeMethod(const std::string& name
     {
         found = true;
 
-        RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = RevBayesCore::assume_cast<const TimeTree &>( args[0].getVariable()->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = dagNodeFor<TimeTree>(args[0].getVariable());
         RevBayesCore::StochasticNode<RevBayesCore::Tree> *gt = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
 
         RevBayesCore::MetropolisHastingsMove *m = RevBayesCore::assume_cast<RevBayesCore::MetropolisHastingsMove*>(this->value);

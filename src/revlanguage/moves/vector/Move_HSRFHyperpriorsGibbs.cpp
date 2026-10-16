@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -57,14 +58,14 @@ void Move_HSRFHyperpriorsGibbs::constructInternalObject( void )
     delete value;
 
     // now allocate a new move
-    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double w = valueFor<RealPos>(weight);
 
-    double p = RevBayesCore::assume_cast<const RealPos &>( prop_global->getRevObject() ).getValue();
+    double p = valueFor<RealPos>(prop_global);
 
-    RevBayesCore::TypedDagNode<double>* tmp = RevBayesCore::assume_cast<const RealPos &>( gs->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* tmp = dagNodeFor<RealPos>(gs);
     RevBayesCore::StochasticNode<double> *g = RevBayesCore::assumeStochastic<double>( tmp );
 
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp1 = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( ls->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp1 = dagNodeFor<ModelVector<RealPos>>(ls);
     std::vector<const RevBayesCore::DagNode*> p1 = tmp1->getParents();
     std::vector< RevBayesCore::StochasticNode<double> *> l;
     for (std::vector<const RevBayesCore::DagNode*>::const_iterator it = p1.begin(); it != p1.end(); ++it)
@@ -80,7 +81,7 @@ void Move_HSRFHyperpriorsGibbs::constructInternalObject( void )
         }
     }
 
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp2 = RevBayesCore::assume_cast<const ModelVector<Real> &>( normals->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp2 = dagNodeFor<ModelVector<Real>>(normals);
     std::vector<const RevBayesCore::DagNode*> p2 = tmp2->getParents();
     std::vector< RevBayesCore::StochasticNode<double> *> n;
     for (std::vector<const RevBayesCore::DagNode*>::const_iterator it = p2.begin(); it != p2.end(); ++it)
@@ -96,9 +97,9 @@ void Move_HSRFHyperpriorsGibbs::constructInternalObject( void )
         }
     }
 
-    double z = RevBayesCore::assume_cast<const RealPos &>( zeta->getRevObject() ).getValue();
+    double z = valueFor<RealPos>(zeta);
 
-    size_t o = RevBayesCore::assume_cast<const Natural &>( order->getRevObject() ).getValue();
+    size_t o = valueFor<Natural>(order);
     if (o == 1)
     {
       value = new RevBayesCore::HSRFHyperpriorsGibbsMove(g, l, n, p, z, w);

@@ -5,6 +5,7 @@
  * Created on 5 August 2017
  */
 
+#include "RevVariableUtilities.h"
 #include "Move_CorrelationMatrixPartialSingleElementBeta.h"
 #include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
@@ -59,12 +60,12 @@ void Move_CorrelationMatrixPartialSingleElementBeta::constructInternalObject( vo
     delete value;
     
     // now allocate a new sliding move
-    double a = RevBayesCore::assume_cast<const RealPos &>( alpha->getRevObject() ).getValue();
-    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* tmp = RevBayesCore::assume_cast<const MatrixReal &>( v->getRevObject() ).getDagNode();
+    double a = valueFor<RealPos>(alpha);
+    double w = valueFor<RealPos>(weight);
+    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* tmp = dagNodeFor<MatrixReal>(v);
     RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *n = RevBayesCore::assumeStochastic<RevBayesCore::MatrixReal>( tmp );
-    bool t = RevBayesCore::assume_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double tt = RevBayesCore::assume_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    bool t = valueFor<RlBoolean>(tune);
+    double tt = valueFor<Probability>(tuneTarget);
     
     RevBayesCore::Proposal *p = new RevBayesCore::CorrelationMatrixPartialElementBetaProposal(n, a);
     p->setTargetAcceptanceRate(tt);

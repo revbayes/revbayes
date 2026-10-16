@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <map>
@@ -89,14 +90,14 @@ void RevLanguage::Move_CharacterHistory::constructInternalObject( void )
     delete value;
 
     // move/proposal arguments
-    double w                 = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    double l                 = RevBayesCore::assume_cast<const Probability &>( lambda->getRevObject() ).getValue();
-    std::string gt           = RevBayesCore::assume_cast<const RlString &>( graph->getRevObject() ).getValue();
-    std::string pt           = RevBayesCore::assume_cast<const RlString &>( proposal->getRevObject() ).getValue();
-    double r                 = RevBayesCore::assume_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double w                 = valueFor<RealPos>(weight);
+    double l                 = valueFor<Probability>(lambda);
+    std::string gt           = valueFor<RlString>(graph);
+    std::string pt           = valueFor<RlString>(proposal);
+    double r                 = valueFor<Probability>(tuneTarget);
 
     // move/proposal parameters
-    RevBayesCore::TypedDagNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_tdn   = RevBayesCore::assume_cast<const RevLanguage::AbstractHomologousDiscreteCharacterData&>( ctmc->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_tdn   = dagNodeFor<RevLanguage::AbstractHomologousDiscreteCharacterData>(ctmc);
     RevBayesCore::StochasticNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_sn  = RevBayesCore::assumeStochastic<RevBayesCore::AbstractHomologousDiscreteCharacterData>( ctmc_tdn );
 
     bool use_site = false;
@@ -108,12 +109,12 @@ void RevLanguage::Move_CharacterHistory::constructInternalObject( void )
     if (qmap_site->getRevObject() != RevNullObject::getInstance())
     {
         use_site = true;
-        qmap_site_tdn = RevBayesCore::assume_cast<const RateGenerator&>( qmap_site->getRevObject() ).getDagNode();
+        qmap_site_tdn = dagNodeFor<RateGenerator>(qmap_site);
     }
     else if (qmap_seq->getRevObject() != RevNullObject::getInstance())
     {
         use_seq = true;
-        qmap_seq_tdn = RevBayesCore::assume_cast<const RateGeneratorSequence&>( qmap_seq->getRevObject() ).getDagNode();
+        qmap_seq_tdn = dagNodeFor<RateGeneratorSequence>(qmap_seq);
     }
     else
     {

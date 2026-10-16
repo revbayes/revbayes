@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -53,10 +54,10 @@ void Move_ElementSwapSimplex::constructInternalObject( void )
     delete value;
     
     // now allocate a new move
-    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* tmp = RevBayesCore::assume_cast<const Simplex &>( x->getRevObject() ).getDagNode();
+    double w = valueFor<RealPos>(weight);
+    RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* tmp = dagNodeFor<Simplex>(x);
     RevBayesCore::StochasticNode< RevBayesCore::Simplex > *n = RevBayesCore::assumeStochastic< RevBayesCore::Simplex >( tmp );
-    bool t = RevBayesCore::assume_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    bool t = valueFor<RlBoolean>(tune);
     
     RevBayesCore::Proposal *prop = new RevBayesCore::ElementSwapSimplexProposal(n);
     value = new RevBayesCore::MetropolisHastingsMove(prop,w,t);

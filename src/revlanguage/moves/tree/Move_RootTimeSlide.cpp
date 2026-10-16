@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -53,13 +54,13 @@ void Move_RootTimeSlide::constructInternalObject( void )
     delete value;
     
     // now allocate a new move
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = RevBayesCore::assume_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = dagNodeFor<TimeTree>(tree);
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
     
-    double d = RevBayesCore::assume_cast<const RealPos &>( delta->getRevObject() ).getValue();
-    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    bool tune = RevBayesCore::assume_cast<const RlBoolean &>( tuning->getRevObject() ).getValue();
-    double tt = RevBayesCore::assume_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double d = valueFor<RealPos>(delta);
+    double w = valueFor<RealPos>(weight);
+    bool tune = valueFor<RlBoolean>(tuning);
+    double tt = valueFor<Probability>(tuneTarget);
 
     RevBayesCore::Proposal *p = new RevBayesCore::RootTimeSlideProposal(t, d);
     p->setTargetAcceptanceRate(tt);

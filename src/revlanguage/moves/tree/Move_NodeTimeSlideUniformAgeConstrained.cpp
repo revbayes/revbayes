@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -56,13 +57,13 @@ void Move_NodeTimeSlideUniformAgeConstrained::constructInternalObject( void )
     delete value;
     
     // now allocate a new move
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = RevBayesCore::assume_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = dagNodeFor<TimeTree>(tree);
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
     
-    const RevBayesCore::RbVector<RevBayesCore::Clade> &constr = RevBayesCore::assume_cast<const ModelVector<Clade> &>( constraints->getRevObject() ).getValue();
+    const RevBayesCore::RbVector<RevBayesCore::Clade> &constr = valueFor<ModelVector<Clade>>(constraints);
 
     
-    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double w = valueFor<RealPos>(weight);
     
     RevBayesCore::Proposal *p = new RevBayesCore::NodeTimeSlideUniformAgeConstrainedProposal( t, constr );
     value = new RevBayesCore::MetropolisHastingsMove(p,w,false);

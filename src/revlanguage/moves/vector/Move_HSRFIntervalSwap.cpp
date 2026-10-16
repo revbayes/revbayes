@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -58,9 +59,9 @@ void Move_HSRFIntervalSwap::constructInternalObject( void )
     delete value;
 
     // now allocate a new vector-scale move
-    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double w = valueFor<RealPos>(weight);
 
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp1 = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( sigmas->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp1 = dagNodeFor<ModelVector<RealPos>>(sigmas);
     std::vector<const RevBayesCore::DagNode*> p1 = tmp1->getParents();
     std::vector< RevBayesCore::StochasticNode<double> *> s;
     for (std::vector<const RevBayesCore::DagNode*>::const_iterator it = p1.begin(); it != p1.end(); ++it)
@@ -76,7 +77,7 @@ void Move_HSRFIntervalSwap::constructInternalObject( void )
         }
     }
 
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp2 = RevBayesCore::assume_cast<const ModelVector<Real> &>( deltas->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp2 = dagNodeFor<ModelVector<Real>>(deltas);
     std::vector<const RevBayesCore::DagNode*> p2 = tmp2->getParents();
     std::vector< RevBayesCore::StochasticNode<double> *> d;
     for (std::vector<const RevBayesCore::DagNode*>::const_iterator it = p2.begin(); it != p2.end(); ++it)
@@ -93,7 +94,7 @@ void Move_HSRFIntervalSwap::constructInternalObject( void )
     }
 
     // get the tuning
-    bool t = RevBayesCore::assume_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    bool t = valueFor<RlBoolean>(tune);
 
     RevBayesCore::Proposal *prop = new RevBayesCore::HSRFIntervalSwapProposal(d,s);
     value = new RevBayesCore::MetropolisHastingsMove(prop,w,t);

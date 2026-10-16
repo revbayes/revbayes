@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -57,10 +58,10 @@ void Move_ElementScale::constructInternalObject( void )
     delete value;
     
     // now allocate a new vector-scale move
-    double l = RevBayesCore::assume_cast<const RealPos &>( lambda->getRevObject() ).getValue();
-    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double l = valueFor<RealPos>(lambda);
+    double w = valueFor<RealPos>(weight);
     
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( x->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp = dagNodeFor<ModelVector<RealPos>>(x);
     std::vector<const RevBayesCore::DagNode*> p = tmp->getParents();
     std::vector< RevBayesCore::StochasticNode<double> *> n;
     for (std::vector<const RevBayesCore::DagNode*>::const_iterator it = p.begin(); it != p.end(); ++it)
@@ -76,8 +77,8 @@ void Move_ElementScale::constructInternalObject( void )
         }
     }
     
-    bool t = RevBayesCore::assume_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double tt = RevBayesCore::assume_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    bool t = valueFor<RlBoolean>(tune);
+    double tt = valueFor<Probability>(tuneTarget);
     
     RevBayesCore::Proposal *prop = new RevBayesCore::ElementScaleProposal(n, l);
     prop->setTargetAcceptanceRate(tt);

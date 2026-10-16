@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -70,21 +71,21 @@ void Move_ResampleFBD::constructInternalObject( void )
 
     if (fbd->getRevObject().isType( MatrixReal::getClassTypeSpec() ))
     {
-    	RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* tmp = RevBayesCore::assume_cast<const MatrixReal &>( fbd->getRevObject() ).getDagNode();
+    	RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* tmp = dagNodeFor<MatrixReal>(fbd);
 		RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *n = RevBayesCore::assumeStochastic<RevBayesCore::MatrixReal>( tmp );
 
 		p = new RevBayesCore::FossilizedBirthDeathResampleAgeProposal<RevBayesCore::MatrixReal>(n);
     }
     else
     {
-    	RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = RevBayesCore::assume_cast<const TimeTree &>( fbd->getRevObject() ).getDagNode();
+    	RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = dagNodeFor<TimeTree>(fbd);
     	RevBayesCore::StochasticNode<RevBayesCore::Tree> *n = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
 
     	p = new RevBayesCore::FossilizedBirthDeathResampleAgeProposal<RevBayesCore::Tree>(n);
     }
 
     // now allocate a new sliding move
-    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double w = valueFor<RealPos>(weight);
     
     value = new RevBayesCore::MetropolisHastingsMove(p,w);
     

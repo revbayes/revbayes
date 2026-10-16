@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -57,14 +58,14 @@ void Move_NodeRateTimeSlideUniform::constructInternalObject( void )
     delete value;
     
     // now allocate a new move
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = RevBayesCore::assume_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = dagNodeFor<TimeTree>(tree);
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
     
-    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double w = valueFor<RealPos>(weight);
     
     RevBayesCore::Proposal *p;
 
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* r = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( rates->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* r = dagNodeFor<ModelVector<RealPos>>(rates);
     if( r->isStochastic() == true )
     {
         RevBayesCore::StochasticNode<RevBayesCore::RbVector<double> >* stoch = RevBayesCore::checkStochastic<RevBayesCore::RbVector<double> >( r );

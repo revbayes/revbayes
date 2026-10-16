@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -59,17 +60,17 @@ void Move_ShrinkExpand::constructInternalObject( void )
     delete value;
     
     // now allocate a new vector-scale move
-    double l = RevBayesCore::assume_cast<const RealPos &>( lambda->getRevObject() ).getValue();
-    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double l = valueFor<RealPos>(lambda);
+    double w = valueFor<RealPos>(weight);
     
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp = NULL;
     if ( x->getRevObject() != RevNullObject::getInstance() && x->getRevObject().isType( ModelVector<Real>::getClassTypeSpec() ) )
     {
-        tmp = RevBayesCore::assume_cast<const ModelVector<Real> &>( x->getRevObject() ).getDagNode();
+        tmp = dagNodeFor<ModelVector<Real>>(x);
     }
     else if ( x->getRevObject() != RevNullObject::getInstance() && x->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
     {
-        tmp = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( x->getRevObject() ).getDagNode();
+        tmp = dagNodeFor<ModelVector<RealPos>>(x);
     }
         
     std::vector<const RevBayesCore::DagNode*> p = tmp->getParents();
@@ -91,13 +92,13 @@ void Move_ShrinkExpand::constructInternalObject( void )
     RevBayesCore::StochasticNode<double> *s = NULL;
     if ( sd != NULL && sd->getRevObject() != RevNullObject::getInstance() )
     {
-        RevBayesCore::TypedDagNode<double> *tmp = RevBayesCore::assume_cast<const RealPos &>( sd->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<double> *tmp = dagNodeFor<RealPos>(sd);
         s = RevBayesCore::assumeStochastic<double>( tmp );
     }
     
     // get the tuning
-    bool t = RevBayesCore::assume_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double tt = RevBayesCore::assume_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    bool t = valueFor<RlBoolean>(tune);
+    double tt = valueFor<Probability>(tuneTarget);
     
     RevBayesCore::Proposal *prop = new RevBayesCore::ShrinkExpandProposal(n, s, l);
     prop->setTargetAcceptanceRate(tt);

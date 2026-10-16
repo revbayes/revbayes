@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <iostream>
@@ -78,14 +79,14 @@ void Move_LayeredScaleProposal::constructInternalObject( void )
     //
 
     // now allocate a new move
-     double d = RevBayesCore::assume_cast<const RealPos &>( lambda->getRevObject() ).getValue();
-     double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
-     double r = RevBayesCore::assume_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+     double d = valueFor<RealPos>(lambda);
+     double w = valueFor<RealPos>(weight);
+     double r = valueFor<Probability>(tuneTarget);
 
-     RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = RevBayesCore::assume_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
+     RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = dagNodeFor<TimeTree>(tree);
      RevBayesCore::StochasticNode<RevBayesCore::Tree> *st = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
 
-     bool t = RevBayesCore::assume_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+     bool t = valueFor<RlBoolean>(tune);
 
      RevBayesCore::Proposal *p = new RevBayesCore::LayeredScaleProposal(st, d, r);
      value = new RevBayesCore::MetropolisHastingsMove(p, w, t);

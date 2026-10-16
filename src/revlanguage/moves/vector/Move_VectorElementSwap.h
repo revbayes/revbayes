@@ -1,6 +1,7 @@
 #ifndef Move_VectorElementSwap_H
 #define Move_VectorElementSwap_H
 
+#include "RevVariableUtilities.h"
 #include "RlMove.h"
 #include "TypeUtilities.h"
 #include "TypedDagNode.h"
@@ -88,9 +89,9 @@ void RevLanguage::Move_VectorElementSwap<rlValueType>::constructInternalObject( 
     delete value;
 
     // only neighbors?
-    bool nei = RevBayesCore::assume_cast<const RlBoolean &>( neighbor->getRevObject() ).getValue();
+    bool nei = valueFor<RlBoolean>(neighbor);
     
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<typename rlValueType::valueType> >* tmp = RevBayesCore::assume_cast<const ModelVector<rlValueType> &>( x->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<typename rlValueType::valueType> >* tmp = dagNodeFor<ModelVector<rlValueType>>(x);
     std::vector<const RevBayesCore::DagNode*> par = tmp->getParents();
     std::vector< RevBayesCore::StochasticNode<typename rlValueType::valueType> *> n;
     for (std::vector<const RevBayesCore::DagNode*>::const_iterator it = par.begin(); it != par.end(); ++it)
@@ -107,7 +108,7 @@ void RevLanguage::Move_VectorElementSwap<rlValueType>::constructInternalObject( 
     }
 
     // now allocate a new vector-scale move
-    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double w = valueFor<RealPos>(weight);
     
     RevBayesCore::VectorElementSwapProposal< typename rlValueType::valueType > *p = new RevBayesCore::VectorElementSwapProposal< typename rlValueType::valueType >(n, nei);
     value = new RevBayesCore::MetropolisHastingsMove(p,w);
