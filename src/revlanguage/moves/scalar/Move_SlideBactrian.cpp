@@ -74,7 +74,7 @@ void Move_SlideBactrian::constructInternalObject( void )
     double d = RevBayesCore::assume_cast<const RealPos &>( sigma->getRevObject() ).getValue();
     double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
     double r = RevBayesCore::assume_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<double>* tmp = RevBayesCore::assume_cast<const RealPos &>( x->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* tmp = RevBayesCore::assume_cast<const Real &>( x->getRevObject() ).getDagNode();
     RevBayesCore::ContinuousStochasticNode *n = dynamic_cast<RevBayesCore::ContinuousStochasticNode *>( tmp );
     if ( n != NULL )
     {
