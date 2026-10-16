@@ -53,7 +53,7 @@ Func_reversiblePoMo* Func_reversiblePoMo::clone( void ) const {
 RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_reversiblePoMo::createFunction( void ) const
 {
     RevBayesCore::TypedDagNode<RevBayesCore::Simplex>* bf = dagNodeFor<Simplex>(this->args[0].getVariable());
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* er = dagNodeFor<ModelVector<RealPos>>(this->args[1].getVariable());
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* er = dagNodeFor<ModelVector<Real>>(this->args[1].getVariable());
 
     if ( er->getValue().size() != (bf->getValue().size() * (bf->getValue().size()-1) / 2.0) )
     {
