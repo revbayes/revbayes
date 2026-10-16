@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <ostream>
 #include "TypeUtilities.h"
 #include <string>
@@ -46,18 +47,18 @@ void Mntr_Model::constructInternalObject( void )
     delete value;
     
     // now allocate a new sliding move
-    const std::string&                  fn      = RevBayesCore::assume_cast<const RlString &>( filename->getRevObject() ).getValue();
-    const std::string&                  sep     = RevBayesCore::assume_cast<const RlString &>( separator->getRevObject() ).getValue();
-    unsigned int                        g       = (int)RevBayesCore::assume_cast<const IntegerPos  &>( printgen->getRevObject() ).getValue();
-    bool                                pp      = RevBayesCore::assume_cast<const RlBoolean &>( posterior->getRevObject() ).getValue();
-    bool                                l       = RevBayesCore::assume_cast<const RlBoolean &>( likelihood->getRevObject() ).getValue();
-    bool                                pr      = RevBayesCore::assume_cast<const RlBoolean &>( prior->getRevObject() ).getValue();
-    bool                                ap      = RevBayesCore::assume_cast<const RlBoolean &>( append->getRevObject() ).getValue();
-    bool                                so      = RevBayesCore::assume_cast<const RlBoolean &>( stochOnly->getRevObject() ).getValue();
-    bool                                wv      = RevBayesCore::assume_cast<const RlBoolean &>( version->getRevObject() ).getValue();
-    const std::string&                 fmt      = RevBayesCore::assume_cast<const RlString &>( format->getRevObject() ).getValue();
+    const std::string&                  fn      = valueFor<RlString>(filename);
+    const std::string&                  sep     = valueFor<RlString>(separator);
+    unsigned int                        g       = (int)valueFor<IntegerPos>(printgen);
+    bool                                pp      = valueFor<RlBoolean>(posterior);
+    bool                                l       = valueFor<RlBoolean>(likelihood);
+    bool                                pr      = valueFor<RlBoolean>(prior);
+    bool                                ap      = valueFor<RlBoolean>(append);
+    bool                                so      = valueFor<RlBoolean>(stochOnly);
+    bool                                wv      = valueFor<RlBoolean>(version);
+    const std::string&                 fmt      = valueFor<RlString>(format);
 
-    ModelVector<RlString> excl = RevBayesCore::assume_cast<const ModelVector<RlString> &>(exclude->getRevObject());
+    ModelVector<RlString> excl = objectFor<ModelVector<RlString>>(exclude);
     std::set<std::string> exclude_list;
     for ( size_t i = 0; i < excl.size(); ++i ) {
         exclude_list.insert(excl[i]);

@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "Mntr_JointConditionalAncestralState.h"
 #include "TypeUtilities.h"
 
@@ -57,16 +58,16 @@ void Mntr_JointConditionalAncestralState::constructInternalObject( void )
 {
     namespace Core = RevBayesCore;
 
-    const std::string&              fn      = RevBayesCore::assume_cast<const RlString &>( filename->getRevObject() ).getValue();
-    const std::string&              sep     = RevBayesCore::assume_cast<const RlString &>( separator->getRevObject() ).getValue();
-    unsigned int                    g       = (int)RevBayesCore::assume_cast<const IntegerPos  &>( printgen->getRevObject() ).getValue();
-    Core::TypedDagNode<Core::Tree>* t = RevBayesCore::assume_cast<const Tree &>( tree->getRevObject() ).getDagNode();
+    const std::string&              fn      = valueFor<RlString>(filename);
+    const std::string&              sep     = valueFor<RlString>(separator);
+    unsigned int                    g       = (int)valueFor<IntegerPos>(printgen);
+    Core::TypedDagNode<Core::Tree>* t = dagNodeFor<Tree>(tree);
     
-    bool                            ap      = RevBayesCore::assume_cast<const RlBoolean &>( append->getRevObject() ).getValue();
-    bool                            wt      = RevBayesCore::assume_cast<const RlBoolean &>( withTips->getRevObject() ).getValue();
-    bool                            wss     = RevBayesCore::assume_cast<const RlBoolean &>( withStartStates->getRevObject() ).getValue();
-    bool                            wv      = RevBayesCore::assume_cast<const RlBoolean &>( version->getRevObject() ).getValue();
-    std::string                     character_type = RevBayesCore::assume_cast<const RlString &>( monitorType->getRevObject() ).getValue();
+    bool                            ap      = valueFor<RlBoolean>(append);
+    bool                            wt      = valueFor<RlBoolean>(withTips);
+    bool                            wss     = valueFor<RlBoolean>(withStartStates);
+    bool                            wv      = valueFor<RlBoolean>(version);
+    std::string                     character_type = valueFor<RlString>(monitorType);
     
 
     
@@ -81,7 +82,7 @@ void Mntr_JointConditionalAncestralState::constructInternalObject( void )
 
     if ( ctmc->getRevObject().isModelObject() )
     {
-        ctmc_tdn = RevBayesCore::assume_cast<const RevLanguage::AbstractHomologousDiscreteCharacterData&>( ctmc->getRevObject() ).getDagNode();
+        ctmc_tdn = dagNodeFor<RevLanguage::AbstractHomologousDiscreteCharacterData>(ctmc);
         ctmc_sn  = RevBayesCore::assume_cast<Core::StochasticNode<Core::AbstractHomologousDiscreteCharacterData>* >(ctmc_tdn);
         
         if ( ctmc_sn->getValue().getDataType() != character_type )
@@ -91,12 +92,12 @@ void Mntr_JointConditionalAncestralState::constructInternalObject( void )
     }
     else if ( cdbdp->getRevObject().isModelObject() )
     {
-        cdbdp_tdn = RevBayesCore::assume_cast<const RevLanguage::Tree&>( cdbdp->getRevObject() ).getDagNode();
+        cdbdp_tdn = dagNodeFor<RevLanguage::Tree>(cdbdp);
         cdbdp_sn  = RevBayesCore::assume_cast<Core::StochasticNode<Core::Tree>* >( cdbdp_tdn );
     }
     else if ( glhbdsp->getRevObject().isModelObject() )
     {
-    	glhbdsp_tdn = RevBayesCore::assume_cast<const RevLanguage::Tree&>( glhbdsp->getRevObject() ).getDagNode();
+    	glhbdsp_tdn = dagNodeFor<RevLanguage::Tree>(glhbdsp);
     	glhbdsp_sn  = RevBayesCore::assume_cast<Core::StochasticNode<Core::Tree>* >( glhbdsp_tdn );
     }
     else

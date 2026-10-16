@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -59,10 +60,10 @@ void Mntr_CharacterHistoryNhxFile::constructInternalObject( void ) {
     delete value;
     
     // now allocate a new sliding move
-    const std::string& fn = RevBayesCore::assume_cast<const RlString &>( filename->getRevObject() ).getValue();
-    const std::string& sep = RevBayesCore::assume_cast<const RlString &>( separator->getRevObject() ).getValue();
-    unsigned int g = (int)RevBayesCore::assume_cast<const IntegerPos &>( printgen->getRevObject() ).getValue();
-    unsigned int mg = (int)RevBayesCore::assume_cast<const IntegerPos &>( maxgen->getRevObject() ).getValue();
+    const std::string& fn = valueFor<RlString>(filename);
+    const std::string& sep = valueFor<RlString>(separator);
+    unsigned int g = (int)valueFor<IntegerPos>(printgen);
+    unsigned int mg = (int)valueFor<IntegerPos>(maxgen);
     
     int burn = 0;
 
@@ -77,22 +78,22 @@ void Mntr_CharacterHistoryNhxFile::constructInternalObject( void ) {
         burn = int( mg*f );
     }
 
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree> *t = RevBayesCore::assume_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree> *t = dagNodeFor<TimeTree>(tree);
     
-    RevBayesCore::TypedDagNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_tdn   = RevBayesCore::assume_cast<const RevLanguage::AbstractHomologousDiscreteCharacterData&>( ctmc->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_tdn   = dagNodeFor<RevLanguage::AbstractHomologousDiscreteCharacterData>(ctmc);
     RevBayesCore::StochasticNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_sn  = RevBayesCore::assumeStochastic<RevBayesCore::AbstractHomologousDiscreteCharacterData>( ctmc_tdn );
     
-    const RevBayesCore::TimeAtlas* atl = &( RevBayesCore::assume_cast<const RlAtlas&>( atlas->getRevObject() ).getValue() );
+    const RevBayesCore::TimeAtlas* atl = &( valueFor<RlAtlas>(atlas) );
     
-    bool pp = RevBayesCore::assume_cast<const RlBoolean &>( posterior->getRevObject() ).getValue();
-    bool l = RevBayesCore::assume_cast<const RlBoolean &>( likelihood->getRevObject() ).getValue();
-    bool pr = RevBayesCore::assume_cast<const RlBoolean &>( prior->getRevObject() ).getValue();
+    bool pp = valueFor<RlBoolean>(posterior);
+    bool l = valueFor<RlBoolean>(likelihood);
+    bool pr = valueFor<RlBoolean>(prior);
     
     bool ap = false; // append disabled for now
     bool sm = true; // show metadata disabled for now
     bool sr = false; // show rates
     
-    std::string mt = RevBayesCore::assume_cast<const RlString&>( type->getRevObject() ).getValue();
+    std::string mt = valueFor<RlString>(type);
     if (mt == "std")
         ; // value = XXXXXX
     else if (mt == "biogeo")

@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "Mntr_StochasticBranchRate.h"
 #include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
@@ -50,17 +51,17 @@ Mntr_StochasticBranchRate* Mntr_StochasticBranchRate::clone(void) const
 void Mntr_StochasticBranchRate::constructInternalObject( void )
 {
     
-    const std::string& file_name      = RevBayesCore::assume_cast<const RlString  &>( filename->getRevObject()           ).getValue();
-    const std::string& sep            = RevBayesCore::assume_cast<const RlString  &>( separator->getRevObject()          ).getValue();
-    unsigned int       print_gen      = (int)RevBayesCore::assume_cast<const IntegerPos   &>( printgen->getRevObject()      ).getValue();
-    bool               app            = RevBayesCore::assume_cast<const RlBoolean &>( append->getRevObject()             ).getValue();
-    bool               wv             = RevBayesCore::assume_cast<const RlBoolean &>( version->getRevObject()            ).getValue();
+    const std::string& file_name      = valueFor<RlString>(filename);
+    const std::string& sep            = valueFor<RlString>(separator);
+    unsigned int       print_gen      = (int)valueFor<IntegerPos>(printgen);
+    bool               app            = valueFor<RlBoolean>(append);
+    bool               wv             = valueFor<RlBoolean>(version);
     
     RevBayesCore::StochasticBranchRateMonitor *m;
 
-    if ( RevBayesCore::assume_cast<const RevLanguage::Tree&>( cdbdp->getRevObject() ).isModelObject() )
+    if ( objectFor<RevLanguage::Tree>(cdbdp).isModelObject() )
     {
-        RevBayesCore::TypedDagNode<RevBayesCore::Tree>* cdbdp_tdn = RevBayesCore::assume_cast<const RevLanguage::Tree&>( cdbdp->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<RevBayesCore::Tree>* cdbdp_tdn = dagNodeFor<RevLanguage::Tree>(cdbdp);
         RevBayesCore::StochasticNode<RevBayesCore::Tree>* cdbdp_sn  = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( cdbdp_tdn );
 
         RevBayesCore::StateDependentSpeciationExtinctionProcess *sse_process = NULL;
@@ -71,9 +72,9 @@ void Mntr_StochasticBranchRate::constructInternalObject( void )
         m->setAppend( app );
         m->setPrintVersion( wv );
     }
-    else if ( RevBayesCore::assume_cast<const RevLanguage::Tree&>( glhbdsp->getRevObject() ).isModelObject() )
+    else if ( objectFor<RevLanguage::Tree>(glhbdsp).isModelObject() )
     {
-        RevBayesCore::TypedDagNode<RevBayesCore::Tree>* glhbdsp_tdn = RevBayesCore::assume_cast<const RevLanguage::Tree&>( glhbdsp->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<RevBayesCore::Tree>* glhbdsp_tdn = dagNodeFor<RevLanguage::Tree>(glhbdsp);
         RevBayesCore::StochasticNode<RevBayesCore::Tree>* glhbdsp_sn  = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( glhbdsp_tdn );
 
         m = new RevBayesCore::StochasticBranchRateMonitor( glhbdsp_sn, (std::uint64_t)print_gen, file_name, sep );

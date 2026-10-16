@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "Mntr_HomeologPhase.h"
 #include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
@@ -44,19 +45,19 @@ Mntr_HomeologPhase* Mntr_HomeologPhase::clone(void) const
 
 void Mntr_HomeologPhase::constructInternalObject( void )
 {
-    const std::string&                  fn      = RevBayesCore::assume_cast<const RlString &>( filename->getRevObject() ).getValue();
-    const std::string&                  sep     = RevBayesCore::assume_cast<const RlString &>( separator->getRevObject() ).getValue();
-    unsigned int                        g       = (int)RevBayesCore::assume_cast<const IntegerPos  &>( printgen->getRevObject() ).getValue();
+    const std::string&                  fn      = valueFor<RlString>(filename);
+    const std::string&                  sep     = valueFor<RlString>(separator);
+    unsigned int                        g       = (int)valueFor<IntegerPos>(printgen);
     
-    bool                                ap      = RevBayesCore::assume_cast<const RlBoolean &>( append->getRevObject() ).getValue();
-    bool                                wv      = RevBayesCore::assume_cast<const RlBoolean &>( version->getRevObject() ).getValue();
+    bool                                ap      = valueFor<RlBoolean>(append);
+    bool                                wv      = valueFor<RlBoolean>(version);
     
 
     
     RevBayesCore::TypedDagNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_tdn = NULL;
     RevBayesCore::StochasticNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_sn = NULL;
     
-    ctmc_tdn = RevBayesCore::assume_cast<const RevLanguage::AbstractHomologousDiscreteCharacterData&>( ctmc->getRevObject() ).getDagNode();
+    ctmc_tdn = dagNodeFor<RevLanguage::AbstractHomologousDiscreteCharacterData>(ctmc);
     ctmc_sn  = RevBayesCore::assumeStochastic<RevBayesCore::AbstractHomologousDiscreteCharacterData>( ctmc_tdn );
         
     

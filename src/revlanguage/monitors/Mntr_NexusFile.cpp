@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "Mntr_NexusFile.h"
 #include "TypeUtilities.h"
 
@@ -36,9 +37,9 @@ void Mntr_NexusFile::constructInternalObject( void ) {
     delete value;
 
     // now allocate a new monitor
-    const std::string& fn = RevBayesCore::assume_cast<const RlString &>( filename->getRevObject() ).getValue();
-    unsigned int g = (int)RevBayesCore::assume_cast<const IntegerPos &>( printgen->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree> *t = RevBayesCore::assume_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
+    const std::string& fn = valueFor<RlString>(filename);
+    unsigned int g = (int)valueFor<IntegerPos>(printgen);
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree> *t = dagNodeFor<TimeTree>(tree);
 
     vars.erase( unique( vars.begin(), vars.end() ), vars.end() );
     sort( vars.begin(), vars.end(), compareVarNames );
@@ -49,8 +50,8 @@ void Mntr_NexusFile::constructInternalObject( void ) {
         n.push_back( node );
     }
 
-    bool np = RevBayesCore::assume_cast<const RlBoolean &>( isNodeParameter->getRevObject() ).getValue();
-    bool taxa = RevBayesCore::assume_cast<const RlBoolean &>( writeTaxa->getRevObject() ).getValue();
+    bool np = valueFor<RlBoolean>(isNodeParameter);
+    bool taxa = valueFor<RlBoolean>(writeTaxa);
 
     RevBayesCore::NexusMonitor* m = new RevBayesCore::NexusMonitor(t, n, np, size_t(g), fn, false, taxa);
     value = m;

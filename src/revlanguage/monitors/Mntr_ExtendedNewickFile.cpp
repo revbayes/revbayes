@@ -1,4 +1,5 @@
 
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <algorithm>
@@ -57,11 +58,11 @@ void Mntr_ExtendedNewickFile::constructInternalObject( void )
     delete value;
     
     // now allocate a new sliding move
-    const std::string& fn = RevBayesCore::assume_cast<const RlString &>( filename->getRevObject() ).getValue();
-    const std::string& sep = RevBayesCore::assume_cast<const RlString &>( separator->getRevObject() ).getValue();
-    unsigned int g = (int)RevBayesCore::assume_cast<const IntegerPos &>( printgen->getRevObject() ).getValue();
-    bool wv = RevBayesCore::assume_cast<const RlBoolean &>( version->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree> *t = RevBayesCore::assume_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
+    const std::string& fn = valueFor<RlString>(filename);
+    const std::string& sep = valueFor<RlString>(separator);
+    unsigned int g = (int)valueFor<IntegerPos>(printgen);
+    bool wv = valueFor<RlBoolean>(version);
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree> *t = dagNodeFor<TimeTree>(tree);
     
     vars.erase( unique( vars.begin(), vars.end() ), vars.end() );
     sort( vars.begin(), vars.end(), compareVarNames );
@@ -79,10 +80,10 @@ void Mntr_ExtendedNewickFile::constructInternalObject( void )
 //        RevBayesCore::DagNode* node = (*i)->getRevObject().getDagNode();
 //        n.insert( node );
 //    }
-    bool np = RevBayesCore::assume_cast<const RlBoolean &>( isNodeParameter->getRevObject() ).getValue();
-    bool pp = RevBayesCore::assume_cast<const RlBoolean &>( posterior->getRevObject() ).getValue();
-    bool l = RevBayesCore::assume_cast<const RlBoolean &>( likelihood->getRevObject() ).getValue();
-    bool pr = RevBayesCore::assume_cast<const RlBoolean &>( prior->getRevObject() ).getValue();
+    bool np = valueFor<RlBoolean>(isNodeParameter);
+    bool pp = valueFor<RlBoolean>(posterior);
+    bool l = valueFor<RlBoolean>(likelihood);
+    bool pr = valueFor<RlBoolean>(prior);
 
     RevBayesCore::ExtendedNewickTreeMonitor* m = new RevBayesCore::ExtendedNewickTreeMonitor(t, n, np, size_t(g), fn, sep, pp, l, pr);
 
