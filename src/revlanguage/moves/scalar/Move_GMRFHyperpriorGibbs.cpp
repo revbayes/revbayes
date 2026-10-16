@@ -61,7 +61,7 @@ void Move_GMRFHyperpriorGibbs::constructInternalObject( void )
     RevBayesCore::TypedDagNode<double>* tmp = RevBayesCore::assume_cast<const RealPos &>( x->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<double> *g = RevBayesCore::assumeStochastic<double>( tmp );
 
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp2 = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( normals->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp2 = RevBayesCore::assume_cast<const ModelVector<Real> &>( normals->getRevObject() ).getDagNode();
     std::vector<const RevBayesCore::DagNode*> p = tmp2->getParents();
     std::vector< RevBayesCore::StochasticNode<double> *> n;
     for (std::vector<const RevBayesCore::DagNode*>::const_iterator it = p.begin(); it != p.end(); ++it)
