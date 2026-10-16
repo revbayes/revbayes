@@ -1,6 +1,7 @@
 #ifndef Func_fnNormalizedQuantile_H
 #define Func_fnNormalizedQuantile_H
 
+#include <memory>
 #include "ModelVector.h"
 #include "RlTypedFunction.h"
 
@@ -66,17 +67,19 @@ RevBayesCore::TypedFunction< RevBayesCore::RbVector<double> >* Func_fnNormalized
 {
     
     const auto& rlDistribution = static_cast<const TypedDistribution<valType>&>( this->args[0].getVariable()->getRevObject() );
-    RevBayesCore::ContinuousDistribution* dist     = static_cast<RevBayesCore::ContinuousDistribution* >( rlDistribution.createDistribution() );    
+    std::unique_ptr<RevBayesCore::ContinuousDistribution> dist(
+        static_cast<RevBayesCore::ContinuousDistribution*>(rlDistribution.createDistribution()) );    
     
     int nc = (int)static_cast<const Integer &>( this->args[1].getVariable()->getRevObject() ).getValue();
     
     double binWidth = 1.0 / ((double)nc);
     double binMid = binWidth * 0.5;
     std::vector<const RevBayesCore::TypedDagNode<double> *> gRates = std::vector<const RevBayesCore::TypedDagNode<double>* >();
+    // Each quantile function owns its distribution; sharing one pointer would delete it repeatedly.
     for (int i=1; i<=nc; i++)
     {
         RevBayesCore::ConstantNode<double> *quant = new RevBayesCore::ConstantNode<double>("", new double((double)i * binWidth - binMid));
-        RevBayesCore::DeterministicNode<double> *tmp = new RevBayesCore::DeterministicNode<double>("", new RevBayesCore::QuantileFunction(quant,  dist));
+        RevBayesCore::DeterministicNode<double> *tmp = new RevBayesCore::DeterministicNode<double>("", new RevBayesCore::QuantileFunction(quant, dist->clone()));
 		gRates.push_back( tmp );
     }
     RevBayesCore::DeterministicNode< RevBayesCore::RbVector<double> > *discRates = new RevBayesCore::DeterministicNode< RevBayesCore::RbVector<double> >( "", new RevBayesCore::VectorFunction<double>(gRates) );
