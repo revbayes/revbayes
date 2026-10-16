@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include <cstddef>
 #include <iostream>
 #include <map>
@@ -117,7 +118,7 @@ HomologousDiscreteCharacterData<PoMoState4>* PoMoState4Converter::convertData(
         for (size_t c = 0; c < d.getNumberOfCharacters(); ++c) {
             for (std::vector<std::string>::const_iterator seq = it->second.begin(); seq != it->second.end(); seq++) {
                 size_t index = d.getIndexOfTaxon(*seq);
-                const DnaState* ch = static_cast< const DnaState*>(&(d.getCharacter(index, c)));
+                const DnaState* ch = assume_cast< const DnaState*>(&(d.getCharacter(index, c)));
                 size_t chIndex = 0;
                 if (ch->getStringValue()=="A") {
                     chIndex = 0;

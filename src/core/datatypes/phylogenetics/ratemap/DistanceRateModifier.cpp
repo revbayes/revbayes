@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include <cmath>
 #include <cstddef>
 #include <ostream>
@@ -168,7 +169,7 @@ double DistanceRateModifier::computeRateMultiplier(std::vector<CharacterEvent *>
             std::set<size_t>::iterator it;
             for (it = availableAreaSet[epochIdx].begin(); it != availableAreaSet[epochIdx].end(); it++)
             {
-                if ( static_cast<CharacterEventDiscrete*>(currState[*it])->getState() == 1)
+                if ( assume_cast<CharacterEventDiscrete*>(currState[*it])->getState() == 1)
                 {
                     present.insert(currState[*it]);
                 }
@@ -256,7 +257,7 @@ double DistanceRateModifier::computeRateMultiplier(std::vector<CharacterEvent *>
         {
             for (it = availableAreaSet[epochIdx].begin(); it != availableAreaSet[epochIdx].end(); it++)
             {
-                if ( static_cast<CharacterEventDiscrete*>(currState[*it])->getState() == 0)
+                if ( assume_cast<CharacterEventDiscrete*>(currState[*it])->getState() == 0)
                 {
                     absent.insert(currState[*it]);
                 }
@@ -270,14 +271,14 @@ double DistanceRateModifier::computeRateMultiplier(std::vector<CharacterEvent *>
         {
             for (it = availableAreaSet[epochIdx].begin(); it != availableAreaSet[epochIdx].end(); it++)
             {
-                if ( static_cast<CharacterEventDiscrete*>(currState[*it])->getState() == 1)
+                if ( assume_cast<CharacterEventDiscrete*>(currState[*it])->getState() == 1)
                 {
                     std::set<size_t>::const_iterator it_adj;
                     const std::set<size_t> adj = adjacentAreaSet[epochIdx*numAreas + *it];
                     int n = 0;
                     for (it_adj = adj.begin(); it_adj != adj.end(); it_adj++)
                     {
-                        if ( static_cast<CharacterEventDiscrete*>(currState[*it_adj])->getState() == 0)
+                        if ( assume_cast<CharacterEventDiscrete*>(currState[*it_adj])->getState() == 0)
                         {
                             absent.insert(currState[*it_adj]);
                             n++;
@@ -586,7 +587,7 @@ unsigned DistanceRateModifier::getNumAvailableAreas( std::vector<CharacterEvent*
     std::set<size_t>::iterator it;
     for (it = availableAreaSet[epochIdx].begin(); it != availableAreaSet[epochIdx].end(); it++)
     {
-        if ( static_cast<CharacterEventDiscrete*>(currState[*it])->getState() == 0)
+        if ( assume_cast<CharacterEventDiscrete*>(currState[*it])->getState() == 0)
         {
             absent.insert(currState[*it]);
         }
@@ -633,7 +634,7 @@ unsigned DistanceRateModifier::getNumEmigratableAreas( std::vector<CharacterEven
     std::set<size_t>::iterator it;
     for (it = availableAreaSet[epochIdx].begin(); it != availableAreaSet[epochIdx].end(); it++)
     {
-        if ( static_cast<CharacterEventDiscrete*>(currState[*it])->getState() == 0)
+        if ( assume_cast<CharacterEventDiscrete*>(currState[*it])->getState() == 0)
         {
             absent.insert(currState[*it]);
         }
