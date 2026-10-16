@@ -1,6 +1,6 @@
+#include "DagNodeTypeUtilities.h"
 #include "RevVariableUtilities.h"
 #include <cstddef>
-#include "TypeUtilities.h"
 #include <ostream>
 #include <string>
 #include <vector>
@@ -66,7 +66,7 @@ void Move_HSRFIntervalSwap::constructInternalObject( void )
     std::vector< RevBayesCore::StochasticNode<double> *> s;
     for (std::vector<const RevBayesCore::DagNode*>::const_iterator it = p1.begin(); it != p1.end(); ++it)
     {
-        const RevBayesCore::StochasticNode<double> *the_node = dynamic_cast< const RevBayesCore::StochasticNode<double>* >( *it );
+        const RevBayesCore::StochasticNode<double> *the_node = RevBayesCore::checkStochastic<double>(*it);
         if ( the_node != NULL )
         {
             s.push_back( const_cast< RevBayesCore::StochasticNode<double>* >( the_node ) );
@@ -82,7 +82,7 @@ void Move_HSRFIntervalSwap::constructInternalObject( void )
     std::vector< RevBayesCore::StochasticNode<double> *> d;
     for (std::vector<const RevBayesCore::DagNode*>::const_iterator it = p2.begin(); it != p2.end(); ++it)
     {
-        const RevBayesCore::StochasticNode<double> *the_node = dynamic_cast< const RevBayesCore::StochasticNode<double>* >( *it );
+        const RevBayesCore::StochasticNode<double> *the_node = RevBayesCore::checkStochastic<double>(*it);
         if ( the_node != NULL )
         {
             d.push_back( const_cast< RevBayesCore::StochasticNode<double>* >( the_node ) );

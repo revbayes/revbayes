@@ -576,7 +576,7 @@ void UltrametricTreeDistribution::executeMethod(const std::string &n, const std:
     if ( n == "getSampleProbabilities" )
     {
 
-        bool log_transorm = RevBayesCore::assume_cast<const TypedDagNode<Boolean>* >( args[0] )->getValue();
+        bool log_transorm = RevBayesCore::getValueOfType<Boolean>(args[0]);
 
         rv.clear();
         rv.resize(num_samples);

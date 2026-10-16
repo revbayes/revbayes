@@ -1,6 +1,7 @@
 #ifndef RlDistributionMemberFunction_H
 #define RlDistributionMemberFunction_H
 
+#include "DagNodeTypeUtilities.h"
 #include "RlMemberMethod.h"
 #include "TypeUtilities.h"
 #include "RlTypedFunction.h"
@@ -86,7 +87,8 @@ RevBayesCore::TypedFunction< typename retType::valueType >* RevLanguage::Distrib
     }
     
     const RevBayesCore::TypedDagNode<typename distributionType::rbValueType>* tmp = the_member_object->getDagNode();
-    const RevBayesCore::StochasticNode<typename distributionType::rbValueType>* o = dynamic_cast<const RevBayesCore::StochasticNode<typename distributionType::rbValueType>* >( tmp );
+    const RevBayesCore::StochasticNode<typename distributionType::rbValueType>* o =
+        RevBayesCore::checkStochastic<typename distributionType::rbValueType>(tmp);
     if ( o == NULL )
     {
         throw RbException("Could not cast the member object.");

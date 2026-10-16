@@ -712,7 +712,7 @@ void RevBayesCore::CTMCProcess<charType>::executeMethod(const std::string &n, co
 
         // now either sample the site rates according to the conditional posterior probability of each rate category
         // or compute them as the posterior mean
-        std::string method = RevBayesCore::assume_cast<const TypedDagNode<std::string>* >( args[0] )->getValue();
+        std::string method = RevBayesCore::getValueOfType<std::string>(args[0]);
 
         if (method == "sampling")
         {

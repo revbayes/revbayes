@@ -5,8 +5,8 @@
 //  Created by David Cerny on 2019-10-15.
 //
 
+#include "DagNodeTypeUtilities.h"
 #include <cmath>
-#include "TypeUtilities.h"
 #include <cstring>
 #include <iomanip>
 #include <ostream>
@@ -148,7 +148,7 @@ void MatrixBoolean::executeMethod(const std::string &n, const std::vector<const 
     
     if ( n == "[]" )
     {
-        size_t index = (size_t)RevBayesCore::assume_cast<const TypedDagNode<std::int64_t> *>( args[0] )->getValue() - 1;
+        size_t index = (size_t)RevBayesCore::getValueOfType<std::int64_t>(args[0]) - 1;
         boost::dynamic_bitset<> tmp = elements[index];
         
         for (size_t i = 0; i < tmp.size(); i++)

@@ -73,10 +73,10 @@ FossilizedBirthDeathSpeciationProcess::FossilizedBirthDeathSpeciationProcess(con
     heterogeneous_lambda_a           = NULL;
     heterogeneous_beta               = NULL;
 
-    heterogeneous_lambda_a = dynamic_cast<const TypedDagNode<RbVector<double> >*>(inlambda_a);
-    homogeneous_lambda_a   = dynamic_cast<const TypedDagNode<double >*>(inlambda_a);
-    heterogeneous_beta     = dynamic_cast<const TypedDagNode<RbVector<double> >*>(inbeta);
-    homogeneous_beta       = dynamic_cast<const TypedDagNode<double >*>(inbeta);
+    heterogeneous_lambda_a = RevBayesCore::checkNodeOfType<RbVector<double>>(inlambda_a);
+    homogeneous_lambda_a   = RevBayesCore::checkNodeOfType<double>(inlambda_a);
+    heterogeneous_beta     = RevBayesCore::checkNodeOfType<RbVector<double>>(inbeta);
+    homogeneous_beta       = RevBayesCore::checkNodeOfType<double>(inbeta);
 
     addParameter( homogeneous_lambda_a );
     addParameter( heterogeneous_lambda_a );

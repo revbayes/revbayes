@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include <cmath>
 #include "TypeUtilities.h"
 #include <algorithm>
@@ -384,12 +385,12 @@ void Tree::executeMethod(const std::string &n, const std::vector<const DagNode *
     }
     else if ( n == "branchLength" )
     {
-        int index = (int)RevBayesCore::assume_cast<const TypedDagNode<std::int64_t> *>( args[0] )->getValue()-1;
+        int index = (int)RevBayesCore::getValueOfType<std::int64_t>(args[0])-1;
         rv = getNode( index ).getBranchLength();
     }
     else if ( n == "nodeAge" )
     {
-        int index = (int)RevBayesCore::assume_cast<const TypedDagNode<std::int64_t> *>( args[0] )->getValue()-1;
+        int index = (int)RevBayesCore::getValueOfType<std::int64_t>(args[0])-1;
         rv = getNode( index ).getAge();
     }
     else if ( n == "treeLength" )
@@ -402,13 +403,15 @@ void Tree::executeMethod(const std::string &n, const std::vector<const DagNode *
     }
     else if ( n == "meanInverseES" )
     {
-        const TypedDagNode< AbstractHomologousDiscreteCharacterData >* c = RevBayesCore::assume_cast<const TypedDagNode< AbstractHomologousDiscreteCharacterData >* >( args[0] );
+        const TypedDagNode< AbstractHomologousDiscreteCharacterData >* c =
+            RevBayesCore::assumeNodeHolds<AbstractHomologousDiscreteCharacterData>(args[0]);
         size_t state_index = (size_t)RevBayesCore::assume_cast<const TypedDagNode<int> *>( args[1] )->getValue();
         rv = RevBayesCore::TreeUtilities::getMeanInverseES( *this, c->getValue(), state_index );
     }
     else if ( n == "calculateMPD" )
     {
-        const TypedDagNode< AbstractHomologousDiscreteCharacterData >* c = RevBayesCore::assume_cast<const TypedDagNode< AbstractHomologousDiscreteCharacterData >* >( args[0] );
+        const TypedDagNode< AbstractHomologousDiscreteCharacterData >* c =
+            RevBayesCore::assumeNodeHolds<AbstractHomologousDiscreteCharacterData>(args[0]);
         size_t state_index = (size_t)RevBayesCore::assume_cast<const TypedDagNode<int> *>( args[1] )->getValue();
         size_t site_index = (size_t)RevBayesCore::assume_cast<const TypedDagNode<int> *>( args[2] )->getValue() - 1;
         // why doesn't this work?
@@ -428,7 +431,8 @@ void Tree::executeMethod(const std::string &n, const std::vector<const DagNode *
     }
     else if ( n == "calculateMNTD" )
     {
-        const TypedDagNode< AbstractHomologousDiscreteCharacterData >* c = RevBayesCore::assume_cast<const TypedDagNode< AbstractHomologousDiscreteCharacterData >* >( args[0] );
+        const TypedDagNode< AbstractHomologousDiscreteCharacterData >* c =
+            RevBayesCore::assumeNodeHolds<AbstractHomologousDiscreteCharacterData>(args[0]);
         size_t state_index = (size_t)RevBayesCore::assume_cast<const TypedDagNode<int> *>( args[1] )->getValue();
         size_t site_index = (size_t)RevBayesCore::assume_cast<const TypedDagNode<int> *>( args[2] )->getValue() - 1;
         // why doesn't this work?
@@ -459,7 +463,7 @@ void Tree::executeMethod(const std::string &n, const std::vector<const DagNode *
 
     if ( n == "parent" )
     {
-        std::int64_t index = RevBayesCore::assume_cast<const TypedDagNode<std::int64_t> *>( args[0] )->getValue()-1;
+        std::int64_t index = RevBayesCore::getValueOfType<std::int64_t>(args[0])-1;
         if (getNode( index ).isRoot() == true)
         {
             throw RbException("Root has no parent.");
@@ -513,7 +517,8 @@ void Tree::executeMethod(const std::string &n, const std::vector<const DagNode *
     }
     else if ( n == "fitchScore" )
     {
-        const TypedDagNode< AbstractHomologousDiscreteCharacterData >* c = RevBayesCore::assume_cast<const TypedDagNode< AbstractHomologousDiscreteCharacterData >* >( args[0] );
+        const TypedDagNode< AbstractHomologousDiscreteCharacterData >* c =
+            RevBayesCore::assumeNodeHolds<AbstractHomologousDiscreteCharacterData>(args[0]);
         rv = RevBayesCore::TreeUtilities::getFitchScore( *this, c->getValue() );
     }
     else
@@ -529,8 +534,8 @@ void Tree::executeMethod(const std::string &n, const std::vector<const DagNode *
 
     if ( n == "isContainedInClade" )
     {
-        int index = (int)RevBayesCore::assume_cast<const TypedDagNode<std::int64_t> *>( args[0] )->getValue()-1;
-        Clade clade = RevBayesCore::assume_cast<const TypedDagNode<Clade> *>( args[1] )->getValue();
+        int index = (int)RevBayesCore::getValueOfType<std::int64_t>(args[0])-1;
+        Clade clade = RevBayesCore::getValueOfType<Clade>(args[1]);
         clade.resetTaxonBitset( getTaxonBitSetMap() );
 
         if ( index < 0 || index >= nodes.size() )
@@ -578,7 +583,7 @@ void Tree::executeMethod(const std::string &n, const std::vector<const DagNode *
     }
     else if ( n == "containsClade" )
     {
-        Clade clade = RevBayesCore::assume_cast<const TypedDagNode<Clade> *>( args[0] )->getValue();
+        Clade clade = RevBayesCore::getValueOfType<Clade>(args[0]);
         clade.resetTaxonBitset( getTaxonBitSetMap() );
 
         bool contained = root->containsClade(clade, true);
@@ -587,7 +592,7 @@ void Tree::executeMethod(const std::string &n, const std::vector<const DagNode *
     }
     else if ( n == "hasSameTopology" )
     {
-        const Tree& t = RevBayesCore::assume_cast<const TypedDagNode<Tree> *>( args[0] )->getValue();
+        const Tree& t = RevBayesCore::getValueOfType<Tree>(args[0]);
 
         rv = Boolean( hasSameTopology(t) );
     }

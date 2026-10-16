@@ -130,45 +130,45 @@ BirthDeathSamplingTreatmentProcess::BirthDeathSamplingTreatmentProcess(const Typ
     addParameter( interval_times_event_extinction );
     addParameter( interval_times_event_sampling );
 
-    heterogeneous_lambda = dynamic_cast<const TypedDagNode<RbVector<double> >*>(in_speciation);
-    homogeneous_lambda   = dynamic_cast<const TypedDagNode<double >*>(in_speciation);
+    heterogeneous_lambda = RevBayesCore::checkNodeOfType<RbVector<double>>(in_speciation);
+    homogeneous_lambda   = RevBayesCore::checkNodeOfType<double>(in_speciation);
 
     addParameter( homogeneous_lambda );
     addParameter( heterogeneous_lambda );
 
-    heterogeneous_mu = dynamic_cast<const TypedDagNode<RbVector<double> >*>(in_extinction);
-    homogeneous_mu   = dynamic_cast<const TypedDagNode<double >*>(in_extinction);
+    heterogeneous_mu = RevBayesCore::checkNodeOfType<RbVector<double>>(in_extinction);
+    homogeneous_mu   = RevBayesCore::checkNodeOfType<double>(in_extinction);
 
     addParameter( homogeneous_mu );
     addParameter( heterogeneous_mu );
 
-    heterogeneous_phi = dynamic_cast<const TypedDagNode<RbVector<double> >*>(in_sampling);
-    homogeneous_phi   = dynamic_cast<const TypedDagNode<double >*>(in_sampling);
+    heterogeneous_phi = RevBayesCore::checkNodeOfType<RbVector<double>>(in_sampling);
+    homogeneous_phi   = RevBayesCore::checkNodeOfType<double>(in_sampling);
 
     addParameter( homogeneous_phi );
     addParameter( heterogeneous_phi );
 
-    heterogeneous_r = dynamic_cast<const TypedDagNode<RbVector<double> >*>(in_treatment);
-    homogeneous_r   = dynamic_cast<const TypedDagNode<double >*>(in_treatment);
+    heterogeneous_r = RevBayesCore::checkNodeOfType<RbVector<double>>(in_treatment);
+    homogeneous_r   = RevBayesCore::checkNodeOfType<double>(in_treatment);
 
     addParameter( homogeneous_r );
     addParameter( heterogeneous_r );
 
-    heterogeneous_Lambda = dynamic_cast<const TypedDagNode<RbVector<double> >*>(in_event_speciation);
+    heterogeneous_Lambda = RevBayesCore::checkNodeOfType<RbVector<double>>(in_event_speciation);
 
     addParameter( heterogeneous_Lambda );
 
-    heterogeneous_Mu = dynamic_cast<const TypedDagNode<RbVector<double> >*>(in_event_extinction);
+    heterogeneous_Mu = RevBayesCore::checkNodeOfType<RbVector<double>>(in_event_extinction);
 
     addParameter( heterogeneous_Mu );
 
-    heterogeneous_Phi = dynamic_cast<const TypedDagNode<RbVector<double> >*>(in_event_sampling);
-    homogeneous_Phi   = dynamic_cast<const TypedDagNode<double >*>(in_event_sampling);  
+    heterogeneous_Phi = RevBayesCore::checkNodeOfType<RbVector<double>>(in_event_sampling);
+    homogeneous_Phi   = RevBayesCore::checkNodeOfType<double>(in_event_sampling);  
 
     addParameter( homogeneous_Phi );
     addParameter( heterogeneous_Phi );
 
-    heterogeneous_R = dynamic_cast<const TypedDagNode<RbVector<double> >*>(in_event_treatment);
+    heterogeneous_R = RevBayesCore::checkNodeOfType<RbVector<double>>(in_event_treatment);
 
     addParameter( heterogeneous_R );
 

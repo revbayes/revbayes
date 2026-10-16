@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "ContinuousCharacterData.h"
 #include "TypeUtilities.h"
 
@@ -392,8 +393,8 @@ void ContinuousCharacterData::executeMethod(const std::string &n, const std::vec
     
     if ( n == "get" )
     {
-        std::int64_t index_taxon = RevBayesCore::assume_cast<const TypedDagNode<std::int64_t> *>( args[0] )->getValue()-1;
-        std::int64_t index_site = RevBayesCore::assume_cast<const TypedDagNode<std::int64_t> *>( args[1] )->getValue()-1;
+        std::int64_t index_taxon = RevBayesCore::getValueOfType<std::int64_t>(args[0])-1;
+        std::int64_t index_site = RevBayesCore::getValueOfType<std::int64_t>(args[1])-1;
         rv = getTaxonData(index_taxon)[index_site];
     }
     else

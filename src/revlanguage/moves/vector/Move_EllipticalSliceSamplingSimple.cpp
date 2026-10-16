@@ -1,6 +1,6 @@
+#include "DagNodeTypeUtilities.h"
 #include "RevVariableUtilities.h"
 #include <cstddef>
-#include "TypeUtilities.h"
 #include <ostream>
 #include <string>
 #include <vector>
@@ -81,7 +81,7 @@ void Move_EllipticalSliceSamplingSimple::constructInternalObject( void )
     std::vector< RevBayesCore::StochasticNode<double> *> n;
     for (std::vector<const RevBayesCore::DagNode*>::const_iterator it = p.begin(); it != p.end(); ++it)
     {
-        const RevBayesCore::StochasticNode<double> *the_node = dynamic_cast< const RevBayesCore::StochasticNode<double>* >( *it );
+        const RevBayesCore::StochasticNode<double> *the_node = RevBayesCore::checkStochastic<double>(*it);
         if ( the_node != NULL )
         {
             n.push_back( const_cast< RevBayesCore::StochasticNode<double>* >( the_node ) );

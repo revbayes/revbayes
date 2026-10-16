@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "SiteMixtureModel.h"
 
 #include <cmath>
@@ -103,9 +104,9 @@ void SiteMixtureModel::executeMethod( const std::string &n, const std::vector<co
         // clear old values
         rv.clear();
 
-        auto& tree = dynamic_cast<const TypedDagNode<Tree> *>( args[0] )->getValue();
-        int node = dynamic_cast<const TypedDagNode<std::int64_t> *>( args[1] )->getValue() - 1; // Natural
-        double rate = dynamic_cast<const TypedDagNode<double> *>( args[2] )->getValue();
+        auto& tree = RevBayesCore::getValueOfType<Tree>(args[0]);
+        int node = RevBayesCore::getValueOfType<std::int64_t>(args[1]) - 1; // Natural
+        double rate = RevBayesCore::getValueOfType<double>(args[2]);
 
         if (node < 0 or node >= tree.getNumberOfNodes())
             throw RbException()<<"SiteMixtureModel.getTransitionProbabilities(tree,node,rate): node "<<node<<" is out of range.  Tree only has "<<tree.getNumberOfNodes()<<" nodes.";

@@ -96,37 +96,37 @@ InferAncestralPopSizeFunctionPiecewise::InferAncestralPopSizeFunctionPiecewise( 
 
 	addParameter( interval_times );
 
-	heterogeneous_lambda = dynamic_cast<const TypedDagNode<RbVector<double> >*>(inspeciation);
-	homogeneous_lambda   = dynamic_cast<const TypedDagNode<double >*>(inspeciation);
+	heterogeneous_lambda = RevBayesCore::checkNodeOfType<RbVector<double>>(inspeciation);
+	homogeneous_lambda   = RevBayesCore::checkNodeOfType<double>(inspeciation);
 
 	addParameter( homogeneous_lambda );
 	addParameter( heterogeneous_lambda );
 
-	heterogeneous_mu = dynamic_cast<const TypedDagNode<RbVector<double> >*>(inextinction);
-	homogeneous_mu   = dynamic_cast<const TypedDagNode<double >*>(inextinction);
+	heterogeneous_mu = RevBayesCore::checkNodeOfType<RbVector<double>>(inextinction);
+	homogeneous_mu   = RevBayesCore::checkNodeOfType<double>(inextinction);
 
 	addParameter( homogeneous_mu );
 	addParameter( heterogeneous_mu );
 
-	heterogeneous_psi = dynamic_cast<const TypedDagNode<RbVector<double> >*>(inserialsampling);
-	homogeneous_psi   = dynamic_cast<const TypedDagNode<double >*>(inserialsampling);
+	heterogeneous_psi = RevBayesCore::checkNodeOfType<RbVector<double>>(inserialsampling);
+	homogeneous_psi   = RevBayesCore::checkNodeOfType<double>(inserialsampling);
 
 	addParameter( homogeneous_psi );
 	addParameter( heterogeneous_psi );
 
-	heterogeneous_r = dynamic_cast<const TypedDagNode<RbVector<double> >*>(intreatment);
-	homogeneous_r   = dynamic_cast<const TypedDagNode<double >*>(intreatment);
+	heterogeneous_r = RevBayesCore::checkNodeOfType<RbVector<double>>(intreatment);
+	homogeneous_r   = RevBayesCore::checkNodeOfType<double>(intreatment);
 
 	addParameter( homogeneous_r );
 	addParameter( heterogeneous_r );
 
-	heterogeneous_o = dynamic_cast<const TypedDagNode<RbVector<double> >*>(inoccurrence);
-	homogeneous_o   = dynamic_cast<const TypedDagNode<double >*>(inoccurrence);
+	heterogeneous_o = RevBayesCore::checkNodeOfType<RbVector<double>>(inoccurrence);
+	homogeneous_o   = RevBayesCore::checkNodeOfType<double>(inoccurrence);
 
 	addParameter( homogeneous_o );
 	addParameter( heterogeneous_o );
 
-	homogeneous_rho = dynamic_cast<const TypedDagNode<double >*>(ineventsampling);
+	homogeneous_rho = RevBayesCore::checkNodeOfType<double>(ineventsampling);
 
 	addParameter( homogeneous_rho );
 

@@ -1,9 +1,9 @@
 #ifndef Move_VectorElementSwap_H
 #define Move_VectorElementSwap_H
 
+#include "DagNodeTypeUtilities.h"
 #include "RevVariableUtilities.h"
 #include "RlMove.h"
-#include "TypeUtilities.h"
 #include "TypedDagNode.h"
 
 #include <ostream>
@@ -96,7 +96,8 @@ void RevLanguage::Move_VectorElementSwap<rlValueType>::constructInternalObject( 
     std::vector< RevBayesCore::StochasticNode<typename rlValueType::valueType> *> n;
     for (std::vector<const RevBayesCore::DagNode*>::const_iterator it = par.begin(); it != par.end(); ++it)
     {
-        const RevBayesCore::StochasticNode<typename rlValueType::valueType> *the_node = dynamic_cast< const RevBayesCore::StochasticNode<typename rlValueType::valueType>* >( *it );
+        const RevBayesCore::StochasticNode<typename rlValueType::valueType> *the_node =
+            RevBayesCore::checkStochastic<typename rlValueType::valueType>(*it);
         if ( the_node != NULL )
         {
             n.push_back( const_cast< RevBayesCore::StochasticNode<typename rlValueType::valueType>* >( the_node ) );

@@ -307,7 +307,7 @@ void RevBayesCore::TreeHistoryCtmc<charType>::executeMethod(const std::string &n
         rv.clear();
         rv.resize( num_sites );
 
-        int index = (int)RevBayesCore::assume_cast<const TypedDagNode<std::int64_t>* >( args[0] )->getValue() - 1;
+        int index = (int)RevBayesCore::getValueOfType<std::int64_t>(args[0]) - 1;
 
         //        const BranchHistory& bh = branch_histories[ index ];
         const std::multiset<CharacterEvent*,CharacterEventCompare> &states = this->histories[index].getHistory();
@@ -337,7 +337,7 @@ void RevBayesCore::TreeHistoryCtmc<charType>::executeMethod(const std::string &n
         rv.clear();
         rv.resize( num_states );
 
-        std::int64_t index = RevBayesCore::assume_cast<const TypedDagNode<std::int64_t>* >( args[0] )->getValue() - 1;
+        std::int64_t index = RevBayesCore::getValueOfType<std::int64_t>(args[0]) - 1;
 
 //        const BranchHistory& bh = branch_histories[ index ];
         const std::vector<CharacterEvent*> &states = this->histories[index].getChildCharacters();
@@ -360,8 +360,8 @@ void RevBayesCore::TreeHistoryCtmc<charType>::executeMethod(const std::string &n
         rv.clear();
         rv.resize( num_states );
 
-        std::int64_t node_index = RevBayesCore::assume_cast<const TypedDagNode<std::int64_t>* >( args[0] )->getValue() - 1;
-        std::int64_t site_index = RevBayesCore::assume_cast<const TypedDagNode<std::int64_t>* >( args[1] )->getValue() - 1;
+        std::int64_t node_index = RevBayesCore::getValueOfType<std::int64_t>(args[0]) - 1;
+        std::int64_t site_index = RevBayesCore::getValueOfType<std::int64_t>(args[1]) - 1;
 
         //        const BranchHistory& bh = branch_histories[ index ];
         const std::vector<CharacterEvent*> &states = this->histories[node_index].getParentCharacters();

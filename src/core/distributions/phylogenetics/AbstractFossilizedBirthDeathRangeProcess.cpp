@@ -65,12 +65,12 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
     heterogeneous_psi              = NULL;
 
     // cast the pointers from their input parameters
-    heterogeneous_lambda    = dynamic_cast<const TypedDagNode<RbVector<double> >*>(inspeciation);
-    homogeneous_lambda      = dynamic_cast<const TypedDagNode<double >*>(inspeciation);
-    heterogeneous_mu        = dynamic_cast<const TypedDagNode<RbVector<double> >*>(inextinction);
-    homogeneous_mu          = dynamic_cast<const TypedDagNode<double >*>(inextinction);
-    heterogeneous_psi       = dynamic_cast<const TypedDagNode<RbVector<double> >*>(inpsi);
-    homogeneous_psi         = dynamic_cast<const TypedDagNode<double >*>(inpsi);
+    heterogeneous_lambda    = RevBayesCore::checkNodeOfType<RbVector<double>>(inspeciation);
+    homogeneous_lambda      = RevBayesCore::checkNodeOfType<double>(inspeciation);
+    heterogeneous_mu        = RevBayesCore::checkNodeOfType<RbVector<double>>(inextinction);
+    homogeneous_mu          = RevBayesCore::checkNodeOfType<double>(inextinction);
+    heterogeneous_psi       = RevBayesCore::checkNodeOfType<RbVector<double>>(inpsi);
+    homogeneous_psi         = RevBayesCore::checkNodeOfType<double>(inpsi);
 
     // add the parameters to the model
     range_parameters.push_back( timeline );

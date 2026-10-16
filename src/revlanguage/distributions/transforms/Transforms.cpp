@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "Transforms.h"
 #include "TypedDagNode.h"
 
@@ -11,14 +12,14 @@ namespace Transforms
 
     optional<double> add_transform(const vector<const DagNode*>& params, double x)
     {
-        auto l = dynamic_cast<const TypedDagNode<double>*>(params[0]);
-        return x + l->getValue();
+        double l = RevBayesCore::getValueOfType<double>(params[0]);
+        return x + l;
     }
 
     optional<double> add_inverse(const vector<const DagNode*>& params, double x)
     {
-        auto l = dynamic_cast<const TypedDagNode<double>*>(params[0]);
-        return x - l->getValue();
+        double l = RevBayesCore::getValueOfType<double>(params[0]);
+        return x - l;
     }
 
     optional<double> log_add_prime(const vector<const DagNode*>& params, double x)
@@ -30,20 +31,20 @@ namespace Transforms
 
     optional<double> mul_transform(const vector<const DagNode*>& params, double x)
     {
-        auto l = dynamic_cast<const TypedDagNode<double>*>(params[0]);
-        return x * l->getValue();
+        double l = RevBayesCore::getValueOfType<double>(params[0]);
+        return x * l;
     }
 
     optional<double> mul_inverse(const vector<const DagNode*>& params, double x)
     {
-        auto l = dynamic_cast<const TypedDagNode<double>*>(params[0]);
-        return x / l->getValue();
+        double l = RevBayesCore::getValueOfType<double>(params[0]);
+        return x / l;
     }
 
     optional<double> log_mul_prime(const vector<const DagNode*>& params, double x)
     {
-        auto l = dynamic_cast<const TypedDagNode<double>*>(params[0]);
-        return log(std::abs(l->getValue()));
+        double l = RevBayesCore::getValueOfType<double>(params[0]);
+        return log(std::abs(l));
     };
 
     // f(x) = exp(x)
@@ -137,14 +138,14 @@ namespace Transforms
 
     optional<double> sub1_transform(const vector<const DagNode*>& params, double x)
     {
-        auto sec = dynamic_cast<const TypedDagNode<double>*>(params[0]);
-        return x - sec->getValue();
+        double sec = RevBayesCore::getValueOfType<double>(params[0]);
+        return x - sec;
     }
 
     optional<double> sub1_inverse(const vector<const DagNode*>& params, double x)
     {
-        auto sec = dynamic_cast<const TypedDagNode<double>*>(params[0]);
-        return x + sec->getValue();
+        double sec = RevBayesCore::getValueOfType<double>(params[0]);
+        return x + sec;
     }
 
     optional<double> log_sub1_prime(const vector<const DagNode*>& params, double x)
@@ -156,14 +157,14 @@ namespace Transforms
 
     optional<double> sub2_transform(const vector<const DagNode*>& params, double x)
     {
-        auto fir = dynamic_cast<const TypedDagNode<double>*>(params[0]);
-        return fir->getValue() - x; 
+        double fir = RevBayesCore::getValueOfType<double>(params[0]);
+        return fir - x; 
     }
 
     optional<double> sub2_inverse(const vector<const DagNode*>& params, double x)
     {
-        auto fir = dynamic_cast<const TypedDagNode<double>*>(params[0]);
-        return fir->getValue() - x; 
+        double fir = RevBayesCore::getValueOfType<double>(params[0]);
+        return fir - x; 
     }
 
     optional<double> log_sub2_prime(const vector<const DagNode*>& params, double x)

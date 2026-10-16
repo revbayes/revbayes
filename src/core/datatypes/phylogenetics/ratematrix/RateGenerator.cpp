@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include <fstream>
 #include "TypeUtilities.h"
 #include <string>
@@ -124,9 +125,9 @@ void RateGenerator::executeMethod(const std::string &n, const std::vector<const 
 
     TransitionProbabilityMatrix P(num_states);
 
-    double rate = RevBayesCore::assume_cast<const TypedDagNode<double> *>( args[0] )->getValue();
-    double start_age = RevBayesCore::assume_cast<const TypedDagNode<double> *>( args[1] )->getValue();
-    double end_age = RevBayesCore::assume_cast<const TypedDagNode<double> *>( args[2] )->getValue();
+    double rate = RevBayesCore::getValueOfType<double>(args[0]);
+    double start_age = RevBayesCore::getValueOfType<double>(args[1]);
+    double end_age = RevBayesCore::getValueOfType<double>(args[2]);
 
     if (start_age < end_age)
     {
@@ -185,7 +186,7 @@ void RateGenerator::executeMethod(const std::string &n, const std::vector<const 
         //    rv.resize(n_states);
         rv.clear();
         
-        size_t from_idx = RevBayesCore::assume_cast<const TypedDagNode<std::int64_t> *>( args[0] )->getValue()-1;
+        size_t from_idx = RevBayesCore::getValueOfType<std::int64_t>(args[0])-1;
         
         for (size_t to_idx = 0; to_idx < n_states; to_idx++)
         {
