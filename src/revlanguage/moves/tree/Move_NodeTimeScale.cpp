@@ -7,6 +7,7 @@
 //
 
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <ostream>
 #include <string>
 
@@ -62,12 +63,12 @@ void Move_NodeTimeScale::constructInternalObject( void )
     delete value;
     
     // now allocate a new sliding move
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = RevBayesCore::assume_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *tr = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
-    double l = static_cast<const RealPos &>( lambda->getRevObject() ).getValue();
-    bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double l = RevBayesCore::assume_cast<const RealPos &>( lambda->getRevObject() ).getValue();
+    bool t = RevBayesCore::assume_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double tt = RevBayesCore::assume_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *p = new RevBayesCore::NodeTimeScaleProposal(tr, l);
     p->setTargetAcceptanceRate(tt);

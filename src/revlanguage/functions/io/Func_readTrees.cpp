@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <sstream>
 #include <string>
 #include <vector>
@@ -55,10 +56,10 @@ RevPtr<RevVariable> Func_readTrees::execute( void )
 {
 
     // get the information from the arguments for reading the file
-    const std::string&  fn = static_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
-    const std::string&  text = static_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
-    const std::string&  treetype = static_cast<const RlString&>( args[2].getVariable()->getRevObject() ).getValue();
-    bool unroot_nonclock = static_cast<const RlBoolean&>( args[3].getVariable()->getRevObject() ).getValue();
+    const std::string&  fn = RevBayesCore::assume_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
+    const std::string&  text = RevBayesCore::assume_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
+    const std::string&  treetype = RevBayesCore::assume_cast<const RlString&>( args[2].getVariable()->getRevObject() ).getValue();
+    bool unroot_nonclock = RevBayesCore::assume_cast<const RlBoolean&>( args[3].getVariable()->getRevObject() ).getValue();
 
     if (fn != "")
     {

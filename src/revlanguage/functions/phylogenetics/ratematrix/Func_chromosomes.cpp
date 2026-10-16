@@ -1,4 +1,5 @@
 #include <iosfwd>
+#include "TypeUtilities.h"
 #include <string>
 #include <vector>
 
@@ -48,13 +49,13 @@ Func_chromosomes* Func_chromosomes::clone( void ) const
 RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_chromosomes::createFunction( void ) const {
     
     
-    RevBayesCore::TypedDagNode< std::int64_t >* n           = static_cast<const Natural &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< double >* gamma    = static_cast<const RealPos &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< double >* delta    = static_cast<const RealPos &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< double >* rho      = static_cast<const RealPos &>( this->args[3].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< double >* eta      = static_cast<const RealPos &>( this->args[4].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< double >* gamma_l  = static_cast<const Real &>( this->args[5].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< double >* delta_l  = static_cast<const Real &>( this->args[6].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< std::int64_t >* n           = RevBayesCore::assume_cast<const Natural &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< double >* gamma    = RevBayesCore::assume_cast<const RealPos &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< double >* delta    = RevBayesCore::assume_cast<const RealPos &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< double >* rho      = RevBayesCore::assume_cast<const RealPos &>( this->args[3].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< double >* eta      = RevBayesCore::assume_cast<const RealPos &>( this->args[4].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< double >* gamma_l  = RevBayesCore::assume_cast<const Real &>( this->args[5].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< double >* delta_l  = RevBayesCore::assume_cast<const Real &>( this->args[6].getVariable()->getRevObject() ).getDagNode();
 
     RevBayesCore::ChromosomesRateMatrixFunction* f = new RevBayesCore::ChromosomesRateMatrixFunction( n, gamma, delta, rho, eta, gamma_l, delta_l );
     

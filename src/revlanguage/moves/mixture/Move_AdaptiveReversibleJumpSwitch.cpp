@@ -1,4 +1,5 @@
 #include "AdaptiveReversibleJumpProposal.h"
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
@@ -38,12 +39,12 @@ void Move_AdaptiveReversibleJumpSwitch::constructInternalObject( void )
     delete value;
     
     // now allocate a new vector-scale move
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<double>* tmp = static_cast<const Real &>( x->getRevObject() ).getDagNode();
+    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    RevBayesCore::TypedDagNode<double>* tmp = RevBayesCore::assume_cast<const Real &>( x->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<double> *sn = RevBayesCore::assumeStochastic<double>( tmp );
-    long wbl = static_cast<const Natural &>( wait_before_learning->getRevObject() ).getValue();
-    long wbu = static_cast<const Natural &>( wait_before_using->getRevObject() ).getValue();
-    long ue  = static_cast<const Natural &>( update_every->getRevObject() ).getValue();
+    long wbl = RevBayesCore::assume_cast<const Natural &>( wait_before_learning->getRevObject() ).getValue();
+    long wbu = RevBayesCore::assume_cast<const Natural &>( wait_before_using->getRevObject() ).getValue();
+    long ue  = RevBayesCore::assume_cast<const Natural &>( update_every->getRevObject() ).getValue();
     RevBayesCore::AdaptiveReversibleJumpProposal *p = new RevBayesCore::AdaptiveReversibleJumpProposal(sn, wbl, wbu, ue);
     value = new RevBayesCore::MetropolisHastingsMove(p,w);
 

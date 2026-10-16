@@ -1,4 +1,5 @@
 #include "Dist_PhyloBrownianMVN.h"
+#include "TypeUtilities.h"
 
 #include <cstddef>
 #include <ostream>
@@ -46,8 +47,8 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
 {
     
     // get the parameters
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = static_cast<const Tree &>( tree->getRevObject() ).getDagNode();
-    size_t n = size_t( static_cast<const Natural &>( nSites->getRevObject() ).getValue() );
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = RevBayesCore::assume_cast<const Tree &>( tree->getRevObject() ).getDagNode();
+    size_t n = size_t( RevBayesCore::assume_cast<const Natural &>( nSites->getRevObject() ).getValue() );
     size_t n_nodes = tau->getValue().getNumberOfNodes();
     
     RevBayesCore::PhyloBrownianProcessMVN *dist = new RevBayesCore::PhyloBrownianProcessMVN(tau, n);
@@ -56,7 +57,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
     // set the clock rates
     if ( branchRates->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
     {
-         RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* br = static_cast<const ModelVector<RealPos> &>( branchRates->getRevObject() ).getDagNode();
+         RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* br = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( branchRates->getRevObject() ).getDagNode();
         
         // sanity check
         size_t n_rates = br->getValue().size();
@@ -70,7 +71,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
     }
     else
     {
-        RevBayesCore::TypedDagNode< double >* br = static_cast<const RealPos &>( branchRates->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< double >* br = RevBayesCore::assume_cast<const RealPos &>( branchRates->getRevObject() ).getDagNode();
         
         dist->setBranchRate( br );
     }
@@ -78,24 +79,24 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
     // set the clock rates
     if ( site_rates->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
     {
-        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* sr = static_cast<const ModelVector<RealPos> &>( site_rates->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* sr = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( site_rates->getRevObject() ).getDagNode();
         dist->setSiteRate( sr );
     }
     else
     {
-        RevBayesCore::TypedDagNode< double >* sr = static_cast<const RealPos &>( site_rates->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< double >* sr = RevBayesCore::assume_cast<const RealPos &>( site_rates->getRevObject() ).getDagNode();
         dist->setSiteRate( sr );
     }
     
     // set the clock rates
     if ( rootStates->getRevObject().isType( ModelVector<Real>::getClassTypeSpec() ) )
     {
-        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* rs = static_cast<const ModelVector<Real> &>( rootStates->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* rs = RevBayesCore::assume_cast<const ModelVector<Real> &>( rootStates->getRevObject() ).getDagNode();
         dist->setRootState( rs );
     }
     else
     {
-        RevBayesCore::TypedDagNode< double >* rs = static_cast<const Real &>( rootStates->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< double >* rs = RevBayesCore::assume_cast<const Real &>( rootStates->getRevObject() ).getDagNode();
         dist->setRootState( rs );
     }
     

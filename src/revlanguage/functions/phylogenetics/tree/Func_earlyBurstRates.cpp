@@ -1,4 +1,5 @@
 #include "Func_earlyBurstRates.h"
+#include "TypeUtilities.h"
 
 #include "ModelVector.h"
 #include "RbVector.h"
@@ -40,9 +41,9 @@ Func_EarlyBurstRates* Func_EarlyBurstRates::clone( void ) const {
 RevBayesCore::TypedFunction<RevBayesCore::RbVector<double> >* Func_EarlyBurstRates::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau    = static_cast<const TimeTree&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* sigma              = static_cast<const RealPos &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* lambda             = static_cast<const RealPos &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau    = RevBayesCore::assume_cast<const TimeTree&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* sigma              = RevBayesCore::assume_cast<const RealPos &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* lambda             = RevBayesCore::assume_cast<const RealPos &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
     
     RevBayesCore::EarlyBurstRatesFunction* f = new RevBayesCore::EarlyBurstRatesFunction( tau, sigma, lambda );
     

@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <ostream>
 #include <string>
 #include <vector>
@@ -57,11 +58,11 @@ void Move_VectorSlideRecenter::constructInternalObject( void )
     delete value;
     
     // now allocate a new vector-scale move
-    double d = static_cast<const RealPos &>( delta->getRevObject() ).getValue();
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    double r = static_cast<const RealPos &>( tuneTarget->getRevObject() ).getValue();
+    double d = RevBayesCore::assume_cast<const RealPos &>( delta->getRevObject() ).getValue();
+    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double r = RevBayesCore::assume_cast<const RealPos &>( tuneTarget->getRevObject() ).getValue();
     
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp = static_cast<const ModelVector<RealPos> &>( x->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( x->getRevObject() ).getDagNode();
     std::vector<const RevBayesCore::DagNode*> p = tmp->getParents();
     std::vector< RevBayesCore::StochasticNode<double> *> n;
     for (std::vector<const RevBayesCore::DagNode*>::const_iterator it = p.begin(); it != p.end(); ++it)
@@ -78,11 +79,11 @@ void Move_VectorSlideRecenter::constructInternalObject( void )
     }
     
     // get the mean of the parameters
-    RevBayesCore::TypedDagNode<double>  *tmp_m = static_cast<const Real &>( mean->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>  *tmp_m = RevBayesCore::assume_cast<const Real &>( mean->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<double>    *m = RevBayesCore::assumeStochastic<double>( tmp_m );
     
     // get the tuning
-    bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    bool t = RevBayesCore::assume_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *prop = new RevBayesCore::VectorSlideRecenterProposal(n,m,d,r);
     value = new RevBayesCore::MetropolisHastingsMove(prop,w,t);

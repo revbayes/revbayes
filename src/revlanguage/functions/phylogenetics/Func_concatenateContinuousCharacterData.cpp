@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <iosfwd>
 #include <vector>
 
@@ -41,15 +42,15 @@ Func_concatenateContinuousCharacterData* Func_concatenateContinuousCharacterData
 /** Execute function */
 RevPtr<RevVariable> Func_concatenateContinuousCharacterData::execute( void )
 {
-    const ContinuousCharacterData& a = static_cast<const ContinuousCharacterData &>( args[0].getVariable()->getRevObject() );
-    const ContinuousCharacterData& b = static_cast<const ContinuousCharacterData &>( args[1].getVariable()->getRevObject() );
-    const std::string& type = static_cast<const RlString &>( args[2].getVariable()->getRevObject() ).getValue();
+    const ContinuousCharacterData& a = RevBayesCore::assume_cast<const ContinuousCharacterData &>( args[0].getVariable()->getRevObject() );
+    const ContinuousCharacterData& b = RevBayesCore::assume_cast<const ContinuousCharacterData &>( args[1].getVariable()->getRevObject() );
+    const std::string& type = RevBayesCore::assume_cast<const RlString &>( args[2].getVariable()->getRevObject() ).getValue();
     
     ContinuousCharacterData *d = a.clone();
     d->concatenate( b, type );
     for (size_t i = 3; i < args.size(); ++i)
     {
-        const ContinuousCharacterData& c = static_cast<const ContinuousCharacterData &>( args[i].getVariable()->getRevObject() );
+        const ContinuousCharacterData& c = RevBayesCore::assume_cast<const ContinuousCharacterData &>( args[i].getVariable()->getRevObject() );
         d->concatenate( c, type );
     }
     

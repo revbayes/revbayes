@@ -1,4 +1,5 @@
 #include <sstream>
+#include "TypeUtilities.h"
 #include <vector>
 
 #include "ArgumentRule.h"
@@ -48,7 +49,7 @@ RevPtr<RevVariable> Func_readBranchLengthTrees::execute( void )
 {
     
     // get the information from the arguments for reading the file
-    const RlString& fn = static_cast<const RlString&>( args[0].getVariable()->getRevObject() );
+    const RlString& fn = RevBayesCore::assume_cast<const RlString&>( args[0].getVariable()->getRevObject() );
     
     // get the global instance of the NCL reader and clear warnings from its warnings buffer
     RevBayesCore::NclReader reader = RevBayesCore::NclReader();

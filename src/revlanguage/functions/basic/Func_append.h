@@ -2,6 +2,7 @@
 #define Func_append_H
 
 #include "ModelVector.h"
+#include "TypeUtilities.h"
 #include "RlTypedFunction.h"
 
 #include <string>
@@ -75,8 +76,8 @@ RevLanguage::Func_append<valType>* RevLanguage::Func_append<valType>::clone( voi
 template <typename valType>
 RevBayesCore::TypedFunction< RevBayesCore::RbVector< typename valType::valueType> >* RevLanguage::Func_append<valType>::createFunction( void ) const
 {
-    const RevBayesCore::TypedDagNode< RevBayesCore::RbVector< typename valType::valueType> >* v     = static_cast<const ModelVector<valType> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    const RevBayesCore::TypedDagNode< typename valType::valueType>* x                               = static_cast<const valType &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    const RevBayesCore::TypedDagNode< RevBayesCore::RbVector< typename valType::valueType> >* v     = RevBayesCore::assume_cast<const ModelVector<valType> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    const RevBayesCore::TypedDagNode< typename valType::valueType>* x                               = RevBayesCore::assume_cast<const valType &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
     
     RevBayesCore::VectorAppendElement<typename valType::valueType>* func = new RevBayesCore::VectorAppendElement<typename valType::valueType>( v, x );
     

@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <sstream>
 #include <string>
 #include <vector>
@@ -52,9 +53,9 @@ RevPtr<RevVariable> Func_listFiles::execute( void )
     
     // get the information from the arguments for reading the file
     size_t arg_index = 0;
-    RevBayesCore::path dir    = static_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+    RevBayesCore::path dir    = RevBayesCore::assume_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
     //bool all_files          = static_cast<const RlBoolean&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
-    bool recursive          = static_cast<const RlBoolean&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+    bool recursive          = RevBayesCore::assume_cast<const RlBoolean&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
     //bool incl_dirs          = static_cast<const RlBoolean&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
     
     // check that the file/path name has been correctly specified

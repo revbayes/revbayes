@@ -1,4 +1,5 @@
 #include <iosfwd>
+#include "TypeUtilities.h"
 #include <string>
 
 #include "ArgumentRule.h"
@@ -67,13 +68,13 @@ void Move_ContinuousEventScale::constructInternalObject( void )
     delete value;
     
     // now allocate a new scaling move
-    double l = static_cast<const RealPos &>( lambda->getRevObject() ).getValue();
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
+    double l = RevBayesCore::assume_cast<const RealPos &>( lambda->getRevObject() ).getValue();
+    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = RevBayesCore::assume_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *n = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
     
-    bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    bool t = RevBayesCore::assume_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    double tt = RevBayesCore::assume_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *p = new RevBayesCore::ContinuousEventScaleProposal(n, l);
     p->setTargetAcceptanceRate(tt);

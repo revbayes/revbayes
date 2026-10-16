@@ -1,4 +1,5 @@
 #include "Transform_Exp.h"
+#include "TypeUtilities.h"
 #include "DistributionTypeUtilities.h"
 
 #include "ArgumentRule.h"
@@ -30,7 +31,7 @@ RevBayesCore::TransformedDistribution* RevLanguage::Transform_Exp::createDistrib
     using namespace Transforms;
 
     // get the parameters
-    const Distribution& rl_vp                      = static_cast<const Distribution &>( base_distribution->getRevObject() );
+    const Distribution& rl_vp                      = RevBayesCore::assume_cast<const Distribution &>( base_distribution->getRevObject() );
     RevBayesCore::TypedDistribution<double>* vp    = RevBayesCore::assumeTypedDistribution<double>( rl_vp.createDistribution() );
 
     RevBayesCore::TransformedDistribution* d = new RevBayesCore::TransformedDistribution(*vp, exp_transform, exp_inverse, log_exp_prime);

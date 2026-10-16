@@ -19,6 +19,7 @@
 #define Func_numUniqueInVector_H
 
 #include "Natural.h"
+#include "TypeUtilities.h"
 #include "RlTypedFunction.h"
 
 #include <string>
@@ -79,7 +80,7 @@ template <typename valType>
 RevBayesCore::TypedFunction<std::int64_t>* RevLanguage::Func_numUniqueInVector<valType>::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<typename valType::valueType> >* vect = static_cast<const ModelVector<valType> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<typename valType::valueType> >* vect = RevBayesCore::assume_cast<const ModelVector<valType> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::NumUniqueInVector<typename valType::valueType>* f = new RevBayesCore::NumUniqueInVector<typename valType::valueType>( vect );
     
     return f;

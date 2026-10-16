@@ -1,4 +1,5 @@
 #include "Func_stirling.h"
+#include "TypeUtilities.h"
 
 #include <string>
 #include <vector>
@@ -39,9 +40,9 @@ Func_stirling* Func_stirling::clone( void ) const {
 RevPtr<RevVariable> Func_stirling::execute()
 {
 
-    std::string kind = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
-    int n = (int)static_cast<const Natural &>( args[1].getVariable()->getRevObject() ).getValue();
-    int k = (int)static_cast<const Natural &>( args[2].getVariable()->getRevObject() ).getValue();
+    std::string kind = RevBayesCore::assume_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
+    int n = (int)RevBayesCore::assume_cast<const Natural &>( args[1].getVariable()->getRevObject() ).getValue();
+    int k = (int)RevBayesCore::assume_cast<const Natural &>( args[2].getVariable()->getRevObject() ).getValue();
 	
 	if (kind == "lnFirst")
     {

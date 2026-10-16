@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <ostream>
 #include <string>
 
@@ -65,12 +66,12 @@ void Move_ScaleBactrianCauchy::constructInternalObject( void )
     delete value;
     
     // now allocate a new sliding move
-    double d = static_cast<const RealPos &>( lambda->getRevObject() ).getValue();
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    double r = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<double>* tmp = static_cast<const RealPos &>( x->getRevObject() ).getDagNode();
-    RevBayesCore::ContinuousStochasticNode *n = static_cast<RevBayesCore::ContinuousStochasticNode *>( tmp );
-    bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    double d = RevBayesCore::assume_cast<const RealPos &>( lambda->getRevObject() ).getValue();
+    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double r = RevBayesCore::assume_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    RevBayesCore::TypedDagNode<double>* tmp = RevBayesCore::assume_cast<const RealPos &>( x->getRevObject() ).getDagNode();
+    RevBayesCore::ContinuousStochasticNode *n = RevBayesCore::assume_cast<RevBayesCore::ContinuousStochasticNode *>( tmp );
+    bool t = RevBayesCore::assume_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *p = new RevBayesCore::ScaleBactrianCauchyProposal(n, d, r);
     value = new RevBayesCore::MetropolisHastingsMove(p, w, t);

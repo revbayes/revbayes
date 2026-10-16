@@ -1,4 +1,5 @@
 #include <iosfwd>
+#include "TypeUtilities.h"
 #include <vector>
 
 #include "Argument.h"
@@ -58,8 +59,8 @@ Func_simStartingTree* Func_simStartingTree::clone( void ) const
 RevPtr<RevVariable> Func_simStartingTree::execute( void )
 {
     
-    const std::vector<RevBayesCore::Taxon> &taxa               = static_cast<const ModelVector<Taxon> &>( args[0].getVariable()->getRevObject() ).getValue();
-    const RevBayesCore::RbVector<RevBayesCore::Clade>& constr  = static_cast<const ModelVector<Clade> &>( args[1].getVariable()->getRevObject() ).getValue();
+    const std::vector<RevBayesCore::Taxon> &taxa               = RevBayesCore::assume_cast<const ModelVector<Taxon> &>( args[0].getVariable()->getRevObject() ).getValue();
+    const RevBayesCore::RbVector<RevBayesCore::Clade>& constr  = RevBayesCore::assume_cast<const ModelVector<Clade> &>( args[1].getVariable()->getRevObject() ).getValue();
 
     RevBayesCore::StartingTreeSimulator simulator;
 

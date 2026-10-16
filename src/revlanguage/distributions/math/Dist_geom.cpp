@@ -1,4 +1,5 @@
 #include <cmath>
+#include "TypeUtilities.h"
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -67,7 +68,7 @@ Dist_geom* Dist_geom::clone( void ) const
 RevBayesCore::GeometricDistribution* Dist_geom::createDistribution( void ) const
 {
     // get the parameters
-    RevBayesCore::TypedDagNode<double>* prob    = static_cast<const Probability &>( p->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* prob    = RevBayesCore::assume_cast<const Probability &>( p->getRevObject() ).getDagNode();
     RevBayesCore::GeometricDistribution* d      = new RevBayesCore::GeometricDistribution( prob );
     
     return d;

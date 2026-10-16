@@ -6,6 +6,7 @@
  */
 
 #include "Move_GraphShiftEdge.h"
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
@@ -70,15 +71,15 @@ void Move_GraphShiftEdge::constructInternalObject( void )
     delete value;
     
     // now allocate a new sliding move
-    double l = static_cast<const Probability &>( prob->getRevObject() ).getValue();
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    const RevBayesCore::RbVector<std::int64_t>& e = static_cast<const ModelVector<Natural> &>( vertices->getRevObject() ).getValue();
-    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double l = RevBayesCore::assume_cast<const Probability &>( prob->getRevObject() ).getValue();
+    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    bool t = RevBayesCore::assume_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    const RevBayesCore::RbVector<std::int64_t>& e = RevBayesCore::assume_cast<const ModelVector<Natural> &>( vertices->getRevObject() ).getValue();
+    double tt = RevBayesCore::assume_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *p = NULL;
     
-    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* tmp = static_cast<const MatrixRealSymmetric &>( v->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* tmp = RevBayesCore::assume_cast<const MatrixRealSymmetric &>( v->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *n = RevBayesCore::assumeStochastic<RevBayesCore::MatrixReal>( tmp );
     bool symm = v->getRevObject().isType( MatrixRealSymmetric::getClassTypeSpec() );
     

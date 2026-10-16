@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <ostream>
 #include <string>
 
@@ -50,12 +51,12 @@ void Move_CollapseExpandFossilBranch::constructInternalObject( void )
     delete value;
     
     // now allocate a new move
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = RevBayesCore::assume_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
     
-    RevBayesCore::TypedDagNode<double> *o = static_cast<const RealPos &>( origin->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double> *o = RevBayesCore::assume_cast<const RealPos &>( origin->getRevObject() ).getDagNode();
     
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *p = new RevBayesCore::CollapseExpandFossilBranchProposal( t, o );
     value = new RevBayesCore::MetropolisHastingsMove(p,w,false);

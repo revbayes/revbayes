@@ -1,4 +1,5 @@
 #include <iosfwd>
+#include "TypeUtilities.h"
 #include <vector>
 
 #include "ArgumentRule.h"
@@ -56,9 +57,9 @@ Func_coala* Func_coala::clone( void ) const
 /** Execute function: Construct coala from RealPos values. */
 RevBayesCore::TypedFunction< RevBayesCore::RbVector<double> >* Func_coala::createFunction( void ) const
 {
-    const RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> > *coordinates = static_cast< ModelVector<Real> & >( args[0].getVariable()->getRevObject() ).getDagNode();
-    const RevBayesCore::MatrixReal &coa = static_cast< MatrixReal& >( args[1].getVariable()->getRevObject() ).getValue();
-    const std::vector<double> &w = static_cast< ModelVector<RealPos>& >( args[2].getVariable()->getRevObject() ).getValue();
+    const RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> > *coordinates = RevBayesCore::assume_cast< ModelVector<Real> & >( args[0].getVariable()->getRevObject() ).getDagNode();
+    const RevBayesCore::MatrixReal &coa = RevBayesCore::assume_cast< MatrixReal& >( args[1].getVariable()->getRevObject() ).getValue();
+    const std::vector<double> &w = RevBayesCore::assume_cast< ModelVector<RealPos>& >( args[2].getVariable()->getRevObject() ).getValue();
 
 
     RevBayesCore::CoalaFunction* func = new RevBayesCore::CoalaFunction( coordinates, coa, w );

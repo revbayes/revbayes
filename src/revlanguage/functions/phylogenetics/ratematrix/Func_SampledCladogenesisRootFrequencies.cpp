@@ -7,6 +7,7 @@
 //
 
 #include "Func_SampledCladogenesisRootFrequencies.h"
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
@@ -59,17 +60,17 @@ RevBayesCore::TypedFunction< RevBayesCore::Simplex >* Func_SampledCladogenesisRo
 {
     
     // rate matrix
-    RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* q = static_cast<const RateGenerator &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* q = RevBayesCore::assume_cast<const RateGenerator &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     
     // cladogenetic probabilities
-    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal>* cp = static_cast<const MatrixReal &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal>* cp = RevBayesCore::assume_cast<const MatrixReal &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
     
     // tree
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = static_cast<const TimeTree &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = RevBayesCore::assume_cast<const TimeTree &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
     
     // clock
-    RevBayesCore::TypedDagNode<double>* r = static_cast<const RealPos &>( this->args[3].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* r = RevBayesCore::assume_cast<const RealPos &>( this->args[3].getVariable()->getRevObject() ).getDagNode();
     
     // check state space matches
     size_t numStatesQ = q->getValue().getNumberOfStates();

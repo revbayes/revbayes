@@ -1,4 +1,5 @@
 #include <sstream>
+#include "TypeUtilities.h"
 #include <string>
 
 #include "RlBoolean.h"
@@ -55,12 +56,12 @@ RevObject* Natural::add( const RevObject& rhs ) const
     
     if ( rhs.getTypeSpec().isDerivedOf( Natural::getClassTypeSpec() ) )
     {
-        return add( static_cast<const Natural&>( rhs ) );
+        return add( RevBayesCore::assume_cast<const Natural&>( rhs ) );
     }
     
     if ( rhs.getTypeSpec().isDerivedOf( RealPos::getClassTypeSpec() ) )
     {
-        return add( static_cast<const RealPos&>( rhs ) );
+        return add( RevBayesCore::assume_cast<const RealPos&>( rhs ) );
     }
     
     return Integer::add( rhs );
@@ -155,12 +156,12 @@ RevObject* Natural::divide( const RevObject& rhs ) const
     
     if ( rhs.getTypeSpec().isDerivedOf( Natural::getClassTypeSpec() ) )
     {
-        return divide( static_cast<const Natural&>( rhs ) );
+        return divide( RevBayesCore::assume_cast<const Natural&>( rhs ) );
     }
     
     if ( rhs.getTypeSpec().isDerivedOf( RealPos::getClassTypeSpec() ) )
     {
-        return divide( static_cast<const RealPos&>( rhs ) );
+        return divide( RevBayesCore::assume_cast<const RealPos&>( rhs ) );
     }
     
     return Integer::divide( rhs );
@@ -280,10 +281,10 @@ RevObject* Natural::multiply( const RevObject& rhs ) const
 {
     
     if ( rhs.getTypeSpec().isDerivedOf( Natural::getClassTypeSpec() ) )
-        return multiply( static_cast<const Natural&>( rhs ) );
+        return multiply( RevBayesCore::assume_cast<const Natural&>( rhs ) );
     
     if ( rhs.getTypeSpec().isDerivedOf( RealPos::getClassTypeSpec() ) )
-        return multiply( static_cast<const RealPos&>( rhs ) );
+        return multiply( RevBayesCore::assume_cast<const RealPos&>( rhs ) );
     
     return Integer::multiply( rhs );
 }

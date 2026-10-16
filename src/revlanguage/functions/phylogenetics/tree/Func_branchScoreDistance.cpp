@@ -7,6 +7,7 @@
 //
 
 #include "Func_branchScoreDistance.h"
+#include "TypeUtilities.h"
 
 #include "RealPos.h"
 #include "RlDeterministicNode.h"
@@ -46,8 +47,8 @@ Func_branchScoreDistance* Func_branchScoreDistance::clone( void ) const {
 RevBayesCore::TypedFunction< double >* Func_branchScoreDistance::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = static_cast<const Tree&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau2 = static_cast<const Tree&>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = RevBayesCore::assume_cast<const Tree&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau2 = RevBayesCore::assume_cast<const Tree&>( this->args[1].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::BranchScoreDistanceStatistic* f = new RevBayesCore::BranchScoreDistanceStatistic( tau, tau2 );
     
     return f;

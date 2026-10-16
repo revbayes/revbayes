@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <sstream>
 #include <string>
 #include <vector>
@@ -49,7 +50,7 @@ RevPtr<RevVariable> Func_annotateTree::execute( void )
     size_t arg_index = 0;
     
     // get the input tree
-    RevBayesCore::Tree* tree = static_cast<const Tree&>( this->args[arg_index++].getVariable()->getRevObject() ).getValue().clone();
+    RevBayesCore::Tree* tree = RevBayesCore::assume_cast<const Tree&>( this->args[arg_index++].getVariable()->getRevObject() ).getValue().clone();
     
     // get the  tree trace(s)
     RevBayesCore::TreeSummary* summary = NULL;
@@ -57,11 +58,11 @@ RevPtr<RevVariable> Func_annotateTree::execute( void )
     RevObject& b = args[arg_index++].getVariable()->getRevObject();
     if ( b.isType( TraceTree::getClassTypeSpec() ) )
     {
-        summary = &( static_cast<TraceTree &>(b).getValue() );
+        summary = &( RevBayesCore::assume_cast<TraceTree &>(b).getValue() );
     }
     else
     {
-        std::vector<TraceTree>& tt = static_cast<const WorkspaceVector<TraceTree> &>(b).getValue();
+        std::vector<TraceTree>& tt = RevBayesCore::assume_cast<const WorkspaceVector<TraceTree> &>(b).getValue();
 
         std::vector<RevBayesCore::TraceTree* > vec;
         for(size_t i = 0; i < tt.size(); i++)
@@ -73,18 +74,18 @@ RevPtr<RevVariable> Func_annotateTree::execute( void )
     }
     
     // get the filename
-    const std::string& filename = static_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+    const std::string& filename = RevBayesCore::assume_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
     
 
     RevBayesCore::TraceTree::AnnotationReport report;
 
-    report.node_ages               = static_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
-    report.conditional_clade_ages  = static_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
-    report.conditional_clade_probs = static_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
-    report.conditional_tree_ages   = static_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
-    report.node_ages_HPD           = static_cast<const Probability &>(args[arg_index++].getVariable()->getRevObject()).getValue();
-    report.mean_node_ages          = static_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
-    report.sampled_ancestor_probs  = static_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
+    report.node_ages               = RevBayesCore::assume_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
+    report.conditional_clade_ages  = RevBayesCore::assume_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
+    report.conditional_clade_probs = RevBayesCore::assume_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
+    report.conditional_tree_ages   = RevBayesCore::assume_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
+    report.node_ages_HPD           = RevBayesCore::assume_cast<const Probability &>(args[arg_index++].getVariable()->getRevObject()).getValue();
+    report.mean_node_ages          = RevBayesCore::assume_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
+    report.sampled_ancestor_probs  = RevBayesCore::assume_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
     
     // do not make a new tree summary object
     // this way we don't need to resummarize every time we annotate a tree

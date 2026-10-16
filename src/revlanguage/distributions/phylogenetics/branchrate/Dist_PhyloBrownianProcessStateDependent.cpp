@@ -1,4 +1,5 @@
 #include "Dist_PhyloBrownianProcessStateDependent.h"
+#include "TypeUtilities.h"
 
 #include <stddef.h>
 #include <ostream>
@@ -47,9 +48,9 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
 {
 
     // get the parameters
-    size_t n = size_t( static_cast<const Natural &>( n_sites->getRevObject() ).getValue() );
+    size_t n = size_t( RevBayesCore::assume_cast<const Natural &>( n_sites->getRevObject() ).getValue() );
 
-    const CharacterHistory& rl_char_hist = static_cast<const RevLanguage::CharacterHistory&>( character_history->getRevObject() );
+    const CharacterHistory& rl_char_hist = RevBayesCore::assume_cast<const RevLanguage::CharacterHistory&>( character_history->getRevObject() );
     RevBayesCore::TypedDagNode<RevBayesCore::CharacterHistoryDiscrete>* char_hist   =  rl_char_hist.getDagNode();
 
     RevBayesCore::PhyloBrownianProcessStateDependent *dist = new RevBayesCore::PhyloBrownianProcessStateDependent(char_hist, n);
@@ -58,16 +59,16 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
     // set sigma
     if ( sigma->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
     {
-        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* s = static_cast<const ModelVector<RealPos> &>( sigma->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* s = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( sigma->getRevObject() ).getDagNode();
         dist->setSigma( s );
     }
     else
     {
-        RevBayesCore::TypedDagNode< double >* s = static_cast<const RealPos &>( sigma->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< double >* s = RevBayesCore::assume_cast<const RealPos &>( sigma->getRevObject() ).getDagNode();
         dist->setSigma( s );
     }
 
-    RevBayesCore::TypedDagNode< double >* rvl = static_cast<const Real &>( root_value->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< double >* rvl = RevBayesCore::assume_cast<const Real &>( root_value->getRevObject() ).getDagNode();
     dist->setRootValue( rvl );
 
     return dist;

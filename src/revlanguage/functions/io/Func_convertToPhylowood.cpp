@@ -1,4 +1,5 @@
 #include "Func_convertToPhylowood.h"
+#include "TypeUtilities.h"
 
 #include <cstddef>
 #include <vector>
@@ -36,13 +37,13 @@ RevPtr<RevVariable> Func_convertToPhylowood::execute( void )
 {
     
     
-    const std::string& stateFilename = static_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
-    const std::string& treeFilename  = static_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
-    const std::string& geoFilename   = static_cast<const RlString&>( args[2].getVariable()->getRevObject() ).getValue();
-    const std::string& phwFilename   = static_cast<const RlString&>( args[3].getVariable()->getRevObject() ).getValue();
-    double burn = static_cast<const Probability&>( args[4].getVariable()->getRevObject() ).getValue();
-    const std::string& chartype      = static_cast<const RlString&>( args[5].getVariable()->getRevObject() ).getValue();
-    const std::string& bgtype      = static_cast<const RlString&>( args[6].getVariable()->getRevObject() ).getValue();
+    const std::string& stateFilename = RevBayesCore::assume_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
+    const std::string& treeFilename  = RevBayesCore::assume_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
+    const std::string& geoFilename   = RevBayesCore::assume_cast<const RlString&>( args[2].getVariable()->getRevObject() ).getValue();
+    const std::string& phwFilename   = RevBayesCore::assume_cast<const RlString&>( args[3].getVariable()->getRevObject() ).getValue();
+    double burn = RevBayesCore::assume_cast<const Probability&>( args[4].getVariable()->getRevObject() ).getValue();
+    const std::string& chartype      = RevBayesCore::assume_cast<const RlString&>( args[5].getVariable()->getRevObject() ).getValue();
+    const std::string& bgtype      = RevBayesCore::assume_cast<const RlString&>( args[6].getVariable()->getRevObject() ).getValue();
     
     RevBayesCore::PhylowoodConverter phw(stateFilename, treeFilename, geoFilename, phwFilename, burn, chartype, bgtype);
     //    RevBayesCore::PhylowoodConverter phw;

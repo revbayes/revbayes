@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -47,8 +48,8 @@ Func_simTree* Func_simTree::clone( void ) const
 RevPtr<RevVariable> Func_simTree::execute( void )
 {
     
-    int num_taxa             = static_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue();
-    const std::string& type = static_cast<const RlString &>( args[1].getVariable()->getRevObject() ).getValue();
+    int num_taxa             = RevBayesCore::assume_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue();
+    const std::string& type = RevBayesCore::assume_cast<const RlString &>( args[1].getVariable()->getRevObject() ).getValue();
     
     // the time tree object (topology + times)
     RevBayesCore::Tree *psi = new RevBayesCore::Tree();

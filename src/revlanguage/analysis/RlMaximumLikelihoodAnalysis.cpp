@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <ostream>
 #include <string>
 #include <vector>
@@ -68,7 +69,7 @@ RevPtr<RevVariable> MaximumLikelihoodAnalysis::executeMethod(std::string const &
         found = true;
         
         // get the member with give index
-        double e = static_cast<const RealPos &>( args[0].getVariable()->getRevObject() ).getValue();
+        double e = RevBayesCore::assume_cast<const RealPos &>( args[0].getVariable()->getRevObject() ).getValue();
         
         value->run( e );
         
@@ -79,7 +80,7 @@ RevPtr<RevVariable> MaximumLikelihoodAnalysis::executeMethod(std::string const &
         found = true;
         
         // get the member with give index
-        const std::string &n = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
+        const std::string &n = RevBayesCore::assume_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
         
         RevBayesCore::Model &m = value->getModel();
         

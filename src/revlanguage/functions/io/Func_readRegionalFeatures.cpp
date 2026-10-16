@@ -6,6 +6,7 @@
 //
 
 #include <algorithm>
+#include "TypeUtilities.h"
 #include <limits.h>
 #include <ostream>
 #include <set>
@@ -86,10 +87,10 @@ RevPtr<RevVariable> Func_readRegionalFeatures::execute( void )
 {
 
 //    const ModelVector<ModelVector<RlString> >& matrix = static_cast<const ModelVector<ModelVector<RlString> >&>( args[0].getVariable()->getRevObject() ).getValue();
-    const std::string& filename = static_cast<RlString&>( args[0].getVariable()->getRevObject() ).getValue();
-    const std::string& delimiter = static_cast<RlString&>( args[1].getVariable()->getRevObject() ).getValue();
-    const bool& header = static_cast<RlBoolean&>( args[2].getVariable()->getRevObject() ).getValue();
-    const std::string& nonexistent_region_token = static_cast<RlString&>( args[3].getVariable()->getRevObject() ).getValue();
+    const std::string& filename = RevBayesCore::assume_cast<RlString&>( args[0].getVariable()->getRevObject() ).getValue();
+    const std::string& delimiter = RevBayesCore::assume_cast<RlString&>( args[1].getVariable()->getRevObject() ).getValue();
+    const bool& header = RevBayesCore::assume_cast<RlBoolean&>( args[2].getVariable()->getRevObject() ).getValue();
+    const std::string& nonexistent_region_token = RevBayesCore::assume_cast<RlString&>( args[3].getVariable()->getRevObject() ).getValue();
     size_t header_offset = 0;
     if (header) header_offset = 1;
     

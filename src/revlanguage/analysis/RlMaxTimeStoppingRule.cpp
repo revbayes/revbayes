@@ -1,5 +1,6 @@
 
 #include <ostream>
+#include "TypeUtilities.h"
 #include <string>
 #include <vector>
 
@@ -46,8 +47,8 @@ void MaxTimeStoppingRule::constructInternalObject( void )
     delete value;
     
     // now allocate a new stopping rule
-    double mt = static_cast<const RealPos &>( maxTime->getRevObject() ).getValue();
-    const std::string &u = static_cast<const RlString &>( unit->getRevObject() ).getValue();
+    double mt = RevBayesCore::assume_cast<const RealPos &>( maxTime->getRevObject() ).getValue();
+    const std::string &u = RevBayesCore::assume_cast<const RlString &>( unit->getRevObject() ).getValue();
     if ( u == "minutes" )
     {
         mt *= 60;

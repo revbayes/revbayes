@@ -1,4 +1,5 @@
 #include <iosfwd>
+#include "TypeUtilities.h"
 #include <string>
 #include <vector>
 
@@ -49,7 +50,7 @@ Func_geometricMean* Func_geometricMean::clone( void ) const
 RevBayesCore::TypedFunction<double>* Func_geometricMean::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* arg = static_cast<const ModelVector<Real> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* arg = RevBayesCore::assume_cast<const ModelVector<Real> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::GeometricMeanFunction* f = new RevBayesCore::GeometricMeanFunction( arg );
     
     return f;

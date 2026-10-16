@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <ostream>
 #include <string>
 
@@ -62,19 +63,19 @@ void Move_FNPR::constructInternalObject( void )
     delete value;
     
     // now allocate a new sliding move
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
     
     // get the tree(s) variable
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = NULL;
     RevBayesCore::StochasticNode< RevBayesCore::RbVector<RevBayesCore::Tree> > *vec_t = NULL;
     if ( tree->getRevObject().isType( TimeTree::getClassTypeSpec() ) )
     {
-        RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = RevBayesCore::assume_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
         t = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
     }
     else if ( tree->getRevObject().isType( ModelVector<TimeTree>::getClassTypeSpec() ) )
     {
-        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::Tree> > *tmp = static_cast<const ModelVector<TimeTree> &>( tree->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::Tree> > *tmp = RevBayesCore::assume_cast<const ModelVector<TimeTree> &>( tree->getRevObject() ).getDagNode();
         vec_t = RevBayesCore::assumeStochastic< RevBayesCore::RbVector<RevBayesCore::Tree> >( tmp );
     }
     else

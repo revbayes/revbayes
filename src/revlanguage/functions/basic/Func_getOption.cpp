@@ -1,4 +1,5 @@
 #include <fstream>
+#include "TypeUtilities.h"
 #include <vector>
 
 #include "Argument.h"
@@ -41,7 +42,7 @@ Func_getOption* Func_getOption::clone( void ) const
 RevPtr<RevVariable> Func_getOption::execute( void )
 {
     
-    const std::string &key = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
+    const std::string &key = RevBayesCore::assume_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
     
     RbSettings& s = RbSettings::userSettings();
     std::string value = s.getOption( key );

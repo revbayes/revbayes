@@ -19,6 +19,7 @@
 #define Func_ifelse_H
 
 #include "RlTypedFunction.h"
+#include "TypeUtilities.h"
 
 namespace RevLanguage {
     
@@ -75,9 +76,9 @@ template <typename valType>
 RevBayesCore::TypedFunction< typename valType::valueType >* RevLanguage::Func_ifelse<valType>::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<RevBayesCore::Boolean>       *c = static_cast<const RlBoolean &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<typename valType::valueType> *a = static_cast<const valType &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<typename valType::valueType> *b = static_cast<const valType &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Boolean>       *c = RevBayesCore::assume_cast<const RlBoolean &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<typename valType::valueType> *a = RevBayesCore::assume_cast<const valType &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<typename valType::valueType> *b = RevBayesCore::assume_cast<const valType &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
     
     RevBayesCore::IfElseFunction<typename valType::valueType> *func = new RevBayesCore::IfElseFunction<typename valType::valueType>( c, a, b );
     

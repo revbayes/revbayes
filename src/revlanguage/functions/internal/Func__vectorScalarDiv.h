@@ -2,6 +2,7 @@
 #define Func__vectorScalarDiv_H
 
 #include "ModelVector.h"
+#include "TypeUtilities.h"
 #include "RlTypedFunction.h"
 
 #include <map>
@@ -79,8 +80,8 @@ RevLanguage::Func__vectorScalarDiv<firstValType, secondValType, retType>* RevLan
 template <typename firstValType, typename secondValType, typename retType>
 RevBayesCore::TypedFunction< RevBayesCore::RbVector<typename retType::valueType> >* RevLanguage::Func__vectorScalarDiv<firstValType, secondValType, retType>::createFunction( void ) const
 {
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector< typename firstValType::valueType > >* firstArg = static_cast<const ModelVector<firstValType> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< typename secondValType::valueType >* secondArg = static_cast<const secondValType &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector< typename firstValType::valueType > >* firstArg = RevBayesCore::assume_cast<const ModelVector<firstValType> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< typename secondValType::valueType >* secondArg = RevBayesCore::assume_cast<const secondValType &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::VectorScalarDivision<typename firstValType::valueType, typename secondValType::valueType, typename retType::valueType> *func = new RevBayesCore::VectorScalarDivision<typename firstValType::valueType, typename secondValType::valueType, typename retType::valueType>(firstArg, secondArg);
     
     return func;

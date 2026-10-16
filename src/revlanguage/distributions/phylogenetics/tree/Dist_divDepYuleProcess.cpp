@@ -1,4 +1,5 @@
 #include <cmath>
+#include "TypeUtilities.h"
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -76,15 +77,15 @@ RevBayesCore::DiversityDependentPureBirthProcess* Dist_divDepYuleProcess::create
     // get the parameters
     
     // the root age
-    RevBayesCore::TypedDagNode<double>* ra = static_cast<const RealPos &>( rootAge->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* ra = RevBayesCore::assume_cast<const RealPos &>( rootAge->getRevObject() ).getDagNode();
     // speciation rate
-    RevBayesCore::TypedDagNode<double>* s       = static_cast<const RealPos &>( initialLambda->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* s       = RevBayesCore::assume_cast<const RealPos &>( initialLambda->getRevObject() ).getDagNode();
     // extinction rate
-    RevBayesCore::TypedDagNode<std::int64_t>* k          = static_cast<const Natural &>( capacity->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<std::int64_t>* k          = RevBayesCore::assume_cast<const Natural &>( capacity->getRevObject() ).getDagNode();
     // condition
-    const std::string& cond                     = static_cast<const RlString &>( condition->getRevObject() ).getValue();
+    const std::string& cond                     = RevBayesCore::assume_cast<const RlString &>( condition->getRevObject() ).getValue();
     // taxon names
-    const std::vector<RevBayesCore::Taxon> t = static_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getDagNode()->getValue();
+    const std::vector<RevBayesCore::Taxon> t = RevBayesCore::assume_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getDagNode()->getValue();
     
     // create the internal distribution object
     RevBayesCore::DiversityDependentPureBirthProcess*   d = new RevBayesCore::DiversityDependentPureBirthProcess(ra, s, k, cond, t);

@@ -1,4 +1,5 @@
 #include <cmath>
+#include "TypeUtilities.h"
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -64,8 +65,8 @@ RevBayesCore::MultinomialDistribution* Dist_multinomial::createDistribution( voi
 {
     
     // get the parameters
-    RevBayesCore::TypedDagNode<std::int64_t>*                              vn = static_cast<const Natural     &>( n->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< RevBayesCore::Simplex >*          vp = static_cast<const Simplex &>( p->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<std::int64_t>*                              vn = RevBayesCore::assume_cast<const Natural     &>( n->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::Simplex >*          vp = RevBayesCore::assume_cast<const Simplex &>( p->getRevObject() ).getDagNode();
     RevBayesCore::MultinomialDistribution*                        d  = new RevBayesCore::MultinomialDistribution( vp, vn );
     return d;
 }

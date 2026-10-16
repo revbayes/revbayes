@@ -7,6 +7,7 @@
 //
 
 #include "Func__and.h"
+#include "TypeUtilities.h"
 
 #include "ArgumentRule.h"
 #include "LogicalAndFunction.h"
@@ -37,8 +38,8 @@ Func__and* Func__and::clone( void ) const
 RevBayesCore::TypedFunction<RevBayesCore::Boolean>* Func__and::createFunction( void ) const
 {
     
-    const RevBayesCore::TypedDagNode<RevBayesCore::Boolean>* leftVal = static_cast<const RlBoolean &>( args[0].getVariable()->getRevObject() ).getDagNode();
-    const RevBayesCore::TypedDagNode<RevBayesCore::Boolean>* rightVal = static_cast<const RlBoolean &>( args[1].getVariable()->getRevObject() ).getDagNode();
+    const RevBayesCore::TypedDagNode<RevBayesCore::Boolean>* leftVal = RevBayesCore::assume_cast<const RlBoolean &>( args[0].getVariable()->getRevObject() ).getDagNode();
+    const RevBayesCore::TypedDagNode<RevBayesCore::Boolean>* rightVal = RevBayesCore::assume_cast<const RlBoolean &>( args[1].getVariable()->getRevObject() ).getDagNode();
     
     RevBayesCore::LogicalAndFunction *func = new RevBayesCore::LogicalAndFunction( leftVal, rightVal );
     

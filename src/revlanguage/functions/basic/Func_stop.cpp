@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <fstream>
 #include <vector>
 
@@ -42,7 +43,7 @@ Func_stop* Func_stop::clone( void ) const
 RevPtr<RevVariable> Func_stop::execute( void )
 {
     const RevObject& out = this->args[0].getVariable()->getRevObject();
-    const RlString& msgObj = static_cast<const RlString&>( out );
+    const RlString& msgObj = RevBayesCore::assume_cast<const RlString&>( out );
     
     std::string errorMessage = msgObj.getValue();
     

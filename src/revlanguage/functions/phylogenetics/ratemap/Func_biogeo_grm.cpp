@@ -1,4 +1,5 @@
 #include <iosfwd>
+#include "TypeUtilities.h"
 #include <string>
 #include <vector>
 
@@ -54,11 +55,11 @@ Func_distanceRateModifier* Func_distanceRateModifier::clone( void ) const {
 RevBayesCore::TypedFunction< RevBayesCore::CharacterHistoryRateModifier >* Func_distanceRateModifier::createFunction( void ) const
 {
     
-    const RevBayesCore::TimeAtlas* atlas = &( static_cast<const RlAtlas&>( this->args[0].getVariable()->getRevObject() ).getValue() );
+    const RevBayesCore::TimeAtlas* atlas = &( RevBayesCore::assume_cast<const RlAtlas&>( this->args[0].getVariable()->getRevObject() ).getValue() );
     
-    RevBayesCore::TypedDagNode<double>* dp = static_cast<const Real&>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    bool udd    = static_cast<const RlBoolean &>( this->args[2].getVariable()->getRevObject() ).getValue();
-    bool uav    = static_cast<const RlBoolean &>( this->args[3].getVariable()->getRevObject() ).getValue();
+    RevBayesCore::TypedDagNode<double>* dp = RevBayesCore::assume_cast<const Real&>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    bool udd    = RevBayesCore::assume_cast<const RlBoolean &>( this->args[2].getVariable()->getRevObject() ).getValue();
+    bool uav    = RevBayesCore::assume_cast<const RlBoolean &>( this->args[3].getVariable()->getRevObject() ).getValue();
     bool uadj   = false; // static_cast<const RlBoolean &>( this->args[4].getVariable()->getRevObject() ).getValue();
 
 

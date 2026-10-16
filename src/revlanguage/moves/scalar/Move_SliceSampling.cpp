@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <ostream>
 #include <string>
 
@@ -69,8 +70,8 @@ void Move_SliceSampling::constructInternalObject( void )
     delete value;
 
     // now allocate a new sliding move
-    double window_ = static_cast<const RealPos &>( window->getRevObject() ).getValue();
-    double weight_ = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double window_ = RevBayesCore::assume_cast<const RealPos &>( window->getRevObject() ).getValue();
+    double weight_ = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
 
     boost::optional<double> lower_bound_;
     boost::optional<double> upper_bound_;
@@ -83,9 +84,9 @@ void Move_SliceSampling::constructInternalObject( void )
             lower_bound_ = 0.0;
     }
 
-    RevBayesCore::TypedDagNode<double>* tmp = static_cast<const Real &>( x->getRevObject() ).getDagNode();
-    RevBayesCore::ContinuousStochasticNode *node_ = static_cast<RevBayesCore::ContinuousStochasticNode *>( tmp );
-    bool tune_ = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    RevBayesCore::TypedDagNode<double>* tmp = RevBayesCore::assume_cast<const Real &>( x->getRevObject() ).getDagNode();
+    RevBayesCore::ContinuousStochasticNode *node_ = RevBayesCore::assume_cast<RevBayesCore::ContinuousStochasticNode *>( tmp );
+    bool tune_ = RevBayesCore::assume_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
 
     auto search_method_ = dynamic_cast<const RlString&>( search_method->getRevObject() ).getValue();
     typedef RevBayesCore::SliceSamplingMove::BoundarySearchMethod search_method_t;

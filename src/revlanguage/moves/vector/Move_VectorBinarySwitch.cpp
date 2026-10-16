@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <ostream>
 #include <string>
 #include <vector>
@@ -65,11 +66,11 @@ void Move_VectorBinarySwitch::constructInternalObject( void )
     delete value;
     
     // now allocate a new vector-slide move
-    const RevBayesCore::RbVector<std::int64_t> &e = static_cast<const ModelVector<Natural> &>( indices->getRevObject() ).getValue();
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    double p = static_cast<const Probability &>( switch_probability->getRevObject() ).getValue();
+    const RevBayesCore::RbVector<std::int64_t> &e = RevBayesCore::assume_cast<const ModelVector<Natural> &>( indices->getRevObject() ).getValue();
+    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double p = RevBayesCore::assume_cast<const Probability &>( switch_probability->getRevObject() ).getValue();
     
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<std::int64_t> >* tmp = static_cast<const ModelVector<Natural> &>( x->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<std::int64_t> >* tmp = RevBayesCore::assume_cast<const ModelVector<Natural> &>( x->getRevObject() ).getDagNode();
 //    RevBayesCore::StochasticNode<RevBayesCore::RbVector<std::int64_t> > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::RbVector<std::int64_t> > *>( tmp );
     
     std::vector<const RevBayesCore::DagNode*> dag_nodes = tmp->getParents();
@@ -87,8 +88,8 @@ void Move_VectorBinarySwitch::constructInternalObject( void )
         }
     }
     
-    bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    bool t = RevBayesCore::assume_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    double tt = RevBayesCore::assume_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *prop = new RevBayesCore::VectorBinarySwitchProposal(stoch_nodes, e, p);
     prop->setTargetAcceptanceRate(tt);

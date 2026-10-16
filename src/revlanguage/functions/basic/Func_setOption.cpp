@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <fstream>
 #include <vector>
 
@@ -42,9 +43,9 @@ Func_setOption* Func_setOption::clone( void ) const
 RevPtr<RevVariable> Func_setOption::execute( void )
 {
     
-    const std::string &key = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
-    const std::string &value = static_cast<const RlString &>( args[1].getVariable()->getRevObject() ).getValue();
-    bool write = static_cast<const RlBoolean &>( args[2].getVariable()->getRevObject() ).getValue();
+    const std::string &key = RevBayesCore::assume_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
+    const std::string &value = RevBayesCore::assume_cast<const RlString &>( args[1].getVariable()->getRevObject() ).getValue();
+    bool write = RevBayesCore::assume_cast<const RlBoolean &>( args[2].getVariable()->getRevObject() ).getValue();
     
     RbSettings& s = RbSettings::userSettings();
     s.setOption( key, value, write );

@@ -1,4 +1,5 @@
 #include <cmath>
+#include "TypeUtilities.h"
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -59,8 +60,8 @@ RevBayesCore::BetaDistribution* Dist_beta::createDistribution( void ) const
 {
     
     // get the parameters
-    RevBayesCore::TypedDagNode<double>* a   = static_cast<const RealPos &>( alpha->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* b   = static_cast<const RealPos &>( beta->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* a   = RevBayesCore::assume_cast<const RealPos &>( alpha->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* b   = RevBayesCore::assume_cast<const RealPos &>( beta->getRevObject() ).getDagNode();
     RevBayesCore::BetaDistribution* d       = new RevBayesCore::BetaDistribution(a, b);
     
     return d;

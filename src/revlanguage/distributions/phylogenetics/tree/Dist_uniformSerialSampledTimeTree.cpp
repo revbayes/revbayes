@@ -1,4 +1,5 @@
 #include <cmath>
+#include "TypeUtilities.h"
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -60,10 +61,10 @@ RevBayesCore::UniformSerialSampledTimeTreeDistribution* Dist_uniformSerialSample
 {
 
     // Get the parameters
-    std::vector<RevBayesCore::Taxon> t = static_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
+    std::vector<RevBayesCore::Taxon> t = RevBayesCore::assume_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
 
     // the start age
-    RevBayesCore::TypedDagNode<double>* a = static_cast<const RealPos &>( start_age->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* a = RevBayesCore::assume_cast<const RealPos &>( start_age->getRevObject() ).getDagNode();
 
     // the start condition
     bool ur = ( start_condition == "originAge" ? false : true );

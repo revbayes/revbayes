@@ -1,4 +1,5 @@
 #include <cmath>
+#include "TypeUtilities.h"
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -55,8 +56,8 @@ RevBayesCore::NegativeBinomialDistribution* Dist_nbinomial::createDistribution( 
 {
     
     // get the parameters
-    RevBayesCore::TypedDagNode<std::int64_t>*   vr = static_cast<const Natural     &>( r->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* vp = static_cast<const Probability &>( p->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<std::int64_t>*   vr = RevBayesCore::assume_cast<const Natural     &>( r->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* vp = RevBayesCore::assume_cast<const Probability &>( p->getRevObject() ).getDagNode();
     RevBayesCore::NegativeBinomialDistribution* d  = new RevBayesCore::NegativeBinomialDistribution( vr, vp );
     return d;
 }

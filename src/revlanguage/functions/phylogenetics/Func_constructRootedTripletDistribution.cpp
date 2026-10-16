@@ -7,6 +7,7 @@
 //
 
 #include "Func_constructRootedTripletDistribution.h"
+#include "TypeUtilities.h"
 
 #include <cstddef>
 
@@ -61,23 +62,23 @@ RevBayesCore::TypedFunction< RevBayesCore::RootedTripletDistribution >* Func_con
     
     if ( this->args[1].getVariable()->getRequiredTypeSpec().isDerivedOf( ModelVector< RlString >::getClassTypeSpec() ) )
     {
-        RevBayesCore::TypedDagNode<RevBayesCore::RbVector< std::string > >* sn = static_cast<const ModelVector< RlString > &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<RevBayesCore::RbVector< std::string > >* sn = RevBayesCore::assume_cast<const ModelVector< RlString > &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
         f = new RevBayesCore::RootedTripletDistributionFunction( sn );
     }
     else if ( this->args[1].getVariable()->getRequiredTypeSpec().isDerivedOf( ModelVector< Taxon >::getClassTypeSpec() ) )
     {
-        RevBayesCore::TypedDagNode<RevBayesCore::RbVector< RevBayesCore::Taxon > >* t = static_cast<const ModelVector< Taxon > &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<RevBayesCore::RbVector< RevBayesCore::Taxon > >* t = RevBayesCore::assume_cast<const ModelVector< Taxon > &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
         f = new RevBayesCore::RootedTripletDistributionFunction( t );
     }
 
     if ( this->args[0].getVariable()->getRequiredTypeSpec().isDerivedOf( ModelVector< TimeTree >::getClassTypeSpec() ) )
     {
-        RevBayesCore::TypedDagNode<RevBayesCore::RbVector< RevBayesCore::Tree > >* gTrees = static_cast<const ModelVector< TimeTree > &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<RevBayesCore::RbVector< RevBayesCore::Tree > >* gTrees = RevBayesCore::assume_cast<const ModelVector< TimeTree > &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
         f->setTrees(gTrees);
     }
     else if ( this->args[0].getVariable()->getRequiredTypeSpec().isDerivedOf( ModelVector< BranchLengthTree >::getClassTypeSpec() ) )
     {
-        RevBayesCore::TypedDagNode<RevBayesCore::RbVector< RevBayesCore::Tree > >* gTrees = static_cast<const ModelVector< BranchLengthTree > &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<RevBayesCore::RbVector< RevBayesCore::Tree > >* gTrees = RevBayesCore::assume_cast<const ModelVector< BranchLengthTree > &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
         f->setTrees(gTrees);
     }
 

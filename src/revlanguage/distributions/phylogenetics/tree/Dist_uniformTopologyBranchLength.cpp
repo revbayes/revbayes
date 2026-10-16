@@ -1,4 +1,5 @@
 #include <cmath>
+#include "TypeUtilities.h"
 #include <cstddef>
 #include <iosfwd>
 #include <string>
@@ -80,15 +81,15 @@ RevBayesCore::UniformTopologyBranchLengthDistribution* Dist_uniformTopologyBranc
 {
     
     // get the taxa to simulate either from a vector of rev taxon objects or a vector of names
-    std::vector<RevBayesCore::Taxon> t  = static_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
+    std::vector<RevBayesCore::Taxon> t  = RevBayesCore::assume_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
     
     RevBayesCore::Clade og;
     if ( outgroup != NULL && outgroup->getRevObject() != RevNullObject::getInstance())
     {
-        og = static_cast<const Clade &>( outgroup->getRevObject() ).getValue();
+        og = RevBayesCore::assume_cast<const Clade &>( outgroup->getRevObject() ).getValue();
     }
     
-    const Distribution& rlDistribution              = static_cast<const Distribution &>( branch_length_prior->getRevObject() );
+    const Distribution& rlDistribution              = RevBayesCore::assume_cast<const Distribution &>( branch_length_prior->getRevObject() );
     RevBayesCore::TypedDistribution<double>* blp    = RevBayesCore::assumeTypedDistribution<double>( rlDistribution.createDistribution() );
     
     

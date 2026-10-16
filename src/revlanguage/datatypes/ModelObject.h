@@ -2,6 +2,7 @@
 #define ModelObject_H
 
 #include "AbstractModelObject.h"
+#include "TypeUtilities.h"
 #include "MethodTable.h"
 #include "RevObject.h"
 #include "TypedDagNode.h"
@@ -439,7 +440,7 @@ void RevLanguage::ModelObject<rbType>::setDagNode(RevBayesCore::DagNode* newNode
     }
     
     // Set the new value node
-    dag_node = static_cast< RevBayesCore::TypedDagNode<rbType>* >( newNode );
+    dag_node = RevBayesCore::assume_cast< RevBayesCore::TypedDagNode<rbType>* >( newNode );
     
     // Increment the reference count to the new value node
     if ( dag_node != NULL )

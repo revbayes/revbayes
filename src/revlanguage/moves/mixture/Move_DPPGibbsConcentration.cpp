@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <ostream>
 #include <string>
 
@@ -48,14 +49,14 @@ void Move_DPPGibbsConcentration::constructInternalObject( void )
     delete value;
     
     // now allocate a new vector-scale move
-    double ne = static_cast<const RealPos &>( numElements->getRevObject() ).getValue();
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<double>* tmp = static_cast<const RealPos &>( cp->getRevObject() ).getDagNode();
+    double ne = RevBayesCore::assume_cast<const RealPos &>( numElements->getRevObject() ).getValue();
+    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    RevBayesCore::TypedDagNode<double>* tmp = RevBayesCore::assume_cast<const RealPos &>( cp->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode< double > *sn = RevBayesCore::assumeStochastic<double>( tmp );
-    RevBayesCore::TypedDagNode<std::int64_t>* tmpNC = static_cast<const Integer &>( numCats->getRevObject() ).getDagNode();
-    RevBayesCore::DeterministicNode<std::int64_t> *nc = static_cast<RevBayesCore::DeterministicNode<std::int64_t> *>( tmpNC );
-    RevBayesCore::TypedDagNode<double>* gS = static_cast<const RealPos &>( gammaShape->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* gR = static_cast<const RealPos &>( gammaRate->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<std::int64_t>* tmpNC = RevBayesCore::assume_cast<const Integer &>( numCats->getRevObject() ).getDagNode();
+    RevBayesCore::DeterministicNode<std::int64_t> *nc = RevBayesCore::assume_cast<RevBayesCore::DeterministicNode<std::int64_t> *>( tmpNC );
+    RevBayesCore::TypedDagNode<double>* gS = RevBayesCore::assume_cast<const RealPos &>( gammaShape->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* gR = RevBayesCore::assume_cast<const RealPos &>( gammaRate->getRevObject() ).getDagNode();
 
     
     value = new RevBayesCore::DPPGibbsConcentrationMove(sn, nc, gS, gR, ne, w);

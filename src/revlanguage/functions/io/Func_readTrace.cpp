@@ -1,4 +1,5 @@
 #include "Func_readTrace.h"
+#include "TypeUtilities.h"
 
 #include <cmath>
 #include <cstdlib>
@@ -53,13 +54,13 @@ Func_readTrace* Func_readTrace::clone( void ) const
 RevPtr<RevVariable> Func_readTrace::execute( void )
 {
     // get the column delimiter
-    const std::string& delimiter       = static_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
+    const std::string& delimiter       = RevBayesCore::assume_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
     // get burnin
     RevObject&         b               = args[2].getVariable()->getRevObject();
     // get the thinning frequency
-    std::int64_t       thinning        = static_cast<const Natural&>( args[3].getVariable()->getRevObject() ).getValue();
+    std::int64_t       thinning        = RevBayesCore::assume_cast<const Natural&>( args[3].getVariable()->getRevObject() ).getValue();
     // get the number of runs
-    std::int64_t       nruns           = static_cast<const Natural&>( args[4].getVariable()->getRevObject() ).getValue();
+    std::int64_t       nruns           = RevBayesCore::assume_cast<const Natural&>( args[4].getVariable()->getRevObject() ).getValue();
     
     std::vector<RevBayesCore::path> vectorOfFileNames;
     
@@ -70,7 +71,7 @@ RevPtr<RevVariable> Func_readTrace::execute( void )
             throw RbException("Specify only a single base filename when nruns > 1");
         }
 
-        const ModelVector<RlString>& fn = static_cast<const ModelVector<RlString> &>( args[0].getVariable()->getRevObject() ).getValue();
+        const ModelVector<RlString>& fn = RevBayesCore::assume_cast<const ModelVector<RlString> &>( args[0].getVariable()->getRevObject() ).getValue();
         std::vector<RevBayesCore::path> tmp;
         for (size_t i = 0; i < fn.size(); i++)
         {
@@ -102,7 +103,7 @@ RevPtr<RevVariable> Func_readTrace::execute( void )
     }
     else
     {
-        RevBayesCore::path trace_file_name = static_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
+        RevBayesCore::path trace_file_name = RevBayesCore::assume_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
         
         for (size_t i = 0; i < nruns; i++)
         {
@@ -211,7 +212,7 @@ RevPtr<RevVariable> Func_readTrace::execute( void )
             // adding values to the Traces
             for (size_t j = 0; j < columns.size(); j++)
             {
-                RevBayesCore::TraceNumeric& t = static_cast<RevBayesCore::TraceNumeric&>( single_trace[j] );
+                RevBayesCore::TraceNumeric& t = RevBayesCore::assume_cast<RevBayesCore::TraceNumeric&>( single_trace[j] );
                 std::string tmp = columns[j];
                 double d = atof( tmp.c_str() );
                 t.addObject(d);
@@ -232,11 +233,11 @@ RevPtr<RevVariable> Func_readTrace::execute( void )
             
             if ( b.isType( Integer::getClassTypeSpec() ) )
             {
-                burnin = (int)static_cast<const Integer &>(b).getValue();
+                burnin = (int)RevBayesCore::assume_cast<const Integer &>(b).getValue();
             }
             else
             {
-                double burninFrac = static_cast<const Probability &>(b).getValue();
+                double burninFrac = RevBayesCore::assume_cast<const Probability &>(b).getValue();
                 burnin = int( floor( it->size()*burninFrac ) );
             }
             

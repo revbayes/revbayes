@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <set>
 #include <sstream>
 #include <string>
@@ -72,8 +73,8 @@ Func_readCharacterData* Func_readCharacterData::clone( void ) const {
 RevPtr<RevVariable> Func_readCharacterData::execute( void ) {
         
     // get the information from the arguments for reading the file
-    RevBayesCore::path fn = static_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
-    bool returnAsVector = static_cast<const RlBoolean&>( args[1].getVariable()->getRevObject() ).getValue();
+    RevBayesCore::path fn = RevBayesCore::assume_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
+    bool returnAsVector = RevBayesCore::assume_cast<const RlBoolean&>( args[1].getVariable()->getRevObject() ).getValue();
     
     // check that the file/path name has been correctly specified
     if ( not RevBayesCore::exists( fn ))
@@ -163,31 +164,31 @@ RevPtr<RevVariable> Func_readCharacterData::execute( void ) {
                     {
                     if ( dType == "DNA" )
                         {
-                        RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::DnaState> *coreM = static_cast<RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::DnaState> *>( *it );
+                        RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::DnaState> *coreM = RevBayesCore::assume_cast<RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::DnaState> *>( *it );
                         AbstractHomologousDiscreteCharacterData mDNA = AbstractHomologousDiscreteCharacterData( coreM );
                         m->push_back( mDNA );
                         }
                     else if ( dType == "RNA" )
                         {
-                        RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::RnaState> *coreM = static_cast<RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::RnaState> *>( *it );
+                        RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::RnaState> *coreM = RevBayesCore::assume_cast<RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::RnaState> *>( *it );
                         AbstractHomologousDiscreteCharacterData mRNA = AbstractHomologousDiscreteCharacterData( coreM );
                         m->push_back( mRNA );
                         }
                     else if ( dType == "Protein" )
                         {
-                        RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::AminoAcidState> *coreM = static_cast<RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::AminoAcidState> *>( *it );
+                        RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::AminoAcidState> *coreM = RevBayesCore::assume_cast<RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::AminoAcidState> *>( *it );
                         AbstractHomologousDiscreteCharacterData mAA = AbstractHomologousDiscreteCharacterData( coreM );
                         m->push_back( mAA );
                         }
                     else if ( dType == "Standard" )
                         {
-                        RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::StandardState> *coreM = static_cast<RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::StandardState> *>( *it );
+                        RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::StandardState> *coreM = RevBayesCore::assume_cast<RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::StandardState> *>( *it );
                         AbstractHomologousDiscreteCharacterData mSS = AbstractHomologousDiscreteCharacterData( coreM );
                         m->push_back( mSS );
                         }
                     else if ( dType == "Continuous" )
                         {
-                        RevBayesCore::ContinuousCharacterData *coreM = static_cast<RevBayesCore::ContinuousCharacterData *>( *it );
+                        RevBayesCore::ContinuousCharacterData *coreM = RevBayesCore::assume_cast<RevBayesCore::ContinuousCharacterData *>( *it );
                         ContinuousCharacterData mCC = ContinuousCharacterData (coreM );
                         m->push_back( mCC );
                         }
@@ -201,19 +202,19 @@ RevPtr<RevVariable> Func_readCharacterData::execute( void ) {
                     {
                     if ( dType == "DNA" )
                         {
-                        RevBayesCore::NonHomologousDiscreteCharacterData<RevBayesCore::DnaState> *coreM = static_cast<RevBayesCore::NonHomologousDiscreteCharacterData<RevBayesCore::DnaState> *>( *it );
+                        RevBayesCore::NonHomologousDiscreteCharacterData<RevBayesCore::DnaState> *coreM = RevBayesCore::assume_cast<RevBayesCore::NonHomologousDiscreteCharacterData<RevBayesCore::DnaState> *>( *it );
                         NonHomologousDiscreteCharacterData<DnaState> mDNA = NonHomologousDiscreteCharacterData<DnaState>( coreM );
                         m->push_back( mDNA );
                         }
                     else if ( dType == "RNA" )
                         {
-                        RevBayesCore::NonHomologousDiscreteCharacterData<RevBayesCore::RnaState> *coreM = static_cast<RevBayesCore::NonHomologousDiscreteCharacterData<RevBayesCore::RnaState> *>( *it );
+                        RevBayesCore::NonHomologousDiscreteCharacterData<RevBayesCore::RnaState> *coreM = RevBayesCore::assume_cast<RevBayesCore::NonHomologousDiscreteCharacterData<RevBayesCore::RnaState> *>( *it );
                         NonHomologousDiscreteCharacterData<RnaState> mRNA = NonHomologousDiscreteCharacterData<RnaState>( coreM );
                         m->push_back( mRNA );
                         }
                     else if ( dType == "Protein" )
                         {
-                        RevBayesCore::NonHomologousDiscreteCharacterData<RevBayesCore::AminoAcidState> *coreM = static_cast<RevBayesCore::NonHomologousDiscreteCharacterData<RevBayesCore::AminoAcidState> *>( *it );
+                        RevBayesCore::NonHomologousDiscreteCharacterData<RevBayesCore::AminoAcidState> *coreM = RevBayesCore::assume_cast<RevBayesCore::NonHomologousDiscreteCharacterData<RevBayesCore::AminoAcidState> *>( *it );
                         NonHomologousDiscreteCharacterData<AminoAcidState> mAA = NonHomologousDiscreteCharacterData<AminoAcidState>( coreM );
                         m->push_back( mAA );
                         }

@@ -1,4 +1,5 @@
 #include "Func_k80.h"
+#include "TypeUtilities.h"
 
 #include "K80RateMatrixFunction.h"
 #include "RealPos.h"
@@ -37,7 +38,7 @@ Func_k80* Func_k80::clone( void ) const
 RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_k80::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode< double >* ka = static_cast<const RealPos &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< double >* ka = RevBayesCore::assume_cast<const RealPos &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     
     RevBayesCore::K80RateMatrixFunction* f = new RevBayesCore::K80RateMatrixFunction( ka );
     

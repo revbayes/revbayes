@@ -1,4 +1,5 @@
 #include <ostream>
+#include "TypeUtilities.h"
 #include <string>
 
 #include "ArgumentRule.h"
@@ -43,10 +44,10 @@ void ExponentialDemographicFunction::constructInternalObject( void )
     delete value;
     
     // now allocate space for a new ExponentialDemographicFunction object
-    RevBayesCore::TypedDagNode<double> *t0 = static_cast<const RealPos &>( time_recent->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double> *t1 = static_cast<const RealPos &>( time_ancient->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double> *N0 = static_cast<const RealPos &>( theta_recent->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double> *N1 = static_cast<const RealPos &>( theta_ancient->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double> *t0 = RevBayesCore::assume_cast<const RealPos &>( time_recent->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double> *t1 = RevBayesCore::assume_cast<const RealPos &>( time_ancient->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double> *N0 = RevBayesCore::assume_cast<const RealPos &>( theta_recent->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double> *N1 = RevBayesCore::assume_cast<const RealPos &>( theta_ancient->getRevObject() ).getDagNode();
 
     value = new RevBayesCore::ExponentialDemographicFunction( N0, N1, t0, t1 );
 }

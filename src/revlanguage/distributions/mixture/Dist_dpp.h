@@ -19,6 +19,7 @@
 #define Dist_dpp_H
 
 #include "DirichletProcessPriorDistribution.h"
+#include "TypeUtilities.h"
 #include "DistributionTypeUtilities.h"
 #include "ModelVector.h"
 #include "RealPos.h"
@@ -100,11 +101,11 @@ RevBayesCore::DirichletProcessPriorDistribution<typename valType::valueType>* Re
 {
 	
     // get the parameters
-    const Distribution& rlDistribution									= static_cast<const Distribution &>( baseDistribution->getRevObject() );
+    const Distribution& rlDistribution									= RevBayesCore::assume_cast<const Distribution &>( baseDistribution->getRevObject() );
     RevBayesCore::TypedDistribution<typename valType::valueType>* g0    = RevBayesCore::assumeTypedDistribution<typename valType::valueType>( rlDistribution.createDistribution() );
-    RevBayesCore::TypedDagNode<double>* cp								= static_cast<const RealPos &>( concentration->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* cp								= RevBayesCore::assume_cast<const RealPos &>( concentration->getRevObject() ).getDagNode();
 
-    int ne = (int)static_cast<const Natural &>( numElements->getRevObject() ).getValue();
+    int ne = (int)RevBayesCore::assume_cast<const Natural &>( numElements->getRevObject() ).getValue();
     RevBayesCore::DirichletProcessPriorDistribution<typename valType::valueType>* d		= new RevBayesCore::DirichletProcessPriorDistribution<typename valType::valueType>(g0, cp, ne);
     
     return d;

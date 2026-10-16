@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <map>
 #include <ostream>
 #include <string>
@@ -88,14 +89,14 @@ void RevLanguage::Move_CharacterHistory::constructInternalObject( void )
     delete value;
 
     // move/proposal arguments
-    double w                 = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    double l                 = static_cast<const Probability &>( lambda->getRevObject() ).getValue();
-    std::string gt           = static_cast<const RlString &>( graph->getRevObject() ).getValue();
-    std::string pt           = static_cast<const RlString &>( proposal->getRevObject() ).getValue();
-    double r                 = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double w                 = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double l                 = RevBayesCore::assume_cast<const Probability &>( lambda->getRevObject() ).getValue();
+    std::string gt           = RevBayesCore::assume_cast<const RlString &>( graph->getRevObject() ).getValue();
+    std::string pt           = RevBayesCore::assume_cast<const RlString &>( proposal->getRevObject() ).getValue();
+    double r                 = RevBayesCore::assume_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
 
     // move/proposal parameters
-    RevBayesCore::TypedDagNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_tdn   = static_cast<const RevLanguage::AbstractHomologousDiscreteCharacterData&>( ctmc->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_tdn   = RevBayesCore::assume_cast<const RevLanguage::AbstractHomologousDiscreteCharacterData&>( ctmc->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_sn  = RevBayesCore::assumeStochastic<RevBayesCore::AbstractHomologousDiscreteCharacterData>( ctmc_tdn );
 
     bool use_site = false;
@@ -107,12 +108,12 @@ void RevLanguage::Move_CharacterHistory::constructInternalObject( void )
     if (qmap_site->getRevObject() != RevNullObject::getInstance())
     {
         use_site = true;
-        qmap_site_tdn = static_cast<const RateGenerator&>( qmap_site->getRevObject() ).getDagNode();
+        qmap_site_tdn = RevBayesCore::assume_cast<const RateGenerator&>( qmap_site->getRevObject() ).getDagNode();
     }
     else if (qmap_seq->getRevObject() != RevNullObject::getInstance())
     {
         use_seq = true;
-        qmap_seq_tdn = static_cast<const RateGeneratorSequence&>( qmap_seq->getRevObject() ).getDagNode();
+        qmap_seq_tdn = RevBayesCore::assume_cast<const RateGeneratorSequence&>( qmap_seq->getRevObject() ).getDagNode();
     }
     else
     {

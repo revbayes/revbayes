@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <sstream>
 #include <string>
 #include <vector>
@@ -103,7 +104,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> TimeTree::executeMethod(std::strin
     {
         found = true;
         
-        double length = static_cast<const RealPos&>( args[0].getVariable()->getRevObject() ).getValue();
+        double length = RevBayesCore::assume_cast<const RealPos&>( args[0].getVariable()->getRevObject() ).getValue();
         this->dag_node->getValue().collapseNegativeBranchLengths(length);
         return NULL;
     }
@@ -130,7 +131,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> TimeTree::executeMethod(std::strin
     {
         found = true;
         
-        int index = (int)static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+        int index = (int)RevBayesCore::assume_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
         
         bool tf = this->dag_node->getValue().getNode((size_t)index).isRoot();
         return new RevVariable( new RlBoolean( tf ) );
@@ -155,11 +156,11 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> TimeTree::executeMethod(std::strin
         const RevObject& current = args[0].getVariable()->getRevObject();
         if ( current.isType( Natural::getClassTypeSpec() ) )
         {
-            size_t index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+            size_t index = RevBayesCore::assume_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
             const RevObject& new_value = args[1].getVariable()->getRevObject();
             if ( new_value.isType( RealPos::getClassTypeSpec() ) )
             {
-                double value = static_cast<const RealPos&>( new_value ).getValue();
+                double value = RevBayesCore::assume_cast<const RealPos&>( new_value ).getValue();
                 RevBayesCore::Tree &tree = dag_node->getValue();
                 tree.getNode(index).setAge(value);
             }

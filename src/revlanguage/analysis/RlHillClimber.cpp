@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <ostream>
 #include <vector>
 
@@ -51,20 +52,20 @@ void HillClimber::constructInternalObject( void )
     // we free the memory first
     delete value;
     
-    const RevBayesCore::Model&                              mdl     = static_cast<const Model &>( model->getRevObject() ).getValue();
-    const WorkspaceVector<Monitor> &                        ws_vec_mntr = static_cast<const WorkspaceVector<Monitor> &>( monitors->getRevObject() );
+    const RevBayesCore::Model&                              mdl     = RevBayesCore::assume_cast<const Model &>( model->getRevObject() ).getValue();
+    const WorkspaceVector<Monitor> &                        ws_vec_mntr = RevBayesCore::assume_cast<const WorkspaceVector<Monitor> &>( monitors->getRevObject() );
     RevBayesCore::RbVector<RevBayesCore::Monitor>           mntr;
     for ( size_t i = 0; i < ws_vec_mntr.size(); ++i )
     {
         mntr.push_back( ws_vec_mntr[i].getValue() );
     }
-    const WorkspaceVector<Move>&                            ws_vec_mvs = static_cast<const WorkspaceVector<Move> &>( moves->getRevObject() );
+    const WorkspaceVector<Move>&                            ws_vec_mvs = RevBayesCore::assume_cast<const WorkspaceVector<Move> &>( moves->getRevObject() );
     RevBayesCore::RbVector<RevBayesCore::Move>              mvs;
     for ( size_t i = 0; i < ws_vec_mvs.size(); ++i )
     {
         mvs.push_back( ws_vec_mvs[i].getValue() );
     }
-    const std::string &                                     sched   = static_cast<const RlString &>( moveschedule->getRevObject() ).getValue();
+    const std::string &                                     sched   = RevBayesCore::assume_cast<const RlString &>( moveschedule->getRevObject() ).getValue();
     
     RevBayesCore::HillClimber *m = new RevBayesCore::HillClimber(mdl, mvs, mntr);
     m->setScheduleType( sched );

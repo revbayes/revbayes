@@ -18,6 +18,7 @@
 #define Func__ge_H
 
 #include "RlBoolean.h"
+#include "TypeUtilities.h"
 #include "RlTypedFunction.h"
 
 #include <string>
@@ -74,8 +75,8 @@ template <typename leftValType, typename rightValType>
 RevBayesCore::TypedFunction<RevBayesCore::Boolean>* RevLanguage::Func__ge<leftValType,rightValType>::createFunction( void ) const
 {
     
-    const RevBayesCore::TypedDagNode<typename leftValType::valueType>* leftVal = static_cast<const leftValType &>( args[0].getVariable()->getRevObject() ).getDagNode();
-    const RevBayesCore::TypedDagNode<typename rightValType::valueType>* rightVal = static_cast<const rightValType &>( args[1].getVariable()->getRevObject() ).getDagNode();
+    const RevBayesCore::TypedDagNode<typename leftValType::valueType>* leftVal = RevBayesCore::assume_cast<const leftValType &>( args[0].getVariable()->getRevObject() ).getDagNode();
+    const RevBayesCore::TypedDagNode<typename rightValType::valueType>* rightVal = RevBayesCore::assume_cast<const rightValType &>( args[1].getVariable()->getRevObject() ).getDagNode();
     
     RevBayesCore::GreaterEqualFunction<typename leftValType::valueType, typename rightValType::valueType> *func = new RevBayesCore::GreaterEqualFunction<typename leftValType::valueType, typename rightValType::valueType>( leftVal, rightVal );
     

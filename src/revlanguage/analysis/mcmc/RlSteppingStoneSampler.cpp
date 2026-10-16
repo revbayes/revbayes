@@ -1,4 +1,5 @@
 #include "RlSteppingStoneSampler.h"
+#include "TypeUtilities.h"
 
 #include <ostream>
 #include <string>
@@ -61,10 +62,10 @@ void SteppingStoneSampler::constructInternalObject( void )
     delete value;
     
     // get the parameter values
-    const std::string&   fn      = static_cast<const RlString &>( filename->getRevObject() ).getValue();
-    const std::string&   pn      = static_cast<const RlString &>( powerColumnName->getRevObject() ).getValue();
-    const std::string&   ln      = static_cast<const RlString &>( likelihoodColumnName->getRevObject() ).getValue();
-    const std::string&   del     = static_cast<const RlString &>( delimiter->getRevObject() ).getValue();
+    const std::string&   fn      = RevBayesCore::assume_cast<const RlString &>( filename->getRevObject() ).getValue();
+    const std::string&   pn      = RevBayesCore::assume_cast<const RlString &>( powerColumnName->getRevObject() ).getValue();
+    const std::string&   ln      = RevBayesCore::assume_cast<const RlString &>( likelihoodColumnName->getRevObject() ).getValue();
+    const std::string&   del     = RevBayesCore::assume_cast<const RlString &>( delimiter->getRevObject() ).getValue();
     
     value = new RevBayesCore::SteppingStoneSampler(fn, pn, ln, del);
     
@@ -87,11 +88,11 @@ RevPtr<RevVariable> SteppingStoneSampler::executeMethod(std::string const &name,
     {
         found = true;
         
-        bool use_bootstrap = static_cast<const RlBoolean &>( args[0].getVariable()->getRevObject() ).getValue();
-        size_t repnum = static_cast<const Natural&>( args[1].getVariable()->getRevObject() ).getValue();
-        double block_length = static_cast<const Probability &>( args[2].getVariable()->getRevObject() ).getValue();
-        bool print_to_file = static_cast<const RlBoolean &>( args[3].getVariable()->getRevObject() ).getValue();
-        bool verbose = static_cast<const RlBoolean &>( args[4].getVariable()->getRevObject() ).getValue();
+        bool use_bootstrap = RevBayesCore::assume_cast<const RlBoolean &>( args[0].getVariable()->getRevObject() ).getValue();
+        size_t repnum = RevBayesCore::assume_cast<const Natural&>( args[1].getVariable()->getRevObject() ).getValue();
+        double block_length = RevBayesCore::assume_cast<const Probability &>( args[2].getVariable()->getRevObject() ).getValue();
+        bool print_to_file = RevBayesCore::assume_cast<const RlBoolean &>( args[3].getVariable()->getRevObject() ).getValue();
+        bool verbose = RevBayesCore::assume_cast<const RlBoolean &>( args[4].getVariable()->getRevObject() ).getValue();
         
         double se;
         

@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <iosfwd>
 #include <vector>
 
@@ -42,15 +43,15 @@ Func_concatenate* Func_concatenate::clone( void ) const
 /** Execute function */
 RevPtr<RevVariable> Func_concatenate::execute( void )
 {
-    const AbstractHomologousDiscreteCharacterData& a = static_cast<const AbstractHomologousDiscreteCharacterData &>( args[0].getVariable()->getRevObject() );
-    const AbstractHomologousDiscreteCharacterData& b = static_cast<const AbstractHomologousDiscreteCharacterData &>( args[1].getVariable()->getRevObject() );
-    const std::string& type = static_cast<const RlString &>( args[2].getVariable()->getRevObject() ).getValue();
+    const AbstractHomologousDiscreteCharacterData& a = RevBayesCore::assume_cast<const AbstractHomologousDiscreteCharacterData &>( args[0].getVariable()->getRevObject() );
+    const AbstractHomologousDiscreteCharacterData& b = RevBayesCore::assume_cast<const AbstractHomologousDiscreteCharacterData &>( args[1].getVariable()->getRevObject() );
+    const std::string& type = RevBayesCore::assume_cast<const RlString &>( args[2].getVariable()->getRevObject() ).getValue();
 
     AbstractHomologousDiscreteCharacterData *d = a.clone();
     d->concatenate( b, type );
     for (size_t i = 3; i < args.size(); ++i)
     {
-        const AbstractHomologousDiscreteCharacterData& c = static_cast<const AbstractHomologousDiscreteCharacterData &>( args[i].getVariable()->getRevObject() );
+        const AbstractHomologousDiscreteCharacterData& c = RevBayesCore::assume_cast<const AbstractHomologousDiscreteCharacterData &>( args[i].getVariable()->getRevObject() );
         d->concatenate( c, type );
     }
     

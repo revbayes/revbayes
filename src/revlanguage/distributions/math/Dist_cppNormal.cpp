@@ -7,6 +7,7 @@
 //
 
 #include <ostream>
+#include "TypeUtilities.h"
 #include <string>
 
 #include "ArgumentRule.h"
@@ -65,9 +66,9 @@ Dist_cppNormal* Dist_cppNormal::clone( void ) const
 RevBayesCore::CompoundPoissonNormalDistribution* Dist_cppNormal::createDistribution( void ) const
 {
     // get the parameters
-    RevBayesCore::TypedDagNode<double>* rate    = static_cast<const RealPos &>( lambda->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* m       = static_cast<const Real &>( mu->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* s       = static_cast<const RealPos &>( sigma->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* rate    = RevBayesCore::assume_cast<const RealPos &>( lambda->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* m       = RevBayesCore::assume_cast<const Real &>( mu->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* s       = RevBayesCore::assume_cast<const RealPos &>( sigma->getRevObject() ).getDagNode();
     
     RevBayesCore::CompoundPoissonNormalDistribution* d        = new RevBayesCore::CompoundPoissonNormalDistribution( rate, m, s );
     

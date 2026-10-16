@@ -1,4 +1,5 @@
 #include <ostream>
+#include "TypeUtilities.h"
 #include <string>
 
 #include "ArgumentRule.h"
@@ -43,7 +44,7 @@ void ConstantDemographicFunction::constructInternalObject( void )
     delete value;
     
     // now allocate space for a new ConstantDemographicFunction object
-    RevBayesCore::TypedDagNode<double> *th = static_cast<const RealPos &>( theta->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double> *th = RevBayesCore::assume_cast<const RealPos &>( theta->getRevObject() ).getDagNode();
 
     value = new RevBayesCore::ConstantDemographicFunction( th );
 }

@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <ostream>
 #include <string>
 #include <vector>
@@ -53,12 +54,12 @@ void Move_GMRFUnevenGridHyperpriorGibbs::constructInternalObject( void )
     delete value;
     
     // now allocate a new move
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
 
-    RevBayesCore::TypedDagNode<double>* tmp = static_cast<const RealPos &>( x->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* tmp = RevBayesCore::assume_cast<const RealPos &>( x->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<double> *g = RevBayesCore::assumeStochastic<double>( tmp );
     
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp2 = static_cast<const ModelVector<RealPos> &>( normals->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp2 = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( normals->getRevObject() ).getDagNode();
     std::vector<const RevBayesCore::DagNode*> p = tmp2->getParents();
     std::vector< RevBayesCore::StochasticNode<double> *> n;
     for (std::vector<const RevBayesCore::DagNode*>::const_iterator it = p.begin(); it != p.end(); ++it)
@@ -74,9 +75,9 @@ void Move_GMRFUnevenGridHyperpriorGibbs::constructInternalObject( void )
         }
     }
 
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* u = static_cast<const ModelVector<RealPos> &>( grid->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* u = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( grid->getRevObject() ).getDagNode();
 
-    double z = static_cast<const RealPos &>( zeta->getRevObject() ).getValue();
+    double z = RevBayesCore::assume_cast<const RealPos &>( zeta->getRevObject() ).getValue();
 
     
     value = new RevBayesCore::GMRFUnevenGridHyperpriorGibbsMove(g, n, u, z, w);

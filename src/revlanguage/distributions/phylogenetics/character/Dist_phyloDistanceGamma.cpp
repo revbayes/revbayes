@@ -1,4 +1,5 @@
 #include "Dist_phyloDistanceGamma.h"
+#include "TypeUtilities.h"
 
 #include <cstddef>
 #include <ostream>
@@ -42,15 +43,15 @@ RevBayesCore::TypedDistribution< RevBayesCore::DistanceMatrix >* Dist_phyloDista
 {
     
     // get the parameters tau, nam, varianceNode and distanceNode that will be used to create the actual distribution.
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = static_cast<const Tree &>( tree->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = RevBayesCore::assume_cast<const Tree &>( tree->getRevObject() ).getDagNode();
     
-    const std::vector<std::string>      &nam  = static_cast<const ModelVector<RlString> &>( names->getRevObject() ).getDagNode()->getValue();
+    const std::vector<std::string>      &nam  = RevBayesCore::assume_cast<const ModelVector<RlString> &>( names->getRevObject() ).getDagNode()->getValue();
     
     RevBayesCore::TypedDagNode< RevBayesCore::DistanceMatrix >* varianceNode = NULL;
-    varianceNode = static_cast<const DistanceMatrix &>( varianceMatrix->getRevObject() ).getDagNode();
+    varianceNode = RevBayesCore::assume_cast<const DistanceMatrix &>( varianceMatrix->getRevObject() ).getDagNode();
     
     RevBayesCore::TypedDagNode< RevBayesCore::DistanceMatrix >* distanceNode = NULL;
-    distanceNode = static_cast<const DistanceMatrix &>( distanceMatrix->getRevObject() ).getDagNode();
+    distanceNode = RevBayesCore::assume_cast<const DistanceMatrix &>( distanceMatrix->getRevObject() ).getDagNode();
     
     RevBayesCore::PhyloDistanceGamma* d = new RevBayesCore::PhyloDistanceGamma( tau );
     

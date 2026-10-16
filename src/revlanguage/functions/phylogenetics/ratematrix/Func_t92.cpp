@@ -1,4 +1,5 @@
 #include "Func_t92.h"
+#include "TypeUtilities.h"
 
 #include "T92RateMatrixFunction.h"
 #include "RealPos.h"
@@ -38,8 +39,8 @@ Func_t92* Func_t92::clone( void ) const
 RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_t92::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode< double >* ka = static_cast<const RealPos &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< double >* gc = static_cast<const Probability &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< double >* ka = RevBayesCore::assume_cast<const RealPos &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< double >* gc = RevBayesCore::assume_cast<const Probability &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::T92RateMatrixFunction* f = new RevBayesCore::T92RateMatrixFunction( gc, ka );
     
     return f;

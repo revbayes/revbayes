@@ -7,6 +7,7 @@
 //
 
 #include "Func_featureInformedRates.h"
+#include "TypeUtilities.h"
 
 #include <cstddef>
 
@@ -53,11 +54,11 @@ RevBayesCore::TypedFunction< RevBayesCore::RbVector<RevBayesCore::RbVector<doubl
 {
     
     // supplied arguments
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<RevBayesCore::RbVector<std::int64_t> > > >* cf = static_cast<const ModelVector<ModelVector<ModelVector<Integer> > >&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > > >* qf = static_cast<const ModelVector<ModelVector<ModelVector<Real> > >&>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* sigma = static_cast<const ModelVector<Real> &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* phi = static_cast<const ModelVector<Real> &>( this->args[3].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* null_rate = static_cast<const RealPos&>( this->args[4].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<RevBayesCore::RbVector<std::int64_t> > > >* cf = RevBayesCore::assume_cast<const ModelVector<ModelVector<ModelVector<Integer> > >&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > > >* qf = RevBayesCore::assume_cast<const ModelVector<ModelVector<ModelVector<Real> > >&>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* sigma = RevBayesCore::assume_cast<const ModelVector<Real> &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* phi = RevBayesCore::assume_cast<const ModelVector<Real> &>( this->args[3].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* null_rate = RevBayesCore::assume_cast<const RealPos&>( this->args[4].getVariable()->getRevObject() ).getDagNode();
     
     // add error checking
     

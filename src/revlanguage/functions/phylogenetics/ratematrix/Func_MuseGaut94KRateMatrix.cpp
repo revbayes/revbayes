@@ -1,4 +1,5 @@
 #include "Func_MuseGaut94KRateMatrix.h"
+#include "TypeUtilities.h"
 #include "CppCodonFuncs.h"
 
 #include "RealPos.h"
@@ -43,9 +44,9 @@ Func_MuseGaut94KRateMatrix* Func_MuseGaut94KRateMatrix::clone( void ) const
 
 RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_MuseGaut94KRateMatrix::createFunction( void ) const
 {
-    RevBayesCore::TypedDagNode< double >* ka = static_cast<const RealPos &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< double >* om = static_cast<const RealPos &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* bf = static_cast<const Simplex &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< double >* ka = RevBayesCore::assume_cast<const RealPos &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< double >* om = RevBayesCore::assume_cast<const RealPos &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* bf = RevBayesCore::assume_cast<const Simplex &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
 
     return RevBayesCore::generic_function_ptr< RevBayesCore::RateGenerator >( CodonMG94K, ka, om, bf );
 }

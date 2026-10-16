@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <ostream>
 #include <string>
 #include <vector>
@@ -56,23 +57,23 @@ void Mcmc::constructInternalObject( void )
     // we free the memory first
     delete value;
     
-    const RevBayesCore::Model&                              mdl     = static_cast<const Model &>( model->getRevObject() ).getValue();
-    const WorkspaceVector<Monitor> &                        ws_vec_mntr = static_cast<const WorkspaceVector<Monitor> &>( monitors->getRevObject() );
+    const RevBayesCore::Model&                              mdl     = RevBayesCore::assume_cast<const Model &>( model->getRevObject() ).getValue();
+    const WorkspaceVector<Monitor> &                        ws_vec_mntr = RevBayesCore::assume_cast<const WorkspaceVector<Monitor> &>( monitors->getRevObject() );
     RevBayesCore::RbVector<RevBayesCore::Monitor>           mntr;
     for ( size_t i = 0; i < ws_vec_mntr.size(); ++i )
     {
         mntr.push_back( ws_vec_mntr[i].getValue() );
     }
-    const WorkspaceVector<Move>&                            ws_vec_mvs = static_cast<const WorkspaceVector<Move> &>( moves->getRevObject() );
+    const WorkspaceVector<Move>&                            ws_vec_mvs = RevBayesCore::assume_cast<const WorkspaceVector<Move> &>( moves->getRevObject() );
     RevBayesCore::RbVector<RevBayesCore::Move>              mvs;
     for ( size_t i = 0; i < ws_vec_mvs.size(); ++i )
     {
         mvs.push_back( ws_vec_mvs[i].getValue() );
     }
-    const std::string &                                     sched   = static_cast<const RlString &>( moveschedule->getRevObject() ).getValue();
-    int                                                     nreps   = (int)static_cast<const Natural &>( num_runs->getRevObject() ).getValue();
-    int                                                     ntries  = (int)static_cast<const Natural &>( num_init_attempts->getRevObject() ).getValue();
-    const std::string &                                     comb    = static_cast<const RlString &>( combine_traces->getRevObject() ).getValue();
+    const std::string &                                     sched   = RevBayesCore::assume_cast<const RlString &>( moveschedule->getRevObject() ).getValue();
+    int                                                     nreps   = (int)RevBayesCore::assume_cast<const Natural &>( num_runs->getRevObject() ).getValue();
+    int                                                     ntries  = (int)RevBayesCore::assume_cast<const Natural &>( num_init_attempts->getRevObject() ).getValue();
+    const std::string &                                     comb    = RevBayesCore::assume_cast<const RlString &>( combine_traces->getRevObject() ).getValue();
 
     RevBayesCore::MonteCarloAnalysisOptions::TraceCombinationTypes ct = RevBayesCore::MonteCarloAnalysisOptions::SEQUENTIAL;
     if ( comb == "sequential" )
@@ -91,9 +92,9 @@ void Mcmc::constructInternalObject( void )
     RevBayesCore::Mcmc *m = new RevBayesCore::Mcmc(mdl, mvs, mntr, ntries);
     m->setScheduleType( sched );
     
-    double                                                  lHeat   = static_cast<const RealPos &>( likelihood_heat->getRevObject() ).getValue();
-    double                                                  pHeat   = static_cast<const RealPos &>( posterior_heat->getRevObject() ).getValue();
-    double                                                  prHeat  = static_cast<const RealPos &>( prior_heat->getRevObject() ).getValue();
+    double                                                  lHeat   = RevBayesCore::assume_cast<const RealPos &>( likelihood_heat->getRevObject() ).getValue();
+    double                                                  pHeat   = RevBayesCore::assume_cast<const RealPos &>( posterior_heat->getRevObject() ).getValue();
+    double                                                  prHeat  = RevBayesCore::assume_cast<const RealPos &>( prior_heat->getRevObject() ).getValue();
     
     if (lHeat != 1.0)
     {

@@ -1,5 +1,6 @@
 
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <algorithm>
 #include <ostream>
 #include <string>
@@ -56,11 +57,11 @@ void Mntr_ExtendedNewickFile::constructInternalObject( void )
     delete value;
     
     // now allocate a new sliding move
-    const std::string& fn = static_cast<const RlString &>( filename->getRevObject() ).getValue();
-    const std::string& sep = static_cast<const RlString &>( separator->getRevObject() ).getValue();
-    unsigned int g = (int)static_cast<const IntegerPos &>( printgen->getRevObject() ).getValue();
-    bool wv = static_cast<const RlBoolean &>( version->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree> *t = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
+    const std::string& fn = RevBayesCore::assume_cast<const RlString &>( filename->getRevObject() ).getValue();
+    const std::string& sep = RevBayesCore::assume_cast<const RlString &>( separator->getRevObject() ).getValue();
+    unsigned int g = (int)RevBayesCore::assume_cast<const IntegerPos &>( printgen->getRevObject() ).getValue();
+    bool wv = RevBayesCore::assume_cast<const RlBoolean &>( version->getRevObject() ).getValue();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree> *t = RevBayesCore::assume_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
     
     vars.erase( unique( vars.begin(), vars.end() ), vars.end() );
     sort( vars.begin(), vars.end(), compareVarNames );
@@ -78,10 +79,10 @@ void Mntr_ExtendedNewickFile::constructInternalObject( void )
 //        RevBayesCore::DagNode* node = (*i)->getRevObject().getDagNode();
 //        n.insert( node );
 //    }
-    bool np = static_cast<const RlBoolean &>( isNodeParameter->getRevObject() ).getValue();
-    bool pp = static_cast<const RlBoolean &>( posterior->getRevObject() ).getValue();
-    bool l = static_cast<const RlBoolean &>( likelihood->getRevObject() ).getValue();
-    bool pr = static_cast<const RlBoolean &>( prior->getRevObject() ).getValue();
+    bool np = RevBayesCore::assume_cast<const RlBoolean &>( isNodeParameter->getRevObject() ).getValue();
+    bool pp = RevBayesCore::assume_cast<const RlBoolean &>( posterior->getRevObject() ).getValue();
+    bool l = RevBayesCore::assume_cast<const RlBoolean &>( likelihood->getRevObject() ).getValue();
+    bool pr = RevBayesCore::assume_cast<const RlBoolean &>( prior->getRevObject() ).getValue();
 
     RevBayesCore::ExtendedNewickTreeMonitor* m = new RevBayesCore::ExtendedNewickTreeMonitor(t, n, np, size_t(g), fn, sep, pp, l, pr);
 

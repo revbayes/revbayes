@@ -2,6 +2,7 @@
 #define Func__scalarMatrixMult_H
 
 #include "ModelVector.h"
+#include "TypeUtilities.h"
 #include "RlTypedFunction.h"
 
 #include <map>
@@ -79,8 +80,8 @@ RevLanguage::Func__scalarMatrixMult<firstValType, secondValType, retType>* RevLa
 template <typename firstValType, typename secondValType, typename retType>
 RevBayesCore::TypedFunction<typename retType::valueType >* RevLanguage::Func__scalarMatrixMult<firstValType, secondValType, retType>::createFunction( void ) const
 {
-    RevBayesCore::TypedDagNode<typename firstValType::valueType>* firstArg = static_cast<const firstValType &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<typename secondValType::valueType>* secondArg = static_cast<const secondValType &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<typename firstValType::valueType>* firstArg = RevBayesCore::assume_cast<const firstValType &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<typename secondValType::valueType>* secondArg = RevBayesCore::assume_cast<const secondValType &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::ScalarMatrixMultiplication<typename firstValType::valueType> *func = new RevBayesCore::ScalarMatrixMultiplication<typename firstValType::valueType>(firstArg, secondArg);
     
     return func;

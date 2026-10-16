@@ -1,4 +1,5 @@
 #include "Func_extantTree.h"
+#include "TypeUtilities.h"
 
 #include "ExtantTreeFunction.h"
 #include "RlTimeTree.h"
@@ -36,7 +37,7 @@ Func_extantTree* Func_extantTree::clone( void ) const
 RevBayesCore::TypedFunction<RevBayesCore::Tree>* Func_extantTree::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = static_cast<const TimeTree&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = RevBayesCore::assume_cast<const TimeTree&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     
     RevBayesCore::ExtantTreeFunction* f = new RevBayesCore::ExtantTreeFunction( tau );
     

@@ -1,4 +1,5 @@
 #include "Transform_Sub2.h"
+#include "TypeUtilities.h"
 #include "DistributionTypeUtilities.h"
 
 #include "ArgumentRule.h"
@@ -30,9 +31,9 @@ RevBayesCore::TransformedDistribution* Transform_Sub2::createDistribution( void 
     using namespace Transforms;
 
     // get the parameters
-    RevBayesCore::TypedDagNode<double>* fir        = static_cast<const Real &>( first->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* fir        = RevBayesCore::assume_cast<const Real &>( first->getRevObject() ).getDagNode();
 
-    const Distribution& rl_vp                      = static_cast<const Distribution &>( second_distribution->getRevObject() );
+    const Distribution& rl_vp                      = RevBayesCore::assume_cast<const Distribution &>( second_distribution->getRevObject() );
     RevBayesCore::TypedDistribution<double>* vp    = RevBayesCore::assumeTypedDistribution<double>( rl_vp.createDistribution() );
 
     RevBayesCore::TransformedDistribution* dist = new RevBayesCore::TransformedDistribution(*vp, sub2_transform, sub2_inverse, log_sub2_prime, {fir});

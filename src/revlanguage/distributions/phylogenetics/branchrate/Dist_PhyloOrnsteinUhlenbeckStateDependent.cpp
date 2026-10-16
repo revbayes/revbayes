@@ -1,4 +1,5 @@
 #include "Dist_PhyloOrnsteinUhlenbeckStateDependent.h"
+#include "TypeUtilities.h"
 
 #include <stddef.h>
 #include <ostream>
@@ -49,14 +50,14 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
 {
 
     // get the parameters
-    size_t n = size_t( static_cast<const Natural &>( n_sites->getRevObject() ).getValue() );
+    size_t n = size_t( RevBayesCore::assume_cast<const Natural &>( n_sites->getRevObject() ).getValue() );
 
-    const CharacterHistory& rl_char_hist = static_cast<const RevLanguage::CharacterHistory&>( character_history->getRevObject() );
+    const CharacterHistory& rl_char_hist = RevBayesCore::assume_cast<const RevLanguage::CharacterHistory&>( character_history->getRevObject() );
     RevBayesCore::TypedDagNode<RevBayesCore::CharacterHistoryDiscrete>* char_hist   =  rl_char_hist.getDagNode();
     size_t number_states = char_hist->getValue().getNumberOfStates();
 
    //    set the root treatment
-    const std::string& rt = static_cast<const RlString &>( root_treatment->getRevObject() ).getValue();
+    const std::string& rt = RevBayesCore::assume_cast<const RlString &>( root_treatment->getRevObject() ).getValue();
     RevBayesCore::PhyloOrnsteinUhlenbeckStateDependent::ROOT_TREATMENT rtr;
     if (rt == "optimum")
     {
@@ -80,7 +81,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
     // set alpha
     if ( alpha->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
     {
-        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* a = static_cast<const ModelVector<RealPos> &>( alpha->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* a = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( alpha->getRevObject() ).getDagNode();
         if ( a->getValue().size() == number_states )
         {
             dist->setAlpha( a );
@@ -92,14 +93,14 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
     }
     else
     {
-        RevBayesCore::TypedDagNode< double >* a = static_cast<const RealPos &>( alpha->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< double >* a = RevBayesCore::assume_cast<const RealPos &>( alpha->getRevObject() ).getDagNode();
         dist->setAlpha( a );
     }
 
     // set theta
     if ( theta->getRevObject().isType( ModelVector<Real>::getClassTypeSpec() ) )
     {
-        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* t = static_cast<const ModelVector<Real> &>( theta->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* t = RevBayesCore::assume_cast<const ModelVector<Real> &>( theta->getRevObject() ).getDagNode();
         if ( t->getValue().size() == number_states )
         {
             dist->setTheta( t );
@@ -111,14 +112,14 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
     }
     else
     {
-        RevBayesCore::TypedDagNode< double >* t = static_cast<const Real &>( theta->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< double >* t = RevBayesCore::assume_cast<const Real &>( theta->getRevObject() ).getDagNode();
         dist->setTheta( t );
     }
 
     // set sigma
     if ( sigma->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
     {
-        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* s = static_cast<const ModelVector<RealPos> &>( sigma->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* s = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( sigma->getRevObject() ).getDagNode();
         if ( s->getValue().size() == number_states )
         {
             dist->setSigma( s );
@@ -130,7 +131,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
     }
     else
     {
-        RevBayesCore::TypedDagNode< double >* s = static_cast<const RealPos &>( sigma->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< double >* s = RevBayesCore::assume_cast<const RealPos &>( sigma->getRevObject() ).getDagNode();
         dist->setSigma( s );
     }
 
@@ -146,7 +147,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
     {
         if ( root_value->getRevObject() != RevNullObject::getInstance() )
         {
-            RevBayesCore::TypedDagNode< double >* rvl = static_cast<const Real &>( root_value->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode< double >* rvl = RevBayesCore::assume_cast<const Real &>( root_value->getRevObject() ).getDagNode();
             dist->setRootValue( rvl );
         }
         else

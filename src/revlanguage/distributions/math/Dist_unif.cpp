@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <ostream>
 #include <string>
 #include <vector>
@@ -40,8 +41,8 @@ Dist_unif* Dist_unif::clone( void ) const
 RevBayesCore::UniformDistribution* Dist_unif::createDistribution( void ) const
 {
     // get the parameters
-    RevBayesCore::TypedDagNode<double>* l   = static_cast<const Real &>( lower->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* u   = static_cast<const Real &>( upper->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* l   = RevBayesCore::assume_cast<const Real &>( lower->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* u   = RevBayesCore::assume_cast<const Real &>( upper->getRevObject() ).getDagNode();
     RevBayesCore::UniformDistribution* d    = new RevBayesCore::UniformDistribution(l, u);
     
     return d;

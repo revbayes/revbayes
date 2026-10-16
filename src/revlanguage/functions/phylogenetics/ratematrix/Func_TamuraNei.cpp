@@ -1,4 +1,5 @@
 #include "Func_TamuraNei.h"
+#include "TypeUtilities.h"
 
 #include "TamuraNeiRateMatrixFunction.h"
 #include "RealPos.h"
@@ -41,9 +42,9 @@ Func_TamuraNei* Func_TamuraNei::clone( void ) const
 RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_TamuraNei::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode< double >* k1 = static_cast<const RealPos &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< double >* k2 = static_cast<const RealPos &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* bf = static_cast<const Simplex &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< double >* k1 = RevBayesCore::assume_cast<const RealPos &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< double >* k2 = RevBayesCore::assume_cast<const RealPos &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* bf = RevBayesCore::assume_cast<const Simplex &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
     
     RevBayesCore::TamuraNeiRateMatrixFunction* f = new RevBayesCore::TamuraNeiRateMatrixFunction( k1, k2, bf );
     

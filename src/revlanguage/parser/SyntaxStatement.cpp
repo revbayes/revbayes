@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <cassert>
 #include <iostream>
 #include <list>
@@ -426,14 +427,14 @@ bool SyntaxStatement::isTrue( SyntaxElement* expr, const std::shared_ptr<Environ
     
     if ( temp->getRevObject().isType( RlBoolean::getClassTypeSpec() ) )
     {
-        bool retValue = static_cast<const RlBoolean&>( temp->getRevObject() ).getValue();
+        bool retValue = RevBayesCore::assume_cast<const RlBoolean&>( temp->getRevObject() ).getValue();
         
         return retValue;
     }
     else
     {
         RevObject *tempObject = temp->getRevObject().convertTo( RlBoolean::getClassTypeSpec() );
-        RlBoolean* tempBool = static_cast<RlBoolean*>( tempObject );
+        RlBoolean* tempBool = RevBayesCore::assume_cast<RlBoolean*>( tempObject );
         bool     retValue = tempBool->getValue();
         
         delete tempBool;

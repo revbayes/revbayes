@@ -1,4 +1,5 @@
 #include "Func_freeSymmetricRateMatrix.h"
+#include "TypeUtilities.h"
 
 #include "FreeSymmetricRateMatrixFunction.h"
 #include "ModelVector.h"
@@ -45,9 +46,9 @@ Func_freeSymmetricRateMatrix* Func_freeSymmetricRateMatrix::clone( void ) const
 RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_freeSymmetricRateMatrix::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* tr = static_cast<const ModelVector<RealPos> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    bool r = static_cast<const RlBoolean &>( this->args[1].getVariable()->getRevObject() ).getDagNode()->getValue();
-    const std::string method = static_cast<const RlString &>( this->args[2].getVariable()->getRevObject() ).getDagNode()->getValue();
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* tr = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    bool r = RevBayesCore::assume_cast<const RlBoolean &>( this->args[1].getVariable()->getRevObject() ).getDagNode()->getValue();
+    const std::string method = RevBayesCore::assume_cast<const RlString &>( this->args[2].getVariable()->getRevObject() ).getDagNode()->getValue();
     
     RevBayesCore::FreeSymmetricRateMatrixFunction* f = new RevBayesCore::FreeSymmetricRateMatrixFunction( tr, r, method);
     

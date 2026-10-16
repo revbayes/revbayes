@@ -1,4 +1,5 @@
 #include <cmath>
+#include "TypeUtilities.h"
 #include <cstddef>
 #include <iosfwd>
 #include <string>
@@ -87,8 +88,8 @@ Dist_markovTimes* Dist_markovTimes::clone( void ) const
 RevBayesCore::MarkovTimesDistribution* Dist_markovTimes::createDistribution( void ) const
 {
 	// get the parameters
-    RevBayesCore::TypedDagNode<double>* the_rate = static_cast<const RealPos &>( rate->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* the_age  = static_cast<const RealPos &>( age->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* the_rate = RevBayesCore::assume_cast<const RealPos &>( rate->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* the_age  = RevBayesCore::assume_cast<const RealPos &>( age->getRevObject() ).getDagNode();
 
     // make the distribution
 	RevBayesCore::MarkovTimesDistribution* d = new RevBayesCore::MarkovTimesDistribution(the_rate, the_age);

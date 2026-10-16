@@ -7,6 +7,7 @@
 //
 
 #include <cmath>
+#include "TypeUtilities.h"
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -79,11 +80,11 @@ RevBayesCore::SampledSpeciationBirthDeathProcess* Dist_sampledSpeciationBirthDea
 {
     
     // Get the parameters
-    RevBayesCore::TypedDagNode<double>* ra   = static_cast<const RealPos &>( root_age->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* sp   = static_cast<const RealPos &>( speciation->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* ex   = static_cast<const RealPos &>( extinction->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* rh   = static_cast<const Probability &>( rho->getRevObject() ).getDagNode();
-    std::vector<RevBayesCore::Taxon> t = static_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
+    RevBayesCore::TypedDagNode<double>* ra   = RevBayesCore::assume_cast<const RealPos &>( root_age->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* sp   = RevBayesCore::assume_cast<const RealPos &>( speciation->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* ex   = RevBayesCore::assume_cast<const RealPos &>( extinction->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* rh   = RevBayesCore::assume_cast<const Probability &>( rho->getRevObject() ).getDagNode();
+    std::vector<RevBayesCore::Taxon> t = RevBayesCore::assume_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
     
     RevBayesCore::SampledSpeciationBirthDeathProcess*   d = new RevBayesCore::SampledSpeciationBirthDeathProcess( ra, sp, ex, rh, t );
     

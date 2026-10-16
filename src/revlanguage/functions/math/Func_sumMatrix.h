@@ -2,6 +2,7 @@
 #define Func_sumMatrix_H
 
 #include "RlTypedFunction.h"
+#include "TypeUtilities.h"
 #include "Real.h"
 
 #include <string>
@@ -97,7 +98,7 @@ Func_sumMatrix* Func_sumMatrix::clone( void ) const
 RevBayesCore::TypedFunction<double>* Func_sumMatrix::createFunction( void ) const
 {
     const RevBayesCore::TypedDagNode< RevBayesCore::MatrixReal >* arg_matrix =
-        static_cast< const MatrixReal& >( this->args[0].getVariable()->getRevObject() ).getDagNode();
+        RevBayesCore::assume_cast< const MatrixReal& >( this->args[0].getVariable()->getRevObject() ).getDagNode();
     
     return RevBayesCore::generic_function_ptr<double>(RevBayesCore::sum_matrix, arg_matrix);
 }

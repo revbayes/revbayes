@@ -1,4 +1,5 @@
 #include <fstream>
+#include "TypeUtilities.h"
 #include <vector>
 
 #include "Argument.h"
@@ -40,7 +41,7 @@ Func_type* Func_type::clone( void ) const
 RevPtr<RevVariable> Func_type::execute( void )
 {
     
-    bool verbose = static_cast< const RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
+    bool verbose = RevBayesCore::assume_cast< const RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
 
     if (verbose)
     {

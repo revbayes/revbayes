@@ -1,4 +1,5 @@
 #include "Func_readRelativeNodeAgeConstraints.h"
+#include "TypeUtilities.h"
 
 #include <sstream>
 #include <vector>
@@ -32,8 +33,8 @@ RevPtr<RevVariable> Func_readRelativeNodeAgeConstraints::execute( void )
 {
     
     // get the information from the arguments for reading the file
-    const RlString& fn = static_cast<const RlString&>( args[0].getVariable()->getRevObject() );
-    const std::string& del = static_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
+    const RlString& fn = RevBayesCore::assume_cast<const RlString&>( args[0].getVariable()->getRevObject() );
+    const std::string& del = RevBayesCore::assume_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
     
     RevBayesCore::RelativeNodeAgeConstraintsReader* dmr = new RevBayesCore::RelativeNodeAgeConstraintsReader( fn.getValue(), del );
     RevBayesCore::RelativeNodeAgeConstraints* dm = new RevBayesCore::RelativeNodeAgeConstraints(dmr);

@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -75,29 +76,29 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_BDSTP::createDistribution( void ) 
     // get the parameters
 
     // the start age
-    RevBayesCore::TypedDagNode<double>* sa       = static_cast<const RealPos &>( start_age->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* sa       = RevBayesCore::assume_cast<const RealPos &>( start_age->getRevObject() ).getDagNode();
 
     // the start condition
     bool uo = ( start_condition == "originAge" ? true : false );
 
     // sampling condition
-    const std::string& cond                     = static_cast<const RlString &>( condition->getRevObject() ).getValue();
+    const std::string& cond                     = RevBayesCore::assume_cast<const RlString &>( condition->getRevObject() ).getValue();
 
     // get the taxa to simulate either from a vector of rev taxon objects or a vector of names
-    std::vector<RevBayesCore::Taxon> tn = static_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
+    std::vector<RevBayesCore::Taxon> tn = RevBayesCore::assume_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
 
     // tree for initialization
     RevBayesCore::Tree* init = NULL;
     if ( initial_tree->getRevObject() != RevNullObject::getInstance() )
     {
-        init = static_cast<const TimeTree &>( initial_tree->getRevObject() ).getDagNode()->getValue().clone();
+        init = RevBayesCore::assume_cast<const TimeTree &>( initial_tree->getRevObject() ).getDagNode()->getValue().clone();
     }
     
     // number of decimal places to use when checking the initial tree against taxon ages
     std::int64_t pr = 0; // unset
     if ( age_check_precision != 0 )
     {
-        pr = static_cast<const Natural &>( age_check_precision->getRevObject() ).getValue();
+        pr = RevBayesCore::assume_cast<const Natural &>( age_check_precision->getRevObject() ).getValue();
     }
 
     RevBayesCore::AbstractBirthDeathProcess* d;
@@ -142,50 +143,50 @@ RevBayesCore::AbstractBirthDeathProcess* Dist_BDSTP::createDistribution( void ) 
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* gt = NULL;
     if ( timeline->getRevObject() != RevNullObject::getInstance() )
     {
-        gt = static_cast<const ModelVector<RealPos> &>( timeline->getRevObject() ).getDagNode();
+        gt = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( timeline->getRevObject() ).getDagNode();
     }
 
     // parameter-specific timelines
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* lt = NULL;
     if ( lambda_timeline->getRevObject() != RevNullObject::getInstance() )
     {
-        lt = static_cast<const ModelVector<RealPos> &>( lambda_timeline->getRevObject() ).getDagNode();
+        lt = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( lambda_timeline->getRevObject() ).getDagNode();
     }
 
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* mt = NULL;
     if ( mu_timeline->getRevObject() != RevNullObject::getInstance() )
     {
-        mt = static_cast<const ModelVector<RealPos> &>( mu_timeline->getRevObject() ).getDagNode();
+        mt = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( mu_timeline->getRevObject() ).getDagNode();
     }
 
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* pt = NULL;
     if ( phi_timeline->getRevObject() != RevNullObject::getInstance() )
     {
-        pt = static_cast<const ModelVector<RealPos> &>( phi_timeline->getRevObject() ).getDagNode();
+        pt = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( phi_timeline->getRevObject() ).getDagNode();
     }
 
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* rt = NULL;
     if ( r_timeline != nullptr && r_timeline->getRevObject() != RevNullObject::getInstance() )
     {
-        rt = static_cast<const ModelVector<RealPos> &>( r_timeline->getRevObject() ).getDagNode();
+        rt = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( r_timeline->getRevObject() ).getDagNode();
     }
 
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* Lt = NULL;
     if ( Lambda_timeline != nullptr && Lambda_timeline->getRevObject() != RevNullObject::getInstance() )
     {
-        Lt = static_cast<const ModelVector<RealPos> &>( Lambda_timeline->getRevObject() ).getDagNode();
+        Lt = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( Lambda_timeline->getRevObject() ).getDagNode();
     }
 
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* Mt = NULL;
     if ( Mu_timeline != nullptr && Mu_timeline->getRevObject() != RevNullObject::getInstance() )
     {
-        Mt = static_cast<const ModelVector<RealPos> &>( Mu_timeline->getRevObject() ).getDagNode();
+        Mt = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( Mu_timeline->getRevObject() ).getDagNode();
     }
 
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* Pt = NULL;
     if ( Phi_timeline->getRevObject() != RevNullObject::getInstance() )
     {
-        Pt = static_cast<const ModelVector<RealPos> &>( Phi_timeline->getRevObject() ).getDagNode();
+        Pt = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( Phi_timeline->getRevObject() ).getDagNode();
     }
 
     d = new RevBayesCore::BirthDeathSamplingTreatmentProcess(sa,

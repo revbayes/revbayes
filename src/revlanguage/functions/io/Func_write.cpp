@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <string>
 #include <iostream>
 #include <vector>
@@ -54,9 +55,9 @@ RevPtr<RevVariable> Func_write::execute( void )
 {
     
     // get the information from the arguments for reading the file
-    RevBayesCore::path fn = static_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
-    bool  append = static_cast<const RlBoolean&>( args[2].getVariable()->getRevObject() ).getValue();
-    const std::string& separator = static_cast<const RlString&>( args[3].getVariable()->getRevObject() ).getValue();
+    RevBayesCore::path fn = RevBayesCore::assume_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
+    bool  append = RevBayesCore::assume_cast<const RlBoolean&>( args[2].getVariable()->getRevObject() ).getValue();
+    const std::string& separator = RevBayesCore::assume_cast<const RlString&>( args[3].getVariable()->getRevObject() ).getValue();
     
     if ( process_ID == 0 )
     {

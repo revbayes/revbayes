@@ -1,4 +1,5 @@
 #include <sstream>
+#include "TypeUtilities.h"
 #include <vector>
 
 #include "ArgumentRule.h"
@@ -38,9 +39,9 @@ RevPtr<RevVariable> Func_convertCountFileToNaturalNumbers::execute( void )
 {
 
 	// get the information from the arguments for reading the file
-	const RlString& fi = static_cast<const RlString&>( args[0].getVariable()->getRevObject() );
-    RevBayesCore::TypedDagNode<std::int64_t>* n_individuals = static_cast<const Integer &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-	const RlString& fo = static_cast<const RlString&>( args[2].getVariable()->getRevObject() );
+	const RlString& fi = RevBayesCore::assume_cast<const RlString&>( args[0].getVariable()->getRevObject() );
+    RevBayesCore::TypedDagNode<std::int64_t>* n_individuals = RevBayesCore::assume_cast<const Integer &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+	const RlString& fo = RevBayesCore::assume_cast<const RlString&>( args[2].getVariable()->getRevObject() );
    
     RevBayesCore::CountFileToNaturalNumbersConverter nn;
     nn.cfconverter( fi.getValue(), n_individuals->getValue(), fo.getValue() );

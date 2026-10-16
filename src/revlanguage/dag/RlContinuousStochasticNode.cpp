@@ -1,4 +1,5 @@
 #include "RlContinuousStochasticNode.h"
+#include "TypeUtilities.h"
 
 #include <cmath>
 #include <cstddef>
@@ -161,7 +162,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> RevLanguage::ContinuousStochasticN
         found = true;
         
         // get the observation
-        const double &observation = static_cast<const Real &>( args[0].getVariable()->getRevObject() ).getValue();
+        const double &observation = RevBayesCore::assume_cast<const Real &>( args[0].getVariable()->getRevObject() ).getValue();
         
         // clamp
         this->clamp( new double(observation) );
@@ -205,7 +206,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> RevLanguage::ContinuousStochasticN
         found = true;
         
         // get the observation
-        const double &observation = static_cast<const Real &>( args[0].getVariable()->getRevObject() ).getValue();
+        const double &observation = RevBayesCore::assume_cast<const Real &>( args[0].getVariable()->getRevObject() ).getValue();
         
         // set value
         this->setValue( new double(observation) );

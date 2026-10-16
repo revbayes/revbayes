@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -73,7 +74,7 @@ RevObject* RlString::add( const RevObject& rhs ) const
     
     if ( rhs.getTypeSpec() == RlString::getClassTypeSpec() )
     {
-        return add( static_cast<const RlString&>( rhs ) );
+        return add( RevBayesCore::assume_cast<const RlString&>( rhs ) );
     }
     
     return ModelObject<std::string>::add( rhs );
@@ -122,7 +123,7 @@ RevPtr<RevVariable> RlString::executeMethod( std::string const &name, const std:
     {
         found = true;
         
-        std::int64_t index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+        std::int64_t index = RevBayesCore::assume_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
         const std::string &str = getValue();
         std::string letter(1,str[index]);
         return RevPtr<RevVariable>( new RevVariable( new RlString( letter ) ) );
@@ -132,8 +133,8 @@ RevPtr<RevVariable> RlString::executeMethod( std::string const &name, const std:
         found = true;
         
         size_t arg_idx = 0;
-        std::int64_t begin = static_cast<const Natural&>( args[arg_idx++].getVariable()->getRevObject() ).getValue() - 1;
-        std::int64_t end = static_cast<const Natural&>( args[arg_idx++].getVariable()->getRevObject() ).getValue() - 1;
+        std::int64_t begin = RevBayesCore::assume_cast<const Natural&>( args[arg_idx++].getVariable()->getRevObject() ).getValue() - 1;
+        std::int64_t end = RevBayesCore::assume_cast<const Natural&>( args[arg_idx++].getVariable()->getRevObject() ).getValue() - 1;
         const std::string &str = getValue();
         std::string substr = str.substr(begin,end-begin+1);
         return RevPtr<RevVariable>( new RevVariable( new RlString( substr ) ) );
@@ -143,7 +144,7 @@ RevPtr<RevVariable> RlString::executeMethod( std::string const &name, const std:
         found = true;
         
         size_t arg_idx = 0;
-        const std::string substr = static_cast<const RlString&>( args[arg_idx++].getVariable()->getRevObject() ).getValue();
+        const std::string substr = RevBayesCore::assume_cast<const RlString&>( args[arg_idx++].getVariable()->getRevObject() ).getValue();
 
         std::string val = getValue();
         size_t index = val.find( substr ) + 1;
@@ -153,7 +154,7 @@ RevPtr<RevVariable> RlString::executeMethod( std::string const &name, const std:
     {
         found = true;
         
-        std::int64_t index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+        std::int64_t index = RevBayesCore::assume_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
         const std::string &str = getValue();
         std::string letter(1,str[index]);
         return RevPtr<RevVariable>( new RevVariable( new RlString( letter ) ) );

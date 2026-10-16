@@ -1,4 +1,5 @@
 #include <iosfwd>
+#include "TypeUtilities.h"
 #include <string>
 #include <vector>
 
@@ -46,11 +47,11 @@ Func_sigmoidVector* Func_sigmoidVector::clone( void ) const
 RevBayesCore::TypedFunction<RevBayesCore::RbVector<double> >* Func_sigmoidVector::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* x = static_cast<const ModelVector<Real> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* min                        = static_cast<const RealPos&>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* max                        = static_cast<const RealPos&>( this->args[2].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* mid                        = static_cast<const Real&>( this->args[3].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* slope                      = static_cast<const Real&>( this->args[4].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* x = RevBayesCore::assume_cast<const ModelVector<Real> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* min                        = RevBayesCore::assume_cast<const RealPos&>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* max                        = RevBayesCore::assume_cast<const RealPos&>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* mid                        = RevBayesCore::assume_cast<const Real&>( this->args[3].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* slope                      = RevBayesCore::assume_cast<const Real&>( this->args[4].getVariable()->getRevObject() ).getDagNode();
 
     RevBayesCore::SigmoidVectorFunction* f = new RevBayesCore::SigmoidVectorFunction( x, min, max, mid, slope );
     

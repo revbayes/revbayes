@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <ostream>
 #include <string>
 #include <vector>
@@ -65,14 +66,14 @@ void Move_VectorSlide::constructInternalObject( void )
     delete value;
     
     // now allocate a new vector-slide move
-    const RevBayesCore::RbVector<std::int64_t> &e = static_cast<const ModelVector<Natural> &>( inidices->getRevObject() ).getValue();
-    double l = static_cast<const RealPos &>( delta->getRevObject() ).getValue();
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp = static_cast<const ModelVector<RealPos> &>( x->getRevObject() ).getDagNode();
+    const RevBayesCore::RbVector<std::int64_t> &e = RevBayesCore::assume_cast<const ModelVector<Natural> &>( inidices->getRevObject() ).getValue();
+    double l = RevBayesCore::assume_cast<const RealPos &>( delta->getRevObject() ).getValue();
+    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( x->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::RbVector<double> > *n = RevBayesCore::assumeStochastic<RevBayesCore::RbVector<double> >( tmp );
     
-    bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    bool t = RevBayesCore::assume_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    double tt = RevBayesCore::assume_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *prop = new RevBayesCore::VectorSlideProposal(n, e, l);
     prop->setTargetAcceptanceRate(tt);

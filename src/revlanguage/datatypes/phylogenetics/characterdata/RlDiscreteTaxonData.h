@@ -2,6 +2,7 @@
 #define RlDiscreteTaxonData_H
 
 #include "DiscreteTaxonData.h"
+#include "TypeUtilities.h"
 #include "ModelObject.h"
 
 #include <set>
@@ -85,7 +86,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> RevLanguage::DiscreteTaxonData<rlT
         found = true;
         
         // get the member with give index
-        const Natural &index = static_cast<const Natural &>( args[0].getVariable()->getRevObject() );
+        const Natural &index = RevBayesCore::assume_cast<const Natural &>( args[0].getVariable()->getRevObject() );
             
         if (this->dag_node->getValue().getNumberOfCharacters() < (size_t)(index.getValue()) )
         {

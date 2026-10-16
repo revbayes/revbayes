@@ -6,6 +6,7 @@
 
 
 #include <iosfwd>
+#include "TypeUtilities.h"
 #include <string>
 #include <vector>
 
@@ -87,9 +88,9 @@ RevPtr<RevVariable> CladogeneticSpeciationRateMatrix::executeMethod(std::string 
 
         // create state for anc -> ch1, ch2
         std::vector<unsigned> state;
-        unsigned anc_state = unsigned( static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() );
-        unsigned ch1_state = unsigned( static_cast<const Natural&>( args[1].getVariable()->getRevObject() ).getValue() );
-        unsigned ch2_state = unsigned( static_cast<const Natural&>( args[2].getVariable()->getRevObject() ).getValue() );
+        unsigned anc_state = unsigned( RevBayesCore::assume_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() );
+        unsigned ch1_state = unsigned( RevBayesCore::assume_cast<const Natural&>( args[1].getVariable()->getRevObject() ).getValue() );
+        unsigned ch2_state = unsigned( RevBayesCore::assume_cast<const Natural&>( args[2].getVariable()->getRevObject() ).getValue() );
         state.push_back(anc_state);
         state.push_back(ch1_state);
         state.push_back(ch2_state);

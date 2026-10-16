@@ -1,5 +1,6 @@
 
 #include <ostream>
+#include "TypeUtilities.h"
 #include <string>
 
 #include "ArgumentRule.h"
@@ -43,7 +44,7 @@ void MaxIterationStoppingRule::constructInternalObject( void )
     delete value;
     
     // now allocate a new stopping rule
-    double m = static_cast<const Natural &>( maxIteration->getRevObject() ).getValue();
+    double m = RevBayesCore::assume_cast<const Natural &>( maxIteration->getRevObject() ).getValue();
     
     value = new RevBayesCore::MaxIterationStoppingRule(m);
 }

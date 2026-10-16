@@ -1,4 +1,5 @@
 #include "Func_gamma.h"
+#include "TypeUtilities.h"
 
 #include "GammaFunction.h"
 #include "Real.h"
@@ -37,7 +38,7 @@ Func_gamma* Func_gamma::clone( void ) const
 RevBayesCore::TypedFunction<double>* Func_gamma::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<double>* x = static_cast<const Real &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* x = RevBayesCore::assume_cast<const Real &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::GammaFunction* f = new RevBayesCore::GammaFunction( x );
     
     return f;

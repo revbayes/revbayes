@@ -1,4 +1,5 @@
 #include <sstream>
+#include "TypeUtilities.h"
 #include <string>
 #include <vector>
 
@@ -78,12 +79,12 @@ RevObject* Real::add( const RevObject& rhs ) const
     
     if ( rhs.getTypeSpec().isDerivedOf( Real::getClassTypeSpec() ) )
     {
-        return add( static_cast<const Real&>( rhs ) );
+        return add( RevBayesCore::assume_cast<const Real&>( rhs ) );
     }
     
     if ( rhs.getTypeSpec().isDerivedOf(  Integer::getClassTypeSpec() ) )
     {
-        return add( static_cast<const Integer&>( rhs ) );
+        return add( RevBayesCore::assume_cast<const Integer&>( rhs ) );
     }
     
     return ModelObject<double>::add( rhs );
@@ -188,10 +189,10 @@ RevObject* Real::divide( const RevObject& rhs ) const
 {
     
     if ( rhs.getTypeSpec().isDerivedOf( Real::getClassTypeSpec() ) )
-        return divide( static_cast<const Real&>( rhs ) );
+        return divide( RevBayesCore::assume_cast<const Real&>( rhs ) );
     
     if ( rhs.getTypeSpec().isDerivedOf(  Integer::getClassTypeSpec() ) )
-        return divide( static_cast<const Integer&>( rhs ) );
+        return divide( RevBayesCore::assume_cast<const Integer&>( rhs ) );
     
     return ModelObject<double>::divide( rhs );
 }
@@ -326,10 +327,10 @@ RevObject* Real::multiply( const RevObject& rhs ) const
 {
     
     if ( rhs.getTypeSpec().isDerivedOf( Real::getClassTypeSpec() ) )
-        return multiply( static_cast<const Real&>( rhs ) );
+        return multiply( RevBayesCore::assume_cast<const Real&>( rhs ) );
     
     if ( rhs.getTypeSpec().isDerivedOf(  Integer::getClassTypeSpec() ) )
-        return multiply( static_cast<const Integer&>( rhs ) );
+        return multiply( RevBayesCore::assume_cast<const Integer&>( rhs ) );
     
     return ModelObject<double>::multiply( rhs );
 }
@@ -381,10 +382,10 @@ RevObject* Real::subtract( const RevObject& rhs ) const
 {
     
     if ( rhs.getTypeSpec().isDerivedOf( Real::getClassTypeSpec() ) )
-        return subtract( static_cast<const Real&>( rhs ) );
+        return subtract( RevBayesCore::assume_cast<const Real&>( rhs ) );
     
     if ( rhs.getTypeSpec().isDerivedOf(  Integer::getClassTypeSpec() ) )
-        return subtract( static_cast<const Integer&>( rhs ) );
+        return subtract( RevBayesCore::assume_cast<const Integer&>( rhs ) );
     
     return ModelObject<double>::subtract( rhs );
 }

@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -66,7 +67,7 @@ RevPtr<RevLanguage::RevVariable> ContinuousTaxonData::executeMethod(std::string 
         found = true;
         
         // get the member with give index
-        const Natural &index = static_cast<const Natural &>( args[0].getVariable()->getRevObject() );
+        const Natural &index = RevBayesCore::assume_cast<const Natural &>( args[0].getVariable()->getRevObject() );
     
         if (this->dag_node->getValue().getNumberOfCharacters() < (size_t)(index.getValue()) )
         {

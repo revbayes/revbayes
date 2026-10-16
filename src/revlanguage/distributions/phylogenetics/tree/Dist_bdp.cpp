@@ -1,4 +1,5 @@
 #include <iosfwd>
+#include "TypeUtilities.h"
 #include <string>
 #include <vector>
 
@@ -65,35 +66,35 @@ RevBayesCore::ConstantRateBirthDeathProcess* Dist_bdp::createDistribution( void 
     // get the parameters
     
     // the root age
-    RevBayesCore::TypedDagNode<double>* ra = static_cast<const RealPos &>( start_age->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* ra = RevBayesCore::assume_cast<const RealPos &>( start_age->getRevObject() ).getDagNode();
     
     // speciation rate
-    RevBayesCore::TypedDagNode<double>* s       = static_cast<const RealPos &>( lambda->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* s       = RevBayesCore::assume_cast<const RealPos &>( lambda->getRevObject() ).getDagNode();
 
     // extinction rate
-    RevBayesCore::TypedDagNode<double>* e       = static_cast<const RealPos &>( mu->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* e       = RevBayesCore::assume_cast<const RealPos &>( mu->getRevObject() ).getDagNode();
     
     // sampling probability
-    RevBayesCore::TypedDagNode<double>* r       = static_cast<const Probability &>( rho->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* r       = RevBayesCore::assume_cast<const Probability &>( rho->getRevObject() ).getDagNode();
     
     // sampling probability
     RevBayesCore::TypedDagNode<double>* mp      = NULL;
     
     // sampling strategy
-    const std::string &strategy                 = static_cast<const RlString &>( sampling_strategy->getRevObject() ).getValue();
+    const std::string &strategy                 = RevBayesCore::assume_cast<const RlString &>( sampling_strategy->getRevObject() ).getValue();
     
     // incompletely sampled clades
     std::vector<RevBayesCore::Clade> inc_clades;
     if ( incomplete_clades->getRevObject() != RevNullObject::getInstance() )
     {
-        inc_clades = static_cast<const ModelVector<Clade> &>( incomplete_clades->getRevObject() ).getValue();
+        inc_clades = RevBayesCore::assume_cast<const ModelVector<Clade> &>( incomplete_clades->getRevObject() ).getValue();
     }
     
     // condition
-    const std::string& cond                     = static_cast<const RlString &>( condition->getRevObject() ).getValue();
+    const std::string& cond                     = RevBayesCore::assume_cast<const RlString &>( condition->getRevObject() ).getValue();
 
     // get the taxa to simulate either from a vector of rev taxon objects or a vector of names
-    std::vector<RevBayesCore::Taxon> t = static_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
+    std::vector<RevBayesCore::Taxon> t = RevBayesCore::assume_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
     
     // create the internal distribution object
     RevBayesCore::ConstantRateBirthDeathProcess* d = new RevBayesCore::ConstantRateBirthDeathProcess(ra, s, e, r, mp, strategy, inc_clades, cond, t);

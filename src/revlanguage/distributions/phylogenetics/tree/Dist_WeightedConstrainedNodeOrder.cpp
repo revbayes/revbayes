@@ -1,4 +1,5 @@
 #include <cmath>
+#include "TypeUtilities.h"
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -71,10 +72,10 @@ RevBayesCore::NodeOrderWeightedConstrainedTreeDistribution* Dist_WeightedConstra
 {
     
     // get the parameters
-    const RevBayesCore::RelativeNodeAgeWeightedConstraints& c = static_cast<const RlRelativeNodeAgeWeightedConstraints &>( constraints->getRevObject() ).getValue();
-    const Distribution&                                     rlDistribution  = static_cast<const Distribution &>( baseDistribution->getRevObject() );
+    const RevBayesCore::RelativeNodeAgeWeightedConstraints& c = RevBayesCore::assume_cast<const RlRelativeNodeAgeWeightedConstraints &>( constraints->getRevObject() ).getValue();
+    const Distribution&                                     rlDistribution  = RevBayesCore::assume_cast<const Distribution &>( baseDistribution->getRevObject() );
     RevBayesCore::TypedDistribution<RevBayesCore::Tree>*    base            = dynamic_cast<RevBayesCore::TypedDistribution<RevBayesCore::Tree>* >( rlDistribution.createDistribution() );
-    RevBayesCore::TypedDagNode<double>* bet       = static_cast<const RealPos &>( beta->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* bet       = RevBayesCore::assume_cast<const RealPos &>( beta->getRevObject() ).getDagNode();
     
     // create the internal distribution object
     RevBayesCore::NodeOrderWeightedConstrainedTreeDistribution* d = new RevBayesCore::NodeOrderWeightedConstrainedTreeDistribution(base, c, *bet);

@@ -1,4 +1,5 @@
 #include "Move_IndependentTopology.h"
+#include "TypeUtilities.h"
 #include "DistributionTypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 
@@ -62,21 +63,21 @@ void Move_IndependentTopology::constructInternalObject( void )
     delete value;
     
     // now allocate a new empirical tree move
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
     
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = RevBayesCore::assume_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
 
-    const Distribution& rlDistribution                        = static_cast<const Distribution &>( proposal_distribution->getRevObject() );
+    const Distribution& rlDistribution                        = RevBayesCore::assume_cast<const Distribution &>( proposal_distribution->getRevObject() );
     RevBayesCore::TypedDistribution<RevBayesCore::Tree>* prop = RevBayesCore::assumeTypedDistribution<RevBayesCore::Tree>( rlDistribution.createDistribution() );
 
-    const RevBayesCore::Clade& c      = static_cast<const Clade&>( outgroup->getRevObject() ).getValue();
+    const RevBayesCore::Clade& c      = RevBayesCore::assume_cast<const Clade&>( outgroup->getRevObject() ).getValue();
 
     RevBayesCore::Proposal *p;
 
     if( substitution_rates->getRevObject() != RevNullObject::getInstance() )
     {
-        RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp = static_cast<const ModelVector<RealPos> &>( substitution_rates->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( substitution_rates->getRevObject() ).getDagNode();
         if( tmp->isStochastic() == true )
         {
             RevBayesCore::StochasticNode<RevBayesCore::RbVector<double> >* stoch = RevBayesCore::checkStochastic<RevBayesCore::RbVector<double> >( tmp );

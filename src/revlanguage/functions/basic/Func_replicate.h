@@ -2,6 +2,7 @@
 #define Func_replicate_H
 
 #include "ModelVector.h"
+#include "TypeUtilities.h"
 #include "RlTypedFunction.h"
 
 #include <string>
@@ -74,8 +75,8 @@ RevLanguage::Func_replicate<valType>* RevLanguage::Func_replicate<valType>::clon
 template <typename valType>
 RevBayesCore::TypedFunction< RevBayesCore::RbVector< typename valType::valueType> >* RevLanguage::Func_replicate<valType>::createFunction( void ) const
 {
-    const RevBayesCore::TypedDagNode<typename valType::valueType>* v   = static_cast<const valType &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    int n   = (int)static_cast<const Natural &>( this->args[1].getVariable()->getRevObject() ).getValue();
+    const RevBayesCore::TypedDagNode<typename valType::valueType>* v   = RevBayesCore::assume_cast<const valType &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    int n   = (int)RevBayesCore::assume_cast<const Natural &>( this->args[1].getVariable()->getRevObject() ).getValue();
     
     RevBayesCore::ReplicateFunction<typename valType::valueType>* func = new RevBayesCore::ReplicateFunction<typename valType::valueType>( v, n );
     

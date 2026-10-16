@@ -1,4 +1,5 @@
 #include <cmath>
+#include "TypeUtilities.h"
 #include <cstddef>
 #include <iosfwd>
 #include <string>
@@ -81,10 +82,10 @@ RevBayesCore::MultivariateNormalDistribution* Dist_multivariateNorm::createDistr
 {
 
     // get the parameters
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* m = static_cast<const ModelVector<Real> &>( mean->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* m = RevBayesCore::assume_cast<const ModelVector<Real> &>( mean->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal>* cov = NULL;
     RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal>* pre = NULL;
-    RevBayesCore::TypedDagNode<double>* sc = static_cast<const RealPos &>( scale->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* sc = RevBayesCore::assume_cast<const RealPos &>( scale->getRevObject() ).getDagNode();
     
     if ( covariance->getRevObject() != RevNullObject::getInstance() && precision->getRevObject() != RevNullObject::getInstance() )
     {
@@ -92,11 +93,11 @@ RevBayesCore::MultivariateNormalDistribution* Dist_multivariateNorm::createDistr
     }
     else if ( covariance->getRevObject() != RevNullObject::getInstance() )
     {
-        cov = static_cast<const MatrixRealSymmetric &>( covariance->getRevObject() ).getDagNode();
+        cov = RevBayesCore::assume_cast<const MatrixRealSymmetric &>( covariance->getRevObject() ).getDagNode();
     }
     else if ( precision->getRevObject() != RevNullObject::getInstance() )
     {
-        pre = static_cast<const MatrixRealSymmetric &>( precision->getRevObject() ).getDagNode();
+        pre = RevBayesCore::assume_cast<const MatrixRealSymmetric &>( precision->getRevObject() ).getDagNode();
     }
     else
     {

@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <sstream>
 #include <string>
 #include <vector>
@@ -37,7 +38,7 @@ RevPtr<RevVariable> Func_fileExists::execute( void )
     
     // get the information from the arguments for reading the file
     size_t arg_index = 0;
-    RevBayesCore::path fn   = static_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+    RevBayesCore::path fn   = RevBayesCore::assume_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
     
     return new RevVariable( new RlBoolean( RevBayesCore::exists(fn) ) );
 }

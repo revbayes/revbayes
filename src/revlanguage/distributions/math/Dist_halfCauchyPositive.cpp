@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <ostream>
 #include <string>
 #include <vector>
@@ -58,8 +59,8 @@ RevBayesCore::HalfCauchyDistribution* Dist_halfCauchyPositive::createDistributio
 {
 
     // get the parameters
-    RevBayesCore::TypedDagNode<double>* l = static_cast<const RealPos &>( location->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* s = static_cast<const RealPos &>( scale->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* l = RevBayesCore::assume_cast<const RealPos &>( location->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* s = RevBayesCore::assume_cast<const RealPos &>( scale->getRevObject() ).getDagNode();
     RevBayesCore::HalfCauchyDistribution*   d = new RevBayesCore::HalfCauchyDistribution(l, s);
     
     return d;

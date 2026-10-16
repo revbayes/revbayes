@@ -1,4 +1,5 @@
 #include <cmath>
+#include "TypeUtilities.h"
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -69,27 +70,27 @@ RevBayesCore::InverseWishartDistribution* Dist_inverseWishart::createDistributio
     
     if ( sigma->getRevObject() != RevNullObject::getInstance() )
     {
-        sg = static_cast<const MatrixRealSymmetric &>( sigma->getRevObject() ).getDagNode();
+        sg = RevBayesCore::assume_cast<const MatrixRealSymmetric &>( sigma->getRevObject() ).getDagNode();
     }
     
     if ( diagonal->getRevObject() != RevNullObject::getInstance() )
     {
-        dv = static_cast<const ModelVector<RealPos> &>( diagonal->getRevObject() ).getDagNode();
+        dv = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( diagonal->getRevObject() ).getDagNode();
     }
     
     if ( kappa->getRevObject() != RevNullObject::getInstance() )
     {
-        ka = static_cast<const RealPos&>( kappa->getRevObject() ).getDagNode();
+        ka = RevBayesCore::assume_cast<const RealPos&>( kappa->getRevObject() ).getDagNode();
     }
     
     if ( df->getRevObject() != RevNullObject::getInstance() )
     {
-        deg = static_cast<const Natural &>( df->getRevObject()).getDagNode();
+        deg = RevBayesCore::assume_cast<const Natural &>( df->getRevObject()).getDagNode();
     }
 
     if ( dim->getRevObject() != RevNullObject::getInstance() )
     {
-        dm = static_cast<const Natural &>( dim->getRevObject()).getDagNode();
+        dm = RevBayesCore::assume_cast<const Natural &>( dim->getRevObject()).getDagNode();
     }
     
     RevBayesCore::InverseWishartDistribution* w =  NULL;

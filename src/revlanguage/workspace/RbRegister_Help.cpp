@@ -1,4 +1,5 @@
 #include <cstdio>
+#include "TypeUtilities.h"
 #include <cstdlib>
 #include <ostream>
 
@@ -25,7 +26,7 @@ void RevLanguage::Workspace::initializeExtraHelp(void)
 //        RevBayesCore::RbHelpSystem::getHelpSystem().addHelpType( static_cast<RevBayesCore::RbHelpType*>(mca.getHelpEntry()) );
 
         TimeTree tt;
-        RevBayesCore::RbHelpSystem::getHelpSystem().addHelpType( static_cast<RevBayesCore::RbHelpType*>(tt.getHelpEntry()) );
+        RevBayesCore::RbHelpSystem::getHelpSystem().addHelpType( RevBayesCore::assume_cast<RevBayesCore::RbHelpType*>(tt.getHelpEntry()) );
 
     }
     catch(RbException& rbException)

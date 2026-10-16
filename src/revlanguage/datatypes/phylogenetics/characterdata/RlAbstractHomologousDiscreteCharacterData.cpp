@@ -1,4 +1,5 @@
 #include "RlAbstractHomologousDiscreteCharacterData.h"
+#include "TypeUtilities.h"
 
 #include <cstddef>
 #include <iostream>
@@ -149,7 +150,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
         found = true;
 
             // get the member with give index
-        const Natural& index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() );
+        const Natural& index = RevBayesCore::assume_cast<const Natural&>( args[0].getVariable()->getRevObject() );
 
         if (this->dag_node->getValue().getNumberOfTaxa() < (size_t)(index.getValue()) )
         {
@@ -168,7 +169,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
         std::vector<std::vector<bool> > mask_gap        = std::vector<std::vector<bool> >(num_taxa, std::vector<bool>());
         std::vector<std::vector<bool> > mask_missing    = std::vector<std::vector<bool> >(num_taxa, std::vector<bool>());
         
-        const RevBayesCore::AbstractHomologousDiscreteCharacterData& ref = static_cast<const AbstractHomologousDiscreteCharacterData&>( args[0].getVariable()->getRevObject() ).getValue();
+        const RevBayesCore::AbstractHomologousDiscreteCharacterData& ref = RevBayesCore::assume_cast<const AbstractHomologousDiscreteCharacterData&>( args[0].getVariable()->getRevObject() ).getValue();
 
         ref.fillMissingSitesMask(mask_gap, mask_missing);
         this->dag_node->getValue().applyMissingSitesMask(mask_gap, mask_missing);
@@ -188,8 +189,8 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
     {
         found = true;
 
-        bool folded = static_cast<const RlBoolean&>( args[0].getVariable()->getRevObject() ).getValue();
-        const std::string& str_ambig_treat = static_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
+        bool folded = RevBayesCore::assume_cast<const RlBoolean&>( args[0].getVariable()->getRevObject() ).getValue();
+        const std::string& str_ambig_treat = RevBayesCore::assume_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
 
         RevBayesCore::AbstractHomologousDiscreteCharacterData::SFS_AMBIGUITY_TREATMENT ambig_treat = RevBayesCore::AbstractHomologousDiscreteCharacterData::SFS_AMBIGUITY_TREATMENT::ANCESTRAL;
         if ( str_ambig_treat == "derived" )
@@ -222,7 +223,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
         found = true;
 
         const RevObject& argument = args[0].getVariable()->getRevObject();
-        std::int64_t n = static_cast<const Natural&>( argument ).getValue();
+        std::int64_t n = RevBayesCore::assume_cast<const Natural&>( argument ).getValue();
 
         RevBayesCore::AbstractHomologousDiscreteCharacterData *trans_data = this->dag_node->getValue().expandCharacters( n );
 
@@ -241,7 +242,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
         found = true;
 
         const RevObject& argument = args[0].getVariable()->getRevObject();
-        bool excl = static_cast<const RlBoolean&>( argument ).getValue();
+        bool excl = RevBayesCore::assume_cast<const RlBoolean&>( argument ).getValue();
 
         std::vector<size_t> tmp = this->dag_node->getValue().getInvariantSiteIndices( excl );
         std::vector<std::int64_t> inv_vect(begin(tmp), end(tmp));
@@ -253,7 +254,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
         found = true;
 
         const RevObject& argument = args[0].getVariable()->getRevObject();
-        bool excl = static_cast<const RlBoolean&>( argument ).getValue();
+        bool excl = RevBayesCore::assume_cast<const RlBoolean&>( argument ).getValue();
 
         size_t n = this->dag_node->getValue().getNumberOfInvariantSites( excl );
 
@@ -302,7 +303,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
         found = true;
 
         const RevObject& argument = args[0].getVariable()->getRevObject();
-        bool excl = static_cast<const RlBoolean&>( argument ).getValue();
+        bool excl = RevBayesCore::assume_cast<const RlBoolean&>( argument ).getValue();
 
         double max_gc = this->dag_node->getValue().maxGcContent( excl );
 
@@ -313,7 +314,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
         found = true;
 
         const RevObject& argument = args[0].getVariable()->getRevObject();
-        bool excl = static_cast<const RlBoolean&>( argument ).getValue();
+        bool excl = RevBayesCore::assume_cast<const RlBoolean&>( argument ).getValue();
 
         size_t max_inv = this->dag_node->getValue().maxInvariableBlockLength( excl );
 
@@ -324,7 +325,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
         found = true;
 
         const RevObject& argument = args[0].getVariable()->getRevObject();
-        bool excl = static_cast<const RlBoolean&>( argument ).getValue();
+        bool excl = RevBayesCore::assume_cast<const RlBoolean&>( argument ).getValue();
 
         size_t max_pd = this->dag_node->getValue().getMaxPairwiseSequenceDifference( excl );
 
@@ -375,7 +376,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
         found = true;
 
         const RevObject& argument = args[0].getVariable()->getRevObject();
-        bool excl = static_cast<const RlBoolean&>( argument ).getValue();
+        bool excl = RevBayesCore::assume_cast<const RlBoolean&>( argument ).getValue();
 
         size_t max_var = this->dag_node->getValue().maxVariableBlockLength( excl );
 
@@ -386,7 +387,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
         found = true;
 
         const RevObject& argument = args[0].getVariable()->getRevObject();
-        bool excl = static_cast<const RlBoolean&>( argument ).getValue();
+        bool excl = RevBayesCore::assume_cast<const RlBoolean&>( argument ).getValue();
 
         double mean_gc = this->dag_node->getValue().meanGcContent( excl );
 
@@ -397,10 +398,10 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
         found = true;
 
         const RevObject& argument = args[0].getVariable()->getRevObject();
-        size_t n = size_t( static_cast<const Natural&>( argument ).getValue() );
+        size_t n = size_t( RevBayesCore::assume_cast<const Natural&>( argument ).getValue() );
 
         const RevObject& excl_argument = args[1].getVariable()->getRevObject();
-        bool excl = static_cast<const RlBoolean&>( excl_argument ).getValue();
+        bool excl = RevBayesCore::assume_cast<const RlBoolean&>( excl_argument ).getValue();
 
         double mean_gc = this->dag_node->getValue().meanGcContentByCodon( n, excl );
 
@@ -411,7 +412,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
         found = true;
 
         const RevObject& argument = args[0].getVariable()->getRevObject();
-        bool excl = static_cast<const RlBoolean&>( argument ).getValue();
+        bool excl = RevBayesCore::assume_cast<const RlBoolean&>( argument ).getValue();
 
         double min_gc = this->dag_node->getValue().minGcContent( excl );
 
@@ -422,7 +423,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
         found = true;
 
         const RevObject& argument = args[0].getVariable()->getRevObject();
-        bool excl = static_cast<const RlBoolean&>( argument ).getValue();
+        bool excl = RevBayesCore::assume_cast<const RlBoolean&>( argument ).getValue();
 
         size_t min_pd = this->dag_node->getValue().getMinPairwiseSequenceDifference( excl );
 
@@ -433,7 +434,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
         found = true;
 
         const RevObject& argument = args[0].getVariable()->getRevObject();
-        bool excl = static_cast<const RlBoolean&>( argument ).getValue();
+        bool excl = RevBayesCore::assume_cast<const RlBoolean&>( argument ).getValue();
 
         RevBayesCore::DistanceMatrix pd = this->dag_node->getValue().getPairwiseSequenceDifference( excl );
 
@@ -444,7 +445,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
         found = true;
 
         const RevObject& argument = args[0].getVariable()->getRevObject();
-        bool excl = static_cast<const RlBoolean&>( argument ).getValue();
+        bool excl = RevBayesCore::assume_cast<const RlBoolean&>( argument ).getValue();
 
         size_t num_blocks = this->dag_node->getValue().numInvariableSiteBlocks( excl );
 
@@ -455,7 +456,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
         found = true;
 
         const RevObject& argument = args[0].getVariable()->getRevObject();
-        double percentage = static_cast<const Probability&>( argument ).getValue();
+        double percentage = RevBayesCore::assume_cast<const Probability&>( argument ).getValue();
 
         size_t num_taxa = this->dag_node->getValue().numberTaxaMissingSequence( percentage );
 
@@ -481,7 +482,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
     {
         found = true;
         
-        double missing = static_cast<const Probability&>( args[0].getVariable()->getRevObject() ).getValue();
+        double missing = RevBayesCore::assume_cast<const Probability&>( args[0].getVariable()->getRevObject() ).getValue();
 
         this->dag_node->getValue().replaceRandomSitesByMissingData(missing);
 
@@ -499,7 +500,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
             // e.g. data.setCodonPartition(sites=v(3))
         if ( argument.isType( Natural::getClassTypeSpec() ) )
         {
-            size_t n = size_t( static_cast<const Natural&>( argument ).getValue() );
+            size_t n = size_t( RevBayesCore::assume_cast<const Natural&>( argument ).getValue() );
             size_t i = 0; // index of included characters
             for (size_t j = 0; j < nChars; j++)
             {
@@ -523,7 +524,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
             // e.g. data.setCodonPartition(sites=v(1,2))
         else if ( argument.isType( ModelVector<Natural>::getClassTypeSpec() ) )
         {
-            const ModelVector<Natural>& x = static_cast<const ModelVector<Natural>&>( argument );
+            const ModelVector<Natural>& x = RevBayesCore::assume_cast<const ModelVector<Natural>&>( argument );
             if (x.size() == 0)
             {
                 return NULL;
@@ -568,7 +569,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
         bool warn = false;
 
         // e.g. data.setNumStatesPartition(2)
-        size_t n = size_t( static_cast<const Natural&>( argument ).getValue() );
+        size_t n = size_t( RevBayesCore::assume_cast<const Natural&>( argument ).getValue() );
         for (size_t i = 0; i < nChars; i++)
         {
             // only set state number partition for previously included characters
@@ -742,7 +743,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
         found = true;
 
         const RevObject& argument = args[0].getVariable()->getRevObject();
-        const std::string &type = static_cast<const RlString&>( argument ).getValue();
+        const std::string &type = RevBayesCore::assume_cast<const RlString&>( argument ).getValue();
 
         RevBayesCore::AbstractHomologousDiscreteCharacterData *trans_data = this->dag_node->getValue().translateCharacters( type );
 
@@ -753,7 +754,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
         found = true;
 
         const RevObject& argument = args[0].getVariable()->getRevObject();
-        bool excl = static_cast<const RlBoolean&>( argument ).getValue();
+        bool excl = RevBayesCore::assume_cast<const RlBoolean&>( argument ).getValue();
 
         double var_gc = this->dag_node->getValue().varGcContent( excl );
 
@@ -764,10 +765,10 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
         found = true;
 
         const RevObject& argument = args[0].getVariable()->getRevObject();
-        size_t n = size_t( static_cast<const Natural&>( argument ).getValue() );
+        size_t n = size_t( RevBayesCore::assume_cast<const Natural&>( argument ).getValue() );
 
         const RevObject& excl_argument = args[1].getVariable()->getRevObject();
-        bool excl = static_cast<const RlBoolean&>( excl_argument ).getValue();
+        bool excl = RevBayesCore::assume_cast<const RlBoolean&>( excl_argument ).getValue();
 
         double var_gc = this->dag_node->getValue().varGcContentByCodon( n, excl );
 

@@ -19,6 +19,7 @@
 #define Func_mult_H
 
 #include "RlTypedFunction.h"
+#include "TypeUtilities.h"
 
 #include <map>
 #include <string>
@@ -77,8 +78,8 @@ template <typename firstValType, typename secondValType, typename retType>
 RevBayesCore::TypedFunction< typename retType::valueType >* RevLanguage::Func__mult<firstValType, secondValType, retType>::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<typename firstValType::valueType>* firstArg = static_cast<const firstValType &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<typename secondValType::valueType>* secondArg = static_cast<const secondValType &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<typename firstValType::valueType>* firstArg = RevBayesCore::assume_cast<const firstValType &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<typename secondValType::valueType>* secondArg = RevBayesCore::assume_cast<const secondValType &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::BinaryMultiplication<typename firstValType::valueType, typename secondValType::valueType, typename retType::valueType> *func = new RevBayesCore::BinaryMultiplication<typename firstValType::valueType, typename secondValType::valueType, typename retType::valueType>(firstArg, secondArg);
     
     return func;

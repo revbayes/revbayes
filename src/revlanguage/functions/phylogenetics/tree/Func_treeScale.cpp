@@ -7,6 +7,7 @@
 //
 
 #include "Func_treeScale.h"
+#include "TypeUtilities.h"
 
 #include <cstddef>
 
@@ -50,15 +51,15 @@ Func_treeScale* Func_treeScale::clone( void ) const {
 RevBayesCore::TypedFunction<RevBayesCore::Tree>* Func_treeScale::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<double>* scale                             = static_cast<const RealPos &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau               = static_cast<const TimeTree&>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* scale                             = RevBayesCore::assume_cast<const RealPos &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau               = RevBayesCore::assume_cast<const TimeTree&>( this->args[1].getVariable()->getRevObject() ).getDagNode();
     
     size_t nTips = tau->getValue().getNumberOfTips();
     RevBayesCore::RbVector<double> tipAges;
     if ( this->args[2].getVariable()->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
     {
 //        tipAges = static_cast< RevBayesCore::RbVector<RealPos>& >( this->args[2].getVariable()->getRevObject() ).getValue();
-        tipAges = static_cast<const ModelVector<RealPos> &>( this->args[2].getVariable()->getRevObject() ).getDagNode()->getValue();
+        tipAges = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( this->args[2].getVariable()->getRevObject() ).getDagNode()->getValue();
         
         // sanity check
         if ( nTips != tipAges.size() )
@@ -68,7 +69,7 @@ RevBayesCore::TypedFunction<RevBayesCore::Tree>* Func_treeScale::createFunction(
     }
     else
     {
-        double v = static_cast<RealPos&>( this->args[2].getVariable()->getRevObject() ).getValue();
+        double v = RevBayesCore::assume_cast<RealPos&>( this->args[2].getVariable()->getRevObject() ).getValue();
         for (size_t i = 0; i < nTips; i++)
         {
             tipAges.push_back( v );

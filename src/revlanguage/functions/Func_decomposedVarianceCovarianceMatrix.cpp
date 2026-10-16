@@ -6,6 +6,7 @@
 //
 
 #include "Func_decomposedVarianceCovarianceMatrix.h"
+#include "TypeUtilities.h"
 
 #include "MatrixReal.h"
 #include "ModelVector.h"
@@ -49,8 +50,8 @@ Func_decomposedVarianceCovarianceMatrix* Func_decomposedVarianceCovarianceMatrix
 
 RevBayesCore::TypedFunction< RevBayesCore::MatrixReal >* Func_decomposedVarianceCovarianceMatrix::createFunction(void) const {
 
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* sd = static_cast<const ModelVector<RealPos>& >( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* r = static_cast<const MatrixReal& >( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* sd = RevBayesCore::assume_cast<const ModelVector<RealPos>& >( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* r = RevBayesCore::assume_cast<const MatrixReal& >( this->args[1].getVariable()->getRevObject() ).getDagNode();
     if ( sd->getValue().size() != r->getValue().getNumberOfColumns() )
         {
         throw RbException("The dimension between the standard deviations and the correlation coefficients does not match.");

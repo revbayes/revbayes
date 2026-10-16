@@ -1,4 +1,5 @@
 #include "RlModelTrace.h"
+#include "TypeUtilities.h"
 
 #include <string>
 
@@ -59,11 +60,11 @@ RevPtr<RevVariable> ModelTrace::executeMethod(std::string const &name, const std
         RevObject& b = args[0].getVariable()->getRevObject();
         if ( b.isType( Integer::getClassTypeSpec() ) )
         {
-            burnin = (int)static_cast<const Integer &>(b).getValue();
+            burnin = (int)RevBayesCore::assume_cast<const Integer &>(b).getValue();
         }
         else
         {
-            double burninFrac = static_cast<const Probability &>(b).getValue();
+            double burninFrac = RevBayesCore::assume_cast<const Probability &>(b).getValue();
             burnin = int( floor( value->size()*burninFrac ) );
         }
 
@@ -75,7 +76,7 @@ RevPtr<RevVariable> ModelTrace::executeMethod(std::string const &name, const std
     {
         found = true;
 
-        bool post = static_cast<const RlBoolean &>( args[0].getVariable()->getRevObject() ).getValue();
+        bool post = RevBayesCore::assume_cast<const RlBoolean &>( args[0].getVariable()->getRevObject() ).getValue();
 
         int n = (int)this->value->size(post);
 

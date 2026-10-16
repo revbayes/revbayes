@@ -1,4 +1,5 @@
 #include <sstream>
+#include "TypeUtilities.h"
 #include <string>
 #include <vector>
 
@@ -101,7 +102,7 @@ RevPtr<RevVariable> MatrixRealPos::executeMethod(std::string const &name, const 
     {
         found = true;
         
-        const Natural& index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() );
+        const Natural& index = RevBayesCore::assume_cast<const Natural&>( args[0].getVariable()->getRevObject() );
         int i = (int)index.getValue() - 1;
         
         RevBayesCore::RbVector<double> m = this->dag_node->getValue().getColumn( i );

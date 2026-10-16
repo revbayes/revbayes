@@ -1,4 +1,5 @@
 #include "RlBurninEstimationConvergenceAssessment.h"
+#include "TypeUtilities.h"
 
 #include <cstdlib>
 #include <cstddef>
@@ -325,7 +326,7 @@ RevPtr<RevVariable> BurninEstimationConvergenceAssessment::executeMethod(std::st
         found = true;
         
         // get the member with give index
-        burninMethod = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
+        burninMethod = RevBayesCore::assume_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
         
     }
     else if (name == "verbose")
@@ -333,7 +334,7 @@ RevPtr<RevVariable> BurninEstimationConvergenceAssessment::executeMethod(std::st
         found = true;
         
         // get the member with give index
-        verbose = static_cast<const RlBoolean &>( args[0].getVariable()->getRevObject() ).getValue();
+        verbose = RevBayesCore::assume_cast<const RlBoolean &>( args[0].getVariable()->getRevObject() ).getValue();
         
     }
     else
@@ -509,11 +510,11 @@ void BurninEstimationConvergenceAssessment::setConstParameter(const std::string&
         // empty the files names
         if ( var->getRevObject().getTypeSpec().isDerivedOf( RlString::getClassTypeSpec() ) )
         {
-            filenames.insert( static_cast<const RlString&>( var->getRevObject() ).getValue() );
+            filenames.insert( RevBayesCore::assume_cast<const RlString&>( var->getRevObject() ).getValue() );
         }
         else
         {
-            const std::vector<std::string> &fn = static_cast<const ModelVector<RlString> &>( var->getRevObject() ).getValue();
+            const std::vector<std::string> &fn = RevBayesCore::assume_cast<const ModelVector<RlString> &>( var->getRevObject() ).getValue();
             for (std::vector<std::string>::const_iterator it=fn.begin(); it!=fn.end(); ++it)
             {
                 filenames.insert( *it );
@@ -523,7 +524,7 @@ void BurninEstimationConvergenceAssessment::setConstParameter(const std::string&
     }
     else if ( name == "delimiter" || name == "separator" )
     {
-        delimiter = static_cast<const RlString&>( var->getRevObject() ).getValue();
+        delimiter = RevBayesCore::assume_cast<const RlString&>( var->getRevObject() ).getValue();
     }
     else
     {

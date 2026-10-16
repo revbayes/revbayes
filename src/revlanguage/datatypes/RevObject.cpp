@@ -1,4 +1,5 @@
 #include <cstdio>
+#include "TypeUtilities.h"
 #include <iostream>
 #include <map>
 #include <string>
@@ -231,7 +232,7 @@ RevBayesCore::RbHelpEntry* RevObject::constructTypeSpecificHelp( void ) const
 void RevObject::addSpecificHelpFields(RevBayesCore::RbHelpEntry *e) const
 {
     
-    RevBayesCore::RbHelpType *help_entry = static_cast<RevBayesCore::RbHelpType*>( e );
+    RevBayesCore::RbHelpType *help_entry = RevBayesCore::assume_cast<RevBayesCore::RbHelpType*>( e );
     
     // create the constructor
     RevBayesCore::RbHelpFunction help_constructor = RevBayesCore::RbHelpFunction();

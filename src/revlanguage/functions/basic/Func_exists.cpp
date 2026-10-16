@@ -1,4 +1,5 @@
 #include <iosfwd>
+#include "TypeUtilities.h"
 #include <vector>
 
 #include "Argument.h"
@@ -40,7 +41,7 @@ Func_exists* Func_exists::clone( void ) const
 RevPtr<RevVariable> Func_exists::execute( void )
 {
     
-    const std::string& name = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
+    const std::string& name = RevBayesCore::assume_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
     
     bool exists = Workspace::userWorkspace().existsVariable( name );
     

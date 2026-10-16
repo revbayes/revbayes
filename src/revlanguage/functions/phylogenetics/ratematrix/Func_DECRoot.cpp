@@ -7,6 +7,7 @@
 //
 
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <vector>
 #include <cmath>
 #include <iosfwd>
@@ -63,11 +64,11 @@ Func_DECRoot* Func_DECRoot::clone( void ) const
 RevBayesCore::TypedFunction< RevBayesCore::Simplex >* Func_DECRoot::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* rf = static_cast<const ModelVector<RealPos> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* rf = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
 
     RevBayesCore::TypedDagNode<RevBayesCore::Simplex >* rs = NULL;
     if ( this->args[1].getVariable() != NULL && this->args[1].getVariable()->getRevObject() != RevNullObject::getInstance()) {
-        rs = static_cast<const Simplex&>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+        rs = RevBayesCore::assume_cast<const Simplex&>( this->args[1].getVariable()->getRevObject() ).getDagNode();
     }
     else {
         size_t n = log2(rf->getValue().size());

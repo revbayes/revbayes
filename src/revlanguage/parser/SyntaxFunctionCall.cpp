@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <sstream>
 #include <list>
 #include <set>
@@ -159,7 +160,7 @@ RevPtr<RevVariable> SyntaxFunctionCall::evaluateContent( const std::shared_ptr<E
             
             if ( the_object.isType( Function::getClassTypeSpec() ) )
             {
-                func = static_cast<Function*>( the_object.clone() );
+                func = RevBayesCore::assume_cast<Function*>( the_object.clone() );
                 std::vector<bool> arg_mapped(args.size(), false);
                 found = func->checkArguments(args, NULL, arg_mapped);
             }

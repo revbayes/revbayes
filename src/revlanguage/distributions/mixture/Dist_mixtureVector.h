@@ -2,6 +2,7 @@
 #define Dist_mixtureVector_H
 
 #include "VectorMixtureDistribution.h"
+#include "TypeUtilities.h"
 #include "DistributionTypeUtilities.h"
 #include "RealPos.h"
 #include "RlTypedDistribution.h"
@@ -98,7 +99,7 @@ RevBayesCore::VectorMixtureDistribution< typename valType::valueType >* RevLangu
 {
     
     // get the parameters
-    const WorkspaceVector<Distribution>& rl_bd = static_cast<const WorkspaceVector<Distribution > &>( base_distributions->getRevObject() );
+    const WorkspaceVector<Distribution>& rl_bd = RevBayesCore::assume_cast<const WorkspaceVector<Distribution > &>( base_distributions->getRevObject() );
     std::vector<RevBayesCore::TypedDistribution<typename valType::valueType>* > bd;
     for (size_t i=0; i<rl_bd.size();++i)
     {
@@ -106,8 +107,8 @@ RevBayesCore::VectorMixtureDistribution< typename valType::valueType >* RevLangu
         bd.push_back( tmp );
     }
 
-    RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* p = static_cast<const Simplex &>( probabilities->getRevObject() ).getDagNode();
-    std::int64_t n = static_cast<const Natural &>( num_values->getRevObject() ).getValue();
+    RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* p = RevBayesCore::assume_cast<const Simplex &>( probabilities->getRevObject() ).getDagNode();
+    std::int64_t n = RevBayesCore::assume_cast<const Natural &>( num_values->getRevObject() ).getValue();
 
     RevBayesCore::VectorMixtureDistribution<typename valType::valueType>* d = new RevBayesCore::VectorMixtureDistribution<typename valType::valueType>(bd,p,n);
     

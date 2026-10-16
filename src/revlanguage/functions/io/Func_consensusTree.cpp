@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <sstream>
 #include <string>
 #include <vector>
@@ -53,11 +54,11 @@ RevPtr<RevVariable> Func_consensusTree::execute(void)
     RevObject& b = args[arg_index++].getVariable()->getRevObject();
     if ( b.isType( TraceTree::getClassTypeSpec() ) )
     {
-        summary = &( static_cast<TraceTree &>(b).getValue() );
+        summary = &( RevBayesCore::assume_cast<TraceTree &>(b).getValue() );
     }
     else
     {
-        std::vector<TraceTree>& tt = static_cast<const WorkspaceVector<TraceTree> &>(b).getValue();
+        std::vector<TraceTree>& tt = RevBayesCore::assume_cast<const WorkspaceVector<TraceTree> &>(b).getValue();
 
         std::vector<RevBayesCore::TraceTree* > vec;
         for(size_t i = 0; i < tt.size(); i++)
@@ -68,17 +69,17 @@ RevPtr<RevVariable> Func_consensusTree::execute(void)
         summary = new RevBayesCore::TreeSummary( vec, tt.front().getValue().isClock() );
     }
     
-    double cutoff = static_cast<const Probability &>(args[arg_index++].getVariable()->getRevObject()).getValue();
+    double cutoff = RevBayesCore::assume_cast<const Probability &>(args[arg_index++].getVariable()->getRevObject()).getValue();
 
-    const std::string& filename = static_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+    const std::string& filename = RevBayesCore::assume_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
 
 
     RevBayesCore::TraceTree::AnnotationReport report;
 
-    report.node_ages_HPD                 = static_cast<const Probability &>(args[arg_index++].getVariable()->getRevObject()).getValue();
-    report.mean_node_ages                = static_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
-    report.sampled_ancestor_probs        = static_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
-    report.force_positive_branch_lengths = static_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
+    report.node_ages_HPD                 = RevBayesCore::assume_cast<const Probability &>(args[arg_index++].getVariable()->getRevObject()).getValue();
+    report.mean_node_ages                = RevBayesCore::assume_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
+    report.sampled_ancestor_probs        = RevBayesCore::assume_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
+    report.force_positive_branch_lengths = RevBayesCore::assume_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
 
     bool verbose = true;
     RevBayesCore::Tree* tree = summary->mrTree(report, cutoff, verbose);

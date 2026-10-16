@@ -7,6 +7,7 @@
 //
 
 #include "Func_rangeEvolutionRateModifier.h"
+#include "TypeUtilities.h"
 
 #include <cstddef>
 #include <ostream>
@@ -54,18 +55,18 @@ Func_rangeEvolutionRateModifier* Func_rangeEvolutionRateModifier::clone( void ) 
 RevBayesCore::TypedFunction< RevBayesCore::CharacterHistoryRateModifier >* Func_rangeEvolutionRateModifier::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<double>* gf = static_cast<const Real&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* lf = static_cast<const Real&>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* gf = RevBayesCore::assume_cast<const Real&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* lf = RevBayesCore::assume_cast<const Real&>( this->args[1].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* c = NULL;
     if ( this->args[2].getVariable()->getRevObject().isType( ModelVector<ModelVector<Real> >::getClassTypeSpec() ) )
     {
-        c = static_cast<const ModelVector<ModelVector<Real> > &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+        c = RevBayesCore::assume_cast<const ModelVector<ModelVector<Real> > &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
     }
     else
     {
         throw RbException("Failed to type cast `matrix` argument!");
     }
-    size_t nc = static_cast<const Natural&>( this->args[3].getVariable()->getRevObject() ).getValue();
+    size_t nc = RevBayesCore::assume_cast<const Natural&>( this->args[3].getVariable()->getRevObject() ).getValue();
     
     
     // validate input

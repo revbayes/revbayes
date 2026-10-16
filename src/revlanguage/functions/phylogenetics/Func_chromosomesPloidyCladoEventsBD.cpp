@@ -5,6 +5,7 @@
 //
 
 #include <iosfwd>
+#include "TypeUtilities.h"
 #include <string>
 #include <vector>
 
@@ -56,9 +57,9 @@ Func_chromosomesPloidyCladoEventsBD* Func_chromosomesPloidyCladoEventsBD::clone(
 RevBayesCore::TypedFunction< RevBayesCore::CladogeneticSpeciationRateMatrix >* Func_chromosomesPloidyCladoEventsBD::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* sr = static_cast<const ModelVector<RealPos> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* sr = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     
-    int ns = (int)static_cast<const Natural &>( this->args[1].getVariable()->getRevObject() ).getValue();
+    int ns = (int)RevBayesCore::assume_cast<const Natural &>( this->args[1].getVariable()->getRevObject() ).getValue();
     
     RevBayesCore::ChromosomesPloidyCladogenicBirthDeathFunction* f = new RevBayesCore::ChromosomesPloidyCladogenicBirthDeathFunction( sr, ns );
     

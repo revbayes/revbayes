@@ -2,6 +2,7 @@
 #define UserFunctionNode_H
 
 #include "DynamicNode.h"
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "RevPtr.h"
 #include "RevVariable.h"
@@ -242,7 +243,7 @@ RevBayesCore::DagNode* UserFunctionNode<rlType>::cloneDAG( RevBayesCore::DagNode
         const RevObject &rObject = args[i].getVariable()->getRevObject();
         if ( rObject.isModelObject() )
         {
-            const AbstractModelObject &modelObj = static_cast< const AbstractModelObject &>( rObject );
+            const AbstractModelObject &modelObj = RevBayesCore::assume_cast< const AbstractModelObject &>( rObject );
             RevBayesCore::DagNode* the_node = modelObj.getDagNode();
             std::map<std::string, const RevBayesCore::DagNode*> names;
             AbstractModelObject *rObjClone = modelObj.clone();

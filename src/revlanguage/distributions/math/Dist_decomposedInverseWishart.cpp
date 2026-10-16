@@ -1,4 +1,5 @@
 #include <cmath>
+#include "TypeUtilities.h"
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -66,11 +67,11 @@ RevBayesCore::DecomposedInverseWishartDistribution* Dist_decomposedInverseWishar
 {
     
     // get the parameters
-    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal>* sg = static_cast<const MatrixRealSymmetric &>( sigma->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* dv = static_cast<const ModelVector<RealPos> &>( diagonal->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* ka = static_cast<const RealPos&>( kappa->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<std::int64_t>* deg = static_cast<const Natural &>( df->getRevObject()).getDagNode();
-    RevBayesCore::TypedDagNode<std::int64_t>* dm = static_cast<const Natural &>( dim->getRevObject()).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal>* sg = RevBayesCore::assume_cast<const MatrixRealSymmetric &>( sigma->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* dv = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( diagonal->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* ka = RevBayesCore::assume_cast<const RealPos&>( kappa->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<std::int64_t>* deg = RevBayesCore::assume_cast<const Natural &>( df->getRevObject()).getDagNode();
+    RevBayesCore::TypedDagNode<std::int64_t>* dm = RevBayesCore::assume_cast<const Natural &>( dim->getRevObject()).getDagNode();
     
     RevBayesCore::DecomposedInverseWishartDistribution* w =  0;
     if ( sg->getValue().getDim() == 0 )

@@ -6,6 +6,7 @@
  */
 
 #include "Move_CorrelationMatrixSpecificElementBeta.h"
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
@@ -59,14 +60,14 @@ void Move_CorrelationMatrixSpecificElementBeta::constructInternalObject( void )
     delete value;
     
     // now allocate a new sliding move
-    size_t i = static_cast<const Natural &>( row->getRevObject() ).getValue();
-    size_t j = static_cast<const Natural &>( col->getRevObject() ).getValue();
-    double a = static_cast<const RealPos &>( alpha->getRevObject() ).getValue();
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    double r = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* tmp = static_cast<const MatrixReal &>( v->getRevObject() ).getDagNode();
+    size_t i = RevBayesCore::assume_cast<const Natural &>( row->getRevObject() ).getValue();
+    size_t j = RevBayesCore::assume_cast<const Natural &>( col->getRevObject() ).getValue();
+    double a = RevBayesCore::assume_cast<const RealPos &>( alpha->getRevObject() ).getValue();
+    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double r = RevBayesCore::assume_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* tmp = RevBayesCore::assume_cast<const MatrixReal &>( v->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *n = RevBayesCore::assumeStochastic<RevBayesCore::MatrixReal>( tmp );
-    bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    bool t = RevBayesCore::assume_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *p = new RevBayesCore::CorrelationMatrixSpecificElementBetaProposal(n,i,j,a,r);
     value = new RevBayesCore::MetropolisHastingsMove(p,w,t);

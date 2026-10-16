@@ -1,4 +1,5 @@
 #include "Func_codonSynonymousNonsynonymousHKYRateMatrix.h"
+#include "TypeUtilities.h"
 
 #include "CodonSynonymousNonsynonymousHKYRateMatrixFunction.h"
 #include "RealPos.h"
@@ -40,9 +41,9 @@ Func_codonSynonymousNonsynonymousHKYRateMatrix* Func_codonSynonymousNonsynonymou
 RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_codonSynonymousNonsynonymousHKYRateMatrix::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode< double >* om = static_cast<const RealPos &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< double >* ka = static_cast<const RealPos &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* bf = static_cast<const Simplex &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< double >* om = RevBayesCore::assume_cast<const RealPos &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< double >* ka = RevBayesCore::assume_cast<const RealPos &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* bf = RevBayesCore::assume_cast<const Simplex &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
     
     if ( bf->getValue().size() != 4 )
     {

@@ -1,4 +1,5 @@
 #include "Func_sin.h"
+#include "TypeUtilities.h"
 
 #include "Real.h"
 #include "RealPos.h"
@@ -40,7 +41,7 @@ double* my_sin(double x)
 
 RevBayesCore::TypedFunction<double>* Func_sin::createFunction( void ) const
 {
-    RevBayesCore::TypedDagNode<double>* arg = static_cast<const Real &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* arg = RevBayesCore::assume_cast<const Real &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
 
     // Select the version of sin that takes a double.
     return RevBayesCore::generic_function_ptr< double >( my_sin, arg );

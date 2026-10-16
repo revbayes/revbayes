@@ -7,6 +7,7 @@
 //
 
 #include <iosfwd>
+#include "TypeUtilities.h"
 #include <vector>
 
 #include "ArgumentRule.h"
@@ -52,8 +53,8 @@ Func_normalize* Func_normalize::clone( void ) const {
 RevBayesCore::TypedFunction< RevBayesCore::RbVector<double> >* Func_normalize::createFunction( void ) const
 {
     
-    const RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> > *params = static_cast< ModelVector<RealPos> & >( args[0].getVariable()->getRevObject() ).getDagNode();
-    const RevBayesCore::TypedDagNode< double > *sum = static_cast< RealPos& >( args[1].getVariable()->getRevObject() ).getDagNode();
+    const RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> > *params = RevBayesCore::assume_cast< ModelVector<RealPos> & >( args[0].getVariable()->getRevObject() ).getDagNode();
+    const RevBayesCore::TypedDagNode< double > *sum = RevBayesCore::assume_cast< RealPos& >( args[1].getVariable()->getRevObject() ).getDagNode();
     
     RevBayesCore::NormalizeVectorFunction *func = new RevBayesCore::NormalizeVectorFunction( params, sum );
     

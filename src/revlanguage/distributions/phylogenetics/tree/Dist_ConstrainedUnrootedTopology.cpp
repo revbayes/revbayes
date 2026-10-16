@@ -1,4 +1,5 @@
 #include <cmath>
+#include "TypeUtilities.h"
 #include <cstddef>
 #include <iosfwd>
 #include <string>
@@ -82,15 +83,15 @@ RevBayesCore::TopologyConstrainedTreeDistribution* Dist_ConstrainedUnrootedTopol
 
     // get the parameters
 
-    const RevBayesCore::RbVector<RevBayesCore::Clade>& c      = static_cast<const ModelVector<Clade> &>( constraints->getRevObject() ).getValue();
-    const Distribution& rlDistribution                        = static_cast<const Distribution &>( base_distribution->getRevObject() );
+    const RevBayesCore::RbVector<RevBayesCore::Clade>& c      = RevBayesCore::assume_cast<const ModelVector<Clade> &>( constraints->getRevObject() ).getValue();
+    const Distribution& rlDistribution                        = RevBayesCore::assume_cast<const Distribution &>( base_distribution->getRevObject() );
     RevBayesCore::TypedDistribution<RevBayesCore::Tree>* base = RevBayesCore::assumeTypedDistribution<RevBayesCore::Tree>( rlDistribution.createDistribution() );
     
     // tree for initialization
     RevBayesCore::Tree* init = nullptr;
     if ( initial_tree->getRevObject() != RevNullObject::getInstance() )
     {
-        init = static_cast<const BranchLengthTree &>( initial_tree->getRevObject() ).getDagNode()->getValue().clone();
+        init = RevBayesCore::assume_cast<const BranchLengthTree &>( initial_tree->getRevObject() ).getDagNode()->getValue().clone();
     }
     
     /* Since an unrooted topology is not a time tree, its tips are not associated with times that would require checking.
@@ -109,14 +110,14 @@ RevBayesCore::TopologyConstrainedTreeDistribution* Dist_ConstrainedUnrootedTopol
     else if ( backbone->getRevObject().isType( ModelVector<BranchLengthTree>::getClassTypeSpec() ) )
     {
         RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::Tree> >* bb = NULL;
-        bb = static_cast<const ModelVector<BranchLengthTree> &>( backbone->getRevObject() ).getDagNode();
+        bb = RevBayesCore::assume_cast<const ModelVector<BranchLengthTree> &>( backbone->getRevObject() ).getDagNode();
         
         dist->setBackbone( NULL, bb );
     }
     else if ( backbone->getRevObject().isType( BranchLengthTree::getClassTypeSpec() ) )
     {
         RevBayesCore::TypedDagNode<RevBayesCore::Tree>* bb = NULL;
-        bb = static_cast<const BranchLengthTree&>( backbone->getRevObject() ).getDagNode();
+        bb = RevBayesCore::assume_cast<const BranchLengthTree&>( backbone->getRevObject() ).getDagNode();
 
         dist->setBackbone( bb, NULL );
     }

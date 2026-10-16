@@ -7,6 +7,7 @@
 //
 
 #include "Mntr_StochasticBranchStateTimes.h"
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
@@ -57,13 +58,13 @@ Mntr_StochasticBranchStateTimes* Mntr_StochasticBranchStateTimes::clone(void) co
 void Mntr_StochasticBranchStateTimes::constructInternalObject( void )
 {
     
-    const std::string& file_name      = static_cast<const RlString  &>( filename->getRevObject()           ).getValue();
-    const std::string& sep            = static_cast<const RlString  &>( separator->getRevObject()          ).getValue();
-    unsigned int       print_gen      = (int)static_cast<const IntegerPos   &>( printgen->getRevObject()      ).getValue();
-    bool               app            = static_cast<const RlBoolean &>( append->getRevObject()             ).getValue();
-    bool               wv             = static_cast<const RlBoolean &>( version->getRevObject()            ).getValue();
+    const std::string& file_name      = RevBayesCore::assume_cast<const RlString  &>( filename->getRevObject()           ).getValue();
+    const std::string& sep            = RevBayesCore::assume_cast<const RlString  &>( separator->getRevObject()          ).getValue();
+    unsigned int       print_gen      = (int)RevBayesCore::assume_cast<const IntegerPos   &>( printgen->getRevObject()      ).getValue();
+    bool               app            = RevBayesCore::assume_cast<const RlBoolean &>( append->getRevObject()             ).getValue();
+    bool               wv             = RevBayesCore::assume_cast<const RlBoolean &>( version->getRevObject()            ).getValue();
     
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* cdbdp_tdn = static_cast<const RevLanguage::Tree&>( cdbdp->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* cdbdp_tdn = RevBayesCore::assume_cast<const RevLanguage::Tree&>( cdbdp->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::Tree>* cdbdp_sn  = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( cdbdp_tdn );
     
     RevBayesCore::StateDependentSpeciationExtinctionProcess *sse_process = NULL;

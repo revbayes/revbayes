@@ -1,4 +1,5 @@
 #include <sstream>
+#include "TypeUtilities.h"
 #include <vector>
 #include <string>
 
@@ -40,14 +41,14 @@ RevPtr<RevVariable> Func_convertFastaFileToNaturalNumbers::execute( void )
 {
 
 	// get the information from the arguments for reading the file
-	const RlString& fi                                                         = static_cast<const RlString&>(                     args[0].getVariable()->getRevObject() );
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<std::string> >* taxa     = static_cast<const ModelVector<RlString> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<std::string> >* alleles  = static_cast<const ModelVector<RlString> &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+	const RlString& fi                                                         = RevBayesCore::assume_cast<const RlString&>(                     args[0].getVariable()->getRevObject() );
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<std::string> >* taxa     = RevBayesCore::assume_cast<const ModelVector<RlString> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<std::string> >* alleles  = RevBayesCore::assume_cast<const ModelVector<RlString> &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
     //std::vector<std::string> taxa     = static_cast<const ModelVector<RlString> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
     //std::vector<std::string> alleles  = static_cast<const ModelVector<RlString> &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
     
-    RevBayesCore::TypedDagNode<std::int64_t>*                           n_individuals  = static_cast<const Integer &>(               this->args[3].getVariable()->getRevObject() ).getDagNode();
-	const RlString& fo                                                         = static_cast<const RlString&>(                     args[4].getVariable()->getRevObject() );
+    RevBayesCore::TypedDagNode<std::int64_t>*                           n_individuals  = RevBayesCore::assume_cast<const Integer &>(               this->args[3].getVariable()->getRevObject() ).getDagNode();
+	const RlString& fo                                                         = RevBayesCore::assume_cast<const RlString&>(                     args[4].getVariable()->getRevObject() );
    
     RevBayesCore::FastaFileToNaturalNumbersConverter nn;
     nn.faconverter( fi.getValue(), taxa->getValue(), alleles->getValue(),  n_individuals->getValue(), fo.getValue() );

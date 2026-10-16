@@ -1,4 +1,5 @@
 #include <iosfwd>
+#include "TypeUtilities.h"
 #include <vector>
 
 #include "Argument.h"
@@ -38,8 +39,8 @@ Func_combineCharacter* Func_combineCharacter::clone( void ) const
 /** Execute function */
 RevPtr<RevVariable> Func_combineCharacter::execute( void )
 {
-    const AbstractHomologousDiscreteCharacterData& a = static_cast<const AbstractHomologousDiscreteCharacterData &>( args[0].getVariable()->getRevObject() );
-    const AbstractHomologousDiscreteCharacterData& b = static_cast<const AbstractHomologousDiscreteCharacterData &>( args[1].getVariable()->getRevObject() );
+    const AbstractHomologousDiscreteCharacterData& a = RevBayesCore::assume_cast<const AbstractHomologousDiscreteCharacterData &>( args[0].getVariable()->getRevObject() );
+    const AbstractHomologousDiscreteCharacterData& b = RevBayesCore::assume_cast<const AbstractHomologousDiscreteCharacterData &>( args[1].getVariable()->getRevObject() );
         
 //    size_t n = 2;
 //    RevBayesCore::AbstractHomologousDiscreteCharacterData *trans_data = a.getValue().expandCharacters( n );

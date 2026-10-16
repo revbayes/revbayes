@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <ostream>
 #include <string>
 
@@ -51,17 +52,17 @@ void Move_LevyJumpSum::constructInternalObject( void )
     delete value;
     
     // now allocate a new sliding move
-    double sf = static_cast<const RealPos &>( slideFactor->getRevObject() ).getValue();
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double sf = RevBayesCore::assume_cast<const RealPos &>( slideFactor->getRevObject() ).getValue();
+    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
     
-    RevBayesCore::TypedDagNode<double>* tmpsv1 = static_cast<const Real &>( slideUp->getRevObject() ).getDagNode();
-    RevBayesCore::ContinuousStochasticNode *sv1 = static_cast<RevBayesCore::ContinuousStochasticNode *>( tmpsv1 );
+    RevBayesCore::TypedDagNode<double>* tmpsv1 = RevBayesCore::assume_cast<const Real &>( slideUp->getRevObject() ).getDagNode();
+    RevBayesCore::ContinuousStochasticNode *sv1 = RevBayesCore::assume_cast<RevBayesCore::ContinuousStochasticNode *>( tmpsv1 );
     
-    RevBayesCore::TypedDagNode<double>* tmpsv2 = static_cast<const Real &>( slideDown->getRevObject() ).getDagNode();
-    RevBayesCore::ContinuousStochasticNode *sv2 = static_cast<RevBayesCore::ContinuousStochasticNode *>( tmpsv2 );
+    RevBayesCore::TypedDagNode<double>* tmpsv2 = RevBayesCore::assume_cast<const Real &>( slideDown->getRevObject() ).getDagNode();
+    RevBayesCore::ContinuousStochasticNode *sv2 = RevBayesCore::assume_cast<RevBayesCore::ContinuousStochasticNode *>( tmpsv2 );
     
-    bool tv = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    bool tv = RevBayesCore::assume_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    double tt = RevBayesCore::assume_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *p = new RevBayesCore::LevyJumpSumProposal(sv1, sv2, sf);
     p->setTargetAcceptanceRate(tt);

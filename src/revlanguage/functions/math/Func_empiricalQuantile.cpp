@@ -7,6 +7,7 @@
 //
 
 #include <iosfwd>
+#include "TypeUtilities.h"
 #include <string>
 #include <vector>
 
@@ -58,8 +59,8 @@ Func_empiricalQuantile* Func_empiricalQuantile::clone( void ) const
 RevBayesCore::TypedFunction<double>* Func_empiricalQuantile::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* arg = static_cast<const ModelVector<Real> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* k = static_cast<const Probability &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* arg = RevBayesCore::assume_cast<const ModelVector<Real> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* k = RevBayesCore::assume_cast<const Probability &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::EmpiricalQuantileFunction* f = new RevBayesCore::EmpiricalQuantileFunction( arg, k );
     
     return f;

@@ -7,6 +7,7 @@
 //
 
 #include "Func_EpochCladoProbs.h"
+#include "TypeUtilities.h"
 
 #include "EpochCladogeneticStateFunction.h"
 #include "ModelVector.h"
@@ -50,8 +51,8 @@ RevBayesCore::TypedFunction< RevBayesCore::CladogeneticProbabilityMatrix >* Func
     
     // supplied arguments
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::CladogeneticProbabilityMatrix> >* cp;
-    cp = static_cast<const ModelVector<CladogeneticProbabilityMatrix> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* et = static_cast<const ModelVector<RealPos> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    cp = RevBayesCore::assume_cast<const ModelVector<CladogeneticProbabilityMatrix> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* et = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
     
 //    size_t num_chars = 0;
     size_t num_states = cp->getValue()[0].getNumberOfStates();

@@ -7,6 +7,7 @@
 //
 
 #include "Func__unot.h"
+#include "TypeUtilities.h"
 
 #include "ArgumentRule.h"
 #include "LogicalUnotFunction.h"
@@ -35,7 +36,7 @@ Func__unot* Func__unot::clone( void ) const {
 RevBayesCore::TypedFunction<RevBayesCore::Boolean>* Func__unot::createFunction( void ) const
 {
     
-    const RevBayesCore::TypedDagNode<RevBayesCore::Boolean>* val = static_cast<const RlBoolean &>( args[0].getVariable()->getRevObject() ).getDagNode();
+    const RevBayesCore::TypedDagNode<RevBayesCore::Boolean>* val = RevBayesCore::assume_cast<const RlBoolean &>( args[0].getVariable()->getRevObject() ).getDagNode();
     
     RevBayesCore::LogicalUnotFunction *func = new RevBayesCore::LogicalUnotFunction( val );
     

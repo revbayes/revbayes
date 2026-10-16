@@ -1,4 +1,5 @@
 #include <iosfwd>
+#include "TypeUtilities.h"
 #include <string>
 
 #include "ArgumentRule.h"
@@ -44,14 +45,14 @@ void Mntr_Probability::constructInternalObject( void )
     delete value;
     
     // now allocate a new sliding move
-    const std::string&                  fn      = static_cast<const RlString &>( filename->getRevObject() ).getValue();
-    const std::string&                  sep     = static_cast<const RlString &>( separator->getRevObject() ).getValue();
-    unsigned int                        g       = (int)static_cast<const IntegerPos &>( printgen->getRevObject() ).getValue();
-    bool                                pp      = static_cast<const RlBoolean &>( posterior->getRevObject() ).getValue();
-    bool                                l       = static_cast<const RlBoolean &>( likelihood->getRevObject() ).getValue();
-    bool                                pr      = static_cast<const RlBoolean &>( prior->getRevObject() ).getValue();
-    bool                                ap      = static_cast<const RlBoolean &>( append->getRevObject() ).getValue();
-    bool                                wv      = static_cast<const RlBoolean &>( version->getRevObject() ).getValue();
+    const std::string&                  fn      = RevBayesCore::assume_cast<const RlString &>( filename->getRevObject() ).getValue();
+    const std::string&                  sep     = RevBayesCore::assume_cast<const RlString &>( separator->getRevObject() ).getValue();
+    unsigned int                        g       = (int)RevBayesCore::assume_cast<const IntegerPos &>( printgen->getRevObject() ).getValue();
+    bool                                pp      = RevBayesCore::assume_cast<const RlBoolean &>( posterior->getRevObject() ).getValue();
+    bool                                l       = RevBayesCore::assume_cast<const RlBoolean &>( likelihood->getRevObject() ).getValue();
+    bool                                pr      = RevBayesCore::assume_cast<const RlBoolean &>( prior->getRevObject() ).getValue();
+    bool                                ap      = RevBayesCore::assume_cast<const RlBoolean &>( append->getRevObject() ).getValue();
+    bool                                wv      = RevBayesCore::assume_cast<const RlBoolean &>( version->getRevObject() ).getValue();
     RevBayesCore::ProbabilityMonitor *m = new RevBayesCore::ProbabilityMonitor((std::uint64_t)g, fn, sep);
     
     // now set the flags

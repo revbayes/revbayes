@@ -1,4 +1,5 @@
 #include <cmath>
+#include "TypeUtilities.h"
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -79,32 +80,32 @@ RevBayesCore::BirthDeathBurstProcess* Dist_BirthDeathBurstProcess::createDistrib
     // get the parameters
     
     // the root age
-    RevBayesCore::TypedDagNode<double>* ra          = static_cast<const RealPos &>( start_age->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* ra          = RevBayesCore::assume_cast<const RealPos &>( start_age->getRevObject() ).getDagNode();
     
     // speciation rate
-    RevBayesCore::TypedDagNode<double>* birth       = static_cast<const RealPos &>( lambda->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* birth       = RevBayesCore::assume_cast<const RealPos &>( lambda->getRevObject() ).getDagNode();
     
     // extinction rate
-    RevBayesCore::TypedDagNode<double>* death       = static_cast<const RealPos &>( mu->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* death       = RevBayesCore::assume_cast<const RealPos &>( mu->getRevObject() ).getDagNode();
     
     // burst probability
-    RevBayesCore::TypedDagNode<double>* burst_prob  = static_cast<const Probability &>( beta->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* burst_prob  = RevBayesCore::assume_cast<const Probability &>( beta->getRevObject() ).getDagNode();
     
     // burst time
-    RevBayesCore::TypedDagNode<double>* bt          = static_cast<const RealPos &>( burst_time->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* bt          = RevBayesCore::assume_cast<const RealPos &>( burst_time->getRevObject() ).getDagNode();
     
     
     // sampling probability
-    RevBayesCore::TypedDagNode<double>* r           = static_cast<const Probability &>( rho->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* r           = RevBayesCore::assume_cast<const Probability &>( rho->getRevObject() ).getDagNode();
     
     // sampling strategy
 //    const std::string &strategy                     = static_cast<const RlString &>( sampling_strategy->getRevObject() ).getValue();
 
     // condition
-    const std::string& cond                         = static_cast<const RlString &>( condition->getRevObject() ).getValue();
+    const std::string& cond                         = RevBayesCore::assume_cast<const RlString &>( condition->getRevObject() ).getValue();
     
     // get the taxa to simulate either from a vector of rev taxon objects or a vector of names
-    std::vector<RevBayesCore::Taxon> t              = static_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
+    std::vector<RevBayesCore::Taxon> t              = RevBayesCore::assume_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
     
     // create the internal distribution object
     RevBayesCore::BirthDeathBurstProcess* d         = new RevBayesCore::BirthDeathBurstProcess(ra, birth, death, burst_prob, bt, r, cond, t);

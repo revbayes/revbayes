@@ -1,4 +1,5 @@
 #include "Func_readAncestralStateTreeTrace.h"
+#include "TypeUtilities.h"
 
 #include <cmath>
 #include <cstddef>
@@ -53,9 +54,9 @@ RevPtr<RevVariable> Func_readAncestralStateTreeTrace::execute( void )
 {
     
     // get the information from the arguments for reading the file
-    RevBayesCore::path fn        = static_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
-    const std::string&  treetype = static_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
-    const std::string&  sep      = static_cast<const RlString&>( args[2].getVariable()->getRevObject() ).getValue();
+    RevBayesCore::path fn        = RevBayesCore::assume_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
+    const std::string&  treetype = RevBayesCore::assume_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
+    const std::string&  sep      = RevBayesCore::assume_cast<const RlString&>( args[2].getVariable()->getRevObject() ).getValue();
     
     // check that the file/path name has been correctly specified
     if ( not RevBayesCore::exists( fn ))
@@ -95,11 +96,11 @@ RevPtr<RevVariable> Func_readAncestralStateTreeTrace::execute( void )
     RevObject& b = args[3].getVariable()->getRevObject();
     if ( b.isType( Integer::getClassTypeSpec() ) )
     {
-        burnin = static_cast<const Integer &>(b).getValue();
+        burnin = RevBayesCore::assume_cast<const Integer &>(b).getValue();
     }
     else
     {
-        double burninFrac = static_cast<const Probability &>(b).getValue();
+        double burninFrac = RevBayesCore::assume_cast<const Probability &>(b).getValue();
         burnin = std::int64_t( floor( rv->getValue().size()*burninFrac ) );
     }
 

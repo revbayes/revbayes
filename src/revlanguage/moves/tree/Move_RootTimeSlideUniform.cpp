@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <ostream>
 #include <string>
 
@@ -53,12 +54,12 @@ void Move_RootTimeSlideUniform::constructInternalObject( void )
     RevBayesCore::StochasticNode< RevBayesCore::RbVector<RevBayesCore::Tree> > *vec_t = NULL;
     if ( tree->getRevObject().isType( TimeTree::getClassTypeSpec() ) )
     {
-        RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = RevBayesCore::assume_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
         t = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
     }
     else if ( tree->getRevObject().isType( ModelVector<TimeTree>::getClassTypeSpec() ) )
     {
-        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::Tree> > *tmp = static_cast<const ModelVector<TimeTree> &>( tree->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::Tree> > *tmp = RevBayesCore::assume_cast<const ModelVector<TimeTree> &>( tree->getRevObject() ).getDagNode();
         vec_t = RevBayesCore::assumeStochastic< RevBayesCore::RbVector<RevBayesCore::Tree> >( tmp );
     }
     else
@@ -67,10 +68,10 @@ void Move_RootTimeSlideUniform::constructInternalObject( void )
     }
     
 
-    RevBayesCore::TypedDagNode<double> *tmp_double = static_cast<const RealPos &>( origin->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double> *tmp_double = RevBayesCore::assume_cast<const RealPos &>( origin->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<double> *d = RevBayesCore::assumeStochastic<double>( tmp_double );
     
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *p = new RevBayesCore::RootTimeSlideUniformProposal( t, vec_t, d );
     value = new RevBayesCore::MetropolisHastingsMove(p,w,false);

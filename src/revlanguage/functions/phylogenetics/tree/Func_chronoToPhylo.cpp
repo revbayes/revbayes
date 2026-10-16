@@ -1,4 +1,5 @@
 #include "Func_chronoToPhylo.h"
+#include "TypeUtilities.h"
 
 #include "ChronoToPhyloFunction.h"
 #include "ModelVector.h"
@@ -43,8 +44,8 @@ Func_chronoToPhylo* Func_chronoToPhylo::clone( void ) const
 RevBayesCore::TypedFunction<RevBayesCore::Tree>* Func_chronoToPhylo::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* chrono = static_cast<const Tree&>( args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* rates = static_cast<const ModelVector<RealPos> &>( args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* chrono = RevBayesCore::assume_cast<const Tree&>( args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* rates = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( args[1].getVariable()->getRevObject() ).getDagNode();
     
     RevBayesCore::ChronoToPhyloFunction* f = new RevBayesCore::ChronoToPhyloFunction( chrono, rates );
     

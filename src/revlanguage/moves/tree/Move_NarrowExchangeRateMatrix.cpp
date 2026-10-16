@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <ostream>
 #include <string>
 #include <vector>
@@ -73,13 +74,13 @@ void Move_NarrowExchangeRateMatrix::constructInternalObject( void )
     delete value;
     
     // now allocate a new sliding move
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
+    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = RevBayesCore::assume_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *n = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
 //    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = static_cast<const ModelVector<RateGenerator> &>( rate_matrices->getRevObject() ).getDagNode();
 
     std::vector< RevBayesCore::StochasticNode<RevBayesCore::RateGenerator> *> rm;
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* deterministic_vector = static_cast<const ModelVector<RateGenerator> &>( rate_matrices->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* deterministic_vector = RevBayesCore::assume_cast<const ModelVector<RateGenerator> &>( rate_matrices->getRevObject() ).getDagNode();
     std::vector<const RevBayesCore::DagNode*> parents = deterministic_vector->getParents();
     for (std::vector<const RevBayesCore::DagNode*>::const_iterator it = parents.begin(); it != parents.end(); ++it)
     {

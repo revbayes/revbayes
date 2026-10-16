@@ -2,6 +2,7 @@
 #define RlStochasticNode_H
 
 #include "StochasticNode.h"
+#include "TypeUtilities.h"
 #include "RevMemberObject.h"
 #include "RlDistribution.h"
 
@@ -180,7 +181,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> RevLanguage::StochasticNode<valueT
         // get the observation
 //        const RevObject &tmp_obj = args[0].getVariable()->getRevObject();
 //        const ModelObject<valueType> *tmp_ptr = dynamic_cast<const ModelObject<valueType> *>( &tmp_obj );
-        const valueType &observation = static_cast<const ModelObject<valueType> &>( args[0].getVariable()->getRevObject() ).getValue();
+        const valueType &observation = RevBayesCore::assume_cast<const ModelObject<valueType> &>( args[0].getVariable()->getRevObject() ).getValue();
         
         // clamp
         this->clamp( RevBayesCore::Cloner<valueType, IsDerivedFrom<valueType, RevBayesCore::Cloneable>::Is >::createClone( observation ) );
@@ -194,7 +195,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> RevLanguage::StochasticNode<valueT
         found = true;
         
         // get the observation
-        bool tf = static_cast<const RlBoolean &>( args[0].getVariable()->getRevObject() ).getValue();
+        bool tf = RevBayesCore::assume_cast<const RlBoolean &>( args[0].getVariable()->getRevObject() ).getValue();
                 
         // mark this node to ignore redraws
         this->setIntegratedOut( tf );
@@ -222,7 +223,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> RevLanguage::StochasticNode<valueT
         found = true;
         
         // get the observation
-        const valueType &observation = static_cast<const ModelObject<valueType> &>( args[0].getVariable()->getRevObject() ).getValue();
+        const valueType &observation = RevBayesCore::assume_cast<const ModelObject<valueType> &>( args[0].getVariable()->getRevObject() ).getValue();
         
         // set value
         this->setValue( RevBayesCore::Cloner<valueType, IsDerivedFrom<valueType, RevBayesCore::Cloneable>::Is >::createClone( observation ) );

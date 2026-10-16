@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <ostream>
 #include <string>
 #include <vector>
@@ -46,10 +47,10 @@ RevBayesCore::NormalDistribution* Dist_normTruncated::createDistribution( void )
 {
     
     // get the parameters
-    RevBayesCore::TypedDagNode<double>* m = static_cast<const Real &>( mean->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* s = static_cast<const RealPos &>( sd->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* mi  = static_cast<const Real &>( min->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* ma  = static_cast<const Real &>( max->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* m = RevBayesCore::assume_cast<const Real &>( mean->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* s = RevBayesCore::assume_cast<const RealPos &>( sd->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* mi  = RevBayesCore::assume_cast<const Real &>( min->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* ma  = RevBayesCore::assume_cast<const Real &>( max->getRevObject() ).getDagNode();
     RevBayesCore::NormalDistribution*   d = new RevBayesCore::NormalDistribution(m, s, mi, ma);
     
     return d;

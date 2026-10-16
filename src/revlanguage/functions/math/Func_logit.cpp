@@ -1,4 +1,5 @@
 #include <iosfwd>
+#include "TypeUtilities.h"
 #include <string>
 #include <vector>
 
@@ -49,7 +50,7 @@ double* logit(double x)
 RevBayesCore::TypedFunction<double>* Func_logit::createFunction( void ) const
 {
 
-    RevBayesCore::TypedDagNode<double>* x = static_cast<const Probability &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* x = RevBayesCore::assume_cast<const Probability &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     return RevBayesCore::generic_function_ptr< double >( logit, x );
 }
 

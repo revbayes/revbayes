@@ -1,4 +1,5 @@
 #include "Func_MuseGaut94RateMatrix.h"
+#include "TypeUtilities.h"
 #include "CppCodonFuncs.h"
 
 #include "RealPos.h"
@@ -43,8 +44,8 @@ Func_MuseGaut94RateMatrix* Func_MuseGaut94RateMatrix::clone( void ) const
 
 RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_MuseGaut94RateMatrix::createFunction( void ) const
 {
-    RevBayesCore::TypedDagNode< double >* om = static_cast<const RealPos &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* bf = static_cast<const Simplex &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< double >* om = RevBayesCore::assume_cast<const RealPos &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* bf = RevBayesCore::assume_cast<const Simplex &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
 
     return RevBayesCore::generic_function_ptr< RevBayesCore::RateGenerator >( CodonMG94, om, bf );
 }

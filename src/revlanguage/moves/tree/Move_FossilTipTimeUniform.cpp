@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <ostream>
 #include <string>
 #include <vector>
@@ -56,15 +57,15 @@ void Move_FossilTipTimeUniform::constructInternalObject( void )
     delete value;
     
     // now allocate a new move
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = RevBayesCore::assume_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
     
-    double we = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double we = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
     
     RevBayesCore::TypedDagNode<double> *org = NULL;
     if ( origin != NULL && origin->getRevObject() != RevNullObject::getInstance() )
     {
-        org = static_cast<const RealPos &>( origin->getRevObject() ).getDagNode();
+        org = RevBayesCore::assume_cast<const RealPos &>( origin->getRevObject() ).getDagNode();
     }
     
     // use NULL as defaults
@@ -73,21 +74,21 @@ void Move_FossilTipTimeUniform::constructInternalObject( void )
     
     if ( max->getRevObject() != RevLanguage::RevNullObject::getInstance() )
     {
-        ma = static_cast<const RealPos &>( max->getRevObject() ).getDagNode();
+        ma = RevBayesCore::assume_cast<const RealPos &>( max->getRevObject() ).getDagNode();
     }
     if ( min->getRevObject() != RevLanguage::RevNullObject::getInstance() )
     {
-        mi = static_cast<const RealPos &>( min->getRevObject() ).getDagNode();
+        mi = RevBayesCore::assume_cast<const RealPos &>( min->getRevObject() ).getDagNode();
     }
     
     std::string tip_name = "";
     if ( tip->getRevObject().getType() == RlString::getClassType() )
     {
-        tip_name = static_cast<const RlString&>( tip->getRevObject() ).getValue();
+        tip_name = RevBayesCore::assume_cast<const RlString&>( tip->getRevObject() ).getValue();
     }
     else if ( tip->getRevObject().getType() == Taxon::getClassType() )
     {
-        tip_name = static_cast<const Taxon&>( tip->getRevObject() ).getValue().getSpeciesName();
+        tip_name = RevBayesCore::assume_cast<const Taxon&>( tip->getRevObject() ).getValue().getSpeciesName();
     }
 
     RevBayesCore::FossilTipTimeUniformProposal *p = new RevBayesCore::FossilTipTimeUniformProposal( t, org, ma, mi, tip_name );

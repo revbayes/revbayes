@@ -1,4 +1,5 @@
 #include "Func_reversiblePoMo.h"
+#include "TypeUtilities.h"
 //
 //  Func_reversiblePoMo.cpp
 //  RevBayesCore
@@ -50,8 +51,8 @@ Func_reversiblePoMo* Func_reversiblePoMo::clone( void ) const {
 
 RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_reversiblePoMo::createFunction( void ) const
 {
-    RevBayesCore::TypedDagNode<RevBayesCore::Simplex>* bf = static_cast<const Simplex &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* er = static_cast<const ModelVector<RealPos> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Simplex>* bf = RevBayesCore::assume_cast<const Simplex &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* er = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
 
     if ( er->getValue().size() != (bf->getValue().size() * (bf->getValue().size()-1) / 2.0) )
     {
@@ -61,7 +62,7 @@ RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_reversiblePoMo:
 
   //RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator >* q = static_cast<const RateMatrix &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
 
-    RevBayesCore::TypedDagNode< std::int64_t >* n = static_cast<const Natural &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< std::int64_t >* n = RevBayesCore::assume_cast<const Natural &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
 
     RevBayesCore::ReversiblePoMoRateMatrixFunction* f = new RevBayesCore::ReversiblePoMoRateMatrixFunction( n, er, bf );
 

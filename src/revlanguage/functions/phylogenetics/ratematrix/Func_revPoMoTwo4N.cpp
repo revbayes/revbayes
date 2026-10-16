@@ -1,4 +1,5 @@
 #include "Func_revPoMoTwo4N.h"
+#include "TypeUtilities.h"
 #include "Func_revPoMoTwo4N.h"
 #include "revPoMoTwo4NRateMatrixFunction.h"
 #include "ModelVector.h"
@@ -33,9 +34,9 @@ Func_revPoMoTwo4N* Func_revPoMoTwo4N::clone( void ) const {
 
 RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_revPoMoTwo4N::createFunction( void ) const
 {
-    RevBayesCore::TypedDagNode< std::int64_t >*                          n  = static_cast<const Natural              &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::Simplex>*           bf = static_cast<const Simplex              &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* ex = static_cast<const ModelVector<RealPos> &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< std::int64_t >*                          n  = RevBayesCore::assume_cast<const Natural              &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Simplex>*           bf = RevBayesCore::assume_cast<const Simplex              &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* ex = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
 
     if ( bf->getValue().size() !=  4 )
     {

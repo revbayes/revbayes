@@ -1,4 +1,5 @@
 #include "Func_MutSelRateMatrix.h"
+#include "TypeUtilities.h"
 #include "CppCodonFuncs.h"
 
 #include "Real.h"
@@ -51,8 +52,8 @@ Func_MutSelRateMatrix* Func_MutSelRateMatrix::clone( void ) const
 
 RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_MutSelRateMatrix::createFunction( void ) const
 {
-    RevBayesCore::TypedDagNode< RevBayesCore::RateGenerator >* q = static_cast<const RateGenerator &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* f = static_cast<const ModelVector<Real> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::RateGenerator >* q = RevBayesCore::assume_cast<const RateGenerator &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* f = RevBayesCore::assume_cast<const ModelVector<Real> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
 
     return RevBayesCore::generic_function_ptr< RevBayesCore::RateGenerator >( MutSelFunc, f, q );
 }

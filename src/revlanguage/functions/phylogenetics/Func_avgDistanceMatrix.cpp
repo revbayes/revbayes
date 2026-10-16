@@ -1,4 +1,5 @@
 #include "Func_avgDistanceMatrix.h"
+#include "TypeUtilities.h"
 
 #include "AverageDistanceMatrix.h"
 #include "DistanceMatrix.h"
@@ -42,13 +43,13 @@ Func_avgDistanceMatrix* Func_avgDistanceMatrix::clone( void ) const
 RevBayesCore::TypedFunction<RevBayesCore::AverageDistanceMatrix>* Func_avgDistanceMatrix::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::DistanceMatrix> >* matrixVector = static_cast<const ModelVector<DistanceMatrix> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::DistanceMatrix> >* matrixVector = RevBayesCore::assume_cast<const ModelVector<DistanceMatrix> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* weightVector = NULL;
     
     if (this->args[1].getVariable()->getRevObject() != RevNullObject::getInstance())
     {
-        RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* weightVector = static_cast<const ModelVector<RealPos> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* weightVector = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
         RevBayesCore::AvgDistanceMatrixFunction * f = new RevBayesCore::AvgDistanceMatrixFunction( matrixVector, weightVector );
         return f;
     }

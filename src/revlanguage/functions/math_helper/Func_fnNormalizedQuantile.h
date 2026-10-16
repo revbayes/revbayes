@@ -2,6 +2,7 @@
 #define Func_fnNormalizedQuantile_H
 
 #include "ModelVector.h"
+#include "TypeUtilities.h"
 #include "RlTypedFunction.h"
 
 #include <string>
@@ -65,10 +66,10 @@ template <typename valType>
 RevBayesCore::TypedFunction< RevBayesCore::RbVector<double> >* Func_fnNormalizedQuantile<valType>::createFunction( void ) const
 {
     
-    const ContinuousDistribution& rlDistribution    = static_cast<const ContinuousDistribution &>( this->args[0].getVariable()->getRevObject() );
-    RevBayesCore::ContinuousDistribution* dist     = static_cast<RevBayesCore::ContinuousDistribution* >( rlDistribution.createDistribution() );    
+    const ContinuousDistribution& rlDistribution    = RevBayesCore::assume_cast<const ContinuousDistribution &>( this->args[0].getVariable()->getRevObject() );
+    RevBayesCore::ContinuousDistribution* dist     = RevBayesCore::assume_cast<RevBayesCore::ContinuousDistribution* >( rlDistribution.createDistribution() );    
     
-    int nc = (int)static_cast<const Integer &>( this->args[1].getVariable()->getRevObject() ).getValue();
+    int nc = (int)RevBayesCore::assume_cast<const Integer &>( this->args[1].getVariable()->getRevObject() ).getValue();
     
     double binWidth = 1.0 / ((double)nc);
     double binMid = binWidth * 0.5;

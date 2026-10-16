@@ -1,4 +1,5 @@
 #include "DistributionFunctionQuantilePositiveContinuous.h"
+#include "TypeUtilities.h"
 
 #include <cstddef>
 
@@ -91,7 +92,7 @@ RevBayesCore::TypedFunction<double>* DistributionFunctionQuantilePositiveContinu
 {
     
     RevBayesCore::TypedFunction<double>* f = NULL;
-    RevBayesCore::TypedDagNode<double>* arg = static_cast<const Probability &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* arg = RevBayesCore::assume_cast<const Probability &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     
     PositiveContinuousDistribution* copyObject = templateObjectPositive->clone();
     

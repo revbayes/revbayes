@@ -6,6 +6,7 @@
  */
 
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <ostream>
 #include <string>
 #include <vector>
@@ -48,7 +49,7 @@ Dist_PhyloOrnsteinUhlenbeck* Dist_PhyloOrnsteinUhlenbeck::clone( void ) const {
 RevBayesCore::PhyloOrnsteinUhlenbeckProcess* Dist_PhyloOrnsteinUhlenbeck::createDistribution( void ) const {
     // get the parameters
     
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = RevBayesCore::assume_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
 
     size_t nNodes = tau->getValue().getNumberOfNodes();
     RevBayesCore::PhyloOrnsteinUhlenbeckProcess* dist = new RevBayesCore::PhyloOrnsteinUhlenbeckProcess( tau );
@@ -56,7 +57,7 @@ RevBayesCore::PhyloOrnsteinUhlenbeckProcess* Dist_PhyloOrnsteinUhlenbeck::create
     //Sigma:
     if ( sigma->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
     {
-        RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* s = static_cast<const ModelVector<RealPos> &>( sigma->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* s = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( sigma->getRevObject() ).getDagNode();
 
         // sanity check
         if ( (nNodes-1) != s->getValue().size() )
@@ -68,14 +69,14 @@ RevBayesCore::PhyloOrnsteinUhlenbeckProcess* Dist_PhyloOrnsteinUhlenbeck::create
     }
     else
     {
-        RevBayesCore::TypedDagNode< double >* s = static_cast<const RealPos &>( sigma->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< double >* s = RevBayesCore::assume_cast<const RealPos &>( sigma->getRevObject() ).getDagNode();
         dist->setSigma( s );
     }
     
     //Mean:
     if ( mean->getRevObject().isType( ModelVector<Real>::getClassTypeSpec() ) )
     {
-        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* m = static_cast<const ModelVector<Real> &>( mean->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* m = RevBayesCore::assume_cast<const ModelVector<Real> &>( mean->getRevObject() ).getDagNode();
         
         // sanity check
         if ( (nNodes-1) != m->getValue().size() )
@@ -87,14 +88,14 @@ RevBayesCore::PhyloOrnsteinUhlenbeckProcess* Dist_PhyloOrnsteinUhlenbeck::create
     }
     else
     {
-        RevBayesCore::TypedDagNode< double >* m = static_cast<const Real &>( mean->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< double >* m = RevBayesCore::assume_cast<const Real &>( mean->getRevObject() ).getDagNode();
         dist->setMean( m );
     }
 
     //Phi:
     if ( phi->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
     {
-        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* p = static_cast<const ModelVector<RealPos> &>( phi->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* p = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( phi->getRevObject() ).getDagNode();
         
         // sanity check
         if ( (nNodes-1) != p->getValue().size() )
@@ -106,7 +107,7 @@ RevBayesCore::PhyloOrnsteinUhlenbeckProcess* Dist_PhyloOrnsteinUhlenbeck::create
     }
     else
     {
-        RevBayesCore::TypedDagNode< double >* p = static_cast<const RealPos &>( phi->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< double >* p = RevBayesCore::assume_cast<const RealPos &>( phi->getRevObject() ).getDagNode();
         dist->setPhi( p );
     }
     

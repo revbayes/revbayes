@@ -1,4 +1,5 @@
 #include "Func_treeAssembly.h"
+#include "TypeUtilities.h"
 
 #include <cstddef>
 
@@ -44,7 +45,7 @@ Func_treeAssembly* Func_treeAssembly::clone( void ) const
 RevBayesCore::TypedFunction<RevBayesCore::Tree>* Func_treeAssembly::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = static_cast<const Tree&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = RevBayesCore::assume_cast<const Tree&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     
     // TreeAssemblyFunction acts directly on the value of the topology node
     // Current topology variable cannot already be parent of another TreeAssemblyFunction
@@ -67,7 +68,7 @@ RevBayesCore::TypedFunction<RevBayesCore::Tree>* Func_treeAssembly::createFuncti
         throw RbException() << "Variable \"" << tau->getName() << "\" cannot be used with more than one treeAssembly function.";
     }
     
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* brlens = static_cast<const ModelVector<RealPos> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* brlens = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::RbVector<double> tmp = brlens->getValue();
     RevBayesCore::TreeAssemblyFunction* f = new RevBayesCore::TreeAssemblyFunction( tau, brlens );
     

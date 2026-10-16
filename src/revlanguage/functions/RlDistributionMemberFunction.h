@@ -2,6 +2,7 @@
 #define RlDistributionMemberFunction_H
 
 #include "RlMemberMethod.h"
+#include "TypeUtilities.h"
 #include "RlTypedFunction.h"
 
 namespace RevLanguage {
@@ -164,7 +165,7 @@ void RevLanguage::DistributionMemberFunction<distributionType, retType>::setMemb
     
     // we do not own the object itself because one object can have multiple member functions
     object = obj;
-    the_member_object = static_cast< const typename distributionType::rlValueType *>( &(obj->getRevObject()) );
+    the_member_object = RevBayesCore::assume_cast< const typename distributionType::rlValueType *>( &(obj->getRevObject()) );
     
 }
 

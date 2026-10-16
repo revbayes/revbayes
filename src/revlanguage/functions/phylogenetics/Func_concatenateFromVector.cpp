@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <iosfwd>
 #include <vector>
 
@@ -45,8 +46,8 @@ Func_concatenateFromVector* Func_concatenateFromVector::clone( void ) const
 /** Execute function */
 RevPtr<RevVariable> Func_concatenateFromVector::execute( void )
 {
-    const ModelVector<AbstractHomologousDiscreteCharacterData>& v = static_cast<const ModelVector<AbstractHomologousDiscreteCharacterData> &>( args[0].getVariable()->getRevObject() );
-    const std::string& type = static_cast<const RlString &>( args[1].getVariable()->getRevObject() ).getValue();
+    const ModelVector<AbstractHomologousDiscreteCharacterData>& v = RevBayesCore::assume_cast<const ModelVector<AbstractHomologousDiscreteCharacterData> &>( args[0].getVariable()->getRevObject() );
+    const std::string& type = RevBayesCore::assume_cast<const RlString &>( args[1].getVariable()->getRevObject() ).getValue();
     
     AbstractHomologousDiscreteCharacterData* a = dynamic_cast<const AbstractHomologousDiscreteCharacterData *>( v.getElement(0) )->clone();
     for (size_t i = 1; i < v.size(); ++i)

@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <ostream>
 #include <string>
 #include <vector>
@@ -57,9 +58,9 @@ void Move_HSRFIntervalSwap::constructInternalObject( void )
     delete value;
 
     // now allocate a new vector-scale move
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
 
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp1 = static_cast<const ModelVector<RealPos> &>( sigmas->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp1 = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( sigmas->getRevObject() ).getDagNode();
     std::vector<const RevBayesCore::DagNode*> p1 = tmp1->getParents();
     std::vector< RevBayesCore::StochasticNode<double> *> s;
     for (std::vector<const RevBayesCore::DagNode*>::const_iterator it = p1.begin(); it != p1.end(); ++it)
@@ -75,7 +76,7 @@ void Move_HSRFIntervalSwap::constructInternalObject( void )
         }
     }
 
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp2 = static_cast<const ModelVector<Real> &>( deltas->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp2 = RevBayesCore::assume_cast<const ModelVector<Real> &>( deltas->getRevObject() ).getDagNode();
     std::vector<const RevBayesCore::DagNode*> p2 = tmp2->getParents();
     std::vector< RevBayesCore::StochasticNode<double> *> d;
     for (std::vector<const RevBayesCore::DagNode*>::const_iterator it = p2.begin(); it != p2.end(); ++it)
@@ -92,7 +93,7 @@ void Move_HSRFIntervalSwap::constructInternalObject( void )
     }
 
     // get the tuning
-    bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    bool t = RevBayesCore::assume_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
 
     RevBayesCore::Proposal *prop = new RevBayesCore::HSRFIntervalSwapProposal(d,s);
     value = new RevBayesCore::MetropolisHastingsMove(prop,w,t);

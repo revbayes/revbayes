@@ -1,4 +1,5 @@
 #include <iosfwd>
+#include "TypeUtilities.h"
 #include <vector>
 
 #include "ArgumentRule.h"
@@ -46,7 +47,7 @@ Func_upperTriangle* Func_upperTriangle::clone( void ) const
 RevBayesCore::TypedFunction< RevBayesCore::RbVector<double> >* Func_upperTriangle::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* m = static_cast<const MatrixReal& >( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* m = RevBayesCore::assume_cast<const MatrixReal& >( this->args[0].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::UpperTriangle *func = new RevBayesCore::UpperTriangle( m );
     
     return func;

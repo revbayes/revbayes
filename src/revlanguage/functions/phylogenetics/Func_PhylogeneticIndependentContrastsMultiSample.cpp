@@ -1,4 +1,5 @@
 #include <iosfwd>
+#include "TypeUtilities.h"
 #include <vector>
 
 #include "Argument.h"
@@ -60,11 +61,11 @@ Func_PhylogeneticIndependentContrastsMultiSample* Func_PhylogeneticIndependentCo
 
 RevBayesCore::TypedFunction<RevBayesCore::RbVector<double> >* Func_PhylogeneticIndependentContrastsMultiSample::createFunction( void ) const
 {
-    const RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = static_cast<const TimeTree &>( args[0].getVariable()->getRevObject() ).getDagNode();
-    const RevBayesCore::TypedDagNode<RevBayesCore::ContinuousCharacterData>* data = static_cast<const ContinuousCharacterData &>( args[1].getVariable()->getRevObject() ).getDagNode();
-    const RevBayesCore::TypedDagNode<std::int64_t>* site = static_cast<const Natural &>( args[2].getVariable()->getRevObject() ).getDagNode();
-    const RevBayesCore::RbVector<RevBayesCore::Taxon>& taxa = static_cast<const ModelVector<Taxon> &>( args[3].getVariable()->getRevObject() ).getValue();
-    const bool& normalized = static_cast<const RlBoolean &>( args[4].getVariable()->getRevObject() ).getValue();
+    const RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = RevBayesCore::assume_cast<const TimeTree &>( args[0].getVariable()->getRevObject() ).getDagNode();
+    const RevBayesCore::TypedDagNode<RevBayesCore::ContinuousCharacterData>* data = RevBayesCore::assume_cast<const ContinuousCharacterData &>( args[1].getVariable()->getRevObject() ).getDagNode();
+    const RevBayesCore::TypedDagNode<std::int64_t>* site = RevBayesCore::assume_cast<const Natural &>( args[2].getVariable()->getRevObject() ).getDagNode();
+    const RevBayesCore::RbVector<RevBayesCore::Taxon>& taxa = RevBayesCore::assume_cast<const ModelVector<Taxon> &>( args[3].getVariable()->getRevObject() ).getValue();
+    const bool& normalized = RevBayesCore::assume_cast<const RlBoolean &>( args[4].getVariable()->getRevObject() ).getValue();
     
     RevBayesCore::PhylogeneticIndependentContrastsMultiSampleFunction* f = new RevBayesCore::PhylogeneticIndependentContrastsMultiSampleFunction( tau, data, site, taxa, normalized );
     

@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <ostream>
 #include <string>
 #include <vector>
@@ -52,13 +53,13 @@ RevBayesCore::SoftBoundUniformNormalDistribution* Dist_SoftBoundUniformNormal::c
 {
     
     // get the parameters
-    RevBayesCore::TypedDagNode<double>* mi = static_cast<const Real &>( min->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* ma = static_cast<const Real &>( max->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* mi = RevBayesCore::assume_cast<const Real &>( min->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* ma = RevBayesCore::assume_cast<const Real &>( max->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode<double>* s  = NULL;
     RevBayesCore::TypedDagNode<double>* p  = NULL;
     
     // condition
-    const std::string& bound               = static_cast<const RlString &>( boundary->getRevObject() ).getValue();
+    const std::string& bound               = RevBayesCore::assume_cast<const RlString &>( boundary->getRevObject() ).getValue();
     RevBayesCore::SoftBoundUniformNormalDistribution::BOUNDS soft_bounds = RevBayesCore::SoftBoundUniformNormalDistribution::BOTH;
     if ( bound == "upper" )
     {
@@ -86,11 +87,11 @@ RevBayesCore::SoftBoundUniformNormalDistribution* Dist_SoftBoundUniformNormal::c
     
     if ( has_sd )
     {
-        s = static_cast<const RealPos &>( sd->getRevObject() ).getDagNode();
+        s = RevBayesCore::assume_cast<const RealPos &>( sd->getRevObject() ).getDagNode();
     }
     else
     {
-        p = static_cast<const Probability &>( prob->getRevObject() ).getDagNode();
+        p = RevBayesCore::assume_cast<const Probability &>( prob->getRevObject() ).getDagNode();
     }
     
     RevBayesCore::SoftBoundUniformNormalDistribution* d = new RevBayesCore::SoftBoundUniformNormalDistribution(mi, ma, s, p, soft_bounds);

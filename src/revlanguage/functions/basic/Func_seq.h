@@ -2,6 +2,7 @@
 #define Func_seq_H
 
 #include "Procedure.h"
+#include "TypeUtilities.h"
 #include <string>
 
 namespace RevLanguage {
@@ -82,9 +83,9 @@ template <typename valType>
 RevLanguage::RevPtr<RevLanguage::RevVariable> RevLanguage::Func_seq<valType>::execute( void )
 {
     
-    typename valType::valueType from = static_cast<const valType &>( args[0].getVariable()->getRevObject() ).getValue();
-    typename valType::valueType to   = static_cast<const valType &>( args[1].getVariable()->getRevObject() ).getValue();
-    typename valType::valueType by   = static_cast<const valType &>( args[2].getVariable()->getRevObject() ).getValue();
+    typename valType::valueType from = RevBayesCore::assume_cast<const valType &>( args[0].getVariable()->getRevObject() ).getValue();
+    typename valType::valueType to   = RevBayesCore::assume_cast<const valType &>( args[1].getVariable()->getRevObject() ).getValue();
+    typename valType::valueType by   = RevBayesCore::assume_cast<const valType &>( args[2].getVariable()->getRevObject() ).getValue();
     
     typename valType::valueType val = from;
     

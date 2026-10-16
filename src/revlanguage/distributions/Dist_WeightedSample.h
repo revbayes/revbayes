@@ -2,6 +2,7 @@
 #define Dist_WeightedSample_H
 
 #include "WeightedSampleDistribution.h"
+#include "TypeUtilities.h"
 #include "DistributionTypeUtilities.h"
 #include "ModelVector.h"
 #include "RealPos.h"
@@ -91,20 +92,20 @@ RevBayesCore::WeightedSampleDistribution<typename valType::valueType>* RevLangua
 
         // get the workspace vector
         const RevObject& obj = baseDistribution->getRevObject();
-        const WorkspaceVector<TypedDistribution<valType> >& obj_vector = static_cast<const WorkspaceVector<TypedDistribution<valType> >& >( obj );
+        const WorkspaceVector<TypedDistribution<valType> >& obj_vector = RevBayesCore::assume_cast<const WorkspaceVector<TypedDistribution<valType> >& >( obj );
         ns = obj_vector.size();
         
         // build our vector of typed distributions
         g0_vector = std::vector< RevBayesCore::TypedDistribution<typename valType::valueType>* >( ns, NULL );
         for (size_t i = 0; i < ns; i++)
         {
-            const Distribution& rlDistribution = static_cast<const Distribution &>( obj_vector[i] );
+            const Distribution& rlDistribution = RevBayesCore::assume_cast<const Distribution &>( obj_vector[i] );
             g0_vector[i] = RevBayesCore::assumeTypedDistribution<typename valType::valueType>( rlDistribution.createDistribution() );
         }
     }
     else {
-        ns                                 = size_t( static_cast<const Natural &>( numSamples->getRevObject() ).getValue() );
-        const Distribution& rlDistribution = static_cast<const Distribution &>( baseDistribution->getRevObject() );
+        ns                                 = size_t( RevBayesCore::assume_cast<const Natural &>( numSamples->getRevObject() ).getValue() );
+        const Distribution& rlDistribution = RevBayesCore::assume_cast<const Distribution &>( baseDistribution->getRevObject() );
         g0                                 = RevBayesCore::assumeTypedDistribution<typename valType::valueType>( rlDistribution.createDistribution() );
 //        d = new RevBayesCore::WeightedSampleDistribution<typename valType::valueType>(g0, ns);
     }

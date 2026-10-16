@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <sstream>
 #include <string>
 #include <vector>
@@ -168,7 +169,7 @@ void Distribution::markAsTransform()
 void Distribution::addSpecificHelpFields(RevBayesCore::RbHelpEntry *e) const
 {
     // create the help function entry that we will fill with some values
-    RevBayesCore::RbHelpDistribution *help = static_cast<RevBayesCore::RbHelpDistribution*>( e );
+    RevBayesCore::RbHelpDistribution *help = RevBayesCore::assume_cast<RevBayesCore::RbHelpDistribution*>( e );
     RevBayesCore::RbHelpDistribution &help_entry = *help;
     
     // create the constructor

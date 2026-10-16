@@ -1,4 +1,5 @@
 #include "Environment.h"
+#include "TypeUtilities.h"
 
 #include <sstream> // IWYU pragma: keep
 #include <utility>
@@ -131,7 +132,7 @@ bool Environment::addFunction( Function* func )
     // but only if this is not an internal function
     if ( func->isInternal() == false )
     {
-        RevBayesCore::RbHelpSystem::getHelpSystem().addHelpFunction( static_cast<RevBayesCore::RbHelpFunction*>(func->getHelpEntry()) );
+        RevBayesCore::RbHelpSystem::getHelpSystem().addHelpFunction( RevBayesCore::assume_cast<RevBayesCore::RbHelpFunction*>(func->getHelpEntry()) );
     }
 
     return true;

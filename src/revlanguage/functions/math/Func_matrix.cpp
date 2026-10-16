@@ -7,6 +7,7 @@
 //
 
 #include "Func_matrix.h"
+#include "TypeUtilities.h"
 
 #include "ArgumentRule.h"
 #include "ModelVector.h"
@@ -49,7 +50,7 @@ RevBayesCore::TypedFunction< RevBayesCore::MatrixReal >* Func_matrix::createFunc
 {
 //    std::vector<std::vector<const RevBayesCore::TypedDagNode<double>* > > params;
     const RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* mtx;
-    mtx = static_cast< const ModelVector<ModelVector<Real> >& >( args[0].getVariable()->getRevObject() ).getDagNode();
+    mtx = RevBayesCore::assume_cast< const ModelVector<ModelVector<Real> >& >( args[0].getVariable()->getRevObject() ).getDagNode();
 //
 //    for ( size_t i = 0; i < args[.size(); i++ )
 //    {

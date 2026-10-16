@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <ostream>
 #include <string>
 
@@ -48,9 +49,9 @@ void Move_ConjugateInverseWishart::constructInternalObject( void )
     delete value;
     
     // now allocate a new sliding move
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
 
-    RevBayesCore::TypedDagNode< RevBayesCore::MatrixReal >* tmp = static_cast<const MatrixRealSymmetric &>( x->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::MatrixReal >* tmp = RevBayesCore::assume_cast<const MatrixRealSymmetric &>( x->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode< RevBayesCore::MatrixReal > *z = RevBayesCore::assumeStochastic< RevBayesCore::MatrixReal >( tmp );
     
     value = new RevBayesCore::ConjugateInverseWishartMove(z, w);

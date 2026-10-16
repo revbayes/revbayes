@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <ostream>
 #include <string>
 #include <vector>
@@ -70,11 +71,11 @@ void Move_EllipticalSliceSamplingLognormalIID::constructInternalObject( void )
     delete value;
     
     // now allocate a new sliding move
-    double window_ = static_cast<const RealPos &>( window->getRevObject() ).getValue();
-    double weight_ = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double window_ = RevBayesCore::assume_cast<const RealPos &>( window->getRevObject() ).getValue();
+    double weight_ = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
     
     // Add the field parameters
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp = static_cast<const ModelVector<RealPos> &>( x->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( x->getRevObject() ).getDagNode();
     std::vector<const RevBayesCore::DagNode*> p = tmp->getParents();
     std::vector< RevBayesCore::StochasticNode<double> *> n;
     for (std::vector<const RevBayesCore::DagNode*>::const_iterator it = p.begin(); it != p.end(); ++it)
@@ -90,10 +91,10 @@ void Move_EllipticalSliceSamplingLognormalIID::constructInternalObject( void )
         }
     }
     
-    RevBayesCore::TypedDagNode< double >* m = static_cast<const Real &>( mu->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< double >* s = static_cast<const RealPos &>( sigma->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< double >* m = RevBayesCore::assume_cast<const Real &>( mu->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< double >* s = RevBayesCore::assume_cast<const RealPos &>( sigma->getRevObject() ).getDagNode();
 
-    bool tune_ = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    bool tune_ = RevBayesCore::assume_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
     
     // finally create the internal move object
     

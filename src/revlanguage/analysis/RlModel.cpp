@@ -1,5 +1,6 @@
 
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <vector>
 #include <algorithm>
 #include <string>
@@ -109,9 +110,9 @@ RevPtr<RevVariable> Model::executeMethod(std::string const &name, const std::vec
     {
         found = true;
         
-        const std::string&   fn      = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
-        bool vb = static_cast< const RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
-        const std::string&   bg      = static_cast<const RlString &>( args[2].getVariable()->getRevObject() ).getValue();
+        const std::string&   fn      = RevBayesCore::assume_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
+        bool vb = RevBayesCore::assume_cast< const RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
+        const std::string&   bg      = RevBayesCore::assume_cast<const RlString &>( args[2].getVariable()->getRevObject() ).getValue();
         printModelDotGraph(fn, vb, bg);
         
         return nullptr;

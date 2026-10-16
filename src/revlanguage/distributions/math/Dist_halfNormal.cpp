@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <ostream>
 #include <string>
 #include <vector>
@@ -46,8 +47,8 @@ RevBayesCore::HalfNormalDistribution* Dist_halfNormal::createDistribution( void 
 {
     
     // get the parameters
-    RevBayesCore::TypedDagNode<double>*         o  = static_cast<const Real &>( offset->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>*         s  = static_cast<const RealPos &>( sd->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>*         o  = RevBayesCore::assume_cast<const Real &>( offset->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>*         s  = RevBayesCore::assume_cast<const RealPos &>( sd->getRevObject() ).getDagNode();
     RevBayesCore::HalfNormalDistribution*  d  = new RevBayesCore::HalfNormalDistribution(o, s);
     
     return d;

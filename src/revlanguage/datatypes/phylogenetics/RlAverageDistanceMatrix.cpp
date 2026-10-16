@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -180,8 +181,8 @@ RevPtr<RevVariable> AverageDistanceMatrix::executeMethod(std::string const &name
         {
             found = true;
             // get the member with given indices
-            const Natural& i = static_cast<const Natural&>( args[0].getVariable()->getRevObject() );
-            const Natural& j = static_cast<const Natural&>( args[1].getVariable()->getRevObject() );
+            const Natural& i = RevBayesCore::assume_cast<const Natural&>( args[0].getVariable()->getRevObject() );
+            const Natural& j = RevBayesCore::assume_cast<const Natural&>( args[1].getVariable()->getRevObject() );
 
             if ( size() < (size_t)(i.getValue()) )
             {
@@ -192,7 +193,7 @@ RevPtr<RevVariable> AverageDistanceMatrix::executeMethod(std::string const &name
                 throw RbException("Index j out of bounds in getElement");
             }
 
-            std::pair<double, bool> element = static_cast< RevBayesCore::AverageDistanceMatrix& >( this->dag_node->getValue() ).getElement(size_t(i.getValue()) - 1, size_t(j.getValue()) - 1);
+            std::pair<double, bool> element = RevBayesCore::assume_cast< RevBayesCore::AverageDistanceMatrix& >( this->dag_node->getValue() ).getElement(size_t(i.getValue()) - 1, size_t(j.getValue()) - 1);
             
             ModelVector<RlString> *n = new ModelVector<RlString>();
             

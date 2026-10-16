@@ -1,4 +1,5 @@
 #include "Func_readStochasticVariableTrace.h"
+#include "TypeUtilities.h"
 
 #include <sstream>
 #include <vector>
@@ -42,9 +43,9 @@ RevPtr<RevVariable> Func_readStochasticVariableTrace::execute( void )
 {
     
     // get the information from the arguments for reading the file
-    const std::string&     fn       = static_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
+    const std::string&     fn       = RevBayesCore::assume_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
     // get the column delimiter
-    const std::string& delimiter    = static_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
+    const std::string& delimiter    = RevBayesCore::assume_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
     
     RevObject& b = args[2].getVariable()->getRevObject();
     
@@ -59,11 +60,11 @@ RevPtr<RevVariable> Func_readStochasticVariableTrace::execute( void )
 
         if ( b.isType( Integer::getClassTypeSpec() ) )
         {
-            burnin = (int)static_cast<const Integer &>(b).getValue();
+            burnin = (int)RevBayesCore::assume_cast<const Integer &>(b).getValue();
         }
         else
         {
-            double burninFrac = static_cast<const Probability &>(b).getValue();
+            double burninFrac = RevBayesCore::assume_cast<const Probability &>(b).getValue();
             burnin = int( floor( it->size()*burninFrac ) );
         }
         

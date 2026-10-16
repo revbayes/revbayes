@@ -1,4 +1,5 @@
 #include <stddef.h>
+#include "TypeUtilities.h"
 #include <ostream>
 #include <string>
 #include <vector>
@@ -65,10 +66,10 @@ void Move_RandomCategoryWalk::constructInternalObject( void )
     delete value;
     
     // get the weight for this move
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
     
     // get the stochastic variable
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<std::int64_t> >* tmp = static_cast<const ModelVector<Natural> &>( x->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<std::int64_t> >* tmp = RevBayesCore::assume_cast<const ModelVector<Natural> &>( x->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::RbVector<std::int64_t> > *n = RevBayesCore::assumeStochastic<RevBayesCore::RbVector<std::int64_t> >( tmp );
     
     // create the internal proposal object

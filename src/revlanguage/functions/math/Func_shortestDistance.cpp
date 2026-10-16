@@ -7,6 +7,7 @@
 //
 
 #include "Func_shortestDistance.h"
+#include "TypeUtilities.h"
 
 #include <cstddef>
 #include <string>
@@ -51,11 +52,11 @@ Func_shortestDistance* Func_shortestDistance::clone( void ) const
 RevBayesCore::TypedFunction<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* Func_shortestDistance::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<std::int64_t> > >* adj = static_cast<const ModelVector<ModelVector<Natural> > &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<std::int64_t> > >* adj = RevBayesCore::assume_cast<const ModelVector<ModelVector<Natural> > &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* dist = NULL;
     if ( this->args[1].getVariable()->getRevObject().isType( ModelVector<ModelVector<RealPos> >::getClassTypeSpec() ) )
     {
-        dist = static_cast<const ModelVector<ModelVector<RealPos> > &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+        dist = RevBayesCore::assume_cast<const ModelVector<ModelVector<RealPos> > &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
     }
     else
     {

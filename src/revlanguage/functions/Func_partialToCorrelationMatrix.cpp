@@ -6,6 +6,7 @@
 //
 
 #include "Func_partialToCorrelationMatrix.h"
+#include "TypeUtilities.h"
 
 #include "MatrixReal.h"
 #include "RlDeterministicNode.h"
@@ -43,7 +44,7 @@ Func_partialToCorrelationMatrix* Func_partialToCorrelationMatrix::clone(void) co
 
 RevBayesCore::TypedFunction< RevBayesCore::MatrixReal >* Func_partialToCorrelationMatrix::createFunction(void) const {
 
-    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* r = static_cast<const MatrixReal& >( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* r = RevBayesCore::assume_cast<const MatrixReal& >( this->args[0].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::PartialToCorrelation* f = new RevBayesCore::PartialToCorrelation( r );
     return f;
     

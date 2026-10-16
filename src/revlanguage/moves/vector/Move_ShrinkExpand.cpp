@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <ostream>
 #include <string>
 #include <vector>
@@ -58,17 +59,17 @@ void Move_ShrinkExpand::constructInternalObject( void )
     delete value;
     
     // now allocate a new vector-scale move
-    double l = static_cast<const RealPos &>( lambda->getRevObject() ).getValue();
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double l = RevBayesCore::assume_cast<const RealPos &>( lambda->getRevObject() ).getValue();
+    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
     
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp = NULL;
     if ( x->getRevObject() != RevNullObject::getInstance() && x->getRevObject().isType( ModelVector<Real>::getClassTypeSpec() ) )
     {
-        tmp = static_cast<const ModelVector<Real> &>( x->getRevObject() ).getDagNode();
+        tmp = RevBayesCore::assume_cast<const ModelVector<Real> &>( x->getRevObject() ).getDagNode();
     }
     else if ( x->getRevObject() != RevNullObject::getInstance() && x->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
     {
-        tmp = static_cast<const ModelVector<RealPos> &>( x->getRevObject() ).getDagNode();
+        tmp = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( x->getRevObject() ).getDagNode();
     }
         
     std::vector<const RevBayesCore::DagNode*> p = tmp->getParents();
@@ -90,13 +91,13 @@ void Move_ShrinkExpand::constructInternalObject( void )
     RevBayesCore::StochasticNode<double> *s = NULL;
     if ( sd != NULL && sd->getRevObject() != RevNullObject::getInstance() )
     {
-        RevBayesCore::TypedDagNode<double> *tmp = static_cast<const RealPos &>( sd->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<double> *tmp = RevBayesCore::assume_cast<const RealPos &>( sd->getRevObject() ).getDagNode();
         s = RevBayesCore::assumeStochastic<double>( tmp );
     }
     
     // get the tuning
-    bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    bool t = RevBayesCore::assume_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    double tt = RevBayesCore::assume_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *prop = new RevBayesCore::ShrinkExpandProposal(n, s, l);
     prop->setTargetAcceptanceRate(tt);

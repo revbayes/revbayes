@@ -1,4 +1,5 @@
 #include "RlAbstractDiscreteTaxonData.h"
+#include "TypeUtilities.h"
 
 #include <cstddef>
 
@@ -92,7 +93,7 @@ RevPtr<RevVariable> AbstractDiscreteTaxonData::executeMethod(std::string const &
         found = true;
         
         // get the member with give index
-        const Natural &index = static_cast<const Natural &>( args[0].getVariable()->getRevObject() );
+        const Natural &index = RevBayesCore::assume_cast<const Natural &>( args[0].getVariable()->getRevObject() );
         
         if (this->dag_node->getValue().getNumberOfCharacters() < (size_t)(index.getValue()) )
         {

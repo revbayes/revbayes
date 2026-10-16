@@ -1,4 +1,5 @@
 #include <cmath>
+#include "TypeUtilities.h"
 #include <cstddef>
 #include <iosfwd>
 #include <string>
@@ -80,8 +81,8 @@ RevBayesCore::DuplicationLossProcess* Dist_DuplicationLoss::createDistribution( 
 {
     
     // Get the parameters
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* ind_tree = static_cast<const TimeTree &>( individual_tree->getRevObject() ).getDagNode();
-    const std::vector<RevBayesCore::Taxon>      &t  = static_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* ind_tree = RevBayesCore::assume_cast<const TimeTree &>( individual_tree->getRevObject() ).getDagNode();
+    const std::vector<RevBayesCore::Taxon>      &t  = RevBayesCore::assume_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
     
     // get the number of nodes for the tree
     size_t n_nodes = ind_tree->getValue().getNumberOfNodes();
@@ -95,7 +96,7 @@ RevBayesCore::DuplicationLossProcess* Dist_DuplicationLoss::createDistribution( 
     
     if ( lambda->getRequiredTypeSpec().isDerivedOf( ModelVector<RealPos>::getClassTypeSpec() ) )
     {
-        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* lambda_node = static_cast<const ModelVector<RealPos> &>( lambda->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* lambda_node = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( lambda->getRevObject() ).getDagNode();
         
         // sanity check
         if ( n_nodes != lambda_node->getValue().size() )
@@ -107,13 +108,13 @@ RevBayesCore::DuplicationLossProcess* Dist_DuplicationLoss::createDistribution( 
     }
     else
     {
-        RevBayesCore::TypedDagNode<double>* lambda_node = static_cast<const RealPos &>( lambda->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<double>* lambda_node = RevBayesCore::assume_cast<const RealPos &>( lambda->getRevObject() ).getDagNode();
         d->setDuplicationRate( lambda_node );
     }
     
     if ( mu->getRequiredTypeSpec().isDerivedOf( ModelVector<RealPos>::getClassTypeSpec() ) )
     {
-        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* mu_node = static_cast<const ModelVector<RealPos> &>( mu->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* mu_node = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( mu->getRevObject() ).getDagNode();
         
         // sanity check
         if ( n_nodes != mu_node->getValue().size() )
@@ -125,7 +126,7 @@ RevBayesCore::DuplicationLossProcess* Dist_DuplicationLoss::createDistribution( 
     }
     else
     {
-        RevBayesCore::TypedDagNode<double>* mu_node = static_cast<const RealPos &>( mu->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<double>* mu_node = RevBayesCore::assume_cast<const RealPos &>( mu->getRevObject() ).getDagNode();
         d->setLossRate( mu_node );
     }
     

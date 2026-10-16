@@ -1,4 +1,5 @@
 #include <iosfwd>
+#include "TypeUtilities.h"
 #include <vector>
 
 #include "ArgumentRule.h"
@@ -49,9 +50,9 @@ Func_discretizePositiveDistribution* Func_discretizePositiveDistribution::clone(
 RevBayesCore::TypedFunction< RevBayesCore::RbVector<double> >* Func_discretizePositiveDistribution::createFunction( void ) const
 {
     
-    const PositiveContinuousDistribution& rlDistribution = static_cast<const PositiveContinuousDistribution &>( this->args[0].getVariable()->getRevObject() );
-    RevBayesCore::ContinuousDistribution* g0 = static_cast<RevBayesCore::ContinuousDistribution* >( rlDistribution.createDistribution() );
-    RevBayesCore::TypedDagNode<std::int64_t>* numCats = static_cast<const Integer &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    const PositiveContinuousDistribution& rlDistribution = RevBayesCore::assume_cast<const PositiveContinuousDistribution &>( this->args[0].getVariable()->getRevObject() );
+    RevBayesCore::ContinuousDistribution* g0 = RevBayesCore::assume_cast<RevBayesCore::ContinuousDistribution* >( rlDistribution.createDistribution() );
+    RevBayesCore::TypedDagNode<std::int64_t>* numCats = RevBayesCore::assume_cast<const Integer &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
     
     RevBayesCore::DiscretizeDistributionFunction *func = new RevBayesCore::DiscretizeDistributionFunction( g0, numCats );
     

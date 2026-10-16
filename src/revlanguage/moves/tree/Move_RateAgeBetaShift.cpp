@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <ostream>
 #include <string>
 #include <vector>
@@ -60,18 +61,18 @@ void Move_RateAgeBetaShift::constructInternalObject( void )
     delete value;
     
     // now allocate a new sliding move
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = static_cast<const Tree &>( tree->getRevObject() ).getDagNode();
-    double d = static_cast<const RealPos &>( delta->getRevObject() ).getValue();
-    bool at = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = RevBayesCore::assume_cast<const Tree &>( tree->getRevObject() ).getDagNode();
+    double d = RevBayesCore::assume_cast<const RealPos &>( delta->getRevObject() ).getValue();
+    bool at = RevBayesCore::assume_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double tt = RevBayesCore::assume_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* tmpRates = static_cast<const ModelVector<RealPos> &>( rates->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* tmpRates = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( rates->getRevObject() ).getDagNode();
     std::vector< RevBayesCore::StochasticNode<double> *> rates;
     RevBayesCore::StochasticNode< RevBayesCore::RbVector<double> >* snode_rates = RevBayesCore::checkStochastic< RevBayesCore::RbVector<double> >( tmpRates );
     if ( tmpRates->isStochastic() == false )
     {
-        RevBayesCore::DeterministicNode< RevBayesCore::RbVector<double> >*dnode = static_cast< RevBayesCore::DeterministicNode< RevBayesCore::RbVector<double> > *>( tmpRates );
+        RevBayesCore::DeterministicNode< RevBayesCore::RbVector<double> >*dnode = RevBayesCore::assume_cast< RevBayesCore::DeterministicNode< RevBayesCore::RbVector<double> > *>( tmpRates );
 
         RevBayesCore::VectorFunction<double>* func_vec = dynamic_cast<RevBayesCore::VectorFunction<double>*>( &dnode->getFunction() );
         if ( func_vec == NULL )

@@ -7,6 +7,7 @@
 //
 
 #include "Func_symmetricDifference.h"
+#include "TypeUtilities.h"
 
 #include "RlTimeTree.h"
 #include "RealPos.h"
@@ -47,8 +48,8 @@ Func_symmetricDifference* Func_symmetricDifference::clone( void ) const {
 RevBayesCore::TypedFunction< double >* Func_symmetricDifference::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = static_cast<const TimeTree&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau2 = static_cast<const TimeTree&>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = RevBayesCore::assume_cast<const TimeTree&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau2 = RevBayesCore::assume_cast<const TimeTree&>( this->args[1].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::SymmetricDifferenceStatistic* f = new RevBayesCore::SymmetricDifferenceStatistic( tau, tau2 );
     
     return f;

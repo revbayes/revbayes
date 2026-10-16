@@ -1,4 +1,5 @@
 #include "Mntr_AncestralState.h"
+#include "TypeUtilities.h"
 
 #include <string>
 
@@ -47,14 +48,14 @@ Mntr_AncestralState* Mntr_AncestralState::clone(void) const
 
 void Mntr_AncestralState::constructInternalObject( void )
 {
-    const std::string&                  fn      = static_cast<const RlString &>( filename->getRevObject() ).getValue();
-    const std::string&                  sep     = static_cast<const RlString &>( separator->getRevObject() ).getValue();
-    unsigned int                        g       = (int)static_cast<const IntegerPos  &>( printgen->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* t = static_cast<const Tree &>( tree->getRevObject() ).getDagNode();
+    const std::string&                  fn      = RevBayesCore::assume_cast<const RlString &>( filename->getRevObject() ).getValue();
+    const std::string&                  sep     = RevBayesCore::assume_cast<const RlString &>( separator->getRevObject() ).getValue();
+    unsigned int                        g       = (int)RevBayesCore::assume_cast<const IntegerPos  &>( printgen->getRevObject() ).getValue();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* t = RevBayesCore::assume_cast<const Tree &>( tree->getRevObject() ).getDagNode();
     RevBayesCore::DagNode*				ch		= ctmc->getRevObject().getDagNode();
-    bool                                ap      = static_cast<const RlBoolean &>( append->getRevObject() ).getValue();
-    bool                                wv      = static_cast<const RlBoolean &>( version->getRevObject() ).getValue();
-    std::string                         character_type = static_cast<const RlString &>( monitorType->getRevObject() ).getValue();
+    bool                                ap      = RevBayesCore::assume_cast<const RlBoolean &>( append->getRevObject() ).getValue();
+    bool                                wv      = RevBayesCore::assume_cast<const RlBoolean &>( version->getRevObject() ).getValue();
+    std::string                         character_type = RevBayesCore::assume_cast<const RlString &>( monitorType->getRevObject() ).getValue();
     
     auto make_monitor = [&]<typename T>()
     {

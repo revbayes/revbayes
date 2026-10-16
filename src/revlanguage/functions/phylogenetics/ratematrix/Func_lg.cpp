@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <iostream>
 #include <string>
 #include <vector>
@@ -184,7 +185,7 @@ RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_lg::createFunct
 {
     const RevObject& obj = args[0].getVariable()->getRevObject();
 
-    RevBayesCore::TypedDagNode<RevBayesCore::Simplex>* bf = static_cast<const Simplex &>( obj ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Simplex>* bf = RevBayesCore::assume_cast<const Simplex &>( obj ).getDagNode();
 
     return RevBayesCore::generic_function_ptr< RevBayesCore::RateGenerator >( LG, bf );
 }

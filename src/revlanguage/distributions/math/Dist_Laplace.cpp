@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <ostream>
 #include <string>
 #include <vector>
@@ -47,8 +48,8 @@ RevBayesCore::LaplaceDistribution* Dist_Laplace::createDistribution( void ) cons
 {
 
     // get the parameters
-    RevBayesCore::TypedDagNode<double>* m = static_cast<const Real &>( mean->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* s = static_cast<const RealPos &>( scale->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* m = RevBayesCore::assume_cast<const Real &>( mean->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* s = RevBayesCore::assume_cast<const RealPos &>( scale->getRevObject() ).getDagNode();
     RevBayesCore::LaplaceDistribution* d = new RevBayesCore::LaplaceDistribution(m, s);
 
     return d;

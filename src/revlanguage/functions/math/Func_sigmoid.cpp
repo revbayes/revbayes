@@ -1,4 +1,5 @@
 #include <iosfwd>
+#include "TypeUtilities.h"
 #include <string>
 #include <vector>
 
@@ -46,11 +47,11 @@ Func_sigmoid* Func_sigmoid::clone( void ) const
 RevBayesCore::TypedFunction<double>* Func_sigmoid::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<double>* x = static_cast<const Real&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* min   = static_cast<const RealPos&>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* max = static_cast<const RealPos&>( this->args[2].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* mid  = static_cast<const Real&>( this->args[3].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* slope   = static_cast<const Real&>( this->args[4].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* x = RevBayesCore::assume_cast<const Real&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* min   = RevBayesCore::assume_cast<const RealPos&>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* max = RevBayesCore::assume_cast<const RealPos&>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* mid  = RevBayesCore::assume_cast<const Real&>( this->args[3].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* slope   = RevBayesCore::assume_cast<const Real&>( this->args[4].getVariable()->getRevObject() ).getDagNode();
 
     RevBayesCore::SigmoidFunction* f = new RevBayesCore::SigmoidFunction( x, min, max, mid, slope );
     

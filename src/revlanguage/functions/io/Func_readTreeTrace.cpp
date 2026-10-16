@@ -1,4 +1,5 @@
 #include "Func_readTreeTrace.h"
+#include "TypeUtilities.h"
 
 #include <cmath>
 #include <cstddef>
@@ -86,14 +87,14 @@ RevPtr<RevVariable> Func_readTreeTrace::execute( void )
     size_t arg_index_nruns     = 9;
 
     // get the information from the arguments for reading the file
-    const std::string&  treetype = static_cast<const RlString&>( args[arg_index_tree_type].getVariable()->getRevObject() ).getValue();
-    bool unroot_nonclock = static_cast<const RlBoolean&>( args[arg_unroot_nonclock].getVariable()->getRevObject() ).getValue();
+    const std::string&  treetype = RevBayesCore::assume_cast<const RlString&>( args[arg_index_tree_type].getVariable()->getRevObject() ).getValue();
+    bool unroot_nonclock = RevBayesCore::assume_cast<const RlBoolean&>( args[arg_unroot_nonclock].getVariable()->getRevObject() ).getValue();
 
-    const std::string&  sep      = static_cast<const RlString&>( args[arg_index_separator].getVariable()->getRevObject() ).getValue();
-    std::int64_t                thin     = static_cast<const Natural&>( args[arg_index_thinning].getVariable()->getRevObject() ).getValue();
-    std::int64_t                offset   = static_cast<const Natural&>( args[arg_index_offset].getVariable()->getRevObject() ).getValue();
-    bool                nexus    = static_cast<RlBoolean&>(args[arg_index_nexus].getVariable()->getRevObject()).getValue();
-    std::int64_t                nruns    = static_cast<const Natural&>( args[arg_index_nruns].getVariable()->getRevObject() ).getValue();
+    const std::string&  sep      = RevBayesCore::assume_cast<const RlString&>( args[arg_index_separator].getVariable()->getRevObject() ).getValue();
+    std::int64_t                thin     = RevBayesCore::assume_cast<const Natural&>( args[arg_index_thinning].getVariable()->getRevObject() ).getValue();
+    std::int64_t                offset   = RevBayesCore::assume_cast<const Natural&>( args[arg_index_offset].getVariable()->getRevObject() ).getValue();
+    bool                nexus    = RevBayesCore::assume_cast<RlBoolean&>(args[arg_index_nexus].getVariable()->getRevObject()).getValue();
+    std::int64_t                nruns    = RevBayesCore::assume_cast<const Natural&>( args[arg_index_nruns].getVariable()->getRevObject() ).getValue();
 
     std::vector<RevBayesCore::path> vectorOfFileNames;
     
@@ -104,7 +105,7 @@ RevPtr<RevVariable> Func_readTreeTrace::execute( void )
             throw RbException("Specify only a single base filename when nruns > 1");
         }
 
-        const ModelVector<RlString>& fn = static_cast<const ModelVector<RlString> &>( args[arg_index_files].getVariable()->getRevObject() ).getValue();
+        const ModelVector<RlString>& fn = RevBayesCore::assume_cast<const ModelVector<RlString> &>( args[arg_index_files].getVariable()->getRevObject() ).getValue();
         std::vector<RevBayesCore::path> tmp;
         for (size_t i = 0; i < fn.size(); i++)
         {
@@ -136,7 +137,7 @@ RevPtr<RevVariable> Func_readTreeTrace::execute( void )
     }
     else
     {
-        RevBayesCore::path bn = static_cast<const RlString&>( args[arg_index_files].getVariable()->getRevObject() ).getValue();
+        RevBayesCore::path bn = RevBayesCore::assume_cast<const RlString&>( args[arg_index_files].getVariable()->getRevObject() ).getValue();
         
         for (size_t i = 0; i < nruns; i++)
         {
@@ -181,7 +182,7 @@ RevPtr<RevVariable> Func_readTreeTrace::execute( void )
         RevBayesCore::Clade og;
         if ( args[arg_index_outgroup].getVariable() != NULL && args[arg_index_outgroup].getVariable()->getRevObject() != RevNullObject::getInstance())
         {
-            og = static_cast<const Clade &>( args[arg_index_outgroup].getVariable()->getRevObject() ).getValue();
+            og = RevBayesCore::assume_cast<const Clade &>( args[arg_index_outgroup].getVariable()->getRevObject() ).getValue();
 
             for (size_t i = 0; i < rv->getValue().size(); ++i)
             {
@@ -200,7 +201,7 @@ RevPtr<RevVariable> Func_readTreeTrace::execute( void )
     RevObject& b = args[arg_index_burnin].getVariable()->getRevObject();
     if ( b.isType( Integer::getClassTypeSpec() ) )
     {
-        burnin = static_cast<const Integer &>(b).getValue();
+        burnin = RevBayesCore::assume_cast<const Integer &>(b).getValue();
 
         for(size_t i = 0; i < rv->getValue().size(); i++)
         {
@@ -214,7 +215,7 @@ RevPtr<RevVariable> Func_readTreeTrace::execute( void )
     }
     else
     {
-        double burninFrac = static_cast<const Probability &>(b).getValue();
+        double burninFrac = RevBayesCore::assume_cast<const Probability &>(b).getValue();
 
         for(size_t i = 0; i < rv->getValue().size(); i++)
         {

@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <iostream>
 #include <string>
 #include <vector>
@@ -52,9 +53,9 @@ RevPtr<RevVariable> Func_source::execute( void )
 {
 
     /* Open file */
-    fs::path fname = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
-    bool echo_on = static_cast<const RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
-    bool continue_on_error = static_cast<const RlBoolean &>( args[2].getVariable()->getRevObject() ).getValue();
+    fs::path fname = RevBayesCore::assume_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
+    bool echo_on = RevBayesCore::assume_cast<const RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
+    bool continue_on_error = RevBayesCore::assume_cast<const RlBoolean &>( args[2].getVariable()->getRevObject() ).getValue();
 
     // Initialize
     RBOUT("Processing file \"" + fname.string() + "\"");

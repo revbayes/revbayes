@@ -1,4 +1,5 @@
 #include <cmath>
+#include "TypeUtilities.h"
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -67,7 +68,7 @@ Dist_poisson* Dist_poisson::clone( void ) const
 RevBayesCore::PoissonDistribution* Dist_poisson::createDistribution( void ) const
 {
     // get the parameters
-    RevBayesCore::TypedDagNode<double>* rate    = static_cast<const RealPos &>( lambda->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* rate    = RevBayesCore::assume_cast<const RealPos &>( lambda->getRevObject() ).getDagNode();
     RevBayesCore::PoissonDistribution* d        = new RevBayesCore::PoissonDistribution( rate );
     
     return d;

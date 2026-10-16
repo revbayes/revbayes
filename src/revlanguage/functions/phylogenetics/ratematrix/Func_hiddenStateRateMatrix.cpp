@@ -1,4 +1,5 @@
 #include "Func_hiddenStateRateMatrix.h"
+#include "TypeUtilities.h"
 
 #include "HiddenStateRateMatrixFunction.h"
 #include "ModelVector.h"
@@ -46,40 +47,40 @@ Func_hiddenStateRateMatrix* Func_hiddenStateRateMatrix::clone( void ) const
 RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_hiddenStateRateMatrix::createFunction( void ) const
 {
     
-    bool rescale = static_cast<const RlBoolean &>( this->args[2].getVariable()->getRevObject() ).getDagNode()->getValue();
+    bool rescale = RevBayesCore::assume_cast<const RlBoolean &>( this->args[2].getVariable()->getRevObject() ).getDagNode()->getValue();
     RevBayesCore::HiddenStateRateMatrixFunction* f = new RevBayesCore::HiddenStateRateMatrixFunction( rescale );
     
     // set transition rates for observed character states
     if ( this->args[0].getVariable()->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
     {
-        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* tr = static_cast<const ModelVector<Real> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* tr = RevBayesCore::assume_cast<const ModelVector<Real> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
         f->setObservedTransitionRates( tr );
     }
     else if ( this->args[0].getVariable()->getRevObject().isType( RateGenerator::getClassTypeSpec() ) )
     {
-        RevBayesCore::TypedDagNode< RevBayesCore::RateGenerator >* tr = static_cast<const RateGenerator &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< RevBayesCore::RateGenerator >* tr = RevBayesCore::assume_cast<const RateGenerator &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
         f->setObservedTransitionRates( tr );
     }
     else
     {
-        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* tr = static_cast<const ModelVector<ModelVector<RealPos> > &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* tr = RevBayesCore::assume_cast<const ModelVector<ModelVector<RealPos> > &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
         f->setObservedTransitionRates( tr );
     }
     
     // set transition rates for hidden character states
     if ( this->args[1].getVariable()->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
     {
-        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* tr = static_cast<const ModelVector<Real> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* tr = RevBayesCore::assume_cast<const ModelVector<Real> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
         f->setHiddenTransitionRates( tr );
     }
     else if ( this->args[1].getVariable()->getRevObject().isType( RateGenerator::getClassTypeSpec() ) )
     {
-        RevBayesCore::TypedDagNode< RevBayesCore::RateGenerator >* tr = static_cast<const RateGenerator &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< RevBayesCore::RateGenerator >* tr = RevBayesCore::assume_cast<const RateGenerator &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
         f->setHiddenTransitionRates( tr );
     }
     else
     {
-        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* tr = static_cast<const ModelVector<ModelVector<RealPos> > &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* tr = RevBayesCore::assume_cast<const ModelVector<ModelVector<RealPos> > &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
         f->setHiddenTransitionRates( tr );
     }
     

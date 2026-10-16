@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <fstream>
 #include <map>
 #include <set>
@@ -301,8 +302,8 @@ Func_ls* Func_ls::clone( void ) const
 RevPtr<RevVariable> Func_ls::execute( void )
 {
     
-    bool printAll = static_cast<const RlBoolean &>( args[0].getVariable()->getRevObject() ).getValue();
-    std::string filter = static_cast<const RlString &>( args[1].getVariable()->getRevObject() ).getValue();
+    bool printAll = RevBayesCore::assume_cast<const RlBoolean &>( args[0].getVariable()->getRevObject() ).getValue();
+    std::string filter = RevBayesCore::assume_cast<const RlString &>( args[1].getVariable()->getRevObject() ).getValue();
     
     // print workspace variables
     if (filter == "all") {

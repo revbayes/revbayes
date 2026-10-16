@@ -1,4 +1,5 @@
 #include <cmath>
+#include "TypeUtilities.h"
 #include <cstddef>
 #include <sstream>
 #include <string>
@@ -57,10 +58,10 @@ RevPtr<RevVariable> Func_ancestralStateTree::execute( void )
 {
     
     // get the input tree
-    const RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tree_node = static_cast<const Tree&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    const RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tree_node = RevBayesCore::assume_cast<const Tree&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     
     // get vector of ancestral state traces
-    const WorkspaceVector<AncestralStateTrace>& ast_vector = static_cast<const WorkspaceVector<AncestralStateTrace> &>( args[1].getVariable()->getRevObject() );
+    const WorkspaceVector<AncestralStateTrace>& ast_vector = RevBayesCore::assume_cast<const WorkspaceVector<AncestralStateTrace> &>( args[1].getVariable()->getRevObject() );
     std::vector<RevBayesCore::AncestralStateTrace> ancestralstate_traces;
     for (int i = 0; i < ast_vector.size(); ++i)
     {
@@ -68,7 +69,7 @@ RevPtr<RevVariable> Func_ancestralStateTree::execute( void )
     }
     
     // get the ancestral state tree trace
-    const TraceTree& tt = static_cast<const TraceTree&>( args[2].getVariable()->getRevObject() );
+    const TraceTree& tt = RevBayesCore::assume_cast<const TraceTree&>( args[2].getVariable()->getRevObject() );
     
     // make a new tree summary object
     RevBayesCore::TraceTree tree_trace;
@@ -79,28 +80,28 @@ RevPtr<RevVariable> Func_ancestralStateTree::execute( void )
     }
     
     // should we annotate start states?
-    bool start_states = static_cast<const RlBoolean &>(args[3].getVariable()->getRevObject()).getValue();
+    bool start_states = RevBayesCore::assume_cast<const RlBoolean &>(args[3].getVariable()->getRevObject()).getValue();
     
     // get the filename
-    const std::string& filename = static_cast<const RlString&>( args[4].getVariable()->getRevObject() ).getValue();
+    const std::string& filename = RevBayesCore::assume_cast<const RlString&>( args[4].getVariable()->getRevObject() ).getValue();
     
     int burnin = 0;
 
     RevObject& b = args[5].getVariable()->getRevObject();
     if ( b.isType( Integer::getClassTypeSpec() ) )
     {
-        burnin = (int)static_cast<const Integer &>(b).getValue();
+        burnin = (int)RevBayesCore::assume_cast<const Integer &>(b).getValue();
     }
     else
     {
-        double burninFrac = static_cast<const Probability &>(b).getValue();
+        double burninFrac = RevBayesCore::assume_cast<const Probability &>(b).getValue();
         burnin = int( floor( ancestralstate_traces[0].size() * burninFrac ) );
     }
 
-    std::string summary_stat = static_cast<const RlString&>( args[6].getVariable()->getRevObject() ).getValue();
+    std::string summary_stat = RevBayesCore::assume_cast<const RlString&>( args[6].getVariable()->getRevObject() ).getValue();
     
 
-    std::string reconstruction = static_cast<const RlString &>(args[7].getVariable()->getRevObject()).getValue();
+    std::string reconstruction = RevBayesCore::assume_cast<const RlString &>(args[7].getVariable()->getRevObject()).getValue();
     bool conditional = false;
     if ( reconstruction == "conditional" )
     {
@@ -111,14 +112,14 @@ RevPtr<RevVariable> Func_ancestralStateTree::execute( void )
         throw RbException("Joint ancestral state summaries are not yet implemented. Coming soon!");
     }
     
-    int site = (int)static_cast<const Integer &>(args[8].getVariable()->getRevObject()).getValue();
+    int site = (int)RevBayesCore::assume_cast<const Integer &>(args[8].getVariable()->getRevObject()).getValue();
     if ( site == 0 )
     {
         throw RbException("In Rev we index using a base '1'. That means, the first site has position '1'. You entered '0' for the site index.");
     }
     --site;
     
-    bool verbose = static_cast<const RlBoolean &>(args[9].getVariable()->getRevObject()).getValue();
+    bool verbose = RevBayesCore::assume_cast<const RlBoolean &>(args[9].getVariable()->getRevObject()).getValue();
     
     // get the tree with ancestral states
     RevBayesCore::JointAncestralStateTrace joint_trace(ancestralstate_traces, tree_trace);
@@ -128,13 +129,13 @@ RevPtr<RevVariable> Func_ancestralStateTree::execute( void )
     if (start_states)
     {
         size_t num_states = 3;
-        num_states = static_cast<const Natural &>(args[10].getVariable()->getRevObject()).getValue();
+        num_states = RevBayesCore::assume_cast<const Natural &>(args[10].getVariable()->getRevObject()).getValue();
         tree = joint_trace.cladoAncestralStateTree2(tree_node->getValue(), summary_stat, num_states, site, conditional, false, verbose);
     }
     else
     {
         size_t num_states = 3;
-        num_states = static_cast<const Natural &>(args[10].getVariable()->getRevObject()).getValue();
+        num_states = RevBayesCore::assume_cast<const Natural &>(args[10].getVariable()->getRevObject()).getValue();
 
         tree = joint_trace.ancestralStateTree(tree_node->getValue(), summary_stat, num_states, site, conditional, false, verbose);
     }

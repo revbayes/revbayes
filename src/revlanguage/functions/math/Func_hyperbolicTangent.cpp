@@ -1,4 +1,5 @@
 #include <iosfwd>
+#include "TypeUtilities.h"
 #include <string>
 #include <vector>
 
@@ -45,7 +46,7 @@ Func_hyperbolicTangent* Func_hyperbolicTangent::clone( void ) const
 RevBayesCore::TypedFunction<double>* Func_hyperbolicTangent::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<double>* x = static_cast<const Real&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* x = RevBayesCore::assume_cast<const Real&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::HyperbolicTangentFunction* f = new RevBayesCore::HyperbolicTangentFunction( x );
     
     return f;

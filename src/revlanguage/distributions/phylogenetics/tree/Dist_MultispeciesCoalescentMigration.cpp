@@ -1,4 +1,5 @@
 #include <cmath>
+#include "TypeUtilities.h"
 #include <cstddef>
 #include <iosfwd>
 #include <string>
@@ -80,20 +81,20 @@ RevBayesCore::MultispeciesCoalescentMigration* Dist_MultispeciesCoalescentMigrat
 {
 
     // Get the parameters
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* st = static_cast<const TimeTree &>( species_tree->getRevObject() ).getDagNode();
-    const std::vector<RevBayesCore::Taxon>      &t  = static_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* st = RevBayesCore::assume_cast<const TimeTree &>( species_tree->getRevObject() ).getDagNode();
+    const std::vector<RevBayesCore::Taxon>      &t  = RevBayesCore::assume_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
 
     // get the number of nodes for the tree
     size_t n_nodes = st->getValue().getNumberOfNodes();
 
-    RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>*    q = static_cast<const RateGenerator &   >( Q->getRevObject()        ).getDagNode();
-    RevBayesCore::TypedDagNode<double>*                         d = static_cast<const RealPos &         >( delta->getRevObject()    ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>*    q = RevBayesCore::assume_cast<const RateGenerator &   >( Q->getRevObject()        ).getDagNode();
+    RevBayesCore::TypedDagNode<double>*                         d = RevBayesCore::assume_cast<const RealPos &         >( delta->getRevObject()    ).getDagNode();
 
     RevBayesCore::MultispeciesCoalescentMigration*   dist = new RevBayesCore::MultispeciesCoalescentMigration( st, t, q, d );
 
     if ( Ne->getRequiredTypeSpec().isDerivedOf( ModelVector<RealPos>::getClassTypeSpec() ) )
     {
-        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* ne_node = static_cast<const ModelVector<RealPos> &>( Ne->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* ne_node = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( Ne->getRevObject() ).getDagNode();
 
         // sanity check
         if ( n_nodes != ne_node->getValue().size() )
@@ -105,7 +106,7 @@ RevBayesCore::MultispeciesCoalescentMigration* Dist_MultispeciesCoalescentMigrat
     }
     else
     {
-        RevBayesCore::TypedDagNode<double>* ne_node = static_cast<const RealPos &>( Ne->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<double>* ne_node = RevBayesCore::assume_cast<const RealPos &>( Ne->getRevObject() ).getDagNode();
         dist->setNe( ne_node );
     }
     dist->redrawValue();

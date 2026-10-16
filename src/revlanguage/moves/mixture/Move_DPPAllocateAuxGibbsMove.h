@@ -2,6 +2,7 @@
 #define Move_DPPAllocateAuxGibbsMove_H
 
 #include "RlMove.h"
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "TypedDagNode.h"
 
@@ -91,9 +92,9 @@ void Move_DPPAllocateAuxGibbsMove<valType>::constructInternalObject( void )
     delete value;
     
     // now allocate a new vector-scale move
-    int na = (int)static_cast<const Integer &>( nAux->getRevObject() ).getValue();
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<typename valType::valueType> >* tmp = static_cast<const ModelVector<valType> &>( x->getRevObject() ).getDagNode();
+    int na = (int)RevBayesCore::assume_cast<const Integer &>( nAux->getRevObject() ).getValue();
+    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<typename valType::valueType> >* tmp = RevBayesCore::assume_cast<const ModelVector<valType> &>( x->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode< RevBayesCore::RbVector<typename valType::valueType> > *sn = RevBayesCore::assumeStochastic< RevBayesCore::RbVector<typename valType::valueType> >( tmp );
     
     value = new RevBayesCore::DPPAllocateAuxGibbsMove<typename valType::valueType>(sn, na, w);

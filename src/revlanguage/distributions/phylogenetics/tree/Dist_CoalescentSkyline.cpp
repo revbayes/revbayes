@@ -1,4 +1,5 @@
 #include <cmath>
+#include "TypeUtilities.h"
 #include <cstddef>
 #include <iosfwd>
 #include <string>
@@ -89,27 +90,27 @@ RevBayesCore::PiecewiseCoalescent* Dist_CoalescentSkyline::createDistribution( v
     // get the parameters
     
     // theta
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* th       = static_cast<const ModelVector<RealPos> &>( theta->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* th       = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( theta->getRevObject() ).getDagNode();
     // times
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* ti       = NULL;
     if ( times != NULL && times->getRevObject() != RevNullObject::getInstance() )
     {
-        ti = static_cast<const ModelVector<RealPos> &>( times->getRevObject() ).getDagNode();
+        ti = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( times->getRevObject() ).getDagNode();
     }
     // number of events per interval
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<std::int64_t> >* enpi       = NULL;
     if ( events_per_interval != NULL && events_per_interval->getRevObject() != RevNullObject::getInstance() )
     {
-        enpi = static_cast<const ModelVector<Natural> &>( events_per_interval->getRevObject() ).getDagNode();
+        enpi = RevBayesCore::assume_cast<const ModelVector<Natural> &>( events_per_interval->getRevObject() ).getDagNode();
     }
     // method
-    const std::string &m                        = static_cast<const RlString &>( method->getRevObject() ).getValue();
+    const std::string &m                        = RevBayesCore::assume_cast<const RlString &>( method->getRevObject() ).getValue();
     // demographic model
-    const std::string &dem                      = static_cast<const RlString &>( model->getRevObject() ).getValue();
+    const std::string &dem                      = RevBayesCore::assume_cast<const RlString &>( model->getRevObject() ).getValue();
     // taxon names
-    const std::vector<RevBayesCore::Taxon> & ta = static_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
+    const std::vector<RevBayesCore::Taxon> & ta = RevBayesCore::assume_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
     // clade constraints
-    const std::vector<RevBayesCore::Clade> &c   = static_cast<const ModelVector<Clade> &>( constraints->getRevObject() ).getValue();
+    const std::vector<RevBayesCore::Clade> &c   = RevBayesCore::assume_cast<const ModelVector<Clade> &>( constraints->getRevObject() ).getValue();
     
     RevBayesCore::PiecewiseCoalescent::METHOD_TYPES meth = RevBayesCore::PiecewiseCoalescent::SPECIFIED;
     if ( m == "events" )

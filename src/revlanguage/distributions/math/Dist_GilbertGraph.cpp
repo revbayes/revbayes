@@ -1,4 +1,5 @@
 #include <cmath>
+#include "TypeUtilities.h"
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -55,8 +56,8 @@ RevBayesCore::GilbertGraphDistribution* Dist_GilbertGraph::createDistribution( v
 {
     
     // get the parameters
-    RevBayesCore::TypedDagNode<double>* p = static_cast<const RealPos&>( edge_probability->getRevObject() ).getDagNode();
-    size_t n = size_t( static_cast<const Natural &>( dim->getRevObject() ).getValue() );
+    RevBayesCore::TypedDagNode<double>* p = RevBayesCore::assume_cast<const RealPos&>( edge_probability->getRevObject() ).getDagNode();
+    size_t n = size_t( RevBayesCore::assume_cast<const Natural &>( dim->getRevObject() ).getValue() );
     
     RevBayesCore::GilbertGraphDistribution* f = new RevBayesCore::GilbertGraphDistribution( n, p );
     

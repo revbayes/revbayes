@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <ostream>
 #include <string>
 #include <vector>
@@ -119,11 +120,11 @@ void Move_UpDownSlideBactrian::constructInternalObject( void )
     delete value;
     
     // now allocate a new up-down-scale move
-    double l = static_cast<const RealPos &>( lambda->getRevObject() ).getValue();
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double l = RevBayesCore::assume_cast<const RealPos &>( lambda->getRevObject() ).getValue();
+    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
     
-    bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    bool t = RevBayesCore::assume_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    double tt = RevBayesCore::assume_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
     
     // finally create the internal move object
     RevBayesCore::UpDownSlideBactrianProposal *prop = new RevBayesCore::UpDownSlideBactrianProposal(l);
@@ -146,13 +147,13 @@ RevPtr<RevVariable> Move_UpDownSlideBactrian::executeMethod(const std::string& n
         Real* uReal = dynamic_cast<Real *>( &args[0].getVariable()->getRevObject() );
         ModelVector<Real>* uVector = dynamic_cast<ModelVector<Real> *>( &args[0].getVariable()->getRevObject() );
         ModelVector<RealPos>* upVector = dynamic_cast<ModelVector<RealPos> *>( &args[0].getVariable()->getRevObject() );
-        bool up = static_cast<RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
+        bool up = RevBayesCore::assume_cast<RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
         
         if ( uReal != NULL )
         {
             RevBayesCore::StochasticNode<double> *the_node = RevBayesCore::checkStochastic<double>( uReal->getDagNode() );
-            RevBayesCore::MetropolisHastingsMove *m = static_cast<RevBayesCore::MetropolisHastingsMove*>(this->value);
-            RevBayesCore::UpDownSlideBactrianProposal &prop = static_cast<RevBayesCore::UpDownSlideBactrianProposal&>( m->getProposal() );
+            RevBayesCore::MetropolisHastingsMove *m = RevBayesCore::assume_cast<RevBayesCore::MetropolisHastingsMove*>(this->value);
+            RevBayesCore::UpDownSlideBactrianProposal &prop = RevBayesCore::assume_cast<RevBayesCore::UpDownSlideBactrianProposal&>( m->getProposal() );
             
             if ( the_node != NULL )
             {
@@ -166,8 +167,8 @@ RevPtr<RevVariable> Move_UpDownSlideBactrian::executeMethod(const std::string& n
         else if ( uVector != NULL && uVector->getDagNode()->isStochastic() == true )
         {
             RevBayesCore::StochasticNode<RevBayesCore::RbVector<double> > *the_node = RevBayesCore::checkStochastic<RevBayesCore::RbVector<double> >( uVector->getDagNode() );
-            RevBayesCore::MetropolisHastingsMove *m = static_cast<RevBayesCore::MetropolisHastingsMove*>(this->value);
-            RevBayesCore::UpDownSlideBactrianProposal &prop = static_cast<RevBayesCore::UpDownSlideBactrianProposal&>( m->getProposal() );
+            RevBayesCore::MetropolisHastingsMove *m = RevBayesCore::assume_cast<RevBayesCore::MetropolisHastingsMove*>(this->value);
+            RevBayesCore::UpDownSlideBactrianProposal &prop = RevBayesCore::assume_cast<RevBayesCore::UpDownSlideBactrianProposal&>( m->getProposal() );
             
             if ( the_node != NULL )
             {
@@ -180,8 +181,8 @@ RevPtr<RevVariable> Move_UpDownSlideBactrian::executeMethod(const std::string& n
         }
         else if ( uVector != NULL && uVector->getDagNode()->isStochastic() == false )
         {
-            RevBayesCore::MetropolisHastingsMove *m = static_cast<RevBayesCore::MetropolisHastingsMove*>(this->value);
-            RevBayesCore::UpDownSlideBactrianProposal &prop = static_cast<RevBayesCore::UpDownSlideBactrianProposal&>( m->getProposal() );
+            RevBayesCore::MetropolisHastingsMove *m = RevBayesCore::assume_cast<RevBayesCore::MetropolisHastingsMove*>(this->value);
+            RevBayesCore::UpDownSlideBactrianProposal &prop = RevBayesCore::assume_cast<RevBayesCore::UpDownSlideBactrianProposal&>( m->getProposal() );
             
             RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* deterministic_vector = uVector->getDagNode();
             std::vector<const RevBayesCore::DagNode*> parents = deterministic_vector->getParents();
@@ -202,8 +203,8 @@ RevPtr<RevVariable> Move_UpDownSlideBactrian::executeMethod(const std::string& n
         }
         else if ( upVector != NULL && upVector->getDagNode()->isStochastic() == false )
         {
-            RevBayesCore::MetropolisHastingsMove *m = static_cast<RevBayesCore::MetropolisHastingsMove*>(this->value);
-            RevBayesCore::UpDownSlideBactrianProposal &prop = static_cast<RevBayesCore::UpDownSlideBactrianProposal&>( m->getProposal() );
+            RevBayesCore::MetropolisHastingsMove *m = RevBayesCore::assume_cast<RevBayesCore::MetropolisHastingsMove*>(this->value);
+            RevBayesCore::UpDownSlideBactrianProposal &prop = RevBayesCore::assume_cast<RevBayesCore::UpDownSlideBactrianProposal&>( m->getProposal() );
             
             RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* deterministic_vector = upVector->getDagNode();
             std::vector<const RevBayesCore::DagNode*> parents = deterministic_vector->getParents();
@@ -236,13 +237,13 @@ RevPtr<RevVariable> Move_UpDownSlideBactrian::executeMethod(const std::string& n
         Real* uReal = dynamic_cast<Real *>( &args[0].getVariable()->getRevObject() );
         ModelVector<Real>* uVector = dynamic_cast<ModelVector<Real> *>( &args[0].getVariable()->getRevObject() );
         ModelVector<RealPos>* upVector = dynamic_cast<ModelVector<RealPos> *>( &args[0].getVariable()->getRevObject() );
-        bool up = static_cast<RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
+        bool up = RevBayesCore::assume_cast<RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
         
         if ( uReal != NULL )
         {
             RevBayesCore::StochasticNode<double> *the_node = RevBayesCore::checkStochastic<double>( uReal->getDagNode() );
-            RevBayesCore::MetropolisHastingsMove *m = static_cast<RevBayesCore::MetropolisHastingsMove*>(this->value);
-            RevBayesCore::UpDownSlideBactrianProposal &prop = static_cast<RevBayesCore::UpDownSlideBactrianProposal&>( m->getProposal() );
+            RevBayesCore::MetropolisHastingsMove *m = RevBayesCore::assume_cast<RevBayesCore::MetropolisHastingsMove*>(this->value);
+            RevBayesCore::UpDownSlideBactrianProposal &prop = RevBayesCore::assume_cast<RevBayesCore::UpDownSlideBactrianProposal&>( m->getProposal() );
             
             if ( the_node != NULL )
             {
@@ -256,8 +257,8 @@ RevPtr<RevVariable> Move_UpDownSlideBactrian::executeMethod(const std::string& n
         else if ( uVector != NULL && uVector->getDagNode()->isStochastic() == true )
         {
             RevBayesCore::StochasticNode<RevBayesCore::RbVector<double> > *the_node = RevBayesCore::checkStochastic<RevBayesCore::RbVector<double> >( uVector->getDagNode() );
-            RevBayesCore::MetropolisHastingsMove *m = static_cast<RevBayesCore::MetropolisHastingsMove*>(this->value);
-            RevBayesCore::UpDownSlideBactrianProposal &prop = static_cast<RevBayesCore::UpDownSlideBactrianProposal&>( m->getProposal() );
+            RevBayesCore::MetropolisHastingsMove *m = RevBayesCore::assume_cast<RevBayesCore::MetropolisHastingsMove*>(this->value);
+            RevBayesCore::UpDownSlideBactrianProposal &prop = RevBayesCore::assume_cast<RevBayesCore::UpDownSlideBactrianProposal&>( m->getProposal() );
             
             if ( the_node != NULL )
             {
@@ -270,8 +271,8 @@ RevPtr<RevVariable> Move_UpDownSlideBactrian::executeMethod(const std::string& n
         }
         else if ( uVector != NULL && uVector->getDagNode()->isStochastic() == false )
         {
-            RevBayesCore::MetropolisHastingsMove *m = static_cast<RevBayesCore::MetropolisHastingsMove*>(this->value);
-            RevBayesCore::UpDownSlideBactrianProposal &prop = static_cast<RevBayesCore::UpDownSlideBactrianProposal&>( m->getProposal() );
+            RevBayesCore::MetropolisHastingsMove *m = RevBayesCore::assume_cast<RevBayesCore::MetropolisHastingsMove*>(this->value);
+            RevBayesCore::UpDownSlideBactrianProposal &prop = RevBayesCore::assume_cast<RevBayesCore::UpDownSlideBactrianProposal&>( m->getProposal() );
             
             RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* deterministic_vector = uVector->getDagNode();
             std::vector<const RevBayesCore::DagNode*> parents = deterministic_vector->getParents();
@@ -291,8 +292,8 @@ RevPtr<RevVariable> Move_UpDownSlideBactrian::executeMethod(const std::string& n
         }
         else if ( upVector != NULL && upVector->getDagNode()->isStochastic() == false )
         {
-            RevBayesCore::MetropolisHastingsMove *m = static_cast<RevBayesCore::MetropolisHastingsMove*>(this->value);
-            RevBayesCore::UpDownSlideBactrianProposal &prop = static_cast<RevBayesCore::UpDownSlideBactrianProposal&>( m->getProposal() );
+            RevBayesCore::MetropolisHastingsMove *m = RevBayesCore::assume_cast<RevBayesCore::MetropolisHastingsMove*>(this->value);
+            RevBayesCore::UpDownSlideBactrianProposal &prop = RevBayesCore::assume_cast<RevBayesCore::UpDownSlideBactrianProposal&>( m->getProposal() );
             
             RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* deterministic_vector = upVector->getDagNode();
             std::vector<const RevBayesCore::DagNode*> parents = deterministic_vector->getParents();

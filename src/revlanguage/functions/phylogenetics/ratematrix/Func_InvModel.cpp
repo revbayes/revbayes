@@ -1,4 +1,5 @@
 #include "Func_InvModel.h"
+#include "TypeUtilities.h"
 
 #include "RealPos.h"
 #include "RlDeterministicNode.h"
@@ -92,8 +93,8 @@ Func_InvModel* Func_InvModel::clone( void ) const
 
 RevBayesCore::TypedFunction< RevBayesCore::SiteMixtureModel >* Func_InvModel::createFunction( void ) const
 {
-    RevBayesCore::TypedDagNode< RevBayesCore::SiteMixtureModel >* submodel = static_cast<const SiteMixtureModel &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< double >* pInv = static_cast<const RealPos &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::SiteMixtureModel >* submodel = RevBayesCore::assume_cast<const SiteMixtureModel &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< double >* pInv = RevBayesCore::assume_cast<const RealPos &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
 
     return RevBayesCore::generic_function_ptr< RevBayesCore::SiteMixtureModel >( InvModelFunc, submodel, pInv );
 }

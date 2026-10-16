@@ -18,6 +18,7 @@
  */
 
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <iostream>
 #include <string>
 #include <vector>
@@ -70,14 +71,14 @@ RevPtr<RevVariable> Func_module::execute( void )
 {
     
     /* Get the module */
-    std::string moduleName = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
+    std::string moduleName = RevBayesCore::assume_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
     const Module& mod = ModuleSystem::getModuleSystem().getModule( moduleName );
     
     std::shared_ptr<Environment> execEnv = env;
     
     if ( args[1].getVariable()->getRevObject() != RevNullObject::getInstance() )
     {
-        std::string ns = static_cast<const RlString &>( args[1].getVariable()->getRevObject() ).getValue();
+        std::string ns = RevBayesCore::assume_cast<const RlString &>( args[1].getVariable()->getRevObject() ).getValue();
     
          execEnv = env->getChildEnvironment( ns );
     }

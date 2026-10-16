@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <iosfwd>
 #include <vector>
 
@@ -59,17 +60,17 @@ Func_assembleContinuousMRF* Func_assembleContinuousMRF::clone( void ) const
 RevBayesCore::TypedFunction<RevBayesCore::RbVector<double> >* Func_assembleContinuousMRF::createFunction( void ) const
 {
 
-    RevBayesCore::TypedDagNode<double>* theta1                              = static_cast<const RealPos &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* increments = static_cast<const ModelVector<Real> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    bool theta1_is_log_scale                                                = static_cast<const RlBoolean &>( args[4].getVariable()->getRevObject() ).getValue();
-    size_t order                                                            = static_cast<const Natural &>( args[5].getVariable()->getRevObject() ).getValue();
+    RevBayesCore::TypedDagNode<double>* theta1                              = RevBayesCore::assume_cast<const RealPos &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* increments = RevBayesCore::assume_cast<const ModelVector<Real> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    bool theta1_is_log_scale                                                = RevBayesCore::assume_cast<const RlBoolean &>( args[4].getVariable()->getRevObject() ).getValue();
+    size_t order                                                            = RevBayesCore::assume_cast<const Natural &>( args[5].getVariable()->getRevObject() ).getValue();
 
     
-    RevBayesCore::TypedDagNode<double>* beta                                = static_cast<const Real &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* beta                                = RevBayesCore::assume_cast<const Real &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* predictors = NULL;
     if (this->args[3].getVariable()->getRevObject() != RevNullObject::getInstance())
     {
-        predictors = static_cast<const ModelVector<Real> &>( this->args[3].getVariable()->getRevObject() ).getDagNode();
+        predictors = RevBayesCore::assume_cast<const ModelVector<Real> &>( this->args[3].getVariable()->getRevObject() ).getDagNode();
     }
     
     if (order == 1)

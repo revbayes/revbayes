@@ -1,4 +1,5 @@
 #include "Func_time.h"
+#include "TypeUtilities.h"
 
 #include <string>
 
@@ -36,7 +37,7 @@ Func_time* Func_time::clone( void ) const
 RevPtr<RevVariable> Func_time::execute( void )
 {
 
-    const std::string &option = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
+    const std::string &option = RevBayesCore::assume_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
 
     boost::posix_time::ptime t = boost::posix_time::microsec_clock::local_time();
 

@@ -18,6 +18,7 @@
 #define DistributionFunctionPdf_H
 
 #include "RlTypedDistribution.h"
+#include "TypeUtilities.h"
 #include "RlTypedFunction.h"
 
 #include <string>
@@ -155,8 +156,8 @@ RevBayesCore::TypedFunction<double>* RevLanguage::DistributionFunctionPdf<valueT
     
     
     
-    RevBayesCore::TypedDagNode<typename valueType::valueType>* arg = static_cast<const valueType &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    bool useLog = static_cast<const RlBoolean &>( this->args[args.size()-1].getVariable()->getRevObject() ).getValue();
+    RevBayesCore::TypedDagNode<typename valueType::valueType>* arg = RevBayesCore::assume_cast<const valueType &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    bool useLog = RevBayesCore::assume_cast<const RlBoolean &>( this->args[args.size()-1].getVariable()->getRevObject() ).getValue();
     RevBayesCore::ProbabilityDensityFunction<typename valueType::valueType>* f = new RevBayesCore::ProbabilityDensityFunction<typename valueType::valueType>( arg, copyObject->createDistribution(), useLog );
     
     return f;

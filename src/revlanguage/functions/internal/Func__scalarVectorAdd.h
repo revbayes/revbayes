@@ -2,6 +2,7 @@
 #define Func__scalarVectorAdd_H
 
 #include "ModelVector.h"
+#include "TypeUtilities.h"
 #include "RlTypedFunction.h"
 
 #include <map>
@@ -79,8 +80,8 @@ RevLanguage::Func__scalarVectorAdd<firstValType, secondValType, retType>* RevLan
 template <typename firstValType, typename secondValType, typename retType>
 RevBayesCore::TypedFunction<typename retType::valueType >* RevLanguage::Func__scalarVectorAdd<firstValType, secondValType, retType>::createFunction( void ) const
 {
-    RevBayesCore::TypedDagNode<typename firstValType::valueType>* firstArg = static_cast<const firstValType &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<typename secondValType::valueType>* secondArg = static_cast<const secondValType &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<typename firstValType::valueType>* firstArg = RevBayesCore::assume_cast<const firstValType &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<typename secondValType::valueType>* secondArg = RevBayesCore::assume_cast<const secondValType &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::ScalarVectorAddition<typename firstValType::valueType, typename secondValType::elementType, typename retType::elementType> *func = new RevBayesCore::ScalarVectorAddition<typename firstValType::valueType, typename secondValType::elementType, typename retType::elementType>(firstArg, secondArg);
     
     return func;

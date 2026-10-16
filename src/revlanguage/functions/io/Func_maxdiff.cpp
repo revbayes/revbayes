@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <sstream>
 #include <string>
 #include <vector>
@@ -33,7 +34,7 @@ RevPtr<RevVariable> Func_maxdiff::execute( void )
 {
     size_t arg_index = 0;
 
-    std::vector<TraceTree>& tt = static_cast<const WorkspaceVector<TraceTree> &>(args[arg_index++].getVariable()->getRevObject()).getValue();
+    std::vector<TraceTree>& tt = RevBayesCore::assume_cast<const WorkspaceVector<TraceTree> &>(args[arg_index++].getVariable()->getRevObject()).getValue();
     
     std::vector<RevBayesCore::TraceTree* > vec;
     for(size_t i = 0; i < tt.size(); i++)

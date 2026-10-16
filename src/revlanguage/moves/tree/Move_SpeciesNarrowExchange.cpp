@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <ostream>
 #include <string>
 #include <vector>
@@ -76,8 +77,8 @@ void Move_SpeciesNarrowExchange::constructInternalObject( void )
     delete value;
 
     // now allocate a new sliding move
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = static_cast<const TimeTree &>( speciesTree->getRevObject() ).getDagNode();
+    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = RevBayesCore::assume_cast<const TimeTree &>( speciesTree->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *st = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
 
     RevBayesCore::Proposal *p = new RevBayesCore::SpeciesNarrowExchangeProposal(st);
@@ -184,11 +185,11 @@ RevPtr<RevVariable> Move_SpeciesNarrowExchange::executeMethod(const std::string&
     {
         found = true;
 
-        RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = static_cast<const TimeTree &>( args[0].getVariable()->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = RevBayesCore::assume_cast<const TimeTree &>( args[0].getVariable()->getRevObject() ).getDagNode();
         RevBayesCore::StochasticNode<RevBayesCore::Tree> *gt = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
 
-        RevBayesCore::MetropolisHastingsMove *m = static_cast<RevBayesCore::MetropolisHastingsMove*>(this->value);
-        RevBayesCore::SpeciesNarrowExchangeProposal &p = static_cast<RevBayesCore::SpeciesNarrowExchangeProposal&>( m->getProposal() );
+        RevBayesCore::MetropolisHastingsMove *m = RevBayesCore::assume_cast<RevBayesCore::MetropolisHastingsMove*>(this->value);
+        RevBayesCore::SpeciesNarrowExchangeProposal &p = RevBayesCore::assume_cast<RevBayesCore::SpeciesNarrowExchangeProposal&>( m->getProposal() );
         p.addGeneTree( gt );
 
         return NULL;
@@ -197,11 +198,11 @@ RevPtr<RevVariable> Move_SpeciesNarrowExchange::executeMethod(const std::string&
     {
         found = true;
 
-        RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = static_cast<const TimeTree &>( args[0].getVariable()->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = RevBayesCore::assume_cast<const TimeTree &>( args[0].getVariable()->getRevObject() ).getDagNode();
         RevBayesCore::StochasticNode<RevBayesCore::Tree> *gt = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
 
-        RevBayesCore::MetropolisHastingsMove *m = static_cast<RevBayesCore::MetropolisHastingsMove*>(this->value);
-        RevBayesCore::SpeciesNarrowExchangeProposal &p = static_cast<RevBayesCore::SpeciesNarrowExchangeProposal&>( m->getProposal() );
+        RevBayesCore::MetropolisHastingsMove *m = RevBayesCore::assume_cast<RevBayesCore::MetropolisHastingsMove*>(this->value);
+        RevBayesCore::SpeciesNarrowExchangeProposal &p = RevBayesCore::assume_cast<RevBayesCore::SpeciesNarrowExchangeProposal&>( m->getProposal() );
         p.removeGeneTree( gt );
 
         return NULL;

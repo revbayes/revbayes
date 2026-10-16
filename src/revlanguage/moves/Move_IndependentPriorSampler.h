@@ -2,6 +2,7 @@
 #define Move_IndependentPriorSampler_H
 
 #include <ostream>
+#include "TypeUtilities.h"
 #include <vector>
 
 #include "RlMove.h"
@@ -88,9 +89,9 @@ void RevLanguage::Move_IndependentPriorSampler<rlValueType>::constructInternalOb
     delete value;
     
     // now allocate a new independent prior sampler move
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
     
-    RevBayesCore::TypedDagNode<typename rlValueType::valueType>* tmp = static_cast<const rlValueType &>( x->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<typename rlValueType::valueType>* tmp = RevBayesCore::assume_cast<const rlValueType &>( x->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode< typename rlValueType::valueType > *sn = RevBayesCore::assumeStochastic< typename rlValueType::valueType >( tmp );
     
     RevBayesCore::Proposal *p = new RevBayesCore::IndependentPriorProposal< typename rlValueType::valueType >(sn);

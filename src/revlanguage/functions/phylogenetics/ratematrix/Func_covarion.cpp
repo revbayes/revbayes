@@ -1,4 +1,5 @@
 #include "Func_covarion.h"
+#include "TypeUtilities.h"
 
 #include "CovarionFunction.h"
 #include "RealPos.h"
@@ -44,19 +45,19 @@ Func_covarion* Func_covarion::clone( void ) const
 RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_covarion::createFunction( void ) const
 {
     
-    bool rescale = static_cast<const RlBoolean &>( this->args[3].getVariable()->getRevObject() ).getDagNode()->getValue();
+    bool rescale = RevBayesCore::assume_cast<const RlBoolean &>( this->args[3].getVariable()->getRevObject() ).getDagNode()->getValue();
     RevBayesCore::CovarionFunction* f = new RevBayesCore::CovarionFunction( rescale );
     
     // set transition rates for observed character states
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = static_cast<const ModelVector<RateGenerator> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = RevBayesCore::assume_cast<const ModelVector<RateGenerator> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     f->setRateMatrices( rm );
     
     // set transition rates for hidden character states
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* rs = static_cast<const ModelVector<RealPos> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* rs = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
     f->setRateScalars( rs );
     
     // set transition rates for hidden character states
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* sr = static_cast<const ModelVector<ModelVector<RealPos> > &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* sr = RevBayesCore::assume_cast<const ModelVector<ModelVector<RealPos> > &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
     f->setSwitchRates( sr );
     
     

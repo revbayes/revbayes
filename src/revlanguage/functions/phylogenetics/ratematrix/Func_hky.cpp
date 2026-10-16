@@ -1,4 +1,5 @@
 #include "Func_hky.h"
+#include "TypeUtilities.h"
 
 #include "HkyRateMatrixFunction.h"
 #include "RealPos.h"
@@ -40,8 +41,8 @@ Func_hky* Func_hky::clone( void ) const
 RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_hky::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode< double >* ka = static_cast<const RealPos &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* bf = static_cast<const Simplex &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< double >* ka = RevBayesCore::assume_cast<const RealPos &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* bf = RevBayesCore::assume_cast<const Simplex &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
     
     if ( bf->getValue().size() != 4 )
     {

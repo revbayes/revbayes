@@ -8,6 +8,7 @@
 
 
 #include <cmath>
+#include "TypeUtilities.h"
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -80,10 +81,10 @@ RevBayesCore::MPEST* Dist_MPEST::createDistribution( void ) const
 {
     
     // Get the parameters
-    RevBayesCore::TypedDagNode<RevBayesCore::RootedTripletDistribution>* st = static_cast<const RootedTripletDistribution &>( speciesTree->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RootedTripletDistribution>* st = RevBayesCore::assume_cast<const RootedTripletDistribution &>( speciesTree->getRevObject() ).getDagNode();
     //RevBayesCore::TypedDagNode<RevBayesCore::RootedTripletDistribution>* gt = static_cast<const RootedTripletDistribution &>( geneTrees->getRevObject() ).getDagNode();
 
-    const bool useSp = static_cast<const RlBoolean& >( useSpecies->getRevObject() ).getValue();
+    const bool useSp = RevBayesCore::assume_cast<const RlBoolean& >( useSpecies->getRevObject() ).getValue();
     
     RevBayesCore::MPEST*   d = new RevBayesCore::MPEST( st, useSp );
     
