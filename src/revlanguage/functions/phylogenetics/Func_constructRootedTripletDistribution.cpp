@@ -112,7 +112,7 @@ const ArgumentRules& Func_constructRootedTripletDistribution::getArgumentRules( 
         treeTypes.push_back( ModelVector< BranchLengthTree >::getClassTypeSpec() );
 
 
-        argumentRules.push_back( new ArgumentRule( "geneTrees",         Tree::getClassTypeSpec(),                       "", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+        argumentRules.push_back( new ArgumentRule( "geneTrees",         treeTypes,                       "", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         argumentRules.push_back( new ArgumentRule( "speciesNames",      ModelVector< RlString >::getClassTypeSpec(),    "", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         argumentRules.push_back( new ArgumentRule( "keepBranchLengths", RlBoolean::getClassTypeSpec(),                  "", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
