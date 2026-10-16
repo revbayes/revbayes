@@ -17,6 +17,7 @@
 #ifndef DPPTableValueUpdate_H
 #define DPPTableValueUpdate_H
 
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include <ostream>
 
@@ -103,7 +104,7 @@ void RevBayesCore::DPPTableValueUpdate<valueType>::performGibbsMove( void )
     // Get random number generator
     RandomNumberGenerator* rng     = GLOBAL_RNG;
     
-    DirichletProcessPriorDistribution<valueType>& dist = static_cast<DirichletProcessPriorDistribution<valueType> &>( variable->getDistribution() );
+    DirichletProcessPriorDistribution<valueType>& dist = assume_cast<DirichletProcessPriorDistribution<valueType> &>( variable->getDistribution() );
     
     dist.getTableParameters();
     

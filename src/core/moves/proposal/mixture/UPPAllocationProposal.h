@@ -1,6 +1,7 @@
 #ifndef UPPAllocationProposal_H
 #define UPPAllocationProposal_H
 
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include <set>
 #include <string>
@@ -136,7 +137,7 @@ template <class mixtureType>
 double RevBayesCore::UPPAllocationProposal<mixtureType>::doProposal( void )
 {
     
-    UniformPartitioningDistribution<mixtureType>& dist = static_cast<UniformPartitioningDistribution<mixtureType> &>( variable->getDistribution() );
+    UniformPartitioningDistribution<mixtureType>& dist = assume_cast<UniformPartitioningDistribution<mixtureType> &>( variable->getDistribution() );
     
     // get the current index
     old_partition = dist.getCurrentIndex();
@@ -189,7 +190,7 @@ template <class mixtureType>
 void RevBayesCore::UPPAllocationProposal<mixtureType>::undoProposal( void )
 {
     
-    UniformPartitioningDistribution<mixtureType>& dist = static_cast<UniformPartitioningDistribution<mixtureType> &>( variable->getDistribution() );
+    UniformPartitioningDistribution<mixtureType>& dist = assume_cast<UniformPartitioningDistribution<mixtureType> &>( variable->getDistribution() );
     dist.setCurrentIndex( (int)old_partition );
     dist.setValueAssignments( old_value_assignments );
     

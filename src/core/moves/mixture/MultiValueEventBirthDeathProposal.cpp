@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "MultiValueEventBirthDeathProposal.h"
 
@@ -393,7 +394,7 @@ void MultiValueEventBirthDeathProposal::undoProposal( void )
 {
     
     MultiValueEvent &mve = event_var->getValue();
-    const MultiValueEventDistribution &dist_mve = static_cast< const MultiValueEventDistribution &>( event_var->getDistribution() );
+    const MultiValueEventDistribution &dist_mve = assume_cast< const MultiValueEventDistribution &>( event_var->getDistribution() );
     std::int64_t n_events = mve.getNumberOfEvents();
     
     // undo the proposal

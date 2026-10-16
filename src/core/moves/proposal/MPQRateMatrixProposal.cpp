@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "MPQRateMatrixProposal.h"
 
@@ -237,7 +238,7 @@ double MPQRateMatrixProposal::doProposal(void)  {
     // Get a pointer to the random number generator
     RandomNumberGenerator* rng = GLOBAL_RNG;
     
-    RateMatrix_MPQ& Q = static_cast<RateMatrix_MPQ&>(variable->getValue());
+    RateMatrix_MPQ& Q = assume_cast<RateMatrix_MPQ&>(variable->getValue());
 
     n_visits++;
     if (Q.getIsReversible() == true)
@@ -286,7 +287,7 @@ double MPQRateMatrixProposal::doProposal(void)  {
 double MPQRateMatrixProposal::applySubMove(SUB_MOVE m) {
 
     RandomNumberGenerator* rng = GLOBAL_RNG;
-    RateMatrix_MPQ& Q = static_cast<RateMatrix_MPQ&>(variable->getValue());
+    RateMatrix_MPQ& Q = assume_cast<RateMatrix_MPQ&>(variable->getValue());
 
     if (m != JUMP_TO_NR && m != JUMP_TO_REV)
         {
@@ -400,7 +401,7 @@ void MPQRateMatrixProposal::undoProposal(void)  {
     n_rejected[last_sub_move]++;
     n_rejected_total[last_sub_move]++;
 
-    RateMatrix_MPQ& v = static_cast<RateMatrix_MPQ&>( variable->getValue() );
+    RateMatrix_MPQ& v = assume_cast<RateMatrix_MPQ&>( variable->getValue() );
 
     v = stored_Q;
 }
@@ -644,7 +645,7 @@ double MPQRateMatrixProposal::getProportionReversible(void) const {
 
 double MPQRateMatrixProposal::updateToNonReversible(void) {
     
-    RateMatrix_MPQ& Q = static_cast<RateMatrix_MPQ&>(variable->getValue());
+    RateMatrix_MPQ& Q = assume_cast<RateMatrix_MPQ&>(variable->getValue());
     
     if (Q.getIsReversible() == false)
         throw RbException("Can only move to a non-reversible model from a reversible one");
@@ -700,7 +701,7 @@ double MPQRateMatrixProposal::updateToNonReversible(void) {
 
 double MPQRateMatrixProposal::updateToReversible(void) {
     
-    RateMatrix_MPQ& Q = static_cast<RateMatrix_MPQ&>(variable->getValue());
+    RateMatrix_MPQ& Q = assume_cast<RateMatrix_MPQ&>(variable->getValue());
     
     if (Q.getIsReversible() == true)
         throw RbException("Can only move to a time reversible model from a non-reversible one");
