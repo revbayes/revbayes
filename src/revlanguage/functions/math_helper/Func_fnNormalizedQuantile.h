@@ -65,7 +65,7 @@ template <typename valType>
 RevBayesCore::TypedFunction< RevBayesCore::RbVector<double> >* Func_fnNormalizedQuantile<valType>::createFunction( void ) const
 {
     
-    const ContinuousDistribution& rlDistribution    = static_cast<const ContinuousDistribution &>( this->args[0].getVariable()->getRevObject() );
+    const auto& rlDistribution = static_cast<const TypedDistribution<valType>&>( this->args[0].getVariable()->getRevObject() );
     RevBayesCore::ContinuousDistribution* dist     = static_cast<RevBayesCore::ContinuousDistribution* >( rlDistribution.createDistribution() );    
     
     int nc = (int)static_cast<const Integer &>( this->args[1].getVariable()->getRevObject() ).getValue();
