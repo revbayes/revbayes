@@ -15,6 +15,24 @@ const T& objectForRevType(const RevVariable* variable)
     return assume_cast<const T&>(variable->getRevObject());
 }
 
+// Read a non-null variable through its assumed Rev type, preserving the const accessor's
+// value or reference return type. A returned reference does not extend the value's lifetime.
+template <class T>
+    requires requires (const RevVariable* variable) { objectForRevType<T>(variable).getValue(); }
+decltype(auto) valueForRevType(const RevVariable* variable)
+{
+    return objectForRevType<T>(variable).getValue();
+}
+
+// Retrieve a non-null variable's DAG node through its assumed Rev type. Preserve the
+// accessor's pointer type and mutability; ownership remains with the existing object.
+template <class T>
+    requires requires (const RevVariable* variable) { objectForRevType<T>(variable).getDagNode(); }
+decltype(auto) dagNodeForRevType(const RevVariable* variable)
+{
+    return objectForRevType<T>(variable).getDagNode();
+}
+
 }
 
 #endif
