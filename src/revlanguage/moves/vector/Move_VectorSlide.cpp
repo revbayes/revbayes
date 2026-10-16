@@ -69,7 +69,7 @@ void Move_VectorSlide::constructInternalObject( void )
     const RevBayesCore::RbVector<std::int64_t> &e = RevBayesCore::assume_cast<const ModelVector<Natural> &>( inidices->getRevObject() ).getValue();
     double l = RevBayesCore::assume_cast<const RealPos &>( delta->getRevObject() ).getValue();
     double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( x->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp = RevBayesCore::assume_cast<const ModelVector<Real> &>( x->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::RbVector<double> > *n = RevBayesCore::assumeStochastic<RevBayesCore::RbVector<double> >( tmp );
     
     bool t = RevBayesCore::assume_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
