@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <fstream>
 #include <vector>
@@ -44,7 +45,7 @@ Func_setwd* Func_setwd::clone( void ) const
 /** Execute function */
 RevPtr<RevVariable> Func_setwd::execute( void )
 {
-    fs::path wd = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
+    fs::path wd = valueForRevType<RlString>(args[0].getVariable());
 
     if ( not fs::exists( wd ))
         throw RbException()<<"setwd: The path "<<wd<<" does not exist.";

@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <iosfwd>
 #include <string>
@@ -73,18 +74,18 @@ RevBayesCore::TypedFunction< RevBayesCore::RateGeneratorSequence >* Func_biogeo_
 
     
     
-    RevBayesCore::TypedDagNode< RevBayesCore::RateGenerator>* rm = static_cast<const RateGenerator&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::RateGenerator>* rm = dagNodeForRevType<RateGenerator>(this->args[0].getVariable());
     // RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* rf = static_cast<const Simplex &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
     
     RevBayesCore::TypedDagNode<RevBayesCore::CharacterHistoryRateModifier>* grm = NULL;
 
     if (this->args[1].getVariable()->getRevObject() != RevNullObject::getInstance())
     {
-        grm = static_cast<const CharacterHistoryRateModifier&>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+        grm = dagNodeForRevType<CharacterHistoryRateModifier>(this->args[1].getVariable());
     }
 
-    unsigned nc  = (unsigned)static_cast<const Natural&>( this->args[3].getVariable()->getRevObject() ).getValue();
-    bool fe      = static_cast<const RlBoolean&>( this->args[4].getVariable()->getRevObject() ).getValue();
+    unsigned nc  = (unsigned)valueForRevType<Natural>(this->args[3].getVariable());
+    bool fe      = valueForRevType<RlBoolean>(this->args[4].getVariable());
     
     RevBayesCore::BiogeographyRateGeneratorSequenceFunction* f = new RevBayesCore::BiogeographyRateGeneratorSequenceFunction(nc,fe,nc); //(nc, true);
     f->setRateMatrix(rm);

@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -52,7 +53,7 @@ std::int64_t* absInt(std::int64_t x)
 
 RevBayesCore::TypedFunction<std::int64_t>* Func_absInt::createFunction( void ) const
 {
-    auto* arg = static_cast<const Integer &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    auto* arg = dagNodeForRevType<Integer>(this->args[0].getVariable());
 
     return RevBayesCore::generic_function_ptr< std::int64_t >( absInt, arg );
 }

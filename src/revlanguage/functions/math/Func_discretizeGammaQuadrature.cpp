@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -41,9 +42,9 @@ Func_discretizeGammaQuadrature* Func_discretizeGammaQuadrature::clone( void ) co
 RevBayesCore::TypedFunction< RevBayesCore::MatrixReal >* Func_discretizeGammaQuadrature::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<double>* shape = static_cast<const Real &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* rate = static_cast<const Real &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<std::int64_t>* numCats = static_cast<const Integer &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* shape = dagNodeForRevType<Real>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode<double>* rate = dagNodeForRevType<Real>(this->args[1].getVariable());
+    RevBayesCore::TypedDagNode<std::int64_t>* numCats = dagNodeForRevType<Integer>(this->args[2].getVariable());
 
     RevBayesCore::DiscretizeGammaQuadratureFunction *func = new RevBayesCore::DiscretizeGammaQuadratureFunction( shape, rate, numCats);
     

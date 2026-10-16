@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <sstream>
 #include <vector>
 
@@ -35,7 +36,7 @@ RevPtr<RevVariable> Func_readAtlas::execute( void )
 {
     
     // get the information from the arguments for reading the file
-    const RlString& fn = static_cast<const RlString&>( args[0].getVariable()->getRevObject() );
+    const RlString& fn = objectForRevType<RlString>(args[0].getVariable());
     
     RevBayesCore::TimeAtlasDataReader* tadr = new RevBayesCore::TimeAtlasDataReader( fn.getValue() );
     RevBayesCore::TimeAtlas* atlas = new RevBayesCore::TimeAtlas(tadr);

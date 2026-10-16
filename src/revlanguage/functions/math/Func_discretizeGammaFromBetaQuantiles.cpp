@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "ArgumentRule.h"
 #include "Ellipsis.h"
 #include "Func_discretizeGammaFromBetaQuantiles.h"
@@ -31,12 +32,12 @@ Func_discretizeGammaFromBetaQuantiles* Func_discretizeGammaFromBetaQuantiles::cl
 RevBayesCore::TypedFunction< RevBayesCore::RbVector<double> >* Func_discretizeGammaFromBetaQuantiles::createFunction( void ) const
 {
 
-    RevBayesCore::TypedDagNode<double>* alpha = static_cast<const Real &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* beta = static_cast<const Real &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* shape = static_cast<const Real &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* rate = static_cast<const Real &>( this->args[3].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<std::int64_t>* numCats = static_cast<const Integer &>( this->args[4].getVariable()->getRevObject() ).getDagNode();
-    bool median = static_cast<const RlBoolean &>( args[5].getVariable()->getRevObject() ).getValue();
+    RevBayesCore::TypedDagNode<double>* alpha = dagNodeForRevType<Real>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode<double>* beta = dagNodeForRevType<Real>(this->args[1].getVariable());
+    RevBayesCore::TypedDagNode<double>* shape = dagNodeForRevType<Real>(this->args[2].getVariable());
+    RevBayesCore::TypedDagNode<double>* rate = dagNodeForRevType<Real>(this->args[3].getVariable());
+    RevBayesCore::TypedDagNode<std::int64_t>* numCats = dagNodeForRevType<Integer>(this->args[4].getVariable());
+    bool median = valueForRevType<RlBoolean>(args[5].getVariable());
 
     RevBayesCore::DiscretizeGammaFromBetaQuantilesFunction *func = new RevBayesCore::DiscretizeGammaFromBetaQuantilesFunction( alpha, beta, shape, rate, numCats, median );
 
