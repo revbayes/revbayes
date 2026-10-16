@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "RlDiscretizedContinuousCharacterData.h"
 
 #include <cstddef>
@@ -138,7 +139,7 @@ RevPtr<RevVariable> DiscretizedContinuousCharacterData::executeMethod(std::strin
         found = true;
 
 		// get the member with given index
-        const Natural& index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() );
+        const Natural& index = objectForRevType<Natural>(args[0].getVariable());
 
         if (this->dag_node->getValue().getNumberOfTaxa() < (size_t)(index.getValue()) )
         {
@@ -162,7 +163,7 @@ RevPtr<RevVariable> DiscretizedContinuousCharacterData::executeMethod(std::strin
         else
         {
     		// get the member with given index
-            size_t index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+            size_t index = valueForRevType<Natural>(args[0].getVariable()) - 1;
             double dx = dag_node->getValue().getDeltaXForCharacter(index);
             return new RevVariable( new RealPos(dx) );
         }
@@ -173,7 +174,7 @@ RevPtr<RevVariable> DiscretizedContinuousCharacterData::executeMethod(std::strin
         found = true;
 
 		// get the member with given index
-        size_t index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+        size_t index = valueForRevType<Natural>(args[0].getVariable()) - 1;
         std::vector<double> pts = dag_node->getValue().getPointsForCharacter(index);
         return new RevVariable( new ModelVector<Real>(pts) );
     }
