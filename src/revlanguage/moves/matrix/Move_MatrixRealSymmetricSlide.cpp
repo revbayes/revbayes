@@ -6,6 +6,7 @@
 //  Copyright (c) 2014 revbayes team. All rights reserved.
 //
 
+#include "RevTypeUtilities.h"
 #include "Move_MatrixRealSymmetricSlide.h"
 
 #include <cstddef>
@@ -58,12 +59,12 @@ void Move_MatrixRealSymmetricSlide::constructInternalObject( void )
     delete value;
   
     // now allocate a new wishart simple move
-    double l = static_cast<const RealPos &>( delta->getRevObject() ).getValue();
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal>* tmp = static_cast<const MatrixRealSymmetric &>( mat->getRevObject() ).getDagNode();
+    double l = valueForRevType<RealPos>(delta);
+    double w = valueForRevType<RealPos>(weight);
+    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal>* tmp = dagNodeForRevType<MatrixRealSymmetric>(mat);
     RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *matrix = static_cast<RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *>( tmp );
-    bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    bool t = valueForRevType<RlBoolean>(tune);
+    double tt = valueForRevType<Probability>(tuneTarget);
     
     RevBayesCore::Proposal *p = new RevBayesCore::MatrixRealSymmetricSingleElementSlidingProposal(matrix, l);
     p->setTargetAcceptanceRate(tt);

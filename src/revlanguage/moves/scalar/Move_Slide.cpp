@@ -70,10 +70,10 @@ void Move_Slide::constructInternalObject( void )
     RevBayesCore::Proposal *p = NULL;
     
     // now allocate a new sliding move
-    double d = objectForRevType<RealPos>(delta).getValue();
-    double w = objectForRevType<RealPos>(weight).getValue();
-    double r = objectForRevType<Probability>(tuneTarget).getValue();
-    RevBayesCore::TypedDagNode<double>* tmp = objectForRevType<Real>(x).getDagNode();
+    double d = valueForRevType<RealPos>(delta);
+    double w = valueForRevType<RealPos>(weight);
+    double r = valueForRevType<Probability>(tuneTarget);
+    RevBayesCore::TypedDagNode<double>* tmp = dagNodeForRevType<Real>(x);
     RevBayesCore::ContinuousStochasticNode *n = dynamic_cast<RevBayesCore::ContinuousStochasticNode *>( tmp );
     if ( n != NULL )
     {
@@ -85,7 +85,7 @@ void Move_Slide::constructInternalObject( void )
         p = new RevBayesCore::SlideProposal(n2,d,r);
         
     }
-    bool t = objectForRevType<RlBoolean>(tune).getValue();
+    bool t = valueForRevType<RlBoolean>(tune);
     
     // finally create the internal move object
     //    value = new RevBayesCore::Move_Slide(n, d, t, w);
