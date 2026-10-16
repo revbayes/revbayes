@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include <fstream>
 #include <string>
 #include <iomanip>
@@ -82,7 +83,7 @@ double RateGenerator::getSumOfRates(const std::vector<CharacterEvent*>& from, do
 
     for (size_t i = 0; i < from.size(); ++i)
     {
-        ++counts[ static_cast<CharacterEventDiscrete*>(from[i])->getState() ];
+        ++counts[ assume_cast<CharacterEventDiscrete*>(from[i])->getState() ];
     }
 
     return getSumOfRates(from, counts, age, rate);
@@ -93,7 +94,7 @@ double RateGenerator::getSumOfRatesDifferential(std::vector<CharacterEvent*> fro
 
     double r = 0.0;
     
-    size_t old_state = static_cast<CharacterEventDiscrete*>(from[ to->getSiteIndex() ])->getState();
+    size_t old_state = assume_cast<CharacterEventDiscrete*>(from[ to->getSiteIndex() ])->getState();
     size_t new_state = to->getState();
 
     
@@ -123,9 +124,9 @@ void RateGenerator::executeMethod(const std::string &n, const std::vector<const 
 
     TransitionProbabilityMatrix P(num_states);
 
-    double rate = static_cast<const TypedDagNode<double> *>( args[0] )->getValue();
-    double start_age = static_cast<const TypedDagNode<double> *>( args[1] )->getValue();
-    double end_age = static_cast<const TypedDagNode<double> *>( args[2] )->getValue();
+    double rate = assume_cast<const TypedDagNode<double> *>( args[0] )->getValue();
+    double start_age = assume_cast<const TypedDagNode<double> *>( args[1] )->getValue();
+    double end_age = assume_cast<const TypedDagNode<double> *>( args[2] )->getValue();
 
     if (start_age < end_age)
     {
@@ -184,7 +185,7 @@ void RateGenerator::executeMethod(const std::string &n, const std::vector<const 
         //    rv.resize(n_states);
         rv.clear();
         
-        size_t from_idx = static_cast<const TypedDagNode<std::int64_t> *>( args[0] )->getValue()-1;
+        size_t from_idx = assume_cast<const TypedDagNode<std::int64_t> *>( args[0] )->getValue()-1;
         
         for (size_t to_idx = 0; to_idx < n_states; to_idx++)
         {
