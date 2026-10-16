@@ -6,6 +6,7 @@
 //  Copyright © 2016 Michael Landis. All rights reserved.
 //
 
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -55,10 +56,10 @@ RevBayesCore::VarianceGammaDistribution* Dist_varianceGamma::createDistribution(
 {
     
     // get the parameters
-    RevBayesCore::TypedDagNode<double>* m        = static_cast<const Real &>( mu->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* k        = static_cast<const RealPos &>( kappa->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* t        = static_cast<const RealPos &>( tau->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* ti       = static_cast<const RealPos &>( tau->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* m        = dagNodeForRevType<Real>(mu);
+    RevBayesCore::TypedDagNode<double>* k        = dagNodeForRevType<RealPos>(kappa);
+    RevBayesCore::TypedDagNode<double>* t        = dagNodeForRevType<RealPos>(tau);
+    RevBayesCore::TypedDagNode<double>* ti       = dagNodeForRevType<RealPos>(tau);
     RevBayesCore::VarianceGammaDistribution*   d = new RevBayesCore::VarianceGammaDistribution(m, k, t, ti);
     
     return d;

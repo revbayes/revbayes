@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cmath>
 #include <cstddef>
 #include <ostream>
@@ -57,7 +58,7 @@ RevBayesCore::BernoulliDistribution* Dist_bernoulli::createDistribution( void ) 
 {
     
     // get the parameters
-    RevBayesCore::TypedDagNode<double>* q   = static_cast<const Probability &>( p->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* q   = dagNodeForRevType<Probability>(p);
     RevBayesCore::BernoulliDistribution* d  = new RevBayesCore::BernoulliDistribution( q );
     
     return d;
