@@ -12,6 +12,7 @@
  * @version 1.0
  */
 
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "ChromosomesPloidyRateMatrixFunction.h"
 
@@ -70,21 +71,21 @@ void ChromosomesPloidyRateMatrixFunction::update( void ) {
     double e_p = eta_p->getValue();
     double be = beta->getValue();
 
-    static_cast< RateMatrix_ChromosomesPloidy* >(value)->setGamma_d( ga_d );
-    static_cast< RateMatrix_ChromosomesPloidy* >(value)->setDelta_d( de_d );
-    static_cast< RateMatrix_ChromosomesPloidy* >(value)->setRho_d( rh_d );
-    static_cast< RateMatrix_ChromosomesPloidy* >(value)->setEta_d( e_d );
-    static_cast< RateMatrix_ChromosomesPloidy* >(value)->setGamma_dl( ga_dl );
-    static_cast< RateMatrix_ChromosomesPloidy* >(value)->setDelta_dl( de_dl );
-    static_cast< RateMatrix_ChromosomesPloidy* >(value)->setGamma_p( ga_p );
-    static_cast< RateMatrix_ChromosomesPloidy* >(value)->setDelta_p( de_p );
-    static_cast< RateMatrix_ChromosomesPloidy* >(value)->setRho_p( rh_p );
-    static_cast< RateMatrix_ChromosomesPloidy* >(value)->setEta_p( e_p );
-    static_cast< RateMatrix_ChromosomesPloidy* >(value)->setGamma_pl( ga_pl );
-    static_cast< RateMatrix_ChromosomesPloidy* >(value)->setDelta_pl( de_pl );
-    static_cast< RateMatrix_ChromosomesPloidy* >(value)->setBeta( be );
+    assume_cast< RateMatrix_ChromosomesPloidy* >(value)->setGamma_d( ga_d );
+    assume_cast< RateMatrix_ChromosomesPloidy* >(value)->setDelta_d( de_d );
+    assume_cast< RateMatrix_ChromosomesPloidy* >(value)->setRho_d( rh_d );
+    assume_cast< RateMatrix_ChromosomesPloidy* >(value)->setEta_d( e_d );
+    assume_cast< RateMatrix_ChromosomesPloidy* >(value)->setGamma_dl( ga_dl );
+    assume_cast< RateMatrix_ChromosomesPloidy* >(value)->setDelta_dl( de_dl );
+    assume_cast< RateMatrix_ChromosomesPloidy* >(value)->setGamma_p( ga_p );
+    assume_cast< RateMatrix_ChromosomesPloidy* >(value)->setDelta_p( de_p );
+    assume_cast< RateMatrix_ChromosomesPloidy* >(value)->setRho_p( rh_p );
+    assume_cast< RateMatrix_ChromosomesPloidy* >(value)->setEta_p( e_p );
+    assume_cast< RateMatrix_ChromosomesPloidy* >(value)->setGamma_pl( ga_pl );
+    assume_cast< RateMatrix_ChromosomesPloidy* >(value)->setDelta_pl( de_pl );
+    assume_cast< RateMatrix_ChromosomesPloidy* >(value)->setBeta( be );
 
-    static_cast< RateMatrix_ChromosomesPloidy* >(value)->update();
+    assume_cast< RateMatrix_ChromosomesPloidy* >(value)->update();
     
 }
 

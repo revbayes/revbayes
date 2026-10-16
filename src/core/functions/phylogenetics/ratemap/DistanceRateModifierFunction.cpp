@@ -6,6 +6,7 @@
 //  Copyright (c) 2014 Michael Landis. All rights reserved.
 //
 
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "DistanceRateModifierFunction.h"
 
@@ -44,7 +45,7 @@ void DistanceRateModifierFunction::update( void )
     // recompute distances based on distancePower
     double dp = distancePower->getValue();
     
-    static_cast<DistanceRateModifier*>(value)->setDistancePower(dp, true);
+    assume_cast<DistanceRateModifier*>(value)->setDistancePower(dp, true);
 }
 
 

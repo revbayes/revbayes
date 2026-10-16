@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "CodonSynonymousNonsynonymousHKYRateMatrixFunction.h"
 
@@ -50,9 +51,9 @@ void CodonSynonymousNonsynonymousHKYRateMatrixFunction::update( void )
     
     
     // set the base frequencies
-    static_cast< RateMatrix_CodonSynonymousNonsynonymousHKY* >(value)->setNucleotideFrequencies( f );
-    static_cast< RateMatrix_CodonSynonymousNonsynonymousHKY* >(value)->setKappa( k );
-    static_cast< RateMatrix_CodonSynonymousNonsynonymousHKY* >(value)->setOmega( o );
+    assume_cast< RateMatrix_CodonSynonymousNonsynonymousHKY* >(value)->setNucleotideFrequencies( f );
+    assume_cast< RateMatrix_CodonSynonymousNonsynonymousHKY* >(value)->setKappa( k );
+    assume_cast< RateMatrix_CodonSynonymousNonsynonymousHKY* >(value)->setOmega( o );
     
     value->update();
 }

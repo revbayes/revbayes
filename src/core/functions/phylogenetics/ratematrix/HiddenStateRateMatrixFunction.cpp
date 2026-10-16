@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "HiddenStateRateMatrixFunction.h"
 
@@ -243,7 +244,7 @@ void HiddenStateRateMatrixFunction::update( void )
     }
     
     // finally set the rates in the actual matrix
-    static_cast< RateMatrix_FreeK* >(value)->setTransitionRates( all_rates_flat );
+    assume_cast< RateMatrix_FreeK* >(value)->setTransitionRates( all_rates_flat );
     value->update();
 }
 

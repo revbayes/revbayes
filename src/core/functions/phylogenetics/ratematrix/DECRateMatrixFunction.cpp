@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "DECRateMatrixFunction.h"
 
@@ -70,9 +71,9 @@ void DECRateMatrixFunction::update( void )
     const std::vector<double>& rs               = rangeSize->getValue();
         
     // set the base frequencies
-    static_cast< RateMatrix_DECRateMatrix* >(value)->setDispersalRates(dr);
-    static_cast< RateMatrix_DECRateMatrix* >(value)->setExtirpationRates(er);
-    static_cast< RateMatrix_DECRateMatrix* >(value)->setRangeSize(rs);
+    assume_cast< RateMatrix_DECRateMatrix* >(value)->setDispersalRates(dr);
+    assume_cast< RateMatrix_DECRateMatrix* >(value)->setExtirpationRates(er);
+    assume_cast< RateMatrix_DECRateMatrix* >(value)->setRangeSize(rs);
     
     value->update();
 }

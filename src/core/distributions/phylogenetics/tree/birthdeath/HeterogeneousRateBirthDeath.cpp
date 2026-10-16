@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include <boost/numeric/odeint.hpp> // IWYU pragma: keep
 #include <algorithm>
@@ -386,7 +387,7 @@ size_t HeterogeneousRateBirthDeath::computeStartIndex(size_t i) const
         const BranchHistory &bh = branch_histories[ node_index ];
         const std::multiset<CharacterEvent*, CharacterEventCompare> &h = bh.getHistory();
         CharacterEvent *event = *(h.begin());
-        return static_cast<CharacterEventDiscrete*>(event)->getState();
+        return assume_cast<CharacterEventDiscrete*>(event)->getState();
     }
     else
     {
@@ -418,7 +419,7 @@ size_t HeterogeneousRateBirthDeath::computeStateIndex(size_t i, double time) con
             const std::multiset<CharacterEvent*, CharacterEventCompare> &h = bh.getHistory();
             for (std::multiset<CharacterEvent*,CharacterEventCompare>::const_iterator it=h.begin(); it!=h.end(); ++it)
             {
-                CharacterEventDiscrete* event = static_cast<CharacterEventDiscrete*>(*it);
+                CharacterEventDiscrete* event = assume_cast<CharacterEventDiscrete*>(*it);
                 double event_time = event->getAge();
                 if ( event_time > time )
                 {
@@ -521,7 +522,7 @@ void HeterogeneousRateBirthDeath::executeMethod(const std::string &n, const std:
             double branch_length = node.getBranchLength();
             for (std::multiset<CharacterEvent*,CharacterEventCompare>::const_iterator it=hist.begin(); it!=hist.end(); ++it)
             {
-                CharacterEventDiscrete* event = static_cast<CharacterEventDiscrete*>(*it);
+                CharacterEventDiscrete* event = assume_cast<CharacterEventDiscrete*>(*it);
                 double end_time = event->getAge() - node.getAge();
                 double time_interval = (end_time - begin_time) / branch_length;
                 
@@ -558,7 +559,7 @@ void HeterogeneousRateBirthDeath::executeMethod(const std::string &n, const std:
             double branch_length = node.getBranchLength();
             for (std::multiset<CharacterEvent*,CharacterEventCompare>::const_iterator it=hist.begin(); it!=hist.end(); ++it)
             {
-                CharacterEventDiscrete* event = static_cast<CharacterEventDiscrete*>(*it);
+                CharacterEventDiscrete* event = assume_cast<CharacterEventDiscrete*>(*it);
                 double end_time = event->getAge() - node.getAge();
                 double time_interval = (end_time - begin_time) / branch_length;
                 

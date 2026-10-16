@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "PoMo4NRateMatrixFunction.h"
 #include "RbException.h"
@@ -55,9 +56,9 @@ void PoMo4NRateMatrixFunction::update( void )
     const std::vector<double>& f = phi->getValue();
 
     // set the base frequencies
-    static_cast< RateMatrix_PoMo4N* >(value)->setN( ni );
-    static_cast< RateMatrix_PoMo4N* >(value)->setMu( m );
-    static_cast< RateMatrix_PoMo4N* >(value)->setPhi( f );
+    assume_cast< RateMatrix_PoMo4N* >(value)->setN( ni );
+    assume_cast< RateMatrix_PoMo4N* >(value)->setMu( m );
+    assume_cast< RateMatrix_PoMo4N* >(value)->setPhi( f );
 
     value->update();
 }
