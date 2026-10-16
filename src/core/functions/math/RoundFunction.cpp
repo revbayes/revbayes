@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "RoundFunction.h"
 
 #include <cmath>
@@ -34,7 +35,7 @@ void RoundFunction::swapParameterInternal(const DagNode *oldP, const DagNode *ne
     
     if (oldP == a) 
     {
-        a = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(a, newP);
     }
     
 }

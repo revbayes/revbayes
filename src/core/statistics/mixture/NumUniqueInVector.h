@@ -18,6 +18,7 @@
 #ifndef NumUniqueInVector_H
 #define NumUniqueInVector_H
 
+#include "DagNodeTypeUtilities.h"
 #include "RbVector.h"
 #include "TypedDagNode.h"
 #include "TypedFunction.h"
@@ -99,7 +100,7 @@ template<class valueType>
 void NumUniqueInVector<valueType>::swapParameterInternal(const DagNode *oldP, const DagNode *newP) {
 
     if (oldP == elementVals) {
-        elementVals = static_cast< const TypedDagNode< RbVector<valueType> >* >( newP );
+        replaceNodeReference(elementVals, newP);
     }
 }
 

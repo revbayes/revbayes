@@ -22,6 +22,7 @@
 #ifndef VectorReverse_H
 #define VectorReverse_H
 
+#include "DagNodeTypeUtilities.h"
 #include "RbVector.h"
 #include "TypedFunction.h"
 
@@ -105,7 +106,7 @@ void RevBayesCore::VectorReverse<valueType>::swapParameterInternal(const DagNode
     
     if ( oldP == org_vector )
     {
-        org_vector = static_cast<const TypedDagNode< RbVector<valueType> >* >( newP );
+        replaceNodeReference(org_vector, newP);
     }
     
 }

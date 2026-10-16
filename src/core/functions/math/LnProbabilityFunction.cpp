@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "LnProbabilityFunction.h"
 #include "Cloneable.h"
 #include "StochasticNode.h"
@@ -29,7 +30,7 @@ void LnProbabilityFunction::swapParameterInternal(const DagNode *oldP, const Dag
     
     if (oldP == a)
     {
-        a = static_cast<const StochasticNode<double>* >( newP );
+        replaceNodeReference(a, newP);
     }
     
 }

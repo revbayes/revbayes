@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "F81RateMatrixFunction.h"
 
 #include <vector>
@@ -57,7 +58,7 @@ void F81RateMatrixFunction::swapParameterInternal(const DagNode *oldP, const Dag
 {
     if (oldP == base_frequencies)
     {
-        base_frequencies = static_cast<const TypedDagNode< Simplex >* >( newP );
+        replaceNodeReference(base_frequencies, newP);
     }
 }
 

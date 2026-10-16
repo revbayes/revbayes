@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include <cstddef>
 #include <iosfwd>
 
@@ -83,7 +84,7 @@ void PattersonsDFunction::swapParameterInternal(const DagNode *oldP, const DagNo
     
     if (oldP == alignment)
     {
-        alignment = static_cast<const TypedDagNode< AbstractHomologousDiscreteCharacterData >* >( newP );
+        replaceNodeReference(alignment, newP);
     }
     
 }

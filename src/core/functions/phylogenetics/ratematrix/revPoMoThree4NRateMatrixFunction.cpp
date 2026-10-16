@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "revPoMoThree4NRateMatrixFunction.h"
 #include "RateMatrix_revPoMoThree4N.h"
 #include "RbException.h"
@@ -56,22 +57,22 @@ void revPoMoThree4NRateMatrixFunction::swapParameterInternal(const DagNode *oldP
 {
     if (oldP == N )
     {
-        N = static_cast< const TypedDagNode< std::int64_t >* >( newP );
+        replaceNodeReference(N, newP);
     }
 
     else if (oldP == pi)
     {
-        pi = static_cast<const TypedDagNode< Simplex >* >( newP );
+        replaceNodeReference(pi, newP);
     }
     
     else if (oldP == rho)
     {
-        rho = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(rho, newP);
     }
 
     else if (oldP == phi)
     {
-        phi = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(phi, newP);
     }
 
 }
