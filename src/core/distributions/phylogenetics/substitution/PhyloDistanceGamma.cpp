@@ -297,14 +297,14 @@ void PhyloDistanceGamma::swapParameterInternal(const DagNode *oldP, const DagNod
     {
         
        // distanceMatrix = static_cast<const TypedDagNode<DistanceMatrix>* >( newP );
-		setDistanceMatrix (static_cast<const TypedDagNode<DistanceMatrix>* >( newP ) );
+		setDistanceMatrix (cast_to_derived<const TypedDagNode<DistanceMatrix>*>(newP));
 		//computeLnProbability();
     }
     else if ( oldP == varianceMatrix )
     {
         
         //varianceMatrix = static_cast<const TypedDagNode<DistanceMatrix>* >( newP );
-		setVarianceMatrix (static_cast<const TypedDagNode<DistanceMatrix>* >( newP ) );
+		setVarianceMatrix (cast_to_derived<const TypedDagNode<DistanceMatrix>*>(newP));
 		//computeLnProbability();
     }
     
