@@ -114,16 +114,14 @@ RevPtr<RevVariable> RlRegionalFeatureLayer::executeMethod(std::string const &nam
                     z[i].push_back((std::int64_t)val[i][j]);
                 }
             }
-            const ModelVector<ModelVector<Integer> >& x = static_cast<const ModelVector<ModelVector<Integer> >&>(z);
-            return new RevVariable( new ModelVector<ModelVector<Integer> >( x ) );
+            return new RevVariable( new ModelVector<ModelVector<Integer> >( z ) );
         } else if (relationship == "between" && type == "quantitative") {
             std::vector<std::vector<double> > val = layer.getFeatureValues();
             RevBayesCore::RbVector<RevBayesCore::RbVector<double> > z;
             for (size_t i = 0; i < val.size(); i++) {
                 z.push_back(val[i]);
             }
-            const ModelVector<ModelVector<Real> >& x = static_cast<const ModelVector<ModelVector<Real> >&>(z);
-            return new RevVariable( new ModelVector<ModelVector<Real> >( x ) );
+            return new RevVariable( new ModelVector<ModelVector<Real> >( z ) );
         }
     }
     
