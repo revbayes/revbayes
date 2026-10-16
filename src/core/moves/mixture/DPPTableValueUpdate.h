@@ -17,6 +17,7 @@
 #ifndef DPPTableValueUpdate_H
 #define DPPTableValueUpdate_H
 
+#include "DagNodeTypeUtilities.h"
 #include <ostream>
 
 #include "DirichletProcessPriorDistribution.h"
@@ -189,7 +190,7 @@ template <class valueType>
 void RevBayesCore::DPPTableValueUpdate<valueType>::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     
-    variable = static_cast<StochasticNode< RbVector<valueType> > * >( newN );
+    replaceNodeReference(variable, newN);
     
 }
 

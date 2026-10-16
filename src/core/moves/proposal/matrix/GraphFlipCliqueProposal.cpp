@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include <cmath>
 #include <iostream>
 #include <cstddef>
@@ -326,11 +327,11 @@ void GraphFlipCliqueProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     if (oldN == array)
     {
-        array = static_cast< StochasticNode<RbVector<RbVector<double> > >* >(newN) ;
+        replaceNodeReference(array, newN) ;
     }
     else
     {
-        matrix = static_cast< StochasticNode<MatrixReal>* >(newN) ;
+        replaceNodeReference(matrix, newN) ;
     }
     
 }

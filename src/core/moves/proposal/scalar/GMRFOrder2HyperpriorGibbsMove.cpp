@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include <cstddef>
 #include <cmath>
 #include <cassert>
@@ -211,14 +212,14 @@ void GMRFOrder2HyperpriorGibbsMove::swapNodeInternal(DagNode *oldN, DagNode *new
     {
         if ( normals[i] == oldN )
         {
-            normals[i] = static_cast<StochasticNode<double> *>(newN);
+            replaceNodeReference(normals[i], newN);
         }
     }
 
     // also swap the sd parameter
     if (oldN == global_scale)
     {
-        global_scale = static_cast<StochasticNode<double>* >(newN) ;
+        replaceNodeReference(global_scale, newN) ;
     }
 
 }

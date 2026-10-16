@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "HSRFIntervalSwapProposal.h"
 
 #include <cmath>
@@ -197,7 +198,7 @@ void HSRFIntervalSwapProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
     {
         if ( delta[i] == oldN )
         {
-            delta[i] = static_cast<StochasticNode<double> *>(newN);
+            replaceNodeReference(delta[i], newN);
         }
     }
 
@@ -205,7 +206,7 @@ void HSRFIntervalSwapProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
     {
         if ( sigma[i] == oldN )
         {
-            sigma[i] = static_cast<StochasticNode<double> *>(newN);
+            replaceNodeReference(sigma[i], newN);
         }
     }
 

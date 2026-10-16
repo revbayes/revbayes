@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "MPQRateMatrixProposal.h"
 
 #include <cstdlib>
@@ -412,7 +413,7 @@ void MPQRateMatrixProposal::undoProposal(void)  {
  */
 void MPQRateMatrixProposal::swapNodeInternal(DagNode *oldN, DagNode *newN) {
     
-    variable = static_cast< StochasticNode<RateGenerator>* >(newN) ;
+    replaceNodeReference(variable, newN);
 }
 
 void MPQRateMatrixProposal::setProposalTuningParameter(double tp) {
