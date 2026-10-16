@@ -1,6 +1,7 @@
 #ifndef AbstractPhyloCTMCSiteHomogeneous_H
 #define AbstractPhyloCTMCSiteHomogeneous_H
 
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "AbstractHomologousDiscreteCharacterData.h"
 #include "ConstantNode.h"
@@ -4115,9 +4116,10 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::swapParameterInte
     }
     else if (oldP == tau)
     {
+        // Check the replacement before detaching the old tree's listener.
+        const auto* replacement = assume_cast<decltype(this->tau)>(newP);
         tau->getValue().getTreeChangeEventHandler().removeListener( this );
-
-        replaceNodeReference(tau, newP);
+        tau = replacement;
 
         tau->getValue().getTreeChangeEventHandler().addListener( this );
 
