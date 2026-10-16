@@ -1,6 +1,7 @@
 #ifndef DiscreteTaxonData_H
 #define DiscreteTaxonData_H
 
+#include "TypeUtilities.h"
 #include "AbstractDiscreteTaxonData.h"
 #include "DiscreteCharacterState.h"
 #include "RbOptions.h"
@@ -274,7 +275,7 @@ void RevBayesCore::DiscreteTaxonData<charType>::addCharacter( const CharacterSta
     }
 #   endif
 
-    addCharacter( static_cast<const charType &>(newChar) );
+    addCharacter( assume_cast<const charType &>(newChar) );
 }
 
 
@@ -294,7 +295,7 @@ void RevBayesCore::DiscreteTaxonData<charType>::addCharacter( const DiscreteChar
     }
 #   endif
 
-    addCharacter( static_cast<const charType &>(newChar) );
+    addCharacter( assume_cast<const charType &>(newChar) );
 
 }
 
@@ -329,7 +330,7 @@ void RevBayesCore::DiscreteTaxonData<charType>::addCharacter( const CharacterSta
     }
 #   endif
 
-    addCharacter( static_cast<const charType &>(newChar), tf );
+    addCharacter( assume_cast<const charType &>(newChar), tf );
 }
 
 
@@ -349,7 +350,7 @@ void RevBayesCore::DiscreteTaxonData<charType>::addCharacter( const DiscreteChar
     }
 #   endif
 
-    addCharacter( static_cast<const charType &>(newChar), tf );
+    addCharacter( assume_cast<const charType &>(newChar), tf );
 
 }
 
