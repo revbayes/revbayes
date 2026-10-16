@@ -5,6 +5,7 @@
 //  Created by Michael Landis on 8/19/14.
 //
 
+#include "RevTypeUtilities.h"
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -56,8 +57,8 @@ Func_mrcaIndex* Func_mrcaIndex::clone( void ) const
 RevBayesCore::TypedFunction<std::int64_t>* Func_mrcaIndex::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = static_cast<const Tree&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    const RevBayesCore::Clade& c = static_cast<const Clade &>( this->args[1].getVariable()->getRevObject() ).getValue();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = dagNodeForRevType<Tree>(this->args[0].getVariable());
+    const RevBayesCore::Clade& c = valueForRevType<Clade>(this->args[1].getVariable());
     RevBayesCore::MrcaIndexStatistic* f = new RevBayesCore::MrcaIndexStatistic( tau, c );
     
     return f;

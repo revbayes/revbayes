@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -41,9 +42,9 @@ Func_discretizeBetaQuadrature* Func_discretizeBetaQuadrature::clone( void ) cons
 RevBayesCore::TypedFunction< RevBayesCore::MatrixReal >* Func_discretizeBetaQuadrature::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<double>* alpha = static_cast<const Real &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* beta = static_cast<const Real &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<std::int64_t>* numCats = static_cast<const Integer &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* alpha = dagNodeForRevType<Real>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode<double>* beta = dagNodeForRevType<Real>(this->args[1].getVariable());
+    RevBayesCore::TypedDagNode<std::int64_t>* numCats = dagNodeForRevType<Integer>(this->args[2].getVariable());
 
     RevBayesCore::DiscretizeBetaQuadratureFunction *func = new RevBayesCore::DiscretizeBetaQuadratureFunction( alpha, beta, numCats);
     

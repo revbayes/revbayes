@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <fstream>
 #include <string>
@@ -49,7 +50,7 @@ Func_help* Func_help::clone( void ) const
 /** Execute function */
 RevPtr<RevVariable> Func_help::execute( void )
 {
-    std::string help_token = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
+    std::string help_token = valueForRevType<RlString>(args[0].getVariable());
     
     if (help_token == "") {
         std::string help_str = "";

@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <set>
 #include <sstream>
@@ -72,8 +73,8 @@ Func_readCharacterData* Func_readCharacterData::clone( void ) const {
 RevPtr<RevVariable> Func_readCharacterData::execute( void ) {
         
     // get the information from the arguments for reading the file
-    RevBayesCore::path fn = static_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
-    bool returnAsVector = static_cast<const RlBoolean&>( args[1].getVariable()->getRevObject() ).getValue();
+    RevBayesCore::path fn = valueForRevType<RlString>(args[0].getVariable());
+    bool returnAsVector = valueForRevType<RlBoolean>(args[1].getVariable());
     
     // check that the file/path name has been correctly specified
     if ( not RevBayesCore::exists( fn ))

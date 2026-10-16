@@ -17,6 +17,7 @@
  * $Id: Func_source.cpp 1485 2012-05-04 16:03:37Z hoehna $
  */
 
+#include "RevTypeUtilities.h"
 #include <iosfwd>
 #include <vector>
 
@@ -71,8 +72,8 @@ Func_range* Func_range::clone( void ) const
 RevPtr<RevVariable> Func_range::execute( void )
 {
     
-    std::int64_t f = static_cast<const Integer &>( args[0].getVariable()->getRevObject() ).getValue();
-    std::int64_t l = static_cast<const Integer &>( args[1].getVariable()->getRevObject() ).getValue();
+    std::int64_t f = valueForRevType<Integer>(args[0].getVariable());
+    std::int64_t l = valueForRevType<Integer>(args[1].getVariable());
     
     if ( f >= 0 && l >= 0 )
     {

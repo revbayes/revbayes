@@ -1,6 +1,7 @@
 #ifndef Func_BSPInterval_H
 #define Func_BSPInterval_H
 
+#include "RevTypeUtilities.h"
 #include "ModelVector.h"
 #include "RlTypedFunction.h"
 
@@ -75,8 +76,8 @@ RevLanguage::Func_BSPInterval<valType>* RevLanguage::Func_BSPInterval<valType>::
 template <typename valType>
 RevBayesCore::TypedFunction< RevBayesCore::RbVector< typename valType::valueType> >* RevLanguage::Func_BSPInterval<valType>::createFunction( void ) const
 {
-    const RevBayesCore::TypedDagNode< RevBayesCore::RbVector<typename valType::valueType> >* v  = static_cast<const ModelVector< valType > &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    const RevBayesCore::TypedDagNode< RevBayesCore::RbVector<std::int64_t> >* n                 = static_cast<const ModelVector< Natural > &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    const RevBayesCore::TypedDagNode< RevBayesCore::RbVector<typename valType::valueType> >* v  = dagNodeForRevType<ModelVector< valType >>(this->args[0].getVariable());
+    const RevBayesCore::TypedDagNode< RevBayesCore::RbVector<std::int64_t> >* n                 = dagNodeForRevType<ModelVector< Natural >>(this->args[1].getVariable());
     
     RevBayesCore::BSPIntervalFunction<typename valType::valueType>* func = new RevBayesCore::BSPIntervalFunction<typename valType::valueType>( v, n );
     

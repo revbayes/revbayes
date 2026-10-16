@@ -1,6 +1,7 @@
 #ifndef Func_median_H
 #define Func_median_H
 
+#include "RevTypeUtilities.h"
 #include "RlTypedFunction.h"
 
 #include <string>
@@ -114,7 +115,7 @@ RevBayesCore::TypedFunction< typename retType::valueType >* RevLanguage::Func_me
     typedef typename retType::valueType returnType;
     
     const RevBayesCore::TypedDagNode< RevBayesCore::RbVector<elementType> >* arg_vector =
-        static_cast< const ModelVector<valType>& >( this->args[0].getVariable()->getRevObject() ).getDagNode();
+        dagNodeForRevType<ModelVector<valType>>(this->args[0].getVariable());
     
     // Use a wrapper function that converts from elementType to returnType
     return RevBayesCore::generic_function_ptr<returnType>(RevBayesCore::median_value<returnType, elementType>, arg_vector);

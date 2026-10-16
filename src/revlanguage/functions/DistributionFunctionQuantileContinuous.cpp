@@ -6,6 +6,7 @@
 //  Copyright 2013 __MyCompanyName__. All rights reserved.
 //
 
+#include "RevTypeUtilities.h"
 #include "DistributionFunctionQuantileContinuous.h"
 
 #include <cstddef>
@@ -99,7 +100,7 @@ RevBayesCore::TypedFunction<double>* DistributionFunctionQuantileContinuous::cre
 {
     
     RevBayesCore::TypedFunction<double>* f = NULL;
-    RevBayesCore::TypedDagNode<double>* arg = static_cast<const Probability &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* arg = dagNodeForRevType<Probability>(this->args[0].getVariable());
     
     ContinuousDistribution* copyObject = templateObject->clone();
     
