@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -48,11 +49,11 @@ RevBayesCore::BimodalNormalDistribution* Dist_bimodalNorm::createDistribution( v
 {
     
     // get the parameters
-    RevBayesCore::TypedDagNode<double>* m1          = static_cast<const Real &>( mean1->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* m2          = static_cast<const Real &>( mean2->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* s1          = static_cast<const RealPos &>( sd1->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* s2          = static_cast<const RealPos &>( sd2->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* p           = static_cast<const Probability &>( prob->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* m1          = dagNodeForRevType<Real>(mean1);
+    RevBayesCore::TypedDagNode<double>* m2          = dagNodeForRevType<Real>(mean2);
+    RevBayesCore::TypedDagNode<double>* s1          = dagNodeForRevType<RealPos>(sd1);
+    RevBayesCore::TypedDagNode<double>* s2          = dagNodeForRevType<RealPos>(sd2);
+    RevBayesCore::TypedDagNode<double>* p           = dagNodeForRevType<Probability>(prob);
     RevBayesCore::BimodalNormalDistribution*   d    = new RevBayesCore::BimodalNormalDistribution(m1, m2, s1, s2, p);
     
     return d;

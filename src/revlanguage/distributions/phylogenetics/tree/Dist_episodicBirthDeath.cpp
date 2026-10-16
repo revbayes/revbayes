@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <iosfwd>
 #include <string>
@@ -75,17 +76,17 @@ RevBayesCore::EpisodicBirthDeathProcess* Dist_episodicBirthDeath::createDistribu
     // get the parameters
     
     // the root age
-    RevBayesCore::TypedDagNode<double>* ra = static_cast<const RealPos &>( start_age->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* ra = dagNodeForRevType<RealPos>(start_age);
     
     // speciation rates
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* sr = NULL;
     if ( lambda_rates->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
     {
-        sr = static_cast<const ModelVector<RealPos> &>( lambda_rates->getRevObject() ).getDagNode();
+        sr = dagNodeForRevType<ModelVector<RealPos>>(lambda_rates);
     }
     else
     {
-        RevBayesCore::TypedDagNode<double>* single_sr = static_cast<const RealPos &>( lambda_rates->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<double>* single_sr = dagNodeForRevType<RealPos>(lambda_rates);
         std::vector<const RevBayesCore::TypedDagNode<double>* > params;
         params.push_back( single_sr );
         
@@ -98,11 +99,11 @@ RevBayesCore::EpisodicBirthDeathProcess* Dist_episodicBirthDeath::createDistribu
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* st = NULL;
     if ( lambda_times->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
     {
-        st = static_cast<const ModelVector<RealPos> &>( lambda_times->getRevObject() ).getDagNode();
+        st = dagNodeForRevType<ModelVector<RealPos>>(lambda_times);
     }
     else
     {
-        RevBayesCore::TypedDagNode<double>* single_st = static_cast<const RealPos &>( lambda_times->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<double>* single_st = dagNodeForRevType<RealPos>(lambda_times);
         std::vector<const RevBayesCore::TypedDagNode<double>* > params;
         params.push_back( single_st );
         
@@ -115,11 +116,11 @@ RevBayesCore::EpisodicBirthDeathProcess* Dist_episodicBirthDeath::createDistribu
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* er = NULL;
     if ( mu_rates->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
     {
-        er = static_cast<const ModelVector<RealPos> &>( mu_rates->getRevObject() ).getDagNode();
+        er = dagNodeForRevType<ModelVector<RealPos>>(mu_rates);
     }
     else
     {
-        RevBayesCore::TypedDagNode<double>* single_er = static_cast<const RealPos &>( mu_rates->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<double>* single_er = dagNodeForRevType<RealPos>(mu_rates);
         std::vector<const RevBayesCore::TypedDagNode<double>* > params;
         params.push_back( single_er );
         
@@ -132,11 +133,11 @@ RevBayesCore::EpisodicBirthDeathProcess* Dist_episodicBirthDeath::createDistribu
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* et = NULL;
     if ( mu_times->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
     {
-        et = static_cast<const ModelVector<RealPos> &>( mu_times->getRevObject() ).getDagNode();
+        et = dagNodeForRevType<ModelVector<RealPos>>(mu_times);
     }
     else
     {
-        RevBayesCore::TypedDagNode<double>* single_et = static_cast<const RealPos &>( mu_times->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<double>* single_et = dagNodeForRevType<RealPos>(mu_times);
         std::vector<const RevBayesCore::TypedDagNode<double>* > params;
         params.push_back( single_et );
         
@@ -146,29 +147,29 @@ RevBayesCore::EpisodicBirthDeathProcess* Dist_episodicBirthDeath::createDistribu
     }
     
     // sampling probability
-    RevBayesCore::TypedDagNode<double>* r                                   = static_cast<const Probability &>( rho->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* r                                   = dagNodeForRevType<Probability>(rho);
     // sampling mixture proportion
 //    RevBayesCore::TypedDagNode<double>* mp                                  = static_cast<const Probability &>( samplingMixtureProportion->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode<double>* mp                                  = NULL;
     // sampling strategy
-    const std::string &strategy                                             = static_cast<const RlString &>( sampling_strategy->getRevObject() ).getValue();
+    const std::string &strategy                                             = valueForRevType<RlString>(sampling_strategy);
     // incompletely sampled clades
     std::vector<RevBayesCore::Clade> inc_clades;
     if ( incomplete_clades->getRevObject() != RevNullObject::getInstance() )
     {
-       inc_clades = static_cast<const ModelVector<Clade> &>( incomplete_clades->getRevObject() ).getValue();
+       inc_clades = valueForRevType<ModelVector<Clade>>(incomplete_clades);
     }
     // condition
-    const std::string& cond                                                 = static_cast<const RlString &>( condition->getRevObject() ).getValue();
+    const std::string& cond                                                 = valueForRevType<RlString>(condition);
     
     // get the taxa to simulate either from a vector of rev taxon objects or a vector of names
-    std::vector<RevBayesCore::Taxon> t                                      = static_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
+    std::vector<RevBayesCore::Taxon> t                                      = valueForRevType<ModelVector<Taxon>>(taxa);
     
     // tree for initialization
     RevBayesCore::Tree* init = NULL;
     if ( initial_tree->getRevObject() != RevNullObject::getInstance() )
     {
-        init = static_cast<const TimeTree &>( initial_tree->getRevObject() ).getDagNode()->getValue().clone();
+        init = dagNodeForRevType<TimeTree>(initial_tree)->getValue().clone();
     }
     
     // create the internal distribution object
