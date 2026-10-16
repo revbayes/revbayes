@@ -36,6 +36,8 @@ namespace RevBayesCore {
     template <typename To, typename From>
         requires std::is_lvalue_reference_v<To> && requires (From& value) {
             static_cast<To>(value);
+            // A pointer cast cannot invoke a converting constructor and create a temporary.
+            static_cast<std::add_pointer_t<std::remove_reference_t<To>>>(std::addressof(value));
             dynamic_cast<std::add_pointer_t<std::remove_reference_t<To>>>(std::addressof(value));
         }
     To assume_cast(From& value)
