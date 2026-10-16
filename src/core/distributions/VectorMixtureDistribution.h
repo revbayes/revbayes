@@ -1,6 +1,8 @@
 #ifndef VectorMixtureDistribution_H
 #define VectorMixtureDistribution_H
 
+#include <algorithm>
+
 #include "DagNodeTypeUtilities.h"
 #include "MemberObject.h"
 #include "RbVector.h"
@@ -287,14 +289,12 @@ void RevBayesCore::VectorMixtureDistribution<mixtureType>::swapParameterInternal
         {
             
             TypedDistribution<mixtureType> *this_prior = base_distributions[j];
-            try {
-                this_prior->swapParameter(old_p,new_p);
-                // if the statement succeeded and didn't throw an error, then the distribution had this parameter
-                found = true;
-            }
-            catch (RbException &e)
+            // Skip absent parameters, but let errors from an actual replacement propagate.
+            const auto& parameters = this_prior->getParameters();
+            if (std::find(parameters.begin(), parameters.end(), old_p) != parameters.end())
             {
-                // do nothing because we actually do not know who had the parameter
+                this_prior->swapParameter(old_p,new_p);
+                found = true;
             }
             
         }
