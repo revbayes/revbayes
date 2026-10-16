@@ -1,6 +1,7 @@
 #ifndef FossilizedBirthDeathResampleAgeProposal_H
 #define FossilizedBirthDeathResampleAgeProposal_H
 
+#include "DagNodeTypeUtilities.h"
 #include "AbstractFossilizedBirthDeathRangeProcess.h"
 #include "Proposal.h"
 #include "RandomNumberFactory.h"
@@ -204,7 +205,7 @@ template<class valType>
 void RevBayesCore::FossilizedBirthDeathResampleAgeProposal<valType>::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
 
-    variable = static_cast<StochasticNode<valType>* >(newN) ;
+    replaceNodeReference(variable, newN) ;
 
 }
 

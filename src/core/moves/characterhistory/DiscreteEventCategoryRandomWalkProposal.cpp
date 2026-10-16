@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include <cstddef>
 #include <iostream>
 
@@ -190,7 +191,7 @@ void DiscreteEventCategoryRandomWalkProposal::undoProposal( void )
 void DiscreteEventCategoryRandomWalkProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     
-    variable = static_cast< StochasticNode<Tree>* >(newN) ;
+    replaceNodeReference(variable, newN) ;
     
     distribution = dynamic_cast< HeterogeneousRateBirthDeath* >( &variable->getDistribution() );
     if ( distribution == NULL )

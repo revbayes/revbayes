@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "BranchLengthScaleProposal.h"
 
 #include <cmath>
@@ -178,7 +179,7 @@ void BranchLengthScaleProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
     
     if ( oldN == tree )
     {
-        tree = static_cast<StochasticNode<Tree>* >(newN);
+        replaceNodeReference(tree, newN);
     }
     
 }

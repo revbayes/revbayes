@@ -1,6 +1,7 @@
 #ifndef UPPAllocationProposal_H
 #define UPPAllocationProposal_H
 
+#include "DagNodeTypeUtilities.h"
 #include <set>
 #include <string>
 
@@ -205,7 +206,7 @@ template <class mixtureType>
 void RevBayesCore::UPPAllocationProposal<mixtureType>::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     
-    variable = static_cast<StochasticNode< RbVector<mixtureType> >* >(newN) ;
+    replaceNodeReference(variable, newN) ;
     
 }
 
