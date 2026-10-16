@@ -1,4 +1,5 @@
 #include <cmath>
+#include "TypeUtilities.h"
 #include <typeinfo>
 #include <algorithm>
 #include <cstddef>
@@ -162,9 +163,9 @@ void RevBayesCore::PosteriorPredictiveSimulation::run( int thinning )
             {
                 // set the tip states to the values sampled during this iteration
                 AncestralStateTrace* tip_state_trace;
-                StateDependentSpeciationExtinctionProcess* sse = static_cast<StateDependentSpeciationExtinctionProcess*>( &the_node->getDistribution() );
+                StateDependentSpeciationExtinctionProcess* sse = RevBayesCore::assume_cast<StateDependentSpeciationExtinctionProcess*>( &the_node->getDistribution() );
                 std::vector<std::string> tips = sse->getValue().getTipNames();
-                size_t num_states = static_cast<TreeDiscreteCharacterData*>( &sse->getValue() )->getCharacterData().getNumberOfStates();
+                size_t num_states = RevBayesCore::assume_cast<TreeDiscreteCharacterData*>( &sse->getValue() )->getCharacterData().getNumberOfStates();
                 HomologousDiscreteCharacterData<NaturalNumbersState> *tip_data = new HomologousDiscreteCharacterData<NaturalNumbersState>();
 
                 // read the ancestral state trace
@@ -198,7 +199,7 @@ void RevBayesCore::PosteriorPredictiveSimulation::run( int thinning )
                 }
                    
                 // finally set the tip data to the sampled values
-                static_cast<TreeDiscreteCharacterData*>( &sse->getValue() )->setCharacterData(tip_data);
+                RevBayesCore::assume_cast<TreeDiscreteCharacterData*>( &sse->getValue() )->setCharacterData(tip_data);
             }
                
             try 

@@ -1,5 +1,6 @@
 //
 #include <cmath>
+#include "TypeUtilities.h"
 #include <cstddef>
 #include <ostream>
 #include <set>
@@ -60,7 +61,7 @@ double StateCountRateModifier::computeRateMultiplier(std::vector<CharacterEvent*
     std::vector<std::set<size_t> > sites_with_states(num_states);
     for (size_t i = 0; i < currState.size(); i++)
     {
-        sites_with_states[ static_cast<CharacterEventDiscrete*>(currState[i])->getState() ].insert(i);
+        sites_with_states[ RevBayesCore::assume_cast<CharacterEventDiscrete*>(currState[i])->getState() ].insert(i);
     }
     
     return computeRateMultiplier(currState, newState, sites_with_states, age);
@@ -71,7 +72,7 @@ double StateCountRateModifier::computeRateMultiplier(std::vector<CharacterEvent*
     std::vector<std::set<size_t> > sites_with_states(num_states);
     for (size_t i = 0; i < currState.size(); i++)
     {
-        sites_with_states[ static_cast<CharacterEventDiscrete*>(currState[i])->getState() ].insert(i);
+        sites_with_states[ RevBayesCore::assume_cast<CharacterEventDiscrete*>(currState[i])->getState() ].insert(i);
     }
     
     return computeRateMultiplier(currState, newState, sites_with_states, age);

@@ -1,4 +1,5 @@
 #include <cmath>
+#include "TypeUtilities.h"
 #include <cstddef>
 #include <deque>
 #include <iosfwd>
@@ -247,7 +248,7 @@ void PhyloOrnsteinUhlenbeckStateDependent::recursiveComputeLnProbability( const 
             for (std::multiset<CharacterEvent*, CharacterEventCompare>::const_iterator iter = hist_left.begin(); iter != hist_left.end(); ++iter)
             {
                 // get the state change event
-                CharacterEventDiscrete* event = static_cast<CharacterEventDiscrete*>(*iter);
+                CharacterEventDiscrete* event = RevBayesCore::assume_cast<CharacterEventDiscrete*>(*iter);
 
                 // get the state index
                 size_t current_state = event->getState();
@@ -263,7 +264,7 @@ void PhyloOrnsteinUhlenbeckStateDependent::recursiveComputeLnProbability( const 
             }
 
             // do it again, since the iterator above only does n-1 of the episodes
-            size_t state_left = static_cast<CharacterEventDiscrete*>(bh_left.getParentCharacters()[0])->getState();
+            size_t state_left = RevBayesCore::assume_cast<CharacterEventDiscrete*>(bh_left.getParentCharacters()[0])->getState();
             double delta_t_left = node.getAge() - begin_time_left;
             times_left.push_back(delta_t_left);
             states_left.push_back(state_left);
@@ -291,7 +292,7 @@ void PhyloOrnsteinUhlenbeckStateDependent::recursiveComputeLnProbability( const 
             for (std::multiset<CharacterEvent*, CharacterEventCompare>::const_iterator iter = hist_right.begin(); iter != hist_right.end(); ++iter)
             {
                 // get the state change event
-                CharacterEventDiscrete* event = static_cast<CharacterEventDiscrete*>(*iter);
+                CharacterEventDiscrete* event = RevBayesCore::assume_cast<CharacterEventDiscrete*>(*iter);
 
                 // get the state index
                 size_t current_state = event->getState();
@@ -307,7 +308,7 @@ void PhyloOrnsteinUhlenbeckStateDependent::recursiveComputeLnProbability( const 
             }
 
             // do it again, since the iterator above only does n-1 of the episodes
-            size_t state_right = static_cast<CharacterEventDiscrete*>(bh_right.getParentCharacters()[0])->getState();
+            size_t state_right = RevBayesCore::assume_cast<CharacterEventDiscrete*>(bh_right.getParentCharacters()[0])->getState();
             double delta_t_right = node.getAge() - begin_time_right;
             times_right.push_back(delta_t_right);
             states_right.push_back(state_right);
@@ -362,7 +363,7 @@ void PhyloOrnsteinUhlenbeckStateDependent::recursiveComputeLnProbability( const 
                 {
                     double var_root;
                     double root_value;
-                    size_t last_state_left  = static_cast<CharacterEventDiscrete*>(bh_left.getParentCharacters()[0])->getState();
+                    size_t last_state_left  = RevBayesCore::assume_cast<CharacterEventDiscrete*>(bh_left.getParentCharacters()[0])->getState();
                     if (root_treatment == OPTIMUM)
                     {
                         double theta = computeStateDependentTheta ( last_state_left );
@@ -903,7 +904,7 @@ void PhyloOrnsteinUhlenbeckStateDependent::simulateRecursively( const TopologyNo
             for (std::multiset<CharacterEvent*, CharacterEventCompare>::const_iterator iter = history.begin(); iter != history.end(); ++iter)
             {
                 // get the state change event
-                CharacterEventDiscrete* event = static_cast<CharacterEventDiscrete*>(*iter);
+                CharacterEventDiscrete* event = RevBayesCore::assume_cast<CharacterEventDiscrete*>(*iter);
 
                 // calculate the times
                 double event_time = event->getAge();
@@ -919,7 +920,7 @@ void PhyloOrnsteinUhlenbeckStateDependent::simulateRecursively( const TopologyNo
             }
 
             // do it again, since the iterator above only does n-1 of the episodes
-            size_t first_state = static_cast<CharacterEventDiscrete*>(bh.getParentCharacters()[0])->getState();
+            size_t first_state = RevBayesCore::assume_cast<CharacterEventDiscrete*>(bh.getParentCharacters()[0])->getState();
             double first_delta_t = node.getAge() - begin_time;
 
             times.push_front(first_delta_t);
@@ -972,7 +973,7 @@ std::vector<double> PhyloOrnsteinUhlenbeckStateDependent::simulateRootCharacters
         size_t left_index = left->getIndex();
         const CharacterHistory& left_history = character_histories->getValue();
         const BranchHistory& bh_left = left_history.getHistory(left_index);
-        size_t root_value_index  = static_cast<CharacterEventDiscrete*>(bh_left.getParentCharacters()[0])->getState();
+        size_t root_value_index  = RevBayesCore::assume_cast<CharacterEventDiscrete*>(bh_left.getParentCharacters()[0])->getState();
         theta = computeStateDependentTheta(root_value_index);
         double sigma = computeStateDependentSigma(root_value_index);
         double alpha = computeStateDependentAlpha(root_value_index);

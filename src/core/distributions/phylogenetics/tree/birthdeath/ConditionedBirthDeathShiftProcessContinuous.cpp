@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <algorithm>
 #include <cmath>
 #include <iosfwd>
@@ -415,7 +416,7 @@ double ConditionedBirthDeathShiftProcessContinuous::computeStartValue(size_t i, 
         const BranchHistory &bh = branch_histories[ node_index ];
         const std::multiset<CharacterEvent*, CharacterEventCompare> &h = bh.getHistory();
         
-        CharacterEventContinuous *event = static_cast<CharacterEventContinuous*>(*h.begin());
+        CharacterEventContinuous *event = RevBayesCore::assume_cast<CharacterEventContinuous*>(*h.begin());
         return event->getState(j);
         
     }
@@ -465,7 +466,7 @@ double ConditionedBirthDeathShiftProcessContinuous::computeStateValue(size_t i, 
             const std::multiset<CharacterEvent*, CharacterEventCompare> &h = bh.getHistory();
             for (std::multiset<CharacterEvent*,CharacterEventCompare>::const_iterator it=h.begin(); it!=h.end(); ++it)
             {
-                CharacterEventContinuous* event = static_cast<CharacterEventContinuous*>(*it);
+                CharacterEventContinuous* event = RevBayesCore::assume_cast<CharacterEventContinuous*>(*it);
                 double event_time = event->getAge();
                 if ( event_time > time )
                 {
@@ -562,7 +563,7 @@ void ConditionedBirthDeathShiftProcessContinuous::executeMethod(const std::strin
             double branch_length = node.getBranchLength();
             for (std::multiset<CharacterEvent*,CharacterEventCompare>::const_iterator it=hist.begin(); it!=hist.end(); ++it)
             {
-                CharacterEventContinuous* event = static_cast<CharacterEventContinuous*>(*it);
+                CharacterEventContinuous* event = RevBayesCore::assume_cast<CharacterEventContinuous*>(*it);
                 double end_time = event->getAge() - node.getAge();
                 double time_interval = (end_time - begin_time) / branch_length;
                 
@@ -598,7 +599,7 @@ void ConditionedBirthDeathShiftProcessContinuous::executeMethod(const std::strin
             double branch_length = node.getBranchLength();
             for (std::multiset<CharacterEvent*,CharacterEventCompare>::const_iterator it=hist.begin(); it!=hist.end(); ++it)
             {
-                CharacterEventContinuous* event = static_cast<CharacterEventContinuous*>(*it);
+                CharacterEventContinuous* event = RevBayesCore::assume_cast<CharacterEventContinuous*>(*it);
                 double end_time = event->getAge() - node.getAge();
                 double time_interval = (end_time - begin_time) / branch_length;
                 
@@ -761,14 +762,14 @@ void ConditionedBirthDeathShiftProcessContinuous::initializeBranchHistories(cons
         if ( parents.size() > 0 )
         {
             CharacterEvent *ce = parents[0];
-            static_cast<CharacterEventContinuous*>( ce )->resize( 2 );
-            static_cast<CharacterEventContinuous*>( ce )->setState( val, idx );
+            RevBayesCore::assume_cast<CharacterEventContinuous*>( ce )->resize( 2 );
+            RevBayesCore::assume_cast<CharacterEventContinuous*>( ce )->setState( val, idx );
         }
         if ( children.size() > 0 )
         {
             CharacterEvent *ce = children[0];
-            static_cast<CharacterEventContinuous*>( ce )->resize( 2 );
-            static_cast<CharacterEventContinuous*>( ce )->setState( val, idx );
+            RevBayesCore::assume_cast<CharacterEventContinuous*>( ce )->resize( 2 );
+            RevBayesCore::assume_cast<CharacterEventContinuous*>( ce )->setState( val, idx );
         }
     }
     

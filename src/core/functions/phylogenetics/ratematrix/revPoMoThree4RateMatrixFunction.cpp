@@ -1,4 +1,5 @@
 #include "revPoMoThree4RateMatrixFunction.h"
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "RateMatrix_revPoMoThree4.h"
 #include "RbException.h"
@@ -41,10 +42,10 @@ void revPoMoThree4RateMatrixFunction::update( void )
     const std::vector<double>& fc = phi->getValue();
 
     // set parameters
-    static_cast< RateMatrix_revPoMoThree4* >(value)->setPi( bf );
-    static_cast< RateMatrix_revPoMoThree4* >(value)->setRho( ex );
-    static_cast< RateMatrix_revPoMoThree4* >(value)->setPhi( fc );
-    static_cast< RateMatrix_revPoMoThree4* >(value)->update();
+    RevBayesCore::assume_cast< RateMatrix_revPoMoThree4* >(value)->setPi( bf );
+    RevBayesCore::assume_cast< RateMatrix_revPoMoThree4* >(value)->setRho( ex );
+    RevBayesCore::assume_cast< RateMatrix_revPoMoThree4* >(value)->setPhi( fc );
+    RevBayesCore::assume_cast< RateMatrix_revPoMoThree4* >(value)->update();
 }
 
 

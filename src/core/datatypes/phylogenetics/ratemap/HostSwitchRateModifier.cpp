@@ -1,4 +1,5 @@
 #include <cmath>
+#include "TypeUtilities.h"
 #include <cstddef>
 #include <ostream>
 #include <set>
@@ -46,7 +47,7 @@ double HostSwitchRateModifier::computeRateMultiplier(std::vector<CharacterEvent*
     size_t to_index = newState->getSiteIndex();
     
     // what is the state change?
-    size_t from_state = static_cast<CharacterEventDiscrete*>(currState[to_index])->getState();
+    size_t from_state = RevBayesCore::assume_cast<CharacterEventDiscrete*>(currState[to_index])->getState();
     size_t to_state = newState->getState();
     
     double r = 1.0;
@@ -93,7 +94,7 @@ double HostSwitchRateModifier::computeRateMultiplier(std::vector<CharacterEvent*
         size_t n_on = 0;
         for (size_t from_index = 0; from_index < this->num_characters; from_index++)
         {
-            size_t s = static_cast<CharacterEventDiscrete*>(currState[from_index])->getState();
+            size_t s = RevBayesCore::assume_cast<CharacterEventDiscrete*>(currState[from_index])->getState();
             // For a 0 -> 1 transition all potential (1) and actual (2) hosts affect the rate
             // For a 1 -> 2 transition only the actual (2) hosts affect the rate
             bool include = (to_state == 2) ? (s == 2) : (s != 0);
@@ -117,7 +118,7 @@ double HostSwitchRateModifier::computeRateMultiplier(std::vector<CharacterEvent*
     std::vector<std::set<size_t> > sites_with_states(num_states);
     for (size_t i = 0; i < currState.size(); i++)
     {
-        sites_with_states[ static_cast<CharacterEventDiscrete*>(currState[i])->getState() ].insert(i);
+        sites_with_states[ RevBayesCore::assume_cast<CharacterEventDiscrete*>(currState[i])->getState() ].insert(i);
     }
     
     return computeRateMultiplier(currState, newState, sites_with_states, age);
@@ -128,7 +129,7 @@ double HostSwitchRateModifier::computeRateMultiplier(std::vector<CharacterEvent*
     std::vector<std::set<size_t> > sites_with_states(num_states);
     for (size_t i = 0; i < currState.size(); i++)
     {
-        sites_with_states[ static_cast<CharacterEventDiscrete*>(currState[i])->getState() ].insert(i);
+        sites_with_states[ RevBayesCore::assume_cast<CharacterEventDiscrete*>(currState[i])->getState() ].insert(i);
     }
     
     return computeRateMultiplier(currState, newState, sites_with_states, age);

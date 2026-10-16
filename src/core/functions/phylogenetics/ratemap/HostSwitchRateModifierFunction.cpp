@@ -7,6 +7,7 @@
 //
 
 #include "HostSwitchRateModifierFunction.h"
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 
 #include <vector>
@@ -60,8 +61,8 @@ void HostSwitchRateModifierFunction::update( void )
     const std::vector<double>& s = scale->getValue();
     
     // apply updates to HostSwitchRateModifier
-    static_cast<HostSwitchRateModifier*>(value)->setTree(t);
-    static_cast<HostSwitchRateModifier*>(value)->setScale(s);
+    RevBayesCore::assume_cast<HostSwitchRateModifier*>(value)->setTree(t);
+    RevBayesCore::assume_cast<HostSwitchRateModifier*>(value)->setScale(s);
 
     
 }

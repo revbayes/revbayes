@@ -1,4 +1,5 @@
 #include "CharacterHistoryContinuous.h"
+#include "TypeUtilities.h"
 
 #include <vector>
 
@@ -48,7 +49,7 @@ BranchHistoryContinuous& CharacterHistoryContinuous::operator[](size_t i)
         throw RbException("Index out of bounds in character history.");
     }
     
-    return static_cast<BranchHistoryContinuous &>( *histories[i] );
+    return RevBayesCore::assume_cast<BranchHistoryContinuous &>( *histories[i] );
 }
 
 
@@ -62,7 +63,7 @@ const BranchHistoryContinuous& CharacterHistoryContinuous::operator[](size_t i) 
         throw RbException("Index out of bounds in character history.");
     }
     
-    return static_cast<const BranchHistoryContinuous &>( *histories[i] );
+    return RevBayesCore::assume_cast<const BranchHistoryContinuous &>( *histories[i] );
 }
 
 
@@ -82,7 +83,7 @@ CharacterHistoryContinuous* CharacterHistoryContinuous::clone( void ) const
 CharacterEventContinuous* CharacterHistoryContinuous::pickRandomEvent( size_t &branch_index )
 {
     
-    return static_cast<CharacterEventContinuous*>( CharacterHistory::pickRandomEvent(branch_index) );
+    return RevBayesCore::assume_cast<CharacterEventContinuous*>( CharacterHistory::pickRandomEvent(branch_index) );
 }
  
 

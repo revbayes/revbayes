@@ -1,4 +1,5 @@
 #include "BinaryMutationCoalescentRateMatrixFunction.h"
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "RateMatrix_BinaryMutationCoalescent.h"
 #include "RbException.h"
@@ -35,9 +36,9 @@ void BinaryMutationCoalescentRateMatrixFunction::update( void )
 {
     
     // set the base frequencies
-    static_cast< RateMatrix_BinaryMutationCoalescent* >(value)->setMutationRate( mu->getValue() );
-    static_cast< RateMatrix_BinaryMutationCoalescent* >(value)->setEffectivePopulationSize( Ne->getValue() );
-    static_cast< RateMatrix_BinaryMutationCoalescent* >(value)->update();
+    RevBayesCore::assume_cast< RateMatrix_BinaryMutationCoalescent* >(value)->setMutationRate( mu->getValue() );
+    RevBayesCore::assume_cast< RateMatrix_BinaryMutationCoalescent* >(value)->setEffectivePopulationSize( Ne->getValue() );
+    RevBayesCore::assume_cast< RateMatrix_BinaryMutationCoalescent* >(value)->update();
     
 }
 

@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include <iostream>
 #include <string>
@@ -65,7 +66,7 @@ double RevBayesCore::HomeologPhaseProposal::doProposal( void )
 {
     ctmc->getValue().switchHomeologPhase(tip1, tip2);
     AbstractPhyloCTMCSiteHomogeneous<DnaState> *ctmc_dist = NULL;
-    ctmc_dist = static_cast<AbstractPhyloCTMCSiteHomogeneous<DnaState>* >( &ctmc->getDistribution() );
+    ctmc_dist = RevBayesCore::assume_cast<AbstractPhyloCTMCSiteHomogeneous<DnaState>* >( &ctmc->getDistribution() );
     ctmc_dist->swap_taxon_name_2_tip_index(tip1, tip2);
     return 0.0;
 }
@@ -138,6 +139,6 @@ void RevBayesCore::HomeologPhaseProposal::undoProposal( void )
 {
     ctmc->getValue().switchHomeologPhase(tip1, tip2);
     AbstractPhyloCTMCSiteHomogeneous<DnaState> *ctmc_dist = NULL;
-    ctmc_dist = static_cast<AbstractPhyloCTMCSiteHomogeneous<DnaState>* >( &ctmc->getDistribution() );
+    ctmc_dist = RevBayesCore::assume_cast<AbstractPhyloCTMCSiteHomogeneous<DnaState>* >( &ctmc->getDistribution() );
     ctmc_dist->swap_taxon_name_2_tip_index(tip1, tip2);
 }

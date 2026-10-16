@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include <ostream>
 #include <set>
 #include <vector>
@@ -50,7 +51,7 @@ double SiteRateModifier::computeRateMultiplier(std::vector<CharacterEvent *> cur
     size_t new_site_class = site_classes[new_site];
     
     // the new event is what event type?
-    size_t old_state = static_cast<CharacterEventDiscrete*>(currState[new_site])->getState();
+    size_t old_state = RevBayesCore::assume_cast<CharacterEventDiscrete*>(currState[new_site])->getState();
     size_t new_state = newState->getState();
     
     // which event_class does that event belong to?

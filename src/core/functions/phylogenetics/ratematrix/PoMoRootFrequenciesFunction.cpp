@@ -1,6 +1,7 @@
 
 
 #include "PoMoRootFrequenciesFunction.h"
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
@@ -20,7 +21,7 @@ PoMoRootFrequenciesFunction::PoMoRootFrequenciesFunction(const TypedDagNode< Sim
 
     useMutationMatrix = false;
     for (size_t i = 0; i < 4+6* (populationSize->getValue()-1); ++i) {
-        static_cast< std::vector<double>* >(value)->push_back(0.0);
+        RevBayesCore::assume_cast< std::vector<double>* >(value)->push_back(0.0);
     }
     // add the lambda parameter as a parent
     addParameter( fixedNucleotideRootFrequencies );
@@ -40,7 +41,7 @@ PoMoRootFrequenciesFunction::PoMoRootFrequenciesFunction(const TypedDagNode< Sim
 {
     useMutationMatrix = true;
     for (size_t i = 0; i < 4+6* (populationSize->getValue()-1); ++i) {
-        static_cast< std::vector<double>* >(value)->push_back(0.0);
+        RevBayesCore::assume_cast< std::vector<double>* >(value)->push_back(0.0);
     }
     // add the lambda parameter as a parent
     addParameter( fixedNucleotideRootFrequencies );
@@ -83,29 +84,29 @@ void PoMoRootFrequenciesFunction::update( void )
     double OneMinusFopar = 1 - fopar;
     // compute all root frequencies as in De Maio, Schlötterer, Kosiol 2013
     //First, the monoallelic states
-    static_cast< std::vector<double>* >(value)->at(0) = fnrf[0] * OneMinusFopar;
-    static_cast< std::vector<double>* >(value)->at(1) = fnrf[1] * OneMinusFopar;
-    static_cast< std::vector<double>* >(value)->at(2) = fnrf[2] * OneMinusFopar;
-    static_cast< std::vector<double>* >(value)->at(3) = fnrf[3] * OneMinusFopar;
+    RevBayesCore::assume_cast< std::vector<double>* >(value)->at(0) = fnrf[0] * OneMinusFopar;
+    RevBayesCore::assume_cast< std::vector<double>* >(value)->at(1) = fnrf[1] * OneMinusFopar;
+    RevBayesCore::assume_cast< std::vector<double>* >(value)->at(2) = fnrf[2] * OneMinusFopar;
+    RevBayesCore::assume_cast< std::vector<double>* >(value)->at(3) = fnrf[3] * OneMinusFopar;
     //Then, the biallelic states
     int currentCell = 4;
     for (unsigned int i = 0; i < 3; ++i) {
         for (unsigned int j = i+1; j < 4; ++j) {
             //For each frequency
             for (unsigned int f = 1; f < ps; ++f) {
-                static_cast< std::vector<double>* >(value)->at(currentCell) = fopar * ( ( fnrf[j]*mr[j*3+i]*1/(double)f) + ( fnrf[i]*mr[i*3+j-1] * 1/(double)(ps-f) ) );
+                RevBayesCore::assume_cast< std::vector<double>* >(value)->at(currentCell) = fopar * ( ( fnrf[j]*mr[j*3+i]*1/(double)f) + ( fnrf[i]*mr[i*3+j-1] * 1/(double)(ps-f) ) );
                 currentCell ++;
             }
         }
     }
     //Normalization, in case the polymorphic states do not add up to fopar
     double sum = 0.0;
-    for (unsigned int i = 4; i < static_cast< std::vector<double>* >(value)->size(); ++i) {
-        sum += static_cast< std::vector<double>* >(value)->at(i);
+    for (unsigned int i = 4; i < RevBayesCore::assume_cast< std::vector<double>* >(value)->size(); ++i) {
+        sum += RevBayesCore::assume_cast< std::vector<double>* >(value)->at(i);
     }
     double normalizer = fopar/sum;
-    for (unsigned int i = 4; i < static_cast< std::vector<double>* >(value)->size(); ++i) {
-        static_cast< std::vector<double>* >(value)->at(i) *= normalizer;
+    for (unsigned int i = 4; i < RevBayesCore::assume_cast< std::vector<double>* >(value)->size(); ++i) {
+        RevBayesCore::assume_cast< std::vector<double>* >(value)->at(i) *= normalizer;
     }
     
 

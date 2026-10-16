@@ -1,4 +1,5 @@
 #include <cmath>
+#include "TypeUtilities.h"
 #include <cstddef>
 #include <ostream>
 #include <set>
@@ -84,7 +85,7 @@ double AdjacentRateModifier::computeRateMultiplierUsingWidth(std::vector<Charact
     {
         if (i == to_index)
             continue;
-        else if ( static_cast<CharacterEventDiscrete*>(currState[i])->getState() == to_state)
+        else if ( RevBayesCore::assume_cast<CharacterEventDiscrete*>(currState[i])->getState() == to_state)
         {
             match[1] += 1.0;
         }
@@ -117,7 +118,7 @@ double AdjacentRateModifier::computeRateMultiplierUsingMatrix(std::vector<Charac
         {
             continue;
         }
-        else if ( static_cast<CharacterEventDiscrete*>(currState[edge.to])->getState() == s)
+        else if ( RevBayesCore::assume_cast<CharacterEventDiscrete*>(currState[edge.to])->getState() == s)
         {
             match[1] += edge.weight;
         }

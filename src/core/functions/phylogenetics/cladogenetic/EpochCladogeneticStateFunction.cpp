@@ -7,6 +7,7 @@
 //
 
 #include <map>
+#include "TypeUtilities.h"
 #include <vector>
 
 #include "CladogeneticProbabilityMatrix_Epoch.h"
@@ -62,8 +63,8 @@ void EpochCladogeneticStateFunction::update( void )
     const RbVector<double>& epoch_times = epochTimes->getValue();
     const RbVector<CladogeneticProbabilityMatrix>& clado_probs = cladoProbs->getValue();
     
-    static_cast<CladogeneticProbabilityMatrix_Epoch*>(value)->setEpochTimes(epoch_times);
-    static_cast<CladogeneticProbabilityMatrix_Epoch*>(value)->setEpochCladogeneticProbabilityMatrix(clado_probs);
+    RevBayesCore::assume_cast<CladogeneticProbabilityMatrix_Epoch*>(value)->setEpochTimes(epoch_times);
+    RevBayesCore::assume_cast<CladogeneticProbabilityMatrix_Epoch*>(value)->setEpochCladogeneticProbabilityMatrix(clado_probs);
     
     value->update();
     

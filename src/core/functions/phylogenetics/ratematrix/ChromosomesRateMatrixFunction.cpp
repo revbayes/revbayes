@@ -13,6 +13,7 @@
  */
 
 #include "ChromosomesRateMatrixFunction.h"
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 
 #include "RateMatrix_Chromosomes.h"
@@ -56,14 +57,14 @@ void ChromosomesRateMatrixFunction::update( void ) {
     double de_l = delta_l->getValue();
     double e = eta->getValue();
 
-    static_cast< RateMatrix_Chromosomes* >(value)->setGamma( ga );
-    static_cast< RateMatrix_Chromosomes* >(value)->setDelta( de );
-    static_cast< RateMatrix_Chromosomes* >(value)->setRho( rh );
-    static_cast< RateMatrix_Chromosomes* >(value)->setEta( e );
-    static_cast< RateMatrix_Chromosomes* >(value)->setGamma_l( ga_l );
-    static_cast< RateMatrix_Chromosomes* >(value)->setDelta_l( de_l );
+    RevBayesCore::assume_cast< RateMatrix_Chromosomes* >(value)->setGamma( ga );
+    RevBayesCore::assume_cast< RateMatrix_Chromosomes* >(value)->setDelta( de );
+    RevBayesCore::assume_cast< RateMatrix_Chromosomes* >(value)->setRho( rh );
+    RevBayesCore::assume_cast< RateMatrix_Chromosomes* >(value)->setEta( e );
+    RevBayesCore::assume_cast< RateMatrix_Chromosomes* >(value)->setGamma_l( ga_l );
+    RevBayesCore::assume_cast< RateMatrix_Chromosomes* >(value)->setDelta_l( de_l );
 
-    static_cast< RateMatrix_Chromosomes* >(value)->update();
+    RevBayesCore::assume_cast< RateMatrix_Chromosomes* >(value)->update();
     
 }
 

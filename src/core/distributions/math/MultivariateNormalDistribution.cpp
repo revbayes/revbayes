@@ -1,4 +1,5 @@
 #include "MultivariateNormalDistribution.h"
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 
 #include <cmath>
@@ -135,8 +136,8 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> MultivariateNormalDistribution::ex
     {
         found = true;
         
-        int    index = (int)static_cast<const TypedDagNode<std::int64_t>   *>( args[0] )->getValue() - 1;
-        double v     = static_cast<const TypedDagNode<double>*>( args[1] )->getValue();
+        int    index = (int)RevBayesCore::assume_cast<const TypedDagNode<std::int64_t>   *>( args[0] )->getValue() - 1;
+        double v     = RevBayesCore::assume_cast<const TypedDagNode<double>*>( args[1] )->getValue();
         
         clampAt(index, v);
 

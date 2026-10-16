@@ -5,6 +5,7 @@
 //
 
 #include "CladogeneticSpeciationRateMatrix.h"
+#include "TypeUtilities.h"
 
 #include <fstream>
 #include <iomanip>
@@ -64,9 +65,9 @@ void CladogeneticSpeciationRateMatrix::executeMethod(const std::string &n, const
     {
 
         // create variable for event states
-        unsigned anc_state = unsigned( static_cast<const TypedDagNode<std::int64_t> *>( args[0] )->getValue() );
-        unsigned ch1_state = unsigned( static_cast<const TypedDagNode<std::int64_t> *>( args[1] )->getValue() );
-        unsigned ch2_state = unsigned( static_cast<const TypedDagNode<std::int64_t> *>( args[2] )->getValue() );
+        unsigned anc_state = unsigned( RevBayesCore::assume_cast<const TypedDagNode<std::int64_t> *>( args[0] )->getValue() );
+        unsigned ch1_state = unsigned( RevBayesCore::assume_cast<const TypedDagNode<std::int64_t> *>( args[1] )->getValue() );
+        unsigned ch2_state = unsigned( RevBayesCore::assume_cast<const TypedDagNode<std::int64_t> *>( args[2] )->getValue() );
         std::vector<unsigned> state;
         state.push_back(anc_state);
         state.push_back(ch1_state);

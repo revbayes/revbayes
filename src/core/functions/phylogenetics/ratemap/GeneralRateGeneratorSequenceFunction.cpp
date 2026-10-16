@@ -7,6 +7,7 @@
 //
 
 #include "GeneralRateGeneratorSequenceFunction.h"
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 
 #include <string>
@@ -60,11 +61,11 @@ void GeneralRateGeneratorSequenceFunction::update( void )
     
     if (rateModifiers != NULL) {
         const RbVector<CharacterHistoryRateModifier>& rate_mods = rateModifiers->getValue();
-        static_cast< RateGeneratorSequenceUsingMatrix* >(value)->setRateModifiers( &rate_mods );
+        RevBayesCore::assume_cast< RateGeneratorSequenceUsingMatrix* >(value)->setRateModifiers( &rate_mods );
     }
 
     // set the rate modifiers in RateGeneratorSequence!!
-    static_cast< RateGeneratorSequenceUsingMatrix* >(value)->setRateMatrix( &rm );
+    RevBayesCore::assume_cast< RateGeneratorSequenceUsingMatrix* >(value)->setRateMatrix( &rm );
     
 
     value->updateMap();

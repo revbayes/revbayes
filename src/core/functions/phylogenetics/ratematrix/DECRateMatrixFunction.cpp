@@ -1,4 +1,5 @@
 #include "DECRateMatrixFunction.h"
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 
 #include <cmath>
@@ -70,9 +71,9 @@ void DECRateMatrixFunction::update( void )
     const std::vector<double>& rs               = rangeSize->getValue();
         
     // set the base frequencies
-    static_cast< RateMatrix_DECRateMatrix* >(value)->setDispersalRates(dr);
-    static_cast< RateMatrix_DECRateMatrix* >(value)->setExtirpationRates(er);
-    static_cast< RateMatrix_DECRateMatrix* >(value)->setRangeSize(rs);
+    RevBayesCore::assume_cast< RateMatrix_DECRateMatrix* >(value)->setDispersalRates(dr);
+    RevBayesCore::assume_cast< RateMatrix_DECRateMatrix* >(value)->setExtirpationRates(er);
+    RevBayesCore::assume_cast< RateMatrix_DECRateMatrix* >(value)->setRangeSize(rs);
     
     value->update();
 }

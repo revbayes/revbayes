@@ -1,4 +1,5 @@
 #include <cmath>
+#include "TypeUtilities.h"
 #include <cstring>
 #include <fstream>
 #include <iomanip>
@@ -251,7 +252,7 @@ void MatrixReal::executeMethod(const std::string &n, const std::vector<const Dag
     
     if ( n == "[]" )
     {
-        int index = (int)static_cast<const TypedDagNode<std::int64_t> *>( args[0] )->getValue()-1;
+        int index = (int)RevBayesCore::assume_cast<const TypedDagNode<std::int64_t> *>( args[0] )->getValue()-1;
         rv = elements[index];
     }
     else if ( n == "upperTriangle" )

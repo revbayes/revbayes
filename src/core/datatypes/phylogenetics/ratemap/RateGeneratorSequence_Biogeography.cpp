@@ -1,4 +1,5 @@
 #include <cmath>
+#include "TypeUtilities.h"
 #include <cstddef>
 #include <set>
 #include <vector>
@@ -237,7 +238,7 @@ double RateGeneratorSequence_Biogeography::getRate(std::vector<CharacterEvent*> 
 {
     size_t s = to->getState();
 
-    if (static_cast<CharacterEventDiscrete*>(from[ to->getSiteIndex() ])->getState() == to->getState())
+    if (RevBayesCore::assume_cast<CharacterEventDiscrete*>(from[ to->getSiteIndex() ])->getState() == to->getState())
     {
 //        std::cout << count[0] << " " << count[1] << "\n";
 //        std::cout << node.getIndex() << " problem...\n";
@@ -422,7 +423,7 @@ double RateGeneratorSequence_Biogeography::getUnnormalizedSumOfRates( std::vecto
     double sum = 0.0;
     for (size_t i = 0; i < from.size(); i++)
     {
-        size_t s = static_cast<CharacterEventDiscrete*>(from[i])->getState();
+        size_t s = RevBayesCore::assume_cast<CharacterEventDiscrete*>(from[i])->getState();
         double v = availableAreaVector[ epochIdx * this->num_characters + i ];
 
         if (forbidExtinction && s == 1 && counts[1] == 0)
@@ -513,14 +514,14 @@ const std::set<size_t> RateGeneratorSequence_Biogeography::getRangeAndFrontierSe
 //    std::set<size_t>
     for (size_t i = 0; i < from.size(); i++)
     {
-        if (static_cast<CharacterEventDiscrete*>(from[i])->getState() == 1)
+        if (RevBayesCore::assume_cast<CharacterEventDiscrete*>(from[i])->getState() == 1)
         {
             ret.insert(i);
             const std::set<size_t> adj = adjacentAreaSet[epochIdx*from.size() + i];
             std::set<size_t>::const_iterator it_adj;
             for (it_adj = adj.begin(); it_adj != adj.end(); it_adj++)
             {
-                if (static_cast<CharacterEventDiscrete*>(from[*it_adj])->getState() == 0)
+                if (RevBayesCore::assume_cast<CharacterEventDiscrete*>(from[*it_adj])->getState() == 0)
                 {
                     ret.insert(*it_adj);
                 }
@@ -540,7 +541,7 @@ size_t RateGeneratorSequence_Biogeography::numOn(const std::vector<CharacterEven
 {
     size_t n = 0;
     for (size_t i = 0; i < s.size(); i++)
-        if (static_cast<CharacterEventDiscrete*>(s[i])->getState() == 1)
+        if (RevBayesCore::assume_cast<CharacterEventDiscrete*>(s[i])->getState() == 1)
             n++;
     return n;
 }

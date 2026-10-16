@@ -1,4 +1,5 @@
 #include <boost/assign/list_of.hpp>
+#include "TypeUtilities.h"
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
@@ -361,7 +362,7 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::computeNodeProbabilit
         if ( node.isTip() == true )
         {
             // this is a tip node
-            TreeDiscreteCharacterData* tree = static_cast<TreeDiscreteCharacterData*>( this->value );
+            TreeDiscreteCharacterData* tree = RevBayesCore::assume_cast<TreeDiscreteCharacterData*>( this->value );
             
             std::vector<double> sampling(num_states, rho->getValue());
             std::vector<double> extinction(num_states, 1.0 - rho->getValue());
@@ -698,7 +699,7 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::fireTreeChangeEvent( 
 
 const RevBayesCore::AbstractHomologousDiscreteCharacterData& TimeVaryingStateDependentSpeciationExtinctionProcess::getCharacterData() const
 {
-    return static_cast<TreeDiscreteCharacterData*>(this->value)->getCharacterData();
+    return RevBayesCore::assume_cast<TreeDiscreteCharacterData*>(this->value)->getCharacterData();
 }
 
 
@@ -827,7 +828,7 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::recursivelyDrawJointC
     
     if ( node.isTip() == true )
     {
-        const AbstractHomologousDiscreteCharacterData& data = static_cast<TreeDiscreteCharacterData*>(this->value)->getCharacterData();
+        const AbstractHomologousDiscreteCharacterData& data = RevBayesCore::assume_cast<TreeDiscreteCharacterData*>(this->value)->getCharacterData();
         const AbstractDiscreteTaxonData& taxon_data = data.getTaxonData( node.getName() );
         
         const DiscreteCharacterState &char_state = taxon_data.getCharacter(0);
@@ -1289,7 +1290,7 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::recursivelyDrawStocha
     {
         // the last time slice of the branch will be the observed state
         
-        const AbstractHomologousDiscreteCharacterData& data = static_cast<TreeDiscreteCharacterData*>(this->value)->getCharacterData();
+        const AbstractHomologousDiscreteCharacterData& data = RevBayesCore::assume_cast<TreeDiscreteCharacterData*>(this->value)->getCharacterData();
         const AbstractDiscreteTaxonData& taxon_data = data.getTaxonData( node.getName() );
         
         const DiscreteCharacterState &char_state = taxon_data.getCharacter(0);
@@ -1523,7 +1524,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> TimeVaryingStateDependentSpeciatio
     {
         found = true;
         
-        const AbstractHomologousDiscreteCharacterData& v = static_cast<const TypedDagNode<AbstractHomologousDiscreteCharacterData > *>( args[0] )->getValue();
+        const AbstractHomologousDiscreteCharacterData& v = RevBayesCore::assume_cast<const TypedDagNode<AbstractHomologousDiscreteCharacterData > *>( args[0] )->getValue();
         
         // check if the tip names match
         bool match = true;
@@ -1550,13 +1551,13 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> TimeVaryingStateDependentSpeciatio
             throw RbException("To clamp a character data object all taxa present in the tree must be present in the character data.");
         }
         
-        static_cast<TreeDiscreteCharacterData*>(this->value)->setCharacterData( v.clone() );
+        RevBayesCore::assume_cast<TreeDiscreteCharacterData*>(this->value)->setCharacterData( v.clone() );
         
         // simulate character history over the tree conditioned on the new tip data
         size_t num_nodes = value->getNumberOfNodes();
         std::vector<std::string> character_histories(num_nodes);
         drawStochasticCharacterMap(character_histories);
-        static_cast<TreeDiscreteCharacterData*>(this->value)->setTimeInStates(time_in_states);
+        RevBayesCore::assume_cast<TreeDiscreteCharacterData*>(this->value)->setTimeInStates(time_in_states);
         
         return NULL;
     }
@@ -1939,7 +1940,7 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::setValue(Tree *v, boo
     
     // delegate to super class
     //    TypedDistribution<Tree>::setValue(v, f);
-    static_cast<TreeDiscreteCharacterData *>(this->value)->setTree( *v );
+    RevBayesCore::assume_cast<TreeDiscreteCharacterData *>(this->value)->setTree( *v );
     
     resizeVectors(v->getNumberOfNodes());
     
@@ -1973,7 +1974,7 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::setValue(Tree *v, boo
         this_tip_data.addCharacter(state);
         tip_data->addTaxonData(this_tip_data);
     }
-    static_cast<TreeDiscreteCharacterData*>(this->value)->setCharacterData(tip_data);
+    RevBayesCore::assume_cast<TreeDiscreteCharacterData*>(this->value)->setCharacterData(tip_data);
     
     // simulate character history over the new tree
     size_t num_nodes = value->getNumberOfNodes();
@@ -1982,7 +1983,7 @@ void TimeVaryingStateDependentSpeciationExtinctionProcess::setValue(Tree *v, boo
         std::vector<std::string> character_histories(num_nodes);
         drawStochasticCharacterMap(character_histories);
     }
-    static_cast<TreeDiscreteCharacterData*>(this->value)->setTimeInStates(time_in_states);
+    RevBayesCore::assume_cast<TreeDiscreteCharacterData*>(this->value)->setTimeInStates(time_in_states);
 }
 
 /**
@@ -2472,11 +2473,11 @@ bool TimeVaryingStateDependentSpeciationExtinctionProcess::simulateTree( size_t 
     
     // set the simulated values
     value->getTreeChangeEventHandler().removeListener( this );
-    static_cast<TreeDiscreteCharacterData *>(this->value)->setTree( *psi );
+    RevBayesCore::assume_cast<TreeDiscreteCharacterData *>(this->value)->setTree( *psi );
     delete phi;
     value->getTreeChangeEventHandler().addListener( this );
-    static_cast<TreeDiscreteCharacterData*>(this->value)->setCharacterData(tip_data);
-    static_cast<TreeDiscreteCharacterData*>(this->value)->setTimeInStates(time_in_states);
+    RevBayesCore::assume_cast<TreeDiscreteCharacterData*>(this->value)->setCharacterData(tip_data);
+    RevBayesCore::assume_cast<TreeDiscreteCharacterData*>(this->value)->setTimeInStates(time_in_states);
     return true;
     
 }

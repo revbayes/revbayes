@@ -1,4 +1,5 @@
 #include "BiogeographyRateGeneratorSequenceFunction.h"
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 
 #include <string>
@@ -46,7 +47,7 @@ void BiogeographyRateGeneratorSequenceFunction::update( void )
     
     // set the gainLossRate
     const RateGenerator& rm = homogeneousRateMatrix->getValue();
-    static_cast< RateGeneratorSequence_Biogeography* >(value)->setRateMatrix(&rm);
+    RevBayesCore::assume_cast< RateGeneratorSequence_Biogeography* >(value)->setRateMatrix(&rm);
 
     
     // set the distancePower

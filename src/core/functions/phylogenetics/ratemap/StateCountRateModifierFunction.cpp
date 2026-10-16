@@ -7,6 +7,7 @@
 //
 
 #include "StateCountRateModifierFunction.h"
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 
 #include "StateCountRateModifier.h"
@@ -56,7 +57,7 @@ void StateCountRateModifierFunction::update( void )
 {
     
     RbVector<double> sf = stateFactors->getValue();
-    static_cast<StateCountRateModifier*>(value)->setStateFactors(sf);
+    RevBayesCore::assume_cast<StateCountRateModifier*>(value)->setStateFactors(sf);
     
 }
 

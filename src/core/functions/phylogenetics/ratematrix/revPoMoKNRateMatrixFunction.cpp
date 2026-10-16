@@ -1,4 +1,5 @@
 #include "revPoMoKNRateMatrixFunction.h"
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "RbException.h"
 
@@ -72,11 +73,11 @@ void revPoMoKNRateMatrixFunction::update( void )
     const std::vector<double>&  f  = phi->getValue();
 
     // set the base frequencies
-    static_cast< RateMatrix_revPoMoKN* >(value)->setK( na );
-    static_cast< RateMatrix_revPoMoKN* >(value)->setN( ni );
-    static_cast< RateMatrix_revPoMoKN* >(value)->setPi( bf );
-    static_cast< RateMatrix_revPoMoKN* >(value)->setRho( ex );
-    static_cast< RateMatrix_revPoMoKN* >(value)->setPhi( f );
+    RevBayesCore::assume_cast< RateMatrix_revPoMoKN* >(value)->setK( na );
+    RevBayesCore::assume_cast< RateMatrix_revPoMoKN* >(value)->setN( ni );
+    RevBayesCore::assume_cast< RateMatrix_revPoMoKN* >(value)->setPi( bf );
+    RevBayesCore::assume_cast< RateMatrix_revPoMoKN* >(value)->setRho( ex );
+    RevBayesCore::assume_cast< RateMatrix_revPoMoKN* >(value)->setPhi( f );
 
     value->update();
 }

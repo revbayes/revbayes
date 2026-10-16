@@ -1,4 +1,5 @@
 #include "HkyRateMatrixFunction.h"
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 
 #include <vector>
@@ -54,8 +55,8 @@ void HkyRateMatrixFunction::update( void )
     
     
     // set the base frequencies
-    static_cast< RateMatrix_HKY* >(value)->setStationaryFrequencies( f );
-    static_cast< RateMatrix_HKY* >(value)->setKappa( k );
+    RevBayesCore::assume_cast< RateMatrix_HKY* >(value)->setStationaryFrequencies( f );
+    RevBayesCore::assume_cast< RateMatrix_HKY* >(value)->setKappa( k );
     
     value->update();
 }

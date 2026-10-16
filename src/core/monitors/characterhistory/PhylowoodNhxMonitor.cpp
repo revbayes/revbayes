@@ -1,4 +1,5 @@
 #include "PhylowoodNhxMonitor.h"
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 
 #include <iostream>
@@ -83,13 +84,13 @@ void PhylowoodNhxMonitor::updateCharacterCounts(TopologyNode* n, std::string brE
     {
         characters = bh.getChildCharacters();
         for (size_t i = 0; i < characters.size(); i++)
-            childCharacterCounts[n->getIndex()][i] += static_cast<CharacterEventDiscrete*>(characters[i])->getState();
+            childCharacterCounts[n->getIndex()][i] += RevBayesCore::assume_cast<CharacterEventDiscrete*>(characters[i])->getState();
     }
     else if (brEnd=="parent")
     {
         characters = bh.getParentCharacters();
         for (size_t i = 0; i < characters.size(); i++)
-            parentCharacterCounts[n->getIndex()][i] += static_cast<CharacterEventDiscrete*>(characters[i])->getState();
+            parentCharacterCounts[n->getIndex()][i] += RevBayesCore::assume_cast<CharacterEventDiscrete*>(characters[i])->getState();
     }
     
 }

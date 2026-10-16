@@ -1,4 +1,5 @@
 #include "AutocorrelatedEventDistribution.h"
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
@@ -276,18 +277,18 @@ void AutocorrelatedEventDistribution::executeMethod(const std::string &n, const 
     
     if ( n == "getValues" )
     {
-        const std::string &val_name = static_cast<const TypedDagNode<std::string> * >( args[0] )->getValue();
+        const std::string &val_name = RevBayesCore::assume_cast<const TypedDagNode<std::string> * >( args[0] )->getValue();
         rv = value->getValues( val_name );
         
     }
     else if ( n == "getRealValues" )
     {
-        const std::string &val_name = static_cast<const TypedDagNode<std::string> * >( args[0] )->getValue();
+        const std::string &val_name = RevBayesCore::assume_cast<const TypedDagNode<std::string> * >( args[0] )->getValue();
         rv = value->getValues( val_name );
     }
     else if ( n == "getRealPosValues" )
     {
-        const std::string &val_name = static_cast<const TypedDagNode<std::string> * >( args[0] )->getValue();
+        const std::string &val_name = RevBayesCore::assume_cast<const TypedDagNode<std::string> * >( args[0] )->getValue();
         rv = value->getValues( val_name );
     }
     else

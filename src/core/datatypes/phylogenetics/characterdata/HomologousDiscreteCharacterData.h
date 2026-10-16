@@ -2,6 +2,7 @@
 #define HomologousDiscreteCharacterData_H
 
 #include "AbstractHomologousDiscreteCharacterData.h"
+#include "TypeUtilities.h"
 #include "DiscreteCharacterState.h"
 #include "MatrixReal.h"
 #include "DiscreteTaxonData.h"
@@ -1373,7 +1374,7 @@ const RevBayesCore::DiscreteTaxonData<charType>& RevBayesCore::HomologousDiscret
     
     if (i != taxonMap.end() ) 
     {
-        return static_cast<const DiscreteTaxonData<charType>&>(*i->second);
+        return RevBayesCore::assume_cast<const DiscreteTaxonData<charType>&>(*i->second);
     }
     else 
     {
@@ -1402,7 +1403,7 @@ RevBayesCore::DiscreteTaxonData<charType>& RevBayesCore::HomologousDiscreteChara
     
     if (i != taxonMap.end() ) 
     {
-        return static_cast<DiscreteTaxonData<charType>&>(*i->second);
+        return RevBayesCore::assume_cast<DiscreteTaxonData<charType>&>(*i->second);
     }
     else 
     {
@@ -1430,7 +1431,7 @@ const RevBayesCore::DiscreteTaxonData<charType>& RevBayesCore::HomologousDiscret
     
     if (i != taxonMap.end() ) 
     {
-        return static_cast<const DiscreteTaxonData<charType>&>(*i->second);
+        return RevBayesCore::assume_cast<const DiscreteTaxonData<charType>&>(*i->second);
     }
     else 
     {
@@ -1459,7 +1460,7 @@ RevBayesCore::DiscreteTaxonData<charType>& RevBayesCore::HomologousDiscreteChara
     
     if (i != taxonMap.end() ) 
     {
-        return static_cast< DiscreteTaxonData<charType>& >( *i->second );
+        return RevBayesCore::assume_cast< DiscreteTaxonData<charType>& >( *i->second );
     }
     else 
     {
@@ -1525,7 +1526,7 @@ void RevBayesCore::HomologousDiscreteCharacterData<charType>::initFromFile(const
         throw RbException()<<"Could not read character data matrix from file "<<filepath<<".";
     }
     
-    HomologousDiscreteCharacterData<charType> *coreM = static_cast<HomologousDiscreteCharacterData<charType> *>( m_i[0] );
+    HomologousDiscreteCharacterData<charType> *coreM = RevBayesCore::assume_cast<HomologousDiscreteCharacterData<charType> *>( m_i[0] );
     
     *this = *coreM;
     

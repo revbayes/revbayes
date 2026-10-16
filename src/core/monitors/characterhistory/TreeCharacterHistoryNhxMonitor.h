@@ -3,6 +3,7 @@
 
 
 #include "Monitor.h"
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "BranchHistoryDiscrete.h"
 #include "StochasticNode.h"
@@ -178,7 +179,7 @@ template<class charType>
 void RevBayesCore::TreeCharacterHistoryNhxMonitor<charType>::updateCharacterCounts(TopologyNode* n, std::string brEnd)
 {
     
-    TreeHistoryCtmc<charType>* p = static_cast< TreeHistoryCtmc<charType>* >(&variable->getDistribution());
+    TreeHistoryCtmc<charType>* p = RevBayesCore::assume_cast< TreeHistoryCtmc<charType>* >(&variable->getDistribution());
     const BranchHistory& bh = p->getHistory(*n);
 
     std::vector<CharacterEvent*> characters;
@@ -186,13 +187,13 @@ void RevBayesCore::TreeCharacterHistoryNhxMonitor<charType>::updateCharacterCoun
     {
         characters = bh.getChildCharacters();
         for (size_t i = 0; i < characters.size(); i++)
-            childCharacterCounts[n->getIndex()][i] += static_cast<CharacterEventDiscrete*>(characters[i])->getState();
+            childCharacterCounts[n->getIndex()][i] += RevBayesCore::assume_cast<CharacterEventDiscrete*>(characters[i])->getState();
     }
     else if (brEnd=="parent")
     {
         characters = bh.getParentCharacters();
         for (size_t i = 0; i < characters.size(); i++)
-            parentCharacterCounts[n->getIndex()][i] += static_cast<CharacterEventDiscrete*>(characters[i])->getState();
+            parentCharacterCounts[n->getIndex()][i] += RevBayesCore::assume_cast<CharacterEventDiscrete*>(characters[i])->getState();
     }
     
 }
@@ -201,7 +202,7 @@ template<class charType>
 std::string RevBayesCore::TreeCharacterHistoryNhxMonitor<charType>::buildCharacterHistoryString(TopologyNode* n, std::string brEnd)
 {
     size_t nd_idx = n->getIndex();
-    TreeHistoryCtmc<charType>* p = static_cast< TreeHistoryCtmc<charType>* >(&variable->getDistribution());
+    TreeHistoryCtmc<charType>* p = RevBayesCore::assume_cast< TreeHistoryCtmc<charType>* >(&variable->getDistribution());
     const BranchHistory& bh = p->getHistory(*n);
 
     std::vector<CharacterEvent*> characters;

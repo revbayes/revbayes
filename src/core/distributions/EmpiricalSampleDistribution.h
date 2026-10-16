@@ -2,6 +2,7 @@
 #define EmpiricalSampleDistribution_H
 
 #include "MemberObject.h"
+#include "TypeUtilities.h"
 #include "Parallelizable.h"
 #include "RbVector.h"
 #include "Trace.h"
@@ -333,8 +334,8 @@ void RevBayesCore::EmpiricalSampleDistribution<mixtureType>::executeMethod(const
     
     if ( n == "getSampleProbabilities" )
     {
-        bool log_transorm = static_cast<const TypedDagNode<Boolean>* >( args[0] )->getValue();
-        bool normalize    = static_cast<const TypedDagNode<Boolean>* >( args[1] )->getValue();
+        bool log_transorm = RevBayesCore::assume_cast<const TypedDagNode<Boolean>* >( args[0] )->getValue();
+        bool normalize    = RevBayesCore::assume_cast<const TypedDagNode<Boolean>* >( args[1] )->getValue();
 
         rv.clear();
         rv.resize(num_samples);

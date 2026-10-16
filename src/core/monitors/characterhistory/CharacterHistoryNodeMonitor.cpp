@@ -1,4 +1,5 @@
 #include "CharacterHistoryNodeMonitor.h"
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
@@ -84,7 +85,7 @@ std::string CharacterHistoryNodeMonitor::buildCharacterHistoryString(TopologyNod
     {
         if (i != 0)
             ss << ",";
-        ss << static_cast<CharacterEventDiscrete*>(characters[i])->getState();
+        ss << RevBayesCore::assume_cast<CharacterEventDiscrete*>(characters[i])->getState();
     }
     
     return ss.str();

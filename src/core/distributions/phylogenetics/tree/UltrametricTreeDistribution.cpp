@@ -1,4 +1,5 @@
 #include <algorithm>
+#include "TypeUtilities.h"
 #include <cmath>
 #include <cstddef>
 #include <iostream>
@@ -575,7 +576,7 @@ void UltrametricTreeDistribution::executeMethod(const std::string &n, const std:
     if ( n == "getSampleProbabilities" )
     {
 
-        bool log_transorm = static_cast<const TypedDagNode<Boolean>* >( args[0] )->getValue();
+        bool log_transorm = RevBayesCore::assume_cast<const TypedDagNode<Boolean>* >( args[0] )->getValue();
 
         rv.clear();
         rv.resize(num_samples);
@@ -587,7 +588,7 @@ void UltrametricTreeDistribution::executeMethod(const std::string &n, const std:
     else if ( n == "getBranchRates" )
     {
 
-        int index = static_cast<const TypedDagNode<int>* >( args[0] )->getValue();
+        int index = RevBayesCore::assume_cast<const TypedDagNode<int>* >( args[0] )->getValue();
 
         Tree &this_tree = *value;
         size_t num_branches = this_tree.getNumberOfNodes() - 1;

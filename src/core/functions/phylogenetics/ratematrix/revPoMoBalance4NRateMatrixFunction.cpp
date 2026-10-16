@@ -1,4 +1,5 @@
 #include "revPoMoBalance4NRateMatrixFunction.h"
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "RbException.h"
 
@@ -56,12 +57,12 @@ void revPoMoBalance4NRateMatrixFunction::update( void )
     const std::vector<std::int64_t>&   Bf = B->getValue();
 
     // set the base frequencies
-    static_cast< RateMatrix_revPoMoBalance4N* >(value)->setN( n );
-    static_cast< RateMatrix_revPoMoBalance4N* >(value)->setPi( p );
-    static_cast< RateMatrix_revPoMoBalance4N* >(value)->setRho( r );
-    static_cast< RateMatrix_revPoMoBalance4N* >(value)->setPhi( s );
-    static_cast< RateMatrix_revPoMoBalance4N* >(value)->setBeta( b );
-    static_cast< RateMatrix_revPoMoBalance4N* >(value)->setB( Bf );
+    RevBayesCore::assume_cast< RateMatrix_revPoMoBalance4N* >(value)->setN( n );
+    RevBayesCore::assume_cast< RateMatrix_revPoMoBalance4N* >(value)->setPi( p );
+    RevBayesCore::assume_cast< RateMatrix_revPoMoBalance4N* >(value)->setRho( r );
+    RevBayesCore::assume_cast< RateMatrix_revPoMoBalance4N* >(value)->setPhi( s );
+    RevBayesCore::assume_cast< RateMatrix_revPoMoBalance4N* >(value)->setBeta( b );
+    RevBayesCore::assume_cast< RateMatrix_revPoMoBalance4N* >(value)->setB( Bf );
 
     value->update();
 }

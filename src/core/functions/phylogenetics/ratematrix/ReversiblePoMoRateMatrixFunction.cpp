@@ -1,4 +1,5 @@
 #include "ReversiblePoMoRateMatrixFunction.h"
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 
 #include "Cloneable.h"
@@ -45,13 +46,13 @@ void ReversiblePoMoRateMatrixFunction::update( void )
 {
 
     // set the exchangeability rates
-    static_cast< RateMatrix_ReversiblePoMo* >(value)->setExchangeabilityRates( static_cast< const RbVector<double>& > ( exchangeabilities->getValue() ) );
+    RevBayesCore::assume_cast< RateMatrix_ReversiblePoMo* >(value)->setExchangeabilityRates( RevBayesCore::assume_cast< const RbVector<double>& > ( exchangeabilities->getValue() ) );
 
     // set the stationary frequencies
-    static_cast< RateMatrix_ReversiblePoMo* >(value)->setStationaryFrequencies( static_cast< const Simplex& > ( equilibrium_frequencies->getValue() ) );
+    RevBayesCore::assume_cast< RateMatrix_ReversiblePoMo* >(value)->setStationaryFrequencies( RevBayesCore::assume_cast< const Simplex& > ( equilibrium_frequencies->getValue() ) );
 
     // now update the matrix
-    static_cast< RateMatrix_ReversiblePoMo* >(value)->update();
+    RevBayesCore::assume_cast< RateMatrix_ReversiblePoMo* >(value)->update();
 
 }
 

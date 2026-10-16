@@ -1,4 +1,5 @@
 #include "FreeSymmetricRateMatrixFunction.h"
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
@@ -57,7 +58,7 @@ void FreeSymmetricRateMatrixFunction::update( void )
     const std::vector<double>& trr = transition_rates->getValue();
     
     // set the base frequencies
-    static_cast< RateMatrix_FreeSymmetric* >(value)->setTransitionRates(trr);
+    RevBayesCore::assume_cast< RateMatrix_FreeSymmetric* >(value)->setTransitionRates(trr);
     
     value->update();
 }

@@ -1,4 +1,5 @@
 #include "ContinuousStochasticNode.h"
+#include "TypeUtilities.h"
 
 #include "ContinuousDistribution.h"
 
@@ -20,13 +21,13 @@ ContinuousStochasticNode* ContinuousStochasticNode::clone( void ) const
 double ContinuousStochasticNode::getMax( void ) const
 {
     
-    return static_cast<ContinuousDistribution *>( distribution )->getMax();
+    return RevBayesCore::assume_cast<ContinuousDistribution *>( distribution )->getMax();
 }
 
 
 double ContinuousStochasticNode::getMin( void ) const
 {
     
-    return static_cast<ContinuousDistribution *>( distribution )->getMin();
+    return RevBayesCore::assume_cast<ContinuousDistribution *>( distribution )->getMin();
 }
 

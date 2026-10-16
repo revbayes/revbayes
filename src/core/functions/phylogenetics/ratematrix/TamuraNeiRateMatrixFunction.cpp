@@ -1,4 +1,5 @@
 #include <vector>
+#include "TypeUtilities.h"
 
 #include "RateGenerator.h"
 #include "DagNodeTypeUtilities.h"
@@ -57,8 +58,8 @@ void TamuraNeiRateMatrixFunction::update( void )
     
     
     // set the base frequencies
-    static_cast< RateMatrix_TamuraNei* >(value)->setStationaryFrequencies( f );
-    static_cast< RateMatrix_TamuraNei* >(value)->setKappa(k1, k2);
+    RevBayesCore::assume_cast< RateMatrix_TamuraNei* >(value)->setStationaryFrequencies( f );
+    RevBayesCore::assume_cast< RateMatrix_TamuraNei* >(value)->setKappa(k1, k2);
     
     value->update();
     

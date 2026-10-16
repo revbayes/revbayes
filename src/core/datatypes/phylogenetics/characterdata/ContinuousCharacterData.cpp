@@ -1,4 +1,5 @@
 #include "ContinuousCharacterData.h"
+#include "TypeUtilities.h"
 
 #include <cmath>
 #include <string>
@@ -391,8 +392,8 @@ void ContinuousCharacterData::executeMethod(const std::string &n, const std::vec
     
     if ( n == "get" )
     {
-        std::int64_t index_taxon = static_cast<const TypedDagNode<std::int64_t> *>( args[0] )->getValue()-1;
-        std::int64_t index_site = static_cast<const TypedDagNode<std::int64_t> *>( args[1] )->getValue()-1;
+        std::int64_t index_taxon = RevBayesCore::assume_cast<const TypedDagNode<std::int64_t> *>( args[0] )->getValue()-1;
+        std::int64_t index_site = RevBayesCore::assume_cast<const TypedDagNode<std::int64_t> *>( args[1] )->getValue()-1;
         rv = getTaxonData(index_taxon)[index_site];
     }
     else
@@ -996,7 +997,7 @@ const ContinuousTaxonData& ContinuousCharacterData::getTaxonData( size_t tn ) co
     
     if (i != taxonMap.end() ) 
     {
-        return static_cast<const ContinuousTaxonData& >(*i->second);
+        return RevBayesCore::assume_cast<const ContinuousTaxonData& >(*i->second);
     }
     else 
     {
@@ -1024,7 +1025,7 @@ ContinuousTaxonData& ContinuousCharacterData::getTaxonData( size_t tn )
     
     if (i != taxonMap.end() ) 
     {
-        return static_cast< ContinuousTaxonData& >(*i->second);
+        return RevBayesCore::assume_cast< ContinuousTaxonData& >(*i->second);
     }
     else 
     {
@@ -1051,7 +1052,7 @@ const ContinuousTaxonData& ContinuousCharacterData::getTaxonData( const std::str
     
     if (i != taxonMap.end() ) 
     {
-        return static_cast<const ContinuousTaxonData& >(*i->second);
+        return RevBayesCore::assume_cast<const ContinuousTaxonData& >(*i->second);
     }
     else 
     {
@@ -1079,7 +1080,7 @@ ContinuousTaxonData& ContinuousCharacterData::getTaxonData( const std::string &t
     
     if (i != taxonMap.end() ) 
     {
-        return static_cast< ContinuousTaxonData& >(*i->second);
+        return RevBayesCore::assume_cast< ContinuousTaxonData& >(*i->second);
     }
     else 
     {
@@ -1437,7 +1438,7 @@ void ContinuousCharacterData::initFromFile(const path &dir, const std::string &f
     myFileType += suffix;
         
     std::vector<AbstractCharacterData*> m_i = reader.readMatrices( filename , myFileType );
-    ContinuousCharacterData *coreM = static_cast<ContinuousCharacterData *>( m_i[0] );
+    ContinuousCharacterData *coreM = RevBayesCore::assume_cast<ContinuousCharacterData *>( m_i[0] );
 
     *this = *coreM;
     

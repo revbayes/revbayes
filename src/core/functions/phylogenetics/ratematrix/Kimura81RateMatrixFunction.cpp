@@ -1,4 +1,5 @@
 #include "Kimura81RateMatrixFunction.h"
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 
 #include <vector>
@@ -57,8 +58,8 @@ void Kimura81RateMatrixFunction::update( void )
     
     
     // set the base frequencies
-    static_cast< RateMatrix_Kimura81* >(value)->setStationaryFrequencies( f );
-    static_cast< RateMatrix_Kimura81* >(value)->setKappa(k1, k2);
+    RevBayesCore::assume_cast< RateMatrix_Kimura81* >(value)->setStationaryFrequencies( f );
+    RevBayesCore::assume_cast< RateMatrix_Kimura81* >(value)->setKappa(k1, k2);
     
     value->update();
     

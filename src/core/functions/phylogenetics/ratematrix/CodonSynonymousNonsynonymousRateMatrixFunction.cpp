@@ -1,4 +1,5 @@
 #include "CodonSynonymousNonsynonymousRateMatrixFunction.h"
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 
 #include <vector>
@@ -47,8 +48,8 @@ void CodonSynonymousNonsynonymousRateMatrixFunction::update( void )
     
     
     // set the base frequencies
-    static_cast< RateMatrix_CodonSynonymousNonsynonymous* >(value)->setCodonFrequencies( f );
-    static_cast< RateMatrix_CodonSynonymousNonsynonymous* >(value)->setOmega( o );
+    RevBayesCore::assume_cast< RateMatrix_CodonSynonymousNonsynonymous* >(value)->setCodonFrequencies( f );
+    RevBayesCore::assume_cast< RateMatrix_CodonSynonymousNonsynonymous* >(value)->setOmega( o );
     
     value->update();
 }

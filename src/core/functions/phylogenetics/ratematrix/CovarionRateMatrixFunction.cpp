@@ -7,6 +7,7 @@
 //
 
 #include "CovarionRateMatrixFunction.h"
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
@@ -73,9 +74,9 @@ void CovarionRateMatrixFunction::update( void )
     
     
     // set the base frequencies
-    static_cast< RateMatrix_Covarion* >(value)->setRateMatrices( rm );
-    static_cast< RateMatrix_Covarion* >(value)->setSwitchRates( sr );
-    static_cast< RateMatrix_Covarion* >(value)->setClockRates( cr );
+    RevBayesCore::assume_cast< RateMatrix_Covarion* >(value)->setRateMatrices( rm );
+    RevBayesCore::assume_cast< RateMatrix_Covarion* >(value)->setSwitchRates( sr );
+    RevBayesCore::assume_cast< RateMatrix_Covarion* >(value)->setClockRates( cr );
     
     value->update();
     

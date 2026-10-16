@@ -1,4 +1,5 @@
 #include "PoMoRateMatrixFunction.h"
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 
 #include "RateMatrix_PoMo.h"
@@ -70,9 +71,9 @@ void PoMoRateMatrixFunction::update( void )
     
     
     // set the base frequencies
-    static_cast< RateMatrix_PoMo* >(value)->setMutationRates( r );
-    static_cast< RateMatrix_PoMo* >(value)->setSelectionCoefficients( s );
-    static_cast< RateMatrix_PoMo* >(value)->update();
+    RevBayesCore::assume_cast< RateMatrix_PoMo* >(value)->setMutationRates( r );
+    RevBayesCore::assume_cast< RateMatrix_PoMo* >(value)->setSelectionCoefficients( s );
+    RevBayesCore::assume_cast< RateMatrix_PoMo* >(value)->update();
     
 }
 

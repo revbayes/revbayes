@@ -2,6 +2,7 @@
 #define ReversibleJumpMixtureProposal_H
 
 #include <set>
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include <string>
 
@@ -208,7 +209,7 @@ double RevBayesCore::ReversibleJumpMixtureProposal<mixtureType>::doProposal( voi
     
     
     mixtureType& v = variable->getValue();
-    ReversibleJumpMixtureConstantDistribution<mixtureType> &d = static_cast< ReversibleJumpMixtureConstantDistribution<mixtureType>& >( variable->getDistribution() );
+    ReversibleJumpMixtureConstantDistribution<mixtureType> &d = RevBayesCore::assume_cast< ReversibleJumpMixtureConstantDistribution<mixtureType>& >( variable->getDistribution() );
     
     // copy value
     stored_value = Cloner<mixtureType, IsDerivedFrom<mixtureType, Cloneable>::Is >::createClone( v );
@@ -285,7 +286,7 @@ void RevBayesCore::ReversibleJumpMixtureProposal<mixtureType>::undoProposal( voi
     variable->setValue( Cloner<mixtureType, IsDerivedFrom<mixtureType, Cloneable>::Is >::createClone( *stored_value ) );
     
     // also reset the index
-    ReversibleJumpMixtureConstantDistribution<mixtureType> &d = static_cast< ReversibleJumpMixtureConstantDistribution<mixtureType>& >( variable->getDistribution() );
+    ReversibleJumpMixtureConstantDistribution<mixtureType> &d = RevBayesCore::assume_cast< ReversibleJumpMixtureConstantDistribution<mixtureType>& >( variable->getDistribution() );
     d.setCurrentIndex( stored_index );
 }
 

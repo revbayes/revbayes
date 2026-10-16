@@ -13,6 +13,7 @@
  */
 
 #include "ChromosomesPloidyRateMatrixFunction.h"
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 
 #include "RateMatrix_ChromosomesPloidy.h"
@@ -70,21 +71,21 @@ void ChromosomesPloidyRateMatrixFunction::update( void ) {
     double e_p = eta_p->getValue();
     double be = beta->getValue();
 
-    static_cast< RateMatrix_ChromosomesPloidy* >(value)->setGamma_d( ga_d );
-    static_cast< RateMatrix_ChromosomesPloidy* >(value)->setDelta_d( de_d );
-    static_cast< RateMatrix_ChromosomesPloidy* >(value)->setRho_d( rh_d );
-    static_cast< RateMatrix_ChromosomesPloidy* >(value)->setEta_d( e_d );
-    static_cast< RateMatrix_ChromosomesPloidy* >(value)->setGamma_dl( ga_dl );
-    static_cast< RateMatrix_ChromosomesPloidy* >(value)->setDelta_dl( de_dl );
-    static_cast< RateMatrix_ChromosomesPloidy* >(value)->setGamma_p( ga_p );
-    static_cast< RateMatrix_ChromosomesPloidy* >(value)->setDelta_p( de_p );
-    static_cast< RateMatrix_ChromosomesPloidy* >(value)->setRho_p( rh_p );
-    static_cast< RateMatrix_ChromosomesPloidy* >(value)->setEta_p( e_p );
-    static_cast< RateMatrix_ChromosomesPloidy* >(value)->setGamma_pl( ga_pl );
-    static_cast< RateMatrix_ChromosomesPloidy* >(value)->setDelta_pl( de_pl );
-    static_cast< RateMatrix_ChromosomesPloidy* >(value)->setBeta( be );
+    RevBayesCore::assume_cast< RateMatrix_ChromosomesPloidy* >(value)->setGamma_d( ga_d );
+    RevBayesCore::assume_cast< RateMatrix_ChromosomesPloidy* >(value)->setDelta_d( de_d );
+    RevBayesCore::assume_cast< RateMatrix_ChromosomesPloidy* >(value)->setRho_d( rh_d );
+    RevBayesCore::assume_cast< RateMatrix_ChromosomesPloidy* >(value)->setEta_d( e_d );
+    RevBayesCore::assume_cast< RateMatrix_ChromosomesPloidy* >(value)->setGamma_dl( ga_dl );
+    RevBayesCore::assume_cast< RateMatrix_ChromosomesPloidy* >(value)->setDelta_dl( de_dl );
+    RevBayesCore::assume_cast< RateMatrix_ChromosomesPloidy* >(value)->setGamma_p( ga_p );
+    RevBayesCore::assume_cast< RateMatrix_ChromosomesPloidy* >(value)->setDelta_p( de_p );
+    RevBayesCore::assume_cast< RateMatrix_ChromosomesPloidy* >(value)->setRho_p( rh_p );
+    RevBayesCore::assume_cast< RateMatrix_ChromosomesPloidy* >(value)->setEta_p( e_p );
+    RevBayesCore::assume_cast< RateMatrix_ChromosomesPloidy* >(value)->setGamma_pl( ga_pl );
+    RevBayesCore::assume_cast< RateMatrix_ChromosomesPloidy* >(value)->setDelta_pl( de_pl );
+    RevBayesCore::assume_cast< RateMatrix_ChromosomesPloidy* >(value)->setBeta( be );
 
-    static_cast< RateMatrix_ChromosomesPloidy* >(value)->update();
+    RevBayesCore::assume_cast< RateMatrix_ChromosomesPloidy* >(value)->update();
     
 }
 

@@ -1,4 +1,5 @@
 #include <cmath>
+#include "TypeUtilities.h"
 #include <cstddef>
 #include <deque>
 #include <iosfwd>
@@ -210,7 +211,7 @@ void PhyloBrownianProcessStateDependent::recursiveComputeLnProbability( const To
 
                 for (std::multiset<CharacterEvent*,CharacterEventCompare>::const_iterator it=hist_left.begin(); it!=hist_left.end(); ++it)
                 {
-                    CharacterEventDiscrete* event = static_cast<CharacterEventDiscrete*>(*it);
+                    CharacterEventDiscrete* event = RevBayesCore::assume_cast<CharacterEventDiscrete*>(*it);
                     double event_time = event->getAge();
 
                     // we need to set the current rate category
@@ -224,7 +225,7 @@ void PhyloBrownianProcessStateDependent::recursiveComputeLnProbability( const To
                     // update our variables
                     begin_time_left     = event_time;
                 }
-                size_t last_state_left  = static_cast<CharacterEventDiscrete*>(bh_left.getParentCharacters()[0])->getState();
+                size_t last_state_left  = RevBayesCore::assume_cast<CharacterEventDiscrete*>(bh_left.getParentCharacters()[0])->getState();
                 double sigma_left = computeStateDependentSigma( last_state_left );
                 v_left += (sigma_left*sigma_left) * (node.getAge() - begin_time_left);
             }
@@ -239,7 +240,7 @@ void PhyloBrownianProcessStateDependent::recursiveComputeLnProbability( const To
 
             for (std::multiset<CharacterEvent*,CharacterEventCompare>::const_iterator it=hist_right.begin(); it!=hist_right.end(); ++it)
             {
-                CharacterEventDiscrete* event = static_cast<CharacterEventDiscrete*>(*it);
+                CharacterEventDiscrete* event = RevBayesCore::assume_cast<CharacterEventDiscrete*>(*it);
                 double event_time = event->getAge();
 
                 // we need to set the current rate category
@@ -253,7 +254,7 @@ void PhyloBrownianProcessStateDependent::recursiveComputeLnProbability( const To
                 // update our variables
                 begin_time_right     = event_time;
             }
-            size_t last_state_right  = static_cast<CharacterEventDiscrete*>(bh_right.getParentCharacters()[0])->getState();
+            size_t last_state_right  = RevBayesCore::assume_cast<CharacterEventDiscrete*>(bh_right.getParentCharacters()[0])->getState();
             double sigma_right = computeStateDependentSigma( last_state_right );
             v_right += (sigma_right*sigma_right) * (node.getAge() - begin_time_right);
 
@@ -712,7 +713,7 @@ void PhyloBrownianProcessStateDependent::simulateRecursively( const TopologyNode
             for (std::multiset<CharacterEvent*, CharacterEventCompare>::const_iterator iter = history.begin(); iter != history.end(); ++iter)
             {
                 // get the state change event
-                CharacterEventDiscrete* event = static_cast<CharacterEventDiscrete*>(*iter);
+                CharacterEventDiscrete* event = RevBayesCore::assume_cast<CharacterEventDiscrete*>(*iter);
 
                 // calculate the times
                 double event_time = event->getAge();
@@ -728,7 +729,7 @@ void PhyloBrownianProcessStateDependent::simulateRecursively( const TopologyNode
             }
 
             // do it again, since the iterator above only does n-1 of the episodes
-            size_t first_state = static_cast<CharacterEventDiscrete*>(bh.getParentCharacters()[0])->getState();
+            size_t first_state = RevBayesCore::assume_cast<CharacterEventDiscrete*>(bh.getParentCharacters()[0])->getState();
             double first_delta_t = node.getAge() - begin_time;
 
             times.push_front(first_delta_t);

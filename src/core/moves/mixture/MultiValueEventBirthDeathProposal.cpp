@@ -1,4 +1,5 @@
 #include "MultiValueEventBirthDeathProposal.h"
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 
 #include <cmath>
@@ -393,7 +394,7 @@ void MultiValueEventBirthDeathProposal::undoProposal( void )
 {
     
     MultiValueEvent &mve = event_var->getValue();
-    const MultiValueEventDistribution &dist_mve = static_cast< const MultiValueEventDistribution &>( event_var->getDistribution() );
+    const MultiValueEventDistribution &dist_mve = RevBayesCore::assume_cast< const MultiValueEventDistribution &>( event_var->getDistribution() );
     std::int64_t n_events = mve.getNumberOfEvents();
     
     // undo the proposal

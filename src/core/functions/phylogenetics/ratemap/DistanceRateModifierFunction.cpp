@@ -7,6 +7,7 @@
 //
 
 #include "DistanceRateModifierFunction.h"
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 
 #include "DistanceRateModifier.h"
@@ -44,7 +45,7 @@ void DistanceRateModifierFunction::update( void )
     // recompute distances based on distancePower
     double dp = distancePower->getValue();
     
-    static_cast<DistanceRateModifier*>(value)->setDistancePower(dp, true);
+    RevBayesCore::assume_cast<DistanceRateModifier*>(value)->setDistancePower(dp, true);
 }
 
 

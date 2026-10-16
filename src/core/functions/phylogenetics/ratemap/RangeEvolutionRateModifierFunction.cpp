@@ -7,6 +7,7 @@
 //
 
 #include "RangeEvolutionRateModifierFunction.h"
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 
 #include "RangeEvolutionRateModifier.h"
@@ -59,13 +60,13 @@ void RangeEvolutionRateModifierFunction::update( void )
 {
     
     double gf = gainFactor->getValue();
-    static_cast<RangeEvolutionRateModifier*>(value)->setGainFactor(gf);
+    RevBayesCore::assume_cast<RangeEvolutionRateModifier*>(value)->setGainFactor(gf);
     
     double lf = lossFactor->getValue();
-    static_cast<RangeEvolutionRateModifier*>(value)->setLossFactor(lf);
+    RevBayesCore::assume_cast<RangeEvolutionRateModifier*>(value)->setLossFactor(lf);
     
     RbVector<RbVector<double> > c = context_matrix->getValue();
-    static_cast<RangeEvolutionRateModifier*>(value)->setContextMatrix(c);
+    RevBayesCore::assume_cast<RangeEvolutionRateModifier*>(value)->setContextMatrix(c);
 
 }
 

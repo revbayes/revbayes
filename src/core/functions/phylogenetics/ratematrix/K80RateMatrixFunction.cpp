@@ -1,4 +1,5 @@
 #include "K80RateMatrixFunction.h"
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 
 #include "Cloneable.h"
@@ -46,7 +47,7 @@ void K80RateMatrixFunction::update( void )
     double k = kappa->getValue();
     
     // set the base frequencies
-    static_cast< RateMatrix_Kimura80* >(value)->setKappa( k );
+    RevBayesCore::assume_cast< RateMatrix_Kimura80* >(value)->setKappa( k );
     
     value->update();
 }

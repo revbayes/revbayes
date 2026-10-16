@@ -1,4 +1,5 @@
 #include "CovarionFunction.h"
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 
 #include <cstddef>
@@ -133,7 +134,7 @@ void CovarionFunction::update( void )
     }
     
     // finally set the rates in the actual matrix
-    static_cast< RateMatrix_FreeK* >(value)->setTransitionRates( all_rates_flat );
+    RevBayesCore::assume_cast< RateMatrix_FreeK* >(value)->setTransitionRates( all_rates_flat );
 
     // set the emitted letters for each covarion state in the actual matrix
     std::vector<int> emit(num_states);
@@ -141,7 +142,7 @@ void CovarionFunction::update( void )
     {
         emit[i] = i % num_org_states;
     }
-    static_cast< RateMatrix_FreeK* >(value)->set_emitted_letters( emit);
+    RevBayesCore::assume_cast< RateMatrix_FreeK* >(value)->set_emitted_letters( emit);
 
     value->update();
 }

@@ -1,4 +1,5 @@
 #include "RbHelpRenderer.h"
+#include "TypeUtilities.h"
 
 #include <string>
 #include <vector>
@@ -299,11 +300,11 @@ std::string HelpRenderer::renderHelp(const RbHelpEntry &entryHelp, size_t w)
 {
     if ( dynamic_cast< const RbHelpFunction *>( &entryHelp ) != NULL)
     {
-        return renderHelp( static_cast<const RbHelpFunction &>( entryHelp ), w);
+        return renderHelp( RevBayesCore::assume_cast<const RbHelpFunction &>( entryHelp ), w);
     }
     else if ( dynamic_cast< const RbHelpType *>( &entryHelp ) != NULL)
     {
-        return renderHelp( static_cast<const RbHelpType &>( entryHelp ), w);
+        return renderHelp( RevBayesCore::assume_cast<const RbHelpType &>( entryHelp ), w);
     }
 
     throw RbException("Unexpected help type.");

@@ -1,4 +1,5 @@
 #include "GtrRateMatrixFunction.h"
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 
 #include <vector>
@@ -52,8 +53,8 @@ void GtrRateMatrixFunction::update( void )
     
     
     // set the base frequencies
-    static_cast< RateMatrix_GTR* >(value)->setStationaryFrequencies( f );
-    static_cast< RateMatrix_GTR* >(value)->setExchangeabilityRates( r );
+    RevBayesCore::assume_cast< RateMatrix_GTR* >(value)->setStationaryFrequencies( f );
+    RevBayesCore::assume_cast< RateMatrix_GTR* >(value)->setExchangeabilityRates( r );
     
     value->update();
     

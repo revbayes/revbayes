@@ -1,4 +1,5 @@
 #include "BranchHistoryContinuous.h"
+#include "TypeUtilities.h"
 
 #include <vector>
 
@@ -35,7 +36,7 @@ BranchHistoryContinuous* BranchHistoryContinuous::clone(void) const
 CharacterEventContinuous* BranchHistoryContinuous::getEvent(size_t i)
 {
     
-    return static_cast<CharacterEventContinuous*>( BranchHistory::getEvent(i) );
+    return RevBayesCore::assume_cast<CharacterEventContinuous*>( BranchHistory::getEvent(i) );
 }
 
 

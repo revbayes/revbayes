@@ -1,4 +1,5 @@
 #include "OrderedRateMatrixFunction.h"
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 
 #include "RateMatrix_FreeK.h"
@@ -53,7 +54,7 @@ void OrderedRateMatrixFunction::update( void )
     double l = lambda->getValue();
     double m = mu->getValue();
 
-    size_t n = static_cast< RateMatrix_FreeK* >(value)->getNumberOfStates();
+    size_t n = RevBayesCore::assume_cast< RateMatrix_FreeK* >(value)->getNumberOfStates();
     
     std::vector<double> r_flat( n * (n-1) );
     size_t k = 0;
@@ -82,7 +83,7 @@ void OrderedRateMatrixFunction::update( void )
     }
 
     // set the flattened rates
-    static_cast< RateMatrix_FreeK* >(value)->setTransitionRates(r_flat);
+    RevBayesCore::assume_cast< RateMatrix_FreeK* >(value)->setTransitionRates(r_flat);
 
     value->update();
     

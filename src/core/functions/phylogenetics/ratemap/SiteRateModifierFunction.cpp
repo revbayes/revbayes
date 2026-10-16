@@ -7,6 +7,7 @@
 //
 
 #include "SiteRateModifierFunction.h"
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 
 #include "SiteRateModifier.h"
@@ -65,9 +66,9 @@ void SiteRateModifierFunction::update( void )
     const RbVector<std::int64_t>& sc               = site_classes->getValue();
     
     // apply updates to SiteRateModifier
-    static_cast<SiteRateModifier*>(value)->setRateMultipliers(rm);
-    static_cast<SiteRateModifier*>(value)->setEventClasses(ec);
-    static_cast<SiteRateModifier*>(value)->setSiteClasses(sc);
+    RevBayesCore::assume_cast<SiteRateModifier*>(value)->setRateMultipliers(rm);
+    RevBayesCore::assume_cast<SiteRateModifier*>(value)->setEventClasses(ec);
+    RevBayesCore::assume_cast<SiteRateModifier*>(value)->setSiteClasses(sc);
     
 }
 

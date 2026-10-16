@@ -7,6 +7,7 @@
 //
 
 #include "EpochRateMatrixFunction.h"
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 
 #include "RateGenerator.h"
@@ -55,9 +56,9 @@ void EpochRateMatrixFunction::update( void )
     
     
     // set the base frequencies
-    static_cast<RateGenerator_Epoch*>(value)->setEpochGenerators(rg);
-    static_cast<RateGenerator_Epoch*>(value)->setEpochRates(r);
-    static_cast<RateGenerator_Epoch*>(value)->setEpochTimes(t);
+    RevBayesCore::assume_cast<RateGenerator_Epoch*>(value)->setEpochGenerators(rg);
+    RevBayesCore::assume_cast<RateGenerator_Epoch*>(value)->setEpochRates(r);
+    RevBayesCore::assume_cast<RateGenerator_Epoch*>(value)->setEpochTimes(t);
     
     value->update();
     

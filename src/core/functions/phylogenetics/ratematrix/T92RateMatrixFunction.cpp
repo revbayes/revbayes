@@ -1,4 +1,5 @@
 #include "T92RateMatrixFunction.h"
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 
 #include "RateMatrix_Tamura92.h"
@@ -52,8 +53,8 @@ void T92RateMatrixFunction::update( void )
     
     
     // set the base frequencies
-    static_cast< RateMatrix_Tamura92* >(value)->setGC( gc );
-    static_cast< RateMatrix_Tamura92* >(value)->setKappa( k );
+    RevBayesCore::assume_cast< RateMatrix_Tamura92* >(value)->setGC( gc );
+    RevBayesCore::assume_cast< RateMatrix_Tamura92* >(value)->setKappa( k );
     
     value->update();
 

@@ -2,6 +2,7 @@
 #define JointConditionalJointConditionalAncestralStateMonitor_H
 
 #include "AbstractHomologousDiscreteCharacterData.h"
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "StateDependentSpeciationExtinctionProcess.h"
 #include "GeneralizedLineageHeterogeneousBirthDeathSamplingProcess.h"
@@ -149,7 +150,7 @@ void JointConditionalAncestralStateMonitor<characterType>::monitorVariables(std:
     GeneralizedLineageHeterogeneousBirthDeathSamplingProcess *dist_glhbdsp = NULL;
     if ( ctmc != NULL )
     {
-        dist_ctmc = static_cast<AbstractPhyloCTMCSiteHomogeneous<characterType>* >( &ctmc->getDistribution() );
+        dist_ctmc = RevBayesCore::assume_cast<AbstractPhyloCTMCSiteHomogeneous<characterType>* >( &ctmc->getDistribution() );
         num_sites = dist_ctmc->getValue().getNumberOfCharacters();
         num_nodes = tree->getValue().getNumberOfNodes();
     }

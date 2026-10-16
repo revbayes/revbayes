@@ -2,6 +2,7 @@
 #define CharacterHistorySummaryMonitor_h
 
 #include "AbstractCharacterData.h"
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "TreeHistoryCtmc.h"
 #include "BiogeographicCladoEvent.h"
@@ -95,7 +96,7 @@ num_states(0)
     //    nodes.push_back(t);
     s->incrementReferenceCount();
 
-    num_states = static_cast<const DiscreteCharacterState&>(s->getValue().getCharacter(0,0)).getNumberOfStates();
+    num_states = RevBayesCore::assume_cast<const DiscreteCharacterState&>(s->getValue().getCharacter(0,0)).getNumberOfStates();
 }
 
 template<class charType>
@@ -196,7 +197,7 @@ std::string RevBayesCore::CharacterHistorySummaryMonitor<charType>::buildIterati
     std::stringstream o;
 
     // get character history for tree
-    TreeHistoryCtmc<charType>* p = static_cast< TreeHistoryCtmc<charType>* >(&variable->getDistribution());
+    TreeHistoryCtmc<charType>* p = RevBayesCore::assume_cast< TreeHistoryCtmc<charType>* >(&variable->getDistribution());
 
     // get branch history for node
     const BranchHistory& bh = p->getHistory(*n);
@@ -262,8 +263,8 @@ std::string RevBayesCore::CharacterHistorySummaryMonitor<charType>::buildIterati
     std::stringstream end_state_ss;
 
     for (size_t i = 0; i < start_states.size(); i++) {
-        start_state_ss << static_cast<CharacterEventDiscrete*>( start_states[i] )->getState();
-        end_state_ss << static_cast<CharacterEventDiscrete*>( end_states[i] )->getState();
+        start_state_ss << RevBayesCore::assume_cast<CharacterEventDiscrete*>( start_states[i] )->getState();
+        end_state_ss << RevBayesCore::assume_cast<CharacterEventDiscrete*>( end_states[i] )->getState();
     }
 
     // no_change along or at end of branch
@@ -286,11 +287,11 @@ std::string RevBayesCore::CharacterHistorySummaryMonitor<charType>::buildIterati
                 std::stringstream curr_state_ss;
                 std::stringstream next_state_ss;
 
-                CharacterEventDiscrete* evt = static_cast<CharacterEventDiscrete*>( *it );
+                CharacterEventDiscrete* evt = RevBayesCore::assume_cast<CharacterEventDiscrete*>( *it );
                 next_states[ evt->getSiteIndex() ] = evt;
                 for (size_t i = 0; i < start_states.size(); i++) {
-                    curr_state_ss << static_cast<CharacterEventDiscrete*>( start_states[i] )->getState();
-                    next_state_ss << static_cast<CharacterEventDiscrete*>( next_states[i] )->getState();
+                    curr_state_ss << RevBayesCore::assume_cast<CharacterEventDiscrete*>( start_states[i] )->getState();
+                    next_state_ss << RevBayesCore::assume_cast<CharacterEventDiscrete*>( next_states[i] )->getState();
                 }
 
                 o << ss_prefix.str() << separator;
@@ -318,7 +319,7 @@ std::string RevBayesCore::CharacterHistorySummaryMonitor<charType>::buildIterati
 
                 // make child state string
                 for (size_t i = 0; i < start_states.size(); i++) {
-                    child_state_ss << static_cast<CharacterEventDiscrete*>( child_states[i] )->getState();
+                    child_state_ss << RevBayesCore::assume_cast<CharacterEventDiscrete*>( child_states[i] )->getState();
                 }
 
                 // make child cladogenesis row string
@@ -344,7 +345,7 @@ template<class charType>
 bool RevBayesCore::CharacterHistorySummaryMonitor<charType>::isCladogenetic( TopologyNode* n ) {
 
     // get character history for tree
-    TreeHistoryCtmc<charType>* p = static_cast< TreeHistoryCtmc<charType>* >(&variable->getDistribution());
+    TreeHistoryCtmc<charType>* p = RevBayesCore::assume_cast< TreeHistoryCtmc<charType>* >(&variable->getDistribution());
 
     bool is_cladogenetic = false;
     if ( !n->isTip() ) {
@@ -355,9 +356,9 @@ bool RevBayesCore::CharacterHistorySummaryMonitor<charType>::isCladogenetic( Top
         const std::vector<CharacterEvent*>& start_states_child1 = p->getHistory(n_child1).getParentCharacters();
 
         for (size_t i = 0; i < end_states.size(); i++) {
-            size_t s_node = static_cast<CharacterEventDiscrete*>( end_states[i] )->getState();
-            size_t s_child0 = static_cast<CharacterEventDiscrete*>( start_states_child0[i] )->getState();
-            size_t s_child1 = static_cast<CharacterEventDiscrete*>( start_states_child1[i] )->getState();
+            size_t s_node = RevBayesCore::assume_cast<CharacterEventDiscrete*>( end_states[i] )->getState();
+            size_t s_child0 = RevBayesCore::assume_cast<CharacterEventDiscrete*>( start_states_child0[i] )->getState();
+            size_t s_child1 = RevBayesCore::assume_cast<CharacterEventDiscrete*>( start_states_child1[i] )->getState();
 
             if (s_node != s_child0 || s_node != s_child1) {
                 is_cladogenetic = true;

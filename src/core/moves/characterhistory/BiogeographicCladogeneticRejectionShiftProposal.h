@@ -2,6 +2,7 @@
 #define BiogeographicCladogeneticRejectionShiftProposal_H
 
 #include "BranchHistoryDiscrete.h"
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "CharacterEventDiscrete.h"
 #include "DeterministicNode.h"
@@ -240,7 +241,7 @@ double RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<charType>::
     const std::vector<CharacterEvent*>& nodeChildState = histories[ node_index  ].getChildCharacters();
     for (size_t i = 0; i < nodeChildState.size(); i++)
     {
-        size_t j = static_cast<CharacterEventDiscrete*>( nodeChildState[i] )->getState();
+        size_t j = RevBayesCore::assume_cast<CharacterEventDiscrete*>( nodeChildState[i] )->getState();
         if (j == 1)
         {
             onCharacters.push_back( i );
@@ -486,16 +487,16 @@ double RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<charType>::
     {
         size_t site_index = *it_s;
         
-        size_t srcSA = static_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->getState();
-        size_t desSA = static_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->getState();
+        size_t srcSA = RevBayesCore::assume_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->getState();
+        size_t desSA = RevBayesCore::assume_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->getState();
         double probA = nodeTpMatrix[srcSA][desSA];
         
-        size_t srcS1 = static_cast<CharacterEventDiscrete*>(leftParentState[site_index])->getState();
-        size_t desS1 = static_cast<CharacterEventDiscrete*>(leftChildState[site_index])->getState();
+        size_t srcS1 = RevBayesCore::assume_cast<CharacterEventDiscrete*>(leftParentState[site_index])->getState();
+        size_t desS1 = RevBayesCore::assume_cast<CharacterEventDiscrete*>(leftChildState[site_index])->getState();
         double prob1 = leftTpMatrix[srcS1][desS1];
         
-        size_t srcS2 = static_cast<CharacterEventDiscrete*>(rightParentState[site_index])->getState();
-        size_t desS2 = static_cast<CharacterEventDiscrete*>(rightChildState[site_index])->getState();
+        size_t srcS2 = RevBayesCore::assume_cast<CharacterEventDiscrete*>(rightParentState[site_index])->getState();
+        size_t desS2 = RevBayesCore::assume_cast<CharacterEventDiscrete*>(rightChildState[site_index])->getState();
         double prob2 = rightTpMatrix[srcS2][desS2];
         
         
@@ -559,14 +560,14 @@ double RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<charType>::
             size_t site_index = *it_s;
             
             // start states
-            size_t A_i = static_cast<CharacterEventDiscrete*>(nodeParentState[site_index] )->getState();
-            size_t R_i = static_cast<CharacterEventDiscrete*>(rightParentState[site_index])->getState();
-            size_t L_i = static_cast<CharacterEventDiscrete*>(leftParentState[site_index] )->getState();
+            size_t A_i = RevBayesCore::assume_cast<CharacterEventDiscrete*>(nodeParentState[site_index] )->getState();
+            size_t R_i = RevBayesCore::assume_cast<CharacterEventDiscrete*>(rightParentState[site_index])->getState();
+            size_t L_i = RevBayesCore::assume_cast<CharacterEventDiscrete*>(leftParentState[site_index] )->getState();
             
             // end states
-            size_t A_j = static_cast<CharacterEventDiscrete*>(nodeChildState[site_index]  )->getState();
-            size_t R_j = static_cast<CharacterEventDiscrete*>(rightChildState[site_index] )->getState();
-            size_t L_j = static_cast<CharacterEventDiscrete*>(leftChildState[site_index]  )->getState();
+            size_t A_j = RevBayesCore::assume_cast<CharacterEventDiscrete*>(nodeChildState[site_index]  )->getState();
+            size_t R_j = RevBayesCore::assume_cast<CharacterEventDiscrete*>(rightChildState[site_index] )->getState();
+            size_t L_j = RevBayesCore::assume_cast<CharacterEventDiscrete*>(leftChildState[site_index]  )->getState();
             
             // get transition probs
             std::vector<double> state_probs(3, 0.0);
@@ -664,7 +665,7 @@ double RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<charType>::
     size_t n_right_on = 0;
     for (size_t i = 0; i < numCharacters; i++)
     {
-        n_right_on += static_cast<CharacterEventDiscrete*>(rightParentState[i])->getState();
+        n_right_on += RevBayesCore::assume_cast<CharacterEventDiscrete*>(rightParentState[i])->getState();
         if (n_right_on > 1) {
             trunk_branch = "right";
             break;
@@ -709,11 +710,11 @@ double RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<charType>::
         {
             // get ancestral and trunk states
             size_t site_index = *it_s;
-            size_t A_i = static_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->getState();
-            size_t T_i = static_cast<CharacterEventDiscrete*>(trunkParentState[site_index])->getState();
+            size_t A_i = RevBayesCore::assume_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->getState();
+            size_t T_i = RevBayesCore::assume_cast<CharacterEventDiscrete*>(trunkParentState[site_index])->getState();
 //            size_t B_i = static_cast<CharacterEventDiscrete*>(budParentState[site_index])->getState();
-            size_t T_j = static_cast<CharacterEventDiscrete*>(trunkChildState[site_index])->getState();
-            size_t B_j = static_cast<CharacterEventDiscrete*>(budChildState[site_index])->getState();
+            size_t T_j = RevBayesCore::assume_cast<CharacterEventDiscrete*>(trunkChildState[site_index])->getState();
+            size_t B_j = RevBayesCore::assume_cast<CharacterEventDiscrete*>(budChildState[site_index])->getState();
             
             // get transition probs
             std::vector<double> state_probs(2, 0.0);
@@ -738,8 +739,8 @@ double RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<charType>::
         {
             size_t site_index = trunk_areas[i];
             
-            size_t B_i = static_cast<CharacterEventDiscrete*>(budParentState[site_index])->getState();
-            size_t B_j = static_cast<CharacterEventDiscrete*>(budChildState[site_index])->getState();
+            size_t B_i = RevBayesCore::assume_cast<CharacterEventDiscrete*>(budParentState[site_index])->getState();
+            size_t B_j = RevBayesCore::assume_cast<CharacterEventDiscrete*>(budChildState[site_index])->getState();
             
             std::vector<double> state_probs(2, 0.0);
             state_probs[0] = budTpMatrix[0][B_j]; // * rightTpMatrix[R_i][R_j];
@@ -1029,9 +1030,9 @@ void RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<charType>::pr
     storedRightState.resize(num_sites,0);
     for (size_t site_index = 0; site_index < num_sites; ++site_index)
     {
-        size_t desSA = static_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->getState();
-        size_t srcS1 = static_cast<CharacterEventDiscrete*>(leftParentState[site_index])->getState();
-        size_t srcS2 = static_cast<CharacterEventDiscrete*>(rightParentState[site_index])->getState();
+        size_t desSA = RevBayesCore::assume_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->getState();
+        size_t srcS1 = RevBayesCore::assume_cast<CharacterEventDiscrete*>(leftParentState[site_index])->getState();
+        size_t srcS2 = RevBayesCore::assume_cast<CharacterEventDiscrete*>(rightParentState[site_index])->getState();
         storedNodeState[site_index] = desSA;
         storedLeftState[site_index] = srcS1;
         storedRightState[site_index] = srcS2;
@@ -1043,7 +1044,7 @@ void RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<charType>::pr
         const std::vector<CharacterEvent*>& subrootState = c->getHistory(*node).getParentCharacters();
         for (size_t site_index = 0; site_index < num_sites; ++site_index)
         {
-            size_t s = static_cast<CharacterEventDiscrete*>(subrootState[site_index])->getState();
+            size_t s = RevBayesCore::assume_cast<CharacterEventDiscrete*>(subrootState[site_index])->getState();
             storedSubrootState[site_index] = s;
         }
     }
@@ -1087,13 +1088,13 @@ void RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<charType>::pr
     const std::vector<CharacterEvent*>& nodeParentState     = histories[ node_index ].getParentCharacters();
     
     std::cout << "L0 : ";
-    for (size_t i = 0; i < numCharacters; i++) { std::cout << static_cast<CharacterEventDiscrete*>( leftParentState[i] )->getState(); }
+    for (size_t i = 0; i < numCharacters; i++) { std::cout << RevBayesCore::assume_cast<CharacterEventDiscrete*>( leftParentState[i] )->getState(); }
     std::cout << "\n";
     std::cout << "R0 : ";
-    for (size_t i = 0; i < numCharacters; i++) { std::cout << static_cast<CharacterEventDiscrete*>( rightParentState[i] )->getState(); }
+    for (size_t i = 0; i < numCharacters; i++) { std::cout << RevBayesCore::assume_cast<CharacterEventDiscrete*>( rightParentState[i] )->getState(); }
     std::cout << "\n";
     std::cout << "A1 : ";
-    for (size_t i = 0; i < numCharacters; i++) { std::cout << static_cast<CharacterEventDiscrete*>( nodeChildState[i] )->getState(); }
+    for (size_t i = 0; i < numCharacters; i++) { std::cout << RevBayesCore::assume_cast<CharacterEventDiscrete*>( nodeChildState[i] )->getState(); }
     std::cout << "\n";
     
 }
@@ -1151,14 +1152,14 @@ double RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<charType>::
             size_t site_index = expandCharacters[i];
             
             if ( GLOBAL_RNG->uniform01() < 0.5 ) {
-                static_cast<CharacterEventDiscrete*>( nodeChildState[site_index]   )->setState( 1 );
-                static_cast<CharacterEventDiscrete*>( leftParentState[site_index]  )->setState( 1 );
-                static_cast<CharacterEventDiscrete*>( rightParentState[site_index] )->setState( 0 );
+                RevBayesCore::assume_cast<CharacterEventDiscrete*>( nodeChildState[site_index]   )->setState( 1 );
+                RevBayesCore::assume_cast<CharacterEventDiscrete*>( leftParentState[site_index]  )->setState( 1 );
+                RevBayesCore::assume_cast<CharacterEventDiscrete*>( rightParentState[site_index] )->setState( 0 );
             }
             else {
-                static_cast<CharacterEventDiscrete*>( nodeChildState[site_index]   )->setState( 1 );
-                static_cast<CharacterEventDiscrete*>( leftParentState[site_index]  )->setState( 0 );
-                static_cast<CharacterEventDiscrete*>( rightParentState[site_index] )->setState( 1 );
+                RevBayesCore::assume_cast<CharacterEventDiscrete*>( nodeChildState[site_index]   )->setState( 1 );
+                RevBayesCore::assume_cast<CharacterEventDiscrete*>( leftParentState[site_index]  )->setState( 0 );
+                RevBayesCore::assume_cast<CharacterEventDiscrete*>( rightParentState[site_index] )->setState( 1 );
             }
             
 //            lnP += log( state_probs[s]/sum );
@@ -1176,9 +1177,9 @@ double RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<charType>::
 //            size_t site_index = *it_s;
             size_t site_index = contractCharacters[i];
 
-            static_cast<CharacterEventDiscrete*>( nodeChildState[site_index]   )->setState( 0 );
-            static_cast<CharacterEventDiscrete*>( leftParentState[site_index]  )->setState( 0 );
-            static_cast<CharacterEventDiscrete*>( rightParentState[site_index] )->setState( 0 );
+            RevBayesCore::assume_cast<CharacterEventDiscrete*>( nodeChildState[site_index]   )->setState( 0 );
+            RevBayesCore::assume_cast<CharacterEventDiscrete*>( leftParentState[site_index]  )->setState( 0 );
+            RevBayesCore::assume_cast<CharacterEventDiscrete*>( rightParentState[site_index] )->setState( 0 );
         }
 
     }
@@ -1188,14 +1189,14 @@ double RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<charType>::
         size_t first_site_index = swapCharacters[0];
         size_t second_site_index = swapCharacters[1];
         
-        size_t first_state = static_cast<CharacterEventDiscrete*>( leftParentState[first_site_index] )->getState();
+        size_t first_state = RevBayesCore::assume_cast<CharacterEventDiscrete*>( leftParentState[first_site_index] )->getState();
         size_t not_first_state = ( first_state == 1 ? 0 : 1 );
         
-        static_cast<CharacterEventDiscrete*>( leftParentState[first_site_index] )->setState( not_first_state );
-        static_cast<CharacterEventDiscrete*>( rightParentState[first_site_index] )->setState( first_state );
+        RevBayesCore::assume_cast<CharacterEventDiscrete*>( leftParentState[first_site_index] )->setState( not_first_state );
+        RevBayesCore::assume_cast<CharacterEventDiscrete*>( rightParentState[first_site_index] )->setState( first_state );
 
-        static_cast<CharacterEventDiscrete*>( leftParentState[second_site_index] )->setState( first_state );
-        static_cast<CharacterEventDiscrete*>( rightParentState[second_site_index] )->setState( not_first_state );
+        RevBayesCore::assume_cast<CharacterEventDiscrete*>( leftParentState[second_site_index] )->setState( first_state );
+        RevBayesCore::assume_cast<CharacterEventDiscrete*>( rightParentState[second_site_index] )->setState( not_first_state );
     }
  
     return 0.0;
@@ -1234,8 +1235,8 @@ double RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<charType>::
     size_t n_left_on = 0;
     size_t n_right_on = 0;
     for (size_t i = 0; i < leftParentState.size(); i++) {
-        n_left_on += static_cast< CharacterEventDiscrete* >( leftParentState[i] )->getState();
-        n_right_on += static_cast< CharacterEventDiscrete* >( rightParentState[i] )->getState();
+        n_left_on += RevBayesCore::assume_cast< CharacterEventDiscrete* >( leftParentState[i] )->getState();
+        n_right_on += RevBayesCore::assume_cast< CharacterEventDiscrete* >( rightParentState[i] )->getState();
         
         if (n_left_on > 1) {
             break;
@@ -1268,9 +1269,9 @@ double RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<charType>::
         for (size_t i = 0; i < contractCharacters.size(); i++)
         {
             size_t site_index = contractCharacters[i];
-            static_cast<CharacterEventDiscrete*>( nodeChildState[site_index] )->setState( 0 );
-            static_cast<CharacterEventDiscrete*>( trunkParentState[site_index] )->setState( 0 );
-            static_cast<CharacterEventDiscrete*>( budParentState[site_index] )->setState( 0 );
+            RevBayesCore::assume_cast<CharacterEventDiscrete*>( nodeChildState[site_index] )->setState( 0 );
+            RevBayesCore::assume_cast<CharacterEventDiscrete*>( trunkParentState[site_index] )->setState( 0 );
+            RevBayesCore::assume_cast<CharacterEventDiscrete*>( budParentState[site_index] )->setState( 0 );
         }
         
         // if we are losing the last character
@@ -1280,9 +1281,9 @@ double RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<charType>::
 //            deprecated::random_shuffle( onCharacters.begin(), onCharacters.end());
             
             size_t site_index = contractCharacters[0];
-            static_cast<CharacterEventDiscrete*>( nodeChildState[site_index] )->setState( 1 );
-            static_cast<CharacterEventDiscrete*>( trunkParentState[site_index] )->setState( 1 );
-            static_cast<CharacterEventDiscrete*>( budParentState[site_index] )->setState( 1 );
+            RevBayesCore::assume_cast<CharacterEventDiscrete*>( nodeChildState[site_index] )->setState( 1 );
+            RevBayesCore::assume_cast<CharacterEventDiscrete*>( trunkParentState[site_index] )->setState( 1 );
+            RevBayesCore::assume_cast<CharacterEventDiscrete*>( budParentState[site_index] )->setState( 1 );
             
 //            do_swap = false;
         }
@@ -1307,17 +1308,17 @@ double RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<charType>::
 //            size_t B_j = static_cast<CharacterEventDiscrete*>(budChildState[site_index])->getState();
 //            
             // record the new state and its probability
-            static_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->setState( 1 );
-            static_cast<CharacterEventDiscrete*>(trunkParentState[site_index])->setState( 1 );
-            static_cast<CharacterEventDiscrete*>(budParentState[site_index])->setState( 0 );
+            RevBayesCore::assume_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->setState( 1 );
+            RevBayesCore::assume_cast<CharacterEventDiscrete*>(trunkParentState[site_index])->setState( 1 );
+            RevBayesCore::assume_cast<CharacterEventDiscrete*>(budParentState[site_index])->setState( 0 );
         }
         
         if ( onCharacters.size() == 1 ) {
 
             size_t site_index = expandCharacters[0];
-            static_cast<CharacterEventDiscrete*>( nodeChildState[site_index] )->setState( 1 );
-            static_cast<CharacterEventDiscrete*>( trunkParentState[site_index] )->setState( 1 );
-            static_cast<CharacterEventDiscrete*>( budParentState[site_index] )->setState( 1 );
+            RevBayesCore::assume_cast<CharacterEventDiscrete*>( nodeChildState[site_index] )->setState( 1 );
+            RevBayesCore::assume_cast<CharacterEventDiscrete*>( trunkParentState[site_index] )->setState( 1 );
+            RevBayesCore::assume_cast<CharacterEventDiscrete*>( budParentState[site_index] )->setState( 1 );
 
 //            do_swap = false;
         }
@@ -1330,8 +1331,8 @@ double RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<charType>::
         size_t first_site_index = swapCharacters[0];
         size_t second_site_index = swapCharacters[1];
         
-        size_t first_state = static_cast<CharacterEventDiscrete*>( budParentState[first_site_index] )->getState();
-        size_t second_state = static_cast<CharacterEventDiscrete*>( budParentState[second_site_index] )->getState();
+        size_t first_state = RevBayesCore::assume_cast<CharacterEventDiscrete*>( budParentState[first_site_index] )->getState();
+        size_t second_state = RevBayesCore::assume_cast<CharacterEventDiscrete*>( budParentState[second_site_index] )->getState();
         
         
         if (first_state == second_state) {
@@ -1343,8 +1344,8 @@ double RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<charType>::
             ;
         }
         
-        static_cast<CharacterEventDiscrete*>( budParentState[first_site_index] )->setState( second_state );
-        static_cast<CharacterEventDiscrete*>( budParentState[second_site_index] )->setState( first_state );
+        RevBayesCore::assume_cast<CharacterEventDiscrete*>( budParentState[first_site_index] )->setState( second_state );
+        RevBayesCore::assume_cast<CharacterEventDiscrete*>( budParentState[second_site_index] )->setState( first_state );
         
 //        static_cast<CharacterEventDiscrete*>( rightParentState[right_site_index] )->setState( left_state );
 //        static_cast<CharacterEventDiscrete*>( rightParentState[left_site_index] )->setState( right_state );
@@ -1425,7 +1426,7 @@ double RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<charType>::
                 s = 1;
             }
 
-            static_cast<CharacterEventDiscrete*>(nodeParentState[i])->setState(s);
+            RevBayesCore::assume_cast<CharacterEventDiscrete*>(nodeParentState[i])->setState(s);
         }
     }
     else {
@@ -1434,7 +1435,7 @@ double RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<charType>::
             if (GLOBAL_RNG->uniform01() < 0.5) {
                 s = 1;
             }
-            static_cast<CharacterEventDiscrete*>(nodeParentState[i])->setState(s);
+            RevBayesCore::assume_cast<CharacterEventDiscrete*>(nodeParentState[i])->setState(s);
         }
     }
 
@@ -1725,8 +1726,8 @@ void RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<charType>::se
     
     // learn bud,trunk states
     for (size_t i = 0; i < leftParentState.size(); i++) {
-        size_t s_left = static_cast< CharacterEventDiscrete* >( leftParentState[i] )->getState();
-        size_t s_right = static_cast< CharacterEventDiscrete* >( rightParentState[i] )->getState();
+        size_t s_left = RevBayesCore::assume_cast< CharacterEventDiscrete* >( leftParentState[i] )->getState();
+        size_t s_right = RevBayesCore::assume_cast< CharacterEventDiscrete* >( rightParentState[i] )->getState();
         
         if (s_left == 1) {
             leftCharacters.push_back( i );
@@ -1817,9 +1818,9 @@ void RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<charType>::un
         size_t srcS1 = storedLeftState[site_index];
         size_t srcS2 = storedRightState[site_index];
         
-        static_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->setState(desSA);
-        static_cast<CharacterEventDiscrete*>(leftParentState[site_index])->setState(srcS1);
-        static_cast<CharacterEventDiscrete*>(rightParentState[site_index])->setState(srcS2);
+        RevBayesCore::assume_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->setState(desSA);
+        RevBayesCore::assume_cast<CharacterEventDiscrete*>(leftParentState[site_index])->setState(srcS1);
+        RevBayesCore::assume_cast<CharacterEventDiscrete*>(rightParentState[site_index])->setState(srcS2);
     }
     
     // restore subroot state if needed
@@ -1831,7 +1832,7 @@ void RevBayesCore::BiogeographicCladogeneticRejectionShiftProposal<charType>::un
         {
             size_t s = storedSubrootState[site_index];
             //                        std::cout << s;
-            static_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->setState(s);
+            RevBayesCore::assume_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->setState(s);
         }
         //        std::cout << "\n";
     }

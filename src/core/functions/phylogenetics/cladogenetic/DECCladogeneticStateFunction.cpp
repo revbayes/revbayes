@@ -1,6 +1,7 @@
 //#define DEBUG_DEC
 
 #include "DECCladogeneticStateFunction.h"
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 
 #include <algorithm>
@@ -633,9 +634,9 @@ double DECCladogeneticStateFunction::computeDataAugmentedCladogeneticLnProbabili
     size_t n_jump_mismatch = 0;
     for (size_t i = 0; i < nodeChildState.size(); i++)
     {
-        size_t sn = static_cast<CharacterEventDiscrete*>(nodeChildState[i])->getState();
-        size_t sl = static_cast<CharacterEventDiscrete*>(leftParentState[i])->getState();
-        size_t sr = static_cast<CharacterEventDiscrete*>(rightParentState[i])->getState();
+        size_t sn = RevBayesCore::assume_cast<CharacterEventDiscrete*>(nodeChildState[i])->getState();
+        size_t sl = RevBayesCore::assume_cast<CharacterEventDiscrete*>(leftParentState[i])->getState();
+        size_t sr = RevBayesCore::assume_cast<CharacterEventDiscrete*>(rightParentState[i])->getState();
         
         n_n_on += sn;
         n_l_on += sl;
@@ -790,9 +791,9 @@ std::string DECCladogeneticStateFunction::simulateDataAugmentedCladogeneticState
     // initialize daughter states to zero
     for (size_t site_index = 0; site_index < numCharacters; ++site_index)
     {
-        static_cast<CharacterEventDiscrete*>( leftParentState[site_index] )->setState(0);
-        static_cast<CharacterEventDiscrete*>( rightParentState[site_index] )->setState(0);
-        size_t s = static_cast<CharacterEventDiscrete*>( nodeChildState[site_index] )->getState();
+        RevBayesCore::assume_cast<CharacterEventDiscrete*>( leftParentState[site_index] )->setState(0);
+        RevBayesCore::assume_cast<CharacterEventDiscrete*>( rightParentState[site_index] )->setState(0);
+        size_t s = RevBayesCore::assume_cast<CharacterEventDiscrete*>( nodeChildState[site_index] )->getState();
         if (s == 0) {
             node_child_off.push_back(site_index);
         }
@@ -810,8 +811,8 @@ std::string DECCladogeneticStateFunction::simulateDataAugmentedCladogeneticState
     }
     else if ( node_child_on.size() == 1) {
         size_t s = node_child_on[0];
-        static_cast<CharacterEventDiscrete*>( leftParentState[s] )->setState(1);
-        static_cast<CharacterEventDiscrete*>( rightParentState[s] )->setState(1);
+        RevBayesCore::assume_cast<CharacterEventDiscrete*>( leftParentState[s] )->setState(1);
+        RevBayesCore::assume_cast<CharacterEventDiscrete*>( rightParentState[s] )->setState(1);
         clado_state = "s";
     }
     else
@@ -826,21 +827,21 @@ std::string DECCladogeneticStateFunction::simulateDataAugmentedCladogeneticState
             {
                 
                 // one area inherited by the right node
-                static_cast<CharacterEventDiscrete*>( rightParentState[ area_idx ] )->setState(1);
+                RevBayesCore::assume_cast<CharacterEventDiscrete*>( rightParentState[ area_idx ] )->setState(1);
                 // all areas inherited by the left node
                 for (std::vector<size_t>::iterator it = node_child_on.begin(); it != node_child_on.end(); it++)
                 {
-                    static_cast<CharacterEventDiscrete*>( leftParentState[ *it ] )->setState(1);
+                    RevBayesCore::assume_cast<CharacterEventDiscrete*>( leftParentState[ *it ] )->setState(1);
                 }
             }
             else
             {
                 // one area inherited by the left node
-                static_cast<CharacterEventDiscrete*>( leftParentState[ area_idx ] )->setState(1);
+                RevBayesCore::assume_cast<CharacterEventDiscrete*>( leftParentState[ area_idx ] )->setState(1);
                 // all areas inherited by the left node
                 for (std::vector<size_t>::iterator it = node_child_on.begin(); it != node_child_on.end(); it++)
                 {
-                    static_cast<CharacterEventDiscrete*>( rightParentState[ *it ] )->setState(1);
+                    RevBayesCore::assume_cast<CharacterEventDiscrete*>( rightParentState[ *it ] )->setState(1);
                 }
             }
             
@@ -854,21 +855,21 @@ std::string DECCladogeneticStateFunction::simulateDataAugmentedCladogeneticState
             size_t area_left_idx = node_child_on[0];
             size_t area_right_idx = node_child_on[1];
             
-            static_cast<CharacterEventDiscrete*>( rightParentState[ area_left_idx ] )->setState(1);
-            static_cast<CharacterEventDiscrete*>( leftParentState[ area_left_idx ] )->setState(0);
-            static_cast<CharacterEventDiscrete*>( rightParentState[ area_right_idx ] )->setState(0);
-            static_cast<CharacterEventDiscrete*>( leftParentState[ area_right_idx ] )->setState(1);
+            RevBayesCore::assume_cast<CharacterEventDiscrete*>( rightParentState[ area_left_idx ] )->setState(1);
+            RevBayesCore::assume_cast<CharacterEventDiscrete*>( leftParentState[ area_left_idx ] )->setState(0);
+            RevBayesCore::assume_cast<CharacterEventDiscrete*>( rightParentState[ area_right_idx ] )->setState(0);
+            RevBayesCore::assume_cast<CharacterEventDiscrete*>( leftParentState[ area_right_idx ] )->setState(1);
             
             for (size_t i = 2; i < node_child_on.size(); i++)
             {
                 size_t j = node_child_on[i];
                 if (GLOBAL_RNG->uniform01() < 0.5) {
-                    static_cast<CharacterEventDiscrete*>( rightParentState[ j ] )->setState(0);
-                    static_cast<CharacterEventDiscrete*>( leftParentState[ j ] )->setState(1);
+                    RevBayesCore::assume_cast<CharacterEventDiscrete*>( rightParentState[ j ] )->setState(0);
+                    RevBayesCore::assume_cast<CharacterEventDiscrete*>( leftParentState[ j ] )->setState(1);
                 }
                 else {
-                    static_cast<CharacterEventDiscrete*>( leftParentState[ j ] )->setState(0);
-                    static_cast<CharacterEventDiscrete*>( rightParentState[ j ] )->setState(1);
+                    RevBayesCore::assume_cast<CharacterEventDiscrete*>( leftParentState[ j ] )->setState(0);
+                    RevBayesCore::assume_cast<CharacterEventDiscrete*>( rightParentState[ j ] )->setState(1);
                 }
             }
             clado_state = "a";
@@ -883,21 +884,21 @@ std::string DECCladogeneticStateFunction::simulateDataAugmentedCladogeneticState
             {
                 
                 // one area inherited by the right node
-                static_cast<CharacterEventDiscrete*>( rightParentState[ area_idx ] )->setState(1);
+                RevBayesCore::assume_cast<CharacterEventDiscrete*>( rightParentState[ area_idx ] )->setState(1);
                 // all areas inherited by the left node
                 for (std::vector<size_t>::iterator it = node_child_on.begin(); it != node_child_on.end(); it++)
                 {
-                    static_cast<CharacterEventDiscrete*>( leftParentState[ *it ] )->setState(1);
+                    RevBayesCore::assume_cast<CharacterEventDiscrete*>( leftParentState[ *it ] )->setState(1);
                 }
             }
             else
             {
                 // one area inherited by the left node
-                static_cast<CharacterEventDiscrete*>( leftParentState[ area_idx ] )->setState(1);
+                RevBayesCore::assume_cast<CharacterEventDiscrete*>( leftParentState[ area_idx ] )->setState(1);
                 // all areas inherited by the left node
                 for (std::vector<size_t>::iterator it = node_child_on.begin(); it != node_child_on.end(); it++)
                 {
-                    static_cast<CharacterEventDiscrete*>( rightParentState[ *it ] )->setState(1);
+                    RevBayesCore::assume_cast<CharacterEventDiscrete*>( rightParentState[ *it ] )->setState(1);
                 }
             }
             clado_state = "j";

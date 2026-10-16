@@ -1,4 +1,5 @@
 #include <cstddef>
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include <cmath>
 #include <iostream>
@@ -97,7 +98,7 @@ double BurstEventProposal::doProposal( void )
     RandomNumberGenerator* rng     = GLOBAL_RNG;
     
     Tree &tree = psi->getValue();
-    BirthDeathBurstProcess *dist = static_cast<BirthDeathBurstProcess *>( &psi->getDistribution() );
+    BirthDeathBurstProcess *dist = RevBayesCore::assume_cast<BirthDeathBurstProcess *>( &psi->getDistribution() );
     
     double burst_age = dist->getBurstTime();
     
@@ -201,7 +202,7 @@ void BurstEventProposal::undoProposal( void )
     // undo the proposal (only if succeeded)
     if ( failed == false)
     {
-        BirthDeathBurstProcess *dist = static_cast<BirthDeathBurstProcess *>( &psi->getDistribution() );
+        BirthDeathBurstProcess *dist = RevBayesCore::assume_cast<BirthDeathBurstProcess *>( &psi->getDistribution() );
         size_t node_index= stored_node->getIndex();
         
         if ( dist->isBurstSpeciation( node_index )  == true )

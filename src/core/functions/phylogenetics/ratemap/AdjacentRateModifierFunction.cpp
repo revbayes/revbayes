@@ -7,6 +7,7 @@
 //
 
 #include "AdjacentRateModifierFunction.h"
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 
 #include <string>
@@ -93,25 +94,25 @@ void AdjacentRateModifierFunction::update( void )
 {
     
     double gf = gainFactor->getValue();
-    static_cast<AdjacentRateModifier*>(value)->setGainFactor(gf);
+    RevBayesCore::assume_cast<AdjacentRateModifier*>(value)->setGainFactor(gf);
     
     double lf = lossFactor->getValue();
-    static_cast<AdjacentRateModifier*>(value)->setLossFactor(lf);
+    RevBayesCore::assume_cast<AdjacentRateModifier*>(value)->setLossFactor(lf);
     
     if (context_type == "width")
     {
         size_t w = width->getValue();
-        static_cast<AdjacentRateModifier*>(value)->setWidth(w);
+        RevBayesCore::assume_cast<AdjacentRateModifier*>(value)->setWidth(w);
     }
     else if (context_type=="array")
     {
         RbVector<RbVector<std::int64_t> > c = context_array->getValue();
-        static_cast<AdjacentRateModifier*>(value)->setContextMatrix(c);
+        RevBayesCore::assume_cast<AdjacentRateModifier*>(value)->setContextMatrix(c);
     }
     else if (context_type=="matrix")
     {
         MatrixReal c = context_matrix->getValue();
-        static_cast<AdjacentRateModifier*>(value)->setContextMatrix(c);
+        RevBayesCore::assume_cast<AdjacentRateModifier*>(value)->setContextMatrix(c);
     }
     
 }
