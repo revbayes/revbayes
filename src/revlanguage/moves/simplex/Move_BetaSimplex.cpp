@@ -128,7 +128,7 @@ const MemberRules& Move_BetaSimplex::getParameterRules(void) const
     {
         
         move_member_rules.push_back( new ArgumentRule( "x"    , Simplex::getClassTypeSpec()  , "The variable this move operates on.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
-        move_member_rules.push_back( new ArgumentRule( "alpha", RealPos::getClassTypeSpec()  , "The concentration parameter on the current value.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Real(1.0) ) );
+        move_member_rules.push_back( new ArgumentRule( "alpha", RealPos::getClassTypeSpec()  , "The concentration parameter on the current value.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RealPos(1.0) ) );
         move_member_rules.push_back( new ArgumentRule( "tune" , RlBoolean::getClassTypeSpec(), "Should we tune the concentration parameter during burnin?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( true ) ) );
         
         /* Inherit weight from Move, put it after variable */
