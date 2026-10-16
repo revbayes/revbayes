@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "RandomCategoryWalkProposal.h"
 
 
@@ -186,6 +187,6 @@ void RandomCategoryWalkProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
     
     if ( variable == oldN )
     {
-        variable = static_cast<StochasticNode< RbVector<std::int64_t> > *>(newN);
+        replaceNodeReference(variable, newN);
     }
 }

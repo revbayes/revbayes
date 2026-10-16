@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "SynchronizedVectorFixedSingleElementSlideProposal.h"
 
 #include <cstddef>
@@ -184,7 +185,7 @@ void SynchronizedVectorFixedSingleElementSlideProposal::swapNodeInternal(DagNode
     {
         if ( variables[i] == oldN )
         {
-            variables[i] = static_cast<StochasticNode<RbVector<double> > *>(newN);
+            replaceNodeReference(variables[i], newN);
         }
     }
     

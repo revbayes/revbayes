@@ -1,6 +1,7 @@
 #ifndef PathRejectionSampleProposal_H
 #define PathRejectionSampleProposal_H
 
+#include "DagNodeTypeUtilities.h"
 #include "BranchHistoryDiscrete.h"
 #include "CharacterEventDiscrete.h"
 #include "DeterministicNode.h"
@@ -656,15 +657,15 @@ void RevBayesCore::PathRejectionSampleProposal<charType>::swapNodeInternal(DagNo
 {
     if (oldN == ctmc)
     {
-        ctmc = static_cast<StochasticNode<AbstractHomologousDiscreteCharacterData>* >(newN) ;
+        replaceNodeReference(ctmc, newN) ;
     }
     else if (oldN == q_map_site)
     {
-        q_map_site = static_cast<TypedDagNode<RateGenerator>* >(newN);
+        replaceNodeReference(q_map_site, newN);
     }
     else if (oldN == q_map_sequence)
     {
-        q_map_sequence = static_cast<TypedDagNode<RateGeneratorSequence>* >(newN);
+        replaceNodeReference(q_map_sequence, newN);
     }
 
 }

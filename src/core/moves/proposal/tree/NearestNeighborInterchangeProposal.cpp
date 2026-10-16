@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "NearestNeighborInterchangeProposal.h"
 
 #include <cstddef>
@@ -318,6 +319,6 @@ void NearestNeighborInterchangeProposal::undoProposal( void )
 void NearestNeighborInterchangeProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     
-    variable = static_cast<StochasticNode<Tree>* >(newN) ;
+    replaceNodeReference(variable, newN) ;
     
 }

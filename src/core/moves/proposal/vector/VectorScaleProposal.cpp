@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "VectorScaleProposal.h"
 
 #include <cmath>
@@ -115,7 +116,7 @@ void VectorScaleProposal::undoProposal( void )
 
 void VectorScaleProposal::swapNodeInternal(DagNode *, DagNode *newN)
 {   
-    variable = static_cast<StochasticNode< RbVector<double> >* >(newN) ;   
+    replaceNodeReference(variable, newN) ;   
 }
 
 
