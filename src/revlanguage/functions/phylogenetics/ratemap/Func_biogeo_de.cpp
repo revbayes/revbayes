@@ -85,8 +85,8 @@ RevBayesCore::TypedFunction< RevBayesCore::RateGeneratorSequence >* Func_biogeo_
         grm = dagNodeFor<CharacterHistoryRateModifier>(this->args[1].getVariable());
     }
 
-    unsigned nc  = (unsigned)valueFor<Natural>(this->args[2].getVariable());
-    bool fe      = valueFor<RlBoolean>(this->args[3].getVariable());
+    unsigned nc  = (unsigned)valueFor<Natural>(this->args[3].getVariable());
+    bool fe      = valueFor<RlBoolean>(this->args[4].getVariable());
     
     RevBayesCore::BiogeographyRateGeneratorSequenceFunction* f = new RevBayesCore::BiogeographyRateGeneratorSequenceFunction(nc,fe,nc); //(nc, true);
     f->setRateMatrix(rm);
