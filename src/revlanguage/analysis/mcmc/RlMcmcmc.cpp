@@ -99,7 +99,7 @@ void Mcmcmc::constructInternalObject( void )
     
     if (heat_temps->getRevObject() != RevNullObject::getInstance())
     {
-        std::vector<double>                                 ht      = valueFor<ModelVector<RealPos>>(heat_temps);
+        std::vector<double>                                 ht      = valueFor<ModelVector<Probability>>(heat_temps);
         
         if(ht.size() != nchains)
         {
