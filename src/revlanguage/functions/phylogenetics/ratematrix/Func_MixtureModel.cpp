@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "Func_MixtureModel.h"
 
 #include "RealPos.h"
@@ -80,11 +81,11 @@ Func_MixtureModel* Func_MixtureModel::clone( void ) const
 
 Core::TypedFunction< Core::SiteMixtureModel >* Func_MixtureModel::createFunction( void ) const
 {
-    Core::TypedDagNode< Core::RbVector<Core::SiteMixtureModel> >* models = static_cast<const ModelVector<SiteMixtureModel> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    Core::TypedDagNode< Core::RbVector<Core::SiteMixtureModel> >* models = dagNodeForRevType<ModelVector<SiteMixtureModel>>(this->args[0].getVariable());
 
     if (auto& fractions_var = *args[1].getVariable(); fractions_var.getRevObject() != RevNullObject::getInstance())
     {
-	Core::TypedDagNode< Core::Simplex >* fractions = static_cast<const Simplex &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+	Core::TypedDagNode< Core::Simplex >* fractions = dagNodeForRevType<Simplex>(this->args[1].getVariable());
         return Core::generic_function_ptr< Core::SiteMixtureModel >( MixtureModelFunc, models, fractions );
     }
     else

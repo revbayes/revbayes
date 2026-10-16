@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "Func_readStochasticVariableTrace.h"
 
 #include <sstream>
@@ -42,9 +43,9 @@ RevPtr<RevVariable> Func_readStochasticVariableTrace::execute( void )
 {
     
     // get the information from the arguments for reading the file
-    const std::string&     fn       = static_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
+    const std::string&     fn       = valueForRevType<RlString>(args[0].getVariable());
     // get the column delimiter
-    const std::string& delimiter    = static_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
+    const std::string& delimiter    = valueForRevType<RlString>(args[1].getVariable());
     
     RevObject& b = args[2].getVariable()->getRevObject();
     

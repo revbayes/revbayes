@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <iosfwd>
 #include <string>
@@ -47,8 +48,8 @@ Func_simTree* Func_simTree::clone( void ) const
 RevPtr<RevVariable> Func_simTree::execute( void )
 {
     
-    int num_taxa             = static_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue();
-    const std::string& type = static_cast<const RlString &>( args[1].getVariable()->getRevObject() ).getValue();
+    int num_taxa             = valueForRevType<Natural>(args[0].getVariable());
+    const std::string& type = valueForRevType<RlString>(args[1].getVariable());
     
     // the time tree object (topology + times)
     RevBayesCore::Tree *psi = new RevBayesCore::Tree();

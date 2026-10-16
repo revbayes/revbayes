@@ -5,6 +5,7 @@
 //  Created by Fábio on 5/10/22.
 //
 
+#include "RevTypeUtilities.h"
 #include <algorithm>
 #include <limits.h>
 #include <ostream>
@@ -86,10 +87,10 @@ RevPtr<RevVariable> Func_readRegionalFeatures::execute( void )
 {
 
 //    const ModelVector<ModelVector<RlString> >& matrix = static_cast<const ModelVector<ModelVector<RlString> >&>( args[0].getVariable()->getRevObject() ).getValue();
-    const std::string& filename = static_cast<RlString&>( args[0].getVariable()->getRevObject() ).getValue();
-    const std::string& delimiter = static_cast<RlString&>( args[1].getVariable()->getRevObject() ).getValue();
-    const bool& header = static_cast<RlBoolean&>( args[2].getVariable()->getRevObject() ).getValue();
-    const std::string& nonexistent_region_token = static_cast<RlString&>( args[3].getVariable()->getRevObject() ).getValue();
+    const std::string& filename = valueForRevType<RlString>(args[0].getVariable());
+    const std::string& delimiter = valueForRevType<RlString>(args[1].getVariable());
+    const bool& header = valueForRevType<RlBoolean>(args[2].getVariable());
+    const std::string& nonexistent_region_token = valueForRevType<RlString>(args[3].getVariable());
     size_t header_offset = 0;
     if (header) header_offset = 1;
     

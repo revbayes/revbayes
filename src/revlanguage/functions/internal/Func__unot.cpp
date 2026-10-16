@@ -6,6 +6,7 @@
 //  Copyright 2012 __MyCompanyName__. All rights reserved.
 //
 
+#include "RevTypeUtilities.h"
 #include "Func__unot.h"
 
 #include "ArgumentRule.h"
@@ -35,7 +36,7 @@ Func__unot* Func__unot::clone( void ) const {
 RevBayesCore::TypedFunction<RevBayesCore::Boolean>* Func__unot::createFunction( void ) const
 {
     
-    const RevBayesCore::TypedDagNode<RevBayesCore::Boolean>* val = static_cast<const RlBoolean &>( args[0].getVariable()->getRevObject() ).getDagNode();
+    const RevBayesCore::TypedDagNode<RevBayesCore::Boolean>* val = dagNodeForRevType<RlBoolean>(args[0].getVariable());
     
     RevBayesCore::LogicalUnotFunction *func = new RevBayesCore::LogicalUnotFunction( val );
     

@@ -6,6 +6,7 @@
 //  Copyright 2012 __MyCompanyName__. All rights reserved.
 //
 
+#include "RevTypeUtilities.h"
 #include <iosfwd>
 #include <vector>
 
@@ -52,8 +53,8 @@ Func_normalize* Func_normalize::clone( void ) const {
 RevBayesCore::TypedFunction< RevBayesCore::RbVector<double> >* Func_normalize::createFunction( void ) const
 {
     
-    const RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> > *params = static_cast< ModelVector<RealPos> & >( args[0].getVariable()->getRevObject() ).getDagNode();
-    const RevBayesCore::TypedDagNode< double > *sum = static_cast< RealPos& >( args[1].getVariable()->getRevObject() ).getDagNode();
+    const RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> > *params = dagNodeForRevType<ModelVector<RealPos>>(args[0].getVariable());
+    const RevBayesCore::TypedDagNode< double > *sum = dagNodeForRevType<RealPos>(args[1].getVariable());
     
     RevBayesCore::NormalizeVectorFunction *func = new RevBayesCore::NormalizeVectorFunction( params, sum );
     

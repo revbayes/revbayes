@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "Func_FreeBinary.h"
 
 #include "FreeBinaryRateMatrixFunction.h"
@@ -44,8 +45,8 @@ Func_FreeBinary* Func_FreeBinary::clone( void ) const
 RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_FreeBinary::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* glr = static_cast<const ModelVector<Real> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    bool r = static_cast<const RlBoolean &>( this->args[1].getVariable()->getRevObject() ).getDagNode()->getValue();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* glr = dagNodeForRevType<ModelVector<Real>>(this->args[0].getVariable());
+    bool r = dagNodeForRevType<RlBoolean>(this->args[1].getVariable())->getValue();
 
     RevBayesCore::FreeBinaryRateMatrixFunction* f = new RevBayesCore::FreeBinaryRateMatrixFunction( glr, r );
     

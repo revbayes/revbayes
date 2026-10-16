@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <iosfwd>
 #include <vector>
@@ -41,15 +42,15 @@ Func_concatenateContinuousCharacterData* Func_concatenateContinuousCharacterData
 /** Execute function */
 RevPtr<RevVariable> Func_concatenateContinuousCharacterData::execute( void )
 {
-    const ContinuousCharacterData& a = static_cast<const ContinuousCharacterData &>( args[0].getVariable()->getRevObject() );
-    const ContinuousCharacterData& b = static_cast<const ContinuousCharacterData &>( args[1].getVariable()->getRevObject() );
-    const std::string& type = static_cast<const RlString &>( args[2].getVariable()->getRevObject() ).getValue();
+    const ContinuousCharacterData& a = objectForRevType<ContinuousCharacterData>(args[0].getVariable());
+    const ContinuousCharacterData& b = objectForRevType<ContinuousCharacterData>(args[1].getVariable());
+    const std::string& type = valueForRevType<RlString>(args[2].getVariable());
     
     ContinuousCharacterData *d = a.clone();
     d->concatenate( b, type );
     for (size_t i = 3; i < args.size(); ++i)
     {
-        const ContinuousCharacterData& c = static_cast<const ContinuousCharacterData &>( args[i].getVariable()->getRevObject() );
+        const ContinuousCharacterData& c = objectForRevType<ContinuousCharacterData>(args[i].getVariable());
         d->concatenate( c, type );
     }
     

@@ -6,6 +6,7 @@
 //  Copyright © 2017 Michael Landis. All rights reserved.
 //
 
+#include "RevTypeUtilities.h"
 #include "Func_covarionRateMatrix.h"
 
 #include <cstddef>
@@ -59,10 +60,10 @@ RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_covarionRateMat
     //    argumentRules.push_back( new ArgumentRule( "switch_rates"         , RateMatrix::getClassTypeSpec(), "The class-switching rate matrix", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
     //    argumentRules.push_back( new ArgumentRule( "clock_rates"          , ModelVector<RealPos>::getClassTypeSpec(), "The rate multipliers per class", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
     
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = static_cast<const ModelVector<RateGenerator> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* sr = static_cast<const RateMatrix&>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* cr = static_cast<const ModelVector<RealPos> &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
-    bool rescale = static_cast<const RlBoolean &>( this->args[3].getVariable()->getRevObject() ).getDagNode()->getValue();
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = dagNodeForRevType<ModelVector<RateGenerator>>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* sr = dagNodeForRevType<RateMatrix>(this->args[1].getVariable());
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* cr = dagNodeForRevType<ModelVector<RealPos>>(this->args[2].getVariable());
+    bool rescale = dagNodeForRevType<RlBoolean>(this->args[3].getVariable())->getValue();
     
     
     RevBayesCore::AbstractRateMatrix* asr = dynamic_cast<RevBayesCore::AbstractRateMatrix*>( &sr->getValue() );

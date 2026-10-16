@@ -6,6 +6,7 @@
 //  Copyright 2012 __MyCompanyName__. All rights reserved.
 //
 
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <iostream>
 #include <string>
@@ -60,9 +61,9 @@ Func_computeWeightedNodeOrderConstraintsScore* Func_computeWeightedNodeOrderCons
 RevBayesCore::TypedFunction<double>* Func_computeWeightedNodeOrderConstraintsScore::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = static_cast<const TimeTree&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< RevBayesCore::RelativeNodeAgeWeightedConstraints>* c = static_cast<const RlRelativeNodeAgeWeightedConstraints &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< double>* bet =  static_cast<const RealPos &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = dagNodeForRevType<TimeTree>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode< RevBayesCore::RelativeNodeAgeWeightedConstraints>* c = dagNodeForRevType<RlRelativeNodeAgeWeightedConstraints>(this->args[1].getVariable());
+    RevBayesCore::TypedDagNode< double>* bet =  dagNodeForRevType<RealPos>(this->args[2].getVariable());
     
     try {
         RevBayesCore::computeWeightedNodeOrderConstraintsScoreFunction* f = new RevBayesCore::computeWeightedNodeOrderConstraintsScoreFunction( tau, c, bet );
