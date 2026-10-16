@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -53,13 +54,13 @@ void Move_BetaSimplex::constructInternalObject( void )
     delete value;
     
     // now allocate a new sliding move
-    double a = static_cast<const RealPos &>( alpha->getRevObject() ).getValue();
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    double r = static_cast<const RealPos &>( tuneTarget->getRevObject() ).getValue();
+    double a = valueForRevType<RealPos>(alpha);
+    double w = valueForRevType<RealPos>(weight);
+    double r = valueForRevType<RealPos>(tuneTarget);
 
-    RevBayesCore::TypedDagNode< RevBayesCore::Simplex>* tmp = static_cast<const Simplex &>( x->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::Simplex>* tmp = dagNodeForRevType<Simplex>(x);
     RevBayesCore::StochasticNode< RevBayesCore::Simplex> *n = static_cast<RevBayesCore::StochasticNode< RevBayesCore::Simplex > *>( tmp );
-    bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    bool t = valueForRevType<RlBoolean>(tune);
     
     RevBayesCore::Proposal *prop = new RevBayesCore::BetaSimplexProposal(n,a,r);
     value = new RevBayesCore::MetropolisHastingsMove(prop,w,t);

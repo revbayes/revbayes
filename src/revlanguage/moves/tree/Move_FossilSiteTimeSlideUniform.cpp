@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -57,18 +58,18 @@ void Move_FossilSiteTimeSlideUniform::constructInternalObject( void )
     delete value;
     
     // now allocate a new move
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = dagNodeForRevType<TimeTree>(tree);
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
     
-    double de = static_cast<const RealPos &>( delta->getRevObject() ).getValue();
-    double we = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    bool   tu = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double de = valueForRevType<RealPos>(delta);
+    double we = valueForRevType<RealPos>(weight);
+    bool   tu = valueForRevType<RlBoolean>(tune);
+    double tt = valueForRevType<Probability>(tuneTarget);
     
     RevBayesCore::TypedDagNode<double> *org = NULL;
     if ( origin != NULL && origin->getRevObject() != RevNullObject::getInstance() )
     {
-        org = static_cast<const RealPos &>( origin->getRevObject() ).getDagNode();
+        org = dagNodeForRevType<RealPos>(origin);
     }
     
     // use NULL as defaults
@@ -77,14 +78,14 @@ void Move_FossilSiteTimeSlideUniform::constructInternalObject( void )
     
     if ( max->getRevObject() != RevLanguage::RevNullObject::getInstance() )
     {
-        ma = static_cast<const RealPos &>( max->getRevObject() ).getDagNode();
+        ma = dagNodeForRevType<RealPos>(max);
     }
     if ( min->getRevObject() != RevLanguage::RevNullObject::getInstance() )
     {
-        mi = static_cast<const RealPos &>( min->getRevObject() ).getDagNode();
+        mi = dagNodeForRevType<RealPos>(min);
     }
     
-    const RevBayesCore::RbVector<RevBayesCore::Taxon>& taxa_vec = static_cast<const ModelVector<Taxon>&>( taxa->getRevObject() ).getValue();
+    const RevBayesCore::RbVector<RevBayesCore::Taxon>& taxa_vec = valueForRevType<ModelVector<Taxon>>(taxa);
 
     RevBayesCore::FossilSiteTimeSlideUniformProposal *p = new RevBayesCore::FossilSiteTimeSlideUniformProposal( t, org, ma, mi, taxa_vec, de, tt );
 
