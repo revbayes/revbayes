@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -51,9 +52,9 @@ void ValidationAnalysis::constructInternalObject( void )
     delete value;
     
     // now allocate a new validation analysis
-    const RevBayesCore::MonteCarloAnalysis&         s   = static_cast<const MonteCarloAnalysis &>( sampler->getRevObject() ).getValue();
-    int                                             n   = (int)static_cast<const Natural &>( simulations->getRevObject() ).getValue();
-    const std::string&                              d   = static_cast<const RlString &>( output_directory->getRevObject() ).getValue();
+    const RevBayesCore::MonteCarloAnalysis&         s   = valueForRevType<MonteCarloAnalysis>(sampler);
+    int                                             n   = (int)valueForRevType<Natural>(simulations);
+    const std::string&                              d   = valueForRevType<RlString>(output_directory);
 
     value = new RevBayesCore::ValidationAnalysis( s, size_t(n), d );
     
@@ -87,7 +88,7 @@ RevPtr<RevVariable> ValidationAnalysis::executeMethod(std::string const &name, c
         
         // get the member with given index
         
-        int gen = (int)static_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue();
+        int gen = (int)valueForRevType<Natural>(args[0].getVariable());
         value->runAll( size_t(gen) );
         
         return NULL;
@@ -97,8 +98,8 @@ RevPtr<RevVariable> ValidationAnalysis::executeMethod(std::string const &name, c
         found = true;
         
         // get the member with given index
-        int gen = (int)static_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue();
-        int tuningInterval = (int)static_cast<const Natural &>( args[1].getVariable()->getRevObject() ).getValue();
+        int gen = (int)valueForRevType<Natural>(args[0].getVariable());
+        int tuningInterval = (int)valueForRevType<Natural>(args[1].getVariable());
         value->burnin( size_t(gen), size_t(tuningInterval) );
         
         return NULL;
@@ -107,7 +108,7 @@ RevPtr<RevVariable> ValidationAnalysis::executeMethod(std::string const &name, c
     {
         found = true;
         
-        double coverage = static_cast<const Probability &>( args[0].getVariable()->getRevObject() ).getValue();
+        double coverage = valueForRevType<Probability>(args[0].getVariable());
         
         value->summarizeAll(coverage);
         
