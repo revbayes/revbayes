@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "NodeAgeByID.h"
 
 #include "TopologyNode.h"
@@ -70,7 +71,7 @@ void NodeAgeByID::swapParameterInternal(const DagNode *oldP, const DagNode *newP
     
     if (oldP == tree) 
     {
-        tree = static_cast<const TypedDagNode<Tree>* >( newP );
+        replaceNodeReference(tree, newP);
     }
     
 }

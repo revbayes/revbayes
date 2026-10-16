@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "SmoothTimeLineFunction.h"
 
 #include <cmath>
@@ -77,15 +78,15 @@ void SmoothTimeLineFunction::swapParameterInternal(const DagNode *oldP, const Da
 
     if (oldP == times)
     {
-        times = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(times, newP);
     }
     else if (oldP == values)
     {
-        values = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(values, newP);
     }
     else if (oldP == max_time)
     {
-        max_time = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(max_time, newP);
     }
 
 }

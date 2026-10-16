@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "TmrcaStatistic.h"
 
 #include <algorithm>
@@ -183,7 +184,7 @@ void TmrcaStatistic::swapParameterInternal(const DagNode *oldP, const DagNode *n
     
     if (oldP == tree) 
     {
-        tree = static_cast<const TypedDagNode<Tree>* >( newP );
+        replaceNodeReference(tree, newP);
         index = -RbConstants::Integer::max;
     }
     

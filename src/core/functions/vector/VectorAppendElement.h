@@ -22,6 +22,7 @@
 #ifndef VectorAppendElement_H
 #define VectorAppendElement_H
 
+#include "DagNodeTypeUtilities.h"
 #include "RbVector.h"
 #include "TypedFunction.h"
 
@@ -112,12 +113,12 @@ void RevBayesCore::VectorAppendElement<valueType>::swapParameterInternal(const D
     
     if ( oldP == element )
     {
-        element = static_cast<const TypedDagNode<valueType>* >( newP );
+        replaceNodeReference(element, newP);
     }
     
     if ( oldP == org_vector )
     {
-        org_vector = static_cast<const TypedDagNode< RbVector<valueType> >* >( newP );
+        replaceNodeReference(org_vector, newP);
     }
     
 }
