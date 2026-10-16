@@ -9,7 +9,7 @@
 #include "ArgumentRules.h"
 #include "OptionRule.h"
 #include "RlBoolean.h"
-#include "ContinuousStochasticNode.h"
+#include "DagNodeTypeUtilities.h"
 #include "Move_SliceSampling.h"
 #include "Real.h"
 #include "RealPos.h"
@@ -85,7 +85,7 @@ void Move_SliceSampling::constructInternalObject( void )
     }
 
     RevBayesCore::TypedDagNode<double>* tmp = RevBayesCore::assume_cast<const Real &>( x->getRevObject() ).getDagNode();
-    RevBayesCore::ContinuousStochasticNode *node_ = RevBayesCore::assume_cast<RevBayesCore::ContinuousStochasticNode *>( tmp );
+    RevBayesCore::StochasticNode<double> *node_ = RevBayesCore::requireStochastic<double>( tmp );
     bool tune_ = RevBayesCore::assume_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
 
     auto search_method_ = dynamic_cast<const RlString&>( search_method->getRevObject() ).getValue();
