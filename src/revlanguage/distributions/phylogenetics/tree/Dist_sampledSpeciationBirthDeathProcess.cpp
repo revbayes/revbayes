@@ -6,6 +6,7 @@
 //  Copyright © 2016 Michael Landis. All rights reserved.
 //
 
+#include "RevTypeUtilities.h"
 #include <cmath>
 #include <iosfwd>
 #include <string>
@@ -79,11 +80,11 @@ RevBayesCore::SampledSpeciationBirthDeathProcess* Dist_sampledSpeciationBirthDea
 {
     
     // Get the parameters
-    RevBayesCore::TypedDagNode<double>* ra   = static_cast<const RealPos &>( root_age->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* sp   = static_cast<const RealPos &>( speciation->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* ex   = static_cast<const RealPos &>( extinction->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* rh   = static_cast<const Probability &>( rho->getRevObject() ).getDagNode();
-    std::vector<RevBayesCore::Taxon> t = static_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
+    RevBayesCore::TypedDagNode<double>* ra   = dagNodeForRevType<RealPos>(root_age);
+    RevBayesCore::TypedDagNode<double>* sp   = dagNodeForRevType<RealPos>(speciation);
+    RevBayesCore::TypedDagNode<double>* ex   = dagNodeForRevType<RealPos>(extinction);
+    RevBayesCore::TypedDagNode<double>* rh   = dagNodeForRevType<Probability>(rho);
+    std::vector<RevBayesCore::Taxon> t = valueForRevType<ModelVector<Taxon>>(taxa);
     
     RevBayesCore::SampledSpeciationBirthDeathProcess*   d = new RevBayesCore::SampledSpeciationBirthDeathProcess( ra, sp, ex, rh, t );
     

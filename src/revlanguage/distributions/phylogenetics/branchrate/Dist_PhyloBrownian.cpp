@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -29,10 +30,10 @@ RevBayesCore::PhyloBrownianProcess* Dist_PhyloBrownian::createDistribution( void
 {
     // get the parameters
 
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = dagNodeForRevType<TimeTree>(tree);
     
-    RevBayesCore::TypedDagNode<double>* s  = static_cast<const RealPos&>( sigma->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* dr  = static_cast<const Real&>( drift->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* s  = dagNodeForRevType<RealPos>(sigma);
+    RevBayesCore::TypedDagNode<double>* dr  = dagNodeForRevType<Real>(drift);
     
     RevBayesCore::PhyloBrownianProcess* d    = new RevBayesCore::PhyloBrownianProcess( tau, s, dr );
     

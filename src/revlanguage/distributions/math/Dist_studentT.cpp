@@ -6,6 +6,7 @@
 //  Copyright © 2016 Dismukes, Wade T [EEOBS]. All rights reserved.
 //
 
+#include "RevTypeUtilities.h"
 #include "Dist_studentT.h"
 
 #include <cstddef>
@@ -52,7 +53,7 @@ RevBayesCore::StudentTDistribution* Dist_studentT::createDistribution( void ) co
 {
     
     // get the parameters
-    RevBayesCore::TypedDagNode<std::int64_t>*    df = static_cast<const Natural     &>( degrees->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<std::int64_t>*    df = dagNodeForRevType<Natural>(degrees);
     RevBayesCore::StudentTDistribution* d  = new RevBayesCore::StudentTDistribution( df );
     
     return d;

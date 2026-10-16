@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cmath>
 #include <cstddef>
 #include <ostream>
@@ -50,8 +51,8 @@ Dist_UniformNatural* Dist_UniformNatural::clone( void ) const
 RevBayesCore::UniformIntegerDistribution* Dist_UniformNatural::createDistribution( void ) const
 {
     // get the parameters
-    RevBayesCore::TypedDagNode<std::int64_t>* l   = static_cast<const Natural &>( lower->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<std::int64_t>* u   = static_cast<const Natural &>( upper->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<std::int64_t>* l   = dagNodeForRevType<Natural>(lower);
+    RevBayesCore::TypedDagNode<std::int64_t>* u   = dagNodeForRevType<Natural>(upper);
     RevBayesCore::UniformIntegerDistribution* d    = new RevBayesCore::UniformIntegerDistribution(l, u);
     
     return d;

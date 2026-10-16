@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -35,9 +36,9 @@ Dist_lnorm* Dist_lnorm::clone( void ) const
 RevBayesCore::LognormalDistribution* Dist_lnorm::createDistribution( void ) const
 {
     // get the parameters
-    RevBayesCore::TypedDagNode<double>* m   = static_cast<const Real &>( mean->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* s   = static_cast<const RealPos &>( sd->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* o   = static_cast<const RealPos &>( offset->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* m   = dagNodeForRevType<Real>(mean);
+    RevBayesCore::TypedDagNode<double>* s   = dagNodeForRevType<RealPos>(sd);
+    RevBayesCore::TypedDagNode<double>* o   = dagNodeForRevType<RealPos>(offset);
     RevBayesCore::LognormalDistribution* d  = new RevBayesCore::LognormalDistribution(m, s, o);
     
     return d;

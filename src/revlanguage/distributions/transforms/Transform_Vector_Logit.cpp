@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "Transform_Vector_Logit.h"
 
 #include "ArgumentRule.h"
@@ -31,7 +32,7 @@ Core::TransformedVectorDistribution* RevLanguage::Transform_Vector_Logit::create
     using namespace Transforms;
 
     // get the parameters
-    const Distribution& rl_vp                      = static_cast<const Distribution &>( base_distribution->getRevObject() );
+    const Distribution& rl_vp                      = objectForRevType<Distribution>(base_distribution);
     std::unique_ptr<Core::TypedDistribution<Core::RbVector<double>>> vp( static_cast<Core::TypedDistribution<Core::RbVector<double>>* >( rl_vp.createDistribution() ) );
 
     return new Core::TransformedVectorDistribution(vp, logit_transform, logit_inverse, log_logit_prime);
