@@ -1,6 +1,7 @@
 #ifndef RevBayes_development_branch_StochasticCharacterMappingMonitor_h
 #define RevBayes_development_branch_StochasticCharacterMappingMonitor_h
 
+#include "DagNodeTypeUtilities.h"
 #include "AbstractHomologousDiscreteCharacterData.h"
 #include "StateDependentSpeciationExtinctionProcess.h"
 #include "GeneralizedLineageHeterogeneousBirthDeathSamplingProcess.h"
@@ -262,16 +263,16 @@ void StochasticCharacterMappingMonitor<characterType>::swapNode(DagNode *oldN, D
 
     if ( oldN == tree )
     {
-        tree = static_cast< TypedDagNode<Tree> *>( newN );
+        replaceNodeReference(tree, newN);
     }
     else if ( oldN == ctmc )
     {
-        ctmc = static_cast< StochasticNode<AbstractHomologousDiscreteCharacterData> *>( newN );
+        replaceNodeReference(ctmc, newN);
     }
     else if ( oldN == cdbdp )
     {
-        cdbdp = static_cast< StochasticNode<Tree> *>( newN );
-        tree = static_cast< StochasticNode<Tree> *>( newN );
+        replaceNodeReference(cdbdp, newN);
+        replaceNodeReference(tree, newN);
     }
 
     VariableMonitor::swapNode( oldN, newN );
