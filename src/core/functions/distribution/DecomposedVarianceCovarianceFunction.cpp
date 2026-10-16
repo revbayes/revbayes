@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "DecomposedVarianceCovarianceFunction.h"
 
 #include <cstddef>
@@ -91,11 +92,11 @@ void DecomposedVarianceCovarianceFunction::swapParameterInternal(const DagNode *
     // check dimensions here
     if (oldP == standardDeviations)
         {
-        standardDeviations = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(standardDeviations, newP);
         }
     else if (oldP == correlationCoefficients)
         {
-        correlationCoefficients = static_cast<const TypedDagNode< MatrixReal >* >( newP );
+        replaceNodeReference(correlationCoefficients, newP);
         }
 }
 

@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "ShortestDistanceFunction.h"
 #include <set>
 #include <vector>
@@ -180,11 +181,11 @@ void ShortestDistanceFunction::swapParameterInternal(const DagNode *oldP, const 
     
     if (oldP == adjacencies)
     {
-        adjacencies = static_cast<const TypedDagNode<RbVector<RbVector<std::int64_t> > >* >( newP );
+        replaceNodeReference(adjacencies, newP);
     }
     else if (oldP == distances)
     {
-        distances = static_cast<const TypedDagNode<RbVector<RbVector<double> > >* >( newP );
+        replaceNodeReference(distances, newP);
     }
     
 }

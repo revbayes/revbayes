@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "TreeLengthStatistic.h"
 
 #include <vector>
@@ -48,7 +49,7 @@ void TreeLengthStatistic::swapParameterInternal(const DagNode *oldP, const DagNo
 {
     if (oldP == tree)
     {
-        tree = static_cast<const TypedDagNode<Tree>* >( newP );
+        replaceNodeReference(tree, newP);
     }
     
 }

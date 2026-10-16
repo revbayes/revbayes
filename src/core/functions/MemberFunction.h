@@ -1,6 +1,7 @@
 #ifndef MemberFunction_H
 #define MemberFunction_H
 
+#include "DagNodeTypeUtilities.h"
 #include "TypedFunction.h"
 #include "TypedDagNode.h"
 
@@ -90,7 +91,7 @@ void RevBayesCore::MemberFunction<memberObjectType,valueType>::swapParameterInte
     
     if ( the_member_variable == oldP )
     {
-        the_member_variable = static_cast< const TypedDagNode<memberObjectType>* > (newP);
+        replaceNodeReference(the_member_variable, newP);
     }
     else
     {

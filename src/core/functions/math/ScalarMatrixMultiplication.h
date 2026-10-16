@@ -1,6 +1,7 @@
 #ifndef ScalarMatrixMultiplication_H
 #define ScalarMatrixMultiplication_H
 
+#include "DagNodeTypeUtilities.h"
 #include "RbVector.h"
 #include "StringUtilities.h"    // For string concatenation through Multiplication
 #include "TypedFunction.h"
@@ -67,12 +68,12 @@ void RevBayesCore::ScalarMatrixMultiplication<firstValueType>::swapParameterInte
     
     if (oldP == a)
     {
-        a = static_cast<const TypedDagNode<firstValueType>* >( newP );
+        replaceNodeReference(a, newP);
     }
     
     if (oldP == b)
     {
-        b = static_cast<const TypedDagNode< MatrixReal >* >( newP );
+        replaceNodeReference(b, newP);
     }
 }
 

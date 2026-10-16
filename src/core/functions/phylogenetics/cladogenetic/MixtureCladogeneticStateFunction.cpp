@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "MixtureCladogeneticStateFunction.h"
 
 #include <utility>
@@ -101,11 +102,11 @@ void MixtureCladogeneticStateFunction::swapParameterInternal(const DagNode *oldP
     
     if (oldP == mixtureWeights)
     {
-        mixtureWeights = static_cast<const TypedDagNode< Simplex >* >( newP );
+        replaceNodeReference(mixtureWeights, newP);
     }
     else if (oldP == cladoProbs)
     {
-        cladoProbs = static_cast<const TypedDagNode< RbVector<CladogeneticProbabilityMatrix> >* >( newP );
+        replaceNodeReference(cladoProbs, newP);
     }
     
 }
