@@ -587,7 +587,7 @@ void UltrametricTreeDistribution::executeMethod(const std::string &n, const std:
     else if ( n == "getBranchRates" )
     {
 
-        int index = static_cast<const TypedDagNode<int>* >( args[0] )->getValue();
+        int index = static_cast<const TypedDagNode<std::int64_t>* >( args[0] )->getValue();
 
         Tree &this_tree = *value;
         size_t num_branches = this_tree.getNumberOfNodes() - 1;
