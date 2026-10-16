@@ -353,7 +353,7 @@ const MemberRules& Dist_CharacterDependentBirthDeathProcess::getParameterRules(v
         std::vector<TypeSpec> sampling_fraction_types;
         sampling_fraction_types.push_back( Probability::getClassTypeSpec() );
         sampling_fraction_types.push_back( ModelVector<Probability>::getClassTypeSpec() );
-        memberRules.push_back( new ArgumentRule( "rho"       , sampling_fraction_types, "The taxon sampling probability."             , ArgumentRule::BY_CONSTANT_REFERENCE   , ArgumentRule::ANY, new RealPos(1.0) ) );
+        memberRules.push_back( new ArgumentRule( "rho"       , sampling_fraction_types, "The taxon sampling probability."             , ArgumentRule::BY_CONSTANT_REFERENCE   , ArgumentRule::ANY, new Probability(1.0) ) );
         
         std::vector<std::string> optionsCondition;
         optionsCondition.push_back( "time" );
