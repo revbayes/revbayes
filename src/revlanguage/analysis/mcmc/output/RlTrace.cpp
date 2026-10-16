@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "RlTrace.h"
 
 #include <cstddef>
@@ -92,7 +93,7 @@ RevPtr<RevVariable> Trace::executeMethod(std::string const &name, const std::vec
     {
         found = true;
 
-        bool post = static_cast<const RlBoolean &>( args[0].getVariable()->getRevObject() ).getValue();
+        bool post = valueForRevType<RlBoolean>(args[0].getVariable());
 
         int n = (int)this->value->size(post);
 
