@@ -144,7 +144,7 @@ const MemberRules& Move_RandomGeometricWalk::getParameterRules(void) const
     if ( !rules_set ) 
     {
         move_member_rules.push_back( new ArgumentRule( "x"   , Integer::getClassTypeSpec()    ,  "The variable on which this move operates.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
-        move_member_rules.push_back( new ArgumentRule( "alpha", Probability::getClassTypeSpec(), "The success probability of the geometric distribution.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY       , new Real(0.5) ) );
+        move_member_rules.push_back( new ArgumentRule( "alpha", Probability::getClassTypeSpec(), "The success probability of the geometric distribution.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY       , new Probability(0.5) ) );
         move_member_rules.push_back( new ArgumentRule( "tune", RlBoolean::getClassTypeSpec()  , "Should we tune the success probability during burnin?", ArgumentRule::BY_VALUE    , ArgumentRule::ANY       , new RlBoolean( true ) ) );
         
         /* Inherit weight from Move, put it after variable */
