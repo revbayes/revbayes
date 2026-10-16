@@ -1,6 +1,7 @@
 #ifndef DPPAllocateAuxGibbsMove_H
 #define DPPAllocateAuxGibbsMove_H
 
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "DirichletProcessPriorDistribution.h"
 #include "AbstractGibbsMove.h"
@@ -92,7 +93,7 @@ void RevBayesCore::DPPAllocateAuxGibbsMove<valueType>::performGibbsMove( void )
     // Get random number generator    
     RandomNumberGenerator* rng     = GLOBAL_RNG;
     
-    DirichletProcessPriorDistribution<valueType>& dist = static_cast<DirichletProcessPriorDistribution<valueType> &>( variable->getDistribution() );
+    DirichletProcessPriorDistribution<valueType>& dist = assume_cast<DirichletProcessPriorDistribution<valueType> &>( variable->getDistribution() );
     
     dist.createRestaurantVectors();
     int num_tables = dist.getNumberOfCategories();

@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "CharacterHistoryNodeMonitor.h"
 
@@ -84,7 +85,7 @@ std::string CharacterHistoryNodeMonitor::buildCharacterHistoryString(TopologyNod
     {
         if (i != 0)
             ss << ",";
-        ss << static_cast<CharacterEventDiscrete*>(characters[i])->getState();
+        ss << assume_cast<CharacterEventDiscrete*>(characters[i])->getState();
     }
     
     return ss.str();
