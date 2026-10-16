@@ -219,7 +219,7 @@ const MemberRules& Move_RateAgeProposal::getParameterRules(void) const
     {
         
         memberRules.push_back( new ArgumentRule( "tree",   Tree::getClassTypeSpec(),      "The tree to which the branch-rates belong.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
-        memberRules.push_back( new ArgumentRule( "alpha",  RealPos::getClassTypeSpec(),   "The scaling factor (strength) of this move.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new Real(1.0) ) );
+        memberRules.push_back( new ArgumentRule( "alpha",  RealPos::getClassTypeSpec(),   "The scaling factor (strength) of this move.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new RealPos(1.0) ) );
         memberRules.push_back( new ArgumentRule( "tune"  , RlBoolean::getClassTypeSpec(), "Should we tune the scaling factor during burnin?", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new RlBoolean( true ) ) );
         
         /* Inherit weight from Move, put it after variable */
