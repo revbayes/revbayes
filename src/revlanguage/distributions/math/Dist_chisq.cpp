@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -48,7 +49,7 @@ RevBayesCore::ChisqDistribution* Dist_chisq::createDistribution( void ) const
 {
     
     // get the parameters
-    RevBayesCore::TypedDagNode<std::int64_t>*    df = RevBayesCore::assume_cast<const Natural     &>( degrees->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<std::int64_t>*    df = dagNodeFor<Natural>(degrees);
     RevBayesCore::ChisqDistribution* d  = new RevBayesCore::ChisqDistribution( df );
     
     return d;

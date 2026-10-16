@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -53,13 +54,13 @@ RevBayesCore::SoftBoundUniformNormalDistribution* Dist_SoftBoundUniformNormal::c
 {
     
     // get the parameters
-    RevBayesCore::TypedDagNode<double>* mi = RevBayesCore::assume_cast<const Real &>( min->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* ma = RevBayesCore::assume_cast<const Real &>( max->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* mi = dagNodeFor<Real>(min);
+    RevBayesCore::TypedDagNode<double>* ma = dagNodeFor<Real>(max);
     RevBayesCore::TypedDagNode<double>* s  = NULL;
     RevBayesCore::TypedDagNode<double>* p  = NULL;
     
     // condition
-    const std::string& bound               = RevBayesCore::assume_cast<const RlString &>( boundary->getRevObject() ).getValue();
+    const std::string& bound               = valueFor<RlString>(boundary);
     RevBayesCore::SoftBoundUniformNormalDistribution::BOUNDS soft_bounds = RevBayesCore::SoftBoundUniformNormalDistribution::BOTH;
     if ( bound == "upper" )
     {
@@ -87,11 +88,11 @@ RevBayesCore::SoftBoundUniformNormalDistribution* Dist_SoftBoundUniformNormal::c
     
     if ( has_sd )
     {
-        s = RevBayesCore::assume_cast<const RealPos &>( sd->getRevObject() ).getDagNode();
+        s = dagNodeFor<RealPos>(sd);
     }
     else
     {
-        p = RevBayesCore::assume_cast<const Probability &>( prob->getRevObject() ).getDagNode();
+        p = dagNodeFor<Probability>(prob);
     }
     
     RevBayesCore::SoftBoundUniformNormalDistribution* d = new RevBayesCore::SoftBoundUniformNormalDistribution(mi, ma, s, p, soft_bounds);

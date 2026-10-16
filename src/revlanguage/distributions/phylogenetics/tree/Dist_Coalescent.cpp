@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cmath>
 #include "TypeUtilities.h"
 #include <iosfwd>
@@ -83,11 +84,11 @@ RevBayesCore::ConstantPopulationCoalescent* Dist_Coalescent::createDistribution(
     // get the parameters
     
     // theta
-    RevBayesCore::TypedDagNode<double>* t       = RevBayesCore::assume_cast<const RealPos &>( theta->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* t       = dagNodeFor<RealPos>(theta);
     // taxon
-    const std::vector<RevBayesCore::Taxon> & ta = RevBayesCore::assume_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
+    const std::vector<RevBayesCore::Taxon> & ta = valueFor<ModelVector<Taxon>>(taxa);
     // clade constraints
-    const std::vector<RevBayesCore::Clade> &c   = RevBayesCore::assume_cast<const ModelVector<Clade> &>( constraints->getRevObject() ).getValue();
+    const std::vector<RevBayesCore::Clade> &c   = valueFor<ModelVector<Clade>>(constraints);
     
     // create the internal distribution object
     RevBayesCore::ConstantPopulationCoalescent*   d = new RevBayesCore::ConstantPopulationCoalescent(t, ta, c);

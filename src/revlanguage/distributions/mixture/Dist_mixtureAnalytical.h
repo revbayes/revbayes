@@ -1,6 +1,7 @@
 #ifndef Dist_mixtureAnalytical_H
 #define Dist_mixtureAnalytical_H
 
+#include "RevVariableUtilities.h"
 #include "AnalyticalMixtureDistribution.h"
 #include "TypeUtilities.h"
 #include "DistributionTypeUtilities.h"
@@ -99,7 +100,7 @@ RevBayesCore::AnalyticalMixtureDistribution< typename valType::valueType >* RevL
 {
     
     // get the parameters
-    const WorkspaceVector<Distribution>& rl_bd = RevBayesCore::assume_cast<const WorkspaceVector<Distribution > &>( base_distributions->getRevObject() );
+    const WorkspaceVector<Distribution>& rl_bd = objectFor<WorkspaceVector<Distribution >>(base_distributions);
     std::vector<RevBayesCore::TypedDistribution<typename valType::valueType>* > bd;
     for (size_t i=0; i<rl_bd.size();++i)
     {
@@ -107,7 +108,7 @@ RevBayesCore::AnalyticalMixtureDistribution< typename valType::valueType >* RevL
         bd.push_back( tmp );
     }
     
-    RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* p = RevBayesCore::assume_cast<const Simplex &>( probabilities->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* p = dagNodeFor<Simplex>(probabilities);
     
     RevBayesCore::AnalyticalMixtureDistribution<typename valType::valueType>* d = new RevBayesCore::AnalyticalMixtureDistribution<typename valType::valueType>(bd,p);
     

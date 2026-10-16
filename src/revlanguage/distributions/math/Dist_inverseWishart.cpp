@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cmath>
 #include "TypeUtilities.h"
 #include <cstddef>
@@ -70,27 +71,27 @@ RevBayesCore::InverseWishartDistribution* Dist_inverseWishart::createDistributio
     
     if ( sigma->getRevObject() != RevNullObject::getInstance() )
     {
-        sg = RevBayesCore::assume_cast<const MatrixRealSymmetric &>( sigma->getRevObject() ).getDagNode();
+        sg = dagNodeFor<MatrixRealSymmetric>(sigma);
     }
     
     if ( diagonal->getRevObject() != RevNullObject::getInstance() )
     {
-        dv = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( diagonal->getRevObject() ).getDagNode();
+        dv = dagNodeFor<ModelVector<RealPos>>(diagonal);
     }
     
     if ( kappa->getRevObject() != RevNullObject::getInstance() )
     {
-        ka = RevBayesCore::assume_cast<const RealPos&>( kappa->getRevObject() ).getDagNode();
+        ka = dagNodeFor<RealPos>(kappa);
     }
     
     if ( df->getRevObject() != RevNullObject::getInstance() )
     {
-        deg = RevBayesCore::assume_cast<const Natural &>( df->getRevObject()).getDagNode();
+        deg = dagNodeFor<Natural>(df);
     }
 
     if ( dim->getRevObject() != RevNullObject::getInstance() )
     {
-        dm = RevBayesCore::assume_cast<const Natural &>( dim->getRevObject()).getDagNode();
+        dm = dagNodeFor<Natural>(dim);
     }
     
     RevBayesCore::InverseWishartDistribution* w =  NULL;

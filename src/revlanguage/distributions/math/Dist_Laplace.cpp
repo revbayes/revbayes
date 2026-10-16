@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -48,8 +49,8 @@ RevBayesCore::LaplaceDistribution* Dist_Laplace::createDistribution( void ) cons
 {
 
     // get the parameters
-    RevBayesCore::TypedDagNode<double>* m = RevBayesCore::assume_cast<const Real &>( mean->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* s = RevBayesCore::assume_cast<const RealPos &>( scale->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* m = dagNodeFor<Real>(mean);
+    RevBayesCore::TypedDagNode<double>* s = dagNodeFor<RealPos>(scale);
     RevBayesCore::LaplaceDistribution* d = new RevBayesCore::LaplaceDistribution(m, s);
 
     return d;

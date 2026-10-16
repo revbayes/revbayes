@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "Transform_Vector_Logit.h"
 #include "TypeUtilities.h"
 
@@ -33,7 +34,7 @@ Core::TransformedVectorDistribution* RevLanguage::Transform_Vector_Logit::create
     using namespace Transforms;
 
     // get the parameters
-    const Distribution& rl_vp                      = RevBayesCore::assume_cast<const Distribution &>( base_distribution->getRevObject() );
+    const Distribution& rl_vp                      = objectFor<Distribution>(base_distribution);
     std::unique_ptr<Core::TypedDistribution<Core::RbVector<double>>> vp( Core::assumeTypedDistribution<Core::RbVector<double>>( rl_vp.createDistribution() ) );
 
     return new Core::TransformedVectorDistribution(vp, logit_transform, logit_inverse, log_logit_prime);

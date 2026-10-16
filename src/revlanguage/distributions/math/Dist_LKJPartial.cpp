@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cmath>
 #include "TypeUtilities.h"
 #include <cstddef>
@@ -57,8 +58,8 @@ RevBayesCore::LKJPartialDistribution* Dist_LKJPartial::createDistribution( void 
 {
     
     // get the parameters
-    RevBayesCore::TypedDagNode<double>* et = RevBayesCore::assume_cast<const RealPos&>( eta->getRevObject() ).getDagNode();
-    size_t d  = size_t( RevBayesCore::assume_cast<const Natural &>( dim->getRevObject() ).getValue() );
+    RevBayesCore::TypedDagNode<double>* et = dagNodeFor<RealPos>(eta);
+    size_t d  = size_t( valueFor<Natural>(dim) );
     
     RevBayesCore::LKJPartialDistribution* f = new RevBayesCore::LKJPartialDistribution( et, d );
 

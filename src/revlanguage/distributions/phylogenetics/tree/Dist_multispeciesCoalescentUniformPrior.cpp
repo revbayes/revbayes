@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cmath>
 #include "TypeUtilities.h"
 #include <iosfwd>
@@ -78,8 +79,8 @@ RevBayesCore::MultispeciesCoalescentUniformPrior* Dist_multispeciesCoalescentUni
 {
 
     // Get the parameters
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* st = RevBayesCore::assume_cast<const TimeTree &>( species_tree->getRevObject() ).getDagNode();
-    const std::vector<RevBayesCore::Taxon>      &t  = RevBayesCore::assume_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* st = dagNodeFor<TimeTree>(species_tree);
+    const std::vector<RevBayesCore::Taxon>      &t  = valueFor<ModelVector<Taxon>>(taxa);
 
     // get the number of nodes for the tree
     // size_t n_nodes = st->getValue().getNumberOfNodes();
@@ -87,7 +88,7 @@ RevBayesCore::MultispeciesCoalescentUniformPrior* Dist_multispeciesCoalescentUni
 
     RevBayesCore::MultispeciesCoalescentUniformPrior*   d = new RevBayesCore::MultispeciesCoalescentUniformPrior( st, t );
 
-    RevBayesCore::TypedDagNode<double>* m = RevBayesCore::assume_cast<const RealPos &>( theta_max->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* m = dagNodeFor<RealPos>(theta_max);
     d->setMaxTheta( m );
     d->redrawValue();
 

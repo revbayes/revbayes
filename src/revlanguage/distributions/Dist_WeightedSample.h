@@ -1,6 +1,7 @@
 #ifndef Dist_WeightedSample_H
 #define Dist_WeightedSample_H
 
+#include "RevVariableUtilities.h"
 #include "WeightedSampleDistribution.h"
 #include "TypeUtilities.h"
 #include "DistributionTypeUtilities.h"
@@ -104,8 +105,8 @@ RevBayesCore::WeightedSampleDistribution<typename valType::valueType>* RevLangua
         }
     }
     else {
-        ns                                 = size_t( RevBayesCore::assume_cast<const Natural &>( numSamples->getRevObject() ).getValue() );
-        const Distribution& rlDistribution = RevBayesCore::assume_cast<const Distribution &>( baseDistribution->getRevObject() );
+        ns                                 = size_t( valueFor<Natural>(numSamples) );
+        const Distribution& rlDistribution = objectFor<Distribution>(baseDistribution);
         g0                                 = RevBayesCore::assumeTypedDistribution<typename valType::valueType>( rlDistribution.createDistribution() );
 //        d = new RevBayesCore::WeightedSampleDistribution<typename valType::valueType>(g0, ns);
     }

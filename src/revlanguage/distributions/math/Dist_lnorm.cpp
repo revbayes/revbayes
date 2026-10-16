@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -36,9 +37,9 @@ Dist_lnorm* Dist_lnorm::clone( void ) const
 RevBayesCore::LognormalDistribution* Dist_lnorm::createDistribution( void ) const
 {
     // get the parameters
-    RevBayesCore::TypedDagNode<double>* m   = RevBayesCore::assume_cast<const Real &>( mean->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* s   = RevBayesCore::assume_cast<const RealPos &>( sd->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* o   = RevBayesCore::assume_cast<const RealPos &>( offset->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* m   = dagNodeFor<Real>(mean);
+    RevBayesCore::TypedDagNode<double>* s   = dagNodeFor<RealPos>(sd);
+    RevBayesCore::TypedDagNode<double>* o   = dagNodeFor<RealPos>(offset);
     RevBayesCore::LognormalDistribution* d  = new RevBayesCore::LognormalDistribution(m, s, o);
     
     return d;

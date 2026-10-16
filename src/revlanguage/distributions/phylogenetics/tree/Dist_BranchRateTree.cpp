@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cmath>
 #include "TypeUtilities.h"
 #include <cstddef>
@@ -93,15 +94,15 @@ RevBayesCore::BranchRateTreeDistribution* Dist_BranchRateTree::createDistributio
 {
 
     // get the parameters
-    const Distribution& rl_rate_prior                           = RevBayesCore::assume_cast<const Distribution &>( branch_rate_prior->getRevObject() );
+    const Distribution& rl_rate_prior                           = objectFor<Distribution>(branch_rate_prior);
     RevBayesCore::TypedDistribution<double>* brp                = dynamic_cast<RevBayesCore::TypedDistribution<double>* >( rl_rate_prior.createDistribution() );
 
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tt          = RevBayesCore::assume_cast<const TimeTree &>( time_tree->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tt          = dagNodeFor<TimeTree>(time_tree);
 
     RevBayesCore::TypedDagNode<double>* rbf = NULL;
     if( root_branch_fraction->getRevObject() != RevNullObject::getInstance() )
     {
-        rbf = RevBayesCore::assume_cast<const Probability &>( root_branch_fraction->getRevObject() ).getDagNode();
+        rbf = dagNodeFor<Probability>(root_branch_fraction);
     }
 
     // create the internal distribution object

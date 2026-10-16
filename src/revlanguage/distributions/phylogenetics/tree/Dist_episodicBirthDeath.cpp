@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <iosfwd>
@@ -76,17 +77,17 @@ RevBayesCore::EpisodicBirthDeathProcess* Dist_episodicBirthDeath::createDistribu
     // get the parameters
     
     // the root age
-    RevBayesCore::TypedDagNode<double>* ra = RevBayesCore::assume_cast<const RealPos &>( start_age->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* ra = dagNodeFor<RealPos>(start_age);
     
     // speciation rates
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* sr = NULL;
     if ( lambda_rates->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
     {
-        sr = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( lambda_rates->getRevObject() ).getDagNode();
+        sr = dagNodeFor<ModelVector<RealPos>>(lambda_rates);
     }
     else
     {
-        RevBayesCore::TypedDagNode<double>* single_sr = RevBayesCore::assume_cast<const RealPos &>( lambda_rates->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<double>* single_sr = dagNodeFor<RealPos>(lambda_rates);
         std::vector<const RevBayesCore::TypedDagNode<double>* > params;
         params.push_back( single_sr );
         
@@ -99,11 +100,11 @@ RevBayesCore::EpisodicBirthDeathProcess* Dist_episodicBirthDeath::createDistribu
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* st = NULL;
     if ( lambda_times->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
     {
-        st = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( lambda_times->getRevObject() ).getDagNode();
+        st = dagNodeFor<ModelVector<RealPos>>(lambda_times);
     }
     else
     {
-        RevBayesCore::TypedDagNode<double>* single_st = RevBayesCore::assume_cast<const RealPos &>( lambda_times->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<double>* single_st = dagNodeFor<RealPos>(lambda_times);
         std::vector<const RevBayesCore::TypedDagNode<double>* > params;
         params.push_back( single_st );
         
@@ -116,11 +117,11 @@ RevBayesCore::EpisodicBirthDeathProcess* Dist_episodicBirthDeath::createDistribu
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* er = NULL;
     if ( mu_rates->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
     {
-        er = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( mu_rates->getRevObject() ).getDagNode();
+        er = dagNodeFor<ModelVector<RealPos>>(mu_rates);
     }
     else
     {
-        RevBayesCore::TypedDagNode<double>* single_er = RevBayesCore::assume_cast<const RealPos &>( mu_rates->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<double>* single_er = dagNodeFor<RealPos>(mu_rates);
         std::vector<const RevBayesCore::TypedDagNode<double>* > params;
         params.push_back( single_er );
         
@@ -133,11 +134,11 @@ RevBayesCore::EpisodicBirthDeathProcess* Dist_episodicBirthDeath::createDistribu
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* et = NULL;
     if ( mu_times->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
     {
-        et = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( mu_times->getRevObject() ).getDagNode();
+        et = dagNodeFor<ModelVector<RealPos>>(mu_times);
     }
     else
     {
-        RevBayesCore::TypedDagNode<double>* single_et = RevBayesCore::assume_cast<const RealPos &>( mu_times->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<double>* single_et = dagNodeFor<RealPos>(mu_times);
         std::vector<const RevBayesCore::TypedDagNode<double>* > params;
         params.push_back( single_et );
         
@@ -147,29 +148,29 @@ RevBayesCore::EpisodicBirthDeathProcess* Dist_episodicBirthDeath::createDistribu
     }
     
     // sampling probability
-    RevBayesCore::TypedDagNode<double>* r                                   = RevBayesCore::assume_cast<const Probability &>( rho->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* r                                   = dagNodeFor<Probability>(rho);
     // sampling mixture proportion
 //    RevBayesCore::TypedDagNode<double>* mp                                  = static_cast<const Probability &>( samplingMixtureProportion->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode<double>* mp                                  = NULL;
     // sampling strategy
-    const std::string &strategy                                             = RevBayesCore::assume_cast<const RlString &>( sampling_strategy->getRevObject() ).getValue();
+    const std::string &strategy                                             = valueFor<RlString>(sampling_strategy);
     // incompletely sampled clades
     std::vector<RevBayesCore::Clade> inc_clades;
     if ( incomplete_clades->getRevObject() != RevNullObject::getInstance() )
     {
-       inc_clades = RevBayesCore::assume_cast<const ModelVector<Clade> &>( incomplete_clades->getRevObject() ).getValue();
+       inc_clades = valueFor<ModelVector<Clade>>(incomplete_clades);
     }
     // condition
-    const std::string& cond                                                 = RevBayesCore::assume_cast<const RlString &>( condition->getRevObject() ).getValue();
+    const std::string& cond                                                 = valueFor<RlString>(condition);
     
     // get the taxa to simulate either from a vector of rev taxon objects or a vector of names
-    std::vector<RevBayesCore::Taxon> t                                      = RevBayesCore::assume_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
+    std::vector<RevBayesCore::Taxon> t                                      = valueFor<ModelVector<Taxon>>(taxa);
     
     // tree for initialization
     RevBayesCore::Tree* init = NULL;
     if ( initial_tree->getRevObject() != RevNullObject::getInstance() )
     {
-        init = RevBayesCore::assume_cast<const TimeTree &>( initial_tree->getRevObject() ).getDagNode()->getValue().clone();
+        init = dagNodeFor<TimeTree>(initial_tree)->getValue().clone();
     }
     
     // create the internal distribution object

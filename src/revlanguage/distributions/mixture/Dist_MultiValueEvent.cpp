@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cmath>
 #include "TypeUtilities.h"
 #include <cstddef>
@@ -89,7 +90,7 @@ RevBayesCore::MultiValueEventDistribution* Dist_MultiValueEvent::createDistribut
 {
     // get the parameters
 //    const WorkspaceVector<TypedDistribution<Real> >& rl_vp                   = static_cast<const WorkspaceVector<TypedDistribution<Real> > &>( value_priors->getRevObject() );
-    const WorkspaceVector<Distribution>& rl_vp                   = RevBayesCore::assume_cast<const WorkspaceVector<Distribution > &>( value_priors->getRevObject() );
+    const WorkspaceVector<Distribution>& rl_vp                   = objectFor<WorkspaceVector<Distribution >>(value_priors);
     std::vector<RevBayesCore::TypedDistribution<double>* > vp;
     for (size_t i=0; i<rl_vp.size();++i)
     {
@@ -97,12 +98,12 @@ RevBayesCore::MultiValueEventDistribution* Dist_MultiValueEvent::createDistribut
         vp.push_back( tmp );
     }
     
-    const Distribution& rl_ep                                           = RevBayesCore::assume_cast<const Distribution &>( event_number_prior->getRevObject() );
+    const Distribution& rl_ep                                           = objectFor<Distribution>(event_number_prior);
     RevBayesCore::TypedDistribution<std::int64_t>* ep                           = RevBayesCore::assumeTypedDistribution<std::int64_t>( rl_ep.createDistribution() );
 
-    const std::vector<std::string>& n = RevBayesCore::assume_cast<const ModelVector<RlString> &>( names->getRevObject() ).getValue();
+    const std::vector<std::string>& n = valueFor<ModelVector<RlString>>(names);
     // offsets
-    const std::vector<std::int64_t> & m = RevBayesCore::assume_cast<const ModelVector<Natural> &>( min_elements->getRevObject() ).getValue();
+    const std::vector<std::int64_t> & m = valueFor<ModelVector<Natural>>(min_elements);
 
     
     RevBayesCore::MultiValueEventDistribution* d    = new RevBayesCore::MultiValueEventDistribution(ep, vp, n, m);

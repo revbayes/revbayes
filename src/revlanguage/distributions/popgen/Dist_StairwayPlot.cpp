@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <math.h>
 #include "TypeUtilities.h"
 #include <stddef.h>
@@ -69,19 +70,19 @@ RevBayesCore::StairwayPlotDistribution* Dist_StairwayPlot::createDistribution( v
 {
     
     // get the parameters
-    long                                                            n_sites = RevBayesCore::assume_cast<const Natural              &>( num_sites->getRevObject() ).getValue();
-    long                                                            n_ind   = RevBayesCore::assume_cast<const Natural              &>( num_individuals->getRevObject() ).getValue();
-    long                                                            f       = RevBayesCore::assume_cast<const RlBoolean            &>( folded->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*   th      = RevBayesCore::assume_cast<const ModelObject<RevBayesCore::RbVector<double>> &>( theta->getRevObject() ).getDagNode();
+    long                                                            n_sites = valueFor<Natural>(num_sites);
+    long                                                            n_ind   = valueFor<Natural>(num_individuals);
+    long                                                            f       = valueFor<RlBoolean>(folded);
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*   th      = dagNodeFor<ModelObject<RevBayesCore::RbVector<double>>>(theta);
 
-    const std::string&                                              m       = RevBayesCore::assume_cast<const RlString             &>( monomorphic_probability->getRevObject() ).getValue();
+    const std::string&                                              m       = valueFor<RlString>(monomorphic_probability);
     RevBayesCore::StairwayPlotDistribution::MONOMORPHIC_PROBABILITY mp = RevBayesCore::StairwayPlotDistribution::REST;
     if ( m == "treelength" )
     {
         mp = RevBayesCore::StairwayPlotDistribution::TREE_LENGTH;
     }
 
-    const std::string&                                              c       = RevBayesCore::assume_cast<const RlString             &>( coding->getRevObject() ).getValue();
+    const std::string&                                              c       = valueFor<RlString>(coding);
     RevBayesCore::StairwayPlotDistribution::CODING cd = RevBayesCore::StairwayPlotDistribution::ALL;
     if ( c == "no-monomorphic" )
     {

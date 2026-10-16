@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -48,11 +49,11 @@ RevBayesCore::OrnsteinUhlenbeckProcess* OrnsteinUhlenbeckProcess::createDistribu
 {
     
     // get the parameters
-    RevBayesCore::TypedDagNode<double>* x           = RevBayesCore::assume_cast<const Real &>( x0->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* th          = RevBayesCore::assume_cast<const Real &>( theta->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* s           = RevBayesCore::assume_cast<const RealPos &>( sigma->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* a           = RevBayesCore::assume_cast<const RealPos &>( alpha->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* ti          = RevBayesCore::assume_cast<const RealPos &>( time->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* x           = dagNodeFor<Real>(x0);
+    RevBayesCore::TypedDagNode<double>* th          = dagNodeFor<Real>(theta);
+    RevBayesCore::TypedDagNode<double>* s           = dagNodeFor<RealPos>(sigma);
+    RevBayesCore::TypedDagNode<double>* a           = dagNodeFor<RealPos>(alpha);
+    RevBayesCore::TypedDagNode<double>* ti          = dagNodeFor<RealPos>(time);
     RevBayesCore::OrnsteinUhlenbeckProcess*   d     = new RevBayesCore::OrnsteinUhlenbeckProcess(x, th, a, s, ti);
     
     return d;

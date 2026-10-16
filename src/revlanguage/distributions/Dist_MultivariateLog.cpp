@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "Dist_MultivariateLog.h"
 #include "TypeUtilities.h"
 
@@ -34,7 +35,7 @@ Core::TransformedVectorDistribution* RevLanguage::Dist_MultivariateLog::createDi
     using Core::RbVector;
 
     // get the parameters
-    const Distribution& rl_vp                      = RevBayesCore::assume_cast<const Distribution &>( log_distribution->getRevObject() );
+    const Distribution& rl_vp                      = objectFor<Distribution>(log_distribution);
     std::unique_ptr<Core::TypedDistribution<Core::RbVector<double>>> vp( Core::assumeTypedDistribution<Core::RbVector<double>>( rl_vp.createDistribution() ) );;
 
     return new Core::TransformedVectorDistribution( vp,

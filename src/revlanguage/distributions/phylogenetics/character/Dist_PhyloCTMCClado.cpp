@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cmath>
 #include "TypeUtilities.h"
 #include <cstddef>
@@ -87,31 +88,31 @@ template <typename State>
 RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharacterData >* Dist_phyloCTMCClado::createDistributionForState( void ) const
 {
     // get the parameters
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = RevBayesCore::assume_cast<const Tree &>( tree->getRevObject() ).getDagNode();
-    size_t n = size_t( RevBayesCore::assume_cast<const Natural &>( nSites->getRevObject() ).getValue() );
-    bool ambig = RevBayesCore::assume_cast<const RlBoolean &>( treatAmbiguousAsGap->getRevObject() ).getValue();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = dagNodeFor<Tree>(tree);
+    size_t n = size_t( valueFor<Natural>(nSites) );
+    bool ambig = valueFor<RlBoolean>(treatAmbiguousAsGap);
 
-    bool internal = RevBayesCore::assume_cast<const RlBoolean &>( storeInternalNodes->getRevObject() ).getValue();
-    bool gapmatch = RevBayesCore::assume_cast<const RlBoolean &>( gapMatchClamped->getRevObject() ).getValue();
+    bool internal = valueFor<RlBoolean>(storeInternalNodes);
+    bool gapmatch = valueFor<RlBoolean>(gapMatchClamped);
 
     size_t nNodes = tau->getValue().getNumberOfNodes();
 
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* site_ratesNode = NULL;
     if ( site_rates != NULL && site_rates->getRevObject() != RevNullObject::getInstance() )
     {
-        site_ratesNode = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( site_rates->getRevObject() ).getDagNode();
+        site_ratesNode = dagNodeFor<ModelVector<RealPos>>(site_rates);
     }
     RevBayesCore::TypedDagNode< double >* p_invNode = NULL;
     if ( p_inv != NULL && p_inv->getRevObject() != RevNullObject::getInstance() )
     {
-        p_invNode = RevBayesCore::assume_cast<const Probability &>( p_inv->getRevObject() ).getDagNode();
+        p_invNode = dagNodeFor<Probability>(p_inv);
     }
 
     RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharacterData > *d = NULL;
     const RevBayesCore::TypedDagNode< RevBayesCore::Simplex > *rf = NULL;
     if ( root_frequencies != NULL && root_frequencies->getRevObject() != RevNullObject::getInstance() )
     {
-        rf = RevBayesCore::assume_cast<const Simplex &>( root_frequencies->getRevObject() ).getDagNode();
+        rf = dagNodeFor<Simplex>(root_frequencies);
     }
 
     // get basic parameters that do not depend on data type
@@ -121,27 +122,27 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
     size_t nCharsClado = 1;
     if ( q->getRevObject().isType( ModelVector<RateGenerator>::getClassTypeSpec() ) )
     {
-        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = RevBayesCore::assume_cast<const ModelVector<RateGenerator> &>( q->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = dagNodeFor<ModelVector<RateGenerator>>(q);
         nChars = rm->getValue()[0].getNumberOfStates();
     }
     else if ( q->getRevObject().isType( SiteMixtureModel::getClassTypeSpec() ) )
     {
-        RevBayesCore::TypedDagNode< RevBayesCore::SiteMixtureModel >* mm = RevBayesCore::assume_cast<const SiteMixtureModel &>( q->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< RevBayesCore::SiteMixtureModel >* mm = dagNodeFor<SiteMixtureModel>(q);
         nChars = mm->getValue().getNumberOfStates();
     }
     else
     {
-        RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = RevBayesCore::assume_cast<const RateMatrix &>( q->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = dagNodeFor<RateMatrix>(q);
         nChars = rm->getValue().getNumberOfStates();
     }
     if ( cladoProbs->getRevObject().isType( ModelVector<CladogeneticProbabilityMatrix>::getClassTypeSpec() ) )
     {
-        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::CladogeneticProbabilityMatrix> >* cp = RevBayesCore::assume_cast<const ModelVector<CladogeneticProbabilityMatrix> &>( q->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::CladogeneticProbabilityMatrix> >* cp = dagNodeFor<ModelVector<CladogeneticProbabilityMatrix>>(q);
         nCharsClado = cp->getValue()[0].getNumberOfStates();
     }
     else
     {
-        RevBayesCore::TypedDagNode<RevBayesCore::CladogeneticProbabilityMatrix>* cp = RevBayesCore::assume_cast<const CladogeneticProbabilityMatrix &>( cladoProbs->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<RevBayesCore::CladogeneticProbabilityMatrix>* cp = dagNodeFor<CladogeneticProbabilityMatrix>(cladoProbs);
         nCharsClado = cp->getValue().getNumberOfStates();
     }
     // state space size checks
@@ -170,7 +171,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
 
     if ( rate->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
     {
-	RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* clockRates = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( rate->getRevObject() ).getDagNode();
+	RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* clockRates = dagNodeFor<ModelVector<RealPos>>(rate);
 
 	// sanity check
 	if ( (nNodes-1) != clockRates->getValue().size() )
@@ -182,14 +183,14 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
     }
     else
     {
-	RevBayesCore::TypedDagNode<double>* clockRate = RevBayesCore::assume_cast<const RealPos &>( rate->getRevObject() ).getDagNode();
+	RevBayesCore::TypedDagNode<double>* clockRate = dagNodeFor<RealPos>(rate);
 	dist->setClockRate( clockRate );
     }
 
     // set the rate matrix
     if ( q->getRevObject().isType( ModelVector<RateGenerator>::getClassTypeSpec() ) )
     {
-	RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = RevBayesCore::assume_cast<const ModelVector<RateGenerator> &>( q->getRevObject() ).getDagNode();
+	RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = dagNodeFor<ModelVector<RateGenerator>>(q);
 
 	// sanity check
 	if ( (nNodes-1) != rm->getValue().size() )
@@ -201,7 +202,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
     }
     else if ( q->getRevObject().isType( SiteMixtureModel::getClassTypeSpec() ) )
     {
-	RevBayesCore::TypedDagNode< RevBayesCore::SiteMixtureModel >* mm = RevBayesCore::assume_cast<const SiteMixtureModel &>( q->getRevObject() ).getDagNode();
+	RevBayesCore::TypedDagNode< RevBayesCore::SiteMixtureModel >* mm = dagNodeFor<SiteMixtureModel>(q);
 	dist->setMixtureModel( mm );
 
 	if ( root_frequencies and root_frequencies->getRevObject() != RevNullObject::getInstance() )
@@ -215,14 +216,14 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
     }
     else
     {
-	RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = RevBayesCore::assume_cast<const RateGenerator &>( q->getRevObject() ).getDagNode();
+	RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = dagNodeFor<RateGenerator>(q);
 	dist->setRateMatrix( rm );
     }
 
     // set the clado probs
     if ( cladoProbs->getRevObject().isType( ModelVector<CladogeneticProbabilityMatrix>::getClassTypeSpec() ) )
     {
-	RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::CladogeneticProbabilityMatrix> >* cp = RevBayesCore::assume_cast<const ModelVector<CladogeneticProbabilityMatrix> &>( cladoProbs->getRevObject() ).getDagNode();
+	RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::CladogeneticProbabilityMatrix> >* cp = dagNodeFor<ModelVector<CladogeneticProbabilityMatrix>>(cladoProbs);
 
 	// sanity check
 	if ( (nNodes-1) != cp->getValue().size() )
@@ -233,7 +234,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
     }
     else
     {
-	RevBayesCore::TypedDagNode<RevBayesCore::CladogeneticProbabilityMatrix>* cp = RevBayesCore::assume_cast<const CladogeneticProbabilityMatrix &>( cladoProbs->getRevObject() ).getDagNode();
+	RevBayesCore::TypedDagNode<RevBayesCore::CladogeneticProbabilityMatrix>* cp = dagNodeFor<CladogeneticProbabilityMatrix>(cladoProbs);
 	dist->setCladogenesisMatrix( cp );
     }
 
@@ -249,7 +250,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
 
 RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharacterData >* Dist_phyloCTMCClado::createDistribution( void ) const
 {
-    const std::string& dt = RevBayesCore::assume_cast<const RlString &>( type->getRevObject() ).getValue();
+    const std::string& dt = valueFor<RlString>(type);
     
     if ( dt == "NaturalNumbers" )
     {

@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -59,8 +60,8 @@ RevBayesCore::CauchyDistribution* Dist_Cauchy::createDistribution( void ) const
 {
 
     // get the parameters
-    RevBayesCore::TypedDagNode<double>* l = RevBayesCore::assume_cast<const Real &>( location->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* s = RevBayesCore::assume_cast<const RealPos &>( scale->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* l = dagNodeFor<Real>(location);
+    RevBayesCore::TypedDagNode<double>* s = dagNodeFor<RealPos>(scale);
     RevBayesCore::CauchyDistribution*   d = new RevBayesCore::CauchyDistribution(l, s);
     
     return d;

@@ -6,6 +6,7 @@
 //  Copyright © 2016 Michael Landis. All rights reserved.
 //
 
+#include "RevVariableUtilities.h"
 #include <iosfwd>
 #include "TypeUtilities.h"
 #include <string>
@@ -72,26 +73,26 @@ RevBayesCore::ConstantRateOutgroupBirthDeathProcess* Dist_outgroupBirthDeath::cr
     // get the parameters
     
     // the start age
-    RevBayesCore::TypedDagNode<double>* ra      = RevBayesCore::assume_cast<const RealPos &>( start_age->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* ra      = dagNodeFor<RealPos>(start_age);
     // speciation rate
-    RevBayesCore::TypedDagNode<double>* s       = RevBayesCore::assume_cast<const RealPos &>( lambda->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* s       = dagNodeFor<RealPos>(lambda);
     // extinction rate
-    RevBayesCore::TypedDagNode<double>* e       = RevBayesCore::assume_cast<const RealPos &>( mu->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* e       = dagNodeFor<RealPos>(mu);
     // sampling probability (ingroup)
-    RevBayesCore::TypedDagNode<double>* ri      = RevBayesCore::assume_cast<const Probability &>( rhoIngroup->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* ri      = dagNodeFor<Probability>(rhoIngroup);
     // sampling probability (outgroup)
-    RevBayesCore::TypedDagNode<double>* ro      = RevBayesCore::assume_cast<const Probability &>( rhoOutgroup->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* ro      = dagNodeFor<Probability>(rhoOutgroup);
     // sampling strategy (ingroup)
-    const std::string& ssi                      = RevBayesCore::assume_cast<const RlString &>( samplingStrategyIngroup->getRevObject() ).getValue();
+    const std::string& ssi                      = valueFor<RlString>(samplingStrategyIngroup);
     // strategy (outgroup)
-    const std::string& sso                      = RevBayesCore::assume_cast<const RlString &>( samplingStrategyOutgroup->getRevObject() ).getValue();
+    const std::string& sso                      = valueFor<RlString>(samplingStrategyOutgroup);
     
     // condition
-    const std::string& cdt                     = RevBayesCore::assume_cast<const RlString &>( condition->getRevObject() ).getValue();
+    const std::string& cdt                     = valueFor<RlString>(condition);
 
     // get the taxa to simulate either from a vector of rev taxon objects or a vector of names
-    std::vector<RevBayesCore::Taxon> t         = RevBayesCore::assume_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
-    std::vector<RevBayesCore::Taxon> t_out     = RevBayesCore::assume_cast<const ModelVector<Taxon> &>( taxaOutgroup->getRevObject() ).getValue();
+    std::vector<RevBayesCore::Taxon> t         = valueFor<ModelVector<Taxon>>(taxa);
+    std::vector<RevBayesCore::Taxon> t_out     = valueFor<ModelVector<Taxon>>(taxaOutgroup);
     
     // create the internal distribution object
     RevBayesCore::ConstantRateOutgroupBirthDeathProcess* d;

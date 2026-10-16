@@ -12,6 +12,7 @@
 #ifndef Dist_upp_H
 #define Dist_upp_H
 
+#include "RevVariableUtilities.h"
 #include "UniformPartitioningDistribution.h"
 #include "TypeUtilities.h"
 #include "ModelVector.h"
@@ -93,8 +94,8 @@ RevBayesCore::UniformPartitioningDistribution<typename valType::valueType>* RevL
     throw RbException("Uniform partitioning distribution currently disabled due to invalid calculations.");
     
     // get the parameters
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<typename valType::valueType> >* v   = RevBayesCore::assume_cast<const ModelVector<valType> &>( values->getRevObject() ).getDagNode();
-    bool iz = RevBayesCore::assume_cast<const RlBoolean &>(include_zero->getRevObject()).getValue();
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<typename valType::valueType> >* v   = dagNodeFor<ModelVector<valType>>(values);
+    bool iz = valueFor<RlBoolean>(include_zero);
     
     RevBayesCore::UniformPartitioningDistribution<typename valType::valueType>* d		= new RevBayesCore::UniformPartitioningDistribution<typename valType::valueType>(v, iz);
     

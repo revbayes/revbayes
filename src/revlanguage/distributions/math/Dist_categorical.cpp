@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cmath>
 #include "TypeUtilities.h"
 #include <cstddef>
@@ -58,7 +59,7 @@ Dist_categorical* Dist_categorical::clone( void ) const
 RevBayesCore::CategoricalDistribution* Dist_categorical::createDistribution( void ) const
 {
     // get the parameters
-    RevBayesCore::TypedDagNode< RevBayesCore::Simplex >*            q    = RevBayesCore::assume_cast<const Simplex&>( p->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::Simplex >*            q    = dagNodeFor<Simplex>(p);
     RevBayesCore::CategoricalDistribution*                          d    = new RevBayesCore::CategoricalDistribution( q );
     
     return d;

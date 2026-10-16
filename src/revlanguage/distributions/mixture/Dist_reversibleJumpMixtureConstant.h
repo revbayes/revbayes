@@ -1,6 +1,7 @@
 #ifndef Dist_reversibleJumpMixtureConstant_H
 #define Dist_reversibleJumpMixtureConstant_H
 
+#include "RevVariableUtilities.h"
 #include "ReversibleJumpMixtureConstantDistribution.h"
 #include "TypeUtilities.h"
 #include "RealPos.h"
@@ -97,8 +98,8 @@ RevBayesCore::ReversibleJumpMixtureConstantDistribution<typename valType::valueT
 {
     
     // get the parameters
-    RevBayesCore::TypedDagNode< typename valType::valueType >*      cv              = RevBayesCore::assume_cast<const valType &>( constValue->getRevObject() ).getDagNode();
-    const Distribution&                                             rlDistribution  = RevBayesCore::assume_cast<const Distribution &>( baseDistribution->getRevObject() );
+    RevBayesCore::TypedDagNode< typename valType::valueType >*      cv              = dagNodeFor<valType>(constValue);
+    const Distribution&                                             rlDistribution  = objectFor<Distribution>(baseDistribution);
     RevBayesCore::TypedDistribution<typename valType::valueType>*   g0              = dynamic_cast<RevBayesCore::TypedDistribution<typename valType::valueType>* >( rlDistribution.createDistribution() );
 
     // error checking
@@ -106,7 +107,7 @@ RevBayesCore::ReversibleJumpMixtureConstantDistribution<typename valType::valueT
     {
         throw RbException("Could not cast distribution in reversible jump mixture.");
     }
-    RevBayesCore::TypedDagNode< double >*                           p               = RevBayesCore::assume_cast<const Probability &>( probability->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< double >*                           p               = dagNodeFor<Probability>(probability);
     
     RevBayesCore::ReversibleJumpMixtureConstantDistribution<typename valType::valueType>* d		= new RevBayesCore::ReversibleJumpMixtureConstantDistribution<typename valType::valueType>(cv,g0,p);
     

@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "Dist_PhyloMultivariateBrownianMultiSampleREML.h"
 #include "TypeUtilities.h"
 
@@ -50,14 +51,14 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
 {
     
     // get the parameters
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = RevBayesCore::assume_cast<const Tree &>( tree->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = dagNodeFor<Tree>(tree);
     size_t n_nodes = tau->getValue().getNumberOfNodes();
 //    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* var = static_cast<const ModelVector<RealPos> &>( within_species_variances->getRevObject() ).getDagNode();
 //    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* var2 = static_cast<const ModelVector<RealPos> &>( within_species_variances2->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* var = RevBayesCore::assume_cast<const ModelVector<ModelVector<RealPos> > &>( within_species_variances->getRevObject() ).getDagNode();
-    const std::vector<RevBayesCore::Taxon>      &t  = RevBayesCore::assume_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* var = dagNodeFor<ModelVector<ModelVector<RealPos> >>(within_species_variances);
+    const std::vector<RevBayesCore::Taxon>      &t  = valueFor<ModelVector<Taxon>>(taxa);
     
-    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal>* vcv = RevBayesCore::assume_cast<const MatrixRealSymmetric&>( rate_matrix->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal>* vcv = dagNodeFor<MatrixRealSymmetric>(rate_matrix);
     
     size_t n = vcv->getValue().getDim();
     
@@ -66,7 +67,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
     // set the clock rates
     if ( branch_rates->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
     {
-        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* br = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( branch_rates->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* br = dagNodeFor<ModelVector<RealPos>>(branch_rates);
         
         // sanity check
         size_t n_rates = br->getValue().size();
@@ -80,7 +81,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
     }
     else
     {
-        RevBayesCore::TypedDagNode< double >* br = RevBayesCore::assume_cast<const RealPos &>( branch_rates->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< double >* br = dagNodeFor<RealPos>(branch_rates);
         
         dist->setBranchRate( br );
     }

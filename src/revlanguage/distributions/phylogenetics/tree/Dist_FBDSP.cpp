@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <iosfwd>
@@ -74,15 +75,15 @@ RevBayesCore::FossilizedBirthDeathSpeciationProcess* Dist_FBDSP::createDistribut
     // get the parameters
     
     // the start age
-    RevBayesCore::TypedDagNode<double>* sa = RevBayesCore::assume_cast<const RealPos &>( start_age->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* sa = dagNodeFor<RealPos>(start_age);
 
     // get the parameters
 
     // sampling condition
-    const std::string& cond  = RevBayesCore::assume_cast<const RlString &>( condition->getRevObject() ).getValue();
+    const std::string& cond  = valueFor<RlString>(condition);
     
     // get the taxa to simulate either from a vector of rev taxon objects or a vector of names
-    std::vector<RevBayesCore::Taxon> t = RevBayesCore::assume_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
+    std::vector<RevBayesCore::Taxon> t = valueFor<ModelVector<Taxon>>(taxa);
 
     // speciation rate
     RevBayesCore::DagNode* l = lambda->getRevObject().getDagNode();
@@ -96,16 +97,16 @@ RevBayesCore::FossilizedBirthDeathSpeciationProcess* Dist_FBDSP::createDistribut
     RevBayesCore::DagNode* b = beta->getRevObject().getDagNode();
 
     // sampling probability
-    RevBayesCore::TypedDagNode<double>* r = RevBayesCore::assume_cast<const Probability &>( rho->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* r = dagNodeFor<Probability>(rho);
 
     // rate change times
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* rt = NULL;
     if ( timeline->getRevObject() != RevNullObject::getInstance() )
     {
-        rt = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( timeline->getRevObject() ).getDagNode();
+        rt = dagNodeFor<ModelVector<RealPos>>(timeline);
     }
 
-    bool c  = RevBayesCore::assume_cast<const RlBoolean &>( complete->getRevObject() ).getValue();
+    bool c  = valueFor<RlBoolean>(complete);
     bool re = false; //static_cast<const RlBoolean &>( resample->getRevObject() ).getValue();
 
     RevBayesCore::FossilizedBirthDeathSpeciationProcess* d = new RevBayesCore::FossilizedBirthDeathSpeciationProcess(sa, l, m, p, r, la, b, rt, cond, t, c, re);

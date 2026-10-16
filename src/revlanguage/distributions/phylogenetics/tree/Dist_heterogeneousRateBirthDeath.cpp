@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cmath>
 #include "TypeUtilities.h"
 #include <iosfwd>
@@ -75,16 +76,16 @@ RevBayesCore::HeterogeneousRateBirthDeath* Dist_heterogeneousRateBirthDeath::cre
 {
     
     // Get the parameters
-    RevBayesCore::TypedDagNode<double>* ra   = RevBayesCore::assume_cast<const RealPos &>( root_age->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<std::int64_t>*    rs   = RevBayesCore::assume_cast<const Natural &>( root_state->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* sp   = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( speciation->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* ex   = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( extinction->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* er   = RevBayesCore::assume_cast<const RealPos &>( event_rate->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* rh   = RevBayesCore::assume_cast<const Probability &>( rho->getRevObject() ).getDagNode();
-    bool allow_same   = RevBayesCore::assume_cast<const RlBoolean &>( allow_same_category->getRevObject() ).getValue();
-    std::vector<RevBayesCore::Taxon> t = RevBayesCore::assume_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
+    RevBayesCore::TypedDagNode<double>* ra   = dagNodeFor<RealPos>(root_age);
+    RevBayesCore::TypedDagNode<std::int64_t>*    rs   = dagNodeFor<Natural>(root_state);
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* sp   = dagNodeFor<ModelVector<RealPos>>(speciation);
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* ex   = dagNodeFor<ModelVector<RealPos>>(extinction);
+    RevBayesCore::TypedDagNode<double>* er   = dagNodeFor<RealPos>(event_rate);
+    RevBayesCore::TypedDagNode<double>* rh   = dagNodeFor<Probability>(rho);
+    bool allow_same   = valueFor<RlBoolean>(allow_same_category);
+    std::vector<RevBayesCore::Taxon> t = valueFor<ModelVector<Taxon>>(taxa);
     // condition
-    const std::string& cond                     = RevBayesCore::assume_cast<const RlString &>( condition->getRevObject() ).getValue();
+    const std::string& cond                     = valueFor<RlString>(condition);
     RevBayesCore::HeterogeneousRateBirthDeath*   d = new RevBayesCore::HeterogeneousRateBirthDeath( ra, rs, sp, ex, er, rh, cond, allow_same, t );
     
     return d;

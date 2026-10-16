@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cmath>
 #include "TypeUtilities.h"
 #include <cstddef>
@@ -80,8 +81,8 @@ RevBayesCore::MultispeciesCoalescent* Dist_constPopMultispCoal::createDistributi
 {
 
     // Get the parameters
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* st = RevBayesCore::assume_cast<const TimeTree &>( species_tree->getRevObject() ).getDagNode();
-    const std::vector<RevBayesCore::Taxon>      &t  = RevBayesCore::assume_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* st = dagNodeFor<TimeTree>(species_tree);
+    const std::vector<RevBayesCore::Taxon>      &t  = valueFor<ModelVector<Taxon>>(taxa);
 
     // get the number of nodes for the tree
     size_t n_nodes = st->getValue().getNumberOfNodes();
@@ -91,7 +92,7 @@ RevBayesCore::MultispeciesCoalescent* Dist_constPopMultispCoal::createDistributi
 
     if ( Ne->getRequiredTypeSpec().isDerivedOf( ModelVector<RealPos>::getClassTypeSpec() ) )
     {
-        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* ne_node = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( Ne->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* ne_node = dagNodeFor<ModelVector<RealPos>>(Ne);
 
         // sanity check
         if ( n_nodes != ne_node->getValue().size() )
@@ -103,7 +104,7 @@ RevBayesCore::MultispeciesCoalescent* Dist_constPopMultispCoal::createDistributi
     }
     else
     {
-        RevBayesCore::TypedDagNode<double>* ne_node = RevBayesCore::assume_cast<const RealPos &>( Ne->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<double>* ne_node = dagNodeFor<RealPos>(Ne);
         d->setNe( ne_node );
     }
     d->redrawValue();

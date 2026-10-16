@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -32,9 +33,9 @@ RevBayesCore::PhyloMultivariateBrownianProcess* Dist_PhyloMvtBrownian::createDis
 {
     // get the parameters
 
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = RevBayesCore::assume_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = dagNodeFor<TimeTree>(tree);
     
-    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal>* sig  = RevBayesCore::assume_cast<const MatrixRealSymmetric&>( sigma->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal>* sig  = dagNodeFor<MatrixRealSymmetric>(sigma);
 //    RevBayesCore::TypedDagNode< RbVector<double> >* r  = static_cast<const ModelVector<Real>&>( rootval->getRevObject() ).getDagNode();
     
 //    RevBayesCore::PhyloMultivariateBrownianProcess* process    = new RevBayesCore::PhyloMultivariateBrownianProcess( tau, om, r );

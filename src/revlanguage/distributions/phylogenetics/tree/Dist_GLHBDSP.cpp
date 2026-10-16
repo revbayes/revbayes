@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <iosfwd>
@@ -74,13 +75,13 @@ Dist_GLHBDSP* Dist_GLHBDSP::clone( void ) const
 RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_GLHBDSP::createDistribution( void ) const
 {
     // the start age
-    RevBayesCore::TypedDagNode<double>* sa = RevBayesCore::assume_cast<const RealPos &>( start_age->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* sa = dagNodeFor<RealPos>(start_age);
 
     // the start type
     bool use_origin = start_type == "originAge" ? true : false;
 
     // sampling condition
-    const std::string& cond = RevBayesCore::assume_cast<const RlString &>( condition->getRevObject() ).getValue();
+    const std::string& cond = valueFor<RlString>(condition);
 
     if ( cond != "time" )
     {
@@ -105,30 +106,30 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_GLHBDSP::createDistrib
     }
 
     // taxa
-    std::vector<RevBayesCore::Taxon> tax = RevBayesCore::assume_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
+    std::vector<RevBayesCore::Taxon> tax = valueFor<ModelVector<Taxon>>(taxa);
 
     // root frequency
-    RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* root_freq = RevBayesCore::assume_cast<const Simplex &>( pi->getRevObject() ).getDagNode();;
+    RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* root_freq = dagNodeFor<Simplex>(pi);;
 
     // number of states
-    size_t num_states = size_t(RevBayesCore::assume_cast<const Natural &>( n_states->getRevObject() ).getValue());
+    size_t num_states = size_t(valueFor<Natural>(n_states));
     if ( num_states < 2 )
     {
     	throw RbException("nStates must be 2 or greater.");
     }
 
     // number of processors
-    size_t num_procs = size_t(RevBayesCore::assume_cast<const Natural &>( n_proc->getRevObject() ).getValue());
+    size_t num_procs = size_t(valueFor<Natural>(n_proc));
 
     // tolerances
-    double absolute_tolerance = (double)RevBayesCore::assume_cast<const RealPos &>(abs_tol->getRevObject()).getValue();
-    double relative_tolerance = (double)RevBayesCore::assume_cast<const RealPos &>(rel_tol->getRevObject()).getValue();
+    double absolute_tolerance = (double)valueFor<RealPos>(abs_tol);
+    double relative_tolerance = (double)valueFor<RealPos>(rel_tol);
 
     // number of sense steps
-    size_t num_steps = size_t(RevBayesCore::assume_cast<const Natural &>( num_step->getRevObject() ).getValue());
+    size_t num_steps = size_t(valueFor<Natural>(num_step));
 
     // indexing
-    bool zi = RevBayesCore::assume_cast<const RlBoolean &>( zero_index->getRevObject() ).getValue();
+    bool zi = valueFor<RlBoolean>(zero_index);
 
     // make the distribution
     RevBayesCore::GeneralizedLineageHeterogeneousBirthDeathSamplingProcess* d = new RevBayesCore::GeneralizedLineageHeterogeneousBirthDeathSamplingProcess(tax, sa, cond, root_freq, num_states, use_origin, zi, num_procs, absolute_tolerance, relative_tolerance, num_steps);
@@ -138,13 +139,13 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_GLHBDSP::createDistrib
     {
     	if ( lambda->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
     	{ // case 1: time homogeneous
-    		RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* l_rates = RevBayesCore::assume_cast<const ModelVector< RealPos > &>( lambda->getRevObject() ).getDagNode();
+    		RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* l_rates = dagNodeFor<ModelVector< RealPos >>(lambda);
     	    d->setLambda(l_rates);
     	}
     	else if ( lambda->getRevObject().isType( ModelVector< ModelVector<RealPos> >::getClassTypeSpec() ) )
 		{ // case 2: time heterogeneous
-    	    RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* l_rates = RevBayesCore::assume_cast<const ModelVector< ModelVector<RealPos> > &>( lambda->getRevObject() ).getDagNode();
-    	    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                           l_times = RevBayesCore::assume_cast<const ModelVector< RealPos > &>( lambda_times->getRevObject() ).getDagNode();
+    	    RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* l_rates = dagNodeFor<ModelVector< ModelVector<RealPos> >>(lambda);
+    	    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                           l_times = dagNodeFor<ModelVector< RealPos >>(lambda_times);
     	    d->setLambda(l_rates, l_times);
 		}
     	else
@@ -162,13 +163,13 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_GLHBDSP::createDistrib
     {
     	if ( mu->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
     	{ // case 1: time homogeneous
-    		RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* m_rates = RevBayesCore::assume_cast<const ModelVector< RealPos > &>( mu->getRevObject() ).getDagNode();
+    		RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* m_rates = dagNodeFor<ModelVector< RealPos >>(mu);
     	    d->setMu(m_rates);
     	}
     	else if ( mu->getRevObject().isType( ModelVector< ModelVector<RealPos> >::getClassTypeSpec() ) )
 		{ // case 2: time heterogeneous
-    	    RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* m_rates = RevBayesCore::assume_cast<const ModelVector< ModelVector<RealPos> > &>( mu->getRevObject() ).getDagNode();
-    	    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                           m_times = RevBayesCore::assume_cast<const ModelVector< RealPos > &>( mu_times->getRevObject() ).getDagNode();
+    	    RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* m_rates = dagNodeFor<ModelVector< ModelVector<RealPos> >>(mu);
+    	    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                           m_times = dagNodeFor<ModelVector< RealPos >>(mu_times);
     	    d->setMu(m_rates, m_times);
 		}
     	else
@@ -182,13 +183,13 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_GLHBDSP::createDistrib
     {
     	if ( phi->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
     	{ // case 1: time homogeneous
-    		RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* p_rates = RevBayesCore::assume_cast<const ModelVector< RealPos > &>( phi->getRevObject() ).getDagNode();
+    		RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* p_rates = dagNodeFor<ModelVector< RealPos >>(phi);
     	    d->setPhi(p_rates);
     	}
     	else if ( phi->getRevObject().isType( ModelVector< ModelVector<RealPos> >::getClassTypeSpec() ) )
 		{ // case 2: time heterogeneous
-    	    RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* p_rates = RevBayesCore::assume_cast<const ModelVector< ModelVector<RealPos> > &>( phi->getRevObject() ).getDagNode();
-    	    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                           p_times = RevBayesCore::assume_cast<const ModelVector< RealPos > &>( phi_times->getRevObject() ).getDagNode();
+    	    RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* p_rates = dagNodeFor<ModelVector< ModelVector<RealPos> >>(phi);
+    	    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                           p_times = dagNodeFor<ModelVector< RealPos >>(phi_times);
     	    d->setPhi(p_rates, p_times);
 		}
     	else
@@ -202,13 +203,13 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_GLHBDSP::createDistrib
     {
     	if ( delta->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
     	{ // case 1: time homogeneous
-    		RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* d_rates = RevBayesCore::assume_cast<const ModelVector< RealPos > &>( delta->getRevObject() ).getDagNode();
+    		RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* d_rates = dagNodeFor<ModelVector< RealPos >>(delta);
     	    d->setDelta(d_rates);
     	}
     	else if ( delta->getRevObject().isType( ModelVector< ModelVector<RealPos> >::getClassTypeSpec() ) )
 		{ // case 2: time heterogeneous
-    	    RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* d_rates = RevBayesCore::assume_cast<const ModelVector< ModelVector<RealPos> > &>( delta->getRevObject() ).getDagNode();
-    	    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                           d_times = RevBayesCore::assume_cast<const ModelVector< RealPos > &>( delta_times->getRevObject() ).getDagNode();
+    	    RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* d_rates = dagNodeFor<ModelVector< ModelVector<RealPos> >>(delta);
+    	    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                           d_times = dagNodeFor<ModelVector< RealPos >>(delta_times);
     	    d->setDelta(d_rates, d_times);
 		}
     	else
@@ -220,16 +221,16 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_GLHBDSP::createDistrib
     // mass-speciation event
     if ( upsilon->getRevObject() != RevNullObject::getInstance() )
     {
-        RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* u_probs = RevBayesCore::assume_cast<const ModelVector< ModelVector<Probability> > &>( upsilon->getRevObject() ).getDagNode();
-        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                           u_times = RevBayesCore::assume_cast<const ModelVector< RealPos> &>( upsilon_times->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* u_probs = dagNodeFor<ModelVector< ModelVector<Probability> >>(upsilon);
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                           u_times = dagNodeFor<ModelVector< RealPos>>(upsilon_times);
         d->setUpsilon(u_probs, u_times);
     }
 
     // mass-extinction event
     if ( gamma->getRevObject() != RevNullObject::getInstance() )
     {
-        RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* g_probs = RevBayesCore::assume_cast<const ModelVector< ModelVector<Probability> > &>( gamma->getRevObject() ).getDagNode();
-        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                           g_times = RevBayesCore::assume_cast<const ModelVector< RealPos> &>( gamma_times->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* g_probs = dagNodeFor<ModelVector< ModelVector<Probability> >>(gamma);
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                           g_times = dagNodeFor<ModelVector< RealPos>>(gamma_times);
         d->setGamma(g_probs, g_times);
     }
 
@@ -238,13 +239,13 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_GLHBDSP::createDistrib
     {
     	if ( rho->getRevObject().isType( Probability::getClassTypeSpec() ) )
     	{ // simple case
-    		RevBayesCore::TypedDagNode< double >* r_probs = RevBayesCore::assume_cast<const Probability &>( rho->getRevObject() ).getDagNode();
+    		RevBayesCore::TypedDagNode< double >* r_probs = dagNodeFor<Probability>(rho);
     		d->setRho(r_probs);
     	}
     	else
     	{ // state-depenent case
-            RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* r_probs = RevBayesCore::assume_cast<const ModelVector< ModelVector<Probability> > &>( rho->getRevObject() ).getDagNode();
-            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                           r_times = RevBayesCore::assume_cast<const ModelVector< RealPos> &>( rho_times->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* r_probs = dagNodeFor<ModelVector< ModelVector<Probability> >>(rho);
+            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                           r_times = dagNodeFor<ModelVector< RealPos>>(rho_times);
             d->setRho(r_probs, r_times);
     	}
     }
@@ -252,8 +253,8 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_GLHBDSP::createDistrib
     // mass-destructive-sampling event
     if ( xi->getRevObject() != RevNullObject::getInstance() )
     {
-        RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* x_probs = RevBayesCore::assume_cast<const ModelVector< ModelVector<Probability> > &>( xi->getRevObject() ).getDagNode();
-        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                           x_times = RevBayesCore::assume_cast<const ModelVector< RealPos> &>( xi_times->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* x_probs = dagNodeFor<ModelVector< ModelVector<Probability> >>(xi);
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                           x_times = dagNodeFor<ModelVector< RealPos>>(xi_times);
         d->setXi(x_probs, x_times);
     }
 
@@ -262,18 +263,18 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_GLHBDSP::createDistrib
     {
     	if ( eta->getRevObject().isType( RealPos::getClassTypeSpec() ) )
     	{
-    		RevBayesCore::TypedDagNode< double >* h_rate = RevBayesCore::assume_cast<const RealPos &>( eta->getRevObject() ).getDagNode();
+    		RevBayesCore::TypedDagNode< double >* h_rate = dagNodeFor<RealPos>(eta);
     	    d->setEta(h_rate);
     	}
     	else if ( eta->getRevObject().isType( RateGenerator::getClassTypeSpec() ) )
     	{ // case 2: time homogeneous
-    		RevBayesCore::TypedDagNode< RevBayesCore::RateGenerator >* h_mats = RevBayesCore::assume_cast<const RateGenerator &>( eta->getRevObject() ).getDagNode();
+    		RevBayesCore::TypedDagNode< RevBayesCore::RateGenerator >* h_mats = dagNodeFor<RateGenerator>(eta);
     	    d->setEta(h_mats);
     	}
     	else if ( eta->getRevObject().isType( ModelVector<RateGenerator>::getClassTypeSpec() ) )
 		{ // case 3: time heterogeneous
-    	    RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RateGenerator > >* h_mats  = RevBayesCore::assume_cast<const ModelVector<RateGenerator> &>( eta->getRevObject() ).getDagNode();
-    	    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                        h_times = RevBayesCore::assume_cast<const ModelVector< RealPos > &>( eta_times->getRevObject() ).getDagNode();
+    	    RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RateGenerator > >* h_mats  = dagNodeFor<ModelVector<RateGenerator>>(eta);
+    	    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                        h_times = dagNodeFor<ModelVector< RealPos >>(eta_times);
     	    d->setEta(h_mats, h_times);
 		}
     	else
@@ -287,13 +288,13 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_GLHBDSP::createDistrib
     {
     	if ( omega->getRevObject().isType( CladogeneticProbabilityMatrix::getClassTypeSpec() ) )
     	{ // case 1: time homogeneous
-    		RevBayesCore::TypedDagNode< RevBayesCore::CladogeneticProbabilityMatrix >* w_mats = RevBayesCore::assume_cast<const CladogeneticProbabilityMatrix &>( omega->getRevObject() ).getDagNode();
+    		RevBayesCore::TypedDagNode< RevBayesCore::CladogeneticProbabilityMatrix >* w_mats = dagNodeFor<CladogeneticProbabilityMatrix>(omega);
     	    d->setOmega(w_mats);
     	}
     	else if ( omega->getRevObject().isType( ModelVector<CladogeneticProbabilityMatrix>::getClassTypeSpec() ) )
 		{ // case 2: time heterogeneous
-    	    RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::CladogeneticProbabilityMatrix > >* w_mats  = RevBayesCore::assume_cast<const ModelVector<CladogeneticProbabilityMatrix> &>( omega->getRevObject() ).getDagNode();
-    	    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                                        w_times = RevBayesCore::assume_cast<const ModelVector< RealPos > &>( omega_times->getRevObject() ).getDagNode();
+    	    RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::CladogeneticProbabilityMatrix > >* w_mats  = dagNodeFor<ModelVector<CladogeneticProbabilityMatrix>>(omega);
+    	    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*                                        w_times = dagNodeFor<ModelVector< RealPos >>(omega_times);
     	    d->setOmega(w_mats, w_times);
 		}
     	else
@@ -305,7 +306,7 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_GLHBDSP::createDistrib
     // mass-extinction mediated state-change event
     if ( zeta->getRevObject() != RevNullObject::getInstance() )
     {
-    	RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::MatrixReal > >* z_mats = RevBayesCore::assume_cast<const ModelVector< StochasticMatrix > &>( zeta->getRevObject() ).getDagNode();;
+    	RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::MatrixReal > >* z_mats = dagNodeFor<ModelVector< StochasticMatrix >>(zeta);;
         d->setZeta(z_mats);
     }
 

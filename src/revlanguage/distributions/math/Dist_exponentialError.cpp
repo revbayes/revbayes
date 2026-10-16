@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cmath>
 #include "TypeUtilities.h"
 #include <cstddef>
@@ -75,15 +76,15 @@ RevBayesCore::ExponentialErrorDistribution* Dist_exponentialError::createDistrib
     // get the parameters
     RevBayesCore::TypedDagNode<RevBayesCore::AverageDistanceMatrix>* averDM = NULL;
     RevBayesCore::TypedDagNode<RevBayesCore::DistanceMatrix>* DM = NULL;
-    RevBayesCore::TypedDagNode<double>* la = RevBayesCore::assume_cast<const RealPos &>( lambda->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* la = dagNodeFor<RealPos>(lambda);
     
     if ( avgDistMat->getRevObject() != RevNullObject::getInstance() )
     {
-        averDM = RevBayesCore::assume_cast<const AverageDistanceMatrix &>( avgDistMat->getRevObject() ).getDagNode();
+        averDM = dagNodeFor<AverageDistanceMatrix>(avgDistMat);
     }
     if ( distMat->getRevObject() != RevNullObject::getInstance() )
     {
-        DM = RevBayesCore::assume_cast<const DistanceMatrix &>( distMat->getRevObject() ).getDagNode();
+        DM = dagNodeFor<DistanceMatrix>(distMat);
     }
     
     RevBayesCore::ExponentialErrorDistribution* ee = NULL;

@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "Dist_FBDRP.h"
 #include "TypeUtilities.h"
 
@@ -87,10 +88,10 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRP::createDistribution( 
     // get the parameters
     
     // sampling condition
-    const std::string& cond  = RevBayesCore::assume_cast<const RlString &>( condition->getRevObject() ).getValue();
+    const std::string& cond  = valueFor<RlString>(condition);
     
     // get the taxa to simulate either from a vector of rev taxon objects or a vector of names
-    std::vector<RevBayesCore::Taxon> t = RevBayesCore::assume_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
+    std::vector<RevBayesCore::Taxon> t = valueFor<ModelVector<Taxon>>(taxa);
 
     // speciation rate
     RevBayesCore::DagNode* l = lambda->getRevObject().getDagNode();
@@ -100,17 +101,17 @@ RevBayesCore::FossilizedBirthDeathRangeProcess* Dist_FBDRP::createDistribution( 
     RevBayesCore::DagNode* p = psi->getRevObject().getDagNode();
 
     // sampling probability
-    RevBayesCore::TypedDagNode<double>* r = RevBayesCore::assume_cast<const Probability &>( rho->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* r = dagNodeFor<Probability>(rho);
 
     // rate change times
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* rt = NULL;
     if ( timeline->getRevObject() != RevNullObject::getInstance() )
     {
-        rt = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( timeline->getRevObject() ).getDagNode();
+        rt = dagNodeFor<ModelVector<RealPos>>(timeline);
     }
 
-    bool c  = RevBayesCore::assume_cast<const RlBoolean &>( complete->getRevObject() ).getValue();
-    bool use_bds = RevBayesCore::assume_cast<const RlBoolean &>( bds->getRevObject() ).getValue();
+    bool c  = valueFor<RlBoolean>(complete);
+    bool use_bds = valueFor<RlBoolean>(bds);
 
     RevBayesCore::FossilizedBirthDeathRangeProcess* d = new RevBayesCore::FossilizedBirthDeathRangeProcess(l, m, p, r, rt, cond, t, c, false, use_bds);
     

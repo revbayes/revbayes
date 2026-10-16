@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -47,8 +48,8 @@ RevBayesCore::HalfNormalDistribution* Dist_halfNormal::createDistribution( void 
 {
     
     // get the parameters
-    RevBayesCore::TypedDagNode<double>*         o  = RevBayesCore::assume_cast<const Real &>( offset->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>*         s  = RevBayesCore::assume_cast<const RealPos &>( sd->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>*         o  = dagNodeFor<Real>(offset);
+    RevBayesCore::TypedDagNode<double>*         s  = dagNodeFor<RealPos>(sd);
     RevBayesCore::HalfNormalDistribution*  d  = new RevBayesCore::HalfNormalDistribution(o, s);
     
     return d;

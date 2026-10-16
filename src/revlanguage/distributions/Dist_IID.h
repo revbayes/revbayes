@@ -1,6 +1,7 @@
 #ifndef Dist_IID_H
 #define Dist_IID_H
 
+#include "RevVariableUtilities.h"
 #include "IidDistribution.h"
 #include "TypeUtilities.h"
 #include "DistributionTypeUtilities.h"
@@ -81,10 +82,10 @@ RevBayesCore::IidDistribution<typename valType::valueType>* RevLanguage::Dist_II
 {
     
     // get the parameters
-    const Distribution& rl_vp                                           = RevBayesCore::assume_cast<const Distribution &>( value_distribution->getRevObject() );
+    const Distribution& rl_vp                                           = objectFor<Distribution>(value_distribution);
     RevBayesCore::TypedDistribution<typename valType::valueType>* vp    = RevBayesCore::assumeTypedDistribution<typename valType::valueType>( rl_vp.createDistribution() );
 
-    std::int64_t n = RevBayesCore::assume_cast<const Natural & >( num_samples->getRevObject() ).getValue();
+    std::int64_t n = valueFor<Natural>(num_samples);
     
     RevBayesCore::IidDistribution<typename valType::valueType>* d = new RevBayesCore::IidDistribution<typename valType::valueType>(n, vp);
     

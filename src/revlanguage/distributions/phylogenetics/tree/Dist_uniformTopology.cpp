@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cmath>
 #include "TypeUtilities.h"
 #include <cstddef>
@@ -80,21 +81,21 @@ Dist_uniformTopology* Dist_uniformTopology::clone( void ) const
 RevBayesCore::UniformTopologyDistribution* Dist_uniformTopology::createDistribution( void ) const {
     
     // get the taxa to simulate either from a vector of rev taxon objects or a vector of names
-    std::vector<RevBayesCore::Taxon> t  = RevBayesCore::assume_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
+    std::vector<RevBayesCore::Taxon> t  = valueFor<ModelVector<Taxon>>(taxa);
 
     RevBayesCore::Clade og;
     if ( outgroup != NULL && outgroup->getRevObject() != RevNullObject::getInstance())
         {
-    	og = RevBayesCore::assume_cast<const Clade &>( outgroup->getRevObject() ).getValue();
+    	og = valueFor<Clade>(outgroup);
         }
     
     std::vector<RevBayesCore::Clade> c;
     if ( constraints != NULL && constraints->getRevObject() != RevNullObject::getInstance())
         {
-    	c = RevBayesCore::assume_cast<const ModelVector<Clade> &>( constraints->getRevObject() ).getValue();
+    	c = valueFor<ModelVector<Clade>>(constraints);
         }
     
-    bool r = RevBayesCore::assume_cast<const RlBoolean &>( rooted->getRevObject() ).getValue();
+    bool r = valueFor<RlBoolean>(rooted);
         
 	RevBayesCore::UniformTopologyDistribution* d = new RevBayesCore::UniformTopologyDistribution( t, og, c, r);
     

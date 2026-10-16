@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cmath>
 #include "TypeUtilities.h"
 #include <cstddef>
@@ -88,9 +89,9 @@ RevBayesCore::DemographyCoalescent* Dist_CoalescentDemography::createDistributio
     // get the parameters
     
     // intervals
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* iv      = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( change_points->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* iv      = dagNodeFor<ModelVector<RealPos>>(change_points);
     // demographic functions
-    const WorkspaceVector<DemographicFunction> &ws_vec_df   = RevBayesCore::assume_cast<const WorkspaceVector<DemographicFunction> &>( demographies->getRevObject() );
+    const WorkspaceVector<DemographicFunction> &ws_vec_df   = objectFor<WorkspaceVector<DemographicFunction>>(demographies);
     RevBayesCore::RbVector<RevBayesCore::DemographicFunction> df;
     for ( size_t i = 0; i < ws_vec_df.size(); ++i )
     {
@@ -103,9 +104,9 @@ RevBayesCore::DemographyCoalescent* Dist_CoalescentDemography::createDistributio
     }
     
     // taxon names
-    const std::vector<RevBayesCore::Taxon> tn               = RevBayesCore::assume_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getDagNode()->getValue();
+    const std::vector<RevBayesCore::Taxon> tn               = dagNodeFor<ModelVector<Taxon>>(taxa)->getValue();
     // clade constraints
-    const std::vector<RevBayesCore::Clade> &c               = RevBayesCore::assume_cast<const ModelVector<Clade> &>( constraints->getRevObject() ).getValue();
+    const std::vector<RevBayesCore::Clade> &c               = valueFor<ModelVector<Clade>>(constraints);
     
     
     // create the internal distribution object

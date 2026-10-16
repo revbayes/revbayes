@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -44,8 +45,8 @@ Dist_logUniform* Dist_logUniform::clone( void ) const
 RevBayesCore::LogUniformDistribution* Dist_logUniform::createDistribution( void ) const
 {
     // get the parameters
-    RevBayesCore::TypedDagNode<double>* mi   = RevBayesCore::assume_cast<const Real &>( min->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* ma   = RevBayesCore::assume_cast<const Real &>( max->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* mi   = dagNodeFor<Real>(min);
+    RevBayesCore::TypedDagNode<double>* ma   = dagNodeFor<Real>(max);
     RevBayesCore::LogUniformDistribution* d  = new RevBayesCore::LogUniformDistribution( mi, ma );
     
     return d;

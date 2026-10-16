@@ -1,6 +1,7 @@
 #ifndef Dist_EmpiricalSample_H
 #define Dist_EmpiricalSample_H
 
+#include "RevVariableUtilities.h"
 #include "EmpiricalSampleDistribution.h"
 #include "TypeUtilities.h"
 #include "DistributionTypeUtilities.h"
@@ -82,7 +83,7 @@ RevBayesCore::EmpiricalSampleDistribution<typename valType::valueType>* RevLangu
 {
     
     // get the parameters
-    const Distribution& rlDistribution                                          = RevBayesCore::assume_cast<const Distribution &>( baseDistribution->getRevObject() );
+    const Distribution& rlDistribution                                          = objectFor<Distribution>(baseDistribution);
     RevBayesCore::TypedDistribution<typename valType::valueType>* g0            = RevBayesCore::assumeTypedDistribution<typename valType::valueType>( rlDistribution.createDistribution() );
 
     RevBayesCore::EmpiricalSampleDistribution<typename valType::valueType>* d   = new RevBayesCore::EmpiricalSampleDistribution<typename valType::valueType>(g0);
@@ -136,7 +137,7 @@ template <typename valType>
 RevLanguage::MethodTable RevLanguage::Dist_EmpiricalSample<valType>::getDistributionMethods( void ) const
 {
     
-    const Distribution& rlDistribution = RevBayesCore::assume_cast<const Distribution &>( baseDistribution->getRevObject() );
+    const Distribution& rlDistribution = objectFor<Distribution>(baseDistribution);
     
     
     MethodTable methods = rlDistribution.getDistributionMethods();

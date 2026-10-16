@@ -1,6 +1,7 @@
 #ifndef Transform_Mul_H
 #define Transform_Mul_H
 
+#include "RevVariableUtilities.h"
 #include "ModelVector.h"
 #include "TypeUtilities.h"
 #include "RealPos.h"
@@ -125,10 +126,10 @@ namespace RevLanguage {
         namespace Core = RevBayesCore;
 
         // get the parameters
-        const Distribution& rl_vp               = RevBayesCore::assume_cast<const Distribution &>( base_distribution->getRevObject() );
+        const Distribution& rl_vp               = objectFor<Distribution>(base_distribution);
         Core::TypedDistribution<double>* vp     = Core::assumeTypedDistribution<double>( rl_vp.createDistribution() );
 
-        Core::TypedDagNode<double>* l           = RevBayesCore::assume_cast<const T &>( lambda->getRevObject() ).getDagNode();
+        Core::TypedDagNode<double>* l           = dagNodeFor<T>(lambda);
 
         Core::TransformedDistribution* dist = new Core::TransformedDistribution(*vp, mul_transform, mul_inverse, log_mul_prime, {l});
 

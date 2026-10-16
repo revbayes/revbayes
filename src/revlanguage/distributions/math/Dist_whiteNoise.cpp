@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -43,9 +44,9 @@ Dist_whiteNoise* Dist_whiteNoise::clone( void ) const
 RevBayesCore::WhiteNoiseDistribution* Dist_whiteNoise::createDistribution( void ) const
 {
     // get the parameters
-    RevBayesCore::TypedDagNode<double>* m   = RevBayesCore::assume_cast<const RealPos &>( mu->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* s   = RevBayesCore::assume_cast<const RealPos &>( sigma->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* t   = RevBayesCore::assume_cast<const RealPos &>( time->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* m   = dagNodeFor<RealPos>(mu);
+    RevBayesCore::TypedDagNode<double>* s   = dagNodeFor<RealPos>(sigma);
+    RevBayesCore::TypedDagNode<double>* t   = dagNodeFor<RealPos>(time);
     RevBayesCore::WhiteNoiseDistribution* d = new RevBayesCore::WhiteNoiseDistribution(m, s, t);
     
     return d;

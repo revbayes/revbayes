@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cmath>
 #include "TypeUtilities.h"
 #include <cstddef>
@@ -86,57 +87,57 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_TimeVaryingStateDepend
 {
     
     // get process start age
-    RevBayesCore::TypedDagNode<double>* ra   = RevBayesCore::assume_cast<const RealPos &>( start_age->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* ra   = dagNodeFor<RealPos>(start_age);
     
     // condition off origin age or root age?
     bool uo = ( start_condition == "originAge" ? true : false );
     
     // extinction rates
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* ex  = RevBayesCore::assume_cast<const ModelVector< ModelVector<RealPos> > &>( extinction_rates->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* ex  = dagNodeFor<ModelVector< ModelVector<RealPos> >>(extinction_rates);
     
     // get speciation rates or cladogenetic speciation rate event map
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* sp = nullptr;
     RevBayesCore::TypedDagNode<RevBayesCore::CladogeneticSpeciationRateMatrix>* cp = nullptr;
     if ( speciation_rates->getRevObject().isType( ModelVector< ModelVector<RealPos> >::getClassTypeSpec() ) )
     {
-        sp  = RevBayesCore::assume_cast<const ModelVector< ModelVector<RealPos> > &>( speciation_rates->getRevObject() ).getDagNode();
+        sp  = dagNodeFor<ModelVector< ModelVector<RealPos> >>(speciation_rates);
     }
     else if ( speciation_rates->getRevObject().isType( CladogeneticSpeciationRateMatrix::getClassTypeSpec() ) )
     {
-        cp = RevBayesCore::assume_cast<const CladogeneticSpeciationRateMatrix &>( speciation_rates->getRevObject() ).getDagNode();
+        cp = dagNodeFor<CladogeneticSpeciationRateMatrix>(speciation_rates);
     }
     
     // rate matrix
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* q      = NULL;
     if ( event_rate_matrix->getRevObject() != RevNullObject::getInstance() )
     {
-        q = RevBayesCore::assume_cast<const ModelVector< RateGenerator > &>( event_rate_matrix->getRevObject() ).getDagNode();
+        q = dagNodeFor<ModelVector< RateGenerator >>(event_rate_matrix);
     }
     
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* epochs  = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( epoch_times->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* epochs  = dagNodeFor<ModelVector<RealPos>>(epoch_times);
 
     
     RevBayesCore::TypedDagNode<double>* r = NULL;
     if ( event_rate->getRevObject() != RevNullObject::getInstance() )
     {
-        r = RevBayesCore::assume_cast<const RealPos &>( event_rate->getRevObject() ).getDagNode();
+        r = dagNodeFor<RealPos>(event_rate);
     }
     
     RevBayesCore::TypedDagNode<RevBayesCore::Simplex >* bf = NULL;
     if ( root_frequencies->getRevObject() != RevNullObject::getInstance() )
     {
-        bf = RevBayesCore::assume_cast<const Simplex &>( root_frequencies->getRevObject() ).getDagNode();
+        bf = dagNodeFor<Simplex>(root_frequencies);
     }
     
-    RevBayesCore::TypedDagNode<double>* rh   = RevBayesCore::assume_cast<const Probability &>( rho->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* rh   = dagNodeFor<Probability>(rho);
     
     // condition
-    const std::string& cond                  = RevBayesCore::assume_cast<const RlString &>( condition->getRevObject() ).getValue();
+    const std::string& cond                  = valueFor<RlString>(condition);
     
-    size_t max_l = RevBayesCore::assume_cast<const Integer &>( max_lineages->getRevObject() ).getValue();
-    size_t min_l = RevBayesCore::assume_cast<const Integer &>( min_lineages->getRevObject() ).getValue();
+    size_t max_l = valueFor<Integer>(max_lineages);
+    size_t min_l = valueFor<Integer>(min_lineages);
     
-    size_t prune = RevBayesCore::assume_cast<const RlBoolean &>( prune_extinct_lineages->getRevObject() ).getValue();
+    size_t prune = valueFor<RlBoolean>(prune_extinct_lineages);
     
     // finally make the distribution
     RevBayesCore::TimeVaryingStateDependentSpeciationExtinctionProcess*   d = new RevBayesCore::TimeVaryingStateDependentSpeciationExtinctionProcess( ra, ex, q, epochs, r, bf, rh, cond, uo, min_l, max_l, prune );
@@ -152,13 +153,13 @@ RevBayesCore::TypedDistribution<RevBayesCore::Tree>* Dist_TimeVaryingStateDepend
     }
     
     // set the number of time slices for the numeric ODE
-    double n = RevBayesCore::assume_cast<const RealPos &>( num_time_slices->getRevObject() ).getValue();
+    double n = valueFor<RealPos>(num_time_slices);
     d->setNumberOfTimeSlices( n );
     
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* ps = NULL;
     if ( phi->getRevObject() != RevNullObject::getInstance() )
     {
-        ps  = RevBayesCore::assume_cast<const ModelVector< ModelVector<RealPos> > &>( phi->getRevObject() ).getDagNode();
+        ps  = dagNodeFor<ModelVector< ModelVector<RealPos> >>(phi);
         
         d->setSerialSamplingRates( ps );
     }

@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cmath>
 #include "TypeUtilities.h"
 #include <cstddef>
@@ -81,15 +82,15 @@ RevBayesCore::UniformTopologyBranchLengthDistribution* Dist_uniformTopologyBranc
 {
     
     // get the taxa to simulate either from a vector of rev taxon objects or a vector of names
-    std::vector<RevBayesCore::Taxon> t  = RevBayesCore::assume_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
+    std::vector<RevBayesCore::Taxon> t  = valueFor<ModelVector<Taxon>>(taxa);
     
     RevBayesCore::Clade og;
     if ( outgroup != NULL && outgroup->getRevObject() != RevNullObject::getInstance())
     {
-        og = RevBayesCore::assume_cast<const Clade &>( outgroup->getRevObject() ).getValue();
+        og = valueFor<Clade>(outgroup);
     }
     
-    const Distribution& rlDistribution              = RevBayesCore::assume_cast<const Distribution &>( branch_length_prior->getRevObject() );
+    const Distribution& rlDistribution              = objectFor<Distribution>(branch_length_prior);
     RevBayesCore::TypedDistribution<double>* blp    = RevBayesCore::assumeTypedDistribution<double>( rlDistribution.createDistribution() );
     
     

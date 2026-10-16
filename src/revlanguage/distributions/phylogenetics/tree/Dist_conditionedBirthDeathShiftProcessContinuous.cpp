@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cmath>
 #include "TypeUtilities.h"
 #include <cstddef>
@@ -76,29 +77,29 @@ RevBayesCore::ConditionedBirthDeathShiftProcessContinuous* Dist_conditionedBirth
 {
     
     // Get the parameters
-    RevBayesCore::TypedDagNode<double>* ra   = RevBayesCore::assume_cast<const RealPos &>( root_age->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* r_sp = RevBayesCore::assume_cast<const RealPos &>( root_speciation->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* r_ex = RevBayesCore::assume_cast<const RealPos &>( root_extinction->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* ra   = dagNodeFor<RealPos>(root_age);
+    RevBayesCore::TypedDagNode<double>* r_sp = dagNodeFor<RealPos>(root_speciation);
+    RevBayesCore::TypedDagNode<double>* r_ex = dagNodeFor<RealPos>(root_extinction);
     
     RevBayesCore::TypedDistribution<double>* distribution_speciation = NULL;
     if ( speciation->getRevObject() != RevNullObject::getInstance() )
     {
-        const Distribution& rl_distribution_speciation  = RevBayesCore::assume_cast<const Distribution &>( speciation->getRevObject() );
+        const Distribution& rl_distribution_speciation  = objectFor<Distribution>(speciation);
         distribution_speciation = RevBayesCore::assumeTypedDistribution<double>( rl_distribution_speciation.createDistribution() );
     }
     
     RevBayesCore::TypedDistribution<double>* distribution_extinction = NULL;
     if ( extinction->getRevObject() != RevNullObject::getInstance() )
     {
-        const Distribution& rl_distribution_extinction  = RevBayesCore::assume_cast<const Distribution &>( extinction->getRevObject() );
+        const Distribution& rl_distribution_extinction  = objectFor<Distribution>(extinction);
         distribution_extinction = RevBayesCore::assumeTypedDistribution<double>( rl_distribution_extinction.createDistribution() );
     }
 
-    RevBayesCore::TypedDagNode<double>* er   = RevBayesCore::assume_cast<const RealPos &>( event_rate->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* rh   = RevBayesCore::assume_cast<const Probability &>( rho->getRevObject() ).getDagNode();
-    std::vector<RevBayesCore::Taxon> t = RevBayesCore::assume_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
+    RevBayesCore::TypedDagNode<double>* er   = dagNodeFor<RealPos>(event_rate);
+    RevBayesCore::TypedDagNode<double>* rh   = dagNodeFor<Probability>(rho);
+    std::vector<RevBayesCore::Taxon> t = valueFor<ModelVector<Taxon>>(taxa);
     // condition
-    const std::string& cond                     = RevBayesCore::assume_cast<const RlString &>( condition->getRevObject() ).getValue();
+    const std::string& cond                     = valueFor<RlString>(condition);
     RevBayesCore::ConditionedBirthDeathShiftProcessContinuous*   d = new RevBayesCore::ConditionedBirthDeathShiftProcessContinuous( ra, r_sp, r_ex, distribution_speciation, distribution_extinction, er, rh, cond, t );
     
     return d;

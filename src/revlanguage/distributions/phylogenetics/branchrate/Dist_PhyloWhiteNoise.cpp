@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cmath>
 #include "TypeUtilities.h"
 #include <cstddef>
@@ -64,9 +65,9 @@ RevBayesCore::PhyloWhiteNoiseProcess* Dist_PhyloWhiteNoise::createDistribution( 
 {
     // get the parameters
 
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = RevBayesCore::assume_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = dagNodeFor<TimeTree>(tree);
     
-    RevBayesCore::TypedDagNode<double>* s  = RevBayesCore::assume_cast<const RealPos &>( sigma->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* s  = dagNodeFor<RealPos>(sigma);
     
     RevBayesCore::PhyloWhiteNoiseProcess* d    = new RevBayesCore::PhyloWhiteNoiseProcess( tau, s );
     

@@ -1,6 +1,7 @@
 #ifndef Transform_Add_H
 #define Transform_Add_H
 
+#include "RevVariableUtilities.h"
 #include "ModelVector.h"
 #include "TypeUtilities.h"
 #include "DistributionTypeUtilities.h"
@@ -123,10 +124,10 @@ namespace RevLanguage {
         using namespace Transforms;
 
         // get the parameters
-        const Distribution& rl_vp                      = RevBayesCore::assume_cast<const Distribution &>( base_distribution->getRevObject() );
+        const Distribution& rl_vp                      = objectFor<Distribution>(base_distribution);
         RevBayesCore::TypedDistribution<double>* vp    = RevBayesCore::assumeTypedDistribution<double>( rl_vp.createDistribution() );
 
-        RevBayesCore::TypedDagNode<double>* d           = RevBayesCore::assume_cast<const T &>( delta->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<double>* d           = dagNodeFor<T>(delta);
 
         RevBayesCore::TransformedDistribution* dist = new RevBayesCore::TransformedDistribution(*vp, add_transform, add_inverse, log_add_prime, {d});
 

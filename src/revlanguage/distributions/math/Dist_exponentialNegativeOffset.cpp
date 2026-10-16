@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -39,8 +40,8 @@ Dist_exponentialNegativeOffset* Dist_exponentialNegativeOffset::clone( void ) co
 
 RevBayesCore::ExponentialDistribution* Dist_exponentialNegativeOffset::createDistribution( void ) const {
     // get the parameters
-    RevBayesCore::TypedDagNode<double>* l     = RevBayesCore::assume_cast<const RealPos &>( lambda->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* o     = RevBayesCore::assume_cast<const Real    &>( offset->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* l     = dagNodeFor<RealPos>(lambda);
+    RevBayesCore::TypedDagNode<double>* o     = dagNodeFor<Real>(offset);
     RevBayesCore::ExponentialDistribution* d  = new RevBayesCore::ExponentialDistribution( l, o );
     
     return d;

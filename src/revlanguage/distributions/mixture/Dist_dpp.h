@@ -18,6 +18,7 @@
 #ifndef Dist_dpp_H
 #define Dist_dpp_H
 
+#include "RevVariableUtilities.h"
 #include "DirichletProcessPriorDistribution.h"
 #include "TypeUtilities.h"
 #include "DistributionTypeUtilities.h"
@@ -101,11 +102,11 @@ RevBayesCore::DirichletProcessPriorDistribution<typename valType::valueType>* Re
 {
 	
     // get the parameters
-    const Distribution& rlDistribution									= RevBayesCore::assume_cast<const Distribution &>( baseDistribution->getRevObject() );
+    const Distribution& rlDistribution									= objectFor<Distribution>(baseDistribution);
     RevBayesCore::TypedDistribution<typename valType::valueType>* g0    = RevBayesCore::assumeTypedDistribution<typename valType::valueType>( rlDistribution.createDistribution() );
-    RevBayesCore::TypedDagNode<double>* cp								= RevBayesCore::assume_cast<const RealPos &>( concentration->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* cp								= dagNodeFor<RealPos>(concentration);
 
-    int ne = (int)RevBayesCore::assume_cast<const Natural &>( numElements->getRevObject() ).getValue();
+    int ne = (int)valueFor<Natural>(numElements);
     RevBayesCore::DirichletProcessPriorDistribution<typename valType::valueType>* d		= new RevBayesCore::DirichletProcessPriorDistribution<typename valType::valueType>(g0, cp, ne);
     
     return d;

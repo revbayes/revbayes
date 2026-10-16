@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -41,8 +42,8 @@ Dist_unifPositive* Dist_unifPositive::clone( void ) const
 RevBayesCore::UniformDistribution* Dist_unifPositive::createDistribution( void ) const
 {
     // get the parameters
-    RevBayesCore::TypedDagNode<double>* l   = RevBayesCore::assume_cast<const RealPos &>( lower->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* u   = RevBayesCore::assume_cast<const RealPos &>( upper->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* l   = dagNodeFor<RealPos>(lower);
+    RevBayesCore::TypedDagNode<double>* u   = dagNodeFor<RealPos>(upper);
     RevBayesCore::UniformDistribution* d    = new RevBayesCore::UniformDistribution(l, u);
     
     return d;

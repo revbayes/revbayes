@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cmath>
 #include "TypeUtilities.h"
 #include <cstddef>
@@ -60,7 +61,7 @@ RevBayesCore::DirichletDistribution* Dist_dirichlet::createDistribution( void ) 
 {
 
     // get the parameters
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* a = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( alpha->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* a = dagNodeFor<ModelVector<RealPos>>(alpha);
     RevBayesCore::DirichletDistribution* d              = new RevBayesCore::DirichletDistribution( a );
     
     return d;

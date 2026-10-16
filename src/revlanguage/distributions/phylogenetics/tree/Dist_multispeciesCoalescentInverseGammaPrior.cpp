@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cmath>
 #include "TypeUtilities.h"
 #include <iosfwd>
@@ -78,13 +79,13 @@ RevBayesCore::MultispeciesCoalescentInverseGammaPrior* Dist_multispeciesCoalesce
 {
 
     // Get the parameters
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>*                 st = RevBayesCore::assume_cast<const TimeTree &>( species_tree->getRevObject() ).getDagNode();
-    size_t                                                          ngt = size_t( RevBayesCore::assume_cast<const Natural &>( num_gene_trees->getRevObject() ).getValue() );
-    RevBayesCore::RbVector<RevBayesCore::RbVector<RevBayesCore::Taxon> > t = RevBayesCore::assume_cast<const ModelVector<ModelVector<Taxon> > &>( taxa->getRevObject() ).getValue();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>*                 st = dagNodeFor<TimeTree>(species_tree);
+    size_t                                                          ngt = size_t( valueFor<Natural>(num_gene_trees) );
+    RevBayesCore::RbVector<RevBayesCore::RbVector<RevBayesCore::Taxon> > t = valueFor<ModelVector<ModelVector<Taxon> >>(taxa);
 
 
-    RevBayesCore::TypedDagNode<double>* sh = RevBayesCore::assume_cast<const RealPos &>( shape->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* sc = RevBayesCore::assume_cast<const RealPos &>( scale->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* sh = dagNodeFor<RealPos>(shape);
+    RevBayesCore::TypedDagNode<double>* sc = dagNodeFor<RealPos>(scale);
 
     RevBayesCore::MultispeciesCoalescentInverseGammaPrior*   d = new RevBayesCore::MultispeciesCoalescentInverseGammaPrior( st, sh, sc, t, ngt );
 
