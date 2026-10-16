@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -69,13 +70,13 @@ void Move_GammaScale::constructInternalObject( void )
     RevBayesCore::Proposal *p = NULL;
     
     // now allocate a new sliding move
-    double d = RevBayesCore::assume_cast<const RealPos &>( lambda->getRevObject() ).getValue();
-    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    double r = RevBayesCore::assume_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<double>* tmp = RevBayesCore::assume_cast<const RealPos &>( x->getRevObject() ).getDagNode();
+    double d = valueFor<RealPos>(lambda);
+    double w = valueFor<RealPos>(weight);
+    double r = valueFor<Probability>(tuneTarget);
+    RevBayesCore::TypedDagNode<double>* tmp = dagNodeFor<RealPos>(x);
     RevBayesCore::StochasticNode<double> *n = RevBayesCore::requireStochastic<double>( tmp );
     p = new RevBayesCore::GammaScaleProposal(n, d, r);
-    bool t = RevBayesCore::assume_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    bool t = valueFor<RlBoolean>(tune);
     
     value = new RevBayesCore::MetropolisHastingsMove(p, w, t);
     

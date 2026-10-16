@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -71,18 +72,18 @@ void Move_MirrorMultiplier::constructInternalObject( void )
     RevBayesCore::Proposal *p = NULL;
 
     // now allocate a new sliding move
-    double d  = RevBayesCore::assume_cast<const RealPos &>( sigma->getRevObject() ).getValue();
-    double w  = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    double r  = RevBayesCore::assume_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
-    double m0 = RevBayesCore::assume_cast<const Real &>( mu0->getRevObject() ).getValue();
-    int n0    = RevBayesCore::assume_cast<const Natural &>( waitBeforeLearning->getRevObject() ).getValue();
-    int c0    = RevBayesCore::assume_cast<const Natural &>( waitBeforeUsing->getRevObject() ).getValue();
-    int m     = RevBayesCore::assume_cast<const Natural &>( maxUpdates->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<double>* tmp = RevBayesCore::assume_cast<const Real &>( x->getRevObject() ).getDagNode();
+    double d  = valueFor<RealPos>(sigma);
+    double w  = valueFor<RealPos>(weight);
+    double r  = valueFor<Probability>(tuneTarget);
+    double m0 = valueFor<Real>(mu0);
+    int n0    = valueFor<Natural>(waitBeforeLearning);
+    int c0    = valueFor<Natural>(waitBeforeUsing);
+    int m     = valueFor<Natural>(maxUpdates);
+    RevBayesCore::TypedDagNode<double>* tmp = dagNodeFor<Real>(x);
     RevBayesCore::StochasticNode<double> *n = RevBayesCore::requireStochastic<double>( tmp );
-    bool a = RevBayesCore::assume_cast<const RlBoolean &>( adaptOnly->getRevObject() ).getValue();
+    bool a = valueFor<RlBoolean>(adaptOnly);
     p = new RevBayesCore::MirrorMultiplierProposal(n,d,m0,n0,c0,m,a,r);
-    bool t = RevBayesCore::assume_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    bool t = valueFor<RlBoolean>(tune);
 
     // finally create the internal move object
     //    value = new RevBayesCore::Move_MirrorMultiplier(n, d, t, w);

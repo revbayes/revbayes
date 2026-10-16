@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -71,10 +72,10 @@ void Move_Slide::constructInternalObject( void )
     RevBayesCore::Proposal *p = NULL;
     
     // now allocate a new sliding move
-    double d = RevBayesCore::assume_cast<const RealPos &>( delta->getRevObject() ).getValue();
-    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    double r = RevBayesCore::assume_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<double>* tmp = RevBayesCore::assume_cast<const Real &>( x->getRevObject() ).getDagNode();
+    double d = valueFor<RealPos>(delta);
+    double w = valueFor<RealPos>(weight);
+    double r = valueFor<Probability>(tuneTarget);
+    RevBayesCore::TypedDagNode<double>* tmp = dagNodeFor<Real>(x);
     RevBayesCore::ContinuousStochasticNode *n = dynamic_cast<RevBayesCore::ContinuousStochasticNode *>( tmp );
     if ( n != NULL )
     {
@@ -86,7 +87,7 @@ void Move_Slide::constructInternalObject( void )
         p = new RevBayesCore::SlideProposal(n2,d,r);
         
     }
-    bool t = RevBayesCore::assume_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    bool t = valueFor<RlBoolean>(tune);
     
     // finally create the internal move object
     //    value = new RevBayesCore::Move_Slide(n, d, t, w);

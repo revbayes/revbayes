@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -70,8 +71,8 @@ void Move_SliceSampling::constructInternalObject( void )
     delete value;
 
     // now allocate a new sliding move
-    double window_ = RevBayesCore::assume_cast<const RealPos &>( window->getRevObject() ).getValue();
-    double weight_ = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double window_ = valueFor<RealPos>(window);
+    double weight_ = valueFor<RealPos>(weight);
 
     boost::optional<double> lower_bound_;
     boost::optional<double> upper_bound_;
@@ -84,9 +85,9 @@ void Move_SliceSampling::constructInternalObject( void )
             lower_bound_ = 0.0;
     }
 
-    RevBayesCore::TypedDagNode<double>* tmp = RevBayesCore::assume_cast<const Real &>( x->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* tmp = dagNodeFor<Real>(x);
     RevBayesCore::StochasticNode<double> *node_ = RevBayesCore::requireStochastic<double>( tmp );
-    bool tune_ = RevBayesCore::assume_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    bool tune_ = valueFor<RlBoolean>(tune);
 
     auto search_method_ = dynamic_cast<const RlString&>( search_method->getRevObject() ).getValue();
     typedef RevBayesCore::SliceSamplingMove::BoundarySearchMethod search_method_t;

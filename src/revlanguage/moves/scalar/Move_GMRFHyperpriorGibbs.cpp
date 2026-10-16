@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -56,12 +57,12 @@ void Move_GMRFHyperpriorGibbs::constructInternalObject( void )
     delete value;
 
     // now allocate a new move
-    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double w = valueFor<RealPos>(weight);
 
-    RevBayesCore::TypedDagNode<double>* tmp = RevBayesCore::assume_cast<const RealPos &>( x->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* tmp = dagNodeFor<RealPos>(x);
     RevBayesCore::StochasticNode<double> *g = RevBayesCore::assumeStochastic<double>( tmp );
 
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp2 = RevBayesCore::assume_cast<const ModelVector<Real> &>( normals->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp2 = dagNodeFor<ModelVector<Real>>(normals);
     std::vector<const RevBayesCore::DagNode*> p = tmp2->getParents();
     std::vector< RevBayesCore::StochasticNode<double> *> n;
     for (std::vector<const RevBayesCore::DagNode*>::const_iterator it = p.begin(); it != p.end(); ++it)
@@ -77,9 +78,9 @@ void Move_GMRFHyperpriorGibbs::constructInternalObject( void )
         }
     }
 
-    double z = RevBayesCore::assume_cast<const RealPos &>( zeta->getRevObject() ).getValue();
+    double z = valueFor<RealPos>(zeta);
 
-    size_t o = RevBayesCore::assume_cast<const Natural &>( order->getRevObject() ).getValue();
+    size_t o = valueFor<Natural>(order);
     if (o == 1)
     {
       value = new RevBayesCore::GMRFHyperpriorGibbsMove(g, n, z, w);

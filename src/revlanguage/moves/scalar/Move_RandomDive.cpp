@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -71,27 +72,27 @@ void Move_RandomDive::constructInternalObject( void )
     RevBayesCore::Proposal *p = NULL;
     
     // now allocate a new sliding move
-    double d = RevBayesCore::assume_cast<const RealPos &>( delta->getRevObject() ).getValue();
-    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    double r = RevBayesCore::assume_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double d = valueFor<RealPos>(delta);
+    double w = valueFor<RealPos>(weight);
+    double r = valueFor<Probability>(tuneTarget);
 
     Real* uReal = dynamic_cast<Real *>( &x->getRevObject() );
     Real* upReal = dynamic_cast<RealPos *>( &x->getRevObject() );
     
     if ( upReal != NULL )
     {
-        RevBayesCore::TypedDagNode<double>* tmp = RevBayesCore::assume_cast<const RealPos &>( x->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<double>* tmp = dagNodeFor<RealPos>(x);
         RevBayesCore::StochasticNode<double> *n = RevBayesCore::requireStochastic<double>( tmp );
         p = new RevBayesCore::HalfRandomDiveProposal(n,d,r);
     }
     else
     {
-        RevBayesCore::TypedDagNode<double>* tmp = RevBayesCore::assume_cast<const Real &>( x->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<double>* tmp = dagNodeFor<Real>(x);
         RevBayesCore::StochasticNode<double> *n = RevBayesCore::requireStochastic<double>( tmp );
         p = new RevBayesCore::RandomDiveProposal(n,d,r);
     }
 
-    bool t = RevBayesCore::assume_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    bool t = valueFor<RlBoolean>(tune);
     
     value = new RevBayesCore::MetropolisHastingsMove(p,w,t);
     

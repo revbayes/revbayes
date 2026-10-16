@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -53,13 +54,13 @@ void Move_BetaProbability::constructInternalObject( void )
     delete value;
     
     // now allocate a new sliding move
-    double d = RevBayesCore::assume_cast<const RealPos &>( delta->getRevObject() ).getValue();
-    double o = RevBayesCore::assume_cast<const RealPos &>( offset->getRevObject() ).getValue();
-    double w = RevBayesCore::assume_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode< double >* tmp = RevBayesCore::assume_cast<const Probability &>( x->getRevObject() ).getDagNode();
+    double d = valueFor<RealPos>(delta);
+    double o = valueFor<RealPos>(offset);
+    double w = valueFor<RealPos>(weight);
+    RevBayesCore::TypedDagNode< double >* tmp = dagNodeFor<Probability>(x);
     RevBayesCore::StochasticNode< double > *n = RevBayesCore::assumeStochastic< double >( tmp );
-    bool t = RevBayesCore::assume_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double tt = RevBayesCore::assume_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    bool t = valueFor<RlBoolean>(tune);
+    double tt = valueFor<Probability>(tuneTarget);
     
     RevBayesCore::Proposal *prop = new RevBayesCore::BetaProbabilityProposal(n, d, o);
     prop->setTargetAcceptanceRate(tt);
