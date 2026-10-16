@@ -115,7 +115,7 @@ const MemberRules& Move_NodeTimeSlidePathTruncatedNormal::getParameterRules(void
     {
         
         memberRules.push_back( new ArgumentRule( "tree", TimeTree::getClassTypeSpec(), "The tree on which this move operates.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
-        memberRules.push_back( new ArgumentRule( "sigma", TimeTree::getClassTypeSpec(), "The sd of the proposal.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC, new RealPos( 1.0 )) );
+        memberRules.push_back( new ArgumentRule( "sigma", RealPos::getClassTypeSpec(), "The sd of the proposal.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RealPos( 1.0 )) );
         memberRules.push_back( new ArgumentRule( "scaleByAge"  , RlBoolean::getClassTypeSpec(), "Should we additionally use age of node to adjust sd?", ArgumentRule::BY_VALUE    , ArgumentRule::ANY       , new RlBoolean( true ) ) );
         memberRules.push_back( new ArgumentRule( "tune"  , RlBoolean::getClassTypeSpec(), "Should we tune sigma during burnin?", ArgumentRule::BY_VALUE    , ArgumentRule::ANY       , new RlBoolean( true ) ) );
 
