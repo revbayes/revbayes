@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "PhylogeneticIndependentContrastsFunction.h"
 
 #include <cmath>
@@ -172,15 +173,15 @@ void PhylogeneticIndependentContrastsFunction::swapParameterInternal(const DagNo
     
     if (oldP == tau)
     {
-        tau = static_cast<const TypedDagNode<Tree>* >( newP );
+        replaceNodeReference(tau, newP);
     }
     else if (oldP == data)
     {
-        data = static_cast<const TypedDagNode<ContinuousCharacterData>* >( newP );
+        replaceNodeReference(data, newP);
     }
     else if (oldP == site)
     {
-        site = static_cast<const TypedDagNode<std::int64_t>* >( newP );
+        replaceNodeReference(site, newP);
     }
 }
 

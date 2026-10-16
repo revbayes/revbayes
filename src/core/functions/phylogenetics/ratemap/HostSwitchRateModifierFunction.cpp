@@ -6,6 +6,7 @@
 //  Copyright © 2017 Michael Landis. All rights reserved.
 //
 
+#include "DagNodeTypeUtilities.h"
 #include "HostSwitchRateModifierFunction.h"
 
 #include <vector>
@@ -71,10 +72,10 @@ void HostSwitchRateModifierFunction::swapParameterInternal(const DagNode *oldP, 
 {
     if (oldP == tau)
     {
-        tau = static_cast<const TypedDagNode<Tree>* >( newP );
+        replaceNodeReference(tau, newP);
     }
     else if (oldP == scale)
     {
-        scale = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+        replaceNodeReference(scale, newP);
     }
 }

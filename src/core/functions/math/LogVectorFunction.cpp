@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "LogVectorFunction.h"
 
 #include <cstddef>
@@ -37,7 +38,7 @@ void LogVectorFunction::swapParameterInternal(const DagNode *oldP, const DagNode
 
     if (oldP == a)
     {
-        a = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+        replaceNodeReference(a, newP);
 
         // free the old value and allocate a new one of the right size
         delete value;

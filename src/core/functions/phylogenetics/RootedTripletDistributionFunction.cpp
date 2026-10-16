@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "RootedTripletDistributionFunction.h"
 
 #include "RootedTripletDistribution.h"
@@ -70,7 +71,7 @@ void RootedTripletDistributionFunction::update( void )
 void RootedTripletDistributionFunction::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
 {
     
-    trees = static_cast<const TypedDagNode< RbVector<Tree> >* >( newP );
+    replaceNodeReference(trees, newP);
 
 }
 

@@ -6,6 +6,7 @@
 //  Copyright (c) 2015 Michael Landis. All rights reserved.
 //
 
+#include "DagNodeTypeUtilities.h"
 #include "EpochRateMatrixFunction.h"
 
 #include "RateGenerator.h"
@@ -69,15 +70,15 @@ void EpochRateMatrixFunction::swapParameterInternal(const DagNode *oldP, const D
     
     if (oldP == epochRateGenerators)
     {
-        epochRateGenerators = static_cast<const TypedDagNode< RbVector<RateGenerator> >* >( newP );
+        replaceNodeReference(epochRateGenerators, newP);
     }
     else if (oldP == epochTimes)
     {
-        epochTimes = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(epochTimes, newP);
     }
     else if (oldP == epochRates)
     {
-        epochRates = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(epochRates, newP);
     }
 
     

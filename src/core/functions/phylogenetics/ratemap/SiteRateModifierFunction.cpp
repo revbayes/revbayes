@@ -6,6 +6,7 @@
 //  Copyright © 2017 Michael Landis. All rights reserved.
 //
 
+#include "DagNodeTypeUtilities.h"
 #include "SiteRateModifierFunction.h"
 
 #include "SiteRateModifier.h"
@@ -76,14 +77,14 @@ void SiteRateModifierFunction::swapParameterInternal(const DagNode *oldP, const 
 {
     if (oldP == rate_multipliers)
     {
-        rate_multipliers = static_cast<const TypedDagNode<RbVector<RbVector<double> > >* >( newP );
+        replaceNodeReference(rate_multipliers, newP);
     }
     else if (oldP == event_classes)
     {
-        event_classes = static_cast<const TypedDagNode<RbVector<RbVector<std::int64_t> > >* >( newP );
+        replaceNodeReference(event_classes, newP);
     }
     else if (oldP == site_classes)
     {
-        site_classes = static_cast<const TypedDagNode<RbVector<std::int64_t> >* >( newP );
+        replaceNodeReference(site_classes, newP);
     }
 }
