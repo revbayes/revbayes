@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "Func_GoldmanYang94RateMatrix.h"
 #include "TypeUtilities.h"
 #include "CppCodonFuncs.h"
@@ -56,9 +57,9 @@ Func_GoldmanYang94RateMatrix* Func_GoldmanYang94RateMatrix::clone( void ) const
 
 RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_GoldmanYang94RateMatrix::createFunction( void ) const
 {
-    RevBayesCore::TypedDagNode< double >* ka = RevBayesCore::assume_cast<const RealPos &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< double >* om = RevBayesCore::assume_cast<const RealPos &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* cf = RevBayesCore::assume_cast<const Simplex &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< double >* ka = dagNodeFor<RealPos>(this->args[1].getVariable());
+    RevBayesCore::TypedDagNode< double >* om = dagNodeFor<RealPos>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* cf = dagNodeFor<Simplex>(this->args[2].getVariable());
 
     return RevBayesCore::generic_function_ptr< RevBayesCore::RateGenerator >( CodonGY94, ka, om, cf );
 }

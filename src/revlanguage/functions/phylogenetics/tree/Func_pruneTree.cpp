@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "Func_pruneTree.h"
 #include "TypeUtilities.h"
 
@@ -50,17 +51,17 @@ Func_pruneTree* Func_pruneTree::clone( void ) const
 RevBayesCore::TypedFunction<RevBayesCore::Tree>* Func_pruneTree::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = RevBayesCore::assume_cast<const Tree&>( args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = dagNodeFor<Tree>(args[0].getVariable());
 
     std::vector<RevBayesCore::Taxon> taxa;
 
     if( args[1].getVariable()->getRevObject().isType( ModelVector<Taxon>::getClassTypeSpec() ) )
     {
-        taxa = RevBayesCore::assume_cast<const ModelVector<Taxon>&>( args[1].getVariable()->getRevObject() ).getValue();
+        taxa = valueFor<ModelVector<Taxon>>(args[1].getVariable());
     }
     else
     {
-        std::vector<std::string> strings = RevBayesCore::assume_cast<const ModelVector<RlString>&>( args[1].getVariable()->getRevObject() ).getValue();
+        std::vector<std::string> strings = valueFor<ModelVector<RlString>>(args[1].getVariable());
 
         for(size_t i = 0; i < strings.size(); i++)
         {
@@ -68,7 +69,7 @@ RevBayesCore::TypedFunction<RevBayesCore::Tree>* Func_pruneTree::createFunction(
         }
     }
 
-    bool prune_fossils = RevBayesCore::assume_cast<const RlBoolean &>( args[2].getVariable()->getRevObject() ).getValue();
+    bool prune_fossils = valueFor<RlBoolean>(args[2].getVariable());
 
     RevBayesCore::PruneTreeFunction* f = new RevBayesCore::PruneTreeFunction( tau, taxa, args[1].getLabel() == "retain", prune_fossils );
     

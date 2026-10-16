@@ -11,6 +11,7 @@
  *
  */
 
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <iostream>
@@ -56,8 +57,8 @@ Func_readAncestralStateTrace* Func_readAncestralStateTrace::clone( void ) const
 RevPtr<RevVariable> Func_readAncestralStateTrace::execute( void ) {
     
     // get the information from the arguments for reading the file
-    RevBayesCore::path fn        = RevBayesCore::assume_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
-    const std::string&  sep      = RevBayesCore::assume_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
+    RevBayesCore::path fn        = valueFor<RlString>(args[0].getVariable());
+    const std::string&  sep      = valueFor<RlString>(args[1].getVariable());
     
     // check that the file/path name has been correctly specified
     

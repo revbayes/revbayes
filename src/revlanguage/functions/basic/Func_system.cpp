@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstdlib>
 #include "TypeUtilities.h"
 #include <iosfwd>
@@ -47,7 +48,7 @@ RevPtr<RevVariable> Func_system::execute( void )
 
     RbSettings& s = RbSettings::userSettings();
 
-    const std::string& cmd = RevBayesCore::assume_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
+    const std::string& cmd = valueFor<RlString>(args[0].getVariable());
     
     // std::system return value is the shell wait status (encoding is implementation-defined); Rev does not expose it yet.
     const int system_status = std::system( cmd.c_str() );

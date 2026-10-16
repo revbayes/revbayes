@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <iosfwd>
 #include "TypeUtilities.h"
 #include <string>
@@ -50,9 +51,9 @@ Func_WattersonTheta* Func_WattersonTheta::clone( void ) const
 RevBayesCore::TypedFunction< double >* Func_WattersonTheta::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<RevBayesCore::AbstractHomologousDiscreteCharacterData >* d = RevBayesCore::assume_cast<const AbstractHomologousDiscreteCharacterData &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::Boolean >* ps = RevBayesCore::assume_cast<const RlBoolean &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::Boolean >* ex = RevBayesCore::assume_cast<const RlBoolean &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::AbstractHomologousDiscreteCharacterData >* d = dagNodeFor<AbstractHomologousDiscreteCharacterData>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode<RevBayesCore::Boolean >* ps = dagNodeFor<RlBoolean>(this->args[1].getVariable());
+    RevBayesCore::TypedDagNode<RevBayesCore::Boolean >* ex = dagNodeFor<RlBoolean>(this->args[2].getVariable());
     RevBayesCore::WattersonThetaFunction* f = new RevBayesCore::WattersonThetaFunction( d, ps->getValue(), ex->getValue() );
     
     return f;

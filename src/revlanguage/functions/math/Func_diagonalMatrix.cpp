@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "Func_diagonalMatrix.h"
 #include "TypeUtilities.h"
 
@@ -41,7 +42,7 @@ Func_diagonalMatrix* Func_diagonalMatrix::clone( void ) const
 RevPtr<RevVariable> Func_diagonalMatrix::execute( void )
 {
     
-    int n = (int)RevBayesCore::assume_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue();
+    int n = (int)valueFor<Natural>(args[0].getVariable());
     RevBayesCore::MatrixReal *m = new RevBayesCore::MatrixReal(n, n, 0.0);
     for (size_t i = 0; i < n; ++i)
     {

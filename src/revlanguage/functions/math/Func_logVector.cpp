@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <iosfwd>
 #include "TypeUtilities.h"
 #include <string>
@@ -55,8 +56,8 @@ Func_logVector* Func_logVector::clone( void ) const
 RevBayesCore::TypedFunction<RevBayesCore::RbVector<double> >* Func_logVector::createFunction( void ) const
 {
 
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* a = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* b = RevBayesCore::assume_cast<const RealPos &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* a = dagNodeFor<ModelVector<RealPos>>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode<double>* b = dagNodeFor<RealPos>(this->args[1].getVariable());
 
     RevBayesCore::LogVectorFunction* f = new RevBayesCore::LogVectorFunction( a, b );
 

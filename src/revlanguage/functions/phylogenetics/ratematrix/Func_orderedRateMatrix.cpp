@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <iosfwd>
 #include "TypeUtilities.h"
 #include <string>
@@ -54,13 +55,13 @@ RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_orderedRateMatr
 {
     
     
-    RevBayesCore::TypedDagNode< std::int64_t >* n                               = RevBayesCore::assume_cast<const Natural &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< double >* lambda                        = RevBayesCore::assume_cast<const RealPos &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< double >* mu                            = RevBayesCore::assume_cast<const RealPos &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< RevBayesCore::Boolean >* zero_state     = RevBayesCore::assume_cast<const RlBoolean &>( this->args[3].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< std::int64_t >* n                               = dagNodeFor<Natural>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode< double >* lambda                        = dagNodeFor<RealPos>(this->args[1].getVariable());
+    RevBayesCore::TypedDagNode< double >* mu                            = dagNodeFor<RealPos>(this->args[2].getVariable());
+    RevBayesCore::TypedDagNode< RevBayesCore::Boolean >* zero_state     = dagNodeFor<RlBoolean>(this->args[3].getVariable());
 
-    bool rescale                                                        = RevBayesCore::assume_cast<const RlBoolean &>( this->args[4].getVariable()->getRevObject() ).getDagNode()->getValue();
-    const std::string method                                            = RevBayesCore::assume_cast<const RlString &>( this->args[5].getVariable()->getRevObject() ).getDagNode()->getValue();
+    bool rescale                                                        = dagNodeFor<RlBoolean>(this->args[4].getVariable())->getValue();
+    const std::string method                                            = dagNodeFor<RlString>(this->args[5].getVariable())->getValue();
 
     RevBayesCore::OrderedRateMatrixFunction* f = new RevBayesCore::OrderedRateMatrixFunction( n, lambda, mu, zero_state->getValue(), rescale, method );
     

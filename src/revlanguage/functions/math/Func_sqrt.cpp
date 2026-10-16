@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "Func_sqrt.h"
 #include "TypeUtilities.h"
 
@@ -41,7 +42,7 @@ double* my_sqrt(double x)
 
 RevBayesCore::TypedFunction<double>* Func_sqrt::createFunction( void ) const
 {
-    RevBayesCore::TypedDagNode<double>* arg = RevBayesCore::assume_cast<const Real &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* arg = dagNodeFor<Real>(this->args[0].getVariable());
 
     // Select the version of sqrt that takes a double.
     return RevBayesCore::generic_function_ptr< double >( my_sqrt, arg );

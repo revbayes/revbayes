@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <sstream>
 #include "TypeUtilities.h"
 #include <vector>
@@ -44,9 +45,9 @@ RevPtr<RevVariable> Func_readPoMoCountFile::execute( void )
 {
 
 	// get the information from the arguments for reading the file
-	const RlString& fn = RevBayesCore::assume_cast<const RlString&>( args[0].getVariable()->getRevObject() );
-	RevBayesCore::TypedDagNode<std::int64_t>* virtualPopulationSize = RevBayesCore::assume_cast<const Integer &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<std::int64_t>* n_states = RevBayesCore::assume_cast<const Integer &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+	const RlString& fn = objectFor<RlString>(args[0].getVariable());
+	RevBayesCore::TypedDagNode<std::int64_t>* virtualPopulationSize = dagNodeFor<Integer>(this->args[1].getVariable());
+    RevBayesCore::TypedDagNode<std::int64_t>* n_states = dagNodeFor<Integer>(this->args[2].getVariable());
 
 	RevBayesCore::PoMoCountFileReader* pcfr = new RevBayesCore::PoMoCountFileReader( fn.getValue(), virtualPopulationSize->getValue());
 

@@ -17,6 +17,7 @@
  * $Id: Func_source.cpp 1485 2012-05-04 16:03:37Z hoehna $
  */
 
+#include "RevVariableUtilities.h"
 #include <iosfwd>
 #include "TypeUtilities.h"
 #include <vector>
@@ -72,8 +73,8 @@ Func_range* Func_range::clone( void ) const
 RevPtr<RevVariable> Func_range::execute( void )
 {
     
-    std::int64_t f = RevBayesCore::assume_cast<const Integer &>( args[0].getVariable()->getRevObject() ).getValue();
-    std::int64_t l = RevBayesCore::assume_cast<const Integer &>( args[1].getVariable()->getRevObject() ).getValue();
+    std::int64_t f = valueFor<Integer>(args[0].getVariable());
+    std::int64_t l = valueFor<Integer>(args[1].getVariable());
     
     if ( f >= 0 && l >= 0 )
     {

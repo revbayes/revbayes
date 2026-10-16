@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "Func_readTrace.h"
 #include "TypeUtilities.h"
 
@@ -54,13 +55,13 @@ Func_readTrace* Func_readTrace::clone( void ) const
 RevPtr<RevVariable> Func_readTrace::execute( void )
 {
     // get the column delimiter
-    const std::string& delimiter       = RevBayesCore::assume_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
+    const std::string& delimiter       = valueFor<RlString>(args[1].getVariable());
     // get burnin
     RevObject&         b               = args[2].getVariable()->getRevObject();
     // get the thinning frequency
-    std::int64_t       thinning        = RevBayesCore::assume_cast<const Natural&>( args[3].getVariable()->getRevObject() ).getValue();
+    std::int64_t       thinning        = valueFor<Natural>(args[3].getVariable());
     // get the number of runs
-    std::int64_t       nruns           = RevBayesCore::assume_cast<const Natural&>( args[4].getVariable()->getRevObject() ).getValue();
+    std::int64_t       nruns           = valueFor<Natural>(args[4].getVariable());
     
     std::vector<RevBayesCore::path> vectorOfFileNames;
     
@@ -71,7 +72,7 @@ RevPtr<RevVariable> Func_readTrace::execute( void )
             throw RbException("Specify only a single base filename when nruns > 1");
         }
 
-        const ModelVector<RlString>& fn = RevBayesCore::assume_cast<const ModelVector<RlString> &>( args[0].getVariable()->getRevObject() ).getValue();
+        const ModelVector<RlString>& fn = valueFor<ModelVector<RlString>>(args[0].getVariable());
         std::vector<RevBayesCore::path> tmp;
         for (size_t i = 0; i < fn.size(); i++)
         {
@@ -103,7 +104,7 @@ RevPtr<RevVariable> Func_readTrace::execute( void )
     }
     else
     {
-        RevBayesCore::path trace_file_name = RevBayesCore::assume_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
+        RevBayesCore::path trace_file_name = valueFor<RlString>(args[0].getVariable());
         
         for (size_t i = 0; i < nruns; i++)
         {

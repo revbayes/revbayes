@@ -9,6 +9,7 @@
 #ifndef __revbayes_proj__Func_vectorFlatten__
 #define __revbayes_proj__Func_vectorFlatten__
 
+#include "RevVariableUtilities.h"
 #include "ModelVector.h"
 #include "TypeUtilities.h"
 #include "RlTypedFunction.h"
@@ -88,7 +89,7 @@ Core::TypedFunction< Core::RbVector<typename T::valueType> >* Func_vectorFlatten
 {
     typedef typename T::valueType CT;
     const Core::TypedDagNode< Core::RbVector<Core::RbVector<CT> > >* vec;
-    vec = RevBayesCore::assume_cast< const ModelVector<ModelVector<T> >& >( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    vec = dagNodeFor<ModelVector<ModelVector<T> >>(this->args[0].getVariable());
 
     return Core::generic_function_ptr<Core::RbVector<CT>>(flatten<CT>, vec);
 }

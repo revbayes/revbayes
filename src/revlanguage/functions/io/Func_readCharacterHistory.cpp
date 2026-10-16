@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <math.h>
 #include "TypeUtilities.h"
 #include <stddef.h>
@@ -38,7 +39,7 @@ RevPtr<RevVariable> Func_readCharacterHistory::execute( void )
     size_t arg_index = 0;
     
     // get the filename for the tree with MAP character history
-    RevBayesCore::path simmap_filename = RevBayesCore::assume_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+    RevBayesCore::path simmap_filename = valueFor<RlString>(args[arg_index++].getVariable());
     
     RevBayesCore::NewickConverter con;
     

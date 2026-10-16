@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <fstream>
 #include "TypeUtilities.h"
 #include <vector>
@@ -42,7 +43,7 @@ Func_getOption* Func_getOption::clone( void ) const
 RevPtr<RevVariable> Func_getOption::execute( void )
 {
     
-    const std::string &key = RevBayesCore::assume_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
+    const std::string &key = valueFor<RlString>(args[0].getVariable());
     
     RbSettings& s = RbSettings::userSettings();
     std::string value = s.getOption( key );

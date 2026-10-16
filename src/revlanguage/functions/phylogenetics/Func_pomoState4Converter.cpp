@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "Func_pomoState4Converter.h"
 #include "TypeUtilities.h"
 
@@ -49,14 +50,14 @@ Func_pomoState4Converter* Func_pomoState4Converter::clone( void ) const {
 
 RevPtr<RevVariable> Func_pomoState4Converter::execute() {
     
-    const RevBayesCore::TypedDagNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* aln = RevBayesCore::assume_cast<const AbstractHomologousDiscreteCharacterData&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    const RevBayesCore::TypedDagNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* aln = dagNodeFor<AbstractHomologousDiscreteCharacterData>(this->args[0].getVariable());
     
-    RevBayesCore::TypedDagNode< std::int64_t >* n = RevBayesCore::assume_cast<const Natural &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< std::int64_t >* n = dagNodeFor<Natural>(this->args[1].getVariable());
 
 
     RevBayesCore::PoMoState4Converter* c = new RevBayesCore::PoMoState4Converter(  );
     
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::Taxon> >* taxa  = RevBayesCore::assume_cast< const ModelVector<Taxon> &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::Taxon> >* taxa  = dagNodeFor<ModelVector<Taxon>>(this->args[2].getVariable());
     
     std::map <std::string, std::string > gene2species;
 

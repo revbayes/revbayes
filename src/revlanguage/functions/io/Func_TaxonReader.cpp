@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "Func_TaxonReader.h"
 #include "TypeUtilities.h"
 
@@ -52,8 +53,8 @@ RevPtr<RevVariable> Func_TaxonReader::execute( void )
 {
     
     // get the information from the arguments for reading the file
-    const RlString& fn = RevBayesCore::assume_cast<const RlString&>( args[0].getVariable()->getRevObject() );
-    std::string del = RevBayesCore::assume_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
+    const RlString& fn = objectFor<RlString>(args[0].getVariable());
+    std::string del = valueFor<RlString>(args[1].getVariable());
     
     RevBayesCore::TaxonReader tr = RevBayesCore::TaxonReader(fn.getValue(), del);
     const std::vector<RevBayesCore::Taxon>& taxa = tr.getTaxa();

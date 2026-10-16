@@ -7,6 +7,7 @@
 //
 
 
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <iosfwd>
@@ -73,11 +74,11 @@ RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_DECRateMatrix::
     
     // dispersal rates
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* dr;
-    dr = RevBayesCore::assume_cast<const ModelVector<ModelVector<RealPos> > &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    dr = dagNodeFor<ModelVector<ModelVector<RealPos> >>(this->args[0].getVariable());
     
     // extirpation rates
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* er;
-    er = RevBayesCore::assume_cast<const ModelVector<ModelVector<RealPos> > &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    er = dagNodeFor<ModelVector<ModelVector<RealPos> >>(this->args[1].getVariable());
     
     size_t num_statesEr = er->getValue().size();
     std::vector<size_t> num_statesDr;
@@ -106,7 +107,7 @@ RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_DECRateMatrix::
     RevBayesCore::TypedDagNode<RevBayesCore::Simplex>* rs = NULL;
     if ( this->args[2].getVariable() != NULL && this->args[2].getVariable()->getRevObject() != RevNullObject::getInstance()) {
     
-        rs = RevBayesCore::assume_cast<const Simplex&>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+        rs = dagNodeFor<Simplex>(this->args[2].getVariable());
         if (rs->getValue().size() != num_statesEr && rs->getValue().size() > 0) {
             throw RbException("The probabilities of range sizes must equal the number of areas.");
         }
@@ -122,14 +123,14 @@ RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_DECRateMatrix::
         rs = new RevBayesCore::ConstantNode<RevBayesCore::Simplex>("", new RevBayesCore::Simplex(n,p));
     }
     
-    std::string nullRangeStr = RevBayesCore::assume_cast<const RlString &>( this->args[3].getVariable()->getRevObject() ).getValue();
+    std::string nullRangeStr = valueFor<RlString>(this->args[3].getVariable());
     bool cs = nullRangeStr=="CondSurv";
     bool ex = nullRangeStr=="Exclude";
 //    std::cout << nullRangeStr << " " << cs << " " << ex << "\n";
     
 //    bool os = static_cast<const RlBoolean&>(this->args[4].getVariable()->getRevObject() ).getValue();
 //    bool order_states_by_size = !os;
-    size_t mrs = RevBayesCore::assume_cast<const Natural&>(this->args[4].getVariable()->getRevObject() ).getValue();
+    size_t mrs = valueFor<Natural>(this->args[4].getVariable());
     
     if (mrs < 1 || mrs > er->getValue().size())
     {

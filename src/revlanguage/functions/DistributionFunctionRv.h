@@ -17,6 +17,7 @@
 #ifndef DistributionFunctionRv_H
 #define DistributionFunctionRv_H
 
+#include "RevVariableUtilities.h"
 #include "RlTypedDistribution.h"
 #include "TypeUtilities.h"
 #include "Procedure.h"
@@ -156,7 +157,7 @@ RevLanguage::RevPtr<RevVariable> RevLanguage::DistributionFunctionRv<valueType>:
         
     }
     
-    int n = (int)RevBayesCore::assume_cast<const Natural &>( this->args[0].getVariable()->getRevObject() ).getValue();
+    int n = (int)valueFor<Natural>(this->args[0].getVariable());
     ModelVector<valueType> *values = new ModelVector<valueType>();
     for (int i = 0;  i < n; ++i)
     {

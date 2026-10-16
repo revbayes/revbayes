@@ -1,6 +1,7 @@
 #ifndef Func__conversion_H
 #define Func__conversion_H
 
+#include "RevVariableUtilities.h"
 #include "RlTypedFunction.h"
 #include "TypeUtilities.h"
 
@@ -62,7 +63,7 @@ RevLanguage::Func__conversion<rlTypeFrom, rlTypeTo>* RevLanguage::Func__conversi
 template <typename rlTypeFrom, typename rlTypeTo>
 RevBayesCore::TypedFunction<typename rlTypeTo::valueType>* RevLanguage::Func__conversion<rlTypeFrom, rlTypeTo>::createFunction( void ) const
 {
-    RevBayesCore::TypedDagNode<typename rlTypeFrom::valueType>* arg = RevBayesCore::assume_cast<const rlTypeFrom &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<typename rlTypeFrom::valueType>* arg = dagNodeFor<rlTypeFrom>(this->args[0].getVariable());
     RevBayesCore::TypeConversionFunction<typename rlTypeFrom::valueType, typename rlTypeTo::valueType> *func = new RevBayesCore::TypeConversionFunction<typename rlTypeFrom::valueType, typename rlTypeTo::valueType>(arg);
     
     return func;

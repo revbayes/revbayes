@@ -6,6 +6,7 @@
 //  Copyright © 2016 Michael Landis. All rights reserved.
 //
 
+#include "RevVariableUtilities.h"
 #include "Func_MixtureCladoProbs.h"
 #include "TypeUtilities.h"
 
@@ -54,8 +55,8 @@ RevBayesCore::TypedFunction< RevBayesCore::CladogeneticProbabilityMatrix >* Func
 {
     
     // supplied arguments
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::CladogeneticProbabilityMatrix> >* cp = RevBayesCore::assume_cast<const ModelVector<CladogeneticProbabilityMatrix> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::Simplex>* ep = RevBayesCore::assume_cast<const Simplex &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::CladogeneticProbabilityMatrix> >* cp = dagNodeFor<ModelVector<CladogeneticProbabilityMatrix>>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode<RevBayesCore::Simplex>* ep = dagNodeFor<Simplex>(this->args[1].getVariable());
     
     size_t n_mixture = cp->getValue().size();
     if (n_mixture > 0) {

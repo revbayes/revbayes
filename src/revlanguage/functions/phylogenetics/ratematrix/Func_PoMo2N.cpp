@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "Func_PoMo2N.h"
 #include "TypeUtilities.h"
 #include "PoMo2NRateMatrixFunction.h"
@@ -35,9 +36,9 @@ Func_PoMo2N* Func_PoMo2N::clone( void ) const
 
 RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_PoMo2N::createFunction( void ) const
 {
-    RevBayesCore::TypedDagNode< std::int64_t                          >* ni = RevBayesCore::assume_cast<const Natural              &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* m  = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* fc = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< std::int64_t                          >* ni = dagNodeFor<Natural>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* m  = dagNodeFor<ModelVector<RealPos>>(this->args[1].getVariable());
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* fc = dagNodeFor<ModelVector<RealPos>>(this->args[2].getVariable());
 
     if ( m->getValue().size() != 2 )
     {

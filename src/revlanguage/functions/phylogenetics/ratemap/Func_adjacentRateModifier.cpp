@@ -6,6 +6,7 @@
 //  Copyright © 2017 Michael Landis. All rights reserved.
 //
 
+#include "RevVariableUtilities.h"
 #include "Func_adjacentRateModifier.h"
 #include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
@@ -67,12 +68,12 @@ RevBayesCore::TypedFunction< RevBayesCore::CharacterHistoryRateModifier >* Func_
     RevPtr<const RevVariable> numStates  = this->args[4].getVariable();
     RevPtr<const RevVariable> numChars   = this->args[5].getVariable();
     
-    RevBayesCore::TypedDagNode<double>* gf = RevBayesCore::assume_cast<const Real&>( gainFactor->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* lf = RevBayesCore::assume_cast<const Real&>( lossFactor->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<std::int64_t>* w = RevBayesCore::assume_cast<const Natural&>( width->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* gf = dagNodeFor<Real>(gainFactor);
+    RevBayesCore::TypedDagNode<double>* lf = dagNodeFor<Real>(lossFactor);
+    RevBayesCore::TypedDagNode<std::int64_t>* w = dagNodeFor<Natural>(width);
     
-    size_t ns = RevBayesCore::assume_cast<const Natural&>( numStates->getRevObject() ).getValue();
-    size_t nc = RevBayesCore::assume_cast<const Natural&>( numChars->getRevObject() ).getValue();
+    size_t ns = valueFor<Natural>(numStates);
+    size_t nc = valueFor<Natural>(numChars);
 
 //    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<std::int64_t> > >* c = NULL;
 //    if ( this->args[3].getVariable()->getRevObject().isType( ModelVector<ModelVector<Natural> >::getClassTypeSpec() ) )
@@ -85,7 +86,7 @@ RevBayesCore::TypedFunction< RevBayesCore::CharacterHistoryRateModifier >* Func_
     
     if (matrix->getRevObject().isType( MatrixReal::getClassTypeSpec() ))
     {
-        RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* tmp = RevBayesCore::assume_cast<const MatrixReal &>( matrix->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* tmp = dagNodeFor<MatrixReal>(matrix);
         RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *n = RevBayesCore::assumeStochastic<RevBayesCore::MatrixReal>( tmp );
         
         // validate input

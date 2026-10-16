@@ -6,6 +6,7 @@
 //  Copyright (c) 2015 Michael Landis. All rights reserved.
 //
 
+#include "RevVariableUtilities.h"
 #include "Func_treeScale.h"
 #include "TypeUtilities.h"
 
@@ -51,15 +52,15 @@ Func_treeScale* Func_treeScale::clone( void ) const {
 RevBayesCore::TypedFunction<RevBayesCore::Tree>* Func_treeScale::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<double>* scale                             = RevBayesCore::assume_cast<const RealPos &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau               = RevBayesCore::assume_cast<const TimeTree&>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* scale                             = dagNodeFor<RealPos>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau               = dagNodeFor<TimeTree>(this->args[1].getVariable());
     
     size_t nTips = tau->getValue().getNumberOfTips();
     RevBayesCore::RbVector<double> tipAges;
     if ( this->args[2].getVariable()->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
     {
 //        tipAges = static_cast< RevBayesCore::RbVector<RealPos>& >( this->args[2].getVariable()->getRevObject() ).getValue();
-        tipAges = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( this->args[2].getVariable()->getRevObject() ).getDagNode()->getValue();
+        tipAges = dagNodeFor<ModelVector<RealPos>>(this->args[2].getVariable())->getValue();
         
         // sanity check
         if ( nTips != tipAges.size() )

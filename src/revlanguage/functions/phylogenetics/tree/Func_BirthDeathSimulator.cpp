@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <iosfwd>
@@ -67,14 +68,14 @@ RevPtr<RevVariable> Func_BirthDeathSimulator::execute( void )
 
     size_t arg_index = 0;
 
-    const std::vector<double> &timeline = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( args[arg_index].getVariable()->getRevObject() ).getValue();
+    const std::vector<double> &timeline = valueFor<ModelVector<RealPos>>(args[arg_index].getVariable());
     simulator.setTimeline( timeline );
 
     ++arg_index;
     std::vector< std::vector<double> > speciation_rates;
     if ( args[arg_index].getVariable()->getRevObject().isType( ModelVector< ModelVector< RealPos > >::getClassTypeSpec() ) )
     {
-        const RevBayesCore::RbVector< RevBayesCore::RbVector<double> > &tmp_speciation_rates = RevBayesCore::assume_cast<const ModelVector< ModelVector<RealPos> > &>( args[arg_index].getVariable()->getRevObject() ).getValue();
+        const RevBayesCore::RbVector< RevBayesCore::RbVector<double> > &tmp_speciation_rates = valueFor<ModelVector< ModelVector<RealPos> >>(args[arg_index].getVariable());
         for (size_t i=0; i<tmp_speciation_rates.size(); ++i)
         {
             speciation_rates.push_back( tmp_speciation_rates[i] );
@@ -82,12 +83,12 @@ RevPtr<RevVariable> Func_BirthDeathSimulator::execute( void )
     }
     else if ( args[arg_index].getVariable()->getRevObject().isType( ModelVector< RealPos >::getClassTypeSpec() ) )
     {
-        const RevBayesCore::RbVector<double> &tmp_speciation_rates = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( args[arg_index].getVariable()->getRevObject() ).getValue();
+        const RevBayesCore::RbVector<double> &tmp_speciation_rates = valueFor<ModelVector<RealPos>>(args[arg_index].getVariable());
         speciation_rates.push_back( tmp_speciation_rates );
     }
     else if ( args[arg_index].getVariable()->getRevObject().isType( RealPos::getClassTypeSpec() ) )
     {
-        double tmp_speciation_rates = RevBayesCore::assume_cast<const RealPos &>( args[arg_index].getVariable()->getRevObject() ).getValue();
+        double tmp_speciation_rates = valueFor<RealPos>(args[arg_index].getVariable());
         speciation_rates.push_back( std::vector<double>(1, tmp_speciation_rates) );
     }
     simulator.setSpeciationRate( speciation_rates );
@@ -96,7 +97,7 @@ RevPtr<RevVariable> Func_BirthDeathSimulator::execute( void )
     std::vector< std::vector<double> > extinction_rates;
     if ( args[arg_index].getVariable()->getRevObject().isType( ModelVector< ModelVector< RealPos > >::getClassTypeSpec() ) )
     {
-        const RevBayesCore::RbVector< RevBayesCore::RbVector<double> > &tmp_extinction_rates = RevBayesCore::assume_cast<const ModelVector< ModelVector<RealPos> > &>( args[arg_index].getVariable()->getRevObject() ).getValue();
+        const RevBayesCore::RbVector< RevBayesCore::RbVector<double> > &tmp_extinction_rates = valueFor<ModelVector< ModelVector<RealPos> >>(args[arg_index].getVariable());
         for (size_t i=0; i<tmp_extinction_rates.size(); ++i)
         {
             extinction_rates.push_back( tmp_extinction_rates[i] );
@@ -104,12 +105,12 @@ RevPtr<RevVariable> Func_BirthDeathSimulator::execute( void )
     }
     else if ( args[arg_index].getVariable()->getRevObject().isType( ModelVector< RealPos >::getClassTypeSpec() ) )
     {
-        const RevBayesCore::RbVector<double> &tmp_extinction_rates = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( args[arg_index].getVariable()->getRevObject() ).getValue();
+        const RevBayesCore::RbVector<double> &tmp_extinction_rates = valueFor<ModelVector<RealPos>>(args[arg_index].getVariable());
         extinction_rates.push_back( tmp_extinction_rates );
     }
     else if ( args[arg_index].getVariable()->getRevObject().isType( RealPos::getClassTypeSpec() ) )
     {
-        double tmp_extinction_rates = RevBayesCore::assume_cast<const RealPos &>( args[arg_index].getVariable()->getRevObject() ).getValue();
+        double tmp_extinction_rates = valueFor<RealPos>(args[arg_index].getVariable());
         extinction_rates.push_back( std::vector<double>(1, tmp_extinction_rates) );
     }
     simulator.setExtinctionRate( extinction_rates );
@@ -119,7 +120,7 @@ RevPtr<RevVariable> Func_BirthDeathSimulator::execute( void )
     std::vector< std::vector<double> > sampling_rates;
     if ( args[arg_index].getVariable()->getRevObject().isType( ModelVector< ModelVector< RealPos > >::getClassTypeSpec() ) )
     {
-        const RevBayesCore::RbVector< RevBayesCore::RbVector<double> > &tmp_sampling_rates = RevBayesCore::assume_cast<const ModelVector< ModelVector<RealPos> > &>( args[arg_index].getVariable()->getRevObject() ).getValue();
+        const RevBayesCore::RbVector< RevBayesCore::RbVector<double> > &tmp_sampling_rates = valueFor<ModelVector< ModelVector<RealPos> >>(args[arg_index].getVariable());
         for (size_t i=0; i<tmp_sampling_rates.size(); ++i)
         {
             sampling_rates.push_back( tmp_sampling_rates[i] );
@@ -127,12 +128,12 @@ RevPtr<RevVariable> Func_BirthDeathSimulator::execute( void )
     }
     else if ( args[arg_index].getVariable()->getRevObject().isType( ModelVector< RealPos >::getClassTypeSpec() ) )
     {
-        const RevBayesCore::RbVector<double> &tmp_sampling_rates = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( args[arg_index].getVariable()->getRevObject() ).getValue();
+        const RevBayesCore::RbVector<double> &tmp_sampling_rates = valueFor<ModelVector<RealPos>>(args[arg_index].getVariable());
         sampling_rates.push_back( tmp_sampling_rates );
     }
     else if ( args[arg_index].getVariable()->getRevObject().isType( RealPos::getClassTypeSpec() ) )
     {
-        double tmp_sampling_rates = RevBayesCore::assume_cast<const RealPos &>( args[arg_index].getVariable()->getRevObject() ).getValue();
+        double tmp_sampling_rates = valueFor<RealPos>(args[arg_index].getVariable());
         sampling_rates.push_back( std::vector<double>(1, tmp_sampling_rates) );
     }
     simulator.setSamplingRate( sampling_rates );
@@ -142,7 +143,7 @@ RevPtr<RevVariable> Func_BirthDeathSimulator::execute( void )
     std::vector< std::vector<double> > sampling_extinction_rates;
     if ( args[arg_index].getVariable()->getRevObject().isType( ModelVector< ModelVector< Probability > >::getClassTypeSpec() ) )
     {
-        const RevBayesCore::RbVector< RevBayesCore::RbVector<double> > &tmp_sampling_extinction_rates = RevBayesCore::assume_cast<const ModelVector< ModelVector<Probability> > &>( args[arg_index].getVariable()->getRevObject() ).getValue();
+        const RevBayesCore::RbVector< RevBayesCore::RbVector<double> > &tmp_sampling_extinction_rates = valueFor<ModelVector< ModelVector<Probability> >>(args[arg_index].getVariable());
         for (size_t i=0; i<tmp_sampling_extinction_rates.size(); ++i)
         {
             sampling_extinction_rates.push_back( tmp_sampling_extinction_rates[i] );
@@ -150,12 +151,12 @@ RevPtr<RevVariable> Func_BirthDeathSimulator::execute( void )
     }
     else if ( args[arg_index].getVariable()->getRevObject().isType( ModelVector< Probability >::getClassTypeSpec() ) )
     {
-        const RevBayesCore::RbVector<double> &tmp_sampling_extinction_rates = RevBayesCore::assume_cast<const ModelVector<Probability> &>( args[arg_index].getVariable()->getRevObject() ).getValue();
+        const RevBayesCore::RbVector<double> &tmp_sampling_extinction_rates = valueFor<ModelVector<Probability>>(args[arg_index].getVariable());
         sampling_extinction_rates.push_back( tmp_sampling_extinction_rates );
     }
     else if ( args[arg_index].getVariable()->getRevObject().isType( Probability::getClassTypeSpec() ) )
     {
-        double tmp_sampling_extinction_rates = RevBayesCore::assume_cast<const Probability &>( args[arg_index].getVariable()->getRevObject() ).getValue();
+        double tmp_sampling_extinction_rates = valueFor<Probability>(args[arg_index].getVariable());
         sampling_extinction_rates.push_back( std::vector<double>(1, tmp_sampling_extinction_rates) );
     }
     simulator.setSamplingExtinctionRate( sampling_extinction_rates );
@@ -165,7 +166,7 @@ RevPtr<RevVariable> Func_BirthDeathSimulator::execute( void )
     std::vector< std::vector<double> > speciation_probability;
     if ( args[arg_index].getVariable()->getRevObject().isType( ModelVector< ModelVector< Probability > >::getClassTypeSpec() ) )
     {
-        const RevBayesCore::RbVector< RevBayesCore::RbVector<double> > &tmp_speciation_probs = RevBayesCore::assume_cast<const ModelVector< ModelVector<Probability> > &>( args[arg_index].getVariable()->getRevObject() ).getValue();
+        const RevBayesCore::RbVector< RevBayesCore::RbVector<double> > &tmp_speciation_probs = valueFor<ModelVector< ModelVector<Probability> >>(args[arg_index].getVariable());
         for (size_t i=0; i<tmp_speciation_probs.size(); ++i)
         {
             speciation_probability.push_back( tmp_speciation_probs[i] );
@@ -173,12 +174,12 @@ RevPtr<RevVariable> Func_BirthDeathSimulator::execute( void )
     }
     else if ( args[arg_index].getVariable()->getRevObject().isType( ModelVector< Probability >::getClassTypeSpec() ) )
     {
-        const RevBayesCore::RbVector<double> &tmp_speciation_probs = RevBayesCore::assume_cast<const ModelVector<Probability> &>( args[arg_index].getVariable()->getRevObject() ).getValue();
+        const RevBayesCore::RbVector<double> &tmp_speciation_probs = valueFor<ModelVector<Probability>>(args[arg_index].getVariable());
         speciation_probability.push_back( tmp_speciation_probs );
     }
     else if ( args[arg_index].getVariable()->getRevObject().isType( Probability::getClassTypeSpec() ) )
     {
-        double tmp_speciation_probs = RevBayesCore::assume_cast<const Probability &>( args[arg_index].getVariable()->getRevObject() ).getValue();
+        double tmp_speciation_probs = valueFor<Probability>(args[arg_index].getVariable());
         speciation_probability.push_back( std::vector<double>(1, tmp_speciation_probs) );
     }
     simulator.setBurstProbability( speciation_probability );
@@ -188,7 +189,7 @@ RevPtr<RevVariable> Func_BirthDeathSimulator::execute( void )
     std::vector< std::vector<double> > extinction_probability;
     if ( args[arg_index].getVariable()->getRevObject().isType( ModelVector< ModelVector< Probability > >::getClassTypeSpec() ) )
     {
-        const RevBayesCore::RbVector< RevBayesCore::RbVector<double> > &tmp_extinction_probs = RevBayesCore::assume_cast<const ModelVector< ModelVector<Probability> > &>( args[arg_index].getVariable()->getRevObject() ).getValue();
+        const RevBayesCore::RbVector< RevBayesCore::RbVector<double> > &tmp_extinction_probs = valueFor<ModelVector< ModelVector<Probability> >>(args[arg_index].getVariable());
         for (size_t i=0; i<tmp_extinction_probs.size(); ++i)
         {
             extinction_probability.push_back( tmp_extinction_probs[i] );
@@ -196,12 +197,12 @@ RevPtr<RevVariable> Func_BirthDeathSimulator::execute( void )
     }
     else if ( args[arg_index].getVariable()->getRevObject().isType( ModelVector< Probability >::getClassTypeSpec() ) )
     {
-        const RevBayesCore::RbVector<double> &tmp_extinction_probs = RevBayesCore::assume_cast<const ModelVector<Probability> &>( args[arg_index].getVariable()->getRevObject() ).getValue();
+        const RevBayesCore::RbVector<double> &tmp_extinction_probs = valueFor<ModelVector<Probability>>(args[arg_index].getVariable());
         extinction_probability.push_back( tmp_extinction_probs );
     }
     else if ( args[arg_index].getVariable()->getRevObject().isType( Probability::getClassTypeSpec() ) )
     {
-        double tmp_extinction_probs = RevBayesCore::assume_cast<const Probability &>( args[arg_index].getVariable()->getRevObject() ).getValue();
+        double tmp_extinction_probs = valueFor<Probability>(args[arg_index].getVariable());
         extinction_probability.push_back( std::vector<double>(1, tmp_extinction_probs) );
     }
     simulator.setMassExtinctionProbability( extinction_probability );
@@ -211,7 +212,7 @@ RevPtr<RevVariable> Func_BirthDeathSimulator::execute( void )
     std::vector< std::vector<double> > sampling_probability;
     if ( args[arg_index].getVariable()->getRevObject().isType( ModelVector< ModelVector< Probability > >::getClassTypeSpec() ) )
     {
-        const RevBayesCore::RbVector< RevBayesCore::RbVector<double> > &tmp_sampling_probs = RevBayesCore::assume_cast<const ModelVector< ModelVector<Probability> > &>( args[arg_index].getVariable()->getRevObject() ).getValue();
+        const RevBayesCore::RbVector< RevBayesCore::RbVector<double> > &tmp_sampling_probs = valueFor<ModelVector< ModelVector<Probability> >>(args[arg_index].getVariable());
         for (size_t i=0; i<tmp_sampling_probs.size(); ++i)
         {
             sampling_probability.push_back( tmp_sampling_probs[i] );
@@ -219,12 +220,12 @@ RevPtr<RevVariable> Func_BirthDeathSimulator::execute( void )
     }
     else if ( args[arg_index].getVariable()->getRevObject().isType( ModelVector< Probability >::getClassTypeSpec() ) )
     {
-        const RevBayesCore::RbVector<double> &tmp_sampling_probs = RevBayesCore::assume_cast<const ModelVector<Probability> &>( args[arg_index].getVariable()->getRevObject() ).getValue();
+        const RevBayesCore::RbVector<double> &tmp_sampling_probs = valueFor<ModelVector<Probability>>(args[arg_index].getVariable());
         sampling_probability.push_back( tmp_sampling_probs );
     }
     else if ( args[arg_index].getVariable()->getRevObject().isType( Probability::getClassTypeSpec() ) )
     {
-        double tmp_sampling_probs = RevBayesCore::assume_cast<const Probability &>( args[arg_index].getVariable()->getRevObject() ).getValue();
+        double tmp_sampling_probs = valueFor<Probability>(args[arg_index].getVariable());
         sampling_probability.push_back( std::vector<double>(1, tmp_sampling_probs) );
     }
     simulator.setSamplingProbability( sampling_probability );
@@ -234,7 +235,7 @@ RevPtr<RevVariable> Func_BirthDeathSimulator::execute( void )
     std::vector< std::vector<double> > sampling_extinction_probability;
     if ( args[arg_index].getVariable()->getRevObject().isType( ModelVector< ModelVector< Probability > >::getClassTypeSpec() ) )
     {
-        const RevBayesCore::RbVector< RevBayesCore::RbVector<double> > &tmp_sampling_extinction_probs = RevBayesCore::assume_cast<const ModelVector< ModelVector<Probability> > &>( args[arg_index].getVariable()->getRevObject() ).getValue();
+        const RevBayesCore::RbVector< RevBayesCore::RbVector<double> > &tmp_sampling_extinction_probs = valueFor<ModelVector< ModelVector<Probability> >>(args[arg_index].getVariable());
         for (size_t i=0; i<tmp_sampling_extinction_probs.size(); ++i)
         {
             sampling_extinction_probability.push_back( tmp_sampling_extinction_probs[i] );
@@ -242,12 +243,12 @@ RevPtr<RevVariable> Func_BirthDeathSimulator::execute( void )
     }
     else if ( args[arg_index].getVariable()->getRevObject().isType( ModelVector< Probability >::getClassTypeSpec() ) )
     {
-        const RevBayesCore::RbVector<double> &tmp_sampling_extinction_probs = RevBayesCore::assume_cast<const ModelVector<Probability> &>( args[arg_index].getVariable()->getRevObject() ).getValue();
+        const RevBayesCore::RbVector<double> &tmp_sampling_extinction_probs = valueFor<ModelVector<Probability>>(args[arg_index].getVariable());
         sampling_extinction_probability.push_back( tmp_sampling_extinction_probs );
     }
     else if ( args[arg_index].getVariable()->getRevObject().isType( Probability::getClassTypeSpec() ) )
     {
-        double tmp_sampling_extinction_probs = RevBayesCore::assume_cast<const Probability &>( args[arg_index].getVariable()->getRevObject() ).getValue();
+        double tmp_sampling_extinction_probs = valueFor<Probability>(args[arg_index].getVariable());
         sampling_extinction_probability.push_back( std::vector<double>(1, tmp_sampling_extinction_probs) );
     }
     else
@@ -258,22 +259,22 @@ RevPtr<RevVariable> Func_BirthDeathSimulator::execute( void )
     simulator.setSamplingExtinctionProbability( sampling_extinction_probability );
 
     ++arg_index;
-    const std::vector<double> &root_probs = RevBayesCore::assume_cast<const Simplex &>( args[arg_index].getVariable()->getRevObject() ).getValue();
+    const std::vector<double> &root_probs = valueFor<Simplex>(args[arg_index].getVariable());
     simulator.setRootCategoryProbabilities( root_probs );
 
     ++arg_index;
-    double time = RevBayesCore::assume_cast<const RealPos &>( args[arg_index].getVariable()->getRevObject() ).getValue();
+    double time = valueFor<RealPos>(args[arg_index].getVariable());
     
     ++arg_index;
     RevBayesCore::BirthDeathForwardSimulator::SIM_CONDITION cdt = RevBayesCore::BirthDeathForwardSimulator::TIME;
-    const std::string& cdt_str = RevBayesCore::assume_cast<const RlString &>( args[arg_index].getVariable()->getRevObject() ).getValue();
+    const std::string& cdt_str = valueFor<RlString>(args[arg_index].getVariable());
 
     ++arg_index;
-    std::int64_t max_lineages = RevBayesCore::assume_cast<const Natural &>( args[arg_index].getVariable()->getRevObject() ).getValue();
+    std::int64_t max_lineages = valueFor<Natural>(args[arg_index].getVariable());
     simulator.setMaxNumLineages(max_lineages);
 
     ++arg_index;
-    bool complete_tree = RevBayesCore::assume_cast<const RlBoolean &>( args[arg_index].getVariable()->getRevObject() ).getValue();
+    bool complete_tree = valueFor<RlBoolean>(args[arg_index].getVariable());
     simulator.setCompleteTree(complete_tree);
 
     if ( cdt_str == "time" )

@@ -17,6 +17,7 @@
 #ifndef Func__le_H
 #define Func__le_H
 
+#include "RevVariableUtilities.h"
 #include "RlBoolean.h"
 #include "TypeUtilities.h"
 #include "RlTypedFunction.h"
@@ -77,8 +78,8 @@ template <typename leftValType, typename rightValType>
 RevBayesCore::TypedFunction<RevBayesCore::Boolean>* RevLanguage::Func__le<leftValType,rightValType>::createFunction( void ) const
 {
     
-    const RevBayesCore::TypedDagNode<typename leftValType::valueType>* leftVal = RevBayesCore::assume_cast<const leftValType &>( args[0].getVariable()->getRevObject() ).getDagNode();
-    const RevBayesCore::TypedDagNode<typename rightValType::valueType>* rightVal = RevBayesCore::assume_cast<const rightValType &>( args[1].getVariable()->getRevObject() ).getDagNode();
+    const RevBayesCore::TypedDagNode<typename leftValType::valueType>* leftVal = dagNodeFor<leftValType>(args[0].getVariable());
+    const RevBayesCore::TypedDagNode<typename rightValType::valueType>* rightVal = dagNodeFor<rightValType>(args[1].getVariable());
     
     RevBayesCore::LessEqualFunction<typename leftValType::valueType, typename rightValType::valueType> *func = new RevBayesCore::LessEqualFunction<typename leftValType::valueType, typename rightValType::valueType>( leftVal, rightVal );
     

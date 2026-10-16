@@ -5,6 +5,7 @@
 //  Created by John Huelsenbeck on 11/17/14.
 //
 
+#include "RevVariableUtilities.h"
 #include "Func_varianceCovarianceMatrix.h"
 #include "TypeUtilities.h"
 
@@ -50,8 +51,8 @@ Func_varianceCovarianceMatrix* Func_varianceCovarianceMatrix::clone(void) const
 
 RevBayesCore::TypedFunction< RevBayesCore::MatrixReal >* Func_varianceCovarianceMatrix::createFunction(void) const {
 
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* sd = RevBayesCore::assume_cast<const ModelVector<RealPos>& >( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* ce = RevBayesCore::assume_cast<const ModelVector<Real>& >( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* sd = dagNodeFor<ModelVector<RealPos>>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* ce = dagNodeFor<ModelVector<Real>>(this->args[1].getVariable());
     
     double n_sd = sd->getValue().size();
     double n_ce = ce->getValue().size();

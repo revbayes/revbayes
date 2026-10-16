@@ -1,6 +1,7 @@
 #ifndef Func_workspaceVector_H
 #define Func_workspaceVector_H
 
+#include "RevVariableUtilities.h"
 #include "Procedure.h"
 #include "TypeUtilities.h"
 
@@ -76,7 +77,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> RevLanguage::Func_workspaceVector<
     RevBayesCore::RbVector<valType> params;
     for ( size_t i = 0; i < args.size(); i++ )
     {
-        const valType &val = RevBayesCore::assume_cast<const valType &>( args[i].getVariable()->getRevObject() );
+        const valType &val = objectFor<valType>(args[i].getVariable());
         params.push_back( val );
     }
     

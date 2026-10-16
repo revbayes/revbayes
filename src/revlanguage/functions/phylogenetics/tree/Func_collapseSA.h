@@ -1,6 +1,7 @@
 #ifndef Func_collapseSA_h
 #define Func_collapseSA_h
 
+#include "RevVariableUtilities.h"
 #include <string>
 #include "TypeUtilities.h"
 #include <iosfwd>
@@ -71,7 +72,7 @@ public:
     // Function functions you have to override
     RevBayesCore::TypedFunction< RevBayesCore::Tree> *                  createFunction(void) const                                 //!< Create internal function object
     {
-        RevBayesCore::TypedDagNode< RevBayesCore::Tree >* tree = RevBayesCore::assume_cast<const Tree &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< RevBayesCore::Tree >* tree = dagNodeFor<Tree>(this->args[0].getVariable());
 
         return RevBayesCore::generic_function_ptr< RevBayesCore::Tree >( collapseSampledAncestorsFunc, tree);
 

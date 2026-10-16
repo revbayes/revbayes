@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <fstream>
@@ -45,7 +46,7 @@ Func_setwd* Func_setwd::clone( void ) const
 /** Execute function */
 RevPtr<RevVariable> Func_setwd::execute( void )
 {
-    fs::path wd = RevBayesCore::assume_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
+    fs::path wd = valueFor<RlString>(args[0].getVariable());
 
     if ( not fs::exists( wd ))
         throw RbException()<<"setwd: The path "<<wd<<" does not exist.";

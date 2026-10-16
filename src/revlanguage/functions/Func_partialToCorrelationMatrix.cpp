@@ -5,6 +5,7 @@
 //  Created by Michael R. May on 08/29/17.
 //
 
+#include "RevVariableUtilities.h"
 #include "Func_partialToCorrelationMatrix.h"
 #include "TypeUtilities.h"
 
@@ -44,7 +45,7 @@ Func_partialToCorrelationMatrix* Func_partialToCorrelationMatrix::clone(void) co
 
 RevBayesCore::TypedFunction< RevBayesCore::MatrixReal >* Func_partialToCorrelationMatrix::createFunction(void) const {
 
-    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* r = RevBayesCore::assume_cast<const MatrixReal& >( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* r = dagNodeFor<MatrixReal>(this->args[0].getVariable());
     RevBayesCore::PartialToCorrelation* f = new RevBayesCore::PartialToCorrelation( r );
     return f;
     

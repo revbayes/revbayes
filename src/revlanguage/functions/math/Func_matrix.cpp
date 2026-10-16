@@ -6,6 +6,7 @@
 //  Copyright © 2017 Michael Landis. All rights reserved.
 //
 
+#include "RevVariableUtilities.h"
 #include "Func_matrix.h"
 #include "TypeUtilities.h"
 
@@ -50,7 +51,7 @@ RevBayesCore::TypedFunction< RevBayesCore::MatrixReal >* Func_matrix::createFunc
 {
 //    std::vector<std::vector<const RevBayesCore::TypedDagNode<double>* > > params;
     const RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* mtx;
-    mtx = RevBayesCore::assume_cast< const ModelVector<ModelVector<Real> >& >( args[0].getVariable()->getRevObject() ).getDagNode();
+    mtx = dagNodeFor<ModelVector<ModelVector<Real> >>(args[0].getVariable());
 //
 //    for ( size_t i = 0; i < args[.size(); i++ )
 //    {

@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <sstream>
 #include "TypeUtilities.h"
 #include <vector>
@@ -39,9 +40,9 @@ RevPtr<RevVariable> Func_convertCountFileToNaturalNumbers::execute( void )
 {
 
 	// get the information from the arguments for reading the file
-	const RlString& fi = RevBayesCore::assume_cast<const RlString&>( args[0].getVariable()->getRevObject() );
-    RevBayesCore::TypedDagNode<std::int64_t>* n_individuals = RevBayesCore::assume_cast<const Integer &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-	const RlString& fo = RevBayesCore::assume_cast<const RlString&>( args[2].getVariable()->getRevObject() );
+	const RlString& fi = objectFor<RlString>(args[0].getVariable());
+    RevBayesCore::TypedDagNode<std::int64_t>* n_individuals = dagNodeFor<Integer>(this->args[1].getVariable());
+	const RlString& fo = objectFor<RlString>(args[2].getVariable());
    
     RevBayesCore::CountFileToNaturalNumbersConverter nn;
     nn.cfconverter( fi.getValue(), n_individuals->getValue(), fo.getValue() );

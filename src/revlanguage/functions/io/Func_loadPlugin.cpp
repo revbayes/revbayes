@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <sstream>
 #include "TypeUtilities.h"
 #include <vector>
@@ -32,8 +33,8 @@ RevPtr<RevVariable> Func_loadPlugin::execute( void )
 {
 
 	// get the information from the arguments for reading the file
-	const RlString&    pn  = RevBayesCore::assume_cast<const RlString&>( args[0].getVariable()->getRevObject() );
-	const RlString&    fn  = RevBayesCore::assume_cast<const RlString&>( args[1].getVariable()->getRevObject() );
+	const RlString&    pn  = objectFor<RlString>(args[0].getVariable());
+	const RlString&    fn  = objectFor<RlString>(args[1].getVariable());
 
 	if(pn.getValue() == "TensorPhylo") {
 

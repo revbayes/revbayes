@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <iosfwd>
 #include "TypeUtilities.h"
 #include <string>
@@ -55,7 +56,7 @@ Func_expVector* Func_expVector::clone( void ) const
 RevBayesCore::TypedFunction<RevBayesCore::RbVector<double> >* Func_expVector::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* arg = RevBayesCore::assume_cast<const ModelVector<Real> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* arg = dagNodeFor<ModelVector<Real>>(this->args[0].getVariable());
     RevBayesCore::ExponentialVectorFunction* f = new RevBayesCore::ExponentialVectorFunction( arg );
     
     return f;

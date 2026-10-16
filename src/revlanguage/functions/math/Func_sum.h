@@ -1,6 +1,7 @@
 #ifndef Func_sum_H
 #define Func_sum_H
 
+#include "RevVariableUtilities.h"
 #include "RlTypedFunction.h"
 #include "TypeUtilities.h"
 
@@ -83,7 +84,7 @@ RevBayesCore::TypedFunction< typename retType::valueType >* RevLanguage::Func_su
     // and ModelVector<valType> wraps RbVector<valType::valueType>. So the element type is valType::valueType.
     typedef typename valType::valueType elementType;
     const RevBayesCore::TypedDagNode< RevBayesCore::RbVector<elementType> >* arg_vector =
-        RevBayesCore::assume_cast< const ModelVector<valType>& >( this->args[0].getVariable()->getRevObject() ).getDagNode();
+        dagNodeFor<ModelVector<valType>>(this->args[0].getVariable());
     
     // Use generic_function_ptr with the return type, which matches elementType
     return RevBayesCore::generic_function_ptr<typename retType::valueType>(RevBayesCore::sum_values<elementType>, arg_vector);

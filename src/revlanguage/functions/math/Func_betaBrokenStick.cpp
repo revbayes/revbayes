@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "ArgumentRule.h"
 #include "TypeUtilities.h"
 #include "Ellipsis.h"
@@ -33,9 +34,9 @@ Func_betaBrokenStick* Func_betaBrokenStick::clone( void ) const
 RevBayesCore::TypedFunction<RevBayesCore::Simplex>* Func_betaBrokenStick::createFunction( void ) const
 {
 
-    RevBayesCore::TypedDagNode<double>* alpha = RevBayesCore::assume_cast<const Real &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* beta = RevBayesCore::assume_cast<const Real &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<std::int64_t>* numCats = RevBayesCore::assume_cast<const Integer &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* alpha = dagNodeFor<Real>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode<double>* beta = dagNodeFor<Real>(this->args[1].getVariable());
+    RevBayesCore::TypedDagNode<std::int64_t>* numCats = dagNodeFor<Integer>(this->args[2].getVariable());
 
     RevBayesCore::BetaBrokenStickFunction *func = new RevBayesCore::BetaBrokenStickFunction( alpha, beta, numCats );
 

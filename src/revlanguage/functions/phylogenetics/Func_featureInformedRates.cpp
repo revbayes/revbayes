@@ -6,6 +6,7 @@
 //  Copyright © 2022 Michael Landis. All rights reserved.
 //
 
+#include "RevVariableUtilities.h"
 #include "Func_featureInformedRates.h"
 #include "TypeUtilities.h"
 
@@ -54,11 +55,11 @@ RevBayesCore::TypedFunction< RevBayesCore::RbVector<RevBayesCore::RbVector<doubl
 {
     
     // supplied arguments
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<RevBayesCore::RbVector<std::int64_t> > > >* cf = RevBayesCore::assume_cast<const ModelVector<ModelVector<ModelVector<Integer> > >&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > > >* qf = RevBayesCore::assume_cast<const ModelVector<ModelVector<ModelVector<Real> > >&>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* sigma = RevBayesCore::assume_cast<const ModelVector<Real> &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* phi = RevBayesCore::assume_cast<const ModelVector<Real> &>( this->args[3].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* null_rate = RevBayesCore::assume_cast<const RealPos&>( this->args[4].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<RevBayesCore::RbVector<std::int64_t> > > >* cf = dagNodeFor<ModelVector<ModelVector<ModelVector<Integer> > >>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > > >* qf = dagNodeFor<ModelVector<ModelVector<ModelVector<Real> > >>(this->args[1].getVariable());
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* sigma = dagNodeFor<ModelVector<Real>>(this->args[2].getVariable());
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* phi = dagNodeFor<ModelVector<Real>>(this->args[3].getVariable());
+    RevBayesCore::TypedDagNode<double>* null_rate = dagNodeFor<RealPos>(this->args[4].getVariable());
     
     // add error checking
     

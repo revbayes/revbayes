@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "Func_FMutSel0RateMatrix.h"
 #include "TypeUtilities.h"
 #include "CppCodonFuncs.h"
@@ -55,9 +56,9 @@ Func_FMutSel0RateMatrix* Func_FMutSel0RateMatrix::clone( void ) const
 
 RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_FMutSel0RateMatrix::createFunction( void ) const
 {
-    RevBayesCore::TypedDagNode< RevBayesCore::RateGenerator >* mu_nuc = RevBayesCore::assume_cast<const RateGenerator &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* fitnesses = RevBayesCore::assume_cast<const ModelVector<Real> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< double >* omega = RevBayesCore::assume_cast<const RealPos &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::RateGenerator >* mu_nuc = dagNodeFor<RateGenerator>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* fitnesses = dagNodeFor<ModelVector<Real>>(this->args[1].getVariable());
+    RevBayesCore::TypedDagNode< double >* omega = dagNodeFor<RealPos>(this->args[2].getVariable());
 
     return RevBayesCore::generic_function_ptr< RevBayesCore::RateGenerator >( FMutSel0Func, fitnesses, omega, mu_nuc );
 }

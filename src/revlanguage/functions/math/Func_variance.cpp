@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <iosfwd>
 #include "TypeUtilities.h"
 #include <string>
@@ -50,7 +51,7 @@ Func_variance* Func_variance::clone( void ) const
 RevBayesCore::TypedFunction<double>* Func_variance::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* arg = RevBayesCore::assume_cast<const ModelVector<Real> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* arg = dagNodeFor<ModelVector<Real>>(this->args[0].getVariable());
     RevBayesCore::VarianceFunction* f = new RevBayesCore::VarianceFunction( arg );
     
     return f;

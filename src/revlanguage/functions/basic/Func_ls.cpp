@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <fstream>
@@ -302,8 +303,8 @@ Func_ls* Func_ls::clone( void ) const
 RevPtr<RevVariable> Func_ls::execute( void )
 {
     
-    bool printAll = RevBayesCore::assume_cast<const RlBoolean &>( args[0].getVariable()->getRevObject() ).getValue();
-    std::string filter = RevBayesCore::assume_cast<const RlString &>( args[1].getVariable()->getRevObject() ).getValue();
+    bool printAll = valueFor<RlBoolean>(args[0].getVariable());
+    std::string filter = valueFor<RlString>(args[1].getVariable());
     
     // print workspace variables
     if (filter == "all") {

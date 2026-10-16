@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <iosfwd>
@@ -60,7 +61,7 @@ RevPtr<RevVariable> Func_writeNexus::execute( void )
 {
     
     // get the information from the arguments for reading the file
-    const RlString& fn = RevBayesCore::assume_cast<const RlString&>( args[0].getVariable()->getRevObject() );
+    const RlString& fn = objectFor<RlString>(args[0].getVariable());
     RevBayesCore::NexusWriter fw( fn.getValue() );
     fw.openStream(false);
 
@@ -69,32 +70,32 @@ RevPtr<RevVariable> Func_writeNexus::execute( void )
 
     if ( this->args[1].getVariable()->getRevObject().getTypeSpec().isDerivedOf( AbstractHomologousDiscreteCharacterData::getClassTypeSpec() ) )
     {
-        const RevBayesCore::AbstractHomologousDiscreteCharacterData &data = RevBayesCore::assume_cast< const AbstractHomologousDiscreteCharacterData & >( args[1].getVariable()->getRevObject() ).getValue();
+        const RevBayesCore::AbstractHomologousDiscreteCharacterData &data = valueFor<AbstractHomologousDiscreteCharacterData>(args[1].getVariable());
         fw.writeNexusBlock( data );
     }
     else if ( this->args[1].getVariable()->getRevObject().getTypeSpec().isDerivedOf( ContinuousCharacterData::getClassTypeSpec() ) )
     {
-        const RevBayesCore::ContinuousCharacterData &data = RevBayesCore::assume_cast< const ContinuousCharacterData & >( args[1].getVariable()->getRevObject() ).getValue();
+        const RevBayesCore::ContinuousCharacterData &data = valueFor<ContinuousCharacterData>(args[1].getVariable());
         fw.writeNexusBlock( data );
     }
     else if ( this->args[1].getVariable()->getRevObject().getTypeSpec().isDerivedOf( Tree::getClassTypeSpec() ) )
     {
-        const RevBayesCore::Tree &data = RevBayesCore::assume_cast< const Tree & >( args[1].getVariable()->getRevObject() ).getValue();
+        const RevBayesCore::Tree &data = valueFor<Tree>(args[1].getVariable());
         fw.writeNexusBlock( data );
     }
     else if ( this->args[1].getVariable()->getRevObject().getTypeSpec().isDerivedOf( ModelVector<Tree>::getClassTypeSpec() ) )
     {
-        const RevBayesCore::RbVector<RevBayesCore::Tree> &data = RevBayesCore::assume_cast< const ModelVector<Tree> & >( args[1].getVariable()->getRevObject() ).getValue();
+        const RevBayesCore::RbVector<RevBayesCore::Tree> &data = valueFor<ModelVector<Tree>>(args[1].getVariable());
         fw.writeNexusBlock( data );
     }
     else if ( this->args[1].getVariable()->getRevObject().getTypeSpec().isDerivedOf( ModelVector<TimeTree>::getClassTypeSpec() ) )
     {
-        const RevBayesCore::RbVector<RevBayesCore::Tree> &data = RevBayesCore::assume_cast< const ModelVector<TimeTree> & >( args[1].getVariable()->getRevObject() ).getValue();
+        const RevBayesCore::RbVector<RevBayesCore::Tree> &data = valueFor<ModelVector<TimeTree>>(args[1].getVariable());
         fw.writeNexusBlock( data );
     }
     else if ( this->args[1].getVariable()->getRevObject().getTypeSpec().isDerivedOf( ModelVector<BranchLengthTree>::getClassTypeSpec() ) )
     {
-        const RevBayesCore::RbVector<RevBayesCore::Tree> &data = RevBayesCore::assume_cast< const ModelVector<BranchLengthTree> & >( args[1].getVariable()->getRevObject() ).getValue();
+        const RevBayesCore::RbVector<RevBayesCore::Tree> &data = valueFor<ModelVector<BranchLengthTree>>(args[1].getVariable());
         fw.writeNexusBlock( data );
     }
     else

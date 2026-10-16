@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <iosfwd>
 #include "TypeUtilities.h"
 #include <vector>
@@ -47,7 +48,7 @@ Func_upperTriangle* Func_upperTriangle::clone( void ) const
 RevBayesCore::TypedFunction< RevBayesCore::RbVector<double> >* Func_upperTriangle::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* m = RevBayesCore::assume_cast<const MatrixReal& >( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* m = dagNodeFor<MatrixReal>(this->args[0].getVariable());
     RevBayesCore::UpperTriangle *func = new RevBayesCore::UpperTriangle( m );
     
     return func;

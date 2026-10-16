@@ -6,6 +6,7 @@
 //  Copyright © 2016 Michael Landis. All rights reserved.
 //
 
+#include "RevVariableUtilities.h"
 #include "Func_choose.h"
 #include "TypeUtilities.h"
 
@@ -45,8 +46,8 @@ Func_choose* Func_choose::clone( void ) const
 RevBayesCore::TypedFunction<std::int64_t>* Func_choose::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<std::int64_t>* n = RevBayesCore::assume_cast<const Natural &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<std::int64_t>* k = RevBayesCore::assume_cast<const Natural &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<std::int64_t>* n = dagNodeFor<Natural>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode<std::int64_t>* k = dagNodeFor<Natural>(this->args[1].getVariable());
     RevBayesCore::ChooseFunction* f = new RevBayesCore::ChooseFunction( n, k );
     
     return f;

@@ -1,6 +1,7 @@
 #ifndef Func__scalarVectorMult_H
 #define Func__scalarVectorMult_H
 
+#include "RevVariableUtilities.h"
 #include "ModelVector.h"
 #include "TypeUtilities.h"
 #include "RlTypedFunction.h"
@@ -80,8 +81,8 @@ RevLanguage::Func__scalarVectorMult<firstValType, secondValType, retType>* RevLa
 template <typename firstValType, typename secondValType, typename retType>
 RevBayesCore::TypedFunction<typename retType::valueType >* RevLanguage::Func__scalarVectorMult<firstValType, secondValType, retType>::createFunction( void ) const
 {
-    RevBayesCore::TypedDagNode<typename firstValType::valueType>* firstArg = RevBayesCore::assume_cast<const firstValType &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<typename secondValType::valueType>* secondArg = RevBayesCore::assume_cast<const secondValType &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<typename firstValType::valueType>* firstArg = dagNodeFor<firstValType>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode<typename secondValType::valueType>* secondArg = dagNodeFor<secondValType>(this->args[1].getVariable());
     RevBayesCore::ScalarVectorMultiplication<typename firstValType::valueType, typename secondValType::elementType, typename retType::elementType> *func = new RevBayesCore::ScalarVectorMultiplication<typename firstValType::valueType, typename secondValType::elementType, typename retType::elementType>(firstArg, secondArg);
     
     return func;

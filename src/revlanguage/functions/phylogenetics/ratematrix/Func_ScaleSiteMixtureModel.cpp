@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "Func_ScaleSiteMixtureModel.h"
 #include "TypeUtilities.h"
 
@@ -64,9 +65,9 @@ Func_ScaleSiteMixtureModel* Func_ScaleSiteMixtureModel::clone( void ) const
 
 Core::TypedFunction< Core::SiteMixtureModel >* Func_ScaleSiteMixtureModel::createFunction( void ) const
 {
-    Core::TypedDagNode< Core::SiteMixtureModel >* model = RevBayesCore::assume_cast<const SiteMixtureModel &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    Core::TypedDagNode< Core::SiteMixtureModel >* model = dagNodeFor<SiteMixtureModel>(this->args[0].getVariable());
 
-    Core::TypedDagNode< double >* factor = RevBayesCore::assume_cast<const RealPos &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    Core::TypedDagNode< double >* factor = dagNodeFor<RealPos>(this->args[1].getVariable());
 
 
     return Core::generic_function_ptr< Core::SiteMixtureModel >( ScaleSiteMixtureModel, model, factor );

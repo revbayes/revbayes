@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <sstream>
@@ -71,18 +72,18 @@ RevPtr<RevVariable> Func_mapTree::execute( void )
         summary = new RevBayesCore::TreeSummary( vec, tt.front().getValue().isClock() );
     }
 
-    const std::string& filename = RevBayesCore::assume_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+    const std::string& filename = valueFor<RlString>(args[arg_index++].getVariable());
 
     
     RevBayesCore::TreeSummary::AnnotationReport report;
 
-    report.conditional_clade_ages        = RevBayesCore::assume_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
-    report.conditional_clade_probs       = RevBayesCore::assume_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
-    report.conditional_tree_ages         = RevBayesCore::assume_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
-    report.node_ages_HPD                 = RevBayesCore::assume_cast<const Probability &>(args[arg_index++].getVariable()->getRevObject()).getValue();
-    report.mean_node_ages                = RevBayesCore::assume_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
-    report.sampled_ancestor_probs        = RevBayesCore::assume_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
-    report.force_positive_branch_lengths = RevBayesCore::assume_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
+    report.conditional_clade_ages        = valueFor<RlBoolean>(this->args[arg_index++].getVariable());
+    report.conditional_clade_probs       = valueFor<RlBoolean>(this->args[arg_index++].getVariable());
+    report.conditional_tree_ages         = valueFor<RlBoolean>(this->args[arg_index++].getVariable());
+    report.node_ages_HPD                 = valueFor<Probability>(args[arg_index++].getVariable());
+    report.mean_node_ages                = valueFor<RlBoolean>(this->args[arg_index++].getVariable());
+    report.sampled_ancestor_probs        = valueFor<RlBoolean>(this->args[arg_index++].getVariable());
+    report.force_positive_branch_lengths = valueFor<RlBoolean>(this->args[arg_index++].getVariable());
     
     bool verbose = true;
     RevBayesCore::Tree* tree = summary->mapTree(report, verbose);

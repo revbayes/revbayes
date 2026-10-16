@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <iosfwd>
@@ -48,8 +49,8 @@ Func_simTree* Func_simTree::clone( void ) const
 RevPtr<RevVariable> Func_simTree::execute( void )
 {
     
-    int num_taxa             = RevBayesCore::assume_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue();
-    const std::string& type = RevBayesCore::assume_cast<const RlString &>( args[1].getVariable()->getRevObject() ).getValue();
+    int num_taxa             = valueFor<Natural>(args[0].getVariable());
+    const std::string& type = valueFor<RlString>(args[1].getVariable());
     
     // the time tree object (topology + times)
     RevBayesCore::Tree *psi = new RevBayesCore::Tree();

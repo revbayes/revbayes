@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "Func_jc.h"
 #include "TypeUtilities.h"
 
@@ -38,7 +39,7 @@ Func_jc* Func_jc::clone( void ) const
 RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_jc::createFunction( void ) const
 {
     
-    size_t ns = RevBayesCore::assume_cast<const Natural &>( this->args[0].getVariable()->getRevObject() ).getValue();
+    size_t ns = valueFor<Natural>(this->args[0].getVariable());
     RevBayesCore::JcRateMatrixFunction* f = new RevBayesCore::JcRateMatrixFunction( ns );
     
     return f;

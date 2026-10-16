@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "BinaryMutationCoalescentRateMatrixFunction.h"
 #include "TypeUtilities.h"
 #include "Func_BinaryMutationCoalescentRateMatrix.h"
@@ -36,10 +37,10 @@ Func_BinaryMutationCoalescentRateMatrix* Func_BinaryMutationCoalescentRateMatrix
 RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_BinaryMutationCoalescentRateMatrix::createFunction( void ) const
 {
     
-    size_t n = RevBayesCore::assume_cast<const Natural &>( this->args[0].getVariable()->getRevObject() ).getValue();
+    size_t n = valueFor<Natural>(this->args[0].getVariable());
 
-    RevBayesCore::TypedDagNode< double >* mu = RevBayesCore::assume_cast<const RealPos &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< double >* ne = RevBayesCore::assume_cast<const RealPos &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< double >* mu = dagNodeFor<RealPos>(this->args[1].getVariable());
+    RevBayesCore::TypedDagNode< double >* ne = dagNodeFor<RealPos>(this->args[2].getVariable());
     
     RevBayesCore::BinaryMutationCoalescentRateMatrixFunction* f = new RevBayesCore::BinaryMutationCoalescentRateMatrixFunction( n, mu, ne );
     

@@ -6,6 +6,7 @@
 //  Copyright 2012 __MyCompanyName__. All rights reserved.
 //
 
+#include "RevVariableUtilities.h"
 #include "Func_pomoRootFrequencies.h"
 #include "TypeUtilities.h"
 
@@ -51,13 +52,13 @@ RevBayesCore::TypedFunction< RevBayesCore::Simplex >* Func_pomoRootFrequencies::
 {
     //Four arguments, root_base_frequencies, root_polymorphism_proportion, Q, virtual_population_size
     
-    RevBayesCore::TypedDagNode<RevBayesCore::Simplex >* rbf = RevBayesCore::assume_cast<const Simplex &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Simplex >* rbf = dagNodeFor<Simplex>(this->args[0].getVariable());
     
-    RevBayesCore::TypedDagNode< double >* rpp = RevBayesCore::assume_cast<const Real &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< double >* rpp = dagNodeFor<Real>(this->args[1].getVariable());
     
-    RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator >* q = RevBayesCore::assume_cast<const RateGenerator &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator >* q = dagNodeFor<RateGenerator>(this->args[2].getVariable());
 
-    RevBayesCore::TypedDagNode< std::int64_t >* n = RevBayesCore::assume_cast<const Natural &>( this->args[3].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< std::int64_t >* n = dagNodeFor<Natural>(this->args[3].getVariable());
 
     RevBayesCore::PoMoRootFrequenciesFunction* pomorf = new RevBayesCore::PoMoRootFrequenciesFunction( rbf, rpp, q, n );
     

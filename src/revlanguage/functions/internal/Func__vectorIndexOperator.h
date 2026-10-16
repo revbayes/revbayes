@@ -1,6 +1,7 @@
 #ifndef Func__vectorIndexOperator_H
 #define Func__vectorIndexOperator_H
 
+#include "RevVariableUtilities.h"
 #include "RlTypedFunction.h"
 #include "TypeUtilities.h"
 
@@ -62,8 +63,8 @@ template <typename valType>
 RevBayesCore::TypedFunction< typename valType::valueType >* RevLanguage::Func__vectorIndexOperator<valType>::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<typename valType::valueType> >* v = RevBayesCore::assume_cast<const ModelVector<valType> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<std::int64_t>* index = RevBayesCore::assume_cast<const Natural &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<typename valType::valueType> >* v = dagNodeFor<ModelVector<valType>>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode<std::int64_t>* index = dagNodeFor<Natural>(this->args[1].getVariable());
     RevBayesCore::VectorIndexOperator<typename valType::valueType> *func = new RevBayesCore::VectorIndexOperator<typename valType::valueType>(v, index);
     
     return func;

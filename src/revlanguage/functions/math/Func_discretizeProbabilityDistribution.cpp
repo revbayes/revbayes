@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <iosfwd>
 #include "TypeUtilities.h"
 #include <vector>
@@ -50,9 +51,9 @@ Func_discretizeProbabilityDistribution* Func_discretizeProbabilityDistribution::
 RevBayesCore::TypedFunction< RevBayesCore::RbVector<double> >* Func_discretizeProbabilityDistribution::createFunction( void ) const
 {
        
-    const ProbabilityContinuousDistribution& rlDistribution = RevBayesCore::assume_cast<const ProbabilityContinuousDistribution&>( this->args[0].getVariable()->getRevObject() );
+    const ProbabilityContinuousDistribution& rlDistribution = objectFor<ProbabilityContinuousDistribution>(this->args[0].getVariable());
     RevBayesCore::ContinuousDistribution* g0 = RevBayesCore::assume_cast<RevBayesCore::ContinuousDistribution* >( rlDistribution.createDistribution() );
-    RevBayesCore::TypedDagNode<std::int64_t>* num_cats = RevBayesCore::assume_cast<const Natural &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<std::int64_t>* num_cats = dagNodeFor<Natural>(this->args[1].getVariable());
     
     RevBayesCore::DiscretizeDistributionFunction *func = new RevBayesCore::DiscretizeDistributionFunction( g0, num_cats );
     

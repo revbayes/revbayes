@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "Func_F3x4.h"
 #include "TypeUtilities.h"
 #include "CppCodonFuncs.h"
@@ -42,9 +43,9 @@ CSimplex* F3x4(const CSimplex& nuc_pi1, const CSimplex& nuc_pi2, const CSimplex&
 
 RevBayesCore::TypedFunction< CSimplex >* Func_F3x4::createFunction( void ) const
 {
-    RevBayesCore::TypedDagNode< CSimplex >* bf1 = RevBayesCore::assume_cast<const Simplex &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< CSimplex >* bf2 = RevBayesCore::assume_cast<const Simplex &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< CSimplex >* bf3 = RevBayesCore::assume_cast<const Simplex &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< CSimplex >* bf1 = dagNodeFor<Simplex>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode< CSimplex >* bf2 = dagNodeFor<Simplex>(this->args[1].getVariable());
+    RevBayesCore::TypedDagNode< CSimplex >* bf3 = dagNodeFor<Simplex>(this->args[2].getVariable());
 
     if ( bf1->getValue().size() != 4 )
     {

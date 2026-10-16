@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "Func_hyperbolicSine.h"
 #include "TypeUtilities.h"
 
@@ -37,7 +38,7 @@ Func_hyperbolicSine* Func_hyperbolicSine::clone( void ) const
 RevBayesCore::TypedFunction<double>* Func_hyperbolicSine::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<double>* x = RevBayesCore::assume_cast<const Real&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* x = dagNodeFor<Real>(this->args[0].getVariable());
     RevBayesCore::HyperbolicSineFunction* f = new RevBayesCore::HyperbolicSineFunction( x );
     
     return f;

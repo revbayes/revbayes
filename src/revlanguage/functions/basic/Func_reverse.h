@@ -1,6 +1,7 @@
 #ifndef Func_reverse_H
 #define Func_reverse_H
 
+#include "RevVariableUtilities.h"
 #include "ModelVector.h"
 #include "TypeUtilities.h"
 #include "RlTypedFunction.h"
@@ -75,7 +76,7 @@ RevLanguage::Func_reverse<valType>* RevLanguage::Func_reverse<valType>::clone( v
 template <typename valType>
 RevBayesCore::TypedFunction< RevBayesCore::RbVector< typename valType::valueType> >* RevLanguage::Func_reverse<valType>::createFunction( void ) const
 {
-    const RevBayesCore::TypedDagNode< RevBayesCore::RbVector< typename valType::valueType> >* v = RevBayesCore::assume_cast<const ModelVector<valType> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    const RevBayesCore::TypedDagNode< RevBayesCore::RbVector< typename valType::valueType> >* v = dagNodeFor<ModelVector<valType>>(this->args[0].getVariable());
     
     RevBayesCore::VectorReverse<typename valType::valueType>* func = new RevBayesCore::VectorReverse<typename valType::valueType>( v );
     

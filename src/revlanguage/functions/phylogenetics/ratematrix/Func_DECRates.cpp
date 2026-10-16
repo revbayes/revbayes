@@ -6,6 +6,7 @@
 //  Copyright (c) 2015 Michael Landis. All rights reserved.
 //
 
+#include "RevVariableUtilities.h"
 #include <vector>
 #include "TypeUtilities.h"
 #include <iosfwd>
@@ -64,9 +65,9 @@ Func_DECRates* Func_DECRates::clone( void ) const
 RevBayesCore::TypedFunction< RevBayesCore::RbVector<double> >* Func_DECRates::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* dr = RevBayesCore::assume_cast<const ModelVector<ModelVector<RealPos> > &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* er = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<std::int64_t>* rs = RevBayesCore::assume_cast<const Natural&>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* dr = dagNodeFor<ModelVector<ModelVector<RealPos> >>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* er = dagNodeFor<ModelVector<RealPos>>(this->args[1].getVariable());
+    RevBayesCore::TypedDagNode<std::int64_t>* rs = dagNodeFor<Natural>(this->args[2].getVariable());
     
     if (dr->getValue().size() != er->getValue().size())
     {

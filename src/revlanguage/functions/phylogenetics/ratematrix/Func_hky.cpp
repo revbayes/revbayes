@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "Func_hky.h"
 #include "TypeUtilities.h"
 
@@ -41,8 +42,8 @@ Func_hky* Func_hky::clone( void ) const
 RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_hky::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode< double >* ka = RevBayesCore::assume_cast<const RealPos &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* bf = RevBayesCore::assume_cast<const Simplex &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< double >* ka = dagNodeFor<RealPos>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* bf = dagNodeFor<Simplex>(this->args[1].getVariable());
     
     if ( bf->getValue().size() != 4 )
     {

@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "Func_X2RateMatrix.h"
 #include "TypeUtilities.h"
 #include "CppDoubletFuncs.h"
@@ -49,7 +50,7 @@ Func_X2RateMatrix* Func_X2RateMatrix::clone( void ) const
 
 RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_X2RateMatrix::createFunction( void ) const
 {
-    RevBayesCore::TypedDagNode< RevBayesCore::RateGenerator >* nuc_q = RevBayesCore::assume_cast<const RateGenerator &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::RateGenerator >* nuc_q = dagNodeFor<RateGenerator>(this->args[0].getVariable());
 
     return RevBayesCore::generic_function_ptr< RevBayesCore::RateGenerator >( X2Func, nuc_q );
 }

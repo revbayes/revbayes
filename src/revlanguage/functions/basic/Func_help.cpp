@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <fstream>
@@ -50,7 +51,7 @@ Func_help* Func_help::clone( void ) const
 /** Execute function */
 RevPtr<RevVariable> Func_help::execute( void )
 {
-    std::string help_token = RevBayesCore::assume_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
+    std::string help_token = valueFor<RlString>(args[0].getVariable());
     
     if (help_token == "") {
         std::string help_str = "";

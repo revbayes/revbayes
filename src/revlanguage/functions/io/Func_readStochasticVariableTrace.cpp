@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "Func_readStochasticVariableTrace.h"
 #include "TypeUtilities.h"
 
@@ -43,9 +44,9 @@ RevPtr<RevVariable> Func_readStochasticVariableTrace::execute( void )
 {
     
     // get the information from the arguments for reading the file
-    const std::string&     fn       = RevBayesCore::assume_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
+    const std::string&     fn       = valueFor<RlString>(args[0].getVariable());
     // get the column delimiter
-    const std::string& delimiter    = RevBayesCore::assume_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
+    const std::string& delimiter    = valueFor<RlString>(args[1].getVariable());
     
     RevObject& b = args[2].getVariable()->getRevObject();
     

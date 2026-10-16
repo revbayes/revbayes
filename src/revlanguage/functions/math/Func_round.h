@@ -1,6 +1,7 @@
 #ifndef Func_round_H
 #define Func_round_H
 
+#include "RevVariableUtilities.h"
 #include "RlTypedFunction.h"
 #include "TypeUtilities.h"
 
@@ -60,7 +61,7 @@ template <typename valType, typename retType>
 RevBayesCore::TypedFunction< typename retType::valueType >* RevLanguage::Func_round<valType, retType>::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<double>* arg = RevBayesCore::assume_cast<const valType &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* arg = dagNodeFor<valType>(this->args[0].getVariable());
     RevBayesCore::RoundFunction* f = new RevBayesCore::RoundFunction( arg );
     
     

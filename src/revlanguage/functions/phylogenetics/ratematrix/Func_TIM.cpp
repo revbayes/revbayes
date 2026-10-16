@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <iosfwd>
 #include "TypeUtilities.h"
 #include <string>
@@ -50,8 +51,8 @@ Func_TIM* Func_TIM::clone( void ) const
 RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_TIM::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<RevBayesCore::Simplex>* er = RevBayesCore::assume_cast<const Simplex &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::Simplex>* bf = RevBayesCore::assume_cast<const Simplex &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Simplex>* er = dagNodeFor<Simplex>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode<RevBayesCore::Simplex>* bf = dagNodeFor<Simplex>(this->args[1].getVariable());
     
     if ( bf->getValue().size() != 4 )
     {

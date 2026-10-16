@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <iosfwd>
 #include "TypeUtilities.h"
 #include <string>
@@ -50,9 +51,9 @@ Func_tmrca* Func_tmrca::clone( void ) const {
 RevBayesCore::TypedFunction<double>* Func_tmrca::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = RevBayesCore::assume_cast<const TimeTree&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    const RevBayesCore::Clade& c = RevBayesCore::assume_cast<const Clade &>( this->args[1].getVariable()->getRevObject() ).getValue();
-    bool stemAge = RevBayesCore::assume_cast<const RlBoolean &>( args[2].getVariable()->getRevObject() ).getValue();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = dagNodeFor<TimeTree>(this->args[0].getVariable());
+    const RevBayesCore::Clade& c = valueFor<Clade>(this->args[1].getVariable());
+    bool stemAge = valueFor<RlBoolean>(args[2].getVariable());
     RevBayesCore::TmrcaStatistic* f = new RevBayesCore::TmrcaStatistic( tau, c, stemAge );
     
     return f;

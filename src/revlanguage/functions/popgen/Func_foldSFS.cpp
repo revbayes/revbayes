@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "Func_foldSFS.h"
 #include "TypeUtilities.h"
 
@@ -42,7 +43,7 @@ Func_foldSFS* Func_foldSFS::clone( void ) const
 RevBayesCore::TypedFunction< RevBayesCore::RbVector<std::int64_t> >* Func_foldSFS::createFunction( void ) const
 {
     const RevBayesCore::TypedDagNode< RevBayesCore::RbVector<std::int64_t> >* sfs =
-        RevBayesCore::assume_cast<const ModelVector<Natural> &>( args[0].getVariable()->getRevObject() ).getDagNode();
+        dagNodeFor<ModelVector<Natural>>(args[0].getVariable());
     RevBayesCore::FoldSFSFunction* f = new RevBayesCore::FoldSFSFunction( sfs );
 
     return f;

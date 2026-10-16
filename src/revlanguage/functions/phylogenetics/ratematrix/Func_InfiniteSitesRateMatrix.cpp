@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "Func_InfiniteSitesRateMatrix.h"
 #include "TypeUtilities.h"
 
@@ -38,7 +39,7 @@ Func_InfiniteSitesRateMatrix* Func_InfiniteSitesRateMatrix::clone( void ) const
 RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_InfiniteSitesRateMatrix::createFunction( void ) const
 {
     
-    int ns = (int)RevBayesCore::assume_cast<const Natural &>( this->args[0].getVariable()->getRevObject() ).getValue();
+    int ns = (int)valueFor<Natural>(this->args[0].getVariable());
     RevBayesCore::InfiniteSitesRateMatrixFunction* f = new RevBayesCore::InfiniteSitesRateMatrixFunction( size_t(ns) );
     
     return f;

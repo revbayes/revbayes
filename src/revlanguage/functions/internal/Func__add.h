@@ -18,6 +18,7 @@
 #ifndef Func__add_H
 #define Func__add_H
 
+#include "RevVariableUtilities.h"
 #include "RlTypedFunction.h"
 #include "TypeUtilities.h"
 
@@ -80,8 +81,8 @@ RevLanguage::Func__add<firstValType, secondValType, retType>* RevLanguage::Func_
 template <typename firstValType, typename secondValType, typename retType>
 RevBayesCore::TypedFunction<typename retType::valueType>* RevLanguage::Func__add<firstValType, secondValType, retType>::createFunction( void ) const
 {
-    RevBayesCore::TypedDagNode<typename firstValType::valueType>* firstArg = RevBayesCore::assume_cast<const firstValType &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<typename secondValType::valueType>* secondArg = RevBayesCore::assume_cast<const secondValType &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<typename firstValType::valueType>* firstArg = dagNodeFor<firstValType>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode<typename secondValType::valueType>* secondArg = dagNodeFor<secondValType>(this->args[1].getVariable());
     RevBayesCore::BinaryAddition<typename firstValType::valueType, typename secondValType::valueType, typename retType::valueType> *func = new RevBayesCore::BinaryAddition<typename firstValType::valueType, typename secondValType::valueType, typename retType::valueType>(firstArg, secondArg);
     
     return func;

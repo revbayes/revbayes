@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <iosfwd>
 #include "TypeUtilities.h"
 #include <vector>
@@ -56,16 +57,16 @@ Func_CladeSpecificHierarchicalBranchRate* Func_CladeSpecificHierarchicalBranchRa
 
 RevBayesCore::TypedFunction<RevBayesCore::RbVector<double> >* Func_CladeSpecificHierarchicalBranchRate::createFunction( void ) const
 {
-    const RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = RevBayesCore::assume_cast<const TimeTree &>( args[0].getVariable()->getRevObject() ).getDagNode();
+    const RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = dagNodeFor<TimeTree>(args[0].getVariable());
     
 //    std::vector<RevBayesCore::Clade> &c = static_cast<const ModelVector<Clade> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
     
     
     std::vector<RevBayesCore::Clade> c;
-    c = RevBayesCore::assume_cast<const ModelVector<Clade> &>( this->args[1].getVariable()->getRevObject() ).getValue();
+    c = valueFor<ModelVector<Clade>>(this->args[1].getVariable());
     
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* br = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* cr = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( this->args[3].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* br = dagNodeFor<ModelVector<RealPos>>(this->args[2].getVariable());
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* cr = dagNodeFor<ModelVector<RealPos>>(this->args[3].getVariable());
     
     RevBayesCore::CladeSpecificHierarchicalBranchRateFunction* f = new RevBayesCore::CladeSpecificHierarchicalBranchRateFunction( tau, c, br, cr );
     

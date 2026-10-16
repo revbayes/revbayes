@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <string>
 #include "TypeUtilities.h"
 #include <iosfwd>
@@ -51,9 +52,9 @@ Func_MinBLTimeScaling* Func_MinBLTimeScaling::clone( void ) const
 /** Execute function */
 RevPtr<RevVariable> Func_MinBLTimeScaling::execute( void )
 {
-    RevBayesCore::Tree* treeToScale              = RevBayesCore::assume_cast<const Tree&>( this->args[0].getVariable()->getRevObject() ).getValue().clone();
-    std::vector<RevBayesCore::Taxon> taxonVector = RevBayesCore::assume_cast<const ModelVector<Taxon> &>( this->args[1].getVariable()->getRevObject() ).getValue();
-    double minBranchLength                       = RevBayesCore::assume_cast<const RealPos&>( this->args[2].getVariable()->getRevObject() ).getValue();
+    RevBayesCore::Tree* treeToScale              = valueFor<Tree>(this->args[0].getVariable()).clone();
+    std::vector<RevBayesCore::Taxon> taxonVector = valueFor<ModelVector<Taxon>>(this->args[1].getVariable());
+    double minBranchLength                       = valueFor<RealPos>(this->args[2].getVariable());
     
     RevBayesCore::Tree *my_tree = RevBayesCore::TreeUtilities::minBLTimeScaling( *treeToScale, taxonVector, minBranchLength );
     

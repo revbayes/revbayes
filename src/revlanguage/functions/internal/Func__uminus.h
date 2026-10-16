@@ -17,6 +17,7 @@
 #ifndef Func_uminus_H
 #define Func_uminus_H
 
+#include "RevVariableUtilities.h"
 #include "TypedFunction.h"
 #include "TypeUtilities.h"
 
@@ -75,7 +76,7 @@ template <typename firstValType, typename retType>
 RevBayesCore::TypedFunction<typename retType::valueType>* RevLanguage::Func__uminus<firstValType, retType>::createFunction(void) const
 {
     
-    RevBayesCore::TypedDagNode<typename firstValType::valueType>* firstArg = RevBayesCore::assume_cast<const firstValType &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<typename firstValType::valueType>* firstArg = dagNodeFor<firstValType>(this->args[0].getVariable());
     RevBayesCore::UnaryMinus<typename firstValType::valueType> *func = new RevBayesCore::UnaryMinus<typename firstValType::valueType>(firstArg);
 
     return func;

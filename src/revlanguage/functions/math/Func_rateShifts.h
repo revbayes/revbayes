@@ -1,6 +1,7 @@
 #ifndef Func_shiftEvents_H
 #define Func_shiftEvents_H
 
+#include "RevVariableUtilities.h"
 #include "RlOrderedEvents.h"
 #include "TypeUtilities.h"
 #include "RlTypedFunction.h"
@@ -48,8 +49,8 @@ Func_shiftEvents<valType>* RevLanguage::Func_shiftEvents<valType>::clone( void )
 template<typename valType>
 RevBayesCore::TypedFunction< RevBayesCore::OrderedEvents<typename valType::valueType> >* RevLanguage::Func_shiftEvents<valType>::createFunction( void ) const
 {
-    const RevBayesCore::TypedDagNode<typename valType::valueType>*                              init   = RevBayesCore::assume_cast<const valType &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-	const RevBayesCore::TypedDagNode<RevBayesCore::OrderedEvents<typename valType::valueType>>* shifts = RevBayesCore::assume_cast<const RlOrderedEvents<valType> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    const RevBayesCore::TypedDagNode<typename valType::valueType>*                              init   = dagNodeFor<valType>(this->args[0].getVariable());
+	const RevBayesCore::TypedDagNode<RevBayesCore::OrderedEvents<typename valType::valueType>>* shifts = dagNodeFor<RlOrderedEvents<valType>>(this->args[1].getVariable());
 
     RevBayesCore::ShiftEventsFunction<typename valType::valueType> *func = new RevBayesCore::ShiftEventsFunction<typename valType::valueType>( init, shifts );
 

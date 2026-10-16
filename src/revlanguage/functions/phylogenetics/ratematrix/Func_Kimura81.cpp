@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "Func_Kimura81.h"
 #include "TypeUtilities.h"
 
@@ -42,9 +43,9 @@ Func_Kimura81* Func_Kimura81::clone( void ) const
 RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_Kimura81::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode< double >* k1 = RevBayesCore::assume_cast<const RealPos &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< double >* k2 = RevBayesCore::assume_cast<const RealPos &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* bf = RevBayesCore::assume_cast<const Simplex &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< double >* k1 = dagNodeFor<RealPos>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode< double >* k2 = dagNodeFor<RealPos>(this->args[1].getVariable());
+    RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* bf = dagNodeFor<Simplex>(this->args[2].getVariable());
     
     RevBayesCore::Kimura81RateMatrixFunction* f = new RevBayesCore::Kimura81RateMatrixFunction( k1, k2, bf );
     

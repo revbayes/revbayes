@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <iosfwd>
 #include "TypeUtilities.h"
 #include <string>
@@ -48,7 +49,7 @@ Func_abs* Func_abs::clone( void ) const
 RevBayesCore::TypedFunction<double>* Func_abs::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<double>* arg = RevBayesCore::assume_cast<const Real &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* arg = dagNodeFor<Real>(this->args[0].getVariable());
     RevBayesCore::AbsoluteValueFunction* f = new RevBayesCore::AbsoluteValueFunction( arg );
     
     return f;

@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "Func_profile.h"
 #include "TypeUtilities.h"
 
@@ -35,8 +36,8 @@ Func_profile* Func_profile::clone( void ) const
 RevPtr<RevVariable> Func_profile::execute( void )
 {
 
-    const std::string &command = RevBayesCore::assume_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
-    const std::string &event = RevBayesCore::assume_cast<const RlString &>( args[1].getVariable()->getRevObject() ).getValue();
+    const std::string &command = valueFor<RlString>(args[0].getVariable());
+    const std::string &event = valueFor<RlString>(args[1].getVariable());
 
     double duration = 0.;
     if ( command == "start" )

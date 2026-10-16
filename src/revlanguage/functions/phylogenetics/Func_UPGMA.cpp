@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "Argument.h"
 #include "TypeUtilities.h"
 #include "ArgumentRule.h"
@@ -36,7 +37,7 @@ Func_UPGMA* Func_UPGMA::clone( void ) const
 /** Execute function */
 RevPtr<RevVariable> Func_UPGMA::execute( void )
 {
-    const AbstractHomologousDiscreteCharacterData& char_data = RevBayesCore::assume_cast<const AbstractHomologousDiscreteCharacterData &>( args[0].getVariable()->getRevObject() );
+    const AbstractHomologousDiscreteCharacterData& char_data = objectFor<AbstractHomologousDiscreteCharacterData>(args[0].getVariable());
     
     bool exclude_ambiguous = false;
     RevBayesCore::DistanceMatrix dist_matrix = char_data.getValue().getPairwiseSequenceDifference( exclude_ambiguous );

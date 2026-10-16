@@ -1,6 +1,7 @@
 #ifndef Func_minMatrix_H
 #define Func_minMatrix_H
 
+#include "RevVariableUtilities.h"
 #include "RlTypedFunction.h"
 #include "TypeUtilities.h"
 #include "Real.h"
@@ -102,7 +103,7 @@ Func_minMatrix* Func_minMatrix::clone( void ) const
 RevBayesCore::TypedFunction<double>* Func_minMatrix::createFunction( void ) const
 {
     const RevBayesCore::TypedDagNode< RevBayesCore::MatrixReal >* arg_matrix =
-        RevBayesCore::assume_cast< const MatrixReal& >( this->args[0].getVariable()->getRevObject() ).getDagNode();
+        dagNodeFor<MatrixReal>(this->args[0].getVariable());
     
     return RevBayesCore::generic_function_ptr<double>(RevBayesCore::min_matrix, arg_matrix);
 }

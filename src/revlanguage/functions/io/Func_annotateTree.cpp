@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <sstream>
@@ -50,7 +51,7 @@ RevPtr<RevVariable> Func_annotateTree::execute( void )
     size_t arg_index = 0;
     
     // get the input tree
-    RevBayesCore::Tree* tree = RevBayesCore::assume_cast<const Tree&>( this->args[arg_index++].getVariable()->getRevObject() ).getValue().clone();
+    RevBayesCore::Tree* tree = valueFor<Tree>(this->args[arg_index++].getVariable()).clone();
     
     // get the  tree trace(s)
     RevBayesCore::TreeSummary* summary = NULL;
@@ -74,18 +75,18 @@ RevPtr<RevVariable> Func_annotateTree::execute( void )
     }
     
     // get the filename
-    const std::string& filename = RevBayesCore::assume_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+    const std::string& filename = valueFor<RlString>(args[arg_index++].getVariable());
     
 
     RevBayesCore::TraceTree::AnnotationReport report;
 
-    report.node_ages               = RevBayesCore::assume_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
-    report.conditional_clade_ages  = RevBayesCore::assume_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
-    report.conditional_clade_probs = RevBayesCore::assume_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
-    report.conditional_tree_ages   = RevBayesCore::assume_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
-    report.node_ages_HPD           = RevBayesCore::assume_cast<const Probability &>(args[arg_index++].getVariable()->getRevObject()).getValue();
-    report.mean_node_ages          = RevBayesCore::assume_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
-    report.sampled_ancestor_probs  = RevBayesCore::assume_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
+    report.node_ages               = valueFor<RlBoolean>(this->args[arg_index++].getVariable());
+    report.conditional_clade_ages  = valueFor<RlBoolean>(this->args[arg_index++].getVariable());
+    report.conditional_clade_probs = valueFor<RlBoolean>(this->args[arg_index++].getVariable());
+    report.conditional_tree_ages   = valueFor<RlBoolean>(this->args[arg_index++].getVariable());
+    report.node_ages_HPD           = valueFor<Probability>(args[arg_index++].getVariable());
+    report.mean_node_ages          = valueFor<RlBoolean>(this->args[arg_index++].getVariable());
+    report.sampled_ancestor_probs  = valueFor<RlBoolean>(this->args[arg_index++].getVariable());
     
     // do not make a new tree summary object
     // this way we don't need to resummarize every time we annotate a tree

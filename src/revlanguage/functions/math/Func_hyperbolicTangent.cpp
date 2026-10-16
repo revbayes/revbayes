@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <iosfwd>
 #include "TypeUtilities.h"
 #include <string>
@@ -46,7 +47,7 @@ Func_hyperbolicTangent* Func_hyperbolicTangent::clone( void ) const
 RevBayesCore::TypedFunction<double>* Func_hyperbolicTangent::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<double>* x = RevBayesCore::assume_cast<const Real&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* x = dagNodeFor<Real>(this->args[0].getVariable());
     RevBayesCore::HyperbolicTangentFunction* f = new RevBayesCore::HyperbolicTangentFunction( x );
     
     return f;

@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "Func_readDelimitedCharacterData.h"
 #include "TypeUtilities.h"
 
@@ -79,11 +80,11 @@ RevPtr<RevVariable> Func_readDelimitedCharacterData::execute()
 {
     
     // get the information from the arguments for reading the file
-    const std::string&  fn      = RevBayesCore::assume_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
-    const std::string&  dt      = RevBayesCore::assume_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
-    const std::string&  lab     = RevBayesCore::assume_cast<const RlString&>( args[2].getVariable()->getRevObject() ).getValue();
-    const std::string&  del     = RevBayesCore::assume_cast<const RlString&>( args[3].getVariable()->getRevObject() ).getValue();
-    bool                header  = RevBayesCore::assume_cast<const RlBoolean&>( args[4].getVariable()->getRevObject() ).getValue();
+    const std::string&  fn      = valueFor<RlString>(args[0].getVariable());
+    const std::string&  dt      = valueFor<RlString>(args[1].getVariable());
+    const std::string&  lab     = valueFor<RlString>(args[2].getVariable());
+    const std::string&  del     = valueFor<RlString>(args[3].getVariable());
+    bool                header  = valueFor<RlBoolean>(args[4].getVariable());
     size_t lines_to_skip = ( header == true ? 1 : 0 );
    
     if (lab == std::string(""))

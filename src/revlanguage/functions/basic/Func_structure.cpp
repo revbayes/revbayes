@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -49,7 +50,7 @@ RevPtr<RevVariable> Func_structure::execute( void )
     
     std::ostringstream o;
     
-    bool verbose = RevBayesCore::assume_cast< const RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
+    bool verbose = valueFor<RlBoolean>(args[1].getVariable());
 
     // get a reference to the variable from which we want to know the struct
     RevPtr<RevVariable> &the_var = args[0].getVariable();

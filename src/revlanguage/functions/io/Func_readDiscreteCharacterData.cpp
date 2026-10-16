@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <set>
@@ -75,8 +76,8 @@ RevPtr<RevVariable> Func_readDiscreteCharacterData::execute( void )
 {
     
     // get the information from the arguments for reading the file
-    RevBayesCore::path fn = RevBayesCore::assume_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
-    bool return_as_vector = RevBayesCore::assume_cast<const RlBoolean&>( args[1].getVariable()->getRevObject() ).getValue();
+    RevBayesCore::path fn = valueFor<RlString>(args[0].getVariable());
+    bool return_as_vector = valueFor<RlBoolean>(args[1].getVariable());
     
     // check that the file/path name has been correctly specified
     if ( not RevBayesCore::exists( fn ))

@@ -1,6 +1,7 @@
 #ifndef Func_replicateEvents_H
 #define Func_replicateEvents_H
 
+#include "RevVariableUtilities.h"
 #include "RlOrderedEvents.h"
 #include "TypeUtilities.h"
 #include "RlTypedFunction.h"
@@ -75,8 +76,8 @@ RevLanguage::Func_replicateEvents<valType>* RevLanguage::Func_replicateEvents<va
 template <typename valType>
 RevBayesCore::TypedFunction< RevBayesCore::OrderedEvents<RevBayesCore::RbVector<typename valType::valueType > > >* RevLanguage::Func_replicateEvents<valType>::createFunction( void ) const
 {
-	const RevBayesCore::TypedDagNode<RevBayesCore::OrderedEvents<typename valType::valueType>>* v   = RevBayesCore::assume_cast<const RlOrderedEvents<valType> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    int n   = (int)RevBayesCore::assume_cast<const Natural &>( this->args[1].getVariable()->getRevObject() ).getValue();
+	const RevBayesCore::TypedDagNode<RevBayesCore::OrderedEvents<typename valType::valueType>>* v   = dagNodeFor<RlOrderedEvents<valType>>(this->args[0].getVariable());
+    int n   = (int)valueFor<Natural>(this->args[1].getVariable());
 
     RevBayesCore::ReplicateEventsFunction<typename valType::valueType>* func = new RevBayesCore::ReplicateEventsFunction<typename valType::valueType>( v, n );
 

@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <iosfwd>
 #include "TypeUtilities.h"
 #include <string>
@@ -50,7 +51,7 @@ Func_mean* Func_mean::clone( void ) const
 RevBayesCore::TypedFunction<double>* Func_mean::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* arg = RevBayesCore::assume_cast<const ModelVector<Real> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* arg = dagNodeFor<ModelVector<Real>>(this->args[0].getVariable());
     RevBayesCore::MeanFunction* f = new RevBayesCore::MeanFunction( arg );
     
     return f;

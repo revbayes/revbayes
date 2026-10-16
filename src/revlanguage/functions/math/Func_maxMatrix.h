@@ -1,6 +1,7 @@
 #ifndef Func_maxMatrix_H
 #define Func_maxMatrix_H
 
+#include "RevVariableUtilities.h"
 #include "RlTypedFunction.h"
 #include "TypeUtilities.h"
 #include "Real.h"
@@ -102,7 +103,7 @@ Func_maxMatrix* Func_maxMatrix::clone( void ) const
 RevBayesCore::TypedFunction<double>* Func_maxMatrix::createFunction( void ) const
 {
     const RevBayesCore::TypedDagNode< RevBayesCore::MatrixReal >* arg_matrix =
-        RevBayesCore::assume_cast< const MatrixReal& >( this->args[0].getVariable()->getRevObject() ).getDagNode();
+        dagNodeFor<MatrixReal>(this->args[0].getVariable());
     
     return RevBayesCore::generic_function_ptr<double>(RevBayesCore::max_matrix, arg_matrix);
 }

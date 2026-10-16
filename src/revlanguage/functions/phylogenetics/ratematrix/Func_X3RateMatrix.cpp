@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "Func_X3RateMatrix.h"
 #include "TypeUtilities.h"
 #include "CppCodonFuncs.h"
@@ -49,7 +50,7 @@ Func_X3RateMatrix* Func_X3RateMatrix::clone( void ) const
 
 RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_X3RateMatrix::createFunction( void ) const
 {
-    RevBayesCore::TypedDagNode< RevBayesCore::RateGenerator >* nuc_q = RevBayesCore::assume_cast<const RateGenerator &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::RateGenerator >* nuc_q = dagNodeFor<RateGenerator>(this->args[0].getVariable());
 
     return RevBayesCore::generic_function_ptr< RevBayesCore::RateGenerator >( X3Func, nuc_q );
 }

@@ -6,6 +6,7 @@
 //  Copyright © 2016 Michael Landis. All rights reserved.
 //
 
+#include "RevVariableUtilities.h"
 #include "Func_formatDiscreteCharacterData.h"
 #include "TypeUtilities.h"
 
@@ -60,9 +61,9 @@ RevPtr<RevVariable> Func_formatDiscreteCharacterData::execute( void )
 {
     
     // get the information from the arguments for reading the file
-    const RevBayesCore::AbstractHomologousDiscreteCharacterData &data = RevBayesCore::assume_cast< const AbstractHomologousDiscreteCharacterData & >( args[0].getVariable()->getRevObject() ).getValue();
-    std::string format = RevBayesCore::assume_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
-    size_t num_states = RevBayesCore::assume_cast<const Natural&>( args[2].getVariable()->getRevObject() ).getValue();
+    const RevBayesCore::AbstractHomologousDiscreteCharacterData &data = valueFor<AbstractHomologousDiscreteCharacterData>(args[0].getVariable());
+    std::string format = valueFor<RlString>(args[1].getVariable());
+    size_t num_states = valueFor<Natural>(args[2].getVariable());
     
     if (format == "DEC" || format == "GeoSSE") {
         

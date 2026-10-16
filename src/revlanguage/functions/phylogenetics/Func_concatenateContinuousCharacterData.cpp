@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <iosfwd>
@@ -42,15 +43,15 @@ Func_concatenateContinuousCharacterData* Func_concatenateContinuousCharacterData
 /** Execute function */
 RevPtr<RevVariable> Func_concatenateContinuousCharacterData::execute( void )
 {
-    const ContinuousCharacterData& a = RevBayesCore::assume_cast<const ContinuousCharacterData &>( args[0].getVariable()->getRevObject() );
-    const ContinuousCharacterData& b = RevBayesCore::assume_cast<const ContinuousCharacterData &>( args[1].getVariable()->getRevObject() );
-    const std::string& type = RevBayesCore::assume_cast<const RlString &>( args[2].getVariable()->getRevObject() ).getValue();
+    const ContinuousCharacterData& a = objectFor<ContinuousCharacterData>(args[0].getVariable());
+    const ContinuousCharacterData& b = objectFor<ContinuousCharacterData>(args[1].getVariable());
+    const std::string& type = valueFor<RlString>(args[2].getVariable());
     
     ContinuousCharacterData *d = a.clone();
     d->concatenate( b, type );
     for (size_t i = 3; i < args.size(); ++i)
     {
-        const ContinuousCharacterData& c = RevBayesCore::assume_cast<const ContinuousCharacterData &>( args[i].getVariable()->getRevObject() );
+        const ContinuousCharacterData& c = objectFor<ContinuousCharacterData>(args[i].getVariable());
         d->concatenate( c, type );
     }
     

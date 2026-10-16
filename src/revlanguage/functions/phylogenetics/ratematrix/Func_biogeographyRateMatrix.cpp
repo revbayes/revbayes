@@ -7,6 +7,7 @@
 //
 
 
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <iosfwd>
@@ -73,11 +74,11 @@ RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_biogeographyRat
     
     // dispersal rates
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* dr;
-    dr = RevBayesCore::assume_cast<const ModelVector<ModelVector<RealPos> > &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    dr = dagNodeFor<ModelVector<ModelVector<RealPos> >>(this->args[0].getVariable());
     
     // extirpation rates
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* er;
-    er = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    er = dagNodeFor<ModelVector<RealPos>>(this->args[1].getVariable());
     
     size_t num_statesEr = er->getValue().size();
     std::vector<size_t> num_statesDr;
@@ -103,7 +104,7 @@ RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_biogeographyRat
     }
 
     // maximum range size
-    size_t mrs = RevBayesCore::assume_cast<const Natural&>(this->args[2].getVariable()->getRevObject() ).getValue();
+    size_t mrs = valueFor<Natural>(this->args[2].getVariable());
     
     if (mrs < 1 || mrs > er->getValue().size())
     {

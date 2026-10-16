@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "HomologousDiscreteCharacterData.h"
 #include "TypeUtilities.h"
 #include "ArgumentRule.h"
@@ -41,12 +42,12 @@ RevPtr<RevVariable> Func_readVCF::execute( void )
     size_t arg_index = 0;
     
     // get the information from the arguments for reading the file
-    const RlString& fn = RevBayesCore::assume_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() );
+    const RlString& fn = objectFor<RlString>(args[arg_index++].getVariable());
 //    RevBayesCore::TypedDagNode<std::int64_t>* virtualPopulationSize = static_cast<const Integer &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
 //    RevBayesCore::TypedDagNode<std::int64_t>* n_states = static_cast<const Integer &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
     
     
-    const std::string type = RevBayesCore::assume_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+    const std::string type = valueFor<RlString>(args[arg_index++].getVariable());
 
     RevBayesCore::VCFReader vcf_reader = RevBayesCore::VCFReader( fn.getValue() );
     

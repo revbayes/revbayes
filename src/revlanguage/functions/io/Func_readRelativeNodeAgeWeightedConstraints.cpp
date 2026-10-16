@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "Func_readRelativeNodeAgeWeightedConstraints.h"
 #include "TypeUtilities.h"
 
@@ -34,9 +35,9 @@ RevPtr<RevVariable> Func_readRelativeNodeAgeWeightedConstraints::execute( void )
 {
     
     // get the information from the arguments for reading the file
-    std::string fn = RevBayesCore::assume_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
-    std::string sep = RevBayesCore::assume_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
-    double th = RevBayesCore::assume_cast<const Real&>( args[2].getVariable()->getRevObject() ).getValue();
+    std::string fn = valueFor<RlString>(args[0].getVariable());
+    std::string sep = valueFor<RlString>(args[1].getVariable());
+    double th = valueFor<Real>(args[2].getVariable());
 
     RevBayesCore::RelativeNodeAgeWeightedConstraintsReader* dmr = new RevBayesCore::RelativeNodeAgeWeightedConstraintsReader( fn, sep, 0, th );
     RevBayesCore::RelativeNodeAgeWeightedConstraints* dm = new RevBayesCore::RelativeNodeAgeWeightedConstraints(dmr);

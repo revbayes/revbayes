@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <iosfwd>
 #include "TypeUtilities.h"
 #include <vector>
@@ -59,10 +60,10 @@ Func_PhylogeneticIndependentContrasts* Func_PhylogeneticIndependentContrasts::cl
 
 RevBayesCore::TypedFunction<RevBayesCore::RbVector<double> >* Func_PhylogeneticIndependentContrasts::createFunction( void ) const
 {
-    const RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = RevBayesCore::assume_cast<const TimeTree &>( args[0].getVariable()->getRevObject() ).getDagNode();
-    const RevBayesCore::TypedDagNode<RevBayesCore::ContinuousCharacterData>* data = RevBayesCore::assume_cast<const ContinuousCharacterData &>( args[1].getVariable()->getRevObject() ).getDagNode();
-    const RevBayesCore::TypedDagNode<std::int64_t>* site = RevBayesCore::assume_cast<const Natural &>( args[2].getVariable()->getRevObject() ).getDagNode();
-    const bool& normalized = RevBayesCore::assume_cast<const RlBoolean &>( args[3].getVariable()->getRevObject() ).getValue();
+    const RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = dagNodeFor<TimeTree>(args[0].getVariable());
+    const RevBayesCore::TypedDagNode<RevBayesCore::ContinuousCharacterData>* data = dagNodeFor<ContinuousCharacterData>(args[1].getVariable());
+    const RevBayesCore::TypedDagNode<std::int64_t>* site = dagNodeFor<Natural>(args[2].getVariable());
+    const bool& normalized = valueFor<RlBoolean>(args[3].getVariable());
     
     RevBayesCore::PhylogeneticIndependentContrastsFunction* f = new RevBayesCore::PhylogeneticIndependentContrastsFunction( tau, data, site, normalized );
     

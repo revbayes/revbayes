@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <iosfwd>
@@ -43,15 +44,15 @@ Func_concatenate* Func_concatenate::clone( void ) const
 /** Execute function */
 RevPtr<RevVariable> Func_concatenate::execute( void )
 {
-    const AbstractHomologousDiscreteCharacterData& a = RevBayesCore::assume_cast<const AbstractHomologousDiscreteCharacterData &>( args[0].getVariable()->getRevObject() );
-    const AbstractHomologousDiscreteCharacterData& b = RevBayesCore::assume_cast<const AbstractHomologousDiscreteCharacterData &>( args[1].getVariable()->getRevObject() );
-    const std::string& type = RevBayesCore::assume_cast<const RlString &>( args[2].getVariable()->getRevObject() ).getValue();
+    const AbstractHomologousDiscreteCharacterData& a = objectFor<AbstractHomologousDiscreteCharacterData>(args[0].getVariable());
+    const AbstractHomologousDiscreteCharacterData& b = objectFor<AbstractHomologousDiscreteCharacterData>(args[1].getVariable());
+    const std::string& type = valueFor<RlString>(args[2].getVariable());
 
     AbstractHomologousDiscreteCharacterData *d = a.clone();
     d->concatenate( b, type );
     for (size_t i = 3; i < args.size(); ++i)
     {
-        const AbstractHomologousDiscreteCharacterData& c = RevBayesCore::assume_cast<const AbstractHomologousDiscreteCharacterData &>( args[i].getVariable()->getRevObject() );
+        const AbstractHomologousDiscreteCharacterData& c = objectFor<AbstractHomologousDiscreteCharacterData>(args[i].getVariable());
         d->concatenate( c, type );
     }
     

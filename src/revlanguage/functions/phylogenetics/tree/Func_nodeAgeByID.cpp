@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <iosfwd>
@@ -50,9 +51,9 @@ Func_nodeAgeByID* Func_nodeAgeByID::clone( void ) const {
 RevBayesCore::TypedFunction<double>* Func_nodeAgeByID::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = RevBayesCore::assume_cast<const TimeTree&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    const size_t nid = RevBayesCore::assume_cast<const Natural &>( args[1].getVariable()->getRevObject() ).getValue() - 1; // this matches the indexing for the core function
-    bool stemAge = RevBayesCore::assume_cast<const RlBoolean &>( args[2].getVariable()->getRevObject() ).getValue();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = dagNodeFor<TimeTree>(this->args[0].getVariable());
+    const size_t nid = valueFor<Natural>(args[1].getVariable()) - 1; // this matches the indexing for the core function
+    bool stemAge = valueFor<RlBoolean>(args[2].getVariable());
     RevBayesCore::NodeAgeByID* f = new RevBayesCore::NodeAgeByID( tau, nid, stemAge );
     
     return f;

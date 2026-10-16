@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <sstream>
 #include "TypeUtilities.h"
 #include <string>
@@ -35,7 +36,7 @@ RevPtr<RevVariable> Proc_StringToInt::execute( void )
 {
     
     // get the information from the arguments for reading the file
-    const std::string& string_val   = RevBayesCore::assume_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
+    const std::string& string_val   = valueFor<RlString>(args[0].getVariable());
     
     if ( StringUtilities::isIntegerNumber( string_val ) == false )
     {

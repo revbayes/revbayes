@@ -6,6 +6,7 @@
 //  Copyright 2012 __MyCompanyName__. All rights reserved.
 //
 
+#include "RevVariableUtilities.h"
 #include "Func_seed.h"
 #include "TypeUtilities.h"
 
@@ -43,7 +44,7 @@ RevPtr<RevVariable> Func_seed::execute( void )
 {
     
     unsigned int s;
-    const Natural &val1 = RevBayesCore::assume_cast<const Natural &>( args[0].getVariable()->getRevObject() );
+    const Natural &val1 = objectFor<Natural>(args[0].getVariable());
     s = (unsigned int) val1.getValue();
     
     RevBayesCore::RandomNumberGenerator *rng = RevBayesCore::GLOBAL_RNG;

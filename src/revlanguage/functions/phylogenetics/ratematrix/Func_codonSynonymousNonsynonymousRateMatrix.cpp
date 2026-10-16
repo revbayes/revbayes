@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "Func_codonSynonymousNonsynonymousRateMatrix.h"
 #include "TypeUtilities.h"
 
@@ -41,8 +42,8 @@ Func_codonSynonymousNonsynonymousRateMatrix* Func_codonSynonymousNonsynonymousRa
 RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_codonSynonymousNonsynonymousRateMatrix::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode< double >* om = RevBayesCore::assume_cast<const RealPos &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* bf = RevBayesCore::assume_cast<const Simplex &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< double >* om = dagNodeFor<RealPos>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* bf = dagNodeFor<Simplex>(this->args[1].getVariable());
     
     if ( bf->getValue().size() != 61 )
     {

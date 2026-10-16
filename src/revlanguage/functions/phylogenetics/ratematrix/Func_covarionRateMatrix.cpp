@@ -6,6 +6,7 @@
 //  Copyright © 2017 Michael Landis. All rights reserved.
 //
 
+#include "RevVariableUtilities.h"
 #include "Func_covarionRateMatrix.h"
 #include "TypeUtilities.h"
 
@@ -60,10 +61,10 @@ RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_covarionRateMat
     //    argumentRules.push_back( new ArgumentRule( "switch_rates"         , RateMatrix::getClassTypeSpec(), "The class-switching rate matrix", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
     //    argumentRules.push_back( new ArgumentRule( "clock_rates"          , ModelVector<RealPos>::getClassTypeSpec(), "The rate multipliers per class", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
     
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = RevBayesCore::assume_cast<const ModelVector<RateGenerator> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* sr = RevBayesCore::assume_cast<const RateMatrix&>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* cr = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
-    bool rescale = RevBayesCore::assume_cast<const RlBoolean &>( this->args[3].getVariable()->getRevObject() ).getDagNode()->getValue();
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = dagNodeFor<ModelVector<RateGenerator>>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* sr = dagNodeFor<RateMatrix>(this->args[1].getVariable());
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* cr = dagNodeFor<ModelVector<RealPos>>(this->args[2].getVariable());
+    bool rescale = dagNodeFor<RlBoolean>(this->args[3].getVariable())->getValue();
     
     
     RevBayesCore::AbstractRateMatrix* asr = dynamic_cast<RevBayesCore::AbstractRateMatrix*>( &sr->getValue() );

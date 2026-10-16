@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "Func_phyloDiversity.h"
 #include "TypeUtilities.h"
 
@@ -49,14 +50,14 @@ Func_phyloDiversity* Func_phyloDiversity::clone( void ) const
 RevBayesCore::TypedFunction<double>* Func_phyloDiversity::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = RevBayesCore::assume_cast<const Tree &>(             this->args[0].getVariable()->getRevObject() ).getDagNode();
-    const RevBayesCore::Clade& sample                             = RevBayesCore::assume_cast<const Clade &>(                this->args[1].getVariable()->getRevObject() ).getValue();
-    bool includeRoot                                              = RevBayesCore::assume_cast<const RlBoolean &>(            this->args[2].getVariable()->getRevObject() ).getValue();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = dagNodeFor<Tree>(this->args[0].getVariable());
+    const RevBayesCore::Clade& sample                             = valueFor<Clade>(this->args[1].getVariable());
+    bool includeRoot                                              = valueFor<RlBoolean>(this->args[2].getVariable());
     
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* w = NULL;
     if ( this->args[3].getVariable() != NULL && this->args[3].getVariable()->getRevObject() != RevNullObject::getInstance() )
     {
-        w = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( this->args[3].getVariable()->getRevObject() ).getDagNode();
+        w = dagNodeFor<ModelVector<RealPos>>(this->args[3].getVariable());
     }
     
     RevBayesCore::PhyloDiversityFunction* f = new RevBayesCore::PhyloDiversityFunction( tau, sample, includeRoot, w );

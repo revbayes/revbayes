@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "Func_powerVector.h"
 #include "TypeUtilities.h"
 
@@ -37,8 +38,8 @@ Func_powerVector* Func_powerVector::clone( void ) const {
 RevBayesCore::TypedFunction< RevBayesCore::RbVector< double > >* Func_powerVector::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* b = RevBayesCore::assume_cast<const ModelVector<Real> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* e = RevBayesCore::assume_cast<const Real &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* b = dagNodeFor<ModelVector<Real>>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode<double>* e = dagNodeFor<Real>(this->args[1].getVariable());
     RevBayesCore::PowerVectorFunction* f = new RevBayesCore::PowerVectorFunction( b, e );
     
     return f;

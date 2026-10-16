@@ -6,6 +6,7 @@
 //  Copyright (c) 2015 Michael Landis. All rights reserved.
 //
 
+#include "RevVariableUtilities.h"
 #include "Func_DECCladoProbs.h"
 #include "TypeUtilities.h"
 
@@ -68,8 +69,8 @@ RevBayesCore::TypedFunction< RevBayesCore::CladogeneticProbabilityMatrix >* Func
 {
     
     // supplied arguments
-    RevBayesCore::TypedDagNode<RevBayesCore::Simplex>* ep = RevBayesCore::assume_cast<const Simplex &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    unsigned nc = (unsigned)RevBayesCore::assume_cast<const Natural &>( this->args[1].getVariable()->getRevObject() ).getValue();
+    RevBayesCore::TypedDagNode<RevBayesCore::Simplex>* ep = dagNodeFor<Simplex>(this->args[0].getVariable());
+    unsigned nc = (unsigned)valueFor<Natural>(this->args[1].getVariable());
     unsigned max_num_areas = RevBayesCore::DECCladogeneticStateFunction::MAX_NUM_AREAS;
     if (nc > max_num_areas) {
         std::stringstream ss;
@@ -77,12 +78,12 @@ RevBayesCore::TypedFunction< RevBayesCore::CladogeneticProbabilityMatrix >* Func
         throw RbException(ss.str());
     }
     
-    unsigned mrs = (unsigned)RevBayesCore::assume_cast<const Natural &>( this->args[2].getVariable()->getRevObject() ).getValue();
+    unsigned mrs = (unsigned)valueFor<Natural>(this->args[2].getVariable());
     if (mrs <= 1) mrs = nc;
-    std::string pt = RevBayesCore::assume_cast<const RlString &> ( this->args[3].getVariable()->getRevObject() ).getValue();
+    std::string pt = valueFor<RlString>(this->args[3].getVariable());
     bool ept = (pt == "pattern");
-    bool wa = RevBayesCore::assume_cast<const RlBoolean &>( this->args[4].getVariable()->getRevObject() ).getValue();
-    ModelVector<RlString> et_tmp = RevBayesCore::assume_cast<const ModelVector<RlString>& >(this->args[5].getVariable()->getRevObject()).getValue();
+    bool wa = valueFor<RlBoolean>(this->args[4].getVariable());
+    ModelVector<RlString> et_tmp = valueFor<ModelVector<RlString>>(this->args[5].getVariable());
     
     // default arguments
     unsigned ns = 2;
@@ -118,7 +119,7 @@ RevBayesCore::TypedFunction< RevBayesCore::CladogeneticProbabilityMatrix >* Func
     }
     
     // connectivity matrix (possible ranges)
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* cg = RevBayesCore::assume_cast<const ModelVector<ModelVector<RealPos> > &>( this->args[6].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* cg = dagNodeFor<ModelVector<ModelVector<RealPos> >>(this->args[6].getVariable());
     if (cg->getValue().size() > 0 && cg->getValue().size() != nc) {
         throw RbException("Size of connectivity graph does not match number of characters.");
     }
@@ -131,7 +132,7 @@ RevBayesCore::TypedFunction< RevBayesCore::CladogeneticProbabilityMatrix >* Func
     }
     
     // vicariance matrix (range-split outcomes)
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* vg = RevBayesCore::assume_cast<const ModelVector<ModelVector<RealPos> > &>( this->args[7].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* vg = dagNodeFor<ModelVector<ModelVector<RealPos> >>(this->args[7].getVariable());
     bool useVicariance = true;
     if (vg->getValue().size() > 0 && vg->getValue().size() != nc) {
         throw RbException("Size of connectivity graph does not match number of characters.");
