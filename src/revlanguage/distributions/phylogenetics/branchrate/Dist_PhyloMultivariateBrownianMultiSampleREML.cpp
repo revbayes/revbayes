@@ -58,7 +58,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::RbVector<double> > >* var = dagNodeFor<ModelVector<ModelVector<RealPos> >>(within_species_variances);
     const std::vector<RevBayesCore::Taxon>      &t  = valueFor<ModelVector<Taxon>>(taxa);
     
-    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal>* vcv = dagNodeFor<MatrixRealSymmetric>(rate_matrix);
+    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal>* vcv = dagNodeFor<MatrixReal>(rate_matrix);
     
     size_t n = vcv->getValue().getDim();
     

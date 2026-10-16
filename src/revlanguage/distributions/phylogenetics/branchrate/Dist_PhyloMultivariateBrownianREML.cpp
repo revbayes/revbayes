@@ -53,7 +53,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
 //    size_t n = size_t( static_cast<const Natural &>( nSites->getRevObject() ).getValue() );
     size_t n_nodes = tau->getValue().getNumberOfNodes();
     
-    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal>* vcv = dagNodeFor<MatrixRealSymmetric>(rate_matrix);
+    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal>* vcv = dagNodeFor<MatrixReal>(rate_matrix);
 
     size_t n = vcv->getValue().getDim();
     
