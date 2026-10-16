@@ -134,7 +134,7 @@ const MemberRules& Move_VectorSlideRecenter::getParameterRules(void) const
         
         move_member_rules.push_back( new ArgumentRule( "x"     , ModelVector<Real>::getClassTypeSpec(), "The variable on which the move operates.", ArgumentRule::BY_REFERENCE, ArgumentRule::DETERMINISTIC ) );
         move_member_rules.push_back( new ArgumentRule( "mean"  , Real::getClassTypeSpec()             , "The mean parameter of the variables.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
-        move_member_rules.push_back( new ArgumentRule( "delta",  RealPos::getClassTypeSpec()          , "The window size parameter.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new Real(1.0) ) );
+        move_member_rules.push_back( new ArgumentRule( "delta",  RealPos::getClassTypeSpec()          , "The window size parameter.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new RealPos(1.0) ) );
         move_member_rules.push_back( new ArgumentRule( "tune"  , RlBoolean::getClassTypeSpec()        , "Should we tune the scaling factor during burnin?", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new RlBoolean( true ) ) );
         
         /* Inherit weight from Move, put it after variable */

@@ -152,7 +152,7 @@ const MemberRules& Move_SynchronizedVectorFixedSingleElementSlide::getParameterR
         index_types.push_back( ModelVector<Natural>::getClassTypeSpec() );
         move_member_rules.push_back( new ArgumentRule( "element", index_types, "The index or indices of the element to scale.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         
-        move_member_rules.push_back( new ArgumentRule( "lambda" , RealPos::getClassTypeSpec()          , "The scaling factor (strength) of this move.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new Real(1.0) ) );
+        move_member_rules.push_back( new ArgumentRule( "lambda" , RealPos::getClassTypeSpec()          , "The scaling factor (strength) of this move.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new RealPos(1.0) ) );
         move_member_rules.push_back( new ArgumentRule( "tune"   , RlBoolean::getClassTypeSpec()        , "Should we tune the scaling factor during burnin?", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new RlBoolean( true ) ) );
         
         /* Inherit weight from Move, put it after variable */
