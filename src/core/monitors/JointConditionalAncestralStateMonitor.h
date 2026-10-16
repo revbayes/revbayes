@@ -1,6 +1,7 @@
 #ifndef JointConditionalJointConditionalAncestralStateMonitor_H
 #define JointConditionalJointConditionalAncestralStateMonitor_H
 
+#include "DagNodeTypeUtilities.h"
 #include "AbstractHomologousDiscreteCharacterData.h"
 #include "StateDependentSpeciationExtinctionProcess.h"
 #include "GeneralizedLineageHeterogeneousBirthDeathSamplingProcess.h"
@@ -312,16 +313,16 @@ void JointConditionalAncestralStateMonitor<characterType>::swapNode(DagNode *old
 	
 	if ( oldN == tree )
 	{
-		tree = static_cast< TypedDagNode<Tree> *>( newN );
+		replaceNodeReference(tree, newN);
 	}
 	else if ( oldN == ctmc )
 	{
-		ctmc = static_cast< StochasticNode<AbstractHomologousDiscreteCharacterData> *>( newN );
+		replaceNodeReference(ctmc, newN);
 	}
     else if ( oldN == cdbdp )
     {
-        cdbdp = static_cast< StochasticNode<Tree> *>( newN );
-        tree = static_cast< StochasticNode<Tree> *>( newN );
+        replaceNodeReference(cdbdp, newN);
+        replaceNodeReference(tree, newN);
     }
     
     Monitor::swapNode( oldN, newN );
