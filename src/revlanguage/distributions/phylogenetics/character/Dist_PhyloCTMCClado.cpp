@@ -132,7 +132,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
     }
     else
     {
-        RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = dagNodeFor<RateMatrix>(q);
+        RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = dagNodeFor<RateGenerator>(q);
         nChars = rm->getValue().getNumberOfStates();
     }
     if ( cladoProbs->getRevObject().isType( ModelVector<CladogeneticProbabilityMatrix>::getClassTypeSpec() ) )
