@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <iostream>
 #include <string>
@@ -182,9 +183,8 @@ Func_wag* Func_wag::clone( void ) const
 
 RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_wag::createFunction( void ) const
 {
-    const RevObject& obj = args[0].getVariable()->getRevObject();
 
-    RevBayesCore::TypedDagNode<RevBayesCore::Simplex>* bf = static_cast<const Simplex &>( obj ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Simplex>* bf = dagNodeForRevType<Simplex>(args[0].getVariable());
 
     return RevBayesCore::generic_function_ptr< RevBayesCore::RateGenerator >( WAG, bf );
 }

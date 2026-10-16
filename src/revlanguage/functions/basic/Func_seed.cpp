@@ -43,8 +43,7 @@ RevPtr<RevVariable> Func_seed::execute( void )
 {
     
     unsigned int s;
-    const Natural &val1 = objectForRevType<Natural>(args[0].getVariable());
-    s = (unsigned int) val1.getValue();
+    s = (unsigned int) valueForRevType<Natural>(args[0].getVariable());
     
     RevBayesCore::RandomNumberGenerator *rng = RevBayesCore::GLOBAL_RNG;
     rng->setSeed( s );

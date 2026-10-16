@@ -222,8 +222,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
     {
         found = true;
 
-        const RevObject& argument = args[0].getVariable()->getRevObject();
-        std::int64_t n = static_cast<const Natural&>( argument ).getValue();
+        std::int64_t n = valueForRevType<Natural>(args[0].getVariable());
 
         RevBayesCore::AbstractHomologousDiscreteCharacterData *trans_data = this->dag_node->getValue().expandCharacters( n );
 
@@ -241,8 +240,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
     {
         found = true;
 
-        const RevObject& argument = args[0].getVariable()->getRevObject();
-        bool excl = static_cast<const RlBoolean&>( argument ).getValue();
+        bool excl = valueForRevType<RlBoolean>(args[0].getVariable());
 
         std::vector<size_t> tmp = this->dag_node->getValue().getInvariantSiteIndices( excl );
         std::vector<std::int64_t> inv_vect(begin(tmp), end(tmp));
@@ -253,8 +251,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
     {
         found = true;
 
-        const RevObject& argument = args[0].getVariable()->getRevObject();
-        bool excl = static_cast<const RlBoolean&>( argument ).getValue();
+        bool excl = valueForRevType<RlBoolean>(args[0].getVariable());
 
         size_t n = this->dag_node->getValue().getNumberOfInvariantSites( excl );
 
@@ -302,8 +299,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
     {
         found = true;
 
-        const RevObject& argument = args[0].getVariable()->getRevObject();
-        bool excl = static_cast<const RlBoolean&>( argument ).getValue();
+        bool excl = valueForRevType<RlBoolean>(args[0].getVariable());
 
         double max_gc = this->dag_node->getValue().maxGcContent( excl );
 
@@ -313,8 +309,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
     {
         found = true;
 
-        const RevObject& argument = args[0].getVariable()->getRevObject();
-        bool excl = static_cast<const RlBoolean&>( argument ).getValue();
+        bool excl = valueForRevType<RlBoolean>(args[0].getVariable());
 
         size_t max_inv = this->dag_node->getValue().maxInvariableBlockLength( excl );
 
@@ -324,8 +319,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
     {
         found = true;
 
-        const RevObject& argument = args[0].getVariable()->getRevObject();
-        bool excl = static_cast<const RlBoolean&>( argument ).getValue();
+        bool excl = valueForRevType<RlBoolean>(args[0].getVariable());
 
         size_t max_pd = this->dag_node->getValue().getMaxPairwiseSequenceDifference( excl );
 
@@ -375,8 +369,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
     {
         found = true;
 
-        const RevObject& argument = args[0].getVariable()->getRevObject();
-        bool excl = static_cast<const RlBoolean&>( argument ).getValue();
+        bool excl = valueForRevType<RlBoolean>(args[0].getVariable());
 
         size_t max_var = this->dag_node->getValue().maxVariableBlockLength( excl );
 
@@ -386,8 +379,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
     {
         found = true;
 
-        const RevObject& argument = args[0].getVariable()->getRevObject();
-        bool excl = static_cast<const RlBoolean&>( argument ).getValue();
+        bool excl = valueForRevType<RlBoolean>(args[0].getVariable());
 
         double mean_gc = this->dag_node->getValue().meanGcContent( excl );
 
@@ -397,11 +389,9 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
     {
         found = true;
 
-        const RevObject& argument = args[0].getVariable()->getRevObject();
-        size_t n = size_t( static_cast<const Natural&>( argument ).getValue() );
+        size_t n = size_t( valueForRevType<Natural>(args[0].getVariable()) );
 
-        const RevObject& excl_argument = args[1].getVariable()->getRevObject();
-        bool excl = static_cast<const RlBoolean&>( excl_argument ).getValue();
+        bool excl = valueForRevType<RlBoolean>(args[1].getVariable());
 
         double mean_gc = this->dag_node->getValue().meanGcContentByCodon( n, excl );
 
@@ -411,8 +401,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
     {
         found = true;
 
-        const RevObject& argument = args[0].getVariable()->getRevObject();
-        bool excl = static_cast<const RlBoolean&>( argument ).getValue();
+        bool excl = valueForRevType<RlBoolean>(args[0].getVariable());
 
         double min_gc = this->dag_node->getValue().minGcContent( excl );
 
@@ -422,8 +411,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
     {
         found = true;
 
-        const RevObject& argument = args[0].getVariable()->getRevObject();
-        bool excl = static_cast<const RlBoolean&>( argument ).getValue();
+        bool excl = valueForRevType<RlBoolean>(args[0].getVariable());
 
         size_t min_pd = this->dag_node->getValue().getMinPairwiseSequenceDifference( excl );
 
@@ -433,8 +421,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
     {
         found = true;
 
-        const RevObject& argument = args[0].getVariable()->getRevObject();
-        bool excl = static_cast<const RlBoolean&>( argument ).getValue();
+        bool excl = valueForRevType<RlBoolean>(args[0].getVariable());
 
         RevBayesCore::DistanceMatrix pd = this->dag_node->getValue().getPairwiseSequenceDifference( excl );
 
@@ -444,8 +431,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
     {
         found = true;
 
-        const RevObject& argument = args[0].getVariable()->getRevObject();
-        bool excl = static_cast<const RlBoolean&>( argument ).getValue();
+        bool excl = valueForRevType<RlBoolean>(args[0].getVariable());
 
         size_t num_blocks = this->dag_node->getValue().numInvariableSiteBlocks( excl );
 
@@ -455,8 +441,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
     {
         found = true;
 
-        const RevObject& argument = args[0].getVariable()->getRevObject();
-        double percentage = static_cast<const Probability&>( argument ).getValue();
+        double percentage = valueForRevType<Probability>(args[0].getVariable());
 
         size_t num_taxa = this->dag_node->getValue().numberTaxaMissingSequence( percentage );
 
@@ -742,8 +727,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
     {
         found = true;
 
-        const RevObject& argument = args[0].getVariable()->getRevObject();
-        const std::string &type = static_cast<const RlString&>( argument ).getValue();
+        const std::string &type = valueForRevType<RlString>(args[0].getVariable());
 
         RevBayesCore::AbstractHomologousDiscreteCharacterData *trans_data = this->dag_node->getValue().translateCharacters( type );
 
@@ -753,8 +737,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
     {
         found = true;
 
-        const RevObject& argument = args[0].getVariable()->getRevObject();
-        bool excl = static_cast<const RlBoolean&>( argument ).getValue();
+        bool excl = valueForRevType<RlBoolean>(args[0].getVariable());
 
         double var_gc = this->dag_node->getValue().varGcContent( excl );
 
@@ -764,11 +747,9 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
     {
         found = true;
 
-        const RevObject& argument = args[0].getVariable()->getRevObject();
-        size_t n = size_t( static_cast<const Natural&>( argument ).getValue() );
+        size_t n = size_t( valueForRevType<Natural>(args[0].getVariable()) );
 
-        const RevObject& excl_argument = args[1].getVariable()->getRevObject();
-        bool excl = static_cast<const RlBoolean&>( excl_argument ).getValue();
+        bool excl = valueForRevType<RlBoolean>(args[1].getVariable());
 
         double var_gc = this->dag_node->getValue().varGcContentByCodon( n, excl );
 
