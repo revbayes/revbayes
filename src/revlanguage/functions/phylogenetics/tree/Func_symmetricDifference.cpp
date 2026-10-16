@@ -49,8 +49,8 @@ Func_symmetricDifference* Func_symmetricDifference::clone( void ) const {
 RevBayesCore::TypedFunction< double >* Func_symmetricDifference::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = dagNodeFor<TimeTree>(this->args[0].getVariable());
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau2 = dagNodeFor<TimeTree>(this->args[1].getVariable());
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = dagNodeFor<Tree>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau2 = dagNodeFor<Tree>(this->args[1].getVariable());
     RevBayesCore::SymmetricDifferenceStatistic* f = new RevBayesCore::SymmetricDifferenceStatistic( tau, tau2 );
     
     return f;
