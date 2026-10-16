@@ -60,8 +60,7 @@ RevPtr<RevVariable> Func_writeNexus::execute( void )
 {
     
     // get the information from the arguments for reading the file
-    const RlString& fn = objectForRevType<RlString>(args[0].getVariable());
-    RevBayesCore::NexusWriter fw( fn.getValue() );
+    RevBayesCore::NexusWriter fw( valueForRevType<RlString>(args[0].getVariable()) );
     fw.openStream(false);
 
     

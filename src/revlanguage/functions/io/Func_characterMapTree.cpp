@@ -74,8 +74,7 @@ RevPtr<RevVariable> Func_characterMapTree::execute( void )
     {
         
         // get the ancestral state tree trace
-        const TraceTree& tt = objectForRevType<TraceTree>(tt_arg.getVariable());
-        tree_trace = tt.getValue();
+        tree_trace = valueForRevType<TraceTree>(tt_arg.getVariable());
     }
     
     // get the filename for the tree with MAP character history

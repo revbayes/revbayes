@@ -50,8 +50,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::ContinuousCharacterData >* Dist_P
     // get the parameters
     size_t n = size_t( valueForRevType<Natural>(n_sites) );
 
-    const CharacterHistory& rl_char_hist = objectForRevType<RevLanguage::CharacterHistory>(character_history);
-    RevBayesCore::TypedDagNode<RevBayesCore::CharacterHistoryDiscrete>* char_hist   =  rl_char_hist.getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::CharacterHistoryDiscrete>* char_hist   =  dagNodeForRevType<RevLanguage::CharacterHistory>(character_history);
 
     RevBayesCore::PhyloBrownianProcessStateDependent *dist = new RevBayesCore::PhyloBrownianProcessStateDependent(char_hist, n);
 
