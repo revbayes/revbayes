@@ -77,8 +77,7 @@ RevBayesCore::TypedFunction< RevBayesCore::RbVector< typename valType::valueType
     std::vector<const RevBayesCore::TypedDagNode<typename valType::valueType>* > params;
     for ( size_t i = 0; i < this->args.size(); i++ )
     {
-        const valType &val = objectForRevType<valType>(this->args[i].getVariable());
-        params.push_back( val.getDagNode() );
+        params.push_back( dagNodeForRevType<valType>(this->args[i].getVariable()) );
     }
     
     RevBayesCore::VectorFunction<typename valType::valueType>* func = new RevBayesCore::VectorFunction<typename valType::valueType>( params );

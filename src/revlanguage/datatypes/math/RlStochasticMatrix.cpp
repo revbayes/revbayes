@@ -126,8 +126,7 @@ RevPtr<RevVariable> StochasticMatrix::executeMethod(std::string const &name, con
     {
         found = true;
         
-        const Natural& index = objectForRevType<Natural>(args[0].getVariable());
-        int i = (int)index.getValue() - 1;
+        int i = (int)valueForRevType<Natural>(args[0].getVariable()) - 1;
         
         RevBayesCore::RbVector<double> m = this->dag_node->getValue().getColumn( i );
 
