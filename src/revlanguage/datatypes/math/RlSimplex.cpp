@@ -127,8 +127,7 @@ void Simplex::constructInternalObject( void )
             RevObject& b = args[i]->getRevObject();
             if ( b.isType( RealPos::getClassTypeSpec() ) )
             {
-                const RealPos &val = objectForRevType<RealPos>(args[i]);
-                params.push_back( val.getDagNode() );
+                params.push_back( dagNodeForRevType<RealPos>(args[i]) );
             }
             else
             {

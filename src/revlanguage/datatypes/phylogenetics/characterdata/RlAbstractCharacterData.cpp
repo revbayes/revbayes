@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "RlAbstractCharacterData.h"
 
 #include <cstddef>
@@ -255,8 +256,7 @@ RevPtr<RevVariable> AbstractCharacterData::executeCharacterDataMethod(std::strin
     {
         found = true;
         
-        const RevObject& argument = args[0].getVariable()->getRevObject();
-        const std::string &n = static_cast<const RlString&>( argument ).getValue();
+        const std::string &n = valueForRevType<RlString>(args[0].getVariable());
         
         bool tf = charDataObject->isSequenceMissing( n );
 
@@ -286,8 +286,7 @@ RevPtr<RevVariable> AbstractCharacterData::executeCharacterDataMethod(std::strin
     {
         found = true;
         
-        const RevObject& argument = args[0].getVariable()->getRevObject();
-        const std::string &n = static_cast<const RlString&>( argument ).getValue();
+        const std::string &n = valueForRevType<RlString>(args[0].getVariable());
         
         double p = charDataObject->getPercentageMissing( n );
         
@@ -366,8 +365,7 @@ RevPtr<RevVariable> AbstractCharacterData::executeCharacterDataMethod(std::strin
     {
         found = true;
         
-        const RevObject& argument = args[0].getVariable()->getRevObject();
-        const std::string &n = static_cast<const RlString&>( argument ).getValue();
+        const std::string &n = valueForRevType<RlString>(args[0].getVariable());
         int index = (int)charDataObject->getIndexOfTaxon( n ) + 1;
         
         return new RevVariable( new Natural(index) );
