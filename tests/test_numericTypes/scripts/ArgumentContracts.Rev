@@ -1,0 +1,19 @@
+seed(12345)
+
+# Exercise numeric wrappers and defaults absent from the existing numeric examples.
+# Successful construction catches narrower wrapper casts in debug builds.
+distance := fnGeographicalDistance(-30.0, -90.0, 20.0, 50.0)
+x ~ dnNormal(0, 1)
+y ~ dnNormal(0, 1)
+m ~ dnNormal(0, 1)
+mirror = mvMirror(x)
+recenter = mvVectorSlideRecenter([x,y], m)
+
+# Different ModelVector and TypedDistribution specializations are not C++ subtypes.
+# Keep these calls while those wrappers require explicit matching accessors.
+hidden := fnHiddenStateRateMatrix([1.0,2.0], [2.0,1.0])
+rates := fnNormalizedQuantile(dnExponential(1.0), 4)
+bins := fnDiscretizeDistribution(dnBeta(2.0,2.0), 4)
+mixture ~ dnMixtureVector([dnNormal(0,1),dnNormal(1,1)], simplex(1,1), 2)
+
+q()
