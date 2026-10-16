@@ -1,6 +1,7 @@
 #ifndef ReversibleJumpMixtureConstantDistribution_H
 #define ReversibleJumpMixtureConstantDistribution_H
 
+#include "DagNodeTypeUtilities.h"
 #include "RbVector.h"
 #include "TypedDagNode.h"
 #include "TypedDistribution.h"
@@ -371,11 +372,11 @@ void RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::swapP
 {
     if (oldP == const_value)
     {
-        const_value = static_cast<const TypedDagNode< mixtureType >* >( newP );
+        replaceNodeReference(const_value, newP);
     }
     else if (oldP == probability)
     {
-        probability = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(probability, newP);
     }
     else
     {

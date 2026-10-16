@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "AutocorrelatedEventDistribution.h"
 
 #include <cstddef>
@@ -476,7 +477,7 @@ void AutocorrelatedEventDistribution::swapParameterInternal( const DagNode *oldP
     
     if ( oldP == autocorrelation_sigmas )
     {
-        autocorrelation_sigmas = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(autocorrelation_sigmas, newP);
         found = true;
     }
     

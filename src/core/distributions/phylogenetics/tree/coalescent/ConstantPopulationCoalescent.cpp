@@ -1,4 +1,5 @@
 #include "TimeInterval.h"
+#include "DagNodeTypeUtilities.h"
 #include <cstddef>
 #include <algorithm>
 #include <cmath>
@@ -278,6 +279,6 @@ void ConstantPopulationCoalescent::swapParameterInternal(const DagNode *old_p, c
 {
     if (old_p == Ne)
     {
-        Ne = static_cast<const TypedDagNode<double>* >( new_p );
+        replaceNodeReference(Ne, new_p);
     }
 }

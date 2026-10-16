@@ -1,6 +1,7 @@
 #ifndef AnalyticalMixtureDistribution_H
 #define AnalyticalMixtureDistribution_H
 
+#include "DagNodeTypeUtilities.h"
 #include "MemberObject.h"
 #include "Simplex.h"
 #include "TypedDagNode.h"
@@ -280,7 +281,7 @@ void RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::swapParameterInte
     if (old_p == probabilities)
     {
         found = true;
-        probabilities = static_cast<const TypedDagNode< Simplex >* >( new_p );
+        replaceNodeReference(probabilities, new_p);
     }
     else
     {

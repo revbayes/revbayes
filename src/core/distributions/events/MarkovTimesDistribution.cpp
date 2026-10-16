@@ -5,6 +5,7 @@
  *      Author: mrmay
  */
 
+#include "DagNodeTypeUtilities.h"
 #include "MarkovTimesDistribution.h"
 
 #include <set>
@@ -216,11 +217,11 @@ void MarkovTimesDistribution::swapParameterInternal(const DagNode *oldP, const D
 {
     if (oldP == rate)
     {
-    	rate = static_cast<const TypedDagNode< double > *>( newP );
+    	replaceNodeReference(rate, newP);
     }
     else if (oldP == age)
     {
-    	age = static_cast<const TypedDagNode< double > *>( newP );
+    	replaceNodeReference(age, newP);
     }
 }
 
