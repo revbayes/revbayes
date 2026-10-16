@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "DistributionFunctionCdf.h"
 
 #include <cstddef>
@@ -177,7 +178,7 @@ RevBayesCore::TypedFunction<double>* DistributionFunctionCdf::createFunction( vo
     
     
     
-    RevBayesCore::TypedDagNode<double>* arg = static_cast<const Real &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* arg = dagNodeForRevType<Real>(this->args[0].getVariable());
     RevBayesCore::CumulativeDistributionFunction* f = new RevBayesCore::CumulativeDistributionFunction( arg, d );
     
     return f;

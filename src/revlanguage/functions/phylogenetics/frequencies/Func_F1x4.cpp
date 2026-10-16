@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "Func_F1x4.h"
 #include "CppCodonFuncs.h"
 
@@ -39,7 +40,7 @@ CSimplex* F1x4(const CSimplex& nuc_pi1)
 
 RevBayesCore::TypedFunction< CSimplex >* Func_F1x4::createFunction( void ) const
 {
-    RevBayesCore::TypedDagNode< CSimplex >* bf = static_cast<const Simplex &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< CSimplex >* bf = dagNodeForRevType<Simplex>(this->args[0].getVariable());
 
     if ( bf->getValue().size() != 4 )
     {

@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <stddef.h>
 #include <iosfwd>
 #include <vector>
@@ -48,8 +49,8 @@ RevPtr<RevVariable> Func_writePhylip::execute( void )
 {
     
     // get the information from the arguments for reading the file
-    const std::string& file_name = static_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
-    const RevBayesCore::AbstractHomologousDiscreteCharacterData &data = static_cast< const AbstractHomologousDiscreteCharacterData & >( args[1].getVariable()->getRevObject() ).getValue();
+    const std::string& file_name = valueForRevType<RlString>(args[0].getVariable());
+    const RevBayesCore::AbstractHomologousDiscreteCharacterData &data = valueForRevType<AbstractHomologousDiscreteCharacterData>(args[1].getVariable());
     
     RevBayesCore::createDirectoryForFile( file_name );
 

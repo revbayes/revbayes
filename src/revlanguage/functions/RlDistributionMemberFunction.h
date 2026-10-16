@@ -1,6 +1,7 @@
 #ifndef RlDistributionMemberFunction_H
 #define RlDistributionMemberFunction_H
 
+#include "RevTypeUtilities.h"
 #include "RlMemberMethod.h"
 #include "RlTypedFunction.h"
 
@@ -164,7 +165,7 @@ void RevLanguage::DistributionMemberFunction<distributionType, retType>::setMemb
     
     // we do not own the object itself because one object can have multiple member functions
     object = obj;
-    the_member_object = static_cast< const typename distributionType::rlValueType *>( &(obj->getRevObject()) );
+    the_member_object = std::addressof(objectForRevType<typename distributionType::rlValueType>(obj));
     
 }
 

@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "Func__simplexIndexOperator.h"
 #include "ModelVector.h"
 #include "RlDeterministicNode.h"
@@ -30,8 +31,8 @@ Func__simplexIndexOperator* Func__simplexIndexOperator::clone( void ) const
 RevBayesCore::TypedFunction< double >* Func__simplexIndexOperator::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* v = static_cast<const Simplex &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<std::int64_t>* index = static_cast<const Natural &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* v = dagNodeForRevType<Simplex>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode<std::int64_t>* index = dagNodeForRevType<Natural>(this->args[1].getVariable());
     RevBayesCore::VectorIndexOperator<double> *func = new RevBayesCore::VectorIndexOperator<double>(v, index);
     
     return func;

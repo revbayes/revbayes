@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -53,13 +54,13 @@ RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_orderedRateMatr
 {
     
     
-    RevBayesCore::TypedDagNode< std::int64_t >* n                               = static_cast<const Natural &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< double >* lambda                        = static_cast<const RealPos &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< double >* mu                            = static_cast<const RealPos &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< RevBayesCore::Boolean >* zero_state     = static_cast<const RlBoolean &>( this->args[3].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< std::int64_t >* n                               = dagNodeForRevType<Natural>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode< double >* lambda                        = dagNodeForRevType<RealPos>(this->args[1].getVariable());
+    RevBayesCore::TypedDagNode< double >* mu                            = dagNodeForRevType<RealPos>(this->args[2].getVariable());
+    RevBayesCore::TypedDagNode< RevBayesCore::Boolean >* zero_state     = dagNodeForRevType<RlBoolean>(this->args[3].getVariable());
 
-    bool rescale                                                        = static_cast<const RlBoolean &>( this->args[4].getVariable()->getRevObject() ).getDagNode()->getValue();
-    const std::string method                                            = static_cast<const RlString &>( this->args[5].getVariable()->getRevObject() ).getDagNode()->getValue();
+    bool rescale                                                        = dagNodeForRevType<RlBoolean>(this->args[4].getVariable())->getValue();
+    const std::string method                                            = dagNodeForRevType<RlString>(this->args[5].getVariable())->getValue();
 
     RevBayesCore::OrderedRateMatrixFunction* f = new RevBayesCore::OrderedRateMatrixFunction( n, lambda, mu, zero_state->getValue(), rescale, method );
     

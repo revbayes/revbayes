@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <iosfwd>
 #include <string>
@@ -54,19 +55,19 @@ RevBayesCore::TypedFunction< RevBayesCore::CladogeneticSpeciationRateMatrix >* F
 {
     
     // speciation rate vector
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* sr = static_cast<const ModelVector<RealPos> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* sr = dagNodeForRevType<ModelVector<RealPos>>(this->args[0].getVariable());
     
     // parameterized geography for within-region features (shape == (N))
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* wf = static_cast<const ModelVector<RealPos> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* wf = dagNodeForRevType<ModelVector<RealPos>>(this->args[1].getVariable());
     
     // parameterized geography for between-region features (shape == (N,N))
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* bf = static_cast<const ModelVector<ModelVector<RealPos> > &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* bf = dagNodeForRevType<ModelVector<ModelVector<RealPos> >>(this->args[2].getVariable());
     
     // support for hidden rate classes
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* rm = NULL;
     if (this->args[3].getVariable()->getRevObject() != RevNullObject::getInstance())
     {
-        RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* rm = static_cast<const ModelVector<RealPos> &>( this->args[3].getVariable()->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* rm = dagNodeForRevType<ModelVector<RealPos>>(this->args[3].getVariable());
         if (rm->getValue().size() > 1)
         {
             throw RbException("Only one hidden rate category currently implemented.");
@@ -77,7 +78,7 @@ RevBayesCore::TypedFunction< RevBayesCore::CladogeneticSpeciationRateMatrix >* F
     int n_regions = (int)wf->getValue().size();
     int mrs = 0;
     if (this->args[4].getVariable()->getRevObject() != RevNullObject::getInstance()) {
-        mrs = (int)static_cast<const Natural &>( this->args[4].getVariable()->getRevObject() ).getValue();
+        mrs = (int)valueForRevType<Natural>(this->args[4].getVariable());
         if (mrs <= 1 || mrs > n_regions) mrs = n_regions;
         assert( mrs > 1 );
     }
@@ -85,7 +86,7 @@ RevBayesCore::TypedFunction< RevBayesCore::CladogeneticSpeciationRateMatrix >* F
     // maximum subrange split size (default == max_range_size)
     int msss = 0;
     if (this->args[5].getVariable()->getRevObject() != RevNullObject::getInstance()) {
-        msss = (int)static_cast<const Natural &>( this->args[5].getVariable()->getRevObject() ).getValue();
+        msss = (int)valueForRevType<Natural>(this->args[5].getVariable());
         if (msss <= 0) msss = mrs;
         assert( msss > 0 );
     }
@@ -93,7 +94,7 @@ RevBayesCore::TypedFunction< RevBayesCore::CladogeneticSpeciationRateMatrix >* F
     // normalize split scores?
     bool nss = false;
     if (this->args[6].getVariable()->getRevObject() != RevNullObject::getInstance()) {
-        nss = (bool)static_cast<const RlBoolean &>( this->args[6].getVariable()->getRevObject() ).getValue();
+        nss = (bool)valueForRevType<RlBoolean>(this->args[6].getVariable());
     }
     
     RevBayesCore::BiogeographyCladogeneticBirthDeathFunction* f = new RevBayesCore::BiogeographyCladogeneticBirthDeathFunction( sr, wf, bf, mrs, msss, nss );

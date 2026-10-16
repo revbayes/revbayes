@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "Func_profile.h"
 
 #include <string>
@@ -34,8 +35,8 @@ Func_profile* Func_profile::clone( void ) const
 RevPtr<RevVariable> Func_profile::execute( void )
 {
 
-    const std::string &command = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
-    const std::string &event = static_cast<const RlString &>( args[1].getVariable()->getRevObject() ).getValue();
+    const std::string &command = valueForRevType<RlString>(args[0].getVariable());
+    const std::string &event = valueForRevType<RlString>(args[1].getVariable());
 
     double duration = 0.;
     if ( command == "start" )

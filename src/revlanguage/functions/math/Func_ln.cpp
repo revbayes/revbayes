@@ -6,6 +6,7 @@
 //  Copyright 2012 __MyCompanyName__. All rights reserved.
 //
 
+#include "RevTypeUtilities.h"
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -53,7 +54,7 @@ Func_ln* Func_ln::clone( void ) const {
 RevBayesCore::TypedFunction<double>* Func_ln::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<double>* arg = static_cast<const RealPos &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* arg = dagNodeForRevType<RealPos>(this->args[0].getVariable());
     RevBayesCore::LnFunction* f = new RevBayesCore::LnFunction( arg );
     
     return f;

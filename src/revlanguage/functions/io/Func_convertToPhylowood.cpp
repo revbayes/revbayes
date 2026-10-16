@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "Func_convertToPhylowood.h"
 
 #include <cstddef>
@@ -36,13 +37,13 @@ RevPtr<RevVariable> Func_convertToPhylowood::execute( void )
 {
     
     
-    const std::string& stateFilename = static_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
-    const std::string& treeFilename  = static_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
-    const std::string& geoFilename   = static_cast<const RlString&>( args[2].getVariable()->getRevObject() ).getValue();
-    const std::string& phwFilename   = static_cast<const RlString&>( args[3].getVariable()->getRevObject() ).getValue();
-    double burn = static_cast<const Probability&>( args[4].getVariable()->getRevObject() ).getValue();
-    const std::string& chartype      = static_cast<const RlString&>( args[5].getVariable()->getRevObject() ).getValue();
-    const std::string& bgtype      = static_cast<const RlString&>( args[6].getVariable()->getRevObject() ).getValue();
+    const std::string& stateFilename = valueForRevType<RlString>(args[0].getVariable());
+    const std::string& treeFilename  = valueForRevType<RlString>(args[1].getVariable());
+    const std::string& geoFilename   = valueForRevType<RlString>(args[2].getVariable());
+    const std::string& phwFilename   = valueForRevType<RlString>(args[3].getVariable());
+    double burn = valueForRevType<Probability>(args[4].getVariable());
+    const std::string& chartype      = valueForRevType<RlString>(args[5].getVariable());
+    const std::string& bgtype      = valueForRevType<RlString>(args[6].getVariable());
     
     RevBayesCore::PhylowoodConverter phw(stateFilename, treeFilename, geoFilename, phwFilename, burn, chartype, bgtype);
     //    RevBayesCore::PhylowoodConverter phw;
