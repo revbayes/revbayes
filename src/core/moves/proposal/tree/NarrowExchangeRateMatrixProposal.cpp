@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include <cstddef>
 #include <cmath>
@@ -185,7 +186,7 @@ double NarrowExchangeRateMatrixProposal::lnProposalProbabilityRateMatrix(const T
     // Get random number generator
     RandomNumberGenerator* rng = GLOBAL_RNG;
     
-    MixtureDistribution<RateGenerator>& dist = static_cast<MixtureDistribution<RateGenerator> &>( rm->getDistribution() );
+    MixtureDistribution<RateGenerator>& dist = assume_cast<MixtureDistribution<RateGenerator> &>( rm->getDistribution() );
     
     // get the number of categories
     size_t n = dist.getNumberOfMixtureElements();
@@ -325,7 +326,7 @@ void NarrowExchangeRateMatrixProposal::undoRateMatrixProposal(const RevBayesCore
     size_t node_index = node.getIndex();
     StochasticNode<RateGenerator> *rm = rate_matrices[node_index];
     
-    MixtureDistribution<RateGenerator>& dist = static_cast<MixtureDistribution<RateGenerator> &>( rm->getDistribution() );
+    MixtureDistribution<RateGenerator>& dist = assume_cast<MixtureDistribution<RateGenerator> &>( rm->getDistribution() );
         
     // set our old value
     dist.setCurrentIndex( i );

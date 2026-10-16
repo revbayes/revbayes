@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "AdaptiveReversibleJumpProposal.h"
 #include "DistributionNormal.h"
@@ -157,7 +158,7 @@ double RevBayesCore::AdaptiveReversibleJumpProposal::doProposal( void )
     
     
     double& v = variable->getValue();
-    ReversibleJumpMixtureConstantDistribution<double> &d = static_cast< ReversibleJumpMixtureConstantDistribution<double>& >( variable->getDistribution() );
+    ReversibleJumpMixtureConstantDistribution<double> &d = assume_cast< ReversibleJumpMixtureConstantDistribution<double>& >( variable->getDistribution() );
     
     // copy value
     stored_value = v;
@@ -325,7 +326,7 @@ void RevBayesCore::AdaptiveReversibleJumpProposal::undoProposal( void )
     variable->setValue( new double(stored_value) );
     
     // also reset the index
-    ReversibleJumpMixtureConstantDistribution<double> &d = static_cast< ReversibleJumpMixtureConstantDistribution<double>& >( variable->getDistribution() );
+    ReversibleJumpMixtureConstantDistribution<double> &d = assume_cast< ReversibleJumpMixtureConstantDistribution<double>& >( variable->getDistribution() );
     d.setCurrentIndex( stored_index );
 }
 
