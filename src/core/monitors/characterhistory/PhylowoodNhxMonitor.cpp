@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "PhylowoodNhxMonitor.h"
 
 #include <iostream>
@@ -332,14 +333,14 @@ void PhylowoodNhxMonitor::swapNode(DagNode *oldN, DagNode *newN)
     // bool found = false;
     if ( oldN == tree )
     {
-        tree = static_cast< TypedDagNode< Tree > *>( newN );
+        replaceNodeReference(tree, newN);
         // found = true;
     }
     for (size_t i = 0; i < branchHistories.size(); i++)
     {
         if (oldN == branchHistories[i])
         {
-            branchHistories[i] = static_cast<StochasticNode<BranchHistory>* >(newN);
+            replaceNodeReference(branchHistories[i], newN);
             // found = true;
         }
     }
