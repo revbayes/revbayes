@@ -5,6 +5,7 @@
  * Created on 13 juillet 2014, 18:13
  */
 
+#include "RevTypeUtilities.h"
 #include "Move_GraphFlipClique.h"
 
 #include <cstddef>
@@ -69,17 +70,17 @@ void Move_GraphFlipClique::constructInternalObject( void )
     delete value;
     
     // now allocate a new sliding move
-    double rs = static_cast<const RealPos&>( set_rate->getRevObject() ).getValue();
-    double ep = static_cast<const Probability &>( edge_prob->getRevObject() ).getValue();
-    double vp = static_cast<const Probability &>( vertex_prob->getRevObject() ).getValue();
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    const RevBayesCore::RbVector<std::int64_t>& e = static_cast<const ModelVector<Natural> &>( vertices->getRevObject() ).getValue();
+    double rs = valueForRevType<RealPos>(set_rate);
+    double ep = valueForRevType<Probability>(edge_prob);
+    double vp = valueForRevType<Probability>(vertex_prob);
+    double w = valueForRevType<RealPos>(weight);
+    bool t = valueForRevType<RlBoolean>(tune);
+    const RevBayesCore::RbVector<std::int64_t>& e = valueForRevType<ModelVector<Natural>>(vertices);
     
     
     RevBayesCore::Proposal *p = NULL;
     
-    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* tmp = static_cast<const MatrixRealSymmetric &>( v->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* tmp = dagNodeForRevType<MatrixRealSymmetric>(v);
     RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::MatrixReal> *>( tmp );
     
     bool symm = v->getRevObject().isType( MatrixRealSymmetric::getClassTypeSpec() );

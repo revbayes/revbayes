@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -58,10 +59,10 @@ void Move_SynchronizedVectorFixedSingleElementSlide::constructInternalObject( vo
     delete value;
     
     // now allocate a new sliding move
-    double l = static_cast<const RealPos &>( lambda->getRevObject() ).getValue();
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double l = valueForRevType<RealPos>(lambda);
+    double w = valueForRevType<RealPos>(weight);
     
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* tmp = static_cast<const ModelVector<ModelVector<Real> >&>( v->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* tmp = dagNodeForRevType<ModelVector<ModelVector<Real> >>(v);
     std::vector<const RevBayesCore::DagNode*> par = tmp->getParents();
     std::vector< RevBayesCore::StochasticNode<RevBayesCore::RbVector<double> > *> n;
     for (std::vector<const RevBayesCore::DagNode*>::const_iterator it = par.begin(); it != par.end(); ++it)
@@ -80,11 +81,11 @@ void Move_SynchronizedVectorFixedSingleElementSlide::constructInternalObject( vo
     std::vector<std::int64_t> e;
     if ( which_element->getRevObject().isType( ModelVector<Natural>::getClassTypeSpec() ) )
     {
-        e = static_cast<const ModelVector<Natural> &>( which_element->getRevObject() ).getValue();
+        e = valueForRevType<ModelVector<Natural>>(which_element);
     }
     else
     {
-        int index = (int)static_cast<const Natural &>( which_element->getRevObject() ).getValue();
+        int index = (int)valueForRevType<Natural>(which_element);
         e.push_back( index );
     }
     
@@ -94,8 +95,8 @@ void Move_SynchronizedVectorFixedSingleElementSlide::constructInternalObject( vo
         --e[i];
     }
     
-    bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    bool t = valueForRevType<RlBoolean>(tune);
+    double tt = valueForRevType<Probability>(tuneTarget);
     
     RevBayesCore::Proposal *prop = new RevBayesCore::SynchronizedVectorFixedSingleElementSlideProposal(n, l, e);
     prop->setTargetAcceptanceRate(tt);
