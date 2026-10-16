@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "BranchHistoryDiscrete.h"
 
 #include <vector>
@@ -40,7 +41,7 @@ size_t BranchHistoryDiscrete::getMaxObservedState(void) const
 
     for (size_t i=0; i<parent_characters.size(); ++i)
     {
-        size_t this_state = static_cast<CharacterEventDiscrete*>(parent_characters[i])->getState();
+        size_t this_state = assume_cast<CharacterEventDiscrete*>(parent_characters[i])->getState();
         if ( max_obs_state < this_state )
         {
             max_obs_state = this_state;
@@ -49,7 +50,7 @@ size_t BranchHistoryDiscrete::getMaxObservedState(void) const
 
     for (size_t i=0; i<child_characters.size(); ++i)
     {
-        size_t this_state = static_cast<CharacterEventDiscrete*>(child_characters[i])->getState();
+        size_t this_state = assume_cast<CharacterEventDiscrete*>(child_characters[i])->getState();
         if ( max_obs_state < this_state )
         {
             max_obs_state = this_state;
@@ -59,7 +60,7 @@ size_t BranchHistoryDiscrete::getMaxObservedState(void) const
     std::multiset<CharacterEvent*,CharacterEventCompare>::iterator it = history.begin();
     for (; it!=history.end(); ++it)
     {
-        size_t this_state = static_cast<CharacterEventDiscrete*>(*it)->getState();
+        size_t this_state = assume_cast<CharacterEventDiscrete*>(*it)->getState();
         if ( max_obs_state < this_state )
         {
             max_obs_state = this_state;
@@ -88,5 +89,5 @@ void BranchHistoryDiscrete::setNumberOfStates(size_t n)
 CharacterEventDiscrete* BranchHistoryDiscrete::getEvent(size_t i)
 {
 
-    return static_cast<CharacterEventDiscrete*>( BranchHistory::getEvent(i) );
+    return assume_cast<CharacterEventDiscrete*>( BranchHistory::getEvent(i) );
 }

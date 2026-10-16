@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "BranchHistoryContinuous.h"
 
 #include <vector>
@@ -35,7 +36,7 @@ BranchHistoryContinuous* BranchHistoryContinuous::clone(void) const
 CharacterEventContinuous* BranchHistoryContinuous::getEvent(size_t i)
 {
     
-    return static_cast<CharacterEventContinuous*>( BranchHistory::getEvent(i) );
+    return assume_cast<CharacterEventContinuous*>( BranchHistory::getEvent(i) );
 }
 
 
