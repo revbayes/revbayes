@@ -122,7 +122,7 @@ const MemberRules& Move_CorrelationMatrixSpecificElementBeta::getParameterRules(
         move_member_rules.push_back( new ArgumentRule( "x"     , MatrixReal::getClassTypeSpec(), "The variable on which this move operates.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
         move_member_rules.push_back( new ArgumentRule( "row"    , Natural::getClassTypeSpec(), "The row of the variable on which this move operates.", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY ) );
         move_member_rules.push_back( new ArgumentRule( "col"    , Natural::getClassTypeSpec(), "The column of the variable on which this move operates.", ArgumentRule::BY_REFERENCE, ArgumentRule::ANY ) );
-        move_member_rules.push_back( new ArgumentRule( "alpha",  RealPos::getClassTypeSpec()   , "The shape of the beta distribution to draw from.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new Real(10.0) ) );
+        move_member_rules.push_back( new ArgumentRule( "alpha",  RealPos::getClassTypeSpec()   , "The shape of the beta distribution to draw from.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new RealPos(10.0) ) );
         move_member_rules.push_back( new ArgumentRule( "tune"  , RlBoolean::getClassTypeSpec() , "Should we tune the scaling factor during burnin?", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new RlBoolean( true ) ) );
         
         /* Inherit weight from Move, put it after variable */

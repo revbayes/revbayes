@@ -117,7 +117,7 @@ const MemberRules& Move_CorrelationMatrixRandomWalk::getParameterRules(void) con
     {
         
         move_member_rules.push_back( new ArgumentRule( "x"     , MatrixReal::getClassTypeSpec(), "The variable on which this move operates.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
-        move_member_rules.push_back( new ArgumentRule( "sigma",  RealPos::getClassTypeSpec()   , "The standard deviation of the normal distribution to draw from.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new Real(0.1) ) );
+        move_member_rules.push_back( new ArgumentRule( "sigma",  RealPos::getClassTypeSpec()   , "The standard deviation of the normal distribution to draw from.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new RealPos(0.1) ) );
         move_member_rules.push_back( new ArgumentRule( "tune"  , RlBoolean::getClassTypeSpec() , "Should we tune the scaling factor during burnin?", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new RlBoolean( true ) ) );
         
         /* Inherit weight from Move, put it after variable */
