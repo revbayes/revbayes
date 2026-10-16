@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "FreeKRateMatrixFunction.h"
 
@@ -74,14 +75,14 @@ void FreeKRateMatrixFunction::update( void )
         }
 
         // set the flattened rates
-        static_cast< RateMatrix_FreeK* >(value)->setTransitionRates(r_flat);
+        assume_cast< RateMatrix_FreeK* >(value)->setTransitionRates(r_flat);
     }
     else if (transition_rates == NULL && transition_rates_flat != NULL)
     {
         const std::vector<double>& r = transition_rates_flat->getValue();
         
         // set the flattened rates
-        static_cast< RateMatrix_FreeK* >(value)->setTransitionRates(r);
+        assume_cast< RateMatrix_FreeK* >(value)->setTransitionRates(r);
     }
 
     value->update();

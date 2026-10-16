@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "QDistribution.h"
 
@@ -34,7 +35,7 @@ QDistribution* QDistribution::clone(void) const {
 
 double QDistribution::computeLnProbability(void) {
 
-    RateMatrix_MPQ& myRateMatrix = static_cast<RateMatrix_MPQ&>(*this->value);
+    RateMatrix_MPQ& myRateMatrix = assume_cast<RateMatrix_MPQ&>(*this->value);
     bool is_reversible = myRateMatrix.getIsReversible();
 
     // get the current value for alpha (prior on stationary frequencies)
@@ -98,7 +99,7 @@ double QDistribution::computeLnProbability(void) {
    The two parts are separated by a semicolon. */
 std::string QDistribution::getHiddenStateString(void) const {
 
-    const RateMatrix_MPQ& m = static_cast<const RateMatrix_MPQ&>( *this->value );
+    const RateMatrix_MPQ& m = assume_cast<const RateMatrix_MPQ&>( *this->value );
     std::stringstream ss;
     ss << m.getStateString() << ";" << std::setprecision(17) << getLnPriorOdds();
     return ss.str();
@@ -120,7 +121,7 @@ void QDistribution::setHiddenStateFromString(const std::string &s) {
         throw RbException() << "Cannot read the prior odds of dnNucleotideRateMatrixMixture from the checkpoint string \"" << s << "\"";
         }
 
-    RateMatrix_MPQ& m = static_cast<RateMatrix_MPQ&>( *this->value );
+    RateMatrix_MPQ& m = assume_cast<RateMatrix_MPQ&>( *this->value );
     m.initFromString( s.substr(0, pos) );
 
     if ( fixed_model == REVERSIBLE_ONLY && m.getIsReversible() == false )
@@ -149,7 +150,7 @@ void QDistribution::executeMethod(const std::string &n, const std::vector<const 
 
     if ( n == "isReversible" )
         {
-        RateMatrix_MPQ& my_rate_matrix = static_cast<RateMatrix_MPQ&>(*this->value);
+        RateMatrix_MPQ& my_rate_matrix = assume_cast<RateMatrix_MPQ&>(*this->value);
         rv = my_rate_matrix.getIsReversible();
         }
     else
@@ -162,7 +163,7 @@ void QDistribution::executeMethod(const std::string &n, const std::vector<const 
 
     if (n == "getPi")
         {
-        RateMatrix_MPQ& my_rate_matrix = static_cast<RateMatrix_MPQ&>(*this->value);
+        RateMatrix_MPQ& my_rate_matrix = assume_cast<RateMatrix_MPQ&>(*this->value);
         rv = my_rate_matrix.getStationaryFrequencies();
         }
     else
@@ -175,13 +176,13 @@ void QDistribution::executeMethod(const std::string &n, const std::vector<const 
 
     if (n == "getRates")
         {
-        RateMatrix_MPQ& my_rate_matrix = static_cast<RateMatrix_MPQ&>(*this->value);
+        RateMatrix_MPQ& my_rate_matrix = assume_cast<RateMatrix_MPQ&>(*this->value);
         rv = my_rate_matrix.getRates();
         }
     else if (n == "getU")
         {
         // where in the polyhedron the current non-reversible model sits.
-        RateMatrix_MPQ& my_rate_matrix = static_cast<RateMatrix_MPQ&>(*this->value);
+        RateMatrix_MPQ& my_rate_matrix = assume_cast<RateMatrix_MPQ&>(*this->value);
         mpq_class u1, u2, u3;
         rv.clear();
         if ( my_rate_matrix.getIsReversible() == true )
@@ -251,7 +252,7 @@ void QDistribution::redrawValue(void) {
     // implement how to draw a new value from the prior
     RandomNumberGenerator* rng = GLOBAL_RNG;
     
-    RateMatrix_MPQ& my_rate_matrix = static_cast<RateMatrix_MPQ&>(*this->value);
+    RateMatrix_MPQ& my_rate_matrix = assume_cast<RateMatrix_MPQ&>(*this->value);
 
     const std::vector<double>& curr_alpha = alpha->getValue();
     
