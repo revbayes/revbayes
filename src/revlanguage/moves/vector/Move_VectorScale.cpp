@@ -100,7 +100,7 @@ const MemberRules& Move_VectorScale::getParameterRules(void) const
     {
         
         move_member_rules.push_back( new ArgumentRule( "x"     , ModelVector<RealPos>::getClassTypeSpec(), "The variable on which this move operates.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
-        move_member_rules.push_back( new ArgumentRule( "lambda", RealPos::getClassTypeSpec()             , "The scaling parameter (strength) of the move.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new Real(1.0) ) );
+        move_member_rules.push_back( new ArgumentRule( "lambda", RealPos::getClassTypeSpec()             , "The scaling parameter (strength) of the move.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new RealPos(1.0) ) );
         move_member_rules.push_back( new ArgumentRule( "tune"  , RlBoolean::getClassTypeSpec()           , "Should we tune the scaling parameter during burnin?", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new RlBoolean( true ) ) );
         
         /* Inherit weight (but not tuneTarget!) from Move and put it after the arguments created above */
