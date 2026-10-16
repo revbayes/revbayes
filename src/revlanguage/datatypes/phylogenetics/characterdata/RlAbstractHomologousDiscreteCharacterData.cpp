@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include "RlAbstractHomologousDiscreteCharacterData.h"
 
@@ -485,7 +486,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
             // e.g. data.setCodonPartition(sites=v(3))
         if ( argument.isType( Natural::getClassTypeSpec() ) )
         {
-            size_t n = size_t( static_cast<const Natural&>( argument ).getValue() );
+            size_t n = size_t( assume_cast<const Natural&>( argument ).getValue() );
             size_t i = 0; // index of included characters
             for (size_t j = 0; j < nChars; j++)
             {
@@ -509,7 +510,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
             // e.g. data.setCodonPartition(sites=v(1,2))
         else if ( argument.isType( ModelVector<Natural>::getClassTypeSpec() ) )
         {
-            const ModelVector<Natural>& x = static_cast<const ModelVector<Natural>&>( argument );
+            const ModelVector<Natural>& x = assume_cast<const ModelVector<Natural>&>( argument );
             if (x.size() == 0)
             {
                 return NULL;
@@ -554,7 +555,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
         bool warn = false;
 
         // e.g. data.setNumStatesPartition(2)
-        size_t n = size_t( static_cast<const Natural&>( argument ).getValue() );
+        size_t n = size_t( assume_cast<const Natural&>( argument ).getValue() );
         for (size_t i = 0; i < nChars; i++)
         {
             // only set state number partition for previously included characters

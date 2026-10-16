@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
@@ -54,7 +55,7 @@ void Move_BranchLengthScale::constructInternalObject( void )
     
     // now allocate a new tree scale move
     RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = dagNodeForRevType<BranchLengthTree>(tree);
-    RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
+    RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = assume_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
     
     double w = valueForRevType<RealPos>(weight);
     double l = valueForRevType<RealPos>(delta);

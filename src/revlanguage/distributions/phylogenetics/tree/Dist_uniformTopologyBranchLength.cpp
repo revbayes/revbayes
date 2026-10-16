@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include <cmath>
 #include <cstddef>
@@ -89,7 +90,7 @@ RevBayesCore::UniformTopologyBranchLengthDistribution* Dist_uniformTopologyBranc
     }
     
     const Distribution& rlDistribution              = objectForRevType<Distribution>(branch_length_prior);
-    RevBayesCore::TypedDistribution<double>* blp    = static_cast<RevBayesCore::TypedDistribution<double>* >( rlDistribution.createDistribution() );
+    RevBayesCore::TypedDistribution<double>* blp    = assume_cast<RevBayesCore::TypedDistribution<double>* >( rlDistribution.createDistribution() );
     
     
     bool r = false;

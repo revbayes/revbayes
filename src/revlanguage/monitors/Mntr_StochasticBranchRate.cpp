@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include "Mntr_StochasticBranchRate.h"
 
@@ -60,7 +61,7 @@ void Mntr_StochasticBranchRate::constructInternalObject( void )
     if ( objectForRevType<RevLanguage::Tree>(cdbdp).isModelObject() )
     {
         RevBayesCore::TypedDagNode<RevBayesCore::Tree>* cdbdp_tdn = dagNodeForRevType<RevLanguage::Tree>(cdbdp);
-        RevBayesCore::StochasticNode<RevBayesCore::Tree>* cdbdp_sn  = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree>* >( cdbdp_tdn );
+        RevBayesCore::StochasticNode<RevBayesCore::Tree>* cdbdp_sn  = assume_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree>* >( cdbdp_tdn );
 
         RevBayesCore::StateDependentSpeciationExtinctionProcess *sse_process = NULL;
         sse_process = dynamic_cast<RevBayesCore::StateDependentSpeciationExtinctionProcess*>( &cdbdp_sn->getDistribution() );
@@ -73,7 +74,7 @@ void Mntr_StochasticBranchRate::constructInternalObject( void )
     else if ( objectForRevType<RevLanguage::Tree>(glhbdsp).isModelObject() )
     {
         RevBayesCore::TypedDagNode<RevBayesCore::Tree>* glhbdsp_tdn = dagNodeForRevType<RevLanguage::Tree>(glhbdsp);
-        RevBayesCore::StochasticNode<RevBayesCore::Tree>* glhbdsp_sn  = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree>* >( glhbdsp_tdn );
+        RevBayesCore::StochasticNode<RevBayesCore::Tree>* glhbdsp_sn  = assume_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree>* >( glhbdsp_tdn );
 
         m = new RevBayesCore::StochasticBranchRateMonitor( glhbdsp_sn, (std::uint64_t)print_gen, file_name, sep );
         m->setAppend( app );

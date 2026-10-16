@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include "Transform_Vector_Log.h"
 
@@ -33,7 +34,7 @@ Core::TransformedVectorDistribution* RevLanguage::Transform_Vector_Log::createDi
 
     // get the parameters
     const Distribution& rl_vp                      = objectForRevType<Distribution>(base_distribution);
-    std::unique_ptr<Core::TypedDistribution<Core::RbVector<double>>> vp( static_cast<Core::TypedDistribution<Core::RbVector<double>>* >( rl_vp.createDistribution() ) );
+    std::unique_ptr<Core::TypedDistribution<Core::RbVector<double>>> vp( assume_cast<Core::TypedDistribution<Core::RbVector<double>>* >( rl_vp.createDistribution() ) );
 
     return new Core::TransformedVectorDistribution(vp, log_transform, log_inverse, log_log_prime);
 }

@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
@@ -82,7 +83,7 @@ void Move_ShrinkExpandScale::constructInternalObject( void )
     if ( sd != NULL && sd->getRevObject() != RevNullObject::getInstance() )
     {
         RevBayesCore::TypedDagNode<double> *tmp = dagNodeForRevType<RealPos>(sd);
-        s = static_cast<RevBayesCore::StochasticNode<double> *>( tmp );
+        s = assume_cast<RevBayesCore::StochasticNode<double> *>( tmp );
     }
     
     // get the tuning
