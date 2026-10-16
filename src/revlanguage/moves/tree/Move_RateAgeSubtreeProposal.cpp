@@ -151,7 +151,7 @@ void Move_RateAgeSubtreeProposal::constructInternalObject( void )
     bool t = valueFor<RlBoolean>(tune);
 
     // get the tree
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = dagNodeFor<TimeTree>(tree);
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = dagNodeFor<Tree>(tree);
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *n = RevBayesCore::assumeStochastic<RevBayesCore::Tree>( tmp );
 
     // finally create the internal move object
