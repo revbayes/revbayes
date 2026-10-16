@@ -6,6 +6,7 @@
 //  Copyright (c) 2015 will freyman. All rights reserved.
 //
 
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
@@ -63,7 +64,7 @@ void Move_NodeTimeScale::constructInternalObject( void )
     
     // now allocate a new sliding move
     RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = dagNodeForRevType<TimeTree>(tree);
-    RevBayesCore::StochasticNode<RevBayesCore::Tree> *tr = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
+    RevBayesCore::StochasticNode<RevBayesCore::Tree> *tr = assume_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
     double l = valueForRevType<RealPos>(lambda);
     bool t = valueForRevType<RlBoolean>(tune);
     double w = valueForRevType<RealPos>(weight);

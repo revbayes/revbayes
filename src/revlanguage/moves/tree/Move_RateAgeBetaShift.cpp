@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
@@ -65,13 +66,13 @@ void Move_RateAgeBetaShift::constructInternalObject( void )
     bool at = valueForRevType<RlBoolean>(tune);
     double w = valueForRevType<RealPos>(weight);
     double tt = valueForRevType<Probability>(tuneTarget);
-    RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
+    RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = assume_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* tmpRates = dagNodeForRevType<ModelVector<RealPos>>(rates);
     std::vector< RevBayesCore::StochasticNode<double> *> rates;
     RevBayesCore::StochasticNode< RevBayesCore::RbVector<double> >* snode_rates = dynamic_cast<RevBayesCore::StochasticNode< RevBayesCore::RbVector<double> > *>( tmpRates );
     if ( tmpRates->isStochastic() == false )
     {
-        RevBayesCore::DeterministicNode< RevBayesCore::RbVector<double> >*dnode = static_cast< RevBayesCore::DeterministicNode< RevBayesCore::RbVector<double> > *>( tmpRates );
+        RevBayesCore::DeterministicNode< RevBayesCore::RbVector<double> >*dnode = assume_cast< RevBayesCore::DeterministicNode< RevBayesCore::RbVector<double> > *>( tmpRates );
 
         RevBayesCore::VectorFunction<double>* func_vec = dynamic_cast<RevBayesCore::VectorFunction<double>*>( &dnode->getFunction() );
         if ( func_vec == NULL )
@@ -82,7 +83,7 @@ void Move_RateAgeBetaShift::constructInternalObject( void )
 
         for (std::vector<const RevBayesCore::TypedDagNode<double>* >::const_iterator it = pars.begin(); it != pars.end(); ++it)
         {
-            rates.push_back( const_cast<RevBayesCore::StochasticNode<double>* >(static_cast<const RevBayesCore::StochasticNode<double>* >( *it ) ) );
+            rates.push_back( const_cast<RevBayesCore::StochasticNode<double>* >(assume_cast<const RevBayesCore::StochasticNode<double>* >( *it ) ) );
         }
     }
     else

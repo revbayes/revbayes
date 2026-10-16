@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
@@ -68,18 +69,18 @@ void Mntr_CharacterHistoryNhxFile::constructInternalObject( void ) {
     RevObject& b = burnin->getRevObject();
     if ( b.isType( Integer::getClassTypeSpec() ) )
     {
-        burn = (int)static_cast<const Integer &>(b).getValue();
+        burn = (int)assume_cast<const Integer &>(b).getValue();
     }
     else
     {
-        double f = static_cast<const Probability &>(b).getValue();
+        double f = assume_cast<const Probability &>(b).getValue();
         burn = int( mg*f );
     }
 
     RevBayesCore::TypedDagNode<RevBayesCore::Tree> *t = dagNodeForRevType<TimeTree>(tree);
     
     RevBayesCore::TypedDagNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_tdn   = dagNodeForRevType<RevLanguage::AbstractHomologousDiscreteCharacterData>(ctmc);
-    RevBayesCore::StochasticNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_sn  = static_cast<RevBayesCore::StochasticNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* >(ctmc_tdn);
+    RevBayesCore::StochasticNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_sn  = assume_cast<RevBayesCore::StochasticNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* >(ctmc_tdn);
     
     const RevBayesCore::TimeAtlas* atl = &( valueForRevType<RlAtlas>(atlas) );
     

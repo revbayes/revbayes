@@ -1,4 +1,5 @@
 
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
@@ -92,7 +93,7 @@ void deprecateUnderPrior(const std::string& method, const Argument& arg)
     if (underPriorObject == RevNullObject::getInstance()) return;
 
     // What value did the user specify?
-    auto underPrior = static_cast<const RlBoolean &>( underPriorObject ).getValue();
+    auto underPrior = assume_cast<const RlBoolean &>( underPriorObject ).getValue();
 
     // Skip if this is a warning and we've already showed the warning twice.
     if (not underPrior and warned > 2) return;

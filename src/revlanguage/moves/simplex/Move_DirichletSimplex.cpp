@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
@@ -62,7 +63,7 @@ void Move_DirichletSimplex::constructInternalObject( void )
     double k = valueForRevType<RealPos>(kappa);
     double r = valueForRevType<RealPos>(tuneTarget);
     RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* tmp = dagNodeForRevType<Simplex>(x);
-    RevBayesCore::StochasticNode< RevBayesCore::Simplex > *n = static_cast<RevBayesCore::StochasticNode< RevBayesCore::Simplex > *>( tmp );
+    RevBayesCore::StochasticNode< RevBayesCore::Simplex > *n = assume_cast<RevBayesCore::StochasticNode< RevBayesCore::Simplex > *>( tmp );
     bool t = valueForRevType<RlBoolean>(tune);
 
     RevBayesCore::Proposal *prop = new RevBayesCore::DirichletSimplexProposal(n,a,nc,o,k,r);
