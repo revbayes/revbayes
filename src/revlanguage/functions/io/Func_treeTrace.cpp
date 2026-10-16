@@ -52,7 +52,8 @@ RevPtr<RevVariable> Func_treeTrace::execute( void )
     
     RevObject& ro = args[0].getVariable()->getRevObject();
 
-    const ModelVector<RevLanguage::Tree>& trees = RevBayesCore::assume_cast<const ModelVector<RevLanguage::Tree>&>( ro );
+    // All accepted tree-vector wrappers share this core value type.
+    const auto& trees = RevBayesCore::assume_cast<const ModelObject<RevBayesCore::RbVector<RevBayesCore::Tree>>&>( ro ).getValue();
 
     if ( ro.isType( ModelVector<TimeTree>::getClassTypeSpec() ) )
     {
