@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "RlAbstractHomologousDiscreteCharacterData.h"
 
 #include <cstddef>
@@ -149,7 +150,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
         found = true;
 
             // get the member with give index
-        const Natural& index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() );
+        const Natural& index = objectForRevType<Natural>(args[0].getVariable());
 
         if (this->dag_node->getValue().getNumberOfTaxa() < (size_t)(index.getValue()) )
         {
@@ -168,7 +169,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
         std::vector<std::vector<bool> > mask_gap        = std::vector<std::vector<bool> >(num_taxa, std::vector<bool>());
         std::vector<std::vector<bool> > mask_missing    = std::vector<std::vector<bool> >(num_taxa, std::vector<bool>());
         
-        const RevBayesCore::AbstractHomologousDiscreteCharacterData& ref = static_cast<const AbstractHomologousDiscreteCharacterData&>( args[0].getVariable()->getRevObject() ).getValue();
+        const RevBayesCore::AbstractHomologousDiscreteCharacterData& ref = valueForRevType<AbstractHomologousDiscreteCharacterData>(args[0].getVariable());
 
         ref.fillMissingSitesMask(mask_gap, mask_missing);
         this->dag_node->getValue().applyMissingSitesMask(mask_gap, mask_missing);
@@ -188,8 +189,8 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
     {
         found = true;
 
-        bool folded = static_cast<const RlBoolean&>( args[0].getVariable()->getRevObject() ).getValue();
-        const std::string& str_ambig_treat = static_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
+        bool folded = valueForRevType<RlBoolean>(args[0].getVariable());
+        const std::string& str_ambig_treat = valueForRevType<RlString>(args[1].getVariable());
 
         RevBayesCore::AbstractHomologousDiscreteCharacterData::SFS_AMBIGUITY_TREATMENT ambig_treat = RevBayesCore::AbstractHomologousDiscreteCharacterData::SFS_AMBIGUITY_TREATMENT::ANCESTRAL;
         if ( str_ambig_treat == "derived" )
@@ -481,7 +482,7 @@ RevPtr<RevVariable> AbstractHomologousDiscreteCharacterData::executeMethod(std::
     {
         found = true;
         
-        double missing = static_cast<const Probability&>( args[0].getVariable()->getRevObject() ).getValue();
+        double missing = valueForRevType<Probability>(args[0].getVariable());
 
         this->dag_node->getValue().replaceRandomSitesByMissingData(missing);
 

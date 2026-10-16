@@ -6,6 +6,7 @@
 //  Copyright (c) 2015 Michael Landis. All rights reserved.
 //
 
+#include "RevTypeUtilities.h"
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -101,7 +102,7 @@ RevPtr<RevVariable> SiteMixtureModel::executeMethod(std::string const &name, con
     {
         found = true;
 
-        const Natural& index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() );
+        const Natural& index = objectForRevType<Natural>(args[0].getVariable());
         int i = index.getValue() - 1;
         
         auto weights = dag_node->getValue().getComponent(i).getRootFrequencies();
