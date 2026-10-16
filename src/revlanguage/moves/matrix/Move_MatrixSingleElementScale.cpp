@@ -168,7 +168,7 @@ const MemberRules& Move_MatrixSingleElementScale::getParameterRules(void) const
         matTypes.push_back( MatrixRealSymmetric::getClassTypeSpec() );
         matTypes.push_back( MatrixReal::getClassTypeSpec() );
         move_member_rules.push_back( new ArgumentRule( "x"     , matTypes, "The variable on which this move operates.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
-        move_member_rules.push_back( new ArgumentRule( "lambda", RealPos::getClassTypeSpec()   , "The scaling factor (strength) of the proposal.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new Real(1.0) ) );
+        move_member_rules.push_back( new ArgumentRule( "lambda", RealPos::getClassTypeSpec()   , "The scaling factor (strength) of the proposal.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new RealPos(1.0) ) );
         move_member_rules.push_back( new ArgumentRule( "tune"  , RlBoolean::getClassTypeSpec() , "Should we tune the scaling factor during burnin?", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new RlBoolean( true ) ) );
         move_member_rules.push_back( new ArgumentRule( "row", Natural::getClassTypeSpec(), "Confine the move to this row; omit to use every element.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
         move_member_rules.push_back( new ArgumentRule( "col", Natural::getClassTypeSpec(), "Confine the move to this column; omit to use every element.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
