@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "PoMoRateMatrixFunction.h"
 
@@ -70,9 +71,9 @@ void PoMoRateMatrixFunction::update( void )
     
     
     // set the base frequencies
-    static_cast< RateMatrix_PoMo* >(value)->setMutationRates( r );
-    static_cast< RateMatrix_PoMo* >(value)->setSelectionCoefficients( s );
-    static_cast< RateMatrix_PoMo* >(value)->update();
+    cast_to_derived< RateMatrix_PoMo* >(value)->setMutationRates( r );
+    cast_to_derived< RateMatrix_PoMo* >(value)->setSelectionCoefficients( s );
+    cast_to_derived< RateMatrix_PoMo* >(value)->update();
     
 }
 

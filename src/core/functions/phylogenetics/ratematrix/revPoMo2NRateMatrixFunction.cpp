@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "revPoMo2NRateMatrixFunction.h"
 #include "RbException.h"
@@ -59,10 +60,10 @@ void revPoMo2NRateMatrixFunction::update( void )
     const std::vector<double>&  f  = phi->getValue();
 
     // set the base frequencies
-    static_cast< RateMatrix_revPoMo2N* >(value)->setN( ni );
-    static_cast< RateMatrix_revPoMo2N* >(value)->setPi( bf );
-    static_cast< RateMatrix_revPoMo2N* >(value)->setRho( ex );
-    static_cast< RateMatrix_revPoMo2N* >(value)->setPhi( f );
+    cast_to_derived< RateMatrix_revPoMo2N* >(value)->setN( ni );
+    cast_to_derived< RateMatrix_revPoMo2N* >(value)->setPi( bf );
+    cast_to_derived< RateMatrix_revPoMo2N* >(value)->setRho( ex );
+    cast_to_derived< RateMatrix_revPoMo2N* >(value)->setPhi( f );
 
     value->update();
 }

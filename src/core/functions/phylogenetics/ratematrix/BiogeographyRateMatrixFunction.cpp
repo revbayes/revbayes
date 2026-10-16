@@ -7,6 +7,7 @@
 //
 
 
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "BiogeographyRateMatrixFunction.h"
 
@@ -73,8 +74,8 @@ void BiogeographyRateMatrixFunction::update( void ) {
     const RbVector<double>& er                  = extirpationRates->getValue();
         
     // set the base frequencies
-    static_cast< RateMatrix_Biogeography* >(value)->setDispersalRates(dr);
-    static_cast< RateMatrix_Biogeography* >(value)->setExtirpationRates(er);
+    cast_to_derived< RateMatrix_Biogeography* >(value)->setDispersalRates(dr);
+    cast_to_derived< RateMatrix_Biogeography* >(value)->setExtirpationRates(er);
     
     value->update();
 }

@@ -6,6 +6,7 @@
 //  Copyright (c) 2015 Michael Landis. All rights reserved.
 //
 
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "EpochRateMatrixFunction.h"
 
@@ -55,9 +56,9 @@ void EpochRateMatrixFunction::update( void )
     
     
     // set the base frequencies
-    static_cast<RateGenerator_Epoch*>(value)->setEpochGenerators(rg);
-    static_cast<RateGenerator_Epoch*>(value)->setEpochRates(r);
-    static_cast<RateGenerator_Epoch*>(value)->setEpochTimes(t);
+    cast_to_derived<RateGenerator_Epoch*>(value)->setEpochGenerators(rg);
+    cast_to_derived<RateGenerator_Epoch*>(value)->setEpochRates(r);
+    cast_to_derived<RateGenerator_Epoch*>(value)->setEpochTimes(t);
     
     value->update();
     

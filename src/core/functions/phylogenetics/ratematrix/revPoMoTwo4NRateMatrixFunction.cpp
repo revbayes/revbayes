@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "revPoMoTwo4NRateMatrixFunction.h"
 #include "RateMatrix_revPoMoTwo4N.h"
@@ -41,10 +42,10 @@ void revPoMoTwo4NRateMatrixFunction::update( void )
     const std::vector<double>& ex = rho->getValue();
 
     // set parameters
-    static_cast< RateMatrix_revPoMoTwo4N* >(value)->setN( n );
-    static_cast< RateMatrix_revPoMoTwo4N* >(value)->setPi( bf );
-    static_cast< RateMatrix_revPoMoTwo4N* >(value)->setRho( ex );
-    static_cast< RateMatrix_revPoMoTwo4N* >(value)->update();
+    cast_to_derived< RateMatrix_revPoMoTwo4N* >(value)->setN( n );
+    cast_to_derived< RateMatrix_revPoMoTwo4N* >(value)->setPi( bf );
+    cast_to_derived< RateMatrix_revPoMoTwo4N* >(value)->setRho( ex );
+    cast_to_derived< RateMatrix_revPoMoTwo4N* >(value)->update();
 }
 
 

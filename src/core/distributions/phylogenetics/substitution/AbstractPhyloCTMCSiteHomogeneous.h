@@ -1866,7 +1866,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::executeMethod(con
 
         // now either sample the site rates according to the conditional posterior probability of each rate category
         // or compute them as the posterior mean
-        std::string method = static_cast<const TypedDagNode<std::string>* >( args[0] )->getValue();
+        std::string method = cast_to_derived<const TypedDagNode<std::string>* >( args[0] )->getValue();
 
         if (method == "sampling")
         {
@@ -2955,7 +2955,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setValue(Abstract
     this->compress();
 
     // now we also set the template state
-    template_state = charType( static_cast<const charType&>( this->value->getTaxonData(0).getCharacter(0) ) );
+    template_state = charType( cast_to_derived<const charType&>( this->value->getTaxonData(0).getCharacter(0) ) );
     template_state.setToFirstState();
     template_state.setGapState( false );
     template_state.setMissingState( false );

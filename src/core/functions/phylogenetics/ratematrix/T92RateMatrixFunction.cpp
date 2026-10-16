@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "T92RateMatrixFunction.h"
 
@@ -52,8 +53,8 @@ void T92RateMatrixFunction::update( void )
     
     
     // set the base frequencies
-    static_cast< RateMatrix_Tamura92* >(value)->setGC( gc );
-    static_cast< RateMatrix_Tamura92* >(value)->setKappa( k );
+    cast_to_derived< RateMatrix_Tamura92* >(value)->setGC( gc );
+    cast_to_derived< RateMatrix_Tamura92* >(value)->setKappa( k );
     
     value->update();
 

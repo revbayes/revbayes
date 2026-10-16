@@ -6,6 +6,7 @@
 //  Copyright © 2017 Michael Landis. All rights reserved.
 //
 
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "SiteRateModifierFunction.h"
 
@@ -65,9 +66,9 @@ void SiteRateModifierFunction::update( void )
     const RbVector<std::int64_t>& sc               = site_classes->getValue();
     
     // apply updates to SiteRateModifier
-    static_cast<SiteRateModifier*>(value)->setRateMultipliers(rm);
-    static_cast<SiteRateModifier*>(value)->setEventClasses(ec);
-    static_cast<SiteRateModifier*>(value)->setSiteClasses(sc);
+    cast_to_derived<SiteRateModifier*>(value)->setRateMultipliers(rm);
+    cast_to_derived<SiteRateModifier*>(value)->setEventClasses(ec);
+    cast_to_derived<SiteRateModifier*>(value)->setSiteClasses(sc);
     
 }
 

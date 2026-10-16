@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "PoMoKNRateMatrixFunction.h"
 #include "RbException.h"
@@ -68,10 +69,10 @@ void PoMoKNRateMatrixFunction::update( void )
     const std::vector<double>& f = phi->getValue();
 
     // set the base frequencies
-    static_cast< RateMatrix_PoMoKN* >(value)->setK( na );
-    static_cast< RateMatrix_PoMoKN* >(value)->setN( ni );
-    static_cast< RateMatrix_PoMoKN* >(value)->setMu( m );
-    static_cast< RateMatrix_PoMoKN* >(value)->setPhi( f );
+    cast_to_derived< RateMatrix_PoMoKN* >(value)->setK( na );
+    cast_to_derived< RateMatrix_PoMoKN* >(value)->setN( ni );
+    cast_to_derived< RateMatrix_PoMoKN* >(value)->setMu( m );
+    cast_to_derived< RateMatrix_PoMoKN* >(value)->setPhi( f );
 
     value->update();
 }

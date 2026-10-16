@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "GtrRateMatrixFunction.h"
 
@@ -52,8 +53,8 @@ void GtrRateMatrixFunction::update( void )
     
     
     // set the base frequencies
-    static_cast< RateMatrix_GTR* >(value)->setStationaryFrequencies( f );
-    static_cast< RateMatrix_GTR* >(value)->setExchangeabilityRates( r );
+    cast_to_derived< RateMatrix_GTR* >(value)->setStationaryFrequencies( f );
+    cast_to_derived< RateMatrix_GTR* >(value)->setExchangeabilityRates( r );
     
     value->update();
     
