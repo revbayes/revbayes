@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
@@ -750,19 +751,19 @@ void FossilizedBirthDeathSpeciationProcess::swapParameterInternal(const DagNode 
 {
     if (oldP == heterogeneous_lambda_a)
     {
-        heterogeneous_lambda_a = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(heterogeneous_lambda_a, newP);
     }
     else if (oldP == heterogeneous_beta)
     {
-        heterogeneous_beta = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(heterogeneous_beta, newP);
     }
     else if (oldP == homogeneous_lambda_a)
     {
-        homogeneous_lambda_a = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(homogeneous_lambda_a, newP);
     }
     else if (oldP == homogeneous_beta)
     {
-        homogeneous_beta = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(homogeneous_beta, newP);
     }
     else
     {

@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include <cstddef>
 #include <cmath>
 #include <iosfwd>
@@ -215,11 +216,11 @@ void ConstantRateCompleteBirthDeathProcess::swapParameterInternal(const DagNode 
 
     if (oldP == speciation)
     {
-        speciation = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(speciation, newP);
     }
     else if (oldP == extinction)
     {
-        extinction = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(extinction, newP);
     }
     else
     {

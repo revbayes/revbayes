@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "PoissonDistribution.h"
 
 #include "DistributionPoisson.h"
@@ -61,6 +62,6 @@ void PoissonDistribution::swapParameterInternal(const DagNode *oldP, const DagNo
 {
     if (oldP == lambda)
     {
-        lambda = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(lambda, newP);
     }
 }
