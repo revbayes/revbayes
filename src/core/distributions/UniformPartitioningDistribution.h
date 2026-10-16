@@ -1,6 +1,7 @@
 #ifndef UniformPartitioningDistribution_H
 #define UniformPartitioningDistribution_H
 
+#include "DagNodeTypeUtilities.h"
 #include "MemberObject.h"
 #include "RbVector.h"
 #include "Simplex.h"
@@ -384,7 +385,7 @@ void RevBayesCore::UniformPartitioningDistribution<valueType>::swapParameterInte
 {
     if (oldP == parameter_values)
     {
-        parameter_values = static_cast<const TypedDagNode< RbVector<valueType> >* >( newP );
+        replaceNodeReference(parameter_values, newP);
     }
 }
 

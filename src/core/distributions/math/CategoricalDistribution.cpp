@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "CategoricalDistribution.h"
 
 #include <cmath>
@@ -90,7 +91,7 @@ void CategoricalDistribution::swapParameterInternal( const DagNode *oldP, const 
 {
     if (oldP == probs)
     {
-        probs = static_cast<const TypedDagNode< Simplex >* >( newP );
+        replaceNodeReference(probs, newP);
     }
 }
 

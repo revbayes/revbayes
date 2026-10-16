@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "InverseGammaDistribution.h"
 
 #include "DistributionInverseGamma.h"
@@ -93,10 +94,10 @@ void InverseGammaDistribution::swapParameterInternal( const DagNode *oldP, const
 {
     if (oldP == shape)
     {
-        shape = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(shape, newP);
     }
     if (oldP == rate)
     {
-        rate = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(rate, newP);
     }
 }

@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include <cstddef>
 #include <cmath>
 #include <vector>
@@ -227,12 +228,12 @@ void MultispeciesCoalescentInverseGammaPrior::swapParameterInternal(const DagNod
 
     if ( oldP == scale )
     {
-        scale = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(scale, newP);
     }
 
     if ( oldP == shape )
     {
-        shape = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(shape, newP);
     }
 
     AbstractMultispeciesCoalescentGenewise::swapParameterInternal(oldP, newP);

@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include <cmath>
 #include <cstddef>
 #include <iostream>
@@ -284,7 +285,7 @@ void PhyloDistanceGamma::swapParameterInternal(const DagNode *oldP, const DagNod
     if (oldP == tau)
     {
        // tau->getValue().getTreeChangeEventHandler().removeListener( this );
-        tau = static_cast<const TypedDagNode<Tree>* >( newP );
+        replaceNodeReference(tau, newP);
 		//First, compute the distance matrix from the current tree
 		
 		//computeLnProbability();

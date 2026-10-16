@@ -1,6 +1,7 @@
 #ifndef GeneralTreeHistoryCtmc_H
 #define GeneralTreeHistoryCtmc_H
 
+#include "DagNodeTypeUtilities.h"
 #include "TreeHistoryCtmc.h"
 #include "AbstractCladogenicStateFunction.h"
 #include "CladogeneticProbabilityMatrix.h"
@@ -1074,23 +1075,23 @@ void RevBayesCore::GeneralTreeHistoryCtmc<charType>::swapParameterInternal( cons
     
     if (oldP == homogeneousRateGenerator)
     {
-        homogeneousRateGenerator = static_cast<const TypedDagNode< RateGeneratorSequence >* >( newP );
+        replaceNodeReference(homogeneousRateGenerator, newP);
     }
     else if (oldP == heterogeneousRateGenerator)
     {
-        heterogeneousRateGenerator = static_cast<const TypedDagNode< RbVector< RateGeneratorSequence > >* >( newP );
+        replaceNodeReference(heterogeneousRateGenerator, newP);
     }
     else if (oldP == homogeneousCladogeneticProbabilityMatrix)
     {
-        homogeneousCladogeneticProbabilityMatrix = static_cast<const DeterministicNode< CladogeneticProbabilityMatrix >* >( newP );
+        replaceNodeReference(homogeneousCladogeneticProbabilityMatrix, newP);
     }
     else if (oldP == rootFrequencies)
     {
-        rootFrequencies = static_cast<const TypedDagNode< Simplex >* >( newP );
+        replaceNodeReference(rootFrequencies, newP);
     }
     else if (oldP == siteRates)
     {
-        siteRates = static_cast<const TypedDagNode< RbVector< double > >* >( newP );
+        replaceNodeReference(siteRates, newP);
     }
     else
     {

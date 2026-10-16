@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include <algorithm>
 #include <cmath>
 #include <set>
@@ -878,19 +879,19 @@ void SampledSpeciationBirthDeathProcess::swapParameterInternal( const DagNode *o
 {
     if (oldP == root_age)
     {
-        root_age = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(root_age, newP);
     }
     else if (oldP == speciation)
     {
-        speciation = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(speciation, newP);
     }
     else if (oldP == extinction)
     {
-        extinction = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(extinction, newP);
     }
     else if (oldP == rho)
     {
-        rho = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(rho, newP);
     }
     
 }
