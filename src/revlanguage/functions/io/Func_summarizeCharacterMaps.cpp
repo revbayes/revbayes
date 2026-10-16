@@ -69,13 +69,12 @@ RevPtr<RevVariable> Func_summarizeCharacterMaps::execute( void )
         ancestralstate_traces.push_back( ast_vector[i].getValue() );
     }
     
-    // get the tree trace
-    const TraceTree& tt = RevBayesCore::assume_cast<const TraceTree&>( args[2].getVariable()->getRevObject() );
-    
     // make a new tree summary object, using the tree trace if necessary
     RevBayesCore::TraceTree tree_trace;
     if (args[2].getVariable()->getRevObject() != RevNullObject::getInstance())
     {
+        // Read the optional trace only after checking that it was supplied.
+        const TraceTree& tt = RevBayesCore::assume_cast<const TraceTree&>( args[2].getVariable()->getRevObject() );
         tree_trace = tt.getValue();
     }
     
