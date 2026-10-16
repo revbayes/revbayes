@@ -71,7 +71,7 @@ RevBayesCore::StairwayPlotDistribution* Dist_StairwayPlot::createDistribution( v
     long                                                            n_sites = static_cast<const Natural              &>( num_sites->getRevObject() ).getValue();
     long                                                            n_ind   = static_cast<const Natural              &>( num_individuals->getRevObject() ).getValue();
     long                                                            f       = static_cast<const RlBoolean            &>( folded->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*   th      = static_cast<const ModelVector<RealPos> &>( theta->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >*   th      = static_cast<const ModelObject<RevBayesCore::RbVector<double>> &>( theta->getRevObject() ).getDagNode();
 
     const std::string&                                              m       = static_cast<const RlString             &>( monomorphic_probability->getRevObject() ).getValue();
     RevBayesCore::StairwayPlotDistribution::MONOMORPHIC_PROBABILITY mp = RevBayesCore::StairwayPlotDistribution::REST;
