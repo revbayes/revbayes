@@ -48,10 +48,10 @@ Func_geographicalDistance* Func_geographicalDistance::clone( void ) const
 RevBayesCore::TypedFunction<double>* Func_geographicalDistance::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<double>* lat1 = dagNodeFor<RealPos>(this->args[0].getVariable());
-    RevBayesCore::TypedDagNode<double>* lon1 = dagNodeFor<RealPos>(this->args[1].getVariable());
-    RevBayesCore::TypedDagNode<double>* lat2 = dagNodeFor<RealPos>(this->args[2].getVariable());
-    RevBayesCore::TypedDagNode<double>* lon2 = dagNodeFor<RealPos>(this->args[3].getVariable());
+    RevBayesCore::TypedDagNode<double>* lat1 = dagNodeFor<Real>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode<double>* lon1 = dagNodeFor<Real>(this->args[1].getVariable());
+    RevBayesCore::TypedDagNode<double>* lat2 = dagNodeFor<Real>(this->args[2].getVariable());
+    RevBayesCore::TypedDagNode<double>* lon2 = dagNodeFor<Real>(this->args[3].getVariable());
     RevBayesCore::GeographicalDistanceFunction* f = new RevBayesCore::GeographicalDistanceFunction( lat1, lon1, lat2, lon2 );
     
     return f;

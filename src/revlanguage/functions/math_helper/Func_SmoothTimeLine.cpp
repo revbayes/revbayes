@@ -60,7 +60,7 @@ Func_SmoothTimeLine* Func_SmoothTimeLine::clone( void ) const
 RevBayesCore::TypedFunction<RevBayesCore::RbVector<double> >* Func_SmoothTimeLine::createFunction( void ) const
 {
 
-    RevBayesCore::TypedDagNode<double>* max_t                              = dagNodeFor<RealPos>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode<double>* max_t                              = dagNodeFor<Real>(this->args[0].getVariable());
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* times = dagNodeFor<ModelVector<RealPos>>(this->args[1].getVariable());
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* values = dagNodeFor<ModelVector<RealPos>>(this->args[2].getVariable());
 
