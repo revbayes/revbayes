@@ -42,6 +42,7 @@ template <class valueType> class RbOrderedSet;
         // pure virtual methods
         virtual void                                                bootstrap(void) = 0;                                                                        //!< Bootstrap the current value of the node (applies only to stochastic nodes)
         virtual DagNode*                                            clone(void) const = 0;
+        virtual bool                                                hasCompatibleValueType(const DagNode& other) const = 0;                                     //!< Whether another node holds the same C++ value type
         virtual DagNode*                                            cloneDAG(DagNodeMap &nodesMap, std::map<std::string, const DagNode* > &names) const = 0;    //!< Clone the entire DAG which is connected to this node
         virtual AbstractTrace*                                      createTraceObject(void) const = 0;                                                          //!< Create an empty trace object of the right trace type
         virtual void                                                getIntegratedParents(RbOrderedSet<DagNode *>& ip) const = 0;
