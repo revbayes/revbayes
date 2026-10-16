@@ -6,6 +6,7 @@
 //  Copyright © 2016 Michael Landis. All rights reserved.
 //
 
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include <cstddef>
 #include <cmath>
@@ -168,7 +169,7 @@ void SampledCladogenesisRootFrequenciesFunction::update( void ) {
         
         // get root history information
         const AbstractCharacterHistoryBirthDeathProcess* dist = dynamic_cast<const AbstractCharacterHistoryBirthDeathProcess* >( &tree->getDistribution() );
-        const CharacterHistoryDiscrete& tree_history = static_cast<const CharacterHistoryDiscrete&>(dist->getCharacterHistory());
+        const CharacterHistoryDiscrete& tree_history = assume_cast<const CharacterHistoryDiscrete&>(dist->getCharacterHistory());
         const BranchHistory& branch_history = tree_history[root.getIndex()];
         const std::multiset<CharacterEvent*,CharacterEventCompare>& events = branch_history.getHistory();
         

@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "BinaryMutationCoalescentRateMatrixFunction.h"
 #include "RateMatrix_BinaryMutationCoalescent.h"
@@ -35,9 +36,9 @@ void BinaryMutationCoalescentRateMatrixFunction::update( void )
 {
     
     // set the base frequencies
-    static_cast< RateMatrix_BinaryMutationCoalescent* >(value)->setMutationRate( mu->getValue() );
-    static_cast< RateMatrix_BinaryMutationCoalescent* >(value)->setEffectivePopulationSize( Ne->getValue() );
-    static_cast< RateMatrix_BinaryMutationCoalescent* >(value)->update();
+    assume_cast< RateMatrix_BinaryMutationCoalescent* >(value)->setMutationRate( mu->getValue() );
+    assume_cast< RateMatrix_BinaryMutationCoalescent* >(value)->setEffectivePopulationSize( Ne->getValue() );
+    assume_cast< RateMatrix_BinaryMutationCoalescent* >(value)->update();
     
 }
 

@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include <vector>
 
@@ -57,8 +58,8 @@ void TamuraNeiRateMatrixFunction::update( void )
     
     
     // set the base frequencies
-    static_cast< RateMatrix_TamuraNei* >(value)->setStationaryFrequencies( f );
-    static_cast< RateMatrix_TamuraNei* >(value)->setKappa(k1, k2);
+    assume_cast< RateMatrix_TamuraNei* >(value)->setStationaryFrequencies( f );
+    assume_cast< RateMatrix_TamuraNei* >(value)->setKappa(k1, k2);
     
     value->update();
     

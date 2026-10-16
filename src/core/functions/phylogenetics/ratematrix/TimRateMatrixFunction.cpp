@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "TimRateMatrixFunction.h"
 
@@ -53,8 +54,8 @@ void TimRateMatrixFunction::update( void )
     
     
     // set the base frequencies
-    static_cast< RateMatrix_TIM* >(value)->setStationaryFrequencies( f );
-    static_cast< RateMatrix_TIM* >(value)->setRates( r );
+    assume_cast< RateMatrix_TIM* >(value)->setStationaryFrequencies( f );
+    assume_cast< RateMatrix_TIM* >(value)->setRates( r );
     
     value->update();
     

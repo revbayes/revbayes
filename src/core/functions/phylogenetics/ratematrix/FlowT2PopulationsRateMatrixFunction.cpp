@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "FlowT2PopulationsRateMatrixFunction.h"
 #include "RbException.h"
@@ -59,10 +60,10 @@ void FlowT2PopulationsRateMatrixFunction::update( void )
     const std::vector<double>& s = sigma->getValue();
 
     // set the base frequencies
-    static_cast< RateMatrix_FlowT2Populations* >(value)->setNu( n );
-    static_cast< RateMatrix_FlowT2Populations* >(value)->setMu( m );
-    static_cast< RateMatrix_FlowT2Populations* >(value)->setLambda( l );
-    static_cast< RateMatrix_FlowT2Populations* >(value)->setSigma( s );
+    assume_cast< RateMatrix_FlowT2Populations* >(value)->setNu( n );
+    assume_cast< RateMatrix_FlowT2Populations* >(value)->setMu( m );
+    assume_cast< RateMatrix_FlowT2Populations* >(value)->setLambda( l );
+    assume_cast< RateMatrix_FlowT2Populations* >(value)->setSigma( s );
 
     value->update();
 }

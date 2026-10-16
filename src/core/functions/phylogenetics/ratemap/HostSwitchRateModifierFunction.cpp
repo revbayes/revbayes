@@ -6,6 +6,7 @@
 //  Copyright © 2017 Michael Landis. All rights reserved.
 //
 
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "HostSwitchRateModifierFunction.h"
 
@@ -60,8 +61,8 @@ void HostSwitchRateModifierFunction::update( void )
     const std::vector<double>& s = scale->getValue();
     
     // apply updates to HostSwitchRateModifier
-    static_cast<HostSwitchRateModifier*>(value)->setTree(t);
-    static_cast<HostSwitchRateModifier*>(value)->setScale(s);
+    assume_cast<HostSwitchRateModifier*>(value)->setTree(t);
+    assume_cast<HostSwitchRateModifier*>(value)->setScale(s);
 
     
 }

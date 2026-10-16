@@ -307,7 +307,7 @@ void RevBayesCore::TreeHistoryCtmc<charType>::executeMethod(const std::string &n
         rv.clear();
         rv.resize( num_sites );
 
-        int index = (int)static_cast<const TypedDagNode<std::int64_t>* >( args[0] )->getValue() - 1;
+        int index = (int)assume_cast<const TypedDagNode<std::int64_t>* >( args[0] )->getValue() - 1;
 
         //        const BranchHistory& bh = branch_histories[ index ];
         const std::multiset<CharacterEvent*,CharacterEventCompare> &states = this->histories[index].getHistory();
@@ -337,7 +337,7 @@ void RevBayesCore::TreeHistoryCtmc<charType>::executeMethod(const std::string &n
         rv.clear();
         rv.resize( num_states );
 
-        std::int64_t index = static_cast<const TypedDagNode<std::int64_t>* >( args[0] )->getValue() - 1;
+        std::int64_t index = assume_cast<const TypedDagNode<std::int64_t>* >( args[0] )->getValue() - 1;
 
 //        const BranchHistory& bh = branch_histories[ index ];
         const std::vector<CharacterEvent*> &states = this->histories[index].getChildCharacters();
@@ -350,7 +350,7 @@ void RevBayesCore::TreeHistoryCtmc<charType>::executeMethod(const std::string &n
         double delta = 1.0/num_sites;
         for (size_t i = 0; i < num_sites; ++i)
         {
-            size_t s = static_cast<CharacterEventDiscrete*>(states[i])->getState();
+            size_t s = assume_cast<CharacterEventDiscrete*>(states[i])->getState();
             rv[s] += delta;
         }
 
@@ -360,21 +360,21 @@ void RevBayesCore::TreeHistoryCtmc<charType>::executeMethod(const std::string &n
         rv.clear();
         rv.resize( num_states );
 
-        std::int64_t node_index = static_cast<const TypedDagNode<std::int64_t>* >( args[0] )->getValue() - 1;
-        std::int64_t site_index = static_cast<const TypedDagNode<std::int64_t>* >( args[1] )->getValue() - 1;
+        std::int64_t node_index = assume_cast<const TypedDagNode<std::int64_t>* >( args[0] )->getValue() - 1;
+        std::int64_t site_index = assume_cast<const TypedDagNode<std::int64_t>* >( args[1] )->getValue() - 1;
 
         //        const BranchHistory& bh = branch_histories[ index ];
         const std::vector<CharacterEvent*> &states = this->histories[node_index].getParentCharacters();
 
         double branch_length = tau->getValue().getNode(node_index).getBranchLength();
 
-        size_t current_state = static_cast<CharacterEventDiscrete*>(states[site_index])->getState();
+        size_t current_state = assume_cast<CharacterEventDiscrete*>(states[site_index])->getState();
         double previous_age = tau->getValue().getNode(node_index).getParent().getAge();
         const std::multiset<CharacterEvent*,CharacterEventCompare> &events = this->histories[node_index].getHistory();
         std::multiset<CharacterEvent*,CharacterEventCompare>::const_iterator it;
         for (it = events.begin(); it != events.end(); ++it)
         {
-            CharacterEventDiscrete *event = static_cast<CharacterEventDiscrete*>(*it);
+            CharacterEventDiscrete *event = assume_cast<CharacterEventDiscrete*>(*it);
             size_t s = event->getSiteIndex();
             if ( s == site_index )
             {
@@ -782,7 +782,7 @@ void RevBayesCore::TreeHistoryCtmc<charType>::setTipProbs(const HomologousCharac
     const std::vector<TopologyNode*>& nodes = this->tau->getValue().getNodes();
 
     tip_probs.resize(num_taxa);
-    const ContinuousCharacterData* ccdp = static_cast<const ContinuousCharacterData*>(tp);
+    const ContinuousCharacterData* ccdp = assume_cast<const ContinuousCharacterData*>(tp);
     for (size_t i = 0; i < nodes.size(); i++)
     {
         TopologyNode* nd = nodes[i];
@@ -812,7 +812,7 @@ void RevBayesCore::TreeHistoryCtmc<charType>::setValue(AbstractHomologousDiscret
     TypedDistribution< AbstractHomologousDiscreteCharacterData >::setValue(v, force);
 
     // now we also set the template state
-    template_state = charType( static_cast<const charType&>( this->value->getTaxonData(0).getCharacter(0) ) );
+    template_state = charType( assume_cast<const charType&>( this->value->getTaxonData(0).getCharacter(0) ) );
     template_state.setToFirstState();
     template_state.setGapState( false );
     template_state.setMissingState( false );

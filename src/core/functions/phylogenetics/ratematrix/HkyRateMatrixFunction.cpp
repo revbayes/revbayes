@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "HkyRateMatrixFunction.h"
 
@@ -54,8 +55,8 @@ void HkyRateMatrixFunction::update( void )
     
     
     // set the base frequencies
-    static_cast< RateMatrix_HKY* >(value)->setStationaryFrequencies( f );
-    static_cast< RateMatrix_HKY* >(value)->setKappa( k );
+    assume_cast< RateMatrix_HKY* >(value)->setStationaryFrequencies( f );
+    assume_cast< RateMatrix_HKY* >(value)->setKappa( k );
     
     value->update();
 }
