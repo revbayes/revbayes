@@ -7,6 +7,7 @@
 #include "RbVector.h"
 #include "RevVariable.h"
 #include "RlString.h"
+#include "TypeUtilities.h"
 
 using namespace RevLanguage;
 
@@ -72,11 +73,11 @@ bool MultiOptionRule::selected(const RevObject& value, std::vector<std::string>&
     std::vector<std::string> strings;
     if ( value.isType( RlString::getClassTypeSpec() ) )
     {
-        strings.push_back( static_cast<const RlString&>( value ).getValue() );
+        strings.push_back( cast_to_derived<const RlString&>( value ).getValue() );
     }
     else if ( value.isType( ModelVector<RlString>::getClassTypeSpec() ) )
     {
-        const RevBayesCore::RbVector<std::string>& v = static_cast<const ModelVector<RlString>&>( value ).getValue();
+        const RevBayesCore::RbVector<std::string>& v = cast_to_derived<const ModelVector<RlString>&>( value ).getValue();
         for ( size_t i = 0; i < v.size(); ++i )
         {
             strings.push_back( v[i] );

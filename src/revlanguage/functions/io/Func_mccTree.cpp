@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include <cstddef>
 #include <sstream>
@@ -55,11 +56,11 @@ RevPtr<RevVariable> Func_mccTree::execute( void )
     RevObject& b = args[arg_index++].getVariable()->getRevObject();
     if ( b.isType( TraceTree::getClassTypeSpec() ) )
     {
-        summary = &( static_cast<TraceTree &>(b).getValue() );
+        summary = &( cast_to_derived<TraceTree &>(b).getValue() );
     }
     else
     {
-        std::vector<TraceTree>& tt = static_cast<const WorkspaceVector<TraceTree> &>(b).getValue();
+        std::vector<TraceTree>& tt = cast_to_derived<const WorkspaceVector<TraceTree> &>(b).getValue();
 
         std::vector<RevBayesCore::TraceTree* > vec;
         for(size_t i = 0; i < tt.size(); i++)

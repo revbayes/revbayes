@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include "Func_readTrace.h"
 
@@ -233,11 +234,11 @@ RevPtr<RevVariable> Func_readTrace::execute( void )
             
             if ( b.isType( Integer::getClassTypeSpec() ) )
             {
-                burnin = (int)static_cast<const Integer &>(b).getValue();
+                burnin = (int)cast_to_derived<const Integer &>(b).getValue();
             }
             else
             {
-                double burninFrac = static_cast<const Probability &>(b).getValue();
+                double burninFrac = cast_to_derived<const Probability &>(b).getValue();
                 burnin = int( floor( it->size()*burninFrac ) );
             }
             
