@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "DiscretizeGammaFunction.h"
 
 #include "DistributionChisq.h"
@@ -42,17 +43,17 @@ void RevBayesCore::DiscretizeGammaFunction::swapParameterInternal(const DagNode 
     
     if (oldP == shape) 
     {
-        shape = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(shape, newP);
     }
     
     if (oldP == rate)
     {
-        rate = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(rate, newP);
     }
     
     if (oldP == numCats)
     {
-        numCats = static_cast<const TypedDagNode<std::int64_t>* >( newP );
+        replaceNodeReference(numCats, newP);
     }
     
 }

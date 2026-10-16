@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "FreeKRateMatrixFunction.h"
 
 #include <cmath>
@@ -93,11 +94,11 @@ void FreeKRateMatrixFunction::swapParameterInternal(const DagNode *oldP, const D
     
     if (oldP == transition_rates)
     {
-        transition_rates = static_cast<const TypedDagNode< RbVector<RbVector<double> > >* >( newP );
+        replaceNodeReference(transition_rates, newP);
     }
     else if (oldP == transition_rates_flat)
     {
-        transition_rates_flat = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(transition_rates_flat, newP);
     }
     
 }

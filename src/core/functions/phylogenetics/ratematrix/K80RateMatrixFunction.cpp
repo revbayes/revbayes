@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "K80RateMatrixFunction.h"
 
 #include "Cloneable.h"
@@ -57,7 +58,7 @@ void K80RateMatrixFunction::swapParameterInternal(const DagNode *oldP, const Dag
     
     if (oldP == kappa)
     {
-        kappa = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(kappa, newP);
     }
     
 }
