@@ -1,4 +1,5 @@
 #include "TimeInterval.h"
+#include "DagNodeTypeUtilities.h"
 #include <cstddef>
 #include <algorithm>
 #include <cmath>
@@ -423,7 +424,7 @@ void UniformSerialSampledTimeTreeDistribution::swapParameterInternal( const DagN
 {
     if (oldP == start_age)
     {
-    	start_age = static_cast<const TypedDagNode<double>* >( newP );
+    	replaceNodeReference(start_age, newP);
     }
     
 }

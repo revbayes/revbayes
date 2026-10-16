@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include <cstddef>
 #include <cmath>
 #include <iosfwd>
@@ -205,11 +206,11 @@ void DiversityDependentPureBirthProcess::swapParameterInternal(const DagNode *ol
     
     if (oldP == initialSpeciation) 
     {
-        initialSpeciation = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(initialSpeciation, newP);
     }
     else if (oldP == capacity) 
     {
-        capacity = static_cast<const TypedDagNode<std::int64_t>* >( newP );
+        replaceNodeReference(capacity, newP);
     }
     else 
     {
