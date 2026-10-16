@@ -148,7 +148,7 @@ void Move_RateAgeProposal::constructInternalObject( void )
     bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
 
     // get the tree
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = static_cast<const Tree&>( tree->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
 
     // finally create the internal move object
