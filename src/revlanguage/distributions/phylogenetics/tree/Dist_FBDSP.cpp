@@ -204,7 +204,7 @@ const MemberRules& Dist_FBDSP::getParameterRules(void) const
         std::vector<TypeSpec> betaParamTypes;
         betaParamTypes.push_back( Probability::getClassTypeSpec() );
         betaParamTypes.push_back( ModelVector<Probability>::getClassTypeSpec() );
-        dist_member_rules.push_back( new ArgumentRule( "beta",  betaParamTypes, "The probability of symmetric speciation.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
+        dist_member_rules.push_back( new ArgumentRule( "beta",  betaParamTypes, "The probability of symmetric speciation.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Probability(0.0) ) );
 
         rules_set = true;
     }
