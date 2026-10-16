@@ -281,7 +281,7 @@ const MemberRules& Dist_TimeVaryingStateDependentSpeciationExtinctionProcess::ge
         memberRules.push_back( new ArgumentRule( "Q"         , ModelVector< RateGenerator >::getClassTypeSpec()        , "The rate matrix of jumping between rate categories.", ArgumentRule::BY_CONSTANT_REFERENCE   , ArgumentRule::ANY, NULL ) );
         memberRules.push_back( new ArgumentRule( "delta"     , RealPos::getClassTypeSpec()              , "The rate-factor of jumping between rate categories.", ArgumentRule::BY_CONSTANT_REFERENCE   , ArgumentRule::ANY, new RealPos(1.0) ) );
         memberRules.push_back( new ArgumentRule( "pi"        , Simplex::getClassTypeSpec()              , "State frequencies at the root."              , ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
-        memberRules.push_back( new ArgumentRule( "rho"       , Probability::getClassTypeSpec()          , "The taxon sampling probability."             , ArgumentRule::BY_CONSTANT_REFERENCE   , ArgumentRule::ANY, new RealPos(1.0) ) );
+        memberRules.push_back( new ArgumentRule( "rho"       , Probability::getClassTypeSpec()          , "The taxon sampling probability."             , ArgumentRule::BY_CONSTANT_REFERENCE   , ArgumentRule::ANY, new Probability(1.0) ) );
         
         std::vector<std::string> optionsCondition;
         optionsCondition.push_back( "time" );

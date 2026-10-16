@@ -183,9 +183,9 @@ const MemberRules& Dist_outgroupBirthDeath::getParameterRules(void) const
         
         dist_member_rules.push_back( new ArgumentRule( "lambda",          RealPos::getClassTypeSpec(), "The constant speciation rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         dist_member_rules.push_back( new ArgumentRule( "mu",              RealPos::getClassTypeSpec(), "The constant extinction rate.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(0.0) ) );
-        dist_member_rules.push_back( new ArgumentRule( "rhoIngroup",             Probability::getClassTypeSpec(), "The ingroup sampling probability.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(1.0) ) );
+        dist_member_rules.push_back( new ArgumentRule( "rhoIngroup",             Probability::getClassTypeSpec(), "The ingroup sampling probability.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Probability(1.0) ) );
         
-        dist_member_rules.push_back( new ArgumentRule( "rhoOutgroup",     Probability::getClassTypeSpec(), "The outgroup sampling probability.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new RealPos(1.0) ) );
+        dist_member_rules.push_back( new ArgumentRule( "rhoOutgroup",     Probability::getClassTypeSpec(), "The outgroup sampling probability.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, new Probability(1.0) ) );
         dist_member_rules.push_back( new ArgumentRule( "taxaOutgroup",    ModelVector<Taxon>::getClassTypeSpec(), "The taxa used for initialization.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
         std::vector<std::string> optionsStrategy;
         optionsStrategy.push_back( "uniform" );
