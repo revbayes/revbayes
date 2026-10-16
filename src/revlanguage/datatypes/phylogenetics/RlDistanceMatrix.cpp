@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <vector>
@@ -199,8 +200,8 @@ RevPtr<RevVariable> DistanceMatrix::executeMethod(std::string const &name, const
 		{
 			found = true;
 			// get the member with given indices
-			const Natural& i = RevBayesCore::assume_cast<const Natural&>( args[0].getVariable()->getRevObject() );
-			const Natural& j = RevBayesCore::assume_cast<const Natural&>( args[1].getVariable()->getRevObject() );
+			const Natural& i = objectFor<Natural>(args[0].getVariable());
+			const Natural& j = objectFor<Natural>(args[1].getVariable());
 
 			if ( size() < (size_t)(i.getValue()) )
 			{
@@ -225,9 +226,9 @@ RevPtr<RevVariable> DistanceMatrix::executeMethod(std::string const &name, const
 		{
 			found = true;
 			// get the member with given indices
-			const Natural& i = RevBayesCore::assume_cast<const Natural&>( args[0].getVariable()->getRevObject() );
-			const Natural& j = RevBayesCore::assume_cast<const Natural&>( args[1].getVariable()->getRevObject() );
-			const Real& v = RevBayesCore::assume_cast<const Real&>( args[2].getVariable()->getRevObject() );
+			const Natural& i = objectFor<Natural>(args[0].getVariable());
+			const Natural& j = objectFor<Natural>(args[1].getVariable());
+			const Real& v = objectFor<Real>(args[2].getVariable());
 
 			if ( size() < (size_t)(i.getValue()) )
 			{

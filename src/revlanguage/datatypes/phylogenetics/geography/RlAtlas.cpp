@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <vector>
@@ -182,7 +183,7 @@ RevPtr<RevVariable> RlAtlas::executeMethod(std::string const &name, const std::v
         found = true;
         
         // get the member with give index
-        std::string value = RevBayesCore::assume_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
+        std::string value = valueFor<RlString>(args[0].getVariable());
         std::vector<std::vector<RevBayesCore::GeographicArea*> > areas = this->dag_node->getValue().getAreas();        
         ModelVector<ModelVector<ModelVector<Real > > > *f = new ModelVector<ModelVector<ModelVector<Real > > >();
         for (size_t i = 0; i < areas.size(); i++)

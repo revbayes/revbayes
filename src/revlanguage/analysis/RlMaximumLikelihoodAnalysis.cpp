@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -69,7 +70,7 @@ RevPtr<RevVariable> MaximumLikelihoodAnalysis::executeMethod(std::string const &
         found = true;
         
         // get the member with give index
-        double e = RevBayesCore::assume_cast<const RealPos &>( args[0].getVariable()->getRevObject() ).getValue();
+        double e = valueFor<RealPos>(args[0].getVariable());
         
         value->run( e );
         
@@ -80,7 +81,7 @@ RevPtr<RevVariable> MaximumLikelihoodAnalysis::executeMethod(std::string const &
         found = true;
         
         // get the member with give index
-        const std::string &n = RevBayesCore::assume_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
+        const std::string &n = valueFor<RlString>(args[0].getVariable());
         
         RevBayesCore::Model &m = value->getModel();
         

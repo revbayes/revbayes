@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "RlPosteriorPredictiveSimulation.h"
 #include "TypeUtilities.h"
 
@@ -67,22 +68,22 @@ void PosteriorPredictiveSimulation::constructInternalObject( void )
     delete value;
     
     // now allocate a new PosteriorPredictiveSimulation object
-    const RevBayesCore::Model&                              mdl     = RevBayesCore::assume_cast<const Model &>( model->getRevObject() ).getValue();
+    const RevBayesCore::Model&                              mdl     = valueFor<Model>(model);
     
     RevBayesCore::RbVector<RevBayesCore::ModelTrace>      pt;
-    const WorkspaceVector<ModelTrace> &      tmp_pt     = RevBayesCore::assume_cast<const WorkspaceVector<ModelTrace> &>( trace->getRevObject() );
+    const WorkspaceVector<ModelTrace> &      tmp_pt     = objectFor<WorkspaceVector<ModelTrace>>(trace);
     for ( size_t i=0; i<tmp_pt.size(); ++i)
     {
         const RevBayesCore::ModelTrace &tr = tmp_pt.getElement( i )->getValue();
         pt.push_back( tr );
     }
     
-    const std::string &    dir   = RevBayesCore::assume_cast<const RlString &>( directory->getRevObject() ).getValue();
+    const std::string &    dir   = valueFor<RlString>(directory);
     
     // get vector of ancestral state traces
     if ( ancestral_state_trace->getRevObject() != RevNullObject::getInstance() )
     {
-        const WorkspaceVector<AncestralStateTrace>& ast = RevBayesCore::assume_cast<const WorkspaceVector<AncestralStateTrace> &>( ancestral_state_trace->getRevObject() );
+        const WorkspaceVector<AncestralStateTrace>& ast = objectFor<WorkspaceVector<AncestralStateTrace>>(ancestral_state_trace);
         std::vector<RevBayesCore::AncestralStateTrace> ancestral_state_traces;
         for (int i = 0; i < ast.size(); ++i)
         {
@@ -105,7 +106,7 @@ RevPtr<RevLanguage::RevVariable> RevLanguage::PosteriorPredictiveSimulation::exe
     {
         found = true;
         
-        double t            = RevBayesCore::assume_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue();
+        double t            = valueFor<Natural>(args[0].getVariable());
         this->value->run( t );
         
         return NULL;

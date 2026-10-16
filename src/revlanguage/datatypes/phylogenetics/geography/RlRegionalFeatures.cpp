@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <vector>
@@ -120,7 +121,7 @@ RevPtr<RevVariable> RlRegionalFeatures::executeMethod(std::string const &name, c
     if (name == "normalize") {
         found = true;
         std::cout << "Warning: RegionalFeatures .normalize() will soon be removed. Use .standardize() instead.\n";
-        std::string relationship = RevBayesCore::assume_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
+        std::string relationship = valueFor<RlString>(args[0].getVariable());
         if (relationship == "within") {
             this->dag_node->getValue().standardizeWithinQuantitative();
         } else if (relationship == "between") {
@@ -139,9 +140,9 @@ RevPtr<RevVariable> RlRegionalFeatures::executeMethod(std::string const &name, c
     if (name == "get")
     {
         found = true;
-        std::string relationship = RevBayesCore::assume_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
-        std::string type = RevBayesCore::assume_cast<const RlString &>( args[1].getVariable()->getRevObject() ).getValue();
-        size_t time_index = RevBayesCore::assume_cast<const Natural &>( args[2].getVariable()->getRevObject() ).getValue() - 1;
+        std::string relationship = valueFor<RlString>(args[0].getVariable());
+        std::string type = valueFor<RlString>(args[1].getVariable());
+        size_t time_index = valueFor<Natural>(args[2].getVariable()) - 1;
 
         // get relevant layer
         if (relationship == "within" && type == "categorical") {

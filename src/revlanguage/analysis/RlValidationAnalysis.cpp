@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -52,9 +53,9 @@ void ValidationAnalysis::constructInternalObject( void )
     delete value;
     
     // now allocate a new validation analysis
-    const RevBayesCore::MonteCarloAnalysis&         s   = RevBayesCore::assume_cast<const MonteCarloAnalysis &>( sampler->getRevObject() ).getValue();
-    int                                             n   = (int)RevBayesCore::assume_cast<const Natural &>( simulations->getRevObject() ).getValue();
-    const std::string&                              d   = RevBayesCore::assume_cast<const RlString &>( output_directory->getRevObject() ).getValue();
+    const RevBayesCore::MonteCarloAnalysis&         s   = valueFor<MonteCarloAnalysis>(sampler);
+    int                                             n   = (int)valueFor<Natural>(simulations);
+    const std::string&                              d   = valueFor<RlString>(output_directory);
 
     value = new RevBayesCore::ValidationAnalysis( s, size_t(n), d );
     
@@ -88,7 +89,7 @@ RevPtr<RevVariable> ValidationAnalysis::executeMethod(std::string const &name, c
         
         // get the member with given index
         
-        int gen = (int)RevBayesCore::assume_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue();
+        int gen = (int)valueFor<Natural>(args[0].getVariable());
         value->runAll( size_t(gen) );
         
         return NULL;
@@ -98,8 +99,8 @@ RevPtr<RevVariable> ValidationAnalysis::executeMethod(std::string const &name, c
         found = true;
         
         // get the member with given index
-        int gen = (int)RevBayesCore::assume_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue();
-        int tuningInterval = (int)RevBayesCore::assume_cast<const Natural &>( args[1].getVariable()->getRevObject() ).getValue();
+        int gen = (int)valueFor<Natural>(args[0].getVariable());
+        int tuningInterval = (int)valueFor<Natural>(args[1].getVariable());
         value->burnin( size_t(gen), size_t(tuningInterval) );
         
         return NULL;
@@ -108,7 +109,7 @@ RevPtr<RevVariable> ValidationAnalysis::executeMethod(std::string const &name, c
     {
         found = true;
         
-        double coverage = RevBayesCore::assume_cast<const Probability &>( args[0].getVariable()->getRevObject() ).getValue();
+        double coverage = valueFor<Probability>(args[0].getVariable());
         
         value->summarizeAll(coverage);
         

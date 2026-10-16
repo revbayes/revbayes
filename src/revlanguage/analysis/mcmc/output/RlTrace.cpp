@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "RlTrace.h"
 #include "TypeUtilities.h"
 
@@ -93,7 +94,7 @@ RevPtr<RevVariable> Trace::executeMethod(std::string const &name, const std::vec
     {
         found = true;
 
-        bool post = RevBayesCore::assume_cast<const RlBoolean &>( args[0].getVariable()->getRevObject() ).getValue();
+        bool post = valueFor<RlBoolean>(args[0].getVariable());
 
         int n = (int)this->value->size(post);
 

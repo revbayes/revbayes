@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <sstream>
 #include "TypeUtilities.h"
 #include <string>
@@ -93,7 +94,7 @@ void StochasticMatrix::constructInternalObject( void )
         }
     }
 
-    const RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::Simplex > >* mtx = RevBayesCore::assume_cast< const ModelVector< Simplex >& >( arg->getRevObject() ).getDagNode();
+    const RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::Simplex > >* mtx = dagNodeFor<ModelVector< Simplex >>(arg);
 
     RevBayesCore::StochasticMatrixFunction* f = new RevBayesCore::StochasticMatrixFunction( mtx );
 
@@ -126,7 +127,7 @@ RevPtr<RevVariable> StochasticMatrix::executeMethod(std::string const &name, con
     {
         found = true;
         
-        const Natural& index = RevBayesCore::assume_cast<const Natural&>( args[0].getVariable()->getRevObject() );
+        const Natural& index = objectFor<Natural>(args[0].getVariable());
         int i = (int)index.getValue() - 1;
         
         RevBayesCore::RbVector<double> m = this->dag_node->getValue().getColumn( i );

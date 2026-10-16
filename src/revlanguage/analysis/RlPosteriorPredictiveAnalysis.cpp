@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -60,8 +61,8 @@ void PosteriorPredictiveAnalysis::constructInternalObject( void )
     delete value;
     
     // now allocate a new sliding move
-    const RevBayesCore::MonteCarloAnalysis&         s     = RevBayesCore::assume_cast<const MonteCarloAnalysis &>( sampler->getRevObject() ).getValue();
-    const std::string&                              dir   = RevBayesCore::assume_cast<const RlString &>( directory->getRevObject() ).getValue();
+    const RevBayesCore::MonteCarloAnalysis&         s     = valueFor<MonteCarloAnalysis>(sampler);
+    const std::string&                              dir   = valueFor<RlString>(directory);
     
     value = new RevBayesCore::PosteriorPredictiveAnalysis( s, dir );
     
@@ -78,7 +79,7 @@ RevPtr<RevVariable> PosteriorPredictiveAnalysis::executeMethod(std::string const
         found = true;
         
         // get the member with give index
-        int gen = (int)RevBayesCore::assume_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue();
+        int gen = (int)valueFor<Natural>(args[0].getVariable());
         value->runAll( size_t(gen) );
         
         return NULL;

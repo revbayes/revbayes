@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "RlPathSampler.h"
 #include "TypeUtilities.h"
 
@@ -62,10 +63,10 @@ void PathSampler::constructInternalObject( void )
     delete value;
     
     // get the parameter values
-    const std::string&   fn      = RevBayesCore::assume_cast<const RlString &>( filename->getRevObject() ).getValue();
-    const std::string&   pn      = RevBayesCore::assume_cast<const RlString &>( powerColumnName->getRevObject() ).getValue();
-    const std::string&   ln      = RevBayesCore::assume_cast<const RlString &>( likelihoodColumnName->getRevObject() ).getValue();
-    const std::string&   del     = RevBayesCore::assume_cast<const RlString &>( delimiter->getRevObject() ).getValue();
+    const std::string&   fn      = valueFor<RlString>(filename);
+    const std::string&   pn      = valueFor<RlString>(powerColumnName);
+    const std::string&   ln      = valueFor<RlString>(likelihoodColumnName);
+    const std::string&   del     = valueFor<RlString>(delimiter);
     
     value = new RevBayesCore::PathSampler(fn, pn, ln, del);
     
@@ -88,11 +89,11 @@ RevPtr<RevVariable> PathSampler::executeMethod(std::string const &name, const st
     {
         found = true;
         
-        bool use_bootstrap = RevBayesCore::assume_cast<const RlBoolean &>( args[0].getVariable()->getRevObject() ).getValue();
-        size_t repnum = RevBayesCore::assume_cast<const Natural&>( args[1].getVariable()->getRevObject() ).getValue();
-        double block_length = RevBayesCore::assume_cast<const Probability &>( args[2].getVariable()->getRevObject() ).getValue();
-        bool print_to_file = RevBayesCore::assume_cast<const RlBoolean &>( args[3].getVariable()->getRevObject() ).getValue();
-        bool verbose = RevBayesCore::assume_cast<const RlBoolean &>( args[4].getVariable()->getRevObject() ).getValue();
+        bool use_bootstrap = valueFor<RlBoolean>(args[0].getVariable());
+        size_t repnum = valueFor<Natural>(args[1].getVariable());
+        double block_length = valueFor<Probability>(args[2].getVariable());
+        bool print_to_file = valueFor<RlBoolean>(args[3].getVariable());
+        bool verbose = valueFor<RlBoolean>(args[4].getVariable());
         
         double se;
         

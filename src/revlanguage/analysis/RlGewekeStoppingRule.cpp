@@ -1,4 +1,5 @@
 
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <iosfwd>
@@ -49,11 +50,11 @@ void GewekeStoppingRule::constructInternalObject( void )
     delete value;
     
     // now allocate a new stopping rule
-    double p = RevBayesCore::assume_cast<const Probability &>( prob->getRevObject() ).getValue();
-    double f1 = RevBayesCore::assume_cast<const Probability &>( frac1->getRevObject() ).getValue();
-    double f2 = RevBayesCore::assume_cast<const Probability &>( frac2->getRevObject() ).getValue();
-    int fq = (int)RevBayesCore::assume_cast<const IntegerPos &>( frequency->getRevObject() ).getValue();
-    const std::string &fn = RevBayesCore::assume_cast<const RlString &>( filename->getRevObject() ).getValue();
+    double p = valueFor<Probability>(prob);
+    double f1 = valueFor<Probability>(frac1);
+    double f2 = valueFor<Probability>(frac2);
+    int fq = (int)valueFor<IntegerPos>(frequency);
+    const std::string &fn = valueFor<RlString>(filename);
     
     RevBayesCore::BurninEstimatorContinuous *burninEst = constructBurninEstimator();
     

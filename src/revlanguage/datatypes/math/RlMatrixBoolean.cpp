@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <sstream>
@@ -119,7 +120,7 @@ RevPtr<RevVariable> MatrixBoolean::executeMethod(std::string const &name, const 
     {
         found = true;
         
-        const Natural& index = RevBayesCore::assume_cast<const Natural&>( args[0].getVariable()->getRevObject() );
+        const Natural& index = objectFor<Natural>(args[0].getVariable());
         size_t i = index.getValue() - 1;
         
         RevBayesCore::RbVector<RevBayesCore::Boolean> m = this->dag_node->getValue().getColumn( i );

@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <iosfwd>
@@ -67,7 +68,7 @@ RevPtr<RevLanguage::RevVariable> ContinuousTaxonData::executeMethod(std::string 
         found = true;
         
         // get the member with give index
-        const Natural &index = RevBayesCore::assume_cast<const Natural &>( args[0].getVariable()->getRevObject() );
+        const Natural &index = objectFor<Natural>(args[0].getVariable());
     
         if (this->dag_node->getValue().getNumberOfCharacters() < (size_t)(index.getValue()) )
         {

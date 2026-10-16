@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <sstream>
@@ -102,21 +103,21 @@ void Clade::constructInternalObject( void )
     }
 
     // get clade constraint flags
-    bool match = RevBayesCore::assume_cast<const RlBoolean &>( optional_match->getRevObject() ).getValue();
-    bool neg = RevBayesCore::assume_cast<const RlBoolean &>( is_negative_constraint->getRevObject() ).getValue();
+    bool match = valueFor<RlBoolean>(optional_match);
+    bool neg = valueFor<RlBoolean>(is_negative_constraint);
 
     // now allocate a new Clade
     std::set<RevBayesCore::Taxon> n_set;
     for (std::vector<RevPtr<const RevVariable> >::iterator it = names.begin(); it != names.end(); ++it)
     {
-        RevBayesCore::Taxon t = RevBayesCore::Taxon(RevBayesCore::assume_cast<const RlString &>( (*it)->getRevObject() ).getValue());
+        RevBayesCore::Taxon t = RevBayesCore::Taxon(valueFor<RlString>((*it)));
         n_set.insert( t );
     }
 
     // now add names to new clade
     for (std::vector<RevPtr<const RevVariable> >::iterator it = names_vector.begin(); it != names_vector.end(); ++it)
     {
-        const ModelVector<RlString> &tmp = RevBayesCore::assume_cast<const ModelVector<RlString> &>( (*it)->getRevObject() );
+        const ModelVector<RlString> &tmp = objectFor<ModelVector<RlString>>((*it));
 
         for (size_t i=0; i<tmp.size(); ++i)
         {
@@ -130,7 +131,7 @@ void Clade::constructInternalObject( void )
     for (std::vector<RevPtr<const RevVariable> >::iterator it = clades.begin(); it != clades.end(); ++it)
     {
 
-        const RevBayesCore::Clade &c = RevBayesCore::assume_cast<const Clade &>( (*it)->getRevObject() ).getValue();
+        const RevBayesCore::Clade &c = valueFor<Clade>((*it));
 
         if (match)
         {
@@ -159,21 +160,21 @@ void Clade::constructInternalObject( void )
     // set the age if provided
     if ( age->getRevObject() != RevNullObject::getInstance() )
     {
-        double a = RevBayesCore::assume_cast<const RealPos &>( age->getRevObject() ).getValue();
+        double a = valueFor<RealPos>(age);
         c->setAge( a );
     }
 
     // set the name if provided
     if ( clade_name->getRevObject() != RevNullObject::getInstance() )
     {
-        const std::string& n = RevBayesCore::assume_cast<const RlString &>( clade_name->getRevObject() ).getValue();
+        const std::string& n = valueFor<RlString>(clade_name);
         c->setCladeName( n );
     }
 
     // set the number of missing if provided
     if ( missing->getRevObject() != RevNullObject::getInstance() )
     {
-        std::int64_t n = RevBayesCore::assume_cast<const Natural &>( missing->getRevObject() ).getValue();
+        std::int64_t n = valueFor<Natural>(missing);
         c->setNumberMissingTaxa( (int)n );
     }
 
@@ -226,7 +227,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Clade::executeMethod(std::string c
     else if (name == "getTaxonName" )
     {
         found = true;
-        int index = (int)RevBayesCore::assume_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+        int index = (int)valueFor<Natural>(args[0].getVariable()) - 1;
         
         std::string t = this->dag_node->getValue().getTaxonName( index );
         return new RevVariable( new RlString( t ) );
@@ -234,7 +235,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Clade::executeMethod(std::string c
     else if (name == "getTaxon" )
     {
         found = true;
-        int index = (int)RevBayesCore::assume_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+        int index = (int)valueFor<Natural>(args[0].getVariable()) - 1;
         
         RevBayesCore::Taxon t = this->dag_node->getValue().getTaxon( index );
         return new RevVariable( new Taxon( t ) );
@@ -242,7 +243,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Clade::executeMethod(std::string c
     else if (name == "setAge" )
     {
         found = true;
-        double a = RevBayesCore::assume_cast<const RealPos&>( args[0].getVariable()->getRevObject() ).getValue();
+        double a = valueFor<RealPos>(args[0].getVariable());
         
         this->dag_node->getValue().setAge( a );
         return NULL;
@@ -250,7 +251,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Clade::executeMethod(std::string c
     else if (name == "setCladeName" || name == "setName" )
     {
         found = true;
-        const std::string& n = RevBayesCore::assume_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
+        const std::string& n = valueFor<RlString>(args[0].getVariable());
         
         this->dag_node->getValue().setCladeName( n );
         return NULL;
@@ -258,7 +259,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Clade::executeMethod(std::string c
     else if (name == "setNumberOfTaxaMissing" )
     {
         found = true;
-        int n = (int)RevBayesCore::assume_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue();
+        int n = (int)valueFor<Natural>(args[0].getVariable());
         
         this->dag_node->getValue().setNumberMissingTaxa( n );
         return NULL;
@@ -403,16 +404,16 @@ void Clade::setConstParameter(const std::string& name, const RevPtr<const RevVar
     //Alternatively, one could provide taxons, not names
     else if ( name == "taxonName" || (name == "" && var->getRevObject().getTypeSpec() == Taxon::getClassTypeSpec() ) )
     {
-        std::string name = RevBayesCore::assume_cast<const Taxon &>( var->getRevObject() ).getDagNode()->getValue().getName();
+        std::string name = dagNodeFor<Taxon>(var)->getValue().getName();
         const RevPtr<const RevVariable> rlName = new const RevVariable(new RlString( name )) ;
         names.push_back( rlName );
     }
     else if ( name == "" && var->getRevObject().getTypeSpec() == ModelVector<Taxon>::getClassTypeSpec() )
     {
         ModelVector<RlString> rlvector = ModelVector<RlString>();
-        for (size_t i = 0; i<RevBayesCore::assume_cast<const ModelVector<Taxon> &>( var->getRevObject()).size(); ++i)
+        for (size_t i = 0; i<objectFor<ModelVector<Taxon>>(var).size(); ++i)
         {
-            std::string name = RevBayesCore::assume_cast<const ModelVector<Taxon> &>( var->getRevObject())[i].getSpeciesName();
+            std::string name = objectFor<ModelVector<Taxon>>(var)[i].getSpeciesName();
             //const RevPtr<const RevVariable> rlName = new const RevVariable(new RlString( name )) ;
             const RlString rlName  = RlString (name);
             rlvector.push_back(rlName);

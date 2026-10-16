@@ -1,4 +1,5 @@
 
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -49,9 +50,9 @@ void GelmanRubinStoppingRule::constructInternalObject( void )
     delete value;
     
     // now allocate a new stopping rule
-    double r = RevBayesCore::assume_cast<const RealPos &>( R->getRevObject() ).getValue();
-    int fq = (int)RevBayesCore::assume_cast<const IntegerPos &>( frequency->getRevObject() ).getValue();
-    const std::string &fn = RevBayesCore::assume_cast<const RlString &>( filename->getRevObject() ).getValue();
+    double r = valueFor<RealPos>(R);
+    int fq = (int)valueFor<IntegerPos>(frequency);
+    const std::string &fn = valueFor<RlString>(filename);
     
     RevBayesCore::BurninEstimatorContinuous *burninEst = constructBurninEstimator();
     

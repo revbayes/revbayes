@@ -1,4 +1,5 @@
 
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -49,9 +50,9 @@ void MinEssStoppingRule::constructInternalObject( void )
     delete value;
     
     // now allocate a new stopping rule
-    double min = RevBayesCore::assume_cast<const RealPos &>( minEss->getRevObject() ).getValue();
-    int fq = RevBayesCore::assume_cast<const IntegerPos &>( frequency->getRevObject() ).getValue();
-    const std::string &fn = RevBayesCore::assume_cast<const RlString &>( filename->getRevObject() ).getValue();
+    double min = valueFor<RealPos>(minEss);
+    int fq = valueFor<IntegerPos>(frequency);
+    const std::string &fn = valueFor<RlString>(filename);
     
     RevBayesCore::BurninEstimatorContinuous *burninEst = constructBurninEstimator();
     

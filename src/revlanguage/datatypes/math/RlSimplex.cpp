@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "RlSimplex.h"
 #include "TypeUtilities.h"
 
@@ -109,7 +110,7 @@ void Simplex::constructInternalObject( void )
         if ( b.isType( ModelVector<RealPos>::getClassTypeSpec() ) )
         {
             const RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* vec;
-            vec = RevBayesCore::assume_cast< const ModelVector<RealPos>& >( args[0]->getRevObject() ).getDagNode();
+            vec = dagNodeFor<ModelVector<RealPos>>(args[0]);
 
             f = new RevBayesCore::SimplexFromVectorFunction( vec );
         }
@@ -127,7 +128,7 @@ void Simplex::constructInternalObject( void )
             RevObject& b = args[i]->getRevObject();
             if ( b.isType( RealPos::getClassTypeSpec() ) )
             {
-                const RealPos &val = RevBayesCore::assume_cast<const RealPos &>( args[i]->getRevObject() );
+                const RealPos &val = objectFor<RealPos>(args[i]);
                 params.push_back( val.getDagNode() );
             }
             else

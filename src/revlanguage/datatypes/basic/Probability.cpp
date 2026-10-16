@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "Probability.h"
 #include "TypeUtilities.h"
 
@@ -69,7 +70,7 @@ void Probability::constructInternalObject( void )
         }
     }
 
-    RevBayesCore::TypedDagNode<double>* x = RevBayesCore::assume_cast<const Real&>( real->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* x = dagNodeFor<Real>(real);
     RevBayesCore::ReferenceFunction<double>* f = new RevBayesCore::ReferenceFunction<double>( x );
 
 
@@ -171,7 +172,7 @@ void Probability::setConstParameter(const std::string& name, const RevPtr<const 
     if ( name == "x" )
     {
         real = var;
-	RevBayesCore::TypedDagNode<double>* x = RevBayesCore::assume_cast<const Real&>( real->getRevObject() ).getDagNode();
+	RevBayesCore::TypedDagNode<double>* x = dagNodeFor<Real>(real);
 	validate(x->getValue());
     }
     else

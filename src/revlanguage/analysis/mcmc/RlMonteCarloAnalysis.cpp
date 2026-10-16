@@ -1,4 +1,5 @@
 
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <ostream>
@@ -120,7 +121,7 @@ RevPtr<RevVariable> MonteCarloAnalysis::executeMethod(std::string const &name, c
         size_t args_index = 0;
         
         RevBayesCore::RbVector<RevBayesCore::StoppingRule> rules;
-        int gen = (int)RevBayesCore::assume_cast<const Natural &>( args[args_index++].getVariable()->getRevObject() ).getValue();
+        int gen = (int)valueFor<Natural>(args[args_index++].getVariable());
         if(gen > 0) {
             gen += currentGen;
             rules.push_back( RevBayesCore::MaxIterationStoppingRule(gen) );
@@ -129,7 +130,7 @@ RevPtr<RevVariable> MonteCarloAnalysis::executeMethod(std::string const &name, c
         // get the member with given index
         if ( args[args_index++].getVariable()->getRevObject() != RevNullObject::getInstance() )
         {
-            const WorkspaceVector<StoppingRule>& ws_vec = RevBayesCore::assume_cast<const WorkspaceVector<StoppingRule> &>( args[1].getVariable()->getRevObject() );
+            const WorkspaceVector<StoppingRule>& ws_vec = objectFor<WorkspaceVector<StoppingRule>>(args[1].getVariable());
             for ( size_t i = 0; i < ws_vec.size(); ++i )
             {
                 rules.push_back( ws_vec[i].getValue() );
@@ -141,17 +142,17 @@ RevPtr<RevVariable> MonteCarloAnalysis::executeMethod(std::string const &name, c
         }
         
         // the tuning interval (0 by default)
-        int tuning_interval = (int)RevBayesCore::assume_cast<const Natural &>( args[args_index++].getVariable()->getRevObject() ).getValue();
+        int tuning_interval = (int)valueFor<Natural>(args[args_index++].getVariable());
 
         // the checkoint file (empty by default) and the checkoint interval (0 by default)
-        const std::string checkpoint_file = RevBayesCore::assume_cast<const RlString &>( args[args_index++].getVariable()->getRevObject() ).getValue();
-        std::int64_t checkpoint_interval = RevBayesCore::assume_cast<const Natural &>( args[args_index++].getVariable()->getRevObject() ).getValue();
+        const std::string checkpoint_file = valueFor<RlString>(args[args_index++].getVariable());
+        std::int64_t checkpoint_interval = valueFor<Natural>(args[args_index++].getVariable());
         if ( (checkpoint_file != "" && checkpoint_interval == 0) || (checkpoint_file == "" && checkpoint_interval != 0) )
         {
             throw RbException("For checkpointing you have to provide both the checkpoint file and the checkpoint frequency (interval).");
         }
         
-        int verbose = (int)RevBayesCore::assume_cast<const Natural &>( args[args_index++].getVariable()->getRevObject() ).getValue();
+        int verbose = (int)valueFor<Natural>(args[args_index++].getVariable());
 
         deprecateUnderPrior("run", args[args_index++]);
 
@@ -167,9 +168,9 @@ RevPtr<RevVariable> MonteCarloAnalysis::executeMethod(std::string const &name, c
         found = true;
         
         // get the member with give index
-        int gen = (int)RevBayesCore::assume_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue();
-        int tuningInterval = (int)RevBayesCore::assume_cast<const Natural &>( args[1].getVariable()->getRevObject() ).getValue();
-        int verbose = (int)RevBayesCore::assume_cast<const Natural &>( args[2].getVariable()->getRevObject() ).getValue();
+        int gen = (int)valueFor<Natural>(args[0].getVariable());
+        int tuningInterval = (int)valueFor<Natural>(args[1].getVariable());
+        int verbose = (int)valueFor<Natural>(args[2].getVariable());
 
         deprecateUnderPrior("burnin", args[3]);
 
@@ -185,7 +186,7 @@ RevPtr<RevVariable> MonteCarloAnalysis::executeMethod(std::string const &name, c
     {
         found = true;
         
-        bool current_period = RevBayesCore::assume_cast<const RlBoolean &>( args[0].getVariable()->getRevObject() ).getValue();
+        bool current_period = valueFor<RlBoolean>(args[0].getVariable());
         
         value->printPerformanceSummary( current_period );
         
@@ -195,7 +196,7 @@ RevPtr<RevVariable> MonteCarloAnalysis::executeMethod(std::string const &name, c
     {
         found = true;
         
-        const std::string &checkpoint_filename = RevBayesCore::assume_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
+        const std::string &checkpoint_filename = valueFor<RlString>(args[0].getVariable());
         
         value->initializeFromCheckpoint( checkpoint_filename );
         

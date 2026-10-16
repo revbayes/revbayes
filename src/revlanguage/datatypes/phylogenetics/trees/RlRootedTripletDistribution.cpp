@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <sstream>
@@ -204,7 +205,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> RootedTripletDistribution::execute
     {
         found = true;
         
-        std::vector<RevBayesCore::Taxon> t = RevBayesCore::assume_cast<const ModelVector<Taxon>  &>( args[0].getVariable()->getRevObject() ).getValue();
+        std::vector<RevBayesCore::Taxon> t = valueFor<ModelVector<Taxon>>(args[0].getVariable());
         RevBayesCore::RootedTripletDistribution &dist = dag_node->getValue();
         dist.setTaxa(t);
         
@@ -214,7 +215,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> RootedTripletDistribution::execute
     {
         found = true;
         
-        std::vector<std::string> t = RevBayesCore::assume_cast<const ModelVector<RlString>  &>( args[0].getVariable()->getRevObject() ).getValue();
+        std::vector<std::string> t = valueFor<ModelVector<RlString>>(args[0].getVariable());
         RevBayesCore::RootedTripletDistribution &dist = dag_node->getValue();
         dist.setSpecies(t);
         

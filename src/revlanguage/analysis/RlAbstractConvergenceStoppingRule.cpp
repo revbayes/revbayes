@@ -1,4 +1,5 @@
 
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <iosfwd>
@@ -42,7 +43,7 @@ RevBayesCore::BurninEstimatorContinuous* AbstractConvergenceStoppingRule::constr
 {
     
     // create a new Burnin Estimator instance
-    const std::string &bm = RevBayesCore::assume_cast<const RlString &>( burninMethod->getRevObject() ).getValue();
+    const std::string &bm = valueFor<RlString>(burninMethod);
     
     RevBayesCore::BurninEstimatorContinuous *burninEst = NULL;
     
@@ -68,7 +69,7 @@ RevBayesCore::BurninEstimatorContinuous* AbstractConvergenceStoppingRule::constr
     }
     else if ( bm == "fixed" )
     {
-        double fraction = RevBayesCore::assume_cast<const Probability &>( burnin->getRevObject() ).getValue();
+        double fraction = valueFor<Probability>(burnin);
         burninEst = new RevBayesCore::FixedBurnin( fraction );
     }
     else

@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "RlContinuousStochasticNode.h"
 #include "TypeUtilities.h"
 
@@ -162,7 +163,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> RevLanguage::ContinuousStochasticN
         found = true;
         
         // get the observation
-        const double &observation = RevBayesCore::assume_cast<const Real &>( args[0].getVariable()->getRevObject() ).getValue();
+        const double &observation = valueFor<Real>(args[0].getVariable());
         
         // clamp
         this->clamp( new double(observation) );
@@ -206,7 +207,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> RevLanguage::ContinuousStochasticN
         found = true;
         
         // get the observation
-        const double &observation = RevBayesCore::assume_cast<const Real &>( args[0].getVariable()->getRevObject() ).getValue();
+        const double &observation = valueFor<Real>(args[0].getVariable());
         
         // set value
         this->setValue( new double(observation) );

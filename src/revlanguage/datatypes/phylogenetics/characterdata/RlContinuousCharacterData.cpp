@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "RlContinuousCharacterData.h"
 #include "TypeUtilities.h"
 
@@ -138,7 +139,7 @@ RevPtr<RevVariable> ContinuousCharacterData::executeMethod(std::string const &na
         if ( args[0].getVariable()->getRevObject().isType( Natural::getClassTypeSpec() ) )
         {
             // get the member with give index
-            const Natural& index = RevBayesCore::assume_cast<const Natural&>( args[0].getVariable()->getRevObject() );
+            const Natural& index = objectFor<Natural>(args[0].getVariable());
         
             if (this->dag_node->getValue().getNumberOfTaxa() < (size_t)(index.getValue()) )
             {
@@ -152,7 +153,7 @@ RevPtr<RevVariable> ContinuousCharacterData::executeMethod(std::string const &na
         else
         {
             // get the argument for the index
-            const std::string &index = RevBayesCore::assume_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
+            const std::string &index = valueFor<RlString>(args[0].getVariable());
             
             const RevBayesCore::ContinuousTaxonData& element = RevBayesCore::assume_cast< RevBayesCore::ContinuousCharacterData& >( this->dag_node->getValue() ).getTaxonData(index);            
             return new RevVariable( new ContinuousTaxonData( new RevBayesCore::ContinuousTaxonData( element ) ) );
@@ -163,7 +164,7 @@ RevPtr<RevVariable> ContinuousCharacterData::executeMethod(std::string const &na
         found = true;
         
         // get the argument for the index
-        std::int64_t index = RevBayesCore::assume_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+        std::int64_t index = valueFor<Natural>(args[0].getVariable()) - 1;
         double max = this->dag_node->getValue().getMaxDifference( index );
         
         return new RevVariable( new Real(max) );
@@ -173,7 +174,7 @@ RevPtr<RevVariable> ContinuousCharacterData::executeMethod(std::string const &na
         found = true;
         
         // get the argument for the index
-        std::int64_t index = RevBayesCore::assume_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+        std::int64_t index = valueFor<Natural>(args[0].getVariable()) - 1;
         double max = this->dag_node->getValue().getMaxSpeciesDifference( index );
         
         return new RevVariable( new Real(max) );
@@ -183,7 +184,7 @@ RevPtr<RevVariable> ContinuousCharacterData::executeMethod(std::string const &na
         found = true;
         
         // get the argument for the index
-        std::int64_t index = RevBayesCore::assume_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+        std::int64_t index = valueFor<Natural>(args[0].getVariable()) - 1;
         double mean = this->dag_node->getValue().getMeanDifference( index );
         
         return new RevVariable( new Real(mean) );
@@ -193,7 +194,7 @@ RevPtr<RevVariable> ContinuousCharacterData::executeMethod(std::string const &na
         found = true;
         
         // get the argument for the index
-        std::int64_t index = RevBayesCore::assume_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+        std::int64_t index = valueFor<Natural>(args[0].getVariable()) - 1;
         double mean = this->dag_node->getValue().getMeanSpeciesDifference( index );
         
         return new RevVariable( new Real(mean) );
@@ -203,7 +204,7 @@ RevPtr<RevVariable> ContinuousCharacterData::executeMethod(std::string const &na
         found = true;
         
         // get the argument for the index
-        std::int64_t index = RevBayesCore::assume_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+        std::int64_t index = valueFor<Natural>(args[0].getVariable()) - 1;
         double mean = this->dag_node->getValue().getMeanValue( index );
         
         return new RevVariable( new Real(mean) );
@@ -213,7 +214,7 @@ RevPtr<RevVariable> ContinuousCharacterData::executeMethod(std::string const &na
         found = true;
         
         // get the argument for the index
-        std::int64_t index = RevBayesCore::assume_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+        std::int64_t index = valueFor<Natural>(args[0].getVariable()) - 1;
         double min = this->dag_node->getValue().getMinSpeciesDifference( index );
         
         return new RevVariable( new Real(min) );
@@ -223,7 +224,7 @@ RevPtr<RevVariable> ContinuousCharacterData::executeMethod(std::string const &na
         found = true;
         
         // get the argument for the index
-        std::int64_t index = RevBayesCore::assume_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+        std::int64_t index = valueFor<Natural>(args[0].getVariable()) - 1;
         double min = this->dag_node->getValue().getMinDifference( index );
         
         return new RevVariable( new Real(min) );
@@ -233,7 +234,7 @@ RevPtr<RevVariable> ContinuousCharacterData::executeMethod(std::string const &na
         found = true;
         
         // get the argument for the index
-        std::int64_t index = RevBayesCore::assume_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+        std::int64_t index = valueFor<Natural>(args[0].getVariable()) - 1;
         RevBayesCore::DistanceMatrix pd = this->dag_node->getValue().getPairwiseSpeciesDifference( index );
         
         return new RevVariable( new DistanceMatrix(pd) );
@@ -243,7 +244,7 @@ RevPtr<RevVariable> ContinuousCharacterData::executeMethod(std::string const &na
         found = true;
         
         // get the argument for the index
-        std::int64_t index = RevBayesCore::assume_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+        std::int64_t index = valueFor<Natural>(args[0].getVariable()) - 1;
         double var = this->dag_node->getValue().getVarSpeciesDifference( index );
         
         return new RevVariable( new Real(var) );
@@ -253,7 +254,7 @@ RevPtr<RevVariable> ContinuousCharacterData::executeMethod(std::string const &na
         found = true;
         
         // get the argument for the index
-        std::int64_t index = RevBayesCore::assume_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+        std::int64_t index = valueFor<Natural>(args[0].getVariable()) - 1;
         double var = this->dag_node->getValue().getVarDifference( index );
         
         return new RevVariable( new Real(var) );
@@ -263,7 +264,7 @@ RevPtr<RevVariable> ContinuousCharacterData::executeMethod(std::string const &na
         found = true;
         
         // get the argument for the index
-        std::int64_t index = RevBayesCore::assume_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+        std::int64_t index = valueFor<Natural>(args[0].getVariable()) - 1;
         double var = this->dag_node->getValue().getVarValue( index );
         
         return new RevVariable( new RealPos(var) );
@@ -273,8 +274,8 @@ RevPtr<RevVariable> ContinuousCharacterData::executeMethod(std::string const &na
         found = true;
         
         // get the argument for the index
-        std::int64_t index_species  = RevBayesCore::assume_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue() - 1;
-        std::int64_t index_site     = RevBayesCore::assume_cast<const Natural &>( args[1].getVariable()->getRevObject() ).getValue() - 1;
+        std::int64_t index_species  = valueFor<Natural>(args[0].getVariable()) - 1;
+        std::int64_t index_site     = valueFor<Natural>(args[1].getVariable()) - 1;
         double var = this->dag_node->getValue().getWithinSpeciesVariance( index_species, index_site );
         
         return new RevVariable( new RealPos(var) );
@@ -284,9 +285,9 @@ RevPtr<RevVariable> ContinuousCharacterData::executeMethod(std::string const &na
     	found = true;
 
     	// get the arguments
-        double error    = RevBayesCore::assume_cast<const RealPos &>( args[0].getVariable()->getRevObject() ).getValue();
-        std::int64_t num_bins   = RevBayesCore::assume_cast<const Natural &>( args[1].getVariable()->getRevObject() ).getValue();
-        double cushion  = RevBayesCore::assume_cast<const RealPos &>( args[2].getVariable()->getRevObject() ).getValue();
+        double error    = valueFor<RealPos>(args[0].getVariable());
+        std::int64_t num_bins   = valueFor<Natural>(args[1].getVariable());
+        double cushion  = valueFor<RealPos>(args[2].getVariable());
 
         // make the discretized data
         RevBayesCore::DiscretizedContinuousCharacterData *disc_data = this->dag_node->getValue().discretizeCharacter(error, num_bins, cushion);

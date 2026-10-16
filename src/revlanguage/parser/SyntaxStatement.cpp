@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include <cstddef>
 #include "TypeUtilities.h"
 #include <cassert>
@@ -427,7 +428,7 @@ bool SyntaxStatement::isTrue( SyntaxElement* expr, const std::shared_ptr<Environ
     
     if ( temp->getRevObject().isType( RlBoolean::getClassTypeSpec() ) )
     {
-        bool retValue = RevBayesCore::assume_cast<const RlBoolean&>( temp->getRevObject() ).getValue();
+        bool retValue = valueFor<RlBoolean>(temp);
         
         return retValue;
     }

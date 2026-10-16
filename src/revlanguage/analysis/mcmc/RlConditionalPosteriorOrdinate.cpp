@@ -1,3 +1,4 @@
+#include "RevVariableUtilities.h"
 #include "RlConditionalPosteriorOrdinate.h"
 #include "TypeUtilities.h"
 
@@ -57,9 +58,9 @@ void ConditionalPosteriorOrdinate::constructInternalObject( void )
     delete value;
     
     // get the parameter values
-    const std::string&              fn              = RevBayesCore::assume_cast<const RlString &>( filename->getRevObject() ).getValue();
-    const std::string&              del             = RevBayesCore::assume_cast<const RlString &>( delimiter->getRevObject() ).getValue();
-    const std::vector<std::string>& cols_to_skip    = RevBayesCore::assume_cast<const ModelVector<RlString> &>( col_names_to_skip->getRevObject() ).getValue();
+    const std::string&              fn              = valueFor<RlString>(filename);
+    const std::string&              del             = valueFor<RlString>(delimiter);
+    const std::vector<std::string>& cols_to_skip    = valueFor<ModelVector<RlString>>(col_names_to_skip);
 
     value = new RevBayesCore::ConditionalPosteriorOrdinate(fn, del, cols_to_skip);
     
@@ -74,9 +75,9 @@ RevPtr<RevVariable> ConditionalPosteriorOrdinate::executeMethod(std::string cons
     {
         found = true;
         
-        const std::vector<double>& counts   = RevBayesCore::assume_cast<const ModelVector<RealPos> &>( args[0].getVariable()->getRevObject() ).getValue();
-        bool as_log                         = RevBayesCore::assume_cast<const RlBoolean            &>( args[1].getVariable()->getRevObject() ).getValue();
-        bool use_folded                     = RevBayesCore::assume_cast<const RlBoolean            &>( args[2].getVariable()->getRevObject() ).getValue();
+        const std::vector<double>& counts   = valueFor<ModelVector<RealPos>>(args[0].getVariable());
+        bool as_log                         = valueFor<RlBoolean>(args[1].getVariable());
+        bool use_folded                     = valueFor<RlBoolean>(args[2].getVariable());
 
         double p = value->predictiveProbability( counts, as_log, use_folded );
         

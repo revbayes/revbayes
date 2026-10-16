@@ -6,6 +6,7 @@
 //  Copyright (c) 2015 Michael Landis. All rights reserved.
 //
 
+#include "RevVariableUtilities.h"
 #include <iosfwd>
 #include "TypeUtilities.h"
 #include <string>
@@ -102,7 +103,7 @@ RevPtr<RevVariable> SiteMixtureModel::executeMethod(std::string const &name, con
     {
         found = true;
 
-        const Natural& index = RevBayesCore::assume_cast<const Natural&>( args[0].getVariable()->getRevObject() );
+        const Natural& index = objectFor<Natural>(args[0].getVariable());
         int i = index.getValue() - 1;
         
         auto weights = dag_node->getValue().getComponent(i).getRootFrequencies();

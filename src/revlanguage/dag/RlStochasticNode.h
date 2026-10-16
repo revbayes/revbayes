@@ -1,6 +1,7 @@
 #ifndef RlStochasticNode_H
 #define RlStochasticNode_H
 
+#include "RevVariableUtilities.h"
 #include "StochasticNode.h"
 #include "TypeUtilities.h"
 #include "RevMemberObject.h"
@@ -181,7 +182,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> RevLanguage::StochasticNode<valueT
         // get the observation
 //        const RevObject &tmp_obj = args[0].getVariable()->getRevObject();
 //        const ModelObject<valueType> *tmp_ptr = dynamic_cast<const ModelObject<valueType> *>( &tmp_obj );
-        const valueType &observation = RevBayesCore::assume_cast<const ModelObject<valueType> &>( args[0].getVariable()->getRevObject() ).getValue();
+        const valueType &observation = valueFor<ModelObject<valueType>>(args[0].getVariable());
         
         // clamp
         this->clamp( RevBayesCore::Cloner<valueType, IsDerivedFrom<valueType, RevBayesCore::Cloneable>::Is >::createClone( observation ) );
@@ -195,7 +196,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> RevLanguage::StochasticNode<valueT
         found = true;
         
         // get the observation
-        bool tf = RevBayesCore::assume_cast<const RlBoolean &>( args[0].getVariable()->getRevObject() ).getValue();
+        bool tf = valueFor<RlBoolean>(args[0].getVariable());
                 
         // mark this node to ignore redraws
         this->setIntegratedOut( tf );
@@ -223,7 +224,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> RevLanguage::StochasticNode<valueT
         found = true;
         
         // get the observation
-        const valueType &observation = RevBayesCore::assume_cast<const ModelObject<valueType> &>( args[0].getVariable()->getRevObject() ).getValue();
+        const valueType &observation = valueFor<ModelObject<valueType>>(args[0].getVariable());
         
         // set value
         this->setValue( RevBayesCore::Cloner<valueType, IsDerivedFrom<valueType, RevBayesCore::Cloneable>::Is >::createClone( observation ) );
