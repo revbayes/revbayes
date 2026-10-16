@@ -1,6 +1,7 @@
 #ifndef TreeHistoryCtmc_H
 #define TreeHistoryCtmc_H
 
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "AbstractHomologousDiscreteCharacterData.h"
 #include "BranchHistoryDiscrete.h"
@@ -889,8 +890,10 @@ void RevBayesCore::TreeHistoryCtmc<charType>::swapParameterInternal(const DagNod
 
     if (oldP == tau)
     {
+        // Check the replacement before detaching the old tree's listener.
+        const auto* replacement = assume_cast<decltype(this->tau)>(newP);
         tau->getValue().getTreeChangeEventHandler().removeListener( this );
-        replaceNodeReference(tau, newP);
+        tau = replacement;
         tau->getValue().getTreeChangeEventHandler().addListener( this );
     }
     else if (oldP == siteRates)
