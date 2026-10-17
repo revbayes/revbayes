@@ -1,0 +1,269 @@
+#include "FossilIntervalCounts.h"
+
+#include <algorithm>
+#include <cmath>
+#include <utility>
+
+#include "RbException.h"
+#include "RbConstants.h"
+#include "RbMathLogic.h"
+#include "TimeInterval.h"
+
+using namespace RevBayesCore;
+
+
+/**
+ * The interval holding an age, or the number of intervals if it falls outside them.
+ * An age on a boundary belongs to the older interval.
+ */
+size_t RevBayesCore::fossilIntervalOf(double age, const std::vector<double> &boundaries, double top)
+{
+    size_t num_intervals = boundaries.size();
+
+    if ( age < boundaries[0] || age >= top )
+    {
+        return num_intervals;
+    }
+
+    for (size_t j = 0; j + 1 < num_intervals; j++)
+    {
+        if ( age < boundaries[j+1] )
+        {
+            return j;
+        }
+    }
+
+    return num_intervals - 1;
+}
+
+
+void RevBayesCore::checkFossilIntervals(const std::vector<double> &boundaries)
+{
+    if ( boundaries.size() < 1 )
+    {
+        throw RbException("The timeline needs at least the present.");
+    }
+
+    for (size_t j = 0; j < boundaries.size(); j++)
+    {
+        if ( RbMath::isFinite( boundaries[j] ) == false || boundaries[j] < 0.0 )
+        {
+            throw RbException("Interval boundaries must be finite ages.");
+        }
+        if ( j > 0 && boundaries[j] <= boundaries[j-1] )
+        {
+            throw RbException("Interval boundaries must be given youngest first, strictly increasing.");
+        }
+    }
+}
+
+
+bool RevBayesCore::fossilIntervalsEqualWidth(const std::vector<double> &boundaries, double top)
+{
+    if ( boundaries.size() < 2 )
+    {
+        return true;
+    }
+
+    double first = boundaries[1] - boundaries[0];
+
+    for (size_t j = 1; j < boundaries.size(); j++)
+    {
+        double width = ( j + 1 < boundaries.size() ? boundaries[j+1] : top ) - boundaries[j];
+        if ( RbMath::isFinite( width ) == false )
+        {
+            continue;
+        }
+        if ( fabs( width - first ) > 1E-6 * first )
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
+/**
+ * Which intervals each taxon was sampled in. A bin straddling a boundary is counted by the
+ * policy: nowhere, at the interval holding its midpoint, at the interval it overlaps most
+ * (the older one on a tie), or in every interval it touches.
+ */
+std::vector<std::vector<bool> > RevBayesCore::fossilIntervalPresence(const std::vector<Taxon> &taxa,
+                                                                    const std::vector<double> &boundaries,
+                                                                    double top,
+                                                                    FossilAgeAmbiguity policy)
+{
+    checkFossilIntervals( boundaries );
+
+    size_t num_intervals = boundaries.size();
+    std::vector<std::vector<bool> > presence( taxa.size(), std::vector<bool>( num_intervals, false ) );
+
+    for (size_t i = 0; i < taxa.size(); i++)
+    {
+        const std::vector<std::pair<TimeInterval, size_t> > &bins = taxa[i].getOccurrences();
+
+        for (size_t b = 0; b < bins.size(); b++)
+        {
+            double min_age = bins[b].first.getMin();
+            double max_age = bins[b].first.getMax();
+
+            size_t youngest = fossilIntervalOf( min_age, boundaries, top );
+            size_t oldest   = fossilIntervalOf( max_age, boundaries, top );
+
+            if ( youngest == oldest )
+            {
+                if ( youngest < num_intervals )
+                {
+                    presence[i][youngest] = true;
+                }
+                continue;
+            }
+
+            if ( policy == FOSSIL_AGE_MIDPOINT )
+            {
+                size_t mid = fossilIntervalOf( (min_age + max_age) / 2.0, boundaries, top );
+                if ( mid < num_intervals )
+                {
+                    presence[i][mid] = true;
+                }
+            }
+            else if ( policy == FOSSIL_AGE_MAJORITY )
+            {
+                size_t best = num_intervals;
+                double most = 0.0;
+                for (size_t j = 0; j < num_intervals; j++)
+                {
+                    double lower   = boundaries[j];
+                    double upper   = ( j + 1 < num_intervals ? boundaries[j+1] : top );
+                    double overlap = std::min( max_age, upper ) - std::max( min_age, lower );
+                    if ( overlap > 0.0 && overlap >= most )
+                    {
+                        best = j;
+                        most = overlap;
+                    }
+                }
+                if ( best < num_intervals )
+                {
+                    presence[i][best] = true;
+                }
+            }
+            else if ( policy == FOSSIL_AGE_ALL )
+            {
+                size_t from = ( youngest < num_intervals ? youngest : 0 );
+                size_t to   = ( oldest   < num_intervals ? oldest   : num_intervals - 1 );
+                for (size_t j = from; j <= to; j++)
+                {
+                    presence[i][j] = true;
+                }
+            }
+        }
+    }
+
+    return presence;
+}
+
+
+/**
+ * The category counts. A taxon's first appearance is the oldest interval it was sampled in
+ * and its last appearance the youngest.
+ */
+std::vector<bool> RevBayesCore::fossilExtantStatus(const std::vector<Taxon> &taxa)
+{
+    std::vector<bool> extant( taxa.size(), false );
+    for (size_t i = 0; i < taxa.size(); i++)
+    {
+        extant[i] = ( taxa[i].isExtinct() == false );
+    }
+    return extant;
+}
+
+
+RevBayesCore::FossilIntervalCounts RevBayesCore::countFossilIntervals(const std::vector<std::vector<bool> > &presence,
+                                                                      const std::vector<bool> &extant)
+{
+    size_t num_intervals = ( presence.empty() ? 0 : presence[0].size() );
+
+    FossilIntervalCounts c;
+    c.singleton         = std::vector<double>( num_intervals, 0.0 );
+    c.bottom_last       = std::vector<double>( num_intervals, 0.0 );
+    c.first_top         = std::vector<double>( num_intervals, 0.0 );
+    c.through           = std::vector<double>( num_intervals, 0.0 );
+    c.two_timer_older   = std::vector<double>( num_intervals, 0.0 );
+    c.two_timer_younger = std::vector<double>( num_intervals, 0.0 );
+    c.three_timer       = std::vector<double>( num_intervals, 0.0 );
+    c.part_timer        = std::vector<double>( num_intervals, 0.0 );
+
+    for (size_t i = 0; i < presence.size(); i++)
+    {
+        bool sampled = false;
+        size_t first = 0;   // oldest interval sampled in
+        size_t last  = 0;   // youngest interval sampled in
+
+        for (size_t j = 0; j < num_intervals; j++)
+        {
+            if ( presence[i][j] == true )
+            {
+                if ( sampled == false )
+                {
+                    last = j;
+                    sampled = true;
+                }
+                first = j;
+            }
+        }
+
+        if ( sampled == false )
+        {
+            continue;
+        }
+
+        // A taxon the record reports as still alive ranges through to the present, so it
+        // crosses the younger edge of every interval it occupies, the youngest one included,
+        // and its last appearance is never inside an interval. Without this the youngest
+        // interval has nothing crossing out of it and so no boundary-crosser estimate, and
+        // every survivor's youngest occurrence counts as an extinction.
+        bool alive = ( i < extant.size() && extant[i] == true );
+
+        for (size_t j = 0; j < num_intervals; j++)
+        {
+            bool crosses_older   = ( first > j );
+            bool crosses_younger = ( alive == true ) || ( last < j );
+            bool last_inside     = ( alive == false && last == j );
+
+            if ( first == j && last_inside )
+            {
+                c.singleton[j]++;
+            }
+            else if ( crosses_older && last_inside )
+            {
+                c.bottom_last[j]++;
+            }
+            else if ( first == j && crosses_younger )
+            {
+                c.first_top[j]++;
+            }
+            else if ( crosses_older && crosses_younger )
+            {
+                c.through[j]++;
+            }
+
+            // the timer counts need both neighbours, so they skip the two end intervals
+            if ( j == 0 || j + 1 == num_intervals )
+            {
+                continue;
+            }
+
+            bool here    = presence[i][j];
+            bool older   = presence[i][j+1];
+            bool younger = presence[i][j-1];
+
+            if ( here && older )                 c.two_timer_older[j]++;
+            if ( here && younger )               c.two_timer_younger[j]++;
+            if ( here && older && younger )      c.three_timer[j]++;
+            if ( here == false && older && younger ) c.part_timer[j]++;
+        }
+    }
+
+    return c;
+}

@@ -1,0 +1,46 @@
+per-taxon, speciation then extinction:
+   [ [ 0.0333, 0.0200, 0.0333, nan ] ,
+     [ 0.1000, 0.0600, 0.0333, nan ] ]
+boundary-crosser:
+   [ [ nan, 0.0693, 0.0288, nan ] ,
+     [ nan, 0.1386, 0.0288, nan ] ]
+three-timer:
+   [ [ nan, nan, nan, nan ] ,
+     [ nan, nan, nan, nan ] ]
+per-taxon, oldest interval bounded at 40:
+   [ [ 0.0333, 0.0200, 0.0333, 0.1000 ] ,
+     [ 0.1000, 0.0600, 0.0333, 0.0000 ] ]
+boundary-crosser, oldest interval bounded at 40:
+   [ [ nan, 0.0693, 0.0288, nan ] ,
+     [ nan, 0.1386, 0.0288, nan ] ]
+per-taxon, max_age below the oldest shift:
+   Warning: max_age is not older than the oldest rate shift, so that interval has no rate.
+   
+   Warning: some occurrences are older than max_age and are not counted.
+   
+   [ [ 0.0667, 0.1000, nan, nan ] ,
+     [ 0.1000, 0.0750, nan, nan ] ]
+per-taxon, present at 5:
+   [ [ 0.0667, 0.0200, 0.0333, 0.1000 ] ,
+     [ 0.2000, 0.0600, 0.0333, 0.0000 ] ]
+per-taxon, ambiguous=exclude:
+   [ [ 0.0333, 0.0200, 0.0200, 0.1000 ] ,
+     [ 0.1000, 0.0600, 0.0200, 0.0000 ] ]
+per-taxon, ambiguous=midpoint:
+   [ [ 0.0333, 0.0333, 0.0200, 0.1000 ] ,
+     [ 0.1000, 0.0667, 0.0200, 0.0000 ] ]
+per-taxon, ambiguous=all:
+   [ [ 0.0333, 0.0167, 0.0333, 0.1000 ] ,
+     [ 0.1000, 0.0667, 0.0167, 0.0000 ] ]
+per-taxon, narrow interval, ambiguous=midpoint:
+   [ [ 0.0333, 0.0286, 0.1000, 0.0476 ] ,
+     [ 0.1000, 0.0857, 0.1000, 0.0095 ] ]
+per-taxon, narrow interval, ambiguous=majority:
+   [ [ 0.0333, 0.0286, 0.0000, 0.0476 ] ,
+     [ 0.1000, 0.0857, 0.0000, 0.0159 ] ]
+three-timer, six intervals:
+   [ [ nan, -0.0693, 0.0288, -0.0288, nan, nan ] ,
+     [ nan, nan, 0.0405, -0.0693, -0.0405, nan ] ]
+boundary-crosser speciation, intervals 2 and 3 in full:
+   0.06931472
+   0.02876821

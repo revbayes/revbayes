@@ -1,0 +1,107 @@
+# Foote's per-taxon and boundary-crosser rates and Alroy's three-timer rates, on a record
+# small enough to check by hand.
+#
+# Four intervals of 10 Myr, boundaries 0 10 20 30 40, and eight taxa whose occurrences put
+# them in these intervals (0 is the youngest):
+#
+#   t1 2,3   t2 1,2,3   t3 1,2   t4 2   t5 0,1   t6 0   t7 0,3   t8 1,3
+#
+# First appearance is the oldest interval a taxon was sampled in, last appearance the
+# youngest, so the categories per interval are
+#
+#   interval   0        1        2        3
+#   singleton  t6       -        t4       -
+#   bottom/last t5 t7   t2 t3 t8 t1       -
+#   first/top  -        t5       t3       t1 t2 t7 t8
+#   through    -        t7       t2 t7 t8 -
+#
+# Per-taxon: (singleton + first/top) / total / width, and (singleton + bottom/last) / total / width
+#   speciation  1/3/10   1/5/10   2/6/10   4/4/10
+#   extinction  3/3/10   3/5/10   2/6/10   0
+# Boundary-crosser: log((through + entering) / through) / width, undefined where nothing ranges through
+#   speciation  nan      log(2)/10   log(4/3)/10   nan
+#   extinction  nan      log(4)/10   log(4/3)/10   nan
+# Three-timer: needs both neighbours, and the sampling probability of the next interval out, so
+# four intervals are too few for any rate. It is tested on a longer record below.
+
+# The per-taxon and boundary-crosser rates match fbdR (github.com/rachelwarnock/fbdR, f917635),
+# the implementation used by Warnock et al. (2020), with the oldest interval bounded at 40.
+# In divDyn 0.8.3 they are oriProp, extProp and oriPC, extPC, divided by the interval length.
+
+taxa <- readTaxonData("data/fossil_rate_estimators.tsv")
+
+# intervals [0,10) [10,20) [20,30) [30,Inf), and the unbounded one has no rate
+timeline <- v(10, 20, 30)
+
+print("per-taxon, speciation then extinction:")
+fnPerTaxonRates(taxa, timeline)
+print("boundary-crosser:")
+fnBoundaryCrosserRates(taxa, timeline)
+print("three-timer:")
+fnThreeTimerRates(taxa, timeline)
+
+# max_age bounds the oldest interval, giving the four 10 Myr intervals of the table above
+print("per-taxon, oldest interval bounded at 40:")
+fnPerTaxonRates(taxa, timeline, max_age=40)
+print("boundary-crosser, oldest interval bounded at 40:")
+fnBoundaryCrosserRates(taxa, timeline, max_age=40)
+
+# a max_age no older than the oldest rate shift warns and returns NaN for that interval
+print("per-taxon, max_age below the oldest shift:")
+fnPerTaxonRates(taxa, timeline, max_age=25)
+
+# present moves the youngest boundary, so interval 0 is [5,10) and its rates double
+print("per-taxon, present at 5:")
+fnPerTaxonRates(taxa, timeline, present=5, max_age=40)
+
+# t4's only occurrence is now the bin [12,24], which spans the boundary at 20:
+#   exclude   t4 is not sampled (the default)
+#   midpoint  t4 is a singleton in interval 1
+#   all       t4 is in intervals 1 and 2
+binned <- readTaxonData("data/fossil_rate_estimators_bin.tsv")
+print("per-taxon, ambiguous=exclude:")
+fnPerTaxonRates(binned, timeline, max_age=40)
+print("per-taxon, ambiguous=midpoint:")
+fnPerTaxonRates(binned, timeline, max_age=40, ambiguous="midpoint")
+print("per-taxon, ambiguous=all:")
+fnPerTaxonRates(binned, timeline, max_age=40, ambiguous="all")
+
+# With shifts at 10, 17 and 19 the bin [12,24] overlaps interval 1 by 5, interval 2 by 2 and
+# interval 3 by 5, so its midpoint 18 and its majority disagree:
+#   midpoint  t4 is a singleton in interval 2
+#   majority  t4 is a singleton in interval 3, the older of the two tied intervals
+narrow <- v(10, 17, 19)
+print("per-taxon, narrow interval, ambiguous=midpoint:")
+fnPerTaxonRates(binned, narrow, max_age=40, ambiguous="midpoint")
+print("per-taxon, narrow interval, ambiguous=majority:")
+fnPerTaxonRates(binned, narrow, max_age=40, ambiguous="majority")
+
+# Six intervals of 10 Myr, boundaries 0 10 20 30 40 50 60, and eight taxa sampled in
+#
+#   a 1,2,3,4   b 2,3,4,5   c 1,3   d 2,4   e 0,1,2   f 3,5   g 0,2   h 2,3
+#
+#   interval              0    1    2    3    4    5
+#   two-timer, older      1    2    3    2    1    -     e | a e | a b h | a b | b
+#   two-timer, younger    -    1    2    3    2    1     e | a e | a b h | a b | b
+#   three-timer           -    1    1    2    1    -     e | a | a b | b
+#   part-timer            -    1    1    1    1    -     g | c | d | f
+#   sampling probability  -    1/2  1/2  2/3  1/2  -
+#
+# Speciation is log(two-timer younger / three-timer) + log(sampling probability of the next
+# older interval), extinction log(two-timer older / three-timer) + log(sampling probability of
+# the next younger interval), each over the width:
+#   speciation  nan   log(1/2)/10   log(4/3)/10   log(3/4)/10   nan           nan
+#   extinction  nan   nan           log(3/2)/10   log(1/2)/10   log(2/3)/10   nan
+# These are oriC3t and extC3t of divDyn 0.8.3, divided by the interval length.
+long <- readTaxonData("data/fossil_rate_estimators_3t.tsv")
+long_timeline <- v(10, 20, 30, 40, 50)
+print("three-timer, six intervals:")
+fnThreeTimerRates(long, long_timeline, max_age=60)
+
+# log(2)/10 and log(4/3)/10 at full precision
+bc <- fnBoundaryCrosserRates(taxa, timeline)
+print("boundary-crosser speciation, intervals 2 and 3 in full:")
+bc[1][2]
+bc[1][3]
+
+q()
