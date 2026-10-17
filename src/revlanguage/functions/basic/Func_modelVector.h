@@ -1,6 +1,7 @@
 #ifndef Func_modelVector_H
 #define Func_modelVector_H
 
+#include "RevTypeUtilities.h"
 #include "ModelVector.h"
 #include "RlTypedFunction.h"
 
@@ -76,8 +77,7 @@ RevBayesCore::TypedFunction< RevBayesCore::RbVector< typename valType::valueType
     std::vector<const RevBayesCore::TypedDagNode<typename valType::valueType>* > params;
     for ( size_t i = 0; i < this->args.size(); i++ )
     {
-        const valType &val = static_cast<const valType &>( this->args[i].getVariable()->getRevObject() );
-        params.push_back( val.getDagNode() );
+        params.push_back( dagNodeForRevType<valType>(this->args[i].getVariable()) );
     }
     
     RevBayesCore::VectorFunction<typename valType::valueType>* func = new RevBayesCore::VectorFunction<typename valType::valueType>( params );

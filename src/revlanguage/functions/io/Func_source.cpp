@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <iostream>
 #include <string>
@@ -52,9 +53,9 @@ RevPtr<RevVariable> Func_source::execute( void )
 {
 
     /* Open file */
-    fs::path fname = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
-    bool echo_on = static_cast<const RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
-    bool continue_on_error = static_cast<const RlBoolean &>( args[2].getVariable()->getRevObject() ).getValue();
+    fs::path fname = valueForRevType<RlString>(args[0].getVariable());
+    bool echo_on = valueForRevType<RlBoolean>(args[1].getVariable());
+    bool continue_on_error = valueForRevType<RlBoolean>(args[2].getVariable());
 
     // Initialize
     RBOUT("Processing file \"" + fname.string() + "\"");

@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "Func_power.h"
 
 #include "PowerFunction.h"
@@ -37,8 +38,8 @@ Func_power* Func_power::clone( void ) const
 RevBayesCore::TypedFunction<double>* Func_power::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<double>* b = static_cast<const Real &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* e = static_cast<const Real &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* b = dagNodeForRevType<Real>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode<double>* e = dagNodeForRevType<Real>(this->args[1].getVariable());
     RevBayesCore::PowerFunction* f = new RevBayesCore::PowerFunction( b, e );
     
     return f;

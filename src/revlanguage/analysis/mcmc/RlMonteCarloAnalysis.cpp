@@ -1,4 +1,5 @@
 
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -119,7 +120,7 @@ RevPtr<RevVariable> MonteCarloAnalysis::executeMethod(std::string const &name, c
         size_t args_index = 0;
         
         RevBayesCore::RbVector<RevBayesCore::StoppingRule> rules;
-        int gen = (int)static_cast<const Natural &>( args[args_index++].getVariable()->getRevObject() ).getValue();
+        int gen = (int)valueForRevType<Natural>(args[args_index++].getVariable());
         if(gen > 0) {
             gen += currentGen;
             rules.push_back( RevBayesCore::MaxIterationStoppingRule(gen) );
@@ -128,7 +129,7 @@ RevPtr<RevVariable> MonteCarloAnalysis::executeMethod(std::string const &name, c
         // get the member with given index
         if ( args[args_index++].getVariable()->getRevObject() != RevNullObject::getInstance() )
         {
-            const WorkspaceVector<StoppingRule>& ws_vec = static_cast<const WorkspaceVector<StoppingRule> &>( args[1].getVariable()->getRevObject() );
+            const WorkspaceVector<StoppingRule>& ws_vec = objectForRevType<WorkspaceVector<StoppingRule>>(args[1].getVariable());
             for ( size_t i = 0; i < ws_vec.size(); ++i )
             {
                 rules.push_back( ws_vec[i].getValue() );
@@ -140,17 +141,17 @@ RevPtr<RevVariable> MonteCarloAnalysis::executeMethod(std::string const &name, c
         }
         
         // the tuning interval (0 by default)
-        int tuning_interval = (int)static_cast<const Natural &>( args[args_index++].getVariable()->getRevObject() ).getValue();
+        int tuning_interval = (int)valueForRevType<Natural>(args[args_index++].getVariable());
 
         // the checkoint file (empty by default) and the checkoint interval (0 by default)
-        const std::string checkpoint_file = static_cast<const RlString &>( args[args_index++].getVariable()->getRevObject() ).getValue();
-        std::int64_t checkpoint_interval = static_cast<const Natural &>( args[args_index++].getVariable()->getRevObject() ).getValue();
+        const std::string checkpoint_file = valueForRevType<RlString>(args[args_index++].getVariable());
+        std::int64_t checkpoint_interval = valueForRevType<Natural>(args[args_index++].getVariable());
         if ( (checkpoint_file != "" && checkpoint_interval == 0) || (checkpoint_file == "" && checkpoint_interval != 0) )
         {
             throw RbException("For checkpointing you have to provide both the checkpoint file and the checkpoint frequency (interval).");
         }
         
-        int verbose = (int)static_cast<const Natural &>( args[args_index++].getVariable()->getRevObject() ).getValue();
+        int verbose = (int)valueForRevType<Natural>(args[args_index++].getVariable());
 
         deprecateUnderPrior("run", args[args_index++]);
 
@@ -166,9 +167,9 @@ RevPtr<RevVariable> MonteCarloAnalysis::executeMethod(std::string const &name, c
         found = true;
         
         // get the member with give index
-        int gen = (int)static_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue();
-        int tuningInterval = (int)static_cast<const Natural &>( args[1].getVariable()->getRevObject() ).getValue();
-        int verbose = (int)static_cast<const Natural &>( args[2].getVariable()->getRevObject() ).getValue();
+        int gen = (int)valueForRevType<Natural>(args[0].getVariable());
+        int tuningInterval = (int)valueForRevType<Natural>(args[1].getVariable());
+        int verbose = (int)valueForRevType<Natural>(args[2].getVariable());
 
         deprecateUnderPrior("burnin", args[3]);
 
@@ -184,7 +185,7 @@ RevPtr<RevVariable> MonteCarloAnalysis::executeMethod(std::string const &name, c
     {
         found = true;
         
-        bool current_period = static_cast<const RlBoolean &>( args[0].getVariable()->getRevObject() ).getValue();
+        bool current_period = valueForRevType<RlBoolean>(args[0].getVariable());
         
         value->printPerformanceSummary( current_period );
         
@@ -194,7 +195,7 @@ RevPtr<RevVariable> MonteCarloAnalysis::executeMethod(std::string const &name, c
     {
         found = true;
         
-        const std::string &checkpoint_filename = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
+        const std::string &checkpoint_filename = valueForRevType<RlString>(args[0].getVariable());
         
         value->initializeFromCheckpoint( checkpoint_filename );
         

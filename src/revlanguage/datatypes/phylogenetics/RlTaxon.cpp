@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <sstream>
 #include <string>
@@ -91,15 +92,15 @@ void Taxon::constructInternalObject( void )
     }
     
     // now allocate a new Taxon
-    std::string taxonName = static_cast<const RlString &>( (taxon)->getRevObject() ).getValue() ;
-    std::string taxonSpecies = static_cast<const RlString &>( (species)->getRevObject() ).getValue() ;
+    std::string taxonName = valueForRevType<RlString>((taxon)) ;
+    std::string taxonSpecies = valueForRevType<RlString>((species)) ;
     taxonSpecies = ( taxonSpecies == "taxonName" ) ? taxonName : taxonSpecies;
-    double minAge = static_cast<const RealPos &>( minage->getRevObject() ).getValue();
+    double minAge = valueForRevType<RealPos>(minage);
     double maxAge = minAge;
 
     if( maxage->getRevObject().isType( RealPos::getClassTypeSpec() ) )
     {
-        maxAge = static_cast<const RealPos &>( maxage->getRevObject() ).getValue();
+        maxAge = valueForRevType<RealPos>(maxage);
     }
     
     dag_node = new RevBayesCore::ConstantNode<RevBayesCore::Taxon>("", new RevBayesCore::Taxon( taxonName ) );
@@ -156,7 +157,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Taxon::executeMethod(std::string c
     if (name == "setMinAge")
     {
         found = true;
-        double a = static_cast<const RealPos&>( args[0].getVariable()->getRevObject() ).getValue();
+        double a = valueForRevType<RealPos>(args[0].getVariable());
 
         dag_node->getValue().setMinAge( a );
         return NULL;
@@ -164,7 +165,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Taxon::executeMethod(std::string c
     if (name == "setMaxAge")
     {
         found = true;
-        double a = static_cast<const RealPos&>( args[0].getVariable()->getRevObject() ).getValue();
+        double a = valueForRevType<RealPos>(args[0].getVariable());
 
         dag_node->getValue().setMaxAge( a );
         return NULL;

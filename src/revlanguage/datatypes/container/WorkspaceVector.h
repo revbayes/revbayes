@@ -1,6 +1,7 @@
 #ifndef WorkspaceVector_H
 #define WorkspaceVector_H
 
+#include "RevTypeUtilities.h"
 #include "RlContainer.h"
 #include "RbConstIterator.h"
 #include "RbVector.h"
@@ -221,14 +222,14 @@ RevPtr<RevVariable> WorkspaceVector<rlType>::executeMethod( std::string const &n
     {
         found = true;
         
-        std::int64_t index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+        std::int64_t index = valueForRevType<Natural>(args[0].getVariable()) - 1;
         return RevPtr<RevVariable>( new RevVariable( getElement( index ) ) );
     }
     else if ( name == "append" )
     {
         found = true;
         
-        const rlType& x = static_cast<const rlType&>( args[0].getVariable()->getRevObject() );
+        const rlType& x = objectForRevType<rlType>(args[0].getVariable());
         this->push_back(x);
         
         return NULL;
@@ -236,7 +237,7 @@ RevPtr<RevVariable> WorkspaceVector<rlType>::executeMethod( std::string const &n
     else if ( name == "erase" )
     {
         found = true;
-        const rlType& x = static_cast<const rlType&>( args[0].getVariable()->getRevObject() );
+        const rlType& x = objectForRevType<rlType>(args[0].getVariable());
         RevBayesCore::RbConstIterator<rlType> pos = this->find( x );
         if ( pos != this->end() )
         {

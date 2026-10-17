@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -64,12 +65,12 @@ void Move_ScaleBactrian::constructInternalObject( void )
     delete value;
     
     // now allocate a new sliding move
-    double d = static_cast<const RealPos &>( lambda->getRevObject() ).getValue();
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    double r = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<double>* tmp = static_cast<const Real &>( x->getRevObject() ).getDagNode();
+    double d = valueForRevType<RealPos>(lambda);
+    double w = valueForRevType<RealPos>(weight);
+    double r = valueForRevType<Probability>(tuneTarget);
+    RevBayesCore::TypedDagNode<double>* tmp = dagNodeForRevType<Real>(x);
     RevBayesCore::ContinuousStochasticNode *n = static_cast<RevBayesCore::ContinuousStochasticNode *>( tmp );
-    bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    bool t = valueForRevType<RlBoolean>(tune);
     
     RevBayesCore::Proposal *p = new RevBayesCore::ScaleBactrianProposal(n, d, r);
     value = new RevBayesCore::MetropolisHastingsMove(p, w, t);

@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -68,13 +69,13 @@ void Move_OrderedEventTimeSlide::constructInternalObject( void )
     delete value;
     
     // now allocate a new random-geometric-walk move
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<RevBayesCore::OrderedEventTimes>* tmp = static_cast<const RlOrderedEventTimes &>( x->getRevObject() ).getDagNode();
+    double w = valueForRevType<RealPos>(weight);
+    RevBayesCore::TypedDagNode<RevBayesCore::OrderedEventTimes>* tmp = dagNodeForRevType<RlOrderedEventTimes>(x);
     RevBayesCore::StochasticNode<RevBayesCore::OrderedEventTimes> *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::OrderedEventTimes> *>( tmp );
     
-    bool tuning = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double d    = static_cast<const RealPos &>( delta->getRevObject() ).getValue();
-    double tt   = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    bool tuning = valueForRevType<RlBoolean>(tune);
+    double d    = valueForRevType<RealPos>(delta);
+    double tt   = valueForRevType<Probability>(tuneTarget);
     
     // finally create the internal move object
     RevBayesCore::Proposal *prop = new RevBayesCore::OrderedEventTimeSlideProposal(n, d);

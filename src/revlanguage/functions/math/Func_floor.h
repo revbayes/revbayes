@@ -1,6 +1,7 @@
 #ifndef Func_floor_H
 #define Func_floor_H
 
+#include "RevTypeUtilities.h"
 #include "RlTypedFunction.h"
 
 #include <string>
@@ -74,7 +75,7 @@ template <typename valType, typename retType>
 RevBayesCore::TypedFunction< typename retType::valueType >* RevLanguage::Func_floor<valType, retType>::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<double>* arg = static_cast<const valType &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* arg = dagNodeForRevType<valType>(this->args[0].getVariable());
     RevBayesCore::FloorFunction* f = new RevBayesCore::FloorFunction( arg );
     
     return f;

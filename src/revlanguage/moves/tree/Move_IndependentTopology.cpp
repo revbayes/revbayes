@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "Move_IndependentTopology.h"
 
 #include <cstddef>
@@ -60,21 +61,21 @@ void Move_IndependentTopology::constructInternalObject( void )
     delete value;
     
     // now allocate a new empirical tree move
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double w = valueForRevType<RealPos>(weight);
     
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = dagNodeForRevType<TimeTree>(tree);
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
 
-    const Distribution& rlDistribution                        = static_cast<const Distribution &>( proposal_distribution->getRevObject() );
+    const Distribution& rlDistribution                        = objectForRevType<Distribution>(proposal_distribution);
     RevBayesCore::TypedDistribution<RevBayesCore::Tree>* prop = static_cast<RevBayesCore::TypedDistribution<RevBayesCore::Tree>* >( rlDistribution.createDistribution() );
 
-    const RevBayesCore::Clade& c      = static_cast<const Clade&>( outgroup->getRevObject() ).getValue();
+    const RevBayesCore::Clade& c      = valueForRevType<Clade>(outgroup);
 
     RevBayesCore::Proposal *p;
 
     if( substitution_rates->getRevObject() != RevNullObject::getInstance() )
     {
-        RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp = static_cast<const ModelVector<RealPos> &>( substitution_rates->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp = dagNodeForRevType<ModelVector<RealPos>>(substitution_rates);
         if( tmp->isStochastic() == true )
         {
             RevBayesCore::StochasticNode<RevBayesCore::RbVector<double> >* stoch = dynamic_cast<RevBayesCore::StochasticNode<RevBayesCore::RbVector<double> >* >( tmp );

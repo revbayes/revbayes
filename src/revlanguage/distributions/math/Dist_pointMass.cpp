@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -41,7 +42,7 @@ Dist_pointMass* Dist_pointMass::clone( void ) const
 RevBayesCore::PointMassDistribution* Dist_pointMass::createDistribution( void ) const
 {
     // get the parameters
-    RevBayesCore::TypedDagNode<double>* l   = static_cast<const Real &>( value->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* l   = dagNodeForRevType<Real>(value);
     RevBayesCore::PointMassDistribution* d    = new RevBayesCore::PointMassDistribution(l);
     
     return d;

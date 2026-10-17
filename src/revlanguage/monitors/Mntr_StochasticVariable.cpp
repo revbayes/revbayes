@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <ostream>
 #include <string>
 
@@ -43,11 +44,11 @@ void Mntr_StochasticVariable::constructInternalObject( void )
     delete value;
     
     // now allocate a new sliding move
-    const std::string&                  fn      = static_cast<const RlString &> ( filename->getRevObject() ).getValue();
-    const std::string&                  sep     = static_cast<const RlString &> ( separator->getRevObject() ).getValue();
-    std::uint64_t                       g       = static_cast<const IntegerPos&>( printgen->getRevObject() ).getValue();
-    bool                                ap      = static_cast<const RlBoolean &>( append->getRevObject() ).getValue();
-    bool                                wv      = static_cast<const RlBoolean &>( version->getRevObject() ).getValue();
+    const std::string&                  fn      = valueForRevType<RlString>(filename);
+    const std::string&                  sep     = valueForRevType<RlString>(separator);
+    std::uint64_t                       g       = valueForRevType<IntegerPos>(printgen);
+    bool                                ap      = valueForRevType<RlBoolean>(append);
+    bool                                wv      = valueForRevType<RlBoolean>(version);
     RevBayesCore::StochasticVariableMonitor *m = new RevBayesCore::StochasticVariableMonitor((std::uint64_t)g, fn, sep);
     
     // now set the flags

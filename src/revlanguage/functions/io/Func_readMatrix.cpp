@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "Func_readMatrix.h"
 
 #include <sstream>
@@ -37,8 +38,8 @@ RevPtr<RevVariable> Func_readMatrix::execute( void )
 {
 	
 	// get the information from the arguments for reading the file
-	const RlString&    fn  = static_cast<const RlString&>( args[0].getVariable()->getRevObject() );
-    const std::string& del = static_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
+	const RlString&    fn  = objectForRevType<RlString>(args[0].getVariable());
+    const std::string& del = valueForRevType<RlString>(args[1].getVariable());
 
     RevBayesCore::MatrixReader* mr = new RevBayesCore::MatrixReader( fn.getValue(), del );
     RevBayesCore::MatrixReal    m  = mr->getMatrix();

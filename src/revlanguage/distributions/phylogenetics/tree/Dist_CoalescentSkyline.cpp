@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cmath>
 #include <cstddef>
 #include <iosfwd>
@@ -89,27 +90,27 @@ RevBayesCore::PiecewiseCoalescent* Dist_CoalescentSkyline::createDistribution( v
     // get the parameters
     
     // theta
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* th       = static_cast<const ModelVector<RealPos> &>( theta->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* th       = dagNodeForRevType<ModelVector<RealPos>>(theta);
     // times
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* ti       = NULL;
     if ( times != NULL && times->getRevObject() != RevNullObject::getInstance() )
     {
-        ti = static_cast<const ModelVector<RealPos> &>( times->getRevObject() ).getDagNode();
+        ti = dagNodeForRevType<ModelVector<RealPos>>(times);
     }
     // number of events per interval
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<std::int64_t> >* enpi       = NULL;
     if ( events_per_interval != NULL && events_per_interval->getRevObject() != RevNullObject::getInstance() )
     {
-        enpi = static_cast<const ModelVector<Natural> &>( events_per_interval->getRevObject() ).getDagNode();
+        enpi = dagNodeForRevType<ModelVector<Natural>>(events_per_interval);
     }
     // method
-    const std::string &m                        = static_cast<const RlString &>( method->getRevObject() ).getValue();
+    const std::string &m                        = valueForRevType<RlString>(method);
     // demographic model
-    const std::string &dem                      = static_cast<const RlString &>( model->getRevObject() ).getValue();
+    const std::string &dem                      = valueForRevType<RlString>(model);
     // taxon names
-    const std::vector<RevBayesCore::Taxon> & ta = static_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
+    const std::vector<RevBayesCore::Taxon> & ta = valueForRevType<ModelVector<Taxon>>(taxa);
     // clade constraints
-    const std::vector<RevBayesCore::Clade> &c   = static_cast<const ModelVector<Clade> &>( constraints->getRevObject() ).getValue();
+    const std::vector<RevBayesCore::Clade> &c   = valueForRevType<ModelVector<Clade>>(constraints);
     
     RevBayesCore::PiecewiseCoalescent::METHOD_TYPES meth = RevBayesCore::PiecewiseCoalescent::SPECIFIED;
     if ( m == "events" )
