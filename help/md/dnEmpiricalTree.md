@@ -7,7 +7,7 @@ Creates a distribution of trees from a trace of trees.
 ## authors
 Will Freyman
 Sebastian Hoehna
-Will Pett
+June Walker
 ## see_also
 mvEmpiricalTree
 treeTrace

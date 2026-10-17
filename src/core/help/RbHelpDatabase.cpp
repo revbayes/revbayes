@@ -349,7 +349,7 @@ if (ceiled_number != 4.0) {
 k <- 2
 x := choose(n, k))");
 	help_strings[string("choose")][string("name")] = string(R"(choose)");
-	help_arrays[string("clade")][string("authors")].push_back(string(R"(Will Pett)"));
+	help_arrays[string("clade")][string("authors")].push_back(string(R"(June Walker)"));
 	help_arrays[string("clade")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_arrays[string("clade")][string("authors")].push_back(string(R"(Michael Landis)"));
 	help_strings[string("clade")][string("description")] = string(R"(A clade is a subtree within a phylogeny.)");
@@ -452,7 +452,7 @@ locus_1_and_2 = concatenate( locus_1, locus_2 ))");
 	help_strings[string("concatenate")][string("title")] = string(R"(Concatenate character matrices)");
 	help_arrays[string("consensusTree")][string("authors")].push_back(string(R"(Seraina Klopfstein)"));
 	help_arrays[string("consensusTree")][string("authors")].push_back(string(R"(Will Freyman)"));
-	help_arrays[string("consensusTree")][string("authors")].push_back(string(R"(Will Pett)"));
+	help_arrays[string("consensusTree")][string("authors")].push_back(string(R"(June Walker)"));
 	help_arrays[string("consensusTree")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("consensusTree")][string("description")] = string(R"(Calculates the majority-rule consensus topology from a trace of trees and summarizes branch lengths.)");
 	help_strings[string("consensusTree")][string("example")] = string(R"(# Read in tree trace
@@ -884,7 +884,7 @@ sum(b))");
 	help_strings[string("dnEmpiricalSample")][string("name")] = string(R"(dnEmpiricalSample)");
 	help_arrays[string("dnEmpiricalTree")][string("authors")].push_back(string(R"(Will Freyman)"));
 	help_arrays[string("dnEmpiricalTree")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
-	help_arrays[string("dnEmpiricalTree")][string("authors")].push_back(string(R"(Will Pett)"));
+	help_arrays[string("dnEmpiricalTree")][string("authors")].push_back(string(R"(June Walker)"));
 	help_strings[string("dnEmpiricalTree")][string("description")] = string(R"(Creates a distribution of trees from a trace of trees.)");
 	help_strings[string("dnEmpiricalTree")][string("example")] = string(R"(# Read in tree trace
 tree_trace = readTreeTrace("output/my.trees", burnin=0.25)
@@ -911,7 +911,7 @@ x ~ dnExponential(lambda=rate)
 x.probability())");
 	help_strings[string("dnExponential")][string("name")] = string(R"(dnExponential)");
 	help_strings[string("dnExponential")][string("title")] = string(R"(Exponential Distribution)");
-	help_arrays[string("dnFossilizedBirthDeathRange")][string("authors")].push_back(string(R"(Walker Pett)"));
+	help_arrays[string("dnFossilizedBirthDeathRange")][string("authors")].push_back(string(R"(June Walker)"));
 	help_strings[string("dnFossilizedBirthDeathRange")][string("description")] = string(R"(The fossilized birth death range process (FBDRP) describes the distribution of a matrix of species origination and extinction times under a model of asymmetric speciation and sampling of extinct species.)");
 	help_strings[string("dnFossilizedBirthDeathRange")][string("details")] = string(R"(Fossil species are represented by a collection of fossil occurrences with uncertainty. Speciation, extinction and sampling rates may be time-homogeneous or piecewise time-heterogeneous. If time-heterogeneous rates are provided, then a vector of rate change time-points musts also be provided. If only a subset of fossil occurrences is provided for each species (e.g. only first and last occurrencces), then the remaining number of fossil samples may be marginalized by specifying `complete=FALSE`. Under the hood, the fossil data is augmented with oldest occurrence ages for each species, which must be sampled during MCMC using `mvResampleFBD`. Setting `BDS` to true causes the model to assume complete lineage sampling i.e. using the Birth-Death with Rateshifts (BDS) model of Silvestro et al. (2019).)");
 	help_strings[string("dnFossilizedBirthDeathRange")][string("example")] = string(R"(lambda ~ dnExp(10)
@@ -927,7 +927,7 @@ moves.append( mvMatrixElementSlide(bd, weight=taxa.size()) ))");
 	help_references[string("dnFossilizedBirthDeathRange")].push_back(RbHelpReference(R"(Improved estimation of macroevolutionary rates from fossil data using a Bayesian framework. Silvestro, Daniele et al. Paleobiology, 45:546-570.)",R"(https://doi.org/10.1017/pab.2019.23)",R"(https://www.cambridge.org/core/journals/paleobiology/article/improved-estimation-of-macroevolutionary-rates-from-fossil-data-using-a-bayesian-framework/334F08A74A6C92F1FEAD91A71FE59A1C )"));
 	help_arrays[string("dnFossilizedBirthDeathRange")][string("see_also")].push_back(string(R"(dnBirthDeathSamplingTreatment)"));
 	help_arrays[string("dnFossilizedBirthDeathRange")][string("see_also")].push_back(string(R"(mvResampleFBD)"));
-	help_arrays[string("dnFossilizedBirthDeathSpeciation")][string("authors")].push_back(string(R"(Walker Pett)"));
+	help_arrays[string("dnFossilizedBirthDeathSpeciation")][string("authors")].push_back(string(R"(June Walker)"));
 	help_strings[string("dnFossilizedBirthDeathSpeciation")][string("description")] = string(R"(The fossilized birth death speciation process (FBDSP) describes the diversification and sampling of extant and extinct species trees under a mixed model of asymmetric, symmetric and anagenetic speciation.)");
 	help_strings[string("dnFossilizedBirthDeathSpeciation")][string("details")] = string(R"(Fossil species are represented by a collection of fossil occurrences with uncertainty. Speciation, extinction and sampling rates may be time-homogeneous or piecewise time-heterogeneous. If time-heterogeneous rates are provided, then a vector of rate change time-points musts also be provided. If only a subset of fossil occurrences is provided for each species (e.g. only first and last occurrencces), then the remaining number of fossil samples may be marginalized by specifying `complete=FALSE`. Under the hood, the fossil data is augmented with oldest occurrence ages for each species, which must be sampled during MCMC using `mvResampleFBD`. Tips represent extinction events, and therefore should be sampled during MCMC using e.g. `mvTipTimeSlideUniform`.)");
 	help_strings[string("dnFossilizedBirthDeathSpeciation")][string("example")] = string(R"(lambda ~ dnExp(10)
@@ -1340,7 +1340,7 @@ mv[6] = mvVectorSlide(x))");
 	help_arrays[string("dnMultivariateNormal")][string("see_also")].push_back(string(R"(dnWishart)"));
 	help_arrays[string("dnMultivariateNormal")][string("see_also")].push_back(string(R"(mvCorrelationMatrixUpdate)"));
 	help_strings[string("dnMultivariateNormal")][string("title")] = string(R"(Multivariate Normal Distribution)");
-	help_arrays[string("dnNbinomial")][string("authors")].push_back(string(R"(Walker Pett)"));
+	help_arrays[string("dnNbinomial")][string("authors")].push_back(string(R"(June Walker)"));
 	help_strings[string("dnNbinomial")][string("description")] = string(R"(Negative binomial probability distribution of x successes before r failures.)");
 	help_strings[string("dnNbinomial")][string("details")] = string(R"(The negative binomial probability distribution describes the number of successes before r failures, where the success probability is p. The probability is given by (x + r - 1 choose x) p^(x) * (1-p)^r)");
 	help_strings[string("dnNbinomial")][string("example")] = string(R"(p ~ dnBeta(1.0,1.0)
@@ -1665,7 +1665,7 @@ Y ~ dnPhyloOUSD(char_hist, theta=theta, rootTreatment="optimum", alpha=alpha, si
 	help_strings[string("dnPhyloOrnsteinUhlenbeckStateDependent")][string("title")] = string(R"(Phylogenetic state-dependent Ornstein-Uhlenbeck process)");
 	help_strings[string("dnPhyloOrnsteinUhlenbeckThreePoint")][string("name")] = string(R"(dnPhyloOrnsteinUhlenbeckThreePoint)");
 	help_strings[string("dnPhyloWhiteNoise")][string("name")] = string(R"(dnPhyloWhiteNoise)");
-	help_arrays[string("dnPointMass")][string("authors")].push_back(string(R"(Walker Pett)"));
+	help_arrays[string("dnPointMass")][string("authors")].push_back(string(R"(June Walker)"));
 	help_strings[string("dnPointMass")][string("description")] = string(R"(Point mass distribution.)");
 	help_strings[string("dnPointMass")][string("details")] = string(R"(The point mass distribution, or Dirac delta function, has density f(x) = 1 when x is equal to the point mass value.)");
 	help_strings[string("dnPointMass")][string("example")] = string(R"(u ~ dnPointMass(1.2))");
@@ -3180,7 +3180,7 @@ max(a)
 	help_strings[string("max")][string("name")] = string(R"(max)");
 	help_arrays[string("max")][string("see_also")].push_back(string(R"(`min`)"));
 	help_strings[string("max")][string("title")] = string(R"(Maximum of a set of numbers)");
-	help_arrays[string("maxdiff")][string("authors")].push_back(string(R"(Will Pett)"));
+	help_arrays[string("maxdiff")][string("authors")].push_back(string(R"(June Walker)"));
 	help_strings[string("maxdiff")][string("description")] = string(R"(Finds the maximum difference in clade probabilities between two posterior samples.)");
 	help_strings[string("maxdiff")][string("example")] = string(R"(# Read in tree trace
 tree_trace = readTreeTrace("output/my.trees", burnin=0.25, nruns=2)
@@ -3227,7 +3227,7 @@ print(recTree))");
 	help_references[string("maximumTree")].push_back(RbHelpReference(R"(Edwards SV, Liu L, Pearl DK (2007). High-resolution species trees without concatenation. Proceedings of the National Academy of Sciences of the USA, 104(14):5936-5941.)",R"(10.1073/pnas.0607004104)",R"(http://www.pnas.org/content/104/14/5936.full )"));
 	help_references[string("maximumTree")].push_back(RbHelpReference(R"(Liu L, Yu L, Pearl DK (2010). Maximum tree: a consistent estimator of the species tree. Journal of Mathematical Biology, 60(1):95-106.)",R"(10.1007/s00285-009-0260-0)",R"(https://link.springer.com/article/10.1007%2Fs00285-009-0260-0 )"));
 	help_strings[string("maximumTree")][string("title")] = string(R"(Maximum tree function to build a species tree.)");
-	help_arrays[string("mccTree")][string("authors")].push_back(string(R"(Will Pett)"));
+	help_arrays[string("mccTree")][string("authors")].push_back(string(R"(June Walker)"));
 	help_arrays[string("mccTree")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("mccTree")][string("description")] = string(R"(Finds the maximum clade credibility (MCC) topology from a trace of trees and summarizes branch lengths.)");
 	help_strings[string("mccTree")][string("example")] = string(R"(# Read in tree trace
@@ -3681,7 +3681,7 @@ Usage examples can be found at https://revbayes.github.io/tutorials/morph_tree/V
 	help_strings[string("mvEllipticalSliceSamplingSimple")][string("name")] = string(R"(mvEllipticalSliceSamplingSimple)");
 	help_arrays[string("mvEmpiricalTree")][string("authors")].push_back(string(R"(Will Freyman)"));
 	help_arrays[string("mvEmpiricalTree")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
-	help_arrays[string("mvEmpiricalTree")][string("authors")].push_back(string(R"(Will Pett)"));
+	help_arrays[string("mvEmpiricalTree")][string("authors")].push_back(string(R"(June Walker)"));
 	help_arrays[string("mvEmpiricalTree")][string("authors")].push_back(string(R"(Jiansi Gao)"));
 	help_strings[string("mvEmpiricalTree")][string("description")] = string(R"(An MCMC move that operates on empirical tree distributions.)");
 	help_strings[string("mvEmpiricalTree")][string("example")] = string(R"(# Read in tree trace
@@ -4111,7 +4111,7 @@ remains unchanged for the tree branches.)");
 	help_arrays[string("mvRateAgeBetaShift")][string("see_also")].push_back(string(R"(mvRateAgeProposal)"));
 	help_arrays[string("mvRateAgeBetaShift")][string("see_also")].push_back(string(R"(mvRateAgeSubtreeProposal)"));
 	help_strings[string("mvRateAgeBetaShift")][string("title")] = string(R"(The RateAgeBetaShift move)");
-	help_arrays[string("mvResampleFBD")][string("authors")].push_back(string(R"(Walker Pett)"));
+	help_arrays[string("mvResampleFBD")][string("authors")].push_back(string(R"(June Walker)"));
 	help_strings[string("mvResampleFBD")][string("description")] = string(R"(This move resamples an oldest occurrence age for a random species in a fossilized birth death process described by `dnFBDRP` or `dnFBDRMatrix`)");
 	help_strings[string("mvResampleFBD")][string("details")] = string(R"(Under the hood, FBD fossil data is augmented with oldest occurrence ages for each species, which are automatically marginalized during when the model is sampled using MCMC. These ages can also be resampled manually using this move.)");
 	help_strings[string("mvResampleFBD")][string("example")] = string(R"(bd ~ dnFBDRP(lambda=lambda, mu=mu, psi=psi, rho=1, taxa=taxa, resample=FALSE)

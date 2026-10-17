@@ -7,7 +7,7 @@ Negative binomial probability distribution of x successes before r failures.
 ## details
 The negative binomial probability distribution describes the number of successes before r failures, where the success probability is p. The probability is given by (x + r - 1 choose x) p^(x) * (1-p)^r
 ## authors
-Walker Pett
+June Walker
 ## see_also
 dnBinomial
 ## example

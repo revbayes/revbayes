@@ -5,7 +5,7 @@ mccTree
 Finds the maximum clade credibility (MCC) topology from a trace of trees and summarizes branch lengths.
 ## details
 ## authors
-Will Pett
+June Walker
 Sebastian Hoehna
 ## see_also
 consensusTree
