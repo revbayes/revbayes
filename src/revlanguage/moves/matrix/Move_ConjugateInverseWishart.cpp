@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
@@ -51,7 +52,7 @@ void Move_ConjugateInverseWishart::constructInternalObject( void )
     double w = valueForRevType<RealPos>(weight);
 
     RevBayesCore::TypedDagNode< RevBayesCore::MatrixReal >* tmp = dagNodeForRevType<MatrixRealSymmetric>(x);
-    RevBayesCore::StochasticNode< RevBayesCore::MatrixReal > *z = static_cast< RevBayesCore::StochasticNode< RevBayesCore::MatrixReal >* >( tmp );
+    RevBayesCore::StochasticNode< RevBayesCore::MatrixReal > *z = assume_cast< RevBayesCore::StochasticNode< RevBayesCore::MatrixReal >* >( tmp );
     
     value = new RevBayesCore::ConjugateInverseWishartMove(z, w);
 }

@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include <cmath>
 #include <cstddef>
@@ -84,7 +85,7 @@ RevBayesCore::TopologyConstrainedTreeDistribution* Dist_ConstrainedUnrootedTopol
 
     const RevBayesCore::RbVector<RevBayesCore::Clade>& c      = valueForRevType<ModelVector<Clade>>(constraints);
     const Distribution& rlDistribution                        = objectForRevType<Distribution>(base_distribution);
-    RevBayesCore::TypedDistribution<RevBayesCore::Tree>* base = static_cast<RevBayesCore::TypedDistribution<RevBayesCore::Tree>* >( rlDistribution.createDistribution() );
+    RevBayesCore::TypedDistribution<RevBayesCore::Tree>* base = assume_cast<RevBayesCore::TypedDistribution<RevBayesCore::Tree>* >( rlDistribution.createDistribution() );
     
     // tree for initialization
     RevBayesCore::Tree* init = nullptr;

@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include <sstream>
 #include <cstddef>
@@ -161,11 +162,11 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
         std::string taxon_name = "";
         if ( taxon.isType( RlString::getClassTypeSpec() ) )
         {
-            taxon_name = static_cast<const RlString&>( taxon ).getValue();
+            taxon_name = assume_cast<const RlString&>( taxon ).getValue();
         }
         else
         {
-            taxon_name = static_cast<const Taxon&>( taxon ).getValue().getSpeciesName();
+            taxon_name = assume_cast<const Taxon&>( taxon ).getValue().getSpeciesName();
         }
 
         this->dag_node->getValue().dropTipNodeWithName( taxon_name );
@@ -358,7 +359,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
             const RevObject& new_value = args[1].getVariable()->getRevObject();
             if ( new_value.isType( RealPos::getClassTypeSpec() ) )
             {
-                double value = static_cast<const RealPos&>( new_value ).getValue();
+                double value = assume_cast<const RealPos&>( new_value ).getValue();
                 RevBayesCore::Tree &tree = dag_node->getValue();
                 
                 double used_age = tree.getRoot().doesUseAges();
@@ -387,11 +388,11 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
         const RevObject& current = args[0].getVariable()->getRevObject();
         if ( current.isType( RlString::getClassTypeSpec() ) )
         {
-            std::string n = std::string( static_cast<const RlString&>( current ).getValue() );
+            std::string n = std::string( assume_cast<const RlString&>( current ).getValue() );
             const RevObject& new_name = args[1].getVariable()->getRevObject();
             if ( new_name.isType( RlString::getClassTypeSpec() ) )
             {
-                std::string name = std::string( static_cast<const RlString&>( new_name ).getValue() );
+                std::string name = std::string( assume_cast<const RlString&>( new_name ).getValue() );
                 getDagNode()->getValue().setTaxonName( n ,name );
                 // std::cout << "new name: "<< dagNode->getValue().getTaxonData( n ).getTaxonName() << std::endl;
             }

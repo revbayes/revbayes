@@ -6,6 +6,7 @@
 //  Copyright © 2016 Michael Landis. All rights reserved.
 //
 
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include <cstddef>
 #include <iosfwd>
@@ -121,7 +122,7 @@ RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_DECStationaryFr
         rs = new RevBayesCore::ConstantNode<RevBayesCore::Simplex >("", new RevBayesCore::Simplex(n,p));
     }
     
-    std::string nullRangeStr = static_cast<const RlString &>( this->args[3].getVariable()->getRevObject() ).getValue();
+    std::string nullRangeStr = assume_cast<const RlString &>( this->args[3].getVariable()->getRevObject() ).getValue();
 //    bool cs = nullRangeStr=="CondSurv";
 //    bool ex = nullRangeStr=="Exclude";
     //    std::cout << nullRangeStr << " " << cs << " " << ex << "\n";

@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include <cstddef>
 #include <vector>
 
@@ -58,7 +59,7 @@ BranchHistoryDiscrete& CharacterHistoryDiscrete::operator[](size_t i)
         throw RbException("Index out of bounds in character history.");
     }
 
-    return static_cast<BranchHistoryDiscrete &>(*histories[i]);
+    return assume_cast<BranchHistoryDiscrete &>(*histories[i]);
 }
 
 
@@ -72,7 +73,7 @@ const BranchHistoryDiscrete& CharacterHistoryDiscrete::operator[](size_t i) cons
         throw RbException("Index out of bounds in character history.");
     }
 
-    return static_cast<const BranchHistoryDiscrete &>(*histories[i]);
+    return assume_cast<const BranchHistoryDiscrete &>(*histories[i]);
 }
 
 
@@ -96,7 +97,7 @@ size_t CharacterHistoryDiscrete::getMaxObservedState( void ) const
     // create a branch history object for each branch
     for (size_t i=0; i<n_branches; ++i)
     {
-        size_t branch_max_states = static_cast<BranchHistoryDiscrete*>(histories[i])->getMaxObservedState();
+        size_t branch_max_states = assume_cast<BranchHistoryDiscrete*>(histories[i])->getMaxObservedState();
 
         if ( branch_max_states > max_obs_state )
         {
@@ -124,7 +125,7 @@ size_t CharacterHistoryDiscrete::getNumberOfStates( void ) const
 CharacterEventDiscrete* CharacterHistoryDiscrete::pickRandomEvent( size_t &branch_index )
 {
 
-    return static_cast<CharacterEventDiscrete *>( CharacterHistory::pickRandomEvent(branch_index) );
+    return assume_cast<CharacterEventDiscrete *>( CharacterHistory::pickRandomEvent(branch_index) );
 }
 
 
@@ -139,7 +140,7 @@ void CharacterHistoryDiscrete::setNumberOfStates(size_t n)
     // create a branch history object for each branch
     for (size_t i=0; i<n_branches; ++i)
     {
-        static_cast<BranchHistoryDiscrete*>(histories[i])->setNumberOfStates( n_states );
+        assume_cast<BranchHistoryDiscrete*>(histories[i])->setNumberOfStates( n_states );
     }
 
 }

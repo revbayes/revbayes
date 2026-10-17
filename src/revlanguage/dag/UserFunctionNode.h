@@ -1,6 +1,7 @@
 #ifndef UserFunctionNode_H
 #define UserFunctionNode_H
 
+#include "TypeUtilities.h"
 #include "DynamicNode.h"
 #include "RevPtr.h"
 #include "RevVariable.h"
@@ -241,7 +242,7 @@ RevBayesCore::DagNode* UserFunctionNode<rlType>::cloneDAG( RevBayesCore::DagNode
         const RevObject &rObject = args[i].getVariable()->getRevObject();
         if ( rObject.isModelObject() )
         {
-            const AbstractModelObject &modelObj = static_cast< const AbstractModelObject &>( rObject );
+            const AbstractModelObject &modelObj = assume_cast< const AbstractModelObject &>( rObject );
             RevBayesCore::DagNode* the_node = modelObj.getDagNode();
             std::map<std::string, const RevBayesCore::DagNode*> names;
             AbstractModelObject *rObjClone = modelObj.clone();
@@ -305,7 +306,7 @@ typename rlType::valueType& UserFunctionNode<rlType>::getValue( void )
     if ( this->touched )
         update();
     
-    return static_cast< RevBayesCore::TypedDagNode<typename rlType::valueType>* >( returnVariable->getRevObject().getDagNode() )->getValue();
+    return assume_cast< RevBayesCore::TypedDagNode<typename rlType::valueType>* >( returnVariable->getRevObject().getDagNode() )->getValue();
 }
 
 
@@ -321,7 +322,7 @@ const typename rlType::valueType& UserFunctionNode<rlType>::getValue( void ) con
     if ( this->touched )
         const_cast<UserFunctionNode<rlType>*>( this )->update();
     
-    return static_cast< RevBayesCore::TypedDagNode<typename rlType::valueType>* >( returnVariable->getRevObject().getDagNode() )->getValue();
+    return assume_cast< RevBayesCore::TypedDagNode<typename rlType::valueType>* >( returnVariable->getRevObject().getDagNode() )->getValue();
 }
 
 

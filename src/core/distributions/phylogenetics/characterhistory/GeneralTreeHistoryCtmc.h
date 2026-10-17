@@ -1,6 +1,7 @@
 #ifndef GeneralTreeHistoryCtmc_H
 #define GeneralTreeHistoryCtmc_H
 
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "TreeHistoryCtmc.h"
 #include "AbstractCladogenicStateFunction.h"
@@ -175,7 +176,7 @@ std::vector<size_t> RevBayesCore::GeneralTreeHistoryCtmc<charType>::computeCount
     
     for (size_t i = 0; i < s.size(); i++)
     {
-        counts[ static_cast<CharacterEventDiscrete*>(s[i])->getState() ] += 1;
+        counts[ assume_cast<CharacterEventDiscrete*>(s[i])->getState() ] += 1;
     }
     
     return counts;
@@ -188,7 +189,7 @@ std::vector<std::set<size_t> > RevBayesCore::GeneralTreeHistoryCtmc<charType>::c
     
     for (size_t i = 0; i < s.size(); i++)
     {
-        sites_with_states[ static_cast<CharacterEventDiscrete*>(s[i])->getState() ].insert( static_cast<CharacterEventDiscrete*>(s[i])->getSiteIndex() );
+        sites_with_states[ assume_cast<CharacterEventDiscrete*>(s[i])->getState() ].insert( assume_cast<CharacterEventDiscrete*>(s[i])->getSiteIndex() );
         //counts[  ] += 1;
     }
     
@@ -208,7 +209,7 @@ double RevBayesCore::GeneralTreeHistoryCtmc<charType>::computeRootLikelihood(con
     std::vector<int> counts(this->num_states, 0);
     for (size_t i = 0; i < rootState.size(); ++i)
     {
-        ++counts[ static_cast<CharacterEventDiscrete*>(rootState[i])->getState() ];
+        ++counts[ assume_cast<CharacterEventDiscrete*>(rootState[i])->getState() ];
     }
     
     // get log prob
@@ -255,7 +256,7 @@ double RevBayesCore::GeneralTreeHistoryCtmc<charType>::computeInternalNodeLikeli
             std::vector<CharacterEvent*> child_state = child_bh.getParentCharacters();
             for (size_t j = 0; j < this->num_sites; ++j)
             {
-                if (static_cast<CharacterEventDiscrete*>(end_state[j])->getState() != static_cast<CharacterEventDiscrete*>(child_state[j])->getState() )
+                if (assume_cast<CharacterEventDiscrete*>(end_state[j])->getState() != assume_cast<CharacterEventDiscrete*>(child_state[j])->getState() )
                 {
                     return RbConstants::Double::neginf;
                 }
@@ -286,7 +287,7 @@ double RevBayesCore::GeneralTreeHistoryCtmc<charType>::computeInternalNodeLikeli
 
     for (it_h = history.rbegin(); it_h != history.rend(); ++it_h)
     {
-        CharacterEventDiscrete* char_event = static_cast<CharacterEventDiscrete*>(*it_h);
+        CharacterEventDiscrete* char_event = assume_cast<CharacterEventDiscrete*>(*it_h);
         
         // next event time
         double idx = char_event->getSiteIndex();
@@ -301,7 +302,7 @@ double RevBayesCore::GeneralTreeHistoryCtmc<charType>::computeInternalNodeLikeli
         if (lnL == RbConstants::Double::neginf) return lnL;
         
         // update counts
-        sites_with_states[ static_cast<CharacterEventDiscrete*>(curr_state[idx])->getState() ].erase( idx );
+        sites_with_states[ assume_cast<CharacterEventDiscrete*>(curr_state[idx])->getState() ].erase( idx );
         sites_with_states[ s ].insert( idx );
         
         // update time and state
@@ -485,7 +486,7 @@ void RevBayesCore::GeneralTreeHistoryCtmc<charType>::initializeTipValues( void )
             TopologyNode* node = nodes[i];
             if ( node->isTip() == true )
             {
-                DiscreteTaxonData<charType>& d = static_cast< DiscreteTaxonData<charType>& >( this->value->getTaxonData( node->getName() ) );
+                DiscreteTaxonData<charType>& d = assume_cast< DiscreteTaxonData<charType>& >( this->value->getTaxonData( node->getName() ) );
                 
                 std::vector<CharacterEvent*> tipState;
                 for (size_t j = 0; j < d.getNumberOfCharacters(); ++j)
@@ -566,8 +567,8 @@ bool RevBayesCore::GeneralTreeHistoryCtmc<charType>::samplePathEnd(const Topolog
         for (size_t site_index=0; site_index<this->num_sites; ++site_index)
         {
             
-            size_t desS1 = static_cast<CharacterEventDiscrete*>(leftChildState[site_index])->getState();
-            size_t desS2 = static_cast<CharacterEventDiscrete*>(rightChildState[site_index])->getState();
+            size_t desS1 = assume_cast<CharacterEventDiscrete*>(leftChildState[site_index])->getState();
+            size_t desS2 = assume_cast<CharacterEventDiscrete*>(rightChildState[site_index])->getState();
             
             std::vector<double> state_probs(this->num_states, 0.0);
             double prob_sum = 0.0;
@@ -589,8 +590,8 @@ bool RevBayesCore::GeneralTreeHistoryCtmc<charType>::samplePathEnd(const Topolog
                 }
             }
             
-            static_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->setState(s);
-            static_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->setState(s);
+            assume_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->setState(s);
+            assume_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->setState(s);
         }
         
        
@@ -615,7 +616,7 @@ bool RevBayesCore::GeneralTreeHistoryCtmc<charType>::samplePathEnd(const Topolog
         for (size_t site_index=0; site_index<this->num_sites; ++site_index)
         {
             
-            size_t desS1 = static_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->getState();
+            size_t desS1 = assume_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->getState();
             
             std::vector<double> state_probs(this->num_states, 0.0);
             double prob_sum = 0.0;
@@ -637,7 +638,7 @@ bool RevBayesCore::GeneralTreeHistoryCtmc<charType>::samplePathEnd(const Topolog
                 }
             }
             
-            static_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->setState(s);
+            assume_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->setState(s);
         }
     }
     
@@ -685,7 +686,7 @@ bool RevBayesCore::GeneralTreeHistoryCtmc<charType>::samplePathStart(const Topol
         std::vector<CharacterEvent*> childParentState(nodeChildState.size());
         for (size_t j = 0; j < childParentState.size(); ++j)
         {
-            childParentState[j] = new CharacterEventDiscrete(j, static_cast<CharacterEventDiscrete*>(nodeChildState[j])->getState(), 0.0);
+            childParentState[j] = new CharacterEventDiscrete(j, assume_cast<CharacterEventDiscrete*>(nodeChildState[j])->getState(), 0.0);
         }
         this->histories[ children[i]->getIndex() ].setParentCharacters( childParentState );
     }
@@ -917,7 +918,7 @@ void RevBayesCore::GeneralTreeHistoryCtmc<charType>::simulate(const TopologyNode
     {
         // create the character
         charType c = charType( this->template_state );
-        c.setStateByIndex( static_cast<CharacterEventDiscrete*>(childState[i])->getState() );
+        c.setStateByIndex( assume_cast<CharacterEventDiscrete*>(childState[i])->getState() );
         taxa[node_index].addCharacter( c );
     }
     
@@ -947,7 +948,7 @@ void RevBayesCore::GeneralTreeHistoryCtmc<charType>::simulate(const TopologyNode
                 std::vector<CharacterEvent*> childParentCharacters = this->histories[children[i]->getIndex()].getParentCharacters();
                 for (size_t j = 0; j < this->num_sites; ++j)
                 {
-                    static_cast<CharacterEventDiscrete*>(childParentCharacters[j])->setState( static_cast<CharacterEventDiscrete*>(childState[j])->getState() );
+                    assume_cast<CharacterEventDiscrete*>(childParentCharacters[j])->setState( assume_cast<CharacterEventDiscrete*>(childState[j])->getState() );
                 }
             }
         }
@@ -1020,7 +1021,7 @@ void RevBayesCore::GeneralTreeHistoryCtmc<charType>::simulateHistory(const Topol
             {
                 
                 evt->setSiteIndex(i);
-                size_t curr_state = static_cast<CharacterEventDiscrete*>(currState[i])->getState();
+                size_t curr_state = assume_cast<CharacterEventDiscrete*>(currState[i])->getState();
                 for (s = 0; !found && s < this->num_states; ++s)
                 {
                     // disregard virtual events (self-transitions)
@@ -1042,7 +1043,7 @@ void RevBayesCore::GeneralTreeHistoryCtmc<charType>::simulateHistory(const Topol
             }
             
             // update counts
-            counts[ static_cast<CharacterEventDiscrete*>(currState[i])->getState() ] -= 1;
+            counts[ assume_cast<CharacterEventDiscrete*>(currState[i])->getState() ] -= 1;
             counts[s] += 1;
             
             // update history
@@ -1059,7 +1060,7 @@ void RevBayesCore::GeneralTreeHistoryCtmc<charType>::simulateHistory(const Topol
     
     for (size_t i = 0; i < this->num_sites; i++)
     {
-        size_t s = static_cast<CharacterEventDiscrete*>(currState[i])->getState();
+        size_t s = assume_cast<CharacterEventDiscrete*>(currState[i])->getState();
         currState[i] = new CharacterEventDiscrete(i, s, end_age);
     }
     

@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
@@ -56,7 +57,7 @@ void Move_GMRFUnevenGridHyperpriorGibbs::constructInternalObject( void )
     double w = valueForRevType<RealPos>(weight);
 
     RevBayesCore::TypedDagNode<double>* tmp = dagNodeForRevType<RealPos>(x);
-    RevBayesCore::StochasticNode<double> *g = static_cast< RevBayesCore::StochasticNode<double>* >( tmp );
+    RevBayesCore::StochasticNode<double> *g = assume_cast< RevBayesCore::StochasticNode<double>* >( tmp );
     
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp2 = dagNodeForRevType<ModelVector<Real>>(normals);
     std::vector<const RevBayesCore::DagNode*> p = tmp2->getParents();

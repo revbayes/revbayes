@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "ReversiblePoMoRateMatrixFunction.h"
 
@@ -45,13 +46,13 @@ void ReversiblePoMoRateMatrixFunction::update( void )
 {
 
     // set the exchangeability rates
-    static_cast< RateMatrix_ReversiblePoMo* >(value)->setExchangeabilityRates( exchangeabilities->getValue() );
+    assume_cast< RateMatrix_ReversiblePoMo* >(value)->setExchangeabilityRates( exchangeabilities->getValue() );
 
     // set the stationary frequencies
-    static_cast< RateMatrix_ReversiblePoMo* >(value)->setStationaryFrequencies( equilibrium_frequencies->getValue() );
+    assume_cast< RateMatrix_ReversiblePoMo* >(value)->setStationaryFrequencies( equilibrium_frequencies->getValue() );
 
     // now update the matrix
-    static_cast< RateMatrix_ReversiblePoMo* >(value)->update();
+    assume_cast< RateMatrix_ReversiblePoMo* >(value)->update();
 
 }
 

@@ -3,6 +3,7 @@
 
 #include "AbstractModelObject.h"
 #include "Cloner.h"
+#include "TypeUtilities.h"
 #include "TypeSpec.h"
 #include "TypedFunction.h"
 
@@ -42,7 +43,7 @@ public:
         std::unique_ptr<AbstractModelObject> current(sourceObject->clone());
         current->setValueFromNode(*sourceNode);
         std::unique_ptr<RevObject> converted(current->convertTo(targetType));
-        auto* value = copyValue(static_cast<const ModelObject<T>&>(*converted).getValue());
+        auto* value = copyValue(assume_cast<const ModelObject<T>&>(*converted).getValue());
         delete this->value;
         this->value = value;
     }

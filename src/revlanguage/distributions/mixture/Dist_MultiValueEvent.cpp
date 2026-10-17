@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include <cmath>
 #include <cstddef>
@@ -92,12 +93,12 @@ RevBayesCore::MultiValueEventDistribution* Dist_MultiValueEvent::createDistribut
     std::vector<RevBayesCore::TypedDistribution<double>* > vp;
     for (size_t i=0; i<rl_vp.size();++i)
     {
-        RevBayesCore::TypedDistribution<double>* tmp = static_cast<RevBayesCore::TypedDistribution<double>* >( rl_vp[i].createDistribution() );
+        RevBayesCore::TypedDistribution<double>* tmp = assume_cast<RevBayesCore::TypedDistribution<double>* >( rl_vp[i].createDistribution() );
         vp.push_back( tmp );
     }
     
     const Distribution& rl_ep                                           = objectForRevType<Distribution>(event_number_prior);
-    RevBayesCore::TypedDistribution<std::int64_t>* ep                           = static_cast<RevBayesCore::TypedDistribution<std::int64_t>* >( rl_ep.createDistribution() );
+    RevBayesCore::TypedDistribution<std::int64_t>* ep                           = assume_cast<RevBayesCore::TypedDistribution<std::int64_t>* >( rl_ep.createDistribution() );
 
     const std::vector<std::string>& n = valueForRevType<ModelVector<RlString>>(names);
     // offsets

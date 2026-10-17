@@ -5,6 +5,7 @@
  * Created on 5 August 2017
  */
 
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include "Move_CorrelationMatrixSpecificElementBeta.h"
 
@@ -65,7 +66,7 @@ void Move_CorrelationMatrixSpecificElementBeta::constructInternalObject( void )
     double w = valueForRevType<RealPos>(weight);
     double r = valueForRevType<Probability>(tuneTarget);
     RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* tmp = dagNodeForRevType<MatrixReal>(v);
-    RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::MatrixReal> *>( tmp );
+    RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *n = assume_cast<RevBayesCore::StochasticNode<RevBayesCore::MatrixReal> *>( tmp );
     bool t = valueForRevType<RlBoolean>(tune);
     
     RevBayesCore::Proposal *p = new RevBayesCore::CorrelationMatrixSpecificElementBetaProposal(n,i,j,a,r);
