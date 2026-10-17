@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "FreeSymmetricRateMatrixFunction.h"
 
 #include <cstddef>
@@ -68,7 +69,7 @@ void FreeSymmetricRateMatrixFunction::swapParameterInternal(const DagNode *oldP,
     
     if (oldP == transition_rates)
     {
-        transition_rates = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(transition_rates, newP);
     }
     
 }

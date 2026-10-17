@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "BinarySwitchProposal.h"
 
 #include "Cloneable.h"
@@ -143,6 +144,6 @@ void BinarySwitchProposal::undoProposal( void )
 void BinarySwitchProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     
-    variable = static_cast<StochasticNode<std::int64_t>* >(newN) ;
+    replaceNodeReference(variable, newN) ;
     
 }

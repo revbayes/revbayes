@@ -6,6 +6,7 @@
 //  Copyright © 2016 Michael Landis. All rights reserved.
 //
 
+#include "DagNodeTypeUtilities.h"
 #include "DECStationaryFrequenciesFunction.h"
 
 //#include "StationaryFrequencies_DECRateMatrix.h"
@@ -64,6 +65,6 @@ void DECStationaryFrequenciesFunction::update( void ) {
 
 void DECStationaryFrequenciesFunction::swapParameterInternal(const DagNode *oldP, const DagNode *newP) {
     if (oldP == rateMatrix) {
-        rateMatrix = static_cast<const TypedDagNode<RateGenerator>* >( newP );
+        replaceNodeReference(rateMatrix, newP);
     }
 }

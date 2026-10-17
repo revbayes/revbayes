@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "FixedNodeheightPruneAndRegraftProposal.h"
 
 #include <cmath>
@@ -275,11 +276,11 @@ void FixedNodeheightPruneAndRegraftProposal::swapNodeInternal(DagNode *oldN, Dag
         
     if ( oldN == variable )
     {
-        variable = static_cast<StochasticNode<Tree>* >(newN);
+        replaceNodeReference(variable, newN);
     }
     else if ( oldN == vector_variable )
     {
-        vector_variable = static_cast<StochasticNode< RbVector<Tree> >* >( newN );
+        replaceNodeReference(vector_variable, newN);
     }
     
 }

@@ -17,6 +17,7 @@
 #ifndef UnaryMinus_H
 #define UnaryMinus_H
 
+#include "DagNodeTypeUtilities.h"
 #include "TypedFunction.h"
 #include "TypedDagNode.h"
 
@@ -58,7 +59,7 @@ RevBayesCore::UnaryMinus<valueType>* RevBayesCore::UnaryMinus<valueType>::clone(
 template <class valueType>
 void RevBayesCore::UnaryMinus<valueType>::swapParameterInternal(const DagNode *oldP, const DagNode *newP) {
     if (oldP == a) {
-        a = static_cast<const TypedDagNode<valueType>* >( newP );
+        replaceNodeReference(a, newP);
     }
 }
 

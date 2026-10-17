@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "QuantileFunction.h"
 
 #include <vector>
@@ -53,7 +54,7 @@ void RevBayesCore::QuantileFunction::swapParameterInternal(const DagNode *oldP, 
     
     if (oldP == p) 
     {
-        p = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(p, newP);
     }
     else 
     {

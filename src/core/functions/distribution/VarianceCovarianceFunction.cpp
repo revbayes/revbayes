@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "VarianceCovarianceFunction.h"
 
 #include <cstddef>
@@ -64,11 +65,11 @@ void VarianceCovarianceFunction::swapParameterInternal(const DagNode *oldP, cons
     // check dimensions here
     if (oldP == standardDeviations)
     {
-        standardDeviations = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(standardDeviations, newP);
     }
     else if (oldP == correlationCoefficients)
     {
-        correlationCoefficients = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(correlationCoefficients, newP);
     }
     
 }

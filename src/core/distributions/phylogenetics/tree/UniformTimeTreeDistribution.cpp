@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include <cstddef>
 #include <algorithm>
 #include <cmath>
@@ -316,7 +317,7 @@ void UniformTimeTreeDistribution::swapParameterInternal( const DagNode *oldP, co
 {
     if (oldP == root_age)
     {
-        root_age = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(root_age, newP);
     }
     
 }

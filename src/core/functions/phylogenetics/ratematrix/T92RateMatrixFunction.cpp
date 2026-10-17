@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "T92RateMatrixFunction.h"
 
 #include "RateMatrix_Tamura92.h"
@@ -64,11 +65,11 @@ void T92RateMatrixFunction::swapParameterInternal(const DagNode *oldP, const Dag
 {
     if (oldP == equilibriumGc)
     {
-        equilibriumGc = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(equilibriumGc, newP);
     }
     else if (oldP == transitionTransversionRate)
     {
-        transitionTransversionRate = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(transitionTransversionRate, newP);
     }
 }
 

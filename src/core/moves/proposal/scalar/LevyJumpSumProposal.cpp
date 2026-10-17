@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include <cmath>
 #include <iostream>
 
@@ -202,12 +203,12 @@ void LevyJumpSumProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
     
     if (oldN == variable1)
     {
-        variable1 = static_cast<ContinuousStochasticNode* >( newN );
+        replaceNodeReference(variable1, newN);
     }
     
     if (oldN == variable2)
     {
-        variable2 = static_cast<ContinuousStochasticNode* >( newN );
+        replaceNodeReference(variable2, newN);
     }
     
 }

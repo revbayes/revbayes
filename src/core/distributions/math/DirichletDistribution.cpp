@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "DirichletDistribution.h"
 
 #include "DistributionDirichlet.h"
@@ -54,7 +55,7 @@ void DirichletDistribution::swapParameterInternal(const DagNode *oldP, const Dag
     
     if (oldP == alpha)
     {
-        alpha = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(alpha, newP);
     }
 }
 

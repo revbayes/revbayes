@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "CorrelationMatrixRandomWalkProposal.h"
 
 #include <cstddef>
@@ -168,7 +169,7 @@ void CorrelationMatrixRandomWalkProposal::undoProposal( void )
 void CorrelationMatrixRandomWalkProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     
-    variable = static_cast< StochasticNode<MatrixReal>* >(newN) ;
+    replaceNodeReference(variable, newN) ;
     
 }
 

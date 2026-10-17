@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "ChromosomesCladogenicStateFunction.h"
 
 #include <utility>
@@ -264,7 +265,7 @@ void ChromosomesCladogenicStateFunction::swapParameterInternal(const DagNode *ol
     
     if (oldP == eventProbs)
     {
-        eventProbs = static_cast<const TypedDagNode< Simplex >* >( newP );
+        replaceNodeReference(eventProbs, newP);
     }
     
 }

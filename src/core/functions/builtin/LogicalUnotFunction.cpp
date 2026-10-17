@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "LogicalUnotFunction.h"
 #include "TypedDagNode.h"
 
@@ -39,7 +40,7 @@ void LogicalUnotFunction::update( void )
 void LogicalUnotFunction::swapParameterInternal(const DagNode *oldP, const DagNode *newP) {
     
     if ( oldP == left ) {
-        left = static_cast<const TypedDagNode<Boolean>* >( newP );
+        replaceNodeReference(left, newP);
     }
     
 }
