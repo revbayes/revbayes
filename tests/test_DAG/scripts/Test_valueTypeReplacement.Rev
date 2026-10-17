@@ -22,3 +22,34 @@ z ~ dnNormal(0, 1)
 z ~ dnGeometric(0.5)
 z.clamp(3)
 z
+
+# conversion_old already depends on the Natural source when adding 2.0 requires a RealPos.
+# The source must stay Natural. Setting it to 2 must update both sums to 3 and 4.
+conversion_source <- 1
+conversion_old := conversion_source + 1
+conversion_new := conversion_source + 2.0
+print("Referenced conversion: " + type(conversion_source) + " " + conversion_old + " " + conversion_new)
+conversion_source <- 2
+print("Updated conversion: " + conversion_old + " " + conversion_new)
+
+# Nothing depends on conversion_unused yet. Adding 2.0 should change its type to RealPos
+# and give a sum of 3.
+conversion_unused <- 1
+conversion_result := conversion_unused + 2.0
+print("Unreferenced conversion: " + type(conversion_unused) + " " + conversion_result + "\n")
+
+# Adding a vector of real numbers must leave vector_source a Natural[]. Assigning [3, 4]
+# should update both sums to [4, 5] and [4, 6].
+vector_source <- [1, 2]
+vector_old := vector_source + [1, 1]
+vector_new := vector_source + [1.0, 2.0]
+vector_source <- [3, 4]
+print("Vector conversion: " + type(vector_source) + " " + vector_old + " " + vector_new)
+
+# Adding a vector must leave simplex_source a Simplex. After the new assignment, the first
+# element should update to 0.5 and the vector sum to [1.5, 1.5].
+simplex_source <- simplex(0.25, 0.75)
+simplex_old := simplex_source[1]
+simplex_new := simplex_source + [1.0, 1.0]
+simplex_source <- simplex(0.5, 0.5)
+print("Simplex conversion: " + type(simplex_source) + " " + simplex_old + " " + simplex_new + "\n")
