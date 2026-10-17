@@ -51,6 +51,30 @@ print("The minimum is " + min(probability_vec) + " and is of type " + type( min(
 print("The sum is " + sum(probability_vec) + " and is of type " + type( sum(probability_vec) ))
 print("The median is " + median(probability_vec) + " and is of type " + type( median(probability_vec) ) + "\n")
 
+# Referenced conversions must preserve both old and new dependencies; unreferenced conversions still replace.
+# Full-model tests do not check these types and updates. Unconditional conversion would supersede
+# the unreferenced replacement check.
+conversion_source <- 1
+conversion_old := conversion_source + 1
+conversion_new := conversion_source + 2.0
+print("Referenced conversion: " + type(conversion_source) + " " + conversion_old + " " + conversion_new)
+conversion_source <- 2
+print("Updated conversion: " + conversion_old + " " + conversion_new)
+conversion_unused <- 1
+conversion_result := conversion_unused + 2.0
+print("Unreferenced conversion: " + type(conversion_unused) + " " + conversion_result + "\n")
+
+vector_source <- [1, 2]
+vector_old := vector_source + [1, 1]
+vector_new := vector_source + [1.0, 2.0]
+vector_source <- [3, 4]
+print("Vector conversion: " + type(vector_source) + " " + vector_old + " " + vector_new)
+simplex_source <- simplex(0.25, 0.75)
+simplex_old := simplex_source[1]
+simplex_new := simplex_source + [1.0, 1.0]
+simplex_source <- simplex(0.5, 0.5)
+print("Simplex conversion: " + type(simplex_source) + " " + simplex_old + " " + simplex_new + "\n")
+
 # Generate a random tree for 5 taxa
 taxa <- [taxon("A"), taxon("B"), taxon("C"), taxon("D"), taxon("E")]
 tree ~ dnUniformTopologyBranchLength(taxa, dnExp(10))
