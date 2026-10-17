@@ -20,7 +20,7 @@
 
 namespace RevBayesCore {
 
-    enum FossilAgeAmbiguity { FOSSIL_AGE_MIDPOINT, FOSSIL_AGE_OVERLAP, FOSSIL_AGE_EXCLUDE };    //!< Where a bin straddling an interval boundary is counted
+    enum FossilAgeAmbiguity { FOSSIL_AGE_EXCLUDE, FOSSIL_AGE_MIDPOINT, FOSSIL_AGE_MAJORITY, FOSSIL_AGE_ALL };    //!< Where a bin straddling an interval boundary is counted
 
     /**
      * @brief Counts of the taxon categories in each interval, Foote's four and then Alroy's.

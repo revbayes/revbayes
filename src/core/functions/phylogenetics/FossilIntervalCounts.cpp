@@ -1,5 +1,6 @@
 #include "FossilIntervalCounts.h"
 
+#include <algorithm>
 #include <cmath>
 #include <utility>
 
@@ -85,7 +86,8 @@ bool RevBayesCore::fossilIntervalsEqualWidth(const std::vector<double> &boundari
 
 /**
  * Which intervals each taxon was sampled in. A bin straddling a boundary is counted by the
- * policy: at the interval holding its midpoint, in every interval it touches, or nowhere.
+ * policy: nowhere, at the interval holding its midpoint, at the interval it overlaps most
+ * (the older one on a tie), or in every interval it touches.
  */
 std::vector<std::vector<bool> > RevBayesCore::fossilIntervalPresence(const std::vector<Taxon> &taxa,
                                                                     const std::vector<double> &boundaries,
@@ -126,7 +128,27 @@ std::vector<std::vector<bool> > RevBayesCore::fossilIntervalPresence(const std::
                     presence[i][mid] = true;
                 }
             }
-            else if ( policy == FOSSIL_AGE_OVERLAP )
+            else if ( policy == FOSSIL_AGE_MAJORITY )
+            {
+                size_t best = num_intervals;
+                double most = 0.0;
+                for (size_t j = 0; j < num_intervals; j++)
+                {
+                    double lower   = boundaries[j];
+                    double upper   = ( j + 1 < num_intervals ? boundaries[j+1] : top );
+                    double overlap = std::min( max_age, upper ) - std::max( min_age, lower );
+                    if ( overlap > 0.0 && overlap >= most )
+                    {
+                        best = j;
+                        most = overlap;
+                    }
+                }
+                if ( best < num_intervals )
+                {
+                    presence[i][best] = true;
+                }
+            }
+            else if ( policy == FOSSIL_AGE_ALL )
             {
                 size_t from = ( youngest < num_intervals ? youngest : 0 );
                 size_t to   = ( oldest   < num_intervals ? oldest   : num_intervals - 1 );

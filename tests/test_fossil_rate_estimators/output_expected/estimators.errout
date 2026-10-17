@@ -23,15 +23,21 @@ per-taxon, max_age below the oldest shift:
 per-taxon, present at 5:
    [ [ 0.0667, 0.0200, 0.0333, 0.1000 ] ,
      [ 0.2000, 0.0600, 0.0333, 0.0000 ] ]
-per-taxon, ambiguous=midpoint:
-   [ [ 0.0333, 0.0333, 0.0200, 0.1000 ] ,
-     [ 0.1000, 0.0667, 0.0200, 0.0000 ] ]
-per-taxon, ambiguous=overlap:
-   [ [ 0.0333, 0.0167, 0.0333, 0.1000 ] ,
-     [ 0.1000, 0.0667, 0.0167, 0.0000 ] ]
 per-taxon, ambiguous=exclude:
    [ [ 0.0333, 0.0200, 0.0200, 0.1000 ] ,
      [ 0.1000, 0.0600, 0.0200, 0.0000 ] ]
+per-taxon, ambiguous=midpoint:
+   [ [ 0.0333, 0.0333, 0.0200, 0.1000 ] ,
+     [ 0.1000, 0.0667, 0.0200, 0.0000 ] ]
+per-taxon, ambiguous=all:
+   [ [ 0.0333, 0.0167, 0.0333, 0.1000 ] ,
+     [ 0.1000, 0.0667, 0.0167, 0.0000 ] ]
+per-taxon, narrow interval, ambiguous=midpoint:
+   [ [ 0.0333, 0.0286, 0.1000, 0.0476 ] ,
+     [ 0.1000, 0.0857, 0.1000, 0.0095 ] ]
+per-taxon, narrow interval, ambiguous=majority:
+   [ [ 0.0333, 0.0286, 0.0000, 0.0476 ] ,
+     [ 0.1000, 0.0857, 0.0000, 0.0159 ] ]
 three-timer, six intervals:
    [ [ nan, -0.0693, 0.0288, -0.0288, nan, nan ] ,
      [ nan, nan, 0.0405, -0.0693, -0.0405, nan ] ]

@@ -55,16 +55,26 @@ print("per-taxon, present at 5:")
 fnPerTaxonRates(taxa, timeline, present=5, max_age=40)
 
 # t4's only occurrence is now the bin [12,24], which spans the boundary at 20:
+#   exclude   t4 is not sampled (the default)
 #   midpoint  t4 is a singleton in interval 1
-#   overlap   t4 is in intervals 1 and 2
-#   exclude   t4 is not sampled
+#   all       t4 is in intervals 1 and 2
 binned <- readTaxonData("data/fossil_rate_estimators_bin.tsv")
-print("per-taxon, ambiguous=midpoint:")
-fnPerTaxonRates(binned, timeline, max_age=40)
-print("per-taxon, ambiguous=overlap:")
-fnPerTaxonRates(binned, timeline, max_age=40, ambiguous="overlap")
 print("per-taxon, ambiguous=exclude:")
-fnPerTaxonRates(binned, timeline, max_age=40, ambiguous="exclude")
+fnPerTaxonRates(binned, timeline, max_age=40)
+print("per-taxon, ambiguous=midpoint:")
+fnPerTaxonRates(binned, timeline, max_age=40, ambiguous="midpoint")
+print("per-taxon, ambiguous=all:")
+fnPerTaxonRates(binned, timeline, max_age=40, ambiguous="all")
+
+# With shifts at 10, 17 and 19 the bin [12,24] overlaps interval 1 by 5, interval 2 by 2 and
+# interval 3 by 5, so its midpoint 18 and its majority disagree:
+#   midpoint  t4 is a singleton in interval 2
+#   majority  t4 is a singleton in interval 3, the older of the two tied intervals
+narrow <- v(10, 17, 19)
+print("per-taxon, narrow interval, ambiguous=midpoint:")
+fnPerTaxonRates(binned, narrow, max_age=40, ambiguous="midpoint")
+print("per-taxon, narrow interval, ambiguous=majority:")
+fnPerTaxonRates(binned, narrow, max_age=40, ambiguous="majority")
 
 # Six intervals of 10 Myr, boundaries 0 10 20 30 40 50 60, and eight taxa sampled in
 #

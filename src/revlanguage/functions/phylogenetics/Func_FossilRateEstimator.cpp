@@ -36,10 +36,11 @@ const ArgumentRules& Func_FossilRateEstimator::getArgumentRules( void ) const
         argument_rules.push_back( new ArgumentRule( "max_age", RealPos::getClassTypeSpec(), "The maximum age of the oldest interval.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY, NULL ) );
 
         std::vector<std::string> ambiguous_options;
-        ambiguous_options.push_back( "midpoint" );
-        ambiguous_options.push_back( "overlap" );
         ambiguous_options.push_back( "exclude" );
-        argument_rules.push_back( new OptionRule( "ambiguous", new RlString("midpoint"), ambiguous_options, "How to count an occurrence that spans an interval boundary." ) );
+        ambiguous_options.push_back( "midpoint" );
+        ambiguous_options.push_back( "majority" );
+        ambiguous_options.push_back( "all" );
+        argument_rules.push_back( new OptionRule( "ambiguous", new RlString("exclude"), ambiguous_options, "How to count an occurrence that spans an interval boundary." ) );
         argument_rules.push_back( new ArgumentRule( "extant", RlBoolean::getClassTypeSpec(), "Read the record's extant status, so a taxon reported as alive ranges to the present.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean(false) ) );
 
         rules_set = true;
@@ -66,9 +67,10 @@ RevBayesCore::TypedFunction< RevBayesCore::MatrixReal >* Func_FossilRateEstimato
         static_cast<const ModelVector<Taxon> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
 
     const std::string &ambiguous = static_cast<const RlString &>( this->args[4].getVariable()->getRevObject() ).getValue();
-    RevBayesCore::FossilAgeAmbiguity policy = RevBayesCore::FOSSIL_AGE_MIDPOINT;
-    if ( ambiguous == "overlap" )      policy = RevBayesCore::FOSSIL_AGE_OVERLAP;
-    else if ( ambiguous == "exclude" ) policy = RevBayesCore::FOSSIL_AGE_EXCLUDE;
+    RevBayesCore::FossilAgeAmbiguity policy = RevBayesCore::FOSSIL_AGE_EXCLUDE;
+    if ( ambiguous == "midpoint" )      policy = RevBayesCore::FOSSIL_AGE_MIDPOINT;
+    else if ( ambiguous == "majority" ) policy = RevBayesCore::FOSSIL_AGE_MAJORITY;
+    else if ( ambiguous == "all" )      policy = RevBayesCore::FOSSIL_AGE_ALL;
 
     bool extant = static_cast<const RlBoolean &>( this->args[5].getVariable()->getRevObject() ).getValue();
 

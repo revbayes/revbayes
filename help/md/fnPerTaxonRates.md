@@ -17,7 +17,7 @@ A taxon's first and last appearance are the oldest and youngest intervals it was
 
 The oldest interval has no rate unless `max_age` bounds it. Occurrences older than `max_age` are not counted, and a `max_age` no older than the oldest rate shift leaves that interval NaN. Both cases warn once.
 
-An occurrence whose reported bin straddles a boundary is counted at the interval holding the bin's midpoint. `ambiguous="overlap"` counts it in every interval the bin touches and `ambiguous="exclude"` drops it.
+By default an occurrence whose reported bin straddles a boundary is dropped, keeping only occurrences resolved to a single interval. `ambiguous="midpoint"` counts it at the interval holding the bin's midpoint, `ambiguous="majority"` at the interval the bin overlaps most (the older one on a tie), and `ambiguous="all"` in every interval the bin touches. To resample ages within their bins, draw them in the script and call the function once per draw.
 ## authors
 June Walker
 ## see_also
