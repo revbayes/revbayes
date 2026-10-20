@@ -32,7 +32,6 @@
 using namespace RevLanguage;
 
 using std::vector;
-using std::set;
 using std::string;
 
 Model::Model() : WorkspaceToCoreWrapperObject<RevBayesCore::Model>()
@@ -120,14 +119,22 @@ RevPtr<RevVariable> Model::executeMethod(std::string const &name, const std::vec
     {
         found = true;
 
-        set<string> names;
+        // The arguments are the original workspace nodes. The model holds clones of them, so we match by the id copied via clone() rather than by name.
+        std::vector<const RevBayesCore::DagNode*> originals;
         for(auto& arg: args)
         {
             for(auto& var: getElementVariables( arg.getVariable() ) )
-                names.insert( var->getName() );
+            {
+                if ( not var->getRevObject().hasDagNode() )
+                {
+                    RBOUT("Warning: can't ignore data at node '" + var->getName() + "' because it is not in the model.");
+                    continue;
+                }
+                originals.push_back( var->getRevObject().getDagNode() );
+            }
         }
 
-        ignoreDataAtNodes( names );
+        ignoreDataAtNodes( originals );
 
         return nullptr;
     }
@@ -493,20 +500,21 @@ void Model::printModelDotGraph(const RevBayesCore::path &fn, bool vb, const std:
     o.close();
 }
 
-void Model::ignoreDataAtNodes(const set<string>& namesToIgnore)
+void Model::ignoreDataAtNodes(const std::vector<const RevBayesCore::DagNode*>& originals)
 {
     auto& graphNodes = value->getDagNodes();
 
-    std::map<string,RevBayesCore::DagNode*> nodeForName;
-    for(auto& node: graphNodes)
-        nodeForName.insert({node->getName(), node});
-
-    for(auto& name: namesToIgnore)
+    for (const RevBayesCore::DagNode* original : originals)
     {
-        if (not nodeForName.count(name))
-            RBOUT("Warning: can't ignore data at node '" + name + "' because it is not in the model.");
+        RevBayesCore::DagNode* copy = RevBayesCore::DagNode::findById( graphNodes, original->getDagNodeId() );
+        if ( copy == NULL )
+        {
+            RBOUT("Warning: can't ignore data at node '" + original->getName() + "' because it is not in the model.");
+        }
         else
-            nodeForName.at(name)->setIgnoreData(true);
+        {
+            copy->setIgnoreData(true);
+        }
     }
 }
 
