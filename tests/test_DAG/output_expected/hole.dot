@@ -1,0 +1,18 @@
+/* Graphical model description in DOT language                                    */
+/*    To view graph:                                                              */
+/*       open this file in the program Graphviz: http://www.graphviz.org          */
+/*       or paste contents into an online viewer: http://stamm-wilbrandt.de/GraphvizFiddle */
+
+digraph REVDAG {
+   n_right [shape=oval, style=filled, fillcolor=white, label="right"]
+   n_1512 [shape=box, style=filled, fillcolor=white, label="2"]
+   n_right_offset [shape=record, style=filled, fillcolor=white, label="{right.offset|0}"]
+   n_left [shape=oval, style=filled, fillcolor=white, label="left"]
+   n_1518 [shape=box, style=filled, fillcolor=white, label="1"]
+   n_left_offset [shape=record, style=filled, fillcolor=white, label="{left.offset|0}"]
+   n_1512 -> n_right
+   n_right_offset -> n_right
+   n_1518 -> n_left
+   n_left_offset -> n_left
+   graph [bgcolor=lavenderblush2, pad=0.25]
+}
