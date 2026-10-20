@@ -519,25 +519,11 @@ void HillClimber::replaceDag(const RbVector<Move> &mvs, const RbVector<Monitor> 
 
             RevBayesCore::DagNode *the_node = *j;
 
-            // error checking
-            if ( the_node->getName() == "" )
-            {
-                throw RbException() << "Unable to connect move '" << the_move->getMoveName() << "' to DAG copy because variable name was lost"; 
-            }
-
-            DagNode* theNewNode = NULL;
-            for (std::vector<DagNode*>::const_iterator k = modelNodes.begin(); k != modelNodes.end(); ++k)
-            {
-                if ( (*k)->getName() == the_node->getName() )
-                {
-                    theNewNode = *k;
-                    break;
-                }
-            }
-            // error checking
+            // Match the cloned node by the id copied through clone(), which stays unique when names collide or are empty.
+            DagNode* theNewNode = DagNode::findById( modelNodes, the_node->getDagNodeId() );
             if ( theNewNode == NULL )
             {
-                throw RbException() << "Cannot find node with name '" << the_node->getName() << "' in the model but received a move working on it.";
+                throw RbException() << "Cannot find DAG node " << the_node->getDagNodeId() << " ('" << the_node->getName() << "') in the model but received a move working on it.";
             }
 
             // now swap the node
@@ -556,25 +542,10 @@ void HillClimber::replaceDag(const RbVector<Move> &mvs, const RbVector<Monitor> 
 
             RevBayesCore::DagNode *the_node = (*j);
 
-            // error checking
-            if ( the_node->getName() == "" )
-            {
-                throw RbException( "Unable to connect monitor to DAG copy because variable name was lost");
-            }
-
-            DagNode* theNewNode = NULL;
-            for (std::vector<DagNode*>::const_iterator k = modelNodes.begin(); k != modelNodes.end(); ++k)
-            {
-                if ( (*k)->getName() == the_node->getName() )
-                {
-                    theNewNode = *k;
-                    break;
-                }
-            }
-            // error checking
+            DagNode* theNewNode = DagNode::findById( modelNodes, the_node->getDagNodeId() );
             if ( theNewNode == NULL )
             {
-                throw RbException() << "Cannot find node with name '" << the_node->getName() << "' in the model but received a monitor working on it.";
+                throw RbException() << "Cannot find DAG node " << the_node->getDagNodeId() << " ('" << the_node->getName() << "') in the model but received a monitor working on it.";
             }
 
             // now swap the node

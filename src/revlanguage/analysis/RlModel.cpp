@@ -304,7 +304,7 @@ void Model::printModelDotGraph(const RevBayesCore::path &fn, bool vb, const std:
             if ( (*it)->getName() != "" )
                 nname << (*it)->getName();
             else
-                nname << (*it);
+                nname << (*it)->getDagNodeId(); // unique id available even for unnamed nodes
             std::string stname = nname.str();
             std::replace( stname.begin(), stname.end(), '[', '_');
 			std::replace( stname.begin(), stname.end(), '.', '_');
@@ -417,7 +417,7 @@ void Model::printModelDotGraph(const RevBayesCore::path &fn, bool vb, const std:
                 }
                 else
                 {
-                    nname << (*it);
+                    nname << (*it)->getDagNodeId();
                 }
                 std::string stname = nname.str();
                 std::replace( stname.begin(), stname.end(), '[', '_');
@@ -441,7 +441,7 @@ void Model::printModelDotGraph(const RevBayesCore::path &fn, bool vb, const std:
                             if ( ch->getName() != "" )
                                 cn << ch->getName();
                             else
-                                cn << ch;
+                                cn << ch->getDagNodeId();
                             std::string stcn = cn.str();
                             std::replace( stcn.begin(), stcn.end(), '[', '_');
                             stcn.erase(std::remove(stcn.begin(), stcn.end(), ']'), stcn.end());  
@@ -461,7 +461,7 @@ void Model::printModelDotGraph(const RevBayesCore::path &fn, bool vb, const std:
                             }
                             else
                             {
-                                cn << (*ci);
+                                cn << (*ci)->getDagNodeId();
                             }
                             std::string stcn = cn.str();
                             std::replace( stcn.begin(), stcn.end(), '[', '_');
