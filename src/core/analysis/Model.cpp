@@ -1,5 +1,6 @@
 #include "Model.h"
 
+#include <cstdint>
 #include <map>
 #include <ostream>
 #include <queue>
@@ -35,17 +36,26 @@ Model::Model(const DagNode *source) : Parallelizable()
  * The entire model graph is copied and a map between the pointers to the original DAG nodes and
  * the copied DAG nodes is created for convenient access.
  *
+ * The set itself is ordered by pointer address. That order changes when the allocator reuses a freed block, so the
+ * same sources can be visited in a different order in the next run. We therefore re-key the sources by the id
+ * assigned at construction and visit that map instead. The id is copied when a node is cloned, so each copy of the
+ * model walks its sources in the same order.
+ *
  * \param[in]    s    The set of DAG nodes from which the model graph is extracted.
  */
 Model::Model(const std::set<const DagNode*> &s) : Parallelizable(),
     sources() 
 {
-    
-    // iterate over all sources
-    for (std::set<const DagNode*>::const_iterator it = s.begin(); it != s.end(); ++it) 
+
+    std::map<std::uint64_t, const DagNode*> sources_by_id;
+    for (std::set<const DagNode*>::const_iterator it = s.begin(); it != s.end(); ++it)
     {
-        // add this node and build model graph
-        addSourceNode( *it );
+        sources_by_id.insert( std::make_pair( (*it)->getDagNodeId(), *it ) );
+    }
+
+    for (std::map<std::uint64_t, const DagNode*>::const_iterator it = sources_by_id.begin(); it != sources_by_id.end(); ++it)
+    {
+        addSourceNode( it->second );
     }
     
 }
