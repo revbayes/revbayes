@@ -1,14 +1,73 @@
-# RevBayes 1.4.2 (unreleased)
+# RevBayes 1.5.0 (unreleased)
+
+# RevBayes 1.4.2 (Oct 26, 2026)
 
 ## Backwards-incompatible changes
+  * Do not allow the `p` and `sd` arguments of `dnSoftBoundUniformNormal` to be specified simultaneously (#1066).
+  * Make `readTaxonData( )` throw on malformed input rather than silently accept garbage from failed parsing (#1075).
 
 ## Features
+  * Implement checkpointing for power posterior analyses (#991).
+  * Add move allowing fossil tips to have linked ages (#1021).
+  * Optionally confine `mvMatrixElementScale` and `mvMatrixElementSlide` to one row or column (#1074).
+  * Make `readTaxonData( )` accept `Inf` ages (#1075).
+  * Recognize "Enter" keystroke on Windows (#1081).
+  * Add function to get the number of MPI processes used by current session (#1083).
 
 ## Bug fixes
+  * Rev parser
+      - Parse commented-out lines inside parentheses (#1071).
+      - Parse lines with more than 8192 characters (#1077).
+  * Moves
+      - Keep `mvCollapseExpandFossilBranch` reversible when sampling fossil ages (#1072).
+      - Do not abort when `mvSlice` cannot find a non-empty slice (#1073).
+      - `mvMatrixElementScale`, `mvMatrixElementSlide`: fix handling of non-square matrices (#1074).
+      - `mvCollapseExpandFossilBranch`: do not collapse a node whose sibling is already a sampled ancestor (#1076).
+      - `mvFNPR`, `mvGPR`: do not prune a subtree whose sibling is a sampled ancestor to maintain reversibility (#1076).
+      - `mvFNPR`, `mvGPR`: do not try to attach to a branch where the parent is younger than the moved node (#1076).
+      - `mvNarrow`, `mvNNI`: do not create a node with two sampled-ancestor tips as children (#1076).
+      - `mvNarrow`, `mvNNI`: fix handling of ages when one of the two swapped nodes is a sampled-ancestor tip (#1076).
+      - `mvSubtreeScale`: avoid scaling a node's age below that of its oldest descendant tip (#1076).
+      - Skip fossil tip age moves if the interval has a `max_age` < `min_age` (#1076).
+      - Fix node replacement in `mvTreeScale` (#1086).
+      - Fix checkpointing issue with `mvBranchLengthScale` (#1121).
+      - `mvNarrow`: restore reverse proposals and enforce fossil ages (#1122).
+      - `mvNNI`: check sampled-ancestor destination ages before exchanging nodes (#1122).
+      - `mvSubtreeScale`: make the bounds and Hastings calculation match the nodes actually scaled (#1122).
+  * I/O
+      - Add missing delimiter to `writeDelimitedCharacterData( )` output (#1080).
+      - Fix output formatting for various matrix types (#1098).
+  * Samplers
+      - Fix time-to-completion estimates for analyses with stopping rules (#1085).
+      - Fix assignment of power posteriors to parallel workers (#1096).
+  * Misc
+      - Eliminate discontinuities in the p.d.f. of `dnSoftBoundUniformNormal` (#1066).
+      - Ignore missing data when calculating the mean and variance of continuous traits (#1079).
+      - Make `getOption( )` and `setOption( )` accept camel-case `lineWidth` (#1087).
+      - Make sure `treeAssembly( )` works if the underlying tree is replaced (#1090).
+      - Bring `fnHostSwitchRateModifier( )` in line with the published description of the model (#1099).
+
+## Refactor
+  * Extract non-template DAG node implementation bases (#1088).
+  * Remove the range-v3 library while keeping view-concatenation (#1102).
 
 ## Documentation improvements
+  * Expand documentation for `powerPosterior` (#991).
+  * `mvFossilSiteTimeSlideUniform` (#1021).
+  * Expand documentation for `dnSoftBoundUniformNormal` (#1066).
+  * `getNumProcesses( )` (#1083).
+  * Minor fixes to `setOption( )` (#1087).
+  * Update author attributions (#1109).
 
 ## Infrastructure
+  * Include git branch and commit info in the Windows release build's startup banner (#1064).
+  * Fix stray test output files and missing expected output (#1079, #1091, #1104).
+  * Proceed to run integration tests even if one of the tutorial tests failed (#1086).
+  * Make sure the continuous-integration script uses the latest boost available for macOS (#1093).
+  * Prevent the macOS+Intel GitHub Action from timing out (#1101).
+
+## New contributors
+  * @ErikDanielsson made their first contribution in #1099.
 
 # RevBayes 1.4.1 (Jul 17, 2026)
 
