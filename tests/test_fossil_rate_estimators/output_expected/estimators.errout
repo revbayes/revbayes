@@ -38,6 +38,15 @@ per-taxon, narrow interval, ambiguous=midpoint:
 per-taxon, narrow interval, ambiguous=majority:
    [ [ 0.0333, 0.0286, 0.0000, 0.0476 ] ,
      [ 0.1000, 0.0857, 0.0000, 0.0159 ] ]
+per-taxon, extant status present but not read:
+   [ [ 0.0333, 0.0200, 0.0333, 0.1000 ] ,
+     [ 0.1000, 0.0600, 0.0333, 0.0000 ] ]
+per-taxon, extant=true:
+   [ [ 0.0250, 0.0167, 0.0333, 0.1000 ] ,
+     [ 0.0750, 0.0500, 0.0167, 0.0000 ] ]
+boundary-crosser, extant=true:
+   [ [ 0.0000, 0.0405, 0.0511, nan ] ,
+     [ 0.1099, 0.0916, 0.0288, nan ] ]
 three-timer, six intervals:
    [ [ nan, -0.0693, 0.0288, -0.0288, nan, nan ] ,
      [ nan, nan, 0.0405, -0.0693, -0.0405, nan ] ]

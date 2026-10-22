@@ -76,6 +76,41 @@ fnPerTaxonRates(binned, narrow, max_age=40, ambiguous="midpoint")
 print("per-taxon, narrow interval, ambiguous=majority:")
 fnPerTaxonRates(binned, narrow, max_age=40, ambiguous="majority")
 
+# The status column is read only when asked for. t4 is reported alive, so under extant=true its
+# range runs from its only occurrence in interval 2 to the present, and it is counted in
+# intervals 1 and 0 as well. That moves it out of the singletons and into t4 ranging through:
+#
+#   interval      0          1          2          3
+#   singleton     t6         -          -          -
+#   bottom/last   t5 t7      t2 t3 t8   t1         -
+#   first/top     -          t5         t3 t4      t1 t2 t7 t8
+#   through       t4         t4 t7      t2 t7 t8   -
+#   total         4          6          6          4
+#
+# t4 is "through" in interval 0 rather than ending there, because a taxon reported alive does
+# not go extinct: it crosses the youngest boundary instead of terminating inside the interval.
+# So extant=true adds it to the totals and to the crossers without adding an extinction.
+#
+# Per-taxon: (singleton + first/top) / total / width, and (singleton + bottom/last) / total / width
+#   speciation  1/4/10   1/6/10   2/6/10   4/4/10
+#   extinction  3/4/10   3/6/10   1/6/10   0
+#
+# Boundary-crosser is log(entering/crossing)/width over the same table, where crossing is
+# "through" and entering adds first/top for speciation and bottom/last for extinction. Interval
+# 0 now has a crosser, so it reads 0 for speciation rather than nan:
+#   speciation  log(1/1)/10   log(3/2)/10   log(5/3)/10   nan
+#   extinction  log(3/1)/10   log(5/2)/10   log(4/3)/10   nan
+#
+# Left alone, extant defaults to false, every taxon reads as not extinct however it is reported,
+# and the rates are those of the first table above.
+extant_record <- readTaxonData("data/fossil_rate_estimators_extant.tsv")
+print("per-taxon, extant status present but not read:")
+fnPerTaxonRates(extant_record, timeline, max_age=40)
+print("per-taxon, extant=true:")
+fnPerTaxonRates(extant_record, timeline, max_age=40, extant=true)
+print("boundary-crosser, extant=true:")
+fnBoundaryCrosserRates(extant_record, timeline, max_age=40, extant=true)
+
 # Six intervals of 10 Myr, boundaries 0 10 20 30 40 50 60, and eight taxa sampled in
 #
 #   a 1,2,3,4   b 2,3,4,5   c 1,3   d 2,4   e 0,1,2   f 3,5   g 0,2   h 2,3

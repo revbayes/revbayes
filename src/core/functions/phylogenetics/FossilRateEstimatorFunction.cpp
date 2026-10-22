@@ -119,7 +119,8 @@ void FossilRateEstimatorFunction::update( void )
         const RbVector<Taxon> &t = taxa->getValue();
         for (size_t i = 0; i < t.size(); i++)
         {
-            if ( t[i].getMaxAge() > top )
+            // >= and not >, to match fossilIntervalOf, which drops an age at top as outside
+            if ( t[i].getMaxAge() >= top )
             {
                 RBOUT("Warning: some occurrences are older than max_age and are not counted.\n");
                 warned_outside = true;
