@@ -146,10 +146,32 @@ double NarrowExchangeProposal::doProposal( void )
     double parent_age   = parent.getAge();
     double uncles_age   = uncle->getAge();
 
-    if (uncles_age >= parent_age)
+    // A sampled ancestor takes its destination parent's age. Allow it to move down as well
+    // as up; otherwise an upward exchange has no reverse proposal.
+    if (!uncle->isSampledAncestorTip() && uncles_age >= parent_age)
     {
         failed = true;
         return RbConstants::Double::neginf;
+    }
+
+    // Work around setAge() refusing out-of-range assignments without throwing, and the tree
+    // probability not enforcing fixed ages. Check before mutating so rejection leaves the tree intact.
+    // These checks could be relaxed once assignment reliably completes and the tree probability
+    // enforces all specified bounds. Equal bounds conservatively preserve the current fossil age.
+    for (TopologyNode* fossil : {node, uncle})
+    {
+        if (!fossil->isSampledAncestorTip())
+            continue;
+
+        double new_age = fossil == node ? grandparent.getAge() : parent_age;
+        double min_age = fossil->getTaxon().getMinAge();
+        double max_age = fossil->getTaxon().getMaxAge();
+        if ((min_age == max_age && new_age != fossil->getAge()) ||
+            (min_age != max_age && (new_age < min_age || new_age > max_age)))
+        {
+            failed = true;
+            return RbConstants::Double::neginf;
+        }
     }
 
     failed = false;
@@ -172,6 +194,8 @@ double NarrowExchangeProposal::doProposal( void )
     if (uncle->isSampledAncestorTip())
         uncle->setAge( uncle->getParent().getAge());
 
+    // Selecting the exchanged uncle reverses the swap and restores sampled-ancestor ages.
+    // Both selections have the same probability; internal ages and the eligible node count stay fixed.
     return 0.0;
 }
 
