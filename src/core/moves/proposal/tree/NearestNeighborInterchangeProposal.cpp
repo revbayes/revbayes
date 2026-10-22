@@ -137,6 +137,27 @@ double NearestNeighborInterchangeProposal::doProposal( void )
     double parent_age   = parent.getAge();
     double uncles_age   = uncle->getAge();
     double my_age       = node->getAge();
+
+    // Sampled-ancestor tips must take their destination parent's age. Check before mutation:
+    // setAge() can refuse an uncertain-age assignment without throwing, while the tree probability
+    // does not reject fixed-age violations. Equal bounds conservatively preserve the current age.
+    // These checks can be relaxed only when assignment reliably completes AND the tree probability
+    // enforces all specified bounds; fixing the setter alone would not make this safe.
+    for (TopologyNode* fossil : {node, uncle})
+    {
+        if (!fossil->isSampledAncestorTip())
+            continue;
+
+        double new_age = fossil == node ? gparent_age : parent_age;
+        double min_age = fossil->getTaxon().getMinAge();
+        double max_age = fossil->getTaxon().getMaxAge();
+        if ((min_age == max_age && new_age != fossil->getAge()) ||
+            (min_age != max_age && (new_age < min_age || new_age > max_age)))
+        {
+            failed = true;
+            return RbConstants::Double::neginf;
+        }
+    }
     
     // now we store all necessary values
     storedChosenNode    = node;
