@@ -39,6 +39,9 @@ namespace RevBayesCore {
         
     };
 
+    // Return the smallest interval containing both effective intervals, with explicit bounds.
+    TimeInterval coveringInterval(const TimeInterval& a, const TimeInterval& b);
+
 }
 
 #endif
