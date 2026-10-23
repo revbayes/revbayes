@@ -1,6 +1,8 @@
 #ifndef TimeInterval_H
 #define TimeInterval_H
 
+#include <compare>
+
 namespace RevBayesCore {
     
     /**
@@ -19,9 +21,9 @@ namespace RevBayesCore {
         TimeInterval(); //!< Default constructor
         TimeInterval(double min, double max);
         
-        bool                                operator==(const TimeInterval &t) const;                //!< Equals operator
-        bool                                operator!=(const TimeInterval &t) const;                //!< Not-equals operator
-        bool                                operator<(const TimeInterval &t) const;                 //!< Less than operator
+        // Compare effective endpoints, ordered by maximum first and minimum second.
+        bool                                operator==(const TimeInterval &t) const;
+        std::partial_ordering               operator<=>(const TimeInterval &t) const;
 
         // Membership and zero width use effective endpoints, including the current [0, 0] default.
         bool                                contains(double age) const;
