@@ -62,6 +62,7 @@ namespace RevBayesCore {
         // stored objects to undo proposal
         size_t                                  tree_index;
         std::vector<double>                     storedAges;
+        double                                  storedRootAge;
     };
     
 }
