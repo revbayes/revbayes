@@ -1,6 +1,7 @@
 #include "TimeInterval.h"
 
 #include <algorithm>
+#include <utility>
 
 #include "RbException.h"
 #include "RbMathLogic.h"
@@ -23,34 +24,18 @@ TimeInterval::TimeInterval(double mn, double mx) : min(mn), max(mx)
 }
 
 
-/**
- * Equals operator.
-
- */
+// Equality uses the same effective endpoints as ordering, including defaults for unset bounds.
 bool TimeInterval::operator==(const RevBayesCore::TimeInterval &t) const
 {
-    
-    return min == t.min && max == t.max;
+    return getMin() == t.getMin() and getMax() == t.getMax();
 }
 
 
-/**
- * Not equals operator. We simply invert the result of the equals operation.
- */
-bool TimeInterval::operator!=(const RevBayesCore::TimeInterval &t) const
+// Sort by maximum age, then minimum: occurrence maps must not merge distinct ranges with
+// the same maximum. Accessors resolve unset bounds before either endpoint is compared.
+std::partial_ordering TimeInterval::operator<=>(const RevBayesCore::TimeInterval &t) const
 {
-    
-    return !operator==(t);
-}
-
-
-/**
- * Less than operator. Sort by maximum age.
- */
-bool TimeInterval::operator<(const RevBayesCore::TimeInterval &t) const
-{
-
-    return max < t.max;
+    return std::pair(getMax(), getMin()) <=> std::pair(t.getMax(), t.getMin());
 }
 
 
