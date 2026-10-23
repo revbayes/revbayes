@@ -965,7 +965,9 @@ std::vector<Taxon> Tree::getTaxa() const
             Taxon taxon = node->getTaxon();
             // Export the realized node age as a fixed interval on the copy. Preserving the
             // original maximum would mix the current age with the taxon's age constraint.
-            const double age = node->getAge();
+            // Compatibility: branch-length trees can have unspecified node ages. Export [0,0],
+            // the effective range formerly produced by NaN endpoints in TimeInterval.
+            const double age = std::isnan(node->getAge()) ? 0.0 : node->getAge();
             taxon.setAgeRange(TimeInterval(age, age));
             taxa.push_back( taxon );
         }
