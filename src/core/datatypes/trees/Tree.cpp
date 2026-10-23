@@ -13,6 +13,7 @@
 #include "RbException.h"
 #include "Tree.h"
 #include "Taxon.h"
+#include "TimeInterval.h"
 #include "TopologyNode.h"
 #include "TypedDagNode.h"
 #include "TreeUtilities.h"
@@ -962,7 +963,10 @@ std::vector<Taxon> Tree::getTaxa() const
         if (node->isTip() or node->getNumberOfChildren() == 1)
         {
             Taxon taxon = node->getTaxon();
-            taxon.setAge(node->getAge());
+            // Export the realized node age as a fixed interval on the copy. Preserving the
+            // original maximum would mix the current age with the taxon's age constraint.
+            const double age = node->getAge();
+            taxon.setAgeRange(TimeInterval(age, age));
             taxa.push_back( taxon );
         }
     }
