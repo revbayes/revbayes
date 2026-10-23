@@ -5,8 +5,6 @@
 #include <cmath>
 #include <utility>
 
-#include "RbException.h"
-
 using namespace RevBayesCore;
 
 
@@ -18,10 +16,7 @@ TimeInterval::TimeInterval() : min(0.0), max(0.0)
 TimeInterval::TimeInterval(double mn, double mx) : min(mn), max(mx)
 {
     assert(not std::isnan(mn) and not std::isnan(mx));
-    if ( max < min )
-    {
-        throw RbException("Time interval max < min");
-    }
+    assert(mn <= mx);
 }
 
 
@@ -56,10 +51,7 @@ double TimeInterval::getMin(void) const
 void TimeInterval::setMin(double s)
 {
     assert(not std::isnan(s));
-    if ( max < s )
-    {
-        throw RbException("Time interval max < min");
-    }
+    assert(s <= max);
 
     min = s;
 }
@@ -80,10 +72,7 @@ double TimeInterval::getMax(void) const
 void TimeInterval::setMax(double s)
 {
     assert(not std::isnan(s));
-    if ( s < min )
-    {
-        throw RbException("Time interval max < min");
-    }
+    assert(min <= s);
 
     max = s;
 }
