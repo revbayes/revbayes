@@ -16,9 +16,10 @@ template <class variableType> class StochasticNode;
      * The subtree-scale operator.
      *
      * A subtree-scale proposal is a scaling proposal on rooted subtrees without changing the topology.
-     * That is, we pick a random node which is not the root.
-     * Then, we uniformly pick an age between the parent and the oldest sampled descendant.
-     * The picked subtree is then scaled to this new age.
+     * Pick a non-root internal node, skipping sampled-ancestor parents. Draw its new age
+     * uniformly between the bound imposed by fixed descendants and its parent's age.
+     * Scale internal ages, stopping at tips and sampled-ancestor parents; the bounds and
+     * Hastings calculation use precisely this same set of scaled nodes.
      *
      *
      * @copyright Copyright 2009-
