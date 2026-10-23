@@ -1,0 +1,36 @@
+# These checks protect probability support after assigning trees, including through a wrapper.
+# Ordinary MCMC tests need not propose these invalid states; remove this group if equivalent
+# direct support checks become part of a shared distribution test suite.
+seed(12)
+taxa = [taxon("a"), taxon("b"), taxon("c")]
+t ~ dnUniformTimeTree(rootAge=10, taxa=taxa)
+u <- t
+u.setAge(1, 0.1)
+t.clamp(u)
+print(exp(t.lnProbability()) == 0)
+
+taxa = [taxon("a", min=1, max=2), taxon("b", min=1, max=2), taxon("c", min=1, max=2)]
+tree_prior = dnBirthDeath(rootAge=10, lambda=0.3, mu=0.1, taxa=taxa)
+t ~ tree_prior
+u <- t
+u.setAge(4, 5)
+u.setAge(5, 10)
+for (a in [0.5, 1.0, 1.5, 2.0, 3.0]) {
+    u.setAge(1, a)
+    t.clamp(u)
+    print(exp(t.lnProbability()) == 0)
+}
+constant_tree <- u
+constant_tree.setAge(1, 1.5)
+mixed ~ dnReversibleJumpMixture(constantValue=constant_tree, baseDistribution=tree_prior, p=0.5)
+mixed.clamp(u)
+print(exp(mixed.lnProbability()) == 0)
+
+# Mixtures and empirical averages of zero densities must return zero, not NaN from their log-sum.
+# This also checks assignment through a wrapper; ordinary valid-state runs miss this case.
+mixed2 ~ dnMixtureAnalytical([tree_prior, tree_prior], simplex(0.5,0.5))
+mixed2.clamp(u)
+print(exp(mixed2.lnProbability()) == 0)
+empirical ~ dnEmpiricalSample(tree_prior)
+empirical.clamp([u])
+print(exp(empirical.lnProbability()) == 0)
