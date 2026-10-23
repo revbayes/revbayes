@@ -179,7 +179,7 @@ TaxonReader::TaxonReader(const std::string &fn, std::string delim) : DelimitedDa
             double min_age = parseNumericField( line[ column_map["min_age"] ], "min_age", i+1 );
             double max_age = parseNumericField( line[ column_map["max_age"] ], "max_age", i+1 );
 
-            // ordering (and its intentional 1e-6 tolerance) is TimeInterval's to enforce
+            // TimeInterval enforces the ordering of the bounds.
             interval.setMin(min_age);
             interval.setMax(max_age);
 
