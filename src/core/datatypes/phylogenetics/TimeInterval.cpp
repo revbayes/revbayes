@@ -100,7 +100,7 @@ double TimeInterval::getMax(void) const
  */
 void TimeInterval::setMax(double s)
 {
-    if ( (min - s) > 1E-6 )
+    if ( s < min )
     {
         throw RbException("Time interval max < min");
     }
