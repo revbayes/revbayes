@@ -812,9 +812,6 @@ Tree* TopologyConstrainedTreeDistribution::simulateRootedTree( bool alwaysReturn
             throw RbException("Cannot simulate tree: clade constraints are older than the origin age.");
         }
 
-        // set the ages of each of the taxa in the constraint
-//        monophyly_constraint.setAges( taxa );
-
         // populate sorted clades vector
         if ( monophyly_constraint.size() > 1 && monophyly_constraint.size() < num_taxa )
         {
