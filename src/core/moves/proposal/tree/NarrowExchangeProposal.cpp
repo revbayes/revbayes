@@ -179,11 +179,12 @@ double NarrowExchangeProposal::doProposal( void )
     storedChosenNode    = node;
     storedUncle         = uncle;
 
-    // now exchange the two nodes
-    grandparent.removeChild( uncle );
-    parent.removeChild( node );
-    grandparent.addChild( node );
-    parent.addChild( uncle );
+    // Replace each child in its original slot. The exchanged children then carry the
+    // positions needed by undo, without changing the order of unaffected siblings.
+    const size_t uncle_pos = grandparent.removeChild( uncle );
+    const size_t node_pos = parent.removeChild( node );
+    grandparent.addChild( node, uncle_pos );
+    parent.addChild( uncle, node_pos );
     node->setParent( &grandparent );
     uncle->setParent( &parent );
         
@@ -241,11 +242,12 @@ void NarrowExchangeProposal::undoProposal( void )
         TopologyNode& parent = storedUncle->getParent();
         TopologyNode& grandparent = storedChosenNode->getParent();
         
-        // now exchange the two nodes
-        grandparent.removeChild( storedChosenNode );
-        parent.removeChild( storedUncle );
-        grandparent.addChild( storedUncle );
-        parent.addChild( storedChosenNode );
+        // The forward exchange preserved child slots, so these positions restore the
+        // original sibling order as well as the topology.
+        const size_t uncle_pos = grandparent.removeChild( storedChosenNode );
+        const size_t node_pos = parent.removeChild( storedUncle );
+        grandparent.addChild( storedUncle, uncle_pos );
+        parent.addChild( storedChosenNode, node_pos );
         storedUncle->setParent( &grandparent );
         storedChosenNode->setParent( &parent );
         
