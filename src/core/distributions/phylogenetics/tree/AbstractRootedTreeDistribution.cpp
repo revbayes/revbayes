@@ -209,7 +209,9 @@ double AbstractRootedTreeDistribution::computeLnProbability( void )
                 }
                 auto taxon = the_node.getTaxon();
                 const auto& interval = taxon.getAgeRange();
-                if (taxon.getName() != "" and not interval.zeroWidth())
+                // Fixed intervals are constraints too: a named tip outside [a,a] has zero
+                // probability, even if its age was assigned without enforcing the bounds.
+                if (taxon.getName() != "")
                 {
                     if (not interval.contains(the_node.getAge()))
                     {
