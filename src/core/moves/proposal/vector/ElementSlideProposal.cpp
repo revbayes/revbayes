@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "ElementSlideProposal.h"
 
 #include "RandomNumberFactory.h"
@@ -163,7 +164,7 @@ void ElementSlideProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
     {
         if ( variables[i] == oldN )
         {
-            variables[i] = static_cast<StochasticNode<double> *>(newN);
+            replaceNodeReference(variables[i], newN);
         }
     }
     

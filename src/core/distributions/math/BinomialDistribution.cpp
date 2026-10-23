@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "BinomialDistribution.h"
 
 #include "DistributionBinomial.h"
@@ -70,11 +71,11 @@ void BinomialDistribution::swapParameterInternal(const DagNode *oldP, const DagN
 
     if (oldP == p)
     {
-        p = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(p, newP);
     }
     else if (oldP == n)
     {
-        n = static_cast<const TypedDagNode<std::int64_t>* >( newP );
+        replaceNodeReference(n, newP);
     }
 
 }

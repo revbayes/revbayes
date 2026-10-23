@@ -1,6 +1,7 @@
 #ifndef BinaryDivision_H
 #define BinaryDivision_H
 
+#include "DagNodeTypeUtilities.h"
 #include "TypedFunction.h"
 #include "TypedDagNode.h"
 
@@ -54,11 +55,11 @@ void RevBayesCore::BinaryDivision<firstValueType, secondValueType, return_type>:
     
     if (oldP == a)
     {
-        a = static_cast<const TypedDagNode<firstValueType>* >( newP );
+        replaceNodeReference(a, newP);
     }
     if (oldP == b)
     {
-        b = static_cast<const TypedDagNode<secondValueType>* >( newP );
+        replaceNodeReference(b, newP);
     }
 
 }

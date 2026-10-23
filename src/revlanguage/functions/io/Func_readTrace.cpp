@@ -212,7 +212,7 @@ RevPtr<RevVariable> Func_readTrace::execute( void )
             // adding values to the Traces
             for (size_t j = 0; j < columns.size(); j++)
             {
-                RevBayesCore::TraceNumeric& t = static_cast<RevBayesCore::TraceNumeric&>( single_trace[j] );
+                RevBayesCore::TraceNumeric& t = single_trace[j];
                 std::string tmp = columns[j];
                 double d = atof( tmp.c_str() );
                 t.addObject(d);

@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include <cmath>
 #include <cstddef>
 #include <set>
@@ -546,8 +547,10 @@ void PhyloBrownianProcessREML::swapParameterInternal(const DagNode *oldP, const 
     
     if (oldP == this->tau)
     {
+        // Check the replacement before detaching the old tree's listener.
+        const auto* replacement = assume_cast<decltype(this->tau)>(newP);
         this->tau->getValue().getTreeChangeEventHandler().removeListener( this );
-        AbstractPhyloBrownianProcess::swapParameterInternal(oldP, newP);
+        AbstractPhyloBrownianProcess::swapParameterInternal(oldP, replacement);
         this->tau->getValue().getTreeChangeEventHandler().addListener( this );
     }
     else

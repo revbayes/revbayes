@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "ScaledDirichletDistribution.h"
 
 #include "DistributionScaledDirichlet.h"
@@ -53,11 +54,11 @@ void ScaledDirichletDistribution::swapParameterInternal(const DagNode *oldP, con
     
     if (oldP == alpha)
     {
-        alpha = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(alpha, newP);
     }
     if (oldP == beta)
     {
-        beta = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(beta, newP);
     }
 
 }

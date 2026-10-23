@@ -14,6 +14,7 @@
  * $Id: VectorDoubleProductStatistic.cpp tracyh $
  */
 
+#include "DagNodeTypeUtilities.h"
 #include "VectorDoubleProductStatistic.h"
 
 #include <cstddef>
@@ -59,10 +60,10 @@ void VectorDoubleProductStatistic::update( void ) {
 void VectorDoubleProductStatistic::swapParameterInternal(const DagNode *oldP, const DagNode *newP) {
 	
     if (oldP == elementVals) {
-        elementVals = static_cast< const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(elementVals, newP);
     }
     if (oldP == multiplier) {
-        multiplier = static_cast< const TypedDagNode< double >* >( newP );
+        replaceNodeReference(multiplier, newP);
     }
 }
 

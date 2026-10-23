@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include <cstddef>
 #include <cmath>
 #include <vector>
@@ -219,7 +220,7 @@ void MultispeciesCoalescentUniformPrior::swapParameterInternal(const DagNode *ol
 
     if ( oldP == max_theta )
     {
-        max_theta = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(max_theta, newP);
     }
 
     AbstractMultispeciesCoalescent::swapParameterInternal(oldP, newP);

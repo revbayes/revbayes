@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "PhyloDiversityFunction.h"
 
 #include <algorithm>
@@ -195,7 +196,7 @@ void PhyloDiversityFunction::swapParameterInternal(const DagNode *oldP, const Da
     
     if (oldP == tau)
     {
-        tau = static_cast<const TypedDagNode<Tree>* >( newP );
+        replaceNodeReference(tau, newP);
     }
 }
 

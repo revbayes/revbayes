@@ -6,7 +6,7 @@
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "RlBoolean.h"
-#include "ContinuousStochasticNode.h"
+#include "StochasticNode.h"
 #include "MetropolisHastingsMove.h"
 #include "Move_ScaleBactrian.h"
 #include "Probability.h"
@@ -69,7 +69,7 @@ void Move_ScaleBactrian::constructInternalObject( void )
     double w = valueForRevType<RealPos>(weight);
     double r = valueForRevType<Probability>(tuneTarget);
     RevBayesCore::TypedDagNode<double>* tmp = dagNodeForRevType<Real>(x);
-    RevBayesCore::ContinuousStochasticNode *n = static_cast<RevBayesCore::ContinuousStochasticNode *>( tmp );
+    RevBayesCore::StochasticNode<double> *n = static_cast<RevBayesCore::StochasticNode<double> *>( tmp );
     bool t = valueForRevType<RlBoolean>(tune);
     
     RevBayesCore::Proposal *p = new RevBayesCore::ScaleBactrianProposal(n, d, r);

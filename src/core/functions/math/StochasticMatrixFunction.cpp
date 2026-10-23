@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include <cstddef>
 #include <vector>
 
@@ -60,6 +61,6 @@ void StochasticMatrixFunction::swapParameterInternal(const DagNode *oldP, const 
 {
 	if (oldP == matrixParams)
 	{
-		matrixParams = static_cast<const TypedDagNode<RbVector<Simplex > >* >( newP );
+		replaceNodeReference(matrixParams, newP);
 	}
 }
