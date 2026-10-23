@@ -1,6 +1,7 @@
 #ifndef RevBayes_development_branch_StochasticCharacterMappingMonitor_h
 #define RevBayes_development_branch_StochasticCharacterMappingMonitor_h
 
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "AbstractHomologousDiscreteCharacterData.h"
 #include "StateDependentSpeciationExtinctionProcess.h"
@@ -100,7 +101,7 @@ StochasticCharacterMappingMonitor<characterType>::StochasticCharacterMappingMoni
     cdbdp = NULL;
 
     AbstractPhyloCTMCSiteHomogeneous<characterType> *ctmc_dist = NULL;
-    ctmc_dist = static_cast<AbstractPhyloCTMCSiteHomogeneous<characterType>* >( &ctmc->getDistribution() );
+    ctmc_dist = assume_cast<AbstractPhyloCTMCSiteHomogeneous<characterType>* >( &ctmc->getDistribution() );
     tree = const_cast<TypedDagNode<Tree>* >( ctmc_dist->getTree() );
 
     addVariable( tree );
@@ -166,7 +167,7 @@ void StochasticCharacterMappingMonitor<characterType>::monitorVariables(std::uin
     AbstractPhyloCTMCSiteHomogeneous<characterType> *ctmc_dist = NULL;
     if ( ctmc != NULL )
     {
-        ctmc_dist = static_cast<AbstractPhyloCTMCSiteHomogeneous<characterType>* >( &ctmc->getDistribution() );
+        ctmc_dist = assume_cast<AbstractPhyloCTMCSiteHomogeneous<characterType>* >( &ctmc->getDistribution() );
         num_nodes = tree->getValue().getNumberOfNodes();
     }
     else

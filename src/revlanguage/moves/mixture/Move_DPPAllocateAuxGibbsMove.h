@@ -1,6 +1,7 @@
 #ifndef Move_DPPAllocateAuxGibbsMove_H
 #define Move_DPPAllocateAuxGibbsMove_H
 
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include "RlMove.h"
 #include "TypedDagNode.h"
@@ -94,7 +95,7 @@ void Move_DPPAllocateAuxGibbsMove<valType>::constructInternalObject( void )
     int na = (int)valueForRevType<Integer>(nAux);
     double w = valueForRevType<RealPos>(weight);
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<typename valType::valueType> >* tmp = dagNodeForRevType<ModelVector<valType>>(x);
-    RevBayesCore::StochasticNode< RevBayesCore::RbVector<typename valType::valueType> > *sn = static_cast<RevBayesCore::StochasticNode< RevBayesCore::RbVector<typename valType::valueType> > *>( tmp );
+    RevBayesCore::StochasticNode< RevBayesCore::RbVector<typename valType::valueType> > *sn = assume_cast<RevBayesCore::StochasticNode< RevBayesCore::RbVector<typename valType::valueType> > *>( tmp );
     
     value = new RevBayesCore::DPPAllocateAuxGibbsMove<typename valType::valueType>(sn, na, w);
 }

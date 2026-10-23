@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include <ostream>
 #include <string>
@@ -54,12 +55,12 @@ void Move_CorrelationMatrixExpansion::constructInternalObject( void )
     double w = valueForRevType<RealPos>(weight);
 
     RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* tmp = dagNodeForRevType<MatrixReal>(correlation_matrix);
-    RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::MatrixReal> *>( tmp );
+    RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *n = assume_cast<RevBayesCore::StochasticNode<RevBayesCore::MatrixReal> *>( tmp );
 
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* var = dagNodeForRevType<ModelVector<RealPos>>(variance);
 
     RevBayesCore::TypedDagNode<RevBayesCore::ContinuousCharacterData>* mvbm_tdn  = dagNodeForRevType<RevLanguage::ContinuousCharacterData>(mvbm);
-    RevBayesCore::StochasticNode<RevBayesCore::ContinuousCharacterData>* mvbm_sn = static_cast<RevBayesCore::StochasticNode<RevBayesCore::ContinuousCharacterData>* >(mvbm_tdn);
+    RevBayesCore::StochasticNode<RevBayesCore::ContinuousCharacterData>* mvbm_sn = assume_cast<RevBayesCore::StochasticNode<RevBayesCore::ContinuousCharacterData>* >(mvbm_tdn);
     
     RevBayesCore::Proposal *p  = new RevBayesCore::CorrelationMatrixExpansionProposal(n, var, mvbm_sn);
     value = new RevBayesCore::MetropolisHastingsMove(p,w,false);

@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include "Move_IndependentTopology.h"
 
@@ -64,10 +65,10 @@ void Move_IndependentTopology::constructInternalObject( void )
     double w = valueForRevType<RealPos>(weight);
     
     RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = dagNodeForRevType<TimeTree>(tree);
-    RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
+    RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = assume_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
 
     const Distribution& rlDistribution                        = objectForRevType<Distribution>(proposal_distribution);
-    RevBayesCore::TypedDistribution<RevBayesCore::Tree>* prop = static_cast<RevBayesCore::TypedDistribution<RevBayesCore::Tree>* >( rlDistribution.createDistribution() );
+    RevBayesCore::TypedDistribution<RevBayesCore::Tree>* prop = assume_cast<RevBayesCore::TypedDistribution<RevBayesCore::Tree>* >( rlDistribution.createDistribution() );
 
     const RevBayesCore::Clade& c      = valueForRevType<Clade>(outgroup);
 

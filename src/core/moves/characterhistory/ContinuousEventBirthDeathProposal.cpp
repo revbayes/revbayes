@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include <iostream>
 #include <vector>
 
@@ -61,11 +62,11 @@ const std::string& ContinuousEventBirthDeathProposal::getProposalName( void ) co
 double ContinuousEventBirthDeathProposal::computeEventProposalProbability(CharacterEvent *event)
 {
     
-    ConditionedBirthDeathShiftProcessContinuous *process = static_cast<ConditionedBirthDeathShiftProcessContinuous*>(distribution);
+    ConditionedBirthDeathShiftProcessContinuous *process = assume_cast<ConditionedBirthDeathShiftProcessContinuous*>(distribution);
     
     double ln_proposal_prob = 0;
 
-    CharacterEventContinuous *cont_event = static_cast<CharacterEventContinuous*>( event );
+    CharacterEventContinuous *cont_event = assume_cast<CharacterEventContinuous*>( event );
     double rate_lambda  = cont_event->getState(0);
     double rate_mu      = cont_event->getState(1);
 
@@ -109,7 +110,7 @@ double ContinuousEventBirthDeathProposal::computeEventProposalProbability(Charac
 
 CharacterEvent* ContinuousEventBirthDeathProposal::drawNewEvent(double event_time)
 {
-    ConditionedBirthDeathShiftProcessContinuous *process = static_cast<ConditionedBirthDeathShiftProcessContinuous*>(distribution);
+    ConditionedBirthDeathShiftProcessContinuous *process = assume_cast<ConditionedBirthDeathShiftProcessContinuous*>(distribution);
 
     // first, get the new values
     double rate_lambda  = process->getRootSpeciationRate();

@@ -1,6 +1,7 @@
 #ifndef Move_OrderedEventSlide_H
 #define Move_OrderedEventSlide_H
 
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include "RlMove.h"
 #include "RlOrderedEvents.h"
@@ -94,7 +95,7 @@ void RevLanguage::Move_OrderedEventSlide<rlValueType>::constructInternalObject( 
     double w = valueForRevType<RealPos>(weight);
 
     RevBayesCore::TypedDagNode<RevBayesCore::OrderedEvents<typename rlValueType::valueType> >* tmp = dagNodeForRevType<RlOrderedEvents<rlValueType>>(x);
-    RevBayesCore::StochasticNode<RevBayesCore::OrderedEvents<typename rlValueType::valueType> > *sn = static_cast<RevBayesCore::StochasticNode<RevBayesCore::OrderedEvents<typename rlValueType::valueType >> *>( tmp );
+    RevBayesCore::StochasticNode<RevBayesCore::OrderedEvents<typename rlValueType::valueType> > *sn = assume_cast<RevBayesCore::StochasticNode<RevBayesCore::OrderedEvents<typename rlValueType::valueType >> *>( tmp );
 
     RevBayesCore::Proposal *p = new RevBayesCore::OrderedEventSlideProposal<typename rlValueType::valueType>( sn, d );
     value = new RevBayesCore::MetropolisHastingsMove(p, w, false);

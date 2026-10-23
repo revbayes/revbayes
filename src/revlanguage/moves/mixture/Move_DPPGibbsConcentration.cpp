@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
@@ -51,7 +52,7 @@ void Move_DPPGibbsConcentration::constructInternalObject( void )
     double ne = valueForRevType<RealPos>(numElements);
     double w = valueForRevType<RealPos>(weight);
     RevBayesCore::TypedDagNode<double>* tmp = dagNodeForRevType<RealPos>(cp);
-    RevBayesCore::StochasticNode< double > *sn = static_cast<RevBayesCore::StochasticNode<double> *>( tmp );
+    RevBayesCore::StochasticNode< double > *sn = assume_cast<RevBayesCore::StochasticNode<double> *>( tmp );
     RevBayesCore::TypedDagNode<std::int64_t>* tmpNC = dagNodeForRevType<Integer>(numCats);
     RevBayesCore::DeterministicNode<std::int64_t> *nc = static_cast<RevBayesCore::DeterministicNode<std::int64_t> *>( tmpNC );
     RevBayesCore::TypedDagNode<double>* gS = dagNodeForRevType<RealPos>(gammaShape);

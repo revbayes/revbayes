@@ -6,6 +6,7 @@
 //  Copyright (c) 2015 Michael Landis. All rights reserved.
 //
 
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
@@ -78,7 +79,7 @@ void Move_LevyJump::constructInternalObject( void )
     double d = valueForRevType<RealPos>(delta);
     double w = valueForRevType<RealPos>(weight);
     RevBayesCore::TypedDagNode<double>* tmp = dagNodeForRevType<Real>(x);
-    RevBayesCore::ContinuousStochasticNode *n = static_cast<RevBayesCore::ContinuousStochasticNode *>( tmp );
+    RevBayesCore::ContinuousStochasticNode *n = assume_cast<RevBayesCore::ContinuousStochasticNode *>( tmp );
     bool t = valueForRevType<RlBoolean>(tune);
     double tt = valueForRevType<Probability>(tuneTarget);
     

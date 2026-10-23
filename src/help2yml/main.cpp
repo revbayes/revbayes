@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include <vector>
 #include <iostream>
 #include <fstream>
@@ -70,7 +71,7 @@ int main(int argc, const char * argv[])
             continue;
         }
 
-        const RevBayesCore::RbHelpFunction& entry = static_cast<const RevBayesCore::RbHelpFunction&>( help.getHelp( name ) );
+        const RevBayesCore::RbHelpFunction& entry = assume_cast<const RevBayesCore::RbHelpFunction&>( help.getHelp( name ) );
         
         if (name.size() > 0 && entry.getUsage() != "c_name()")
         {
@@ -97,7 +98,7 @@ int main(int argc, const char * argv[])
         {
             std::cerr << "Adding type with name:\t" << name << std::endl;
             
-            const RevBayesCore::RbHelpType& typeEntry = static_cast<const RevBayesCore::RbHelpType&>( help.getHelp( name ) );
+            const RevBayesCore::RbHelpType& typeEntry = assume_cast<const RevBayesCore::RbHelpType&>( help.getHelp( name ) );
 
             fs << renderer.renderHelp(typeEntry);
             

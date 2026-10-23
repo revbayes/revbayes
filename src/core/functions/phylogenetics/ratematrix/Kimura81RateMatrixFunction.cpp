@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "Kimura81RateMatrixFunction.h"
 
@@ -57,8 +58,8 @@ void Kimura81RateMatrixFunction::update( void )
     
     
     // set the base frequencies
-    static_cast< RateMatrix_Kimura81* >(value)->setStationaryFrequencies( f );
-    static_cast< RateMatrix_Kimura81* >(value)->setKappa(k1, k2);
+    assume_cast< RateMatrix_Kimura81* >(value)->setStationaryFrequencies( f );
+    assume_cast< RateMatrix_Kimura81* >(value)->setKappa(k1, k2);
     
     value->update();
     

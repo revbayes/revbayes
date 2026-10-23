@@ -6,6 +6,7 @@
 //  Copyright © 2017 Michael Landis. All rights reserved.
 //
 
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "RangeEvolutionRateModifierFunction.h"
 
@@ -59,13 +60,13 @@ void RangeEvolutionRateModifierFunction::update( void )
 {
     
     double gf = gainFactor->getValue();
-    static_cast<RangeEvolutionRateModifier*>(value)->setGainFactor(gf);
+    assume_cast<RangeEvolutionRateModifier*>(value)->setGainFactor(gf);
     
     double lf = lossFactor->getValue();
-    static_cast<RangeEvolutionRateModifier*>(value)->setLossFactor(lf);
+    assume_cast<RangeEvolutionRateModifier*>(value)->setLossFactor(lf);
     
     RbVector<RbVector<double> > c = context_matrix->getValue();
-    static_cast<RangeEvolutionRateModifier*>(value)->setContextMatrix(c);
+    assume_cast<RangeEvolutionRateModifier*>(value)->setContextMatrix(c);
 
 }
 

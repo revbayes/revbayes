@@ -1,6 +1,7 @@
 #ifndef BiogeographicNodeRejectionSampleProposal_H
 #define BiogeographicNodeRejectionSampleProposal_H
 
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "BranchHistoryDiscrete.h"
 #include "CharacterEventDiscrete.h"
@@ -240,16 +241,16 @@ double RevBayesCore::BiogeographicNodeRejectionSampleProposal<charType>::compute
     {
         size_t site_index = *it_s;
         
-        size_t srcSA = static_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->getState();
-        size_t desSA = static_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->getState();
+        size_t srcSA = assume_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->getState();
+        size_t desSA = assume_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->getState();
         double probA = nodeTpMatrix[srcSA][desSA];
         
-        size_t srcS1 = static_cast<CharacterEventDiscrete*>(leftParentState[site_index])->getState();
-        size_t desS1 = static_cast<CharacterEventDiscrete*>(leftChildState[site_index])->getState();
+        size_t srcS1 = assume_cast<CharacterEventDiscrete*>(leftParentState[site_index])->getState();
+        size_t desS1 = assume_cast<CharacterEventDiscrete*>(leftChildState[site_index])->getState();
         double prob1 = leftTpMatrix[srcS1][desS1];
         
-        size_t srcS2 = static_cast<CharacterEventDiscrete*>(rightParentState[site_index])->getState();
-        size_t desS2 = static_cast<CharacterEventDiscrete*>(rightChildState[site_index])->getState();
+        size_t srcS2 = assume_cast<CharacterEventDiscrete*>(rightParentState[site_index])->getState();
+        size_t desS2 = assume_cast<CharacterEventDiscrete*>(rightChildState[site_index])->getState();
         double prob2 = rightTpMatrix[srcS2][desS2];
         
         
@@ -376,7 +377,7 @@ double RevBayesCore::BiogeographicNodeRejectionSampleProposal<charType>::compute
     size_t n_n_on = 0;
     for (size_t i = 0; i < nodeChildState.size(); i++)
     {
-        size_t sn = static_cast<CharacterEventDiscrete*>(nodeChildState[i])->getState();
+        size_t sn = assume_cast<CharacterEventDiscrete*>(nodeChildState[i])->getState();
         n_n_on += sn;
     }
     std::string clado_type = c->getCladogeneticEvent( node->getIndex() );
@@ -489,9 +490,9 @@ double RevBayesCore::BiogeographicNodeRejectionSampleProposal<charType>::compute
     for (it_s = sampledCharacters.begin(); it_s != sampledCharacters.end(); it_s++)
     {
         size_t site_index = *it_s;
-        size_t ancS  = static_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->getState();
-        size_t desS1 = static_cast<CharacterEventDiscrete*>(leftChildState[site_index])->getState();
-        size_t desS2 = static_cast<CharacterEventDiscrete*>(rightChildState[site_index])->getState();
+        size_t ancS  = assume_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->getState();
+        size_t desS1 = assume_cast<CharacterEventDiscrete*>(leftChildState[site_index])->getState();
+        size_t desS2 = assume_cast<CharacterEventDiscrete*>(rightChildState[site_index])->getState();
         
         std::vector<double> state_probs(numStates,0.0);
         double sum = 0.0;
@@ -503,7 +504,7 @@ double RevBayesCore::BiogeographicNodeRejectionSampleProposal<charType>::compute
         }
         
         // get the probability of the sampled state *before* cladogenesis
-        size_t s = static_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->getState();
+        size_t s = assume_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->getState();
         lnP += log( state_probs[s]/sum );
     }
 
@@ -645,9 +646,9 @@ void RevBayesCore::BiogeographicNodeRejectionSampleProposal<charType>::preparePr
     storedRightState.resize(num_sites,0);
     for (size_t site_index = 0; site_index < num_sites; ++site_index)
     {
-        size_t desSA = static_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->getState();
-        size_t srcS1 = static_cast<CharacterEventDiscrete*>(leftParentState[site_index])->getState();
-        size_t srcS2 = static_cast<CharacterEventDiscrete*>(rightParentState[site_index])->getState();
+        size_t desSA = assume_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->getState();
+        size_t srcS1 = assume_cast<CharacterEventDiscrete*>(leftParentState[site_index])->getState();
+        size_t srcS2 = assume_cast<CharacterEventDiscrete*>(rightParentState[site_index])->getState();
         storedNodeState[site_index] = desSA;
         storedLeftState[site_index] = srcS1;
         storedRightState[site_index] = srcS2;
@@ -662,7 +663,7 @@ void RevBayesCore::BiogeographicNodeRejectionSampleProposal<charType>::preparePr
         const std::vector<CharacterEvent*>& subrootState = c->getHistory(*node).getParentCharacters();
         for (size_t site_index = 0; site_index < num_sites; ++site_index)
         {
-            size_t s = static_cast<CharacterEventDiscrete*>(subrootState[site_index])->getState();
+            size_t s = assume_cast<CharacterEventDiscrete*>(subrootState[site_index])->getState();
             storedSubrootState[site_index] = s;
         }
     }
@@ -771,7 +772,7 @@ double RevBayesCore::BiogeographicNodeRejectionSampleProposal<charType>::sampleN
                 ++s;
             }
 //            size_t old_s = static_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->getState();
-            static_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->setState(s);
+            assume_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->setState(s);
         }
     }
 
@@ -779,9 +780,9 @@ double RevBayesCore::BiogeographicNodeRejectionSampleProposal<charType>::sampleN
     for (it_s = sampledCharacters.begin(); it_s != sampledCharacters.end(); it_s++)
     {
         size_t site_index = *it_s;
-        size_t ancS  = static_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->getState();
-        size_t desS1 = static_cast<CharacterEventDiscrete*>(leftChildState[site_index])->getState();
-        size_t desS2 = static_cast<CharacterEventDiscrete*>(rightChildState[site_index])->getState();
+        size_t ancS  = assume_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->getState();
+        size_t desS1 = assume_cast<CharacterEventDiscrete*>(leftChildState[site_index])->getState();
+        size_t desS2 = assume_cast<CharacterEventDiscrete*>(rightChildState[site_index])->getState();
         
         std::vector<double> state_probs(numStates,0.0);
         double sum = 0.0;
@@ -807,9 +808,9 @@ double RevBayesCore::BiogeographicNodeRejectionSampleProposal<charType>::sampleN
         
         lnP += std::log( state_probs[s] / sum );
         
-        static_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->setState(s);
-        static_cast<CharacterEventDiscrete*>(leftParentState[site_index])->setState(s);
-        static_cast<CharacterEventDiscrete*>(rightParentState[site_index])->setState(s);
+        assume_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->setState(s);
+        assume_cast<CharacterEventDiscrete*>(leftParentState[site_index])->setState(s);
+        assume_cast<CharacterEventDiscrete*>(rightParentState[site_index])->setState(s);
     }
     
     return lnP;
@@ -859,9 +860,9 @@ double RevBayesCore::BiogeographicNodeRejectionSampleProposal<charType>::sampleC
     std::vector<size_t> idx_off;
     for (size_t i = 0; i < nodeChildState.size(); i++)
     {
-        size_t s = static_cast<CharacterEventDiscrete*>(nodeChildState[i])->getState();
-        static_cast<CharacterEventDiscrete*>(leftParentState[i])->setState(s);
-        static_cast<CharacterEventDiscrete*>(rightParentState[i])->setState(s);
+        size_t s = assume_cast<CharacterEventDiscrete*>(nodeChildState[i])->getState();
+        assume_cast<CharacterEventDiscrete*>(leftParentState[i])->setState(s);
+        assume_cast<CharacterEventDiscrete*>(rightParentState[i])->setState(s);
         if (s == 1)
         {
             idx_on.push_back(i);
@@ -926,26 +927,26 @@ double RevBayesCore::BiogeographicNodeRejectionSampleProposal<charType>::sampleC
             // set all right-parent nodes to zero
             for (size_t i = 0; i < idx_on.size(); i++) {
                 size_t j = idx_on[i];
-                static_cast<CharacterEventDiscrete*>(rightParentState[j])->setState(0);
+                assume_cast<CharacterEventDiscrete*>(rightParentState[j])->setState(0);
             }
             // set the sampled right-parent nodes to one
             for (std::vector<size_t>::iterator it = bud_char_idx.begin(); it != bud_char_idx.end(); it++)
             {
                 size_t j = idx_on[*it];
-                static_cast<CharacterEventDiscrete*>(rightParentState[j])->setState(1);
+                assume_cast<CharacterEventDiscrete*>(rightParentState[j])->setState(1);
             }
         }
         else {
             // set all left-parent nodes to zero
             for (size_t i = 0; i < idx_on.size(); i++) {
                 size_t j = idx_on[i];
-                static_cast<CharacterEventDiscrete*>(leftParentState[j])->setState(0);
+                assume_cast<CharacterEventDiscrete*>(leftParentState[j])->setState(0);
             }
             // set the sampled left-parent nodes to one
             for (std::vector<size_t>::iterator it = bud_char_idx.begin(); it != bud_char_idx.end(); it++)
             {
                 size_t j = idx_on[*it];
-                static_cast<CharacterEventDiscrete*>(leftParentState[j])->setState(1);
+                assume_cast<CharacterEventDiscrete*>(leftParentState[j])->setState(1);
             }
         }
         
@@ -964,11 +965,11 @@ double RevBayesCore::BiogeographicNodeRejectionSampleProposal<charType>::sampleC
             size_t j = idx_on[i];
 
             if (n_child1_on > 0) {
-                static_cast<CharacterEventDiscrete*>(leftParentState[j])->setState(0);
-                static_cast<CharacterEventDiscrete*>(rightParentState[j])->setState(1);
+                assume_cast<CharacterEventDiscrete*>(leftParentState[j])->setState(0);
+                assume_cast<CharacterEventDiscrete*>(rightParentState[j])->setState(1);
             } else {
-                static_cast<CharacterEventDiscrete*>(leftParentState[j])->setState(1);
-                static_cast<CharacterEventDiscrete*>(rightParentState[j])->setState(0);
+                assume_cast<CharacterEventDiscrete*>(leftParentState[j])->setState(1);
+                assume_cast<CharacterEventDiscrete*>(rightParentState[j])->setState(0);
             }
             
             n_child1_on -= 1;
@@ -988,17 +989,17 @@ double RevBayesCore::BiogeographicNodeRejectionSampleProposal<charType>::sampleC
         if (left_branch_is_trunk) {
             for (size_t i = 0; i < idx_on.size(); i++) {
                 size_t j = idx_on[i];
-                static_cast<CharacterEventDiscrete*>(rightParentState[j])->setState(0);
+                assume_cast<CharacterEventDiscrete*>(rightParentState[j])->setState(0);
             }
-            static_cast<CharacterEventDiscrete*>(rightParentState[bud_char_idx])->setState(1);
+            assume_cast<CharacterEventDiscrete*>(rightParentState[bud_char_idx])->setState(1);
             
         }
         else {
             for (size_t i = 0; i < idx_on.size(); i++) {
                 size_t j = idx_on[i];
-                static_cast<CharacterEventDiscrete*>(leftParentState[j])->setState(0);
+                assume_cast<CharacterEventDiscrete*>(leftParentState[j])->setState(0);
             }
-            static_cast<CharacterEventDiscrete*>(leftParentState[bud_char_idx])->setState(1);
+            assume_cast<CharacterEventDiscrete*>(leftParentState[bud_char_idx])->setState(1);
             
         }
         size_t n_events =  2 * (numCharacters - idx_on.size());
@@ -1169,9 +1170,9 @@ void RevBayesCore::BiogeographicNodeRejectionSampleProposal<charType>::undoPropo
         size_t srcS1 = storedLeftState[site_index];
         size_t srcS2 = storedRightState[site_index];
         
-        static_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->setState(desSA);
-        static_cast<CharacterEventDiscrete*>(leftParentState[site_index])->setState(srcS1);
-        static_cast<CharacterEventDiscrete*>(rightParentState[site_index])->setState(srcS2);
+        assume_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->setState(desSA);
+        assume_cast<CharacterEventDiscrete*>(leftParentState[site_index])->setState(srcS1);
+        assume_cast<CharacterEventDiscrete*>(rightParentState[site_index])->setState(srcS2);
     }
     
     // restore subroot state if needed
@@ -1183,7 +1184,7 @@ void RevBayesCore::BiogeographicNodeRejectionSampleProposal<charType>::undoPropo
         {
             size_t s = storedSubrootState[site_index];
 //                        std::cout << s;
-            static_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->setState(s);
+            assume_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->setState(s);
         }
 //        std::cout << "\n";
     }

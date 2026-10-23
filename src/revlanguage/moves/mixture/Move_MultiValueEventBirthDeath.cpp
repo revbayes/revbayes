@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
@@ -67,7 +68,7 @@ void Move_MultiValueEventBirthDeath::constructInternalObject( void )
     // now allocate a new random-geometric-walk move
     double w = valueForRevType<RealPos>(weight);
     RevBayesCore::TypedDagNode<RevBayesCore::MultiValueEvent>* tmp = dagNodeForRevType<MultiValueEvent>(x);
-    RevBayesCore::StochasticNode<RevBayesCore::MultiValueEvent> *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::MultiValueEvent> *>( tmp );
+    RevBayesCore::StochasticNode<RevBayesCore::MultiValueEvent> *n = assume_cast<RevBayesCore::StochasticNode<RevBayesCore::MultiValueEvent> *>( tmp );
     bool use_ac = valueForRevType<RlBoolean>(ac);
 //    bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
     bool t = false;

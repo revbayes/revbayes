@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include <cstddef>
 #include <cassert>
@@ -434,7 +435,7 @@ bool SyntaxStatement::isTrue( SyntaxElement* expr, const std::shared_ptr<Environ
     else
     {
         RevObject *tempObject = temp->getRevObject().convertTo( RlBoolean::getClassTypeSpec() );
-        RlBoolean* tempBool = static_cast<RlBoolean*>( tempObject );
+        RlBoolean* tempBool = assume_cast<RlBoolean*>( tempObject );
         bool     retValue = tempBool->getValue();
         
         delete tempBool;
