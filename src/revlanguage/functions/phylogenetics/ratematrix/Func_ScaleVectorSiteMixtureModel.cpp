@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "Func_ScaleVectorSiteMixtureModel.h"
 
 #include "RealPos.h"
@@ -85,16 +86,16 @@ Func_ScaleVectorSiteMixtureModel* Func_ScaleVectorSiteMixtureModel::clone( void 
 
 Core::TypedFunction< Core::RbVector<Core::SiteMixtureModel> >* Func_ScaleVectorSiteMixtureModel::createFunction( void ) const
 {
-    Core::TypedDagNode< Core::RbVector<double> >* rates = dynamic_cast<const ModelVector<RealPos> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    Core::TypedDagNode< Core::RbVector<double> >* rates = dagNodeForRevType<ModelVector<RealPos>>(this->args[1].getVariable());
 
     if ( this->args[0].getVariable()->getRevObject().isType( ModelVector<SiteMixtureModel>::getClassTypeSpec() ) )
     {
-	Core::TypedDagNode< Core::RbVector<Core::SiteMixtureModel> >* models = dynamic_cast<const ModelVector<SiteMixtureModel> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+	Core::TypedDagNode< Core::RbVector<Core::SiteMixtureModel> >* models = dagNodeForRevType<ModelVector<SiteMixtureModel>>(this->args[0].getVariable());
 	return Core::generic_function_ptr< Core::RbVector<Core::SiteMixtureModel> >( ScaleVectorSiteMixtureModels, models, rates );
     }
     else if (this->args[0].getVariable()->getRevObject().isType( SiteMixtureModel::getClassTypeSpec() ) )
     {
-	Core::TypedDagNode< Core::SiteMixtureModel >* model = dynamic_cast<const SiteMixtureModel &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+	Core::TypedDagNode< Core::SiteMixtureModel >* model = dagNodeForRevType<SiteMixtureModel>(this->args[0].getVariable());
 	return Core::generic_function_ptr< Core::RbVector<Core::SiteMixtureModel> >( ScaleVectorSiteMixtureModel, model, rates );
     }
     else

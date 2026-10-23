@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cmath>
 #include <cstddef>
 #include <ostream>
@@ -65,16 +66,16 @@ RevBayesCore::WishartDistribution* Dist_wishart::createDistribution( void ) cons
      */
     if (kappa != NULL)
     {
-        ka = static_cast<const RealPos&>( kappa->getRevObject() ).getDagNode();
+        ka = dagNodeForRevType<RealPos>(kappa);
     }
     
-    RevBayesCore::TypedDagNode<std::int64_t>* deg = static_cast<const Natural &>( df->getRevObject()).getDagNode();
+    RevBayesCore::TypedDagNode<std::int64_t>* deg = dagNodeForRevType<Natural>(df);
 
     RevBayesCore::TypedDagNode<std::int64_t>* dm = NULL;
 //    int dm = -1;
     if (dim != NULL)
     {
-        dm = static_cast<const Natural &>( dim->getRevObject()).getDagNode();
+        dm = dagNodeForRevType<Natural>(dim);
 //        dm = static_cast<const Natural &>( dim->getValue()).getValue();
     }
     RevBayesCore::WishartDistribution* w    =  NULL;

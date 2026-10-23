@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <algorithm>
 #include <functional>
@@ -67,37 +68,37 @@ void Mcmcmc::constructInternalObject( void )
     // we free the memory first
     delete value;
     
-    const RevBayesCore::Model&                              mdl     = static_cast<const Model &>( model->getRevObject() ).getValue();
-    const WorkspaceVector<Monitor> &                        ws_vec_mntr = static_cast<const WorkspaceVector<Monitor> &>( monitors->getRevObject() );
+    const RevBayesCore::Model&                              mdl     = valueForRevType<Model>(model);
+    const WorkspaceVector<Monitor> &                        ws_vec_mntr = objectForRevType<WorkspaceVector<Monitor>>(monitors);
     RevBayesCore::RbVector<RevBayesCore::Monitor>           mntr;
     for ( size_t i = 0; i < ws_vec_mntr.size(); ++i )
     {
         mntr.push_back( ws_vec_mntr[i].getValue() );
     }
-    const WorkspaceVector<Move>&                            ws_vec_mvs = static_cast<const WorkspaceVector<Move> &>( moves->getRevObject() );
+    const WorkspaceVector<Move>&                            ws_vec_mvs = objectForRevType<WorkspaceVector<Move>>(moves);
     RevBayesCore::RbVector<RevBayesCore::Move>              mvs;
     for ( size_t i = 0; i < ws_vec_mvs.size(); ++i )
     {
         mvs.push_back( ws_vec_mvs[i].getValue() );
     }
-    const std::string &                                     sched   = static_cast<const RlString &>( moveschedule->getRevObject() ).getValue();
-    int                                                     nchains = (int)static_cast<const Natural &>( num_chains->getRevObject() ).getValue();
-    int                                                     si      = (int)static_cast<const Natural &>( swap_interval->getRevObject() ).getValue();
-    double                                                  delta   = static_cast<const RealPos &>( delta_heat->getRevObject() ).getValue();
-    int                                                     nreps   = (int)static_cast<const Natural &>( num_runs->getRevObject() ).getValue();
-    const std::string &                                     comb    = static_cast<const RlString &>( combine_traces->getRevObject() ).getValue();
-    int                                                     ntries  = (int)static_cast<const Natural &>( num_init_attempts->getRevObject() ).getValue();
+    const std::string &                                     sched   = valueForRevType<RlString>(moveschedule);
+    int                                                     nchains = (int)valueForRevType<Natural>(num_chains);
+    int                                                     si      = (int)valueForRevType<Natural>(swap_interval);
+    double                                                  delta   = valueForRevType<RealPos>(delta_heat);
+    int                                                     nreps   = (int)valueForRevType<Natural>(num_runs);
+    const std::string &                                     comb    = valueForRevType<RlString>(combine_traces);
+    int                                                     ntries  = (int)valueForRevType<Natural>(num_init_attempts);
     
-    bool                                                    th      = static_cast<const RlBoolean &>( tune_heat->getRevObject() ).getValue();
-    double                                                  tht     = static_cast<const Probability &>( tune_heat_target->getRevObject() ).getValue();
-    const std::string &                                     sm      = static_cast<const RlString &>( swap_method->getRevObject() ).getValue();
-    const std::string &                                     smo     = static_cast<const RlString &>( swap_mode->getRevObject() ).getValue();
+    bool                                                    th      = valueForRevType<RlBoolean>(tune_heat);
+    double                                                  tht     = valueForRevType<Probability>(tune_heat_target);
+    const std::string &                                     sm      = valueForRevType<RlString>(swap_method);
+    const std::string &                                     smo     = valueForRevType<RlString>(swap_mode);
     
     RevBayesCore::Mcmcmc *m = new RevBayesCore::Mcmcmc(mdl, mvs, mntr, sched, nchains, si, delta, ntries, th, tht, sm, smo);
     
     if (heat_temps->getRevObject() != RevNullObject::getInstance())
     {
-        std::vector<double>                                 ht      = static_cast<const ModelVector<Probability>&>( heat_temps->getRevObject() ).getValue();
+        std::vector<double>                                 ht      = valueForRevType<ModelVector<Probability>>(heat_temps);
         
         if(ht.size() != nchains)
         {
@@ -119,7 +120,7 @@ void Mcmcmc::constructInternalObject( void )
         std::int64_t si2 = 0;
         if (swap_interval2->getRevObject() != RevNullObject::getInstance())
         {
-            si2 = static_cast<const Natural &>( swap_interval2->getRevObject() ).getValue();
+            si2 = valueForRevType<Natural>(swap_interval2);
         }
         else
         {

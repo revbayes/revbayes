@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <iosfwd>
 #include <vector>
@@ -59,17 +60,17 @@ Func_assembleContinuousMRF* Func_assembleContinuousMRF::clone( void ) const
 RevBayesCore::TypedFunction<RevBayesCore::RbVector<double> >* Func_assembleContinuousMRF::createFunction( void ) const
 {
 
-    RevBayesCore::TypedDagNode<double>* theta1                              = static_cast<const Real&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* increments = static_cast<const ModelVector<Real> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    bool theta1_is_log_scale                                                = static_cast<const RlBoolean &>( args[4].getVariable()->getRevObject() ).getValue();
-    size_t order                                                            = static_cast<const Natural &>( args[5].getVariable()->getRevObject() ).getValue();
+    RevBayesCore::TypedDagNode<double>* theta1                              = dagNodeForRevType<Real>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* increments = dagNodeForRevType<ModelVector<Real>>(this->args[1].getVariable());
+    bool theta1_is_log_scale                                                = valueForRevType<RlBoolean>(args[4].getVariable());
+    size_t order                                                            = valueForRevType<Natural>(args[5].getVariable());
 
     
-    RevBayesCore::TypedDagNode<double>* beta                                = static_cast<const Real &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* beta                                = dagNodeForRevType<Real>(this->args[2].getVariable());
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* predictors = NULL;
     if (this->args[3].getVariable()->getRevObject() != RevNullObject::getInstance())
     {
-        predictors = static_cast<const ModelVector<Real> &>( this->args[3].getVariable()->getRevObject() ).getDagNode();
+        predictors = dagNodeForRevType<ModelVector<Real>>(this->args[3].getVariable());
     }
     
     if (order == 1)

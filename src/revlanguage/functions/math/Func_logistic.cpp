@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -46,7 +47,7 @@ Func_logistic* Func_logistic::clone( void ) const
 RevBayesCore::TypedFunction<double>* Func_logistic::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<double>* x = static_cast<const Real&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* x = dagNodeForRevType<Real>(this->args[0].getVariable());
     RevBayesCore::LogisticFunction* f = new RevBayesCore::LogisticFunction( x );
     
     return f;

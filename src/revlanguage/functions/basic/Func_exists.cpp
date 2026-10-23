@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <iosfwd>
 #include <vector>
 
@@ -40,7 +41,7 @@ Func_exists* Func_exists::clone( void ) const
 RevPtr<RevVariable> Func_exists::execute( void )
 {
     
-    const std::string& name = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
+    const std::string& name = valueForRevType<RlString>(args[0].getVariable());
     
     bool exists = Workspace::userWorkspace().existsVariable( name );
     

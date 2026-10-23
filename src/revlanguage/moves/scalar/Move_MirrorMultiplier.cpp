@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -69,18 +70,18 @@ void Move_MirrorMultiplier::constructInternalObject( void )
     RevBayesCore::Proposal *p = NULL;
 
     // now allocate a new sliding move
-    double d  = static_cast<const RealPos &>( sigma->getRevObject() ).getValue();
-    double w  = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    double r  = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
-    double m0 = static_cast<const Real &>( mu0->getRevObject() ).getValue();
-    int n0    = static_cast<const Natural &>( waitBeforeLearning->getRevObject() ).getValue();
-    int c0    = static_cast<const Natural &>( waitBeforeUsing->getRevObject() ).getValue();
-    int m     = static_cast<const Natural &>( maxUpdates->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<double>* tmp = static_cast<const Real &>( x->getRevObject() ).getDagNode();
+    double d  = valueForRevType<RealPos>(sigma);
+    double w  = valueForRevType<RealPos>(weight);
+    double r  = valueForRevType<Probability>(tuneTarget);
+    double m0 = valueForRevType<Real>(mu0);
+    int n0    = valueForRevType<Natural>(waitBeforeLearning);
+    int c0    = valueForRevType<Natural>(waitBeforeUsing);
+    int m     = valueForRevType<Natural>(maxUpdates);
+    RevBayesCore::TypedDagNode<double>* tmp = dagNodeForRevType<Real>(x);
     RevBayesCore::StochasticNode<double> *n = dynamic_cast<RevBayesCore::StochasticNode<double> *>( tmp );
-    bool a = static_cast<const RlBoolean &>( adaptOnly->getRevObject() ).getValue();
+    bool a = valueForRevType<RlBoolean>(adaptOnly);
     p = new RevBayesCore::MirrorMultiplierProposal(n,d,m0,n0,c0,m,a,r);
-    bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    bool t = valueForRevType<RlBoolean>(tune);
 
     // finally create the internal move object
     //    value = new RevBayesCore::Move_MirrorMultiplier(n, d, t, w);

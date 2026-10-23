@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cmath>
 #include <cstddef>
 #include <iosfwd>
@@ -77,12 +78,12 @@ RevBayesCore::EmpiricalDistribution<RevBayesCore::Tree>* Dist_empiricalTree::cre
     // get the parameters
     
     // tree trace
-    RevBayesCore::TraceTree* tt = &static_cast<const TraceTree &>( trace->getRevObject() ).getValue();
+    RevBayesCore::TraceTree* tt = &valueForRevType<TraceTree>(trace);
 
     RevBayesCore::Trace<double>* nt = NULL;
     if( density->getRevObject() != RevNullObject::getInstance() )
     {
-        nt = &static_cast<const Trace &>( density->getRevObject() ).getValue();
+        nt = &valueForRevType<Trace>(density);
     }
 
     // create the internal distribution object

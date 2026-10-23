@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "Func_dNdSRateMatrix.h"
 #include "CppCodonFuncs.h"
 
@@ -48,8 +49,8 @@ Func_dNdSRateMatrix* Func_dNdSRateMatrix::clone( void ) const
 
 RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_dNdSRateMatrix::createFunction( void ) const
 {
-    RevBayesCore::TypedDagNode< RevBayesCore::RateGenerator >* nuc_q = static_cast<const RateGenerator &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< double >* omega = static_cast<const RealPos &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::RateGenerator >* nuc_q = dagNodeForRevType<RateGenerator>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode< double >* omega = dagNodeForRevType<RealPos>(this->args[1].getVariable());
 
     return RevBayesCore::generic_function_ptr< RevBayesCore::RateGenerator >( dNdSFunc, omega, nuc_q );
 }

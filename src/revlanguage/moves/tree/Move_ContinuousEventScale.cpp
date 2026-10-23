@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <iosfwd>
 #include <string>
 
@@ -66,13 +67,13 @@ void Move_ContinuousEventScale::constructInternalObject( void )
     delete value;
     
     // now allocate a new scaling move
-    double l = static_cast<const RealPos &>( lambda->getRevObject() ).getValue();
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
+    double l = valueForRevType<RealPos>(lambda);
+    double w = valueForRevType<RealPos>(weight);
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = dagNodeForRevType<TimeTree>(tree);
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
     
-    bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    bool t = valueForRevType<RlBoolean>(tune);
+    double tt = valueForRevType<Probability>(tuneTarget);
     
     RevBayesCore::Proposal *p = new RevBayesCore::ContinuousEventScaleProposal(n, l);
     p->setTargetAcceptanceRate(tt);

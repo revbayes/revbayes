@@ -1,4 +1,5 @@
 
+#include "RevTypeUtilities.h"
 #include <algorithm>
 #include <string>
 #include <ostream>
@@ -48,10 +49,10 @@ void Mntr_File::constructInternalObject( void )
     delete value;
     
     // now allocate a new sliding move
-    const std::string& fn  = static_cast<const RlString &>( filename->getRevObject()  ).getValue();
-    const std::string& sep = static_cast<const RlString &>( separator->getRevObject() ).getValue();
-    const std::string& fmt = static_cast<const RlString &>( format->getRevObject()    ).getValue();
-    unsigned int g = (int)static_cast<const IntegerPos &>( printgen->getRevObject() ).getValue();
+    const std::string& fn  = valueForRevType<RlString>(filename);
+    const std::string& sep = valueForRevType<RlString>(separator);
+    const std::string& fmt = valueForRevType<RlString>(format);
+    unsigned int g = (int)valueForRevType<IntegerPos>(printgen);
     
     // sort, remove duplicates, the create monitor vector
     vars.erase( unique( vars.begin(), vars.end() ), vars.end() );
@@ -62,11 +63,11 @@ void Mntr_File::constructInternalObject( void )
         RevBayesCore::DagNode* node = (*i)->getRevObject().getDagNode();
         n.push_back( node );
     }
-    bool pp = static_cast<const RlBoolean &>( posterior->getRevObject() ).getValue();
-    bool l = static_cast<const RlBoolean &>( likelihood->getRevObject() ).getValue();
-    bool pr = static_cast<const RlBoolean &>( prior->getRevObject() ).getValue();
-    bool app = static_cast<const RlBoolean &>( append->getRevObject() ).getValue();
-    bool wv = static_cast<const RlBoolean &>( version->getRevObject() ).getValue();
+    bool pp = valueForRevType<RlBoolean>(posterior);
+    bool l = valueForRevType<RlBoolean>(likelihood);
+    bool pr = valueForRevType<RlBoolean>(prior);
+    bool app = valueForRevType<RlBoolean>(append);
+    bool wv = valueForRevType<RlBoolean>(version);
 
     SampleFormat Format = (fmt == "json") ? SampleFormat(JSONFormat()) : SampleFormat(SeparatorFormat(sep));
     value = new RevBayesCore::VariableMonitor(n, (std::uint64_t)g, fn, Format, pp, l, pr, app, wv);

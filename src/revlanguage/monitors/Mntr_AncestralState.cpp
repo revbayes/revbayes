@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "Mntr_AncestralState.h"
 
 #include <string>
@@ -47,14 +48,14 @@ Mntr_AncestralState* Mntr_AncestralState::clone(void) const
 
 void Mntr_AncestralState::constructInternalObject( void )
 {
-    const std::string&                  fn      = static_cast<const RlString &>( filename->getRevObject() ).getValue();
-    const std::string&                  sep     = static_cast<const RlString &>( separator->getRevObject() ).getValue();
-    unsigned int                        g       = (int)static_cast<const IntegerPos  &>( printgen->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* t = static_cast<const Tree &>( tree->getRevObject() ).getDagNode();
+    const std::string&                  fn      = valueForRevType<RlString>(filename);
+    const std::string&                  sep     = valueForRevType<RlString>(separator);
+    unsigned int                        g       = (int)valueForRevType<IntegerPos>(printgen);
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* t = dagNodeForRevType<Tree>(tree);
     RevBayesCore::DagNode*				ch		= ctmc->getRevObject().getDagNode();
-    bool                                ap      = static_cast<const RlBoolean &>( append->getRevObject() ).getValue();
-    bool                                wv      = static_cast<const RlBoolean &>( version->getRevObject() ).getValue();
-    std::string                         character_type = static_cast<const RlString &>( monitorType->getRevObject() ).getValue();
+    bool                                ap      = valueForRevType<RlBoolean>(append);
+    bool                                wv      = valueForRevType<RlBoolean>(version);
+    std::string                         character_type = valueForRevType<RlString>(monitorType);
     
     auto make_monitor = [&]<typename T>()
     {

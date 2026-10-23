@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "Func__mod.h"
 
 #include "ArgumentRule.h"
@@ -29,8 +30,8 @@ Func__mod* Func__mod::clone( void ) const
 RevBayesCore::TypedFunction<std::int64_t>* Func__mod::createFunction( void ) const
 {
     
-    const RevBayesCore::TypedDagNode<std::int64_t>* leftVal = static_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getDagNode();
-    const RevBayesCore::TypedDagNode<std::int64_t>* rightVal = static_cast<const Natural &>( args[1].getVariable()->getRevObject() ).getDagNode();
+    const RevBayesCore::TypedDagNode<std::int64_t>* leftVal = dagNodeForRevType<Natural>(args[0].getVariable());
+    const RevBayesCore::TypedDagNode<std::int64_t>* rightVal = dagNodeForRevType<Natural>(args[1].getVariable());
     
     RevBayesCore::ModuloFunction *func = new RevBayesCore::ModuloFunction( leftVal, rightVal );
     

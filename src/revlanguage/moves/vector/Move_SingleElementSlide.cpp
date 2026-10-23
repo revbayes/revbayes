@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -56,9 +57,9 @@ void Move_SingleElementSlide::constructInternalObject( void )
     delete value;
     
     // now allocate a new sliding move
-    double l = static_cast<const RealPos &>( lambda->getRevObject() ).getValue();
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp = static_cast<const ModelVector<Real> &>( v->getRevObject() ).getDagNode();
+    double l = valueForRevType<RealPos>(lambda);
+    double w = valueForRevType<RealPos>(weight);
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp = dagNodeForRevType<ModelVector<Real>>(v);
     std::vector<const RevBayesCore::DagNode*> p = tmp->getParents();
     std::vector< RevBayesCore::StochasticNode<double> *> n;
     for (std::vector<const RevBayesCore::DagNode*>::const_iterator it = p.begin(); it != p.end(); ++it)
@@ -74,8 +75,8 @@ void Move_SingleElementSlide::constructInternalObject( void )
         }
     }
     
-    bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    bool t = valueForRevType<RlBoolean>(tune);
+    double tt = valueForRevType<Probability>(tuneTarget);
     
     RevBayesCore::Proposal *prop = new RevBayesCore::SingleElementSlideProposal(n, l);
     prop->setTargetAcceptanceRate(tt);

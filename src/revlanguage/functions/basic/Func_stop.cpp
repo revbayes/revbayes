@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <fstream>
 #include <vector>
@@ -41,8 +42,7 @@ Func_stop* Func_stop::clone( void ) const
 /** Execute function */
 RevPtr<RevVariable> Func_stop::execute( void )
 {
-    const RevObject& out = this->args[0].getVariable()->getRevObject();
-    const RlString& msgObj = static_cast<const RlString&>( out );
+    const RlString& msgObj = objectForRevType<RlString>(this->args[0].getVariable());
     
     std::string errorMessage = msgObj.getValue();
     

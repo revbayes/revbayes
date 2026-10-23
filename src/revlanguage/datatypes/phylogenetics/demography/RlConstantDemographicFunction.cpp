@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <ostream>
 #include <string>
 
@@ -43,7 +44,7 @@ void ConstantDemographicFunction::constructInternalObject( void )
     delete value;
     
     // now allocate space for a new ConstantDemographicFunction object
-    RevBayesCore::TypedDagNode<double> *th = static_cast<const RealPos &>( theta->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double> *th = dagNodeForRevType<RealPos>(theta);
 
     value = new RevBayesCore::ConstantDemographicFunction( th );
 }

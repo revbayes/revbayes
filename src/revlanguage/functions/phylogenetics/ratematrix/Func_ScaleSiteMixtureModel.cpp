@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "Func_ScaleSiteMixtureModel.h"
 
 #include "RealPos.h"
@@ -63,9 +64,9 @@ Func_ScaleSiteMixtureModel* Func_ScaleSiteMixtureModel::clone( void ) const
 
 Core::TypedFunction< Core::SiteMixtureModel >* Func_ScaleSiteMixtureModel::createFunction( void ) const
 {
-    Core::TypedDagNode< Core::SiteMixtureModel >* model = static_cast<const SiteMixtureModel &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    Core::TypedDagNode< Core::SiteMixtureModel >* model = dagNodeForRevType<SiteMixtureModel>(this->args[0].getVariable());
 
-    Core::TypedDagNode< double >* factor = static_cast<const RealPos &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    Core::TypedDagNode< double >* factor = dagNodeForRevType<RealPos>(this->args[1].getVariable());
 
 
     return Core::generic_function_ptr< Core::SiteMixtureModel >( ScaleSiteMixtureModel, model, factor );

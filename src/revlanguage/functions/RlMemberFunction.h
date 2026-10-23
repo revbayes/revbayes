@@ -1,6 +1,7 @@
 #ifndef RlMemberFunction_H
 #define RlMemberFunction_H
 
+#include "RevTypeUtilities.h"
 #include "RlMemberMethod.h"
 #include "RlTypedFunction.h"
 
@@ -194,7 +195,7 @@ void RevLanguage::MemberFunction<memberObjectType, retType>::setMemberObject( co
     
     // we do not own the object itself because one object can have multiple member functions
     object = obj;
-    the_member_object = static_cast< const memberObjectType *>( &(obj->getRevObject()) );
+    the_member_object = std::addressof(objectForRevType<memberObjectType>(obj));
 }
 
 

@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "Func_FreeK.h"
 
 #include "FreeKRateMatrixFunction.h"
@@ -47,18 +48,18 @@ Func_FreeK* Func_FreeK::clone( void ) const
 RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_FreeK::createFunction( void ) const
 {
     
-    bool rescale = static_cast<const RlBoolean &>( this->args[1].getVariable()->getRevObject() ).getDagNode()->getValue();
-    const std::string method = static_cast<const RlString &>( this->args[2].getVariable()->getRevObject() ).getDagNode()->getValue();
+    bool rescale = dagNodeForRevType<RlBoolean>(this->args[1].getVariable())->getValue();
+    const std::string method = dagNodeForRevType<RlString>(this->args[2].getVariable())->getValue();
     // flat transition rates
     if ( this->args[0].getVariable()->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
     {
-        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* tr = static_cast<const ModelVector<RealPos> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* tr = dagNodeForRevType<ModelVector<RealPos>>(this->args[0].getVariable());
         RevBayesCore::FreeKRateMatrixFunction* f = new RevBayesCore::FreeKRateMatrixFunction( tr, rescale, method );
         return f;
     }
     else
     {
-        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* tr = static_cast<const ModelVector<ModelVector<RealPos> > &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* tr = dagNodeForRevType<ModelVector<ModelVector<RealPos> >>(this->args[0].getVariable());
         RevBayesCore::FreeKRateMatrixFunction* f = new RevBayesCore::FreeKRateMatrixFunction( tr, rescale, method );
         return f;
     }

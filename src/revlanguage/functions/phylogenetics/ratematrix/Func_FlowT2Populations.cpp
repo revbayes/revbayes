@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "Func_FlowT2Populations.h"
 #include "FlowT2PopulationsRateMatrixFunction.h"
 #include "RateMatrix_FlowT2Populations.h"
@@ -35,10 +36,10 @@ Func_FlowT2Populations* Func_FlowT2Populations::clone( void ) const
 RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_FlowT2Populations::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* n = static_cast<const ModelVector<Real>&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* m = static_cast<const ModelVector<Real>&>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* l = static_cast<const ModelVector<Real>&>( this->args[2].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* s = static_cast<const ModelVector<Real>&>( this->args[3].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* n = dagNodeForRevType<ModelVector<Real>>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* m = dagNodeForRevType<ModelVector<Real>>(this->args[1].getVariable());
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* l = dagNodeForRevType<ModelVector<Real>>(this->args[2].getVariable());
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* s = dagNodeForRevType<ModelVector<Real>>(this->args[3].getVariable());
 
     if ( n->getValue().size() != 2 )
     {
