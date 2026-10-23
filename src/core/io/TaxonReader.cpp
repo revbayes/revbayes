@@ -183,7 +183,10 @@ TaxonReader::TaxonReader(const std::string &fn, std::string delim) : DelimitedDa
             double min_age = parseNumericField( line[ column_map["min_age"] ], "min_age", i+1 );
             double max_age = parseNumericField( line[ column_map["max_age"] ], "max_age", i+1 );
 
-            // TimeInterval enforces the ordering of the bounds.
+            if (min_age > max_age)
+                throw RbException() << "Invalid age range for taxon '" << taxon_name << "' in '" << fn
+                                    << "', line " << i+1 << ": min_age (" << min_age
+                                    << ") exceeds max_age (" << max_age << ").";
             TimeInterval interval(min_age, max_age);
 
             if ( found == false )
