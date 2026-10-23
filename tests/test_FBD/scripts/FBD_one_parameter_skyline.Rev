@@ -51,7 +51,7 @@ moves.append( mvNodeTimeSlideUniform(fbd_tree, weight=100.0) )
 moves.append( mvNodeTimeScale(fbd_tree, weight = 200.0))
 moves.append( mvRootTimeSlideUniform(fbd_tree, origin_time, weight=50.0) )
 moves.append( mvSubtreeScale(fbd_tree, weight = 100.0))
-moves.append( mvTreeScale(fbd_tree, origin_time, weight = 100.0))
+moves.append( mvTreeScale(fbd_tree, weight = 100.0))
 
 branch_rates_morpho ~ dnExponential(lambda = 10.0)
 moves.append( mvScale(branch_rates_morpho, weight = 5.0, lambda = 0.1))
