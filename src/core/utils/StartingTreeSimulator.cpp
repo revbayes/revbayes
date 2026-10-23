@@ -68,43 +68,6 @@ Tree* StartingTreeSimulator::simulateTree( const std::vector<Taxon> &taxa, const
     for (size_t i = 0; i < my_constraints.size(); ++i)
     {
         
-        // set the ages of each of the taxa in the constraint
-        for (size_t j = 0; j < my_constraints[i].size(); ++j)
-        {
-            for (size_t k = 0; k < num_taxa; ++k)
-            {
-                if ( taxa[k].getName() == my_constraints[i].getTaxonName(j) )
-                {
-                    my_constraints[i].setTaxonAge(j, taxa[k].getAge());
-                    break;
-                }
-            }
-        }
-        
-        // set ages for optional constraints
-        if ( my_constraints[i].hasOptionalConstraints() == true )
-        {
-            std::vector<Clade> optional_constraints = my_constraints[i].getOptionalConstraints();
-            for (size_t k = 0; k < optional_constraints.size(); k++)
-            {
-                for (size_t opt_taxon_idx = 0; opt_taxon_idx < optional_constraints[k].size(); opt_taxon_idx++)
-                {
-                    for (size_t full_taxon_idx = 0; full_taxon_idx < num_taxa; full_taxon_idx++)
-                    {
-                        if ( taxa[full_taxon_idx].getName() == optional_constraints[k].getTaxonName(opt_taxon_idx) )
-                        {
-                        
-                            optional_constraints[k].setTaxonAge(opt_taxon_idx, taxa[full_taxon_idx].getAge());
-                            break;
-                        }
-                    }
-                }
-            
-            }
-        
-            my_constraints[i].setOptionalConstraints( optional_constraints );
-        } // finished with the optional constrains, if they exist
-        
         // populate sorted clades vector
         if ( my_constraints[i].size() > 1 && my_constraints[i].size() <= num_taxa )
         {
@@ -197,10 +160,12 @@ Tree* StartingTreeSimulator::simulateTree( const std::vector<Taxon> &taxa, const
         RbOrderedSet<TopologyNode*> nodes_in_clade;
         
         
+        // These singleton clades only identify existing nodes; clade equality ignores ages.
+        // Simulation uses those nodes' ages and original taxon constraints, so no ages need
+        // to be copied into the constraint members or these temporary clades.
         for (size_t k = 0; k < taxa.size(); ++k)
         {
             Clade tmp_clade = Clade( taxa[k] );
-            tmp_clade.setAge( taxa[k].getAge() );
             clades.push_back( tmp_clade );
         }
         
