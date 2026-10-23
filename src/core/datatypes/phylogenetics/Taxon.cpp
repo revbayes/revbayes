@@ -134,8 +134,7 @@ void Taxon::addOccurrence( const TimeInterval &d )
 {
     occurrences[d]++;
 
-    // Capture both effective bounds before replacement: lowering the minimum separately
-    // would also lower an implicit maximum, potentially losing an existing occurrence age.
+    // Expand the entire range to retain all previous occurrences as well as the new one.
     age_range = coveringInterval(age_range, d);
 }
 
