@@ -189,7 +189,7 @@ double FossilizedBirthDeathRangeProcess::computeLnProbabilityBDS()
             // include sampling density
             if ( dirty_psi[i] )
             {
-                std::map<TimeInterval, size_t> ages = taxa[i].getOccurrences();
+                const std::vector<std::pair<TimeInterval, size_t> > &ages = taxa[i].getOccurrences();
 
                 // if there is a range of fossil ages
                 if ( min_age != max_age )
@@ -218,7 +218,7 @@ double FossilizedBirthDeathRangeProcess::computeLnProbabilityBDS()
 
                         size_t k = 0;
                         // increase running psi total for each observation
-                        for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++,k++ )
+                        for ( std::vector<std::pair<TimeInterval, size_t> >::const_iterator Fi = ages.begin(); Fi != ages.end(); Fi++,k++ )
                         {
                             if ( Fi->first.getMin() < t_0 && Fi->first.getMax() > times[j] )
                             {
@@ -242,7 +242,7 @@ double FossilizedBirthDeathRangeProcess::computeLnProbabilityBDS()
 
                     size_t k = 0;
                     // compute product of psi totals
-                    for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++,k++ )
+                    for ( std::vector<std::pair<TimeInterval, size_t> >::const_iterator Fi = ages.begin(); Fi != ages.end(); Fi++,k++ )
                     {
                         count += Fi->second;
 

@@ -170,8 +170,8 @@ AbstractFossilizedBirthDeathRangeProcess::AbstractFossilizedBirthDeathRangeProce
 
     for ( size_t i = 0; i < taxa.size(); i++ )
     {
-        std::map<TimeInterval, size_t> ages = taxa[i].getOccurrences();
-        for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++ )
+        const std::vector<std::pair<TimeInterval, size_t> > &ages = taxa[i].getOccurrences();
+        for ( std::vector<std::pair<TimeInterval, size_t> >::const_iterator Fi = ages.begin(); Fi != ages.end(); Fi++ )
         {
             // find the oldest minimum age
             o_i[i] = std::max(Fi->first.getMin(), o_i[i]);
@@ -280,7 +280,7 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
 
             if ( dirty_psi[i] || force )
             {
-                std::map<TimeInterval, size_t> ages = taxa[i].getOccurrences();
+                const std::vector<std::pair<TimeInterval, size_t> > &ages = taxa[i].getOccurrences();
 
                 // if there is a range of fossil ages
                 if ( min_age != max_age )
@@ -308,7 +308,7 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
 
                         size_t k = 0;
                         // increase running psi total for each observation
-                        for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++,k++ )
+                        for ( std::vector<std::pair<TimeInterval, size_t> >::const_iterator Fi = ages.begin(); Fi != ages.end(); Fi++,k++ )
                         {
                             if ( Fi->first.getMin() < t_0 && Fi->first.getMax() > times[j] )
                             {
@@ -333,7 +333,7 @@ double AbstractFossilizedBirthDeathRangeProcess::computeLnProbabilityRanges( boo
 
                     size_t k = 0;
                     // compute factors of the sum over each possible oldest/youngest observation
-                    for ( std::map<TimeInterval, size_t>::iterator Fi = ages.begin(); Fi != ages.end(); Fi++,k++ )
+                    for ( std::vector<std::pair<TimeInterval, size_t> >::const_iterator Fi = ages.begin(); Fi != ages.end(); Fi++,k++ )
                     {
                         count += Fi->second;
 
