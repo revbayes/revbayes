@@ -3,7 +3,7 @@
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "Real.h"
-#include "RlSimplex.h"
+#include "Probability.h"
 #include "StochasticNode.h"
 #include "TypedDistribution.h"
 #include "Transforms.h"
@@ -81,7 +81,7 @@ const RevLanguage::MemberRules& RevLanguage::Transform_Vector_Log::getParameterR
     if ( rules_set == false )
     {
 	// Should we add 
-	std::vector<TypeSpec> distTypes = { TypedDistribution<ModelVector<RealPos>>::getClassTypeSpec(), TypedDistribution<ModelVector<Probability>>::getClassTypeSpec(), TypedDistribution<Simplex>::getClassTypeSpec() };
+	std::vector<TypeSpec> distTypes = { TypedDistribution<ModelVector<RealPos>>::getClassTypeSpec(), TypedDistribution<ModelVector<Probability>>::getClassTypeSpec() };
 
         dist_member_rules.push_back( new ArgumentRule( "baseDistribution", distTypes, "The distribution to be transformed.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
 
