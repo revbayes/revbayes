@@ -109,11 +109,10 @@ void TimeInterval::setMax(double s)
 }
 
 
-// Test inclusive effective bounds, preserving the existing comparison behavior for NaN points.
-// Do not rewrite as positive comparisons: that would reject NaNs during this interface refactor.
+// Both inclusive comparisons must hold: an unknown (NaN) age is not in the interval.
 bool TimeInterval::contains(double age) const
 {
-    return not (age < getMin() or age > getMax());
+    return age >= getMin() and age <= getMax();
 }
 
 
