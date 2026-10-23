@@ -159,6 +159,10 @@ double RevBayesCore::AnalyticalMixtureDistribution<mixtureType>::computeLnProbab
         }
     }
     
+    // If every component has zero density, the mixture does too. Subtracting -infinity
+    // from itself in the log-sum below would instead turn an impossible value into NaN.
+    if (max_prob == RbConstants::Double::neginf) return max_prob;
+
     // safe summation of exp-transformed values
     double sum_probs = 0.0;
     for (size_t i=0; i<base_distributions.size(); ++i)
