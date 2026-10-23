@@ -208,13 +208,14 @@ double AbstractRootedTreeDistribution::computeLnProbability( void )
 
                 }
                 auto taxon = the_node.getTaxon();
-                if(taxon.getName() != "" && taxon.getMinAge() != taxon.getMaxAge())
+                const auto& interval = taxon.getAgeRange();
+                if (taxon.getName() != "" and not interval.zeroWidth())
                 {
-                    if(the_node.getAge() < taxon.getMinAge() || the_node.getAge() > taxon.getMaxAge())
+                    if (not interval.contains(the_node.getAge()))
                     {
                         std::cerr << "Age of taxon " << taxon.getName() << " incompatible with age range";
                         return withReason(Double::neginf)<< "Pr(tree)=0: taxon " << taxon.getName() <<" has age "<<the_node.getAge()
-                                                         <<" outside of age range ["<<taxon.getMinAge()<<", "<<taxon.getMaxAge()<<"]";
+                                                         <<" outside of age range ["<<taxon.getMinAge()<<", "<<interval.getMax()<<"]";
                     }
                 }
             }

@@ -240,7 +240,7 @@ TaxonReader::TaxonReader(const std::string &fn, std::string delim) : DelimitedDa
             std::map<TimeInterval, size_t> occs = taxon.getOccurrences();
             for ( std::map<TimeInterval, size_t>::const_iterator it = occs.begin(); it != occs.end(); it++ )
             {
-                if ( it->first.getMin() == 0.0 && it->first.getMax() == 0.0 )
+                if ( it->first.getMin() == 0.0 and it->first.zeroWidth() )
                 {
                     sampled_at_present = true;
                 }

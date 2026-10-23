@@ -2117,8 +2117,9 @@ void TopologyNode::scaleAgesFromTaxonAgesMBL(double minbl)
 
 void TopologyNode::setAge(double a, bool propagate)
 {
-    if(getTaxon().getName() != "" && getTaxon().getMinAge() != getTaxon().getMaxAge()) {
-        if(a < getTaxon().getMinAge() || a > getTaxon().getMaxAge()) {
+    const auto& interval = getTaxon().getAgeRange();
+    if (getTaxon().getName() != "" and not interval.zeroWidth()) {
+        if (not interval.contains(a)) {
             std::cerr << "Attempting to set new age of taxon " << getTaxon().getName() << " incompatible with age range" << std::endl;
 
             // NOTE: This code intentionally constructs trees with different ages for sampled-ancestors-parents and sampled-ancestor-tips.
