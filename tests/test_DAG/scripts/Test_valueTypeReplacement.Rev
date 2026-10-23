@@ -1,0 +1,24 @@
+## continue-on-error
+
+# Protect rejected type changes and subsequent graph use; cycle tests do not exercise type mismatch.
+# This test is needed while redefinition rewires existing dependents instead of rebuilding expressions.
+x ~ dnNormal(0, 1)
+x.clamp(1.25)
+y := 2*x
+x ~ dnGeometric(0.5)
+x
+y
+
+x ~ dnNormal(0, 1)
+x.clamp(2.0)
+y
+
+# A deterministic double can replace a stochastic double used by an ordinary expression.
+x := 3.0 + 1.0
+y
+
+# Ownership of a variable alone must not prevent a value-type change.
+z ~ dnNormal(0, 1)
+z ~ dnGeometric(0.5)
+z.clamp(3)
+z
