@@ -6,6 +6,7 @@
 
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
+#include "RbException.h"
 #include "TreeUtilities.h"
 #include "Cloneable.h"
 #include "StochasticNode.h"
@@ -108,6 +109,15 @@ double TreeScaleProposal::doProposal( void )
     
     // we need to work with the times
     double my_age      = node.getAge();
+
+    // rootAge represents the root coordinate, not an independent origin or stem age.
+    // Check before mutation: undo must not overwrite a different scalar with the root age.
+    if (rootAge != NULL)
+    {
+        if (rootAge->getValue() != my_age)
+            throw RbException("mvTreeScale: rootAge must equal the tree's root age; do not pass an origin age as rootAge.");
+        storedRootAge = rootAge->getValue();
+    }
     
     // now we store all necessary values
     storedAges = std::vector<double>(tau.getNumberOfNodes(), 0.0);
@@ -190,7 +200,7 @@ void TreeScaleProposal::undoProposal( void )
     
     if ( rootAge != NULL )
     {
-        rootAge->setValue( new double(node.getAge()) );
+        rootAge->setValue( new double(storedRootAge) );
     }
     
 }
