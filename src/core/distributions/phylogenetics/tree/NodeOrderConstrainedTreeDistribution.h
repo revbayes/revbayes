@@ -37,6 +37,8 @@ namespace RevBayesCore {
         virtual void                                            setValue(Tree *v, bool f=false);                                                                    //!< Set the current value, e.g. attach an observation (clamp)
 
 
+        void repairCheckpointValue(Tree& tree) override;
+
     protected:
 
         //        // virtual methods that may be overwritten, but then the derived class should call this methods

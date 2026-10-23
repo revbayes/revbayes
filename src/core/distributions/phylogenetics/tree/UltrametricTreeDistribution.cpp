@@ -789,3 +789,10 @@ void UltrametricTreeDistribution::touchSpecialization(const DagNode *affecter, b
     }
 
 }
+
+
+// Forward checkpoint repair to the tree distribution without evaluating a modified copy.
+void UltrametricTreeDistribution::repairCheckpointValue(Tree& tree)
+{
+    tree_prior->repairCheckpointValue(tree);
+}

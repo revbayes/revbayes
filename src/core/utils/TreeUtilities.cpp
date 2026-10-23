@@ -1725,7 +1725,7 @@ void RevBayesCore::TreeUtilities::setAgesRecursively(TopologyNode& node, double 
  * @param taxaToCopy vector of Taxon objects corresponding to the tips of the tree
  * @param agePrecision how many decimal places to use when checking for compatibility between the tip ages from treeToChange and taxaToCopy
  */
-Tree* RevBayesCore::TreeUtilities::startingTreeInitializer(Tree& treeToChange, std::vector<Taxon>& taxaToCopy, std::int64_t agePrecision)
+Tree* RevBayesCore::TreeUtilities::startingTreeInitializer(Tree& treeToChange, std::vector<Taxon>& taxaToCopy, std::int64_t agePrecision, bool checkAges)
 {
     // Check that the user-supplied tree contains the same number of tips as the vector of taxa
     size_t tip_num = treeToChange.getNumberOfTips();
@@ -1757,26 +1757,32 @@ Tree* RevBayesCore::TreeUtilities::startingTreeInitializer(Tree& treeToChange, s
         throw RbException("Tip names of the initial tree do not match the taxon names.");
     }
     
-    double factor = pow(10.0, agePrecision);
-    
-    // Check that the ages of the taxa in the user-supplied tree fall within their age uncertainty ranges
-    for (size_t i = 0; i < tax_num; ++i)
+    // Initial trees are validated here, but ordinary setValue() is also used to evaluate
+    // proposals through wrappers. In that path, the distribution must return zero density.
+    if (checkAges)
     {
-        // Grab the minimum and maximum ages of the i-th taxon from the taxaToCopy vector
-        double min_age = std::round(taxaToCopy[i].getMinAge() * factor) / factor;
-        double max_age = std::round(taxaToCopy[i].getMaxAge() * factor) / factor;
-        // Get the age of the tree tip of the same name
-        double tip_age = std::round(treeToChange.getTipNodeWithName( taxaToCopy[i].getName() ).getAge() * factor) / factor;
-
-        if (tip_age < min_age || tip_age > max_age)
-        {
-            std::ostringstream s;
-            s << "The age of tip '" << taxaToCopy[i].getSpeciesName() << "' in the initial tree is outside of specified bounds.";
-            throw RbException( s.str() );
-        }
-    }
+        double factor = pow(10.0, agePrecision);
     
-    // Alter the tip age values of treeToChange in place
+        // Check that the ages of the taxa in the user-supplied tree fall within their age uncertainty ranges
+        for (size_t i = 0; i < tax_num; ++i)
+        {
+            // Grab the minimum and maximum ages of the i-th taxon from the taxaToCopy vector
+            double min_age = std::round(taxaToCopy[i].getMinAge() * factor) / factor;
+            double max_age = std::round(taxaToCopy[i].getMaxAge() * factor) / factor;
+            // Get the age of the tree tip of the same name
+            double tip_age = std::round(treeToChange.getTipNodeWithName( taxaToCopy[i].getName() ).getAge() * factor) / factor;
+
+            if (tip_age < min_age || tip_age > max_age)
+            {
+                std::ostringstream s;
+                s << "The age of tip '" << taxaToCopy[i].getSpeciesName() << "' in the initial tree is outside of specified bounds.";
+                throw RbException( s.str() );
+            }
+        }
+    
+    }
+
+    // Attach the input taxon metadata without changing the realized tip ages.
     for (size_t i = 0; i < tax_num; ++i)
     {
         std::string tip_name = taxaToCopy[i].getName();
