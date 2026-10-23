@@ -225,7 +225,7 @@ double FossilizedBirthDeathRangeProcess::computeLnProbabilityBDS()
                                 double dt = 1.0;
 
                                 // only compute dt if this is a non-singleton
-                                if ( Fi->first.getMin() != Fi->first.getMax() )
+                                if ( not Fi->first.zeroWidth() )
                                 {
                                     dt = std::min(std::min(Fi->first.getMax(), b), t_0) - std::max(std::max(Fi->first.getMin(), d), times[j]);
                                 }

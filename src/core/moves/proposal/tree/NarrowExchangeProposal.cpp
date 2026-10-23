@@ -164,10 +164,9 @@ double NarrowExchangeProposal::doProposal( void )
             continue;
 
         double new_age = fossil == node ? grandparent.getAge() : parent_age;
-        double min_age = fossil->getTaxon().getMinAge();
-        double max_age = fossil->getTaxon().getMaxAge();
-        if ((min_age == max_age && new_age != fossil->getAge()) ||
-            (min_age != max_age && (new_age < min_age || new_age > max_age)))
+        const auto& interval = fossil->getTaxon().getAgeRange();
+        if ((interval.zeroWidth() and new_age != fossil->getAge()) or
+            (not interval.zeroWidth() and not interval.contains(new_age)))
         {
             failed = true;
             return RbConstants::Double::neginf;
