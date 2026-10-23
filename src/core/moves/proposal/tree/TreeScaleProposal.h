@@ -19,6 +19,7 @@ namespace RevBayesCore {
      * Scale internal ages together, stopping at tips and sampled-ancestor parents.
      * The Hastings factor counts only the scaled ages. An optional root-age scalar tracks
      * the tree root and is not an additional independent coordinate.
+     * Alternatively, scale an independent origin age with the tree, adding one coordinate.
      *
      *
      * @copyright Copyright 2009-
@@ -29,7 +30,8 @@ namespace RevBayesCore {
     class TreeScaleProposal : public Proposal {
         
     public:
-        TreeScaleProposal( StochasticNode<Tree> *t, StochasticNode< RbVector<Tree> > *vec_n, StochasticNode<double> *r, double d );                                               //!< Constructor
+        TreeScaleProposal(StochasticNode<Tree>* t, StochasticNode<RbVector<Tree>>* vec_n,
+                          StochasticNode<double>* r, double d, StochasticNode<double>* o = nullptr);
         
         // Basic utility functions
         void                                    cleanProposal(void);                                                //!< Clean up proposal
@@ -55,6 +57,7 @@ namespace RevBayesCore {
         StochasticNode<Tree>*                   tree;
         StochasticNode< RbVector<Tree> >*       vector_variable;                                                    //!< The alternative variable the proposal is working on
         StochasticNode<double>*                 rootAge;
+        StochasticNode<double>*                 originAge;
         
         // parameters
         double                                  delta;
@@ -63,6 +66,7 @@ namespace RevBayesCore {
         size_t                                  tree_index;
         std::vector<double>                     storedAges;
         double                                  storedRootAge;
+        double                                  storedOriginAge;
     };
     
 }
