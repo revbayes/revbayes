@@ -622,18 +622,6 @@ void Clade::setNumberMissingTaxa(int n)
 
 
 /**
- * Set the taxon age at position i.
- *
- * \param[in]    i    The index for the taxon we are interested in.
- * \param[in]    age  The age of the taxon to set.
- *
- */
-void Clade::setTaxonAge(size_t i, double age)
-{
-    taxa[i].setAge(age);
-}
-
-/**
  * Set flag for negative clade constraint.
  *
  * \param[in]    tf   Flag indicating if clade is a negative constraint.
@@ -717,30 +705,6 @@ std::ostream& operator<<(std::ostream& o, const Clade& x) {
     o << x.toString();
    
     return o;
-}
-
-void Clade::setAges(const std::vector<Taxon>& taxa)
-{
-    size_t N = size();
-    // set the ages of each of the taxa in the constraint
-    for (size_t j = 0; j < N; ++j)
-    {
-        bool found = false;
-        for (size_t i=0; i<taxa.size(); ++i)
-        {
-            const Taxon& t = taxa[i];
-            if ( t.getName() == getTaxonName(j) )
-            {
-                setTaxonAge(j, t.getAge());
-                found = true;
-                break;
-            }
-        }
-        if ( found == false )
-        {
-            throw RbException() << "set_ages_for_constraint: can't find taxon " << getTaxonName(j) << " in full taxon set!";
-        }
-    }
 }
 
 // std::sort needs a "strict weak ordering" that returns true

@@ -72,13 +72,11 @@ namespace RevBayesCore {
         std::set<Taxon>                             intersection(const Clade&) const;                           //!< Get the taxa that both clades have in common.
         void                                        resetTaxonBitset(const std::map<std::string, size_t> map);
         void                                        setAge(double a);                                           //!< Set the age of the clade.
-        void                                        setAges(const std::vector<Taxon>& taxa);                         //!< Set the aged of the taxa based on this set.
         void                                        setBitRepresentation(const RbBitSet &b);
         void                                        setCladeName(const std::string& n);                         //!< Set the name of the clade.
         void                                        setOptionalConstraints(const std::vector<Clade>& c);        //!< Set optional clade constraints.
         void                                        setMrca(const std::set<Taxon>&);                            //!< Set the mrca taxon, if applicable.
         void                                        setNumberMissingTaxa(int n);                                //!< Set the number of missing taxa in this clade.
-        void                                        setTaxonAge(size_t i, double age);                          //!< Set a single taxon's age.
         void                                        setNegativeConstraint(bool);                                //!< Set clade to be a negative constraint
         size_t                                      size(void) const;                                           //!< Get the number of taxa.
         std::string                                 toString(void) const;                                       //!< Convert this value into a string.
