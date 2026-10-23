@@ -154,25 +154,6 @@ double NarrowExchangeProposal::doProposal( void )
         return RbConstants::Double::neginf;
     }
 
-    // Work around setAge() refusing out-of-range assignments without throwing, and the tree
-    // probability not enforcing fixed ages. Check before mutating so rejection leaves the tree intact.
-    // These checks could be relaxed once assignment reliably completes and the tree probability
-    // enforces all specified bounds. Equal bounds conservatively preserve the current fossil age.
-    for (TopologyNode* fossil : {node, uncle})
-    {
-        if (!fossil->isSampledAncestorTip())
-            continue;
-
-        double new_age = fossil == node ? grandparent.getAge() : parent_age;
-        const auto& interval = fossil->getTaxon().getAgeRange();
-        if ((interval.zeroWidth() and new_age != fossil->getAge()) or
-            (not interval.zeroWidth() and not interval.contains(new_age)))
-        {
-            failed = true;
-            return RbConstants::Double::neginf;
-        }
-    }
-
     failed = false;
 
     // now we store all necessary values

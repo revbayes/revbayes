@@ -21,7 +21,7 @@ template <class variableType> class StochasticNode;
      * Pick a non-root node whose parent is not the root, and exchange it with its uncle.
      * Internal node ages stay fixed.
      * An ordinary uncle must be younger than the parent. Sampled-ancestor tips take their new
-     * parent's age, provided this preserves fixed ages and respects uncertain-age bounds.
+     * parent's age. The tree probability enforces taxon age constraints.
      *
      *
      * @copyright Copyright 2009-
