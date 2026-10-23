@@ -47,6 +47,12 @@ double TaxonReader::parseNumericField(const std::string &s, const std::string &f
                             << "\" field on line " << line << " of the taxon definition file.";
     }
 
+    if (std::isnan(v))
+    {
+        throw RbException() << "NaN is not allowed in the \"" << field
+                            << "\" field on line " << line << " of the taxon definition file.";
+    }
+
     return v;
 }
 
