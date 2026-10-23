@@ -97,6 +97,9 @@ void Taxon::constructInternalObject( void )
 
     if (std::isnan(minAge) or std::isnan(maxAge))
         throw RbException() << "Age bounds for taxon '" << taxonName << "' must not be NaN.";
+    if (minAge > maxAge)
+        throw RbException() << "Invalid age range for taxon '" << taxonName << "': minimum age ("
+                            << minAge << ") exceeds maximum age (" << maxAge << ").";
     RevBayesCore::TimeInterval range(minAge, maxAge);
 
     // Release the previous node only after the new range has passed validation.
@@ -162,6 +165,10 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Taxon::executeMethod(std::string c
         if (std::isnan(a))
             throw RbException() << "Minimum age for taxon '" << dag_node->getValue().getName()
                                 << "' must not be NaN.";
+        if (a > dag_node->getValue().getMaxAge())
+            throw RbException() << "Cannot set minimum age of taxon '" << dag_node->getValue().getName()
+                                << "' to " << a << ": it exceeds the current maximum age ("
+                                << dag_node->getValue().getMaxAge() << ").";
 
         dag_node->getValue().setMinAge( a );
         return NULL;
@@ -174,6 +181,10 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Taxon::executeMethod(std::string c
         if (std::isnan(a))
             throw RbException() << "Maximum age for taxon '" << dag_node->getValue().getName()
                                 << "' must not be NaN.";
+        if (a < dag_node->getValue().getMinAge())
+            throw RbException() << "Cannot set maximum age of taxon '" << dag_node->getValue().getName()
+                                << "' to " << a << ": it is below the current minimum age ("
+                                << dag_node->getValue().getMinAge() << ").";
 
         dag_node->getValue().setMaxAge( a );
         return NULL;
