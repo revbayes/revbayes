@@ -1,3 +1,4 @@
+#include "TreeUtilities.h"
 #include <boost/numeric/odeint.hpp> // IWYU pragma: keep
 #include <algorithm>
 #include <cmath>
@@ -184,6 +185,9 @@ HeterogeneousRateBirthDeath* HeterogeneousRateBirthDeath::clone( void ) const
 /* Compute probability */
 double HeterogeneousRateBirthDeath::computeLnProbability( void )
 {
+    const double ln_taxon_ages = TreeUtilities::lnProbabilityTaxonAges(*value);
+    if (ln_taxon_ages != 0.0) return ln_taxon_ages;
+
     // for now
     totalScaling = 0;
     shift_same_category = false;

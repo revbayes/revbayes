@@ -217,6 +217,10 @@ std::vector<double> TimeVaryingStateDependentSpeciationExtinctionProcess::calcul
  */
 double TimeVaryingStateDependentSpeciationExtinctionProcess::computeLnProbability( void )
 {
+    // SSE analyses can condition on a dated tree whose attached taxa have default [0,0]
+    // ranges. Add tip-age constraint checks here once the interface distinguishes explicit
+    // constraints from unspecified ranges; the latter must allow dated fossil tips.
+
     
     // check that the ages are in correct chronological order
     // i.e., no child is older than its parent

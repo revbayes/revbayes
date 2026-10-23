@@ -1,3 +1,4 @@
+#include "TreeUtilities.h"
 #include <cstddef>
 #include <algorithm>
 #include <cmath>
@@ -132,6 +133,9 @@ UniformTimeTreeDistribution* UniformTimeTreeDistribution::clone( void ) const
 /* Compute probability */
 double UniformTimeTreeDistribution::computeLnProbability( void )
 {
+    const double ln_taxon_ages = TreeUtilities::lnProbabilityTaxonAges(*value);
+    if (ln_taxon_ages != 0.0) return ln_taxon_ages;
+
     
     // Variable declarations and initialization
     double lnProb = 0.0;

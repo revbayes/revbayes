@@ -1,3 +1,4 @@
+#include "TreeUtilities.h"
 #include <cstddef>
 #include <algorithm>
 #include <cmath>
@@ -237,6 +238,9 @@ double ConditionedBirthDeathShiftProcessContinuous::computeBranchProbability(dou
 /* Compute probability */
 double ConditionedBirthDeathShiftProcessContinuous::computeLnProbability( void )
 {
+    const double ln_taxon_ages = TreeUtilities::lnProbabilityTaxonAges(*value);
+    if (ln_taxon_ages != 0.0) return ln_taxon_ages;
+
     
     // Variable declarations and initialization
     double ln_prob = 0.0;

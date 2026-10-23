@@ -1,3 +1,4 @@
+#include "TreeUtilities.h"
 #include <cstddef>
 #include <cmath>
 #include <iostream>
@@ -131,6 +132,9 @@ void AbstractMultispeciesCoalescent::buildRandomBinaryTree(std::vector<TopologyN
 
 double AbstractMultispeciesCoalescent::computeLnProbability( void )
 {
+    const double ln_taxon_ages = TreeUtilities::lnProbabilityTaxonAges(*value);
+    if (ln_taxon_ages != 0.0) return ln_taxon_ages;
+
     resetTipAllocations();
 
     // variable declarations and initialization

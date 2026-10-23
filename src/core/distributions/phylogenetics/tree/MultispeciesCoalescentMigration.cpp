@@ -1,3 +1,4 @@
+#include "TreeUtilities.h"
 #include <cstdlib>
 #include <cmath>
 #include <cstddef>
@@ -153,6 +154,9 @@ MultispeciesCoalescentMigration* MultispeciesCoalescentMigration::clone( void ) 
 
 double MultispeciesCoalescentMigration::computeLnProbability( void )
 {
+    const double ln_taxon_ages = TreeUtilities::lnProbabilityTaxonAges(*value);
+    if (ln_taxon_ages != 0.0) return ln_taxon_ages;
+
     
     const Tree &sp = species_tree->getValue();
     const std::vector< TopologyNode* >& species_tree_nodes = sp.getNodes();

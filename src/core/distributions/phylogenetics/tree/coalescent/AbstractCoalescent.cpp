@@ -1,3 +1,4 @@
+#include "TreeUtilities.h"
 #include "AbstractCoalescent.h"
 
 #include <cmath>
@@ -238,6 +239,9 @@ void AbstractCoalescent::buildHeterochronousRandomBinaryTree(Tree *psi, std::vec
  */
 double AbstractCoalescent::computeLnProbability( void )
 {
+    const double ln_taxon_ages = TreeUtilities::lnProbabilityTaxonAges(*value);
+    if (ln_taxon_ages != 0.0) return ln_taxon_ages;
+
     
     // variable declarations and initialization
     double lnProbTimes = 0;

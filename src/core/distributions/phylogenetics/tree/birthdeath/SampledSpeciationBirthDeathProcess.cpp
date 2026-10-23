@@ -1,3 +1,4 @@
+#include "TreeUtilities.h"
 #include <algorithm>
 #include <cmath>
 #include <set>
@@ -166,6 +167,9 @@ SampledSpeciationBirthDeathProcess* SampledSpeciationBirthDeathProcess::clone( v
 /* Compute probability */
 double SampledSpeciationBirthDeathProcess::computeLnProbability( void )
 {
+    const double ln_taxon_ages = TreeUtilities::lnProbabilityTaxonAges(*value);
+    if (ln_taxon_ages != 0.0) return ln_taxon_ages;
+
     // for now
     totalScaling = 0;
     

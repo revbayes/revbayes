@@ -1,3 +1,4 @@
+#include "TreeUtilities.h"
 #include <cstddef>
 #include <algorithm>
 #include <cmath>
@@ -172,6 +173,9 @@ void AbstractRootedTreeDistribution::buildRandomBinaryTree(std::vector<TopologyN
 
 double AbstractRootedTreeDistribution::computeLnProbability( void )
 {
+    const double ln_taxon_ages = TreeUtilities::lnProbabilityTaxonAges(*value);
+    if (ln_taxon_ages != 0.0) return ln_taxon_ages;
+
     using namespace RbConstants;
 
     // proceed as std::int64_t as derived classes validate a non-zero likeilhood
@@ -207,19 +211,7 @@ double AbstractRootedTreeDistribution::computeLnProbability( void )
                     }
 
                 }
-                auto taxon = the_node.getTaxon();
-                const auto& interval = taxon.getAgeRange();
-                // Fixed intervals are constraints too: a named tip outside [a,a] has zero
-                // probability, even if its age was assigned without enforcing the bounds.
-                if (taxon.getName() != "")
-                {
-                    if (not interval.contains(the_node.getAge()))
-                    {
-                        std::cerr << "Age of taxon " << taxon.getName() << " incompatible with age range";
-                        return withReason(Double::neginf)<< "Pr(tree)=0: taxon " << taxon.getName() <<" has age "<<the_node.getAge()
-                                                         <<" outside of age range ["<<taxon.getMinAge()<<", "<<interval.getMax()<<"]";
-                    }
-                }
+
             }
             if( the_node.getAge() - the_node.getParent().getAge() > 0 )
             {

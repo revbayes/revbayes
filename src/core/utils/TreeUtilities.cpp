@@ -24,6 +24,8 @@
 #include "StringUtilities.h"
 #include "Tree.h"
 #include "TreeUtilities.h"
+#include "RbConstants.h"
+#include "RbSettings.h"
 #include "AbstractDiscreteTaxonData.h"
 #include "AverageDistanceMatrix.h"
 #include "Cloneable.h"
@@ -1783,4 +1785,27 @@ Tree* RevBayesCore::TreeUtilities::startingTreeInitializer(Tree& treeToChange, s
     
     RevBayesCore::Tree *p = &treeToChange;
     return p;
+}
+
+
+// Attached taxon intervals constrain realized tip ages, including point intervals. This check
+// never repairs the tree: modifying a proposal here would evaluate a different state.
+double RevBayesCore::TreeUtilities::lnProbabilityTaxonAges(const Tree& tree)
+{
+    for (const auto* node : tree.getNodes())
+    {
+        if (not node->isTip()) continue;
+        const auto& taxon = node->getTaxon();
+        const auto& interval = taxon.getAgeRange();
+        if (not taxon.getName().empty() and not interval.contains(node->getAge()))
+        {
+            if (RbSettings::userSettings().getDebugMCMC() >= 1 or
+                RbSettings::userSettings().getLogMCMC() >= 1)
+                std::cerr << "Age of taxon " << taxon.getName() << " incompatible with age range\n";
+            return withReason(RbConstants::Double::neginf)
+                << "Pr(tree)=0: taxon " << taxon.getName() << " has age " << node->getAge()
+                << " outside of age range [" << interval.getMin() << ", " << interval.getMax() << "]";
+        }
+    }
+    return 0.0;
 }

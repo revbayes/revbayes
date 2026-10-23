@@ -32,6 +32,8 @@ namespace RevBayesCore {
 
     namespace TreeUtilities {
 
+        double                                      lnProbabilityTaxonAges(const Tree& tree);
+
         // these function are for public use
         std::vector<double>                         calculateEDR(const Tree& t);                                                                            //!< get distribution of weighted times between speciation/coalescent events in a tree
         double                                      calculateMPD(const Tree& t, const AbstractHomologousDiscreteCharacterData& c, size_t site_index, size_t state_index, bool zscore, bool branch_lengths, size_t num_randomizations); //!< calculate the Mean Pairwise Distance

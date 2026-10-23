@@ -1,3 +1,4 @@
+#include "TreeUtilities.h"
 #include <string>
 
 #include "RandomNumberFactory.h"
@@ -237,6 +238,9 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::buildSerialSample
 
 double GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::computeLnProbability(void)
 {
+    const double ln_taxon_ages = TreeUtilities::lnProbabilityTaxonAges(*value);
+    if (ln_taxon_ages != 0.0) return ln_taxon_ages;
+
 
 	// make sure we need to recompute
 	if ( probability_dirty == false )
