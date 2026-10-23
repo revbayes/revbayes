@@ -136,7 +136,8 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Taxon::executeMethod(std::string c
     {
         found = true;
         
-        double a = this->dag_node->getValue().getAge();
+        // Compatibility: retain Rev's getAge() as a lower-bound alias pending a usage review.
+        double a = this->dag_node->getValue().getMinAge();
         return RevPtr<RevVariable>( new RevVariable( new RealPos( a ) ) );
     }
     if (name == "getMinAge")
