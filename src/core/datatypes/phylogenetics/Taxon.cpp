@@ -157,17 +157,6 @@ bool Taxon::isExtinct(void) const
 
 
 /**
- * Get the age for this taxon.
- *
- * \return    The age.
- */
-double Taxon::getAge( void ) const
-{
-    return age_range.getMin();
-}
-
-
-/**
  * Get the occurrences for this taxon.
  *
  * \return    A map of occurrence age ranges to counts.

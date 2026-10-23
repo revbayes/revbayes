@@ -77,8 +77,8 @@ RevPtr<RevVariable> Func_simCompleteTree::execute( void )
         // create the i-th taxon
         RevBayesCore::TopologyNode* node = new RevBayesCore::TopologyNode( taxa[i], i );
         
-        // set the age of this tip node
-        node->setAge( taxa[i].getAge() );
+        // Initialize this tip at the lower bound of its age constraint.
+        node->setAge( taxa[i].getMinAge() );
         
         // add the new node to the list
         nodes[i] = node;
