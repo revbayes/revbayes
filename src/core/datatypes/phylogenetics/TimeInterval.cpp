@@ -1,5 +1,7 @@
 #include "TimeInterval.h"
 
+#include <algorithm>
+
 #include "RbException.h"
 #include "RbMathLogic.h"
 #include "RbConstants.h" // IWYU pragma: keep
@@ -121,4 +123,11 @@ bool TimeInterval::contains(double age) const
 bool TimeInterval::zeroWidth() const
 {
     return getMin() == getMax();
+}
+
+
+// Use the outer effective endpoints to cover both intervals symmetrically, including any gap.
+TimeInterval RevBayesCore::coveringInterval(const TimeInterval& a, const TimeInterval& b)
+{
+    return TimeInterval(std::min(a.getMin(), b.getMin()), std::max(a.getMax(), b.getMax()));
 }
