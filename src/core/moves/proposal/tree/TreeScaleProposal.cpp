@@ -78,13 +78,21 @@ double TreeScaleProposal::getProposalTuningParameter( void ) const
 }
 
 
-/**
- * Perform the proposal.
- *
- *
- *
- * \return The hastings ratio.
- */
+namespace {
+
+// Follow rescaleSubtree's binary traversal: tips and sampled-ancestor parents stop scaling
+// of their entire subtrees. Only the internal ages above these boundaries enter the Jacobian.
+size_t countScaledAges(const TopologyNode& node)
+{
+    if (node.isTip() or node.isSampledAncestorParent())
+        return 0;
+
+    return 1 + countScaledAges(node.getChild(0)) + countScaledAges(node.getChild(1));
+}
+
+}
+
+// Scale eligible internal ages together, keeping an optional root-age scalar synchronized.
 double TreeScaleProposal::doProposal( void )
 {
     
@@ -122,6 +130,7 @@ double TreeScaleProposal::doProposal( void )
     // now we store all necessary values
     storedAges = std::vector<double>(tau.getNumberOfNodes(), 0.0);
     TreeUtilities::getAges(node, storedAges);
+    const size_t num_scaled_ages = countScaledAges(node);
     
     // draw new ages 
     double u = rng->uniform01();
@@ -132,11 +141,14 @@ double TreeScaleProposal::doProposal( void )
     
     if ( rootAge != NULL )
     {
-        rootAge->setValue( new double(my_age * scaling_factor) );
+        // A sampled-ancestor root is a fixed boundary, so use its actual age after scaling.
+        rootAge->setValue( new double(node.getAge()) );
     }
     
-    // compute the Hastings ratio
-    double lnHastingsratio = log( scaling_factor ) * (tau.getNumberOfNodes() - tau.getNumberOfTips());
+    // The log-symmetric scale draw gives a Hastings factor s^k for k scaled coordinates.
+    // A root-age scalar represents the same coordinate as the tree root, not an extra one.
+    // Fixed boundaries and their descendants contribute nothing, including a no-op at the root.
+    double lnHastingsratio = log( scaling_factor ) * num_scaled_ages;
     
     return lnHastingsratio;
 }

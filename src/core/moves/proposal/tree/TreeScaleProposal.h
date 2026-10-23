@@ -14,11 +14,11 @@ namespace RevBayesCore {
     template <class variableType> class StochasticNode;
     
     /**
-     * The narrow-exchange operator.
+     * The tree-scale operator.
      *
-     * A narrow-exchange proposal is a NNI (nearest neighbour interchange) proposal on rooted trees without changing the node age.
-     * That is, we pick a random node which is not the root and neither its parent is the root.
-     * Then, we try to exchange the picked node with it's uncle. This move will automatically fail if the uncle is older than the parent.
+     * Scale internal ages together, stopping at tips and sampled-ancestor parents.
+     * The Hastings factor counts only the scaled ages. An optional root-age scalar tracks
+     * the tree root and is not an additional independent coordinate.
      *
      *
      * @copyright Copyright 2009-
