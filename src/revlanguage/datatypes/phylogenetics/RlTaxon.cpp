@@ -190,6 +190,24 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Taxon::executeMethod(std::string c
         return NULL;
     }
     
+    if (name == "setAgeRange")
+    {
+        found = true;
+        double minAge = static_cast<const RealPos&>(args[0].getVariable()->getRevObject()).getValue();
+        double maxAge = static_cast<const RealPos&>(args[1].getVariable()->getRevObject()).getValue();
+
+        if (std::isnan(minAge) or std::isnan(maxAge))
+            throw RbException() << "Age bounds for taxon '" << dag_node->getValue().getName()
+                                << "' must not be NaN.";
+        if (minAge > maxAge)
+            throw RbException() << "Invalid age range for taxon '" << dag_node->getValue().getName()
+                                << "': minimum age (" << minAge << ") exceeds maximum age (" << maxAge << ").";
+
+        // Validate both bounds before replacing the range, so failed updates leave it unchanged.
+        dag_node->getValue().setAgeRange(RevBayesCore::TimeInterval(minAge, maxAge));
+        return NULL;
+    }
+
     return ModelObject<RevBayesCore::Taxon>::executeMethod( name, args, found );
 }
 
@@ -290,6 +308,13 @@ void Taxon::initMethods( void )
     ArgumentRules* set_max_age_arg_rules = new ArgumentRules();
     set_max_age_arg_rules->push_back( new ArgumentRule( "a", RealPos::getClassTypeSpec(), "The max age of the clade.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
     methods.addFunction( new MemberProcedure( "setMaxAge", RlUtils::Void, set_max_age_arg_rules ) );
+
+    ArgumentRules* set_age_range_arg_rules = new ArgumentRules();
+    set_age_range_arg_rules->push_back(new ArgumentRule("minAge", RealPos::getClassTypeSpec(),
+        "The minimum age of the taxon.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY));
+    set_age_range_arg_rules->push_back(new ArgumentRule("maxAge", RealPos::getClassTypeSpec(),
+        "The maximum age of the taxon.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY));
+    methods.addFunction(new MemberProcedure("setAgeRange", RlUtils::Void, set_age_range_arg_rules));
 }
 
 

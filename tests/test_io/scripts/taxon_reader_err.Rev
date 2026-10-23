@@ -7,3 +7,7 @@ readTaxonData("data/taxa_unparseable_number.tsv")
 # Inf is a valid upper bound for an occurrence age
 taxa = readTaxonData("data/taxa_inf_age.tsv")
 taxa[1].getMaxAge()
+
+# Whole-range updates accept ordered bounds and reject reversed bounds.
+taxa[1].setAgeRange(2, 3)
+taxa[1].setAgeRange(3, 2)
