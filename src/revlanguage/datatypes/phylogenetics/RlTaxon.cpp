@@ -1,4 +1,5 @@
 #include <cstddef>
+#include <cmath>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -18,6 +19,7 @@
 #include "MethodTable.h"
 #include "ModelObject.h"
 #include "RbHelpReference.h"
+#include "RbException.h"
 #include "RevObject.h"
 #include "RevPtr.h"
 #include "RevVariable.h"
@@ -81,16 +83,7 @@ Taxon* Taxon::clone(void) const
 
 void Taxon::constructInternalObject( void ) 
 {
-    // we free the memory first
-    if ( dag_node != NULL )
-    {
-        if ( dag_node->decrementReferenceCount() == 0 )
-        {
-            delete dag_node;
-        }
-    }
-    
-    // now allocate a new Taxon
+    // Validate the age range before replacing the existing taxon.
     std::string taxonName = static_cast<const RlString &>( (taxon)->getRevObject() ).getValue() ;
     std::string taxonSpecies = static_cast<const RlString &>( (species)->getRevObject() ).getValue() ;
     taxonSpecies = ( taxonSpecies == "taxonName" ) ? taxonName : taxonSpecies;
@@ -101,12 +94,19 @@ void Taxon::constructInternalObject( void )
     {
         maxAge = static_cast<const RealPos &>( maxage->getRevObject() ).getValue();
     }
+
+    if (std::isnan(minAge) or std::isnan(maxAge))
+        throw RbException() << "Age bounds for taxon '" << taxonName << "' must not be NaN.";
+    RevBayesCore::TimeInterval range(minAge, maxAge);
+
+    // Release the previous node only after the new range has passed validation.
+    if (dag_node != NULL and dag_node->decrementReferenceCount() == 0)
+        delete dag_node;
     
     dag_node = new RevBayesCore::ConstantNode<RevBayesCore::Taxon>("", new RevBayesCore::Taxon( taxonName ) );
     
     dag_node->getValue().setSpeciesName( taxonSpecies );
     
-    RevBayesCore::TimeInterval range(minAge, maxAge);
     dag_node->getValue().setAgeRange(range);
 
     dag_node->incrementReferenceCount();
@@ -159,6 +159,10 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Taxon::executeMethod(std::string c
         found = true;
         double a = static_cast<const RealPos&>( args[0].getVariable()->getRevObject() ).getValue();
 
+        if (std::isnan(a))
+            throw RbException() << "Minimum age for taxon '" << dag_node->getValue().getName()
+                                << "' must not be NaN.";
+
         dag_node->getValue().setMinAge( a );
         return NULL;
     }
@@ -166,6 +170,10 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Taxon::executeMethod(std::string c
     {
         found = true;
         double a = static_cast<const RealPos&>( args[0].getVariable()->getRevObject() ).getValue();
+
+        if (std::isnan(a))
+            throw RbException() << "Maximum age for taxon '" << dag_node->getValue().getName()
+                                << "' must not be NaN.";
 
         dag_node->getValue().setMaxAge( a );
         return NULL;
