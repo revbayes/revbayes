@@ -791,8 +791,8 @@ Tree* TopologyConstrainedTreeDistribution::simulateRootedTree( bool alwaysReturn
         // create the i-th taxon
         TopologyNode* node = new TopologyNode( taxa[i], i );
 
-        // set the age of this tip node
-        node->setAge( taxa[i].getAge() );
+        // Initialize this tip at the lower bound of its age constraint.
+        node->setAge( taxa[i].getMinAge() );
 
         // add the new node to the list
         nodes.push_back( node );
@@ -920,7 +920,7 @@ Tree* TopologyConstrainedTreeDistribution::simulateRootedTree( bool alwaysReturn
             const Taxon& taxon = unclaimed_taxa[k];
 
             Clade tmp_clade = Clade( taxon );
-            tmp_clade.setAge( taxon.getAge() );
+            tmp_clade.setAge( taxon.getMinAge() );
             children.push_back( tmp_clade );
         }
 

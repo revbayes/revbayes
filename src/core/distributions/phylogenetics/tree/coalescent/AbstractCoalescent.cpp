@@ -312,7 +312,7 @@ void AbstractCoalescent::simulateTree( void )
     bool homochronous = true;
     for (size_t i=0; i<num_taxa; ++i)
     {
-        if ( taxa[i].getAge() > 0.0 )
+        if ( taxa[i].getMinAge() > 0.0 )
         {
           homochronous = false;
           break;
@@ -354,7 +354,7 @@ void AbstractCoalescent::simulateHeterochronousTree( void )
         const std::string& name = taxa[i].getName();
         node->setName(name);
         node->setSpeciesName(taxa[i].getSpeciesName());
-        node->setAge(taxa[i].getAge());
+        node->setAge(taxa[i].getMinAge());
         // add to tips
         nodes.push_back(node);
     }

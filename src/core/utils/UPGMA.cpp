@@ -33,7 +33,7 @@ Tree* UPGMA::constructTree(const DistanceMatrix &d) const
     for (size_t i=0; i<num_tips; ++i)
     {
         TopologyNode* node = new TopologyNode( taxa[i], i );
-        node->setAge( taxa[i].getAge() );
+        node->setAge( taxa[i].getMinAge() );
         active_nodes[i] = node;
     }
     

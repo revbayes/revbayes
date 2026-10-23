@@ -122,12 +122,12 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
         RevBayesCore::TopologyNode* new_p = new RevBayesCore::TopologyNode();
         RevBayesCore::TopologyNode* new_f = new RevBayesCore::TopologyNode(taxon, this->dag_node->getValue().getNumberOfTips()+1);
 
-        new_f->setAge(taxon.getAge());
-        double max_child_age = (taxon.getAge() > n.getAge() ? taxon.getAge() : n.getAge());
+        new_f->setAge(taxon.getMinAge());
+        double max_child_age = (taxon.getMinAge() > n.getAge() ? taxon.getMinAge() : n.getAge());
         if ( p.getAge() < max_child_age )
         {
             RevBayesCore::TreeUtilities::rescaleTree(this->dag_node->getValue().getRoot(), max_child_age / p.getAge() + 0.5);
-            max_child_age = (taxon.getAge() > n.getAge() ? taxon.getAge() : n.getAge());
+            max_child_age = (taxon.getMinAge() > n.getAge() ? taxon.getMinAge() : n.getAge());
         }
         
         new_p->setAge( (p.getAge() - max_child_age) / 2.0 + max_child_age);

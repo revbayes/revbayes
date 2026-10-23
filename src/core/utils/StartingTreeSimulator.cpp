@@ -54,8 +54,8 @@ Tree* StartingTreeSimulator::simulateTree( const std::vector<Taxon> &taxa, const
         // create the i-th taxon
         TopologyNode* node = new TopologyNode( taxa[i], i );
         
-        // set the age of this tip node
-        node->setAge( taxa[i].getAge() );
+        // Initialize this tip at the lower bound of its age constraint.
+        node->setAge( taxa[i].getMinAge() );
         
         // add the new node to the list
         nodes.push_back( node );

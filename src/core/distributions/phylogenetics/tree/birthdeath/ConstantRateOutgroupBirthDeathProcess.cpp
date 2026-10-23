@@ -398,8 +398,8 @@ void ConstantRateOutgroupBirthDeathProcess::simulateOutgroupTree( void )
         // create the i-th taxon
         TopologyNode* node = new TopologyNode( taxa_ingroup[i], i );
         
-        // set the age of this tip node
-        node->setAge( taxa_ingroup[i].getAge() );
+        // Initialize this tip at the lower bound of its age constraint.
+        node->setAge( taxa_ingroup[i].getMinAge() );
         
         // add the new node to the list
         nodes_ingroup.push_back( node );
@@ -411,8 +411,8 @@ void ConstantRateOutgroupBirthDeathProcess::simulateOutgroupTree( void )
         // create the i-th taxon
         TopologyNode* node = new TopologyNode( taxa_outgroup[i], i );
         
-        // set the age of this tip node
-        node->setAge( taxa_outgroup[i].getAge() );
+        // Initialize this tip at the lower bound of its age constraint.
+        node->setAge( taxa_outgroup[i].getMinAge() );
         
         // add the new node to the list
         nodes_outgroup.push_back( node );

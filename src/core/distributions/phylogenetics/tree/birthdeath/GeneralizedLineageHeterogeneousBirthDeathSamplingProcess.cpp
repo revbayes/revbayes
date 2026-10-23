@@ -1129,7 +1129,7 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::simulateTree(void
         const std::string& name = taxa[i].getName();
         node->setName(name);
         node->setSpeciesName(taxa[i].getSpeciesName());
-        node->setAge(taxa[i].getAge());
+        node->setAge(taxa[i].getMinAge());
         node->setTaxon(taxa[i]);
 
         // add to tips
@@ -1185,8 +1185,8 @@ std::vector<double> GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::si
 
     for(size_t i = 0; i < num_ages; ++i)
     {
-    	// get the age of the tip
-    	double a = taxa[i + 1].getAge();
+        // Use the same lower-bound age as tip initialization.
+        double a = taxa[i + 1].getMinAge();
 
     	// simulate the age of a node
     	double new_age = a + rng->uniform01() * (max_age - a);
