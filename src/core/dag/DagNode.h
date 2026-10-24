@@ -2,6 +2,7 @@
 #define DagNode_H
 
 #include <cstddef>
+#include <cstdint>
 #include <map>
 #include <set>
 #include <vector>
@@ -64,6 +65,7 @@ template <class valueType> class RbOrderedSet;
         void                                                        addMonitor(Monitor *m);                                                                     //!< Add a new monitor on this node
         void                                                        addMove(Move *m);                                                                           //!< Add a new move on this node
         void                                                        addTouchedElementIndex(size_t i);                                                           //!< Add the index of an element that has been touch (usually for vector-like values)
+        std::uint64_t                                               allocateDagNodeId(void);                                                                    //!< Allocate a new identifier for a newly constructed node
         void                                                        clearTouchedElementIndices(void);
         void                                                        clearVisitFlag(const size_t &flagType);
         void                                                        clearVisitFlagVector(const size_t &flagType, std::vector<DagNode *>& nodes);
@@ -71,12 +73,14 @@ template <class valueType> class RbOrderedSet;
         size_t                                                      decrementReferenceCount(void) const;                                                        //!< Decrement the reference count for reference counting in smart pointers
         static bool                                                 dependsOn(const DagNode* node, const DagNode* target);                                      //!< Does `node` transitively depend on `target` through its parents? Uses the Pearce-Kelly topological order for an O(1) fast path and a region-restricted upward search otherwise.
         void                                                        executeMethod(const std::string &n, const std::vector<const DagNode*> &args, double &rv) const; //!< Map the member methods to internal function calls
+        static DagNode*                                             findById(const std::vector<DagNode*>& nodes, std::uint64_t id);                             //!< Find the copy of a node in a cloned DAG
         void                                                        findUniqueDescendants(RbOrderedSet<DagNode *>& descendants);
         void                                                        findUniqueDescendantsVector(RbOrderedSet<DagNode *>& descendants, std::vector<DagNode *>& nodes);
         void                                                        findUniqueDescendantsWithFlag(RbOrderedSet<DagNode *>& descendants, const size_t flagType);
         void                                                        findUniqueDescendantsWithFlagVector(RbOrderedSet<DagNode *>& descendants, const size_t flagType, std::vector<DagNode *>& nodes);
-        void                                                        getAffectedNodes(RbOrderedSet<DagNode *>& affected) const;                                  //!< get affected nodes
+        void                                                        getAffectedNodes(RbOrderedSet<DagNode *>& affected) const;                                  //!< Get affected nodes
         const std::vector<DagNode*>&                                getChildren(void) const;                                                                    //!< Get the set of children
+        std::uint64_t                                               getDagNodeId(void) const;                                                                   //!< Identifier shared by a node and every clone of it
         DagNodeTypes                                                getDagNodeType(void) const;
         virtual Distribution&                                       getDistribution(void);
         virtual const Distribution&                                 getDistribution(void) const;
@@ -95,7 +99,7 @@ template <class valueType> class RbOrderedSet;
         const std::set<size_t>&                                     getTouchedElementIndices(void) const;                                                       //!< Get the indices of the touches elements. If the set is empty, then all elements might have changed.
         bool                                                        getVisitFlag(const size_t flagType) const;
         void                                                        incrementReferenceCount(void) const;                                                        //!< Increment the reference count for reference counting in smart pointers
-        void                                                        initiateGetAffectedNodes(RbOrderedSet<DagNode *>& affected);                                //!< get affected nodes
+        void                                                        initiateGetAffectedNodes(RbOrderedSet<DagNode *>& affected);                                //!< Get affected nodes
         void                                                        initiateGetAffectedNodesVector(RbOrderedSet<DagNode *>& affected, std::vector<DagNode *>& nodes);
         bool                                                        isAssignable(void) const;                                                                   //!< Is this DAG node modifiable by user?
         virtual bool                                                isClamped(void) const;                                                                      //!< Is this node clamped? Only stochastic nodes might be clamped.
@@ -161,9 +165,10 @@ template <class valueType> class RbOrderedSet;
 
     private:
 
-        static void                                                 bfgtAddEdge(const DagNode* parent, const DagNode* child);                                           //!< BGFT online edge insertion: repair the topological pseudo-order or throw if the new edge would close a cycle.
+        static void                                                 bfgtAddEdge(const DagNode* parent, const DagNode* child);                                   //!< BGFT online edge insertion: repair the topological pseudo-order or throw if the new edge would close a cycle.
 
-        mutable std::size_t                                         topo_level;                                                                                   //!< This node's level (rank in the topological pseudo-ordering of the DAG).
+        mutable std::size_t                                         topo_level;                                                                                 //!< This node's level (rank in the topological pseudo-ordering of the DAG).
+        std::uint64_t                                               dag_node_id;                                                                                //!< Identifier assigned at construction. The copy constructor copies it, so clones correspond to the original.
         mutable size_t                                              ref_count;
         mutable std::vector<bool>                                   visit_flags;                                                                                //!< In order: affected, find, keep, reinitialize, restore
     };

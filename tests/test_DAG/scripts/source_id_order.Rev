@@ -1,0 +1,43 @@
+################################################################################
+#
+# RevBayes Test-Script: Visit independent model() sources in construction-ID
+#                       order, not pointer-address order.
+#
+# authors: David Cerny
+#
+################################################################################
+
+# Scenario 1: "hole" is created before "right" and then removed, so the allocator
+# can give its storage to "left", which is created last (and as such has a higher
+# ID than "right") but into the storage freed by the removal of "hole" (so it has
+# a lower address than "right").
+
+dot_h = "output/hole.dot"
+
+hole ~ dnExp(10.0)
+right ~ dnExp(2.0)
+clear(hole)
+left ~ dnExp(1.0)
+
+m_h = model(left, right)
+write("Writing model graph to " + dot_h)
+m_h.graph(dot_h)
+
+clear()
+
+# Scenario 2: "right" is created before "left" with no holes in between, so it has
+# both a lower ID and a lower address. If we walk the set of model() sources in ID
+# order rather than address order, the resulting graph should have "right" before
+# "left" in both scenarios.
+
+dot_nh = "output/no_hole.dot"
+
+right ~ dnExp(2.0)
+left ~ dnExp(1.0)
+
+m_nh = model(left, right)
+write("Writing model graph to " + dot_nh)
+m_nh.graph(dot_nh)
+
+clear()
+q()

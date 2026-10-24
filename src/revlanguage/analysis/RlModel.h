@@ -9,6 +9,7 @@
 #include <ostream>
 #include <string>
 #include <set>
+#include <vector>
 
 namespace RevLanguage {
     
@@ -45,10 +46,10 @@ namespace RevLanguage {
         
     protected:
         
-        virtual void                                printValue(std::ostream& o, bool user) const;                                                      //!< Print value (for user)
-        void                                        setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);     //!< Set member variable
+        virtual void                                printValue(std::ostream& o, bool user) const;                                           //!< Print value (for user)
+        void                                        setConstParameter(const std::string& name, const RevPtr<const RevVariable> &var);       //!< Set member variable
         void                                        printModelDotGraph(const RevBayesCore::path &fn, bool vb, const std::string &bgc);
-        void                                        ignoreDataAtNodes(const std::set<std::string>& names);
+        void                                        ignoreDataAtNodes(const std::vector<const RevBayesCore::DagNode*>& originals);
         void                                        ignoreAllData();
         
         std::set<RevPtr<const RevVariable> >        sources;

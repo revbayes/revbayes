@@ -1,0 +1,42 @@
+################################################################################
+#
+# RevBayes Test-Script: Generate model graph in DOT format
+#
+# authors: Martin R. Smith, David Cerny
+#
+################################################################################
+
+# Test data and script originally provided by Martin R. Smith
+# (see https://github.com/revbayes/revbayes/issues/566)
+
+seed(12345)
+
+dotFile = "output/my.model"
+
+# Load character data
+chars <- readDiscreteCharacterData("data/issue566_data.nex")
+taxa <- chars.names()
+outgroup <- clade(taxa[1])
+nTaxa <- chars.size()
+nEdge <- 2 * nTaxa - 3
+
+# Uniform prior on tree topologies
+topology ~ dnUniformTopology(taxa, outgroup = outgroup)
+tree_length ~ dnGamma(shape = 2, rate = 1)
+rel_br_lengths ~ dnDirichlet( rep(1.0, nEdge) )
+br_lengths := rel_br_lengths * tree_length
+
+phylogeny := treeAssembly(topology, br_lengths)
+
+m_morph[1] ~ dnPhyloCTMC( tree = phylogeny, Q = fnJC(5), type = "Standard",
+                          coding = "variable" )
+
+m_morph[1].clamp(chars)
+
+lnL := m_morph[1].lnProbability()
+
+mymodel = model(phylogeny)
+write("Writing model graph to", dotFile)
+mymodel.graph(dotFile)
+print(" # # # OK # # # ")
+q()
