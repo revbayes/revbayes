@@ -297,14 +297,23 @@ double RevBayesCore::EmpiricalSampleDistribution<valueType>::computeLnProbabilit
     {
 #endif
 
-        // now normalize
-        for (size_t i = 0; i < num_samples; ++i)
+        // An empirical average of zero densities is zero. Avoid -infinity - -infinity
+        // below, but still broadcast the result to the other MPI processes.
+        if (max == RbConstants::Double::neginf)
         {
-            probs[i] = exp( ln_probs[i] - max);
-            prob += probs[i];
+            ln_prob = max;
         }
+        else
+        {
+            // now normalize
+            for (size_t i = 0; i < num_samples; ++i)
+            {
+                probs[i] = exp( ln_probs[i] - max);
+                prob += probs[i];
+            }
         
-        ln_prob = std::log( prob ) + max - std::log( num_samples );
+            ln_prob = std::log( prob ) + max - std::log( num_samples );
+        }
         
 #ifdef RB_MPI
 
