@@ -209,10 +209,10 @@ double AbstractRootedTreeDistribution::computeLnProbability( void )
 
                 }
                 auto taxon = the_node.getTaxon();
-                // Presence identifies an explicit constraint independently of the taxon name.
-                // Retain the point-interval exemption until its loading behavior is handled separately.
+                // Every explicit interval, including [a,a] and [0,0], constrains the tip age.
+                // An absent interval supplies no bound; initialization defaults are not constraints.
                 const auto& interval = taxon.getAgeRange();
-                if (interval and not interval->zeroWidth())
+                if (interval)
                 {
                     if (not interval->contains(the_node.getAge()))
                     {
