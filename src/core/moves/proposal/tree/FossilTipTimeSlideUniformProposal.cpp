@@ -169,13 +169,12 @@ double FossilTipTimeSlideUniformProposal::doProposal( void )
     double min_age      = 0;
     double max_age;
     
-    // adjust min and max age, either given taxon data or given provided ages
+    // Use the required attached interval unless the move supplies an explicit pair of bounds.
     if ( min == NULL )
     {
         // adjust min age given taxon data
         Taxon& taxon = node.getTaxon();
-        // COMPAT(age-range): Preserve [0,0] proposal bounds when neither taxon nor move supplies them.
-        const auto interval = taxon.getAgeRange().value_or(TimeInterval(0.0, 0.0));
+        const auto& interval = *taxon.getAgeRange();
         min_age = interval.getMin();
     }
     else
@@ -187,8 +186,7 @@ double FossilTipTimeSlideUniformProposal::doProposal( void )
     {
         // adjust max age given taxon data
         Taxon& taxon = node.getTaxon();
-        // COMPAT(age-range): Preserve [0,0] proposal bounds when neither taxon nor move supplies them.
-        const auto interval = taxon.getAgeRange().value_or(TimeInterval(0.0, 0.0));
+        const auto& interval = *taxon.getAgeRange();
         double taxon_max_age = interval.getMax();
         max_age = taxon_max_age;
     }
