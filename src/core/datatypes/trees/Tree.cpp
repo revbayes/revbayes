@@ -988,8 +988,10 @@ void RevBayesCore::Tree::checkTaxonAges(bool forceAdjust)
         if ( !node->isTip() ) continue;
         Taxon taxon = node->getTaxon();
         
-        // COMPAT(age-range): Preserve validation/repair against [0,0] when no range was supplied.
-        const auto interval = taxon.getAgeRange().value_or(TimeInterval(0.0, 0.0));
+        // An absent constraint imposes no age bound; explicit [0,0] still requires an extant tip.
+        const auto& range = taxon.getAgeRange();
+        if (not range) continue;
+        const auto& interval = *range;
         if ( node->getAge() < interval.getMin() )
         {
             if (forceAdjust)
