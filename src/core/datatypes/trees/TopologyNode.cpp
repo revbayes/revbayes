@@ -2120,10 +2120,11 @@ void TopologyNode::scaleAgesFromTaxonAgesMBL(double minbl)
 
 void TopologyNode::setAge(double a, bool propagate)
 {
-    // COMPAT(age-range): Preserve [0,0] and its zero-width exemption for an unset constraint.
-    const auto interval = getTaxon().getAgeRange().value_or(TimeInterval(0.0, 0.0));
-    if (getTaxon().getName() != "" and not interval.zeroWidth()) {
-        if (not interval.contains(a)) {
+    // An unset range formerly acted as [0,0], which was already exempt as zero-width.
+    // Check presence directly while retaining both exemptions for explicit intervals.
+    const auto& interval = getTaxon().getAgeRange();
+    if (interval and getTaxon().getName() != "" and not interval->zeroWidth()) {
+        if (not interval->contains(a)) {
             std::cerr << "Attempting to set new age of taxon " << getTaxon().getName() << " incompatible with age range" << std::endl;
 
             // NOTE: This code intentionally constructs trees with different ages for sampled-ancestors-parents and sampled-ancestor-tips.
