@@ -39,6 +39,11 @@ FossilSiteTimeSlideUniformProposal::FossilSiteTimeSlideUniformProposal( Stochast
     taxa( t ),
     lambda( l )
 {
+    // Explicit bounds define one proposal interval; do not combine a supplied endpoint with
+    // an implicit endpoint from the taxon. Validate before registering any DAG nodes.
+    if ((min == nullptr) != (max == nullptr))
+        throw RbException() << "mv" << getProposalName() << ": min and max must be supplied together.";
+
     // tell the base class to add the node
     addNode( tree );
     addNode( origin );
