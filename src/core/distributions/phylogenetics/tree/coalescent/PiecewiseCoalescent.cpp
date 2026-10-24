@@ -1,3 +1,4 @@
+#include "TimeInterval.h"
 #include <cstddef>
 #include <algorithm>
 #include <cmath>
@@ -435,7 +436,9 @@ std::vector<double> PiecewiseCoalescent::simulateCoalescentAges( size_t n ) cons
     size_t num_taxa_at_present = 0;
     for (size_t i = 0; i < num_taxa; ++i)
     {
-        double a = taxa[i].getMinAge();
+        // COMPAT(age-range): Preserve the zero sampling-age default used by this construction/simulation.
+        const auto interval = taxa[i].getAgeRange().value_or(TimeInterval(0.0, 0.0));
+        double a = interval.getMin();
         if ( a > 0.0 )
         {
             serial_tip_ages.push_back(a);

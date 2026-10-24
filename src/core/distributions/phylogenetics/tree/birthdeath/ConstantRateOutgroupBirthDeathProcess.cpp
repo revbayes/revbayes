@@ -399,7 +399,9 @@ void ConstantRateOutgroupBirthDeathProcess::simulateOutgroupTree( void )
         TopologyNode* node = new TopologyNode( taxa_ingroup[i], i );
         
         // Initialize this tip at the lower bound of its age constraint.
-        node->setAge( taxa_ingroup[i].getMinAge() );
+        // COMPAT(age-range): Preserve the zero sampling-age default used by this construction/simulation.
+        const auto ingroup_interval = taxa_ingroup[i].getAgeRange().value_or(TimeInterval(0.0, 0.0));
+        node->setAge( ingroup_interval.getMin() );
         
         // add the new node to the list
         nodes_ingroup.push_back( node );
@@ -412,7 +414,9 @@ void ConstantRateOutgroupBirthDeathProcess::simulateOutgroupTree( void )
         TopologyNode* node = new TopologyNode( taxa_outgroup[i], i );
         
         // Initialize this tip at the lower bound of its age constraint.
-        node->setAge( taxa_outgroup[i].getMinAge() );
+        // COMPAT(age-range): Preserve the zero sampling-age default used by this construction/simulation.
+        const auto outgroup_interval = taxa_outgroup[i].getAgeRange().value_or(TimeInterval(0.0, 0.0));
+        node->setAge( outgroup_interval.getMin() );
         
         // add the new node to the list
         nodes_outgroup.push_back( node );

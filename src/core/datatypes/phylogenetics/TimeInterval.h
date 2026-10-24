@@ -18,7 +18,6 @@ namespace RevBayesCore {
     class TimeInterval {
         
     public:
-        TimeInterval(); //!< Default point interval [0, 0].
         TimeInterval(double min, double max);
         
         // Compare endpoints, ordered by maximum first and minimum second.

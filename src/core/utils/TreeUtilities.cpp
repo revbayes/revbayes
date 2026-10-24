@@ -1,3 +1,4 @@
+#include "TimeInterval.h"
 #include <cmath>
 #include <cstdlib>
 #include <boost/functional/hash/extensions.hpp>
@@ -1761,8 +1762,10 @@ Tree* RevBayesCore::TreeUtilities::startingTreeInitializer(Tree& treeToChange, s
     for (size_t i = 0; i < tax_num; ++i)
     {
         // Grab the minimum and maximum ages of the i-th taxon from the taxaToCopy vector
-        double min_age = std::round(taxaToCopy[i].getMinAge() * factor) / factor;
-        double max_age = std::round(taxaToCopy[i].getMaxAge() * factor) / factor;
+        // COMPAT(age-range): Preserve validation/repair against [0,0] when no range was supplied.
+        const auto interval = taxaToCopy[i].getAgeRange().value_or(TimeInterval(0.0, 0.0));
+        double min_age = std::round(interval.getMin() * factor) / factor;
+        double max_age = std::round(interval.getMax() * factor) / factor;
         // Get the age of the tree tip of the same name
         double tip_age = std::round(treeToChange.getTipNodeWithName( taxaToCopy[i].getName() ).getAge() * factor) / factor;
 

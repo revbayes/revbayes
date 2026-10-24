@@ -1,3 +1,4 @@
+#include "TimeInterval.h"
 #include <cmath>
 #include <iostream>
 #include <cstddef>
@@ -161,7 +162,9 @@ double FossilTipTimeSlideUniformProposal::doProposal( void )
     {
         // adjust min age given taxon data
         Taxon& taxon = node.getTaxon();
-        min_age = taxon.getMinAge();
+        // COMPAT(age-range): Preserve [0,0] proposal bounds when neither taxon nor move supplies them.
+        const auto interval = taxon.getAgeRange().value_or(TimeInterval(0.0, 0.0));
+        min_age = interval.getMin();
     }
     else
     {
@@ -172,7 +175,9 @@ double FossilTipTimeSlideUniformProposal::doProposal( void )
     {
         // adjust max age given taxon data
         Taxon& taxon = node.getTaxon();
-        double taxon_max_age = taxon.getMaxAge();
+        // COMPAT(age-range): Preserve [0,0] proposal bounds when neither taxon nor move supplies them.
+        const auto interval = taxon.getAgeRange().value_or(TimeInterval(0.0, 0.0));
+        double taxon_max_age = interval.getMax();
         max_age = taxon_max_age;
     }
     else

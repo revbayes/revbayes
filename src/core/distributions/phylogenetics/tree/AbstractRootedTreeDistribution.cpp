@@ -1,3 +1,4 @@
+#include "TimeInterval.h"
 #include <cstddef>
 #include <algorithm>
 #include <cmath>
@@ -208,14 +209,15 @@ double AbstractRootedTreeDistribution::computeLnProbability( void )
 
                 }
                 auto taxon = the_node.getTaxon();
-                const auto& interval = taxon.getAgeRange();
+                // COMPAT(age-range): Preserve the [0,0] zero-width exemption for unset constraints.
+                const auto interval = taxon.getAgeRange().value_or(TimeInterval(0.0, 0.0));
                 if (taxon.getName() != "" and not interval.zeroWidth())
                 {
                     if (not interval.contains(the_node.getAge()))
                     {
                         std::cerr << "Age of taxon " << taxon.getName() << " incompatible with age range";
                         return withReason(Double::neginf)<< "Pr(tree)=0: taxon " << taxon.getName() <<" has age "<<the_node.getAge()
-                                                         <<" outside of age range ["<<taxon.getMinAge()<<", "<<interval.getMax()<<"]";
+                                                         <<" outside of age range ["<<interval.getMin()<<", "<<interval.getMax()<<"]";
                     }
                 }
             }
@@ -714,7 +716,9 @@ void AbstractRootedTreeDistribution::simulateTree( bool alwaysReturn )
         TopologyNode* node = new TopologyNode( taxa[i], i );
 
         // Initialize this tip at the lower bound of its age constraint.
-        node->setAge( taxa[i].getMinAge() );
+        // COMPAT(age-range): Preserve the zero sampling-age default used by this construction/simulation.
+        const auto interval = taxa[i].getAgeRange().value_or(TimeInterval(0.0, 0.0));
+        node->setAge( interval.getMin() );
 
         // add the new node to the list
         nodes.push_back( node );

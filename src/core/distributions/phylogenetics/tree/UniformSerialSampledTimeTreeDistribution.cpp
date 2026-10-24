@@ -1,3 +1,4 @@
+#include "TimeInterval.h"
 #include <cstddef>
 #include <algorithm>
 #include <cmath>
@@ -293,7 +294,11 @@ std::vector<double> UniformSerialSampledTimeTreeDistribution::simulateCoalescent
     // taxon is active.  Trying to remove two active taxa then leads to a crash.
     std::vector<double> sorted_taxon_ages;
     for(auto& taxon: taxa)
-        sorted_taxon_ages.push_back(taxon.getMinAge());
+    {
+        // COMPAT(age-range): Preserve the zero sampling-age default used by this construction/simulation.
+        const auto interval = taxon.getAgeRange().value_or(TimeInterval(0.0, 0.0));
+        sorted_taxon_ages.push_back(interval.getMin());
+    }
     std::sort(sorted_taxon_ages.begin(), sorted_taxon_ages.end());
 
     for(size_t i = 0; i < num_ages; ++i)
@@ -343,7 +348,9 @@ void UniformSerialSampledTimeTreeDistribution::simulateTree( void )
         const std::string& name = taxa[i].getName();
         node->setName(name);
         node->setSpeciesName(taxa[i].getSpeciesName());
-        node->setAge(taxa[i].getMinAge());
+        // COMPAT(age-range): Preserve the zero sampling-age default used by this construction/simulation.
+        const auto interval = taxa[i].getAgeRange().value_or(TimeInterval(0.0, 0.0));
+        node->setAge(interval.getMin());
         node->setTaxon(taxa[i]);
         // add to tips
         nodes.push_back(node);

@@ -988,18 +988,20 @@ void RevBayesCore::Tree::checkTaxonAges(bool forceAdjust)
         if ( !node->isTip() ) continue;
         Taxon taxon = node->getTaxon();
         
-        if ( node->getAge() < taxon.getMinAge() )
+        // COMPAT(age-range): Preserve validation/repair against [0,0] when no range was supplied.
+        const auto interval = taxon.getAgeRange().value_or(TimeInterval(0.0, 0.0));
+        if ( node->getAge() < interval.getMin() )
         {
             if (forceAdjust)
             {
-                node->setAge(taxon.getMinAge());
+                node->setAge(interval.getMin());
                 
                 // only notify the user if we are making a non-trivial adjustment
-                if ( taxon.getMinAge() - node->getAge() > 1e-06 * node->getAge() )
+                if ( interval.getMin() - node->getAge() > 1e-06 * node->getAge() )
                 {
                     std::stringstream msg;
                     msg << "Age of taxon " << taxon.getName() << " was below the specified minimum and has been adjusted from ";
-                    msg << std::setprecision(6) << std::noshowpoint << node->getAge() << " to " << taxon.getMinAge() << ".";
+                    msg << std::setprecision(6) << std::noshowpoint << node->getAge() << " to " << interval.getMin() << ".";
                     RBOUT( msg.str() );
                 }
             }
@@ -1008,18 +1010,18 @@ void RevBayesCore::Tree::checkTaxonAges(bool forceAdjust)
                 throw RbException() << "Age of taxon " << taxon.getName() << " is below the specified minimum.";
             }
         }
-        if ( node->getAge() > taxon.getMaxAge() )
+        if ( node->getAge() > interval.getMax() )
         {
             if (forceAdjust)
             {
-                node->setAge(taxon.getMaxAge());
+                node->setAge(interval.getMax());
                 
                 // only notify the user if we are making a non-trivial adjustment
-                if ( node->getAge() - taxon.getMaxAge() > 1e-06 * node->getAge() )
+                if ( node->getAge() - interval.getMax() > 1e-06 * node->getAge() )
                 {
                     std::stringstream msg;
                     msg << "Age of taxon " << taxon.getName() << " was above the specified maximum and has been adjusted from ";
-                    msg << std::setprecision(6) << std::noshowpoint << node->getAge() << " to " << taxon.getMaxAge() << ".";
+                    msg << std::setprecision(6) << std::noshowpoint << node->getAge() << " to " << interval.getMax() << ".";
                     RBOUT( msg.str() );
                 }
             }

@@ -8,11 +8,6 @@
 using namespace RevBayesCore;
 
 
-TimeInterval::TimeInterval() : min(0.0), max(0.0)
-{
-}
-
-
 TimeInterval::TimeInterval(double mn, double mx) : min(mn), max(mx)
 {
     assert(not std::isnan(mn) and not std::isnan(mx));
@@ -85,7 +80,7 @@ bool TimeInterval::contains(double age) const
 }
 
 
-// A point interval has equal endpoints, including the default [0, 0].
+// A point interval has equal endpoints, including [0, 0].
 bool TimeInterval::zeroWidth() const
 {
     return getMin() == getMax();
