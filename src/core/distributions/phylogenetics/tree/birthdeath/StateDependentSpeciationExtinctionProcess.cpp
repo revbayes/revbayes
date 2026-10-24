@@ -217,6 +217,16 @@ std::vector<double> StateDependentSpeciationExtinctionProcess::calculateTotalAna
  */
 double StateDependentSpeciationExtinctionProcess::computeLnProbability( void )
 {
+    // Attached explicit intervals restrict tip ages, including point intervals. Absence is
+    // not an implicit [0,0] constraint, and a taxon name does not determine whether bounds apply.
+    for (const auto* node : value->getNodes())
+    {
+        if (not node->isTip()) continue;
+        const auto& interval = node->getTaxon().getAgeRange();
+        if (interval and not interval->contains(node->getAge()))
+            return RbConstants::Double::neginf;
+    }
+
     
     // check that the ages are in correct chronological order
     // i.e., no child is older than its parent
