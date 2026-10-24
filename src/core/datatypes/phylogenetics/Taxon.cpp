@@ -134,9 +134,9 @@ void Taxon::addOccurrence( const TimeInterval &d )
 {
     occurrences[d]++;
 
-    // COMPAT(age-range): The first occurrence formerly covered the default [0,0] too.
-    // Revisit whether an unset range should instead adopt that occurrence alone.
-    age_range = coveringInterval(age_range.value_or(TimeInterval(0.0, 0.0)), d);
+    // The first occurrence establishes an absent constraint. An explicit range, including
+    // [0,0], still contributes to the interval covering all occurrences.
+    age_range = age_range ? coveringInterval(*age_range, d) : d;
 }
 
 
