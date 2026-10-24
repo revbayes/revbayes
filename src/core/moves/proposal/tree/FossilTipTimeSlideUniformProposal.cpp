@@ -149,6 +149,13 @@ double FossilTipTimeSlideUniformProposal::doProposal( void )
     
     TopologyNode& node = tau.getNode(node_index);
 
+    // An absent constraint is not a fixed age. Require an attached interval even when the move
+    // supplies bounds, so a missing constraint cannot silently disable an age-changing move.
+    if (not node.getTaxon().getAgeRange())
+        throw RbException() << "mv" << getProposalName() << ": taxon '" << node.getName()
+                            << "' has no attached age interval; this move requires one.";
+
+
     TopologyNode& parent = node.getParent();
 
     // we need to work with the times

@@ -112,6 +112,16 @@ double FossilSiteTimeSlideUniformProposal::doProposal( void )
     // proposal is the only reliable way to get rid of this problem, so we just do that and eat the extra computational cost.
 
 
+    // Site arguments identify taxa by name; constraints must be attached to every affected tree
+    // tip. Check them all before calculating bounds or changing ages, even with explicit bounds.
+    for (const auto& taxon : taxa)
+    {
+        const auto& tip = tau.getTipNodeWithName(taxon.getName());
+        if (not tip.getTaxon().getAgeRange())
+            throw RbException() << "mv" << getProposalName() << ": taxon '" << tip.getName()
+                                << "' has no attached age interval; this move requires one.";
+    }
+
     // change this to node_indices
     node_index = tree->getValue().getTipIndex( taxa[0].getName() );
 
