@@ -209,10 +209,10 @@ double AbstractRootedTreeDistribution::computeLnProbability( void )
 
                 }
                 auto taxon = the_node.getTaxon();
-                // Absence formerly supplied the exempt point interval [0,0]. Testing presence
-                // directly preserves that behavior, including for non-finite proposed ages.
+                // Presence identifies an explicit constraint independently of the taxon name.
+                // Retain the point-interval exemption until its loading behavior is handled separately.
                 const auto& interval = taxon.getAgeRange();
-                if (interval and taxon.getName() != "" and not interval->zeroWidth())
+                if (interval and not interval->zeroWidth())
                 {
                     if (not interval->contains(the_node.getAge()))
                     {
