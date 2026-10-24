@@ -168,7 +168,7 @@ jobs:
             echo "BOOST_VER=$ver" >> "$GITHUB_ENV"
             echo "BOOST_FROM_SOURCE=true" >> "$GITHUB_ENV"
           else
-            brew install boost ccache coreutils meson
+            brew install boost ccache
           fi
 
     - name: Cache boost
