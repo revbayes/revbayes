@@ -209,15 +209,16 @@ double AbstractRootedTreeDistribution::computeLnProbability( void )
 
                 }
                 auto taxon = the_node.getTaxon();
-                // COMPAT(age-range): Preserve the [0,0] zero-width exemption for unset constraints.
-                const auto interval = taxon.getAgeRange().value_or(TimeInterval(0.0, 0.0));
-                if (taxon.getName() != "" and not interval.zeroWidth())
+                // Absence formerly supplied the exempt point interval [0,0]. Testing presence
+                // directly preserves that behavior, including for non-finite proposed ages.
+                const auto& interval = taxon.getAgeRange();
+                if (interval and taxon.getName() != "" and not interval->zeroWidth())
                 {
-                    if (not interval.contains(the_node.getAge()))
+                    if (not interval->contains(the_node.getAge()))
                     {
                         std::cerr << "Age of taxon " << taxon.getName() << " incompatible with age range";
                         return withReason(Double::neginf)<< "Pr(tree)=0: taxon " << taxon.getName() <<" has age "<<the_node.getAge()
-                                                         <<" outside of age range ["<<interval.getMin()<<", "<<interval.getMax()<<"]";
+                                                         <<" outside of age range ["<<interval->getMin()<<", "<<interval->getMax()<<"]";
                     }
                 }
             }
