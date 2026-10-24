@@ -238,6 +238,17 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::buildSerialSample
 
 double GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::computeLnProbability(void)
 {
+    // Attached explicit intervals restrict tip ages, including point intervals. Absence is
+    // not an implicit [0,0] constraint, and a taxon name does not determine whether bounds apply.
+    // Check before returning a cached density: changing taxon metadata need not dirty that cache.
+    for (const auto* node : value->getNodes())
+    {
+        if (not node->isTip()) continue;
+        const auto& interval = node->getTaxon().getAgeRange();
+        if (interval and not interval->contains(node->getAge()))
+            return RbConstants::Double::neginf;
+    }
+
 
 	// make sure we need to recompute
 	if ( probability_dirty == false )
