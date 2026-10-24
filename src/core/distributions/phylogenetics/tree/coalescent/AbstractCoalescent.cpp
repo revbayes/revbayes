@@ -352,10 +352,9 @@ void AbstractCoalescent::simulateHeterochronousTree( void )
         // get the node from the list
         TopologyNode* node = new TopologyNode(i);
         
-        // set name and age
-        const std::string& name = taxa[i].getName();
-        node->setName(name);
-        node->setSpeciesName(taxa[i].getSpeciesName());
+        // Preserve the explicit sampling-age constraint as well as the names. Copying only
+        // names would turn a constrained dated sample into an unconstrained tree tip.
+        node->setTaxon(taxa[i]);
         // COMPAT(age-range): Preserve the zero sampling-age default used by this construction/simulation.
         const auto interval = taxa[i].getAgeRange().value_or(TimeInterval(0.0, 0.0));
         node->setAge(interval.getMin());
