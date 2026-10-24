@@ -2120,10 +2120,10 @@ void TopologyNode::scaleAgesFromTaxonAgesMBL(double minbl)
 
 void TopologyNode::setAge(double a, bool propagate)
 {
-    // An unset range formerly acted as [0,0], which was already exempt as zero-width.
-    // Check presence directly while retaining both exemptions for explicit intervals.
+    // Explicit constraints do not depend on a taxon name. Keep the point-interval exemption
+    // here: changing assignment behavior is separate from enforcing probability support.
     const auto& interval = getTaxon().getAgeRange();
-    if (interval and getTaxon().getName() != "" and not interval->zeroWidth()) {
+    if (interval and not interval->zeroWidth()) {
         if (not interval->contains(a)) {
             std::cerr << "Attempting to set new age of taxon " << getTaxon().getName() << " incompatible with age range" << std::endl;
 
