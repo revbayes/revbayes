@@ -188,6 +188,19 @@ double AbstractRootedTreeDistribution::computeLnProbability( void )
     {
 
         const TopologyNode &the_node = *(*it);
+        const auto& taxon = the_node.getTaxon();
+        // Each attached interval constrains its node, including roots and internal sampled ancestors.
+        // Absence imposes no bound; neither the taxon name nor the interval width changes support.
+        const auto& interval = taxon.getAgeRange();
+        if (interval)
+        {
+            if (not interval->contains(the_node.getAge()))
+            {
+                std::cerr << "Age of taxon " << taxon.getName() << " incompatible with age range";
+                return withReason(Double::neginf)<< "Pr(tree)=0: taxon " << taxon.getName() <<" has age "<<the_node.getAge()
+                                                 <<" outside of age range ["<<interval->getMin()<<", "<<interval->getMax()<<"]";
+            }
+        }
         if ( the_node.isRoot() == false )
         {
             if( the_node.isTip() )
@@ -208,19 +221,7 @@ double AbstractRootedTreeDistribution::computeLnProbability( void )
                     }
 
                 }
-                auto taxon = the_node.getTaxon();
-                // Every explicit interval, including [a,a] and [0,0], constrains the tip age.
-                // An absent interval supplies no bound; initialization defaults are not constraints.
-                const auto& interval = taxon.getAgeRange();
-                if (interval)
-                {
-                    if (not interval->contains(the_node.getAge()))
-                    {
-                        std::cerr << "Age of taxon " << taxon.getName() << " incompatible with age range";
-                        return withReason(Double::neginf)<< "Pr(tree)=0: taxon " << taxon.getName() <<" has age "<<the_node.getAge()
-                                                         <<" outside of age range ["<<interval->getMin()<<", "<<interval->getMax()<<"]";
-                    }
-                }
+
             }
             if( the_node.getAge() - the_node.getParent().getAge() > 0 )
             {
