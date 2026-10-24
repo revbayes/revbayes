@@ -1,3 +1,4 @@
+#include "TimeInterval.h"
 #include "DistanceMatrix.h"
 #include "RbConstants.h"
 #include "Taxon.h"
@@ -33,7 +34,9 @@ Tree* UPGMA::constructTree(const DistanceMatrix &d) const
     for (size_t i=0; i<num_tips; ++i)
     {
         TopologyNode* node = new TopologyNode( taxa[i], i );
-        node->setAge( taxa[i].getMinAge() );
+        // COMPAT(age-range): Preserve the zero sampling-age default used by this construction/simulation.
+        const auto interval = taxa[i].getAgeRange().value_or(TimeInterval(0.0, 0.0));
+        node->setAge( interval.getMin() );
         active_nodes[i] = node;
     }
     

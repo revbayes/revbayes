@@ -312,7 +312,9 @@ void AbstractCoalescent::simulateTree( void )
     bool homochronous = true;
     for (size_t i=0; i<num_taxa; ++i)
     {
-        if ( taxa[i].getMinAge() > 0.0 )
+        // COMPAT(age-range): Preserve the zero sampling-age default used by this construction/simulation.
+        const auto interval = taxa[i].getAgeRange().value_or(TimeInterval(0.0, 0.0));
+        if ( interval.getMin() > 0.0 )
         {
           homochronous = false;
           break;
@@ -354,7 +356,9 @@ void AbstractCoalescent::simulateHeterochronousTree( void )
         const std::string& name = taxa[i].getName();
         node->setName(name);
         node->setSpeciesName(taxa[i].getSpeciesName());
-        node->setAge(taxa[i].getMinAge());
+        // COMPAT(age-range): Preserve the zero sampling-age default used by this construction/simulation.
+        const auto interval = taxa[i].getAgeRange().value_or(TimeInterval(0.0, 0.0));
+        node->setAge(interval.getMin());
         // add to tips
         nodes.push_back(node);
     }
