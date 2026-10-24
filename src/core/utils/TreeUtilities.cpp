@@ -1762,8 +1762,10 @@ Tree* RevBayesCore::TreeUtilities::startingTreeInitializer(Tree& treeToChange, s
     for (size_t i = 0; i < tax_num; ++i)
     {
         // Grab the minimum and maximum ages of the i-th taxon from the taxaToCopy vector
-        // COMPAT(age-range): Preserve validation/repair against [0,0] when no range was supplied.
-        const auto interval = taxaToCopy[i].getAgeRange().value_or(TimeInterval(0.0, 0.0));
+        // Absence supplies no bounds to validate. Explicit intervals retain the existing rounding.
+        const auto& range = taxaToCopy[i].getAgeRange();
+        if (not range) continue;
+        const auto& interval = *range;
         double min_age = std::round(interval.getMin() * factor) / factor;
         double max_age = std::round(interval.getMax() * factor) / factor;
         // Get the age of the tree tip of the same name
