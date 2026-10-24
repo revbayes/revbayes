@@ -167,6 +167,19 @@ void AbstractMultispeciesCoalescentGenewise::buildRandomBinaryTree(std::vector< 
 
 double AbstractMultispeciesCoalescentGenewise::computeLnProbability( void )
 {
+    // Check each gene tree against its attached explicit tip constraints; absent ranges
+    // impose no bound, whereas point intervals remain constraints.
+    for (const auto& tree : *value)
+    {
+        for (const auto* node : tree.getNodes())
+        {
+            if (not node->isTip()) continue;
+            const auto& interval = node->getTaxon().getAgeRange();
+            if (interval and not interval->contains(node->getAge()))
+                return RbConstants::Double::neginf;
+        }
+    }
+
     resetTipAllocations();
 
     // variable declarations and initialization
