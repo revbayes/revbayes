@@ -413,6 +413,16 @@ double UltrametricTreeDistribution::computeBranchRateLnProbability(const Tree &m
 /* Compute probability */
 double UltrametricTreeDistribution::computeLnProbability( void )
 {
+    // Check the actual tree before passing a copy to the prior: its setValue can repair
+    // ages, concealing violations in the original tree. Absent intervals impose no bound.
+    for (const auto* node : value->getNodes())
+    {
+        if (not node->isTip()) continue;
+        const auto& interval = node->getTaxon().getAgeRange();
+        if (interval and not interval->contains(node->getAge()))
+            return RbConstants::Double::neginf;
+    }
+
 
     // create a temporary copy of the this tree
     const Tree &my_time_tree = *value;
