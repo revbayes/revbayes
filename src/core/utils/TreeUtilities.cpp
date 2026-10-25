@@ -1728,7 +1728,7 @@ void RevBayesCore::TreeUtilities::setAgesRecursively(TopologyNode& node, double 
  * @param agePrecision decimal places used to validate supplied tip ages
  * @param repairAges validate and repair accepted endpoint discrepancies; false only attaches metadata
  */
-Tree* RevBayesCore::TreeUtilities::prepareTreeTaxa(Tree& treeToChange, const std::vector<Taxon>& taxaToCopy, std::int64_t agePrecision, bool repairAges)
+void RevBayesCore::TreeUtilities::prepareTreeTaxa(Tree& treeToChange, const std::vector<Taxon>& taxaToCopy, std::int64_t agePrecision, bool repairAges)
 {
     // Check that the user-supplied tree contains the same number of tips as the vector of taxa
     size_t tip_num = treeToChange.getNumberOfTips();
@@ -1841,8 +1841,6 @@ Tree* RevBayesCore::TreeUtilities::prepareTreeTaxa(Tree& treeToChange, const std
     
     for (const auto& [node, age] : adjusted) node->setAge(age);
 
-    RevBayesCore::Tree *p = &treeToChange;
-    return p;
 }
 
 
