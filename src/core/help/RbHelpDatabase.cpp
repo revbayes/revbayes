@@ -5635,7 +5635,11 @@ individuals.
 
 Use `setAgeRange(minAge, maxAge)` to replace both age bounds together. The bounds must be
 nonnegative, must not be NaN, and must satisfy `minAge <= maxAge`; equal bounds specify an exact age.
-An invalid call leaves the existing range unchanged.)");
+An invalid call leaves the existing range unchanged.
+
+`getMinAge()` and `getMaxAge()` return the endpoints of an existing range; `getAge()` is an alias
+for `getMinAge()`. These getters throw if no range has been supplied. Use `hasAgeRange()` to check
+before querying a potentially absent range.)");
 	help_strings[string("taxon")][string("example")] = string(R"(# we can create a Taxon object
 taxon_gorilla = taxon("Gorilla_gorilla")
 # we can create a dummy vector of Taxon objects for simulation
