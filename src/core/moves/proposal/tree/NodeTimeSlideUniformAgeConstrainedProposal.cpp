@@ -8,6 +8,7 @@
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
 #include "RbException.h"
+#include "RbMathHelper.h"
 #include "Clade.h"
 #include "Proposal.h"
 #include "RbVector.h"
@@ -150,8 +151,9 @@ double NodeTimeSlideUniformAgeConstrainedProposal::doProposal( void )
     // now we store all necessary values
     stored_age = our_age;
     
-    // draw new ages and compute the hastings ratio at the same time
-    double our_new_age = (max_age-min_age) * rng->uniform01() + min_age;
+    // Draw new ages and compute the Hastings ratio at the same time. Helper::fma makes (max - min)*u + min
+    // a single rounding so platforms match.
+    double our_new_age = RbMath::Helper::fma(max_age - min_age, rng->uniform01(), min_age);
     
     
     // set the age
