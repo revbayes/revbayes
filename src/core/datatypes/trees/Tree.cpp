@@ -977,58 +977,6 @@ std::vector<Taxon> Tree::getTaxa() const
 }
 
 
-// Repair only small checkpoint-rounding errors, without relaxing probability support.
-// Plan all changes first so an incompatible bound or chronology cannot leave a partial repair.
-void RevBayesCore::Tree::repairCheckpointTaxonAges()
-{
-    constexpr double tolerance = 1.0e-6;
-    std::map<TopologyNode*, double> adjusted;
-    for (auto* node : nodes)
-    {
-        const auto& taxon = node->getTaxon();
-        const auto& range = taxon.getAgeRange();
-        if (not range) continue;
-        const auto& interval = *range;
-        const double age = node->getAge();
-        if (not std::isfinite(age))
-            throw RbException() << "Non-finite checkpoint age for taxon " << taxon.getName();
-        if (interval.contains(age)) continue;
-        const double endpoint = age < interval.getMin() ? interval.getMin() : interval.getMax();
-        if (std::abs(age - endpoint) > tolerance)
-            throw RbException() << "Checkpoint age " << age << " for taxon " << taxon.getName()
-                << " is outside [" << interval.getMin() << ", " << interval.getMax()
-                << "] by more than " << tolerance;
-        auto* target = node->isSampledAncestorTip() ? &node->getParent() : node;
-        const auto [it, inserted] = adjusted.emplace(target, endpoint);
-        if (not inserted and it->second != endpoint)
-            throw RbException("Conflicting sampled-ancestor ages during checkpoint restoration.");
-    }
-
-    // Changing an SA tip also changes its parent and any other SA children. Check the complete
-    // resulting chronology and all attached constraints before calling the propagating age setter.
-    const auto restoredAge = [&adjusted](TopologyNode* node)
-    {
-        auto* target = node->isSampledAncestorTip() ? &node->getParent() : node;
-        auto it = adjusted.find(target);
-        return it == adjusted.end() ? node->getAge() : it->second;
-    };
-    for (auto* node : nodes)
-    {
-        const double age = restoredAge(node);
-        if (not std::isfinite(age) or not std::isfinite(node->getAge()) or
-            std::abs(age - node->getAge()) > tolerance)
-            throw RbException("Checkpoint repair would change a node age by more than the rounding tolerance.");
-        if (not node->isRoot() and not (age <= restoredAge(&node->getParent())))
-            throw RbException("Inconsistent checkpoint tree chronology after tip-age repair.");
-        if (node->isSampledAncestorTip() and age != restoredAge(&node->getParent()))
-            throw RbException("Inconsistent checkpoint sampled-ancestor age after tip-age repair.");
-        const auto& range = node->getTaxon().getAgeRange();
-        if (range and not range->contains(age))
-            throw RbException() << "Incompatible checkpoint age constraints for taxon "
-                << node->getTaxon().getName();
-    }
-    for (const auto& [node, age] : adjusted) node->setAge(age);
-}
 
 /**
  * Returns a map of the taxa to their BitSet indices.

@@ -98,7 +98,7 @@ TopologyConstrainedTreeDistribution::TopologyConstrainedTreeDistribution(TypedDi
             
             try
             {
-                RevBayesCore::Tree *my_tree = TreeUtilities::startingTreeInitializer( *t, taxa, age_check_precision, true );
+                RevBayesCore::Tree *my_tree = TreeUtilities::prepareTreeTaxa( *t, taxa, age_check_precision, true );
                 value = my_tree->clone();
             }
             catch (RbException &e)
