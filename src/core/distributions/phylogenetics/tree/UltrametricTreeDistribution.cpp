@@ -416,12 +416,8 @@ double UltrametricTreeDistribution::computeLnProbability( void )
     // Check the actual tree before passing a copy to the prior: its setValue can repair
     // ages, concealing violations in the original tree. Check all nodes, including roots and
     // internal sampled ancestors; absent intervals impose no bound.
-    for (const auto* node : value->getNodes())
-    {
-        const auto& interval = node->getTaxon().getAgeRange();
-        if (interval and not interval->contains(node->getAge()))
-            return RbConstants::Double::neginf;
-    }
+    if (not TreeUtilities::nodeAgesWithinRanges(*value))
+        return RbConstants::Double::neginf;
 
 
     // create a temporary copy of the this tree

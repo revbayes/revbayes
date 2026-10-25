@@ -14,6 +14,7 @@
 #include "RbConstants.h"
 #include "RbMathCombinatorialFunctions.h"
 #include "TopologyNode.h"
+#include "TreeUtilities.h"
 #include "RbException.h"
 #include "Taxon.h"
 #include "Tree.h"
@@ -167,16 +168,10 @@ void AbstractMultispeciesCoalescentGenewise::buildRandomBinaryTree(std::vector< 
 
 double AbstractMultispeciesCoalescentGenewise::computeLnProbability( void )
 {
-    // Check every node of each gene tree, including roots and internal sampled ancestors.
-    // Attached intervals constrain their nodes regardless of name or width; absence imposes no bound.
     for (const auto& tree : *value)
     {
-        for (const auto* node : tree.getNodes())
-        {
-            const auto& interval = node->getTaxon().getAgeRange();
-            if (interval and not interval->contains(node->getAge()))
-                return RbConstants::Double::neginf;
-        }
+        if (not TreeUtilities::nodeAgesWithinRanges(tree))
+            return RbConstants::Double::neginf;
     }
 
     resetTipAllocations();

@@ -13,6 +13,7 @@
 #include "RbConstants.h"
 #include "StochasticNode.h"
 #include "TopologyNode.h"
+#include "TreeUtilities.h"
 #include "SampledSpeciationBirthDeathProcess.h"
 #include "AbstractCharacterHistoryBirthDeathProcess.h"
 #include "BranchHistory.h"
@@ -166,14 +167,8 @@ SampledSpeciationBirthDeathProcess* SampledSpeciationBirthDeathProcess::clone( v
 /* Compute probability */
 double SampledSpeciationBirthDeathProcess::computeLnProbability( void )
 {
-    // Each attached interval constrains its node, including roots and internal sampled ancestors.
-    // Absence imposes no bound; neither the taxon name nor the interval width changes support.
-    for (const auto* node : value->getNodes())
-    {
-        const auto& interval = node->getTaxon().getAgeRange();
-        if (interval and not interval->contains(node->getAge()))
-            return RbConstants::Double::neginf;
-    }
+    if (not TreeUtilities::nodeAgesWithinRanges(*value))
+        return RbConstants::Double::neginf;
 
     // for now
     totalScaling = 0;
