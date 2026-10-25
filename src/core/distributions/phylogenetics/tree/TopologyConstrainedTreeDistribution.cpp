@@ -60,6 +60,7 @@ TopologyConstrainedTreeDistribution::TopologyConstrainedTreeDistribution(TypedDi
     num_backbones( 0 ),
     use_multiple_backbones( false ),
     starting_tree( t ),
+    age_check_precision( age_check_precision ),
     rooting_known( false ),
     is_rooted( true )
 {
@@ -139,6 +140,7 @@ TopologyConstrainedTreeDistribution::TopologyConstrainedTreeDistribution(const T
     num_backbones( d.num_backbones ),
     use_multiple_backbones( d.use_multiple_backbones ),
     starting_tree( (d.starting_tree==NULL ? NULL : d.starting_tree->clone()) ),
+    age_check_precision( d.age_check_precision ),
     rooting_known( d.rooting_known ),
     is_rooted( d.is_rooted )
 {
@@ -215,6 +217,7 @@ TopologyConstrainedTreeDistribution& TopologyConstrainedTreeDistribution::operat
         num_backbones                   = d.num_backbones;
         use_multiple_backbones          = d.use_multiple_backbones;
         starting_tree                   = (d.starting_tree == NULL ? NULL : d.starting_tree->clone());
+        age_check_precision             = d.age_check_precision;
         rooting_known                   = d.rooting_known;
         is_rooted                       = d.is_rooted;
 
@@ -1387,4 +1390,19 @@ void TopologyConstrainedTreeDistribution::restoreSpecialization(const DagNode *r
 void TopologyConstrainedTreeDistribution::repairCheckpointValue(Tree& tree)
 {
     base_distribution->repairCheckpointValue(tree);
+}
+
+
+// Match this wrapper's initial-tree preparation where it supplies its own precision. Other bases
+// retain their own preparation policy; do not apply two potentially different rounding rules.
+void TopologyConstrainedTreeDistribution::prepareForClamping(Tree& tree)
+{
+    auto* rooted = dynamic_cast<AbstractRootedTreeDistribution*>(base_distribution);
+    const auto& nodes = tree.getNodes();
+    const bool has_fossils = std::any_of(nodes.begin(), nodes.end(),
+        [](const TopologyNode* node) { return node->isTip() and node->isFossil(); });
+    if (rooted and has_fossils)
+        TreeUtilities::prepareTreeTaxa(tree, rooted->getTaxa(), age_check_precision, true);
+    else
+        base_distribution->prepareForClamping(tree);
 }

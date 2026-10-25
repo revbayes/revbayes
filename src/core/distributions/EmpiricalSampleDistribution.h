@@ -41,6 +41,7 @@ namespace RevBayesCore {
         RevLanguage::RevPtr<RevLanguage::RevVariable>       executeProcedure(const std::string &name, const std::vector<DagNode *> args, bool &found);
         void                                                redrawValue(void);
         void                                                setValue(RbVector<valueType> *v, bool f=false);
+        void prepareForClamping(RbVector<valueType>& v) override;
         void repairCheckpointValue(RbVector<valueType>& v) override;
         
     protected:
@@ -577,6 +578,13 @@ void RevBayesCore::EmpiricalSampleDistribution<valueType>::repairCheckpointValue
         internal_value_copy = v;
         setInternalDistributions();
     }
+}
+
+// Prepare each observation before setValue installs it and builds any private distribution copies.
+template<class valueType>
+void RevBayesCore::EmpiricalSampleDistribution<valueType>::prepareForClamping(RbVector<valueType>& v)
+{
+    for (auto& element : v) base_distribution->prepareForClamping(element);
 }
 
 #endif

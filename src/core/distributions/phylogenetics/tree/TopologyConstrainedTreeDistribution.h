@@ -38,6 +38,7 @@ namespace RevBayesCore {
         virtual void                                        setValue(Tree *v, bool f=false);                                                                    //!< Set the current value, e.g. attach an observation (clamp)
         virtual bool                                        allowsSA(void) { return base_distribution->allowsSA(); }                                            //!< Checks if distribution is compatible with sampled ancestors
         
+        void prepareForClamping(Tree& tree) override;
         void repairCheckpointValue(Tree& tree) override;
 
     protected:
@@ -78,6 +79,7 @@ namespace RevBayesCore {
         size_t                                              num_backbones;
         bool                                                use_multiple_backbones;
         Tree*                                               starting_tree;
+        std::int64_t                                        age_check_precision;
         
         bool                                                rooting_known;
         bool                                                is_rooted;

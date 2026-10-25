@@ -1286,7 +1286,7 @@ Tree* RevBayesCore::TreeUtilities::minBLTimeScaling(Tree& treeToScale, const std
     
     if (tip_num != tax_num)
     {
-        throw RbException("Number of tips in the initial tree does not match the number of taxa.");
+        throw RbException("Number of tips in the supplied tree does not match the number of taxa.");
     }
     
     // Check that the tip labels of the user-supplied tree match those of the vector of taxa
@@ -1307,7 +1307,7 @@ Tree* RevBayesCore::TreeUtilities::minBLTimeScaling(Tree& treeToScale, const std
     std::sort(taxon_names.begin(), taxon_names.end());
     if (tip_names != taxon_names)
     {
-        throw RbException("Tip names of the initial tree do not match the taxon names.");
+        throw RbException("Tip names of the supplied tree do not match the taxon names.");
     }
     
     // Alter the tip age values of treeToScale in place
@@ -1723,7 +1723,7 @@ void RevBayesCore::TreeUtilities::setAgesRecursively(TopologyNode& node, double 
  * Attach taxon metadata and optionally prepare initial or observed tip ages using decimal rounding.
  * See repairCheckpointTaxonAges below: it uses an absolute tolerance instead. Keep the acceptance
  * rules separate until they can be unified deliberately.
- * @param treeToChange user-supplied starting tree to be modified
+ * @param treeToChange user-supplied tree to be modified
  * @param taxaToCopy vector of Taxon objects corresponding to the tips of the tree
  * @param agePrecision decimal places used to validate supplied tip ages
  * @param repairAges validate and repair accepted endpoint discrepancies; false only attaches metadata
@@ -1736,7 +1736,7 @@ Tree* RevBayesCore::TreeUtilities::prepareTreeTaxa(Tree& treeToChange, const std
     
     if (tip_num != tax_num)
     {
-        throw RbException("Number of tips in the initial tree does not match the number of taxa.");
+        throw RbException("Number of tips in the supplied tree does not match the number of taxa.");
     }
     
     // Check that the tip labels of the user-supplied tree match those of the vector of taxa
@@ -1757,7 +1757,7 @@ Tree* RevBayesCore::TreeUtilities::prepareTreeTaxa(Tree& treeToChange, const std
     std::sort(taxon_names.begin(), taxon_names.end());
     if (tip_names != taxon_names)
     {
-        throw RbException("Tip names of the initial tree do not match the taxon names.");
+        throw RbException("Tip names of the supplied tree do not match the taxon names.");
     }
     
     const double factor = pow(10.0, agePrecision);
@@ -1782,7 +1782,7 @@ Tree* RevBayesCore::TreeUtilities::prepareTreeTaxa(Tree& treeToChange, const std
             if (not (tip_age >= min_age and tip_age <= max_age))
             {
                 std::ostringstream s;
-                s << "The age of tip '" << taxaToCopy[i].getSpeciesName() << "' in the initial tree is outside of specified bounds.";
+                s << "The age of tip '" << taxaToCopy[i].getSpeciesName() << "' in the supplied tree is outside of specified bounds.";
                 throw RbException( s.str() );
             }
             auto& node = treeToChange.getTipNodeWithName(taxaToCopy[i].getName());
@@ -1792,7 +1792,7 @@ Tree* RevBayesCore::TreeUtilities::prepareTreeTaxa(Tree& treeToChange, const std
                 auto* target = node.isSampledAncestorTip() ? &node.getParent() : &node;
                 const auto [it, inserted] = adjusted.emplace(target, endpoint);
                 if (not inserted and it->second != endpoint)
-                    throw RbException("Conflicting sampled-ancestor ages during starting-tree repair.");
+                    throw RbException("Conflicting sampled-ancestor ages during tree age repair.");
             }
         }
     
@@ -1812,11 +1812,11 @@ Tree* RevBayesCore::TreeUtilities::prepareTreeTaxa(Tree& treeToChange, const std
                 const double age = repairedAge(node);
                 if (not std::isfinite(age) or not std::isfinite(node->getAge()) or
                     std::round(age * factor) != std::round(node->getAge() * factor))
-                    throw RbException("Starting-tree repair would exceed ageCheckPrecision.");
+                    throw RbException("Tree age repair would exceed ageCheckPrecision.");
                 if (not node->isRoot() and not (age <= repairedAge(&node->getParent())))
-                    throw RbException("Inconsistent starting-tree chronology after age repair.");
+                    throw RbException("Inconsistent tree chronology after age repair.");
                 if (node->isSampledAncestorTip() and age != repairedAge(&node->getParent()))
-                    throw RbException("Inconsistent starting-tree sampled-ancestor age after repair.");
+                    throw RbException("Inconsistent sampled-ancestor age after repair.");
 
                 // Tip metadata will be replaced below; internal nodes retain their attached constraints.
                 const Taxon* taxon = &node->getTaxon();
@@ -1825,14 +1825,14 @@ Tree* RevBayesCore::TreeUtilities::prepareTreeTaxa(Tree& treeToChange, const std
                         [node](const Taxon& t) { return t.getName() == node->getName(); });
                 const auto& range = taxon->getAgeRange();
                 if (range and not range->contains(age))
-                    throw RbException() << "Incompatible starting-tree age constraint for taxon '"
+                    throw RbException() << "Incompatible tree age constraint for taxon '"
                                         << taxon->getName() << "' after repair.";
             }
         }
 
     }
 
-    // Attach the input metadata, then apply only the fully validated initialization repairs.
+    // Attach the input metadata, then apply only the fully validated repairs.
     for (size_t i = 0; i < tax_num; ++i)
     {
         std::string tip_name = taxaToCopy[i].getName();

@@ -806,3 +806,10 @@ void UltrametricTreeDistribution::repairCheckpointValue(Tree& tree)
 {
     tree_prior->repairCheckpointValue(tree);
 }
+
+
+// Prepare observations through the underlying tree distribution before installing wrapper state.
+void UltrametricTreeDistribution::prepareForClamping(Tree& tree)
+{
+    tree_prior->prepareForClamping(tree);
+}

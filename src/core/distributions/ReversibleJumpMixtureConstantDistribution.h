@@ -54,6 +54,8 @@ namespace RevBayesCore {
         void                                                        restoreSpecialization(const DagNode *restorer);
         void                                                        touchSpecialization(const DagNode *toucher, bool touchAll);
 
+        // Clamping preparation remains the default no-op: components can disagree on constraints
+        // or precision. Sequential repair would impose a component order on the observation.
         void repairCheckpointValue(mixtureType& v) override;
 
     protected:

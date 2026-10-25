@@ -73,6 +73,7 @@ namespace RevBayesCore {
         void                                                redrawValue(void);                                          //!< Draw a new random value from distribution
         
         
+        void prepareForClamping(Tree& tree) override;
         void repairCheckpointValue(Tree& tree) override;
 
     protected:

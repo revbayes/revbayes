@@ -308,3 +308,10 @@ void NodeOrderWeightedConstrainedTreeDistribution::repairCheckpointValue(Tree& t
 {
     base_distribution->repairCheckpointValue(tree);
 }
+
+
+// Prepare observations through the underlying tree distribution before installing wrapper state.
+void NodeOrderWeightedConstrainedTreeDistribution::prepareForClamping(Tree& tree)
+{
+    base_distribution->prepareForClamping(tree);
+}
