@@ -7,6 +7,7 @@
 #include "ConstantNode.h"
 #include "RlTaxon.h"
 #include "RlString.h"
+#include "RlBoolean.h"
 #include "RealPos.h"
 #include "TypeSpec.h"
 #include "ArgumentRule.h"
@@ -139,6 +140,11 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Taxon::executeMethod(std::string c
         
         std::string n = this->dag_node->getValue().getSpeciesName();
         return RevPtr<RevVariable>( new RevVariable( new RlString( n ) ) );
+    }
+    if (name == "hasAgeRange")
+    {
+        found = true;
+        return new RevVariable(new RlBoolean(dag_node->getValue().getAgeRange().has_value()));
     }
     if (name == "getAge")
     {
@@ -307,6 +313,8 @@ void Taxon::initMethods( void )
     ArgumentRules* species_name_arg_rules = new ArgumentRules();
     methods.addFunction( new MemberProcedure( "getSpeciesName", RlString::getClassTypeSpec(), species_name_arg_rules ) );
     
+    methods.addFunction(new MemberProcedure("hasAgeRange", RlBoolean::getClassTypeSpec(), new ArgumentRules()));
+
     ArgumentRules* age_arg_rules = new ArgumentRules();
     methods.addFunction( new MemberProcedure( "getAge", RlString::getClassTypeSpec(), age_arg_rules ) );
     

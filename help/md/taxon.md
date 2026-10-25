@@ -6,7 +6,8 @@ Taxon object
 The taxon function creates a Taxon object.
 ## details
 Each Taxon object records that taxon's name in addition to other information, such as its age range.
-The default age range is [0,0], representing an extant taxon. Character matrices and trees contain
+A taxon constructed without ages has no age range. Use `hasAgeRange()` to distinguish this from
+an explicitly supplied range, including [0,0]. Character matrices and trees contain
 Taxon vectors (Taxon[]) that are used to match leaf nodes to data entries for phylogenetic analyses.
 For multispecies coalescent analyses, Taxon objects are also used to assign species memberships to
 individuals.
