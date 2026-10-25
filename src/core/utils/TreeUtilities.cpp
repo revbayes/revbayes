@@ -462,8 +462,9 @@ double RevBayesCore::TreeUtilities::computeRobinsonFouldDistance(const std::vect
 void RevBayesCore::TreeUtilities::constructTimeTreeRecursively(TopologyNode& tn, const TopologyNode& n, std::vector<TopologyNode*> &nodes, std::vector<double> &ages, double depth)
 {
 
-    // set the name
-    tn.setName( n.getName() );
+    // Conversion changes the tree representation, not the observations attached to its nodes.
+    // Preserve explicit constraints (and their absence), species names, and occurrences.
+    tn.setTaxon( n.getTaxon() );
 
     // copy the index
     tn.setIndex( n.getIndex() );
