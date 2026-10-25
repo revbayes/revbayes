@@ -123,14 +123,15 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
         RevBayesCore::TopologyNode* new_p = new RevBayesCore::TopologyNode();
         RevBayesCore::TopologyNode* new_f = new RevBayesCore::TopologyNode(taxon, this->dag_node->getValue().getNumberOfTips()+1);
 
-        // COMPAT(age-range): Preserve the zero sampling-age default used by this construction/simulation.
-        const auto interval = taxon.getAgeRange().value_or(RevBayesCore::TimeInterval(0.0, 0.0));
-        new_f->setAge(interval.getMin());
-        double max_child_age = (interval.getMin() > n.getAge() ? interval.getMin() : n.getAge());
+        // Unconstrained tips start at age zero.
+        const auto& interval = taxon.getAgeRange();
+        const double interval_age = interval ? interval->getMin() : 0.0;
+        new_f->setAge(interval_age);
+        double max_child_age = (interval_age > n.getAge() ? interval_age : n.getAge());
         if ( p.getAge() < max_child_age )
         {
             RevBayesCore::TreeUtilities::rescaleTree(this->dag_node->getValue().getRoot(), max_child_age / p.getAge() + 0.5);
-            max_child_age = (interval.getMin() > n.getAge() ? interval.getMin() : n.getAge());
+            max_child_age = (interval_age > n.getAge() ? interval_age : n.getAge());
         }
         
         new_p->setAge( (p.getAge() - max_child_age) / 2.0 + max_child_age);
