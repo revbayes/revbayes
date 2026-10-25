@@ -90,7 +90,7 @@ void Taxon::constructInternalObject( void )
     // A nonnumeric default distinguishes omitted ages from an explicitly supplied zero.
     const bool has_min = minage->getRevObject().isType(RealPos::getClassTypeSpec());
     const bool has_max = maxage->getRevObject().isType(RealPos::getClassTypeSpec());
-    // COMPAT(age-range): With only max supplied, the lower endpoint still defaults to zero.
+    // Supplying only a maximum explicitly establishes an interval with lower endpoint zero.
     double minAge = has_min ? static_cast<const RealPos&>(minage->getRevObject()).getValue() : 0.0;
     double maxAge = minAge;
 
@@ -183,7 +183,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Taxon::executeMethod(std::string c
                                 << "' to " << a << ": it exceeds the current maximum age ("
                                 << interval.getMax() << ").";
 
-        dag_node->getValue().setMinAge( a );
+        dag_node->getValue().setAgeRange(RevBayesCore::TimeInterval(a, interval.getMax()));
         return NULL;
     }
     if (name == "setMaxAge")
@@ -201,7 +201,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Taxon::executeMethod(std::string c
                                 << "' to " << a << ": it is below the current minimum age ("
                                 << interval.getMin() << ").";
 
-        dag_node->getValue().setMaxAge( a );
+        dag_node->getValue().setAgeRange(RevBayesCore::TimeInterval(interval.getMin(), a));
         return NULL;
     }
     
