@@ -1,3 +1,4 @@
+#include "TreeUtilities.h"
 #include "TimeInterval.h"
 #include <cstddef>
 #include <algorithm>
@@ -859,5 +860,5 @@ void AbstractRootedTreeDistribution::touchSpecialization(const DagNode *affecter
 // deliberately does not perform this repair, since it is also used during density evaluation.
 void AbstractRootedTreeDistribution::repairCheckpointValue(Tree& tree)
 {
-    tree.repairCheckpointTaxonAges();
+    TreeUtilities::repairCheckpointTaxonAges(tree);
 }

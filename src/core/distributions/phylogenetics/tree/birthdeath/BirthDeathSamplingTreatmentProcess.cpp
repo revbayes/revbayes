@@ -201,7 +201,7 @@ BirthDeathSamplingTreatmentProcess::BirthDeathSamplingTreatmentProcess(const Typ
     {
         try
         {
-            RevBayesCore::Tree *my_tree = TreeUtilities::startingTreeInitializer( *t, taxa, age_check_precision, true );
+            RevBayesCore::Tree *my_tree = TreeUtilities::prepareTreeTaxa( *t, taxa, age_check_precision, true );
             value = my_tree->clone();
         }
         catch (RbException &e)
@@ -2029,6 +2029,6 @@ bool BirthDeathSamplingTreatmentProcess::allowsSA() {
 
 void RevBayesCore::BirthDeathSamplingTreatmentProcess::setValue(Tree * v, bool f)
 {
-    RevBayesCore::Tree *newv = TreeUtilities::startingTreeInitializer(*v, taxa, age_check_precision, false);
+    RevBayesCore::Tree *newv = TreeUtilities::prepareTreeTaxa(*v, taxa, age_check_precision, false);
     AbstractRootedTreeDistribution::setValue(newv, f);
 }
