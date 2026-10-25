@@ -56,6 +56,7 @@ template <class valueType> class RbOrderedSet;
         virtual void                                                redraw(SimulationCondition c = SimulationCondition::MCMC) = 0;                                                                           //!< Redraw the current value of the node (applies only to stochastic nodes)
         virtual void                                                setMcmcMode(bool tf) = 0;                                                                   //!< Set the modus of the DAG node to MCMC mode.
         virtual void                                                setValueFromFile(const path &dir) = 0;                                                      //!< Set value from string.
+        virtual void                                                restoreFromCheckpoint(const std::string& v) { setValueFromString(v); }
         virtual void                                                setValueFromString(const std::string &v) = 0;                                               //!< Set value from string.
         virtual void                                                writeToFile(const path &dir) const = 0;                                                     //!< Write the value of this node to a file within the given directory.
 

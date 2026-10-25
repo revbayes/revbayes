@@ -2029,6 +2029,6 @@ bool BirthDeathSamplingTreatmentProcess::allowsSA() {
 
 void RevBayesCore::BirthDeathSamplingTreatmentProcess::setValue(Tree * v, bool f)
 {
-    RevBayesCore::Tree *newv = TreeUtilities::startingTreeInitializer(*v, taxa, age_check_precision);
+    RevBayesCore::Tree *newv = TreeUtilities::startingTreeInitializer(*v, taxa, age_check_precision, false);
     AbstractRootedTreeDistribution::setValue(newv, f);
 }

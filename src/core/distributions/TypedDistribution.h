@@ -61,6 +61,8 @@ namespace RevBayesCore {
         
         // virtual methods
         virtual void                                                setValue(variableType *v, bool f=false);                                    //!< Set the current value, e.g. attach an observation (clamp)
+        // Called only by explicit checkpoint restoration, never by ordinary value assignment.
+        virtual void                                                repairCheckpointValue(variableType& v) {}
         virtual bool                                                allowsSA(void) { return false; }                                            //!< Checks if distribution is compatible with sampled ancestors
         
         // pure virtual public methods

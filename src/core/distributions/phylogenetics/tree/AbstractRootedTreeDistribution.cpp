@@ -818,7 +818,8 @@ void AbstractRootedTreeDistribution::setValue(Tree *v, bool f )
         
     }
 
-    value->checkTaxonAges(true);
+    // In particular, do not clamp tip ages here: wrappers also install copies of proposals
+    // through setValue(), and must evaluate tip-age constraints without repairing violations.
     
 }
 
@@ -851,4 +852,12 @@ void AbstractRootedTreeDistribution::touchSpecialization(const DagNode *affecter
         
     }
     
+}
+
+
+// Checkpoint serialization can move a tip slightly beyond its bounds. Ordinary setValue()
+// deliberately does not perform this repair, since it is also used during density evaluation.
+void AbstractRootedTreeDistribution::repairCheckpointValue(Tree& tree)
+{
+    tree.repairCheckpointTaxonAges();
 }
