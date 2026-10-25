@@ -11,6 +11,7 @@
 #include "TypedDistribution.h"
 
 #include <cassert>
+#include <memory>
 
 namespace RevBayesCore {
 
@@ -142,9 +143,15 @@ void RevBayesCore::StochasticNode<valueType>::bootstrap(void)
 template<class valueType>
 void RevBayesCore::StochasticNode<valueType>::clamp(valueType *val)
 {
-    // clamp the node with the value
-    // we call set value because some derived classes might have special implementations for setting values (e.g. mixtures)
-    setValue( val );
+    // Preserve self-clamping as well as ownership of a supplied observation. Preparation may
+    // throw, so do not mutate the current node value or leak the incoming observation on failure.
+    if (val == &getValue())
+        val = Cloner<valueType, IsDerivedFrom<valueType, Cloneable>::Is>::createClone(*val);
+    std::unique_ptr<valueType> observation(val);
+    getDistribution().prepareForClamping(*observation);
+
+    // Retain specialized value installation (e.g. mixtures), after explicit observation preparation.
+    setValue(observation.release());
     this->clamped = true;
 }
 

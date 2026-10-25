@@ -43,6 +43,7 @@ template <class variableType> class StochasticNode;
         virtual void                                            setValue(Tree *v, bool f=false);                                                                    //!< Set the current value, e.g. attach an observation (clamp)
         
         
+        void prepareForClamping(Tree& tree) override;
         void repairCheckpointValue(Tree& tree) override;
 
     protected:

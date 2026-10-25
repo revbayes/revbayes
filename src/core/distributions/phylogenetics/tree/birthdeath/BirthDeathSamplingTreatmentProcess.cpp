@@ -2032,3 +2032,10 @@ void RevBayesCore::BirthDeathSamplingTreatmentProcess::setValue(Tree * v, bool f
     RevBayesCore::Tree *newv = TreeUtilities::prepareTreeTaxa(*v, taxa, age_check_precision, false);
     AbstractRootedTreeDistribution::setValue(newv, f);
 }
+
+
+// Observations use exactly the same taxon metadata and rounding rule as supplied initial trees.
+void BirthDeathSamplingTreatmentProcess::prepareForClamping(Tree& tree)
+{
+    TreeUtilities::prepareTreeTaxa(tree, taxa, age_check_precision, true);
+}

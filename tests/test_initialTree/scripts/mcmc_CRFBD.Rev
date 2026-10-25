@@ -80,7 +80,7 @@ sampling_at_present <- 14/23
 #
 # THE SCRIPT SHOULD THROW THE FOLLOWING ERROR MESSAGE:
 #
-# "   Error:	The age of tip 'Almadasuchus' in the initial tree is outside of specified bounds."
+# "   Error:	The age of tip 'Almadasuchus' in the supplied tree is outside of specified bounds."
 #
 ##################################################################################################
 

@@ -200,7 +200,7 @@ const MemberRules& Dist_ConstrainedTopology::getParameterRules(void) const
         member_rules.push_back( new ArgumentRule( "treeDistribution", TypedDistribution<TimeTree>::getClassTypeSpec(), "The base distribution for the tree.",   ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         member_rules.push_back( new ArgumentRule( "constraints",      ModelVector<Clade>::getClassTypeSpec(),          "The topological constraints.",          ArgumentRule::BY_VALUE, ArgumentRule::ANY, new ModelVector<Clade>() ) );
         member_rules.push_back( new ArgumentRule( "initialTree" ,     TimeTree::getClassTypeSpec() , "Instead of drawing a tree from the distribution, initialize distribution with this tree.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, NULL ) );
-        member_rules.push_back( new ArgumentRule( "ageCheckPrecision", Natural::getClassTypeSpec(), "If an initial tree is provided, how many decimal places should be used when checking its tip ages against a taxon file?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(4) ) );
+        member_rules.push_back( new ArgumentRule( "ageCheckPrecision", Natural::getClassTypeSpec(), "Decimal places used to check initial or clamped tree tip ages against taxon ranges; accepted discrepancies are repaired to the exact bounds.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Natural(4) ) );
 
         std::vector<TypeSpec> backboneTypes;
         backboneTypes.push_back( TimeTree::getClassTypeSpec() );
