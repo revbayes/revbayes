@@ -180,14 +180,18 @@ const std::optional<TimeInterval>& Taxon::getAgeRange( void ) const
 */
 const std::string Taxon::getJsonRespresentation(void) const {
 
-    // COMPAT(age-range): Preserve the serialized endpoints; absence is not exported yet.
-    const auto range = age_range.value_or(TimeInterval(0.0, 0.0));
     std::string jsonStr = "";
     jsonStr += "{\"Taxon\": {";
     jsonStr += "\"name\": \"" + name + "\", ";
     jsonStr += "\"speciesName\": \"" + species_name + "\", ";
-    jsonStr += "\"TimeInterval\": {\"minAge\": " + std::to_string(range.getMin()) + ", ";
-    jsonStr += "\"maxAge\": " + std::to_string(range.getMax()) + "}}";
+    if (age_range)
+    {
+        jsonStr += "\"TimeInterval\": {\"minAge\": " + std::to_string(age_range->getMin()) + ", ";
+        jsonStr += "\"maxAge\": " + std::to_string(age_range->getMax()) + "}";
+    }
+    else
+        jsonStr += "\"TimeInterval\": null";
+    jsonStr += "}";
     return jsonStr;
 }
 
