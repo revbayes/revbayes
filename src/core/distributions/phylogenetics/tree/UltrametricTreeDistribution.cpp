@@ -413,9 +413,7 @@ double UltrametricTreeDistribution::computeBranchRateLnProbability(const Tree &m
 /* Compute probability */
 double UltrametricTreeDistribution::computeLnProbability( void )
 {
-    // Check the actual tree before passing a copy to the prior: its setValue can repair
-    // ages, concealing violations in the original tree. Check all nodes, including roots and
-    // internal sampled ancestors; absent intervals impose no bound.
+    // Enforce the actual tree's attached intervals before evaluating a copy under the prior.
     if (not TreeUtilities::nodeAgesWithinRanges(*value))
         return RbConstants::Double::neginf;
 

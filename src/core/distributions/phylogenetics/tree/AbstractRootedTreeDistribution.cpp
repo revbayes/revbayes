@@ -22,7 +22,6 @@
 #include "Tree.h"
 #include "TypedDagNode.h"
 #include "TypedDistribution.h"
-#include "RbSettings.h"
 
 namespace RevBayesCore { class DagNode; }
 namespace RevBayesCore { template <class valueType> class RbOrderedSet; }
