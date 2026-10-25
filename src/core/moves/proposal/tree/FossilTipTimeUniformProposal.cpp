@@ -159,35 +159,20 @@ double FossilTipTimeUniformProposal::doProposal( void )
     // we need to work with the times
     double parent_age   = parent.getAge();
     double my_age       = node.getAge();
-    double min_age      = 0;
+    double min_age;
     double max_age;
     
-    // Use the required attached interval unless the move supplies an explicit pair of bounds.
-    if ( min == NULL )
+    // Explicit bounds are supplied as a pair; otherwise use the required attached interval.
+    if (min != nullptr)
     {
-        // adjust min age given taxon data
-        Taxon& taxon = node.getTaxon();
-        const auto& interval = *taxon.getAgeRange();
-        min_age = interval.getMin();
-    }
-    else
-    {
-        // adjust min age given provided age
         min_age = min->getValue();
-    }
-    if ( max == NULL )
-    {
-        // adjust max age given taxon data
-        Taxon& taxon = node.getTaxon();
-        const auto& interval = *taxon.getAgeRange();
-        double taxon_max_age = interval.getMax();
-        max_age = taxon_max_age;
+        max_age = max->getValue();
     }
     else
     {
-        // adjust max age given provided variable
-        double provided_max_age = max->getValue();
-        max_age = provided_max_age;
+        const auto& interval = *node.getTaxon().getAgeRange();
+        min_age = interval.getMin();
+        max_age = interval.getMax();
     }
 
     if ( node.isSampledAncestorTip() == true )
