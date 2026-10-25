@@ -141,17 +141,43 @@ jobs:
       with:
         xcode-version: ${{ matrix.version }}
 
-    - name: Install (macOS)
-      if: runner.os == 'macOS'
-      run: |
-          brew install boost ccache coreutils meson
-
     - name: Install meson
       run: |
         python3 -mpip install meson ninja
 
     # Caches for different branches are isolated, so we don't need to put the branch name into the key.
     # The total size for all caches in a repository is 5Gb.
+    
+    - name: Install ccache (macOS Intel)
+      if: runner.os == 'macOS' && matrix.arch == 'mac-intel64'
+      run: |
+          set -euo pipefail
+          rel=$(curl -fsSL \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ github.token }}" \
+            https://api.github.com/repos/ccache/ccache/releases/latest)
+          case "$(uname -m)" in
+            x86_64) arch=x86_64 ;;
+            arm64) arch=arm64 ;;
+            *) echo "unsupported arch: $(uname -m)" >&2; exit 1 ;;
+          esac
+          url=$(printf '%s\n' "$rel" | jq -r --arg arch "$arch" '
+            (
+              [.assets[] | select(.name | endswith("-darwin.tar.gz"))] +
+              [.assets[] | select(.name | endswith("-darwin-" + $arch + ".tar.gz"))]
+            )[0].browser_download_url // empty
+          ')
+          if [ -z "$url" ]; then
+            echo "No macOS ccache archive in $(printf '%s\n' "$rel" | jq -r .tag_name)" >&2
+            exit 1
+          fi
+          archive=$(basename "$url")
+          echo "Installing $archive from $(printf '%s\n' "$rel" | jq -r .tag_name)"
+          curl -fL "$url" | tar xz
+          mkdir -p "$HOME/.local/bin"
+          cp "${archive%.tar.gz}/ccache" "$HOME/.local/bin/ccache"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          "$HOME/.local/bin/ccache" --version
 
     - name: ccache
       uses: hendrikmuhs/ccache-action@v1.2
