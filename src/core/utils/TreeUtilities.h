@@ -64,7 +64,7 @@ namespace RevBayesCore {
         void                                        rescaleTree(TopologyNode& n, double factor);                                                            //!< rescale tree ages below a node by a factor
         void                                        setAges(TopologyNode& n, const std::vector<double>& ages);                                              //!< set ages of a node and children from a vector
         void                                        setAgesRecursively(TopologyNode& n, double age);                                                        //!< set age of a node and rescale its children
-        Tree*                                       prepareTreeTaxa(Tree& treeToChange, const std::vector<Taxon>& taxaToCopy, std::int64_t agePrecision, bool repairAges);         //!< Attach taxa and optionally prepare rounded initial/observed ages.
+        void                                        prepareTreeTaxa(Tree& treeToChange, const std::vector<Taxon>& taxaToCopy, std::int64_t agePrecision, bool repairAges);         //!< Attach taxa and optionally prepare rounded initial/observed ages.
         void                                        repairCheckpointTaxonAges(Tree& tree);
         bool                                        nodeAgesWithinRanges(const Tree& tree);
 
