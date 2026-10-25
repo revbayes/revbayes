@@ -301,3 +301,10 @@ void NodeOrderWeightedConstrainedTreeDistribution::swapParameterInternal( const 
     base_distribution->swapParameter(oldP,newP);
 
 }
+
+
+// Forward checkpoint repair to the tree distribution without evaluating a modified copy.
+void NodeOrderWeightedConstrainedTreeDistribution::repairCheckpointValue(Tree& tree)
+{
+    base_distribution->repairCheckpointValue(tree);
+}

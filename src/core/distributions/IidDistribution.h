@@ -34,6 +34,8 @@ namespace RevBayesCore {
         double                                              computeLnProbability(void);
         void                                                redrawValue(void);
         
+        void repairCheckpointValue(RbVector<valueType>& v) override;
+
     protected:
         // Parameter management functions
         void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);                        //!< Swap a parameter
@@ -157,6 +159,13 @@ void RevBayesCore::IidDistribution<valueType>::swapParameterInternal( const DagN
     
     value_prior->swapParameter(oldP,newP);
     
+}
+
+// Propagate checkpoint-only repair to the component distributions on the restored value.
+template<class valueType>
+void RevBayesCore::IidDistribution<valueType>::repairCheckpointValue(RbVector<valueType>& v)
+{
+    for (auto& element : v) value_prior->repairCheckpointValue(element);
 }
 
 #endif

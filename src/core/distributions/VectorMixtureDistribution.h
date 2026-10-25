@@ -44,6 +44,8 @@ namespace RevBayesCore {
         void                                                    restoreSpecialization(const DagNode *restorer);
         void                                                    touchSpecialization(const DagNode *toucher, bool touchAll);
         
+        void repairCheckpointValue(RbVector<mixtureType>& v) override;
+
     protected:
         // Parameter management functions
         void                                                    swapParameterInternal(const DagNode *oldP, const DagNode *newP);                        //!< Swap a parameter
@@ -328,6 +330,14 @@ void RevBayesCore::VectorMixtureDistribution<mixtureType>::touchSpecialization( 
     // only do this when the toucher was our parameters
     dirty = true;
     
+}
+
+// Propagate checkpoint-only repair to the component distributions on the restored value.
+template<class mixtureType>
+void RevBayesCore::VectorMixtureDistribution<mixtureType>::repairCheckpointValue(RbVector<mixtureType>& v)
+{
+    for (auto& element : v)
+        for (auto* component : base_distributions) component->repairCheckpointValue(element);
 }
 
 #endif

@@ -38,6 +38,8 @@ namespace RevBayesCore {
         virtual void                                        setValue(Tree *v, bool f=false);                                                                    //!< Set the current value, e.g. attach an observation (clamp)
         virtual bool                                        allowsSA(void) { return base_distribution->allowsSA(); }                                            //!< Checks if distribution is compatible with sampled ancestors
         
+        void repairCheckpointValue(Tree& tree) override;
+
     protected:
         
         void                                                initializeBitSets();

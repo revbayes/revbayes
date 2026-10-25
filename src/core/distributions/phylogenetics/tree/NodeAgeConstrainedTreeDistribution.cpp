@@ -245,3 +245,10 @@ void NodeAgeConstrainedTreeDistribution::restoreSpecialization(const DagNode *re
     value->getRoot().setAge( a );
     
 }
+
+
+// Forward checkpoint repair to the tree distribution without evaluating a modified copy.
+void NodeAgeConstrainedTreeDistribution::repairCheckpointValue(Tree& tree)
+{
+    base_distribution->repairCheckpointValue(tree);
+}

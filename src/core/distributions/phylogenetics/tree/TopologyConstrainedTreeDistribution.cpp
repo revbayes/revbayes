@@ -1381,3 +1381,10 @@ void TopologyConstrainedTreeDistribution::restoreSpecialization(const DagNode *r
     base_distribution->restore(restorer);
     
 }
+
+
+// Forward checkpoint repair to the tree distribution without evaluating a modified copy.
+void TopologyConstrainedTreeDistribution::repairCheckpointValue(Tree& tree)
+{
+    base_distribution->repairCheckpointValue(tree);
+}

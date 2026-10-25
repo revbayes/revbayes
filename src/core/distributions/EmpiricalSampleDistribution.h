@@ -41,6 +41,7 @@ namespace RevBayesCore {
         RevLanguage::RevPtr<RevLanguage::RevVariable>       executeProcedure(const std::string &name, const std::vector<DagNode *> args, bool &found);
         void                                                redrawValue(void);
         void                                                setValue(RbVector<valueType> *v, bool f=false);
+        void repairCheckpointValue(RbVector<valueType>& v) override;
         
     protected:
         // Parameter management functions
@@ -563,6 +564,19 @@ void RevBayesCore::EmpiricalSampleDistribution<valueType>::restoreSpecialization
         
     }
     
+}
+
+// Repair restored elements, then refresh the copies used for empirical density evaluation.
+// A containing wrapper may pass an external value; it will install that value separately.
+template<class valueType>
+void RevBayesCore::EmpiricalSampleDistribution<valueType>::repairCheckpointValue(RbVector<valueType>& v)
+{
+    for (auto& element : v) base_distribution->repairCheckpointValue(element);
+    if (&v == this->value)
+    {
+        internal_value_copy = v;
+        setInternalDistributions();
+    }
 }
 
 #endif
