@@ -146,33 +146,17 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Taxon::executeMethod(std::string c
         found = true;
         return new RevVariable(new RlBoolean(dag_node->getValue().getAgeRange().has_value()));
     }
-    if (name == "getAge")
+    if (name == "getAge" or name == "getMinAge" or name == "getMaxAge")
     {
         found = true;
-        
-        // Compatibility: retain Rev's getAge() as a lower-bound alias pending a usage review.
-        // COMPAT(age-range): Preserve scalar getters and endpoint validation for unset ranges.
-        const auto interval = this->dag_node->getValue().getAgeRange().value_or(RevBayesCore::TimeInterval(0.0, 0.0));
-        double a = interval.getMin();
-        return RevPtr<RevVariable>( new RevVariable( new RealPos( a ) ) );
-    }
-    if (name == "getMinAge")
-    {
-        found = true;
+        const auto& interval = dag_node->getValue().getAgeRange();
+        if (not interval)
+            throw RbException() << "Taxon '" << dag_node->getValue().getName()
+                                << "' has no age range; use hasAgeRange() before querying its bounds.";
 
-        // COMPAT(age-range): Preserve scalar getters and endpoint validation for unset ranges.
-        const auto interval = this->dag_node->getValue().getAgeRange().value_or(RevBayesCore::TimeInterval(0.0, 0.0));
-        double a = interval.getMin();
-        return RevPtr<RevVariable>( new RevVariable( new RealPos( a ) ) );
-    }
-    if (name == "getMaxAge")
-    {
-        found = true;
-
-        // COMPAT(age-range): Preserve scalar getters and endpoint validation for unset ranges.
-        const auto interval = this->dag_node->getValue().getAgeRange().value_or(RevBayesCore::TimeInterval(0.0, 0.0));
-        double a = interval.getMax();
-        return RevPtr<RevVariable>( new RevVariable( new RealPos( a ) ) );
+        // Rev's getAge() remains an alias for the minimum of the age range.
+        double a = name == "getMaxAge" ? interval->getMax() : interval->getMin();
+        return RevPtr<RevVariable>(new RevVariable(new RealPos(a)));
     }
     if (name == "setMinAge")
     {

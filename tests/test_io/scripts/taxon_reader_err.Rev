@@ -16,6 +16,11 @@ taxa[1].setAgeRange(3, 2)
 # Scalar getter tests cannot distinguish these states; retain this while ranges are optional.
 unset = taxon("unset")
 unset.hasAgeRange()
+# Missing bounds must not silently become zero. This also protects the getAge() alias;
+# existing file-reader tests always supply ranges. Remove if absent ranges become unrepresentable.
+unset.getAge()
+unset.getMinAge()
+unset.getMaxAge()
 taxon("zero", age=0).hasAgeRange()
 unset.setAgeRange(0, 0)
 unset.hasAgeRange()
