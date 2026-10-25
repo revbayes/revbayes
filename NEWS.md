@@ -1,6 +1,6 @@
 # RevBayes 1.5.0 (unreleased)
 
-# RevBayes 1.4.2 (Oct 26, 2026)
+# RevBayes 1.4.2 (Oct 25, 2026)
 
 ## Backwards-incompatible changes
   * Do not allow the `p` and `sd` arguments of `dnSoftBoundUniformNormal` to be specified simultaneously (#1066).
