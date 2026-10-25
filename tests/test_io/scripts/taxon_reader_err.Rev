@@ -21,6 +21,11 @@ unset.hasAgeRange()
 unset.getAge()
 unset.getMinAge()
 unset.getMaxAge()
+# Endpoint edits require an existing range and must leave absence intact on failure.
+# Reader tests cannot exercise absence; retain this while endpoint setters are available.
+unset.setMinAge(0)
+unset.setMaxAge(3)
+unset.hasAgeRange()
 taxon("zero", age=0).hasAgeRange()
 unset.setAgeRange(0, 0)
 unset.hasAgeRange()

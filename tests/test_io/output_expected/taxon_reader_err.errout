@@ -6,5 +6,8 @@
    Error:	Taxon 'unset' has no age range; use hasAgeRange() before querying its bounds.
    Error:	Taxon 'unset' has no age range; use hasAgeRange() before querying its bounds.
    Error:	Taxon 'unset' has no age range; use hasAgeRange() before querying its bounds.
+   Error:	Taxon 'unset' has no age range; use setAgeRange(minAge, maxAge) to establish both bounds.
+   Error:	Taxon 'unset' has no age range; use setAgeRange(minAge, maxAge) to establish both bounds.
+   FALSE
    TRUE
    TRUE
