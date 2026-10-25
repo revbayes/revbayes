@@ -2090,9 +2090,9 @@ void TopologyNode::scaleAgesFromTaxonAgesMBL(double minbl)
     {
         if ( children[i]->isTip() )
         {
-            // COMPAT(age-range): Preserve midpoint initialization at zero for an unset constraint.
-            const auto interval = children[i]->getTaxon().getAgeRange().value_or(TimeInterval(0.0, 0.0));
-            double tip_age = ( interval.getMin() + interval.getMax() ) / 2;
+            // Unconstrained tips start at age zero.
+            const auto& interval = children[i]->getTaxon().getAgeRange();
+            double tip_age = interval ? (interval->getMin() + interval->getMax()) / 2 : 0.0;
             children[i]->setAge( tip_age );
         }
         else

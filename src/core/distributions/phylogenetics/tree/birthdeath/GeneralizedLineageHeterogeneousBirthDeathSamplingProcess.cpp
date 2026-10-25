@@ -1140,9 +1140,10 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::simulateTree(void
         const std::string& name = taxa[i].getName();
         node->setName(name);
         node->setSpeciesName(taxa[i].getSpeciesName());
-        // COMPAT(age-range): Preserve the zero sampling-age default used by this construction/simulation.
-        const auto interval = taxa[i].getAgeRange().value_or(TimeInterval(0.0, 0.0));
-        node->setAge(interval.getMin());
+        // Unconstrained tips start at age zero.
+        const auto& interval = taxa[i].getAgeRange();
+        const double interval_age = interval ? interval->getMin() : 0.0;
+        node->setAge(interval_age);
         node->setTaxon(taxa[i]);
 
         // add to tips
@@ -1199,9 +1200,10 @@ std::vector<double> GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::si
     for(size_t i = 0; i < num_ages; ++i)
     {
         // Use the same lower-bound age as tip initialization.
-        // COMPAT(age-range): Preserve the zero sampling-age default used by this construction/simulation.
-        const auto interval = taxa[i + 1].getAgeRange().value_or(TimeInterval(0.0, 0.0));
-        double a = interval.getMin();
+        // Unconstrained tips start at age zero.
+        const auto& interval = taxa[i + 1].getAgeRange();
+        const double interval_age = interval ? interval->getMin() : 0.0;
+        double a = interval_age;
 
     	// simulate the age of a node
     	double new_age = a + rng->uniform01() * (max_age - a);

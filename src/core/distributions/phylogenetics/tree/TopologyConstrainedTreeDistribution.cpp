@@ -795,9 +795,10 @@ Tree* TopologyConstrainedTreeDistribution::simulateRootedTree( bool alwaysReturn
         TopologyNode* node = new TopologyNode( taxa[i], i );
 
         // Initialize this tip at the lower bound of its age constraint.
-        // COMPAT(age-range): Preserve the zero sampling-age default used by this construction/simulation.
-        const auto interval = taxa[i].getAgeRange().value_or(TimeInterval(0.0, 0.0));
-        node->setAge( interval.getMin() );
+        // Unconstrained tips start at age zero.
+        const auto& interval = taxa[i].getAgeRange();
+        const double interval_age = interval ? interval->getMin() : 0.0;
+        node->setAge( interval_age );
 
         // add the new node to the list
         nodes.push_back( node );
@@ -925,9 +926,10 @@ Tree* TopologyConstrainedTreeDistribution::simulateRootedTree( bool alwaysReturn
             const Taxon& taxon = unclaimed_taxa[k];
 
             Clade tmp_clade = Clade( taxon );
-            // COMPAT(age-range): Preserve the zero sampling-age default used by this construction/simulation.
-            const auto interval = taxon.getAgeRange().value_or(TimeInterval(0.0, 0.0));
-            tmp_clade.setAge( interval.getMin() );
+            // Unconstrained tips start at age zero.
+            const auto& interval = taxon.getAgeRange();
+            const double interval_age = interval ? interval->getMin() : 0.0;
+            tmp_clade.setAge( interval_age );
             children.push_back( tmp_clade );
         }
 
