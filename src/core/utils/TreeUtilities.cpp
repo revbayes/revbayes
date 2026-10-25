@@ -1722,9 +1722,10 @@ void RevBayesCore::TreeUtilities::setAgesRecursively(TopologyNode& node, double 
  * Make sure that the starting tree used to initialize serial-sampling birth-death analyses satisfies specified age constraints, and assign min/max ages to its tips
  * @param treeToChange user-supplied starting tree to be modified
  * @param taxaToCopy vector of Taxon objects corresponding to the tips of the tree
- * @param agePrecision how many decimal places to use when checking for compatibility between the tip ages from treeToChange and taxaToCopy
+ * @param agePrecision decimal places used to validate supplied tip ages
+ * @param repairAges repair accepted endpoint discrepancies only during explicit initialization
  */
-Tree* RevBayesCore::TreeUtilities::startingTreeInitializer(Tree& treeToChange, std::vector<Taxon>& taxaToCopy, std::int64_t agePrecision)
+Tree* RevBayesCore::TreeUtilities::startingTreeInitializer(Tree& treeToChange, std::vector<Taxon>& taxaToCopy, std::int64_t agePrecision, bool repairAges)
 {
     // Check that the user-supplied tree contains the same number of tips as the vector of taxa
     size_t tip_num = treeToChange.getNumberOfTips();
@@ -1756,7 +1757,8 @@ Tree* RevBayesCore::TreeUtilities::startingTreeInitializer(Tree& treeToChange, s
         throw RbException("Tip names of the initial tree do not match the taxon names.");
     }
     
-    double factor = pow(10.0, agePrecision);
+    const double factor = pow(10.0, agePrecision);
+    std::map<TopologyNode*, double> adjusted;
     
     // Check that the ages of the taxa in the user-supplied tree fall within their age uncertainty ranges
     for (size_t i = 0; i < tax_num; ++i)
@@ -1771,21 +1773,66 @@ Tree* RevBayesCore::TreeUtilities::startingTreeInitializer(Tree& treeToChange, s
         // Get the age of the tree tip of the same name
         double tip_age = std::round(treeToChange.getTipNodeWithName( taxaToCopy[i].getName() ).getAge() * factor) / factor;
 
-        if (tip_age < min_age || tip_age > max_age)
+        if (not (tip_age >= min_age and tip_age <= max_age))
         {
             std::ostringstream s;
             s << "The age of tip '" << taxaToCopy[i].getSpeciesName() << "' in the initial tree is outside of specified bounds.";
             throw RbException( s.str() );
         }
+        auto& node = treeToChange.getTipNodeWithName(taxaToCopy[i].getName());
+        if (repairAges and not interval.contains(node.getAge()))
+        {
+            const double endpoint = node.getAge() < interval.getMin() ? interval.getMin() : interval.getMax();
+            auto* target = node.isSampledAncestorTip() ? &node.getParent() : &node;
+            const auto [it, inserted] = adjusted.emplace(target, endpoint);
+            if (not inserted and it->second != endpoint)
+                throw RbException("Conflicting sampled-ancestor ages during starting-tree repair.");
+        }
     }
     
-    // Alter the tip age values of treeToChange in place
+    // Validate the complete planned state before changing ages or metadata. Repairing an SA tip
+    // also moves its parent and other SA children; these changes must fit the accepted precision.
+    if (not adjusted.empty())
+    {
+        // Predict the propagating setter's result for each node without changing the input tree.
+        const auto repairedAge = [&adjusted](TopologyNode* node)
+        {
+            auto* target = node->isSampledAncestorTip() ? &node->getParent() : node;
+            auto it = adjusted.find(target);
+            return it == adjusted.end() ? node->getAge() : it->second;
+        };
+        for (auto* node : treeToChange.getNodes())
+        {
+            const double age = repairedAge(node);
+            if (not std::isfinite(age) or not std::isfinite(node->getAge()) or
+                std::round(age * factor) != std::round(node->getAge() * factor))
+                throw RbException("Starting-tree repair would exceed ageCheckPrecision.");
+            if (not node->isRoot() and not (age <= repairedAge(&node->getParent())))
+                throw RbException("Inconsistent starting-tree chronology after age repair.");
+            if (node->isSampledAncestorTip() and age != repairedAge(&node->getParent()))
+                throw RbException("Inconsistent starting-tree sampled-ancestor age after repair.");
+
+            // Tip metadata will be replaced below; internal nodes retain their attached constraints.
+            const Taxon* taxon = &node->getTaxon();
+            if (node->isTip())
+                taxon = &*std::find_if(taxaToCopy.begin(), taxaToCopy.end(),
+                    [node](const Taxon& t) { return t.getName() == node->getName(); });
+            const auto& range = taxon->getAgeRange();
+            if (range and not range->contains(age))
+                throw RbException() << "Incompatible starting-tree age constraint for taxon '"
+                                    << taxon->getName() << "' after repair.";
+        }
+    }
+
+    // Attach the input metadata, then apply only the fully validated initialization repairs.
     for (size_t i = 0; i < tax_num; ++i)
     {
         std::string tip_name = taxaToCopy[i].getName();
         treeToChange.setTaxonObject( tip_name, taxaToCopy[i] );
     }
     
+    for (const auto& [node, age] : adjusted) node->setAge(age);
+
     RevBayesCore::Tree *p = &treeToChange;
     return p;
 }
