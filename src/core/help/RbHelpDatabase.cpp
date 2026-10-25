@@ -5626,14 +5626,27 @@ system("pwd"))");
 	help_strings[string("tanh")][string("name")] = string(R"(tanh)");
 	help_arrays[string("taxon")][string("authors")].push_back(string(R"(Michael Landis)"));
 	help_strings[string("taxon")][string("description")] = string(R"(The taxon function creates a Taxon object.)");
-	help_strings[string("taxon")][string("details")] = string(R"(Each Taxon object records that taxon's name in addition to other information, such as age (which is non-zero for fossils). Character matrices and trees contain Taxon vectors (Taxon[]) that are used to match leaf nodes to data entries for phylogenetic analyses. For multispecies coalescent analyses, Taxon objects are also used to assign species memberships to individuals.)");
+	help_strings[string("taxon")][string("details")] = string(R"(Each Taxon object records that taxon's name in addition to other information, such as its age range.
+A taxon constructed without ages has no age range. Use `hasAgeRange()` to distinguish this from
+an explicitly supplied range, including [0,0]. Character matrices and trees contain
+Taxon vectors (Taxon[]) that are used to match leaf nodes to data entries for phylogenetic analyses.
+For multispecies coalescent analyses, Taxon objects are also used to assign species memberships to
+individuals.
+
+Use `setAgeRange(minAge, maxAge)` to replace both age bounds together. The bounds must be
+nonnegative, must not be NaN, and must satisfy `minAge <= maxAge`; equal bounds specify an exact age.
+An invalid call leaves the existing range unchanged.)");
 	help_strings[string("taxon")][string("example")] = string(R"(# we can create a Taxon object
 taxon_gorilla = taxon("Gorilla_gorilla")
 # we can create a dummy vector of Taxon objects for simulation
 for (i in 1:10) { taxa[i] = taxon("Taxon"+i) }
 phy ~ dnBDP(lambda=1, mu=0, rootAge=1, taxa=taxa)
 # retrieve the taxon list for 'phy'
-phy.taxa())");
+phy.taxa()
+
+# Set both bounds of a fossil's age range together
+fossil = taxon("Fossil_species")
+fossil.setAgeRange(minAge=5, maxAge=6))");
 	help_strings[string("taxon")][string("name")] = string(R"(taxon)");
 	help_arrays[string("taxon")][string("see_also")].push_back(string(R"(readTaxonData)"));
 	help_strings[string("taxon")][string("title")] = string(R"(Taxon object)");
