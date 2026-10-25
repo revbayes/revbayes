@@ -173,29 +173,6 @@ const std::optional<TimeInterval>& Taxon::getAgeRange( void ) const
 }
 
 
-// Update a copy before installing it, so validation does not first materialize an absent range.
-void Taxon::setMinAge( double a )
-{
-    // COMPAT(age-range): A single-endpoint update starts from the old default [0,0].
-    // Revisit whether callers must establish a complete interval first.
-    auto range = age_range.value_or(TimeInterval(0.0, 0.0));
-    range.setMin(a);
-    age_range = range;
-}
-
-
-// Update a copy before installing it, so validation does not first materialize an absent range.
-void Taxon::setMaxAge( double a )
-{
-    // COMPAT(age-range): A single-endpoint update starts from the old default [0,0].
-    // Revisit whether callers must establish a complete interval first.
-    auto range = age_range.value_or(TimeInterval(0.0, 0.0));
-    range.setMax(a);
-    age_range = range;
-}
-
-
-
 /**
 * Get a JSON-formatted string description of this object.
 *
