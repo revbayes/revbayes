@@ -1900,3 +1900,17 @@ void RevBayesCore::TreeUtilities::repairCheckpointTaxonAges(Tree& tree)
     }
     for (const auto& [node, age] : adjusted) node->setAge(age);
 }
+
+
+// Every attached interval constrains its node, regardless of name, interval width, or node type.
+// Absent intervals impose no bound; contains() rejects NaN ages when an interval is present.
+bool RevBayesCore::TreeUtilities::nodeAgesWithinRanges(const Tree& tree)
+{
+    for (const auto* node : tree.getNodes())
+    {
+        const auto& interval = node->getTaxon().getAgeRange();
+        if (interval and not interval->contains(node->getAge()))
+            return false;
+    }
+    return true;
+}

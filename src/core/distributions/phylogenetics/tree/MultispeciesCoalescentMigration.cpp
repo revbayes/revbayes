@@ -18,6 +18,7 @@
 #include "RbMathCombinatorialFunctions.h"
 #include "RbMathLogic.h"
 #include "TopologyNode.h"
+#include "TreeUtilities.h"
 #include "RateGenerator.h"
 #include "RbException.h"
 #include "RbVector.h"
@@ -153,14 +154,8 @@ MultispeciesCoalescentMigration* MultispeciesCoalescentMigration::clone( void ) 
 
 double MultispeciesCoalescentMigration::computeLnProbability( void )
 {
-    // Each attached interval constrains its node, including roots and internal sampled ancestors.
-    // Absence imposes no bound; neither the taxon name nor the interval width changes support.
-    for (const auto* node : value->getNodes())
-    {
-        const auto& interval = node->getTaxon().getAgeRange();
-        if (interval and not interval->contains(node->getAge()))
-            return RbConstants::Double::neginf;
-    }
+    if (not TreeUtilities::nodeAgesWithinRanges(*value))
+        return RbConstants::Double::neginf;
 
     
     const Tree &sp = species_tree->getValue();
