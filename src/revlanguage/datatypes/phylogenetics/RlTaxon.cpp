@@ -304,13 +304,13 @@ void Taxon::initMethods( void )
     methods.addFunction(new MemberProcedure("hasAgeRange", RlBoolean::getClassTypeSpec(), new ArgumentRules()));
 
     ArgumentRules* age_arg_rules = new ArgumentRules();
-    methods.addFunction( new MemberProcedure( "getAge", RlString::getClassTypeSpec(), age_arg_rules ) );
+    methods.addFunction( new MemberProcedure( "getAge", RealPos::getClassTypeSpec(), age_arg_rules ) );
     
     age_arg_rules = new ArgumentRules();
-    methods.addFunction( new MemberProcedure( "getMinAge", RlString::getClassTypeSpec(), age_arg_rules ) );
+    methods.addFunction( new MemberProcedure( "getMinAge", RealPos::getClassTypeSpec(), age_arg_rules ) );
 
     age_arg_rules = new ArgumentRules();
-    methods.addFunction( new MemberProcedure( "getMaxAge", RlString::getClassTypeSpec(), age_arg_rules ) );
+    methods.addFunction( new MemberProcedure( "getMaxAge", RealPos::getClassTypeSpec(), age_arg_rules ) );
 
     ArgumentRules* set_min_age_arg_rules = new ArgumentRules();
     set_min_age_arg_rules->push_back( new ArgumentRule( "a", RealPos::getClassTypeSpec(), "The min age of the clade.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
