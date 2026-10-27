@@ -1,0 +1,8 @@
+   Successfully read one character matrix from file 'data/anolis.nex'
+   Attempting to read the contents of file "anolis.tre"
+   Successfully read file
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 5 different moves in a random move schedule with 228 moves per iteration
+   
