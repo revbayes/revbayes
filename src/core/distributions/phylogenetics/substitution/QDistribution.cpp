@@ -1,7 +1,10 @@
 #include "QDistribution.h"
 
 #include <cmath>
+#include <iomanip>
 #include <iostream>
+#include <sstream>
+#include <string>
 #include "RateMatrix_MPQ.h"
 #include "DistributionDirichlet.h"
 #include "RandomNumberFactory.h"
@@ -46,6 +49,9 @@ double QDistribution::computeLnProbability(void) {
     else
         lnProb += log_rho_non_reversible;
 
+    /* The flat densities on the two polytopes. The non-reversible one is taken in the
+       free weights (AC, AG, AT, CA, CG, CT, GA, GC), the coordinates in which the jump
+       Jacobian 64 w_CG w_CT w_GT is computed; see RateMatrix_MPQ.cpp. */
     if (is_reversible == true)
         lnProb += std::log(3840.0);
     else
@@ -79,6 +85,51 @@ double QDistribution::computeLnProbability(void) {
 }
 
 /* Set the prior odds log(rho_R / rho_N) while keeping rho_R + rho_N = 1 */
+/* Checkpointing. The checkpoint writes this string in place of the value of the
+   node, and hands it back through setHiddenStateFromString on a restart. It
+   carries two things a restart cannot recover from the Rev script:
+
+     - the rate matrix itself, exactly (see RateMatrix_MPQ::getStateString), and
+     - the prior odds, which mvMPQRateMatrix(tuneModelPrior=TRUE) adapts inside
+       this distribution. The script would otherwise reset them to the value it
+       was given, changing the target distribution of the resumed chain.
+
+   The two parts are separated by a semicolon. */
+std::string QDistribution::getHiddenStateString(void) const {
+
+    const RateMatrix_MPQ& m = static_cast<const RateMatrix_MPQ&>( *this->value );
+    std::stringstream ss;
+    ss << m.getStateString() << ";" << std::setprecision(17) << getLnPriorOdds();
+    return ss.str();
+}
+
+void QDistribution::setHiddenStateFromString(const std::string &s) {
+
+    size_t pos = s.find(';');
+    if ( pos == std::string::npos )
+        throw RbException() << "Cannot restore dnQ from the checkpoint string \"" << s << "\"";
+
+    double delta;
+    try
+        {
+        delta = std::stod( s.substr(pos + 1) );
+        }
+    catch (std::exception&)
+        {
+        throw RbException() << "Cannot read the prior odds of dnQ from the checkpoint string \"" << s << "\"";
+        }
+
+    RateMatrix_MPQ& m = static_cast<RateMatrix_MPQ&>( *this->value );
+    m.initFromString( s.substr(0, pos) );
+
+    if ( fixed_model == REVERSIBLE_ONLY && m.getIsReversible() == false )
+        throw RbException("The checkpointed dnQ rate matrix is non-reversible, but the model is fixed to the reversible one");
+    if ( fixed_model == NON_REVERSIBLE_ONLY && m.getIsReversible() == true )
+        throw RbException("The checkpointed dnQ rate matrix is reversible, but the model is fixed to the non-reversible one");
+
+    setLnPriorOdds( delta );
+}
+
 void QDistribution::setLnPriorOdds(double delta) {
 
     if (delta > 0.0)

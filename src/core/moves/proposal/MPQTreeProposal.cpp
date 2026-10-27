@@ -19,11 +19,6 @@
 #include "TopologyNode.h"
 
 
-#define MIN_FREQ    10e-4
-#define A           0
-#define C           1
-#define G           2
-#define T           3
 
 namespace RevBayesCore { class DagNode; }
 namespace RevBayesCore { template <class valueType> class TypedDagNode; }
@@ -39,8 +34,7 @@ MPQTreeProposal::MPQTreeProposal( StochasticNode<Tree>* t, bool ur ) : Proposal(
 tree( t ),
 update_root( ur ),
 tuning_branch_length( 0.1 ),
-tuning_tree_length( 0.01 ),
-verify_root_move( false )
+tuning_tree_length( 0.01 )
 {
 
     addNode( tree );
@@ -51,8 +45,7 @@ MPQTreeProposal::MPQTreeProposal( const MPQTreeProposal& p ) : Proposal( p ),
 tree( p.tree ),
 update_root( p.update_root ),
 tuning_branch_length( p.tuning_branch_length ),
-tuning_tree_length( p.tuning_tree_length ),
-verify_root_move( p.verify_root_move )
+tuning_tree_length( p.tuning_tree_length )
 {
         
     // tell the base class to add the node
@@ -97,7 +90,8 @@ const std::string& MPQTreeProposal::getProposalName( void ) const {
 
 double MPQTreeProposal::getProposalTuningParameter( void ) const
 {
-    return 0.0;
+    // this proposal has no tuning parameter
+    return RbConstants::Double::nan;
 }
 
 
@@ -172,11 +166,7 @@ void MPQTreeProposal::prepareProposal( void )
 void MPQTreeProposal::printParameterSummary(std::ostream &o, bool name_only) const 
 {
     
-    o << "lambda = ";
-    if (name_only == false)
-    {
-//        o << rev_alpha_pi;
-    }
+    // no parameters
 }
 
 
@@ -349,19 +339,6 @@ void MPQTreeProposal::undoProposal( void )
         touched.push_back( &current_root->getChild(0) );
         touched.push_back( &current_root->getChild(1) );
         reannounceBranches( touched );
-
-        /* The root move is the only proposal here that rearranges topology, and
-           the reversal above is written by hand rather than restored from a copy.
-           If it is ever wrong the tree is corrupted quietly and the run keeps
-           going, so when asked we check that the tree really did come back. */
-        if ( verify_root_move == true )
-        {
-            std::string restored = tau.getNewickRepresentation();
-            if ( restored != stored_newick )
-            {
-                throw RbException("MPQTreeProposal::undoProposal failed to restore the tree after a root-position move.\n  before: " + stored_newick + "\n  after:  " + restored);
-            }
-        }
     }
 
 }
@@ -382,36 +359,6 @@ void MPQTreeProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
     }
     
 }
-
-
-void MPQTreeProposal::setProposalTuningParameter(double tp)
-{
-//    rev_alpha_pi = tp;
-}
-
-
-/**
- * Tune the Proposal to accept the desired acceptance ratio.
- *
- * The acceptance ratio for this Proposal should be around 0.44.
- * If it is too large, then we increase the proposal size,
- * and if it is too small, then we decrease the proposal size.
- */
-void MPQTreeProposal::tune( double rate ) 
-{
-    
-//    if ( rate > 0.44 )
-//        {
-//        rev_alpha_pi *= (1.0 + ((rate-0.44)/0.56) );
-//        }
-//    else
-//        {
-//        rev_alpha_pi /= (2.0 - rate/0.44 );
-//        }
-//    rev_alpha_pi = fmin(10000, rev_alpha_pi);
-}
-
-
 
 
 double MPQTreeProposal::updateBranchLengths() 
@@ -546,11 +493,6 @@ double MPQTreeProposal::updateRootPosition(void)
         {
             return RbConstants::Double::neginf;
         }
-    }
-
-    if ( verify_root_move == true )
-    {
-        stored_newick = tau.getNewickRepresentation();
     }
 
     stored_root_index = tau.getRoot().getIndex();

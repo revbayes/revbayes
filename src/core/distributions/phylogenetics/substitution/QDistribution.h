@@ -35,6 +35,8 @@ namespace RevBayesCore {
         double                                  getLnPriorOdds(void) const { return log_rho_reversible - log_rho_non_reversible; }
         void                                    setLnPriorOdds(double delta);                                                              //!< Set log(rho_R/rho_N), keeping rho_R + rho_N = 1
         FIXED_MODEL                             getFixedModel(void) const { return fixed_model; }
+        std::string                             getHiddenStateString(void) const;                                                          //!< The exact rate matrix and the prior odds, for checkpointing
+        void                                    setHiddenStateFromString(const std::string &s);                                            //!< Restore what getHiddenStateString wrote
         bool                                    isModelFixed(void) const { return fixed_model != FREE; }
 
     protected:

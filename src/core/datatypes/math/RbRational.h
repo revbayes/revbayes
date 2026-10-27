@@ -155,4 +155,27 @@
 
 #endif
 
+#include <stdexcept>
+#include <string>
+
+    /* Read a rational written by operator<< ("n/d", or just "n"), exactly. This is
+       how checkpoints keep the rate matrix exact across a restart. */
+    inline mpq_class mpqFromString(const std::string& s) {
+
+#   if defined(RB_USE_GMP)
+        mpq_class q(s, 10);
+        if ( q.get_den() == 0 )
+            throw std::invalid_argument("mpqFromString: zero denominator in \"" + s + "\"");
+        q.canonicalize();
+        return q;
+#   else
+        size_t slash = s.find('/');
+        mpq_class::integer_type n( s.substr(0, slash) );
+        mpq_class::integer_type d( slash == std::string::npos ? std::string("1") : s.substr(slash + 1) );
+        if ( d == 0 )
+            throw std::invalid_argument("mpqFromString: zero denominator in \"" + s + "\"");
+        return mpq_class( mpq_class::rational_type(n, d) );
+#   endif
+    }
+
 #endif

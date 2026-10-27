@@ -16,7 +16,6 @@
 #include "QDistribution.h"
 
 
-#define MIN_FREQ    10e-4
 #define MAX_LN_PRIOR_ODDS  1000.0
 #define MIN_TUNE_STEP      0.001
 #define MAX_TUNE_STEP      256.0
@@ -82,7 +81,8 @@ variable(n) {
     n_visits         = 0;
     n_tuning_calls   = 0;
     tune_step        = 1.0;
-    tune_last_dir    = 0;
+    tune_bracket_lo  = RbConstants::Double::neginf;
+    tune_bracket_hi  = RbConstants::Double::inf;
     tune_calls_total = 0;
     for (int i=0; i<NUM_SUB_MOVES; i++)
         num_dead_intervals[i] = 0;
@@ -112,7 +112,8 @@ MPQRateMatrixProposal::MPQRateMatrixProposal( const MPQRateMatrixProposal& p ) :
     n_visits( p.n_visits ),
     n_tuning_calls( p.n_tuning_calls ),
     tune_step( p.tune_step ),
-    tune_last_dir( p.tune_last_dir ),
+    tune_bracket_lo( p.tune_bracket_lo ),
+    tune_bracket_hi( p.tune_bracket_hi ),
     tune_calls_total( p.tune_calls_total ),
     poly_alpha( p.poly_alpha ),
     poly_center_set( p.poly_center_set ),
@@ -310,7 +311,7 @@ double MPQRateMatrixProposal::applySubMove(SUB_MOVE m) {
             return Q.updateNonReversibleBackbone(rng, tuning[NR_BB_ALL], 0.5);
 
         case NR_BB_SINGLE:
-            return Q.updateNonReversibleBackbone(rng, tuning[NR_BB_SINGLE], 0.5);
+            return Q.updateNonReversibleBackboneSingle(rng, tuning[NR_BB_SINGLE], 0.5);
 
         case NR_U:
             return Q.updateNonReversibleU(rng, tuning[NR_U]);
@@ -530,29 +531,53 @@ void MPQRateMatrixProposal::tune(double rate) {
         {
         /* Search phase. One of the models was never visited, so the observed log
            odds carries no information about HOW far off the prior is, only about
-           which way. Step in that direction, doubling while the direction holds and
-           halving on a reversal, which brackets the answer geometrically. */
+           which way. Each such interval bounds the answer on one side: if only the
+           non-reversible model was visited the current value is too small, and if
+           only the reversible model was visited it is too large. Until the answer is
+           bounded on both sides, step outward, doubling the step each time; once it
+           is, bisect the bracket. Keeping the bracket is what stops the search
+           cycling: without it, a step doubled after a reversal can carry the value
+           back past a point already known to be on the wrong side. */
+        double current = q_dist->getLnPriorOdds();
         int dir = ( n_reversible == 0 ) ? 1 : -1;
+        if ( dir == 1 && current > tune_bracket_lo )
+            tune_bracket_lo = current;
+        if ( dir == -1 && current < tune_bracket_hi )
+            tune_bracket_hi = current;
 
-        if ( tune_last_dir != 0 && dir != tune_last_dir )
-            tune_step *= 0.5;
+        /* The bracket is learned from a chain that is still burning in, so it can
+           go stale. If it closes down to nothing without either model being
+           visited from inside it, forget it and search outward again. */
+        if ( tune_bracket_hi - tune_bracket_lo < MIN_TUNE_STEP )
+            {
+            tune_bracket_lo = ( dir ==  1 ) ? current : RbConstants::Double::neginf;
+            tune_bracket_hi = ( dir == -1 ) ? current : RbConstants::Double::inf;
+            tune_step       = 1.0;
+            }
+
+        if ( std::isfinite(tune_bracket_lo) == true && std::isfinite(tune_bracket_hi) == true )
+            {
+            ln_prior_odds = 0.5 * (tune_bracket_lo + tune_bracket_hi);
+            }
         else
+            {
             tune_step *= 2.0;
-
-        if ( tune_step < MIN_TUNE_STEP )
-            tune_step = MIN_TUNE_STEP;
-        if ( tune_step > MAX_TUNE_STEP )
-            tune_step = MAX_TUNE_STEP;
-
-        ln_prior_odds  = q_dist->getLnPriorOdds() + dir * tune_step;
-        tune_last_dir  = dir;
+            if ( tune_step < MIN_TUNE_STEP )
+                tune_step = MIN_TUNE_STEP;
+            if ( tune_step > MAX_TUNE_STEP )
+                tune_step = MAX_TUNE_STEP;
+            ln_prior_odds = current + dir * tune_step;
+            }
 
         n_tuning_calls = 0;
         }
     else
         {
-        // refinement phase
+        // refinement phase; a later search starts from a fresh bracket
         n_tuning_calls++;
+        tune_bracket_lo = RbConstants::Double::neginf;
+        tune_bracket_hi = RbConstants::Double::inf;
+        tune_step       = 1.0;
 
         double p_rev = (double)n_reversible / (double)n_visits;
         double observed_ln_odds = log(p_rev) - log(1.0 - p_rev);
@@ -660,36 +685,7 @@ double MPQRateMatrixProposal::updateToNonReversible(void) {
     mpq_class u1 = randomPoint.getX();
     mpq_class u2 = randomPoint.getY();
     mpq_class u3 = randomPoint.getZ();
-#   if 1
     Q.nonreversibilize(u1, u2, u3);
-#   else
-    Q.setIsReversible(false);
-    Q(A,C) = stored_Q(A,C) + (pi[C]/pi[A]) * stored_Q(C,G) * (2 * u1 - 1) + (pi[C]/pi[A]) * stored_Q(C,T) * (2 * u2 - 1);
-    Q(A,G) = stored_Q(A,G) - (pi[C]/pi[A]) * stored_Q(C,G) * (2 * u1 - 1) + (pi[G]/pi[A]) * stored_Q(G,T) * (2 * u3 - 1);
-    Q(A,T) = stored_Q(A,T) - (pi[C]/pi[A]) * stored_Q(C,T) * (2 * u2 - 1) - (pi[G]/pi[A]) * stored_Q(G,T) * (2 * u3 - 1);
-    Q(C,G) = 2 * stored_Q(C,G) * u1;
-    Q(C,T) = 2 * stored_Q(C,T) * u2;
-    Q(G,T) = 2 * stored_Q(G,T) * u3;
-    Q(C,A) = (pi[A]/pi[C]) * stored_Q(A,C) - stored_Q(C,G) * (2 * u1 - 1) - stored_Q(C,T) * (2 * u2 - 1);
-    Q(G,A) = (pi[A]/pi[G]) * stored_Q(A,G) + (pi[C]/pi[G]) * stored_Q(C,G) * (2 * u1 - 1) - stored_Q(G,T) * (2 * u3 - 1);
-    Q(T,A) = (pi[A]/pi[T]) * stored_Q(A,T) + (pi[C]/pi[T]) * stored_Q(C,T) * (2 * u2 - 1) + (pi[G]/pi[T]) * stored_Q(G,T) * (2 * u3 - 1);
-    Q(G,C) = 2 * (pi[C]/pi[G]) * stored_Q(C,G) * (1 - u1);
-    Q(T,C) = 2 * (pi[C]/pi[T]) * stored_Q(C,T) * (1 - u2);
-    Q(T,G) = 2 * (pi[G]/pi[T]) * stored_Q(G,T) * (1 - u3);
-    
-    // update the diagonal components of the rate matrix
-    mpq_class sum;
-    for (int i=0; i<4; i++)
-        {
-        sum = 0;
-        for (int j=0; j<4; j++)
-            {
-            if (i != j)
-                sum += Q(i,j);
-            }
-        Q(i,i) = -sum;
-        }
-#   endif
     
     double lnProb = lnRv + lnJacobian;
     if (std::isfinite(lnProb) == false)
@@ -712,40 +708,7 @@ double MPQRateMatrixProposal::updateToReversible(void) {
     stored_Q = Q;
 
     // average rates with same stationary frequencies
-#   if 1
     Q.reversibilize();
-#   else
-    Q.setIsReversible(true);
-    std::vector<mpq_class>& pi = Q.getPi();
-    mpq_class averageRate;
-    mpq_class sum;
-    for (int i=0; i<4; i++)
-        {
-        sum = 0;
-        for (int j=0; j<4; j++)
-            {
-            if (i != j)
-                {
-                Q(i,j) = (pi[i] * stored_Q(i,j) + pi[j] * stored_Q(j,i)) / (2 * pi[i]);
-                sum += Q(i,j);
-                averageRate += pi[i] * Q(i,j);
-                }
-            }
-        Q(i,i) = -sum;
-        }
-        
-    Q.setExchangeabilityRates();
-    
-    // make certain average rate is one
-    if (averageRate != 1)
-        {
-        mpq_class factor = 1 / averageRate;
-        std::cout << "Warning: the average rate should be one in updateToReversible" << std::endl;
-        for (int i=0; i<4; i++)
-            for (int j=0; j<4; j++)
-                Q(i,j) *= factor;
-        }
-#   endif
 
     // jacobian
     std::vector<mpq_class>& pi = Q.getPi();

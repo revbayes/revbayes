@@ -25,9 +25,6 @@ the root must nevertheless be handled consistently with the tree prior.
 This move does not take a rate-matrix argument. Connect the tree and
 the rate matrix through the phylogenetic likelihood, using `dnPhyloCTMC`.
 
-`tune` defaults to TRUE and enables tuning when requested during burn-in.
-`weight` controls selection frequency relative to other moves.
-
 ## authors
 John P. Huelsenbeck
 Sebastian Höhna
@@ -46,8 +43,7 @@ mvReversibilityAwareBranchLengthScale
         taxa=taxa, branchLengthDistribution=dnExp(10.0), rooted=TRUE)
 
     moves = VectorMoves()
-    moves.append(mvMPQTree(tree=tree, updateRoot=TRUE,
-                           tune=FALSE, weight=4))
+    moves.append(mvMPQTree(tree=tree, updateRoot=TRUE, weight=4))
 
     # If the root must stay on an assigned outgroup branch, instead
     # construct the move with updateRoot=FALSE.

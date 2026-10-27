@@ -55,11 +55,11 @@ void Move_MPQTree::constructInternalObject( void ) {
     RevBayesCore::TypedDagNode<RevBayesCore::Tree >* tmp_tree = static_cast<const Tree &>( tree->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::Tree > *t = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp_tree );
 
-    bool tu = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
     bool ur = static_cast<const RlBoolean &>( update_root->getRevObject() ).getValue();
     
     RevBayesCore::Proposal *p = new RevBayesCore::MPQTreeProposal(t, ur);
-    value = new RevBayesCore::MetropolisHastingsMove(p,w,tu);
+    // the proposal has nothing to tune
+    value = new RevBayesCore::MetropolisHastingsMove(p,w,false);
 
 }
 
@@ -108,13 +108,18 @@ const MemberRules& Move_MPQTree::getParameterRules(void) const {
            move that registers a node it does not change makes RevBayes touch that
            node on every proposal, which here would dirty the whole CTMC and force
            a full likelihood recomputation for what is only a branch-length change. */
-        move_member_rules.push_back( new ArgumentRule( "tree"  , Tree::getClassTypeSpec(),                 "The phylogeny.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY ) );
-        move_member_rules.push_back( new ArgumentRule( "tune"  , RlBoolean::getClassTypeSpec(),            "Should we tune the scaling factor during burnin?", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new RlBoolean( true ) ) );
+        move_member_rules.push_back( new ArgumentRule( "tree"  , Tree::getClassTypeSpec(),                 "The phylogeny.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
         move_member_rules.push_back( new ArgumentRule( "updateRoot", RlBoolean::getClassTypeSpec(),        "Should the position of the root be updated? Set this to FALSE whenever an outgroup has been assigned. The move cannot work this out for itself: the tree prior does not enforce the outgroup once the MCMC is running (RevBayes issue #157), so a root move would walk the root off the outgroup and nothing would object.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( true ) ) );
         
-        /* Inherit weight from Move, put it after variable */
+        /* Inherit weight (but not tuneTarget!) from Move and put it after the arguments created above */
         const MemberRules& inheritedRules = Move::getParameterRules();
-        move_member_rules.insert( move_member_rules.end(), inheritedRules.begin(), inheritedRules.end() );
+        for (size_t i = 0; i < inheritedRules.size(); ++i)
+            {
+            if ( inheritedRules[i].getArgumentLabel() == "weight" )
+                {
+                move_member_rules.push_back( inheritedRules[i].clone() );
+                }
+            }
         
         rules_set = true;
         }
@@ -156,10 +161,6 @@ void Move_MPQTree::setConstParameter(const std::string& name, const RevPtr<const
     else if ( name == "weight" )
         {
         weight = var;
-        }
-    else if ( name == "tune" )
-        {
-        tune = var;
         }
     else if ( name == "updateRoot" )
         {

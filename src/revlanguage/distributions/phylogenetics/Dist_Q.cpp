@@ -97,9 +97,16 @@ RevBayesCore::QDistribution* Dist_Q::createDistribution(void) const {
 
 RateMatrix* Dist_Q::createRandomVariable(void) const {
     
+    // as in TypedDistribution<rlType>::createRandomVariable, but returning a RateMatrix
     RevBayesCore::TypedDistribution<RevBayesCore::RateGenerator>* d = createDistribution();
-    RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rv  = new StochasticNode("", d, this->clone() );
-    return new RateMatrix(rv);
+    Dist_Q* rl_dist_copy = this->clone();
+    RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rv  = new StochasticNode<RevBayesCore::RateGenerator>("", d, rl_dist_copy );
+
+    RateMatrix* rl_rv = new RateMatrix(rv);
+    rl_dist_copy->setVariable( rl_rv );
+    rl_rv->addMethods( rl_dist_copy->getDistributionMethods() );
+
+    return rl_rv;
 }
 
 /* Get Rev type of object */
@@ -112,7 +119,7 @@ const std::string& Dist_Q::getClassType(void) {
 /* Get class type spec describing type of object */
 const TypeSpec& Dist_Q::getClassTypeSpec(void) {
     
-    static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( TypedDistribution<Probability>::getClassTypeSpec() ) );
+    static TypeSpec rev_type_spec = TypeSpec( getClassType(), new TypeSpec( TypedDistribution<RateGenerator>::getClassTypeSpec() ) );
     return rev_type_spec;
 }
 

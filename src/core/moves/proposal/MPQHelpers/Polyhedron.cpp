@@ -148,12 +148,13 @@ void Polyhedron::calculateFacetVolume(Plane* pln, std::vector<Vertex*>& vertices
             mpq_class b2;
             mpq_class b3;
             mpq_class b4;
-            if (isInTetrahedron(&randomPoint, &center, v1, v2, v3, b1, b2, b3, b4) == true)
+            /* A point on a face shared by two tetrahedra, or at the center itself,
+               lies in more than one of them. Keep the first. The density needs only
+               the barycentric weight on the center, and that is the same in every
+               tetrahedron containing the point, since they all share the center. */
+            if (pointFoundInPolyhedron == false && isInTetrahedron(&randomPoint, &center, v1, v2, v3, b1, b2, b3, b4) == true)
                 {
-                //std::cout << b1.get_d() << " " << b2.get_d() << " " << b3.get_d() << " " << b4.get_d() << " " << std::endl;
                 alphaC = b1.get_d();
-                if (pointFoundInPolyhedron == true)
-                    throw(RbException("Polyhedron: Point already found in polyhedron"));
                 pointFoundInPolyhedron = true;
                 mpq_class x = center.getX() * b1 + v1->getX() * b2 + v2->getX() * b3 + v3->getX() * b4;
                 mpq_class y = center.getY() * b1 + v1->getY() * b2 + v2->getY() * b3 + v3->getY() * b4;
@@ -161,7 +162,7 @@ void Polyhedron::calculateFacetVolume(Plane* pln, std::vector<Vertex*>& vertices
                 Vector t;
                 t.set(x, y, z); // Vector pt = v0*a + v1*s + v2*t + v3*u;
                 if (t != randomPoint)
-                    throw(RbException("Polyhedron: Test point does not match random point"));
+                    throw(RbException("Polyhedron: internal error, the barycentric reconstruction of the point does not match the point. Please report this."));
                 }
             }
         
@@ -246,7 +247,7 @@ Vertex* Polyhedron::findOtherVertex(Vertex* from, Vertex* v, Plane* pln) {
         if (std::find(vertices.begin(), vertices.end(), v) == vertices.end())
             continue;
         if (vertices.size() != 2)
-            throw RbException("Polyhedron: Expected two vertices on an edge");
+            throw RbException("Polyhedron: internal error, an edge of the polyhedron does not have exactly two vertices. Please report this.");
 
         if (vertices[0] == v && vertices[1] != from)
             return vertices[1];

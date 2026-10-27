@@ -47,10 +47,7 @@ template <class variableType> class StochasticNode;
         double                                              getProposalTuningParameter(void) const;
         void                                                printParameterSummary(std::ostream &o, bool name_only) const;                                       //!< Print the parameter summary
         void                                                prepareProposal(void);                                                              //!< Prepare the proposal
-        void                                                setProposalTuningParameter(double tp);
-        void                                                tune(double r);                                                                     //!< Tune the proposal to achieve a better acceptance/rejection ratio
         void                                                undoProposal(void);                                                                 //!< Reject the proposal
-        void                                                setVerifyRootMove(bool tf) { verify_root_move = tf; }                               //!< Check every root move by round trip
         bool                                                lastMoveWasRoot(void) const { return last_move == ROOT_POSITION; }
         
     protected:
@@ -117,16 +114,6 @@ template <class variableType> class StochasticNode;
         size_t                                              stored_root_index;
         MOVE_TYPE                                           last_move;
 
-        /* Set to true to have every root-position move verified by round trip:
-           the Newick string is captured before the move and compared against the
-           tree undoProposal hands back. The root move is the only one here that
-           rearranges topology, its undo is a hand-written reversal of that
-           rearrangement, and a mistake there would corrupt the tree silently
-           rather than crash. Costs a string comparison per rejected root move,
-           so leave it off for production runs and on for the first few thousand
-           iterations of anything new. */
-        bool                                                verify_root_move;
-        std::string                                         stored_newick;
 
 //        std::vector<mpq_class>                              W;
 

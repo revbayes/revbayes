@@ -9,7 +9,7 @@
 #include "RealPos.h"
 #include "RevObject.h"
 #include "RlBoolean.h"
-#include "RlTree.h"
+#include "RlBranchLengthTree.h"
 #include "BranchLengthScaleProposal.h"
 #include "TypeSpec.h"
 #include "Move.h"
@@ -52,7 +52,7 @@ void Move_BranchLengthScale::constructInternalObject( void )
     delete value;
     
     // now allocate a new tree scale move
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = static_cast<const Tree &>( tree->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = static_cast<const BranchLengthTree &>( tree->getRevObject() ).getDagNode();
     RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
     
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
@@ -109,7 +109,7 @@ const MemberRules& Move_BranchLengthScale::getParameterRules(void) const
     
     if ( rules_set == false )
     {
-        move_member_rules.push_back( new ArgumentRule( "tree"   , Tree::getClassTypeSpec() , "The tree variable the move operates on.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
+        move_member_rules.push_back( new ArgumentRule( "tree"   , BranchLengthTree::getClassTypeSpec() , "The tree variable the move operates on.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
         move_member_rules.push_back( new ArgumentRule( "delta"  , RealPos::getClassTypeSpec()  , "The scaling factor (strength) of the proposal.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY       , new RealPos( 1.0 ) ) );
         move_member_rules.push_back( new ArgumentRule( "tune"   , RlBoolean::getClassTypeSpec(), "Should we tune the scaling factor during burnin?", ArgumentRule::BY_VALUE    , ArgumentRule::ANY       , new RlBoolean( true ) ) );
         

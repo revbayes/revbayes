@@ -33,7 +33,6 @@ class TypeSpec;
         
         RevPtr<const RevVariable>                   tree;
         RevPtr<const RevVariable>                   weight;
-        RevPtr<const RevVariable>                   tune;
         RevPtr<const RevVariable>                   update_root;
         
     };

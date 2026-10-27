@@ -47,6 +47,8 @@ namespace RevBayesCore {
         std::vector<mpq_class>&             getPi(void) { needs_update = true; return pi; }        //!< non-const, so treat as a write; see operator()
         const std::vector<mpq_class>&       getPi(void) const { return pi; }
         std::vector<double>                 getRates(void) const ;
+        std::string                         getStateString(void) const;                                                         //!< The exact state, as read back by initFromString
+        void                                initFromString(const std::string &s);                                               //!< Restore the exact state written by getStateString
         void                                initializeTimeReversibleModel(const std::vector<double>& alpha, RandomNumberGenerator* rng);
         void                                initializeNonReversibleModel(const std::vector<double>& alpha, RandomNumberGenerator* rng);
         void                                nonreversibilize(mpq_class& u1, mpq_class& u2, mpq_class& u3);
@@ -63,6 +65,7 @@ namespace RevBayesCore {
         double                              updateBackboneWeights(RandomNumberGenerator* rng, double alpha0, double offset);
         double                              updateBackboneWeightsSingle(RandomNumberGenerator* rng, double alpha0, double offset);
         double                              updateNonReversibleBackbone(RandomNumberGenerator* rng, double alpha0, double offset);
+        double                              updateNonReversibleBackboneSingle(RandomNumberGenerator* rng, double alpha0, double offset);
         double                              updateNonReversibleU(RandomNumberGenerator* rng, double delta);
 
                                             // virtual methods from RateMatrix

@@ -129,9 +129,15 @@ const MemberRules& Move_MPQRateMatrix::getParameterRules(void) const {
         move_member_rules.push_back( new ArgumentRule( "polyhedronCenter", ModelVector<RealPos>::getClassTypeSpec(), "The point (u1,u2,u3) in the polyhedron about which the jump proposal is centred, or an empty vector to use the time-reversible point (1/2,1/2,1/2). Establish it with a short run confined to the non-reversible model, monitoring Q.getU(), and pass the posterior mean. Because the polyhedron changes shape with every proposal, a centre it cannot accommodate is pulled back along the line toward the time-reversible point for that proposal only; the value given here is kept and tried afresh each time.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new ModelVector<RealPos>() ) );
         move_member_rules.push_back( new ArgumentRule( "tunePolyhedronAlpha", RlBoolean::getClassTypeSpec(), "Should polyhedronAlpha be adapted during burnin against the rate at which jumps are accepted? There is no target rate to aim at, since this is an independence proposal and more acceptance is simply better, so the tuning hill-climbs. Like the other adaptations it must finish before sampling begins.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false ) ) );
         
-        /* Inherit weight from Move, put it after variable */
+        /* Inherit weight (but not tuneTarget!) from Move and put it after the arguments created above */
         const MemberRules& inheritedRules = Move::getParameterRules();
-        move_member_rules.insert( move_member_rules.end(), inheritedRules.begin(), inheritedRules.end() );
+        for (size_t i = 0; i < inheritedRules.size(); ++i)
+            {
+            if ( inheritedRules[i].getArgumentLabel() == "weight" )
+                {
+                move_member_rules.push_back( inheritedRules[i].clone() );
+                }
+            }
         
         rules_set = true;
         }

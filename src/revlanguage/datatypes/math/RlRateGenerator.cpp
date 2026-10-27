@@ -1,3 +1,11 @@
+//
+//  RlRateGenerator.cpp
+//  revbayes-proj
+//
+//  Created by Michael Landis on 3/17/15.
+//  Copyright (c) 2015 Michael Landis. All rights reserved.
+//
+
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -107,20 +115,11 @@ const TypeSpec& RateGenerator::getTypeSpec(void) const {
     return type_spec;
 }
 
-void RateGenerator::initMethods(void)
-{
+void RateGenerator::initMethods(void) {
     
     // member procedures
     ArgumentRules* getStateDescriptionsArgRules = new ArgumentRules();
     methods.addFunction( new MemberProcedure( "getStateDescriptions", ModelVector<RlString>::getClassTypeSpec(), getStateDescriptionsArgRules) );
-    
-    // add the DAG node member methods
-    // note that this is a sage case because all DAG nodes are member objects
-    if ( dag_node != NULL )
-    {
-        const MethodTable &dagMethods = dynamic_cast<RevMemberObject*>( dag_node )->getMethods();
-        methods.insertInheritedMethods( dagMethods );
-    }
     
     // member functions
     ArgumentRules* transitionProbabilityArgRules = new ArgumentRules();

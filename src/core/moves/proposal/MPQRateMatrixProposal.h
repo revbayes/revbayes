@@ -123,7 +123,8 @@ template <class variableType> class StochasticNode;
         long                                                n_visits;                                                                           //!< visits to either model since the last tuning call
         long                                                n_tuning_calls;
         double                                              tune_step;
-        int                                                 tune_last_dir;
+        double                                              tune_bracket_lo;                                                                    //!< largest lnPriorOdds known to be too small (only the non-reversible model visited)
+        double                                              tune_bracket_hi;                                                                    //!< smallest lnPriorOdds known to be too large (only the reversible model visited)
         double                                              poly_alpha;
         double                                              poly_center[3];
         bool                                                poly_center_set;

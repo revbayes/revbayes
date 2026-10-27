@@ -26,7 +26,6 @@ of `Q.getU()` from a preliminary non-reversible analysis. If a proposed
 polyhedron cannot accommodate the requested center, the center is
 moved toward the reversible point for that proposal.
 
-`tune` defaults to TRUE and enables tuning when requested by the MCMC.
 `tunePolyhedronAlpha`, which defaults to FALSE, enables adaptation of
 the proposal concentration during burn-in.
 
@@ -35,9 +34,10 @@ it adapts the model prior during burn-in to encourage balanced model
 occupancy. This changes the target distribution. Finish all adaptation
 before collecting production samples, and monitor `Q.lnPriorOdds()`
 to retain the final prior odds needed to calculate the Bayes factor.
-
-`weight` controls how frequently this move is selected relative to
-other moves.
+A checkpoint stores the adapted prior odds with the rate matrix, so a
+resumed run keeps the same target distribution. The tuned proposal
+widths and `polyhedronAlpha` are not stored; after a restart they return
+to their starting values, which affects mixing but not the target.
 
 ## authors
 John P. Huelsenbeck

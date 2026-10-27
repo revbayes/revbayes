@@ -8,10 +8,12 @@
 #include "DistributionBeta.h"
 #include "DistributionDirichlet.h"
 #include "RbMathVector.h"
+#include "StringUtilities.h"
 #include "TransitionProbabilityMatrix.h"
 
 #include <cmath>
 #include <iostream>
+#include <sstream>
 
 #define MIN_FREQ    10e-8
 
@@ -50,11 +52,16 @@
    composed of only six of those loops, with flow between pairs of nucleotides.
    Neither polytope moves when pi moves.  The prior is therefore flat on each 
    polytope, with density 1/V_R = 3840 and 1/V_N = 1935360 respectively. The reversible
-   jump Jacobian J_RN = 64 w_CG w_CT w_GT is taken in the same free coordinates.
-   
-   Note that the weights taken as "free" (or coordinates) are crucial. The density
-   of the non-reversible model, and of course, the Jacobian, depends on the choice
-   of coordinates. That is not true for the time-reversible model.
+   jump Jacobian is |J_RN| = 64 w_CG w_CT w_GT.
+
+   The free coordinates behind these constants are any five of the six backbone
+   weights for the time-reversible model and (AC, AG, AT, CA, CG, CT, GA, GC) for
+   the non-reversible model. Note that the weights taken as "free" (or coordinates)
+   matter. The density of the non-reversible model, and the Jacobian, depend on the
+   choice of coordinates; only their product enters the acceptance ratio, and that
+   product does not. For example, in (AC, AG, AT, CG, CT, GA, GC, GT) the two are
+   1/V_N = 3870720 and |J_RN| = 32 w_CG w_CT w_GT. The density of the
+   time-reversible model does not depend on which five backbone weights are used.
 
    Every move below is written as a move on (pi, w). This matters: a move
    written in terms of the exchangeability rates r, or of the raw q_ij, changes
@@ -835,6 +842,75 @@ void RateMatrix_MPQ::setPi(std::vector<mpq_class>& f) {
         this->pi[i] = f[i];
 }
 
+/* The exact state of the matrix, for checkpointing: the model, then the four
+   stationary frequencies and the twelve off-diagonal rates as rationals,
+
+       R,pi_A,pi_C,pi_G,pi_T,q_AC,q_AG,q_AT,q_CA,...,q_TG
+
+   with N in place of R for the non-reversible model. Writing rationals rather
+   than doubles keeps the restarted chain on exactly the state it left, so the
+   exact constraint checks behave the same after a restart as before it. */
+std::string RateMatrix_MPQ::getStateString(void) const {
+
+    std::stringstream ss;
+    ss << ( isReversible == true ? "R" : "N" );
+    for (int i=0; i<4; i++)
+        ss << "," << pi[i];
+    for (int i=0; i<4; i++)
+        for (int j=0; j<4; j++)
+            if (i != j)
+                ss << "," << (*this)(i,j);
+    return ss.str();
+}
+
+void RateMatrix_MPQ::initFromString(const std::string &s) {
+
+    std::vector<std::string> elements;
+    StringUtilities::stringSplit(s, ",", elements);
+    if ( elements.size() != 17 || (elements[0] != "R" && elements[0] != "N") )
+        throw RbException() << "Cannot restore a dnQ rate matrix from \"" << s << "\"";
+
+    std::vector<mpq_class> new_pi(4);
+    std::vector<mpq_class> new_q(16);
+    try
+        {
+        for (int i=0; i<4; i++)
+            new_pi[i] = mpqFromString( elements[1+i] );
+        for (int i=0, k=5; i<4; i++)
+            for (int j=0; j<4; j++)
+                if (i != j)
+                    new_q[i*4+j] = mpqFromString( elements[k++] );
+        }
+    catch (std::exception& e)
+        {
+        throw RbException() << "Cannot restore a dnQ rate matrix from \"" << s << "\": " << e.what();
+        }
+
+    isReversible = ( elements[0] == "R" );
+    setPi(new_pi);
+    for (int i=0; i<4; i++)
+        {
+        mpq_class sum = 0;
+        for (int j=0; j<4; j++)
+            {
+            if (i != j)
+                {
+                (*this)(i,j) = new_q[i*4+j];
+                sum += new_q[i*4+j];
+                }
+            }
+        (*this)(i,i) = -sum;
+        }
+    if (isReversible == true)
+        setExchangeabilityRates();
+    needs_update = true;
+
+    mpq_class averageRate;
+    calculateAverageRate(averageRate);
+    if (averageRate != 1)
+        throw RbException() << "The dnQ rate matrix restored from \"" << s << "\" does not have an average rate of one";
+}
+
 /** Calculate the transition probabilities for the real case */
 void RateMatrix_MPQ::tiProbsExpm(double t, TransitionProbabilityMatrix& P) const {
 
@@ -1023,13 +1099,14 @@ double RateMatrix_MPQ::worstRowSumError    = 0.0;
 
 void RateMatrix_MPQ::updateIfNeeded(void) const {
 
-    RateMatrix_MPQ* self = const_cast<RateMatrix_MPQ*>(this);
-
     if (needs_update == true)
         {
         moveToDouble();
-        self->updateEigenSystem();
+#       ifdef MPQ_TIPROBS_EIGEN
+        // only the eigensystem route reads the eigenvectors; tiProbsExpm does not
+        const_cast<RateMatrix_MPQ*>(this)->updateEigenSystem();
         eigenUpdateCount++;
+#       endif
         needs_update = false;
         return;
         }
@@ -1045,7 +1122,8 @@ void RateMatrix_MPQ::updateIfNeeded(void) const {
    runs in the forward direction.
 
    The prior is flat in w.  In the (backbone, u) parameterization it is therefore
-   proportional to the Jacobian of that reparameterization, 64 w^R_CG w^R_CT w^R_GT,
+   proportional to the Jacobian of that reparameterization, 64 w^R_CG w^R_CT w^R_GT
+   (in the coordinates given at the top of this file),
    which is constant in u but not in the backbone. That is the only non-trivial
    density term any of these moves has to carry. */
 
@@ -1265,6 +1343,71 @@ double RateMatrix_MPQ::updateNonReversibleBackbone(RandomNumberGenerator* rng, d
 
     // the reparameterization Jacobian, 64 w_CG w_CT w_GT, at the new backbone
     // relative to the old one
+    lnProposalProb += log(newWR[W_CG].get_d()) + log(newWR[W_CT].get_d()) + log(newWR[W_GT].get_d());
+    lnProposalProb -= log(wR[W_CG].get_d())    + log(wR[W_CT].get_d())    + log(wR[W_GT].get_d());
+
+    return lnProposalProb;
+}
+
+/* The single-element version for the non-reversible model: redraw one backbone
+   weight and scale the other five to keep the sum at one half, holding (u1,u2,u3)
+   and pi fixed. As in updateBackboneWeightsSingle the move itself has Jacobian
+   factor^(6-2); as in updateNonReversibleBackbone the reparameterization Jacobian
+   64 w_CG w_CT w_GT enters as a ratio. A backbone that puts the fixed point
+   (u1,u2,u3) outside its polyhedron is refused. */
+double RateMatrix_MPQ::updateNonReversibleBackboneSingle(RandomNumberGenerator* rng, double alpha0, double offset) {
+
+    if (isReversible == true)
+        throw(RbException("Can only update the non-reversible backbone for non-reversible models"));
+
+    mpq_class oneHalf(1, 2);
+
+    std::vector<mpq_class> wR(6);
+    calculateWeights(wR);
+
+    mpq_class u1, u2, u3;
+    if (recoverU(u1, u2, u3) == false)
+        return RbConstants::Double::neginf;
+
+    size_t index = size_t(rng->uniform01() * 6);
+    if (index > 5)
+        index = 5;
+
+    std::vector<double> oldVals(2);
+    std::vector<double> alphaForward(2);
+    std::vector<double> alphaReverse(2);
+    oldVals[0] = 2.0 * wR[index].get_d();
+    oldVals[1] = 1.0 - oldVals[0];
+    alphaForward[0] = oldVals[0] * alpha0 + offset;
+    alphaForward[1] = oldVals[1] * alpha0 + offset;
+
+    std::vector<double> newVals = RbStatistics::Dirichlet::rv(alphaForward, *rng);
+    if (isDrawUsable(newVals) == false)
+        return RbConstants::Double::neginf;
+    alphaReverse[0] = newVals[0] * alpha0 + offset;
+    alphaReverse[1] = newVals[1] * alpha0 + offset;
+
+    double factor = newVals[1] / oldVals[1];
+    std::vector<double> proposed(6);
+    for (int i=0; i<6; i++)
+        {
+        if (i == (int)index)
+            proposed[i] = newVals[0];
+        else
+            proposed[i] = 2.0 * wR[i].get_d() * factor;
+        }
+
+    std::vector<mpq_class> newWR;
+    if (exactlyNormalize(proposed, newWR, oneHalf) == false)
+        return RbConstants::Double::neginf;
+
+    if (buildNonReversibleFromBackbone(newWR, u1, u2, u3) == false)
+        return RbConstants::Double::neginf;
+
+    double lnProposalProb = RbStatistics::Dirichlet::lnPdf(alphaReverse, oldVals) -
+                            RbStatistics::Dirichlet::lnPdf(alphaForward, newVals);
+    lnProposalProb += (6 - 2) * log(factor);
+
     lnProposalProb += log(newWR[W_CG].get_d()) + log(newWR[W_CT].get_d()) + log(newWR[W_GT].get_d());
     lnProposalProb -= log(wR[W_CG].get_d())    + log(wR[W_CT].get_d())    + log(wR[W_GT].get_d());
 
