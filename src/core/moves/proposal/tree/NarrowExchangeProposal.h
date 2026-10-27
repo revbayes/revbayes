@@ -17,9 +17,11 @@ template <class variableType> class StochasticNode;
     /**
      * The narrow-exchange operator.
      *
-     * A narrow-exchange proposal is a NNI (nearest neighbour interchange) proposal on rooted trees without changing the node age.
-     * That is, we pick a random node which is not the root and neither its parent is the root. 
-     * Then, we try to exchange the picked node with it's uncle. This move will automatically fail if the uncle is older than the parent.
+     * A narrow-exchange proposal is a NNI (nearest neighbour interchange) on rooted trees.
+     * Pick a non-root node whose parent is not the root, and exchange it with its uncle.
+     * Internal node ages stay fixed.
+     * An ordinary uncle must be younger than the parent. Sampled-ancestor tips take their new
+     * parent's age, provided this preserves fixed ages and respects uncertain-age bounds.
      *
      *
      * @copyright Copyright 2009-
