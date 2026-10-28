@@ -106,8 +106,14 @@ endif
 ############# libraries #################
 libdl = cpp.find_library('dl')
 
+# Embed the help pages, which RbHelpDatabase.cpp includes as RbHelpText.inc
+help_text = custom_target('rb-help-text',
+                          input: help_pages,
+                          output: 'RbHelpText.inc',
+                          command: [import('python').find_installation(), files('help/embed_help.py'), '@OUTPUT@', '@INPUT@'])
+
 core = static_library('rb-core',
-                      core_sources,
+                      core_sources + [help_text],
                       include_directories: [src_inc],
                       dependencies: [boost,mpi])
 

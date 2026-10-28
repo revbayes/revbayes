@@ -14,11 +14,10 @@
 # 2. Generate cmake variables from command-line flags.
 # 3. Create the build/ directory (if missing).
 # 4. Update the version number            --> src/revlanguage/utils/GitVersion.cpp
-# 5. Update the help database --> src/core/help/RbHelpDatabase.cpp
-# 6. Run ./regenerate.sh
-# 7. Run cmake <--- This is where the configuration actually happens
-# 8. Run make or ninja to do the build.
-# 9. Restore GitVersion.cpp from backup.
+# 5. Run ./regenerate.sh
+# 6. Run cmake <--- This is where the configuration actually happens
+# 7. Run make or ninja to do the build.
+# 8. Restore GitVersion.cpp from backup.
 
 # If you change this script, please update the list above.
 
@@ -173,9 +172,6 @@ fi
 echo " Copying current GitVersion.cpp to src/revlanguage/utils"
 mv GitVersion.cpp ../../src/revlanguage/utils/
 
-
-######### Generate help database
-../generate_help.sh
 
 
 ######## Generate some files for cmake

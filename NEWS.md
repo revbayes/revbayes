@@ -1,5 +1,8 @@
 # RevBayes 1.5.0 (unreleased)
 
+## Infrastructure
+  * Embed the help pages in `rb` and parse them at runtime, replacing `md2help.pl` and the generated `RbHelpDatabase.cpp`.
+
 # RevBayes 1.4.2 (Nov 5, 2026)
 
 ## Backwards-incompatible changes
