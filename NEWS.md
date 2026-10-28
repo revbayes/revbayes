@@ -1,5 +1,8 @@
 # RevBayes 1.5.0 (unreleased)
 
+## Bug fixes
+  * Show the authors listed in help pages, which were never displayed.
+
 ## Infrastructure
   * Embed the help pages in `rb` and parse them at runtime, replacing `md2help.pl` and the generated `RbHelpDatabase.cpp`.
 
