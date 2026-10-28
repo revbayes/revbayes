@@ -363,7 +363,7 @@ jobs:
               if [ "${{ matrix.compiler }}" = "gcc" ] && [ "${{ matrix.version }}" = "14" ]; then
                 FP_FLAGS="-DCMAKE_CXX_FLAGS=-ffp-contract=off"
               fi
-              BUILD_DIR=build exec_name=rb ./build.sh -help2yml true -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_INSTALL_PREFIX=$HOME/local -mpi ${{ matrix.mpi }} ${FP_FLAGS}
+              BUILD_DIR=build exec_name=rb ./build.sh -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_INSTALL_PREFIX=$HOME/local -mpi ${{ matrix.mpi }} ${FP_FLAGS}
               cmake --install build
            )
         fi
@@ -407,6 +407,7 @@ jobs:
         export PATH=${HOME}/wrapper:${HOME}/local/bin:$PATH
 
         echo "\"Hello World\"" | rb
+        rb --dump-help-json help.json
         echo ::group::Test suite
         cd tests
 
