@@ -1,5 +1,5 @@
 ## name
-Set value
+setValue
 ## title
 Set the value of a stochastic variable
 

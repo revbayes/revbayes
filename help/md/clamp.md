@@ -1,5 +1,5 @@
 ## name
-Clamp
+clamp
 ## title
 Clamp a stochastic variable to a fixed/observed value
 ## description
