@@ -179,8 +179,6 @@
 // #include "Move_PathCharacterHistoryRejectionSample.h"
 #include "Move_CharacterHistory.h"
 
-#include "Move_ResampleFBD.h"
-
 #include "Move_BirthDeathEventContinuous.h"
 #include "Move_BirthDeathEventDiscrete.h"
 #include "Move_BirthDeathFromAgeEvent.h"
@@ -487,8 +485,6 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_IndependentPriorSampler<ModelVector<Natural> >( ) );
 //        addType( new Move_IndependentPriorSampler<RateGenerator>( ) );
         addType( new Move_IndependentPriorSampler<Tree>( ) );
-
-        addType( new Move_ResampleFBD()                      );
     }
     catch(RbException& rbException)
     {

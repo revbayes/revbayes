@@ -1,6 +1,7 @@
 # RevBayes 1.4.2 (unreleased)
 
 ## Backwards-incompatible changes
+  * Remove `dnFBDRP`, `dnFBDSP` and `mvResampleFBD`, which were not working. A revised implementation is planned for 1.5.0.
 
 ## Features
 
