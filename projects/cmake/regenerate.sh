@@ -57,8 +57,6 @@ generate_subdir_cmake "core" "rb-core"
 
 generate_subdir_cmake "revlanguage" "rb-parser"
 
-# We will only USE this if we do subdir(help2yml)
-generate_subdir_cmake "help2yml" "rb-help"
 
 # We will only USE this if we do subdir(cmd)
 generate_subdir_cmake "cmd" "rb-cmd-lib"

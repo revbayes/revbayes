@@ -1,4 +1,5 @@
 #include <cstdlib>
+#include <fstream>
 #include <string>
 #include <vector>
 #include <iostream>
@@ -7,6 +8,7 @@
 #include "Parser.h"
 #include "RbVersion.h"
 #include "RbException.h"
+#include "RbHelpJson.h"
 #include "RbSettings.h"
 #include "RevClient.h"
 #include "RevLanguageMain.h"
@@ -54,6 +56,8 @@ struct ParsedOptions
     std::vector<std::string> options;
 
     std::optional<std::uint64_t> seed;
+
+    std::optional<std::string> help_json;
 
     std::vector<std::string> expressions;
 
@@ -108,6 +112,8 @@ ParsedOptions parse_cmd_line(int argc, char* argv[])
 
     stage1.add_option("-s,--seed",           options.seed,            "Random seed (unsigned integer)");
     stage1.add_option("-o,--setOption",      options.options,         "Set an option key=value  (See ?setOption for the list of available keys and their associated values)")->allow_extra_args(false);
+    // For building the documentation website, so hidden from --help
+    stage1.add_option("--dump-help-json",    options.help_json,       "Write the help for every function and type to a JSON file and exit")->group("");
 
     stage1.prefix_command();
     try {
@@ -214,6 +220,33 @@ int main(int argc, char* argv[])
     {
         std::cout << RbVersion().getVersion() << std::endl;
         exit(0);
+    }
+
+    /* Write the help database, reporting malformed help pages, and exit */
+    if ( cmd_line.help_json )
+    {
+        RevLanguage::Workspace::globalWorkspace().initializeGlobalWorkspace();
+
+        int result = 0;
+        if ( process_id == 0 )
+        {
+            for (const std::string& problem : RevBayesCore::checkHelpPages())
+            {
+                std::cerr << "Help page problem: " << problem << std::endl;
+                result = 1;
+            }
+
+            std::ofstream out( cmd_line.help_json.value() );
+            out << RevBayesCore::renderHelpJson();
+            if ( not out )
+            {
+                std::cerr << "Error: could not write '" << cmd_line.help_json.value() << "'" << std::endl;
+                result = 1;
+            }
+        }
+
+        RevClient::shutdown();
+        return result;
     }
 
     /* Set default session properties from cmd line flags */
