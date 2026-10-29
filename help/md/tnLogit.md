@@ -8,7 +8,7 @@ Logit-transforms a given distribution.
 If P ~ dist then tnLogit(dist) is the distribution of log(P/(1-P)).
 
 The distribution `dist` can be either univariate (dnBeta) or
-multivariate (dnDirichlet).
+multivariate (dnIID).
 
 ## authors
 Ben Redelings
@@ -21,5 +21,5 @@ logit, tnExp, tnLog, tnInvlogitit
     p ~ dnBeta(1,2)
     x := logit(p)                    # Expressed as a deterministic function of the probability.
 
-    xs ~ dnDirichlet([1,1,1,1]) |> tnLogit() 
+    xs ~ dnIID(4, dnBeta(1,2)) |> tnLogit()
 ## references
