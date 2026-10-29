@@ -22,7 +22,7 @@ tnExp, tnLogit, tnInvlogit
     x ~ dnExponential(1) |> tnLog()   # Expressed using pipes.
 
     y ~ dnExponential(1)
-    x := log(y)                       # This is also equivalent.
+    x := ln(y)                        # This is also equivalent.
 
     xs ~ dnIID(4, dnExponential(1)) |> tnLog()
 ## references
