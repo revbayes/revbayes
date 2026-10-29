@@ -297,8 +297,7 @@ Argument ArgumentRule::fitArgument( Argument& arg ) const
                 else
                 {
                     the_new_var = the_var;
-                    the_new_var->replaceRevObject(convertedObject.get());
-                    convertedObject.release();
+                    the_new_var->replaceRevObject(convertedObject.release());
                 }
                 the_new_var->setRequiredTypeSpec( argTypeSpec );
             }
