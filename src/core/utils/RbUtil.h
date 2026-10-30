@@ -2,6 +2,7 @@
 #define RbUtil_H
 
 
+#include "TypeUtilities.h"
 #include "RbContainer.h"
 #include "RbVector.h"
 
@@ -46,11 +47,11 @@ namespace RevBayesCore {
         public:
             //            static const T&  getElement(const T &obj, size_t i) { return obj; }
             static size_t    size(const T &obj) {
-                const Container *c = static_cast<const Container*>( &obj );
+                const Container *c = assume_cast<const Container*>( &obj );
                 return c->size();
             }
             static void    printElement(std::ostream &o, const T &obj, size_t i) {
-                const Container *c = static_cast<const Container*>( &obj );
+                const Container *c = assume_cast<const Container*>( &obj );
                 c->printElement(o,i);
             }
         };

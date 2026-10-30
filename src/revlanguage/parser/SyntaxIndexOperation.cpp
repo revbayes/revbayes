@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include <cstddef>
 #include <iosfwd>
 #include <string>
@@ -194,7 +195,7 @@ RevPtr<RevVariable> SyntaxIndexOperation::evaluateLHSContent( const std::shared_
         throw RbException()<<"Index should be of type Natural, but is of type "<<idx_obj.getTypeSpec().getType()<<".";
     }
 
-    int idx = (int)static_cast<Integer&>( idx_obj ).getValue();
+    int idx = (int)assume_cast<Integer&>( idx_obj ).getValue();
     std::string identifier = theParentVar->getName() + "[" + std::to_string(idx) + "]";
 
     // first ensure that we've got an entry with name `identifier` in the environment

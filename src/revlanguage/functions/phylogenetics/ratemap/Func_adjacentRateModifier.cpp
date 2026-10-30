@@ -6,6 +6,7 @@
 //  Copyright © 2017 Michael Landis. All rights reserved.
 //
 
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include "Func_adjacentRateModifier.h"
 
@@ -85,7 +86,7 @@ RevBayesCore::TypedFunction< RevBayesCore::CharacterHistoryRateModifier >* Func_
     if (matrix->getRevObject().isType( MatrixReal::getClassTypeSpec() ))
     {
         RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* tmp = dagNodeForRevType<MatrixReal>(matrix);
-        RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::MatrixReal> *>( tmp );
+        RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *n = assume_cast<RevBayesCore::StochasticNode<RevBayesCore::MatrixReal> *>( tmp );
         
         // validate input
         if (n != NULL) {

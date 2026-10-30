@@ -941,7 +941,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
                 // set the counts for this patter
                 process_pattern_counts[patternIndex] = pattern_counts[patternIndex+pattern_block_start];
 
-                charType &c = static_cast<charType &>( taxon.getCharacter(site_indices[indexOfSitePattern[patternIndex+pattern_block_start]]) );
+                charType &c = assume_cast<charType &>( taxon.getCharacter(site_indices[indexOfSitePattern[patternIndex+pattern_block_start]]) );
                 gap_matrix[node_index][patternIndex] = c.isGapState();
 
                 if ( using_ambiguous_characters == true )
@@ -1864,7 +1864,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::executeMethod(con
 
         // now either sample the site rates according to the conditional posterior probability of each rate category
         // or compute them as the posterior mean
-        std::string method = static_cast<const TypedDagNode<std::string>* >( args[0] )->getValue();
+        std::string method = assume_cast<const TypedDagNode<std::string>* >( args[0] )->getValue();
 
         if (method == "sampling")
         {
@@ -2122,7 +2122,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::tipDrawJointCondi
     this->updateTransitionProbabilityMatrix( node_index );
 
     const AbstractHomologousDiscreteCharacterData& d = this->getValue();
-    const HomologousDiscreteCharacterData<charType>& dd = static_cast<const HomologousDiscreteCharacterData<charType>& >( d );
+    const HomologousDiscreteCharacterData<charType>& dd = assume_cast<const HomologousDiscreteCharacterData<charType>& >( d );
     const DiscreteTaxonData<charType>& td = dd.getTaxonData( node.getName() );
 
     // ideally sample ambiguous tip states given the underlying process and ancestral state
@@ -2953,7 +2953,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setValue(Abstract
     this->compress();
 
     // now we also set the template state
-    template_state = charType( static_cast<const charType&>( this->value->getTaxonData(0).getCharacter(0) ) );
+    template_state = charType( assume_cast<const charType&>( this->value->getTaxonData(0).getCharacter(0) ) );
     template_state.setToFirstState();
     template_state.setGapState( false );
     template_state.setMissingState( false );

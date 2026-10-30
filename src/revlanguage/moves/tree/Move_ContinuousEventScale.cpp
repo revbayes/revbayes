@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include <iosfwd>
 #include <string>
@@ -70,7 +71,7 @@ void Move_ContinuousEventScale::constructInternalObject( void )
     double l = valueForRevType<RealPos>(lambda);
     double w = valueForRevType<RealPos>(weight);
     RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = dagNodeForRevType<TimeTree>(tree);
-    RevBayesCore::StochasticNode<RevBayesCore::Tree> *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
+    RevBayesCore::StochasticNode<RevBayesCore::Tree> *n = assume_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
     
     bool t = valueForRevType<RlBoolean>(tune);
     double tt = valueForRevType<Probability>(tuneTarget);

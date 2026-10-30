@@ -6,6 +6,7 @@
 //  Copyright © 2017 Michael Landis. All rights reserved.
 //
 
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "StateCountRateModifierFunction.h"
 
@@ -56,7 +57,7 @@ void StateCountRateModifierFunction::update( void )
 {
     
     RbVector<double> sf = stateFactors->getValue();
-    static_cast<StateCountRateModifier*>(value)->setStateFactors(sf);
+    assume_cast<StateCountRateModifier*>(value)->setStateFactors(sf);
     
 }
 

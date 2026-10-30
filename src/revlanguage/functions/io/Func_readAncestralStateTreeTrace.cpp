@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include "Func_readAncestralStateTreeTrace.h"
 
@@ -96,11 +97,11 @@ RevPtr<RevVariable> Func_readAncestralStateTreeTrace::execute( void )
     RevObject& b = args[3].getVariable()->getRevObject();
     if ( b.isType( Integer::getClassTypeSpec() ) )
     {
-        burnin = static_cast<const Integer &>(b).getValue();
+        burnin = assume_cast<const Integer &>(b).getValue();
     }
     else
     {
-        double burninFrac = static_cast<const Probability &>(b).getValue();
+        double burninFrac = assume_cast<const Probability &>(b).getValue();
         burnin = std::int64_t( floor( rv->getValue().size()*burninFrac ) );
     }
 

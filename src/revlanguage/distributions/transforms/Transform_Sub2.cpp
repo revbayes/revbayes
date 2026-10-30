@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include "Transform_Sub2.h"
 
@@ -33,7 +34,7 @@ RevBayesCore::TransformedDistribution* Transform_Sub2::createDistribution( void 
     RevBayesCore::TypedDagNode<double>* fir        = dagNodeForRevType<Real>(first);
 
     const Distribution& rl_vp                      = objectForRevType<Distribution>(second_distribution);
-    RevBayesCore::TypedDistribution<double>* vp    = static_cast<RevBayesCore::TypedDistribution<double>* >( rl_vp.createDistribution() );
+    RevBayesCore::TypedDistribution<double>* vp    = assume_cast<RevBayesCore::TypedDistribution<double>* >( rl_vp.createDistribution() );
 
     RevBayesCore::TransformedDistribution* dist = new RevBayesCore::TransformedDistribution(*vp, sub2_transform, sub2_inverse, log_sub2_prime, {fir});
 

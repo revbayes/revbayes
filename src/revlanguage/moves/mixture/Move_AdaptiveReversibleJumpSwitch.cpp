@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include "AdaptiveReversibleJumpProposal.h"
 #include "ArgumentRule.h"
@@ -40,7 +41,7 @@ void Move_AdaptiveReversibleJumpSwitch::constructInternalObject( void )
     // now allocate a new vector-scale move
     double w = valueForRevType<RealPos>(weight);
     RevBayesCore::TypedDagNode<double>* tmp = dagNodeForRevType<Real>(x);
-    RevBayesCore::StochasticNode<double> *sn = static_cast<RevBayesCore::StochasticNode<double> *>( tmp );
+    RevBayesCore::StochasticNode<double> *sn = assume_cast<RevBayesCore::StochasticNode<double> *>( tmp );
     long wbl = valueForRevType<Natural>(wait_before_learning);
     long wbu = valueForRevType<Natural>(wait_before_using);
     long ue  = valueForRevType<Natural>(update_every);

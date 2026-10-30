@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include <cstddef>
 #include <sstream>
 #include <map>
@@ -120,7 +121,7 @@ bool Workspace::addDistribution( Distribution *dist )
     function_table.addFunction( new ConstructorFunction( dist ) );
     
     // add the help entry for this distribution to the global help system instance
-    RevBayesCore::RbHelpDistribution* entry = static_cast<RevBayesCore::RbHelpDistribution*>( dist->getHelpEntry() );
+    RevBayesCore::RbHelpDistribution* entry = assume_cast<RevBayesCore::RbHelpDistribution*>( dist->getHelpEntry() );
     RevBayesCore::RbHelpSystem::getHelpSystem().addHelpDistribution( entry );
 
     return true;
@@ -162,7 +163,7 @@ bool Workspace::addType( RevObject *templ )
     }
 
     // add the help entry for this type to the global help system instance
-    RevBayesCore::RbHelpSystem::getHelpSystem().addHelpType( static_cast<RevBayesCore::RbHelpType*>( templ->getHelpEntry() ) );
+    RevBayesCore::RbHelpSystem::getHelpSystem().addHelpType( assume_cast<RevBayesCore::RbHelpType*>( templ->getHelpEntry() ) );
 
     return true;
 }
@@ -292,7 +293,7 @@ RevObject* Workspace::makeNewDefaultObject(const std::string& type) const
     {
         if ( it->second->isAbstract() )
         {
-            RevAbstractType* theAbstractType = static_cast< RevAbstractType* >( it->second );
+            RevAbstractType* theAbstractType = assume_cast< RevAbstractType* >( it->second );
             return theAbstractType->makeExampleObject();
         }
         

@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "F81RateMatrixFunction.h"
 
@@ -47,7 +48,7 @@ void F81RateMatrixFunction::update( void )
     const std::vector<double>& f = base_frequencies->getValue();
     
     // set the base frequencies
-    static_cast< RateMatrix_F81* >(value)->setStationaryFrequencies( f );
+    assume_cast< RateMatrix_F81* >(value)->setStationaryFrequencies( f );
     
     value->update();
 }

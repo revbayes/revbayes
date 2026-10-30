@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
@@ -57,7 +58,7 @@ void Move_NodeRateTimeSlideUniform::constructInternalObject( void )
     
     // now allocate a new move
     RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = dagNodeForRevType<TimeTree>(tree);
-    RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
+    RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = assume_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
     
     double w = valueForRevType<RealPos>(weight);
     

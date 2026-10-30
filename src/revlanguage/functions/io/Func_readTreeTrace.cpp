@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include "Func_readTreeTrace.h"
 
@@ -201,7 +202,7 @@ RevPtr<RevVariable> Func_readTreeTrace::execute( void )
     RevObject& b = args[arg_index_burnin].getVariable()->getRevObject();
     if ( b.isType( Integer::getClassTypeSpec() ) )
     {
-        burnin = static_cast<const Integer &>(b).getValue();
+        burnin = assume_cast<const Integer &>(b).getValue();
 
         for(size_t i = 0; i < rv->getValue().size(); i++)
         {
@@ -215,7 +216,7 @@ RevPtr<RevVariable> Func_readTreeTrace::execute( void )
     }
     else
     {
-        double burninFrac = static_cast<const Probability &>(b).getValue();
+        double burninFrac = assume_cast<const Probability &>(b).getValue();
 
         for(size_t i = 0; i < rv->getValue().size(); i++)
         {

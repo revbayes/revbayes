@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
@@ -70,7 +71,7 @@ void Move_ScaleBactrianCauchy::constructInternalObject( void )
     double w = valueForRevType<RealPos>(weight);
     double r = valueForRevType<Probability>(tuneTarget);
     RevBayesCore::TypedDagNode<double>* tmp = dagNodeForRevType<RealPos>(x);
-    RevBayesCore::StochasticNode<double> *n = static_cast<RevBayesCore::StochasticNode<double> *>( tmp );
+    RevBayesCore::StochasticNode<double> *n = assume_cast<RevBayesCore::StochasticNode<double> *>( tmp );
     bool t = valueForRevType<RlBoolean>(tune);
     
     RevBayesCore::Proposal *p = new RevBayesCore::ScaleBactrianCauchyProposal(n, d, r);

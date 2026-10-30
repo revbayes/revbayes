@@ -12,6 +12,7 @@
  * @version 1.0
  */
 
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "ChromosomesRateMatrixFunction.h"
 
@@ -56,14 +57,14 @@ void ChromosomesRateMatrixFunction::update( void ) {
     double de_l = delta_l->getValue();
     double e = eta->getValue();
 
-    static_cast< RateMatrix_Chromosomes* >(value)->setGamma( ga );
-    static_cast< RateMatrix_Chromosomes* >(value)->setDelta( de );
-    static_cast< RateMatrix_Chromosomes* >(value)->setRho( rh );
-    static_cast< RateMatrix_Chromosomes* >(value)->setEta( e );
-    static_cast< RateMatrix_Chromosomes* >(value)->setGamma_l( ga_l );
-    static_cast< RateMatrix_Chromosomes* >(value)->setDelta_l( de_l );
+    assume_cast< RateMatrix_Chromosomes* >(value)->setGamma( ga );
+    assume_cast< RateMatrix_Chromosomes* >(value)->setDelta( de );
+    assume_cast< RateMatrix_Chromosomes* >(value)->setRho( rh );
+    assume_cast< RateMatrix_Chromosomes* >(value)->setEta( e );
+    assume_cast< RateMatrix_Chromosomes* >(value)->setGamma_l( ga_l );
+    assume_cast< RateMatrix_Chromosomes* >(value)->setDelta_l( de_l );
 
-    static_cast< RateMatrix_Chromosomes* >(value)->update();
+    assume_cast< RateMatrix_Chromosomes* >(value)->update();
     
 }
 

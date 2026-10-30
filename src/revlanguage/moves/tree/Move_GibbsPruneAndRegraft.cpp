@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
@@ -52,7 +53,7 @@ void Move_GibbsPruneAndRegraft::constructInternalObject( void )
     // now allocate a new sliding move
     RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = dagNodeForRevType<TimeTree>(tree);
     double w = valueForRevType<RealPos>(weight);
-    RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
+    RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = assume_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
     
     RevBayesCore::Proposal *p = new RevBayesCore::GibbsPruneAndRegraftProposal(t);
     value = new RevBayesCore::MetropolisHastingsMove(p,w);

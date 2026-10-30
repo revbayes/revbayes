@@ -1,6 +1,7 @@
 #ifndef Move_DPPTableValueUpdate_H
 #define Move_DPPTableValueUpdate_H
 
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include "RlMove.h"
 #include "SimpleProposal.h"
@@ -94,7 +95,7 @@ void Move_DPPTableValueUpdate<valType>::constructInternalObject( void )
     // now allocate a new vector-scale move
     double w = valueForRevType<RealPos>(weight);
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<typename valType::valueType> >* tmp = dagNodeForRevType<ModelVector<valType>>(x);
-    RevBayesCore::StochasticNode< RevBayesCore::RbVector<typename valType::valueType> > *sn = static_cast<RevBayesCore::StochasticNode< RevBayesCore::RbVector<typename valType::valueType> > *>( tmp );
+    RevBayesCore::StochasticNode< RevBayesCore::RbVector<typename valType::valueType> > *sn = assume_cast<RevBayesCore::StochasticNode< RevBayesCore::RbVector<typename valType::valueType> > *>( tmp );
     
     RevBayesCore::SimpleProposal<typename valType::valueType> *p = template_proposal->clone();
     

@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include <stddef.h>
 #include <ostream>
@@ -69,7 +70,7 @@ void Move_RandomCategoryWalk::constructInternalObject( void )
     
     // get the stochastic variable
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<std::int64_t> >* tmp = dagNodeForRevType<ModelVector<Natural>>(x);
-    RevBayesCore::StochasticNode<RevBayesCore::RbVector<std::int64_t> > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::RbVector<std::int64_t> > *>( tmp );
+    RevBayesCore::StochasticNode<RevBayesCore::RbVector<std::int64_t> > *n = assume_cast<RevBayesCore::StochasticNode<RevBayesCore::RbVector<std::int64_t> > *>( tmp );
     
     // create the internal proposal object
     RevBayesCore::Proposal *prop = new RevBayesCore::RandomCategoryWalkProposal(n);
