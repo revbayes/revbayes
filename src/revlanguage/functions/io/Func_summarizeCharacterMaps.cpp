@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "Func_summarizeCharacterMaps.h"
 
 #include <cmath>
@@ -56,12 +57,12 @@ RevPtr<RevVariable> Func_summarizeCharacterMaps::execute( void )
     RevBayesCore::Tree input_tree = RevBayesCore::Tree();
     if (this->args[0].getVariable()->getRevObject() != RevNullObject::getInstance())
     {
-        const RevBayesCore::TypedDagNode<RevBayesCore::Tree> *input_tree_dag = static_cast<const Tree&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+        const RevBayesCore::TypedDagNode<RevBayesCore::Tree> *input_tree_dag = dagNodeForRevType<Tree>(this->args[0].getVariable());
         input_tree = input_tree_dag->getValue();
     }
 
     // get the vector of stochastic character map traces
-    const WorkspaceVector<AncestralStateTrace>& ast_vector = static_cast<const WorkspaceVector<AncestralStateTrace> &>( args[1].getVariable()->getRevObject() );
+    const WorkspaceVector<AncestralStateTrace>& ast_vector = objectForRevType<WorkspaceVector<AncestralStateTrace>>(args[1].getVariable());
     std::vector<RevBayesCore::AncestralStateTrace> ancestralstate_traces;
     for (int i = 0; i < ast_vector.size(); ++i)
     {
@@ -75,12 +76,11 @@ RevPtr<RevVariable> Func_summarizeCharacterMaps::execute( void )
     if (args[2].getVariable()->getRevObject() != RevNullObject::getInstance())
     {
         // Read the optional trace only after checking that it was supplied.
-        const TraceTree& tt = static_cast<const TraceTree&>( args[2].getVariable()->getRevObject() );
-        tree_trace = tt.getValue();
+        tree_trace = valueForRevType<TraceTree>(args[2].getVariable());
     }
     
     // get the filename to write output
-    const std::string& filename = static_cast<const RlString&>( args[3].getVariable()->getRevObject() ).getValue();
+    const std::string& filename = valueForRevType<RlString>(args[3].getVariable());
    
     // check if burnin was entered as integer or probability
     int burnin = 0;
@@ -95,14 +95,14 @@ RevPtr<RevVariable> Func_summarizeCharacterMaps::execute( void )
         burnin = int( floor( ancestralstate_traces[0].size() * burninFrac ) );
     }
     
-    const std::string& sep = static_cast<const RlString  &>( args[5].getVariable()->getRevObject() ).getValue();
+    const std::string& sep = valueForRevType<RlString>(args[5].getVariable());
 
     if (sep.empty())
         throw RbException()<<"summarizeCharacterMaps: the separator may not be empty!";
 
-    bool verbose = static_cast<const RlBoolean &>( args[6].getVariable()->getRevObject() ).getValue();
+    bool verbose = valueForRevType<RlBoolean>(args[6].getVariable());
     
-    bool bwd_time = static_cast<const RlBoolean &>( args[7].getVariable()->getRevObject() ).getValue();
+    bool bwd_time = valueForRevType<RlBoolean>(args[7].getVariable());
     
     // summarize stochastic character maps
     RevBayesCore::JointAncestralStateTrace joint_trace(ancestralstate_traces, tree_trace);

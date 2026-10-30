@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "Func_treePairwiseDistances.h"
 
 #include "DistanceMatrix.h"
@@ -41,7 +42,7 @@ RevBayesCore::TypedFunction< RevBayesCore::DistanceMatrix >* Func_treePairwiseDi
     
     // RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = static_cast<const TimeTree&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     
-    RevBayesCore::TypedDagNode < RevBayesCore::Tree >* tau = static_cast<const Tree &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode < RevBayesCore::Tree >* tau = dagNodeForRevType<Tree>(this->args[0].getVariable());
     
     RevBayesCore::TreePairwiseDistances * f = new RevBayesCore::TreePairwiseDistances( tau );
     

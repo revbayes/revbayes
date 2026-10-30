@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -70,11 +71,11 @@ void Move_EllipticalSliceSamplingSimple::constructInternalObject( void )
     delete value;
 
     // now allocate a new sliding move
-    double window_ = static_cast<const RealPos &>( window->getRevObject() ).getValue();
-    double weight_ = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double window_ = valueForRevType<RealPos>(window);
+    double weight_ = valueForRevType<RealPos>(weight);
 
     // Add the field parameters
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp = static_cast<const ModelVector<Real> &>( x->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp = dagNodeForRevType<ModelVector<Real>>(x);
     std::vector<const RevBayesCore::DagNode*> p = tmp->getParents();
     std::vector< RevBayesCore::StochasticNode<double> *> n;
     for (std::vector<const RevBayesCore::DagNode*>::const_iterator it = p.begin(); it != p.end(); ++it)
@@ -90,9 +91,9 @@ void Move_EllipticalSliceSamplingSimple::constructInternalObject( void )
         }
     }
 
-    bool tune_ = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    bool tune_ = valueForRevType<RlBoolean>(tune);
 
-    bool fa = static_cast<const RlBoolean &>( forceAccept->getRevObject() ).getValue();
+    bool fa = valueForRevType<RlBoolean>(forceAccept);
 
     // finally create the internal move object
 

@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "Func_writeDelimitedCharacterData.h"
 
 #include <cstddef>
@@ -53,19 +54,19 @@ RevPtr<RevVariable> Func_writeDelimitedCharacterData::execute( void )
 {
     
     // get the information from the arguments for reading the file
-    const RlString& fn = static_cast<const RlString&>( args[0].getVariable()->getRevObject() );
+    const RlString& fn = objectForRevType<RlString>(args[0].getVariable());
     const RevBayesCore::HomologousCharacterData *data = NULL;
     
     if ( args[1].getVariable()->getRevObject().isType( AbstractHomologousDiscreteCharacterData::getClassTypeSpec() ) )
     {
-        data = &static_cast< const AbstractHomologousDiscreteCharacterData & >( args[1].getVariable()->getRevObject() ).getValue();
+        data = &valueForRevType<AbstractHomologousDiscreteCharacterData>(args[1].getVariable());
     }
     else if ( args[1].getVariable()->getRevObject().isType( ContinuousCharacterData::getClassTypeSpec() ) )
     {
-        data = &static_cast< const ContinuousCharacterData & >( args[1].getVariable()->getRevObject() ).getValue();
+        data = &valueForRevType<ContinuousCharacterData>(args[1].getVariable());
     }
     
-    const std::string& del = static_cast<const RlString&>( args[2].getVariable()->getRevObject() ).getValue();
+    const std::string& del = valueForRevType<RlString>(args[2].getVariable());
     
     if (del.empty())
         throw RbException()<<"writeDelimitedCharacterData: the delimiter may not be empty!";

@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cmath>
 #include <cstddef>
 #include <ostream>
@@ -56,8 +57,8 @@ RevBayesCore::LKJDistribution* Dist_LKJ::createDistribution( void ) const
 {
     
     // get the parameters
-    RevBayesCore::TypedDagNode<double>* et = static_cast<const RealPos&>( eta->getRevObject() ).getDagNode();
-    size_t d  = size_t( static_cast<const Natural &>( dim->getRevObject() ).getValue() );
+    RevBayesCore::TypedDagNode<double>* et = dagNodeForRevType<RealPos>(eta);
+    size_t d  = size_t( valueForRevType<Natural>(dim) );
     
     RevBayesCore::LKJDistribution* f = new RevBayesCore::LKJDistribution( et, d );
 

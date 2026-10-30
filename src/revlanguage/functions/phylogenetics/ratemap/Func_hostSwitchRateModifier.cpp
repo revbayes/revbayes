@@ -6,6 +6,7 @@
 //  Copyright © 2017 Michael Landis. All rights reserved.
 //
 
+#include "RevTypeUtilities.h"
 #include "Func_hostSwitchRateModifier.h"
 
 #include "HostSwitchRateModifierFunction.h"
@@ -50,8 +51,8 @@ Func_hostSwitchRateModifier* Func_hostSwitchRateModifier::clone( void ) const {
 RevBayesCore::TypedFunction< RevBayesCore::CharacterHistoryRateModifier >* Func_hostSwitchRateModifier::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree >* dist  = static_cast<const Tree &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* scale = static_cast<const ModelVector<RealPos> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree >* dist  = dagNodeForRevType<Tree>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* scale = dagNodeForRevType<ModelVector<RealPos>>(this->args[1].getVariable());
     
     RevBayesCore::HostSwitchRateModifierFunction* f = new RevBayesCore::HostSwitchRateModifierFunction(dist, scale);
     

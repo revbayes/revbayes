@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "Mntr_SiteMixtureAllocation.h"
 
 #include <cstddef>
@@ -55,17 +56,17 @@ Mntr_SiteMixtureAllocation* Mntr_SiteMixtureAllocation::clone(void) const
 
 void Mntr_SiteMixtureAllocation::constructInternalObject( void )
 {
-    const std::string&                  fn      = static_cast<const RlString &>( filename->getRevObject() ).getValue();
-    const std::string&                  sep     = static_cast<const RlString &>( separator->getRevObject() ).getValue();
-    unsigned int                        g       = (int)static_cast<const IntegerPos  &>( printgen->getRevObject() ).getValue();
+    const std::string&                  fn      = valueForRevType<RlString>(filename);
+    const std::string&                  sep     = valueForRevType<RlString>(separator);
+    unsigned int                        g       = (int)valueForRevType<IntegerPos>(printgen);
     
-    bool                                ap      = static_cast<const RlBoolean &>( append->getRevObject() ).getValue();
-    bool                                wv      = static_cast<const RlBoolean &>( version->getRevObject() ).getValue();
-    std::string                         character_type = static_cast<const RlString &>( monitorType->getRevObject() ).getValue();
+    bool                                ap      = valueForRevType<RlBoolean>(append);
+    bool                                wv      = valueForRevType<RlBoolean>(version);
+    std::string                         character_type = valueForRevType<RlString>(monitorType);
     
 
     
-    RevBayesCore::TypedDagNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_tdn = static_cast<const RevLanguage::AbstractHomologousDiscreteCharacterData&>( ctmc->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_tdn = dagNodeForRevType<RevLanguage::AbstractHomologousDiscreteCharacterData>(ctmc);
     RevBayesCore::StochasticNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_sn = static_cast<RevBayesCore::StochasticNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* >(ctmc_tdn);
     
     delete value;

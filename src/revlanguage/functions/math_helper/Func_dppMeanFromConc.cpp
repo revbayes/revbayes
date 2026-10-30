@@ -6,6 +6,7 @@
 //  Copyright 2012 __MyCompanyName__. All rights reserved.
 //
 
+#include "RevTypeUtilities.h"
 #include <iosfwd>
 #include <vector>
 
@@ -46,8 +47,8 @@ Func_dppMeanFromConc* Func_dppMeanFromConc::clone( void ) const
 RevPtr<RevVariable> Func_dppMeanFromConc::execute()
 {
 	
-    double cp = static_cast<const RealPos &>( args[0].getVariable()->getRevObject() ).getValue();
-    double ne = static_cast<const RealPos &>( args[1].getVariable()->getRevObject() ).getValue();
+    double cp = valueForRevType<RealPos>(args[0].getVariable());
+    double ne = valueForRevType<RealPos>(args[1].getVariable());
 	
 	double numCat = RevBayesCore::RbStatistics::Helper::dppExpectNumTableFromConcParam(cp, ne);
 	

@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -46,10 +47,10 @@ RevBayesCore::NormalDistribution* Dist_normTruncatedPositive::createDistribution
 {
     
     // get the parameters
-    RevBayesCore::TypedDagNode<double>* m = static_cast<const Real &>( mean->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* s = static_cast<const RealPos &>( sd->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* mi  = static_cast<const RealPos &>( min->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* ma  = static_cast<const RealPos &>( max->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* m = dagNodeForRevType<Real>(mean);
+    RevBayesCore::TypedDagNode<double>* s = dagNodeForRevType<RealPos>(sd);
+    RevBayesCore::TypedDagNode<double>* mi  = dagNodeForRevType<RealPos>(min);
+    RevBayesCore::TypedDagNode<double>* ma  = dagNodeForRevType<RealPos>(max);
     RevBayesCore::NormalDistribution*   d = new RevBayesCore::NormalDistribution(m, s, mi, ma);
     
     return d;

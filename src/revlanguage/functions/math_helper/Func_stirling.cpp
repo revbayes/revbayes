@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "Func_stirling.h"
 
 #include <string>
@@ -39,9 +40,9 @@ Func_stirling* Func_stirling::clone( void ) const {
 RevPtr<RevVariable> Func_stirling::execute()
 {
 
-    std::string kind = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
-    int n = (int)static_cast<const Natural &>( args[1].getVariable()->getRevObject() ).getValue();
-    int k = (int)static_cast<const Natural &>( args[2].getVariable()->getRevObject() ).getValue();
+    std::string kind = valueForRevType<RlString>(args[0].getVariable());
+    int n = (int)valueForRevType<Natural>(args[1].getVariable());
+    int k = (int)valueForRevType<Natural>(args[2].getVariable());
 	
 	if (kind == "lnFirst")
     {

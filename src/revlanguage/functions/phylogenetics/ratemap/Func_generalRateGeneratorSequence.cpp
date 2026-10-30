@@ -7,6 +7,7 @@
 //
 
 //#include "BiogeographyRateGeneratorSequenceFunction.h"
+#include "RevTypeUtilities.h"
 #include "Func_generalRateGeneratorSequence.h"
 
 #include <cstddef>
@@ -55,14 +56,14 @@ Func_generalRateGeneratorSequence* Func_generalRateGeneratorSequence::clone( voi
 RevBayesCore::TypedFunction<RevBayesCore::RateGeneratorSequence>* Func_generalRateGeneratorSequence::createFunction() const
 {
     
-    RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = static_cast<const RateGenerator&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = dagNodeForRevType<RateGenerator>(this->args[0].getVariable());
     size_t ns = rm->getValue().getNumberOfStates();
-    std::uint64_t nc = static_cast<const Natural&>( this->args[1].getVariable()->getRevObject() ).getValue();
+    std::uint64_t nc = valueForRevType<Natural>(this->args[1].getVariable());
     
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::CharacterHistoryRateModifier> >* rm_vec = NULL;
     if ( this->args[2].getVariable()->getRevObject().isType( ModelVector<CharacterHistoryRateModifier>::getClassTypeSpec() ) )
     {
-         rm_vec = static_cast<const ModelVector<CharacterHistoryRateModifier>&>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+         rm_vec = dagNodeForRevType<ModelVector<CharacterHistoryRateModifier>>(this->args[2].getVariable());
     }
     
     RevBayesCore::GeneralRateGeneratorSequenceFunction* f = new RevBayesCore::GeneralRateGeneratorSequenceFunction(ns, nc);

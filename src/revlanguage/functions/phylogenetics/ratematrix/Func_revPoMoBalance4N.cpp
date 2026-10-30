@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "Func_revPoMoBalance4N.h"
 #include "revPoMoBalance4NRateMatrixFunction.h"
 #include "RateMatrix_revPoMoBalance4N.h"
@@ -34,12 +35,12 @@ Func_revPoMoBalance4N* Func_revPoMoBalance4N::clone( void ) const
 
 RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_revPoMoBalance4N::createFunction( void ) const
 {
-    RevBayesCore::TypedDagNode< std::int64_t                          >* n  = static_cast<const Natural              &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::Simplex          >* p  = static_cast<const Simplex              &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* r  = static_cast<const ModelVector<RealPos> &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* s  = static_cast<const ModelVector<Real>    &>( this->args[3].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* b  = static_cast<const ModelVector<RealPos> &>( this->args[4].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<std::int64_t>   >* Bf = static_cast<const ModelVector<Natural> &>( this->args[5].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< std::int64_t                          >* n  = dagNodeForRevType<Natural>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode<RevBayesCore::Simplex          >* p  = dagNodeForRevType<Simplex>(this->args[1].getVariable());
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* r  = dagNodeForRevType<ModelVector<RealPos>>(this->args[2].getVariable());
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* s  = dagNodeForRevType<ModelVector<Real>>(this->args[3].getVariable());
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* b  = dagNodeForRevType<ModelVector<RealPos>>(this->args[4].getVariable());
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<std::int64_t>   >* Bf = dagNodeForRevType<ModelVector<Natural>>(this->args[5].getVariable());
 
     if ( p->getValue().size() !=  4 )
     {

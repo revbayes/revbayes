@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "Func_stitchTree.h"
 
 #include "ModelVector.h"
@@ -43,9 +44,9 @@ Func_stitchTree* Func_stitchTree::clone( void ) const
 RevBayesCore::TypedFunction<RevBayesCore::Tree>* Func_stitchTree::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* bt = static_cast<const Tree&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::Tree> >* pc = static_cast<const ModelVector<TimeTree> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::RbVector<RevBayesCore::RbVector<RevBayesCore::Taxon> > pt = static_cast<const ModelVector<ModelVector<Taxon> > &>( this->args[2].getVariable()->getRevObject() ).getValue();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* bt = dagNodeForRevType<Tree>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::Tree> >* pc = dagNodeForRevType<ModelVector<TimeTree>>(this->args[1].getVariable());
+    RevBayesCore::RbVector<RevBayesCore::RbVector<RevBayesCore::Taxon> > pt = valueForRevType<ModelVector<ModelVector<Taxon> >>(this->args[2].getVariable());
   
     RevBayesCore::StitchTreeFunction* f = new RevBayesCore::StitchTreeFunction( bt, pc, pt );
     
