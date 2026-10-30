@@ -358,6 +358,9 @@ void RevVariable::printValue(std::ostream& o, bool toScreen) const
 /** Replace the RevVariable and update the DAG structure. */
 void RevVariable::replaceRevObject( RevObject *newValue )
 {
+    // Take ownership immediately so a rejected replacement also deletes the incoming object.
+    std::unique_ptr<RevObject> replacement(newValue);
+
     if ( isReferenceVariable() )
     {
         referenced_variable = NULL;
@@ -377,7 +380,7 @@ void RevVariable::replaceRevObject( RevObject *newValue )
     }
     
     delete rev_object;
-    rev_object = newValue;
+    rev_object = replacement.release();
     
     if ( rev_object != NULL )
     {

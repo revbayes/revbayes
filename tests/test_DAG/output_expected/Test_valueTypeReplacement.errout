@@ -1,0 +1,6 @@
+   Error:	Cannot redefine 'x' with a different value type because existing expressions, moves, or monitors reference it.
+   1.25
+   2.5
+   4
+   8
+   3

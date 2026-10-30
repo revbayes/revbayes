@@ -33,7 +33,8 @@ namespace RevLanguage {
         bool                                    isAssignable(void) const;                                                   //!< Is object or upstream members assignable?
         bool                                    isConstant(void) const;                                                     //!< Is this variable and the internally stored deterministic node constant?
         void                                    makeConstantValue(void);                                                    //!< Convert to constant object
-        void                                    makeConversionValue(RevPtr<RevVariable> var);                                  //!< Convert to conversion object
+        void                                    makeConversionValue(const AbstractModelObject& source) override;
+        void                                    setValueFromNode(const RevBayesCore::DagNode& source) override;
         ModelObject<rbType>*                    makeIndirectReference(void);                                                //!< Make reference to object
         void                                    makeUserFunctionValue(UserFunction* fxn);                                   //!< Convert to user-defined Rev function object
         void                                    setDagNode(RevBayesCore::DagNode *newNode);                                 //!< Set or replace the internal dag node (and keep me)
@@ -78,6 +79,7 @@ namespace RevLanguage {
 #include "RlConstantNode.h"
 #include "RlDeterministicNode.h"
 #include "RlUtils.h"
+#include "RevObjectConversionFunction.h"
 #include "StochasticNode.h"
 #include "UserFunctionNode.h"
 #include "RevVariable.h"
@@ -301,6 +303,25 @@ bool RevLanguage::ModelObject<rbType>::isConstant( void ) const
 {
     
     return dag_node->isConstant();
+}
+
+
+// Turn an already converted value into a dependent conversion without replacing the source node.
+template <typename rbType>
+void RevLanguage::ModelObject<rbType>::makeConversionValue(const AbstractModelObject& source)
+{
+    auto* function = new RevObjectConversionFunction<rbType>(source, *this);
+    auto* node = new RevBayesCore::DeterministicNode<rbType>("", function);
+    setDagNode(node);
+}
+
+
+// Copy the value without cloning the source node or attaching temporary children to its parents.
+template <typename rbType>
+void RevLanguage::ModelObject<rbType>::setValueFromNode(const RevBayesCore::DagNode& source)
+{
+    const auto& value = static_cast<const RevBayesCore::TypedDagNode<rbType>&>(source).getValue();
+    setValue(RevBayesCore::Cloner<rbType, IsDerivedFrom<rbType, RevBayesCore::Cloneable>::Is>::createClone(value));
 }
 
 
