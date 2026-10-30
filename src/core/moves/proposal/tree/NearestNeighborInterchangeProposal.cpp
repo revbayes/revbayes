@@ -138,21 +138,21 @@ double NearestNeighborInterchangeProposal::doProposal( void )
     double uncles_age   = uncle->getAge();
     double my_age       = node->getAge();
 
-    // Sampled-ancestor tips must take their destination parent's age. Check before mutation:
-    // setAge() can refuse an uncertain-age assignment without throwing, while the tree probability
-    // does not reject fixed-age violations. Equal bounds conservatively preserve the current age.
-    // These checks can be relaxed only when assignment reliably completes AND the tree probability
-    // enforces all specified bounds; fixing the setter alone would not make this safe.
+    // A sampled-ancestor tip must match its parent's age. This move preserves sampling
+    // ages, so reject an exchange that would require changing a tip's age, even if its
+    // taxon interval permits the change or no explicit sampling-age constraint was supplied.
+    //
+    // A possible generalization would move each exchanged sampled-ancestor tip to its new
+    // parent's age; the reverse exchange would restore its original age. Enabling this
+    // requires establishing when the model permits sampling ages to vary, enforcing age
+    // constraints in the distribution, and checking reversibility and the Hastings ratio.
     for (TopologyNode* fossil : {node, uncle})
     {
-        if (!fossil->isSampledAncestorTip())
+        if (not fossil->isSampledAncestorTip())
             continue;
 
         double new_age = fossil == node ? gparent_age : parent_age;
-        double min_age = fossil->getTaxon().getMinAge();
-        double max_age = fossil->getTaxon().getMaxAge();
-        if ((min_age == max_age && new_age != fossil->getAge()) ||
-            (min_age != max_age && (new_age < min_age || new_age > max_age)))
+        if (new_age != fossil->getAge())
         {
             failed = true;
             return RbConstants::Double::neginf;
@@ -181,13 +181,7 @@ double NearestNeighborInterchangeProposal::doProposal( void )
     
     // node rescale and MH
     double my_new_age;
-    if ( node->isSampledAncestorTip())
-    {
-        // If we are moving a sampled ancestor tip, then we are really moving the sampled ancestor.
-        // Set the sampled-ancestor-tip age to the age of the sampled-ancestor-parent.
-        node->setAge( grandparent.getAge() );
-    }
-    else if ( node->isTip() )
+    if ( node->isTip() )
     {
         my_new_age = my_age;
         // We don't actually have to set anything here.
@@ -208,13 +202,7 @@ double NearestNeighborInterchangeProposal::doProposal( void )
 
     // uncle rescale and MH
     double uncles_new_age;
-    if ( uncle->isSampledAncestorTip())
-    {
-        // If we are moving a sampled ancestor tip, then we are really moving the sampled ancestor.
-        // Set the sampled-ancestor-tip age to the age of the sampled-ancestor-parent.
-        uncle->setAge( parent.getAge() );
-    }
-    else if ( uncle->isTip() )
+    if ( uncle->isTip() )
     {
         uncles_new_age = uncles_age;
         // We don't actually have to set anything here.
@@ -295,13 +283,11 @@ void NearestNeighborInterchangeProposal::undoProposal( void )
 
         if (storedChosenNode->isSampledAncestorTip())
         {
-            storedChosenNode->setAge(storedChosenNode->getParent().getAge());
             assert(storedChosenNode->getAge() == storedChosenNode->getParent().getAge());
         }
 
         if (storedUncle->isSampledAncestorTip())
         {
-            storedUncle->setAge(storedUncle->getParent().getAge());
             assert(storedUncle->getAge() == storedUncle->getParent().getAge());
         }
     }

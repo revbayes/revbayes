@@ -146,28 +146,29 @@ double NarrowExchangeProposal::doProposal( void )
     double parent_age   = parent.getAge();
     double uncles_age   = uncle->getAge();
 
-    // A sampled ancestor takes its destination parent's age. Allow it to move down as well
-    // as up; otherwise an upward exchange has no reverse proposal.
-    if (!uncle->isSampledAncestorTip() && uncles_age >= parent_age)
+    // Ordinary tips and subtrees must fit below the parent. Sampled-ancestor tips instead
+    // require equality, checked below, so equal-age exchanges remain reversible.
+    if (not uncle->isSampledAncestorTip() and uncles_age >= parent_age)
     {
         failed = true;
         return RbConstants::Double::neginf;
     }
 
-    // Work around setAge() refusing out-of-range assignments without throwing, and the tree
-    // probability not enforcing fixed ages. Check before mutating so rejection leaves the tree intact.
-    // These checks could be relaxed once assignment reliably completes and the tree probability
-    // enforces all specified bounds. Equal bounds conservatively preserve the current fossil age.
+    // A sampled-ancestor tip must match its parent's age. This move preserves sampling
+    // ages, so reject an exchange that would require changing a tip's age, even if its
+    // taxon interval permits the change or no explicit sampling-age constraint was supplied.
+    //
+    // A possible generalization would move each exchanged sampled-ancestor tip to its new
+    // parent's age; the reverse exchange would restore its original age. Enabling this
+    // requires establishing when the model permits sampling ages to vary, enforcing age
+    // constraints in the distribution, and checking reversibility and the Hastings ratio.
     for (TopologyNode* fossil : {node, uncle})
     {
-        if (!fossil->isSampledAncestorTip())
+        if (not fossil->isSampledAncestorTip())
             continue;
 
         double new_age = fossil == node ? grandparent.getAge() : parent_age;
-        double min_age = fossil->getTaxon().getMinAge();
-        double max_age = fossil->getTaxon().getMaxAge();
-        if ((min_age == max_age && new_age != fossil->getAge()) ||
-            (min_age != max_age && (new_age < min_age || new_age > max_age)))
+        if (new_age != fossil->getAge())
         {
             failed = true;
             return RbConstants::Double::neginf;
@@ -187,14 +188,8 @@ double NarrowExchangeProposal::doProposal( void )
     parent.addChild( uncle );
     node->setParent( &grandparent );
     uncle->setParent( &parent );
-        
-    if (node->isSampledAncestorTip())
-        node->setAge( node->getParent().getAge());
 
-    if (uncle->isSampledAncestorTip())
-        uncle->setAge( uncle->getParent().getAge());
-
-    // Selecting the exchanged uncle reverses the swap and restores sampled-ancestor ages.
+    // Selecting the exchanged uncle reverses the swap; every node retains its age.
     // Both selections have the same probability; internal ages and the eligible node count stay fixed.
     return 0.0;
 }
@@ -249,12 +244,6 @@ void NarrowExchangeProposal::undoProposal( void )
         parent.addChild( storedChosenNode );
         storedUncle->setParent( &grandparent );
         storedChosenNode->setParent( &parent );
-        
-        if (storedChosenNode->isSampledAncestorTip())
-            storedChosenNode->setAge( storedChosenNode->getParent().getAge());
-
-        if (storedUncle->isSampledAncestorTip())
-            storedUncle->setAge( storedUncle->getParent().getAge());
     }
     
 }
