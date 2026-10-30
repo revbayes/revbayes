@@ -2,6 +2,7 @@
 
 ## Backwards-incompatible changes
   * Remove `dnFBDRP`, `dnFBDSP` and `mvResampleFBD`, which were not working. A revised implementation is planned for 1.5.0.
+  * Remove `fnChronoToPhylo`, which was unused.
 
 ## Features
 

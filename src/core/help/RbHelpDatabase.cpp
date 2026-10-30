@@ -1899,7 +1899,6 @@ fnBSPInterval( a, b ))");
 	help_strings[string("fnChromosomesCladoProbs")][string("name")] = string(R"(fnChromosomesCladoProbs)");
 	help_strings[string("fnChromosomesPloidy")][string("name")] = string(R"(fnChromosomesPloidy)");
 	help_strings[string("fnChromosomesPloidyCladoEventsBD")][string("name")] = string(R"(fnChromosomesPloidyCladoEventsBD)");
-	help_strings[string("fnChronoToPhylo")][string("name")] = string(R"(fnChronoToPhylo)");
 	help_strings[string("fnCladeSpecificHierarchicalBranchRate")][string("name")] = string(R"(fnCladeSpecificHierarchicalBranchRate)");
 	help_strings[string("fnCladogeneticSpeciationRateMatrix")][string("name")] = string(R"(fnCladogeneticSpeciationRateMatrix)");
 	help_arrays[string("fnCoala")][string("authors")].push_back(string(R"(Bastien Boussau)"));
