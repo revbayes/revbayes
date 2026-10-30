@@ -112,7 +112,7 @@ const MemberRules& Move_VectorFixedSingleElementSlide::getParameterRules(void) c
     if ( !rules_set )
         {
         move_member_rules.push_back( new ArgumentRule( "x"      , ModelVector<Real>::getClassTypeSpec(), "The variable on which this move operates.", ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC ) );
-        move_member_rules.push_back( new ArgumentRule( "lambda" , RealPos::getClassTypeSpec()          , "The scaling factor (strength) of this move.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new Real(1.0) ) );
+        move_member_rules.push_back( new ArgumentRule( "lambda" , RealPos::getClassTypeSpec()          , "The scaling factor (strength) of this move.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new RealPos(1.0) ) );
         move_member_rules.push_back( new ArgumentRule( "tune"   , RlBoolean::getClassTypeSpec()        , "Should we tune the scaling factor during burnin?", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new RlBoolean( true ) ) );
         move_member_rules.push_back( new ArgumentRule( "element", Natural::getClassTypeSpec()          , "The index of the element to scale.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new Natural( 1 ) ) );
         

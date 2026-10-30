@@ -59,7 +59,7 @@ Func_assembleContinuousMRF* Func_assembleContinuousMRF::clone( void ) const
 RevBayesCore::TypedFunction<RevBayesCore::RbVector<double> >* Func_assembleContinuousMRF::createFunction( void ) const
 {
 
-    RevBayesCore::TypedDagNode<double>* theta1                              = static_cast<const RealPos &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* theta1                              = static_cast<const Real&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* increments = static_cast<const ModelVector<Real> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
     bool theta1_is_log_scale                                                = static_cast<const RlBoolean &>( args[4].getVariable()->getRevObject() ).getValue();
     size_t order                                                            = static_cast<const Natural &>( args[5].getVariable()->getRevObject() ).getValue();
