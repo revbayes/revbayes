@@ -1,3 +1,4 @@
+#include "TimeInterval.h"
 #include <cstdio>
 #include <algorithm>
 #include <cstddef>
@@ -2089,7 +2090,9 @@ void TopologyNode::scaleAgesFromTaxonAgesMBL(double minbl)
     {
         if ( children[i]->isTip() )
         {
-            double tip_age = ( children[i]->getTaxon().getMinAge() + children[i]->getTaxon().getMaxAge() ) / 2;
+            // COMPAT(age-range): Preserve midpoint initialization at zero for an unset constraint.
+            const auto interval = children[i]->getTaxon().getAgeRange().value_or(TimeInterval(0.0, 0.0));
+            double tip_age = ( interval.getMin() + interval.getMax() ) / 2;
             children[i]->setAge( tip_age );
         }
         else
@@ -2117,9 +2120,11 @@ void TopologyNode::scaleAgesFromTaxonAgesMBL(double minbl)
 
 void TopologyNode::setAge(double a, bool propagate)
 {
+    // An unset range formerly acted as [0,0], which was already exempt as zero-width.
+    // Check presence directly while retaining both exemptions for explicit intervals.
     const auto& interval = getTaxon().getAgeRange();
-    if (getTaxon().getName() != "" and not interval.zeroWidth()) {
-        if (not interval.contains(a)) {
+    if (interval and getTaxon().getName() != "" and not interval->zeroWidth()) {
+        if (not interval->contains(a)) {
             std::cerr << "Attempting to set new age of taxon " << getTaxon().getName() << " incompatible with age range" << std::endl;
 
             // NOTE: This code intentionally constructs trees with different ages for sampled-ancestors-parents and sampled-ancestor-tips.

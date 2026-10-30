@@ -87,7 +87,11 @@ void Taxon::constructInternalObject( void )
     std::string taxonName = static_cast<const RlString &>( (taxon)->getRevObject() ).getValue() ;
     std::string taxonSpecies = static_cast<const RlString &>( (species)->getRevObject() ).getValue() ;
     taxonSpecies = ( taxonSpecies == "taxonName" ) ? taxonName : taxonSpecies;
-    double minAge = static_cast<const RealPos &>( minage->getRevObject() ).getValue();
+    // A nonnumeric default distinguishes omitted ages from an explicitly supplied zero.
+    const bool has_min = minage->getRevObject().isType(RealPos::getClassTypeSpec());
+    const bool has_max = maxage->getRevObject().isType(RealPos::getClassTypeSpec());
+    // COMPAT(age-range): With only max supplied, the lower endpoint still defaults to zero.
+    double minAge = has_min ? static_cast<const RealPos&>(minage->getRevObject()).getValue() : 0.0;
     double maxAge = minAge;
 
     if( maxage->getRevObject().isType( RealPos::getClassTypeSpec() ) )
@@ -110,7 +114,8 @@ void Taxon::constructInternalObject( void )
     
     dag_node->getValue().setSpeciesName( taxonSpecies );
     
-    dag_node->getValue().setAgeRange(range);
+    if (has_min or has_max)
+        dag_node->getValue().setAgeRange(range);
 
     dag_node->incrementReferenceCount();
     
@@ -140,21 +145,27 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Taxon::executeMethod(std::string c
         found = true;
         
         // Compatibility: retain Rev's getAge() as a lower-bound alias pending a usage review.
-        double a = this->dag_node->getValue().getMinAge();
+        // COMPAT(age-range): Preserve scalar getters and endpoint validation for unset ranges.
+        const auto interval = this->dag_node->getValue().getAgeRange().value_or(RevBayesCore::TimeInterval(0.0, 0.0));
+        double a = interval.getMin();
         return RevPtr<RevVariable>( new RevVariable( new RealPos( a ) ) );
     }
     if (name == "getMinAge")
     {
         found = true;
 
-        double a = this->dag_node->getValue().getAgeRange().getMin();
+        // COMPAT(age-range): Preserve scalar getters and endpoint validation for unset ranges.
+        const auto interval = this->dag_node->getValue().getAgeRange().value_or(RevBayesCore::TimeInterval(0.0, 0.0));
+        double a = interval.getMin();
         return RevPtr<RevVariable>( new RevVariable( new RealPos( a ) ) );
     }
     if (name == "getMaxAge")
     {
         found = true;
 
-        double a = this->dag_node->getValue().getAgeRange().getMax();
+        // COMPAT(age-range): Preserve scalar getters and endpoint validation for unset ranges.
+        const auto interval = this->dag_node->getValue().getAgeRange().value_or(RevBayesCore::TimeInterval(0.0, 0.0));
+        double a = interval.getMax();
         return RevPtr<RevVariable>( new RevVariable( new RealPos( a ) ) );
     }
     if (name == "setMinAge")
@@ -165,10 +176,12 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Taxon::executeMethod(std::string c
         if (std::isnan(a))
             throw RbException() << "Minimum age for taxon '" << dag_node->getValue().getName()
                                 << "' must not be NaN.";
-        if (a > dag_node->getValue().getMaxAge())
+        // COMPAT(age-range): Preserve scalar getters and endpoint validation for unset ranges.
+        const auto interval = dag_node->getValue().getAgeRange().value_or(RevBayesCore::TimeInterval(0.0, 0.0));
+        if (a > interval.getMax())
             throw RbException() << "Cannot set minimum age of taxon '" << dag_node->getValue().getName()
                                 << "' to " << a << ": it exceeds the current maximum age ("
-                                << dag_node->getValue().getMaxAge() << ").";
+                                << interval.getMax() << ").";
 
         dag_node->getValue().setMinAge( a );
         return NULL;
@@ -181,10 +194,12 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Taxon::executeMethod(std::string c
         if (std::isnan(a))
             throw RbException() << "Maximum age for taxon '" << dag_node->getValue().getName()
                                 << "' must not be NaN.";
-        if (a < dag_node->getValue().getMinAge())
+        // COMPAT(age-range): Preserve scalar getters and endpoint validation for unset ranges.
+        const auto interval = dag_node->getValue().getAgeRange().value_or(RevBayesCore::TimeInterval(0.0, 0.0));
+        if (a < interval.getMin())
             throw RbException() << "Cannot set maximum age of taxon '" << dag_node->getValue().getName()
                                 << "' to " << a << ": it is below the current minimum age ("
-                                << dag_node->getValue().getMinAge() << ").";
+                                << interval.getMin() << ").";
 
         dag_node->getValue().setMaxAge( a );
         return NULL;
@@ -241,7 +256,7 @@ const MemberRules& Taxon::getParameterRules(void) const
         std::vector<std::string> ageLabels;
         ageLabels.push_back("age");
         ageLabels.push_back("min");
-        memberRules.push_back( new ArgumentRule(ageLabels,     RealPos::getClassTypeSpec(), "The (minimum) age before the present when this taxon was sampled.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RealPos(0.0) ) );
+        memberRules.push_back( new ArgumentRule(ageLabels,     RealPos::getClassTypeSpec(), "The (minimum) age before the present when this taxon was sampled.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("unspecified") ) );
         memberRules.push_back( new ArgumentRule("max",         RealPos::getClassTypeSpec(), "The maximum age before the present when this taxon was sampled.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlString("age/min") ) );
 
         rules_set = true;

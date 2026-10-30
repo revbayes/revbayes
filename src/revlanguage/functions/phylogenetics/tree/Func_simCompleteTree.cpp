@@ -1,3 +1,4 @@
+#include "TimeInterval.h"
 #include <cmath>       /* log2 */
 #include <cstddef>
 #include <algorithm>
@@ -78,7 +79,9 @@ RevPtr<RevVariable> Func_simCompleteTree::execute( void )
         RevBayesCore::TopologyNode* node = new RevBayesCore::TopologyNode( taxa[i], i );
         
         // Initialize this tip at the lower bound of its age constraint.
-        node->setAge( taxa[i].getMinAge() );
+        // COMPAT(age-range): Preserve the zero sampling-age default used by this construction/simulation.
+        const auto interval = taxa[i].getAgeRange().value_or(RevBayesCore::TimeInterval(0.0, 0.0));
+        node->setAge( interval.getMin() );
         
         // add the new node to the list
         nodes[i] = node;
