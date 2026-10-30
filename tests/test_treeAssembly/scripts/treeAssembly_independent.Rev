@@ -1,0 +1,39 @@
+# Checks that several assemblies can read one tree at once, each keeping the branch lengths
+# it was given, and that none of them disturbs the input.
+# Every line printed must be TRUE.
+seed(1)
+out = "output/treeAssembly_independent.txt"
+
+chars <- readDiscreteCharacterData("data/primates_cytb_small.nex")
+taxa <- chars.taxa()
+root_age <- 10.0
+tree ~ dnBDP(lambda=0.4, mu=0.1, rho=1.0, rootAge=root_age, taxa=taxa, condition="nTaxa")
+before = tree.treeLength()
+
+n = 2 * taxa.size() - 2
+for (i in 1:n) { short[i] <- 0.25 }
+for (i in 1:n) { long[i] <- 4.0 }
+
+a := fnTreeAssembly(tree, short)
+b := fnTreeAssembly(tree, long)
+for (i in 1:n) { mid[i] <- 1.0 }
+c := fnTreeAssembly(tree, mid)
+
+print(filename=out, "three assemblies on one tree each keep the lengths they were given:\n")
+print(filename=out, append=TRUE, abs(a.treeLength() - 0.25 * n) < 1E-8, "\n")
+print(filename=out, append=TRUE, abs(b.treeLength() - 4.0 * n) < 1E-8, "\n")
+print(filename=out, append=TRUE, abs(c.treeLength() - 1.0 * n) < 1E-8, "\n")
+
+print(filename=out, append=TRUE, "and the input tree is untouched by any of them:\n")
+print(filename=out, append=TRUE, abs(tree.treeLength() - before) < 1E-10, "\n")
+
+print(filename=out, append=TRUE, "and they all have the shape of the input:\n")
+shape = TRUE
+for (i in 1:(tree.nnodes() - 1)) {
+    shape = shape && a.parent(i) == tree.parent(i)
+    shape = shape && b.parent(i) == tree.parent(i)
+    shape = shape && c.parent(i) == tree.parent(i)
+}
+print(filename=out, append=TRUE, shape, "\n")
+
+q()

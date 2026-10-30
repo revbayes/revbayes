@@ -46,29 +46,7 @@ RevBayesCore::TypedFunction<RevBayesCore::Tree>* Func_treeAssembly::createFuncti
     
     RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = static_cast<const Tree&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
     
-    // TreeAssemblyFunction acts directly on the value of the topology node
-    // Current topology variable cannot already be parent of another TreeAssemblyFunction
-    bool topology_in_use = false;
-    const std::vector<RevBayesCore::DagNode*>& tauChildren = tau->getChildren();
-    for (size_t i = 0; i < tauChildren.size(); i++)
-    {
-        RevBayesCore::DeterministicNode<RevBayesCore::Tree>* tauChild = dynamic_cast<RevBayesCore::DeterministicNode<RevBayesCore::Tree>*>(tauChildren[i]);
-        if ( tauChild != NULL )
-        {
-            RevBayesCore::TreeAssemblyFunction* tf = dynamic_cast<RevBayesCore::TreeAssemblyFunction*>(&tauChild->getFunction());
-            if ( tf != NULL )
-            {
-                topology_in_use = true;
-            }
-        }
-    }
-    if ( topology_in_use == true )
-    {
-        throw RbException() << "Variable \"" << tau->getName() << "\" cannot be used with more than one treeAssembly function.";
-    }
-    
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* brlens = static_cast<const ModelVector<RealPos> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::RbVector<double> tmp = brlens->getValue();
     RevBayesCore::TreeAssemblyFunction* f = new RevBayesCore::TreeAssemblyFunction( tau, brlens );
     
     return f;
