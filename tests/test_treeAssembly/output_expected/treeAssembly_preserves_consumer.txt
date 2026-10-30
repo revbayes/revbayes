@@ -1,0 +1,8 @@
+an assembly does not change what another consumer of the input tree sees:
+TRUE	
+TRUE	
+the input tree keeps its own branch lengths and ages:
+TRUE	
+TRUE	
+the assembled tree carries the lengths it was given:
+TRUE	

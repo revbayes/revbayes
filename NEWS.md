@@ -3,10 +3,13 @@
 ## Backwards-incompatible changes
   * Remove `dnFBDRP`, `dnFBDSP` and `mvResampleFBD`, which were not working. A revised implementation is planned for 1.5.0.
   * Remove `fnChronoToPhylo`, which was unused.
+  * Stop monitors on a topology from reporting the assembled branch lengths.
 
 ## Features
+  * Allow `fnTreeAssembly` on a time tree, and more than once on the same tree.
 
 ## Bug fixes
+  * Fix `fnTreeAssembly` writing the assembled branch lengths into the input tree.
 
 ## Documentation improvements
 

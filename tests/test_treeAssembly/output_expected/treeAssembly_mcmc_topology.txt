@@ -1,0 +1,2 @@
+an assembled topology carries the true likelihood under NNI and SPR:
+TRUE	
