@@ -157,17 +157,6 @@ bool Taxon::isExtinct(void) const
 
 
 /**
- * Get the age for this taxon.
- *
- * \return    The age.
- */
-double Taxon::getAge( void ) const
-{
-    return age_range.getMin();
-}
-
-
-/**
  * Get the occurrences for this taxon.
  *
  * \return    A map of occurrence age ranges to counts.
@@ -259,29 +248,6 @@ const std::string& Taxon::getName( void ) const
 const std::string& Taxon::getSpeciesName( void ) const
 {
     return species_name;
-}
-
-
-/**
- * Set the age for this taxon.
- *
- * \param[in]    a     The age.
- */
-void Taxon::setAge(double a)
-{
-    
-    if ( age_range.getMax() < a )
-    {
-        age_range.setMax(a);
-        age_range.setMin(a);
-    }
-    else
-    {
-        age_range.setMin(a);
-        // Sebastian (20210519): We should not automatically set the max age
-        // because otherwise we always get a range of size 0.
-//        age_range.setMax(a);
-    }
 }
 
 

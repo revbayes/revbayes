@@ -38,7 +38,6 @@ namespace RevBayesCore {
         // public methods
         void                                  addOccurrence(const TimeInterval &d);       //!< Add an occurrence.
         bool                                  isExtinct(void) const;                      //!< Get the extinct status flag.
-        double                                getAge(void) const;                         //!< Get the age for this taxon.
         const TimeInterval&                   getAgeRange(void) const;                    //!< Get the date info for this taxon.
         const std::string                     getJsonRespresentation(void) const;         //!< Get JSON-formatted string.
         double                                getMaxAge(void) const;                      //!< Get the max age for this taxon.
@@ -47,7 +46,6 @@ namespace RevBayesCore {
         const std::map<TimeInterval, size_t>& getOccurrences(void) const;                 //!< Get the occurrence ages and counts.
         const std::string&                    getSpeciesName(void) const;                 //!< Get the name of the species.
 
-        void                                  setAge(double a);                           //!< Set the age.
         void                                  setMinAge(double a);                        //!< Set the min age.
         void                                  setMaxAge(double a);                        //!< Set the max age.
         void                                  setAgeRange(const TimeInterval &d);         //!< Set the date info.

@@ -241,12 +241,12 @@ std::vector<double> DemographyCoalescent::simulateCoalescentAges( size_t n ) con
     // Get the rng
     RandomNumberGenerator* rng = GLOBAL_RNG;
     
-    // retrieve the times of any serially sampled tips
+    // Use the same lower-bound sampling ages as tip initialization.
     std::vector<double> serial_ages;
     size_t num_taxa_at_present = 0;
     for (size_t i = 0; i < num_taxa; ++i)
     {
-        double a = taxa[i].getAge();
+        double a = taxa[i].getMinAge();
         if ( a > 0.0 )
         {
             serial_ages.push_back(a);

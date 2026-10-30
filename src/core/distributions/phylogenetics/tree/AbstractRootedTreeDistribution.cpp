@@ -208,13 +208,14 @@ double AbstractRootedTreeDistribution::computeLnProbability( void )
 
                 }
                 auto taxon = the_node.getTaxon();
-                if(taxon.getName() != "" && taxon.getMinAge() != taxon.getMaxAge())
+                const auto& interval = taxon.getAgeRange();
+                if (taxon.getName() != "" and not interval.zeroWidth())
                 {
-                    if(the_node.getAge() < taxon.getMinAge() || the_node.getAge() > taxon.getMaxAge())
+                    if (not interval.contains(the_node.getAge()))
                     {
                         std::cerr << "Age of taxon " << taxon.getName() << " incompatible with age range";
                         return withReason(Double::neginf)<< "Pr(tree)=0: taxon " << taxon.getName() <<" has age "<<the_node.getAge()
-                                                         <<" outside of age range ["<<taxon.getMinAge()<<", "<<taxon.getMaxAge()<<"]";
+                                                         <<" outside of age range ["<<taxon.getMinAge()<<", "<<interval.getMax()<<"]";
                     }
                 }
             }
@@ -712,8 +713,8 @@ void AbstractRootedTreeDistribution::simulateTree( bool alwaysReturn )
         // create the i-th taxon
         TopologyNode* node = new TopologyNode( taxa[i], i );
 
-        // set the age of this tip node
-        node->setAge( taxa[i].getAge() );
+        // Initialize this tip at the lower bound of its age constraint.
+        node->setAge( taxa[i].getMinAge() );
 
         // add the new node to the list
         nodes.push_back( node );

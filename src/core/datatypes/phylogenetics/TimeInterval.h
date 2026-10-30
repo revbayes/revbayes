@@ -23,6 +23,10 @@ namespace RevBayesCore {
         bool                                operator!=(const TimeInterval &t) const;                //!< Not-equals operator
         bool                                operator<(const TimeInterval &t) const;                 //!< Less than operator
 
+        // Membership and zero width use effective endpoints, including the current [0, 0] default.
+        bool                                contains(double age) const;
+        bool                                zeroWidth() const;
+
         // public functions
         double                              getMin(void) const;                                     //!< Get the number of days since counting.
         double                              getMax(void) const;                                     //!< Get the number of million years ago.
