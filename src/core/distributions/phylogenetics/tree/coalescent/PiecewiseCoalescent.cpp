@@ -436,9 +436,10 @@ std::vector<double> PiecewiseCoalescent::simulateCoalescentAges( size_t n ) cons
     size_t num_taxa_at_present = 0;
     for (size_t i = 0; i < num_taxa; ++i)
     {
-        // COMPAT(age-range): Preserve the zero sampling-age default used by this construction/simulation.
-        const auto interval = taxa[i].getAgeRange().value_or(TimeInterval(0.0, 0.0));
-        double a = interval.getMin();
+        // Unconstrained tips start at age zero.
+        const auto& interval = taxa[i].getAgeRange();
+        const double interval_age = interval ? interval->getMin() : 0.0;
+        double a = interval_age;
         if ( a > 0.0 )
         {
             serial_tip_ages.push_back(a);

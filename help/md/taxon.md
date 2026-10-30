@@ -6,14 +6,21 @@ Taxon object
 The taxon function creates a Taxon object.
 ## details
 Each Taxon object records that taxon's name in addition to other information, such as its age range.
-The default age range is [0,0], representing an extant taxon. Character matrices and trees contain
+A taxon constructed without ages has no age range. Use `hasAgeRange()` to distinguish this from
+an explicitly supplied range, including [0,0]. Character matrices and trees contain
 Taxon vectors (Taxon[]) that are used to match leaf nodes to data entries for phylogenetic analyses.
 For multispecies coalescent analyses, Taxon objects are also used to assign species memberships to
 individuals.
 
 Use `setAgeRange(minAge, maxAge)` to replace both age bounds together. The bounds must be
 nonnegative, must not be NaN, and must satisfy `minAge <= maxAge`; equal bounds specify an exact age.
-An invalid call leaves the existing range unchanged.
+An invalid call leaves the existing range unchanged. `setMinAge(a)` and `setMaxAge(a)` change one
+endpoint of an existing range; they throw if no range has been supplied. Use `setAgeRange()` to
+establish both bounds first.
+
+`getMinAge()` and `getMaxAge()` return the endpoints of an existing range; `getAge()` is an alias
+for `getMinAge()`. These getters throw if no range has been supplied. Use `hasAgeRange()` to check
+before querying a potentially absent range.
 ## authors
 Michael Landis
 ## see_also

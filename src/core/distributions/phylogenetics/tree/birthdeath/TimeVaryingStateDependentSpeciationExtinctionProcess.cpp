@@ -23,6 +23,7 @@
 #include "RlString.h"
 #include "StochasticNode.h"
 #include "TopologyNode.h"
+#include "TreeUtilities.h"
 #include "AbstractDiscreteTaxonData.h"
 #include "AbstractTaxonData.h"
 #include "Cloneable.h"
@@ -217,6 +218,9 @@ std::vector<double> TimeVaryingStateDependentSpeciationExtinctionProcess::calcul
  */
 double TimeVaryingStateDependentSpeciationExtinctionProcess::computeLnProbability( void )
 {
+    if (not TreeUtilities::nodeAgesWithinRanges(*value))
+        return RbConstants::Double::neginf;
+
     
     // check that the ages are in correct chronological order
     // i.e., no child is older than its parent

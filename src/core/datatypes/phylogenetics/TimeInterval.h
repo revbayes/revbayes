@@ -29,10 +29,8 @@ namespace RevBayesCore {
         bool                                zeroWidth() const;
 
         // public functions
-        double                              getMin(void) const;                                     //!< Get the number of days since counting.
-        double                              getMax(void) const;                                     //!< Get the number of million years ago.
-        void                                setMin(double);                                         //!< Get the number of days since counting.
-        void                                setMax(double);                                         //!< Get the number of million years ago.
+        double                              getMin(void) const;                                     //!< Get the lower endpoint.
+        double                              getMax(void) const;                                     //!< Get the upper endpoint.
         
     private:
         // Explicit endpoints: neither is NaN. Infinity is allowed; min must not exceed max.

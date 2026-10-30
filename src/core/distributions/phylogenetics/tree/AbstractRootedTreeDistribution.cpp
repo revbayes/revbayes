@@ -1,3 +1,4 @@
+#include "TreeUtilities.h"
 #include "TimeInterval.h"
 #include <cstddef>
 #include <algorithm>
@@ -21,7 +22,6 @@
 #include "Tree.h"
 #include "TypedDagNode.h"
 #include "TypedDistribution.h"
-#include "RbSettings.h"
 
 namespace RevBayesCore { class DagNode; }
 namespace RevBayesCore { template <class valueType> class RbOrderedSet; }
@@ -188,6 +188,21 @@ double AbstractRootedTreeDistribution::computeLnProbability( void )
     {
 
         const TopologyNode &the_node = *(*it);
+        const auto& taxon = the_node.getTaxon();
+        // Each attached interval constrains its node, including roots and internal sampled ancestors.
+        // Absence imposes no bound; neither the taxon name nor the interval width changes support.
+        const auto& interval = taxon.getAgeRange();
+        if (interval)
+        {
+            if (not interval->contains(the_node.getAge()))
+            {
+                const auto& settings = RbSettings::userSettings();
+                if (settings.getDebugMCMC() >= 1 or settings.getLogMCMC() >= 1)
+                    std::cerr << "Age of taxon " << taxon.getName() << " incompatible with age range\n";
+                return withReason(Double::neginf)<< "Pr(tree)=0: taxon " << taxon.getName() <<" has age "<<the_node.getAge()
+                                                 <<" outside of age range ["<<interval->getMin()<<", "<<interval->getMax()<<"]";
+            }
+        }
         if ( the_node.isRoot() == false )
         {
             if( the_node.isTip() )
@@ -208,19 +223,7 @@ double AbstractRootedTreeDistribution::computeLnProbability( void )
                     }
 
                 }
-                auto taxon = the_node.getTaxon();
-                // Absence formerly supplied the exempt point interval [0,0]. Testing presence
-                // directly preserves that behavior, including for non-finite proposed ages.
-                const auto& interval = taxon.getAgeRange();
-                if (interval and taxon.getName() != "" and not interval->zeroWidth())
-                {
-                    if (not interval->contains(the_node.getAge()))
-                    {
-                        std::cerr << "Age of taxon " << taxon.getName() << " incompatible with age range";
-                        return withReason(Double::neginf)<< "Pr(tree)=0: taxon " << taxon.getName() <<" has age "<<the_node.getAge()
-                                                         <<" outside of age range ["<<interval->getMin()<<", "<<interval->getMax()<<"]";
-                    }
-                }
+
             }
             if( the_node.getAge() - the_node.getParent().getAge() > 0 )
             {
@@ -717,9 +720,10 @@ void AbstractRootedTreeDistribution::simulateTree( bool alwaysReturn )
         TopologyNode* node = new TopologyNode( taxa[i], i );
 
         // Initialize this tip at the lower bound of its age constraint.
-        // COMPAT(age-range): Preserve the zero sampling-age default used by this construction/simulation.
-        const auto interval = taxa[i].getAgeRange().value_or(TimeInterval(0.0, 0.0));
-        node->setAge( interval.getMin() );
+        // Unconstrained tips start at age zero.
+        const auto& interval = taxa[i].getAgeRange();
+        const double interval_age = interval ? interval->getMin() : 0.0;
+        node->setAge( interval_age );
 
         // add the new node to the list
         nodes.push_back( node );
@@ -817,7 +821,8 @@ void AbstractRootedTreeDistribution::setValue(Tree *v, bool f )
         
     }
 
-    value->checkTaxonAges(true);
+    // In particular, do not clamp tip ages here: wrappers also install copies of proposals
+    // through setValue(), and must evaluate tip-age constraints without repairing violations.
     
 }
 
@@ -850,4 +855,12 @@ void AbstractRootedTreeDistribution::touchSpecialization(const DagNode *affecter
         
     }
     
+}
+
+
+// Checkpoint serialization can move a tip slightly beyond its bounds. Ordinary setValue()
+// deliberately does not perform this repair, since it is also used during density evaluation.
+void AbstractRootedTreeDistribution::repairCheckpointValue(Tree& tree)
+{
+    TreeUtilities::repairCheckpointTaxonAges(tree);
 }

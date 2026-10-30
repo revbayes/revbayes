@@ -34,6 +34,7 @@ namespace RevBayesCore {
         virtual void                                        redrawValue(void);                                                                                  //!< Draw a new random value from the distribution
 
         virtual void                                        setValue(Tree *v, bool f=false);                                                                    //!< Set the current value, e.g. attach an observation (clamp)
+        void                                                repairCheckpointValue(Tree& tree) override;
         size_t                                              getNumberOfTaxa(void) const;
         double                                              getOriginAge(void) const;
         virtual double                                      getRootAge(void) const;

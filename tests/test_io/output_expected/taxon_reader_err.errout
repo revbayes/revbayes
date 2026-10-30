@@ -2,3 +2,12 @@
    Error:	Could not parse 'abc' as a number in the "min_age" field on line 2 of the taxon definition file.
    inf
    Error:	Invalid age range for taxon 't1': minimum age (3) exceeds maximum age (2).
+   FALSE
+   Error:	Taxon 'unset' has no age range; use hasAgeRange() before querying its bounds.
+   Error:	Taxon 'unset' has no age range; use hasAgeRange() before querying its bounds.
+   Error:	Taxon 'unset' has no age range; use hasAgeRange() before querying its bounds.
+   Error:	Taxon 'unset' has no age range; use setAgeRange(minAge, maxAge) to establish both bounds.
+   Error:	Taxon 'unset' has no age range; use setAgeRange(minAge, maxAge) to establish both bounds.
+   FALSE
+   TRUE
+   TRUE

@@ -14,6 +14,7 @@
 #include "RbConstants.h"
 #include "RbMathCombinatorialFunctions.h"
 #include "TopologyNode.h"
+#include "TreeUtilities.h"
 #include "RbException.h"
 #include "Taxon.h"
 #include "Tree.h"
@@ -167,6 +168,12 @@ void AbstractMultispeciesCoalescentGenewise::buildRandomBinaryTree(std::vector< 
 
 double AbstractMultispeciesCoalescentGenewise::computeLnProbability( void )
 {
+    for (const auto& tree : *value)
+    {
+        if (not TreeUtilities::nodeAgesWithinRanges(tree))
+            return RbConstants::Double::neginf;
+    }
+
     resetTipAllocations();
 
     // variable declarations and initialization

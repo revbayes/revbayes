@@ -977,62 +977,6 @@ std::vector<Taxon> Tree::getTaxa() const
 }
 
 
-/**
- * Check that all tip ages are within their specified taxon age ranges
- * If forceAdjust is true (default), will adjust misspecified ages, otherwise throws an exception
- */
-void RevBayesCore::Tree::checkTaxonAges(bool forceAdjust)
-{
-    for (auto& node : nodes)
-    {
-        if ( !node->isTip() ) continue;
-        Taxon taxon = node->getTaxon();
-        
-        // COMPAT(age-range): Preserve validation/repair against [0,0] when no range was supplied.
-        const auto interval = taxon.getAgeRange().value_or(TimeInterval(0.0, 0.0));
-        if ( node->getAge() < interval.getMin() )
-        {
-            if (forceAdjust)
-            {
-                node->setAge(interval.getMin());
-                
-                // only notify the user if we are making a non-trivial adjustment
-                if ( interval.getMin() - node->getAge() > 1e-06 * node->getAge() )
-                {
-                    std::stringstream msg;
-                    msg << "Age of taxon " << taxon.getName() << " was below the specified minimum and has been adjusted from ";
-                    msg << std::setprecision(6) << std::noshowpoint << node->getAge() << " to " << interval.getMin() << ".";
-                    RBOUT( msg.str() );
-                }
-            }
-            else
-            {
-                throw RbException() << "Age of taxon " << taxon.getName() << " is below the specified minimum.";
-            }
-        }
-        if ( node->getAge() > interval.getMax() )
-        {
-            if (forceAdjust)
-            {
-                node->setAge(interval.getMax());
-                
-                // only notify the user if we are making a non-trivial adjustment
-                if ( node->getAge() - interval.getMax() > 1e-06 * node->getAge() )
-                {
-                    std::stringstream msg;
-                    msg << "Age of taxon " << taxon.getName() << " was above the specified maximum and has been adjusted from ";
-                    msg << std::setprecision(6) << std::noshowpoint << node->getAge() << " to " << interval.getMax() << ".";
-                    RBOUT( msg.str() );
-                }
-            }
-            else
-            {
-                throw RbException() << "Age of taxon " << taxon.getName() << " is above the specified maximum.";
-            }
-        }
-    }
-}
-
 
 /**
  * Returns a map of the taxa to their BitSet indices.

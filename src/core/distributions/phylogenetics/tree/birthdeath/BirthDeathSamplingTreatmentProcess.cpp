@@ -201,8 +201,8 @@ BirthDeathSamplingTreatmentProcess::BirthDeathSamplingTreatmentProcess(const Typ
     {
         try
         {
-            RevBayesCore::Tree *my_tree = TreeUtilities::startingTreeInitializer( *t, taxa, age_check_precision );
-            value = my_tree->clone();
+            TreeUtilities::prepareTreeTaxa( *t, taxa, age_check_precision, true );
+            value = t->clone();
         }
         catch (RbException &e)
         {
@@ -2029,6 +2029,13 @@ bool BirthDeathSamplingTreatmentProcess::allowsSA() {
 
 void RevBayesCore::BirthDeathSamplingTreatmentProcess::setValue(Tree * v, bool f)
 {
-    RevBayesCore::Tree *newv = TreeUtilities::startingTreeInitializer(*v, taxa, age_check_precision);
-    AbstractRootedTreeDistribution::setValue(newv, f);
+    TreeUtilities::prepareTreeTaxa(*v, taxa, age_check_precision, false);
+    AbstractRootedTreeDistribution::setValue(v, f);
+}
+
+
+// Observations use exactly the same taxon metadata and rounding rule as supplied initial trees.
+void BirthDeathSamplingTreatmentProcess::prepareForClamping(Tree& tree)
+{
+    TreeUtilities::prepareTreeTaxa(tree, taxa, age_check_precision, true);
 }

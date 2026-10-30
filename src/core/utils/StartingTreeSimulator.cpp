@@ -55,9 +55,10 @@ Tree* StartingTreeSimulator::simulateTree( const std::vector<Taxon> &taxa, const
         TopologyNode* node = new TopologyNode( taxa[i], i );
         
         // Initialize this tip at the lower bound of its age constraint.
-        // COMPAT(age-range): Preserve the zero sampling-age default used by this construction/simulation.
-        const auto interval = taxa[i].getAgeRange().value_or(TimeInterval(0.0, 0.0));
-        node->setAge( interval.getMin() );
+        // Unconstrained tips start at age zero.
+        const auto& interval = taxa[i].getAgeRange();
+        const double interval_age = interval ? interval->getMin() : 0.0;
+        node->setAge( interval_age );
         
         // add the new node to the list
         nodes.push_back( node );
@@ -263,9 +264,10 @@ void StartingTreeSimulator::simulateClade( RbOrderedSet<TopologyNode*> &nodes, d
         double a = this_node->getAge();
         if ( this_node->isTip() == true )
         {
-            // COMPAT(age-range): An unset upper bound formerly contributed zero to scheduling.
-            const auto interval = this_node->getTaxon().getAgeRange().value_or(TimeInterval(0.0, 0.0));
-            a = interval.getMax();
+            // Unconstrained tips start at age zero.
+            const auto& interval = this_node->getTaxon().getAgeRange();
+            const double interval_age = interval ? interval->getMax() : 0.0;
+            a = interval_age;
         }
         if ( a > min_age )
         {

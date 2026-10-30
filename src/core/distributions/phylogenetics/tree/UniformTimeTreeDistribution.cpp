@@ -9,6 +9,7 @@
 #include "RbMathCombinatorialFunctions.h"
 #include "StochasticNode.h"
 #include "TopologyNode.h"
+#include "TreeUtilities.h"
 #include "UniformTimeTreeDistribution.h"
 #include "Taxon.h"
 #include "Tree.h"
@@ -132,6 +133,9 @@ UniformTimeTreeDistribution* UniformTimeTreeDistribution::clone( void ) const
 /* Compute probability */
 double UniformTimeTreeDistribution::computeLnProbability( void )
 {
+    if (not TreeUtilities::nodeAgesWithinRanges(*value))
+        return RbConstants::Double::neginf;
+
     
     // Variable declarations and initialization
     double lnProb = 0.0;

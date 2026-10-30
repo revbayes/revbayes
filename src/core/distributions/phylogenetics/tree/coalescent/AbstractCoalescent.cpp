@@ -10,6 +10,7 @@
 #include "RbException.h"
 #include "Taxon.h"
 #include "TopologyNode.h"
+#include "TreeUtilities.h"
 #include "TimeInterval.h"
 
 using namespace RevBayesCore;
@@ -238,6 +239,9 @@ void AbstractCoalescent::buildHeterochronousRandomBinaryTree(Tree *psi, std::vec
  */
 double AbstractCoalescent::computeLnProbability( void )
 {
+    if (not TreeUtilities::nodeAgesWithinRanges(*value))
+        return RbConstants::Double::neginf;
+
     
     // variable declarations and initialization
     double lnProbTimes = 0;
@@ -312,9 +316,10 @@ void AbstractCoalescent::simulateTree( void )
     bool homochronous = true;
     for (size_t i=0; i<num_taxa; ++i)
     {
-        // COMPAT(age-range): Preserve the zero sampling-age default used by this construction/simulation.
-        const auto interval = taxa[i].getAgeRange().value_or(TimeInterval(0.0, 0.0));
-        if ( interval.getMin() > 0.0 )
+        // Unconstrained tips start at age zero.
+        const auto& interval = taxa[i].getAgeRange();
+        const double interval_age = interval ? interval->getMin() : 0.0;
+        if ( interval_age > 0.0 )
         {
           homochronous = false;
           break;
@@ -352,13 +357,13 @@ void AbstractCoalescent::simulateHeterochronousTree( void )
         // get the node from the list
         TopologyNode* node = new TopologyNode(i);
         
-        // set name and age
-        const std::string& name = taxa[i].getName();
-        node->setName(name);
-        node->setSpeciesName(taxa[i].getSpeciesName());
-        // COMPAT(age-range): Preserve the zero sampling-age default used by this construction/simulation.
-        const auto interval = taxa[i].getAgeRange().value_or(TimeInterval(0.0, 0.0));
-        node->setAge(interval.getMin());
+        // Preserve the explicit sampling-age constraint as well as the names. Copying only
+        // names would turn a constrained dated sample into an unconstrained tree tip.
+        node->setTaxon(taxa[i]);
+        // Unconstrained tips start at age zero.
+        const auto& interval = taxa[i].getAgeRange();
+        const double interval_age = interval ? interval->getMin() : 0.0;
+        node->setAge(interval_age);
         // add to tips
         nodes.push_back(node);
     }

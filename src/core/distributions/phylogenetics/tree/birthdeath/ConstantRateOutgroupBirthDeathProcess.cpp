@@ -399,9 +399,10 @@ void ConstantRateOutgroupBirthDeathProcess::simulateOutgroupTree( void )
         TopologyNode* node = new TopologyNode( taxa_ingroup[i], i );
         
         // Initialize this tip at the lower bound of its age constraint.
-        // COMPAT(age-range): Preserve the zero sampling-age default used by this construction/simulation.
-        const auto ingroup_interval = taxa_ingroup[i].getAgeRange().value_or(TimeInterval(0.0, 0.0));
-        node->setAge( ingroup_interval.getMin() );
+        // Unconstrained tips start at age zero.
+        const auto& ingroup_interval = taxa_ingroup[i].getAgeRange();
+        const double ingroup_interval_age = ingroup_interval ? ingroup_interval->getMin() : 0.0;
+        node->setAge( ingroup_interval_age );
         
         // add the new node to the list
         nodes_ingroup.push_back( node );
@@ -414,9 +415,10 @@ void ConstantRateOutgroupBirthDeathProcess::simulateOutgroupTree( void )
         TopologyNode* node = new TopologyNode( taxa_outgroup[i], i );
         
         // Initialize this tip at the lower bound of its age constraint.
-        // COMPAT(age-range): Preserve the zero sampling-age default used by this construction/simulation.
-        const auto outgroup_interval = taxa_outgroup[i].getAgeRange().value_or(TimeInterval(0.0, 0.0));
-        node->setAge( outgroup_interval.getMin() );
+        // Unconstrained tips start at age zero.
+        const auto& outgroup_interval = taxa_outgroup[i].getAgeRange();
+        const double outgroup_interval_age = outgroup_interval ? outgroup_interval->getMin() : 0.0;
+        node->setAge( outgroup_interval_age );
         
         // add the new node to the list
         nodes_outgroup.push_back( node );

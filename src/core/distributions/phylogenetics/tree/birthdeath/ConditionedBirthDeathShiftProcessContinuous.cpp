@@ -11,6 +11,7 @@
 #include "RbConstants.h"
 #include "StochasticNode.h"
 #include "TopologyNode.h"
+#include "TreeUtilities.h"
 #include "ConditionedBirthDeathShiftProcessContinuous.h"
 #include "AbstractCharacterHistoryBirthDeathProcess.h"
 #include "BranchHistory.h"
@@ -237,6 +238,9 @@ double ConditionedBirthDeathShiftProcessContinuous::computeBranchProbability(dou
 /* Compute probability */
 double ConditionedBirthDeathShiftProcessContinuous::computeLnProbability( void )
 {
+    if (not TreeUtilities::nodeAgesWithinRanges(*value))
+        return RbConstants::Double::neginf;
+
     
     // Variable declarations and initialization
     double ln_prob = 0.0;

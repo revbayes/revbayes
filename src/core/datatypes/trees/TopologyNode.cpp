@@ -2090,9 +2090,9 @@ void TopologyNode::scaleAgesFromTaxonAgesMBL(double minbl)
     {
         if ( children[i]->isTip() )
         {
-            // COMPAT(age-range): Preserve midpoint initialization at zero for an unset constraint.
-            const auto interval = children[i]->getTaxon().getAgeRange().value_or(TimeInterval(0.0, 0.0));
-            double tip_age = ( interval.getMin() + interval.getMax() ) / 2;
+            // Unconstrained tips start at age zero.
+            const auto& interval = children[i]->getTaxon().getAgeRange();
+            double tip_age = interval ? (interval->getMin() + interval->getMax()) / 2 : 0.0;
             children[i]->setAge( tip_age );
         }
         else
@@ -2120,28 +2120,8 @@ void TopologyNode::scaleAgesFromTaxonAgesMBL(double minbl)
 
 void TopologyNode::setAge(double a, bool propagate)
 {
-    // An unset range formerly acted as [0,0], which was already exempt as zero-width.
-    // Check presence directly while retaining both exemptions for explicit intervals.
-    const auto& interval = getTaxon().getAgeRange();
-    if (interval and getTaxon().getName() != "" and not interval->zeroWidth()) {
-        if (not interval->contains(a)) {
-            std::cerr << "Attempting to set new age of taxon " << getTaxon().getName() << " incompatible with age range" << std::endl;
-
-            // NOTE: This code intentionally constructs trees with different ages for sampled-ancestors-parents and sampled-ancestor-tips.
-	    //
-	    // If we try to set the age of a sampled-ancestor parent to an age outside of the age rate, then this code will leave the
-	    // sampled-ancestor-parent and sampled-ancestor-top with different ages.
-	    //
-            // If a proposal is setting the age, then the proposed should have a -Inf probability and be rejected.
-	    //
-            // However, if this occurs somewhere else (such as during undoProposal), then this can leave the tree in an inconsistent state
-	    // So: AVOID situations where undoProposal tries to set the age of a sampled-ancestor-parent to an age outside of the age
-	    //     range.
-
-            return;
-            //throw RbException() << "New age of taxa " << getTaxon().getName() << " incompatible with age range";
-        }
-    }
+    // Assign the requested age even outside an attached interval; tree probabilities enforce
+    // interval support. Silent refusal here can break sampled-ancestor propagation and proposal undo.
     if ( sampled_ancestor_tip == true && propagate == true )
     {
         parent->setAge(a);

@@ -245,3 +245,17 @@ void NodeAgeConstrainedTreeDistribution::restoreSpecialization(const DagNode *re
     value->getRoot().setAge( a );
     
 }
+
+
+// Forward checkpoint repair to the tree distribution without evaluating a modified copy.
+void NodeAgeConstrainedTreeDistribution::repairCheckpointValue(Tree& tree)
+{
+    base_distribution->repairCheckpointValue(tree);
+}
+
+
+// Prepare observations through the underlying tree distribution before installing wrapper state.
+void NodeAgeConstrainedTreeDistribution::prepareForClamping(Tree& tree)
+{
+    base_distribution->prepareForClamping(tree);
+}

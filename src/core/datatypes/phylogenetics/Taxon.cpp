@@ -134,9 +134,9 @@ void Taxon::addOccurrence( const TimeInterval &d )
 {
     occurrences[d]++;
 
-    // COMPAT(age-range): The first occurrence formerly covered the default [0,0] too.
-    // Revisit whether an unset range should instead adopt that occurrence alone.
-    age_range = coveringInterval(age_range.value_or(TimeInterval(0.0, 0.0)), d);
+    // The first occurrence establishes an absent constraint. An explicit range, including
+    // [0,0], still contributes to the interval covering all occurrences.
+    age_range = age_range ? coveringInterval(*age_range, d) : d;
 }
 
 
@@ -173,29 +173,6 @@ const std::optional<TimeInterval>& Taxon::getAgeRange( void ) const
 }
 
 
-// Update a copy before installing it, so validation does not first materialize an absent range.
-void Taxon::setMinAge( double a )
-{
-    // COMPAT(age-range): A single-endpoint update starts from the old default [0,0].
-    // Revisit whether callers must establish a complete interval first.
-    auto range = age_range.value_or(TimeInterval(0.0, 0.0));
-    range.setMin(a);
-    age_range = range;
-}
-
-
-// Update a copy before installing it, so validation does not first materialize an absent range.
-void Taxon::setMaxAge( double a )
-{
-    // COMPAT(age-range): A single-endpoint update starts from the old default [0,0].
-    // Revisit whether callers must establish a complete interval first.
-    auto range = age_range.value_or(TimeInterval(0.0, 0.0));
-    range.setMax(a);
-    age_range = range;
-}
-
-
-
 /**
 * Get a JSON-formatted string description of this object.
 *
@@ -203,14 +180,18 @@ void Taxon::setMaxAge( double a )
 */
 const std::string Taxon::getJsonRespresentation(void) const {
 
-    // COMPAT(age-range): Preserve the serialized endpoints; absence is not exported yet.
-    const auto range = age_range.value_or(TimeInterval(0.0, 0.0));
     std::string jsonStr = "";
     jsonStr += "{\"Taxon\": {";
     jsonStr += "\"name\": \"" + name + "\", ";
     jsonStr += "\"speciesName\": \"" + species_name + "\", ";
-    jsonStr += "\"TimeInterval\": {\"minAge\": " + std::to_string(range.getMin()) + ", ";
-    jsonStr += "\"maxAge\": " + std::to_string(range.getMax()) + "}}";
+    if (age_range)
+    {
+        jsonStr += "\"TimeInterval\": {\"minAge\": " + std::to_string(age_range->getMin()) + ", ";
+        jsonStr += "\"maxAge\": " + std::to_string(age_range->getMax()) + "}";
+    }
+    else
+        jsonStr += "\"TimeInterval\": null";
+    jsonStr += "}";
     return jsonStr;
 }
 

@@ -39,6 +39,11 @@ FossilSiteTimeSlideUniformProposal::FossilSiteTimeSlideUniformProposal( Stochast
     taxa( t ),
     lambda( l )
 {
+    // Explicit bounds define one proposal interval; do not combine a supplied endpoint with
+    // an implicit endpoint from the taxon. Validate before registering any DAG nodes.
+    if ((min == nullptr) != (max == nullptr))
+        throw RbException() << "mv" << getProposalName() << ": min and max must be supplied together.";
+
     // tell the base class to add the node
     addNode( tree );
     addNode( origin );
@@ -112,6 +117,16 @@ double FossilSiteTimeSlideUniformProposal::doProposal( void )
     // proposal is the only reliable way to get rid of this problem, so we just do that and eat the extra computational cost.
 
 
+    // Site arguments identify taxa by name; constraints must be attached to every affected tree
+    // tip. Check them all before calculating bounds or changing ages, even with explicit bounds.
+    for (const auto& taxon : taxa)
+    {
+        const auto& tip = tau.getTipNodeWithName(taxon.getName());
+        if (not tip.getTaxon().getAgeRange())
+            throw RbException() << "mv" << getProposalName() << ": taxon '" << tip.getName()
+                                << "' has no attached age interval; this move requires one.";
+    }
+
     // change this to node_indices
     node_index = tree->getValue().getTipIndex( taxa[0].getName() );
 
@@ -123,40 +138,21 @@ double FossilSiteTimeSlideUniformProposal::doProposal( void )
     // we need to work with the times
     double parent_age   = parent.getAge();
     double my_age       = node.getAge();    
-    double min_age      = 0;
+    double min_age;
     double max_age;
     
-    // adjust min and max age, either given taxon data or given provided ages
-    if ( min == NULL )
+    // Explicit bounds are supplied as a pair; otherwise use the required attached interval.
+    // Fossils at a site share the same bounds; use the first affected tip's interval.
+    if (min != nullptr)
     {
-        // adjust min age given taxon data
-        Taxon& taxon = node.getTaxon();
-
-        // min_age should be the same for all fossils at a site
-        // COMPAT(age-range): Preserve [0,0] proposal bounds when neither taxon nor move supplies them.
-        const auto interval = taxon.getAgeRange().value_or(TimeInterval(0.0, 0.0));
-        min_age = interval.getMin();
-    }
-    else
-    {
-        // adjust min age given provided age
         min_age = min->getValue();
-    }
-    if ( max == NULL )
-    {
-        // adjust max age given taxon data
-        // since it uses the taxon data the same value works for all species of one site
-        Taxon& taxon = node.getTaxon();
-        // COMPAT(age-range): Preserve [0,0] proposal bounds when neither taxon nor move supplies them.
-        const auto interval = taxon.getAgeRange().value_or(TimeInterval(0.0, 0.0));
-        double taxon_max_age = interval.getMax();
-        max_age = taxon_max_age;
+        max_age = max->getValue();
     }
     else
     {
-        // adjust max age given provided variable
-        double provided_max_age = max->getValue();
-        max_age = provided_max_age;
+        const auto& interval = *node.getTaxon().getAgeRange();
+        min_age = interval.getMin();
+        max_age = interval.getMax();
     }
 
     std::vector<double> max_ages(taxa.size());

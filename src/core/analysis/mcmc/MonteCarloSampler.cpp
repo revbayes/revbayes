@@ -324,7 +324,7 @@ void MonteCarloSampler::baseInitializeSamplerFromCheckpoint( void )
             if ( nodes[j]->getName() == parameter_name )
             {
                 // set the value for the variable with the last sample in the trace
-                nodes[j]->setValueFromString( parameter_values[i] );
+                nodes[j]->restoreFromCheckpoint( parameter_values[i] );
                 nodes[j]->keep();
                 break;
             }

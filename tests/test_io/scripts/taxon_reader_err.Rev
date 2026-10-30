@@ -11,3 +11,21 @@ taxa[1].getMaxAge()
 # Whole-range updates accept ordered bounds and reject reversed bounds.
 taxa[1].setAgeRange(2, 3)
 taxa[1].setAgeRange(3, 2)
+
+# Presence must distinguish an unset range from explicit zero and survive whole-range assignment.
+# Scalar getter tests cannot distinguish these states; retain this while ranges are optional.
+unset = taxon("unset")
+unset.hasAgeRange()
+# Missing bounds must not silently become zero. This also protects the getAge() alias;
+# existing file-reader tests always supply ranges. Remove if absent ranges become unrepresentable.
+unset.getAge()
+unset.getMinAge()
+unset.getMaxAge()
+# Endpoint edits require an existing range and must leave absence intact on failure.
+# Reader tests cannot exercise absence; retain this while endpoint setters are available.
+unset.setMinAge(0)
+unset.setMaxAge(3)
+unset.hasAgeRange()
+taxon("zero", age=0).hasAgeRange()
+unset.setAgeRange(0, 0)
+unset.hasAgeRange()

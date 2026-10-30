@@ -7,6 +7,7 @@
 #include "ConstantNode.h"
 #include "RlTaxon.h"
 #include "RlString.h"
+#include "RlBoolean.h"
 #include "RealPos.h"
 #include "TypeSpec.h"
 #include "ArgumentRule.h"
@@ -90,7 +91,7 @@ void Taxon::constructInternalObject( void )
     // A nonnumeric default distinguishes omitted ages from an explicitly supplied zero.
     const bool has_min = minage->getRevObject().isType(RealPos::getClassTypeSpec());
     const bool has_max = maxage->getRevObject().isType(RealPos::getClassTypeSpec());
-    // COMPAT(age-range): With only max supplied, the lower endpoint still defaults to zero.
+    // Supplying only a maximum explicitly establishes an interval with lower endpoint zero.
     double minAge = has_min ? static_cast<const RealPos&>(minage->getRevObject()).getValue() : 0.0;
     double maxAge = minAge;
 
@@ -140,33 +141,22 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Taxon::executeMethod(std::string c
         std::string n = this->dag_node->getValue().getSpeciesName();
         return RevPtr<RevVariable>( new RevVariable( new RlString( n ) ) );
     }
-    if (name == "getAge")
+    if (name == "hasAgeRange")
     {
         found = true;
-        
-        // Compatibility: retain Rev's getAge() as a lower-bound alias pending a usage review.
-        // COMPAT(age-range): Preserve scalar getters and endpoint validation for unset ranges.
-        const auto interval = this->dag_node->getValue().getAgeRange().value_or(RevBayesCore::TimeInterval(0.0, 0.0));
-        double a = interval.getMin();
-        return RevPtr<RevVariable>( new RevVariable( new RealPos( a ) ) );
+        return new RevVariable(new RlBoolean(dag_node->getValue().getAgeRange().has_value()));
     }
-    if (name == "getMinAge")
+    if (name == "getAge" or name == "getMinAge" or name == "getMaxAge")
     {
         found = true;
+        const auto& interval = dag_node->getValue().getAgeRange();
+        if (not interval)
+            throw RbException() << "Taxon '" << dag_node->getValue().getName()
+                                << "' has no age range; use hasAgeRange() before querying its bounds.";
 
-        // COMPAT(age-range): Preserve scalar getters and endpoint validation for unset ranges.
-        const auto interval = this->dag_node->getValue().getAgeRange().value_or(RevBayesCore::TimeInterval(0.0, 0.0));
-        double a = interval.getMin();
-        return RevPtr<RevVariable>( new RevVariable( new RealPos( a ) ) );
-    }
-    if (name == "getMaxAge")
-    {
-        found = true;
-
-        // COMPAT(age-range): Preserve scalar getters and endpoint validation for unset ranges.
-        const auto interval = this->dag_node->getValue().getAgeRange().value_or(RevBayesCore::TimeInterval(0.0, 0.0));
-        double a = interval.getMax();
-        return RevPtr<RevVariable>( new RevVariable( new RealPos( a ) ) );
+        // Rev's getAge() remains an alias for the minimum of the age range.
+        double a = name == "getMaxAge" ? interval->getMax() : interval->getMin();
+        return RevPtr<RevVariable>(new RevVariable(new RealPos(a)));
     }
     if (name == "setMinAge")
     {
@@ -176,14 +166,16 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Taxon::executeMethod(std::string c
         if (std::isnan(a))
             throw RbException() << "Minimum age for taxon '" << dag_node->getValue().getName()
                                 << "' must not be NaN.";
-        // COMPAT(age-range): Preserve scalar getters and endpoint validation for unset ranges.
-        const auto interval = dag_node->getValue().getAgeRange().value_or(RevBayesCore::TimeInterval(0.0, 0.0));
-        if (a > interval.getMax())
+        const auto& interval = dag_node->getValue().getAgeRange();
+        if (not interval)
+            throw RbException() << "Taxon '" << dag_node->getValue().getName()
+                                << "' has no age range; use setAgeRange(minAge, maxAge) to establish both bounds.";
+        if (a > interval->getMax())
             throw RbException() << "Cannot set minimum age of taxon '" << dag_node->getValue().getName()
                                 << "' to " << a << ": it exceeds the current maximum age ("
-                                << interval.getMax() << ").";
+                                << interval->getMax() << ").";
 
-        dag_node->getValue().setMinAge( a );
+        dag_node->getValue().setAgeRange(RevBayesCore::TimeInterval(a, interval->getMax()));
         return NULL;
     }
     if (name == "setMaxAge")
@@ -194,14 +186,16 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Taxon::executeMethod(std::string c
         if (std::isnan(a))
             throw RbException() << "Maximum age for taxon '" << dag_node->getValue().getName()
                                 << "' must not be NaN.";
-        // COMPAT(age-range): Preserve scalar getters and endpoint validation for unset ranges.
-        const auto interval = dag_node->getValue().getAgeRange().value_or(RevBayesCore::TimeInterval(0.0, 0.0));
-        if (a < interval.getMin())
+        const auto& interval = dag_node->getValue().getAgeRange();
+        if (not interval)
+            throw RbException() << "Taxon '" << dag_node->getValue().getName()
+                                << "' has no age range; use setAgeRange(minAge, maxAge) to establish both bounds.";
+        if (a < interval->getMin())
             throw RbException() << "Cannot set maximum age of taxon '" << dag_node->getValue().getName()
                                 << "' to " << a << ": it is below the current minimum age ("
-                                << interval.getMin() << ").";
+                                << interval->getMin() << ").";
 
-        dag_node->getValue().setMaxAge( a );
+        dag_node->getValue().setAgeRange(RevBayesCore::TimeInterval(interval->getMin(), a));
         return NULL;
     }
     
@@ -307,14 +301,16 @@ void Taxon::initMethods( void )
     ArgumentRules* species_name_arg_rules = new ArgumentRules();
     methods.addFunction( new MemberProcedure( "getSpeciesName", RlString::getClassTypeSpec(), species_name_arg_rules ) );
     
+    methods.addFunction(new MemberProcedure("hasAgeRange", RlBoolean::getClassTypeSpec(), new ArgumentRules()));
+
     ArgumentRules* age_arg_rules = new ArgumentRules();
-    methods.addFunction( new MemberProcedure( "getAge", RlString::getClassTypeSpec(), age_arg_rules ) );
+    methods.addFunction( new MemberProcedure( "getAge", RealPos::getClassTypeSpec(), age_arg_rules ) );
     
     age_arg_rules = new ArgumentRules();
-    methods.addFunction( new MemberProcedure( "getMinAge", RlString::getClassTypeSpec(), age_arg_rules ) );
+    methods.addFunction( new MemberProcedure( "getMinAge", RealPos::getClassTypeSpec(), age_arg_rules ) );
 
     age_arg_rules = new ArgumentRules();
-    methods.addFunction( new MemberProcedure( "getMaxAge", RlString::getClassTypeSpec(), age_arg_rules ) );
+    methods.addFunction( new MemberProcedure( "getMaxAge", RealPos::getClassTypeSpec(), age_arg_rules ) );
 
     ArgumentRules* set_min_age_arg_rules = new ArgumentRules();
     set_min_age_arg_rules->push_back( new ArgumentRule( "a", RealPos::getClassTypeSpec(), "The min age of the clade.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );

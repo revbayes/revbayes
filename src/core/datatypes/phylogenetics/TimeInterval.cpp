@@ -31,7 +31,7 @@ std::partial_ordering TimeInterval::operator<=>(const RevBayesCore::TimeInterval
 
 
 /**
- * Get the beginning time of the interval
+ * Get the lower endpoint of the interval
  */
 double TimeInterval::getMin(void) const
 {
@@ -41,35 +41,11 @@ double TimeInterval::getMin(void) const
 
 
 /**
- * Set the beginning time of the interval
- */
-void TimeInterval::setMin(double s)
-{
-    assert(not std::isnan(s));
-    assert(s <= max);
-
-    min = s;
-}
-
-
-/**
- * Get the beginning time of the interval
+ * Get the upper endpoint of the interval
  */
 double TimeInterval::getMax(void) const
 {
     return max;
-}
-
-
-/**
- * Set the beginning time of the interval
- */
-void TimeInterval::setMax(double s)
-{
-    assert(not std::isnan(s));
-    assert(min <= s);
-
-    max = s;
 }
 
 

@@ -10,6 +10,7 @@
 #include "RbMathCombinatorialFunctions.h"
 #include "StochasticNode.h"
 #include "TopologyNode.h"
+#include "TreeUtilities.h"
 #include "UniformSerialSampledTimeTreeDistribution.h"
 #include "Taxon.h"
 #include "Tree.h"
@@ -129,6 +130,9 @@ void UniformSerialSampledTimeTreeDistribution::buildSerialSampledRandomBinaryTre
 /* Compute probability */
 double UniformSerialSampledTimeTreeDistribution::computeLnProbability( void )
 {
+    if (not TreeUtilities::nodeAgesWithinRanges(*value))
+        return RbConstants::Double::neginf;
+
     // Variable declarations and initialization
     double lnProb = 0.0;
     double age = 0.0;
@@ -295,9 +299,10 @@ std::vector<double> UniformSerialSampledTimeTreeDistribution::simulateCoalescent
     std::vector<double> sorted_taxon_ages;
     for(auto& taxon: taxa)
     {
-        // COMPAT(age-range): Preserve the zero sampling-age default used by this construction/simulation.
-        const auto interval = taxon.getAgeRange().value_or(TimeInterval(0.0, 0.0));
-        sorted_taxon_ages.push_back(interval.getMin());
+        // Unconstrained tips start at age zero.
+        const auto& interval = taxon.getAgeRange();
+        const double interval_age = interval ? interval->getMin() : 0.0;
+        sorted_taxon_ages.push_back(interval_age);
     }
     std::sort(sorted_taxon_ages.begin(), sorted_taxon_ages.end());
 
@@ -348,9 +353,10 @@ void UniformSerialSampledTimeTreeDistribution::simulateTree( void )
         const std::string& name = taxa[i].getName();
         node->setName(name);
         node->setSpeciesName(taxa[i].getSpeciesName());
-        // COMPAT(age-range): Preserve the zero sampling-age default used by this construction/simulation.
-        const auto interval = taxa[i].getAgeRange().value_or(TimeInterval(0.0, 0.0));
-        node->setAge(interval.getMin());
+        // Unconstrained tips start at age zero.
+        const auto& interval = taxa[i].getAgeRange();
+        const double interval_age = interval ? interval->getMin() : 0.0;
+        node->setAge(interval_age);
         node->setTaxon(taxa[i]);
         // add to tips
         nodes.push_back(node);
