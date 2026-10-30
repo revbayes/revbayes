@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "MultiValueEventSlideProposal.h"
 
 #include <cmath>
@@ -191,7 +192,7 @@ void MultiValueEventSlideProposal::swapNodeInternal(DagNode *oldN, DagNode *newN
     
     if ( oldN == event_var )
     {
-        event_var = static_cast<StochasticNode<MultiValueEvent>* >(newN) ;
+        replaceNodeReference(event_var, newN) ;
     }
     
 }

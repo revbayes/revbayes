@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "GeometricMeanFunction.h"
 
 #include <vector>
@@ -70,7 +71,7 @@ void GeometricMeanFunction::swapParameterInternal(const DagNode *oldP, const Dag
     
     if ( oldP == vals )
     {
-        vals = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(vals, newP);
     }
     
 }

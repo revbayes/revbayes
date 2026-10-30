@@ -1,6 +1,7 @@
 #ifndef DistributionMemberFunction_H
 #define DistributionMemberFunction_H
 
+#include "DagNodeTypeUtilities.h"
 #include "TypedFunction.h"
 
 namespace RevBayesCore {
@@ -89,7 +90,7 @@ void RevBayesCore::DistributionMemberFunction<distributionType,valueType>::swapP
     
     if ( the_member_variable == oldP )
     {
-        the_member_variable = static_cast< const StochasticNode<distributionType>* > (newP);
+        replaceNodeReference(the_member_variable, newP);
     }
     else
     {

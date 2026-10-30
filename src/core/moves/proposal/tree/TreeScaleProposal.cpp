@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "TreeScaleProposal.h"
 
 #include <cstddef>
@@ -207,15 +208,15 @@ void TreeScaleProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
     
     if ( oldN == tree )
     {
-        tree = static_cast<StochasticNode<Tree>* >(newN);
+        replaceNodeReference(tree, newN);
     }
     else if ( oldN == vector_variable )
     {
-        vector_variable = static_cast<StochasticNode< RbVector<Tree> >* >(newN);
+        replaceNodeReference(vector_variable, newN);
     }
     else if ( oldN == rootAge )
     {
-        rootAge = static_cast<StochasticNode<double>* >(newN);
+        replaceNodeReference(rootAge, newN);
     }
     
 }

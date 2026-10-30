@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include <cstddef>
 #include <cmath>
 #include <iosfwd>
@@ -416,7 +417,7 @@ void BirthDeathProcess::swapParameterInternal(const DagNode *oldP, const DagNode
     
     if ( oldP == rho ) 
     {
-        rho = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(rho, newP);
     }
     else
     {

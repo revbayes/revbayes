@@ -428,8 +428,7 @@ void Monitor::swapNode(DagNode *oldN, DagNode *newN)
         throw RbException("Memory leak in monitor. Please report this bug to Sebastian.");
     }
     
-    it = nodes.insert( it, newN );
-    nodes.erase( it + 1 );
+    *it = newN;
 }
 
 

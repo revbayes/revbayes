@@ -6,6 +6,7 @@
 //  Copyright (c) 2014 revbayes team. All rights reserved.
 //
 
+#include "DagNodeTypeUtilities.h"
 #include "LKJPartialDistribution.h"
 
 #include "RandomNumberFactory.h"
@@ -49,7 +50,7 @@ void LKJPartialDistribution::swapParameterInternal(const DagNode *oldP, const Da
     
     if (oldP == eta)
     {
-        eta = static_cast<const TypedDagNode<double>* >(newP);
+        replaceNodeReference(eta, newP);
     }
 
 }

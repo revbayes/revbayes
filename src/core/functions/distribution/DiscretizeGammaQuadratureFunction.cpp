@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "DiscretizeGammaQuadratureFunction.h"
 
 #include <cstddef>
@@ -40,17 +41,17 @@ void RevBayesCore::DiscretizeGammaQuadratureFunction::swapParameterInternal(cons
     
     if (oldP == shape) 
     {
-        shape = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(shape, newP);
     }
     
     if (oldP == rate)
     {
-        rate = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(rate, newP);
     }
     
     if (oldP == numCats)
     {
-        numCats = static_cast<const TypedDagNode<std::int64_t>* >( newP );
+        replaceNodeReference(numCats, newP);
     }
     
 }

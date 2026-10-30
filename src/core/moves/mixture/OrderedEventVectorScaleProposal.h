@@ -1,6 +1,7 @@
 #ifndef OrderedEventVectorScaleProposal_H
 #define OrderedEventVectorScaleProposal_H
 
+#include "DagNodeTypeUtilities.h"
 #include <set>
 #include <string>
 
@@ -240,7 +241,7 @@ template <class valueType>
 void RevBayesCore::OrderedEventVectorScaleProposal<valueType>::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     
-    variable = static_cast< StochasticNode<OrderedEvents<valueType> >* >(newN) ;
+    replaceNodeReference(variable, newN) ;
     
 }
 

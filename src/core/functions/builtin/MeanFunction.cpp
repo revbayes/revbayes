@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "MeanFunction.h"
 
 #include <vector>
@@ -69,7 +70,7 @@ void MeanFunction::swapParameterInternal(const DagNode *oldP, const DagNode *new
     
     if ( oldP == vals )
     {
-        vals = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(vals, newP);
     }
     
 }

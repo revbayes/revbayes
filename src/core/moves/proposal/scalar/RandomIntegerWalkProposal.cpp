@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "RandomIntegerWalkProposal.h"
 
 #include "RandomNumberFactory.h"
@@ -150,6 +151,6 @@ void RandomIntegerWalkProposal::undoProposal( void )
 void RandomIntegerWalkProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     
-    variable = static_cast<StochasticNode<std::int64_t>* >(newN) ;
+    replaceNodeReference(variable, newN) ;
     
 }

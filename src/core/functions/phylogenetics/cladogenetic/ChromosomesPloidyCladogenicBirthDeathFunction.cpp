@@ -5,6 +5,7 @@
 //
 
 
+#include "DagNodeTypeUtilities.h"
 #include "ChromosomesPloidyCladogenicBirthDeathFunction.h"
 
 #include <cstddef>
@@ -359,7 +360,7 @@ void ChromosomesPloidyCladogenicBirthDeathFunction::swapParameterInternal(const 
     
     if (oldP == speciation_rates)
     {
-        speciation_rates = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(speciation_rates, newP);
     }
     
 }

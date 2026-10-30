@@ -1,5 +1,6 @@
 
 
+#include "DagNodeTypeUtilities.h"
 #include "PoMoRootFrequenciesFunction.h"
 
 #include <cstddef>
@@ -118,19 +119,19 @@ void PoMoRootFrequenciesFunction::swapParameterInternal(const DagNode *oldP, con
     
     if (oldP == fixedNucleotideRootFrequencies)
     {
-        fixedNucleotideRootFrequencies = static_cast<const TypedDagNode< Simplex >* >( newP );
+        replaceNodeReference(fixedNucleotideRootFrequencies, newP);
     }
     else if (oldP == frequencyOfPolymorphismsAtTheRoot)
     {
-        frequencyOfPolymorphismsAtTheRoot = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(frequencyOfPolymorphismsAtTheRoot, newP);
     }
     else if (oldP == mutationRates)
     {
-        mutationRates = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(mutationRates, newP);
     }
     else if (oldP == populationSize)
     {
-        populationSize = static_cast<const TypedDagNode< std::int64_t >* >( newP );
+        replaceNodeReference(populationSize, newP);
     }
 
     
