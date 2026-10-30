@@ -1,6 +1,8 @@
 #ifndef TimeInterval_H
 #define TimeInterval_H
 
+#include <compare>
+
 namespace RevBayesCore {
     
     /**
@@ -16,14 +18,14 @@ namespace RevBayesCore {
     class TimeInterval {
         
     public:
-        TimeInterval(); //!< Default constructor
+        TimeInterval(); //!< Default point interval [0, 0].
         TimeInterval(double min, double max);
         
-        bool                                operator==(const TimeInterval &t) const;                //!< Equals operator
-        bool                                operator!=(const TimeInterval &t) const;                //!< Not-equals operator
-        bool                                operator<(const TimeInterval &t) const;                 //!< Less than operator
+        // Compare endpoints, ordered by maximum first and minimum second.
+        bool                                operator==(const TimeInterval &t) const;
+        std::partial_ordering               operator<=>(const TimeInterval &t) const;
 
-        // Membership and zero width use effective endpoints, including the current [0, 0] default.
+        // Inclusive membership and point-interval detection.
         bool                                contains(double age) const;
         bool                                zeroWidth() const;
 
@@ -34,10 +36,14 @@ namespace RevBayesCore {
         void                                setMax(double);                                         //!< Get the number of million years ago.
         
     private:
+        // Explicit endpoints: neither is NaN. Infinity is allowed; min must not exceed max.
         double  min;
         double  max;
         
     };
+
+    // Return the smallest interval containing both intervals.
+    TimeInterval coveringInterval(const TimeInterval& a, const TimeInterval& b);
 
 }
 

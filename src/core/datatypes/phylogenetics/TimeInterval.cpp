@@ -1,54 +1,37 @@
 #include "TimeInterval.h"
 
-#include "RbException.h"
-#include "RbMathLogic.h"
-#include "RbConstants.h" // IWYU pragma: keep
+#include <algorithm>
+#include <cassert>
+#include <cmath>
+#include <utility>
 
 using namespace RevBayesCore;
 
 
-TimeInterval::TimeInterval() : min(RbConstants::Double::nan), max(RbConstants::Double::nan)
+TimeInterval::TimeInterval() : min(0.0), max(0.0)
 {
 }
 
 
 TimeInterval::TimeInterval(double mn, double mx) : min(mn), max(mx)
 {
-    if ( max < min )
-    {
-        throw RbException("Time interval max < min");
-    }
+    assert(not std::isnan(mn) and not std::isnan(mx));
+    assert(mn <= mx);
 }
 
 
-/**
- * Equals operator.
-
- */
+// Equality uses the same endpoints as ordering.
 bool TimeInterval::operator==(const RevBayesCore::TimeInterval &t) const
 {
-    
-    return min == t.min && max == t.max;
+    return getMin() == t.getMin() and getMax() == t.getMax();
 }
 
 
-/**
- * Not equals operator. We simply invert the result of the equals operation.
- */
-bool TimeInterval::operator!=(const RevBayesCore::TimeInterval &t) const
+// Sort by maximum age, then minimum: occurrence maps must not merge distinct ranges with
+// the same maximum.
+std::partial_ordering TimeInterval::operator<=>(const RevBayesCore::TimeInterval &t) const
 {
-    
-    return !operator==(t);
-}
-
-
-/**
- * Less than operator. Sort by maximum age.
- */
-bool TimeInterval::operator<(const RevBayesCore::TimeInterval &t) const
-{
-
-    return max < t.max;
+    return std::pair(getMax(), getMin()) <=> std::pair(t.getMax(), t.getMin());
 }
 
 
@@ -57,11 +40,6 @@ bool TimeInterval::operator<(const RevBayesCore::TimeInterval &t) const
  */
 double TimeInterval::getMin(void) const
 {
-
-    if ( RbMath::isNan(min) )
-    {
-        return 0.0;
-    }
 
     return min;
 }
@@ -72,10 +50,8 @@ double TimeInterval::getMin(void) const
  */
 void TimeInterval::setMin(double s)
 {
-    if ( max < s )
-    {
-        throw RbException("Time interval max < min");
-    }
+    assert(not std::isnan(s));
+    assert(s <= max);
 
     min = s;
 }
@@ -86,11 +62,6 @@ void TimeInterval::setMin(double s)
  */
 double TimeInterval::getMax(void) const
 {
-    if ( RbMath::isNan(max) )
-    {
-        return getMin();
-    }
-
     return max;
 }
 
@@ -100,26 +71,29 @@ double TimeInterval::getMax(void) const
  */
 void TimeInterval::setMax(double s)
 {
-    if ( (min - s) > 1E-6 )
-    {
-        throw RbException("Time interval max < min");
-    }
+    assert(not std::isnan(s));
+    assert(min <= s);
 
     max = s;
 }
 
 
-// Test inclusive effective bounds, preserving the existing comparison behavior for NaN points.
-// Do not rewrite as positive comparisons: that would reject NaNs during this interface refactor.
+// Both inclusive comparisons must hold: an unknown (NaN) age is not in the interval.
 bool TimeInterval::contains(double age) const
 {
-    return not (age < getMin() or age > getMax());
+    return age >= getMin() and age <= getMax();
 }
 
 
-// Zero width describes the effective interval, not whether bounds were explicitly supplied.
-// An entirely unspecified range still behaves as [0, 0].
+// A point interval has equal endpoints, including the default [0, 0].
 bool TimeInterval::zeroWidth() const
 {
     return getMin() == getMax();
+}
+
+
+// Use the outer endpoints to cover both intervals symmetrically, including any gap.
+TimeInterval RevBayesCore::coveringInterval(const TimeInterval& a, const TimeInterval& b)
+{
+    return TimeInterval(std::min(a.getMin(), b.getMin()), std::max(a.getMax(), b.getMax()));
 }

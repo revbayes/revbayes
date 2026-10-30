@@ -134,14 +134,8 @@ void Taxon::addOccurrence( const TimeInterval &d )
 {
     occurrences[d]++;
 
-    if ( d.getMax() > age_range.getMax() )
-    {
-        age_range.setMax( d.getMax() );
-    }
-    if ( d.getMin() < age_range.getMin() )
-    {
-        age_range.setMin( d.getMin() );
-    }
+    // Expand the entire range to retain all previous occurrences as well as the new one.
+    age_range = coveringInterval(age_range, d);
 }
 
 
