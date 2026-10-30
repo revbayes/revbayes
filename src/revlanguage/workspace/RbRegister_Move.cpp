@@ -143,6 +143,10 @@
 //#include "Move_CorrelationMatrixReparameterization.h"
 //#include "Move_CorrelationMatrixExpansion.h"
 
+/* Moves on rate matrices */
+#include "Move_MPQRateMatrix.h"
+#include "Move_MPQTree.h"
+
 /* Moves on random adjacency graphs */
 #include "Move_GraphFlipEdge.h"
 #include "Move_GraphFlipClique.h"
@@ -226,6 +230,7 @@
 #include "Move_RateAgeBetaShift.h"
 #include "Move_RateAgeProposal.h"
 #include "Move_RateAgeSubtreeProposal.h"
+#include "Move_ReversibilityAwareBranchLengthScale.h"
 #include "Move_RootTimeScaleBactrian.h"
 #include "Move_RootTimeSlide.h"
 #include "Move_RootTimeSlideUniform.h"
@@ -348,6 +353,11 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
 
         /* Moves on matrices of real values */
         addType( new Move_ConjugateInverseWishart() );
+        
+        /* Moves on rate matrices (incl reversible jump) */
+        addType( new Move_MPQRateMatrix() );
+        addType( new Move_MPQTree() );
+
 
         /* Moves of random adjacency graphs */
         addType( new Move_GraphFlipEdge() );
@@ -454,6 +464,7 @@ void RevLanguage::Workspace::initializeMoveGlobalWorkspace(void)
         addType( new Move_RateAgeBetaShift()                 );
         addType( new Move_RateAgeProposal()                  );
         addType( new Move_RateAgeSubtreeProposal()           );
+        addType( new Move_ReversibilityAwareBranchLengthScale());
         addType( new Move_RootTimeSlide()                    );
         addType( new Move_RootTimeScaleBactrian()            );
         addType( new Move_RootTimeSlideUniform()             );

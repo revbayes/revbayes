@@ -1,0 +1,110 @@
+################################################################################
+#
+# RevBayes Integration Test: Reversible-jump MCMC between the time-reversible
+#                            and non-reversible substitution models
+#
+# Model: The Anolis alignment on a fixed unrooted topology, with the branch
+#        lengths and the position of the root sampled. The rate matrix is drawn
+#        from dnQ, and mvMPQRateMatrix moves the chain between the
+#        time-reversible and non-reversible models. The prior odds on the two
+#        models are fixed at lnPriorOdds = -5.5, about the value that balances
+#        them on this alignment, so that both jumps occur even in a short run.
+#
+#
+# authors: John Huelsenbeck
+#
+################################################################################
+
+## Global settings
+
+NUM_MCMC_ITERATIONS       = 10
+
+seed(12345)
+
+
+#######################
+# Reading in the Data #
+#######################
+
+# read in the alignment and the fixed tree
+aln <- readDiscreteCharacterData( "data/anolis.nex" )
+rooted_tree <- readBranchLengthTrees( "data/anolis.tre" )[1]
+
+# get some useful variables from the data
+n_taxa <- aln.size()
+taxa <- aln.taxa()
+
+# create the monitor and moves vectors
+moves     = VectorMoves()
+monitors  = VectorMonitors()
+
+
+
+##############
+# Tree model #
+##############
+
+# the topology is fixed; the branch lengths and the root position are sampled
+tree ~ dnUniformTopologyBranchLength( branchLengthDistribution=dnExp(10.0), taxa, rooted=TRUE )
+tree.setValue( rooted_tree )
+
+moves.append( mvBranchLengthScale( tree, weight=n_taxa*2-1 ) )
+moves.append( mvReversibilityAwareBranchLengthScale( tree, weight=n_taxa*2-1 ) )
+moves.append( mvMPQTree( tree=tree, updateRoot=TRUE, weight=n_taxa*2-1 ) )
+
+
+
+######################
+# Substitution model #
+######################
+
+# prior on the stationary frequencies
+sf_hp <- v(1,1,1,1)
+
+# the rate matrix, either time reversible or non-reversible;
+# lnPriorOdds is log(rho_R / rho_N), so -5.5 tilts the prior toward the
+# non-reversible model by about as much as the data favor the reversible one
+Q ~ dnQ( alpha=sf_hp, lnPriorOdds=-5.5 )
+
+# the reversible-jump move; the prior odds are held fixed and nothing is tuned
+moves.append( mvMPQRateMatrix( Q, weight=50, tune=FALSE, tuneModelPrior=FALSE ) )
+
+# quantities to monitor
+prob_reversible := ifelse( Q.isReversible(), 1.0, 0.0 )
+pi              := Q.getPi()
+q_rates         := Q.getRates()
+u               := Q.getU()
+ln_prior_odds   := Q.lnPriorOdds()
+
+# gamma-distributed rate variation among sites
+alpha ~ dnUniform(0.0, 1E6)
+alpha.setValue( 1.0 )
+moves.append( mvScale(alpha,lambda=0.5,tune=FALSE,weight=1) )
+rates := fnDiscretizeGamma( alpha, alpha, 4 )
+
+# the phylogenetic CTMC, clamped to the alignment
+seq ~ dnPhyloCTMC( tree=tree, Q=Q, siteRates=rates, type="DNA" )
+seq.clamp( aln )
+
+
+
+
+#############
+# THE Model #
+#############
+
+# We define our model.
+# We can use any node of our model as a handle, here we chose to use the rate matrix.
+mymodel = model( Q )
+
+
+
+monitors.append( mnModel(filename="output/anolis_RJ_nonreversible.log",printgen=1, separator = TAB) )
+monitors.append( mnFile(filename="output/anolis_RJ_nonreversible.trees",printgen=1, tree) )
+
+mymcmc = mcmc(mymodel, monitors, moves)
+mymcmc.run(generations=NUM_MCMC_ITERATIONS)
+
+
+# quit RevBayes
+q()
