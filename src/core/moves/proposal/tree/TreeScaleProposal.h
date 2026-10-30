@@ -14,11 +14,12 @@ namespace RevBayesCore {
     template <class variableType> class StochasticNode;
     
     /**
-     * The narrow-exchange operator.
+     * The tree-scale operator.
      *
-     * A narrow-exchange proposal is a NNI (nearest neighbour interchange) proposal on rooted trees without changing the node age.
-     * That is, we pick a random node which is not the root and neither its parent is the root.
-     * Then, we try to exchange the picked node with it's uncle. This move will automatically fail if the uncle is older than the parent.
+     * Scale internal ages together, stopping at tips and sampled-ancestor parents.
+     * The Hastings factor counts only the scaled ages. An optional root-age scalar tracks
+     * the tree root and is not an additional independent coordinate.
+     * Alternatively, scale an independent origin age with the tree, adding one coordinate.
      *
      *
      * @copyright Copyright 2009-
@@ -29,7 +30,8 @@ namespace RevBayesCore {
     class TreeScaleProposal : public Proposal {
         
     public:
-        TreeScaleProposal( StochasticNode<Tree> *t, StochasticNode< RbVector<Tree> > *vec_n, StochasticNode<double> *r, double d );                                               //!< Constructor
+        TreeScaleProposal(StochasticNode<Tree>* t, StochasticNode<RbVector<Tree>>* vec_n,
+                          StochasticNode<double>* r, double d, StochasticNode<double>* o = nullptr);
         
         // Basic utility functions
         void                                    cleanProposal(void);                                                //!< Clean up proposal
@@ -55,6 +57,7 @@ namespace RevBayesCore {
         StochasticNode<Tree>*                   tree;
         StochasticNode< RbVector<Tree> >*       vector_variable;                                                    //!< The alternative variable the proposal is working on
         StochasticNode<double>*                 rootAge;
+        StochasticNode<double>*                 originAge;
         
         // parameters
         double                                  delta;
@@ -62,6 +65,8 @@ namespace RevBayesCore {
         // stored objects to undo proposal
         size_t                                  tree_index;
         std::vector<double>                     storedAges;
+        double                                  storedRootAge;
+        double                                  storedOriginAge;
     };
     
 }
