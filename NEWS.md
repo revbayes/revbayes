@@ -6,6 +6,7 @@
 ## Features
 
 ## Bug fixes
+  * Fix cached partial likelihoods being discarded when a tree move is rejected.
 
 ## Documentation improvements
 
