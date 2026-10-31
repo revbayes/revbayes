@@ -1,0 +1,8 @@
+three assemblies on one tree each keep the lengths they were given:
+TRUE	
+TRUE	
+TRUE	
+and the input tree is untouched by any of them:
+TRUE	
+and they all have the shape of the input:
+TRUE	

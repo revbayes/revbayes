@@ -1,0 +1,47 @@
+# Checks that a likelihood reading the input tree directly stays correct while an assembly
+# hangs off the same tree and the tree is moved. The cached likelihood after the chain is
+# compared with one computed afresh from a checkpoint.
+# Every line printed must be TRUE.
+out = "output/treeAssembly_bystander.txt"
+print(filename=out, "a reader of the input tree stays right while an assembly hangs off it:\n")
+
+chars <- readDiscreteCharacterData("data/primates_cytb_small.nex")
+taxa <- chars.taxa()
+root_age <- 10.0
+
+agree = TRUE
+for (rep in 1:3) {
+    for (pass in 1:2) {
+        seed(rep)
+        tree ~ dnBDP(lambda=0.4, mu=0.1, rho=1.0, rootAge=root_age, taxa=taxa, condition="nTaxa")
+
+        # the only clamped likelihood, and it reads the input tree, not the assembly
+        direct ~ dnPhyloCTMC(tree=tree, Q=fnJC(4), branchRates=0.02, type="DNA")
+        direct.clamp(chars)
+
+        for (i in 1:(2 * taxa.size() - 2)) { bl[i] <- 0.1 * i }
+        bystander := fnTreeAssembly(tree, bl)
+        idle ~ dnUniform(0, 1)
+
+        w = ifelse(pass == 1, 1.0, 1E-9)
+        moves = [ mvFNPR(tree, weight=5*w), mvNarrow(tree, weight=5*w),
+                  mvNodeTimeSlideUniform(tree, weight=5*w), mvSubtreeScale(tree, weight=5*w),
+                  mvSlide(idle, weight=20/w) ]
+
+        log = "output/treeAssembly_bystander_" + rep + "_" + pass + ".log"
+        state = "output/treeAssembly_bystander_" + rep + ".state"
+        m = mcmc(model(tree, idle, bystander), [ mnFile(filename=log, printgen=10, idle) ], moves, moveschedule="single")
+        if (pass == 1) {
+            m.run(generations=3000, checkpointFile=state, checkpointInterval=3000)
+            cached = readTrace(log, burnin=0)[3].getValues()
+        } else {
+            m.initializeFromCheckpoint(state)
+            m.run(generations=1000)
+            fresh = readTrace(log, burnin=0)[3].getValues()
+        }
+    }
+    agree = agree && abs(cached[cached.size()] - fresh[fresh.size()]) < 1E-6
+}
+print(filename=out, append=TRUE, agree, "\n")
+
+q()
