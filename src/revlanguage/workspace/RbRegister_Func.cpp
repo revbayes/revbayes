@@ -30,6 +30,7 @@
 
 /* Files including helper classes */
 #include "RbException.h"
+#include "RlBranchLengthTree.h"
 #include "RlUserInterface.h"
 #include "Workspace.h"
 
@@ -85,7 +86,6 @@
 #include "Func_BirthDeathSimulator.h"
 #include "Func_branchScoreDistance.h"
 #include "Func_checkNodeOrderConstraints.h"
-#include "Func_chronoToPhylo.h"
 #include "Func_computeWeightedNodeOrderConstraintsScore.h"
 #include "Func_combineCharacter.h"
 #include "Func_concatenate.h"
@@ -445,7 +445,6 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         addFunction( new Func_BirthDeathSimulator()                             );
         addFunction( new Func_branchScoreDistance()                             );
         addFunction( new Func_checkNodeOrderConstraints()                       );
-        addFunction( new Func_chronoToPhylo()                                   );
         addFunction( new Func_computeWeightedNodeOrderConstraintsScore()        );
         addFunction( new Func_combineCharacter()                                );
         addFunction( new Func_concatenate()                                     );
