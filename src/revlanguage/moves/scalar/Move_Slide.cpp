@@ -72,7 +72,7 @@ void Move_Slide::constructInternalObject( void )
     double d = static_cast<const RealPos &>( delta->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     double r = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<double>* tmp = static_cast<const RealPos &>( x->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* tmp = static_cast<const Real &>( x->getRevObject() ).getDagNode();
     RevBayesCore::ContinuousStochasticNode *n = dynamic_cast<RevBayesCore::ContinuousStochasticNode *>( tmp );
     if ( n != NULL )
     {

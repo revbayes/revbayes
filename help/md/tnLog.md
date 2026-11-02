@@ -8,7 +8,7 @@ Log-transforms a given distribution.
 If X ~ dist then tnLog(dist) is the distribution of log(X).
 
 The distribution `dist` can be either univariate (dnExponential) or
-multivariate (dnDirichlet).
+multivariate (dnIID).
 
 This is NOT the same as dnLog(dist), which provides a distribution
 that has distribution `dist` on the log-scale.
@@ -22,7 +22,7 @@ tnExp, tnLogit, tnInvlogit
     x ~ dnExponential(1) |> tnLog()   # Expressed using pipes.
 
     y ~ dnExponential(1)
-    x := log(y)                       # This is also equivalent.
+    x := ln(y)                        # This is also equivalent.
 
-    x ~ dnDirichlet([1,1,1,1]) |> tnLog()
+    xs ~ dnIID(4, dnExponential(1)) |> tnLog()
 ## references

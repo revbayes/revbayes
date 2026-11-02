@@ -81,12 +81,12 @@ void Mntr_StochasticCharacterMapping::constructInternalObject( void )
     Core::TypedDagNode<Core::Tree>* glhbdsp_tdn = NULL;
     Core::StochasticNode<Core::Tree>* glhbdsp_sn = NULL;
 
-    if ( static_cast<const RevLanguage::AbstractHomologousDiscreteCharacterData&>( ctmc->getRevObject() ).isModelObject() )
+    if ( ctmc->getRevObject().isModelObject() )
     {
         ctmc_tdn = static_cast<const RevLanguage::AbstractHomologousDiscreteCharacterData&>( ctmc->getRevObject() ).getDagNode();
         ctmc_sn  = static_cast<Core::StochasticNode<Core::AbstractHomologousDiscreteCharacterData>* >(ctmc_tdn);
     }
-    else if ( static_cast<const RevLanguage::Tree&>( cdbdp->getRevObject() ).isModelObject() )
+    else if ( cdbdp->getRevObject().isModelObject() )
     {
         cdbdp_tdn = static_cast<const RevLanguage::Tree&>( cdbdp->getRevObject() ).getDagNode();
         cdbdp_sn  = static_cast<Core::StochasticNode<Core::Tree>* >( cdbdp_tdn );
@@ -95,7 +95,7 @@ void Mntr_StochasticCharacterMapping::constructInternalObject( void )
         sse_process = dynamic_cast<Core::StateDependentSpeciationExtinctionProcess*>( &cdbdp_sn->getDistribution() );
         sse_process->setSampleCharacterHistory( true );
     }
-    else if ( static_cast<const RevLanguage::Tree&>( glhbdsp->getRevObject() ).isModelObject() )
+    else if ( glhbdsp->getRevObject().isModelObject() )
     {
     	glhbdsp_tdn = static_cast<const RevLanguage::Tree&>( glhbdsp->getRevObject() ).getDagNode();
     	glhbdsp_sn  = static_cast<Core::StochasticNode<Core::Tree>* >( glhbdsp_tdn );
@@ -108,11 +108,11 @@ void Mntr_StochasticCharacterMapping::constructInternalObject( void )
 
     std::string model_type = "";
     std::string data_type = "";
-    if ( static_cast<const RevLanguage::AbstractHomologousDiscreteCharacterData&>( ctmc->getRevObject() ).isModelObject() ) {
+    if ( ctmc->getRevObject().isModelObject() ) {
         model_type = "ctmc";
         data_type = ctmc_sn->getValue().getDataType();
     }
-    else if ( static_cast<const RevLanguage::Tree&>( cdbdp->getRevObject() ).isModelObject() )
+    else if ( cdbdp->getRevObject().isModelObject() )
     {
         model_type = "cdbdp";
         data_type = "NaturalNumbers";

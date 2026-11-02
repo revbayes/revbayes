@@ -78,7 +78,7 @@ void Mntr_JointConditionalAncestralState::constructInternalObject( void )
     Core::TypedDagNode<Core::Tree>* glhbdsp_tdn = NULL;
     Core::StochasticNode<Core::Tree>* glhbdsp_sn = NULL;
 
-    if ( static_cast<const RevLanguage::AbstractHomologousDiscreteCharacterData&>( ctmc->getRevObject() ).isModelObject() )
+    if ( ctmc->getRevObject().isModelObject() )
     {
         ctmc_tdn = static_cast<const RevLanguage::AbstractHomologousDiscreteCharacterData&>( ctmc->getRevObject() ).getDagNode();
         ctmc_sn  = static_cast<Core::StochasticNode<Core::AbstractHomologousDiscreteCharacterData>* >(ctmc_tdn);
@@ -88,12 +88,12 @@ void Mntr_JointConditionalAncestralState::constructInternalObject( void )
             throw RbException("mnJointConditionalAncestralStateMonitor requires the CTMC to be of same type as the specified character.");
         }
     }
-    else if ( static_cast<const RevLanguage::Tree&>( cdbdp->getRevObject() ).isModelObject() )
+    else if ( cdbdp->getRevObject().isModelObject() )
     {
         cdbdp_tdn = static_cast<const RevLanguage::Tree&>( cdbdp->getRevObject() ).getDagNode();
         cdbdp_sn  = static_cast<Core::StochasticNode<Core::Tree>* >( cdbdp_tdn );
     }
-    else if ( static_cast<const RevLanguage::Tree&>( glhbdsp->getRevObject() ).isModelObject() )
+    else if ( glhbdsp->getRevObject().isModelObject() )
     {
     	glhbdsp_tdn = static_cast<const RevLanguage::Tree&>( glhbdsp->getRevObject() ).getDagNode();
     	glhbdsp_sn  = static_cast<Core::StochasticNode<Core::Tree>* >( glhbdsp_tdn );
@@ -108,11 +108,11 @@ void Mntr_JointConditionalAncestralState::constructInternalObject( void )
     auto make_monitor = [&]<typename T>()
     {
         Core::JointConditionalAncestralStateMonitor<T> *m;
-        if ( static_cast<const RevLanguage::AbstractHomologousDiscreteCharacterData&>( ctmc->getRevObject() ).isModelObject() )
+        if ( ctmc->getRevObject().isModelObject() )
         {
             m = new Core::JointConditionalAncestralStateMonitor<T>(t, ctmc_sn, (std::uint64_t)g, fn, sep, wt, wss);
         }
-        else if ( static_cast<const RevLanguage::Tree&>( cdbdp->getRevObject() ).isModelObject() )
+        else if ( cdbdp->getRevObject().isModelObject() )
         {
             m = new Core::JointConditionalAncestralStateMonitor<T>(cdbdp_sn, (std::uint64_t)g, fn, sep, wt, wss);
         }
