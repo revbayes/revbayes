@@ -39,7 +39,8 @@ template <class valueType> class TypedDagNode;
     private:
         
         // members
-        void                                                copyTopology(void);                                                               //!< Copy the input's topology, as a tree of branch lengths.
+        bool                                                syncShape(void);                                                                    //!< Rewire our nodes into the input's shape, or false with nothing mutated.
+        void                                                copyTopology(bool replaced);                                                        //!< Copy the input's topology to our tree.
         void                                                listenTo(const Tree *t);
 
         const TypedDagNode<Tree>*                           tau = nullptr;
@@ -50,6 +51,9 @@ template <class valueType> class TypedDagNode;
         std::vector<size_t>                                 event_nodes;                                                                        //!< Nodes the input fired a tree change event for, to be fired on ours once it has caught up.
         bool                                                heard_event = false;
         bool                                                tau_touched = true;
+        std::vector<size_t>                                 rebuilt;                                                                            //!< Nodes we last rewired, which bounds what a restore has to look at.
+        bool                                                rebuilt_valid = false;
+        bool                                                restoring = false;
         bool                                                shape_moved = true;                                                                 //!< Whether our copy's shape is behind the input's, until the topology is copied again.
     };
     

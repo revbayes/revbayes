@@ -119,6 +119,9 @@ void TreeAssemblyFunction::keep( const DagNode *affecter )
     //delegate to base class
     TypedFunction< Tree >::keep( affecter );
 
+    // a kept edit is never undone, so no restore can use this record
+    rebuilt_valid = false;
+
     // SH (20200221): This needs to stay, otherwise the MCMC does not update properly.
     touchedNodeIndices.clear();
     brlenFlagDirty = false;
@@ -149,7 +152,9 @@ void TreeAssemblyFunction::restore( const DagNode *restorer )
 
     // The flags are cleared first so this doesn't notify any listeners. They will have already
     // been notified by an upstream touch.
+    restoring = true;
     update();
+    restoring = false;
 }
 
 
@@ -164,6 +169,10 @@ void TreeAssemblyFunction::touch(const DagNode *toucher)
 
     if ( toucher == tau )
     {
+        // An assembly nothing reads never runs update(), so it can go many moves without
+        // rewiring, and the record would describe an older shape than the one being undone.
+        rebuilt_valid = false;
+
         // drop stale per-branch indices so update() rewrites every branch length onto it
         touchedNodeIndices.clear();
         tau_touched = true;
@@ -185,8 +194,77 @@ void TreeAssemblyFunction::touch(const DagNode *toucher)
 }
 
 
-/** Copy the input's topology onto our own tree, as a tree of branch lengths rather than one of ages. */
-void TreeAssemblyFunction::copyTopology( void )
+/**
+ * Move our own nodes into the input's shape instead of letting Tree's assignment rebuild them.
+ * Index i is the same branch in both trees, so they can be diffed directly.
+ * False where the trees do not correspond node for node, so nothing is mutated before everything
+ * this touches has been validated and the caller can still copy.
+ */
+bool TreeAssemblyFunction::syncShape( void )
+{
+    const Tree &in = tau->getValue();
+    const std::vector<TopologyNode*> &theirs = in.getNodes();
+    const std::vector<TopologyNode*> &ours = value->getNodes();
+    size_t n = ours.size();
+    if ( n != theirs.size() or n == 0 ) return false;
+
+    // After a rejected move our copy differs from the restored input only where we rewired it.
+    bool full = ( restoring == false or rebuilt_valid == false );
+    size_t count = ( full == true ? n : rebuilt.size() );
+
+    // Only mvIndependentTopology moves the root to another node. Bail and let the caller copy.
+    size_t root_index = in.getRoot().getIndex();
+    if ( root_index >= n or value->getRoot().getIndex() != root_index ) return false;
+    if ( ours[root_index]->getIndex() != root_index ) return false;
+
+    for (size_t k = 0; k < count; ++k)
+    {
+        size_t i = ( full == true ? k : rebuilt[k] );
+        if ( i >= n or ours[i]->getIndex() != i or theirs[i]->getIndex() != i ) return false;
+        const std::vector<TopologyNode*> &tc = theirs[i]->getChildren();
+        for (size_t c = 0; c < tc.size(); ++c)
+        {
+            size_t ci = tc[c]->getIndex();
+            if ( ci >= n or ours[ci]->getIndex() != ci ) return false;
+        }
+    }
+
+    std::vector<size_t> next;
+    for (size_t k = 0; k < count; ++k)
+    {
+        size_t i = ( full == true ? k : rebuilt[k] );
+        const std::vector<TopologyNode*> &tc = theirs[i]->getChildren();
+        const std::vector<TopologyNode*> &oc = ours[i]->getChildren();
+        bool same = ( tc.size() == oc.size() );
+        for (size_t c = 0; same == true and c < tc.size(); ++c)
+        {
+            same = ( tc[c]->getIndex() == oc[c]->getIndex() );
+        }
+        if ( same == true ) continue;
+
+        // quietly: update() passes on the input's own events once the shape is in place
+        while ( ours[i]->getNumberOfChildren() > 0 ) ours[i]->removeChild( &ours[i]->getChild(0) );
+        for (size_t c = 0; c < tc.size(); ++c)
+        {
+            TopologyNode *child = ours[ tc[c]->getIndex() ];
+            ours[i]->addChild( child );
+            child->setParent( ours[i], false );
+        }
+        next.push_back(i);
+    }
+
+    if ( full == true )
+    {
+        rebuilt = next;
+        rebuilt_valid = true;
+    }
+
+    return true;
+}
+
+
+/** Copy the input's topology to our tree. Rewires in place where it can, and copies otherwise. */
+void TreeAssemblyFunction::copyTopology( bool replaced )
 {
     // the assignment below sends a tree listener event
     std::set<TreeChangeEventListener*> listeners = value->getTreeChangeEventHandler().getListeners();
@@ -195,8 +273,12 @@ void TreeAssemblyFunction::copyTopology( void )
     const Tree &in = tau->getValue();
     double root_length = in.getRoot().getBranchLength();
 
-    // Tree's assignment keeps the node indices of the input, which the branch lengths are indexed by
-    *value = in;
+    // A replaced tree can differ arbitrarily, so there is nothing for syncShape to diff against.
+    if ( replaced == true or syncShape() == false )
+    {
+        rebuilt_valid = false;
+        *value = in;
+    }
 
     // Our branch lengths come from the vector, so the input's ages do not describe our branches.
     // Dropping them keeps the Newick writer from recomputing every length as parent age minus age.
@@ -220,7 +302,7 @@ void TreeAssemblyFunction::update( void )
     bool replaced = ( tau_touched == true && heard_event == false );
     if ( shape_moved == true || replaced == true )
     {
-        copyTopology();
+        copyTopology( replaced );
         if ( value->getNumberOfNodes() - 1 != v.size() )
         {
             throw RbException() << "Number of branches (" << (value->getNumberOfNodes() - 1) << ") does not match the number of branch lengths (" << v.size() << ")";
