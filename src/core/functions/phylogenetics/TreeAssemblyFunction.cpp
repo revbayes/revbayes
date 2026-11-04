@@ -197,6 +197,11 @@ void TreeAssemblyFunction::copyTopology( void )
 
     // Tree's assignment keeps the node indices of the input, which the branch lengths are indexed by
     *value = in;
+
+    // Our branch lengths come from the vector, so the input's ages do not describe our branches.
+    // Dropping them keeps the Newick writer from recomputing every length as parent age minus age.
+    value->getRoot().setUseAges( false, true );
+
     // the root has no branch
     value->getRoot().setBranchLength( root_length, false );
 
