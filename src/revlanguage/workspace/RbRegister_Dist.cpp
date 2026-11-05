@@ -143,6 +143,9 @@
 #include "Dist_phyloCTMCDASiteIID.h"
 #include "Dist_phyloCTMCClado.h"
 
+/* Branch rate priors (in folder "distributions/phylogenetics") */
+#include "Dist_Q.h"
+
 /* Branch rate priors (in folder "distributions/phylogenetics/tree") */
 
 /* Trait evolution models (in folder "distributions/phylogenetics/branchrates") */
@@ -314,6 +317,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
 
         /* Evolutionary processes (in folder "distributions/phylogenetics") */
+        AddDistribution< RateGenerator              >( new Dist_Q()                                             );
 
 //        AddDistribution< CharacterHistory           >( new Dist_PhyloCharacterEvent()                           );
 

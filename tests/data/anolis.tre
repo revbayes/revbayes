@@ -1,0 +1,5 @@
+#NEXUS
+
+begin trees;
+tree Tree_1 = [&R] ((((((Anolis_ahli:0.234551,(((Anolis_garmani:0.092933,Anolis_grahami:0.076442):0.060225,Anolis_valencienni:0.139066):0.016328,Anolis_lineatopus:0.169651):0.061388):0.034355,(Anolis_ophiolepis:0.085595,Anolis_sagrei:0.081991):0.150188):0.059103,(((Anolis_alutaceus:0.134128,Anolis_vanidicus:0.181940):0.098897,((Anolis_angusticeps:0.074247,Anolis_paternus:0.052495):0.128986,Anolis_loysiana:0.160067):0.034553):0.045545,(Anolis_marcanoi:0.205216,Anolis_strahmi:0.173749):0.128079):0.010768):0.018644,((((((Anolis_aliniger:0.138379,Anolis_coelestinus:0.167833):0.063454,Anolis_bahorucoensis:0.192164):0.021052,(Anolis_equestris:0.021812,Anolis_luteogularis:0.024814):0.170630):0.009559,Anolis_occultus:0.366387):0.039000,(Anolis_insolitus:0.206887,Anolis_olssoni:0.218790):0.043178):0.015600,(Anolis_barahonae:0.179072,Anolis_cuvieri:0.147796):0.067970):0.027188):0.014459,((Anolis_brevirostris:0.155937,Anolis_distichus:0.097319):0.106099,((Anolis_cristatellus:0.183918,Anolis_krugi:0.136677):0.027642,Anolis_stratulus:0.171680):0.068274):0.034407):0.052829,Diplolaemus_darwinii:0.515463):0;
+end;
