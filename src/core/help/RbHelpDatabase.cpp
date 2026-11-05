@@ -5478,7 +5478,25 @@ mymcmc.run( rules = stopping_rules ))");
 	help_arrays[string("srGeweke")][string("see_also")].push_back(string(R"(srStationarity)"));
 	help_strings[string("srGeweke")][string("title")] = string(R"(Geweke stopping rule)");
 	help_strings[string("srMaxIteration")][string("description")] = string(R"(Terminates an MCMC run once the specified number of iterations have been
-performed. This rule would typically be used alongside other stopping criteria.)");
+performed.)");
+	help_strings[string("srMaxIteration")][string("details")] = string(R"(For an analysis conducted from scratch, employing the maximum iteration rule is
+exactly equivalent to specifying the `generations` argument:
+
+    mcmc.run( [srMaxIteration(10000)] )
+
+as well as the following:
+
+    mcmc.run(generations=10000)
+
+will both stop the analysis once it has completed 10,000 generations. However,
+the two `.run()` calls above will behave differently when they follow a call to
+`.initializeFromCheckpoint()` -- i.e., when resuming a checkpointed analysis.
+For example, if such an analysis was interrupted at generation 5000, resuming
+it with `generations=10000` will cause it to be extended by another 10,000
+generations, yielding a total length of 15,000 generations. In contrast,
+specifying `srMaxIteration(10000)` upon resumption will stop the analysis once
+it has reached a total length of 10,000 generations, limiting the resumed run
+to just 5000 generations.)");
 	help_strings[string("srMaxIteration")][string("example")] = string(R"(# Binomial example: estimate success probability given 7 successes out of 20 trials
 r ~ dnExp(10)
 p := Probability(ifelse(r < 1, r, 1))
