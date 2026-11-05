@@ -6,10 +6,11 @@
 #
 # Model: The Anolis alignment on a fixed unrooted topology, with the branch
 #        lengths and the position of the root sampled. The rate matrix is drawn
-#        from dnQ, and mvMPQRateMatrix moves the chain between the
-#        time-reversible and non-reversible models. The prior odds on the two
-#        models are fixed at lnPriorOdds = -5.5, about the value that balances
-#        them on this alignment, so that both jumps occur even in a short run.
+#        from dnNucleotideRateMatrixMixture, and mvMPQRateMatrix moves the
+#        chain between the time-reversible and non-reversible models. The prior
+#        odds on the two models are fixed at lnPriorOdds = -5.5, about the value
+#        that balances them on this alignment, so that both jumps occur even in
+#        a short run.
 #
 #        This test differs from mcmc_RJ_nonreversible.Rev only in moving the
 #        center of the polyhedron proposal and concentrating the draw about it
@@ -71,7 +72,7 @@ sf_hp <- v(1,1,1,1)
 # the rate matrix, either time reversible or non-reversible;
 # lnPriorOdds is log(rho_R / rho_N), so -5.5 tilts the prior toward the
 # non-reversible model by about as much as the data favor the reversible one
-Q ~ dnQ( alpha=sf_hp, lnPriorOdds=-5.5 )
+Q ~ dnNucleotideRateMatrixMixture( alpha=sf_hp, lnPriorOdds=-5.5 )
 
 # the reversible-jump move; the prior odds are held fixed and nothing is tuned.
 # The center is the one used for the Savolainen atpB alignment; it is here to

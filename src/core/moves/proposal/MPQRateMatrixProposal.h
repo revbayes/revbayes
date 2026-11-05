@@ -82,7 +82,6 @@ template <class variableType> class StochasticNode;
                                                                proposal is pulled back toward (1/2,1/2,1/2) for that proposal only. */
         void                                                setPolyhedronCenter(double u1, double u2, double u3);
         void                                                useReversiblePolyhedronCenter(void) { poly.useReversibleCenter(); }
-        void                                                setTunePolyhedronAlpha(bool tf) { tune_poly_alpha = tf; }
         double                                              getSubMoveTuningParameter(SUB_MOVE m) const { return tuning[m]; }
         double                                              getSubMoveAcceptanceRate(SUB_MOVE m) const;                                          //!< Acceptance rate since the last tuning call, or -1 if untried
         double                                              getSubMoveAcceptanceRateTotal(SUB_MOVE m) const;                                     //!< Acceptance rate over the whole run, or -1 if untried
@@ -128,12 +127,6 @@ template <class variableType> class StochasticNode;
         double                                              poly_alpha;
         double                                              poly_center[3];
         bool                                                poly_center_set;
-
-                                                            // hill-climbing state for the alphaT tuning; see tune()
-        bool                                                tune_poly_alpha;
-        double                                              poly_alpha_factor;
-        double                                              poly_alpha_last_rate;
-        long                                                poly_alpha_calls;
 
         long                                                num_failed_to_reversible;
         long                                                num_failed_to_nonreversible;

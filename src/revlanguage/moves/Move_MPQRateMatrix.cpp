@@ -63,7 +63,6 @@ void Move_MPQRateMatrix::constructInternalObject( void ) {
     RevBayesCore::MPQRateMatrixProposal *p = new RevBayesCore::MPQRateMatrixProposal(n);
     p->setTuneModelPrior( tmp_prior );
     p->setPolyhedronAlpha( poly_a );
-    p->setTunePolyhedronAlpha( static_cast<const RlBoolean &>( tune_polyhedron_alpha->getRevObject() ).getValue() );
 
     /* An empty vector means leave the centre at the time-reversible point. Anything
        else must be the three polyhedron coordinates. */
@@ -127,7 +126,6 @@ const MemberRules& Move_MPQRateMatrix::getParameterRules(void) const {
         move_member_rules.push_back( new ArgumentRule( "tuneModelPrior", RlBoolean::getClassTypeSpec(),    "Should the prior on the model indicator be adapted toward equal time in the two models? This changes the target distribution, so it must only be done during burnin: run the burnin with a tuningInterval, then do the production run without one. The tilt that was reached is reported as lnPriorOdds by the operator summary, and the Bayes factor is recovered from it as BF_NR = (p_N/p_R) * exp(lnPriorOdds). Note that this has no effect unless tune=TRUE, since that is what makes the MCMC call the move's tuning function at all.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false ) ) );
         move_member_rules.push_back( new ArgumentRule( "polyhedronAlpha", RealPos::getClassTypeSpec(),     "Concentration of the point drawn from the polyhedron when jumping between models. At one the draw is uniform over the polyhedron, which is an independence proposal and mixes badly when the data are informative about the rate matrix. Above one it concentrates near the time-reversible center, making the jump a small move; below one it spreads toward the facets. Which direction helps depends on the data, so monitor Q.getU() to see where the non-reversible model sits and read the jump acceptance rates from the operator summary. This affects the acceptance rate only, never the target.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RealPos( 1.0 ) ) );
         move_member_rules.push_back( new ArgumentRule( "polyhedronCenter", ModelVector<RealPos>::getClassTypeSpec(), "The point (u1,u2,u3) in the polyhedron about which the jump proposal is centred, or an empty vector to use the time-reversible point (1/2,1/2,1/2). Establish it with a short run confined to the non-reversible model, monitoring Q.getU(), and pass the posterior mean. Because the polyhedron changes shape with every proposal, a centre it cannot accommodate is pulled back along the line toward the time-reversible point for that proposal only; the value given here is kept and tried afresh each time.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new ModelVector<RealPos>() ) );
-        move_member_rules.push_back( new ArgumentRule( "tunePolyhedronAlpha", RlBoolean::getClassTypeSpec(), "Should polyhedronAlpha be adapted during burnin against the rate at which jumps are accepted? There is no target rate to aim at, since this is an independence proposal and more acceptance is simply better, so the tuning hill-climbs. Like the other adaptations it must finish before sampling begins.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false ) ) );
         
         /* Inherit weight (but not tuneTarget!) from Move and put it after the arguments created above */
         const MemberRules& inheritedRules = Move::getParameterRules();
@@ -199,10 +197,6 @@ void Move_MPQRateMatrix::setConstParameter(const std::string& name, const RevPtr
     else if ( name == "polyhedronCenter" )
         {
         polyhedron_center = var;
-        }
-    else if ( name == "tunePolyhedronAlpha" )
-        {
-        tune_polyhedron_alpha = var;
         }
     else
         {

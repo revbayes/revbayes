@@ -1,5 +1,5 @@
 ## name
-dnQ
+dnNucleotideRateMatrixMixture
 
 ## title
 Distribution on reversible and non-reversible nucleotide rate matrices
@@ -50,7 +50,7 @@ dnPhyloCTMC
 
 ## example
     # Create a rate matrix with equal prior probabilities for the models.
-    Q ~ dnQ(alpha=v(1,1,1,1), lnPriorOdds=0.0)
+    Q ~ dnNucleotideRateMatrixMixture(alpha=v(1,1,1,1), lnPriorOdds=0.0)
 
     moves = VectorMoves()
     moves.append(mvMPQRateMatrix(Q, tune=FALSE, tuneModelPrior=FALSE))
@@ -61,4 +61,4 @@ dnPhyloCTMC
     log_prior_odds := Q.lnPriorOdds()
 
     # Alternatively, restrict a separate matrix to one model.
-    Q_NR ~ dnQ(alpha=v(1,1,1,1), fixedModel="nonreversible")
+    Q_NR ~ dnNucleotideRateMatrixMixture(alpha=v(1,1,1,1), fixedModel="nonreversible")

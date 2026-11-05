@@ -2,14 +2,14 @@
 mvMPQRateMatrix
 
 ## title
-Rate-matrix updates and reversible-jump proposals for dnQ
+Rate-matrix updates and reversible-jump proposals for dnNucleotideRateMatrixMixture
 
 ## description
-Updates a nucleotide rate matrix drawn from `dnQ`, including proposals
+Updates a nucleotide rate matrix drawn from `dnNucleotideRateMatrixMixture`, including proposals
 between the time-reversible and non-reversible models.
 
 ## details
-`Q` must be a stochastic rate matrix drawn from `dnQ`. When that
+`Q` must be a stochastic rate matrix drawn from `dnNucleotideRateMatrixMixture`. When that
 distribution uses `fixedModel="free"`, this move can change the model
 indicator. When a model is fixed, model-switching proposals are disabled.
 
@@ -26,9 +26,6 @@ of `Q.getU()` from a preliminary non-reversible analysis. If a proposed
 polyhedron cannot accommodate the requested center, the center is
 moved toward the reversible point for that proposal.
 
-`tunePolyhedronAlpha`, which defaults to FALSE, enables adaptation of
-the proposal concentration during burn-in.
-
 `tuneModelPrior` defaults to FALSE. If enabled together with `tune`,
 it adapts the model prior during burn-in to encourage balanced model
 occupancy. This changes the target distribution. Finish all adaptation
@@ -36,20 +33,20 @@ before collecting production samples, and monitor `Q.lnPriorOdds()`
 to retain the final prior odds needed to calculate the Bayes factor.
 A checkpoint stores the adapted prior odds with the rate matrix, so a
 resumed run keeps the same target distribution. The tuned proposal
-widths and `polyhedronAlpha` are not stored; after a restart they return
-to their starting values, which affects mixing but not the target.
+widths are not stored; after a restart they return to their starting
+values, which affects mixing but not the target.
 
 ## authors
 John P. Huelsenbeck
 Sebastian Höhna
 
 ## see_also
-dnQ
+dnNucleotideRateMatrixMixture
 mvMPQTree
 mvReversibilityAwareBranchLengthScale
 
 ## example
-    Q ~ dnQ(alpha=v(1,1,1,1), lnPriorOdds=0.0)
+    Q ~ dnNucleotideRateMatrixMixture(alpha=v(1,1,1,1), lnPriorOdds=0.0)
     moves = VectorMoves()
 
     # Default proposal with adaptation disabled.

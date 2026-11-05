@@ -33,7 +33,7 @@ John P. Huelsenbeck
 Sebastian Höhna
 
 ## see_also
-dnQ
+dnNucleotideRateMatrixMixture
 dnUniformTopologyBranchLength
 mvBranchLengthScale
 mvMPQTree

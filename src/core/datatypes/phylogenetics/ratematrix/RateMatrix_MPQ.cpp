@@ -15,7 +15,6 @@
 #include <iostream>
 #include <sstream>
 
-#define MIN_FREQ    10e-8
 
 // smallest component of a Dirichlet draw we are willing to build a reverse concentration parameter from
 #define MIN_DIRICHLET_DRAW  1.0e-290
@@ -159,81 +158,6 @@ RateMatrix_MPQ& RateMatrix_MPQ::operator=(const RateMatrix_MPQ& rhs) {
         needs_update = rhs.needs_update;
         }
     return *this;
-}
-
-void RateMatrix_MPQ::adjust(void) {
-
-    if (isReversible == true)
-        {
-        std::vector<double> adjR(6);
-        for (int i=0; i<6; i++)
-            adjR[i] = r[i].get_d();
-        for (int i=0; i<5; i++)
-            r[i] = adjR[i];
-        r[5] = 1 - (r[0] + r[1] + r[2] + r[3] + r[4]);
-        std::vector<double> adjPi(4);
-        for (int i=0; i<4; i++)
-            adjPi[i] = pi[i].get_d();
-        for (int i=0; i<3; i++)
-            pi[i] = adjPi[i];
-        pi[3] = 1 - (pi[0] + pi[1] + pi[2]);
-            
-        for (int i=0, k=0; i<4; i++)
-            {
-            for (int j=i+1; j<4; j++)
-                {
-                (*this)(i,j) = r[k] * pi[j];
-                (*this)(j,i) = r[k] * pi[i];
-                k++;
-                }
-            }
-        mpq_class averageRate;
-        for (int i=0; i<4; i++)
-            {
-            mpq_class sum;
-            for (int j=0; j<4; j++)
-                {
-                if (i != j)
-                    sum += (*this)(i,j);
-                }
-            (*this)(i,i) = -sum;
-            averageRate += pi[i] * sum;
-            }
-        mpq_class factor = 1 / averageRate;
-        for (int i=0; i<4; i++)
-            for (int j=0; j<4; j++)
-                (*this)(i,j) *= factor;
-                
-        }
-    else
-        {
-        mpq_class adjQ[4][4];
-        for (int i=0; i<4; i++)
-            for (int j=0; j<4; j++)
-                adjQ[i][j] = (*this)(i,j);
-        for (int i=0; i<4; i++)
-            for (int j=0; j<4; j++)
-                (*this)(i,j) = adjQ[i][j];
-                
-        calculateStationaryFrequencies(this->pi);
-                
-        mpq_class averageRate;
-        for (int i=0; i<4; i++)
-            {
-            mpq_class sum;
-            for (int j=0; j<4; j++)
-                {
-                if (i != j)
-                    sum += (*this)(i,j);
-                }
-            (*this)(i,i) = -sum;
-            averageRate += pi[i] * sum;
-            }
-        mpq_class factor = 1 / averageRate;
-        for (int i=0; i<4; i++)
-            for (int j=0; j<4; j++)
-                (*this)(i,j) *= factor;
-        }
 }
 
 double RateMatrix_MPQ::averageRate(void) const {
@@ -532,26 +456,6 @@ void RateMatrix_MPQ::calculateWeights(std::vector<mpq_class>& wts) const {
         for (int j=i+1; j<4; j++)
             wts[k++] = (pi[i] * (*this)(i,j) + pi[j] * (*this)(j,i)) / 2;
         }
-}
-
-bool RateMatrix_MPQ::check(void) {
-
-    mpq_class averageRate;
-    for (int i=0; i<4; i++)
-        {
-        mpq_class sum;
-        for (int j=0; j<4; j++)
-            {
-            if (i != j)
-                sum += (*this)(i,j);
-            }
-        if ((*this)(i,i) != -sum)
-            return false;
-        averageRate += pi[i] * sum;
-        }
-    if (averageRate != 1)
-        return false;
-    return true;
 }
 
 RateMatrix_MPQ* RateMatrix_MPQ::clone( void ) const {
@@ -868,7 +772,7 @@ void RateMatrix_MPQ::initFromString(const std::string &s) {
     std::vector<std::string> elements;
     StringUtilities::stringSplit(s, ",", elements);
     if ( elements.size() != 17 || (elements[0] != "R" && elements[0] != "N") )
-        throw RbException() << "Cannot restore a dnQ rate matrix from \"" << s << "\"";
+        throw RbException() << "Cannot restore a dnNucleotideRateMatrixMixture rate matrix from \"" << s << "\"";
 
     std::vector<mpq_class> new_pi(4);
     std::vector<mpq_class> new_q(16);
@@ -883,7 +787,7 @@ void RateMatrix_MPQ::initFromString(const std::string &s) {
         }
     catch (std::exception& e)
         {
-        throw RbException() << "Cannot restore a dnQ rate matrix from \"" << s << "\": " << e.what();
+        throw RbException() << "Cannot restore a dnNucleotideRateMatrixMixture rate matrix from \"" << s << "\": " << e.what();
         }
 
     isReversible = ( elements[0] == "R" );
@@ -908,7 +812,7 @@ void RateMatrix_MPQ::initFromString(const std::string &s) {
     mpq_class averageRate;
     calculateAverageRate(averageRate);
     if (averageRate != 1)
-        throw RbException() << "The dnQ rate matrix restored from \"" << s << "\" does not have an average rate of one";
+        throw RbException() << "The dnNucleotideRateMatrixMixture rate matrix restored from \"" << s << "\" does not have an average rate of one";
 }
 
 /** Calculate the transition probabilities for the real case */

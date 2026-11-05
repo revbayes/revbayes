@@ -83,14 +83,15 @@ namespace RevBayesCore {
          * (1/2, 1/2, 1/2). Calculating the volume of a tetrahedron is pretty easy, just requiring
          * the calculation of the determinant of a matrix containing the vertices.
          *
-         * All calculations are done with the GMP rational class. The GMP library is a high-
+         * All calculations are done with rational numbers. By default, this code uses the Boost 
+         * rational number class. You can alternatively compile with the GMP library, a high-
          * performance C/C++ library for arbitrary-precision arithmetic. I think the rational
-         * class from the GMP library uses two of the integer objects to represent the numerator
-         * and denominator. Why do I use the GMP class at all? I do it to allow for exact
+         * class from both libraries use two of the integer objects to represent the numerator
+         * and denominator. Why do I use the rational numbers at all? I do it to allow for exact
          * bounds checks and to avoid problems with threshold comparisons (which a normal implementation
          * using doubles would require). I took care to make certain that all of the key calculations
          * are always with rational numbers, never requiring the use of doubles or even
-         * mpf_class (real number representation in the GMP library).
+         * arbitrary precision real numbers.
          *
          * Besides calculating the volume of the polyhedron, this class will also generate
          * random points from the polyhedron. The algorithm for doing this is pretty cool. You

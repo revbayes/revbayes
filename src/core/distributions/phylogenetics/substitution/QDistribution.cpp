@@ -107,7 +107,7 @@ void QDistribution::setHiddenStateFromString(const std::string &s) {
 
     size_t pos = s.find(';');
     if ( pos == std::string::npos )
-        throw RbException() << "Cannot restore dnQ from the checkpoint string \"" << s << "\"";
+        throw RbException() << "Cannot restore dnNucleotideRateMatrixMixture from the checkpoint string \"" << s << "\"";
 
     double delta;
     try
@@ -116,16 +116,16 @@ void QDistribution::setHiddenStateFromString(const std::string &s) {
         }
     catch (std::exception&)
         {
-        throw RbException() << "Cannot read the prior odds of dnQ from the checkpoint string \"" << s << "\"";
+        throw RbException() << "Cannot read the prior odds of dnNucleotideRateMatrixMixture from the checkpoint string \"" << s << "\"";
         }
 
     RateMatrix_MPQ& m = static_cast<RateMatrix_MPQ&>( *this->value );
     m.initFromString( s.substr(0, pos) );
 
     if ( fixed_model == REVERSIBLE_ONLY && m.getIsReversible() == false )
-        throw RbException("The checkpointed dnQ rate matrix is non-reversible, but the model is fixed to the reversible one");
+        throw RbException("The checkpointed dnNucleotideRateMatrixMixture rate matrix is non-reversible, but the model is fixed to the reversible one");
     if ( fixed_model == NON_REVERSIBLE_ONLY && m.getIsReversible() == true )
-        throw RbException("The checkpointed dnQ rate matrix is reversible, but the model is fixed to the non-reversible one");
+        throw RbException("The checkpointed dnNucleotideRateMatrixMixture rate matrix is reversible, but the model is fixed to the non-reversible one");
 
     setLnPriorOdds( delta );
 }

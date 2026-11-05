@@ -20,9 +20,11 @@ namespace RevBayesCore {
         
         /**
          * This class is used to hold a 4 X 4 rate matrix for a continuous-time Markov model. The
-         * implementation of this class relies on GMP rationals to hold rates and to calculate
-         * stationary frequencies or exchangeability parameters. This class also has functionality
-         * to propose a reversible model from a non-reversible one and also to do the reverse.
+         * implementation of this class holds rates in exact rationals (Boost's cpp_rational by
+         * default, or GMP's mpq_class when built with RB_USE_GMP; see RbRational.h) and uses them
+         * to calculate stationary frequencies or exchangeability parameters. This class also has
+         * functionality to propose a reversible model from a non-reversible one and also to do the
+         * reverse.
          *
          * @copyright Copyright 2009-
          * @author The RevBayes Development Core Team (John Huelsenbeck)
@@ -36,12 +38,10 @@ namespace RevBayesCore {
         mpq_class&                          operator()(size_t r, size_t c) { needs_update = true; return this->q[r * 4 + c]; }
         const mpq_class&                    operator()(size_t r, size_t c) const { return this->q[r * 4 + c]; }
         RateMatrix_MPQ&                     operator=(const RateMatrix_MPQ& rhs);
-        void                                adjust(void);
         void                                calculateAllWeights(std::vector<mpq_class>& w) const;
         void                                calculateAverageRate(mpq_class& ave) const;
         void                                calculateStationaryFrequencies(std::vector<mpq_class>& f);
         void                                calculateWeights(std::vector<mpq_class>& wts) const;
-        bool                                check(void);
         std::vector<mpq_class>&             getExchangeabilityRates(void) { return r; }
         bool                                getIsReversible(void) { return isReversible; }
         std::vector<mpq_class>&             getPi(void) { needs_update = true; return pi; }        //!< non-const, so treat as a write; see operator()

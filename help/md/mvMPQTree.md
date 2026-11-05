@@ -6,7 +6,7 @@ Tree proposals for reversible and non-reversible substitution analyses
 
 ## description
 Proposes tree updates in analyses using the reversible and non-reversible
-nucleotide models implemented by `dnQ`, optionally updating root position.
+nucleotide models implemented by `dnNucleotideRateMatrixMixture`, optionally updating root position.
 
 ## details
 `tree` should be a stochastic, non-clock tree parameterized by branch
@@ -30,7 +30,7 @@ John P. Huelsenbeck
 Sebastian Höhna
 
 ## see_also
-dnQ
+dnNucleotideRateMatrixMixture
 dnUniformTopologyBranchLength
 dnPhyloCTMC
 mvMPQRateMatrix

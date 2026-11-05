@@ -39,8 +39,8 @@ using namespace RevLanguage;
 
 Dist_Q::Dist_Q(void) : TypedDistribution<RateGenerator>() {
     
-    setGuiDistributionName("Q");
-    setGuiDistributionToolTip("Q distribution for random variables on rate matrices");
+    setGuiDistributionName("Nucleotide Rate Matrix Mixture");
+    setGuiDistributionToolTip("Mixture of time-reversible and non-reversible nucleotide rate matrices");
 }
 
 Dist_Q::~Dist_Q(void) {
@@ -89,7 +89,7 @@ RevBayesCore::QDistribution* Dist_Q::createDistribution(void) const {
     else if ( fm == "nonreversible" )
         fixed = RevBayesCore::QDistribution::NON_REVERSIBLE_ONLY;
     else if ( fm != "free" )
-        throw RbException("The 'fixedModel' argument of dnQ must be \"free\", \"reversible\" or \"nonreversible\".");
+        throw RbException("The 'fixedModel' argument of dnNucleotideRateMatrixMixture must be \"free\", \"reversible\" or \"nonreversible\".");
 
     RevBayesCore::QDistribution* d = new RevBayesCore::QDistribution(a, logRhoReversible, logRhoNonReversible, fixed);
     return d;
@@ -133,7 +133,7 @@ const TypeSpec& Dist_Q::getClassTypeSpec(void) {
 std::string Dist_Q::getDistributionFunctionName(void) const {
 
     // create a distribution name variable that is the same for all instance of this class
-    std::string d_name = "Q";
+    std::string d_name = "NucleotideRateMatrixMixture";
     return d_name;
 }
 
@@ -201,7 +201,7 @@ const TypeSpec& Dist_Q::getTypeSpec(void) const {
 /** Print value for user */
 void Dist_Q::printValue(std::ostream& o) const {
     
-    o << "Q(alpha=";
+    o << "NucleotideRateMatrixMixture(alpha=";
     if ( alpha != NULL )
         {
         o << alpha->getName();
