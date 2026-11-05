@@ -1,0 +1,261 @@
+################################################################################
+#
+# RevBayes Test-Script: Check that we can create a mixture model using
+#                       dnMixtureAnalytical. This script sets up a time tree
+#                       analysis, and employs the distribution twice: first to
+#                       mix between several different tree priors, and then to
+#                       to mix between several different relaxed-clock models.
+#
+#
+# authors: Sebastian Hoehna
+#
+################################################################################
+
+seed(12345)
+
+# This script is pasted together and adapted from the scripts used by Darlim
+# & Hoehna (2025), Proceedings of the Royal Society B 292(2043): 20250091. See
+# https://datadryad.org/dataset/doi:10.5061/dryad.xwdbrv1pn#readme
+
+#######################
+# Reading in the data #
+#######################
+
+# Import the molecular sequences
+mol_data <- readDiscreteCharacterData("data/crocs_COI.nex")
+
+# Helpers
+n_taxa <- mol_data.size()
+n_branches <- 2 * n_taxa - 2
+taxa <- mol_data.taxa()
+
+# Create some vector for the moves and monitors of this analysis
+moves    = VectorMoves()
+monitors = VectorMonitors()
+
+
+###############################################
+# Mixture model for tree-generating processes #
+###############################################
+
+extant_mrca ~ dnUniform( 75.0, 120.0 )
+moves.append( mvScale(extant_mrca, tune=true, weight=3.0) )
+moves.append( mvSlide(extant_mrca, tune=true, weight=3.0) )
+
+# Fix the probability of sampling extant lineages to 1
+rho <- 1.0
+
+# Log standard deviation scaler
+H <- 0.587405
+
+####################
+# Pure birth process
+
+# Define priors on the birth rate and death rate #
+pb_speciation_rate ~ dnLognormal( ln(0.1), 2*H )
+
+# Specify a scale move on the speciation_rate parameter #
+moves.append( mvScale(pb_speciation_rate, lambda=0.5, tune=true, weight=3.0) )
+
+#####################
+# Birth-death process
+
+# Define priors on the birth rate and death rate #
+bd_speciation_rate ~ dnLognormal( ln(0.1), 2*H )
+bd_extinction_rate ~ dnLognormal( ln(0.05), 2*H )
+
+# Specify a scale move on the speciation_rate parameter #
+moves.append( mvScale(bd_speciation_rate, lambda=0.5, tune=true, weight=3.0) )
+moves.append( mvScale(bd_extinction_rate, lambda=0.5, tune=true, weight=3.0) )
+
+##############################
+# Episodic birth-death process
+
+NUM_INTERVALS = 5
+NUM_BREAKS := NUM_INTERVALS - 1
+
+# Define exponential priors on the birth rate and death rate #
+ebd_speciation_rate ~ dnLognormal( ln(0.1), 2*H )
+ebd_extinction_rate ~ dnLognormal( ln(0.05), 2*H )
+
+# Specify a scale move on the speciation_rate parameter #
+moves.append( mvScale(ebd_speciation_rate, lambda=0.5, tune=true, weight=3.0) )
+moves.append( mvScale(ebd_extinction_rate, lambda=0.5, tune=true, weight=3.0) )
+
+# Prior and hyperprior for overall amount of rate variation
+ebd_speciation_global_scale_hyperprior <- H / NUM_INTERVALS
+ebd_extinction_global_scale_hyperprior <- H / NUM_INTERVALS
+
+ebd_sigma_speciation ~ dnHalfCauchy(0,1)
+ebd_sigma_extinction ~ dnHalfCauchy(0,1)
+
+# Make sure values initialize to something reasonable
+ebd_sigma_speciation.setValue( runif(1, 0.005, 0.1)[1] )
+ebd_sigma_extinction.setValue( runif(1, 0.005, 0.1)[1] )
+
+moves.append( mvSlideBactrian(ebd_sigma_speciation, weight=5) )
+moves.append( mvSlideBactrian(ebd_sigma_extinction, weight=5) )
+
+for (i in 1:NUM_BREAKS) {
+
+  # Non-centralized parameterization of horseshoe
+  ebd_delta_log_speciation[i] ~ dnNormal( mean=0, sd=ebd_sigma_speciation*ebd_speciation_global_scale_hyperprior, min=-5, max=5 )
+  ebd_delta_log_extinction[i] ~ dnNormal( mean=0, sd=ebd_sigma_extinction*ebd_extinction_global_scale_hyperprior, min=-5, max=5 )
+
+  moves.append( mvSlideBactrian(ebd_delta_log_speciation[i], weight=5) )
+  moves.append( mvSlideBactrian(ebd_delta_log_extinction[i], weight=5) )
+
+  delta_up_down_move[i] = mvUpDownSlide(weight=5.0)
+  delta_up_down_move[i].addVariable(ebd_delta_log_speciation[i],TRUE)
+  delta_up_down_move[i].addVariable(ebd_delta_log_extinction[i],TRUE)
+  moves.append(  delta_up_down_move[i] )
+
+}
+
+# Assemble first-order differences and speciation_rate at present into the random field
+ebd_speciation := fnassembleContinuousMRF(ln(ebd_speciation_rate), ebd_delta_log_speciation, initialValueIsLogScale=TRUE, order=1)
+ebd_extinction := fnassembleContinuousMRF(ln(ebd_extinction_rate), ebd_delta_log_extinction, initialValueIsLogScale=TRUE, order=1)
+
+interval_times <- abs(100 * seq(1, NUM_BREAKS, 1)/NUM_INTERVALS)
+
+####################
+# Set up the mixture
+
+tree_base_dists = [ dnBDP(lambda=pb_speciation_rate, mu=0.0,
+                          rho=rho, rootAge=extant_mrca, samplingStrategy="uniform", taxa=taxa),
+                    dnBDP(lambda=bd_speciation_rate, mu=bd_extinction_rate,
+                          rho=rho, rootAge=extant_mrca, samplingStrategy="uniform", taxa=taxa),
+                    dnEBDP(lambdaRates=ebd_speciation, lambdaTimes=interval_times, muRates=ebd_extinction,
+                           muTimes=interval_times, rho=rho, rootAge=extant_mrca, samplingStrategy="uniform",
+                           condition="survival", taxa=taxa) ]
+
+timetree ~ dnMixtureAnalytical( tree_base_dists, simplex( rep(1, tree_base_dists.size()) ) )
+
+probs_tree_prior := timetree.getMixtureProbabilities()
+print("Tree prior probabilities:")
+probs_tree_prior
+
+# Specify moves on the tree and node times #
+moves.append( mvNarrow(timetree, weight=n_taxa*2) )
+moves.append( mvFNPR(timetree, weight=n_taxa/2.0) )
+moves.append( mvNodeTimeSlideUniform(timetree, weight=2*n_taxa) )
+moves.append( mvSubtreeScale(timetree, weight=n_taxa/2.0) )
+moves.append( mvTreeScale(timetree, extant_mrca, weight=2.0) )
+
+
+##############################################################
+# Mixture model for relaxed clocks on molecular branch rates #
+##############################################################
+
+root_age := timetree.rootAge()
+
+CLOCK_MEAN <- 5E-3
+
+########################
+# Uncorrelated lognormal
+
+UCLN_mean ~ dnLognormal( ln(CLOCK_MEAN), sd=2*H )
+UCLN_sd ~ dnExponential( 1.0 / H )
+
+# Transform the branch rate mean into a log of the branch rate mean
+UCLN_ln_mean := ln( UCLN_mean )
+
+# The two hyperparameters will be operated on by scale moves
+moves.append( mvScale(UCLN_mean, lambda=0.5, tune=true, weight=5.0) )
+moves.append( mvScale(UCLN_sd, lambda=0.5, tune=true, weight=5.0) )
+
+##########################
+# Uncorrelated exponential
+
+UCE_mean ~ dnLognormal( ln(CLOCK_MEAN), sd=2*H )
+
+# The mean will be operated on by a scale move
+moves.append( mvScale(UCE_mean, lambda=0.5, tune=true, weight=5.0) )
+
+###################
+# independent gamma
+
+IGR_mean ~ dnLognormal( ln(CLOCK_MEAN), sd=2*H )
+IGR_sd ~ dnExponential( 1.0 / H )
+
+IGR_alpha := IGR_mean*IGR_mean / ( IGR_sd*IGR_sd )
+IGR_beta  := IGR_mean / ( IGR_sd*IGR_sd )
+
+# The two hyperparameters will be operated on by scale moves
+moves.append( mvScale(IGR_mean, lambda=0.5, tune=true, weight=5.0) )
+moves.append( mvScale(IGR_sd, lambda=0.5, tune=true, weight=5.0) )
+
+####################
+# Set up the mixture
+
+clock_base_dists = [ dnIID(dnLognormal(UCLN_ln_mean, sd=UCLN_sd), numValues=n_branches),
+                     dnIID(dnExp(1/UCE_mean), numValues=n_branches),
+                     dnIID(dnGamma(IGR_alpha, IGR_beta), numValues=n_branches) ]
+
+branch_rates ~ dnMixtureAnalytical( clock_base_dists, simplex(rep(1,clock_base_dists.size())) )
+
+moves.append( mvVectorSingleElementScale(branch_rates, lambda=0.5, tune=true, weight=2*n_branches) )
+moves.append( mvVectorScale(branch_rates, lambda=0.5, tune=true, weight=5) )
+
+probs_relaxed_clock := branch_rates.getMixtureProbabilities()
+print("Relaxed clock probabilities:")
+probs_relaxed_clock
+
+
+#######################################
+# GTR+G nucleotide substitution model #
+#######################################
+
+# First the stationary frequencies
+pi_prior <- v(1, 1, 1, 1)
+pi ~ dnDirichlet(pi_prior)
+
+# Then the exchangeability rates
+er_prior <- v(1, 1, 1, 1, 1, 1)
+er ~ dnDirichlet(er_prior)
+
+moves.append( mvBetaSimplex(er, alpha=10.0, weight=1.0) )
+moves.append( mvBetaSimplex(pi, alpha=10.0, weight=1.0) )
+moves.append( mvDirichletSimplex(er, alpha=10.0, weight=0.5) )
+moves.append( mvDirichletSimplex(pi, alpha=10.0, weight=0.5) )
+
+# Create the matrix
+Q_mol := fnGTR(er, pi)
+
+# Create a discretized gamma distribution of rate categories
+alpha_ASRV ~ dnUniform( 0.0, 1E8 )
+alpha_ASRV.setValue( 1.0 )
+moves.append( mvScale(alpha_ASRV, lambda=0.1, tune=true, weight=1.0) )
+
+rates_ASRV := fnDiscretizeGamma( alpha_ASRV, alpha_ASRV, 4 )
+
+
+#############################################
+# Phylogenetic continuous-time Markov chain #
+#############################################
+
+# Create the overall model and clamp with observed DNA data
+phySeq ~ dnPhyloCTMC(tree=timetree, Q=Q_mol, siteRates=rates_ASRV, branchRates=branch_rates, type="DNA")
+phySeq.clamp(mol_data)
+
+
+########
+# MCMC #
+########
+
+# Initialize the model object
+mymodel = model(timetree)
+
+# Create a vector of monitors
+monitors.append( mnModel(filename="output/crocs_COI_double_mixture.log", printgen=10) )
+monitors.append( mnFile(filename="output/crocs_COI_double_mixture.trees", printgen=10, timetree) )
+
+# Initialize the MCMC object
+mymcmc = mcmc(mymodel, monitors, moves)
+
+# Run the MCMC
+mymcmc.burnin(generations=100, tuningInterval=5)
+mymcmc.run(generations=50)
+
+clear()
+q()
