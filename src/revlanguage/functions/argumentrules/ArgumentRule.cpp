@@ -1,9 +1,11 @@
 #include <cstddef>
+#include <memory>
 #include <sstream>
 #include <string>
 #include <vector>
 
 #include "Argument.h"
+#include "AbstractModelObject.h"
 #include "ArgumentRule.h"
 #include "RbException.h"
 #include "RlFunction.h"
@@ -272,18 +274,35 @@ Argument ArgumentRule::fitArgument( Argument& arg ) const
         }
         else if ( the_var->getRevObject().isConvertibleTo( argTypeSpec, convert_by_value ) != -1 )
         {
-            // Fit by type conversion. For now, we also modify the type of the incoming variable wrapper.
-            RevObject* convertedObject = the_var->getRevObject().convertTo( argTypeSpec );
+            std::unique_ptr<RevObject> convertedObject(the_var->getRevObject().convertTo(argTypeSpec));
 
             RevPtr<RevVariable> the_new_var = nullptr;
             if ( the_var->getRevObject().isConstant() and not by_value )
             {
-                the_new_var = the_var;
-                the_new_var->replaceRevObject( convertedObject );
+                const auto& source = the_var->getRevObject();
+                auto* oldNode = source.hasDagNode() ? source.getDagNode() : nullptr;
+                auto* newNode = convertedObject->hasDagNode() ? convertedObject->getDagNode() : nullptr;
+
+                // Preserve existing users when fitting the argument would change their C++ value type.
+                // Decide before adding the conversion child, which itself becomes a user of the source.
+                if (oldNode && newNode &&
+                    (!oldNode->getChildren().empty() || !oldNode->getMoves().empty() ||
+                     !oldNode->getMonitors().empty()) && !oldNode->hasCompatibleValueType(*newNode))
+                {
+                    static_cast<AbstractModelObject&>(*convertedObject).makeConversionValue(
+                        static_cast<const AbstractModelObject&>(source));
+                    the_new_var = new RevVariable(convertedObject.release(), the_var->getName());
+                    the_new_var->setHiddenVariableState(true);
+                }
+                else
+                {
+                    the_new_var = the_var;
+                    the_new_var->replaceRevObject(convertedObject.release());
+                }
                 the_new_var->setRequiredTypeSpec( argTypeSpec );
             }
             else
-                the_new_var = RevPtr<RevVariable>( new RevVariable(convertedObject, the_var->getName() ) );
+                the_new_var = RevPtr<RevVariable>( new RevVariable(convertedObject.release(), the_var->getName() ) );
                 
             return Argument( the_new_var, arg.getLabel(), false );
         }
