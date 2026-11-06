@@ -1,0 +1,44 @@
+# Checks the original use of fnTreeAssembly, a topology moved by NNI and SPR with branch
+# lengths sampled separately. The cached likelihood after the chain is compared with one
+# computed afresh from a checkpoint.
+# Every line printed must be TRUE.
+out = "output/treeAssembly_mcmc_topology.txt"
+print(filename=out, "an assembled topology carries the true likelihood under NNI and SPR:\n")
+
+chars <- readDiscreteCharacterData("data/primates_cytb_small.nex")
+taxa <- chars.taxa()
+n_branches = 2 * taxa.size() - 3
+
+agree = TRUE
+for (rep in 1:3) {
+    for (pass in 1:2) {
+        seed(rep)
+        topology ~ dnUniformTopology(taxa=taxa)
+        for (i in 1:n_branches) { bl[i] ~ dnExponential(10) }
+        psi := fnTreeAssembly(topology, bl)
+        seq ~ dnPhyloCTMC(tree=psi, Q=fnJC(4), type="DNA")
+        seq.clamp(chars)
+        idle ~ dnUniform(0, 1)
+
+        w = ifelse(pass == 1, 1.0, 1E-9)
+        moves = [ mvNNI(topology, weight=5*w), mvSPR(topology, weight=5*w),
+                  mvSlide(idle, weight=20/w) ]
+        for (i in 1:n_branches) { moves.append( mvScale(bl[i], weight=w) ) }
+
+        log = "output/treeAssembly_mcmc_topology_" + rep + "_" + pass + ".log"
+        state = "output/treeAssembly_mcmc_topology_" + rep + ".state"
+        m = mcmc(model(topology, idle), [ mnFile(filename=log, printgen=10, idle) ], moves, moveschedule="single")
+        if (pass == 1) {
+            m.run(generations=3000, checkpointFile=state, checkpointInterval=3000)
+            cached = readTrace(log, burnin=0)[3].getValues()
+        } else {
+            m.initializeFromCheckpoint(state)
+            m.run(generations=1000)
+            fresh = readTrace(log, burnin=0)[3].getValues()
+        }
+    }
+    agree = agree && abs(cached[cached.size()] - fresh[fresh.size()]) < 1E-6
+}
+print(filename=out, append=TRUE, agree, "\n")
+
+q()

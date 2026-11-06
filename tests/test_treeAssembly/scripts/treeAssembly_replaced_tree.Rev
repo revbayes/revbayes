@@ -1,0 +1,54 @@
+# Checks that an assembly follows a tree that is replaced wholesale rather than edited, which
+# fires no tree change event at all. The cached likelihood after the chain is compared with
+# one computed afresh from a checkpoint.
+# Every line printed must be TRUE.
+out = "output/treeAssembly_replaced_tree.txt"
+print(filename=out, "an assembly follows a tree that is replaced rather than edited:\n")
+
+chars <- readDiscreteCharacterData("data/primates_cytb_small.nex")
+taxa <- chars.taxa()
+root_age <- 10.0
+pool = "output/treeAssembly_replaced_tree_pool.trees"
+n_branches = 2 * taxa.size() - 2
+
+# a pool of time trees of different shapes
+seed(3)
+start ~ dnBDP(lambda=0.4, mu=0.1, rho=1.0, rootAge=root_age, taxa=taxa, condition="nTaxa")
+m0 = mcmc(model(start), [ mnFile(filename=pool, printgen=20, start) ],
+          [ mvFNPR(start, weight=4), mvNodeTimeSlideUniform(start, weight=4),
+            mvSubtreeScale(start, weight=4) ])
+m0.run(generations=2000)
+trace = readTreeTrace(pool, treetype="clock", burnin=0.1)
+
+agree = TRUE
+for (rep in 1:3) {
+    for (pass in 1:2) {
+        seed(4 + rep)
+        tree ~ dnEmpiricalTree(trace)
+        for (i in 1:n_branches) { bl[i] ~ dnExponential(20.0) }
+        psi := fnTreeAssembly(tree, bl)
+        seq ~ dnPhyloCTMC(tree=psi, Q=fnJC(4), type="DNA")
+        seq.clamp(chars)
+        idle ~ dnUniform(0, 1)
+
+        w = ifelse(pass == 1, 1.0, 1E-9)
+        moves = [ mvEmpiricalTree(tree, weight=10*w), mvSlide(idle, weight=20/w) ]
+        for (i in 1:n_branches) { moves.append( mvScale(bl[i], weight=w) ) }
+
+        log = "output/treeAssembly_replaced_tree_" + rep + "_" + pass + ".log"
+        state = "output/treeAssembly_replaced_tree_" + rep + ".state"
+        m = mcmc(model(psi, idle), [ mnFile(filename=log, printgen=10, idle) ], moves, moveschedule="single")
+        if (pass == 1) {
+            m.run(generations=3000, checkpointFile=state, checkpointInterval=3000)
+            cached = readTrace(log, burnin=0)[3].getValues()
+        } else {
+            m.initializeFromCheckpoint(state)
+            m.run(generations=1000)
+            fresh = readTrace(log, burnin=0)[3].getValues()
+        }
+    }
+    agree = agree && abs(cached[cached.size()] - fresh[fresh.size()]) < 1E-6
+}
+print(filename=out, append=TRUE, agree, "\n")
+
+q()

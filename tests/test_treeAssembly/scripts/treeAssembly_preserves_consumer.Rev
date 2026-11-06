@@ -1,0 +1,41 @@
+# Checks that an assembly is invisible to everything else reading the input tree: the same
+# ages, branch lengths and likelihood with or without one. Failure means the assembly is
+# writing into the input tree.
+# Every line printed must be TRUE.
+seed(1)
+out = "output/treeAssembly_preserves_consumer.txt"
+
+chars <- readDiscreteCharacterData("data/primates_cytb_small.nex")
+taxa <- chars.taxa()
+root_age <- 10.0
+tree ~ dnBDP(lambda=0.4, mu=0.1, rho=1.0, rootAge=root_age, taxa=taxa, condition="nTaxa")
+
+# the control: one consumer, no assembly anywhere in the model
+control ~ dnPhyloCTMC(tree=tree, Q=fnJC(4), branchRates=0.02, type="DNA")
+control.clamp(chars)
+ln_alone = control.lnProbability()
+length_alone = tree.treeLength()
+root_alone = tree.rootAge()
+
+# the same tree, with an assembly reading it and carrying quite different lengths
+for (i in 1:(2 * taxa.size() - 2)) { bl[i] <- 0.1 * i }
+assembled := fnTreeAssembly(tree, bl)
+other ~ dnPhyloCTMC(tree=assembled, Q=fnJC(4), branchRates=1.0, type="DNA")
+other.clamp(chars)
+
+print(filename=out, "an assembly does not change what another consumer of the input tree sees:\n")
+print(filename=out, append=TRUE, abs(control.lnProbability() - ln_alone) < 1E-10, "\n")
+
+# a consumer built after the assembly computes from scratch, not from a cache
+after ~ dnPhyloCTMC(tree=tree, Q=fnJC(4), branchRates=0.02, type="DNA")
+after.clamp(chars)
+print(filename=out, append=TRUE, abs(after.lnProbability() - ln_alone) < 1E-10, "\n")
+
+print(filename=out, append=TRUE, "the input tree keeps its own branch lengths and ages:\n")
+print(filename=out, append=TRUE, abs(tree.treeLength() - length_alone) < 1E-10, "\n")
+print(filename=out, append=TRUE, abs(tree.rootAge() - root_alone) < 1E-10, "\n")
+
+print(filename=out, append=TRUE, "the assembled tree carries the lengths it was given:\n")
+print(filename=out, append=TRUE, abs(assembled.treeLength() - sum(bl)) < 1E-8, "\n")
+
+q()
