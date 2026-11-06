@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "CladeSpecificHierarchicalBranchRateFunction.h"
 
 #include <iosfwd>
@@ -118,18 +119,18 @@ void CladeSpecificHierarchicalBranchRateFunction::swapParameterInternal(const Da
     
     if (oldP == tau)
     {
-        tau = static_cast<const TypedDagNode<Tree>* >( newP );
+        replaceNodeReference(tau, newP);
         
         flattenClades();
 
     }
     else if (oldP == base_rates)
     {
-        base_rates = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(base_rates, newP);
     }
     else if (oldP == clade_rates)
     {
-        clade_rates = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(clade_rates, newP);
     }
 }
 

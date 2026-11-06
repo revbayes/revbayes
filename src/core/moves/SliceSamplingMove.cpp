@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include <cstdlib>
 #include <cmath>
 #include <cassert>
@@ -672,7 +673,7 @@ void SliceSamplingMove::resetMoveCounters( void )
 void SliceSamplingMove::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     
-    variable = static_cast<StochasticNode<double>* >(newN) ;
+    replaceNodeReference(variable, newN) ;
 }
 
 

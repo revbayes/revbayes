@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "HyperbolicTangentFunction.h"
 
 #include <cmath>
@@ -32,7 +33,7 @@ void HyperbolicTangentFunction::swapParameterInternal(const DagNode *oldP, const
     
     if (oldP == x)
     {
-        x = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(x, newP);
     }
     
 }

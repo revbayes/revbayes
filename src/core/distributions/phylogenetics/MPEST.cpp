@@ -6,6 +6,7 @@
 //  Copyright (c) 2014 Bastien Boussau. All rights reserved.
 //
 
+#include "DagNodeTypeUtilities.h"
 #include <cmath>
 #include <cstddef>
 #include <iostream>
@@ -190,7 +191,7 @@ void MPEST::swapParameterInternal(const DagNode *oldP, const DagNode *newP)
     
     if (oldP == speciesTree)
     {
-        speciesTree = static_cast<const TypedDagNode< RootedTripletDistribution > * >( newP );
+        replaceNodeReference(speciesTree, newP);
     }
    /* else if ( oldP == geneTrees)
     {

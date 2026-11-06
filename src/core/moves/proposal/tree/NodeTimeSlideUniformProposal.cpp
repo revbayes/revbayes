@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include <cstddef>
 #include <cmath>
 #include <iostream>
@@ -191,11 +192,11 @@ void NodeTimeSlideUniformProposal::swapNodeInternal(DagNode *oldN, DagNode *newN
     
     if ( oldN == variable )
     {
-        variable = static_cast<StochasticNode<Tree>* >(newN);
+        replaceNodeReference(variable, newN);
     }
     else if ( oldN == vector_variable )
     {
-        vector_variable = static_cast<StochasticNode< RbVector<Tree> >* >( newN );
+        replaceNodeReference(vector_variable, newN);
     }
     
 }

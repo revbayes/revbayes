@@ -6,6 +6,7 @@
 //  Copyright (c) 2013 Michael Landis. All rights reserved.
 //
 
+#include "DagNodeTypeUtilities.h"
 #include "CharacterHistoryPosteriorPredictiveMonitor.h"
 
 #include <cstddef>
@@ -270,14 +271,14 @@ void CharacterHistoryPosteriorPredictiveMonitor::swapNode(DagNode *oldN, DagNode
     // bool found = false;
     if ( oldN == tree )
     {
-        tree = static_cast< TypedDagNode< Tree > *>( newN );
+        replaceNodeReference(tree, newN);
         // found = true;
     }
     for (size_t i = 0; i < branchHistories.size(); i++)
     {
         if (oldN == branchHistories[i])
         {
-            branchHistories[i] = static_cast<StochasticNode<BranchHistory>* >(newN);
+            replaceNodeReference(branchHistories[i], newN);
             // found = true;
         }
     }

@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include <cmath>
 #include <iostream>
 
@@ -181,6 +182,6 @@ void RootTimeScaleBactrianProposal::undoProposal( void )
 void RootTimeScaleBactrianProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     
-    variable = static_cast<StochasticNode<Tree>* >(newN) ;
+    replaceNodeReference(variable, newN) ;
     
 }

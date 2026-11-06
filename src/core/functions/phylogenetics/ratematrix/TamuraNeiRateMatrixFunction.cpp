@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include <vector>
 
 #include "RateGenerator.h"
@@ -70,17 +71,17 @@ void TamuraNeiRateMatrixFunction::swapParameterInternal(const DagNode *oldP, con
     
     if (oldP == base_frequencies)
     {
-        base_frequencies = static_cast<const TypedDagNode<Simplex>* >( newP );
+        replaceNodeReference(base_frequencies, newP);
     }
     
     if (oldP == kappa_1)
     {
-        kappa_1 = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(kappa_1, newP);
     }
     
     if (oldP == kappa_2)
     {
-        kappa_2 = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(kappa_2, newP);
     }
     
 }

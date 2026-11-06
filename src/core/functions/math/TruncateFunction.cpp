@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "TruncateFunction.h"
 #include "Cloneable.h"
 #include "TypedDagNode.h"
@@ -32,7 +33,7 @@ void TruncateFunction::swapParameterInternal(const DagNode *oldP, const DagNode 
 
     if (oldP == a) 
     {
-        a = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(a, newP);
     }
     
 }

@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "TreeAssemblyFunction.h"
 
 #include <cstddef>
@@ -190,7 +191,7 @@ void TreeAssemblyFunction::swapParameterInternal(const DagNode *oldP, const DagN
 
     if (oldP == tau)
     {
-        tau = static_cast<const TypedDagNode<Tree>* >( newP );
+        replaceNodeReference(tau, newP);
         
         Tree *psi = const_cast<Tree*>( &tau->getValue() );
         
@@ -200,7 +201,7 @@ void TreeAssemblyFunction::swapParameterInternal(const DagNode *oldP, const DagN
     }
     else if (oldP == brlen)
     {
-        brlen = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(brlen, newP);
     }
     
 }

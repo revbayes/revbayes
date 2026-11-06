@@ -1,6 +1,7 @@
 #ifndef PhyloCTMCClado_H
 #define PhyloCTMCClado_H
 
+#include "DagNodeTypeUtilities.h"
 #include "AbstractCladogenicStateFunction.h"
 #include "CharacterHistory.h"
 #include "ChromosomesCladogenicStateFunction.h"
@@ -1408,15 +1409,15 @@ void RevBayesCore::PhyloCTMCClado<charType>::swapParameterInternal(const DagNode
 
     if (oldP == homogeneousCladogenesisMatrix)
     {
-        homogeneousCladogenesisMatrix = static_cast<const TypedDagNode< CladogeneticProbabilityMatrix >* >( newP );
+        replaceNodeReference(homogeneousCladogenesisMatrix, newP);
     }
     else if (oldP == heterogeneousCladogenesisMatrices)
     {
-        heterogeneousCladogenesisMatrices = static_cast<const TypedDagNode< RbVector< CladogeneticProbabilityMatrix > >* >( newP );
+        replaceNodeReference(heterogeneousCladogenesisMatrices, newP);
     }
     else if (oldP == cladogenesisTimes)
     {
-        cladogenesisTimes = static_cast<const TypedDagNode< RbVector< RbVector< double > > >* >( newP );
+        replaceNodeReference(cladogenesisTimes, newP);
     }
     else
     {

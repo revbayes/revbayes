@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include <cmath>
 #include <iostream>
 
@@ -178,7 +179,7 @@ void RootTimeSlideProposal::undoProposal( void )
 void RootTimeSlideProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     
-    variable = static_cast<StochasticNode<Tree>* >(newN) ;
+    replaceNodeReference(variable, newN) ;
     
 }
 

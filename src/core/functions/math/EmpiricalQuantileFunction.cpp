@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "EmpiricalQuantileFunction.h"
 
 #include <cstddef>
@@ -78,11 +79,11 @@ void EmpiricalQuantileFunction::swapParameterInternal(const DagNode *oldP, const
     
     if ( oldP == vals )
     {
-        vals = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(vals, newP);
     }
     
     if ( oldP == kth_quantile )
     {
-        kth_quantile = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(kth_quantile, newP);
     }
 }

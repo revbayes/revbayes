@@ -6,6 +6,7 @@
 //  Copyright © 2016 Michael Landis. All rights reserved.
 //
 
+#include "DagNodeTypeUtilities.h"
 #include <map>
 #include <vector>
 
@@ -76,11 +77,11 @@ void EpochCladogeneticStateFunction::swapParameterInternal(const DagNode *oldP, 
     
     if (oldP == epochTimes)
     {
-        epochTimes = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(epochTimes, newP);
     }
     else if (oldP == cladoProbs)
     {
-        cladoProbs = static_cast<const TypedDagNode< RbVector<CladogeneticProbabilityMatrix> >* >( newP );
+        replaceNodeReference(cladoProbs, newP);
     }
     
 }

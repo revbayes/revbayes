@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "TajimasPiFunction.h"
 
 #include "AbstractHomologousDiscreteCharacterData.h"
@@ -63,7 +64,7 @@ void TajimasPiFunction::swapParameterInternal(const DagNode *oldP, const DagNode
     
     if (oldP == alignment)
     {
-        alignment = static_cast<const TypedDagNode< AbstractHomologousDiscreteCharacterData >* >( newP );
+        replaceNodeReference(alignment, newP);
     }
     
 }

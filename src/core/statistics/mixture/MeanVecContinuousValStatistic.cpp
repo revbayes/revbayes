@@ -14,6 +14,7 @@
  * $Id: MeanVecContinuousValStatistic.cpp tracyh $
  */
  
+#include "DagNodeTypeUtilities.h"
 #include "MeanVecContinuousValStatistic.h"
 
 #include <cstddef>
@@ -60,7 +61,7 @@ void MeanVecContinuousValStatistic::update( void ) {
 void MeanVecContinuousValStatistic::swapParameterInternal(const DagNode *oldP, const DagNode *newP) {
 	
     if (oldP == elementVals) {
-        elementVals = static_cast< const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(elementVals, newP);
     }
 }
 
