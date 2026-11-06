@@ -13,7 +13,7 @@
       in {
         packages.default = pkgs.stdenv.mkDerivation {
           pname = "revbayes";
-          version = "1.4.2";
+          version = "1.5.0-preview";
 
           src = ./.;
 
@@ -27,7 +27,7 @@
             # Generate GitVersion.cpp — git is not available in the Nix sandbox
             {
               echo '#include "GitVersion.h"'
-              echo 'const char *build_git_sha = "1.4.2";'
+              echo 'const char *build_git_sha = "1.5.0-preview";'
               echo 'const char *build_date = "unknown";'
               echo 'const char *build_git_branch = "unknown";'
             } > src/revlanguage/utils/GitVersion.cpp
