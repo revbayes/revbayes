@@ -1741,17 +1741,17 @@ deviation can be either automatically computed from `p` or directly specified
 using the `sd` argument. Exactly one of `sd` and `p` must be specified, with
 the unspecified value automatically computed so that the density is continuous
 at `min` and `max`.)");
-	help_strings[string("dnSoftBoundUniformNormal")][string("example")] = string(R"(    # Create a simple model (unclamped)
+	help_strings[string("dnSoftBoundUniformNormal")][string("example")] = string(R"(# Create a simple model (unclamped)
 calib ~ dnSoftBoundUniformNormal( 13.6, 25, p=0.95, "upper" )
 mymodel = model(calib)
 
 # Create a move vector and a monitor vector
-    moves[1] = mvSlide(calib, delta=0.1, weight=1.0)
-    monitors[1] = mnScreen(calib, printgen=1000)
+moves[1] = mvSlide(calib, delta=0.1, weight=1.0)
+monitors[1] = mnScreen(calib, printgen=1000)
 
 # Use MCMC to draw samples from the specified distribution
-    mymcmc = mcmc(mymodel, monitors, moves)
-    mymcmc.run(generations=200000))");
+mymcmc = mcmc(mymodel, monitors, moves)
+mymcmc.run(generations=200000))");
 	help_strings[string("dnSoftBoundUniformNormal")][string("name")] = string(R"(dnSoftBoundUniformNormal)");
 	help_arrays[string("dnSoftBoundUniformNormal")][string("see_also")].push_back(string(R"(dnNormal)"));
 	help_arrays[string("dnSoftBoundUniformNormal")][string("see_also")].push_back(string(R"(dnUniform)"));
