@@ -12,7 +12,7 @@
 #include <utility>
 #include <vector>
 #include <optional>
-#include <range/v3/all.hpp>
+#include <ranges>
 
 #include "NewickConverter.h"
 #include "ProgressBar.h"
@@ -36,8 +36,6 @@
 #include "Tree.h"
 
 using namespace RevBayesCore;
-
-namespace views = ranges::views;
 
 /*
  * TreeSummary constructor
@@ -472,7 +470,7 @@ std::vector< std::pair<Tree, std::int64_t> > TreeSummary::getCredibleSetOfTrees(
         progress.start();
     }
     
-    for (auto& [newick, count]: tree_samples | views::reverse)
+    for (auto& [newick, count]: tree_samples | std::views::reverse)
     {
         if (verbose) progress.update(counter);
         counter++;
@@ -561,7 +559,7 @@ std::vector<Clade> TreeSummary::getUniqueClades( double min_clade_probability, b
         progress.start();
     }
 
-    for (auto& [clade, count]: clade_samples | views::reverse)
+    for (auto& [clade, count]: clade_samples | std::views::reverse)
     {
         if (verbose) progress.update(counter);
         counter++;
@@ -918,7 +916,7 @@ Tree* TreeSummary::mrTree(AnnotationReport report, double cutoff, bool verbose)
 
     double totalSamples = sampleSize(true);
 
-    for (const auto& [clade, count]: clade_samples | views::reverse)
+    for (const auto& [clade, count]: clade_samples | std::views::reverse)
     {
         float cladeFreq = count / totalSamples;
         if (cladeFreq < cutoff)  break;
@@ -1046,7 +1044,7 @@ void TreeSummary::printCladeSummary(std::ostream &o, double min_clade_probabilit
     std::vector<Taxon> ordered_taxa = traces.front()->objectAt(0).getTaxa();
     VectorUtilities::sort( ordered_taxa );
 
-    for (auto& [clade, count]: clade_samples | views::reverse)
+    for (auto& [clade, count]: clade_samples | std::views::reverse)
     {
         Clade c(clade.first, ordered_taxa);
         c.setMrca(clade.second);
@@ -1136,7 +1134,7 @@ void TreeSummary::printTreeSummary(std::ostream &o, double credible_interval_siz
     double total_samples = sampleSize(true);
     RandomNumberGenerator *rng = GLOBAL_RNG;
     
-    for (auto& [newick, count]: tree_samples | views::reverse)
+    for (auto& [newick, count]: tree_samples | std::views::reverse)
     {
         double freq = count;
         double p = freq/total_samples;

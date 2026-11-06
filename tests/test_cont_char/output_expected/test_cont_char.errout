@@ -1,0 +1,8 @@
+   Successfully read one character matrix from file 'data/artiodactyla_hypsodonty_missing.nex'
+   Successfully read one character matrix from file 'data/artiodactyla_hypsodonty_drop.nex'
+maximum differences of the continuous trait equal, test passed
+mean differences of the continuous trait equal, test passed
+mean values of the continuous trait equal, test passed
+variances of the continuous trait equal, test passed
+variances of the continuous trait equal, test passed
+variance differences of the continuous trait equal, test passed

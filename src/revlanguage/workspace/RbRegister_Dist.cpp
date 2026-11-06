@@ -143,6 +143,9 @@
 #include "Dist_phyloCTMCDASiteIID.h"
 #include "Dist_phyloCTMCClado.h"
 
+/* Branch rate priors (in folder "distributions/phylogenetics") */
+#include "Dist_Q.h"
+
 /* Branch rate priors (in folder "distributions/phylogenetics/tree") */
 
 /* Trait evolution models (in folder "distributions/phylogenetics/branchrates") */
@@ -183,8 +186,6 @@
 #include "Dist_ConstrainedNodeOrder.h"
 #include "Dist_WeightedConstrainedNodeOrder.h"
 #include "Dist_DuplicationLoss.h"
-#include "Dist_FBDRP.h"
-#include "Dist_FBDSP.h"
 #include "Dist_GLHBDSP.h"
 #include "Dist_constPopMultispCoal.h"
 #include "Dist_divDepYuleProcess.h"
@@ -316,6 +317,7 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
 
 
         /* Evolutionary processes (in folder "distributions/phylogenetics") */
+        AddDistribution< RateGenerator              >( new Dist_Q()                                             );
 
 //        AddDistribution< CharacterHistory           >( new Dist_PhyloCharacterEvent()                           );
 
@@ -374,10 +376,6 @@ void RevLanguage::Workspace::initializeDistGlobalWorkspace(void)
         AddDistribution< TimeTree                   >( new Dist_sampledSpeciationBirthDeathProcess() );
         AddDistribution< TimeTree                   >( new Dist_TimeVaryingStateDependentSpeciationExtinctionProcess() );
         AddDistribution< TimeTree                   >( new Dist_GLHBDSP() );
-
-        // fossilized-birth-death range processes
-        AddDistribution< MatrixReal                 >( new Dist_FBDRP());
-        AddDistribution< TimeTree                   >( new Dist_FBDSP());
 
         // birth-death-sampling-treatment processes and submodels
         AddDistribution< TimeTree                   >( new Dist_BDSTP());

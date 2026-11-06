@@ -1,0 +1,176 @@
+################################################################################
+#
+# RevBayes Test-Script: Check that the probability density function of a
+#                       soft-bounded (normal-tailed) uniform distribution is
+#                       free of discontinuities at the boundaries
+#
+# author: David Cerny
+#
+################################################################################
+
+min <- 13.6
+max <- 25
+prob <- 0.95
+
+print("Both boundaries are soft; distribution parameterized by normal-tail probability mass\n")
+
+# Place a probability mass of (1 - 0.95) = 0.05 on the two tails (0.025 on each)
+x0 ~ dnSoftBoundUniformNormal( min, max, p = prob )
+
+# Left normal tail
+x0.clamp(13.59)
+x0.lnProbability()
+x0.clamp(13.5999)
+x0.lnProbability()
+
+# Uniform "core"
+x0.clamp(13.7)
+x0.lnProbability()
+x0.clamp(24.9)
+x0.lnProbability()
+
+# Right normal tail
+x0.clamp(25.0001)
+x0.lnProbability()
+x0.clamp(25.01)
+x0.lnProbability()
+
+# Check that the uniform "core" accounts for p = 0.95 of total probability mass
+x0.clamp( (min + max)/2 )
+(max - min) * exp( x0.lnProbability() ) == prob
+
+print("")
+
+print("Both boundaries are soft; distribution parameterized by normal-tail standard deviation\n")
+
+# Use a standard deviation of 0.1 for both normal tails
+x1 ~ dnSoftBoundUniformNormal( min, max, sd = 0.1 )
+
+# Left normal tail
+x1.clamp(13.59)
+x1.lnProbability()
+x1.clamp(13.5999)
+x1.lnProbability()
+
+# Uniform "core"
+x1.clamp(13.7)
+x1.lnProbability()
+x1.clamp(24.9)
+x1.lnProbability()
+
+# Right normal tail
+x1.clamp(25.0001)
+x1.lnProbability()
+x1.clamp(25.01)
+x1.lnProbability()
+
+print("")
+
+print("Upper boundary is soft; distribution parameterized by normal-tail probability mass\n")
+
+# Place a probability mass of (1 - 0.95) = 0.05 on the right tail
+x2 ~ dnSoftBoundUniformNormal( min, max, p = prob, boundary = "upper" )
+
+# The following are outside the range, and should therefore yield -inf
+x2.clamp(13.59)
+x2.lnProbability()
+x2.clamp(13.5999)
+x2.lnProbability()
+
+# Uniform "core"
+x2.clamp(13.7)
+x2.lnProbability()
+x2.clamp(24.9)
+x2.lnProbability()
+
+# Right normal tail
+x2.clamp(25.0001)
+x2.lnProbability()
+x2.clamp(25.01)
+x2.lnProbability()
+
+# Check that the uniform "core" accounts for p = 0.95 of total probability mass
+x2.clamp( (min + max)/2 )
+(max - min) * exp( x2.lnProbability() ) == prob
+
+print("")
+
+print("Upper boundary is soft; distribution parameterized by normal-tail standard deviation\n")
+
+# Use a standard deviation of 0.1 for the right normal tail
+x3 ~ dnSoftBoundUniformNormal( min, max, sd = 0.1, boundary = "upper" )
+
+# The following are outside the range, and should therefore yield -inf
+x3.clamp(13.59)
+x3.lnProbability()
+x3.clamp(13.5999)
+x3.lnProbability()
+
+# Uniform "core"
+x3.clamp(13.7)
+x3.lnProbability()
+x3.clamp(24.9)
+x3.lnProbability()
+
+# Right normal tail
+x3.clamp(25.0001)
+x3.lnProbability()
+x3.clamp(25.01)
+x3.lnProbability()
+
+print("")
+
+print("Lower boundary is soft; distribution parameterized by normal-tail probability mass\n")
+
+# Place a probability mass of (1 - 0.95) = 0.05 on the left tail
+x4 ~ dnSoftBoundUniformNormal( min, max, p = prob, boundary = "lower" )
+
+# Left normal tail
+x4.clamp(13.59)
+x4.lnProbability()
+x4.clamp(13.5999)
+x4.lnProbability()
+
+# Uniform "core"
+x4.clamp(13.7)
+x4.lnProbability()
+x4.clamp(24.9)
+x4.lnProbability()
+
+# The following are outside the range, and should therefore yield -inf
+x4.clamp(25.0001)
+x4.lnProbability()
+x4.clamp(25.01)
+x4.lnProbability()
+
+# Check that the uniform "core" accounts for p = 0.95 of total probability mass
+x4.clamp( (min + max)/2 )
+(max - min) * exp( x4.lnProbability() ) == prob
+
+print("")
+
+print("Lower boundary is soft; distribution parameterized by normal-tail standard deviation\n")
+
+# Use a standard deviation of 0.1 for the left normal tail
+x5 ~ dnSoftBoundUniformNormal( min, max, sd = 0.1, boundary = "lower" )
+
+# Left normal tail
+x5.clamp(13.59)
+x5.lnProbability()
+x5.clamp(13.5999)
+x5.lnProbability()
+
+# Uniform "core"
+x5.clamp(13.7)
+x5.lnProbability()
+x5.clamp(24.9)
+x5.lnProbability()
+
+# The following are outside the range, and should therefore yield -inf
+x5.clamp(25.0001)
+x5.lnProbability()
+x5.clamp(25.01)
+x5.lnProbability()
+
+clear()
+q()

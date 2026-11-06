@@ -25,17 +25,32 @@
 
 namespace RevLanguage {
 
+
 class Delimiter : public ArgumentRule {
 
-    static constexpr const char* DESCRIPTION = "The field separator character. Values on each line of the file are separated by this character. If sep = \"\" the separator is \'white space\', that is one or more spaces, tabs, newlines or carriage returns.";
+    static constexpr const char* DESCRIPTION = "The field separator string. Values on each line of the file are separated by this string. If sep = \"\" the separator is \'white space\', that is one or more spaces, tabs, newlines or carriage returns.";
 
-    public:
-                                        Delimiter( const std::string &desc = DESCRIPTION, const std::string& def = "");              //! Some type specification needs to be met, value arguments by default
+public:
+    Delimiter( const std::string& def = "", const std::string &desc = DESCRIPTION);         //! Some type specification needs to be met, value arguments by default
 
-        // Basic utility functions
-        Delimiter*                      clone(void) const { return new Delimiter(*this); }   //!< Clone object
+    // Basic utility functions
+    Delimiter* clone(void) const { return new Delimiter(*this); }   //!< Clone object
 };
-    
+
+
+// When writing a delimiter, we cannot use patterns like "any white" space that we use to split fields.
+// Instead we must use a specific string.
+class WriteDelimiter : public ArgumentRule {
+
+    static constexpr const char* DESCRIPTION = "The field separator string. It may not be empty.";
+
+public:
+    WriteDelimiter( const std::string& def, const std::string &desc = DESCRIPTION);        //! Some type specification needs to be met, value arguments by default
+
+    // Basic utility functions
+    WriteDelimiter* clone(void) const { return new WriteDelimiter(*this); }   //!< Clone object
+};
+
 }
 
 #endif

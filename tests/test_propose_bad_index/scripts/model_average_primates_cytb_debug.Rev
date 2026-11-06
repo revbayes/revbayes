@@ -117,7 +117,7 @@ seq.clamp(data) # attach the observed data
 
 my_model = model(phylogeny)
 
-my_model.graph("model.dot")
+my_model.graph("output/model_average_primates_cytb_debug.dot")
 
 #####################
 # Make the monitors #

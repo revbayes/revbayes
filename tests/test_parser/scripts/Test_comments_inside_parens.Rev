@@ -1,0 +1,99 @@
+################################################################################
+#
+# RevBayes Test-Script: Checking that we can parse a distribution call that
+#                       contains commented-out lines
+#
+#
+# authors: David Cerny
+#
+################################################################################
+
+seed(12345)
+
+
+#######################
+# Reading in the data #
+#######################
+
+# Read in sequence data for both genes
+data <- readDiscreteCharacterData("data/primates_cytb_small.nex")
+
+# Get some useful variables from the data. We need these later on.
+taxa <- data.taxa()
+num_branches = 2 * taxa.size() - 3
+
+moves = VectorMoves()
+monitors = VectorMonitors()
+
+
+######################
+# Substitution model #
+######################
+
+# Specify the Jukes-Cantor substitution model applied uniformly to all sites
+Q <- fnJC(4)
+
+
+########################################
+# Among-sites rate heterogeneity model #
+########################################
+
+# Discretized gamma distribution of rates across sites
+alpha ~ dnUniform(0.0, 1E6)
+# moves.append( mvScale(alpha, weight=5.0) )
+char_rates := fnDiscretizeGamma(alpha, alpha, 4)
+
+
+##############
+# Tree model #
+##############
+
+for(i in 1:num_branches) {
+    bl[i] ~ dnExponential(1)
+    moves.append( mvScale(bl[i], weight=0.1) )
+}
+
+topology ~ dnUniformTopology(taxa=taxa)
+moves.append( mvNNI(topology, weight=1.0) )
+moves.append( mvSPR(topology, weight=3.0) )
+
+psi := fnTreeAssembly(topology, bl)
+
+
+###################
+# PhyloCTMC model #
+###################
+
+# Here we have a multiline comment inside a distribution constructor
+seq ~ dnPhyloCTMC(
+    tree=psi,
+    Q=Q,
+    # ============================================================ #
+    # We decided we don't want an ASRV model after all, and we are #
+    # letting everyone know right in the middle of our call to     #
+    # dnPhyloCTMC by commenting out the corresponding argument:    #
+    #                                                              #
+    # siteRates=char_rates,                                        #
+    # ============================================================ #
+    type="DNA")
+
+# Attach the data
+seq.clamp(data)
+
+
+############
+# Analysis #
+############
+
+# We define the full model using the rate matrix as a handle
+mymodel = model(Q)
+
+# Define a monitor
+monitors.append( mnStochasticVariable(filename="output/comments_inside_parens.log",
+                                      printgen=1, separator = TAB) )
+
+# Run the MCMC
+mymcmc = mcmc(mymodel, monitors, moves, moveschedule="single")
+mymcmc.run(generations=1000)
+
+q()

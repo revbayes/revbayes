@@ -23,13 +23,6 @@ The results are not official.
 1.645
 1.654
 
-##### SSE
-2.384
-2.382
- 2.390
-2.394
-2.438
-
 ##### AVX / -march=native
 1.574
 1.575
@@ -53,13 +46,6 @@ The results are not official.
  2.941
 2.949
 2.960
-
-##### SSE (1.29x slower)
-3.066
-3.078
- 3.081
-3.082
-3.089
 
 ##### AVX  (-march=native)  (1.32x slower)
 2.090

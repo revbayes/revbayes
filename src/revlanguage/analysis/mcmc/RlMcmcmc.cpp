@@ -97,7 +97,7 @@ void Mcmcmc::constructInternalObject( void )
     
     if (heat_temps->getRevObject() != RevNullObject::getInstance())
     {
-        std::vector<double>                                 ht      = static_cast<const ModelVector<RealPos> &>( heat_temps->getRevObject() ).getValue();
+        std::vector<double>                                 ht      = static_cast<const ModelVector<Probability>&>( heat_temps->getRevObject() ).getValue();
         
         if(ht.size() != nchains)
         {

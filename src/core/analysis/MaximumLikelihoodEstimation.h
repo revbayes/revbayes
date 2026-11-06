@@ -36,32 +36,32 @@ namespace RevBayesCore {
         
     public:
         MaximumLikelihoodEstimation(void);
-        virtual                                ~MaximumLikelihoodEstimation(void);                            //!< Virtual destructor
+        virtual                                ~MaximumLikelihoodEstimation(void);                                           //!< Virtual destructor
         
         // pure virtual public methods
 //        virtual void                            addFileMonitorExtension(const std::string &s, bool dir) = 0;
 //        virtual void                            addMonitor(const Monitor &m) = 0;
-        virtual void                            disableScreenMonitor(void) = 0;                     //!< Disable/remove all screen monitors
+        virtual void                            disableScreenMonitor(void) = 0;                                              //!< Disable/remove all screen monitors
         virtual MaximumLikelihoodEstimation*    clone(void) const = 0;
-        virtual void                            finishMonitors(void) = 0;                           //!< Finish the monitors
+        virtual void                            finishMonitors(void) = 0;                                                    //!< Finish the monitors
         virtual Model&                          getModel(void) = 0;
         virtual const Model&                    getModel(void) const = 0;
         virtual double                          getModelLnProbability(bool likelihood_only) = 0;
-        virtual std::string                     getStrategyDescription(void) const = 0;             //!< Get the discription of the strategy used for this sampler.
-        virtual bool                            hasConverged(double m) = 0;                         //!< Has the estimator converged to the maximum likelihood value
-        virtual void                            initializeSampler(void) = 0;                        //!< Initialize objects for mcmc sampling
+        virtual std::string                     getStrategyDescription(void) const = 0;                                      //!< Get the discription of the strategy used for this sampler.
+        virtual bool                            hasConverged(double m) = 0;                                                  //!< Has the estimator converged to the maximum likelihood value
+        virtual void                            initializeSampler(void) = 0;                                                 //!< Initialize objects for mcmc sampling
         virtual void                            monitor(std::uint64_t g) = 0;
         virtual void                            nextCycle(void) = 0;
         virtual void                            removeMonitors(void) = 0;
-        virtual void                            reset(void) = 0;                                    //!< Reset the sampler for a new run.
+        virtual void                            reset(void) = 0;                                                             //!< Reset the sampler for a new run.
         virtual void                            setModel(Model *m) = 0;
-        virtual void                            startMonitors(size_t num_cycles, bool reopen) = 0;  //!< Start the monitors
-        virtual void                            tune(void) = 0;                                     //!< Tune the sampler and its moves.
-        virtual void                            writeMonitorHeaders(void) = 0;                      //!< Write the headers of the monitors
+        virtual void                            startMonitors(size_t num_cycles, bool reopen, double maxSeconds = 0.0) = 0;  //!< Start the monitors
+        virtual void                            tune(void) = 0;                                                              //!< Tune the sampler and its moves.
+        virtual void                            writeMonitorHeaders(void) = 0;                                               //!< Write the headers of the monitors
 
         // public methods
-        size_t                                  getCurrentGeneration(void) const;                   //!< Get the current generations number
-        //        void                                    initializeMonitors(void);                         //!< Assign model and mcmc ptrs to monitors
+        size_t                                  getCurrentGeneration(void) const;                                            //!< Get the current generations number
+        //        void                                    initializeMonitors(void);                                          //!< Assign model and mcmc ptrs to monitors
         //        void                                    redrawChainState(void);
         
     protected:
@@ -72,7 +72,7 @@ namespace RevBayesCore {
     };
     
     // Global functions using the class
-    std::ostream&                               operator<<(std::ostream& o, const MaximumLikelihoodEstimation& x);                                //!< Overloaded output operator
+    std::ostream&                               operator<<(std::ostream& o, const MaximumLikelihoodEstimation& x);           //!< Overloaded output operator
     
 }
 

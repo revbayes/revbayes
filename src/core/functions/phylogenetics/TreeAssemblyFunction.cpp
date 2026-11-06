@@ -26,6 +26,9 @@
  * 3. restore and update might clear the list of changed branches (in touchedIndices).
  * 4. the branch-length vector might not be up-to-date with TreeAssemblyFunction::update() or ::restore() is called.
  * 5. the topology might change before update is called.
+ * 6. some topology sources (dnEmpiricalTree / mvEmpiricalTree) delete the Tree and allocate a
+ *    new one, so the value pointer must be reset from tau->getValue() before we touch nodes.
+ *    - See https://github.com/revbayes/revbayes/issues/547
  */
 
 using namespace RevBayesCore;
@@ -110,6 +113,10 @@ void TreeAssemblyFunction::restore( const DagNode *restorer )
 {
     //delegate to base class
     TypedFunction< Tree >::restore( restorer );
+
+    // The topology Tree may have been replaced (e.g. a rejected mvEmpiricalTree).
+    // bind to current topology
+    value = const_cast<Tree*>( &tau->getValue() );
     
     touchedNodeIndices.clear();
     brlenFlagDirty = false;
@@ -124,6 +131,15 @@ void TreeAssemblyFunction::touch(const DagNode *toucher)
     
     //reset flag
     brlenFlagDirty = true;
+
+    if ( toucher == tau )
+    {
+        // dnEmpiricalTree replaces the Tree object; NNI/SPR edit it in place.
+        // Bind to the current topology in either case, and drop stale per-branch
+        // indices so update() rewrites every branch length onto it.
+        value = const_cast<Tree*>( &tau->getValue() );
+        touchedNodeIndices.clear();
+    }
     
     if ( toucher == brlen )
     {
@@ -143,6 +159,8 @@ void TreeAssemblyFunction::touch(const DagNode *toucher)
 
 void TreeAssemblyFunction::update( void )
 {
+    // bind to current topology
+    value = const_cast<Tree*>( &tau->getValue() );
 
     const std::vector<double> &v = brlen->getValue();
     if ( touchedNodeIndices.size() < v.size() )

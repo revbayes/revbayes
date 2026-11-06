@@ -14,7 +14,7 @@ The minimum ages is computed either by its oldest descendant (for sampled ancest
 Sebastian Hoehna
 
 ## see_also
-mvFossilTipTimeSlideUniform
+mvFossilTipTimeUniform
 
 ## example
 

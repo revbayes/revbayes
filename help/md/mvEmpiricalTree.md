@@ -8,7 +8,7 @@ An MCMC move that operates on empirical tree distributions.
 ## authors
 Will Freyman
 Sebastian Hoehna
-Will Pett
+June Walker
 Jiansi Gao
 ## see_also
 mvEmpiricalTree

@@ -3,7 +3,7 @@
 #include <iomanip>
 #include <ostream>
 #include <vector>
-#include <range/v3/all.hpp> // for ranges::views
+#include "concat_view.h"
 
 #include "AbstractHomologousDiscreteCharacterData.h"
 #include "AbstractMove.h"
@@ -19,8 +19,6 @@
 #include "StochasticNode.h"
 #include "TopologyNode.h"
 #include "Tree.h"
-
-namespace views = ranges::views;
 
 using namespace RevBayesCore;
 
@@ -130,7 +128,7 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
     if (logMCMC >= 3)
     {
         std::cerr<<std::setprecision(11);
-        for(auto& node: views::concat(nodes,affected_nodes))
+        for(auto& node: concat_view(nodes,affected_nodes))
         {
             auto pr = initialPdfs.at(node);
             std::cerr<<"    BEFORE:   "<<node->getName()<<":  "<<pr<<"\n";
@@ -272,7 +270,7 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
     // 7. compute the heated posterior ratio
     double ln_likelihood_ratio = 0;
     double ln_prior_ratio = 0;
-    for(auto node: views::concat(nodes, affected_nodes))
+    for(auto node: concat_view(nodes, affected_nodes))
     {
         if (auto test_stoch = dynamic_cast<StochasticNode< AbstractHomologousDiscreteCharacterData >* >(node))
         {
@@ -298,7 +296,7 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
     if (logMCMC >= 3)
     {
         auto proposedPrs = getNodePrs(nodes, affected_nodes);
-        for(auto& node: views::concat(nodes,affected_nodes))
+        for(auto& node: concat_view(nodes,affected_nodes))
         {
             auto pr = proposedPrs.at(node);
             std::cerr<<"    PROPOSED: "<<node->getName()<<":  "<<pr<<"\n";
@@ -393,7 +391,7 @@ void RateAgeBetaShift::performMcmcMove( double prHeat, double lHeat, double pHea
 
     if (logMCMC >= 3)
     {
-        for(auto& node: views::concat(nodes,affected_nodes))
+        for(auto& node: concat_view(nodes,affected_nodes))
         {
             auto pr = finalPdfs.at(node);
             std::cerr<<"    FINAL:    "<<node->getName()<<":  "<<pr<<"\n";
@@ -624,5 +622,4 @@ void RateAgeBetaShift::tune( void )
     }
 
 }
-
 

@@ -21,7 +21,7 @@ template <class variableType> class TypedDistribution;
      * Propose a new time tree topology from an unconstrained proposal distribution
      *
      * @copyright Copyright 2009-
-     * @author The RevBayes Development Core Team (Will Pett)
+     * @author The RevBayes Development Core Team (June Walker)
      * @since 2012-07-12, version 1.0
      *
      */

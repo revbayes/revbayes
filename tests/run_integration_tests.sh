@@ -87,11 +87,15 @@ if [ ! -d "revbayes.github.io" ] ; then
 fi
 
 # Run the tutorial tests using the script from the website
+tutorial_status=0
 if [ ${#only_tests[@]} = 0 ] ; then
 (
     cd revbayes.github.io/tutorials
     ./run_tutorial_tests.sh ${rb_exec[@]}
-) || exit 1
+) || {
+    tutorial_status=$?
+    printf "\n${BOLD}#### ${RED}Tutorial tests failed with status $tutorial_status; continuing with integration tests.${CLEAR}\n\n"
+}
 fi
 
 if [ ${#only_tests[@]} -gt 0 ] ; then
@@ -165,6 +169,19 @@ for t in ${TESTS}; do
         fi
 
     done
+
+    # A script that writes outside output/ leaves the file in the source tree, where it can be
+    # committed by accident and where two scripts can overwrite each other. Nothing tracked
+    # lives at the root of a test directory, so anything here is a stray.
+    strays="$(ls -A | grep -vxE 'scripts|output|output_expected|output_expected_mpi|exit_expected|data' | tr '\n' ' ')"
+    if [ -n "${strays% }" ] ; then
+        printf "\n   ${RED}FAIL${CLEAR}: wrote outside output/: ${strays}\n\n"
+        if [ "${test_result}" = 0 ] ; then
+            test_result="\twrote outside output/: ${strays}\n"
+        else
+            test_result="${test_result}\twrote outside output/: ${strays}\n"
+        fi
+    fi
 
     # store the exit status
     status+=("${test_result}")
@@ -260,10 +277,10 @@ while [  $i -lt ${#tests[@]} ]; do
 done
 
 
-if [ $failed -gt 0 ]; then
-    printf "\n\n${BOLD}#### ${MAGENTA}Warning!${CLEAR}${BOLD} unexpected failures: $failed   expected failures: $xfailed   total tests: $i${CLEAR}\n\n"
+if [ "$failed" -gt 0 ] || [ "$tutorial_status" -ne 0 ]; then
+    printf "\n\n${BOLD}#### ${MAGENTA}Warning!${CLEAR}${BOLD} tutorial status: $tutorial_status   unexpected failures: $failed   expected failures: $xfailed   total tests: $i${CLEAR}\n\n"
     exit 113
 else
-    printf "\n\n${BOLD}#### ${GREEN}Success!${CLEAR}${BOLD} unexpected failures: $failed   expected failures: $xfailed   total tests: $i${CLEAR}\n\n"
+    printf "\n\n${BOLD}#### ${GREEN}Success!${CLEAR}${BOLD} tutorial status: $tutorial_status   unexpected failures: $failed   expected failures: $xfailed   total tests: $i${CLEAR}\n\n"
     printf "\n\n${BOLD}#### All tests passed.${CLEAR}\n\n"
 fi

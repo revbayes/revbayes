@@ -128,34 +128,70 @@ double NarrowExchangeProposal::doProposal( void )
         uncle = &grandparent.getChild( 1 );
     }
     
+    if (uncle->isSampledAncestorTip())
+    {
+        TopologyNode* brother = &parent.getChild(0);
+        if (node == brother)
+            brother = &parent.getChild(1);
+
+        if (brother->isSampledAncestorTip())
+        {
+            // Swapping uncle and node, will mean that parent has two sampled-ancestor children.
+            failed = true;
+            return RbConstants::Double::neginf; // fail proposal
+        }
+    }
+
     // we need to work with the times
     double parent_age   = parent.getAge();
     double uncles_age   = uncle->getAge();
-    
-    if ( uncles_age < parent_age )
-    {
-        failed = false;
-        
-        // now we store all necessary values
-        storedChosenNode    = node;
-        storedUncle         = uncle;
-        
-        // now exchange the two nodes
-        grandparent.removeChild( uncle );
-        parent.removeChild( node );
-        grandparent.addChild( node );
-        parent.addChild( uncle );
-        node->setParent( &grandparent );
-        uncle->setParent( &parent );
-        
-        return 0.0;
-    }
-    else
+
+    // Ordinary tips and subtrees must fit below the parent. Sampled-ancestor tips instead
+    // require equality, checked below, so equal-age exchanges remain reversible.
+    if (not uncle->isSampledAncestorTip() and uncles_age >= parent_age)
     {
         failed = true;
         return RbConstants::Double::neginf;
     }
-    
+
+    // A sampled-ancestor tip must match its parent's age. This move preserves sampling
+    // ages, so reject an exchange that would require changing a tip's age, even if its
+    // taxon interval permits the change or no explicit sampling-age constraint was supplied.
+    //
+    // A possible generalization would move each exchanged sampled-ancestor tip to its new
+    // parent's age; the reverse exchange would restore its original age. Enabling this
+    // requires establishing when the model permits sampling ages to vary, enforcing age
+    // constraints in the distribution, and checking reversibility and the Hastings ratio.
+    for (TopologyNode* fossil : {node, uncle})
+    {
+        if (not fossil->isSampledAncestorTip())
+            continue;
+
+        double new_age = fossil == node ? grandparent.getAge() : parent_age;
+        if (new_age != fossil->getAge())
+        {
+            failed = true;
+            return RbConstants::Double::neginf;
+        }
+    }
+
+    failed = false;
+
+    // now we store all necessary values
+    storedChosenNode    = node;
+    storedUncle         = uncle;
+
+    // now exchange the two nodes
+    grandparent.removeChild( uncle );
+    parent.removeChild( node );
+    grandparent.addChild( node );
+    parent.addChild( uncle );
+    node->setParent( &grandparent );
+    uncle->setParent( &parent );
+
+    // Selecting the exchanged uncle reverses the swap; every node retains its age.
+    // Both selections have the same probability; internal ages and the eligible node count stay fixed.
+    return 0.0;
 }
 
 
@@ -208,7 +244,6 @@ void NarrowExchangeProposal::undoProposal( void )
         parent.addChild( storedChosenNode );
         storedUncle->setParent( &grandparent );
         storedChosenNode->setParent( &parent );
-        
     }
     
 }
