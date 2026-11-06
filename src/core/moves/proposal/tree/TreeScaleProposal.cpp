@@ -6,6 +6,7 @@
 
 #include "RandomNumberFactory.h"
 #include "RandomNumberGenerator.h"
+#include "RbException.h"
 #include "TreeUtilities.h"
 #include "Cloneable.h"
 #include "StochasticNode.h"
@@ -21,16 +22,22 @@ using namespace RevBayesCore;
  *
  * Here we simply allocate and initialize the Proposal object.
  */
-TreeScaleProposal::TreeScaleProposal( StochasticNode<Tree> *t, StochasticNode< RbVector<Tree> > *vec_n, StochasticNode<double> *r, double d ) : Proposal(),
+TreeScaleProposal::TreeScaleProposal(StochasticNode<Tree>* t, StochasticNode<RbVector<Tree>>* vec_n,
+                                   StochasticNode<double>* r, double d, StochasticNode<double>* o) : Proposal(),
     tree( t ),
     vector_variable( vec_n),
     rootAge( r ),
+    originAge( o ),
     delta( d )
 {
+    if (rootAge != NULL and originAge != NULL)
+        throw RbException("mvTreeScale: rootAge and originAge are mutually exclusive.");
+
     // tell the base class to add the node
     addNode( tree );
     addNode( vector_variable );
     addNode( rootAge );
+    addNode( originAge );
     
 }
 
@@ -77,13 +84,21 @@ double TreeScaleProposal::getProposalTuningParameter( void ) const
 }
 
 
-/**
- * Perform the proposal.
- *
- *
- *
- * \return The hastings ratio.
- */
+namespace {
+
+// Follow rescaleSubtree's binary traversal: tips and sampled-ancestor parents stop scaling
+// of their entire subtrees. Only the internal ages above these boundaries enter the Jacobian.
+size_t countScaledAges(const TopologyNode& node)
+{
+    if (node.isTip() or node.isSampledAncestorParent())
+        return 0;
+
+    return 1 + countScaledAges(node.getChild(0)) + countScaledAges(node.getChild(1));
+}
+
+}
+
+// Scale eligible internal ages, synchronizing a root-age scalar or jointly scaling an origin.
 double TreeScaleProposal::doProposal( void )
 {
     
@@ -108,10 +123,23 @@ double TreeScaleProposal::doProposal( void )
     
     // we need to work with the times
     double my_age      = node.getAge();
+
+    // rootAge represents the root coordinate, not an independent origin or stem age.
+    // Check before mutation: undo must not overwrite a different scalar with the root age.
+    if (rootAge != NULL)
+    {
+        if (rootAge->getValue() != my_age)
+            throw RbException("mvTreeScale: rootAge must equal the tree's root age; "
+                              "use originAge for an independent origin age.");
+        storedRootAge = rootAge->getValue();
+    }
+    if (originAge != NULL)
+        storedOriginAge = originAge->getValue();
     
     // now we store all necessary values
     storedAges = std::vector<double>(tau.getNumberOfNodes(), 0.0);
     TreeUtilities::getAges(node, storedAges);
+    const size_t num_scaled_ages = countScaledAges(node);
     
     // draw new ages 
     double u = rng->uniform01();
@@ -122,11 +150,17 @@ double TreeScaleProposal::doProposal( void )
     
     if ( rootAge != NULL )
     {
-        rootAge->setValue( new double(my_age * scaling_factor) );
+        // A sampled-ancestor root is a fixed boundary, so use its actual age after scaling.
+        rootAge->setValue( new double(node.getAge()) );
     }
+    if (originAge != NULL)
+        originAge->setValue( new double(storedOriginAge * scaling_factor) );
     
-    // compute the Hastings ratio
-    double lnHastingsratio = log( scaling_factor ) * (tau.getNumberOfNodes() - tau.getNumberOfTips());
+    // The log-symmetric scale draw gives a Hastings factor s^k for k scaled coordinates.
+    // A root-age scalar represents the same coordinate as the tree root, not an extra one.
+    // Fixed boundaries and their descendants contribute nothing, including a no-op at the root.
+    // An independent origin is one additional scaled coordinate, even if the root is fixed.
+    double lnHastingsratio = log( scaling_factor ) * (num_scaled_ages + (originAge != NULL ? 1 : 0));
     
     return lnHastingsratio;
 }
@@ -190,8 +224,10 @@ void TreeScaleProposal::undoProposal( void )
     
     if ( rootAge != NULL )
     {
-        rootAge->setValue( new double(node.getAge()) );
+        rootAge->setValue( new double(storedRootAge) );
     }
+    if (originAge != NULL)
+        originAge->setValue( new double(storedOriginAge) );
     
 }
 
@@ -216,6 +252,10 @@ void TreeScaleProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
     else if ( oldN == rootAge )
     {
         rootAge = static_cast<StochasticNode<double>* >(newN);
+    }
+    else if ( oldN == originAge )
+    {
+        originAge = static_cast<StochasticNode<double>* >(newN);
     }
     
 }

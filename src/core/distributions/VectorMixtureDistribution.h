@@ -44,6 +44,10 @@ namespace RevBayesCore {
         void                                                    restoreSpecialization(const DagNode *restorer);
         void                                                    touchSpecialization(const DagNode *toucher, bool touchAll);
         
+        // Clamping preparation remains the default no-op: components can disagree on constraints
+        // or precision. Sequential repair would impose a component order on the observation.
+        void repairCheckpointValue(RbVector<mixtureType>& v) override;
+
     protected:
         // Parameter management functions
         void                                                    swapParameterInternal(const DagNode *oldP, const DagNode *newP);                        //!< Swap a parameter
@@ -163,6 +167,10 @@ double RevBayesCore::VectorMixtureDistribution<mixtureType>::computeLnProbabilit
         }
     }
     
+    // If every component has zero density, the mixture does too. Subtracting -infinity
+    // from itself in the log-sum below would instead turn an impossible value into NaN.
+    if (max_prob == RbConstants::Double::neginf) return max_prob;
+
     // safe summation of exp-transformed values
     double sum_probs = 0.0;
     for (size_t i=0; i<base_distributions.size(); ++i)
@@ -324,6 +332,14 @@ void RevBayesCore::VectorMixtureDistribution<mixtureType>::touchSpecialization( 
     // only do this when the toucher was our parameters
     dirty = true;
     
+}
+
+// Propagate checkpoint-only repair to the component distributions on the restored value.
+template<class mixtureType>
+void RevBayesCore::VectorMixtureDistribution<mixtureType>::repairCheckpointValue(RbVector<mixtureType>& v)
+{
+    for (auto& element : v)
+        for (auto* component : base_distributions) component->repairCheckpointValue(element);
 }
 
 #endif

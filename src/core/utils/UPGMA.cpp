@@ -1,3 +1,4 @@
+#include "TimeInterval.h"
 #include "DistanceMatrix.h"
 #include "RbConstants.h"
 #include "Taxon.h"
@@ -33,7 +34,10 @@ Tree* UPGMA::constructTree(const DistanceMatrix &d) const
     for (size_t i=0; i<num_tips; ++i)
     {
         TopologyNode* node = new TopologyNode( taxa[i], i );
-        node->setAge( taxa[i].getAge() );
+        // Unconstrained tips start at age zero.
+        const auto& interval = taxa[i].getAgeRange();
+        const double interval_age = interval ? interval->getMin() : 0.0;
+        node->setAge( interval_age );
         active_nodes[i] = node;
     }
     
