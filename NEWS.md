@@ -9,7 +9,7 @@
   * Remove `mvResampleFBD` (#1132).
 
 ## Speed & memory
-  * 1.1--8x speedup in `dnPhyloCTMC` analyses by not discarding partial likelihoods upon rejecting a tree move (#1136).
+  * 1.1–8x speedup in `dnPhyloCTMC` analyses by not discarding partial likelihoods upon rejecting a tree move (#1136).
   
 ## New models/analyses
   * Reversible-jump MCMC between time-reversible and non-reversible nucleotide substitution models (#1110).
