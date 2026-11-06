@@ -1,6 +1,7 @@
 #ifndef StochasticNode_H
 #define StochasticNode_H
 
+#include "TypeUtilities.h"
 #include "Cloner.h"
 #include "DynamicNode.h"
 #include "IsDerivedFrom.h"
@@ -99,7 +100,7 @@ RevBayesCore::StochasticNode<valueType>::StochasticNode(const StochasticNode<val
     this->attachToDistributionParameters( *this );
 
     // Set us as the DAG node of the distribution
-    static_cast<TypedDistribution<valueType>*>( this->distribution )->setStochasticNode( this );
+    assume_cast<TypedDistribution<valueType>*>( this->distribution )->setStochasticNode( this );
 }
 
 
@@ -122,7 +123,7 @@ RevBayesCore::StochasticNode<valueType>& RevBayesCore::StochasticNode<valueType>
         StochasticNodeBase::assign( n, *this );
 
         // Set us as the DAG node of the new distribution
-        static_cast<TypedDistribution<valueType>*>( this->distribution )->setStochasticNode( this );
+        assume_cast<TypedDistribution<valueType>*>( this->distribution )->setStochasticNode( this );
     }
 
     return *this;
@@ -203,7 +204,7 @@ void RevBayesCore::StochasticNode<valueType>::getAffected(RbOrderedSet<DagNode*>
 template<class valueType>
 RevBayesCore::TypedDistribution<valueType>& RevBayesCore::StochasticNode<valueType>::getDistribution(void)
 {
-    return *static_cast<TypedDistribution<valueType>*>( this->distribution );
+    return *assume_cast<TypedDistribution<valueType>*>( this->distribution );
 }
 
 
@@ -211,7 +212,7 @@ RevBayesCore::TypedDistribution<valueType>& RevBayesCore::StochasticNode<valueTy
 template<class valueType>
 const RevBayesCore::TypedDistribution<valueType>& RevBayesCore::StochasticNode<valueType>::getDistribution(void) const
 {
-    return *static_cast<const TypedDistribution<valueType>*>( this->distribution );
+    return *assume_cast<const TypedDistribution<valueType>*>( this->distribution );
 }
 
 
@@ -296,7 +297,7 @@ std::vector<const RevBayesCore::DagNode*> RevBayesCore::StochasticNode<valueType
 template<class valueType>
 valueType& RevBayesCore::StochasticNode<valueType>::getValue(void)
 {
-    return static_cast<TypedDistribution<valueType>*>( this->distribution )->getValue();
+    return assume_cast<TypedDistribution<valueType>*>( this->distribution )->getValue();
 }
 
 
@@ -304,7 +305,7 @@ valueType& RevBayesCore::StochasticNode<valueType>::getValue(void)
 template<class valueType>
 const valueType& RevBayesCore::StochasticNode<valueType>::getValue(void) const
 {
-    return static_cast<const TypedDistribution<valueType>*>( this->distribution )->getValue();
+    return assume_cast<const TypedDistribution<valueType>*>( this->distribution )->getValue();
 }
 
 
@@ -437,7 +438,7 @@ void RevBayesCore::StochasticNode<valueType>::setIntegratedOut(bool tf)
 template<class valueType>
 void RevBayesCore::StochasticNode<valueType>::setIntegrationIndex(size_t i)
 {
-    TypedDistribution<valueType> *typedDistribution = static_cast<TypedDistribution<valueType>*>( this->distribution );
+    TypedDistribution<valueType> *typedDistribution = assume_cast<TypedDistribution<valueType>*>( this->distribution );
     valueType *newValue = Cloner<valueType, IsDerivedFrom<valueType, Cloneable>::Is>::createClone( typedDistribution->getParameterValues()[i] );
     this->setValue( newValue );
 }
@@ -464,7 +465,7 @@ template<class valueType>
 void RevBayesCore::StochasticNode<valueType>::setValue(valueType *val, bool forceTouch)
 {
     // set the value
-    static_cast<TypedDistribution<valueType>*>( this->distribution )->setValue( val, true );
+    assume_cast<TypedDistribution<valueType>*>( this->distribution )->setValue( val, true );
     if ( forceTouch == true )
     {
         // touch this node for probability recalculation

@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include <cstddef>
 #include <iostream>
 #include <set>
@@ -95,7 +96,7 @@ void TreeDiscreteCharacterData::initFromFile(const path &dir, const std::string 
         throw RbException()<<"Could not read character data matrix from file "<<filename<<".";
     }
     
-    HomologousDiscreteCharacterData<StandardState> *coreM = static_cast<HomologousDiscreteCharacterData<StandardState> *>( m_i[0] );
+    HomologousDiscreteCharacterData<StandardState> *coreM = assume_cast<HomologousDiscreteCharacterData<StandardState> *>( m_i[0] );
     
     character_data = coreM;
     

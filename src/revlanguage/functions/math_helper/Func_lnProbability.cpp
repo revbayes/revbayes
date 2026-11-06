@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include "Func_lnProbability.h"
 
@@ -39,7 +40,7 @@ RevBayesCore::TypedFunction<double>* Func_lnProbability::createFunction( void ) 
 {
     
     RevBayesCore::TypedDagNode<double>* x = dagNodeForRevType<Real>(this->args[0].getVariable());
-    RevBayesCore::StochasticNode<double>* y = static_cast<RevBayesCore::StochasticNode<double>* >(x);
+    RevBayesCore::StochasticNode<double>* y = assume_cast<RevBayesCore::StochasticNode<double>* >(x);
     RevBayesCore::LnProbabilityFunction* f = new RevBayesCore::LnProbabilityFunction( y );
     
     return f;

@@ -6,6 +6,7 @@
 //  Copyright (c) 2014 revbayes team. All rights reserved.
 //
 
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include "Move_MatrixRealSymmetricSlide.h"
 
@@ -62,7 +63,7 @@ void Move_MatrixRealSymmetricSlide::constructInternalObject( void )
     double l = valueForRevType<RealPos>(delta);
     double w = valueForRevType<RealPos>(weight);
     RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal>* tmp = dagNodeForRevType<MatrixRealSymmetric>(mat);
-    RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *matrix = static_cast<RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *>( tmp );
+    RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *matrix = assume_cast<RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *>( tmp );
     bool t = valueForRevType<RlBoolean>(tune);
     double tt = valueForRevType<Probability>(tuneTarget);
     

@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "CodonSynonymousNonsynonymousRateMatrixFunction.h"
 
@@ -47,8 +48,8 @@ void CodonSynonymousNonsynonymousRateMatrixFunction::update( void )
     
     
     // set the base frequencies
-    static_cast< RateMatrix_CodonSynonymousNonsynonymous* >(value)->setCodonFrequencies( f );
-    static_cast< RateMatrix_CodonSynonymousNonsynonymous* >(value)->setOmega( o );
+    assume_cast< RateMatrix_CodonSynonymousNonsynonymous* >(value)->setCodonFrequencies( f );
+    assume_cast< RateMatrix_CodonSynonymousNonsynonymous* >(value)->setOmega( o );
     
     value->update();
 }

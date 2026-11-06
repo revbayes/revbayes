@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
@@ -71,7 +72,7 @@ void Move_OrderedEventTimeSlide::constructInternalObject( void )
     // now allocate a new random-geometric-walk move
     double w = valueForRevType<RealPos>(weight);
     RevBayesCore::TypedDagNode<RevBayesCore::OrderedEventTimes>* tmp = dagNodeForRevType<RlOrderedEventTimes>(x);
-    RevBayesCore::StochasticNode<RevBayesCore::OrderedEventTimes> *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::OrderedEventTimes> *>( tmp );
+    RevBayesCore::StochasticNode<RevBayesCore::OrderedEventTimes> *n = assume_cast<RevBayesCore::StochasticNode<RevBayesCore::OrderedEventTimes> *>( tmp );
     
     bool tuning = valueForRevType<RlBoolean>(tune);
     double d    = valueForRevType<RealPos>(delta);

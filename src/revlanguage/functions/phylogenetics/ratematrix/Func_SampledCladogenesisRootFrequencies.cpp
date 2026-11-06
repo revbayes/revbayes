@@ -6,6 +6,7 @@
 //  Copyright © 2016 Michael Landis. All rights reserved.
 //
 
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include "Func_SampledCladogenesisRootFrequencies.h"
 
@@ -66,7 +67,7 @@ RevBayesCore::TypedFunction< RevBayesCore::Simplex >* Func_SampledCladogenesisRo
     
     // tree
     RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = dagNodeForRevType<TimeTree>(this->args[2].getVariable());
-    RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
+    RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = assume_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
     
     // clock
     RevBayesCore::TypedDagNode<double>* r = dagNodeForRevType<RealPos>(this->args[3].getVariable());

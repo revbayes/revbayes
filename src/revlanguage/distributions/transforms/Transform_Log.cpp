@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include "Transform_Log.h"
 
@@ -32,7 +33,7 @@ RevBayesCore::TransformedDistribution* Transform_Log::createDistribution( void )
 
     // get the parameters
     const Distribution& rl_vp                      = objectForRevType<Distribution>(base_distribution);
-    RevBayesCore::TypedDistribution<double>* vp    = static_cast<RevBayesCore::TypedDistribution<double>* >( rl_vp.createDistribution() );
+    RevBayesCore::TypedDistribution<double>* vp    = assume_cast<RevBayesCore::TypedDistribution<double>* >( rl_vp.createDistribution() );
 
     RevBayesCore::TransformedDistribution* d = new RevBayesCore::TransformedDistribution(*vp, log_transform, log_inverse, log_log_prime);
 

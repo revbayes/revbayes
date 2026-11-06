@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include "Dist_phyloCTMCDASequence.h"
 
@@ -412,7 +413,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
         {
 
             cp_tdn = dagNodeForRevType<CladogeneticProbabilityMatrix>(clado_probs);
-            cp_dn  = static_cast<RevBayesCore::DeterministicNode<RevBayesCore::CladogeneticProbabilityMatrix>*>( cp_tdn );
+            cp_dn  = assume_cast<RevBayesCore::DeterministicNode<RevBayesCore::CladogeneticProbabilityMatrix>*>( cp_tdn );
             dist->setCladogeneticProbabilityMatrix( cp_dn );
         }
         

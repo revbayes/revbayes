@@ -1,6 +1,7 @@
 #ifndef CTMCProcess_H
 #define CTMCProcess_H
 
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "Simplex.h"
 #include "RateGenerator.h"
@@ -606,7 +607,7 @@ void RevBayesCore::CTMCProcess<charType>::compress( void )
         // set the counts for this patter
         process_pattern_counts[pattern_index] = pattern_counts[pattern_index+pattern_block_start];
 
-        charType &c = static_cast<charType &>( seq.getCharacter(site_indices[index_of_site_pattern[pattern_index+pattern_block_start]]) );
+        charType &c = assume_cast<charType &>( seq.getCharacter(site_indices[index_of_site_pattern[pattern_index+pattern_block_start]]) );
         gap_vector[pattern_index] = c.isGapState();
 
         if ( using_ambiguous_characters == true )
@@ -711,7 +712,7 @@ void RevBayesCore::CTMCProcess<charType>::executeMethod(const std::string &n, co
 
         // now either sample the site rates according to the conditional posterior probability of each rate category
         // or compute them as the posterior mean
-        std::string method = static_cast<const TypedDagNode<std::string>* >( args[0] )->getValue();
+        std::string method = assume_cast<const TypedDagNode<std::string>* >( args[0] )->getValue();
 
         if (method == "sampling")
         {
@@ -1122,7 +1123,7 @@ void RevBayesCore::CTMCProcess<charType>::setValue(AbstractDiscreteTaxonData *v,
     this->compress();
 
     // now we also set the template state
-    template_state = charType( static_cast<const charType&>( this->value->getCharacter(0) ) );
+    template_state = charType( assume_cast<const charType&>( this->value->getCharacter(0) ) );
     template_state.setToFirstState();
     template_state.setGapState( false );
     template_state.setMissingState( false );

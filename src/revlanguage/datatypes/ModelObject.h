@@ -321,7 +321,7 @@ void RevLanguage::ModelObject<rbType>::makeConversionValue(const AbstractModelOb
 template <typename rbType>
 void RevLanguage::ModelObject<rbType>::setValueFromNode(const RevBayesCore::DagNode& source)
 {
-    const auto& value = static_cast<const RevBayesCore::TypedDagNode<rbType>&>(source).getValue();
+    const auto& value = assume_cast<const RevBayesCore::TypedDagNode<rbType>&>(source).getValue();
     setValue(RevBayesCore::Cloner<rbType, IsDerivedFrom<rbType, RevBayesCore::Cloneable>::Is>::createClone(value));
 }
 

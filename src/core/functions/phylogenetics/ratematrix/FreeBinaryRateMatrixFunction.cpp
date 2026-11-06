@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "FreeBinaryRateMatrixFunction.h"
 
@@ -41,7 +42,7 @@ void FreeBinaryRateMatrixFunction::update( void )
     const std::vector<double>& r = transition_rates->getValue();
     
     // set the base frequencies
-    static_cast< RateMatrix_FreeBinary* >(value)->setTransitionRates(r);
+    assume_cast< RateMatrix_FreeBinary* >(value)->setTransitionRates(r);
     
     value->update();
 }
