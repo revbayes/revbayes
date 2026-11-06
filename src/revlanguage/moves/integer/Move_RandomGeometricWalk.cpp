@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -67,12 +68,12 @@ void Move_RandomGeometricWalk::constructInternalObject( void )
     delete value;
     
     // now allocate a new random-geometric-walk move
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<std::int64_t>* tmp = static_cast<const Integer &>( x->getRevObject() ).getDagNode();
+    double w = valueForRevType<RealPos>(weight);
+    RevBayesCore::TypedDagNode<std::int64_t>* tmp = dagNodeForRevType<Integer>(x);
     RevBayesCore::StochasticNode<std::int64_t> *n = static_cast<RevBayesCore::StochasticNode<std::int64_t> *>( tmp );
-    double a = static_cast<const Probability &>( p->getRevObject() ).getValue();
-    bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double a = valueForRevType<Probability>(p);
+    bool t = valueForRevType<RlBoolean>(tune);
+    double tt = valueForRevType<Probability>(tuneTarget);
 
     // finally create the internal move object
     RevBayesCore::Proposal *prop = new RevBayesCore::RandomGeometricWalkProposal(n, a);

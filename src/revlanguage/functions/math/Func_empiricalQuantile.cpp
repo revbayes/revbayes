@@ -6,6 +6,7 @@
 //  Copyright © 2016 Lyndon Coghill. All rights reserved.
 //
 
+#include "RevTypeUtilities.h"
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -58,8 +59,8 @@ Func_empiricalQuantile* Func_empiricalQuantile::clone( void ) const
 RevBayesCore::TypedFunction<double>* Func_empiricalQuantile::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* arg = static_cast<const ModelVector<Real> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* k = static_cast<const Probability &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* arg = dagNodeForRevType<ModelVector<Real>>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode<double>* k = dagNodeForRevType<Probability>(this->args[1].getVariable());
     RevBayesCore::EmpiricalQuantileFunction* f = new RevBayesCore::EmpiricalQuantileFunction( arg, k );
     
     return f;

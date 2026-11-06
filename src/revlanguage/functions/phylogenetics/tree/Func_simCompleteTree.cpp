@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cmath>       /* log2 */
 #include <cstddef>
 #include <algorithm>
@@ -55,11 +56,11 @@ RevPtr<RevVariable> Func_simCompleteTree::execute( void )
     size_t arg_index = 0;
     
     // taxon names
-    const std::vector<RevBayesCore::Taxon> &taxa   = static_cast<const ModelVector<Taxon> &>( args[arg_index++].getVariable()->getRevObject() ).getDagNode()->getValue();
+    const std::vector<RevBayesCore::Taxon> &taxa   = dagNodeForRevType<ModelVector<Taxon>>(args[arg_index++].getVariable())->getValue();
 
-    double age  = static_cast<const RealPos &>( args[arg_index++].getVariable()->getRevObject() ).getValue();
-    double b    = static_cast<const RealPos &>( args[arg_index++].getVariable()->getRevObject() ).getValue();
-    double d    = static_cast<const RealPos &>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+    double age  = valueForRevType<RealPos>(args[arg_index++].getVariable());
+    double b    = valueForRevType<RealPos>(args[arg_index++].getVariable());
+    double d    = valueForRevType<RealPos>(args[arg_index++].getVariable());
     
     // get the number of taxa
     size_t num_taxa = taxa.size();

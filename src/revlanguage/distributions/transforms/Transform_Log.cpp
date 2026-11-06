@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "Transform_Log.h"
 
 #include "ArgumentRule.h"
@@ -30,7 +31,7 @@ RevBayesCore::TransformedDistribution* Transform_Log::createDistribution( void )
     using namespace Transforms;
 
     // get the parameters
-    const Distribution& rl_vp                      = static_cast<const Distribution &>( base_distribution->getRevObject() );
+    const Distribution& rl_vp                      = objectForRevType<Distribution>(base_distribution);
     RevBayesCore::TypedDistribution<double>* vp    = static_cast<RevBayesCore::TypedDistribution<double>* >( rl_vp.createDistribution() );
 
     RevBayesCore::TransformedDistribution* d = new RevBayesCore::TransformedDistribution(*vp, log_transform, log_inverse, log_log_prime);

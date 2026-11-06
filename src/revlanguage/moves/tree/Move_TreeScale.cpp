@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -58,12 +59,12 @@ void Move_TreeScale::constructInternalObject( void )
     RevBayesCore::StochasticNode< RevBayesCore::RbVector<RevBayesCore::Tree> > *vec_t = NULL;
     if ( tree->getRevObject().isType( TimeTree::getClassTypeSpec() ) )
     {
-        RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = dagNodeForRevType<TimeTree>(tree);
         t = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
     }
     else if ( tree->getRevObject().isType( ModelVector<TimeTree>::getClassTypeSpec() ) )
     {
-        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::Tree> > *tmp = static_cast<const ModelVector<TimeTree> &>( tree->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::Tree> > *tmp = dagNodeForRevType<ModelVector<TimeTree>>(tree);
         vec_t = static_cast<RevBayesCore::StochasticNode< RevBayesCore::RbVector<RevBayesCore::Tree> > *>( tmp );
     }
     else
@@ -74,13 +75,13 @@ void Move_TreeScale::constructInternalObject( void )
     RevBayesCore::StochasticNode<double> *ra = NULL;
     if ( rootAge != NULL && rootAge->getRevObject() != RevNullObject::getInstance() )
     {
-        RevBayesCore::TypedDagNode<double> *tmp = static_cast<const RealPos &>( rootAge->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<double> *tmp = dagNodeForRevType<RealPos>(rootAge);
         ra = static_cast<RevBayesCore::StochasticNode<double> *>( tmp );
     }
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    double l = static_cast<const RealPos &>( delta->getRevObject() ).getValue();
-    bool tune = static_cast<const RlBoolean &>( tuning->getRevObject() ).getValue();
-    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double w = valueForRevType<RealPos>(weight);
+    double l = valueForRevType<RealPos>(delta);
+    bool tune = valueForRevType<RlBoolean>(tuning);
+    double tt = valueForRevType<Probability>(tuneTarget);
 
     RevBayesCore::Proposal *p = new RevBayesCore::TreeScaleProposal(t, vec_t, ra, l);
     p->setTargetAcceptanceRate(tt);

@@ -17,6 +17,7 @@
 #ifndef DistributionFunctionRv_H
 #define DistributionFunctionRv_H
 
+#include "RevTypeUtilities.h"
 #include "RlTypedDistribution.h"
 #include "Procedure.h"
 
@@ -155,7 +156,7 @@ RevLanguage::RevPtr<RevVariable> RevLanguage::DistributionFunctionRv<valueType>:
         
     }
     
-    int n = (int)static_cast<const Natural &>( this->args[0].getVariable()->getRevObject() ).getValue();
+    int n = (int)valueForRevType<Natural>(this->args[0].getVariable());
     ModelVector<valueType> *values = new ModelVector<valueType>();
     for (int i = 0;  i < n; ++i)
     {

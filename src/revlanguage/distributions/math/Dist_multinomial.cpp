@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cmath>
 #include <cstddef>
 #include <ostream>
@@ -64,8 +65,8 @@ RevBayesCore::MultinomialDistribution* Dist_multinomial::createDistribution( voi
 {
     
     // get the parameters
-    RevBayesCore::TypedDagNode<std::int64_t>*                              vn = static_cast<const Natural     &>( n->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< RevBayesCore::Simplex >*          vp = static_cast<const Simplex &>( p->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<std::int64_t>*                              vn = dagNodeForRevType<Natural>(n);
+    RevBayesCore::TypedDagNode< RevBayesCore::Simplex >*          vp = dagNodeForRevType<Simplex>(p);
     RevBayesCore::MultinomialDistribution*                        d  = new RevBayesCore::MultinomialDistribution( vp, vn );
     return d;
 }

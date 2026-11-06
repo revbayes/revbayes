@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <ostream>
 #include <string>
 
@@ -45,18 +46,18 @@ void Mntr_Model::constructInternalObject( void )
     delete value;
     
     // now allocate a new sliding move
-    const std::string&                  fn      = static_cast<const RlString &>( filename->getRevObject() ).getValue();
-    const std::string&                  sep     = static_cast<const RlString &>( separator->getRevObject() ).getValue();
-    unsigned int                        g       = (int)static_cast<const IntegerPos  &>( printgen->getRevObject() ).getValue();
-    bool                                pp      = static_cast<const RlBoolean &>( posterior->getRevObject() ).getValue();
-    bool                                l       = static_cast<const RlBoolean &>( likelihood->getRevObject() ).getValue();
-    bool                                pr      = static_cast<const RlBoolean &>( prior->getRevObject() ).getValue();
-    bool                                ap      = static_cast<const RlBoolean &>( append->getRevObject() ).getValue();
-    bool                                so      = static_cast<const RlBoolean &>( stochOnly->getRevObject() ).getValue();
-    bool                                wv      = static_cast<const RlBoolean &>( version->getRevObject() ).getValue();
-    const std::string&                 fmt      = static_cast<const RlString &>( format->getRevObject() ).getValue();
+    const std::string&                  fn      = valueForRevType<RlString>(filename);
+    const std::string&                  sep     = valueForRevType<RlString>(separator);
+    unsigned int                        g       = (int)valueForRevType<IntegerPos>(printgen);
+    bool                                pp      = valueForRevType<RlBoolean>(posterior);
+    bool                                l       = valueForRevType<RlBoolean>(likelihood);
+    bool                                pr      = valueForRevType<RlBoolean>(prior);
+    bool                                ap      = valueForRevType<RlBoolean>(append);
+    bool                                so      = valueForRevType<RlBoolean>(stochOnly);
+    bool                                wv      = valueForRevType<RlBoolean>(version);
+    const std::string&                 fmt      = valueForRevType<RlString>(format);
 
-    ModelVector<RlString> excl = static_cast<const ModelVector<RlString> &>(exclude->getRevObject());
+    ModelVector<RlString> excl = objectForRevType<ModelVector<RlString>>(exclude);
     std::set<std::string> exclude_list;
     for ( size_t i = 0; i < excl.size(); ++i ) {
         exclude_list.insert(excl[i]);

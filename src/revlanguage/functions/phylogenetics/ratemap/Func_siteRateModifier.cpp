@@ -6,6 +6,7 @@
 //  Copyright © 2017 Michael Landis. All rights reserved.
 //
 
+#include "RevTypeUtilities.h"
 #include "Func_siteRateModifier.h"
 
 #include "SiteRateModifierFunction.h"
@@ -48,11 +49,11 @@ Func_siteRateModifier* Func_siteRateModifier::clone( void ) const {
 RevBayesCore::TypedFunction< RevBayesCore::CharacterHistoryRateModifier >* Func_siteRateModifier::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* rate_multipliers  = static_cast<const ModelVector<ModelVector<RealPos> > &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* rate_multipliers  = dagNodeForRevType<ModelVector<ModelVector<RealPos> >>(this->args[0].getVariable());
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<std::int64_t> > >* event_classes;
-    event_classes = static_cast<const ModelVector<ModelVector<Natural> > &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    event_classes = dagNodeForRevType<ModelVector<ModelVector<Natural> >>(this->args[1].getVariable());
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<std::int64_t> >* site_classes;
-    site_classes = static_cast<const ModelVector<Natural> &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    site_classes = dagNodeForRevType<ModelVector<Natural>>(this->args[2].getVariable());
 
     RevBayesCore::SiteRateModifierFunction* f = new RevBayesCore::SiteRateModifierFunction(rate_multipliers, event_classes, site_classes);
     

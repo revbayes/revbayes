@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <iosfwd>
 #include <string>
 
@@ -44,14 +45,14 @@ void Mntr_Probability::constructInternalObject( void )
     delete value;
     
     // now allocate a new sliding move
-    const std::string&                  fn      = static_cast<const RlString &>( filename->getRevObject() ).getValue();
-    const std::string&                  sep     = static_cast<const RlString &>( separator->getRevObject() ).getValue();
-    unsigned int                        g       = (int)static_cast<const IntegerPos &>( printgen->getRevObject() ).getValue();
-    bool                                pp      = static_cast<const RlBoolean &>( posterior->getRevObject() ).getValue();
-    bool                                l       = static_cast<const RlBoolean &>( likelihood->getRevObject() ).getValue();
-    bool                                pr      = static_cast<const RlBoolean &>( prior->getRevObject() ).getValue();
-    bool                                ap      = static_cast<const RlBoolean &>( append->getRevObject() ).getValue();
-    bool                                wv      = static_cast<const RlBoolean &>( version->getRevObject() ).getValue();
+    const std::string&                  fn      = valueForRevType<RlString>(filename);
+    const std::string&                  sep     = valueForRevType<RlString>(separator);
+    unsigned int                        g       = (int)valueForRevType<IntegerPos>(printgen);
+    bool                                pp      = valueForRevType<RlBoolean>(posterior);
+    bool                                l       = valueForRevType<RlBoolean>(likelihood);
+    bool                                pr      = valueForRevType<RlBoolean>(prior);
+    bool                                ap      = valueForRevType<RlBoolean>(append);
+    bool                                wv      = valueForRevType<RlBoolean>(version);
     RevBayesCore::ProbabilityMonitor *m = new RevBayesCore::ProbabilityMonitor((std::uint64_t)g, fn, sep);
     
     // now set the flags

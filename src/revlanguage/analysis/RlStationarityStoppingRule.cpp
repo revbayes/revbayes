@@ -1,4 +1,5 @@
 
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -48,9 +49,9 @@ void StationarityStoppingRule::constructInternalObject( void )
     delete value;
     
     // now allocate a new stopping rule
-    double p = static_cast<const Probability &>( prob->getRevObject() ).getValue();
-    int fq = static_cast<const IntegerPos &>( frequency->getRevObject() ).getValue();
-    const std::string &fn = static_cast<const RlString &>( filename->getRevObject() ).getValue();
+    double p = valueForRevType<Probability>(prob);
+    int fq = valueForRevType<IntegerPos>(frequency);
+    const std::string &fn = valueForRevType<RlString>(filename);
     
     RevBayesCore::BurninEstimatorContinuous *burninEst = constructBurninEstimator();
     

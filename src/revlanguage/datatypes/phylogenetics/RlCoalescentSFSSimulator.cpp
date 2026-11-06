@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "CoalescentSFSSimulator.h"
 
 #include <ostream>
@@ -78,12 +79,12 @@ void CoalescentSFSSimulator::constructInternalObject( void )
     delete value;
     
     // get the parameter values
-    std::vector<double> cp  = static_cast<const ModelVector<RealPos> &>( change_points->getRevObject() ).getValue();
-    double gt               = static_cast<const RealPos &>( generation_time->getRevObject() ).getValue();
-    const std::string& p    = static_cast<const RlString &>( ploidy->getRevObject() ).getValue();
+    std::vector<double> cp  = valueForRevType<ModelVector<RealPos>>(change_points);
+    double gt               = valueForRevType<RealPos>(generation_time);
+    const std::string& p    = valueForRevType<RlString>(ploidy);
     
     // demographic functions
-    const WorkspaceVector<DemographicFunction> &ws_vec_df   = static_cast<const WorkspaceVector<DemographicFunction> &>( demographies->getRevObject() );
+    const WorkspaceVector<DemographicFunction> &ws_vec_df   = objectForRevType<WorkspaceVector<DemographicFunction>>(demographies);
     RevBayesCore::RbVector<RevBayesCore::DemographicFunction> df;
     for ( size_t i = 0; i < ws_vec_df.size(); ++i )
     {
@@ -106,9 +107,9 @@ RevPtr<RevVariable> CoalescentSFSSimulator::executeMethod(std::string const &nam
         
         size_t args_index   = 0;
         
-        double mu           = static_cast<const RealPos &>( args[args_index++].getVariable()->getRevObject() ).getValue();
-        long sample_size    = static_cast<const Natural &>( args[args_index++].getVariable()->getRevObject() ).getValue();
-        long reps           = static_cast<const Natural &>( args[args_index++].getVariable()->getRevObject() ).getValue();
+        double mu           = valueForRevType<RealPos>(args[args_index++].getVariable());
+        long sample_size    = valueForRevType<Natural>(args[args_index++].getVariable());
+        long reps           = valueForRevType<Natural>(args[args_index++].getVariable());
 
         RevBayesCore::RbVector<std::int64_t>* m = value->simulateSFS(mu, sample_size, reps);
         
@@ -120,10 +121,10 @@ RevPtr<RevVariable> CoalescentSFSSimulator::executeMethod(std::string const &nam
         
         size_t args_index   = 0;
             
-        long                sample_size     = static_cast<const Natural &>( args[args_index++].getVariable()->getRevObject() ).getValue();
-        long                reps            = static_cast<const Natural &>( args[args_index++].getVariable()->getRevObject() ).getValue();
-        const std::string&  f_name_stats    = static_cast<const RlString &>( args[args_index++].getVariable()->getRevObject() ).getValue();
-        const std::string&  f_name_trees    = static_cast<const RlString &>( args[args_index++].getVariable()->getRevObject() ).getValue();
+        long                sample_size     = valueForRevType<Natural>(args[args_index++].getVariable());
+        long                reps            = valueForRevType<Natural>(args[args_index++].getVariable());
+        const std::string&  f_name_stats    = valueForRevType<RlString>(args[args_index++].getVariable());
+        const std::string&  f_name_trees    = valueForRevType<RlString>(args[args_index++].getVariable());
 
         value->simulateCoalescent(sample_size, reps, f_name_stats, f_name_trees);
             

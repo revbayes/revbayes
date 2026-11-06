@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -51,17 +52,17 @@ void Move_LevyJumpSum::constructInternalObject( void )
     delete value;
     
     // now allocate a new sliding move
-    double sf = static_cast<const RealPos &>( slideFactor->getRevObject() ).getValue();
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double sf = valueForRevType<RealPos>(slideFactor);
+    double w = valueForRevType<RealPos>(weight);
     
-    RevBayesCore::TypedDagNode<double>* tmpsv1 = static_cast<const Real &>( slideUp->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* tmpsv1 = dagNodeForRevType<Real>(slideUp);
     RevBayesCore::ContinuousStochasticNode *sv1 = static_cast<RevBayesCore::ContinuousStochasticNode *>( tmpsv1 );
     
-    RevBayesCore::TypedDagNode<double>* tmpsv2 = static_cast<const Real &>( slideDown->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* tmpsv2 = dagNodeForRevType<Real>(slideDown);
     RevBayesCore::ContinuousStochasticNode *sv2 = static_cast<RevBayesCore::ContinuousStochasticNode *>( tmpsv2 );
     
-    bool tv = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    bool tv = valueForRevType<RlBoolean>(tune);
+    double tt = valueForRevType<Probability>(tuneTarget);
     
     RevBayesCore::Proposal *p = new RevBayesCore::LevyJumpSumProposal(sv1, sv2, sf);
     p->setTargetAcceptanceRate(tt);

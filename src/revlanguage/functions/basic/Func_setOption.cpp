@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <fstream>
 #include <vector>
@@ -42,9 +43,9 @@ Func_setOption* Func_setOption::clone( void ) const
 RevPtr<RevVariable> Func_setOption::execute( void )
 {
     
-    const std::string &key = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
-    const std::string &value = static_cast<const RlString &>( args[1].getVariable()->getRevObject() ).getValue();
-    bool write = static_cast<const RlBoolean &>( args[2].getVariable()->getRevObject() ).getValue();
+    const std::string &key = valueForRevType<RlString>(args[0].getVariable());
+    const std::string &value = valueForRevType<RlString>(args[1].getVariable());
+    bool write = valueForRevType<RlBoolean>(args[2].getVariable());
     
     RbSettings& s = RbSettings::userSettings();
     s.setOption( key, value, write );
