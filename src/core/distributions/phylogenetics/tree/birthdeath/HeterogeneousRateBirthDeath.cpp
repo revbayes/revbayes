@@ -12,6 +12,7 @@
 #include "RbConstants.h"
 #include "StochasticNode.h"
 #include "TopologyNode.h"
+#include "TreeUtilities.h"
 #include "HeterogeneousRateBirthDeath.h"
 #include "OdeHeterogeneousRateBirthDeath.h"
 #include "AbstractCharacterHistoryBirthDeathProcess.h"
@@ -184,6 +185,9 @@ HeterogeneousRateBirthDeath* HeterogeneousRateBirthDeath::clone( void ) const
 /* Compute probability */
 double HeterogeneousRateBirthDeath::computeLnProbability( void )
 {
+    if (not TreeUtilities::nodeAgesWithinRanges(*value))
+        return RbConstants::Double::neginf;
+
     // for now
     totalScaling = 0;
     shift_same_category = false;

@@ -73,6 +73,9 @@ namespace RevBayesCore {
         void                                                redrawValue(void);                                          //!< Draw a new random value from distribution
         
         
+        void prepareForClamping(Tree& tree) override;
+        void repairCheckpointValue(Tree& tree) override;
+
     protected:
         // Parameter management functions
         virtual void                                        getAffected(RbOrderedSet<DagNode *>& affected, const DagNode* affecter);                                      //!< get affected nodes

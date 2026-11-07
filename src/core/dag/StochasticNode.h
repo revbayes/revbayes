@@ -11,6 +11,7 @@
 #include "TypedDistribution.h"
 
 #include <cassert>
+#include <memory>
 
 namespace RevBayesCore {
 
@@ -58,6 +59,7 @@ namespace RevBayesCore {
         virtual void                                       setValue(valueType *val, bool touch=true);                                   //!< Set the value of this node
         void                                               setValueFromFile(const path &dir);                                           //!< Set value from string.
         void                                               setValueFromString(const std::string &v);                                    //!< Set value from string.
+        void restoreFromCheckpoint(const std::string& v) override;
 
         // Parent DAG nodes management functions
         std::vector<const DagNode*>                        getParents(void) const;                                                      //!< Get the set of parents
@@ -141,9 +143,15 @@ void RevBayesCore::StochasticNode<valueType>::bootstrap(void)
 template<class valueType>
 void RevBayesCore::StochasticNode<valueType>::clamp(valueType *val)
 {
-    // clamp the node with the value
-    // we call set value because some derived classes might have special implementations for setting values (e.g. mixtures)
-    setValue( val );
+    // Preserve self-clamping as well as ownership of a supplied observation. Preparation may
+    // throw, so do not mutate the current node value or leak the incoming observation on failure.
+    if (val == &getValue())
+        val = Cloner<valueType, IsDerivedFrom<valueType, Cloneable>::Is>::createClone(*val);
+    std::unique_ptr<valueType> observation(val);
+    getDistribution().prepareForClamping(*observation);
+
+    // Retain specialized value installation (e.g. mixtures), after explicit observation preparation.
+    setValue(observation.release());
     this->clamped = true;
 }
 
@@ -515,6 +523,21 @@ template<class valueType>
 void RevBayesCore::StochasticNode<valueType>::touchMe(const DagNode *toucher, bool touchAll)
 {
     StochasticNodeBase::touchMe( *this, *this, toucher, touchAll );
+}
+
+
+
+// Ordinary assignment must not repair proposals. Only checkpoint loading may adjust the
+// installed value, after the distribution's existing loading/initialization work has run.
+template<class valueType>
+void RevBayesCore::StochasticNode<valueType>::restoreFromCheckpoint(const std::string& v)
+{
+    setValueFromString(v);
+    if (not (v.size() >= 2 and v.front() == '\'' and v.back() == '\''))
+    {
+        getDistribution().repairCheckpointValue(getValue());
+        this->touch();
+    }
 }
 
 #endif

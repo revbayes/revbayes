@@ -1,6 +1,8 @@
 #ifndef TimeInterval_H
 #define TimeInterval_H
 
+#include <compare>
+
 namespace RevBayesCore {
     
     /**
@@ -16,24 +18,29 @@ namespace RevBayesCore {
     class TimeInterval {
         
     public:
-        TimeInterval(); //!< Default constructor
         TimeInterval(double min, double max);
         
-        bool                                operator==(const TimeInterval &t) const;                //!< Equals operator
-        bool                                operator!=(const TimeInterval &t) const;                //!< Not-equals operator
-        bool                                operator<(const TimeInterval &t) const;                 //!< Less than operator
+        // Compare endpoints, ordered by maximum first and minimum second.
+        bool                                operator==(const TimeInterval &t) const;
+        std::partial_ordering               operator<=>(const TimeInterval &t) const;
+
+        // Inclusive membership and point-interval detection.
+        bool                                contains(double age) const;
+        bool                                zeroWidth() const;
 
         // public functions
-        double                              getMin(void) const;                                     //!< Get the number of days since counting.
-        double                              getMax(void) const;                                     //!< Get the number of million years ago.
-        void                                setMin(double);                                         //!< Get the number of days since counting.
-        void                                setMax(double);                                         //!< Get the number of million years ago.
+        double                              getMin(void) const;                                     //!< Get the lower endpoint.
+        double                              getMax(void) const;                                     //!< Get the upper endpoint.
         
     private:
+        // Explicit endpoints: neither is NaN. Infinity is allowed; min must not exceed max.
         double  min;
         double  max;
         
     };
+
+    // Return the smallest interval containing both intervals.
+    TimeInterval coveringInterval(const TimeInterval& a, const TimeInterval& b);
 
 }
 

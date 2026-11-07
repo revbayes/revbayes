@@ -1,3 +1,4 @@
+#include "TimeInterval.h"
 #include <cstddef>
 #include <algorithm>
 #include <cmath>
@@ -9,6 +10,7 @@
 #include "RbMathCombinatorialFunctions.h"
 #include "StochasticNode.h"
 #include "TopologyNode.h"
+#include "TreeUtilities.h"
 #include "UniformSerialSampledTimeTreeDistribution.h"
 #include "Taxon.h"
 #include "Tree.h"
@@ -128,6 +130,9 @@ void UniformSerialSampledTimeTreeDistribution::buildSerialSampledRandomBinaryTre
 /* Compute probability */
 double UniformSerialSampledTimeTreeDistribution::computeLnProbability( void )
 {
+    if (not TreeUtilities::nodeAgesWithinRanges(*value))
+        return RbConstants::Double::neginf;
+
     // Variable declarations and initialization
     double lnProb = 0.0;
     double age = 0.0;
@@ -286,13 +291,19 @@ std::vector<double> UniformSerialSampledTimeTreeDistribution::simulateCoalescent
     	num_ages = num_taxa - 1;
     }
 
-    // Its important that we sort the taxon ages, and do not use
+    // Use lower-bound sampling ages, matching tip initialization.
+    // Its important that we sort these ages, and do not use
     // the youngest or (if has_root_age) the oldest.
     // If we do not do this, we can get an age when only one
     // taxon is active.  Trying to remove two active taxa then leads to a crash.
     std::vector<double> sorted_taxon_ages;
     for(auto& taxon: taxa)
-        sorted_taxon_ages.push_back(taxon.getAge());
+    {
+        // Unconstrained tips start at age zero.
+        const auto& interval = taxon.getAgeRange();
+        const double interval_age = interval ? interval->getMin() : 0.0;
+        sorted_taxon_ages.push_back(interval_age);
+    }
     std::sort(sorted_taxon_ages.begin(), sorted_taxon_ages.end());
 
     for(size_t i = 0; i < num_ages; ++i)
@@ -342,7 +353,10 @@ void UniformSerialSampledTimeTreeDistribution::simulateTree( void )
         const std::string& name = taxa[i].getName();
         node->setName(name);
         node->setSpeciesName(taxa[i].getSpeciesName());
-        node->setAge(taxa[i].getAge());
+        // Unconstrained tips start at age zero.
+        const auto& interval = taxa[i].getAgeRange();
+        const double interval_age = interval ? interval->getMin() : 0.0;
+        node->setAge(interval_age);
         node->setTaxon(taxa[i]);
         // add to tips
         nodes.push_back(node);

@@ -1,3 +1,4 @@
+#include "TimeInterval.h"
 #include <string>
 
 #include "RandomNumberFactory.h"
@@ -11,6 +12,7 @@
 #include "DiscreteTaxonData.h"
 #include "NaturalNumbersState.h"
 #include "TopologyNode.h"
+#include "TreeUtilities.h"
 #include "Taxon.h"
 #include "Tree.h"
 #include "RlUserInterface.h"
@@ -237,6 +239,10 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::buildSerialSample
 
 double GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::computeLnProbability(void)
 {
+    // Check before returning a cached density: changing taxon metadata need not dirty that cache.
+    if (not TreeUtilities::nodeAgesWithinRanges(*value))
+        return RbConstants::Double::neginf;
+
 
 	// make sure we need to recompute
 	if ( probability_dirty == false )
@@ -1129,7 +1135,10 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::simulateTree(void
         const std::string& name = taxa[i].getName();
         node->setName(name);
         node->setSpeciesName(taxa[i].getSpeciesName());
-        node->setAge(taxa[i].getAge());
+        // Unconstrained tips start at age zero.
+        const auto& interval = taxa[i].getAgeRange();
+        const double interval_age = interval ? interval->getMin() : 0.0;
+        node->setAge(interval_age);
         node->setTaxon(taxa[i]);
 
         // add to tips
@@ -1185,8 +1194,11 @@ std::vector<double> GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::si
 
     for(size_t i = 0; i < num_ages; ++i)
     {
-    	// get the age of the tip
-    	double a = taxa[i + 1].getAge();
+        // Use the same lower-bound age as tip initialization.
+        // Unconstrained tips start at age zero.
+        const auto& interval = taxa[i + 1].getAgeRange();
+        const double interval_age = interval ? interval->getMin() : 0.0;
+        double a = interval_age;
 
     	// simulate the age of a node
     	double new_age = a + rng->uniform01() * (max_age - a);

@@ -18,6 +18,7 @@
 #include "RbMathCombinatorialFunctions.h"
 #include "RbMathLogic.h"
 #include "TopologyNode.h"
+#include "TreeUtilities.h"
 #include "RateGenerator.h"
 #include "RbException.h"
 #include "RbVector.h"
@@ -153,6 +154,9 @@ MultispeciesCoalescentMigration* MultispeciesCoalescentMigration::clone( void ) 
 
 double MultispeciesCoalescentMigration::computeLnProbability( void )
 {
+    if (not TreeUtilities::nodeAgesWithinRanges(*value))
+        return RbConstants::Double::neginf;
+
     
     const Tree &sp = species_tree->getValue();
     const std::vector< TopologyNode* >& species_tree_nodes = sp.getNodes();

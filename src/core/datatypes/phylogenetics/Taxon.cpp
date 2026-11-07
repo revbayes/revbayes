@@ -134,14 +134,9 @@ void Taxon::addOccurrence( const TimeInterval &d )
 {
     occurrences[d]++;
 
-    if ( d.getMax() > age_range.getMax() )
-    {
-        age_range.setMax( d.getMax() );
-    }
-    if ( d.getMin() < age_range.getMin() )
-    {
-        age_range.setMin( d.getMin() );
-    }
+    // The first occurrence establishes an absent constraint. An explicit range, including
+    // [0,0], still contributes to the interval covering all occurrences.
+    age_range = age_range ? coveringInterval(*age_range, d) : d;
 }
 
 
@@ -157,17 +152,6 @@ bool Taxon::isExtinct(void) const
 
 
 /**
- * Get the age for this taxon.
- *
- * \return    The age.
- */
-double Taxon::getAge( void ) const
-{
-    return age_range.getMin();
-}
-
-
-/**
  * Get the occurrences for this taxon.
  *
  * \return    A map of occurrence age ranges to counts.
@@ -179,48 +163,14 @@ const std::map<TimeInterval, size_t>& Taxon::getOccurrences( void ) const
 
 
 /**
- * Get the age range for this taxon across all occurrences.
+ * Get the explicitly established age range, if any, for this taxon.
  *
  * \return    The age range.
  */
-const TimeInterval& Taxon::getAgeRange( void ) const
+const std::optional<TimeInterval>& Taxon::getAgeRange( void ) const
 {
     return age_range;
 }
-
-
-/**
- * Get the max age for this taxon across all occurrences.
- *
- * \return    The age.
- */
-double Taxon::getMaxAge( void ) const
-{
-    return age_range.getMax();
-}
-
-
-/**
- * Get the min age for this taxon across all occurrences.
- *
- * \return    The age.
- */
-double Taxon::getMinAge( void ) const
-{
-    return age_range.getMin();
-}
-
-void Taxon::setMinAge( double a )
-{
-    age_range.setMin( a );
-}
-
-
-void Taxon::setMaxAge( double a )
-{
-    age_range.setMax( a );
-}
-
 
 
 /**
@@ -234,8 +184,14 @@ const std::string Taxon::getJsonRespresentation(void) const {
     jsonStr += "{\"Taxon\": {";
     jsonStr += "\"name\": \"" + name + "\", ";
     jsonStr += "\"speciesName\": \"" + species_name + "\", ";
-    jsonStr += "\"TimeInterval\": {\"minAge\": " + std::to_string(age_range.getMin()) + ", ";
-    jsonStr += "\"maxAge\": " + std::to_string(age_range.getMax()) + "}}";
+    if (age_range)
+    {
+        jsonStr += "\"TimeInterval\": {\"minAge\": " + std::to_string(age_range->getMin()) + ", ";
+        jsonStr += "\"maxAge\": " + std::to_string(age_range->getMax()) + "}";
+    }
+    else
+        jsonStr += "\"TimeInterval\": null";
+    jsonStr += "}";
     return jsonStr;
 }
 
@@ -259,29 +215,6 @@ const std::string& Taxon::getName( void ) const
 const std::string& Taxon::getSpeciesName( void ) const
 {
     return species_name;
-}
-
-
-/**
- * Set the age for this taxon.
- *
- * \param[in]    a     The age.
- */
-void Taxon::setAge(double a)
-{
-    
-    if ( age_range.getMax() < a )
-    {
-        age_range.setMax(a);
-        age_range.setMin(a);
-    }
-    else
-    {
-        age_range.setMin(a);
-        // Sebastian (20210519): We should not automatically set the max age
-        // because otherwise we always get a range of size 0.
-//        age_range.setMax(a);
-    }
 }
 
 

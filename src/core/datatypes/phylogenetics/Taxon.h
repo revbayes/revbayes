@@ -3,6 +3,7 @@
 
 #include <ostream>
 #include <map>
+#include <optional>
 
 #include "TimeInterval.h"
 
@@ -38,18 +39,12 @@ namespace RevBayesCore {
         // public methods
         void                                  addOccurrence(const TimeInterval &d);       //!< Add an occurrence.
         bool                                  isExtinct(void) const;                      //!< Get the extinct status flag.
-        double                                getAge(void) const;                         //!< Get the age for this taxon.
-        const TimeInterval&                   getAgeRange(void) const;                    //!< Get the date info for this taxon.
+        const std::optional<TimeInterval>&    getAgeRange(void) const;                    //!< Get the explicitly established age constraint, if any.
         const std::string                     getJsonRespresentation(void) const;         //!< Get JSON-formatted string.
-        double                                getMaxAge(void) const;                      //!< Get the max age for this taxon.
-        double                                getMinAge(void) const;                      //!< Get the min age for this taxon.
         const std::string&                    getName(void) const;                        //!< Get the name for this taxon.
         const std::map<TimeInterval, size_t>& getOccurrences(void) const;                 //!< Get the occurrence ages and counts.
         const std::string&                    getSpeciesName(void) const;                 //!< Get the name of the species.
 
-        void                                  setAge(double a);                           //!< Set the age.
-        void                                  setMinAge(double a);                        //!< Set the min age.
-        void                                  setMaxAge(double a);                        //!< Set the max age.
         void                                  setAgeRange(const TimeInterval &d);         //!< Set the date info.
         void                                  setExtinct(bool extinct);                   //!< Set the extinct status flag.
         void                                  setName(const std::string &n);              //!< Set the name.
@@ -58,7 +53,8 @@ namespace RevBayesCore {
     private:
         
         // private members
-        TimeInterval                          age_range;
+        // Absence records that no interval was established, independently of effective defaults.
+        std::optional<TimeInterval>           age_range;
         std::map<TimeInterval, size_t>        occurrences;
         std::string                           name;
         std::string                           species_name;

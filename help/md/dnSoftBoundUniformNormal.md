@@ -22,16 +22,16 @@ Sebastian Hoehna
 dnNormal
 dnUniform
 ## example
-	# Create a simple model (unclamped)
+    # Create a simple model (unclamped)
     calib ~ dnSoftBoundUniformNormal( 13.6, 25, p=0.95, "upper" )
     mymodel = model(calib)
     
     # Create a move vector and a monitor vector
-	moves[1] = mvSlide(calib, delta=0.1, weight=1.0)
-	monitors[1] = mnScreen(calib, printgen=1000)
-	
+    moves[1] = mvSlide(calib, delta=0.1, weight=1.0)
+    monitors[1] = mnScreen(calib, printgen=1000)
+    
     # Use MCMC to draw samples from the specified distribution   
-	mymcmc = mcmc(mymodel, monitors, moves)
-	mymcmc.run(generations=200000)
+    mymcmc = mcmc(mymodel, monitors, moves)
+    mymcmc.run(generations=200000)
 
 ## references
