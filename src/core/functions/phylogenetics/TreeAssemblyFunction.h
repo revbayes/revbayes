@@ -45,8 +45,9 @@ template <class valueType> class TypedDagNode;
 
         const TypedDagNode<Tree>*                           tau = nullptr;
         const TypedDagNode< RbVector<double> >*             brlen = nullptr;
-        std::set<size_t>                                    touchedNodeIndices;
         bool                                                brlenFlagDirty = true;
+        std::vector<double>                                 before_move;                                                                        //!< Our lengths at a move's first touch, which a rejection restores.
+        bool                                                before_move_valid = false;
         const Tree*                                         heard_from = NULL;                                                                  //!< The tree we listen to, which dnEmpiricalTree can replace.
         std::vector<size_t>                                 event_nodes;                                                                        //!< Nodes the input fired a tree change event for, to be fired on ours once it has caught up.
         bool                                                heard_event = false;

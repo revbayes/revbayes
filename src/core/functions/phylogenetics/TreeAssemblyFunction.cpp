@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <vector>
 
+#include "RbConstants.h"
 #include "RbException.h"
 #include "DagNode.h"
 #include "RbVector.h"
@@ -26,7 +27,7 @@
  * Complications:
  * 1. we create a new copy of the tree, and do not modify the input tree.
  * 2. restore and update can be called multiple times after a single MCMC move.
- * 3. restore and update might clear the list of changed branches (in touchedIndices).
+ * 3. a branch length vector computed as a whole names no changed elements.
  * 4. the branch-length vector might not be up-to-date with TreeAssemblyFunction::update() or ::restore() is called.
  * 5. the topology might change before update is called.
  * 6. some topology sources (dnEmpiricalTree / mvEmpiricalTree) delete the Tree and allocate a
@@ -121,9 +122,8 @@ void TreeAssemblyFunction::keep( const DagNode *affecter )
 
     // a kept edit is never undone, so no restore can use this record
     rebuilt_valid = false;
+    before_move_valid = false;
 
-    // SH (20200221): This needs to stay, otherwise the MCMC does not update properly.
-    touchedNodeIndices.clear();
     brlenFlagDirty = false;
     // shape_moved remembers what this drops, since update() may not have read it yet
     event_nodes.clear();
@@ -147,7 +147,6 @@ void TreeAssemblyFunction::restore( const DagNode *restorer )
     //delegate to base class
     TypedFunction< Tree >::restore( restorer );
 
-    touchedNodeIndices.clear();
     brlenFlagDirty = false;
 
     // The flags are cleared first so this doesn't notify any listeners. They will have already
@@ -155,6 +154,14 @@ void TreeAssemblyFunction::restore( const DagNode *restorer )
     restoring = true;
     update();
     restoring = false;
+
+    // The length vector may not be restored yet. Give our copy the lengths the readers went back to, or a
+    // later move that proposes the same lengths again would find nothing changed.
+    if ( before_move_valid == true )
+    {
+        for (size_t i = 0; i < before_move.size() && i < value->getNumberOfNodes(); ++i) value->getNode(i).setBranchLength( before_move[i], false );
+        before_move_valid = false;
+    }
 }
 
 
@@ -164,6 +171,14 @@ void TreeAssemblyFunction::touch(const DagNode *toucher)
     //delegate to base class
     TypedFunction< Tree >::touch( toucher );
 
+    // the lengths readers hold before this move, which a rejection returns them to
+    if ( before_move_valid == false )
+    {
+        before_move.resize( value->getNumberOfNodes() );
+        for (size_t i = 0; i < before_move.size(); ++i) before_move[i] = value->getNode(i).getBranchLength();
+        before_move_valid = true;
+    }
+
     //reset flag
     brlenFlagDirty = true;
 
@@ -172,24 +187,7 @@ void TreeAssemblyFunction::touch(const DagNode *toucher)
         // An assembly nothing reads never runs update(), so it can go many moves without
         // rewiring, and the record would describe an older shape than the one being undone.
         rebuilt_valid = false;
-
-        // drop stale per-branch indices so update() rewrites every branch length onto it
-        touchedNodeIndices.clear();
         tau_touched = true;
-    }
-
-    if ( toucher == brlen )
-    {
-        const std::set<size_t> &touchedIndices = toucher->getTouchedElementIndices();
-        touchedNodeIndices.insert(touchedIndices.begin(), touchedIndices.end());
-    }
-
-    if ( toucher != tau && touchedNodeIndices.size() == 0 && brlen != NULL )
-    {
-        for (size_t i = 0; i < brlen->getValue().size(); ++i)
-        {
-            touchedNodeIndices.insert(i);
-        }
     }
 }
 
@@ -298,6 +296,10 @@ void TreeAssemblyFunction::update( void )
     // bind to the current topology
     listenTo( &tau->getValue() );
 
+    // the lengths a reader last saw, before a copy below can replace our nodes
+    std::vector<double> seen( v.size(), RbConstants::Double::nan );
+    for (size_t i = 0; i < v.size() && i < value->getNumberOfNodes(); ++i) seen[i] = value->getNode(i).getBranchLength();
+
     // silence from a tree that was touched means it was replaced wholesale
     bool replaced = ( tau_touched == true && heard_event == false );
     if ( shape_moved == true || replaced == true )
@@ -336,13 +338,10 @@ void TreeAssemblyFunction::update( void )
             }
         }
 
-        // a branch length move does not touch the tree, so only its touched elements say
-        for (std::set<size_t>::iterator it = touchedNodeIndices.begin(); it != touchedNodeIndices.end(); ++it)
+        // only a length that changed, whichever parent's touch announced it
+        for (size_t i = 0; i < v.size(); ++i)
         {
-            if ( *it < v.size() )
-            {
-                value->getTreeChangeEventHandler().fire( value->getNode( *it ), TreeChangeEventMessage::BRANCH_LENGTH );
-            }
+            if ( v[i] != seen[i] ) value->getTreeChangeEventHandler().fire( value->getNode(i), TreeChangeEventMessage::BRANCH_LENGTH );
         }
     }
 
@@ -350,7 +349,6 @@ void TreeAssemblyFunction::update( void )
     shape_moved = false;
     heard_event = false;
     tau_touched = false;
-    touchedNodeIndices.clear();
     brlenFlagDirty = false;
 }
 
@@ -364,7 +362,6 @@ void TreeAssemblyFunction::swapParameterInternal(const DagNode *oldP, const DagN
         tau = static_cast<const TypedDagNode<Tree>* >( newP );
         listenTo( &tau->getValue() );
         // our own copy keeps its identity, and update() copies the new topology onto it
-        touchedNodeIndices.clear();
     }
     else if (oldP == brlen)
     {
