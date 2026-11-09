@@ -1,0 +1,11 @@
+   Successfully read one character matrix from file 'data/fasta_no_comments.fasta'
+   Successfully read one character matrix from file 'data/fasta_comments.fasta'
+   Successfully read one character matrix from file 'data/fasta_comments_crlf.fasta'
+   [ Taxon_A, Taxon_B, Taxon_C, Taxon_D ]
+   24
+   [ Taxon_A, Taxon_B, Taxon_C, Taxon_D ]
+   24
+   Error reading file "data/fasta_text_before_first_record.fasta"
+   No data matrix was read.
+   Error:   Illegal non-whitespace occurring outside of a name/sequence pair.  Expecting the first name to startwith > but found "T".
+   Error:   The error occurred while reading line 1 column 0 in file "fasta_text_before_first_record.fasta"
