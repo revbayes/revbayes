@@ -1,0 +1,121 @@
+################################################################################
+#
+# RevBayes Test-Script: Check that the natural log of a factorial is accurate
+#                       when calculated using the internal RbMath::lnFactorial()
+#                       function.
+#
+# author: David Cerny
+#
+################################################################################
+
+# integer comparison tolerance
+ulp <- 2^(-47)
+
+x ~ dnPoisson(1.0)
+
+x.clamp(1)
+lnf[1] <- -1.0 - x.lnProbability()
+print("ln(1!) = " + lnf[1] + "; " + ifelse(abs(lnf[1] - ln(1)) <= ulp, "TRUE", "FALSE"))
+
+x.clamp(2)
+lnf[2] <- -1.0 - x.lnProbability()
+print("ln(2!) = " + lnf[2] + "; " + ifelse(abs(lnf[2] - ln(2 * 1)) <= ulp, "TRUE", "FALSE"))
+
+x.clamp(3)
+lnf[3] <- -1.0 - x.lnProbability()
+print("ln(3!) = " + lnf[3] + "; " + ifelse(abs(lnf[3] - ln(3 * 2 * 1)) <= ulp, "TRUE", "FALSE"))
+
+x.clamp(4)
+lnf[4] <- -1.0 - x.lnProbability()
+print("ln(4!) = " + lnf[4] + "; " + ifelse(abs(lnf[4] - ln(4 * 3 * 2 * 1)) <= ulp, "TRUE", "FALSE"))
+
+x.clamp(5)
+lnf[5] <- -1.0 - x.lnProbability()
+print("ln(5!) = " + lnf[5] + "; " + ifelse(abs(lnf[5] - ln(5 * 4 * 3 * 2 * 1)) <= ulp, "TRUE", "FALSE"))
+
+x.clamp(6)
+lnf[6] <- -1.0 - x.lnProbability()
+print("ln(6!) = " + lnf[6] + "; " + ifelse(abs(lnf[6] - ln(6 * 5 * 4 * 3 * 2 * 1)) <= ulp, "TRUE", "FALSE"))
+
+x.clamp(7)
+lnf[7] <- -1.0 - x.lnProbability()
+print("ln(7!) = " + lnf[7] + "; " + ifelse(abs(lnf[7] - ln(7 * 6 * 5 * 4 * 3 * 2 * 1)) <= ulp, "TRUE", "FALSE"))
+
+x.clamp(8)
+lnf[8] <- -1.0 - x.lnProbability()
+print("ln(8!) = " + lnf[8] + "; " + ifelse(abs(lnf[8] - ln(8 * 7 * 6 * 5 * 4 * 3 * 2 * 1)) <= ulp, "TRUE", "FALSE"))
+
+x.clamp(9)
+lnf[9] <- -1.0 - x.lnProbability()
+print("ln(9!) = " + lnf[9] + "; " + ifelse(abs(lnf[9] - ln(9 * 8 * 7 * 6 * 5 * 4 * 3 * 2 * 1)) <= ulp, "TRUE", "FALSE"))
+
+x.clamp(10)
+lnf[10] <- -1.0 - x.lnProbability()
+y <- 10 * 9 * 8 * 7 * 6 * 5 * 4 * 3 * 2 * 1
+print("ln(10!) = " + lnf[10] + "; " + ifelse(abs(lnf[10] - ln(y)) <= ulp, "TRUE", "FALSE"))
+
+x.clamp(11)
+lnf[11] <- -1.0 - x.lnProbability()
+print("ln(11!) = " + lnf[11] + "; " + ifelse(abs(lnf[11] - ln(11 * y)) <= ulp, "TRUE", "FALSE"))
+
+x.clamp(12)
+lnf[12] <- -1.0 - x.lnProbability()
+print("ln(12!) = " + lnf[12] + "; " + ifelse(abs(lnf[12] - ln(12 * 11 * y)) <= ulp, "TRUE", "FALSE"))
+
+x.clamp(13)
+lnf[13] <- -1.0 - x.lnProbability()
+print("ln(13!) = " + lnf[13] + "; " + ifelse(abs(lnf[13] - ln(13 * 12 * 11 * y)) <= ulp, "TRUE", "FALSE"))
+
+x.clamp(14)
+lnf[14] <- -1.0 - x.lnProbability()
+print("ln(14!) = " + lnf[14] + "; " + ifelse(abs(lnf[14] - ln(14 * 13 * 12 * 11 * y)) <= ulp, "TRUE", "FALSE"))
+
+x.clamp(15)
+lnf[15] <- -1.0 - x.lnProbability()
+print("ln(15!) = " + lnf[15] + "; " + ifelse(abs(lnf[15] - ln(15 * 14 * 13 * 12 * 11 * y)) <= ulp, "TRUE", "FALSE"))
+
+x.clamp(16)
+lnf[16] <- -1.0 - x.lnProbability()
+print("ln(16!) = " + lnf[16] + "; " + ifelse(abs(lnf[16] - ln(16 * 15 * 14 * 13 * 12 * 11 * y)) <= ulp, "TRUE", "FALSE"))
+
+x.clamp(17)
+lnf[17] <- -1.0 - x.lnProbability()
+print("ln(17!) = " + lnf[17] + "; " + ifelse(abs(lnf[17] - ln(17 * 16 * 15 * 14 * 13 * 12 * 11 * y)) <= ulp, "TRUE", "FALSE"))
+
+x.clamp(18)
+lnf[18] <- -1.0 - x.lnProbability()
+print("ln(18!) = " + lnf[18] + "; " + ifelse(abs(lnf[18] - ln(18 * 17 * 16 * 15 * 14 * 13 * 12 * 11 * y)) <= ulp, "TRUE", "FALSE"))
+
+x.clamp(19)
+lnf[19] <- -1.0 - x.lnProbability()
+print("ln(19!) = " + lnf[19] + "; " + ifelse(abs(lnf[19] - ln(19 * 18 * 17 * 16 * 15 * 14 * 13 * 12 * 11 * y)) <= ulp, "TRUE", "FALSE"))
+
+x.clamp(20)
+lnf[20] <- -1.0 - x.lnProbability()
+z <- ln(20 * 19 * 18 * 17 * 16 * 15 * 14 * 13 * 12 * 11 * 10 * 9 * 8 * 7 * 6 * 5 * 4 * 3 * 2 * 1)
+print("ln(20!) = " + lnf[20] + "; " + ifelse(abs(lnf[20] - z) <= ulp, "TRUE", "FALSE"))
+
+# Note that 21! already exceeds 2^64, i.e., the largest integer that can be stored in a std::uint64_t.
+
+x.clamp(21)
+lnf[21] <- -1.0 - x.lnProbability()
+print("ln(21!) = " + lnf[21] + "; " + ifelse(abs(lnf[21] - ln(21) - z) <= ulp, "TRUE", "FALSE"))
+
+x.clamp(22)
+lnf[22] <- -1.0 - x.lnProbability()
+print("ln(22!) = " + lnf[22] + "; " + ifelse(abs(lnf[22] - ln(22) - ln(21) - z) <= ulp, "TRUE", "FALSE"))
+
+x.clamp(23)
+lnf[23] <- -1.0 - x.lnProbability()
+print("ln(23!) = " + lnf[23] + "; " + ifelse(abs(lnf[23] - ln(23) - ln(22) - ln(21) - z) <= ulp, "TRUE", "FALSE"))
+
+x.clamp(24)
+lnf[24] <- -1.0 - x.lnProbability()
+print("ln(24!) = " + lnf[24] + "; " + ifelse(abs(lnf[24] - ln(24) - ln(23) - ln(22) - ln(21) - z) <= ulp, "TRUE", "FALSE"))
+
+x.clamp(25)
+lnf[25] <- -1.0 - x.lnProbability()
+print("ln(25!) = " + lnf[25] + "; " + ifelse(abs(lnf[25] - ln(25) - ln(24) - ln(23) - ln(22) - ln(21) - z) <= ulp, "TRUE", "FALSE"))
+
+clear()
+q()
