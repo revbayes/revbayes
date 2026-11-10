@@ -1,5 +1,7 @@
 
 #include <cstddef>
+#include <cstdint>
+#include <map>
 #include <vector>
 #include <algorithm>
 #include <string>
@@ -294,7 +296,41 @@ void Model::printModelDotGraph(const RevBayesCore::path &fn, bool vb, const std:
     
     const std::vector<RevBayesCore::DagNode*>& theNodes = value->getDagNodes();
     std::vector<RevBayesCore::DagNode*>::const_iterator it;
-    
+
+    // The graph file must number only the nodes that appear in that graph. The lifetime ID counts
+    // every node built at startup, including default arguments that are not part of this model,
+    // so printing it would change the file whenever a distribution is added to the registry.
+    // Instead, we collect the nodes this particular graph will draw, sort them by construction
+    // order, and label them accordingly: n_1, n_2, etc. Any holes in this sequence correspond to
+    // the named nodes in the same graph.
+    std::vector<const RevBayesCore::DagNode*> shown;
+    for ( it = theNodes.begin(); it != theNodes.end(); ++it )
+    {
+        if ( !(*it)->isHidden() || vb )
+        {
+            shown.push_back( *it );
+        }
+    }
+    std::sort( shown.begin(), shown.end(),
+               []( const RevBayesCore::DagNode* a, const RevBayesCore::DagNode* b )
+               {
+                   return a->getDagNodeId() < b->getDagNodeId();
+               } );
+    std::map<const RevBayesCore::DagNode*, std::uint64_t> graph_number;
+    for ( size_t i = 0; i < shown.size(); ++i )
+    {
+        graph_number[ shown[i] ] = i + 1;
+    }
+    auto unnamed_label = [&graph_number]( const RevBayesCore::DagNode* node ) -> std::uint64_t
+    {
+        std::map<const RevBayesCore::DagNode*, std::uint64_t>::const_iterator found = graph_number.find( node );
+        if ( found == graph_number.end() )
+        {
+            return node->getDagNodeId();
+        }
+        return found->second;
+    };
+
     RevBayesCore::createDirectoryForFile( fn );
     
     std::ofstream o( fn.string() );
@@ -311,7 +347,7 @@ void Model::printModelDotGraph(const RevBayesCore::path &fn, bool vb, const std:
             if ( (*it)->getName() != "" )
                 nname << (*it)->getName();
             else
-                nname << (*it)->getDagNodeId(); // unique id available even for unnamed nodes
+                nname << unnamed_label( *it );
             std::string stname = nname.str();
             std::replace( stname.begin(), stname.end(), '[', '_');
 			std::replace( stname.begin(), stname.end(), '.', '_');
@@ -424,7 +460,7 @@ void Model::printModelDotGraph(const RevBayesCore::path &fn, bool vb, const std:
                 }
                 else
                 {
-                    nname << (*it)->getDagNodeId();
+                    nname << unnamed_label( *it );
                 }
                 std::string stname = nname.str();
                 std::replace( stname.begin(), stname.end(), '[', '_');
@@ -448,7 +484,7 @@ void Model::printModelDotGraph(const RevBayesCore::path &fn, bool vb, const std:
                             if ( ch->getName() != "" )
                                 cn << ch->getName();
                             else
-                                cn << ch->getDagNodeId();
+                                cn << unnamed_label( ch );
                             std::string stcn = cn.str();
                             std::replace( stcn.begin(), stcn.end(), '[', '_');
                             stcn.erase(std::remove(stcn.begin(), stcn.end(), ']'), stcn.end());  
@@ -468,7 +504,7 @@ void Model::printModelDotGraph(const RevBayesCore::path &fn, bool vb, const std:
                             }
                             else
                             {
-                                cn << (*ci)->getDagNodeId();
+                                cn << unnamed_label( *ci );
                             }
                             std::string stcn = cn.str();
                             std::replace( stcn.begin(), stcn.end(), '[', '_');
