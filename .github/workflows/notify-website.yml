@@ -1,0 +1,32 @@
+name: Update the website for a release
+
+# Tells revbayes.github.io to regenerate its help reference from the published release.
+on:
+  release:
+    types: [published]
+
+permissions: {}
+
+jobs:
+  notify-website:
+    if: ${{ !github.event.release.prerelease }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get a token for the website repository
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.WEBSITE_APP_ID }}
+          private-key: ${{ secrets.WEBSITE_APP_KEY }}
+          owner: revbayes
+          repositories: revbayes.github.io
+
+      - name: Start the website's update-help workflow
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          gh api repos/revbayes/revbayes.github.io/dispatches \
+             -f event_type=revbayes-release \
+             -f "client_payload[tag]=${TAG}"
