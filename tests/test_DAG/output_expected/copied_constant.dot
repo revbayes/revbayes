@@ -1,0 +1,10 @@
+/* Graphical model description in DOT language                                    */
+/*    To view graph:                                                              */
+/*       open this file in the program Graphviz: http://www.graphviz.org          */
+/*       or paste contents into an online viewer: http://stamm-wilbrandt.de/GraphvizFiddle */
+
+digraph REVDAG {
+   n_a [shape=record, style=filled, fillcolor=white, label="{a|1}"]
+   n_b [shape=record, style=filled, fillcolor=white, label="{b|1}"]
+   graph [bgcolor=lavenderblush2, pad=0.25]
+}
