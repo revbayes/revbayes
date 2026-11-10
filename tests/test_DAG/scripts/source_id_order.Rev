@@ -40,4 +40,18 @@ write("Writing model graph to " + dot_nh)
 m_nh.graph(dot_nh)
 
 clear()
+
+# Scenario 3: assigning one constant to another copies the node. The copy must not
+# receive the original's ID, or model() would treat them as one node.
+
+dot_copy = "output/copied_constant.dot"
+
+a <- 1.0
+b <- a
+
+m_copy = model(a, b)
+write("Writing model graph to " + dot_copy)
+m_copy.graph(dot_copy)
+
+clear()
 q()
