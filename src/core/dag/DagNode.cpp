@@ -70,7 +70,7 @@ DagNode::DagNode( const DagNode &n ) : Parallelizable( n ),
     name( n.name ),
     touched_elements( n.touched_elements ),
     topo_level( 1 ),
-    dag_node_id( n.dag_node_id ),
+    dag_node_id( allocateDagNodeId() ),
     ref_count( 0 ),
     visit_flags( n.visit_flags )
 {
@@ -115,7 +115,7 @@ DagNode& DagNode::operator=(const DagNode &d)
         hidden           = d.hidden;
         touched_elements = d.touched_elements;
         visit_flags      = d.visit_flags;
-        // dag_node_id stays with this object. The copy constructor is what shares an id with a clone.
+        // dag_node_id stays with this object. Assignment does not create a new node.
     }
 
     return *this;
@@ -232,7 +232,10 @@ void DagNode::addTouchedElementIndex(size_t i)
 }
 
 
-/** Next identity for a newly constructed node. Clones do not call this; they copy the original's id. */
+/**
+ * Next identity for a newly constructed node, including an ordinary copy.
+ * cloneDAG overwrites it with the source's ID.
+ */
 std::uint64_t DagNode::allocateDagNodeId(void)
 {
     static std::uint64_t next_id = 1;
@@ -1079,6 +1082,18 @@ void DagNode::bfgtAddEdge( const DagNode* parent, const DagNode* child )
         throw;
     }
 }
+
+
+/**
+ * Write the source node's identifier back onto a cloneDAG copy.
+ * The copy constructor has already taken a fresh id; this replaces it so that a
+ * cloned model still matches the moves and monitors that point at the original.
+ */
+ void DagNode::preserveDagNodeId( const DagNode& source )
+ {
+ 
+     dag_node_id = source.dag_node_id;
+ }
 
 
 /** Print children. We assume indent is from line 2 (hanging indent). Line length is lineLen. */

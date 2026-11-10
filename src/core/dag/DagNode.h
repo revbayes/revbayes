@@ -81,7 +81,7 @@ template <class valueType> class RbOrderedSet;
         void                                                        findUniqueDescendantsWithFlagVector(RbOrderedSet<DagNode *>& descendants, const size_t flagType, std::vector<DagNode *>& nodes);
         void                                                        getAffectedNodes(RbOrderedSet<DagNode *>& affected) const;                                  //!< Get affected nodes
         const std::vector<DagNode*>&                                getChildren(void) const;                                                                    //!< Get the set of children
-        std::uint64_t                                               getDagNodeId(void) const;                                                                   //!< Identifier shared by a node and every clone of it
+        std::uint64_t                                               getDagNodeId(void) const;                                                                   //!< Identifier of this node. cloneDAG copies share it; other copies do not
         DagNodeTypes                                                getDagNodeType(void) const;
         virtual Distribution&                                       getDistribution(void);
         virtual const Distribution&                                 getDistribution(void) const;
@@ -114,6 +114,7 @@ template <class valueType> class RbOrderedSet;
         void                                                        keep(void);
         void                                                        keepAffected(void);                                                                         //!< Keep value of affected nodes
         void                                                        keepVector(std::vector<DagNode *>& nodes);
+        void                                                        preserveDagNodeId(const DagNode& source);                                                   //!< Give a cloneDAG copy the source node's identifier
         virtual void                                                reInitialized(void);                                                                        //!< The DAG was re-initialized so maybe you want to reset some stuff
         virtual void                                                reInitializeAffected(void);                                                                 //!< The DAG was re-initialized so maybe you want to reset some stuff
         virtual void                                                reInitializeMe(void);                                                                       //!< The DAG was re-initialized so maybe you want to reset some stuff
@@ -169,7 +170,7 @@ template <class valueType> class RbOrderedSet;
         static void                                                 bfgtAddEdge(const DagNode* parent, const DagNode* child);                                   //!< BGFT online edge insertion: repair the topological pseudo-order or throw if the new edge would close a cycle.
 
         mutable std::size_t                                         topo_level;                                                                                 //!< This node's level (rank in the topological pseudo-ordering of the DAG).
-        std::uint64_t                                               dag_node_id;                                                                                //!< Identifier assigned at construction. The copy constructor copies it, so clones correspond to the original.
+        std::uint64_t                                               dag_node_id;                                                                                //!< Identifier assigned at construction. An ordinary copy gets its own; cloneDAG preserves the source's.
         mutable size_t                                              ref_count;
         mutable std::vector<bool>                                   visit_flags;                                                                                //!< In order: affected, find, keep, reinitialize, restore
     };
