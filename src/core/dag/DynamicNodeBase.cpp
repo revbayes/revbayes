@@ -51,8 +51,11 @@ DagNode* DynamicNodeBase::cloneDAG(const DagNode &owner, DagNodeMap &new_nodes, 
         }
     }
 
-    // Get a shallow copy
+    // Get a shallow copy. The copy constructor took a fresh ID, but since this copy stands in for the original
+    // inside a cloned model, we want to replace that new ID by the ID of the original node. This allows moves
+    // and monitors aimed at the original to still find the right node in the cloned model.
     DagNode *copy = owner.clone();
+    copy->preserveDagNodeId( owner );
 
     // Add this node and its copy to the map
     new_nodes[ &owner ] = copy;
