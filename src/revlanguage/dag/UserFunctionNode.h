@@ -211,9 +211,12 @@ RevBayesCore::DagNode* UserFunctionNode<rlType>::cloneDAG( RevBayesCore::DagNode
     
     // We avoid the conflict between calls to swapParent from replacement of the Rev object in an
     // argument variable, and the need to swap parents while cloning the DAG by implementing our
-    // own cloneDAG function, where we use the temporary hack of replacing argument variables with
-    // variables having new objects with the required DAG nodes.
+    // own cloneDAG function. The loop below uses the temporary hack of replacing each argument
+    // with a new variable holding the cloned DAG node. The clone received a fresh ID, but since
+    // it stands in for the original inside a cloned model, we replace that new ID with the ID of
+    // the original node.
     UserFunctionNode<rlType>* copy = this->clone();
+    copy->preserveDagNodeId( *this );
     
     // Add this node and its copy to the map
     newNodes[ this ] = copy;
