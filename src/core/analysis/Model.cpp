@@ -37,9 +37,9 @@ Model::Model(const DagNode *source) : Parallelizable()
  * the copied DAG nodes is created for convenient access.
  *
  * The set itself is ordered by pointer address. That order changes when the allocator reuses a freed block, so the
- * same sources can be visited in a different order in the next run. We therefore re-key the sources by the id
- * assigned at construction and visit that map instead. The id is copied when a node is cloned, so each copy of the
- * model walks its sources in the same order.
+ * same sources can be visited in a different order in the next run. We therefore re-key the sources by the ID
+ * assigned at construction and visit that map instead. cloneDAG preserves that ID, so each copy of the model
+ * walks its sources in the same order. An ordinary copy of a node receives its own ID.
  *
  * \param[in]    s    The set of DAG nodes from which the model graph is extracted.
  */
