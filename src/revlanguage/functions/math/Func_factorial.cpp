@@ -14,15 +14,11 @@
 
 using namespace RevLanguage;
 
-namespace {
-
-    double* factorial(std::int64_t n)
-    {
-        return new double(
-            boost::math::factorial<double>(static_cast<unsigned int>(n))
-        );
-    }
-
+double* my_factorial(std::int64_t n)
+{
+    return new double(
+        boost::math::factorial<double>(static_cast<unsigned int>(n))
+    );
 }
 
 Func_factorial::Func_factorial(void) : TypedFunction<RealPos>()
@@ -41,7 +37,7 @@ RevBayesCore::TypedFunction<double>* Func_factorial::createFunction(void) const
             this->args[0].getVariable()->getRevObject()
         ).getDagNode();
 
-    return RevBayesCore::generic_function_ptr<double>(factorial, n);
+    return RevBayesCore::generic_function_ptr<double>(my_factorial, n);
 }
 
 const ArgumentRules& Func_factorial::getArgumentRules(void) const
