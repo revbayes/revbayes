@@ -117,8 +117,18 @@ jobs:
       run: |
         # If we're running in a docker image, we are already root
         if [ -n "${{ matrix.image }}" ]  ; then
+          if ! getent hosts archive.ubuntu.com >/dev/null; then
+            echo "archive.ubuntu.com does not resolve; falling back to the MIT mirror"
+            sed -i -E 's#http://(archive|security)\.ubuntu\.com/ubuntu/?#http://mirrors.mit.edu/ubuntu/#' \
+              /etc/apt/sources.list.d/ubuntu.sources
+          fi
           apt-get update && apt-get install -y sudo build-essential git cmake
-        fi 
+        else
+          if ! getent hosts archive.ubuntu.com >/dev/null; then
+            echo "archive.ubuntu.com does not resolve; falling back to the MIT mirror"
+            printf '%s\n' https://mirrors.mit.edu/ubuntu | sudo tee /etc/apt/apt-mirrors.txt >/dev/null
+          fi
+        fi
 
         sudo apt-get update
         sudo apt-get install -y ccache meson
@@ -142,10 +152,14 @@ jobs:
       if: matrix.name == 'windows'
       run: |
           # If we're running in a docker image, we are already root
-          if [ -n "${{ matrix.image }}" ]  ; then
-            apt-get update && apt-get install -y sudo build-essential git cmake wget pkgconf
-            echo HOME=/root >> "$GITHUB_ENV"
+          if ! getent hosts archive.ubuntu.com >/dev/null; then
+            echo "archive.ubuntu.com does not resolve; falling back to the MIT mirror"
+            sed -i -E 's#http://(archive|security)\.ubuntu\.com/ubuntu/?#http://mirrors.mit.edu/ubuntu/#' \
+              /etc/apt/sources.list.d/ubuntu.sources
           fi
+          apt-get update && apt-get install -y sudo build-essential git cmake wget pkgconf
+          echo HOME=/root >> "$GITHUB_ENV"
+
           sudo apt-get update
           sudo apt-get install -y ccache dos2unix zstd
           sudo apt-get install -y git python3-setuptools python3-pip g++-mingw-w64 wine64
