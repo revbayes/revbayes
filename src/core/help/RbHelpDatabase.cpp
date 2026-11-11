@@ -1908,6 +1908,17 @@ if (ln_of_ex != 1) {
 	help_strings[string("exp")][string("name")] = string(R"(exp)");
 	help_arrays[string("exp")][string("see_also")].push_back(string(R"(ln)"));
 	help_strings[string("exp")][string("title")] = string(R"(Exponential of a number)");
+	help_arrays[string("factorial")][string("authors")].push_back(string(R"(Amandeep Das)"));
+	help_strings[string("factorial")][string("description")] = string(R"(Calculates the factorial of a natural number.)");
+	help_strings[string("factorial")][string("details")] = string(R"(This function accepts one argument, a natural number `n`, and returns its factorial as a positive real number. The factorial is the product of all positive integers less than or equal to `n`. By definition, the factorial of zero is one. Results that exceed the representable range of the return type may cause a numerical overflow error.)");
+	help_strings[string("factorial")][string("example")] = string(R"(# Calculate the factorial of 5
+factorial(5)
+
+# Calculate the factorial of 0
+factorial(0))");
+	help_strings[string("factorial")][string("name")] = string(R"(factorial)");
+	help_arrays[string("factorial")][string("see_also")].push_back(string(R"(gamma)"));
+	help_strings[string("factorial")][string("title")] = string(R"(factorial)");
 	help_strings[string("floor")][string("description")] = string(R"(Rounds a number down to the nearest integer.)");
 	help_strings[string("floor")][string("details")] = string(R"(The floor function takes as input a real number x, and gives as output the
 greatest integer less than or equal to x.)");

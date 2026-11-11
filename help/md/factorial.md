@@ -11,9 +11,9 @@ Amandeep Das
 ## see_also
 gamma
 ## example
-# Calculate the factorial of 5
+    # Calculate the factorial of 5
     factorial(5)
 
-# Calculate the factorial of 0
+    # Calculate the factorial of 0
     factorial(0)
 ## references
