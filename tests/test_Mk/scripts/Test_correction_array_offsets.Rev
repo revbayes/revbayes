@@ -1,0 +1,49 @@
+################################################################################
+#
+# RevBayes Test-Script: Check that the ascertainment-bias correction array
+#                       offsets are properly copied.
+#
+# authors: David Cerny, Martin R. Smith
+#
+################################################################################
+
+# Uses data and modifies a script provided by Martin R. Smith
+# (see https://github.com/revbayes/revbayes/issues/566)
+
+seed(12345)
+
+# Load character data
+chars <- readDiscreteCharacterData("data/issue566_data.nex")
+taxa <- chars.names()
+outgroup <- clade(taxa[1])
+nTaxa <- chars.size()
+nEdge <- 2 * nTaxa - 3
+
+# Uniform prior on tree topologies
+topology ~ dnUniformTopology(taxa, outgroup = outgroup)
+tree_length ~ dnGamma(shape = 2, rate = 1)
+rel_br_lengths ~ dnDirichlet( rep(1.0, nEdge) )
+br_lengths := rel_br_lengths * tree_length
+
+phylogeny := treeAssembly(topology, br_lengths)
+
+m_morph[1] ~ dnPhyloCTMC( tree = phylogeny, Q = fnJC(5), type = "Standard", coding = "variable" )
+m_morph[1].clamp(chars)
+
+lnL := m_morph[1].lnProbability()
+original = lnL                               # likelihood of the original variable outside the model
+
+mymodel = model(phylogeny)
+
+# We need to also evaluate the likelihood of the clone created by model(),
+# but we need to do it before mcmc() rebuilds the ascertainment-bias 
+# correction array offsets, potentially hiding a bad copy. Alternative
+# ways of doing this would be to simply print the model ('mymodel') or its
+# graph ('mymodel.graph("file.dot")').
+
+cloned = mymodel.lnProbability( m_morph[1] ) # likelihood of the cloned variable inside the model
+
+# A segfault may happen here if the copy is bad
+
+clear()
+q()
