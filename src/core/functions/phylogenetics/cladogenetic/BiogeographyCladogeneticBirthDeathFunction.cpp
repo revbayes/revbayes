@@ -745,7 +745,7 @@ BiogeographyCladogeneticBirthDeathFunction* BiogeographyCladogeneticBirthDeathFu
 }
 
 
-double BiogeographyCladogeneticBirthDeathFunction::computeDataAugmentedCladogeneticLnProbability(const std::vector<BranchHistory*>& histories,
+double BiogeographyCladogeneticBirthDeathFunction::computeDataAugmentedCladogeneticLnProbability(const CharacterHistoryDiscrete& histories,
                                                                                               size_t node_index,
                                                                                               size_t left_index,
                                                                                               size_t right_index ) const
