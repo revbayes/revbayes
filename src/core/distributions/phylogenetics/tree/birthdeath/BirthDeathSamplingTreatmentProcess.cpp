@@ -201,8 +201,8 @@ BirthDeathSamplingTreatmentProcess::BirthDeathSamplingTreatmentProcess(const Typ
     {
         try
         {
-            RevBayesCore::Tree *my_tree = TreeUtilities::startingTreeInitializer( *t, taxa, age_check_precision );
-            value = my_tree->clone();
+            TreeUtilities::prepareTreeTaxa( *t, taxa, age_check_precision, true );
+            value = t->clone();
         }
         catch (RbException &e)
         {
@@ -277,10 +277,8 @@ double BirthDeathSamplingTreatmentProcess::computeLnProbabilityDivergenceTimes( 
     prepareTimeline();
 
     // Assign nodes to sets
-    if ( countAllNodes() )
-    {
-        return RbConstants::Double::neginf;
-    }
+    // This throws an exception if a node has two sampled-ancestor tips.
+    countAllNodes();
 
     // precompute A_i, B_i, C_i, E_i(t_i)
     prepareProbComputation();
@@ -577,7 +575,7 @@ double BirthDeathSamplingTreatmentProcess::computeLnProbabilityTimes( void ) con
  * Non-burst trackers (1,3,4) are vectors of times of the samples.
  * All burst trackers (2,5,6) are vectors of vectors of samples, each vector corresponding to an event
  */
-bool BirthDeathSamplingTreatmentProcess::countAllNodes(void) const
+void BirthDeathSamplingTreatmentProcess::countAllNodes(void) const
 {
   // get node/time variables
   size_t num_nodes = value->getNumberOfNodes();
@@ -660,11 +658,9 @@ bool BirthDeathSamplingTreatmentProcess::countAllNodes(void) const
       }
       else if ( n.isInternal() && n.getChild(0).isSampledAncestorTip() && n.getChild(1).isSampledAncestorTip() )
       {
-          return true;
+          throw RbException()<<"BDSTP: Node with two sampled-ancestor tips!\n";
       }
   }
-
-  return false;
 }
 
 
@@ -2033,6 +2029,13 @@ bool BirthDeathSamplingTreatmentProcess::allowsSA() {
 
 void RevBayesCore::BirthDeathSamplingTreatmentProcess::setValue(Tree * v, bool f)
 {
-    RevBayesCore::Tree *newv = TreeUtilities::startingTreeInitializer(*v, taxa, age_check_precision);
-    AbstractRootedTreeDistribution::setValue(newv, f);
+    TreeUtilities::prepareTreeTaxa(*v, taxa, age_check_precision, false);
+    AbstractRootedTreeDistribution::setValue(v, f);
+}
+
+
+// Observations use exactly the same taxon metadata and rounding rule as supplied initial trees.
+void BirthDeathSamplingTreatmentProcess::prepareForClamping(Tree& tree)
+{
+    TreeUtilities::prepareTreeTaxa(tree, taxa, age_check_precision, true);
 }

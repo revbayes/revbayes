@@ -1,6 +1,5 @@
 #include <iomanip>
 #include <iostream>
-#include <range/v3/all.hpp> // for ranges::views
 #include <boost/lexical_cast.hpp> // for lexical_cast
 
 #include "DebugMove.h"
@@ -8,10 +7,9 @@
 #include "RbMathLogic.h"
 #include "RbConstants.h"
 #include "variant.h"
+#include "concat_view.h"
 
 using namespace RevBayesCore;
-
-namespace views = ranges::views;
 
 const double* ProbOrError::is_prob() const
 {
@@ -46,7 +44,7 @@ std::ostream& operator<<(std::ostream& o, const ProbOrError& pe)
 NodePrMap getNodePrs(const std::vector<DagNode*>& nodes, const RbOrderedSet<DagNode*>& affected_nodes)
 {
     NodePrMap Prs;
-    for(auto node: views::concat(nodes, affected_nodes))
+    for(auto node: concat_view(nodes, affected_nodes))
     {
         ProbOrError lnPr(RbConstants::Double::nan);
 
@@ -111,4 +109,3 @@ void compareNodePrs(const std::string& name, const NodePrMap& pdfs1, const NodeP
 
     if (err) throw E;
 }
-

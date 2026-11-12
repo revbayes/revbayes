@@ -1,0 +1,49 @@
+
+################################################################################
+#
+# RevBayes Test-Script: Checking that we can use treeAssembly + dnEmpiricalTree
+#                       + mvEmpiricalTree to sample branch lengths on
+#                       a predefined set of topologies
+#
+# authors: David Cerny
+#
+################################################################################
+
+seed(12345)
+
+# Rev code below originally provided by Ziad Khoury
+# (see https://github.com/revbayes/revbayes/issues/547)
+
+taxon_names = ["tax1", "tax2", "tax3", "tax4", "tax5"]
+
+for (i in 1:taxon_names.size()) {
+    taxa[i] = taxon(taxon_names[i])
+}
+
+topology ~ dnUniformTopology(taxa=taxa)
+moves[1] = mvNNI(topology, weight=1.0)
+
+model = model(topology)
+monitors[1] = mnFile(filename="output/test_trees.trees", printgen=5, separator = TAB, topology)
+mcmc = mcmc(model, monitors, moves)
+
+mcmc.run(generations=1000)
+
+trace_emp = readTreeTrace("output/test_trees.trees", treetype="non-clock", burnin=0.0)
+tree_emp ~ dnEmpiricalTree(trace_emp)
+moves_emp[1] = mvEmpiricalTree(tree_emp, weight=1.0)
+
+num_branches = 2 * taxa.size() - 3
+branch_lengths ~ dnDirichlet(rep(1.0, num_branches))
+moves_emp[2] = mvBetaSimplex(branch_lengths, alpha=10.0, weight=num_branches, tuneTarget=0.23)
+
+psi_emp := treeAssembly(tree_emp, branch_lengths)
+
+model_emp = model(psi_emp)
+monitors_emp[1] = mnFile(filename="output/assembled_trees.trees", printgen=5, separator = TAB, psi_emp)
+monitors_emp[2] = mnModel(filename="output/branch_lengths.log", printgen=5, separator = TAB)
+mcmc_emp = mcmc(model_emp, monitors_emp, moves_emp)
+
+mcmc_emp.run(generations=1000)
+
+q()

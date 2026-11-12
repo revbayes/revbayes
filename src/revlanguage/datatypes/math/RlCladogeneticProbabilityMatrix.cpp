@@ -89,10 +89,20 @@ const TypeSpec& CladogeneticProbabilityMatrix::getClassTypeSpec(void) {
 
 /** Get the type spec of this class. We return a member variable because instances might have different element types. */
 const TypeSpec& CladogeneticProbabilityMatrix::getTypeSpec(void) const {
-    
+
     static TypeSpec type_spec = getClassTypeSpec();
     return type_spec;
 }
+
+/** Print the value of the matrix.
+    The 'user' flag is delibrately ignored, we always print in the user-facing
+format so that print and write produces the same output as auto-print
+**/
+void CladogeneticProbabilityMatrix::printValue(std::ostream& o, bool user) const
+{
+    this->getDagNode()->printValue( o, ",", -1, true, true, true );
+}
+
 
 void CladogeneticProbabilityMatrix::initMethods(void) {
     ; // do nothing

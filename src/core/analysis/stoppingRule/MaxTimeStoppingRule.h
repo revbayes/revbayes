@@ -30,6 +30,7 @@ namespace RevBayesCore {
         // public methods
         bool                                                checkAtIteration(size_t g) const;                           //!< Should we check for convergence at the given iteration?
         MaxTimeStoppingRule*                                clone(void) const;                                          //!< Clone function. This is similar to the copy constructor but useful in inheritance.
+        double                                              getMaxTime(void) const;                                     //!< Get the maximum allowed wall-clock time in seconds.
         bool                                                isConvergenceRule(void) const;                              //!< No, this is a threshold rule.
         void                                                runStarted(void);                                           //!< The run just started. Here we do not need to do anything.
         void                                                setNumberOfRuns(size_t n);                                  //!< Set how many runs/replicates there are.

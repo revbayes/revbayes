@@ -99,7 +99,7 @@ double NearestNeighborInterchangeProposal::doProposal( void )
     if ( tau.getNumberOfTips() < 3)
     {
         failed = true;
-        return RbConstants::Double::neginf;
+        return RbConstants::Double::neginf; // fail proposal
     }
     
     // pick a random node which is not the root nor a direct descendant of the root
@@ -118,11 +118,46 @@ double NearestNeighborInterchangeProposal::doProposal( void )
         uncle = &grandparent.getChild( 1 );
     }
     
+    if (uncle->isSampledAncestorTip())
+    {
+        TopologyNode* brother = &parent.getChild(0);
+        if (node == brother)
+            brother = &parent.getChild(1);
+
+        if (brother->isSampledAncestorTip())
+        {
+            // Swapping uncle and node, will mean that parent has two sampled-ancestor children.
+            failed = true;
+            return RbConstants::Double::neginf; // fail proposal
+        }
+    }
+
     // we need to work with the times
     double gparent_age  = grandparent.getAge();
     double parent_age   = parent.getAge();
     double uncles_age   = uncle->getAge();
     double my_age       = node->getAge();
+
+    // A sampled-ancestor tip must match its parent's age. This move preserves sampling
+    // ages, so reject an exchange that would require changing a tip's age, even if its
+    // taxon interval permits the change or no explicit sampling-age constraint was supplied.
+    //
+    // A possible generalization would move each exchanged sampled-ancestor tip to its new
+    // parent's age; the reverse exchange would restore its original age. Enabling this
+    // requires establishing when the model permits sampling ages to vary, enforcing age
+    // constraints in the distribution, and checking reversibility and the Hastings ratio.
+    for (TopologyNode* fossil : {node, uncle})
+    {
+        if (not fossil->isSampledAncestorTip())
+            continue;
+
+        double new_age = fossil == node ? gparent_age : parent_age;
+        if (new_age != fossil->getAge())
+        {
+            failed = true;
+            return RbConstants::Double::neginf;
+        }
+    }
     
     // now we store all necessary values
     storedChosenNode    = node;
@@ -149,7 +184,7 @@ double NearestNeighborInterchangeProposal::doProposal( void )
     if ( node->isTip() )
     {
         my_new_age = my_age;
-        lnHastingsratio = 0.0;
+        // We don't actually have to set anything here.
     }
     else
     {
@@ -163,7 +198,6 @@ double NearestNeighborInterchangeProposal::doProposal( void )
         // compute the Hastings ratio
         size_t nNodes = node->getNumberOfNodesInSubtree(false);
         lnHastingsratio += (nNodes > 1 ? log( scaling_factor ) * (nNodes-1) : 0.0 );
-
     }
 
     // uncle rescale and MH
@@ -171,6 +205,7 @@ double NearestNeighborInterchangeProposal::doProposal( void )
     if ( uncle->isTip() )
     {
         uncles_new_age = uncles_age;
+        // We don't actually have to set anything here.
     }
     else
     {
@@ -182,9 +217,11 @@ double NearestNeighborInterchangeProposal::doProposal( void )
 
         size_t nNodes = uncle->getNumberOfNodesInSubtree(false);
         lnHastingsratio += (nNodes > 1 ? log( scaling_factor ) * (nNodes-1) : 0.0 );
-        
     }
     
+    assert(not grandparent.getChild(0).isSampledAncestorTip() or not grandparent.getChild(1).isSampledAncestorTip());
+    assert(not parent.getChild(0).isSampledAncestorTip() or not parent.getChild(1).isSampledAncestorTip());
+
     return lnHastingsratio;
     
 }
@@ -243,6 +280,16 @@ void NearestNeighborInterchangeProposal::undoProposal( void )
         // rescale to old ages
         TreeUtilities::setAges(*storedChosenNode, storedAges);
         TreeUtilities::setAges(*storedUncle, storedAges);
+
+        if (storedChosenNode->isSampledAncestorTip())
+        {
+            assert(storedChosenNode->getAge() == storedChosenNode->getParent().getAge());
+        }
+
+        if (storedUncle->isSampledAncestorTip())
+        {
+            assert(storedUncle->getAge() == storedUncle->getParent().getAge());
+        }
     }
     
 }

@@ -21,12 +21,12 @@ namespace RevLanguage {
      *
      */
     class Dist_uniformTopologyBranchLength : public TypedDistribution<BranchLengthTree> {
-        
+
     public:
         Dist_uniformTopologyBranchLength( void );                                                                                                                   //!< Default constructor
         
         // Basic utility functions
-        Dist_uniformTopologyBranchLength*                        clone(void) const;                                                                              //!< Clone the object
+        Dist_uniformTopologyBranchLength*                       clone(void) const;                                                                              //!< Clone the object
         static const std::string&                               getClassType(void);                                                                             //!< Get Rev type
         static const TypeSpec&                                  getClassTypeSpec(void);                                                                         //!< Get class type spec
         std::string                                             getDistributionFunctionName(void) const;                                                        //!< Get the Rev-name for this distribution.
@@ -35,7 +35,7 @@ namespace RevLanguage {
         
         
         // Distribution functions you have to override
-        RevBayesCore::UniformTopologyBranchLengthDistribution*   createDistribution(void) const;                                                                 //!< Create the internal distribution object
+        RevBayesCore::UniformTopologyBranchLengthDistribution*  createDistribution(void) const;                                                                 //!< Create the internal distribution object
         
     protected:
         

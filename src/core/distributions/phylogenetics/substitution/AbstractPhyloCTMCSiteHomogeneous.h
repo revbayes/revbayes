@@ -117,11 +117,12 @@ namespace RevBayesCore {
         {
             assert( item >= 0 and item < num_items );
 
-            // Should we assume that we only mark things dirty after touching?
-            // assert( is_touched() );
+            // Record the previous state while this item is still clean, because a tree move
+            // fires its events before the touch reaches us.
+            touch();
 
             // Here is where we unshare with the previous state.
-            if (prev_state and not (*prev_state)[item].dirty and not is_dirty(item))
+            if (not (*prev_state)[item].dirty and not is_dirty(item))
             {
                 // If we mark something dirty multiple times, we don't want to flip the bit twice!
                 current_state[item].active = (*prev_state)[item].active ^ 1;
@@ -132,7 +133,7 @@ namespace RevBayesCore {
 
         bool is_touched() const
         {
-            return prev_state;
+            return prev_state.has_value();
         }
 
         void mark_all_dirty()

@@ -5,7 +5,7 @@ maxdiff
 Finds the maximum difference in clade probabilities between two posterior samples.
 ## details
 ## authors
-Will Pett
+June Walker
 ## see_also
 readTreeTrace
 ## example

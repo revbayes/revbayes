@@ -60,6 +60,7 @@ TopologyConstrainedTreeDistribution::TopologyConstrainedTreeDistribution(TypedDi
     num_backbones( 0 ),
     use_multiple_backbones( false ),
     starting_tree( t ),
+    age_check_precision( age_check_precision ),
     rooting_known( false ),
     is_rooted( true )
 {
@@ -98,8 +99,8 @@ TopologyConstrainedTreeDistribution::TopologyConstrainedTreeDistribution(TypedDi
             
             try
             {
-                RevBayesCore::Tree *my_tree = TreeUtilities::startingTreeInitializer( *t, taxa, age_check_precision );
-                value = my_tree->clone();
+                TreeUtilities::prepareTreeTaxa( *t, taxa, age_check_precision, true );
+                value = t->clone();
             }
             catch (RbException &e)
             {
@@ -139,6 +140,7 @@ TopologyConstrainedTreeDistribution::TopologyConstrainedTreeDistribution(const T
     num_backbones( d.num_backbones ),
     use_multiple_backbones( d.use_multiple_backbones ),
     starting_tree( (d.starting_tree==NULL ? NULL : d.starting_tree->clone()) ),
+    age_check_precision( d.age_check_precision ),
     rooting_known( d.rooting_known ),
     is_rooted( d.is_rooted )
 {
@@ -215,6 +217,7 @@ TopologyConstrainedTreeDistribution& TopologyConstrainedTreeDistribution::operat
         num_backbones                   = d.num_backbones;
         use_multiple_backbones          = d.use_multiple_backbones;
         starting_tree                   = (d.starting_tree == NULL ? NULL : d.starting_tree->clone());
+        age_check_precision             = d.age_check_precision;
         rooting_known                   = d.rooting_known;
         is_rooted                       = d.is_rooted;
 
@@ -791,8 +794,11 @@ Tree* TopologyConstrainedTreeDistribution::simulateRootedTree( bool alwaysReturn
         // create the i-th taxon
         TopologyNode* node = new TopologyNode( taxa[i], i );
 
-        // set the age of this tip node
-        node->setAge( taxa[i].getAge() );
+        // Initialize this tip at the lower bound of its age constraint.
+        // Unconstrained tips start at age zero.
+        const auto& interval = taxa[i].getAgeRange();
+        const double interval_age = interval ? interval->getMin() : 0.0;
+        node->setAge( interval_age );
 
         // add the new node to the list
         nodes.push_back( node );
@@ -811,9 +817,6 @@ Tree* TopologyConstrainedTreeDistribution::simulateRootedTree( bool alwaysReturn
         {
             throw RbException("Cannot simulate tree: clade constraints are older than the origin age.");
         }
-
-        // set the ages of each of the taxa in the constraint
-//        monophyly_constraint.setAges( taxa );
 
         // populate sorted clades vector
         if ( monophyly_constraint.size() > 1 && monophyly_constraint.size() < num_taxa )
@@ -923,7 +926,10 @@ Tree* TopologyConstrainedTreeDistribution::simulateRootedTree( bool alwaysReturn
             const Taxon& taxon = unclaimed_taxa[k];
 
             Clade tmp_clade = Clade( taxon );
-            tmp_clade.setAge( taxon.getAge() );
+            // Unconstrained tips start at age zero.
+            const auto& interval = taxon.getAgeRange();
+            const double interval_age = interval ? interval->getMin() : 0.0;
+            tmp_clade.setAge( interval_age );
             children.push_back( tmp_clade );
         }
 
@@ -1379,4 +1385,26 @@ void TopologyConstrainedTreeDistribution::restoreSpecialization(const DagNode *r
     
     base_distribution->restore(restorer);
     
+}
+
+
+// Forward checkpoint repair to the tree distribution without evaluating a modified copy.
+void TopologyConstrainedTreeDistribution::repairCheckpointValue(Tree& tree)
+{
+    base_distribution->repairCheckpointValue(tree);
+}
+
+
+// Match this wrapper's initial-tree preparation where it supplies its own precision. Other bases
+// retain their own preparation policy; do not apply two potentially different rounding rules.
+void TopologyConstrainedTreeDistribution::prepareForClamping(Tree& tree)
+{
+    auto* rooted = dynamic_cast<AbstractRootedTreeDistribution*>(base_distribution);
+    const auto& nodes = tree.getNodes();
+    const bool has_fossils = std::any_of(nodes.begin(), nodes.end(),
+        [](const TopologyNode* node) { return node->isTip() and node->isFossil(); });
+    if (rooted and has_fossils)
+        TreeUtilities::prepareTreeTaxa(tree, rooted->getTaxa(), age_check_precision, true);
+    else
+        base_distribution->prepareForClamping(tree);
 }

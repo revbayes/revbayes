@@ -41,6 +41,8 @@ namespace RevBayesCore {
         RevLanguage::RevPtr<RevLanguage::RevVariable>       executeProcedure(const std::string &name, const std::vector<DagNode *> args, bool &found);
         void                                                redrawValue(void);
         void                                                setValue(RbVector<valueType> *v, bool f=false);
+        void prepareForClamping(RbVector<valueType>& v) override;
+        void repairCheckpointValue(RbVector<valueType>& v) override;
         
     protected:
         // Parameter management functions
@@ -297,14 +299,23 @@ double RevBayesCore::EmpiricalSampleDistribution<valueType>::computeLnProbabilit
     {
 #endif
 
-        // now normalize
-        for (size_t i = 0; i < num_samples; ++i)
+        // An empirical average of zero densities is zero. Avoid -infinity - -infinity
+        // below, but still broadcast the result to the other MPI processes.
+        if (max == RbConstants::Double::neginf)
         {
-            probs[i] = exp( ln_probs[i] - max);
-            prob += probs[i];
+            ln_prob = max;
         }
+        else
+        {
+            // now normalize
+            for (size_t i = 0; i < num_samples; ++i)
+            {
+                probs[i] = exp( ln_probs[i] - max);
+                prob += probs[i];
+            }
         
-        ln_prob = std::log( prob ) + max - std::log( num_samples );
+            ln_prob = std::log( prob ) + max - std::log( num_samples );
+        }
         
 #ifdef RB_MPI
 
@@ -554,6 +565,26 @@ void RevBayesCore::EmpiricalSampleDistribution<valueType>::restoreSpecialization
         
     }
     
+}
+
+// Repair restored elements, then refresh the copies used for empirical density evaluation.
+// A containing wrapper may pass an external value; it will install that value separately.
+template<class valueType>
+void RevBayesCore::EmpiricalSampleDistribution<valueType>::repairCheckpointValue(RbVector<valueType>& v)
+{
+    for (auto& element : v) base_distribution->repairCheckpointValue(element);
+    if (&v == this->value)
+    {
+        internal_value_copy = v;
+        setInternalDistributions();
+    }
+}
+
+// Prepare each observation before setValue installs it and builds any private distribution copies.
+template<class valueType>
+void RevBayesCore::EmpiricalSampleDistribution<valueType>::prepareForClamping(RbVector<valueType>& v)
+{
+    for (auto& element : v) base_distribution->prepareForClamping(element);
 }
 
 #endif

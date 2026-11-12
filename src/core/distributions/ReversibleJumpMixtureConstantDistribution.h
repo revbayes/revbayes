@@ -54,6 +54,10 @@ namespace RevBayesCore {
         void                                                        restoreSpecialization(const DagNode *restorer);
         void                                                        touchSpecialization(const DagNode *toucher, bool touchAll);
 
+        // Clamping preparation remains the default no-op: components can disagree on constraints
+        // or precision. Sequential repair would impose a component order on the observation.
+        void repairCheckpointValue(mixtureType& v) override;
+
     protected:
         // Parameter management functions
         void                                                        swapParameterInternal(const DagNode *oldP, const DagNode *newP);            //!< Swap a parameter
@@ -432,6 +436,13 @@ void RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::touch
         }
     }
     
+}
+
+// Only the continuous component delegates to a distribution; the constant value is exact.
+template<class mixtureType>
+void RevBayesCore::ReversibleJumpMixtureConstantDistribution<mixtureType>::repairCheckpointValue(mixtureType& v)
+{
+    if (index != 0) base_distribution->repairCheckpointValue(v);
 }
 
 #endif

@@ -7,6 +7,7 @@
 #include "DiscreteTaxonData.h"
 
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 #include <vector>
@@ -110,6 +111,10 @@ namespace RevBayesCore {
 
 
 #include "CharacterTranslator.h"
+#include "AminoAcidState.h"
+#include "CodonState.h"
+#include "DoubletState.h"
+#include "RnaState.h"
 #include "DnaState.h"
 #include "NaturalNumbersState.h"
 #include "NclReader.h"
@@ -2059,29 +2064,46 @@ void RevBayesCore::HomologousDiscreteCharacterData<charType>::restoreCharacter(s
 
 
 /**
- * Compute the state frequencies per site.
- *
- * \return       A matrix of character frequencies where each column is a character and each row a taxon.
+ * Translate each sequence into a matrix with the destination character type.
+ * The matrix specialization must match its sequences so typed access remains valid.
  */
 template<class charType>
 RevBayesCore::AbstractHomologousDiscreteCharacterData* RevBayesCore::HomologousDiscreteCharacterData<charType>::translateCharacters( const std::string &type ) const
 {
-    
-    size_t num_sequences = this->taxa.size();
-    HomologousDiscreteCharacterData<DnaState> *trans_char_data = new HomologousDiscreteCharacterData<DnaState>();
-    
-    for (size_t i = 0; i < num_sequences; ++i)
+    std::unique_ptr<AbstractHomologousDiscreteCharacterData> trans_char_data;
+    if ( type == "DNA" )
+    {
+        trans_char_data = std::make_unique<HomologousDiscreteCharacterData<DnaState>>();
+    }
+    else if ( type == "RNA" )
+    {
+        trans_char_data = std::make_unique<HomologousDiscreteCharacterData<RnaState>>();
+    }
+    else if ( type == "AA" || type == "Protein" )
+    {
+        trans_char_data = std::make_unique<HomologousDiscreteCharacterData<AminoAcidState>>();
+    }
+    else if ( type == "Codon" )
+    {
+        trans_char_data = std::make_unique<HomologousDiscreteCharacterData<CodonState>>();
+    }
+    else if ( type == "Doublet" )
+    {
+        trans_char_data = std::make_unique<HomologousDiscreteCharacterData<DoubletState>>();
+    }
+    else
+    {
+        throw RbException() << "Unknown destination character type: \"" << type << "\"";
+    }
+
+    for (size_t i = 0; i < this->taxa.size(); ++i)
     {
         const DiscreteTaxonData<charType>& seq = this->getTaxonData(i);
-        //        DiscreteTaxonData<DnaState>& trans_seq = seq.convertToDnaCharacters();
-        //
-        AbstractDiscreteTaxonData *trans_seq = CharacterTranslator::translateCharacters( seq, type );
+        std::unique_ptr<AbstractDiscreteTaxonData> trans_seq(CharacterTranslator::translateCharacters(seq, type));
         trans_char_data->addTaxonData( *trans_seq );
-        
-        delete trans_seq;
     }
-    
-    return trans_char_data;
+
+    return trans_char_data.release();
 }
 
 

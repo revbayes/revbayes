@@ -16,9 +16,7 @@
 #include "RbOrderedSet.h"
 #include "RbException.h"
 #include "RbSettings.h"  // for debugMCMC setting
-#include <range/v3/all.hpp> // for ranges::views
-
-namespace views = ranges::views;
+#include "concat_view.h"
 
 using namespace RevBayesCore;
 
@@ -278,7 +276,7 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     if (logMCMC >= 3)
     {
         std::cerr<<std::setprecision(11);
-        for(auto& node: views::concat(nodes,affected_nodes))
+        for(auto& node: concat_view(nodes,affected_nodes))
         {
             auto pr = initialPdfs.at(node);
             std::cerr<<"    BEFORE:   "<<node->getName()<<":  "<<pr<<"\n";
@@ -320,7 +318,11 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     }
     catch (const RbException &e)
     {
-        if ( e.getExceptionType() != RbException::MATH_ERROR and e.getExceptionType() != RbException::SKIP_PROPOSAL)
+        if ( e.getExceptionType() == RbException::SKIP_PROPOSAL )
+        {
+            return;
+        }
+        else if ( e.getExceptionType() != RbException::MATH_ERROR )
         {
             throw e;
         }
@@ -342,7 +344,7 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     bool zero_or_nan_to_finite = false;
 
     // compute the probability of the current value for each node
-    for (auto node: views::concat(touched_nodes, affected_nodes))
+    for (auto node: concat_view(touched_nodes, affected_nodes))
     {
         if (not node->isStochastic()) continue;
 
@@ -381,7 +383,7 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
     if (logMCMC >= 3)
     {
         auto proposedPrs = getNodePrs(nodes, affected_nodes);
-        for(auto& node: views::concat(nodes,affected_nodes))
+        for(auto& node: concat_view(nodes,affected_nodes))
         {
             auto pr = proposedPrs.at(node);
             std::cerr<<"    PROPOSED: "<<node->getName()<<":  "<<pr<<"\n";
@@ -452,7 +454,7 @@ void MetropolisHastingsMove::performMcmcMove( double prHeat, double lHeat, doubl
 
     if (logMCMC >= 3)
     {
-        for(auto& node: views::concat(nodes,affected_nodes))
+        for(auto& node: concat_view(nodes,affected_nodes))
         {
             auto pr = finalPdfs.at(node);
             std::cerr<<"    FINAL:    "<<node->getName()<<":  "<<pr<<"\n";

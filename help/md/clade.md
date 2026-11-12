@@ -7,7 +7,7 @@ A clade is a subtree within a phylogeny.
 ## details
 Clades are defined in terms of a taxon set and a shared tree topology. In phylogenetic analyses, clades are generally used (a) to constrain tree topologies to match provided taxon relationships, (b) to identify the most recent common ancestor of a taxon set within a phylogeny, or (c) to apply node age calibrations on particular nodes in the phylogeny.
 ## authors
-Will Pett
+June Walker
 Sebastian Hoehna
 Michael Landis
 ## see_also

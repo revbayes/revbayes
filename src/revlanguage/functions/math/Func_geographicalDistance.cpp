@@ -46,10 +46,10 @@ Func_geographicalDistance* Func_geographicalDistance::clone( void ) const
 RevBayesCore::TypedFunction<double>* Func_geographicalDistance::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<double>* lat1 = static_cast<const RealPos&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* lon1 = static_cast<const RealPos&>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* lat2 = static_cast<const RealPos&>( this->args[2].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* lon2 = static_cast<const RealPos&>( this->args[3].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* lat1 = static_cast<const Real&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* lon1 = static_cast<const Real&>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* lat2 = static_cast<const Real&>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* lon2 = static_cast<const Real&>( this->args[3].getVariable()->getRevObject() ).getDagNode();
     RevBayesCore::GeographicalDistanceFunction* f = new RevBayesCore::GeographicalDistanceFunction( lat1, lon1, lat2, lon2 );
     
     return f;

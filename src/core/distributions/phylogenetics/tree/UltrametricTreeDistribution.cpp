@@ -413,6 +413,10 @@ double UltrametricTreeDistribution::computeBranchRateLnProbability(const Tree &m
 /* Compute probability */
 double UltrametricTreeDistribution::computeLnProbability( void )
 {
+    // Enforce the actual tree's attached intervals before evaluating a copy under the prior.
+    if (not TreeUtilities::nodeAgesWithinRanges(*value))
+        return RbConstants::Double::neginf;
+
 
     // create a temporary copy of the this tree
     const Tree &my_time_tree = *value;
@@ -788,4 +792,18 @@ void UltrametricTreeDistribution::touchSpecialization(const DagNode *affecter, b
         dag_node->touchAffected();
     }
 
+}
+
+
+// Forward checkpoint repair to the tree distribution without evaluating a modified copy.
+void UltrametricTreeDistribution::repairCheckpointValue(Tree& tree)
+{
+    tree_prior->repairCheckpointValue(tree);
+}
+
+
+// Prepare observations through the underlying tree distribution before installing wrapper state.
+void UltrametricTreeDistribution::prepareForClamping(Tree& tree)
+{
+    tree_prior->prepareForClamping(tree);
 }

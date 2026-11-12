@@ -78,11 +78,17 @@ void Move_TreeScale::constructInternalObject( void )
         ra = static_cast<RevBayesCore::StochasticNode<double> *>( tmp );
     }
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    RevBayesCore::StochasticNode<double>* oa = NULL;
+    if (originAge != NULL and originAge->getRevObject() != RevNullObject::getInstance())
+    {
+        auto* tmp = static_cast<const RealPos&>(originAge->getRevObject()).getDagNode();
+        oa = static_cast<RevBayesCore::StochasticNode<double>*>(tmp);
+    }
     double l = static_cast<const RealPos &>( delta->getRevObject() ).getValue();
     bool tune = static_cast<const RlBoolean &>( tuning->getRevObject() ).getValue();
     double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
 
-    RevBayesCore::Proposal *p = new RevBayesCore::TreeScaleProposal(t, vec_t, ra, l);
+    RevBayesCore::Proposal *p = new RevBayesCore::TreeScaleProposal(t, vec_t, ra, l, oa);
     p->setTargetAcceptanceRate(tt);
     
     value = new RevBayesCore::MetropolisHastingsMove(p, w, tune);
@@ -152,6 +158,11 @@ const MemberRules& Move_TreeScale::getParameterRules(void) const
         /* Provide our own default value for tuneTarget */
         move_member_rules.push_back( new ArgumentRule( "tuneTarget", Probability::getClassTypeSpec(), "The acceptance probability targeted by auto-tuning.", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new Probability( 0.234 ) ) );
 
+        // Append the new argument so existing positional arguments retain their meaning.
+        move_member_rules.push_back(new ArgumentRule("originAge", RealPos::getClassTypeSpec(),
+            "An independent origin age to scale with the tree; mutually exclusive with rootAge.",
+            ArgumentRule::BY_REFERENCE, ArgumentRule::STOCHASTIC, NULL));
+
         rules_set = true;
     }
 
@@ -197,6 +208,10 @@ void Move_TreeScale::setConstParameter(const std::string& name, const RevPtr<con
     else if ( name == "rootAge" )
     {
         rootAge = var;
+    }
+    else if ( name == "originAge" )
+    {
+        originAge = var;
     }
     else if ( name == "delta" )
     {

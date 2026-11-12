@@ -73,7 +73,7 @@ void Move_HSRFUnevenGridHyperpriorsGibbs::constructInternalObject( void )
         }
     }
     
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp2 = static_cast<const ModelVector<RealPos> &>( normals->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp2 = static_cast<const ModelVector<Real>&>( normals->getRevObject() ).getDagNode();
     std::vector<const RevBayesCore::DagNode*> p2 = tmp2->getParents();
     std::vector< RevBayesCore::StochasticNode<double> *> n;
     for (std::vector<const RevBayesCore::DagNode*>::const_iterator it = p2.begin(); it != p2.end(); ++it)

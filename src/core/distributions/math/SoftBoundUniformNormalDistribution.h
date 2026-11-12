@@ -22,8 +22,12 @@ template <class valueType> class TypedDagNode;
     class SoftBoundUniformNormalDistribution : public ContinuousDistribution {
         
     public:
+        enum BOUNDS { BOTH, UPPER, LOWER };
+
         SoftBoundUniformNormalDistribution(const TypedDagNode<double> *mi, const TypedDagNode<double> *ma,
-                                  const TypedDagNode<double> *sd, const TypedDagNode<double> *p);
+                                  const TypedDagNode<double> *sd, const TypedDagNode<double> *p, BOUNDS bound);
+        
+
         
         // public member functions
         double                                              cdf(void) const;                                                                //!< Cummulative density function
@@ -45,6 +49,7 @@ template <class valueType> class TypedDagNode;
         const TypedDagNode<double>*                         max;
         const TypedDagNode<double>*                         stDev;
         const TypedDagNode<double>*                         prob;
+        BOUNDS                                              soft_bound;
         
     };
     

@@ -61,7 +61,7 @@ void Move_SynchronizedVectorFixedSingleElementSlide::constructInternalObject( vo
     double l = static_cast<const RealPos &>( lambda->getRevObject() ).getValue();
     double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
     
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* tmp = static_cast<const ModelVector<ModelVector<RealPos> > &>( v->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* tmp = static_cast<const ModelVector<ModelVector<Real> >&>( v->getRevObject() ).getDagNode();
     std::vector<const RevBayesCore::DagNode*> par = tmp->getParents();
     std::vector< RevBayesCore::StochasticNode<RevBayesCore::RbVector<double> > *> n;
     for (std::vector<const RevBayesCore::DagNode*>::const_iterator it = par.begin(); it != par.end(); ++it)
@@ -152,7 +152,7 @@ const MemberRules& Move_SynchronizedVectorFixedSingleElementSlide::getParameterR
         index_types.push_back( ModelVector<Natural>::getClassTypeSpec() );
         move_member_rules.push_back( new ArgumentRule( "element", index_types, "The index or indices of the element to scale.", ArgumentRule::BY_VALUE, ArgumentRule::ANY ) );
         
-        move_member_rules.push_back( new ArgumentRule( "lambda" , RealPos::getClassTypeSpec()          , "The scaling factor (strength) of this move.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new Real(1.0) ) );
+        move_member_rules.push_back( new ArgumentRule( "lambda" , RealPos::getClassTypeSpec()          , "The scaling factor (strength) of this move.", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new RealPos(1.0) ) );
         move_member_rules.push_back( new ArgumentRule( "tune"   , RlBoolean::getClassTypeSpec()        , "Should we tune the scaling factor during burnin?", ArgumentRule::BY_VALUE    , ArgumentRule::ANY, new RlBoolean( true ) ) );
         
         /* Inherit weight from Move, put it after variable */

@@ -5,9 +5,9 @@
 #include "Taxon.h"
 
 namespace RevBayesCore {
-    
-    
-    
+
+
+
     /**
      * Reader for taxon names mapped to other information including species name and sampling dates.
      *
@@ -30,7 +30,9 @@ namespace RevBayesCore {
 
         
     protected:
-        
+
+        static double               parseNumericField(const std::string &s, const std::string &field, size_t line);   //!< Parse a numeric field, requiring the whole field to be consumed.
+
         std::vector<Taxon>          taxa;
     };
 }

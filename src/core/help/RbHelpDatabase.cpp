@@ -349,7 +349,7 @@ if (ceiled_number != 4.0) {
 k <- 2
 x := choose(n, k))");
 	help_strings[string("choose")][string("name")] = string(R"(choose)");
-	help_arrays[string("clade")][string("authors")].push_back(string(R"(Will Pett)"));
+	help_arrays[string("clade")][string("authors")].push_back(string(R"(June Walker)"));
 	help_arrays[string("clade")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_arrays[string("clade")][string("authors")].push_back(string(R"(Michael Landis)"));
 	help_strings[string("clade")][string("description")] = string(R"(A clade is a subtree within a phylogeny.)");
@@ -452,7 +452,7 @@ locus_1_and_2 = concatenate( locus_1, locus_2 ))");
 	help_strings[string("concatenate")][string("title")] = string(R"(Concatenate character matrices)");
 	help_arrays[string("consensusTree")][string("authors")].push_back(string(R"(Seraina Klopfstein)"));
 	help_arrays[string("consensusTree")][string("authors")].push_back(string(R"(Will Freyman)"));
-	help_arrays[string("consensusTree")][string("authors")].push_back(string(R"(Will Pett)"));
+	help_arrays[string("consensusTree")][string("authors")].push_back(string(R"(June Walker)"));
 	help_arrays[string("consensusTree")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("consensusTree")][string("description")] = string(R"(Calculates the majority-rule consensus topology from a trace of trees and summarizes branch lengths.)");
 	help_strings[string("consensusTree")][string("example")] = string(R"(# Read in tree trace
@@ -884,7 +884,7 @@ sum(b))");
 	help_strings[string("dnEmpiricalSample")][string("name")] = string(R"(dnEmpiricalSample)");
 	help_arrays[string("dnEmpiricalTree")][string("authors")].push_back(string(R"(Will Freyman)"));
 	help_arrays[string("dnEmpiricalTree")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
-	help_arrays[string("dnEmpiricalTree")][string("authors")].push_back(string(R"(Will Pett)"));
+	help_arrays[string("dnEmpiricalTree")][string("authors")].push_back(string(R"(June Walker)"));
 	help_strings[string("dnEmpiricalTree")][string("description")] = string(R"(Creates a distribution of trees from a trace of trees.)");
 	help_strings[string("dnEmpiricalTree")][string("example")] = string(R"(# Read in tree trace
 tree_trace = readTreeTrace("output/my.trees", burnin=0.25)
@@ -911,51 +911,6 @@ x ~ dnExponential(lambda=rate)
 x.probability())");
 	help_strings[string("dnExponential")][string("name")] = string(R"(dnExponential)");
 	help_strings[string("dnExponential")][string("title")] = string(R"(Exponential Distribution)");
-	help_arrays[string("dnFossilizedBirthDeathRange")][string("authors")].push_back(string(R"(Walker Pett)"));
-	help_strings[string("dnFossilizedBirthDeathRange")][string("description")] = string(R"(The fossilized birth death range process (FBDRP) describes the distribution of a matrix of species origination and extinction times under a model of asymmetric speciation and sampling of extinct species.)");
-	help_strings[string("dnFossilizedBirthDeathRange")][string("details")] = string(R"(Fossil species are represented by a collection of fossil occurrences with uncertainty. Speciation, extinction and sampling rates may be time-homogeneous or piecewise time-heterogeneous. If time-heterogeneous rates are provided, then a vector of rate change time-points musts also be provided. If only a subset of fossil occurrences is provided for each species (e.g. only first and last occurrencces), then the remaining number of fossil samples may be marginalized by specifying `complete=FALSE`. Under the hood, the fossil data is augmented with oldest occurrence ages for each species, which must be sampled during MCMC using `mvResampleFBD`. Setting `BDS` to true causes the model to assume complete lineage sampling i.e. using the Birth-Death with Rateshifts (BDS) model of Silvestro et al. (2019).)");
-	help_strings[string("dnFossilizedBirthDeathRange")][string("example")] = string(R"(lambda ~ dnExp(10)
-mu ~ dnExp(10)
-psi ~ dnExp(10)
-
-bd ~ dnFBDRP(lambda=lambda, mu=mu, psi=psi, rho=1, taxa=taxa)
-
-moves.append( mvMatrixElementScale(bd, weight=taxa.size()) )
-moves.append( mvMatrixElementSlide(bd, weight=taxa.size()) ))");
-	help_strings[string("dnFossilizedBirthDeathRange")][string("name")] = string(R"(dnFossilizedBirthDeathRange)");
-	help_references[string("dnFossilizedBirthDeathRange")].push_back(RbHelpReference(R"(The fossilized birth-death model for the analysis of stratigraphic range data under different speciation modes. Stadler, Tanja et al. Journal of theoretical biology, 447:41-55.)",R"()",R"(https://www.sciencedirect.com/science/article/pii/S002251931830119X )"));
-	help_references[string("dnFossilizedBirthDeathRange")].push_back(RbHelpReference(R"(Improved estimation of macroevolutionary rates from fossil data using a Bayesian framework. Silvestro, Daniele et al. Paleobiology, 45:546-570.)",R"(https://doi.org/10.1017/pab.2019.23)",R"(https://www.cambridge.org/core/journals/paleobiology/article/improved-estimation-of-macroevolutionary-rates-from-fossil-data-using-a-bayesian-framework/334F08A74A6C92F1FEAD91A71FE59A1C )"));
-	help_arrays[string("dnFossilizedBirthDeathRange")][string("see_also")].push_back(string(R"(dnBirthDeathSamplingTreatment)"));
-	help_arrays[string("dnFossilizedBirthDeathRange")][string("see_also")].push_back(string(R"(mvResampleFBD)"));
-	help_arrays[string("dnFossilizedBirthDeathSpeciation")][string("authors")].push_back(string(R"(Walker Pett)"));
-	help_strings[string("dnFossilizedBirthDeathSpeciation")][string("description")] = string(R"(The fossilized birth death speciation process (FBDSP) describes the diversification and sampling of extant and extinct species trees under a mixed model of asymmetric, symmetric and anagenetic speciation.)");
-	help_strings[string("dnFossilizedBirthDeathSpeciation")][string("details")] = string(R"(Fossil species are represented by a collection of fossil occurrences with uncertainty. Speciation, extinction and sampling rates may be time-homogeneous or piecewise time-heterogeneous. If time-heterogeneous rates are provided, then a vector of rate change time-points musts also be provided. If only a subset of fossil occurrences is provided for each species (e.g. only first and last occurrencces), then the remaining number of fossil samples may be marginalized by specifying `complete=FALSE`. Under the hood, the fossil data is augmented with oldest occurrence ages for each species, which must be sampled during MCMC using `mvResampleFBD`. Tips represent extinction events, and therefore should be sampled during MCMC using e.g. `mvTipTimeSlideUniform`.)");
-	help_strings[string("dnFossilizedBirthDeathSpeciation")][string("example")] = string(R"(lambda ~ dnExp(10)
-mu ~ dnExp(10)
-psi ~ dnExp(10)
-
-min_age = 0.0
-for(i in 1:taxa.size())
-{
-        if ( taxa[i].getMinAge() > min_age )
-        {
-                min_age = taxa[i].getMinAge()
-        }
-}
-
-origin ~ dnExp(1/10)
-
-bd ~ dnFBDSP(originAge=min_age+origin, lambda=lambda, mu=mu, psi=psi, rho=1, taxa=taxa, complete=FALSE)
-
-moves.append( mvFNPR(bd, weight = taxa.size()) )
-moves.append( mvNodeTimeSlideUniform(bd, weight = taxa.size()) )
-moves.append( mvRootTimeSlideUniform(bd, origin=origin, weight = taxa.size()) )
-moves.append( mvTipTimeSlideUniform(bd, weight = taxa.size()) ))");
-	help_strings[string("dnFossilizedBirthDeathSpeciation")][string("name")] = string(R"(dnFossilizedBirthDeathSpeciation)");
-	help_references[string("dnFossilizedBirthDeathSpeciation")].push_back(RbHelpReference(R"(The fossilized birth-death model for the analysis of stratigraphic range data under different speciation modes. Stadler, Tanja et al. Journal of theoretical biology, 447:41-55.)",R"()",R"(https://www.sciencedirect.com/science/article/pii/S002251931830119X )"));
-	help_arrays[string("dnFossilizedBirthDeathSpeciation")][string("see_also")].push_back(string(R"(dnFossilizedBirthDeathRange)"));
-	help_arrays[string("dnFossilizedBirthDeathSpeciation")][string("see_also")].push_back(string(R"(dnBirthDeathSamplingTreatment)"));
-	help_arrays[string("dnFossilizedBirthDeathSpeciation")][string("see_also")].push_back(string(R"(mvResampleFBD)"));
 	help_arrays[string("dnGamma")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("dnGamma")][string("description")] = string(R"(The Gamma distribution describes the probability of the sum of exponentially distributed variables.)");
 	help_strings[string("dnGamma")][string("details")] = string(R"(The gamma distribution takes two parameters, shape and rate. Similar to how 1/rate gives the mean of the exponential, shape/rate gives the mean of the gamma. It provides a natural prior distribution for parameters that could be considered as sums of exponential variables.
@@ -1340,7 +1295,7 @@ mv[6] = mvVectorSlide(x))");
 	help_arrays[string("dnMultivariateNormal")][string("see_also")].push_back(string(R"(dnWishart)"));
 	help_arrays[string("dnMultivariateNormal")][string("see_also")].push_back(string(R"(mvCorrelationMatrixUpdate)"));
 	help_strings[string("dnMultivariateNormal")][string("title")] = string(R"(Multivariate Normal Distribution)");
-	help_arrays[string("dnNbinomial")][string("authors")].push_back(string(R"(Walker Pett)"));
+	help_arrays[string("dnNbinomial")][string("authors")].push_back(string(R"(June Walker)"));
 	help_strings[string("dnNbinomial")][string("description")] = string(R"(Negative binomial probability distribution of x successes before r failures.)");
 	help_strings[string("dnNbinomial")][string("details")] = string(R"(The negative binomial probability distribution describes the number of successes before r failures, where the success probability is p. The probability is given by (x + r - 1 choose x) p^(x) * (1-p)^r)");
 	help_strings[string("dnNbinomial")][string("example")] = string(R"(p ~ dnBeta(1.0,1.0)
@@ -1373,6 +1328,57 @@ sd(x))");
 	help_strings[string("dnNormal")][string("name")] = string(R"(dnNormal)");
 	help_arrays[string("dnNormal")][string("see_also")].push_back(string(R"(dnLognormal)"));
 	help_strings[string("dnNormal")][string("title")] = string(R"(Normal Distribution)");
+	help_arrays[string("dnNucleotideRateMatrixMixture")][string("authors")].push_back(string(R"(John P. Huelsenbeck)"));
+	help_arrays[string("dnNucleotideRateMatrixMixture")][string("authors")].push_back(string(R"(Sebastian Höhna)"));
+	help_strings[string("dnNucleotideRateMatrixMixture")][string("description")] = string(R"(Defines a nucleotide substitution rate matrix that can move between
+time-reversible and non-reversible models during reversible-jump MCMC.)");
+	help_strings[string("dnNucleotideRateMatrixMixture")][string("details")] = string(R"(Use this distribution with `mvMPQRateMatrix` to sample the rate matrix
+and propose changes between the two models.
+
+`alpha` is a vector of four positive Dirichlet concentration parameters
+for the stationary nucleotide frequencies. Setting all four entries to
+one gives a uniform prior on these frequencies.
+
+`fixedModel` defaults to `"free"`, allowing transitions between models.
+Set it to `"reversible"` or `"nonreversible"` to restrict the analysis
+to that model; model-switching proposals are then disabled.
+
+`lnPriorOdds` specifies log(rho_R/rho_N), where rho_R and rho_N are the
+prior probabilities of the reversible and non-reversible models.
+Its default, zero, gives equal prior probabilities. Positive values
+favor reversibility; negative values favor non-reversibility.
+
+For a free-model analysis with fixed prior odds, the Bayes factor
+favoring the non-reversible model is
+
+    BF_NR = (p_N / p_R) * exp(lnPriorOdds)
+
+where p_N and p_R are the posterior model probabilities estimated from
+the sampled model indicators. Use production samples after burn-in,
+with adequate mixing between models.
+
+If `mvMPQRateMatrix` adapts the model prior during burn-in, freeze that
+adaptation before collecting production samples and use the final
+value reported by `Q.lnPriorOdds()` in the calculation.)");
+	help_strings[string("dnNucleotideRateMatrixMixture")][string("example")] = string(R"(# Create a rate matrix with equal prior probabilities for the models.
+Q ~ dnNucleotideRateMatrixMixture(alpha=v(1,1,1,1), lnPriorOdds=0.0)
+
+moves = VectorMoves()
+moves.append(mvMPQRateMatrix(Q, tune=FALSE, tuneModelPrior=FALSE))
+
+# Define quantities that can be monitored during MCMC.
+reversible := ifelse(Q.isReversible(), 1.0, 0.0)
+frequencies := Q.getPi()
+log_prior_odds := Q.lnPriorOdds()
+
+# Alternatively, restrict a separate matrix to one model.
+Q_NR ~ dnNucleotideRateMatrixMixture(alpha=v(1,1,1,1), fixedModel="nonreversible"))");
+	help_strings[string("dnNucleotideRateMatrixMixture")][string("name")] = string(R"(dnNucleotideRateMatrixMixture)");
+	help_arrays[string("dnNucleotideRateMatrixMixture")][string("see_also")].push_back(string(R"(mvMPQRateMatrix)"));
+	help_arrays[string("dnNucleotideRateMatrixMixture")][string("see_also")].push_back(string(R"(mvMPQTree)"));
+	help_arrays[string("dnNucleotideRateMatrixMixture")][string("see_also")].push_back(string(R"(mvReversibilityAwareBranchLengthScale)"));
+	help_arrays[string("dnNucleotideRateMatrixMixture")][string("see_also")].push_back(string(R"(dnPhyloCTMC)"));
+	help_strings[string("dnNucleotideRateMatrixMixture")][string("title")] = string(R"(Distribution on reversible and non-reversible nucleotide rate matrices)");
 	help_arrays[string("dnOrnsteinUhlenbeck")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("dnOrnsteinUhlenbeck")][string("description")] = string(R"(A Bernoulli-distributed random variable takes the value 1 with probability p and the value 0 with probability 1-p.)");
 	help_strings[string("dnOrnsteinUhlenbeck")][string("example")] = string(R"(p ~ dnBeta(1.0,1.0)
@@ -1665,7 +1671,7 @@ Y ~ dnPhyloOUSD(char_hist, theta=theta, rootTreatment="optimum", alpha=alpha, si
 	help_strings[string("dnPhyloOrnsteinUhlenbeckStateDependent")][string("title")] = string(R"(Phylogenetic state-dependent Ornstein-Uhlenbeck process)");
 	help_strings[string("dnPhyloOrnsteinUhlenbeckThreePoint")][string("name")] = string(R"(dnPhyloOrnsteinUhlenbeckThreePoint)");
 	help_strings[string("dnPhyloWhiteNoise")][string("name")] = string(R"(dnPhyloWhiteNoise)");
-	help_arrays[string("dnPointMass")][string("authors")].push_back(string(R"(Walker Pett)"));
+	help_arrays[string("dnPointMass")][string("authors")].push_back(string(R"(June Walker)"));
 	help_strings[string("dnPointMass")][string("description")] = string(R"(Point mass distribution.)");
 	help_strings[string("dnPointMass")][string("details")] = string(R"(The point mass distribution, or Dirac delta function, has density f(x) = 1 when x is equal to the point mass value.)");
 	help_strings[string("dnPointMass")][string("example")] = string(R"(u ~ dnPointMass(1.2))");
@@ -1723,20 +1729,33 @@ sum(x))");
 	help_strings[string("dnScaledDirichlet")][string("title")] = string(R"(Scaled Dirichlet Distribution)");
 	help_strings[string("dnSerialSampledBirthDeath")][string("name")] = string(R"(dnSerialSampledBirthDeath)");
 	help_arrays[string("dnSoftBoundUniformNormal")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
-	help_strings[string("dnSoftBoundUniformNormal")][string("description")] = string(R"(A softbound uniform distribution with normally distributed tails outside the interval of the uniform distribution.)");
-	help_strings[string("dnSoftBoundUniformNormal")][string("details")] = string(R"(The center piece of this distribution a uniform distribution defined between the given interval. A variable is drawn from that uniform distribution with probability p and with probability 1-p outside the interval. The probability density outside the interval is described by a normal distribution with standard deviation sd.)");
-	help_strings[string("dnSoftBoundUniformNormal")][string("example")] = string(R"(p ~ dnBeta(1.0,1.0)
-x ~ dnBernoulli(p)
-x.clamp(1)
-moves[1] = mvSlide(p, delta=0.1, weight=1.0)
-monitors[1] = screenmonitor(printgen=1000, separator = "        ", speciation)
-mymodel = model(p)
+	help_strings[string("dnSoftBoundUniformNormal")][string("description")] = string(R"(A soft-bounded uniform distribution with one or two normally distributed tails
+outside the domain of the uniform component.)");
+	help_strings[string("dnSoftBoundUniformNormal")][string("details")] = string(R"(Draws from a uniform distribution defined between the `min` and `max` values
+with probability `p`. The tail probability (1 - `p`) is assigned to values
+smaller than `min` (if `boundary="lower"`), values larger than `max` (if
+`boundary="upper"`), or apportioned equally between the lower and upper tails
+(by default, when `boundary="both"`). The probability density outside the
+[`min`, `max`] interval is that of a normal distribution whose standard
+deviation can be either automatically computed from `p` or directly specified
+using the `sd` argument. Exactly one of `sd` and `p` must be specified, with
+the unspecified value automatically computed so that the density is continuous
+at `min` and `max`.)");
+	help_strings[string("dnSoftBoundUniformNormal")][string("example")] = string(R"(# Create a simple model (unclamped)
+calib ~ dnSoftBoundUniformNormal( 13.6, 25, p=0.95, "upper" )
+mymodel = model(calib)
+
+# Create a move vector and a monitor vector
+moves[1] = mvSlide(calib, delta=0.1, weight=1.0)
+monitors[1] = mnScreen(calib, printgen=1000)
+
+# Use MCMC to draw samples from the specified distribution
 mymcmc = mcmc(mymodel, monitors, moves)
-mymcmc.burnin(generations=20000,tuningInterval=100)
 mymcmc.run(generations=200000))");
 	help_strings[string("dnSoftBoundUniformNormal")][string("name")] = string(R"(dnSoftBoundUniformNormal)");
+	help_arrays[string("dnSoftBoundUniformNormal")][string("see_also")].push_back(string(R"(dnNormal)"));
 	help_arrays[string("dnSoftBoundUniformNormal")][string("see_also")].push_back(string(R"(dnUniform)"));
-	help_strings[string("dnSoftBoundUniformNormal")][string("title")] = string(R"(Softbound Uniform Distribution with Normal distributed tails.)");
+	help_strings[string("dnSoftBoundUniformNormal")][string("title")] = string(R"(Soft-bounded uniform-normal distribution)");
 	help_arrays[string("dnStairwayPlot")][string("authors")].push_back(string(R"(Sebastian Höhna)"));
 	help_strings[string("dnStairwayPlot")][string("description")] = string(R"(Bayesian StairwayPlot for inferring single population demographic histories
 from site frequency spectra.)");
@@ -2927,6 +2946,24 @@ Q3 := fndNdS(fnX3(fnGTR(er, nuc_pi)), omega)         # GTR + X3 + dNdS)");
 	help_strings[string("fndNdS")][string("title")] = string(R"(Add a dN/dS factor to a codon rate matrix.)");
 	help_strings[string("formatDiscreteCharacterData")][string("name")] = string(R"(formatDiscreteCharacterData)");
 	help_strings[string("gamma")][string("name")] = string(R"(gamma)");
+	help_arrays[string("getNumProcesses")][string("authors")].push_back(string(R"(David Černý)"));
+	help_strings[string("getNumProcesses")][string("description")] = string(R"(Returns the number of processes used by the current RevBayes session.)");
+	help_strings[string("getNumProcesses")][string("details")] = string(R"(In an MPI-enabled build (i.e., `rb-mpi`, launched as `mpirun -np N ./rb-mpi`),
+the function returns `N` (i.e., the size of the `MPI_COMM_WORLD` communicator).
+In a non-MPI build, it always returns 1. The value is the number of MPI ranks,
+not necessarily the number of hardware CPU cores.)");
+	help_strings[string("getNumProcesses")][string("example")] = string(R"(# For `mpirun -np 16 ./rb-mpi`, this prints 16:
+getNumProcesses()
+
+# Record the process count for reproducibility bookkeeping
+print("Running on " + getNumProcesses() + " process(es).")
+
+# Guard-check the launch configuration
+if (getNumProcesses() != 32) {
+    stop("Expected 32 processes, got " + getNumProcesses() + ".")
+})");
+	help_strings[string("getNumProcesses")][string("name")] = string(R"(getNumProcesses)");
+	help_strings[string("getNumProcesses")][string("title")] = string(R"(Get the number of MPI processes)");
 	help_arrays[string("getOption")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("getOption")][string("description")] = string(R"(Get a global option for RevBayes.)");
 	help_strings[string("getOption")][string("details")] = string(R"(Runtime options are used to personalize RevBayes and are stored on the local machine. See `setOption` for the list of available keys and their associated values.)");
@@ -3057,7 +3094,7 @@ max(a)
 	help_strings[string("max")][string("name")] = string(R"(max)");
 	help_arrays[string("max")][string("see_also")].push_back(string(R"(`min`)"));
 	help_strings[string("max")][string("title")] = string(R"(Maximum of a set of numbers)");
-	help_arrays[string("maxdiff")][string("authors")].push_back(string(R"(Will Pett)"));
+	help_arrays[string("maxdiff")][string("authors")].push_back(string(R"(June Walker)"));
 	help_strings[string("maxdiff")][string("description")] = string(R"(Finds the maximum difference in clade probabilities between two posterior samples.)");
 	help_strings[string("maxdiff")][string("example")] = string(R"(# Read in tree trace
 tree_trace = readTreeTrace("output/my.trees", burnin=0.25, nruns=2)
@@ -3104,7 +3141,7 @@ print(recTree))");
 	help_references[string("maximumTree")].push_back(RbHelpReference(R"(Edwards SV, Liu L, Pearl DK (2007). High-resolution species trees without concatenation. Proceedings of the National Academy of Sciences of the USA, 104(14):5936-5941.)",R"(10.1073/pnas.0607004104)",R"(http://www.pnas.org/content/104/14/5936.full )"));
 	help_references[string("maximumTree")].push_back(RbHelpReference(R"(Liu L, Yu L, Pearl DK (2010). Maximum tree: a consistent estimator of the species tree. Journal of Mathematical Biology, 60(1):95-106.)",R"(10.1007/s00285-009-0260-0)",R"(https://link.springer.com/article/10.1007%2Fs00285-009-0260-0 )"));
 	help_strings[string("maximumTree")][string("title")] = string(R"(Maximum tree function to build a species tree.)");
-	help_arrays[string("mccTree")][string("authors")].push_back(string(R"(Will Pett)"));
+	help_arrays[string("mccTree")][string("authors")].push_back(string(R"(June Walker)"));
 	help_arrays[string("mccTree")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_strings[string("mccTree")][string("description")] = string(R"(Finds the maximum clade credibility (MCC) topology from a trace of trees and summarizes branch lengths.)");
 	help_strings[string("mccTree")][string("example")] = string(R"(# Read in tree trace
@@ -3559,7 +3596,7 @@ Usage examples can be found at https://revbayes.github.io/tutorials/morph_tree/V
 	help_strings[string("mvEllipticalSliceSamplingSimple")][string("name")] = string(R"(mvEllipticalSliceSamplingSimple)");
 	help_arrays[string("mvEmpiricalTree")][string("authors")].push_back(string(R"(Will Freyman)"));
 	help_arrays[string("mvEmpiricalTree")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
-	help_arrays[string("mvEmpiricalTree")][string("authors")].push_back(string(R"(Will Pett)"));
+	help_arrays[string("mvEmpiricalTree")][string("authors")].push_back(string(R"(June Walker)"));
 	help_arrays[string("mvEmpiricalTree")][string("authors")].push_back(string(R"(Jiansi Gao)"));
 	help_strings[string("mvEmpiricalTree")][string("description")] = string(R"(An MCMC move that operates on empirical tree distributions.)");
 	help_strings[string("mvEmpiricalTree")][string("example")] = string(R"(# Read in tree trace
@@ -3841,6 +3878,90 @@ mymcmc.operatorSummary())");
 	help_strings[string("mvLayeredScaleProposal")][string("title")] = string(R"(Rescales all the subtrees below some age.)");
 	help_strings[string("mvLevyJump")][string("name")] = string(R"(mvLevyJump)");
 	help_strings[string("mvLevyJumpSum")][string("name")] = string(R"(mvLevyJumpSum)");
+	help_arrays[string("mvMPQRateMatrix")][string("authors")].push_back(string(R"(John P. Huelsenbeck)"));
+	help_arrays[string("mvMPQRateMatrix")][string("authors")].push_back(string(R"(Sebastian Höhna)"));
+	help_strings[string("mvMPQRateMatrix")][string("description")] = string(R"(Updates a nucleotide rate matrix drawn from `dnNucleotideRateMatrixMixture`, including proposals
+between the time-reversible and non-reversible models.)");
+	help_strings[string("mvMPQRateMatrix")][string("details")] = string(R"(`Q` must be a stochastic rate matrix drawn from `dnNucleotideRateMatrixMixture`. When that
+distribution uses `fixedModel="free"`, this move can change the model
+indicator. When a model is fixed, model-switching proposals are disabled.
+
+`polyhedronAlpha` controls the concentration of the non-reversible
+jump proposal. Its default value, one, gives a uniform draw over the
+polyhedron. Larger values concentrate the proposal near its center;
+values below one favor points nearer its boundary. This parameter
+changes the proposal distribution, not the target distribution.
+
+`polyhedronCenter` optionally specifies three coordinates for the
+proposal center. An empty vector, the default, uses the reversible
+point (0.5, 0.5, 0.5). A center can be chosen using the posterior mean
+of `Q.getU()` from a preliminary non-reversible analysis. If a proposed
+polyhedron cannot accommodate the requested center, the center is
+moved toward the reversible point for that proposal.
+
+`tuneModelPrior` defaults to FALSE. If enabled together with `tune`,
+it adapts the model prior during burn-in to encourage balanced model
+occupancy. This changes the target distribution. Finish all adaptation
+before collecting production samples, and monitor `Q.lnPriorOdds()`
+to retain the final prior odds needed to calculate the Bayes factor.
+A checkpoint stores the adapted prior odds with the rate matrix, so a
+resumed run keeps the same target distribution. The tuned proposal
+widths are not stored; after a restart they return to their starting
+values, which affects mixing but not the target.)");
+	help_strings[string("mvMPQRateMatrix")][string("example")] = string(R"(Q ~ dnNucleotideRateMatrixMixture(alpha=v(1,1,1,1), lnPriorOdds=0.0)
+moves = VectorMoves()
+
+# Default proposal with adaptation disabled.
+moves.append(mvMPQRateMatrix(Q, weight=10,
+                            tune=FALSE, tuneModelPrior=FALSE))
+
+# Alternative proposal with a specified center and concentration.
+# In an analysis, choose the proposal settings appropriate to the data.
+shifted_move = mvMPQRateMatrix(Q, weight=10,
+                              tune=FALSE, tuneModelPrior=FALSE,
+                              polyhedronCenter=v(0.56,0.54,0.34),
+                              polyhedronAlpha=10.0))");
+	help_strings[string("mvMPQRateMatrix")][string("name")] = string(R"(mvMPQRateMatrix)");
+	help_arrays[string("mvMPQRateMatrix")][string("see_also")].push_back(string(R"(dnNucleotideRateMatrixMixture)"));
+	help_arrays[string("mvMPQRateMatrix")][string("see_also")].push_back(string(R"(mvMPQTree)"));
+	help_arrays[string("mvMPQRateMatrix")][string("see_also")].push_back(string(R"(mvReversibilityAwareBranchLengthScale)"));
+	help_strings[string("mvMPQRateMatrix")][string("title")] = string(R"(Rate-matrix updates and reversible-jump proposals for dnNucleotideRateMatrixMixture)");
+	help_arrays[string("mvMPQTree")][string("authors")].push_back(string(R"(John P. Huelsenbeck)"));
+	help_arrays[string("mvMPQTree")][string("authors")].push_back(string(R"(Sebastian Höhna)"));
+	help_strings[string("mvMPQTree")][string("description")] = string(R"(Proposes tree updates in analyses using the reversible and non-reversible
+nucleotide models implemented by `dnNucleotideRateMatrixMixture`, optionally updating root position.)");
+	help_strings[string("mvMPQTree")][string("details")] = string(R"(`tree` should be a stochastic, non-clock tree parameterized by branch
+lengths, as produced by `dnUniformTopologyBranchLength`.
+
+`updateRoot` defaults to TRUE and allows proposals that change root
+position. Set it to FALSE when the root must remain on a specified
+outgroup branch. This move does not automatically detect an assigned
+outgroup or enforce that root constraint.
+
+Root position can affect the likelihood under a non-reversible model.
+Under the stationary time-reversible model, the likelihood is unchanged
+by moving the root on a fixed unrooted tree with fixed branch lengths;
+the root must nevertheless be handled consistently with the tree prior.
+
+This move does not take a rate-matrix argument. Connect the tree and
+the rate matrix through the phylogenetic likelihood, using `dnPhyloCTMC`.)");
+	help_strings[string("mvMPQTree")][string("example")] = string(R"(taxa <- v(taxon("A"), taxon("B"), taxon("C"), taxon("D"))
+
+tree ~ dnUniformTopologyBranchLength(
+    taxa=taxa, branchLengthDistribution=dnExp(10.0), rooted=TRUE)
+
+moves = VectorMoves()
+moves.append(mvMPQTree(tree=tree, updateRoot=TRUE, weight=4))
+
+# If the root must stay on an assigned outgroup branch, instead
+# construct the move with updateRoot=FALSE.)");
+	help_strings[string("mvMPQTree")][string("name")] = string(R"(mvMPQTree)");
+	help_arrays[string("mvMPQTree")][string("see_also")].push_back(string(R"(dnNucleotideRateMatrixMixture)"));
+	help_arrays[string("mvMPQTree")][string("see_also")].push_back(string(R"(dnUniformTopologyBranchLength)"));
+	help_arrays[string("mvMPQTree")][string("see_also")].push_back(string(R"(dnPhyloCTMC)"));
+	help_arrays[string("mvMPQTree")][string("see_also")].push_back(string(R"(mvMPQRateMatrix)"));
+	help_arrays[string("mvMPQTree")][string("see_also")].push_back(string(R"(mvReversibilityAwareBranchLengthScale)"));
+	help_strings[string("mvMPQTree")][string("title")] = string(R"(Tree proposals for reversible and non-reversible substitution analyses)");
 	help_strings[string("mvMatrixElementScale")][string("name")] = string(R"(mvMatrixElementScale)");
 	help_strings[string("mvMatrixElementSlide")][string("name")] = string(R"(mvMatrixElementSlide)");
 	help_strings[string("mvMirror")][string("description")] = string(R"(The adaptive mirror (normal) proposal of Thawornwattana et al. 2017, uses MCMC samples to find posterior mean and variance. After user-defined waiting time, proposes moves on opposite side of posterior mean from current location using a normal distribution with the learned posterior standard deviation (scaled by lambda). Before this time, the move uses mu0 as the mean, and lambda as the standard deviation. WARNING: Disabling tuning disables both tuning of proposal variance and learning of empirical mean and variance. To learn the empirical mean and variance without tuning sigma, set adaptOnly=true.)");
@@ -3989,16 +4110,44 @@ remains unchanged for the tree branches.)");
 	help_arrays[string("mvRateAgeBetaShift")][string("see_also")].push_back(string(R"(mvRateAgeProposal)"));
 	help_arrays[string("mvRateAgeBetaShift")][string("see_also")].push_back(string(R"(mvRateAgeSubtreeProposal)"));
 	help_strings[string("mvRateAgeBetaShift")][string("title")] = string(R"(The RateAgeBetaShift move)");
-	help_arrays[string("mvResampleFBD")][string("authors")].push_back(string(R"(Walker Pett)"));
-	help_strings[string("mvResampleFBD")][string("description")] = string(R"(This move resamples an oldest occurrence age for a random species in a fossilized birth death process described by `dnFBDRP` or `dnFBDRMatrix`)");
-	help_strings[string("mvResampleFBD")][string("details")] = string(R"(Under the hood, FBD fossil data is augmented with oldest occurrence ages for each species, which are automatically marginalized during when the model is sampled using MCMC. These ages can also be resampled manually using this move.)");
-	help_strings[string("mvResampleFBD")][string("example")] = string(R"(bd ~ dnFBDRP(lambda=lambda, mu=mu, psi=psi, rho=1, taxa=taxa, resample=FALSE)
+	help_arrays[string("mvReversibilityAwareBranchLengthScale")][string("authors")].push_back(string(R"(John P. Huelsenbeck)"));
+	help_arrays[string("mvReversibilityAwareBranchLengthScale")][string("authors")].push_back(string(R"(Sebastian Höhna)"));
+	help_strings[string("mvReversibilityAwareBranchLengthScale")][string("description")] = string(R"(Scales the length of a randomly chosen non-root branch. When that branch
+descends from a bifurcating root, its sibling is scaled by the same
+factor, so the two root branches change together and keep their length
+ratio.)");
+	help_strings[string("mvReversibilityAwareBranchLengthScale")][string("details")] = string(R"(Use this move on a stochastic, non-clock tree parameterized by branch
+lengths, such as a rooted tree drawn from
+`dnUniformTopologyBranchLength`.
 
-moves.append( mvResampleFBD(bd, weight=taxa.size()) ))");
-	help_strings[string("mvResampleFBD")][string("name")] = string(R"(mvResampleFBD)");
-	help_references[string("mvResampleFBD")].push_back(RbHelpReference(R"(The fossilized birth-death model for the analysis of stratigraphic range data under different speciation modes. Stadler, Tanja et al. Journal of theoretical biology, 447:41-55.)",R"()",R"(https://www.sciencedirect.com/science/article/pii/S002251931830119X )"));
-	help_arrays[string("mvResampleFBD")][string("see_also")].push_back(string(R"(dnFossilizedBirthDeathRange)"));
-	help_arrays[string("mvResampleFBD")][string("see_also")].push_back(string(R"(dnFossilizedBirthDeathRangeMatrix)"));
+Every branch not attached to the root is scaled on its own, as in
+`mvBranchLengthScale`. Under a stationary time-reversible substitution
+model, the two root branches correspond to one edge of the unrooted
+tree. Their combined length affects the likelihood, whereas their
+relative lengths are informed by the prior alone. Scaling them jointly
+updates the combined length without changing their ratio. The move is
+also usable under the non-reversible model and does not require a
+rate-matrix argument.
+
+Use this move alongside an ordinary single-branch scaler such as
+`mvBranchLengthScale`. Joint scaling alone cannot explore the ratio
+of the two root-branch lengths.)");
+	help_strings[string("mvReversibilityAwareBranchLengthScale")][string("example")] = string(R"(taxa <- v(taxon("A"), taxon("B"), taxon("C"), taxon("D"))
+
+tree ~ dnUniformTopologyBranchLength(
+    taxa=taxa, branchLengthDistribution=dnExp(10.0), rooted=TRUE)
+
+moves = VectorMoves()
+moves.append(mvBranchLengthScale(tree, tune=FALSE, weight=4))
+moves.append(mvReversibilityAwareBranchLengthScale(
+    tree, delta=1.0, tune=FALSE, weight=4)))");
+	help_strings[string("mvReversibilityAwareBranchLengthScale")][string("name")] = string(R"(mvReversibilityAwareBranchLengthScale)");
+	help_arrays[string("mvReversibilityAwareBranchLengthScale")][string("see_also")].push_back(string(R"(dnNucleotideRateMatrixMixture)"));
+	help_arrays[string("mvReversibilityAwareBranchLengthScale")][string("see_also")].push_back(string(R"(dnUniformTopologyBranchLength)"));
+	help_arrays[string("mvReversibilityAwareBranchLengthScale")][string("see_also")].push_back(string(R"(mvBranchLengthScale)"));
+	help_arrays[string("mvReversibilityAwareBranchLengthScale")][string("see_also")].push_back(string(R"(mvMPQTree)"));
+	help_arrays[string("mvReversibilityAwareBranchLengthScale")][string("see_also")].push_back(string(R"(mvMPQRateMatrix)"));
+	help_strings[string("mvReversibilityAwareBranchLengthScale")][string("title")] = string(R"(Branch-length scaling that keeps the root edge together)");
 	help_strings[string("mvRootTimeScaleBactrian")][string("name")] = string(R"(mvRootTimeScaleBactrian)");
 	help_strings[string("mvRootTimeSlideUniform")][string("name")] = string(R"(mvRootTimeSlideUniform)");
 	help_strings[string("mvSPR")][string("description")] = string(R"(Tree topology move that performs a Subtree Prune and Regraft (SPR) on
@@ -4461,11 +4610,18 @@ mymcmc.operatorSummary())");
 	help_strings[string("mvSubtreeScale")][string("name")] = string(R"(mvSubtreeScale)");
 	help_strings[string("mvSymmetricMatrixElementSlide")][string("name")] = string(R"(mvSymmetricMatrixElementSlide)");
 	help_strings[string("mvSynchronizedVectorFixedSingleElementSlide")][string("name")] = string(R"(mvSynchronizedVectorFixedSingleElementSlide)");
-	help_strings[string("mvTreeScale")][string("description")] = string(R"(Scales the ages of all internal nodes in a `TimeTree` by the same factor while
-leaving the topology unchanged.)");
-	help_strings[string("mvTreeScale")][string("details")] = string(R"(The `mvTreeScale` move scales the ages of all internal nodes (including
-the root) by a random factor of exp(delta * (u - 0.5)), where delta is a tuning
-parameter and u is a random draw from the uniform distribution on [0, 1].)");
+	help_strings[string("mvTreeScale")][string("description")] = string(R"(Scales internal ages in a `TimeTree` by the same factor while leaving the topology unchanged.
+Optionally scales an independent origin age with the tree.)");
+	help_strings[string("mvTreeScale")][string("details")] = string(R"(The `mvTreeScale` move scales internal ages by a random factor of exp(delta * (u - 0.5)),
+where delta is a tuning parameter and u is a random draw from the uniform distribution on [0, 1].
+Scaling stops at tips and sampled-ancestor parents, leaving their entire subtrees unchanged.
+The Hastings factor counts only the internal ages being scaled.
+
+Supply `rootAge` when the tree's root age is represented by a separate stochastic variable.
+Its value must equal the tree's root age; it tracks that same coordinate during the move.
+For an origin-conditioned tree, use `originAge` instead to scale the independent origin
+from its own current value. The origin contributes one additional coordinate to the Hastings factor.
+Supplying both arguments is an error. With neither argument, only the tree is scaled.)");
 	help_strings[string("mvTreeScale")][string("example")] = string(R"(taxa <- v(taxon("A"), taxon("B"), taxon("C"), taxon("D"), taxon("E"), taxon("F"))
 height ~ dnUniform(0, 10)
 moves = VectorMoves()
@@ -4474,7 +4630,12 @@ moves = VectorMoves()
 tree ~ dnBDP(lambda=1.0, mu=0.2, rootAge=height, taxa=taxa)
 
 # Assign it a mvTreeScale move
-moves.append( mvTreeScale(tree=tree, rootAge=height, delta=1, tune=TRUE, weight=5) ))");
+moves.append( mvTreeScale(tree=tree, rootAge=height, delta=1, tune=TRUE, weight=5) )
+
+# Jointly scale an independent origin and an origin-conditioned tree
+origin ~ dnExponential(0.1)
+fossil_tree ~ dnFBDP(origin=origin, lambda=1.0, mu=0.2, psi=0.1, rho=1.0, taxa=taxa)
+moves.append( mvTreeScale(tree=fossil_tree, originAge=origin, weight=5) ))");
 	help_strings[string("mvTreeScale")][string("name")] = string(R"(mvTreeScale)");
 	help_references[string("mvTreeScale")].push_back(RbHelpReference(R"(Yang Z (2014). Molecular Evolution: A Statistical Approach. Oxford, UK: Oxford University Press.)",R"(10.1093/acprof:oso/9780199602605.001.0001)",R"(https://academic.oup.com/book/26340 )"));
 	help_arrays[string("mvTreeScale")][string("see_also")].push_back(string(R"(mvSubtreeScale)"));
@@ -4649,11 +4810,14 @@ ps.stdError(bootstrap=TRUE, replicates=50, printFiles=TRUE) # bootstrap (50 repl
 	help_arrays[string("powerPosterior")][string("authors")].push_back(string(R"(Sebastian Hoehna)"));
 	help_arrays[string("powerPosterior")][string("authors")].push_back(string(R"(Michael Landis)"));
 	help_arrays[string("powerPosterior")][string("authors")].push_back(string(R"(John Huelsenbeck)"));
+	help_arrays[string("powerPosterior")][string("authors")].push_back(string(R"(David Černý)"));
 	help_strings[string("powerPosterior")][string("description")] = string(R"(Samples from a series of "power posterior" distributions with the likelihood
 term raised to a power between 0 and 1. Such distributions are often used to
 estimate marginal likelihoods for model selection or hypothesis testing via
 Bayes factors (Gelman & Meng 1998; Friel & Pettitt 2008).)");
-	help_strings[string("powerPosterior")][string("details")] = string(R"(A power posterior analysis samples from a series of importance distributions of
+	help_strings[string("powerPosterior")][string("details")] = string(R"(Description
+
+A power posterior analysis samples from a series of importance distributions of
 the form:
     f_beta(theta | Y) = f(theta) x f(Y | theta)^beta
     
@@ -4682,32 +4846,174 @@ file with the suffix "_stone_<K>" will contain samples from the prior. For
 reasons of numerical stability, the beta of this final stone is not set exactly
 to 0 but to an extremely small positive number (~ 1.2e-302).
 
-The RevBayes implementation of power posterior analysis is fully parallelized
-(Hoehna et al. 2021). In general, after a common pre-burnin stage that should
-allow the sampler to converge to the posterior (see the `.burnin()` method),
-the `.run()` method will distribute the K stones among M available CPUs in such
-a way that each CPU handles floor(K/M) or ceiling(K/M) consecutive powers. This
-has the advantage of allowing the last sample for one power to be used as the
-starting state for the subsequent power. However, to account for the transition
-from one power to the next, each power posterior should still include a small
-burnin fraction (set to 0.25 by default and specified by the `burninFraction`
-argument to the `.run()` method). For example, with K = 50, M = 8, and a single
-CPU used for each likelihood computation (`procPerLikelihood=1`, by default),
-the individual power posteriors will be distributed among the CPUs as follows:
+Implementation
 
-    -----------------------------------------------------------------
-                        Filename suffix (= K - i)
-    -----------------------------------------------------------------
-    | CPU 1 | CPU 2 | CPU 3 | CPU 4 | CPU 5 | CPU 6 | CPU 7 | CPU 8 |
-    |-------|-------|-------|-------|-------|-------|-------|-------|
-    |   1   |   7   |   13  |   19  |   26  |   32  |   38  |   44  |
-    |   2   |   8   |   14  |   20  |   27  |   33  |   39  |   45  |
-    |  ...  |  ...  |  ...  |  ...  |  ...  |  ...  |  ...  |  ...  |
-    |   6   |   12  |   18  |   24  |   31  |   37  |   43  |   49  |
-    |       |       |       |   25  |       |       |       |   50  |
+A power posterior analysis consists of up to four distinct stages:
 
-More flexible strategies are enabled by the `.runOneStone()` method, which
-allows the user to execute a separate analysis for each power posterior.)");
+    1. Global pre-burnin
+    2. Stone-specific pre-burnin
+    3. Stone-specific burnin
+    4. Stone-specific sampling phase
+
+The global pre-burnin (1) is executed using the `.burnin()` method and is meant
+to allow the sampler to converge to the posterior. No samples are collected, 
+and a separate generation counter is used, much like with `mcmc.burnin()`. This
+stage is executed using a single worker, which corresponds either to a single
+process, or to a group of `procPerLikelihood` processes if this argument
+(controlling the number of processes used for each likelihood computation) is
+set to a value other than 1 (default).
+
+In contrast, the remaining three stages are executed using the `.run()` method
+and fully parallelized (see Höhna et al. 2021, though note that the current
+implementation diverges somewhat from that described therein). The K stones are
+distributed among M available workers in such a way that each worker handles
+floor(K/M) or ceiling(K/M) consecutive powers. This allows the last sample for
+one power to be used as the starting state for the next power. The assignment
+of stones to available workers is summarized in a table printed at the start of
+every analysis. For example, with K = 50, M = 8, and `procPerLikelihood=1`, the
+individual power posteriors will be distributed among processes as follows:
+
+    Process | Step 1 | Step 2 | Step 3 | Step 4 | Step 5 | Step 6 | Step 7
+    --------|--------|--------|--------|--------|--------|--------|--------
+          1 |      1 |      2 |      3 |      4 |      5 |      6 |
+          2 |      7 |      8 |      9 |     10 |     11 |     12 |
+          3 |     13 |     14 |     15 |     16 |     17 |     18 |
+          4 |     19 |     20 |     21 |     22 |     23 |     24 |     25
+          5 |     26 |     27 |     28 |     29 |     30 |     31 |
+          6 |     32 |     33 |     34 |     35 |     36 |     37 |
+          7 |     38 |     39 |     40 |     41 |     42 |     43 |
+          8 |     44 |     45 |     46 |     47 |     48 |     49 |     50
+
+To facilitate the transitions from one power to the next, which may require
+additional move tuning (since moves should become bolder for powers closer to
+0), a stone-specific pre-burnin (2) is performed. No samples are collected
+during this stage, and another separate generation counter is used. By default,
+this pre-burnin doubles the specified stone length, so if the user specifies
+`.run(generations=1000)`, it will consist of 1000 generations for each stone.
+This value can be changed by setting the `preburninGenerations` argument of the
+`.run()` method.
+
+Additionally, samples collected during the transition from one likelihood power
+to another can be discarded as a stone-specific burnin (3), which is set to 25%
+of the specified stone length by default. This value can be changed by setting
+the `burninFraction` argument of the `.run()` method. The burnin phase shares
+its generation counter with the sampling phase, so in the example above, the
+first logged iteration would actually be 250 (with iterations 0--240 discarded
+as burnin).
+
+Finally, during the stone-specific sampling phase (4), samples are drawn from
+a given power posterior. Its length is jointly determined by the `generations`
+and `burninFraction` arguments of the `.run()` method, so in the example above,
+it would consist of 750 generations for each stone (1000 specified generations
+minus the 25% reserved for burnin).
+
+In addition to the `.run()` method, which distributes stones among workers 
+automatically, `powerPosterior` also supports more flexible parallelization
+strategies via the `.runOneStone()` method, which allows the user to execute
+a separate analysis for each power posterior. This increased flexibility comes
+at the cost of lower-quality starting values: as `.runOneStone(index=<x>, ...)`
+is not guaranteed to have been called before `.runOneStone(index=<x+1>, ...)`, 
+the latter cannot be initialized with the output of the former, and will simply 
+start from whatever state the sampler happens to currently hold.
+
+Checkpointing
+
+Stages 1 (global pre-burnin), 3 (stone-specific burnin), and 4 (stone-specific
+sampling phase) can be checkpointed and resumed from a checkpoint. For highly
+parallelized analyses where each stone is assigned to a separate worker, the
+amount of time spent in stages 2--4 may be negligible compared to the amount
+of time required to converge to the posterior. In such a case, it may be useful
+to checkpoint and resume the global pre-burnin as follows:
+
+    pow_p.burnin(generations=10000, tuningInterval=100,
+                 checkpointFile="pow_p_burnin.ckp", checkpointInterval=100)
+    pow_p.initializeFromCheckpoint("pow_p_burnin.ckp")
+    pow_p.burnin(tuningInterval=100)
+
+The checkpointing mechanism automatically records the planned length specified
+in the first call to `.burnin()`. As a result, there is no need to specify the
+`generations` argument upon resumption. If, for example, the original analysis
+was interrupted at generation 7500, the second call to `.burnin()` will ensure
+that the resumed analysis completes the remaining 2500 generations. However,
+the `generations` argument can be set in the second call as well. In this case,
+it extends the pre-burnin by the specified number of generations:
+
+    pow_p.initializeFromCheckpoint("pow_p_burnin.ckp")
+    pow_p.burnin(generations=5000, tuningInterval=100)
+
+Note that the necessary checkpoint files can also be produced by regular MCMC
+or MCMCMC analyses, so the `powerPosterior` sampler makes it possible to re-use
+the output of such analyses without requiring a lengthy global pre-burnin stage
+of its own. The `generations` must be explicitly set in this scenario, as there
+is no planned length for the "resume-to-target" functionality to utilize.
+
+Individual stones can also be checkpointed and resumed from a checkpoint. To do
+so, the `.initializeFromCheckpoint()` method takes a `stones` argument that
+allows the user to specify exactly which power posteriors should be restarted.
+This can be a single index or a vector thereof. Following on the example above,
+if the original analysis was interrupted during the very last step (step 7), we
+may resume it as follows:
+
+    pow_p.run(generations=1000, checkpointFile="analysis.ckp",
+              checkpointInterval=100)
+    pow_p.initializeFromCheckpoint("analysis.ckp", [25, 50])
+    pow_p.run(generations=800)
+    
+When applied to individual stones, the checkpointing mechanism also records the
+planned burnin length. Therefore, if the original analysis was interrupted
+at generation 200 (i.e., still within the 250-generation-long burnin stage),
+the commands above will cause the resumed analysis to complete the remaining 50
+generations of burnin, followed by sampling for 750 generations (numbered 250
+through 1000) -- exactly as though no interruption had occurred in the first
+place. The `burninFraction` argument of the `.run()` call (which would normally
+cause the first 0.25 times 800 = 200 generations to be discarded as burnin) is
+ignored in this case, and a warning is printed to this effect.
+
+If the analysis was interrupted at an earlier step, we may have to resurrect
+entire sequences of stones. In this case, a nested vector (vector of vectors)
+of stone indices is passed to `.initializeFromCheckpoint()` via its `stones`
+argument. Each inner vector then corresponds to a sequence of stones to be
+executed by one parallel worker. Only the first stone from each sequence needs
+to have a checkpoint associated with it, as each subsequent stone will instead
+use the output of the previous stone as its starting state. For example, if the
+original analysis was interrupted during step 2, we could resume it as follows:
+
+    pow_p.initializeFromCheckpoint("analysis.ckp",
+              [ 2:6, 8:12, 14:18, 20:25, 27:31, 33:37, 39:43, 45:50 ])
+    pow_p.run(generations=800)
+    
+Or as follows if it was interrupted during step 6:
+
+    pow_p.initializeFromCheckpoint("analysis.ckp",
+              [ [6], [12], [18], 24:25, [31], [37], [43], 49:50 ])
+
+Note that in this case, the `.run()` call honors the assignment of stones to
+workers specified in `.initializeFromCheckpoint()`, instead of automatically
+generating an assignment of its own. An exception is thrown if the length of
+the outer vector (i.e., the number of parallel workers requested by the user
+for the resumed analysis) exceeds the number of workers available. Note also
+that when the `stones` argument is specified using the range-based notation,
+it makes a difference whether the range is enclosed in square brackets. The
+following:
+
+    pow_p.initializeFromCheckpoint( "analysis.ckp", 1:5 )
+    
+means "resurrect stones 1 through 5, and leave it up to the `.run()` method to
+decide how to assign them to available workers". Checkpoint files must be
+available for all 5 specified stones. In contrast,
+
+    pow_p.initializeFromCheckpoint( "analysis.ckp", [1:5] )
+    
+means "resurrect stone 1, and then run stones 2 through 5 on the same parallel
+worker, using the last sample from the previous stone as the starting point for
+the next". In this case, we only require checkpoint files for stone 1.
+
+Finally, checkpointing is also available for the `.runOneStone()` method:
+
+    pow_p.runOneStone(index=16, generations=500, checkpointFile="analysis.ckp",
+                      checkpointInterval=50)
+    pow_p.initializeFromCheckpoint("analysis.ckp", 16)
+    pow_p.runOneStone(index=16, generations=500))");
 	help_strings[string("powerPosterior")][string("example")] = string(R"(# Create a simple model (unclamped)
 a ~ dnExponential(1)
 mymodel = model(a)
@@ -4928,7 +5234,7 @@ The currently available keys and their associated values are as follows:
 
     tolerance=<numeric>          Tolerance for comparing doubles.
 
-        DEFAULT: 10e-10
+        DEFAULT: 1e-09
 
     debugMCMC=<0,1>              How much work to perform to check MCMC?
 
@@ -4949,14 +5255,14 @@ The currently available keys and their associated values are as follows:
         4: Writes out additional details about the mvSlice move (if present).
 
         DEFAULT: 0)");
-	help_strings[string("setOption")][string("example")] = string(R"(# compute the absolute value of a real number
-getOption("linewidth")
+	help_strings[string("setOption")][string("example")] = string(R"(# find out what the current line width is
+getOption("lineWidth")
 
-# let us set the linewidth to a new value
-setOption("linewidth", 200)
+# let's set the line width to a new value
+setOption("lineWidth", 200)
 
 # now let's check what the value is
-getOption("linewidth"))");
+getOption("lineWidth"))");
 	help_strings[string("setOption")][string("name")] = string(R"(setOption)");
 	help_arrays[string("setOption")][string("see_also")].push_back(string(R"(getOption)"));
 	help_strings[string("setOption")][string("title")] = string(R"(Set a global RevBayes option)");
@@ -5185,7 +5491,25 @@ mymcmc.run( rules = stopping_rules ))");
 	help_arrays[string("srGeweke")][string("see_also")].push_back(string(R"(srStationarity)"));
 	help_strings[string("srGeweke")][string("title")] = string(R"(Geweke stopping rule)");
 	help_strings[string("srMaxIteration")][string("description")] = string(R"(Terminates an MCMC run once the specified number of iterations have been
-performed. This rule would typically be used alongside other stopping criteria.)");
+performed.)");
+	help_strings[string("srMaxIteration")][string("details")] = string(R"(For an analysis conducted from scratch, employing the maximum iteration rule is
+exactly equivalent to specifying the `generations` argument:
+
+    mcmc.run( [srMaxIteration(10000)] )
+
+as well as the following:
+
+    mcmc.run(generations=10000)
+
+will both stop the analysis once it has completed 10,000 generations. However,
+the two `.run()` calls above will behave differently when they follow a call to
+`.initializeFromCheckpoint()` -- i.e., when resuming a checkpointed analysis.
+For example, if such an analysis was interrupted at generation 5000, resuming
+it with `generations=10000` will cause it to be extended by another 10,000
+generations, yielding a total length of 15,000 generations. In contrast,
+specifying `srMaxIteration(10000)` upon resumption will stop the analysis once
+it has reached a total length of 10,000 generations, limiting the resumed run
+to just 5000 generations.)");
 	help_strings[string("srMaxIteration")][string("example")] = string(R"(# Binomial example: estimate success probability given 7 successes out of 20 trials
 r ~ dnExp(10)
 p := Probability(ifelse(r < 1, r, 1))
@@ -5506,14 +5830,33 @@ system("pwd"))");
 	help_strings[string("tanh")][string("name")] = string(R"(tanh)");
 	help_arrays[string("taxon")][string("authors")].push_back(string(R"(Michael Landis)"));
 	help_strings[string("taxon")][string("description")] = string(R"(The taxon function creates a Taxon object.)");
-	help_strings[string("taxon")][string("details")] = string(R"(Each Taxon object records that taxon's name in addition to other information, such as age (which is non-zero for fossils). Character matrices and trees contain Taxon vectors (Taxon[]) that are used to match leaf nodes to data entries for phylogenetic analyses. For multispecies coalescent analyses, Taxon objects are also used to assign species memberships to individuals.)");
+	help_strings[string("taxon")][string("details")] = string(R"(Each Taxon object records that taxon's name in addition to other information, such as its age range.
+A taxon constructed without ages has no age range. Use `hasAgeRange()` to distinguish this from
+an explicitly supplied range, including [0,0]. Character matrices and trees contain
+Taxon vectors (Taxon[]) that are used to match leaf nodes to data entries for phylogenetic analyses.
+For multispecies coalescent analyses, Taxon objects are also used to assign species memberships to
+individuals.
+
+Use `setAgeRange(minAge, maxAge)` to replace both age bounds together. The bounds must be
+nonnegative, must not be NaN, and must satisfy `minAge <= maxAge`; equal bounds specify an exact age.
+An invalid call leaves the existing range unchanged. `setMinAge(a)` and `setMaxAge(a)` change one
+endpoint of an existing range; they throw if no range has been supplied. Use `setAgeRange()` to
+establish both bounds first.
+
+`getMinAge()` and `getMaxAge()` return the endpoints of an existing range; `getAge()` is an alias
+for `getMinAge()`. These getters throw if no range has been supplied. Use `hasAgeRange()` to check
+before querying a potentially absent range.)");
 	help_strings[string("taxon")][string("example")] = string(R"(# we can create a Taxon object
 taxon_gorilla = taxon("Gorilla_gorilla")
 # we can create a dummy vector of Taxon objects for simulation
 for (i in 1:10) { taxa[i] = taxon("Taxon"+i) }
 phy ~ dnBDP(lambda=1, mu=0, rootAge=1, taxa=taxa)
 # retrieve the taxon list for 'phy'
-phy.taxa())");
+phy.taxa()
+
+# Set both bounds of a fossil's age range together
+fossil = taxon("Fossil_species")
+fossil.setAgeRange(minAge=5, maxAge=6))");
 	help_strings[string("taxon")][string("name")] = string(R"(taxon)");
 	help_arrays[string("taxon")][string("see_also")].push_back(string(R"(readTaxonData)"));
 	help_strings[string("taxon")][string("title")] = string(R"(Taxon object)");
@@ -5603,7 +5946,7 @@ x ~ dnMultivariateNormal(mu,Sigma) |> tnInvlogit())");
 	help_strings[string("tnLog")][string("details")] = string(R"(If X ~ dist then tnLog(dist) is the distribution of log(X).
 
 The distribution `dist` can be either univariate (dnExponential) or
-multivariate (dnDirichlet).
+multivariate (dnIID).
 
 This is NOT the same as dnLog(dist), which provides a distribution
 that has distribution `dist` on the log-scale.)");
@@ -5611,9 +5954,9 @@ that has distribution `dist` on the log-scale.)");
 x ~ dnExponential(1) |> tnLog()   # Expressed using pipes.
 
 y ~ dnExponential(1)
-x := log(y)                       # This is also equivalent.
+x := ln(y)                        # This is also equivalent.
 
-x ~ dnDirichlet([1,1,1,1]) |> tnLog())");
+xs ~ dnIID(4, dnExponential(1)) |> tnLog())");
 	help_strings[string("tnLog")][string("name")] = string(R"(tnLog)");
 	help_arrays[string("tnLog")][string("see_also")].push_back(string(R"(tnExp, tnLogit, tnInvlogit)"));
 	help_strings[string("tnLog")][string("title")] = string(R"(Log-transformed distribution)");
@@ -5622,14 +5965,14 @@ x ~ dnDirichlet([1,1,1,1]) |> tnLog())");
 	help_strings[string("tnLogit")][string("details")] = string(R"(If P ~ dist then tnLogit(dist) is the distribution of log(P/(1-P)).
 
 The distribution `dist` can be either univariate (dnBeta) or
-multivariate (dnDirichlet).)");
+multivariate (dnIID).)");
 	help_strings[string("tnLogit")][string("example")] = string(R"(x ~ tnLogit(dnBeta(1,2))         # The log-odds of an Beta random variable.
 x ~ dnBeta(1,2)|> tnLogit()      # Expressed using pipes.
 
 p ~ dnBeta(1,2)
 x := logit(p)                    # Expressed as a deterministic function of the probability.
 
-xs ~ dnDirichlet([1,1,1,1]) |> tnLogit())");
+xs ~ dnIID(4, dnBeta(1,2)) |> tnLogit())");
 	help_strings[string("tnLogit")][string("name")] = string(R"(tnLogit)");
 	help_arrays[string("tnLogit")][string("see_also")].push_back(string(R"(logit, tnExp, tnLog, tnInvlogitit)"));
 	help_strings[string("tnLogit")][string("title")] = string(R"(Logit-transformed distribution)");

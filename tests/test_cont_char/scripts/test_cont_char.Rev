@@ -1,0 +1,103 @@
+# These tests aim at verifying that the member methods of continuous character data work properly with and without missing data
+
+cont_missing = readContinuousCharacterData( "data/artiodactyla_hypsodonty_missing.nex" )
+cont_drop    = readContinuousCharacterData( "data/artiodactyla_hypsodonty_drop.nex" )
+
+# maximum difference
+a <- cont_missing.maxDifference(1)
+b <- cont_drop.maxDifference(1)
+print(filename = "output/Test_cont_char.txt", append = TRUE, a)
+print(filename = "output/Test_cont_char.txt", append = TRUE, "\n")
+print(filename = "output/Test_cont_char.txt", append = TRUE, b)
+print(filename = "output/Test_cont_char.txt", append = TRUE, "\n")
+
+
+threshold <- 0.00001
+if (abs(a - b) < threshold){
+    print("maximum differences of the continuous trait equal, test passed")
+}else{
+    print("maximum differences of the continuous trait not equal, test failed")
+}
+
+# mean difference
+c <- cont_missing.maxDifference(1)
+d <- cont_drop.maxDifference(1)
+print(filename = "output/Test_cont_char.txt", append = TRUE, c)
+print(filename = "output/Test_cont_char.txt", append = TRUE, "\n")
+print(filename = "output/Test_cont_char.txt", append = TRUE, d)
+print(filename = "output/Test_cont_char.txt", append = TRUE, "\n")
+
+
+threshold <- 0.00001
+if (abs(c - d) < threshold){
+    print("mean differences of the continuous trait equal, test passed")
+}else{
+    print("mean differences of the continuous trait not equal, test failed")
+}
+
+
+# mean value
+e <- cont_missing.meanValue(1)
+f <- cont_drop.meanValue(1)
+print(filename = "output/Test_cont_char.txt", append = TRUE, e)
+print(filename = "output/Test_cont_char.txt", append = TRUE, "\n")
+print(filename = "output/Test_cont_char.txt", append = TRUE, f)
+print(filename = "output/Test_cont_char.txt", append = TRUE, "\n")
+
+
+threshold <- 0.00001
+if (abs(e - f) < threshold){
+    print("mean values of the continuous trait equal, test passed")
+}else{
+    print("mean values of the continuous trait not equal, test failed")
+}
+
+
+# minimum difference
+g <- cont_missing.minDifference(1)
+h <- cont_drop.minDifference(1)
+print(filename = "output/Test_cont_char.txt", append = TRUE, g)
+print(filename = "output/Test_cont_char.txt", append = TRUE, "\n")
+print(filename = "output/Test_cont_char.txt", append = TRUE, h)
+print(filename = "output/Test_cont_char.txt", append = TRUE, "\n")
+
+
+threshold <- 0.00001
+if (abs(a - b) < threshold){
+    print("variances of the continuous trait equal, test passed")
+}else{
+    print("variances of the continuous trait not equal, test failed")
+}
+
+
+# variance
+i <- cont_missing.var(1)
+j <- cont_drop.var(1)
+print(filename = "output/Test_cont_char.txt", append = TRUE, i)
+print(filename = "output/Test_cont_char.txt", append = TRUE, "\n")
+print(filename = "output/Test_cont_char.txt", append = TRUE, j)
+print(filename = "output/Test_cont_char.txt", append = TRUE, "\n")
+
+
+threshold <- 0.00001
+if (abs(i - j) < threshold){
+    print("variances of the continuous trait equal, test passed")
+}else{
+    print("variances of the continuous trait not equal, test failed")
+}
+
+
+# variance difference
+k <- cont_missing.varDifference(1)
+l <- cont_drop.varDifference(1)
+print(filename = "output/Test_cont_char.txt", append = TRUE, k)
+print(filename = "output/Test_cont_char.txt", append = TRUE, "\n")
+print(filename = "output/Test_cont_char.txt", append = TRUE, l)
+
+
+threshold <- 0.00001
+if (abs(i - j) < threshold){
+    print("variance differences of the continuous trait equal, test passed")
+}else{
+    print("variance differences of the continuous trait not equal, test failed")
+}

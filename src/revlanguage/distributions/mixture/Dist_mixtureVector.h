@@ -97,7 +97,7 @@ RevBayesCore::VectorMixtureDistribution< typename valType::valueType >* RevLangu
 {
     
     // get the parameters
-    const WorkspaceVector<Distribution>& rl_bd = static_cast<const WorkspaceVector<Distribution > &>( base_distributions->getRevObject() );
+    const auto& rl_bd = static_cast<const WorkspaceVector<TypedDistribution<valType>>&>( base_distributions->getRevObject() );
     std::vector<RevBayesCore::TypedDistribution<typename valType::valueType>* > bd;
     for (size_t i=0; i<rl_bd.size();++i)
     {
