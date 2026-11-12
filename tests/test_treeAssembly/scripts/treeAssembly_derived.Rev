@@ -1,0 +1,40 @@
+# Branch lengths are computed from the input tree, so a tree move touches the tree assembly through both inputs.
+out = "output/treeAssembly_derived.txt"
+print(filename=out, "treeAssembly with lengths derived from the input tree checkpoints correctly:\n")
+
+chars <- readDiscreteCharacterData("data/primates_cytb_small.nex")
+taxa <- chars.taxa()
+
+agree = TRUE
+for (rep in 1:3) {
+    for (pass in 1:2) {
+        seed(rep)
+        tree ~ dnBDP(lambda=0.4, mu=0.1, rho=1.0, rootAge=10.0, taxa=taxa, condition="nTaxa")
+        for (i in 1:(2 * taxa.size() - 2)) { bl[i] := 0.02 * tree.branchLength(i) }
+        assembled := fnTreeAssembly(tree, bl)
+        seq ~ dnPhyloCTMC(tree=assembled, Q=fnJC(4), type="DNA")
+        seq.clamp(chars)
+        idle ~ dnUniform(0, 1)
+
+        w = ifelse(pass == 1, 1.0, 1E-9)
+        moves = [ mvFNPR(tree, weight=5*w), mvNarrow(tree, weight=5*w),
+                  mvNodeTimeSlideUniform(tree, weight=5*w), mvSubtreeScale(tree, weight=5*w),
+                  mvSlide(idle, weight=20/w) ]
+
+        log = "output/treeAssembly_derived_" + rep + "_" + pass + ".log"
+        state = "output/treeAssembly_derived_" + rep + ".state"
+        m = mcmc(model(tree, idle), [ mnFile(filename=log, printgen=10, idle) ], moves, moveschedule="single")
+        if (pass == 1) {
+            m.run(generations=3000, checkpointFile=state, checkpointInterval=3000)
+            cached = readTrace(log, burnin=0)[3].getValues()
+        } else {
+            m.initializeFromCheckpoint(state)
+            m.run(generations=1000)
+            fresh = readTrace(log, burnin=0)[3].getValues()
+        }
+    }
+    agree = agree && abs(cached[cached.size()] - fresh[fresh.size()]) < 1E-6
+}
+print(filename=out, append=TRUE, agree, "\n")
+
+q()
