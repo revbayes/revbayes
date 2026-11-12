@@ -19,7 +19,9 @@
 #include "MemberProcedure.h"
 #include "MethodTable.h"
 #include "RbBoolean.h"
+#include "RbException.h"
 #include "RbFileManager.h"
+#include "Real.h"
 #include "RevPtr.h"
 #include "RevVariable.h"
 #include "RlBoolean.h"
@@ -50,6 +52,11 @@ Model::Model() : WorkspaceToCoreWrapperObject<RevBayesCore::Model>()
 
     auto ignoreAllDataRules = new ArgumentRules();
     methods.addFunction( new MemberProcedure("ignoreAllData", RlUtils::Void, ignoreAllDataRules) );
+
+    // model() clones the DAG, so here we actually return the log-probability of the clone of the requested variable
+    auto* lnProbRules = new ArgumentRules();
+    lnProbRules->push_back( new ArgumentRule("x", RevObject::getClassTypeSpec(), "A variable in the model whose log-probability is to be returned.", ArgumentRule::BY_CONSTANT_REFERENCE, ArgumentRule::ANY ) );
+    methods.addFunction( new MemberProcedure("lnProbability", Real::getClassTypeSpec(), lnProbRules) );
 }
 
 
@@ -138,6 +145,34 @@ RevPtr<RevVariable> Model::executeMethod(std::string const &name, const std::vec
         ignoreAllData();
 
         return nullptr;
+    }
+    else if (name == "lnProbability")
+    {
+        found = true;
+
+        const RevObject& obj = args[0].getVariable()->getRevObject();
+        if ( not obj.hasDagNode() or obj.getDagNode()->getName().empty() )
+        {
+            throw RbException() << "lnProbability requires a named variable.";
+        }
+
+        // Find the node by name
+        const std::string& nodeName = obj.getDagNode()->getName();
+        RevBayesCore::DagNode* modelNode = NULL;
+        for ( RevBayesCore::DagNode* node : value->getDagNodes() )
+        {
+            if ( node->getName() == nodeName )
+            {
+                modelNode = node;
+                break;
+            }
+        }
+        if ( modelNode == NULL )
+        {
+            throw RbException() << "Node '" << nodeName << "' is not in the model.";
+        }
+
+        return new RevVariable( new Real( modelNode->getLnProbability() ) );
     }
     
     return RevObject::executeMethod( name, args, found );
