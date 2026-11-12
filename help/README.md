@@ -2,9 +2,9 @@
 
 The Markdown files stored in the `md` directory are used to generate the database of help entries that populate the help system in RevBayes.
 
-The Perl script `md2help.pl` processes these files to generate the `src/core/help/RbHelpDatabase.cpp` source file that is compiled with the `rb` executable.
+The build embeds these files in the `rb` executable unchanged, and `src/core/help/RbHelpDatabase.cpp` parses them the first time help is requested. Editing a file here and rebuilding is all that is needed to update the help.
 
-Building RevBayes with the `-help true` option automatically runs `md2help.pl` to update the C++ database, and also yields the `rb-help2yml` executable, which is used to generate an exhaustive YAML database of all information contained in the RevBayes help system, including the information contained in the Markdown database, as well as hardcoded elements such as function arguments and return types. A web portal for this database is presented on the [RevBayes documentation website](https://revbayes.github.io/documentation/).
+The build also yields the `rb-help2yml` executable, which is used to generate an exhaustive YAML database of all information contained in the RevBayes help system, including the information contained in the Markdown database, as well as hardcoded elements such as function arguments and return types. A web portal for this database is presented on the [RevBayes documentation website](https://revbayes.github.io/documentation/).
 
 The fields in each Markdown help entry file are:
 
