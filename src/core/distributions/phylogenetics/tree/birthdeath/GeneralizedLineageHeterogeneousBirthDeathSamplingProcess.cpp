@@ -239,9 +239,9 @@ void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::buildSerialSample
 
 double GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::computeLnProbability(void)
 {
-    // Check before returning a cached density: changing taxon metadata need not dirty that cache.
-    if (not TreeUtilities::nodeAgesWithinRanges(*value))
-        return RbConstants::Double::neginf;
+	// Check before returning a cached density: changing taxon metadata need not dirty that cache.
+	if (not TreeUtilities::nodeAgesWithinRanges(*value))
+		return RbConstants::Double::neginf;
 
 
 	// make sure we need to recompute
@@ -257,26 +257,26 @@ double GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::computeLnProbab
 	}
 
 	// store the old likelihood
-    old_ln_prob = current_ln_prob;
+	old_ln_prob = current_ln_prob;
 
-    // calculate a likelihood!
-    // tp_ptr->writeStateToFile("params.dat");
+	// calculate a likelihood!
+	// tp_ptr->writeStateToFile("params.dat");
 	// tp_ptr->loadStateFromFile("state.dat");
-    current_ln_prob = tp_ptr->computeLogLikelihood();
+	current_ln_prob = tp_ptr->computeLogLikelihood();
 
-    // we are now able to reset tp approximator
-    tp_can_reset = true;
+	// we are now able to reset tp approximator
+	tp_can_reset = true;
 
-    // flag the likelihood as up-to-date
-    probability_dirty = false;
+	// flag the likelihood as up-to-date
+	probability_dirty = false;
 
-    // NOTE: this likelihood differs from the one computed in other revbayes
-    // distributions because we include the probability density of the root node.
-    // for lineage-homogeneous (state-independent) models, that probability density
-    // drops out if we condition on survival, in which case this likelihood
-    // will be equivalent to a likelihood from other revbayes birth-death models
+	// NOTE: this likelihood differs from the one computed in other revbayes
+	// distributions because we include the probability density of the root node.
+	// for lineage-homogeneous (state-independent) models, that probability density
+	// drops out if we condition on survival, in which case this likelihood
+	// will be equivalent to a likelihood from other revbayes birth-death models
 
-    return current_ln_prob;
+	return current_ln_prob;
 }
 
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::dumpModel(std::string file_name)
