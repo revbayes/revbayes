@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "Dist_phyloCTMCDASiteIID.h"
 
 #include <cstddef>
@@ -72,28 +73,28 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
 {
 
     // get the parameters
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = static_cast<const Tree &>( tree->getRevObject() ).getDagNode();
-    size_t n = size_t( static_cast<const Natural &>( nSites->getRevObject() ).getValue() );
-    const std::string& dt = static_cast<const RlString &>( type->getRevObject() ).getValue();
-    bool ambig = static_cast<const RlBoolean &>( treatAmbiguousAsGap->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = dagNodeForRevType<Tree>(tree);
+    size_t n = size_t( valueForRevType<Natural>(nSites) );
+    const std::string& dt = valueForRevType<RlString>(type);
+    bool ambig = dagNodeForRevType<RlBoolean>(treatAmbiguousAsGap);
     size_t nNodes = tau->getValue().getNumberOfNodes();
 
     RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* siteRatesNode = NULL;
     if ( siteRates != NULL && siteRates->getRevObject() != RevNullObject::getInstance() )
     {
-        siteRatesNode = static_cast<const ModelVector<RealPos> &>( siteRates->getRevObject() ).getDagNode();
+        siteRatesNode = dagNodeForRevType<ModelVector<RealPos>>(siteRates);
     }
     RevBayesCore::TypedDagNode< double >* pInvNode = NULL;
     if ( pInv != NULL && pInv->getRevObject() != RevNullObject::getInstance() )
     {
-        pInvNode = static_cast<const Probability &>( pInv->getRevObject() ).getDagNode();
+        pInvNode = dagNodeForRevType<Probability>(pInv);
     }
 
     RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharacterData > *d = NULL;
     const RevBayesCore::TypedDagNode< RevBayesCore::Simplex > *rf = NULL;
     if ( rootFrequencies->getRevObject() != RevNullObject::getInstance() )
     {
-        rf = static_cast<const Simplex &>( rootFrequencies->getRevObject() ).getDagNode();
+        rf = dagNodeForRevType<Simplex>(rootFrequencies);
     }
 
     if ( dt == "DNA" )
@@ -110,7 +111,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
         // set the clock rates
         if ( rate->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
         {
-            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* clockRates = static_cast<const ModelVector<RealPos> &>( rate->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* clockRates = dagNodeForRevType<ModelVector<RealPos>>(rate);
 
             // sanity check
             size_t nRates = clockRates->getValue().size();
@@ -123,14 +124,14 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
         }
         else
         {
-            RevBayesCore::TypedDagNode<double>* clockRate = static_cast<const RealPos &>( rate->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode<double>* clockRate = dagNodeForRevType<RealPos>(rate);
             dist->setClockRate( clockRate );
         }
 
         // set the rate matrix
         if ( q->getRevObject().isType( ModelVector<RateGenerator>::getClassTypeSpec() ) )
         {
-            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = static_cast<const ModelVector<RateGenerator> &>( q->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = dagNodeForRevType<ModelVector<RateGenerator>>(q);
 
             // sanity check
             if ( (nNodes-1) != rm->getValue().size() )
@@ -148,7 +149,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
         }
         else
         {
-            RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = static_cast<const RateGenerator &>( q->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = dagNodeForRevType<RateGenerator>(q);
             dist->setRateGenerator( rm );
         }
 
@@ -171,7 +172,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
 
         if ( rate->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
         {
-            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* clockRates = static_cast<const ModelVector<RealPos> &>( rate->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* clockRates = dagNodeForRevType<ModelVector<RealPos>>(rate);
 
             // sanity check
             if ( (nNodes-1) != clockRates->getValue().size() )
@@ -183,14 +184,14 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
         }
         else
         {
-            RevBayesCore::TypedDagNode<double>* clockRate = static_cast<const RealPos &>( rate->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode<double>* clockRate = dagNodeForRevType<RealPos>(rate);
             dist->setClockRate( clockRate );
         }
 
         // set the rate matrix
         if ( q->getRevObject().isType( ModelVector<RateGenerator>::getClassTypeSpec() ) )
         {
-            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = static_cast<const ModelVector<RateGenerator> &>( q->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = dagNodeForRevType<ModelVector<RateGenerator>>(q);
 
             // sanity check
             if ( (nNodes-1) != rm->getValue().size() )
@@ -208,7 +209,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
         }
         else
         {
-            RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = static_cast<const RateGenerator &>( q->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = dagNodeForRevType<RateGenerator>(q);
             dist->setRateGenerator( rm );
         }
 
@@ -230,7 +231,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
 
         if ( rate->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
         {
-            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* clockRates = static_cast<const ModelVector<RealPos> &>( rate->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* clockRates = dagNodeForRevType<ModelVector<RealPos>>(rate);
 
             // sanity check
             if ( (nNodes-1) != clockRates->getValue().size() )
@@ -242,14 +243,14 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
         }
         else
         {
-            RevBayesCore::TypedDagNode<double>* clockRate = static_cast<const RealPos &>( rate->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode<double>* clockRate = dagNodeForRevType<RealPos>(rate);
             dist->setClockRate( clockRate );
         }
 
         // set the rate matrix
         if ( q->getRevObject().isType( ModelVector<RateGenerator>::getClassTypeSpec() ) )
         {
-            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = static_cast<const ModelVector<RateGenerator> &>( q->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = dagNodeForRevType<ModelVector<RateGenerator>>(q);
 
             // sanity check
             if ( (nNodes-1) != rm->getValue().size() )
@@ -267,7 +268,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
         }
         else
         {
-            RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = static_cast<const RateGenerator &>( q->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = dagNodeForRevType<RateGenerator>(q);
             dist->setRateGenerator( rm );
         }
 
@@ -286,12 +287,12 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
         size_t nChars = 1;
         if ( q->getRevObject().isType( ModelVector<RateGenerator>::getClassTypeSpec() ) )
         {
-            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = static_cast<const ModelVector<RateGenerator> &>( q->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = dagNodeForRevType<ModelVector<RateGenerator>>(q);
             nChars = rm->getValue()[0].getNumberOfStates();
         }
         else
         {
-            RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = static_cast<const RateGenerator &>( q->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = dagNodeForRevType<RateGenerator>(q);
             nChars = rm->getValue().getNumberOfStates();
         }
 
@@ -305,7 +306,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
 
         if ( rate->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
         {
-            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* clockRates = static_cast<const ModelVector<RealPos> &>( rate->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* clockRates = dagNodeForRevType<ModelVector<RealPos>>(rate);
 
             // sanity check
             if ( (nNodes-1) != clockRates->getValue().size() )
@@ -317,14 +318,14 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
         }
         else
         {
-            RevBayesCore::TypedDagNode<double>* clockRate = static_cast<const RealPos &>( rate->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode<double>* clockRate = dagNodeForRevType<RealPos>(rate);
             dist->setClockRate( clockRate );
         }
 
         // set the rate matrix
         if ( q->getRevObject().isType( ModelVector<RateGenerator>::getClassTypeSpec() ) )
         {
-            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = static_cast<const ModelVector<RateGenerator> &>( q->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = dagNodeForRevType<ModelVector<RateGenerator>>(q);
 
             // sanity check
             if ( (nNodes-1) != rm->getValue().size() )
@@ -342,7 +343,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
         }
         else
         {
-            RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = static_cast<const RateGenerator &>( q->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = dagNodeForRevType<RateGenerator>(q);
             dist->setRateGenerator( rm );
         }
 
@@ -360,12 +361,12 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
         size_t nChars = 1;
         if ( q->getRevObject().isType( ModelVector<RateGenerator>::getClassTypeSpec() ) )
         {
-            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = static_cast<const ModelVector<RateGenerator> &>( q->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = dagNodeForRevType<ModelVector<RateGenerator>>(q);
             nChars = rm->getValue()[0].getNumberOfStates();
         }
         else
         {
-            RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = static_cast<const RateGenerator &>( q->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = dagNodeForRevType<RateGenerator>(q);
             nChars = rm->getValue().getNumberOfStates();
         }
 
@@ -379,7 +380,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
 
         if ( rate->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
         {
-            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* clockRates = static_cast<const ModelVector<RealPos> &>( rate->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* clockRates = dagNodeForRevType<ModelVector<RealPos>>(rate);
 
             // sanity check
             if ( (nNodes-1) != clockRates->getValue().size() )
@@ -391,14 +392,14 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
         }
         else
         {
-            RevBayesCore::TypedDagNode<double>* clockRate = static_cast<const RealPos &>( rate->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode<double>* clockRate = dagNodeForRevType<RealPos>(rate);
             dist->setClockRate( clockRate );
         }
 
         // set the rate matrix
         if ( q->getRevObject().isType( ModelVector<RateGenerator>::getClassTypeSpec() ) )
         {
-            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = static_cast<const ModelVector<RateGenerator> &>( q->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = dagNodeForRevType<ModelVector<RateGenerator>>(q);
 
             // sanity check
             if ( (nNodes-1) != rm->getValue().size() )
@@ -416,7 +417,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
         }
         else
         {
-            RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = static_cast<const RateGenerator &>( q->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = dagNodeForRevType<RateGenerator>(q);
             dist->setRateGenerator( rm );
         }
 
@@ -433,13 +434,13 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
         size_t nChars = 1;
         if ( q->getRevObject().isType( ModelVector<RateGenerator>::getClassTypeSpec() ) )
         {
-            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = static_cast<const ModelVector<RateGenerator> &>( q->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = dagNodeForRevType<ModelVector<RateGenerator>>(q);
             nChars = rm->getValue()[0].getNumberOfStates();
             // RevBayesCore::g_MAX_NAT_NUM_STATES = nChars;
         }
         else
         {
-            RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = static_cast<const RateGenerator &>( q->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = dagNodeForRevType<RateGenerator>(q);
             nChars = rm->getValue().getNumberOfStates();
             // RevBayesCore::g_MAX_NAT_NUM_STATES = nChars;
         }
@@ -454,7 +455,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
 
         if ( rate->getRevObject().isType( ModelVector<RealPos>::getClassTypeSpec() ) )
         {
-            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* clockRates = static_cast<const ModelVector<RealPos> &>( rate->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* clockRates = dagNodeForRevType<ModelVector<RealPos>>(rate);
 
             // sanity check
             if ( (nNodes-1) != clockRates->getValue().size() )
@@ -466,14 +467,14 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
         }
         else
         {
-            RevBayesCore::TypedDagNode<double>* clockRate = static_cast<const RealPos &>( rate->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode<double>* clockRate = dagNodeForRevType<RealPos>(rate);
             dist->setClockRate( clockRate );
         }
 
         // set the rate matrix
         if ( q->getRevObject().isType( ModelVector<RateGenerator>::getClassTypeSpec() ) )
         {
-            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = static_cast<const ModelVector<RateGenerator> &>( q->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode< RevBayesCore::RbVector<RevBayesCore::RateGenerator> >* rm = dagNodeForRevType<ModelVector<RateGenerator>>(q);
 
             // sanity check
             if ( (nNodes-1) != rm->getValue().size() )
@@ -491,7 +492,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
         }
         else
         {
-            RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = static_cast<const RateGenerator &>( q->getRevObject() ).getDagNode();
+            RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>* rm = dagNodeForRevType<RateGenerator>(q);
             dist->setRateGenerator( rm );
         }
 

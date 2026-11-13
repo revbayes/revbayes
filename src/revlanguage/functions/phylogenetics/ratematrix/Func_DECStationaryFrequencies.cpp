@@ -6,6 +6,7 @@
 //  Copyright © 2016 Michael Landis. All rights reserved.
 //
 
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <iosfwd>
 #include <string>
@@ -72,11 +73,11 @@ RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_DECStationaryFr
     
     // dispersal rates
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::RbVector<double> > >* dr;
-    dr = static_cast<const ModelVector<ModelVector<RealPos> > &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    dr = dagNodeForRevType<ModelVector<ModelVector<RealPos> >>(this->args[0].getVariable());
     
     // extirpation rates
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* er;
-    er = static_cast<const ModelVector<RealPos> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    er = dagNodeForRevType<ModelVector<RealPos>>(this->args[1].getVariable());
     
     size_t num_statesEr = er->getValue().size();
     std::vector<size_t> num_statesDr;
@@ -104,7 +105,7 @@ RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_DECStationaryFr
     RevBayesCore::TypedDagNode<RevBayesCore::Simplex >* rs = NULL;
     if ( this->args[2].getVariable() != NULL && this->args[2].getVariable()->getRevObject() != RevNullObject::getInstance()) {
         
-        rs = static_cast<const Simplex&>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+        rs = dagNodeForRevType<Simplex>(this->args[2].getVariable());
         if (rs->getValue().size() != num_statesEr && rs->getValue().size() > 0) {
             throw RbException("The probabilities of range sizes must equal the number of areas.");
         }

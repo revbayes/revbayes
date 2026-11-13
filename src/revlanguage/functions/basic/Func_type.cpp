@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <fstream>
 #include <vector>
 
@@ -40,7 +41,7 @@ Func_type* Func_type::clone( void ) const
 RevPtr<RevVariable> Func_type::execute( void )
 {
     
-    bool verbose = static_cast< const RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
+    bool verbose = valueForRevType<RlBoolean>(args[1].getVariable());
 
     if (verbose)
     {

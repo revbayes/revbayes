@@ -1,4 +1,5 @@
 #include "TimeInterval.h"
+#include "RevTypeUtilities.h"
 #include <sstream>
 #include <cstddef>
 #include <string>
@@ -104,16 +105,16 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
     {
         found = true;
         
-        const RevBayesCore::Taxon& taxon = static_cast<const Taxon&>(args[0].getVariable()->getRevObject()).getValue();
+        const RevBayesCore::Taxon& taxon = valueForRevType<Taxon>(args[0].getVariable());
         RevBayesCore::Clade tmp;
         if ( args[1].getVariable()->getRevObject().isType( ModelVector<Taxon>::getClassTypeSpec() ) )
         {
-            const std::vector<RevBayesCore::Taxon> &taxa = static_cast<const ModelVector<Taxon>&>( args[1].getVariable()->getRevObject() ).getValue();
+            const std::vector<RevBayesCore::Taxon> &taxa = valueForRevType<ModelVector<Taxon>>(args[1].getVariable());
             tmp = RevBayesCore::Clade( taxa );
         }
         else if ( args[1].getVariable()->getRevObject().isType( Clade::getClassTypeSpec() ) )
         {
-            tmp = static_cast<const Clade&>( args[1].getVariable()->getRevObject() ).getValue();
+            tmp = valueForRevType<Clade>(args[1].getVariable());
         }
         tmp.resetTaxonBitset( this->dag_node->getValue().getTaxonBitSetMap() );
         RevBayesCore::TopologyNode& n = this->dag_node->getValue().getMrca( tmp );
@@ -183,12 +184,12 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
         
         if ( args[0].getVariable()->getRevObject().isType( ModelVector<Taxon>::getClassTypeSpec() ) )
         {
-            const std::vector<RevBayesCore::Taxon> &taxa = static_cast<const ModelVector<Taxon>&>( args[0].getVariable()->getRevObject() ).getValue();
+            const std::vector<RevBayesCore::Taxon> &taxa = valueForRevType<ModelVector<Taxon>>(args[0].getVariable());
             tmp = RevBayesCore::Clade( taxa );
         }
         else if ( args[0].getVariable()->getRevObject().isType( Clade::getClassTypeSpec() ) )
         {
-            tmp = static_cast<const Clade&>( args[0].getVariable()->getRevObject() ).getValue();
+            tmp = valueForRevType<Clade>(args[0].getVariable());
         }
         
         tmp.resetTaxonBitset( this->dag_node->getValue().getTaxonBitSetMap() );
@@ -198,7 +199,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
     else if ( name == "getDescendantTaxa" )
     {
         found = true;
-        std::int64_t index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+        std::int64_t index = valueForRevType<Natural>(args[0].getVariable()) - 1;
         RevBayesCore::Tree &tree = dag_node->getValue();
         std::vector<RevBayesCore::Taxon> t = tree.getNode(index).getClade().getTaxa();
         return new RevVariable( new ModelVector<Taxon>( t ) );
@@ -222,7 +223,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
     {
         found = true;
         
-        RevBayesCore::Clade tmp = static_cast<const Clade&>( args[0].getVariable()->getRevObject() ).getValue();
+        RevBayesCore::Clade tmp = valueForRevType<Clade>(args[0].getVariable());
         
         tmp.resetTaxonBitset( this->dag_node->getValue().getTaxonBitSetMap() );
         
@@ -231,8 +232,8 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
     else if ( name == "getPSSP" )
     {
         found = true;
-        const AbstractHomologousDiscreteCharacterData c = static_cast<const AbstractHomologousDiscreteCharacterData& >( args[0].getVariable()->getRevObject() ).getValue();
-        size_t state_index = static_cast<const Natural&>( args[1].getVariable()->getRevObject() ).getValue();
+        const AbstractHomologousDiscreteCharacterData c = valueForRevType<AbstractHomologousDiscreteCharacterData>(args[0].getVariable());
+        size_t state_index = valueForRevType<Natural>(args[1].getVariable());
 
         std::vector<double> bl = RevBayesCore::TreeUtilities::getPSSP( dag_node->getValue(), c.getValue(), state_index );
         ModelVector<RealPos> *n = new ModelVector<RealPos>( bl );
@@ -256,7 +257,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
     {
         found = true;
 
-        std::int64_t index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+        std::int64_t index = valueForRevType<Natural>(args[0].getVariable()) - 1;
 
         bool tf = this->dag_node->getValue().getNode((size_t)index).isInternal();
         return new RevVariable( new RlBoolean( tf ) );
@@ -279,7 +280,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
     {
         found = true;
 
-        std::int64_t index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+        std::int64_t index = valueForRevType<Natural>(args[0].getVariable()) - 1;
         const std::string& n = this->dag_node->getValue().getNode((size_t)index).getName();
         return new RevVariable( new RlString( n ) );
     }
@@ -287,7 +288,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
     {
         found = true;
 
-        double f = static_cast<const RealPos&>( args[0].getVariable()->getRevObject() ).getValue();
+        double f = valueForRevType<RealPos>(args[0].getVariable());
         RevBayesCore::Tree &tree = dag_node->getValue();
         RevBayesCore::TreeUtilities::offsetTree(tree.getRoot(), f);
         
@@ -305,7 +306,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
     else if (name == "renumberNodes")
     {
         found = true;
-        const RevBayesCore::Tree &reference = static_cast<const Tree&>( args[0].getVariable()->getRevObject() ).getValue();
+        const RevBayesCore::Tree &reference = valueForRevType<Tree>(args[0].getVariable());
         RevBayesCore::Tree &tree = dag_node->getValue();
         tree.renumberNodes(reference);
         return NULL;
@@ -314,17 +315,17 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
     {
         found = true;
         
-        bool make_bifurcating = static_cast<RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
+        bool make_bifurcating = valueForRevType<RlBoolean>(args[1].getVariable());
         RevBayesCore::Tree &tree = dag_node->getValue();
         
         if ( args[0].getVariable()->getRevObject().isType( RlString::getClassTypeSpec() ) )
         {
-            const std::string &outgr_leaf = static_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
+            const std::string &outgr_leaf = valueForRevType<RlString>(args[0].getVariable());
             tree.reroot(outgr_leaf, make_bifurcating, true);
         }
         else if ( args[0].getVariable()->getRevObject().isType( Clade::getClassTypeSpec() ) )
         {
-            const RevBayesCore::Clade &outgr_clade = static_cast<const Clade&>( args[0].getVariable()->getRevObject() ).getValue();
+            const RevBayesCore::Clade &outgr_clade = valueForRevType<Clade>(args[0].getVariable());
             tree.reroot(outgr_clade, make_bifurcating, true);
         }
         
@@ -334,7 +335,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
     {
         found = true;
 
-        double f = static_cast<const RealPos&>( args[0].getVariable()->getRevObject() ).getValue();
+        double f = valueForRevType<RealPos>(args[0].getVariable());
         RevBayesCore::Tree &tree = dag_node->getValue();
         RevBayesCore::TreeUtilities::rescaleTree(tree.getRoot(), f);
 
@@ -344,7 +345,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
     {
         found = true;
         
-        bool resolve_root = static_cast<RlBoolean &>( args[0].getVariable()->getRevObject() ).getValue();
+        bool resolve_root = valueForRevType<RlBoolean>(args[0].getVariable());
         RevBayesCore::Tree &tree = dag_node->getValue();
         tree.resolveMultifurcations( resolve_root );
         
@@ -357,7 +358,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
         const RevObject& current = args[0].getVariable()->getRevObject();
         if ( current.isType( Natural::getClassTypeSpec() ) )
         {
-            size_t index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+            size_t index = valueForRevType<Natural>(args[0].getVariable()) - 1;
             const RevObject& new_value = args[1].getVariable()->getRevObject();
             if ( new_value.isType( RealPos::getClassTypeSpec() ) )
             {
@@ -376,7 +377,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
     {
         found = true;
 
-        double tf = static_cast<const RlBoolean&>( args[0].getVariable()->getRevObject() ).getValue();
+        double tf = valueForRevType<RlBoolean>(args[0].getVariable());
         RevBayesCore::Tree &tree = dag_node->getValue();
         tree.setNegativeConstraint(tf);
         // RevBayesCore::TreeUtilities::rescaleTree(&tree, &tree.getRoot(), f);
@@ -404,7 +405,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
     else if (name == "suppressOutdegreeOneNodes")
     {
         found = true;
-        bool replace = static_cast<RlBoolean &>( args[0].getVariable()->getRevObject() ).getValue();
+        bool replace = valueForRevType<RlBoolean>(args[0].getVariable());
         
         RevBayesCore::Tree &tree = dag_node->getValue();
         tree.suppressOutdegreeOneNodes( replace );
@@ -418,11 +419,11 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Tree::executeMethod(std::string co
         std::string tip_name = "";
         if ( args[0].getVariable()->getRevObject().getType() == RlString::getClassType() )
         {
-            tip_name = static_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
+            tip_name = valueForRevType<RlString>(args[0].getVariable());
         }
         else if ( args[0].getVariable()->getRevObject().getType() == Taxon::getClassType() )
         {
-            tip_name = static_cast<const Taxon&>( args[0].getVariable()->getRevObject() ).getValue().getSpeciesName();
+            tip_name = valueForRevType<Taxon>(args[0].getVariable()).getSpeciesName();
         }
         std::int64_t index = this->dag_node->getValue().getTipNodeWithName( tip_name ).getIndex() + 1;
         return new RevVariable( new Natural( index ) );

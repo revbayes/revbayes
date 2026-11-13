@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -49,8 +50,8 @@ Func_SegregatingSites* Func_SegregatingSites::clone( void ) const
 RevBayesCore::TypedFunction< std::int64_t >* Func_SegregatingSites::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<RevBayesCore::AbstractHomologousDiscreteCharacterData >* d = static_cast<const AbstractHomologousDiscreteCharacterData &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::Boolean >* ex = static_cast<const RlBoolean &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::AbstractHomologousDiscreteCharacterData >* d = dagNodeForRevType<AbstractHomologousDiscreteCharacterData>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode<RevBayesCore::Boolean >* ex = dagNodeForRevType<RlBoolean>(this->args[1].getVariable());
 
     RevBayesCore::SegregatingSitesFunction* f = new RevBayesCore::SegregatingSitesFunction( d, ex->getValue() );
     

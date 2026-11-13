@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "Func_dppConcFromMean.h"
 
 #include <vector>
@@ -37,8 +38,8 @@ Func_dppConcFromMean* Func_dppConcFromMean::clone( void ) const
 RevPtr<RevVariable> Func_dppConcFromMean::execute()
 {
 
-    double nc = static_cast<const RealPos &>( args[0].getVariable()->getRevObject() ).getValue();
-    double ne = static_cast<const Natural &>( args[1].getVariable()->getRevObject() ).getValue();
+    double nc = valueForRevType<RealPos>(args[0].getVariable());
+    double ne = valueForRevType<Natural>(args[1].getVariable());
 	
 	double meanCP = RevBayesCore::RbStatistics::Helper::dppConcParamFromNumTables(nc, ne);
 	RealPos* value = new RealPos( meanCP );

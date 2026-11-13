@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -42,8 +43,8 @@ Dist_gamma* Dist_gamma::clone( void ) const
 RevBayesCore::GammaDistribution* Dist_gamma::createDistribution( void ) const
 {
     // get the parameters
-    RevBayesCore::TypedDagNode<double>* sh  = static_cast<const RealPos &>( shape->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* r   = static_cast<const RealPos &>( rate->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* sh  = dagNodeForRevType<RealPos>(shape);
+    RevBayesCore::TypedDagNode<double>* r   = dagNodeForRevType<RealPos>(rate);
     RevBayesCore::GammaDistribution* d      = new RevBayesCore::GammaDistribution(sh, r);
     
     return d;

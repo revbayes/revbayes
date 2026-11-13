@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "Func_TamuraNei.h"
 
 #include "TamuraNeiRateMatrixFunction.h"
@@ -41,9 +42,9 @@ Func_TamuraNei* Func_TamuraNei::clone( void ) const
 RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_TamuraNei::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode< double >* k1 = static_cast<const RealPos &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< double >* k2 = static_cast<const RealPos &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* bf = static_cast<const Simplex &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< double >* k1 = dagNodeForRevType<RealPos>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode< double >* k2 = dagNodeForRevType<RealPos>(this->args[1].getVariable());
+    RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* bf = dagNodeForRevType<Simplex>(this->args[2].getVariable());
     
     RevBayesCore::TamuraNeiRateMatrixFunction* f = new RevBayesCore::TamuraNeiRateMatrixFunction( k1, k2, bf );
     

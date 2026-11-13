@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <cmath>
 #include <sstream>
@@ -85,19 +86,19 @@ Taxon* Taxon::clone(void) const
 void Taxon::constructInternalObject( void ) 
 {
     // Validate the age range before replacing the existing taxon.
-    std::string taxonName = static_cast<const RlString &>( (taxon)->getRevObject() ).getValue() ;
-    std::string taxonSpecies = static_cast<const RlString &>( (species)->getRevObject() ).getValue() ;
+    std::string taxonName = valueForRevType<RlString>((taxon)) ;
+    std::string taxonSpecies = valueForRevType<RlString>((species)) ;
     taxonSpecies = ( taxonSpecies == "taxonName" ) ? taxonName : taxonSpecies;
     // A nonnumeric default distinguishes omitted ages from an explicitly supplied zero.
     const bool has_min = minage->getRevObject().isType(RealPos::getClassTypeSpec());
     const bool has_max = maxage->getRevObject().isType(RealPos::getClassTypeSpec());
     // Supplying only a maximum explicitly establishes an interval with lower endpoint zero.
-    double minAge = has_min ? static_cast<const RealPos&>(minage->getRevObject()).getValue() : 0.0;
+    double minAge = has_min ? valueForRevType<RealPos>(minage) : 0.0;
     double maxAge = minAge;
 
     if( maxage->getRevObject().isType( RealPos::getClassTypeSpec() ) )
     {
-        maxAge = static_cast<const RealPos &>( maxage->getRevObject() ).getValue();
+        maxAge = valueForRevType<RealPos>(maxage);
     }
 
     if (std::isnan(minAge) or std::isnan(maxAge))
@@ -161,7 +162,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Taxon::executeMethod(std::string c
     if (name == "setMinAge")
     {
         found = true;
-        double a = static_cast<const RealPos&>( args[0].getVariable()->getRevObject() ).getValue();
+        double a = valueForRevType<RealPos>( args[0].getVariable() );
 
         if (std::isnan(a))
             throw RbException() << "Minimum age for taxon '" << dag_node->getValue().getName()
@@ -181,7 +182,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Taxon::executeMethod(std::string c
     if (name == "setMaxAge")
     {
         found = true;
-        double a = static_cast<const RealPos&>( args[0].getVariable()->getRevObject() ).getValue();
+        double a = valueForRevType<RealPos>(args[0].getVariable());
 
         if (std::isnan(a))
             throw RbException() << "Maximum age for taxon '" << dag_node->getValue().getName()
@@ -202,8 +203,8 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> Taxon::executeMethod(std::string c
     if (name == "setAgeRange")
     {
         found = true;
-        double minAge = static_cast<const RealPos&>(args[0].getVariable()->getRevObject()).getValue();
-        double maxAge = static_cast<const RealPos&>(args[1].getVariable()->getRevObject()).getValue();
+        double minAge = valueForRevType<RealPos>(args[0].getVariable());
+        double maxAge = valueForRevType<RealPos>(args[1].getVariable());
 
         if (std::isnan(minAge) or std::isnan(maxAge))
             throw RbException() << "Age bounds for taxon '" << dag_node->getValue().getName()

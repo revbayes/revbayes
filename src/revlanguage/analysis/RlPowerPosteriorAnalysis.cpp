@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -98,9 +99,9 @@ void PowerPosteriorAnalysis::constructInternalObject( void )
     delete value;
 
     // now allocate a new sliding move
-    const RevBayesCore::Model&                      mdl     = static_cast<const Model &>( model->getRevObject() ).getValue();
-    const WorkspaceVector<Move>&                    rlmvs   = static_cast<const WorkspaceVector<Move> &>( moves->getRevObject() );
-    const WorkspaceVector<Monitor>&                 rlmntr  = static_cast<const WorkspaceVector<Monitor> &>( monitors->getRevObject() );
+    const RevBayesCore::Model&                      mdl     = valueForRevType<Model>(model);
+    const WorkspaceVector<Move>&                    rlmvs   = objectForRevType<WorkspaceVector<Move>>(moves);
+    const WorkspaceVector<Monitor>&                 rlmntr  = objectForRevType<WorkspaceVector<Monitor>>(monitors);
     RevBayesCore::RbVector<RevBayesCore::Monitor>   mntr;
     for ( size_t i = 0; i < rlmntr.size(); ++i )
     {
@@ -111,10 +112,10 @@ void PowerPosteriorAnalysis::constructInternalObject( void )
     {
         mvs.push_back( rlmvs[i].getValue() );
     }
-    const std::string&                              fn      = static_cast<const RlString &>( filename->getRevObject() ).getValue();
-    const double                                    alpha   = static_cast<const RealPos &>( alphaVal->getRevObject() ).getValue();
-    const int                                       sf      = (int)static_cast<const Natural &>( sampFreq->getRevObject() ).getValue();
-    const int                                       k       = (int)static_cast<const Natural &>( proc_per_lik->getRevObject() ).getValue();
+    const std::string&                              fn      = valueForRevType<RlString>(filename);
+    const double                                    alpha   = valueForRevType<RealPos>(alphaVal);
+    const int                                       sf      = (int)valueForRevType<Natural>(sampFreq);
+    const int                                       k       = (int)valueForRevType<Natural>(proc_per_lik);
 
     RevBayesCore::Mcmc *m = new RevBayesCore::Mcmc(mdl, mvs, mntr);
     m->setScheduleType( "random" );
@@ -124,11 +125,11 @@ void PowerPosteriorAnalysis::constructInternalObject( void )
     std::vector<double> beta;
     if ( powers->getRevObject() != RevNullObject::getInstance() )
     {
-        beta = static_cast<const ModelVector<RealPos> &>( powers->getRevObject() ).getValue();
+        beta = valueForRevType<ModelVector<RealPos>>(powers);
     }
     else
     {
-        int k = (int)static_cast<const Natural &>( cats->getRevObject() ).getValue();
+        int k = (int)valueForRevType<Natural>(cats);
         for (int i = k - 1; i >= 0; --i) // subtract 1 to account for the difference between 1-based and 0-based indexing
         {
             double b = RevBayesCore::RbStatistics::Beta::quantile(alpha, 1.0, i / double(k - 1));
@@ -150,16 +151,16 @@ RevPtr<RevVariable> PowerPosteriorAnalysis::executeMethod(std::string const &nam
         found = true;
 
         // get the member with a given index
-        std::int64_t gen = static_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue();
-        double burn_frac = static_cast<const Probability &>( args[1].getVariable()->getRevObject() ).getValue();
+        std::int64_t gen = valueForRevType<Natural>(args[0].getVariable());
+        double burn_frac = valueForRevType<Probability>(args[1].getVariable());
         size_t preburn_gen = gen;
         if ( args[2].getVariable()->getRevObject() != RevNullObject::getInstance() )
         {
-            preburn_gen = static_cast<const Natural &>( args[2].getVariable()->getRevObject() ).getValue();
+            preburn_gen = valueForRevType<Natural>(args[2].getVariable());
         }
-        size_t tune_int = static_cast<const Natural &>( args[3].getVariable()->getRevObject() ).getValue();
-        const std::string ckp_file = static_cast<const RlString &>( args[4].getVariable()->getRevObject() ).getValue();
-        size_t ckp_int = static_cast<const Natural &>( args[5].getVariable()->getRevObject() ).getValue();
+        size_t tune_int = valueForRevType<Natural>(args[3].getVariable());
+        const std::string ckp_file = valueForRevType<RlString>(args[4].getVariable());
+        size_t ckp_int = valueForRevType<Natural>(args[5].getVariable());
         
         value->runAll( size_t(gen), burn_frac, preburn_gen, tune_int, ckp_file, ckp_int );
 
@@ -170,21 +171,21 @@ RevPtr<RevVariable> PowerPosteriorAnalysis::executeMethod(std::string const &nam
         found = true;
         
         // subtract 1 to account for the difference between (user-facing / Rev) 1-based indexing and (internal / C++) 0-based indexing
-        size_t ind = static_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+        size_t ind = valueForRevType<Natural>(args[0].getVariable()) - 1;
         if (ind < 0 or ind > value->getPowers().size() - 1)
         {
             throw RbException() << "Index cannot be smaller than 1 or larger than " << value->getPowers().size() << ".";
         }
-        std::int64_t gen = static_cast<const Natural &>( args[1].getVariable()->getRevObject() ).getValue();
-        double burn_frac = static_cast<const Probability &>( args[2].getVariable()->getRevObject() ).getValue();
+        std::int64_t gen = valueForRevType<Natural>(args[1].getVariable());
+        double burn_frac = valueForRevType<Probability>(args[2].getVariable());
         size_t preburn_gen = gen;
         if ( args[3].getVariable()->getRevObject() != RevNullObject::getInstance() )
         {
-            preburn_gen = static_cast<const Natural &>( args[3].getVariable()->getRevObject() ).getValue();
+            preburn_gen = valueForRevType<Natural>(args[3].getVariable());
         }
-        size_t tune_int = static_cast<const Natural &>( args[4].getVariable()->getRevObject() ).getValue();
-        const std::string ckp_file = static_cast<const RlString &>( args[5].getVariable()->getRevObject() ).getValue();
-        size_t ckp_int = static_cast<const Natural &>( args[6].getVariable()->getRevObject() ).getValue();
+        size_t tune_int = valueForRevType<Natural>(args[4].getVariable());
+        const std::string ckp_file = valueForRevType<RlString>(args[5].getVariable());
+        size_t ckp_int = valueForRevType<Natural>(args[6].getVariable());
         
         value->runStone( ind, size_t(gen), burn_frac, preburn_gen, tune_int, true, ckp_file, ckp_int );
         value->setResumeFromCheckpoint( false );
@@ -209,11 +210,11 @@ RevPtr<RevVariable> PowerPosteriorAnalysis::executeMethod(std::string const &nam
         size_t gen = 0;
         if ( gen_specified )
         {
-            gen = (size_t)static_cast<const Natural &>( args[0].getVariable()->getRevObject() ).getValue();
+            gen = (size_t)valueForRevType<Natural>(args[0].getVariable());
         }
-        int tuningInterval = (size_t)static_cast<const Natural &>( args[1].getVariable()->getRevObject() ).getValue();
-        const std::string ckp_file = static_cast<const RlString &>( args[2].getVariable()->getRevObject() ).getValue();
-        size_t ckp_int = static_cast<const Natural &>( args[3].getVariable()->getRevObject() ).getValue();
+        int tuningInterval = (size_t)valueForRevType<Natural>(args[1].getVariable());
+        const std::string ckp_file = valueForRevType<RlString>(args[2].getVariable());
+        size_t ckp_int = valueForRevType<Natural>(args[3].getVariable());
         
         value->burnin( gen, gen_specified, tuningInterval, ckp_file, ckp_int );
 
@@ -223,7 +224,7 @@ RevPtr<RevVariable> PowerPosteriorAnalysis::executeMethod(std::string const &nam
     {
         found = true;
         
-        const std::string &checkpoint_filename = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
+        const std::string &checkpoint_filename = valueForRevType<RlString>(args[0].getVariable());
         
         if ( args[1].getVariable()->getRevObject() == RevNullObject::getInstance() )
         {
@@ -232,7 +233,7 @@ RevPtr<RevVariable> PowerPosteriorAnalysis::executeMethod(std::string const &nam
         else if ( args[1].getVariable()->getRevObject().isType( ModelVector< ModelVector<Natural> >::getClassTypeSpec() ) )
         {
             RevBayesCore::RbVector<RevBayesCore::RbVector<std::int64_t>> nmv;
-            nmv = static_cast<const ModelVector< ModelVector<Natural> > &>( args[1].getVariable()->getRevObject() ).getValue();
+            nmv = valueForRevType<ModelVector< ModelVector<Natural> >>(args[1].getVariable());
 
             std::vector<std::vector<size_t>> stone_sequences;
             for (size_t i = 0; i < nmv.size(); ++i)
@@ -258,11 +259,11 @@ RevPtr<RevVariable> PowerPosteriorAnalysis::executeMethod(std::string const &nam
             std::vector<std::int64_t> mv;
             if ( args[1].getVariable()->getRevObject().isType( ModelVector<Natural>::getClassTypeSpec() ) )
             {
-                mv = static_cast<const ModelVector<Natural> &>( args[1].getVariable()->getRevObject() ).getValue();
+                mv = valueForRevType<ModelVector<Natural>>(args[1].getVariable());
             }
             else
             {
-                std::int64_t index = static_cast<const Natural &>( args[1].getVariable()->getRevObject() ).getValue();
+                std::int64_t index = valueForRevType<Natural>(args[1].getVariable());
                 mv.push_back( index );
             }
             

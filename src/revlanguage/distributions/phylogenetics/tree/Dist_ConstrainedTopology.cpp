@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cmath>
 #include <cstddef>
 #include <iosfwd>
@@ -82,22 +83,22 @@ RevBayesCore::TopologyConstrainedTreeDistribution* Dist_ConstrainedTopology::cre
 
     // get the parameters
 
-    const RevBayesCore::RbVector<RevBayesCore::Clade>& c      = static_cast<const ModelVector<Clade> &>( constraints->getRevObject() ).getValue();
-    const Distribution& rlDistribution                        = static_cast<const Distribution &>( base_distribution->getRevObject() );
+    const RevBayesCore::RbVector<RevBayesCore::Clade>& c      = valueForRevType<ModelVector<Clade>>(constraints);
+    const Distribution& rlDistribution                        = objectForRevType<Distribution>(base_distribution);
     RevBayesCore::TypedDistribution<RevBayesCore::Tree>* base = static_cast<RevBayesCore::TypedDistribution<RevBayesCore::Tree>* >( rlDistribution.createDistribution() );
     
     // tree for initialization
     RevBayesCore::Tree* init = NULL;
     if ( initial_tree->getRevObject() != RevNullObject::getInstance() )
     {
-        init = static_cast<const TimeTree &>( initial_tree->getRevObject() ).getDagNode()->getValue().clone();
+        init = dagNodeForRevType<TimeTree>(initial_tree)->getValue().clone();
     }
     
     // number of decimal places to use when checking the initial tree against taxon ages
     std::int64_t pr = 0; // unset
     if ( age_check_precision != NULL )
     {
-        pr = static_cast<const Natural &>( age_check_precision->getRevObject() ).getValue();
+        pr = valueForRevType<Natural>(age_check_precision);
     }
     
     // create the internal distribution object
@@ -110,14 +111,14 @@ RevBayesCore::TopologyConstrainedTreeDistribution* Dist_ConstrainedTopology::cre
     else if ( backbone->getRevObject().isType( ModelVector<TimeTree>::getClassTypeSpec() ) )
     {
         RevBayesCore::TypedDagNode<RevBayesCore::RbVector<RevBayesCore::Tree> >* bb = NULL;
-        bb = static_cast<const ModelVector<TimeTree> &>( backbone->getRevObject() ).getDagNode();
+        bb = dagNodeForRevType<ModelVector<TimeTree>>(backbone);
         
         dist->setBackbone( NULL, bb );
     }
     else if ( backbone->getRevObject().isType( TimeTree::getClassTypeSpec() ) )
     {
         RevBayesCore::TypedDagNode<RevBayesCore::Tree>* bb = NULL;
-        bb = static_cast<const TimeTree&>( backbone->getRevObject() ).getDagNode();
+        bb = dagNodeForRevType<TimeTree>(backbone);
 
         dist->setBackbone( bb, NULL );
     }

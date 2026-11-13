@@ -1,4 +1,5 @@
 
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <vector>
 #include <algorithm>
@@ -109,9 +110,9 @@ RevPtr<RevVariable> Model::executeMethod(std::string const &name, const std::vec
     {
         found = true;
         
-        const std::string&   fn      = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
-        bool vb = static_cast< const RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
-        const std::string&   bg      = static_cast<const RlString &>( args[2].getVariable()->getRevObject() ).getValue();
+        const std::string&   fn      = valueForRevType<RlString>(args[0].getVariable());
+        bool vb = valueForRevType<RlBoolean>(args[1].getVariable());
+        const std::string&   bg      = valueForRevType<RlString>(args[2].getVariable());
         printModelDotGraph(fn, vb, bg);
         
         return nullptr;

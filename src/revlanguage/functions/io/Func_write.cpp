@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <string>
 #include <iostream>
@@ -54,9 +55,9 @@ RevPtr<RevVariable> Func_write::execute( void )
 {
     
     // get the information from the arguments for reading the file
-    RevBayesCore::path fn = static_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
-    bool  append = static_cast<const RlBoolean&>( args[2].getVariable()->getRevObject() ).getValue();
-    const std::string& separator = static_cast<const RlString&>( args[3].getVariable()->getRevObject() ).getValue();
+    RevBayesCore::path fn = valueForRevType<RlString>(args[1].getVariable());
+    bool  append = valueForRevType<RlBoolean>(args[2].getVariable());
+    const std::string& separator = valueForRevType<RlString>(args[3].getVariable());
     
     if ( process_ID == 0 )
     {

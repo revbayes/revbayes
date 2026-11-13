@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <math.h>
 #include <cstddef>
 #include <ostream>
@@ -55,7 +56,7 @@ Dist_Q* Dist_Q::clone(void) const {
 RevBayesCore::QDistribution* Dist_Q::createDistribution(void) const {
     
     // get the parameters
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* a = static_cast<const ModelVector<RealPos> &>(alpha->getRevObject()).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* a = dagNodeForRevType<ModelVector<RealPos>>(alpha);
         
     /* The prior odds on the two models, given as log(rho_R / rho_N). The two
        log weights are recovered from it in a form that stays accurate at any
@@ -64,7 +65,7 @@ RevBayesCore::QDistribution* Dist_Q::createDistribution(void) const {
        weight were recovered from the other by log1p(-exp(.)), which fails once
        the prior bias passes about 36 log units. That matters because the tuning of
        the model prior during burn-in can drive the odds far from even. */
-    double delta = static_cast<const Real &>( lnPriorOdds->getRevObject() ).getDagNode()->getValue();
+    double delta = valueForRevType<Real>(lnPriorOdds);
 
     double logRhoReversible, logRhoNonReversible;
     if (delta > 0.0)
@@ -82,7 +83,7 @@ RevBayesCore::QDistribution* Dist_Q::createDistribution(void) const {
        is the only way to compare their likelihoods with none of the reversible-jump
        machinery involved. It also switches the jump moves off, because
        MPQRateMatrixProposal asks the distribution rather than keeping its own flag. */
-    const std::string& fm = static_cast<const RlString &>(fixedModel->getRevObject()).getValue();
+    const std::string& fm = valueForRevType<RlString>(fixedModel);
     RevBayesCore::QDistribution::FIXED_MODEL fixed = RevBayesCore::QDistribution::FREE;
     if ( fm == "reversible" )
         fixed = RevBayesCore::QDistribution::REVERSIBLE_ONLY;

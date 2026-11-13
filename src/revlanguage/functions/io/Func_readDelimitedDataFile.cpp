@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "Func_readDelimitedDataFile.h"
 
 #include <cstdlib>
@@ -89,10 +90,10 @@ RevPtr<RevVariable> Func_readDelimitedDataFile::execute( void )
 {
     
     // get the information from the arguments for reading the file
-    const std::string& fn  = static_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
-    bool header            = static_cast<const RlBoolean&>( args[1].getVariable()->getRevObject() ).getValue();
-    const std::string& del = static_cast<const RlString&>( args[2].getVariable()->getRevObject() ).getValue();
-    bool rownames          = static_cast<const RlBoolean&>( args[3].getVariable()->getRevObject() ).getValue();
+    const std::string& fn  = valueForRevType<RlString>(args[0].getVariable());
+    bool header            = valueForRevType<RlBoolean>(args[1].getVariable());
+    const std::string& del = valueForRevType<RlString>(args[2].getVariable());
+    bool rownames          = valueForRevType<RlBoolean>(args[3].getVariable());
     
     // get data from file
     RevBayesCore::DelimitedDataReader* tsv_data = new RevBayesCore::DelimitedDataReader(fn, del, header);

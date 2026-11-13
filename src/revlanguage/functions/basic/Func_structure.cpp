@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -48,7 +49,7 @@ RevPtr<RevVariable> Func_structure::execute( void )
     
     std::ostringstream o;
     
-    bool verbose = static_cast< const RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
+    bool verbose = valueForRevType<RlBoolean>(args[1].getVariable());
 
     // get a reference to the variable from which we want to know the struct
     RevPtr<RevVariable> &the_var = args[0].getVariable();

@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -49,8 +50,8 @@ Func_TVM* Func_TVM::clone( void ) const
 RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_TVM::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<RevBayesCore::Simplex>* er = static_cast<const Simplex &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::Simplex>* bf = static_cast<const Simplex &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Simplex>* er = dagNodeForRevType<Simplex>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode<RevBayesCore::Simplex>* bf = dagNodeForRevType<Simplex>(this->args[1].getVariable());
     
     if ( bf->getValue().size() != 4 )
     {
