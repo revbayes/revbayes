@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include <cstddef>
 #include <iostream>
@@ -82,7 +83,7 @@ void Move_LayeredScaleProposal::constructInternalObject( void )
      double r = valueForRevType<Probability>(tuneTarget);
 
      RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = dagNodeForRevType<TimeTree>(tree);
-     RevBayesCore::StochasticNode<RevBayesCore::Tree> *st = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
+     RevBayesCore::StochasticNode<RevBayesCore::Tree> *st = assume_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
 
      bool t = valueForRevType<RlBoolean>(tune);
 

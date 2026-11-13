@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include <cmath>
 #include <cstddef>
@@ -83,14 +84,14 @@ RevBayesCore::ConditionedBirthDeathShiftProcessContinuous* Dist_conditionedBirth
     if ( speciation->getRevObject() != RevNullObject::getInstance() )
     {
         const Distribution& rl_distribution_speciation  = objectForRevType<Distribution>(speciation);
-        distribution_speciation = static_cast<RevBayesCore::TypedDistribution<double>* >( rl_distribution_speciation.createDistribution() );
+        distribution_speciation = assume_cast<RevBayesCore::TypedDistribution<double>* >( rl_distribution_speciation.createDistribution() );
     }
     
     RevBayesCore::TypedDistribution<double>* distribution_extinction = NULL;
     if ( extinction->getRevObject() != RevNullObject::getInstance() )
     {
         const Distribution& rl_distribution_extinction  = objectForRevType<Distribution>(extinction);
-        distribution_extinction = static_cast<RevBayesCore::TypedDistribution<double>* >( rl_distribution_extinction.createDistribution() );
+        distribution_extinction = assume_cast<RevBayesCore::TypedDistribution<double>* >( rl_distribution_extinction.createDistribution() );
     }
 
     RevBayesCore::TypedDagNode<double>* er   = dagNodeForRevType<RealPos>(event_rate);

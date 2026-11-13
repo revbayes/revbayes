@@ -1,6 +1,7 @@
 #ifndef ModelVector_H
 #define ModelVector_H
 
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include "RlContainer.h"
 #include "ModelObject.h"
@@ -233,7 +234,7 @@ RevObject* ModelVector<rlType>::convertTo(const TypeSpec &type) const
             for ( std::vector<const RevBayesCore::DagNode*>::iterator i = args.begin(); i != args.end(); ++i )
             {
                 RevBayesCore::DagNode* node = const_cast<RevBayesCore::DagNode*>(*i);
-                RevBayesCore::TypedDagNode<elementType>* tnode = static_cast<RevBayesCore::TypedDagNode<elementType>* >( node );
+                RevBayesCore::TypedDagNode<elementType>* tnode = assume_cast<RevBayesCore::TypedDagNode<elementType>* >( node );
                 rlType orgElement = rlType( tnode );
                 theConvertedContainer->push_back( orgElement );
                 
@@ -555,7 +556,7 @@ double ModelVector<rlType>::isConvertibleTo( const TypeSpec& type, bool convert_
 
             if( type.getType() == "Simplex" )
             {
-                Probability* ro = static_cast<Probability*>( org_element.convertTo( Probability::getClassTypeSpec() ) );
+                Probability* ro = assume_cast<Probability*>( org_element.convertTo( Probability::getClassTypeSpec() ) );
                 sum += ro->getValue();
                 delete ro;
             }

@@ -5,6 +5,7 @@
  * Created on May 4, 2016
  */
 
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include "Move_CorrelationMatrixUpdate.h"
 
@@ -62,7 +63,7 @@ void Move_CorrelationMatrixUpdate::constructInternalObject( void ) {
     double l = valueForRevType<RealPos>(lambda);
     double w = valueForRevType<RealPos>(weight);
     RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* tmp = dagNodeForRevType<MatrixReal>(r);
-    RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::MatrixReal> *>( tmp );
+    RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *n = assume_cast<RevBayesCore::StochasticNode<RevBayesCore::MatrixReal> *>( tmp );
     RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* sigma = dagNodeForRevType<ModelVector<RealPos>>(s);
     bool t = valueForRevType<RlBoolean>(tune);
     double tt = valueForRevType<Probability>(tuneTarget);

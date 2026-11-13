@@ -5,6 +5,7 @@
  * Created on 13 juillet 2014, 18:13
  */
 
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include "Move_GraphFlipEdge.h"
 
@@ -79,7 +80,7 @@ void Move_GraphFlipEdge::constructInternalObject( void )
     RevBayesCore::Proposal *p = NULL;
     
     RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* tmp = dagNodeForRevType<MatrixRealSymmetric>(v);
-    RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::MatrixReal> *>( tmp );
+    RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *n = assume_cast<RevBayesCore::StochasticNode<RevBayesCore::MatrixReal> *>( tmp );
     bool symm = v->getRevObject().isType( MatrixRealSymmetric::getClassTypeSpec() );
     
     p = new RevBayesCore::GraphFlipEdgeProposal(n, e, l, symm );

@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include <cstdlib>
 #include <sstream>
 #include <cstddef>
@@ -460,7 +461,7 @@ RevBayesCore::RbHelpFunction* Function::constructTypeSpecificHelp( void ) const
 void Function::addSpecificHelpFields(RevBayesCore::RbHelpEntry *e) const
 {
     // create the help function entry that we will fill with some values
-    RevBayesCore::RbHelpFunction *help = static_cast<RevBayesCore::RbHelpFunction*>( e );
+    RevBayesCore::RbHelpFunction *help = assume_cast<RevBayesCore::RbHelpFunction*>( e );
     RevBayesCore::RbHelpFunction &help_entry = *help;
     
     // usage

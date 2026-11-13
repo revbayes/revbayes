@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include <sstream>
 #include <string>
 
@@ -54,12 +55,12 @@ RevObject* IntegerPos::add( const RevObject& rhs ) const
     
     if ( rhs.getTypeSpec().isDerivedOf( IntegerPos::getClassTypeSpec() ) )
     {
-        return add( static_cast<const IntegerPos&>( rhs ) );
+        return add( assume_cast<const IntegerPos&>( rhs ) );
     }
     
     if ( rhs.getTypeSpec().isDerivedOf( RealPos::getClassTypeSpec() ) )
     {
-        return add( static_cast<const RealPos&>( rhs ) );
+        return add( assume_cast<const RealPos&>( rhs ) );
     }
     
     return Integer::add( rhs );
@@ -154,12 +155,12 @@ RevObject* IntegerPos::divide( const RevObject& rhs ) const
     
     if ( rhs.getTypeSpec().isDerivedOf( IntegerPos::getClassTypeSpec() ) )
     {
-        return divide( static_cast<const IntegerPos&>( rhs ) );
+        return divide( assume_cast<const IntegerPos&>( rhs ) );
     }
     
     if ( rhs.getTypeSpec().isDerivedOf( RealPos::getClassTypeSpec() ) )
     {
-        return divide( static_cast<const RealPos&>( rhs ) );
+        return divide( assume_cast<const RealPos&>( rhs ) );
     }
     
     return IntegerPos::divide( rhs );
@@ -279,10 +280,10 @@ RevObject* IntegerPos::multiply( const RevObject& rhs ) const
 {
     
     if ( rhs.getTypeSpec().isDerivedOf( IntegerPos::getClassTypeSpec() ) )
-        return multiply( static_cast<const IntegerPos&>( rhs ) );
+        return multiply( assume_cast<const IntegerPos&>( rhs ) );
     
     if ( rhs.getTypeSpec().isDerivedOf( RealPos::getClassTypeSpec() ) )
-        return multiply( static_cast<const RealPos&>( rhs ) );
+        return multiply( assume_cast<const RealPos&>( rhs ) );
     
     return Integer::multiply( rhs );
 }

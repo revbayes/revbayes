@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "revPoMoNeutralM4NRateMatrixFunction.h"
 #include "RateMatrix_revPoMoNeutralM4N.h"
@@ -56,11 +57,11 @@ void revPoMoNeutralM4NRateMatrixFunction::update( void )
     const std::vector<double>& ex = rho->getValue();
 
     // set parameters
-    static_cast< RateMatrix_revPoMoNeutralM4N* >(value)->setN( n );
-    static_cast< RateMatrix_revPoMoNeutralM4N* >(value)->setM( m );
-    static_cast< RateMatrix_revPoMoNeutralM4N* >(value)->setPi( bf );
-    static_cast< RateMatrix_revPoMoNeutralM4N* >(value)->setRho( ex );
-    static_cast< RateMatrix_revPoMoNeutralM4N* >(value)->update();
+    assume_cast< RateMatrix_revPoMoNeutralM4N* >(value)->setN( n );
+    assume_cast< RateMatrix_revPoMoNeutralM4N* >(value)->setM( m );
+    assume_cast< RateMatrix_revPoMoNeutralM4N* >(value)->setPi( bf );
+    assume_cast< RateMatrix_revPoMoNeutralM4N* >(value)->setRho( ex );
+    assume_cast< RateMatrix_revPoMoNeutralM4N* >(value)->update();
 }
 
 

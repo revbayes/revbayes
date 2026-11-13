@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include <sstream>
 #include <string>
 
@@ -71,12 +72,12 @@ RevObject* RealPos::add( const RevObject& rhs ) const
     
     if ( rhs.getTypeSpec().isDerivedOf( RealPos::getClassTypeSpec() ) )
     {
-        return add( static_cast<const RealPos&>( rhs ) );
+        return add( assume_cast<const RealPos&>( rhs ) );
     }
     
     if ( rhs.getTypeSpec().isDerivedOf( Natural::getClassTypeSpec() ) )
     {
-        return add( static_cast<const Natural&>( rhs ) );
+        return add( assume_cast<const Natural&>( rhs ) );
     }
     
     return Real::add( rhs );
@@ -152,12 +153,12 @@ RevObject* RealPos::divide( const RevObject& rhs ) const
     
     if ( rhs.getTypeSpec().isDerivedOf( RealPos::getClassTypeSpec() ) )
     {
-        return divide( static_cast<const RealPos&>( rhs ) );
+        return divide( assume_cast<const RealPos&>( rhs ) );
     }
     
     if ( rhs.getTypeSpec().isDerivedOf( Natural::getClassTypeSpec() ) )
     {
-        return divide( static_cast<const Natural&>( rhs ) );
+        return divide( assume_cast<const Natural&>( rhs ) );
     }
     
     return Real::divide( rhs );
@@ -257,12 +258,12 @@ RevObject* RealPos::multiply( const RevObject& rhs ) const
     
     if ( rhs.getTypeSpec().isDerivedOf( RealPos::getClassTypeSpec() ) )
     {
-        return multiply( static_cast<const RealPos&>( rhs ) );
+        return multiply( assume_cast<const RealPos&>( rhs ) );
     }
     
     if ( rhs.getTypeSpec().isDerivedOf( Natural::getClassTypeSpec() ) )
     {
-        return multiply( static_cast<const Natural&>( rhs ) );
+        return multiply( assume_cast<const Natural&>( rhs ) );
     }
     
     return Real::multiply( rhs );

@@ -1,6 +1,7 @@
 #ifndef TipRejectionSampleProposal_H
 #define TipRejectionSampleProposal_H
 
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include "BranchHistoryDiscrete.h"
 #include "CharacterEventDiscrete.h"
@@ -356,7 +357,7 @@ void RevBayesCore::TipRejectionSampleProposal<charType>::prepareProposal( void )
     const std::vector<CharacterEvent*>& curr_tip_state = p->getHistory(*node).getChildCharacters();
     for (size_t site_index = 0; site_index < num_sites; ++site_index)
     {
-        size_t s = static_cast<CharacterEventDiscrete*>(curr_tip_state[site_index])->getState();
+        size_t s = assume_cast<CharacterEventDiscrete*>(curr_tip_state[site_index])->getState();
         storedTipState[site_index] = s;
     }
 
@@ -421,7 +422,7 @@ void RevBayesCore::TipRejectionSampleProposal<charType>::sampleTipCharacters( vo
     for (it_s = sampledCharacters.begin(); it_s != sampledCharacters.end(); it_s++)
     {
         size_t site_index = *it_s;
-        size_t ancS  = static_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->getState();
+        size_t ancS  = assume_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->getState();
 
         double u = GLOBAL_RNG->uniform01();
 
@@ -429,7 +430,7 @@ void RevBayesCore::TipRejectionSampleProposal<charType>::sampleTipCharacters( vo
         double sum = 0.0;
         for ( size_t i=0; i<numStates; ++i )
         {
-            if ( static_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->isValidState(i) )
+            if ( assume_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->isValidState(i) )
             {
                 double p = tip_tp_matrix[ancS][i];
                 sum += p;
@@ -448,7 +449,7 @@ void RevBayesCore::TipRejectionSampleProposal<charType>::sampleTipCharacters( vo
             ++s;
         }
 
-        static_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->setState(s);
+        assume_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->setState(s);
     }
 
 
@@ -572,7 +573,7 @@ void RevBayesCore::TipRejectionSampleProposal<charType>::undoProposal( void )
     for (size_t site_index = 0; site_index < num_sites; ++site_index)
     {
         size_t s = storedTipState[site_index];
-        static_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->setState(s);
+        assume_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->setState(s);
     }
 
 

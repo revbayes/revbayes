@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include "RlModelTrace.h"
 
@@ -60,11 +61,11 @@ RevPtr<RevVariable> ModelTrace::executeMethod(std::string const &name, const std
         RevObject& b = args[0].getVariable()->getRevObject();
         if ( b.isType( Integer::getClassTypeSpec() ) )
         {
-            burnin = (int)static_cast<const Integer &>(b).getValue();
+            burnin = (int)assume_cast<const Integer &>(b).getValue();
         }
         else
         {
-            double burninFrac = static_cast<const Probability &>(b).getValue();
+            double burninFrac = assume_cast<const Probability &>(b).getValue();
             burnin = int( floor( value->size()*burninFrac ) );
         }
 

@@ -6,6 +6,7 @@
 //  Copyright © 2016 Michael Landis. All rights reserved.
 //
 
+#include "TypeUtilities.h"
 #include "DagNodeTypeUtilities.h"
 #include <map>
 #include <vector>
@@ -62,8 +63,8 @@ void EpochCladogeneticStateFunction::update( void )
     const RbVector<double>& epoch_times = epochTimes->getValue();
     const RbVector<CladogeneticProbabilityMatrix>& clado_probs = cladoProbs->getValue();
     
-    static_cast<CladogeneticProbabilityMatrix_Epoch*>(value)->setEpochTimes(epoch_times);
-    static_cast<CladogeneticProbabilityMatrix_Epoch*>(value)->setEpochCladogeneticProbabilityMatrix(clado_probs);
+    assume_cast<CladogeneticProbabilityMatrix_Epoch*>(value)->setEpochTimes(epoch_times);
+    assume_cast<CladogeneticProbabilityMatrix_Epoch*>(value)->setEpochCladogeneticProbabilityMatrix(clado_probs);
     
     value->update();
     

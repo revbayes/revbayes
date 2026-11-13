@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
@@ -79,7 +80,7 @@ void Move_VectorSlideRecenter::constructInternalObject( void )
     
     // get the mean of the parameters
     RevBayesCore::TypedDagNode<double>  *tmp_m = dagNodeForRevType<Real>(mean);
-    RevBayesCore::StochasticNode<double>    *m = static_cast<RevBayesCore::StochasticNode<double> *>( tmp_m );
+    RevBayesCore::StochasticNode<double>    *m = assume_cast<RevBayesCore::StochasticNode<double> *>( tmp_m );
     
     // get the tuning
     bool t = valueForRevType<RlBoolean>(tune);

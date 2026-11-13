@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RevTypeUtilities.h"
 #include <cmath>
 #include <cstddef>
@@ -95,11 +96,11 @@ RevPtr<RevVariable> Func_characterMapTree::execute( void )
     RevObject& b = args[arg_index++].getVariable()->getRevObject();
     if ( b.isType( Integer::getClassTypeSpec() ) )
     {
-        burnin = (int)static_cast<const Integer &>(b).getValue();
+        burnin = (int)assume_cast<const Integer &>(b).getValue();
     }
     else
     {
-        double burnin_frac = static_cast<const Probability &>(b).getValue();
+        double burnin_frac = assume_cast<const Probability &>(b).getValue();
         burnin = int( floor( ancestralstate_traces[0].size() * burnin_frac ) );
     }
 
