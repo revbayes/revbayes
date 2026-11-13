@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include <cstdlib>
 #include <cmath>
 #include <iostream>
@@ -163,12 +164,12 @@ void MultispeciesCoalescent::swapParameterInternal(const DagNode *oldP, const Da
 
     if ( oldP == Nes )
     {
-        Nes = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(Nes, newP);
     }
 
     if ( oldP == Ne )
     {
-        Ne = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(Ne, newP);
     }
 
     AbstractMultispeciesCoalescent::swapParameterInternal(oldP, newP);

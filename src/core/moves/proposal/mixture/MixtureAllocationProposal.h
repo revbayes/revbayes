@@ -1,6 +1,7 @@
 #ifndef MixtureAllocationProposal_H
 #define MixtureAllocationProposal_H
 
+#include "DagNodeTypeUtilities.h"
 #include <set>
 #include <string>
 
@@ -244,7 +245,7 @@ template <class mixtureType>
 void RevBayesCore::MixtureAllocationProposal<mixtureType>::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     
-    variable = static_cast<StochasticNode<mixtureType>* >(newN) ;
+    replaceNodeReference(variable, newN) ;
     
 }
 

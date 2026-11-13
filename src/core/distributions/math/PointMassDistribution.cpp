@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "PointMassDistribution.h"
 
 #include <cmath>
@@ -133,7 +134,7 @@ void PointMassDistribution::swapParameterInternal(const DagNode *oldP, const Dag
     
     if (oldP == val)
     {
-        val = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(val, newP);
     }
     
 }

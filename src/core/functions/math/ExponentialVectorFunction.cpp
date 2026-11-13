@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "ExponentialVectorFunction.h"
 
 #include <cstddef>
@@ -35,7 +36,7 @@ void ExponentialVectorFunction::swapParameterInternal(const DagNode *oldP, const
 
     if (oldP == a)
     {
-        a = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+        replaceNodeReference(a, newP);
 
         // free the old value and allocate a new one of the right size
         delete value;

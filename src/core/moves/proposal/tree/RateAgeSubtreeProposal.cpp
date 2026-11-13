@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "DistributionBeta.h"
 #include "RateAgeSubtreeProposal.h"
 #include "RandomNumberFactory.h"
@@ -269,7 +270,7 @@ void RateAgeSubtreeProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
     
     if (oldN == tree)
     {
-        tree = static_cast<StochasticNode<Tree>* >(newN) ;
+        replaceNodeReference(tree, newN) ;
     }
     else
     {
@@ -281,7 +282,7 @@ void RateAgeSubtreeProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
             {
                 if (oldN == branch_rates[i][j])
                 {
-                    branch_rates[i][j] = static_cast<StochasticNode<double>* >(newN);
+                    replaceNodeReference(branch_rates[i][j], newN);
                 }
             }
             

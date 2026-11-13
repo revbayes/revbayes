@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "StandardDeviationFunction.h"
 
 #include <cmath>
@@ -73,7 +74,7 @@ void StandardDeviationFunction::swapParameterInternal(const DagNode *oldP, const
     
     if ( oldP == vals )
     {
-        vals = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(vals, newP);
     }
     
 }

@@ -6,6 +6,7 @@
 //  Copyright © 2017 Michael Landis. All rights reserved.
 //
 
+#include "DagNodeTypeUtilities.h"
 #include "RangeEvolutionRateModifierFunction.h"
 
 #include "RangeEvolutionRateModifier.h"
@@ -75,14 +76,14 @@ void RangeEvolutionRateModifierFunction::swapParameterInternal(const DagNode *ol
     
     if (oldP == gainFactor)
     {
-        gainFactor = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(gainFactor, newP);
     }
     else if (oldP == lossFactor)
     {
-        lossFactor = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(lossFactor, newP);
     }
     else if (oldP == context_matrix)
     {
-        context_matrix = static_cast<const TypedDagNode<RbVector<RbVector<double> > >* >( newP );
+        replaceNodeReference(context_matrix, newP);
     }
 }

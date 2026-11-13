@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "UniformDistribution.h"
 
 #include "DistributionUniform.h"
@@ -90,11 +91,11 @@ void UniformDistribution::swapParameterInternal(const DagNode *oldP, const DagNo
     
     if (oldP == min) 
     {
-        min = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(min, newP);
     }
     else if (oldP == max) 
     {
-        max = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(max, newP);
     }
     
 }
