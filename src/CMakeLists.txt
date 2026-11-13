@@ -188,10 +188,20 @@ link_directories(${Boost_LIBRARY_DIRS})
 # This will look for "generated_include_dirs.cmake" in the module path.
 include("generated_include_dirs")
 
+# Embed the help pages, which RbHelpDatabase.cpp includes as RbHelpText.inc
+file(GLOB RB_HELP_PAGES ${PROJECT_SOURCE_DIR}/../help/md/*.md)
+set(RB_HELP_TEXT ${CMAKE_CURRENT_BINARY_DIR}/generated/RbHelpText.inc)
+add_custom_command(OUTPUT ${RB_HELP_TEXT}
+  COMMAND ${CMAKE_COMMAND} -DHELP_DIR=${PROJECT_SOURCE_DIR}/../help/md -DOUT=${RB_HELP_TEXT} -P ${PROJECT_SOURCE_DIR}/../help/embed_help.cmake
+  DEPENDS ${RB_HELP_PAGES} ${PROJECT_SOURCE_DIR}/../help/embed_help.cmake)
+add_custom_target(rb-help-text DEPENDS ${RB_HELP_TEXT})
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/generated)
+
 # Split into much smaller libraries
 add_subdirectory(libs)
 add_subdirectory(core)
 add_subdirectory(revlanguage)
+add_dependencies(rb-core rb-help-text)
 
 
 message("Compile information:")
