@@ -16,7 +16,7 @@ const std::vector<std::string>& RbHelpEntry::getAliases( void ) const
 const std::vector<std::string>& RbHelpEntry::getAuthor( void ) const
 {
     // return a const reference to the internal value
-    return RbHelpDatabase::getHelpDatabase().getHelpStringVector(name,"author");
+    return RbHelpDatabase::getHelpDatabase().getHelpStringVector(name,"authors");
 }
 
 const std::vector<std::string>& RbHelpEntry::getTypeSpec( void ) const
