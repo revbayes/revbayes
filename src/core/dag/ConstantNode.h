@@ -124,8 +124,10 @@ RevBayesCore::DagNode* RevBayesCore::ConstantNode<valueType>::cloneDAG( DagNodeM
         }
     }
     
-    // Make pristine copy
+    // Make a pristine copy. The copy constructor took a fresh ID, but since this copy stands in for the original
+    // inside a cloned model, we want to replace that new ID by the ID of the original node.
     ConstantNode* copy = clone();
+    copy->preserveDagNodeId( *this );
     newNodes[ this ] = copy;
     
     // Make sure the children clone themselves

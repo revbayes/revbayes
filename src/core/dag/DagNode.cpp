@@ -1,8 +1,10 @@
 #include "DagNode.h"
 
 #include <algorithm>
+#include <atomic>
 #include <cmath>
 #include <cstddef>
+#include <cstdint>
 #include <limits>
 #include <ostream>
 #include <string>
@@ -43,6 +45,7 @@ DagNode::DagNode( const std::string &n ) : Parallelizable(),
     name( n ),
     touched_elements(),
     topo_level( 1 ),
+    dag_node_id( allocateDagNodeId() ),
     ref_count( 0 ),
     visit_flags( std::vector<bool>(5, false) )
 {
@@ -67,6 +70,7 @@ DagNode::DagNode( const DagNode &n ) : Parallelizable( n ),
     name( n.name ),
     touched_elements( n.touched_elements ),
     topo_level( 1 ),
+    dag_node_id( allocateDagNodeId() ),
     ref_count( 0 ),
     visit_flags( n.visit_flags )
 {
@@ -111,6 +115,7 @@ DagNode& DagNode::operator=(const DagNode &d)
         hidden           = d.hidden;
         touched_elements = d.touched_elements;
         visit_flags      = d.visit_flags;
+        // dag_node_id stays with this object. Assignment does not create a new node.
     }
 
     return *this;
@@ -224,6 +229,17 @@ void DagNode::addTouchedElementIndex(size_t i)
 
     touched_elements.insert( i );
 
+}
+
+
+/**
+ * Next identity for a newly constructed node, including an ordinary copy.
+ * cloneDAG overwrites it with the source's ID.
+ */
+std::uint64_t DagNode::allocateDagNodeId(void)
+{
+    static std::uint64_t next_id = 1;
+    return next_id++;
 }
 
 
@@ -521,6 +537,28 @@ const std::string& DagNode::getName( void ) const
 {
 
     return name;
+}
+
+
+std::uint64_t DagNode::getDagNodeId( void ) const
+{
+
+    return dag_node_id;
+}
+
+
+DagNode* DagNode::findById( const std::vector<DagNode*>& nodes, std::uint64_t id )
+{
+
+    for ( DagNode* node : nodes )
+    {
+        if ( node->getDagNodeId() == id )
+        {
+            return node;
+        }
+    }
+
+    return NULL;
 }
 
 
@@ -1044,6 +1082,18 @@ void DagNode::bfgtAddEdge( const DagNode* parent, const DagNode* child )
         throw;
     }
 }
+
+
+/**
+ * Write the source node's identifier back onto a cloneDAG copy.
+ * The copy constructor has already taken a fresh id; this replaces it so that a
+ * cloned model still matches the moves and monitors that point at the original.
+ */
+ void DagNode::preserveDagNodeId( const DagNode& source )
+ {
+ 
+     dag_node_id = source.dag_node_id;
+ }
 
 
 /** Print children. We assume indent is from line 2 (hanging indent). Line length is lineLen. */
