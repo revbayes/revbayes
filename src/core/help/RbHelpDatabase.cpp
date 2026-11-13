@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -189,13 +190,33 @@ namespace
         return trimRight(s);
     }
 
+    // A tab means 8 spaces to the parser but often 4 to the author, so a mix is ambiguous.
+    bool mixesTabsAndSpaces(const std::string& example)
+    {
+        bool tabs = false;
+        bool spaces = false;
+        for (const std::string& line : split(example, "\n"))
+        {
+            if (line.find_first_not_of(" \t") == std::string::npos) continue;
+            if (line[0] == '\t') tabs = true;
+            if (line[0] == ' ') spaces = true;
+        }
+        return tabs && spaces;
+    }
+
     // Split a page into its "## key" sections.
-    std::map<std::string, std::string> parseSections(const std::string& text)
+    std::map<std::string, std::string> parseSections(const std::string& name, const std::string& text, std::vector<std::string>& problems)
     {
         std::map<std::string, std::string> sections;
         std::string key;
         std::string value;
         bool in_section = false;
+
+        auto add = [&]()
+        {
+            if (sections.count(key)) problems.push_back(name + ".md: duplicate section '" + key + "'");
+            sections[key] = value;
+        };
 
         size_t start = 0;
         while (start < text.size())
@@ -207,7 +228,7 @@ namespace
 
             if (line.compare(0, 3, "## ") == 0)
             {
-                if (in_section && !key.empty()) sections[key] = value;
+                if (in_section && !key.empty()) add();
                 key = line.substr(3);
                 if (!key.empty() && key.back() == '\n') key.pop_back();
                 value = "";
@@ -218,10 +239,12 @@ namespace
                 value += line;
             }
         }
-        if (in_section) sections[key] = value;
+        if (in_section) add();
 
         return sections;
     }
+
+    const std::set<std::string> section_names = {"name", "title", "description", "details", "authors", "see_also", "example", "references"};
 }
 
 
@@ -229,8 +252,24 @@ RbHelpDatabase::RbHelpDatabase()
 {
     for (const HelpPage& page : help_pages)
     {
-        for (const auto& [key, value] : parseSections(page.text))
+        page_names.push_back(page.name);
+        std::string file = std::string(page.name) + ".md";
+
+        for (const auto& [key, value] : parseSections(page.name, page.text, problems))
         {
+            if (section_names.count(key) == 0)
+            {
+                problems.push_back(file + ": unknown section '" + key + "'");
+            }
+            if (key == "name" && trim(value) != page.name)
+            {
+                problems.push_back(file + ": '## name' is '" + trim(value) + "', not the file name");
+            }
+            if (key == "example" && mixesTabsAndSpaces(value))
+            {
+                problems.push_back(file + ": example indents some lines with tabs and others with spaces");
+            }
+
             if (key == "references")
             {
                 for (const RbHelpReference& ref : parseReferences(value))

@@ -5,6 +5,7 @@
 
 ## Infrastructure
   * Embed the help pages in `rb` and parse them at runtime, replacing `md2help.pl` and the generated `RbHelpDatabase.cpp`.
+  * Replace `rb-help2yml` with `rb --dump-help-json`, which also reports malformed help pages. CI checks the help pages on every pull request.
 
 # RevBayes 1.4.2 (Nov 5, 2026)
 

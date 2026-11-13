@@ -4,7 +4,7 @@ The Markdown files stored in the `md` directory are used to generate the databas
 
 The build embeds these files in the `rb` executable unchanged, and `src/core/help/RbHelpDatabase.cpp` parses them the first time help is requested. Editing a file here and rebuilding is all that is needed to update the help.
 
-The build also yields the `rb-help2yml` executable, which is used to generate an exhaustive YAML database of all information contained in the RevBayes help system, including the information contained in the Markdown database, as well as hardcoded elements such as function arguments and return types. A web portal for this database is presented on the [RevBayes documentation website](https://revbayes.github.io/documentation/).
+`rb --dump-help-json help.json` writes everything in the help system as JSON: the text of these files, along with the arguments, types, defaults and return types that come from the code. The [RevBayes documentation website](https://revbayes.github.io/documentation/) is built from this file. The same command reports malformed help files, such as a duplicate or unknown section, a `name` that differs from the file name, or an example indented partly with tabs and partly with spaces, and exits with an error if it finds any. CI runs it on every pull request.
 
 The fields in each Markdown help entry file are:
 

@@ -1,7 +1,7 @@
 ## name
 fnK81
 
-# title
+## title
 The Kimura (1981) nucleotide rate matrix
 
 ## description

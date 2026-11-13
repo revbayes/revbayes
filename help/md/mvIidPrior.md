@@ -1,5 +1,5 @@
 ## name
-mvIidPrio
+mvIidPrior
 ## title
 Move to propose from prior
 ## description

@@ -146,10 +146,6 @@ if [ "$static_boost" = "true" ] ; then
     cmake_args="-DSTATIC_BOOST=ON $cmake_args"
 fi
 
-# generate rb-help2yml executable
-# manually set DHELP=OFF to avoid
-cmake_args="-DHELP=ON $cmake_args"
-
 echo "RevBayes executable is '${exec_name}'"
 cmake_args="-DRB_EXEC_NAME=${exec_name} $cmake_args"
 

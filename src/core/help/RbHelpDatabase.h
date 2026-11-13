@@ -27,6 +27,8 @@ namespace RevBayesCore {
         const std::string&                   getHelpString(std::string name, std::string key) { return help_strings[name][key]; }
         const std::vector<std::string>&      getHelpStringVector(std::string name, std::string key) { return help_arrays[name][key]; }
         const std::vector<RbHelpReference>&  getHelpReferences(std::string name) { return help_references[name]; }
+        const std::vector<std::string>&      getPageNames(void) const { return page_names; }
+        const std::vector<std::string>&      getProblems(void) const { return problems; }
         
         static RbHelpDatabase&               getHelpDatabase(void)
         {
@@ -40,6 +42,8 @@ namespace RevBayesCore {
         std::map< std::string, std::map< std::string, std::string> >                   help_strings;
         std::map< std::string, std::map< std::string, std::vector<std::string> > >     help_arrays;
         std::map< std::string, std::vector<RbHelpReference> >                          help_references;
+        std::vector<std::string>                                                       page_names;
+        std::vector<std::string>                                                       problems;                //!< Malformed help pages, one message each
         
     };
     
