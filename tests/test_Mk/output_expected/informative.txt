@@ -1,0 +1,2 @@
+informative lnL matches brute force:	TRUE	
+informative patterns sum to one under the correction:	TRUE	
