@@ -1,0 +1,23 @@
+# coding="informative" checked against sums over site patterns (5 states)
+tree <- readTrees(text="((A:0.1,B:0.2):0.05,C:0.3,(D:0.15,E:0.25):0.1);")[1]
+
+# 1. lnL against a brute-force value, for informative sites (some with one taxon missing) plus
+#    uninformative ones that must be excluded: two taxa that differ, three taxa all different,
+#    one state with two singletons, one state with one singleton
+data <- readDiscreteCharacterData("data/informative_k5.nex")
+seq ~ dnPhyloCTMC(tree=tree, Q=fnJC(5), type="Standard", coding="informative")
+seq.clamp(data)
+write("informative lnL matches brute force:", abs(seq.lnProbability() - (-44.4250033422)) < 1e-8, "\n", filename="output/informative.txt")
+
+# 2. every pattern on four observed taxa goes in; the sites kept must sum to the probability
+#    the correction removes, lnL = sum_i lnL_i - n log sum_i L_i over the kept sites
+all_data <- readDiscreteCharacterData("data/informative_k5_all.nex")
+all_seq ~ dnPhyloCTMC(tree=tree, Q=fnJC(5), type="Standard", coding="informative")
+all_seq.clamp(all_data)
+site <- all_seq.siteLikelihoods()
+total_lnl <- 0.0
+total_p <- 0.0
+for (i in 1:site.size()) { total_lnl <- total_lnl + site[i]; total_p <- total_p + exp(site[i]) }
+write("informative patterns sum to one under the correction:", abs(all_seq.lnProbability() - (total_lnl - site.size() * ln(total_p))) < 1e-8, "\n", filename="output/informative.txt", append=TRUE)
+
+q()
