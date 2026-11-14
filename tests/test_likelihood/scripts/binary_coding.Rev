@@ -1,0 +1,15 @@
+setOption("outputPrecision",14,FALSE)
+
+tree <- readTrees(text="((A:0.1,B:0.2):0.05,C:0.3,(D:0.15,E:0.25):0.1);")[1]
+data <- readDiscreteCharacterData("data/binary_coding.nex")
+Q <- fnFreeBinary(simplex(0.3,0.7), rescaled=true)
+
+seq1 ~ dnPhyloCTMC(tree=tree, Q=Q, type="Restriction", coding="noabsencesites|nosingletonpresence")
+seq1.clamp(data)
+write("likelihood for coding=\"noabsencesites|nosingletonpresence\" =", seq1.lnProbability(), "\n", filename="output/binary_coding.txt")
+
+seq2 ~ dnPhyloCTMC(tree=tree, Q=Q, type="Restriction", coding=["noabsencesites", "nosingletonpresence"])
+seq2.clamp(data)
+write("likelihood for coding=[\"noabsencesites\", \"nosingletonpresence\"] =", seq2.lnProbability(), "\n", filename="output/binary_coding.txt", append=TRUE)
+
+q()
