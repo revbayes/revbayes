@@ -14,7 +14,8 @@ namespace RevBayesCore {
         
         enum Coding { ALL                 = 0x00,
                       VARIABLE            = 0x03,
-                      INFORMATIVE         = 0x0F
+                      INFORMATIVE         = 0x0F,
+                      ORDERED             = 0x10    // uninformative patterns are those of ordered (Wagner) parsimony
                     };
     };
 
@@ -52,6 +53,7 @@ namespace RevBayesCore {
         bool                                                warned;
 
         int                                                 coding;
+        bool                                                ordered;
         size_t                                              N;
 
         size_t                                              numCorrectionMasks;
@@ -85,7 +87,7 @@ namespace RevBayesCore {
 
 template<class charType>
 RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::PhyloCTMCSiteHomogeneousConditional(const TypedDagNode<Tree> *t, size_t nChars, bool c, size_t nSites, bool amb, AscertainmentBias::Coding ty, bool internal, bool gapmatch) :
-    PhyloCTMCSiteHomogeneous<charType>(  t, nChars, c, nSites, amb, internal, gapmatch ), warned(false), coding(ty), N(nSites), numCorrectionMasks(0)
+    PhyloCTMCSiteHomogeneous<charType>(  t, nChars, c, nSites, amb, internal, gapmatch ), warned(false), coding(ty & ~AscertainmentBias::ORDERED), ordered(ty & AscertainmentBias::ORDERED), N(nSites), numCorrectionMasks(0)
 {
     if (coding != AscertainmentBias::ALL)
     {
@@ -133,6 +135,7 @@ RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::PhyloCTMCSiteHomoge
     PhyloCTMCSiteHomogeneous< charType>( n ),
     warned(n.warned),
     coding(n.coding),
+    ordered(n.ordered),
     N(n.N),
     numCorrectionMasks(n.numCorrectionMasks),
     activeCorrectionOffset(n.activeCorrectionOffset),
@@ -338,6 +341,22 @@ bool RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::isSitePatternC
 
     bool informative = num_informative > 1;
 
+    // ordered: informative if some threshold between adjacent states has two taxa on each side
+    if (ordered)
+    {
+        informative = false;
+        for (size_t j = 1; j < this->num_chars && informative == false; j++)
+        {
+            size_t below = 0;
+            size_t above = 0;
+            for (std::map<size_t, size_t>::iterator it = charCounts.begin(); it != charCounts.end(); it++)
+            {
+                (it->first < j ? below : above) += it->second;
+            }
+            informative = (below > 1 && above > 1);
+        }
+    }
+
     if ( (charCounts.size() == 1 && (coding == AscertainmentBias::VARIABLE)) || (!informative && (coding == AscertainmentBias::INFORMATIVE)) )
     {
         return false;
@@ -353,6 +372,37 @@ bool RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::isSitePatternC
 {
     // if the pattern is constant, then it is incompatible with the variable coding
     if (charCounts.size() == 1) return !(coding & AscertainmentBias::VARIABLE);
+
+    // ordered: informative if some threshold between adjacent states has two taxa on each side;
+    // an ambiguous taxon spanning the threshold is on neither side
+    if (ordered && coding == AscertainmentBias::INFORMATIVE)
+    {
+        for (size_t j = 1; j < this->num_chars; j++)
+        {
+            size_t below = 0;
+            size_t above = 0;
+            for (std::map<RbBitSet, size_t>::iterator it = charCounts.begin(); it != charCounts.end(); it++)
+            {
+                const RbBitSet& r = it->first;
+                bool any_below = false;
+                bool any_above = false;
+                for (size_t i = 0; i < r.size(); i++)
+                {
+                    if ( r.test(i) )
+                    {
+                        (i < j ? any_below : any_above) = true;
+                    }
+                }
+                if (any_below && !any_above) below += it->second;
+                if (any_above && !any_below) above += it->second;
+            }
+            if (below > 1 && above > 1)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 
     // find the common_states
     std::map<size_t,size_t> stateCounts;
@@ -867,7 +917,16 @@ double RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::sumRootLikel
                         * then count the all-autapomorphies pattern only once, when a is its
                         * smallest state (bits of c below a are the states below a)
                         */
-                        if ( (maskObservationCounts[mask] == popcount + 1 && (c & ((size_t(1) << a) - 1)) == 0) ||
+                        // ordered: a pattern is uninformative only with at most one autapomorphic
+                        // state below a and one above, so the all-autapomorphies pattern with one
+                        // state on each side of a is counted only for that a
+                        size_t lower = std::bitset<sizeof(size_t)*CHAR_BIT>(c & ((size_t(1) << a) - 1)).count();
+                        if ( ordered && (lower > 1 || popcount - lower > 1) )
+                        {
+                            continue;
+                        }
+
+                        if ( (maskObservationCounts[mask] == popcount + 1 && (lower == 0 || (ordered && popcount == 2))) ||
                              maskObservationCounts[mask] > popcount + 1)
                         {
                             // iterate over initial states

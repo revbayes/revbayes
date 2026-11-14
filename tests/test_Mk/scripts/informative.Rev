@@ -20,4 +20,14 @@ total_p <- 0.0
 for (i in 1:site.size()) { total_lnl <- total_lnl + site[i]; total_p <- total_p + exp(site[i]) }
 write("informative patterns sum to one under the correction:", abs(all_seq.lnProbability() - (total_lnl - site.size() * ln(total_p))) < 1e-8, "\n", filename="output/informative.txt", append=TRUE)
 
+# 3. the same under coding="informative|ordered", where a site is informative when some threshold
+#    between adjacent states has two taxa on each side
+ord_seq ~ dnPhyloCTMC(tree=tree, Q=fnOrderedRateMatrix(5), type="Standard", coding="informative|ordered")
+ord_seq.clamp(all_data)
+ord_site <- ord_seq.siteLikelihoods()
+total_lnl <- 0.0
+total_p <- 0.0
+for (i in 1:ord_site.size()) { total_lnl <- total_lnl + ord_site[i]; total_p <- total_p + exp(ord_site[i]) }
+write("ordered informative patterns sum to one under the correction:", abs(ord_seq.lnProbability() - (total_lnl - ord_site.size() * ln(total_p))) < 1e-8, "\n", filename="output/informative.txt", append=TRUE)
+
 q()
