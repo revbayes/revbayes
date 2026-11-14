@@ -865,9 +865,10 @@ double RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::sumRootLikel
                         * 2. don't double-count patterns (num obs == num auto)
                         *
                         * if num obs == num auto + 1
-                        * then don't double count the all-autapomorphies pattern
+                        * then count the all-autapomorphies pattern only once, when a is its
+                        * smallest state (bits of c below a are the states below a)
                         */
-                        if ( (maskObservationCounts[mask] == popcount + 1 && a == 0) ||
+                        if ( (maskObservationCounts[mask] == popcount + 1 && (c & ((size_t(1) << a) - 1)) == 0) ||
                              maskObservationCounts[mask] > popcount + 1)
                         {
                             // iterate over initial states
