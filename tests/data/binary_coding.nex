@@ -1,0 +1,12 @@
+#NEXUS
+begin data;
+dimensions ntax=5 nchar=8;
+format datatype=restriction gap=-;
+matrix
+A 11010111
+B 11100111
+C 01111011
+D 10111101
+E 00011111
+;
+end;
