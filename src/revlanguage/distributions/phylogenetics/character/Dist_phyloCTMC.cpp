@@ -1,5 +1,6 @@
 #include "Dist_phyloCTMC.h"
 
+#include <algorithm>
 #include <cstddef>
 #include <ostream>
 
@@ -282,7 +283,25 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
     RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = static_cast<const Tree &>( tree->getRevObject() ).getDagNode();
     size_t n = size_t( static_cast<const Natural &>( nSites->getRevObject() ).getValue() );
     bool ambig = static_cast<const RlBoolean &>( treatAmbiguousAsGap->getRevObject() ).getValue();
-    const RevBayesCore::RbVector<std::string>& codings = static_cast<const ModelVector<RlString> &>( coding->getRevObject() ).getValue();
+    const RevBayesCore::RbVector<std::string>& all_codings = static_cast<const ModelVector<RlString> &>( coding->getRevObject() ).getValue();
+    // "ordered" is only a qualifier for "informative"
+    bool ordered = false;
+    std::vector<std::string> codings;
+    for (size_t i = 0; i < all_codings.size(); i++)
+    {
+        if (all_codings[i] == "ordered")
+        {
+            ordered = true;
+        }
+        else
+        {
+            codings.push_back(all_codings[i]);
+        }
+    }
+    if ( ordered && std::find(codings.begin(), codings.end(), "informative") == codings.end() )
+    {
+        throw RbException( "The coding \"ordered\" must be combined with \"informative\", e.g. \"informative|ordered\"" );
+    }
     bool internal = static_cast<const RlBoolean &>( storeInternalNodes->getRevObject() ).getValue();
     bool gapmatch = static_cast<const RlBoolean &>( gapMatchClamped->getRevObject() ).getValue();
 
@@ -345,6 +364,10 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
         if (codings[0] == "informative")
         {
             cd = RevBayesCore::AscertainmentBias::INFORMATIVE;
+            if (ordered)
+            {
+                cd |= RevBayesCore::AscertainmentBias::ORDERED;
+            }
         }
         else if (codings[0] == "variable")
         {
@@ -562,7 +585,7 @@ const MemberRules& Dist_phyloCTMC::getParameterRules(void) const
 
         dist_member_rules.push_back( new ArgumentRule( "treatAmbiguousAsGap", RlBoolean::getClassTypeSpec(), "Should we treat ambiguous characters as gaps/missing?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false ) ) );
 
-        std::vector<std::string> codingOptions = {"all", "noabsencesites", "nopresencesites", "informative", "variable", "nosingletonpresence", "nosingletonabsence", "nosingletons"};
+        std::vector<std::string> codingOptions = {"all", "noabsencesites", "nopresencesites", "informative", "variable", "nosingletonpresence", "nosingletonabsence", "nosingletons", "ordered"};
         dist_member_rules.push_back(new MultiOptionRule("coding", new RlString("all"), codingOptions, "|", "What character patterns have been sampled?"));
 
         dist_member_rules.push_back( new ArgumentRule( "storeInternalNodes", RlBoolean::getClassTypeSpec(), "Should we store internal node states in the character matrix?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false ) ) );
