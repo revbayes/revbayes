@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "VarianceGammaDistribution.h"
 
 #include "DistributionVarianceGamma.h"
@@ -84,14 +85,14 @@ void VarianceGammaDistribution::swapParameterInternal(const DagNode *oldP, const
     
     if (oldP == mu)
     {
-        mu = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(mu, newP);
     }
     else if (oldP == kappa)
     {
-        kappa = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(kappa, newP);
     }
     else if (oldP == tau)
     {
-        tau = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(tau, newP);
     }
 }

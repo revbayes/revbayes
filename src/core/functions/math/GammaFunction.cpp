@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "GammaFunction.h"
 
 #include "RbMathFunctions.h"
@@ -32,7 +33,7 @@ void GammaFunction::swapParameterInternal(const DagNode *oldP, const DagNode *ne
     
     if (oldP == a)
     {
-        a = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(a, newP);
     }
     
 }

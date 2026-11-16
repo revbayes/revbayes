@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "FlowT2PopulationsRateMatrixFunction.h"
 #include "RbException.h"
 
@@ -73,22 +74,22 @@ void FlowT2PopulationsRateMatrixFunction::swapParameterInternal(const DagNode *o
     
     if (oldP == nu)
     {
-        nu = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(nu, newP);
     }
     
     if (oldP == mu)
     {
-        mu = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(mu, newP);
     }
 
     if (oldP == lambda)
     {
-        lambda = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(lambda, newP);
     }
 
     if (oldP == sigma)
     {
-        sigma = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(sigma, newP);
     }
 
 }

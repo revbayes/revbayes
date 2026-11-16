@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "QDistribution.h"
 
 #include <cmath>
@@ -241,7 +242,7 @@ void QDistribution::swapParameterInternal(const DagNode *oldP, const DagNode *ne
     
     if (oldP == alpha)
         {
-        alpha = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(alpha, newP);
         }
 }
 

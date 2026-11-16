@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "MPQTreeProposal.h"
 
 #include "RbConstants.h"
@@ -355,7 +356,7 @@ void MPQTreeProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
     
     if ( oldN == tree )
     {
-        tree = static_cast< StochasticNode<Tree>* >(newN) ;
+        replaceNodeReference(tree, newN);
     }
     
 }

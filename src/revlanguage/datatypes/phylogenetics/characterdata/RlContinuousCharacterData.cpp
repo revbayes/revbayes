@@ -145,7 +145,7 @@ RevPtr<RevVariable> ContinuousCharacterData::executeMethod(std::string const &na
                 throw RbException("Index out of bounds in []");
             }
         
-            const RevBayesCore::ContinuousTaxonData& element = static_cast< RevBayesCore::ContinuousCharacterData& >( this->dag_node->getValue() ).getTaxonData(size_t(index.getValue()) - 1);
+            const RevBayesCore::ContinuousTaxonData& element = this->dag_node->getValue().getTaxonData(size_t(index.getValue()) - 1);
         
             return new RevVariable( new ContinuousTaxonData( new RevBayesCore::ContinuousTaxonData( element ) ) );
         }
@@ -154,7 +154,7 @@ RevPtr<RevVariable> ContinuousCharacterData::executeMethod(std::string const &na
             // get the argument for the index
             const std::string &index = valueForRevType<RlString>(args[0].getVariable());
             
-            const RevBayesCore::ContinuousTaxonData& element = static_cast< RevBayesCore::ContinuousCharacterData& >( this->dag_node->getValue() ).getTaxonData(index);            
+            const RevBayesCore::ContinuousTaxonData& element = this->dag_node->getValue().getTaxonData(index);            
             return new RevVariable( new ContinuousTaxonData( new RevBayesCore::ContinuousTaxonData( element ) ) );
         }
     }

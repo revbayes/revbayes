@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "ExtantTreeFunction.h"
 
 #include <cassert>
@@ -135,7 +136,7 @@ void ExtantTreeFunction::swapParameterInternal(const DagNode *oldP, const DagNod
     
     if (oldP == tau)
     {
-        tau = static_cast<const TypedDagNode<Tree>* >( newP );
+        replaceNodeReference(tau, newP);
     }
     
 }

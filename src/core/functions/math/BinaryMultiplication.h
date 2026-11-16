@@ -1,6 +1,7 @@
 #ifndef BinaryMultiplication_H
 #define BinaryMultiplication_H
 
+#include "DagNodeTypeUtilities.h"
 #include "TypedFunction.h"
 #include "TypedDagNode.h"
 
@@ -52,12 +53,12 @@ void RevBayesCore::BinaryMultiplication<firstValueType, secondValueType, return_
     
     if (oldP == a)
     {
-        a = static_cast<const TypedDagNode<firstValueType>* >( newP );
+        replaceNodeReference(a, newP);
     }
     
     if (oldP == b)
     {
-        b = static_cast<const TypedDagNode<secondValueType>* >( newP );
+        replaceNodeReference(b, newP);
     }
     
 }

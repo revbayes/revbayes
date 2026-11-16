@@ -6,6 +6,7 @@
 //  Copyright © 2018 Michael Landis. All rights reserved.
 //
 
+#include "DagNodeTypeUtilities.h"
 #include "BiogeographyCladogeneticBirthDeathFunction.h"
 
 #include <cmath>
@@ -902,19 +903,19 @@ void BiogeographyCladogeneticBirthDeathFunction::swapParameterInternal(const Dag
 {
     if (oldP == speciationRates)
     {
-        speciationRates = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(speciationRates, newP);
     }
     if (oldP == hiddenRateMultipliers)
     {
-        hiddenRateMultipliers = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(hiddenRateMultipliers, newP);
     }
     if (oldP == withinRegionFeatures)
     {
-        withinRegionFeatures = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+        replaceNodeReference(withinRegionFeatures, newP);
     }
     if (oldP == betweenRegionFeatures)
     {
-        betweenRegionFeatures = static_cast<const TypedDagNode<RbVector<RbVector<double> > >* >( newP );
+        replaceNodeReference(betweenRegionFeatures, newP);
     }
 }
 

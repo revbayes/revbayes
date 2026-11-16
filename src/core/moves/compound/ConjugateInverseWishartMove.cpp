@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include <cstddef>
 #include <iosfwd>
 #include <vector>
@@ -140,7 +141,7 @@ void ConjugateInverseWishartMove::swapNodeInternal(DagNode *oldN, DagNode *newN)
     
     if (oldN == sigma)
     {
-        sigma = static_cast<StochasticNode<MatrixReal>* >(newN) ;
+        replaceNodeReference(sigma, newN) ;
     }
     
 }

@@ -1,5 +1,6 @@
 //#define DEBUG_DEC
 
+#include "DagNodeTypeUtilities.h"
 #include "DECCladogeneticStateFunction.h"
 
 #include <algorithm>
@@ -1013,15 +1014,15 @@ void DECCladogeneticStateFunction::swapParameterInternal(const DagNode *oldP, co
     
     if (oldP == eventProbs)
     {
-        eventProbs = static_cast<const TypedDagNode< Simplex >* >( newP );
+        replaceNodeReference(eventProbs, newP);
     }
     else if (oldP == connectivityGraph)
     {
-        connectivityGraph = static_cast<const TypedDagNode<RbVector<RbVector<double> > >* >(newP);
+        replaceNodeReference(connectivityGraph, newP);
     }
     else if (oldP == vicarianceGraph)
     {
-        vicarianceGraph = static_cast<const TypedDagNode<RbVector<RbVector<double> > >* >(newP);
+        replaceNodeReference(vicarianceGraph, newP);
     }
     
 }

@@ -1,4 +1,5 @@
 
+#include "DagNodeTypeUtilities.h"
 #include "NormalDistribution.h"
 
 #include "DistributionNormal.h"
@@ -117,18 +118,18 @@ void NormalDistribution::swapParameterInternal(const DagNode *oldP, const DagNod
 {
     if (oldP == mean)
     {
-        mean = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(mean, newP);
     }
     else if (oldP == stDev)
     {
-        stDev = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(stDev, newP);
     }
     else if (oldP == min)
     {
-        min = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(min, newP);
     }
     else if (oldP == max)
     {
-        max = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(max, newP);
     }
 }

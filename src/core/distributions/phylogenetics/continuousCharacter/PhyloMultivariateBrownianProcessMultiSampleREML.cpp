@@ -1,3 +1,5 @@
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include <cmath>
 #include <cstddef>
 #include <iosfwd>
@@ -755,13 +757,15 @@ void PhyloMultivariateBrownianProcessMultiSampleREML::swapParameterInternal(cons
     
     if (oldP == this->tau)
     {
+        // Check the replacement before detaching the old tree's listener.
+        const auto* replacement = assume_cast<decltype(this->tau)>(newP);
         this->tau->getValue().getTreeChangeEventHandler().removeListener( this );
-        AbstractPhyloBrownianProcess::swapParameterInternal(oldP, newP);
+        AbstractPhyloBrownianProcess::swapParameterInternal(oldP, replacement);
         this->tau->getValue().getTreeChangeEventHandler().addListener( this );
     }
     else if (oldP == this->rate_matrix)
     {
-        rate_matrix = static_cast<const TypedDagNode< MatrixReal >* >( newP );
+        replaceNodeReference(rate_matrix, newP);
         active_matrix = 0;
         precision_matrices[0] = rate_matrix->getValue().computeInverse();
         precision_matrices[0].setCholesky(true);
@@ -771,7 +775,7 @@ void PhyloMultivariateBrownianProcessMultiSampleREML::swapParameterInternal(cons
     else if ( oldP == this->within_species_variances )
     {
 //        within_species_variances = static_cast<const TypedDagNode< RbVector< double > >* >( newP );
-        within_species_variances = static_cast<const TypedDagNode< RbVector< RbVector< double > > >* >( newP );
+        replaceNodeReference(within_species_variances, newP);
     }
 //    else if ( oldP == this->within_species_variances2 )
 //    {

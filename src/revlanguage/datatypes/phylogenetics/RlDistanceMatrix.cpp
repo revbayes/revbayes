@@ -211,7 +211,7 @@ RevPtr<RevVariable> DistanceMatrix::executeMethod(std::string const &name, const
 				throw RbException("Index j out of bounds in getElement");
 			}
 
-			double element = static_cast< RevBayesCore::DistanceMatrix& >( this->dag_node->getValue() ).getElement(size_t(i.getValue()) - 1, size_t(j.getValue()) - 1);
+			double element = this->dag_node->getValue().getElement(size_t(i.getValue()) - 1, size_t(j.getValue()) - 1);
 			
 			return new RevVariable( new Real( element ) );
 
@@ -238,7 +238,7 @@ RevPtr<RevVariable> DistanceMatrix::executeMethod(std::string const &name, const
 				throw RbException("Index j out of bounds in getElement");
 			}
 			
-			static_cast< RevBayesCore::DistanceMatrix& >( this->dag_node->getValue() ).getElement(size_t(i.getValue()) - 1, size_t(j.getValue()) - 1) = double(v.getValue() );
+			this->dag_node->getValue().getElement(size_t(i.getValue()) - 1, size_t(j.getValue()) - 1) = double(v.getValue() );
 			
 		}
 		return NULL;
@@ -255,7 +255,7 @@ RevPtr<RevVariable> DistanceMatrix::executeMethod(std::string const &name, const
 
 const Real* DistanceMatrix::getElement(size_t idx, size_t idy) const
 {
-	double element = static_cast< RevBayesCore::DistanceMatrix& >( this->dag_node->getValue() ).getElement(idx - 1, idy - 1);
+	double element = this->dag_node->getValue().getElement(idx - 1, idy - 1);
 	
 	return new Real( element ) ;
 
@@ -264,7 +264,7 @@ const Real* DistanceMatrix::getElement(size_t idx, size_t idy) const
 
 void DistanceMatrix::setElement(size_t idx, size_t idy, double& value) {
 
-	static_cast< RevBayesCore::DistanceMatrix& >( this->dag_node->getValue() ).getElement(idx - 1, idy - 1) = value;
+	this->dag_node->getValue().getElement(idx - 1, idy - 1) = value;
 	
 	return ;
 }

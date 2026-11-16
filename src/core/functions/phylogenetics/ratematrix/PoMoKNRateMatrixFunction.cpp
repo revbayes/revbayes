@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "PoMoKNRateMatrixFunction.h"
 #include "RbException.h"
 
@@ -82,22 +83,22 @@ void PoMoKNRateMatrixFunction::swapParameterInternal(const DagNode *oldP, const 
     
     if (oldP == K)
     {
-        K = static_cast<const TypedDagNode< std::int64_t >* >( newP );
+        replaceNodeReference(K, newP);
     }
     
     if (oldP == N)
     {
-        N =  static_cast<const TypedDagNode< std::int64_t >* >( newP );
+        replaceNodeReference(N, newP);
     }
 
     if (oldP == mu)
     {
-        mu = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(mu, newP);
     }
 
     if (oldP == phi)
     {
-        phi = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(phi, newP);
     }
 
 }

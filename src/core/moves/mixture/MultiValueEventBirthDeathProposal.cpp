@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "MultiValueEventBirthDeathProposal.h"
 
 #include <cmath>
@@ -453,7 +454,7 @@ void MultiValueEventBirthDeathProposal::swapNodeInternal(DagNode *oldN, DagNode 
     
     if ( oldN == event_var )
     {
-        event_var = static_cast<StochasticNode<MultiValueEvent>* >(newN) ;
+        replaceNodeReference(event_var, newN) ;
     }
     
 }

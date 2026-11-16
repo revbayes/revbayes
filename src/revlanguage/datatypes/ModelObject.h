@@ -1,6 +1,7 @@
 #ifndef ModelObject_H
 #define ModelObject_H
 
+#include "TypeUtilities.h"
 #include "AbstractModelObject.h"
 #include "MethodTable.h"
 #include "RevObject.h"
@@ -441,6 +442,8 @@ void RevLanguage::ModelObject<rbType>::setName(std::string const &n)
 template <typename rbType>
 void RevLanguage::ModelObject<rbType>::setDagNode(RevBayesCore::DagNode* newNode)
 {
+    // Validate before changing the graph or releasing the old node.
+    auto* replacement = assume_cast<RevBayesCore::TypedDagNode<rbType>*>(newNode);
     
     // Take care of the old value node
     if ( dag_node != NULL )
@@ -460,7 +463,7 @@ void RevLanguage::ModelObject<rbType>::setDagNode(RevBayesCore::DagNode* newNode
     }
     
     // Set the new value node
-    dag_node = static_cast< RevBayesCore::TypedDagNode<rbType>* >( newNode );
+    dag_node = replacement;
     
     // Increment the reference count to the new value node
     if ( dag_node != NULL )

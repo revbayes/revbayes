@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "FeatureInformedRateFunction.h"
 #include "RbException.h"
 #include "Cloneable.h"
@@ -137,19 +138,19 @@ void FeatureInformedRateFunction::swapParameterInternal(const DagNode *oldP, con
     
     if (oldP == categorical_features)
     {
-        categorical_features = static_cast<const TypedDagNode< RbVector<RbVector<RbVector<std::int64_t> > > >* >( newP );
+        replaceNodeReference(categorical_features, newP);
     }
     if (oldP == quantitative_features)
     {
-        quantitative_features = static_cast<const TypedDagNode< RbVector<RbVector<RbVector<double> > > >* >( newP );
+        replaceNodeReference(quantitative_features, newP);
     }
     if (oldP == categorical_params)
     {
-        categorical_params = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(categorical_params, newP);
     }
     if (oldP == quantitative_params)
     {
-        quantitative_params = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(quantitative_params, newP);
     }
     
     

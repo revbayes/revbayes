@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "VectorSingleElementSlideProposal.h"
 
 #include <vector>
@@ -162,7 +163,7 @@ void VectorSingleElementSlideProposal::undoProposal( void )
 void VectorSingleElementSlideProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     
-    variable = static_cast<StochasticNode< RbVector<double> >* >(newN) ;
+    replaceNodeReference(variable, newN) ;
     
 }
 
