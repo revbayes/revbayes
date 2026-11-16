@@ -41,7 +41,7 @@ template <class valueType> class TypedDagNode;
         const static unsigned JUMP_DISPERSAL                        = 2;         // A  -> A|B
         
         // public member functions
-        virtual double computeDataAugmentedCladogeneticLnProbability( const std::vector<BranchHistory*>& histories,
+        virtual double computeDataAugmentedCladogeneticLnProbability( const CharacterHistoryDiscrete& histories,
                                                                      size_t node_index,
                                                                      size_t left_index,
                                                                      size_t right_index ) const;
