@@ -1314,6 +1314,15 @@ void DagNode::replace( DagNode *n )
         throw RbException( "Cannot complete this assignment: '" + getNodeDisplayName( n ) + "' depends on '" + getNodeDisplayName( this ) + "', so replacing one with the other would create a circular dependency." );
     }
 
+    // Only references rewired below constrain the replacement's value type. Check before any
+    // mutation so rejecting a redefinition leaves all existing dependents attached to this node.
+    if ( n != nullptr && (!children.empty() || !moves.empty() || !monitors.empty()) &&
+         !hasCompatibleValueType(*n) )
+    {
+        throw RbException("Cannot redefine '" + getNodeDisplayName(this) +
+                          "' with a different value type because existing expressions, moves, or monitors reference it.");
+    }
+
     // replace myself for all my monitor
     while ( monitors.empty() == false )
     {

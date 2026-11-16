@@ -22,6 +22,12 @@ namespace RevBayesCore {
         // pure virtual methods
         virtual TypedDagNode<valueType>*                    clone(void) const = 0;
 
+        // Compare value types independently of whether nodes are constant, deterministic, or stochastic.
+        bool hasCompatibleValueType(const DagNode& other) const override
+        {
+            return dynamic_cast<const TypedDagNode<valueType>*>(&other) != nullptr;
+        }
+
         // member functions
         virtual AbstractTrace*                              createTraceObject(void) const;                                                                              //!< Create an empty trace object of the right trace type
         virtual size_t                                      getNumberOfElements(void) const;                                                                            //!< Get the number of elements for this value
