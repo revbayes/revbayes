@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <ostream>
 #include <string>
 
@@ -48,14 +49,14 @@ void Move_CorrelationMatrixReparameterization::constructInternalObject( void )
     // we free the memory first
     delete value;
 
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double w = valueForRevType<RealPos>(weight);
 
-    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* tmp = static_cast<const MatrixReal &>( correlation_matrix->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* tmp = dagNodeForRevType<MatrixReal>(correlation_matrix);
     RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::MatrixReal> *>( tmp );
 
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* var = static_cast<const ModelVector<RealPos>& >( variance->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* var = dagNodeForRevType<ModelVector<RealPos>>(variance);
 
-    RevBayesCore::TypedDagNode<RevBayesCore::ContinuousCharacterData>* mvbm_tdn  = static_cast<const RevLanguage::ContinuousCharacterData&>( mvbm->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::ContinuousCharacterData>* mvbm_tdn  = dagNodeForRevType<RevLanguage::ContinuousCharacterData>(mvbm);
     RevBayesCore::StochasticNode<RevBayesCore::ContinuousCharacterData>* mvbm_sn = static_cast<RevBayesCore::StochasticNode<RevBayesCore::ContinuousCharacterData>* >(mvbm_tdn);
     
     value = new RevBayesCore::CorrelationMatrixReparameterizationMove(n, var, mvbm_sn, false, w);

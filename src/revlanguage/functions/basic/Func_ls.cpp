@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <fstream>
 #include <map>
@@ -301,8 +302,8 @@ Func_ls* Func_ls::clone( void ) const
 RevPtr<RevVariable> Func_ls::execute( void )
 {
     
-    bool printAll = static_cast<const RlBoolean &>( args[0].getVariable()->getRevObject() ).getValue();
-    std::string filter = static_cast<const RlString &>( args[1].getVariable()->getRevObject() ).getValue();
+    bool printAll = valueForRevType<RlBoolean>(args[0].getVariable());
+    std::string filter = valueForRevType<RlString>(args[1].getVariable());
     
     // print workspace variables
     if (filter == "all") {

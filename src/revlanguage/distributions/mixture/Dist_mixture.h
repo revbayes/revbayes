@@ -1,6 +1,7 @@
 #ifndef Dist_mixture_H
 #define Dist_mixture_H
 
+#include "RevTypeUtilities.h"
 #include "MixtureDistribution.h"
 #include "RealPos.h"
 #include "RlTypedDistribution.h"
@@ -94,8 +95,8 @@ RevBayesCore::MixtureDistribution<typename valType::valueType>* RevLanguage::Dis
 {
 	
     // get the parameters
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<typename valType::valueType> >* v   = static_cast<const ModelVector<valType> &>( values->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< RevBayesCore::Simplex >*                      p   = static_cast<const Simplex &>( probabilities->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<typename valType::valueType> >* v   = dagNodeForRevType<ModelVector<valType>>(values);
+    RevBayesCore::TypedDagNode< RevBayesCore::Simplex >*                      p   = dagNodeForRevType<Simplex>(probabilities);
     
     RevBayesCore::MixtureDistribution<typename valType::valueType>* d		= new RevBayesCore::MixtureDistribution<typename valType::valueType>(v,p);
     

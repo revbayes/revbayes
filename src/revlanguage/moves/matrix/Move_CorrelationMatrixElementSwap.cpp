@@ -5,6 +5,7 @@
  * Created on 5 August 2017
  */
 
+#include "RevTypeUtilities.h"
 #include "Move_CorrelationMatrixElementSwap.h"
 
 #include <cstddef>
@@ -54,8 +55,8 @@ void Move_CorrelationMatrixElementSwap::constructInternalObject( void )
     delete value;
     
     // now allocate a new sliding move
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* tmp = static_cast<const MatrixReal &>( v->getRevObject() ).getDagNode();
+    double w = valueForRevType<RealPos>(weight);
+    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* tmp = dagNodeForRevType<MatrixReal>(v);
     RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::MatrixReal> *>( tmp );
     
     RevBayesCore::Proposal *p = new RevBayesCore::CorrelationMatrixElementSwapProposal(n);

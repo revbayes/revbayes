@@ -1,6 +1,7 @@
 #ifndef Move_GibbsMixtureAllocation_H
 #define Move_GibbsMixtureAllocation_H
 
+#include "RevTypeUtilities.h"
 #include "RlMove.h"
 #include "TypedDagNode.h"
 
@@ -86,8 +87,8 @@ void RevLanguage::Move_GibbsMixtureAllocation<rlValueType>::constructInternalObj
     delete value;
     
     // now allocate a new vector-scale move
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<typename rlValueType::valueType>* tmp = static_cast<const rlValueType &>( x->getRevObject() ).getDagNode();
+    double w = valueForRevType<RealPos>(weight);
+    RevBayesCore::TypedDagNode<typename rlValueType::valueType>* tmp = dagNodeForRevType<rlValueType>(x);
     RevBayesCore::StochasticNode< typename rlValueType::valueType > *sn = static_cast<RevBayesCore::StochasticNode< typename rlValueType::valueType > *>( tmp );
     
     RevBayesCore::Proposal *p = new RevBayesCore::GibbsMixtureAllocationProposal<typename rlValueType::valueType>( sn );

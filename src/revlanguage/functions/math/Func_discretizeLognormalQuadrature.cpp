@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -41,9 +42,9 @@ Func_discretizeLognormalQuadrature* Func_discretizeLognormalQuadrature::clone( v
 RevBayesCore::TypedFunction< RevBayesCore::MatrixReal >* Func_discretizeLognormalQuadrature::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<double>* m   = static_cast<const Real &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* s   = static_cast<const RealPos &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<std::int64_t>* numCats = static_cast<const Integer &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* m   = dagNodeForRevType<Real>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode<double>* s   = dagNodeForRevType<RealPos>(this->args[1].getVariable());
+    RevBayesCore::TypedDagNode<std::int64_t>* numCats = dagNodeForRevType<Integer>(this->args[2].getVariable());
 
     RevBayesCore::DiscretizeLognormalQuadratureFunction *func = new RevBayesCore::DiscretizeLognormalQuadratureFunction( m, s, numCats);
     

@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -54,15 +55,15 @@ void Move_DirichletSimplex::constructInternalObject( void )
     delete value;
     
     // now allocate a new sliding move
-    double a = static_cast<const RealPos &>( alpha->getRevObject() ).getValue();
-    int nc   = static_cast<const Natural &>( numCats->getRevObject() ).getValue();
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    double o = static_cast<const RealPos &>( offset->getRevObject() ).getValue();
-    double k = static_cast<const RealPos &>( kappa->getRevObject() ).getValue();
-    double r = static_cast<const RealPos &>( tuneTarget->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* tmp = static_cast<const Simplex &>( x->getRevObject() ).getDagNode();
+    double a = valueForRevType<RealPos>(alpha);
+    int nc   = valueForRevType<Natural>(numCats);
+    double w = valueForRevType<RealPos>(weight);
+    double o = valueForRevType<RealPos>(offset);
+    double k = valueForRevType<RealPos>(kappa);
+    double r = valueForRevType<RealPos>(tuneTarget);
+    RevBayesCore::TypedDagNode< RevBayesCore::Simplex >* tmp = dagNodeForRevType<Simplex>(x);
     RevBayesCore::StochasticNode< RevBayesCore::Simplex > *n = static_cast<RevBayesCore::StochasticNode< RevBayesCore::Simplex > *>( tmp );
-    bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    bool t = valueForRevType<RlBoolean>(tune);
 
     RevBayesCore::Proposal *prop = new RevBayesCore::DirichletSimplexProposal(n,a,nc,o,k,r);
     value = new RevBayesCore::MetropolisHastingsMove(prop,w,t);

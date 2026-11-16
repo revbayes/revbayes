@@ -17,6 +17,7 @@
  * $Id: Func_module.cpp 1485 2012-05-04 16:03:37Z hoehna $
  */
 
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <iostream>
 #include <string>
@@ -70,14 +71,14 @@ RevPtr<RevVariable> Func_module::execute( void )
 {
     
     /* Get the module */
-    std::string moduleName = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
+    std::string moduleName = valueForRevType<RlString>(args[0].getVariable());
     const Module& mod = ModuleSystem::getModuleSystem().getModule( moduleName );
     
     std::shared_ptr<Environment> execEnv = env;
     
     if ( args[1].getVariable()->getRevObject() != RevNullObject::getInstance() )
     {
-        std::string ns = static_cast<const RlString &>( args[1].getVariable()->getRevObject() ).getValue();
+        std::string ns = valueForRevType<RlString>(args[1].getVariable());
     
          execEnv = env->getChildEnvironment( ns );
     }

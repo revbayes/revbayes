@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -49,8 +50,8 @@ Func_TajimasD* Func_TajimasD::clone( void ) const
 RevBayesCore::TypedFunction< double >* Func_TajimasD::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<RevBayesCore::AbstractHomologousDiscreteCharacterData >* d = static_cast<const AbstractHomologousDiscreteCharacterData &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    bool excl = static_cast<const RlBoolean &>( this->args[1].getVariable()->getRevObject() ).getValue();
+    RevBayesCore::TypedDagNode<RevBayesCore::AbstractHomologousDiscreteCharacterData >* d = dagNodeForRevType<AbstractHomologousDiscreteCharacterData>(this->args[0].getVariable());
+    bool excl = valueForRevType<RlBoolean>(this->args[1].getVariable());
     RevBayesCore::TajimasDFunction* f = new RevBayesCore::TajimasDFunction( d, excl );
     
     return f;

@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <iosfwd>
 #include <vector>
 
@@ -50,10 +51,10 @@ Func_discretizeBeta* Func_discretizeBeta::clone( void ) const
 RevBayesCore::TypedFunction< RevBayesCore::RbVector<double> >* Func_discretizeBeta::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<double>* alpha = static_cast<const Real &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* beta = static_cast<const Real &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<std::int64_t>* numCats = static_cast<const Integer &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
-    bool median = static_cast<const RlBoolean &>( args[3].getVariable()->getRevObject() ).getValue();
+    RevBayesCore::TypedDagNode<double>* alpha = dagNodeForRevType<Real>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode<double>* beta = dagNodeForRevType<Real>(this->args[1].getVariable());
+    RevBayesCore::TypedDagNode<std::int64_t>* numCats = dagNodeForRevType<Integer>(this->args[2].getVariable());
+    bool median = valueForRevType<RlBoolean>(args[3].getVariable());
     
     RevBayesCore::DiscretizeBetaFunction *func = new RevBayesCore::DiscretizeBetaFunction( alpha, beta, numCats, median );
     

@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "Func_maximumTree.h"
 
 #include "ModelVector.h"
@@ -40,7 +41,7 @@ Func_maximumTree* Func_maximumTree::clone( void ) const
 RevBayesCore::TypedFunction< RevBayesCore::Tree >* Func_maximumTree::createFunction( void ) const
 {
 
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::Tree > >* gTrees = static_cast<const ModelVector< TimeTree > &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector< RevBayesCore::Tree > >* gTrees = dagNodeForRevType<ModelVector< TimeTree >>(this->args[0].getVariable());
 
     RevBayesCore::MaximumTreeFunction* f = new RevBayesCore::MaximumTreeFunction( gTrees );
 

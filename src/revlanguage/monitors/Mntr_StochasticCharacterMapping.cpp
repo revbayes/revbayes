@@ -6,6 +6,7 @@
 //  Copyright (c) 2016 will freyman. All rights reserved.
 //
 
+#include "RevTypeUtilities.h"
 #include "Mntr_StochasticCharacterMapping.h"
 
 #include <cstddef>
@@ -62,14 +63,14 @@ void Mntr_StochasticCharacterMapping::constructInternalObject( void )
 {
     namespace Core = RevBayesCore;
 
-    const std::string& file_name      = static_cast<const RlString        &>( filename->getRevObject()           ).getValue();
-    bool               is             = static_cast<const RlBoolean       &>( include_simmap->getRevObject()     ).getValue();
-    bool               sd             = static_cast<const RlBoolean       &>( use_simmap_default->getRevObject() ).getValue();
-    const std::string& sep            = static_cast<const RlString        &>( separator->getRevObject()          ).getValue();
-    unsigned int       print_gen      = (int)static_cast<const IntegerPos &>( printgen->getRevObject()           ).getValue();
-    bool               app            = static_cast<const RlBoolean       &>( append->getRevObject()             ).getValue();
-    bool               wv             = static_cast<const RlBoolean       &>( version->getRevObject()            ).getValue();
-    size_t             idx            = (size_t)static_cast<const Natural &>( index->getRevObject()              ).getValue();
+    const std::string& file_name      = valueForRevType<RlString>(filename);
+    bool               is             = valueForRevType<RlBoolean>(include_simmap);
+    bool               sd             = valueForRevType<RlBoolean>(use_simmap_default);
+    const std::string& sep            = valueForRevType<RlString>(separator);
+    unsigned int       print_gen      = (int)valueForRevType<IntegerPos>(printgen);
+    bool               app            = valueForRevType<RlBoolean>(append);
+    bool               wv             = valueForRevType<RlBoolean>(version);
+    size_t             idx            = (size_t)valueForRevType<Natural>(index);
 
 
     Core::TypedDagNode<Core::AbstractHomologousDiscreteCharacterData>* ctmc_tdn = NULL;
@@ -83,12 +84,12 @@ void Mntr_StochasticCharacterMapping::constructInternalObject( void )
 
     if ( ctmc->getRevObject().isModelObject() )
     {
-        ctmc_tdn = static_cast<const RevLanguage::AbstractHomologousDiscreteCharacterData&>( ctmc->getRevObject() ).getDagNode();
+        ctmc_tdn = dagNodeForRevType<RevLanguage::AbstractHomologousDiscreteCharacterData>(ctmc);
         ctmc_sn  = static_cast<Core::StochasticNode<Core::AbstractHomologousDiscreteCharacterData>* >(ctmc_tdn);
     }
     else if ( cdbdp->getRevObject().isModelObject() )
     {
-        cdbdp_tdn = static_cast<const RevLanguage::Tree&>( cdbdp->getRevObject() ).getDagNode();
+        cdbdp_tdn = dagNodeForRevType<RevLanguage::Tree>(cdbdp);
         cdbdp_sn  = static_cast<Core::StochasticNode<Core::Tree>* >( cdbdp_tdn );
 
         Core::StateDependentSpeciationExtinctionProcess *sse_process = NULL;
@@ -97,7 +98,7 @@ void Mntr_StochasticCharacterMapping::constructInternalObject( void )
     }
     else if ( glhbdsp->getRevObject().isModelObject() )
     {
-    	glhbdsp_tdn = static_cast<const RevLanguage::Tree&>( glhbdsp->getRevObject() ).getDagNode();
+    	glhbdsp_tdn = dagNodeForRevType<RevLanguage::Tree>(glhbdsp);
     	glhbdsp_sn  = static_cast<Core::StochasticNode<Core::Tree>* >( glhbdsp_tdn );
     }
     else

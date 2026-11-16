@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cmath>
 #include <cstddef>
 #include <ostream>
@@ -59,8 +60,8 @@ RevBayesCore::BetaDistribution* Dist_beta::createDistribution( void ) const
 {
     
     // get the parameters
-    RevBayesCore::TypedDagNode<double>* a   = static_cast<const RealPos &>( alpha->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* b   = static_cast<const RealPos &>( beta->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* a   = dagNodeForRevType<RealPos>(alpha);
+    RevBayesCore::TypedDagNode<double>* b   = dagNodeForRevType<RealPos>(beta);
     RevBayesCore::BetaDistribution* d       = new RevBayesCore::BetaDistribution(a, b);
     
     return d;

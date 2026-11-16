@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "Move_MPQRateMatrix.h"
 
 #include <cstddef>
@@ -52,13 +53,13 @@ void Move_MPQRateMatrix::constructInternalObject( void ) {
     
     // now allocate a new sliding move
 //    double l = static_cast<const RealPos &>( lambda->getRevObject() ).getValue();
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator >* tmp = static_cast<const RateGenerator &>( Q->getRevObject() ).getDagNode();
+    double w = valueForRevType<RealPos>(weight);
+    RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator >* tmp = dagNodeForRevType<RateGenerator>(Q);
     RevBayesCore::StochasticNode<RevBayesCore::RateGenerator > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::RateGenerator> *>( tmp );
-    bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    bool t = valueForRevType<RlBoolean>(tune);
     
-    bool tmp_prior = static_cast<const RlBoolean &>( tune_model_prior->getRevObject() ).getValue();
-    double poly_a  = static_cast<const RealPos &>( polyhedron_alpha->getRevObject() ).getValue();
+    bool tmp_prior = valueForRevType<RlBoolean>(tune_model_prior);
+    double poly_a  = valueForRevType<RealPos>(polyhedron_alpha);
 
     RevBayesCore::MPQRateMatrixProposal *p = new RevBayesCore::MPQRateMatrixProposal(n);
     p->setTuneModelPrior( tmp_prior );
@@ -66,7 +67,7 @@ void Move_MPQRateMatrix::constructInternalObject( void ) {
 
     /* An empty vector means leave the centre at the time-reversible point. Anything
        else must be the three polyhedron coordinates. */
-    const std::vector<double>& ctr = static_cast<const ModelVector<RealPos> &>( polyhedron_center->getRevObject() ).getValue();
+    const std::vector<double>& ctr = valueForRevType<ModelVector<RealPos>>(polyhedron_center);
     if ( ctr.size() == 3 )
         {
         p->setPolyhedronCenter( ctr[0], ctr[1], ctr[2] );

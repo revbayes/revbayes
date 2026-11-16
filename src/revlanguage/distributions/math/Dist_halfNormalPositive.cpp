@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -45,8 +46,8 @@ RevBayesCore::HalfNormalDistribution* Dist_halfNormalPositive::createDistributio
 {
     
     // get the parameters
-    RevBayesCore::TypedDagNode<double>*         o  = static_cast<const RealPos &>( offset->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>*         s  = static_cast<const RealPos &>( sd->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>*         o  = dagNodeForRevType<RealPos>(offset);
+    RevBayesCore::TypedDagNode<double>*         s  = dagNodeForRevType<RealPos>(sd);
     RevBayesCore::HalfNormalDistribution*  d  = new RevBayesCore::HalfNormalDistribution(o, s);
     
     return d;

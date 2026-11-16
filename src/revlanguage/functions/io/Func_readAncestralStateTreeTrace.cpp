@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "Func_readAncestralStateTreeTrace.h"
 
 #include <cmath>
@@ -53,9 +54,9 @@ RevPtr<RevVariable> Func_readAncestralStateTreeTrace::execute( void )
 {
     
     // get the information from the arguments for reading the file
-    RevBayesCore::path fn        = static_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
-    const std::string&  treetype = static_cast<const RlString&>( args[1].getVariable()->getRevObject() ).getValue();
-    const std::string&  sep      = static_cast<const RlString&>( args[2].getVariable()->getRevObject() ).getValue();
+    RevBayesCore::path fn        = valueForRevType<RlString>(args[0].getVariable());
+    const std::string&  treetype = valueForRevType<RlString>(args[1].getVariable());
+    const std::string&  sep      = valueForRevType<RlString>(args[2].getVariable());
     
     // check that the file/path name has been correctly specified
     if ( not RevBayesCore::exists( fn ))

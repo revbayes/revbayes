@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -52,12 +53,12 @@ void Move_HSRFUnevenGridHyperpriorsGibbs::constructInternalObject( void )
     delete value;
     
     // now allocate a new move
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double w = valueForRevType<RealPos>(weight);
 
-    RevBayesCore::TypedDagNode<double>* tmp = static_cast<const RealPos &>( gs->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* tmp = dagNodeForRevType<RealPos>(gs);
     RevBayesCore::StochasticNode<double> *g = static_cast< RevBayesCore::StochasticNode<double>* >( tmp );
 
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp1 = static_cast<const ModelVector<RealPos> &>( ls->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp1 = dagNodeForRevType<ModelVector<RealPos>>(ls);
     std::vector<const RevBayesCore::DagNode*> p1 = tmp1->getParents();
     std::vector< RevBayesCore::StochasticNode<double> *> l;
     for (std::vector<const RevBayesCore::DagNode*>::const_iterator it = p1.begin(); it != p1.end(); ++it)
@@ -73,7 +74,7 @@ void Move_HSRFUnevenGridHyperpriorsGibbs::constructInternalObject( void )
         }
     }
     
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp2 = static_cast<const ModelVector<Real>&>( normals->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* tmp2 = dagNodeForRevType<ModelVector<Real>>(normals);
     std::vector<const RevBayesCore::DagNode*> p2 = tmp2->getParents();
     std::vector< RevBayesCore::StochasticNode<double> *> n;
     for (std::vector<const RevBayesCore::DagNode*>::const_iterator it = p2.begin(); it != p2.end(); ++it)
@@ -90,9 +91,9 @@ void Move_HSRFUnevenGridHyperpriorsGibbs::constructInternalObject( void )
     }
     
     
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* u = static_cast<const ModelVector<RealPos> &>( grid->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* u = dagNodeForRevType<ModelVector<RealPos>>(grid);
     
-    double z = static_cast<const RealPos &>( zeta->getRevObject() ).getValue();
+    double z = valueForRevType<RealPos>(zeta);
 
     value = new RevBayesCore::HSRFUnevenGridHyperpriorsGibbsMove(g, l, n, u, z, w);
 }

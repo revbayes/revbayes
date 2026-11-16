@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -55,8 +56,8 @@ RevBayesCore::ExponentialDistribution* Dist_exponential::createDistribution( voi
 {
 
     // get the parameters
-    RevBayesCore::TypedDagNode<double>* l     = static_cast<const RealPos &>( lambda->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* o     = static_cast<const Real    &>( offset->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* l     = dagNodeForRevType<RealPos>(lambda);
+    RevBayesCore::TypedDagNode<double>* o     = dagNodeForRevType<Real>(offset);
     RevBayesCore::ExponentialDistribution* d  = new RevBayesCore::ExponentialDistribution( l, o );
     
     return d;

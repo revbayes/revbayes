@@ -1,6 +1,7 @@
 #ifndef RlNonHomologousDiscreteCharacterData_H
 #define RlNonHomologousDiscreteCharacterData_H
 
+#include "RevTypeUtilities.h"
 #include "NonHomologousDiscreteCharacterData.h"
 #include "ModelObject.h"
 #include "RlAbstractNonHomologousDiscreteCharacterData.h"
@@ -109,7 +110,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> RevLanguage::NonHomologousDiscrete
         found = true;
         
         // get the member with give index
-        const Natural& index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() );
+        const Natural& index = objectForRevType<Natural>(args[0].getVariable());
         
         if (this->dag_node->getValue().getNumberOfTaxa() < (size_t)(index.getValue()) )
         {

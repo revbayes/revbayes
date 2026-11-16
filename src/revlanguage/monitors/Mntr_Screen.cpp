@@ -1,4 +1,5 @@
 
+#include "RevTypeUtilities.h"
 #include <algorithm>
 #include <ostream>
 #include <string>
@@ -41,7 +42,7 @@ void Mntr_Screen::constructInternalObject( void )
     delete value;
     
     // now allocate space for a new Mntr_Screen object
-    std::uint64_t g = (std::uint64_t) static_cast<const IntegerPos &>( printgen->getRevObject() ).getValue();
+    std::uint64_t g = (std::uint64_t) valueForRevType<IntegerPos>(printgen);
     vars.erase( unique( vars.begin(), vars.end() ), vars.end() );
     sort( vars.begin(), vars.end(), compareVarNames );
     std::vector<RevBayesCore::DagNode *> n;
@@ -50,9 +51,9 @@ void Mntr_Screen::constructInternalObject( void )
         RevBayesCore::DagNode* node = (*i)->getRevObject().getDagNode();
         n.push_back( node );
     }
-    bool pp = static_cast<const RlBoolean &>( posterior->getRevObject() ).getValue();
-    bool l = static_cast<const RlBoolean &>( likelihood->getRevObject() ).getValue();
-    bool pr = static_cast<const RlBoolean &>( prior->getRevObject() ).getValue();
+    bool pp = valueForRevType<RlBoolean>(posterior);
+    bool l = valueForRevType<RlBoolean>(likelihood);
+    bool pr = valueForRevType<RlBoolean>(prior);
     value = new RevBayesCore::ScreenMonitor(n, g, pp, l, pr);
 }
 

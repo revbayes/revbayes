@@ -6,6 +6,7 @@
 //  Copyright 2012 __MyCompanyName__. All rights reserved.
 //
 
+#include "RevTypeUtilities.h"
 #include "Func_sort.h"
 
 #include "ArgumentRule.h"
@@ -38,8 +39,8 @@ Func_sort* Func_sort::clone( void ) const
 RevBayesCore::TypedFunction< RevBayesCore::RbVector<double> >* Func_sort::createFunction( void ) const
 {
     
-    const RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* vec = static_cast<const ModelVector<Real> &>( args[0].getVariable()->getRevObject() ).getDagNode();
-    bool ascending = static_cast<const RlBoolean &>( args[1].getVariable()->getRevObject() ).getValue();
+    const RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* vec = dagNodeForRevType<ModelVector<Real>>(args[0].getVariable());
+    bool ascending = valueForRevType<RlBoolean>(args[1].getVariable());
 
     RevBayesCore::SortVectorFunction *func = new RevBayesCore::SortVectorFunction( vec, ascending );
     

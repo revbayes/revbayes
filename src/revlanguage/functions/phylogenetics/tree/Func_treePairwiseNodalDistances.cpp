@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "Func_treePairwiseNodalDistances.h"
 
 #include "DistanceMatrix.h"
@@ -38,7 +39,7 @@ Func_treePairwiseNodalDistances * Func_treePairwiseNodalDistances::clone( void )
 
 RevBayesCore::TypedFunction< RevBayesCore::DistanceMatrix >* Func_treePairwiseNodalDistances::createFunction( void ) const
 {
-    RevBayesCore::TypedDagNode < RevBayesCore::Tree >* tau = static_cast<const Tree &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode < RevBayesCore::Tree >* tau = dagNodeForRevType<Tree>(this->args[0].getVariable());
     
     RevBayesCore::TreePairwiseNodalDistances * f = new RevBayesCore::TreePairwiseNodalDistances( tau );
     

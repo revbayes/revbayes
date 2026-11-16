@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "Dist_MultivariateLog.h"
 
 #include "ArgumentRule.h"
@@ -32,7 +33,7 @@ Core::TransformedVectorDistribution* RevLanguage::Dist_MultivariateLog::createDi
     using Core::RbVector;
 
     // get the parameters
-    const Distribution& rl_vp                      = static_cast<const Distribution &>( log_distribution->getRevObject() );
+    const Distribution& rl_vp                      = objectForRevType<Distribution>(log_distribution);
     std::unique_ptr<Core::TypedDistribution<Core::RbVector<double>>> vp( static_cast<Core::TypedDistribution<Core::RbVector<double>>* >( rl_vp.createDistribution() ) );;
 
     return new Core::TransformedVectorDistribution( vp,

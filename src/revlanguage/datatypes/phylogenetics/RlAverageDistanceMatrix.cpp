@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <iosfwd>
 #include <string>
@@ -180,8 +181,8 @@ RevPtr<RevVariable> AverageDistanceMatrix::executeMethod(std::string const &name
         {
             found = true;
             // get the member with given indices
-            const Natural& i = static_cast<const Natural&>( args[0].getVariable()->getRevObject() );
-            const Natural& j = static_cast<const Natural&>( args[1].getVariable()->getRevObject() );
+            const Natural& i = objectForRevType<Natural>(args[0].getVariable());
+            const Natural& j = objectForRevType<Natural>(args[1].getVariable());
 
             if ( size() < (size_t)(i.getValue()) )
             {

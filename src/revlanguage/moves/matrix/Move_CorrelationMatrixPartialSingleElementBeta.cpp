@@ -5,6 +5,7 @@
  * Created on 5 August 2017
  */
 
+#include "RevTypeUtilities.h"
 #include "Move_CorrelationMatrixPartialSingleElementBeta.h"
 
 #include <cstddef>
@@ -57,12 +58,12 @@ void Move_CorrelationMatrixPartialSingleElementBeta::constructInternalObject( vo
     delete value;
     
     // now allocate a new sliding move
-    double a = static_cast<const RealPos &>( alpha->getRevObject() ).getValue();
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* tmp = static_cast<const MatrixReal &>( v->getRevObject() ).getDagNode();
+    double a = valueForRevType<RealPos>(alpha);
+    double w = valueForRevType<RealPos>(weight);
+    RevBayesCore::TypedDagNode<RevBayesCore::MatrixReal >* tmp = dagNodeForRevType<MatrixReal>(v);
     RevBayesCore::StochasticNode<RevBayesCore::MatrixReal > *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::MatrixReal> *>( tmp );
-    bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    bool t = valueForRevType<RlBoolean>(tune);
+    double tt = valueForRevType<Probability>(tuneTarget);
     
     RevBayesCore::Proposal *p = new RevBayesCore::CorrelationMatrixPartialElementBetaProposal(n, a);
     p->setTargetAcceptanceRate(tt);

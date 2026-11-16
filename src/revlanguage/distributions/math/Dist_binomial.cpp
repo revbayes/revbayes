@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cmath>
 #include <cstddef>
 #include <ostream>
@@ -55,8 +56,8 @@ RevBayesCore::BinomialDistribution* Dist_binomial::createDistribution( void ) co
 {
     
     // get the parameters
-    RevBayesCore::TypedDagNode<std::int64_t>*    vn = static_cast<const Natural     &>( n->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* vp = static_cast<const Probability &>( p->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<std::int64_t>*    vn = dagNodeForRevType<Natural>(n);
+    RevBayesCore::TypedDagNode<double>* vp = dagNodeForRevType<Probability>(p);
     RevBayesCore::BinomialDistribution* d  = new RevBayesCore::BinomialDistribution( vn, vp );
     return d;
 }
