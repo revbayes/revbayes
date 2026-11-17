@@ -27,6 +27,10 @@ are initialized as a mixture: with probability (1 - epsilon), the score
 is accurate; with probability epsilon, the score is drawn from the 
 distribution defined by `observationErrorFrequencies`
 
+The `coding` argument specifies which site patterns could have been sampled and corrects the likelihood for excluded patterns (ascertainment bias correction). The default, `"all"`, applies no correction. For Standard data, you can use `"all"`, `"informative"`, or `"variable"`, but only one at a time. Other data types accept only `"all"`, except for Binary and Restriction data.
+
+For `type="Binary"` or `type="Restriction"`, you can combine options in a string separated by `"|"` or as a vector. For example, `coding="noabsencesites|nosingletonpresence"` and `coding=["noabsencesites", "nosingletonpresence"]` both exclude sites where all taxa have 0 or exactly one taxon has 1. Each option may appear only once. The options `"variable"` and `"nosingletons"` each combine the corresponding absence and presence exclusions, and `"informative"` combines `"variable"` with `"nosingletons"`. Combining codings for other data types gives an error.
+
 For more details, see the tutorials on [graphical models](https://revbayes.github.io/tutorials/intro/graph_models) and on
 [specifying a phylogenetic continuous-time Markov chain](https://revbayes.github.io/tutorials/ctmc/) model.
 ## authors
