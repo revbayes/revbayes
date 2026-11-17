@@ -6,10 +6,10 @@ Q <- fnFreeBinary(simplex(0.3,0.7), rescaled=true)
 
 seq1 ~ dnPhyloCTMC(tree=tree, Q=Q, type="Restriction", coding="noabsencesites|nosingletonpresence")
 seq1.clamp(data)
-write("likelihood for coding=\"noabsencesites|nosingletonpresence\" =", seq1.lnProbability(), "\n", filename="output/binary_coding.txt")
+write("likelihood for coding=\"noabsencesites|nosingletonpresence\" =", seq1.lnProbability())
 
 seq2 ~ dnPhyloCTMC(tree=tree, Q=Q, type="Restriction", coding=["noabsencesites", "nosingletonpresence"])
 seq2.clamp(data)
-write("likelihood for coding=[\"noabsencesites\", \"nosingletonpresence\"] =", seq2.lnProbability(), "\n", filename="output/binary_coding.txt", append=TRUE)
+write("likelihood for coding=[\"noabsencesites\", \"nosingletonpresence\"] =", seq2.lnProbability())
 
 q()

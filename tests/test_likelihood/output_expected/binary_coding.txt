@@ -1,2 +1,0 @@
-likelihood for coding="noabsencesites|nosingletonpresence" =	-24.619427523102	
-likelihood for coding=["noabsencesites", "nosingletonpresence"] =	-24.619427523102	
