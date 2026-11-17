@@ -60,30 +60,30 @@ namespace RevBayesCore {
         enum MEAN { ARITHMETIC, HARMONIC };
         
         UltrametricTreeDistribution(TypedDistribution<Tree>* tp, TypedDistribution<double>* rp, TypedDagNode<double> *ra, TypedDagNode<double> *rbf, const TraceTree &tt, Trace<double>* d = NULL, MEAN m = ARITHMETIC);   //!< Constructor
-        UltrametricTreeDistribution(const UltrametricTreeDistribution &d);                                              //!< Copy-constructor
-        virtual                                            ~UltrametricTreeDistribution(void);                          //!< Virtual destructor
+        UltrametricTreeDistribution(const UltrametricTreeDistribution &d);                                                                      //!< Copy-constructor
+        virtual                                            ~UltrametricTreeDistribution(void);                                                  //!< Virtual destructor
         
         
-        UltrametricTreeDistribution&                        operator=(const UltrametricTreeDistribution &d);            //!< Assignment operator
+        UltrametricTreeDistribution&                        operator=(const UltrametricTreeDistribution &d);                                    //!< Assignment operator
 
         // public member functions
-        UltrametricTreeDistribution*                        clone(void) const;                                          //!< Create an independent clone
-        double                                              computeLnProbability(void);                                 //!< Compute ln prob of current value
-        void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const;     //!< Map the member methods to internal function calls
-        void                                                redrawValue(void);                                          //!< Draw a new random value from distribution
+        UltrametricTreeDistribution*                        clone(void) const override;                                                         //!< Create an independent clone
+        double                                              computeLnProbability(void) override;                                                //!< Compute ln prob of current value
+        void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const override; //!< Map the member methods to internal function calls
+        void                                                redrawValue(void) override;                                                         //!< Draw a new random value from distribution
         
         
-        void prepareForClamping(Tree& tree) override;
-        void repairCheckpointValue(Tree& tree) override;
+        void                                                prepareForClamping(Tree& tree) override;
+        void                                                repairCheckpointValue(Tree& tree) override;
 
     protected:
         // Parameter management functions
-        virtual void                                        getAffected(RbOrderedSet<DagNode *>& affected, const DagNode* affecter);                                      //!< get affected nodes
-        virtual void                                        keepSpecialization(const DagNode* affecter);
-        virtual void                                        restoreSpecialization(const DagNode *restorer);
-        virtual void                                        touchSpecialization(const DagNode *toucher, bool touchAll);
+        virtual void                                        getAffected(RbOrderedSet<DagNode *>& affected, const DagNode* affecter) override;   //!< Get affected nodes
+        virtual void                                        keepSpecialization(const DagNode* affecter) override;
+        virtual void                                        restoreSpecialization(const DagNode *restorer) override;
+        virtual void                                        touchSpecialization(const DagNode *toucher, bool touchAll) override;
         
-        void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);            //!< Swap a parameter
+        void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP) override;           //!< Swap a parameter
         
     private:
         

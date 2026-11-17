@@ -1,5 +1,5 @@
 ## name
-mvFossilSiteSlideUniform
+mvFossilSiteTimeSlideUniform
 ## title
 Move to simultaneously update the ages of site-linked fossils
 ## description

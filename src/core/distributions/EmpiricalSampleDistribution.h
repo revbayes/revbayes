@@ -35,28 +35,29 @@ namespace RevBayesCore {
         EmpiricalSampleDistribution&                        operator=(const EmpiricalSampleDistribution &d);
 
         // public member functions
-        EmpiricalSampleDistribution*                        clone(void) const;                                                                      //!< Create an independent clone
-        double                                              computeLnProbability(void);
-        void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const;     //!< Map the member methods to internal function calls
-        RevLanguage::RevPtr<RevLanguage::RevVariable>       executeProcedure(const std::string &name, const std::vector<DagNode *> args, bool &found);
-        void                                                redrawValue(void);
-        void                                                setValue(RbVector<valueType> *v, bool f=false);
-        void prepareForClamping(RbVector<valueType>& v) override;
-        void repairCheckpointValue(RbVector<valueType>& v) override;
+        EmpiricalSampleDistribution*                        clone(void) const override;                                                             //!< Create an independent clone
+        double                                              computeLnProbability(void) override;
+        void                                                executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const override; //!< Map the member methods to internal function calls
+        RevLanguage::RevPtr<RevLanguage::RevVariable>       executeProcedure(const std::string &name, const std::vector<DagNode *> args, bool &found) override;
+        void                                                redrawValue(void) override;
+        void                                                setValue(RbVector<valueType> *v, bool f=false) override;
+        
+        void                                                prepareForClamping(RbVector<valueType>& v) override;
+        void                                                repairCheckpointValue(RbVector<valueType>& v) override;
         
     protected:
         // Parameter management functions
-        void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);                        //!< Swap a parameter
-        virtual void                                        setActivePIDSpecialized(size_t i, size_t n);                                                          //!< Set the number of processes for this distribution.
+        void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP) override;               //!< Swap a parameter
+        virtual void                                        setActivePIDSpecialized(size_t i, size_t n) override;                                   //!< Set the number of processes for this distribution.
 
         
     private:
         // helper methods
         RbVector<valueType>*                                simulate();
-        virtual void                                        keepSpecialization(const DagNode* affecter);
-        virtual void                                        restoreSpecialization(const DagNode *restorer);
+        virtual void                                        keepSpecialization(const DagNode* affecter) override;
+        virtual void                                        restoreSpecialization(const DagNode *restorer) override;
         void                                                setInternalDistributions(void);
-        virtual void                                        touchSpecialization(const DagNode *toucher, bool touchAll);
+        virtual void                                        touchSpecialization(const DagNode *toucher, bool touchAll) override;
         
         // private members
         TypedDistribution<valueType>*                       base_distribution;

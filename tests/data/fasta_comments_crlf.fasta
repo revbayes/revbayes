@@ -1,0 +1,11 @@
+;Classic FASTA comment lines before the first record,
+
+;separated by a blank line and using CRLF line endings.
+>Taxon_A
+ACGTACGTACGTACGTACGTACGT
+>Taxon_B
+ACGTACGAACGTACGTAC-TACGT
+>Taxon_C
+ACGTTCGTACGTACNTACGTACGT
+>Taxon_D
+ACGTACGTACCTACGTACGTAC??

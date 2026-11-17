@@ -32,25 +32,25 @@ namespace RevBayesCore {
         VectorMixtureDistribution(const VectorMixtureDistribution<mixtureType> &d);
 
         // public member functions
-        VectorMixtureDistribution*                              clone(void) const;                                                                      //!< Create an independent clone
-        double                                                  computeLnProbability(void);
-        void                                                    executeMethod(const std::string &n, const std::vector<const DagNode*> &args, Simplex &rv) const;     //!< Map the member methods to internal function calls
-        void                                                    redrawValue(void);
+        VectorMixtureDistribution*                              clone(void) const override;                                                             //!< Create an independent clone
+        double                                                  computeLnProbability(void) override;
+        void                                                    executeMethod(const std::string &n, const std::vector<const DagNode*> &args, Simplex &rv) const override; //!< Map the member methods to internal function calls
+        void                                                    redrawValue(void) override;
 //        void                                                    setValue(RbVector<mixtureType> *v, bool f=false);
         
         // special handling of state changes
-        void                                                    getAffected(RbOrderedSet<DagNode *>& affected, const DagNode* affecter);                          //!< get affected nodes
-        void                                                    keepSpecialization(const DagNode* affecter);
-        void                                                    restoreSpecialization(const DagNode *restorer);
-        void                                                    touchSpecialization(const DagNode *toucher, bool touchAll);
+        void                                                    getAffected(RbOrderedSet<DagNode *>& affected, const DagNode* affecter) override;       //!< Get affected nodes
+        void                                                    keepSpecialization(const DagNode* affecter) override;
+        void                                                    restoreSpecialization(const DagNode *restorer) override;
+        void                                                    touchSpecialization(const DagNode *toucher, bool touchAll) override;
         
         // Clamping preparation remains the default no-op: components can disagree on constraints
         // or precision. Sequential repair would impose a component order on the observation.
-        void repairCheckpointValue(RbVector<mixtureType>& v) override;
+        void                                                    repairCheckpointValue(RbVector<mixtureType>& v) override;
 
     protected:
         // Parameter management functions
-        void                                                    swapParameterInternal(const DagNode *oldP, const DagNode *newP);                        //!< Swap a parameter
+        void                                                    swapParameterInternal(const DagNode *oldP, const DagNode *newP) override;               //!< Swap a parameter
         
         
     private:
@@ -59,7 +59,7 @@ namespace RevBayesCore {
         // private members
         std::vector<TypedDistribution< mixtureType >* >         base_distributions;
         const TypedDagNode< Simplex >*                          probabilities;
-        std::int64_t                                                    num_values;
+        std::int64_t                                            num_values;
 
         bool                                                    dirty;
         std::vector<double>                                     ln_probabilities;

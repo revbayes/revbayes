@@ -27,51 +27,51 @@ namespace RevBayesCore {
         StochasticNode&                                    operator=(const StochasticNode &n);                                          //!< Assignment operator
 
         // Basic utility function
-        virtual StochasticNode<valueType>*                 clone(void) const;
+        virtual StochasticNode<valueType>*                 clone(void) const override;
 
         // methods
-        void                                               bootstrap(void);                                                             //!< Bootstrap the current value of the node (applies only to stochastic nodes)
+        void                                               bootstrap(void) override;                                                    //!< Bootstrap the current value of the node (applies only to stochastic nodes)
         void                                               clamp(valueType *val);                                                       //!< Clamp an observation to this random variable
-        void                                               executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const; //!< Map the member methods to internal function calls
-        virtual TypedDistribution<valueType>&              getDistribution(void);
-        virtual const TypedDistribution<valueType>&        getDistribution(void) const;
-        void                                               getIntegratedParents(RbOrderedSet<DagNode*> &ip) const;
-        virtual double                                     getLnProbability(void);
-        virtual double                                     getPrevLnProbability(void) const;
-        virtual double                                     getLnProbabilityRatio(void);
+        void                                               executeMethod(const std::string &n, const std::vector<const DagNode*> &args, RbVector<double> &rv) const override; //!< Map the member methods to internal function calls
+        virtual TypedDistribution<valueType>&              getDistribution(void) override;
+        virtual const TypedDistribution<valueType>&        getDistribution(void) const override;
+        void                                               getIntegratedParents(RbOrderedSet<DagNode*> &ip) const override;
+        virtual double                                     getLnProbability(void) override;
+        virtual double                                     getPrevLnProbability(void) const override;
+        virtual double                                     getLnProbabilityRatio(void) override;
         virtual std::vector<double>                        getMixtureLikelihoods(bool log=true) const;
-        virtual std::vector<double>                        getMixtureProbabilities(void) const;
-        virtual size_t                                     getNumberOfMixtureElements(void) const;                                     //!< Get the number of elements for this value
-        valueType&                                         getValue(void);
-        const valueType&                                   getValue(void) const;
-        bool                                               isClamped(void) const;                                                       //!< Is this DAG node clamped?
-        bool                                               isIntegratedOut(void) const;
-        bool                                               isIgnoredData(void) const;
-        bool                                               isStochastic(void) const;                                                    //!< Is this DAG node stochastic?
-        virtual void                                       printStructureInfo(std::ostream &o, bool verbose=false) const;               //!< Print the structural information (e.g. name, value-type, distribution/function, children, parents, etc.)
-        void                                               redraw(SimulationCondition c = SimulationCondition::MCMC);                   //!< Redraw the current value of the node (applies only to stochastic nodes)
-        virtual void                                       reInitializeMe(void);                                                        //!< The DAG was re-initialized so maybe you want to reset some stuff (delegate to distribution)
+        virtual std::vector<double>                        getMixtureProbabilities(void) const override;
+        virtual size_t                                     getNumberOfMixtureElements(void) const override;                             //!< Get the number of elements for this value
+        valueType&                                         getValue(void) override;
+        const valueType&                                   getValue(void) const override;
+        bool                                               isClamped(void) const override;                                              //!< Is this DAG node clamped?
+        bool                                               isIntegratedOut(void) const override;
+        bool                                               isIgnoredData(void) const override;
+        bool                                               isStochastic(void) const override;                                           //!< Is this DAG node stochastic?
+        virtual void                                       printStructureInfo(std::ostream &o, bool verbose=false) const override;      //!< Print the structural information (e.g. name, value-type, distribution/function, children, parents, etc.)
+        void                                               redraw(SimulationCondition c = SimulationCondition::MCMC) override;          //!< Redraw the current value of the node (applies only to stochastic nodes)
+        virtual void                                       reInitializeMe(void) override;                                               //!< The DAG was re-initialized so maybe you want to reset some stuff (delegate to distribution)
+        void                                               restoreFromCheckpoint(const std::string& v) override;
         void                                               setIgnoreRedraw(bool tf=true);
         void                                               setIntegratedOut(bool tf=true);
-        virtual void                                       setIntegrationIndex(size_t i);
-        void                                               setMcmcMode(bool tf);                                                        //!< Set the modus of the DAG node to MCMC mode.
-        virtual void                                       setIgnoreData(bool tf);                                                      //!< Set whether we want to have the probability of the prior only.
+        virtual void                                       setIntegrationIndex(size_t i) override;
+        void                                               setMcmcMode(bool tf) override;                                               //!< Set the modus of the DAG node to MCMC mode.
+        virtual void                                       setIgnoreData(bool tf) override;                                             //!< Set whether we want to have the probability of the prior only.
         virtual void                                       setValue(valueType *val, bool touch=true);                                   //!< Set the value of this node
-        void                                               setValueFromFile(const path &dir);                                           //!< Set value from string.
-        void                                               setValueFromString(const std::string &v);                                    //!< Set value from string.
-        void restoreFromCheckpoint(const std::string& v) override;
+        void                                               setValueFromFile(const path &dir) override;                                  //!< Set value from string.
+        void                                               setValueFromString(const std::string &v) override;                           //!< Set value from string.
 
         // Parent DAG nodes management functions
-        std::vector<const DagNode*>                        getParents(void) const;                                                      //!< Get the set of parents
-        void                                               swapParent(const DagNode *oldParent, const DagNode *newParent);              //!< Exchange the parent (distribution parameter)
+        std::vector<const DagNode*>                        getParents(void) const override;                                             //!< Get the set of parents
+        void                                               swapParent(const DagNode *oldParent, const DagNode *newParent) override;     //!< Exchange the parent (distribution parameter)
 
     protected:
-        virtual double                                     computeRecursiveIntegratedLnProbability(RbOrderedSet<DagNode*> &integratedParents, size_t index);
-        virtual void                                       getAffected(RbOrderedSet<DagNode*> &affected, const DagNode *affecter);      //!< Mark and get affected nodes
-        virtual void                                       keepMe(const DagNode *affecter);                                             //!< Keep value of this and affected nodes
-        virtual void                                       restoreMe(const DagNode *restorer);                                          //!< Restore value of this nodes
-        virtual void                                       setActivePIDSpecialized(size_t activePid, size_t numProcesses);              //!< Set the number of processes for this class.
-        virtual void                                       touchMe(const DagNode *toucher, bool touchAll);                              //!< Tell affected nodes value is reset
+        virtual double                                     computeRecursiveIntegratedLnProbability(RbOrderedSet<DagNode*> &integratedParents, size_t index) override;
+        virtual void                                       getAffected(RbOrderedSet<DagNode*> &affected, const DagNode *affecter) override; //!< Mark and get affected nodes
+        virtual void                                       keepMe(const DagNode *affecter) override;                                    //!< Keep value of this and affected nodes
+        virtual void                                       restoreMe(const DagNode *restorer) override;                                 //!< Restore value of this nodes
+        virtual void                                       setActivePIDSpecialized(size_t activePid, size_t numProcesses) override;     //!< Set the number of processes for this class.
+        virtual void                                       touchMe(const DagNode *toucher, bool touchAll) override;                     //!< Tell affected nodes value is reset
     };
 
 }

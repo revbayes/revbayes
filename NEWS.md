@@ -1,5 +1,12 @@
 # RevBayes 1.5.0 (unreleased)
 
+## Bug fixes
+  * Show the authors listed in help pages, which were never displayed.
+
+## Infrastructure
+  * Embed the help pages in `rb` and parse them at runtime, replacing `md2help.pl` and the generated `RbHelpDatabase.cpp`.
+  * Replace `rb-help2yml` with `rb --dump-help-json`, which also reports malformed help pages. CI checks the help pages on every pull request.
+
 # RevBayes 1.4.2 (Nov 5, 2026)
 
 ## Backwards-incompatible changes

@@ -6,16 +6,21 @@ PROJDIR=$(dirname $0)
 
 SRC="$PROJDIR/../../src"
 
-"$PROJDIR"/../generate_help.sh
-
 "$PROJDIR"/generate_includes.sh
+
+echo "Defining variable 'help_pages' in 'src/meson.build'"
+(
+    cd "$SRC"
+    echo "help_pages = files(["
+    ls ../help/md/*.md | sed "s|^|'|" | sed "s|$|',|"
+    echo "])"
+) >> "$SRC"/meson.build
 
 echo "
 subdir('core')
 subdir('revlanguage')
 subdir('libs')
 subdir('cmd')
-subdir('help2yml')
 " >> "$SRC"/meson.build
 
 "$PROJDIR"/generate_version_number.sh
@@ -33,5 +38,3 @@ mv GitVersion.cpp "$SRC"/revlanguage/utils/
 "$PROJDIR"/generate_sources.sh libs
 
 "$PROJDIR"/generate_sources.sh cmd
-
-"$PROJDIR"/generate_sources.sh help2yml

@@ -30,7 +30,7 @@ template <class valueType> class TypedDagNode;
         
         // public member functions
         ChromosomesCladogenicStateFunction*                         clone(void) const;
-        double computeDataAugmentedCladogeneticLnProbability(const std::vector<BranchHistory*>& histories,
+        double computeDataAugmentedCladogeneticLnProbability(const CharacterHistoryDiscrete& histories,
                                                                                       size_t node_index,
                                                                                       size_t left_index,
                                                                                       size_t right_index ) const;

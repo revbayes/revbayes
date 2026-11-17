@@ -22,16 +22,16 @@ class DagNode;
         ScreenMonitor(const std::vector<DagNode *> &n, std::uint64_t g, bool pp=true, bool l=true, bool pr=true);  //!< Constructor with vector of DAG nodes
         
         // basic methods
-        ScreenMonitor*                      clone(void) const;
+        ScreenMonitor*                      clone(void) const override;
         
         // Monitor functions
-        bool                                isScreenMonitor(void) const;
-        void                                monitor(std::uint64_t gen);
+        bool                                isScreenMonitor(void) const override;
+        void                                monitor(std::uint64_t gen) override;
         void                                reset(size_t numCycles, double maxSeconds) override;
         void                                setReplicateIndex(size_t idx);
         
         // ScreenMonitor functions
-        void                                printHeader(void);
+        void                                printHeader(void) override;
 
     private:
         

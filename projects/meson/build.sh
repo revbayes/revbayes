@@ -9,7 +9,6 @@ all_args="$@"
 debug="false"
 mpi="false"
 cmd="false"
-help2yml="true"
 boost_root=""
 install_dir="$HOME/Applications/RevBayes"
 
@@ -24,7 +23,6 @@ while echo $1 | grep ^- > /dev/null; do
 -debug          <true|false>    : set to true to build in debug mode. Defaults to false.
 -mpi            <true|false>    : set to true if you want to build the MPI version. Defaults to false.
 -cmd            <true|false>    : set to true if you want to build RevStudio with GTK2+. Defaults to false.
--help2yml       <true|false>    : update the help database and build the YAML help generator. Defaults to true.
 -boost_root     string          : specify directory containing Boost headers (e.g. `/usr/include`). Defaults to unset.
 -install_dir    string          : defaults to ~/Applications/RevBayes
 -j              integer         : the number of threads to use when compiling RevBayes. Defaults to automatic.
@@ -32,9 +30,9 @@ while echo $1 | grep ^- > /dev/null; do
 You can also specify meson options as -Dvar1=value1 -Dvar2=value2
 
 Examples:
-  ./build.sh -mpi true -help2yml true
+  ./build.sh -mpi true
   ./build.sh -boost_root /home/santa/installed-boost_1.72 -install_dir $HOME/local/RevBayes
-  ./build.sh -mpi true -Dhelp2yml=true
+  ./build.sh -mpi true -cmd true
   export BOOST_ROOT=/home/santa/installed-boost_1.72; ./build.sh'
         exit
     fi
@@ -161,7 +159,6 @@ if [ "$travis" = "true" ]; then
     CC=${C_COMPILER}
     CXX=${CXX_COMPILER}
     exec_name=rb
-    help2yml=true
 fi
 
 if [ "$debug" = "true" ] ; then
@@ -178,10 +175,6 @@ fi
 
 if [ -n "$boost_root" ] ; then
     export BOOST_ROOT="${boost_root}"
-fi
-
-if [ "$help2yml" = "true" ] ; then
-    meson_args="-Dhelp2yml=true $meson_args"
 fi
 
 if [ -n "${install_dir}" ] ; then

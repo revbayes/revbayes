@@ -1,0 +1,32 @@
+## continue-on-error
+################################################################################
+#
+# RevBayes Test-Script: Reading FASTA files with ';' comment lines before the
+#                       first record (#1141)
+#
+# authors: Adam Wright
+#
+################################################################################
+
+# The same alignment without comments, with a FAIR-bioHeaders (FHR) header made
+# by `bioheaders combine`, and with classic ';' comments separated by a blank
+# line and CRLF line endings. All three should give the same matrix.
+plain = readDiscreteCharacterData("data/fasta_no_comments.fasta")
+fhr = readDiscreteCharacterData("data/fasta_comments.fasta")
+crlf = readDiscreteCharacterData("data/fasta_comments_crlf.fasta")
+
+fhr.names()
+fhr.nchar()
+crlf.names()
+crlf.nchar()
+
+writeFasta("output/fasta_no_comments.fasta", plain)
+writeFasta("output/fasta_comments.fasta", fhr)
+writeFasta("output/fasta_comments_crlf.fasta", crlf)
+
+# Other text before the first record is still an error
+readDiscreteCharacterData("data/fasta_text_before_first_record.fasta")
+
+clear()
+
+q()

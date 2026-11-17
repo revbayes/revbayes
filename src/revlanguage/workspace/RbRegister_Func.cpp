@@ -253,6 +253,7 @@
 #include "Func_empiricalQuantile.h"
 #include "Func_exp.h"
 #include "Func_expVector.h"
+#include "Func_factorial.h"
 #include "Func_floor.h"
 #include "Func_gamma.h"
 #include "Func_lnProbability.h"
@@ -521,6 +522,9 @@ void RevLanguage::Workspace::initializeFuncGlobalWorkspace(void)
         // exponential function
         addFunction( new Func_exp() );
         addFunction( new Func_expVector() );
+
+        // factorial function
+        addFunction( new Func_factorial() );
 
 		// floor function
         addFunction( new Func_floor<Real,Integer>()  );

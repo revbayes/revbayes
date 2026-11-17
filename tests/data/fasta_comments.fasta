@@ -1,0 +1,24 @@
+;~schema: https://w3id.org/fair-bioheaders/fhr/v0.4.0
+;~schemaVersion: '2.0'
+;~genome: RevBayes FASTA comment test alignment
+;~taxon:
+;~  name: synthetic construct
+;~  uri: https://identifiers.org/taxonomy:32630
+;~version: '1.0'
+;~metadataAuthor:
+;~- name: Adam Wright
+;~  uri: https://orcid.org/0000-0002-5719-4024
+;~dateCreated: '2026-11-09'
+;~checksum: 1lqk/+IVfAfbwk1pLJ4bN0M9oXj3QcLW571TcgDV99U=
+;~assemblyAuthor:
+;~- name: Adam Wright
+;~  uri: https://orcid.org/0000-0002-5719-4024
+;~masking: not-masked
+>Taxon_A
+ACGTACGTACGTACGTACGTACGT
+>Taxon_B
+ACGTACGAACGTACGTAC-TACGT
+>Taxon_C
+ACGTTCGTACGTACNTACGTACGT
+>Taxon_D
+ACGTACGTACCTACGTACGTAC??

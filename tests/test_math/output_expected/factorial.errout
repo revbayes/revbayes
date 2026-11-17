@@ -1,0 +1,7 @@
+factorial(0) = 1
+factorial(1) = 1
+factorial(5) = 120
+factorial(10) = 3.6288e+06
+factorial(20) = 2.4329e+18
+factorial(50) = 3.04141e+64
+factorial(170) = 7.25742e+306

@@ -214,8 +214,10 @@ double RbMath::lfastchoose2(double n, double k, int *s_choose) {
 
 /* log factorial ln(n!) */
 /*!
- * This function calculates the natural log of the factorial of n using
- * the Stirling approximation.
+ * This function calculates the natural log of the factorial of n. For 0 <= n <= 20
+ * the value is log of the exact factorial stored in RbConstants::N_FACTORIAL.
+ * For n > 20, we use std::lgamma instead. Both approaches are accurate to within
+ * a unit in the last place.
  *
  * \brief Natural log of the factorial.
  * \param n is the number for the factorial (n!).
@@ -224,15 +226,10 @@ double RbMath::lfastchoose2(double n, double k, int *s_choose) {
  */
 double RbMath::lnFactorial(int n) {
 
-    if (n == 0)
-        return 0;
-    
-    double n1 = n;
-    double r  = 1.0 / n1;
-    double C0 =  0.918938533204672722;
-    double C1 =  1.0/12.0;
-    double C3 = -1.0/360.0;
-    return (n1 + 0.5) * log(n1) - n1 + C0 + r*(C1 + r*r*C3);
+    if (n >= 0 && n <= 20)
+        return std::log( RbConstants::N_FACTORIAL[n] );
+
+    return std::lgamma(static_cast<double>(n) + 1.0);
 }
 
 

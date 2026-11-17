@@ -43,18 +43,6 @@ Neither the [master](https://github.com/revbayes/revbayes/tree/master) branch no
 5. Merge development into master
     * On doing this, GitHub creates a merge commit, giving master 1 unique change that is not on development, and making this whole dance necessary next time
     
-6. Generate a YAML-formatted help file
+6. Check the website
 
-    1. Re-build RevBayes from scratch. This automatically generates a `rb-help2yml` executable outside the `build` directory.
-    2. Run the executable to generate a `help.yml` file from the contents of [`help/md`](https://github.com/revbayes/revbayes/tree/master/help/md)
-        * `./rb-help2yml`
-
-7. Update website from within the [revbayes.github.io](https://github.com/revbayes/revbayes.github.io) repo
-
-    1. Update download version by modifying `_config.yml`
-    2. Copy `help.yml` to the `_data` directory
-    3. Commit the changes
-        * `git add _config.yml`
-        * `git add _data/help.yml`
-        * `git commit -m "Update RB version to <X.Y.Z>"`
-
+    Publishing the release runs `notify-website.yml`, which starts the `update-help` workflow in [revbayes.github.io](https://github.com/revbayes/revbayes.github.io). That workflow downloads the release's linux64 package, regenerates `_data/help.json` with `rb --dump-help-json`, sets the version in `_config.yml`, and opens a pull request with both that merges by itself once the website's checks pass. If the workflow fails, rerun it from that repository's Actions tab with the release tag. If a check fails, the pull request stays open until it is fixed.

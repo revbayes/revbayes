@@ -149,7 +149,7 @@ Unique topologies in this trace: 59
 # Test .computeEntropy(), .computePairwiseRFDistances(), .computeTreeLengths() #
 ################################################################################
 
-Entropy of the entire post-burnin sample: 1.45455
+Entropy of the entire post-burnin sample: 1.45454
 
 Extract all unique trees, coerce the resulting vector to a new tree
 trace, and compute pairwise RF distances between its elements:

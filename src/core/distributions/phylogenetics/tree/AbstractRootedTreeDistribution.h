@@ -22,18 +22,18 @@ namespace RevBayesCore {
         virtual ~AbstractRootedTreeDistribution(void);
         
         // overloaded operators
-        AbstractRootedTreeDistribution&                     operator=(const AbstractRootedTreeDistribution& d);                                                            //!< Assignment
+        AbstractRootedTreeDistribution&                     operator=(const AbstractRootedTreeDistribution& d);                                                 //!< Assignment
 
         // pure virtual member functions
-        virtual AbstractRootedTreeDistribution*             clone(void) const = 0;                                                                              //!< Create an independent clone
+        virtual AbstractRootedTreeDistribution*             clone(void) const override = 0;                                                                     //!< Create an independent clone
         
         
         // public member functions you may want to override
-        double                                              computeLnProbability(void);                                                                         //!< Compute the log-transformed probability of the current value.
-        virtual void                                        redrawValue(SimulationCondition c);                                                                 //!< Draw a new random value from the distribution
-        virtual void                                        redrawValue(void);                                                                                  //!< Draw a new random value from the distribution
+        double                                              computeLnProbability(void) override;                                                                //!< Compute the log-transformed probability of the current value.
+        virtual void                                        redrawValue(SimulationCondition c) override;                                                        //!< Draw a new random value from the distribution
+        virtual void                                        redrawValue(void) override;                                                                         //!< Draw a new random value from the distribution
 
-        virtual void                                        setValue(Tree *v, bool f=false);                                                                    //!< Set the current value, e.g. attach an observation (clamp)
+        virtual void                                        setValue(Tree *v, bool f=false) override;                                                           //!< Set the current value, e.g. attach an observation (clamp)
         void                                                repairCheckpointValue(Tree& tree) override;
         size_t                                              getNumberOfTaxa(void) const;
         double                                              getOriginAge(void) const;
@@ -51,13 +51,13 @@ namespace RevBayesCore {
         virtual std::vector<double>                         simulateDivergenceTimes(size_t n, double origin, double end, double present, bool alwaysReturn) const = 0;             //!< Simulate n speciation events.
         
         // virtual methods that may be overwritten, but then the derived class should call this methods
-        virtual void                                        getAffected(RbOrderedSet<DagNode *>& affected, const DagNode* affecter);                                  //!< get affected nodes
-        virtual void                                        keepSpecialization(const DagNode* affecter);
-        virtual void                                        restoreSpecialization(const DagNode *restorer);
-        virtual void                                        touchSpecialization(const DagNode *toucher, bool touchAll);
+        virtual void                                        getAffected(RbOrderedSet<DagNode *>& affected, const DagNode* affecter) override;                   //!< Get affected nodes
+        virtual void                                        keepSpecialization(const DagNode* affecter) override;
+        virtual void                                        restoreSpecialization(const DagNode *restorer) override;
+        virtual void                                        touchSpecialization(const DagNode *toucher, bool touchAll) override;
         
         // Parameter management functions. You need to override both if you have additional parameters
-        virtual void                                        swapParameterInternal(const DagNode *oldP, const DagNode *newP);                                    //!< Swap a parameter
+        virtual void                                        swapParameterInternal(const DagNode *oldP, const DagNode *newP) override;                           //!< Swap a parameter
         
         
         // helper functions

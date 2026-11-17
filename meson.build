@@ -106,8 +106,14 @@ endif
 ############# libraries #################
 libdl = cpp.find_library('dl')
 
+# Embed the help pages, which RbHelpDatabase.cpp includes as RbHelpText.inc
+help_text = custom_target('rb-help-text',
+                          input: help_pages,
+                          output: 'RbHelpText.inc',
+                          command: [import('python').find_installation(), files('help/embed_help.py'), '@OUTPUT@', '@INPUT@'])
+
 core = static_library('rb-core',
-                      core_sources,
+                      core_sources + [help_text],
                       include_directories: [src_inc],
                       dependencies: [boost,mpi])
 
@@ -120,11 +126,6 @@ libs = static_library('rb-lib',
                       libs_sources,
                       include_directories: [src_inc],
                       dependencies: [boost, libdl])
-
-help2yml = static_library('rb-help2yml',
-                          help2yml_sources,
-                          include_directories: [src_inc],
-                          dependencies: [boost])
 
 ############# executables #################
 
@@ -156,17 +157,6 @@ if get_option('studio')
 endif
 
 subdir('tests')
-
-if get_option('help2yml')
-
-  executable(rb_name+'-help2yml',
-             ['src/help2yml/main.cpp'],
-             link_with: [core, revlanguage, libs, help2yml],
-             include_directories: [src_inc],
-             dependencies: [boost, mpi],
-             install_rpath: extra_rpath,
-             install: true)
-endif
 
 ####
 

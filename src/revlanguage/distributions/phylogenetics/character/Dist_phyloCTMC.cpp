@@ -7,6 +7,7 @@
 #include "PhyloCTMCSiteHomogeneous.h"
 #include "PhyloCTMCSiteHomogeneousBinary.h"
 #include "PhyloCTMCSiteHomogeneousNucleotide.h"
+#include "MultiOptionRule.h"
 #include "OptionRule.h"
 #include "Probability.h"
 #include "RevNullObject.h"
@@ -281,11 +282,16 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
     RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = static_cast<const Tree &>( tree->getRevObject() ).getDagNode();
     size_t n = size_t( static_cast<const Natural &>( nSites->getRevObject() ).getValue() );
     bool ambig = static_cast<const RlBoolean &>( treatAmbiguousAsGap->getRevObject() ).getValue();
-    const std::string& code = static_cast<const RlString &>( coding->getRevObject() ).getValue();
+    const RevBayesCore::RbVector<std::string>& codings = static_cast<const ModelVector<RlString> &>( coding->getRevObject() ).getValue();
     bool internal = static_cast<const RlBoolean &>( storeInternalNodes->getRevObject() ).getValue();
     bool gapmatch = static_cast<const RlBoolean &>( gapMatchClamped->getRevObject() ).getValue();
 
-    if ( !(dt == "Binary" || dt == "Restriction" || dt == "Standard") && code != "all")
+    if ( codings.size() > 1 && !(dt == "Binary" || dt == "Restriction") )
+    {
+        throw RbException( "Codings can only be combined for Binary/Restriction datatypes" );
+    }
+
+    if ( !(dt == "Binary" || dt == "Restriction" || dt == "Standard") && codings[0] != "all")
     {
         throw RbException( "Ascertainment bias correction only supported with Standard and Binary/Restriction datatypes" );
     }
@@ -336,18 +342,18 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
 
         int cd = RevBayesCore::AscertainmentBias::ALL;
         // split the coding option on "|"
-        if (code == "informative")
+        if (codings[0] == "informative")
         {
             cd = RevBayesCore::AscertainmentBias::INFORMATIVE;
         }
-        else if (code == "variable")
+        else if (codings[0] == "variable")
         {
             cd = RevBayesCore::AscertainmentBias::VARIABLE;
         }
-        else if (code != "all")
+        else if (codings[0] != "all")
         {
             std::stringstream ss;
-            ss << "Invalid coding option \"" << code << "\"\n";
+            ss << "Invalid coding option \"" << codings[0] << "\"\n";
             ss << "\tAvailable Standard state codings: all, informative, variable\n";
             ss << "\tDefault: all.\n";
             throw RbException(ss.str());
@@ -385,54 +391,42 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractHomologousDiscreteCharact
             throw RbException( "Only binary characters allowed for type=Binary/Restriction" );
         }
 
-        // split the coding option on "|"
-        std::string s = code;
-        std::vector<std::string> tokens;
-
-        size_t pos = 0;
-        while ((pos = s.find("|")) != std::string::npos)
-        {
-            tokens.push_back(s.substr(0, pos));
-            s.erase(0, pos + 1);
-        }
-        tokens.push_back(s);
-
-        // set the flags for each token
+        // set the flags for each coding
         int cd = RevBayesCore::AscertainmentBias::ALL;
-        for (size_t i = 0; i < tokens.size(); i++)
+        for (size_t i = 0; i < codings.size(); i++)
         {
-            if (tokens[i] == "noabsencesites")
+            if (codings[i] == "noabsencesites")
             {
                 cd |= RevBayesCore::BinaryAscertainmentBias::NOABSENCESITES;
             }
-            else if (tokens[i] == "nopresencesites")
+            else if (codings[i] == "nopresencesites")
             {
                 cd |= RevBayesCore::BinaryAscertainmentBias::NOPRESENCESITES;
             }
-            else if (tokens[i] == "informative")
+            else if (codings[i] == "informative")
             {
                 cd |= RevBayesCore::AscertainmentBias::INFORMATIVE;
             }
-            else if (tokens[i] == "variable")
+            else if (codings[i] == "variable")
             {
                 cd |= RevBayesCore::AscertainmentBias::VARIABLE;
             }
-            else if (tokens[i] == "nosingletonpresence")
+            else if (codings[i] == "nosingletonpresence")
             {
                 cd |= RevBayesCore::BinaryAscertainmentBias::NOSINGLETONPRESENCE;
             }
-            else if (tokens[i] == "nosingletonabsence")
+            else if (codings[i] == "nosingletonabsence")
             {
                 cd |= RevBayesCore::BinaryAscertainmentBias::NOSINGLETONABSENCE;
             }
-            else if (tokens[i] == "nosingletons")
+            else if (codings[i] == "nosingletons")
             {
                 cd |= RevBayesCore::BinaryAscertainmentBias::NOSINGLETONS;
             }
-            else if (tokens[i] != "all")
+            else if (codings[i] != "all")
             {
                 std::stringstream ss;
-                ss << "Invalid coding option \"" << tokens[i] << "\"\n";
+                ss << "Invalid coding option \"" << codings[i] << "\"\n";
                 ss << "\tAvailable Binary state codings: all, noabsencesites, nopresencesites, informative, variable, nosingletonpresence, nosingletonabsence, nosingletons\n";
                 ss << "\tDefault: all. Codings are combined using the vertical bar \'|\'\n";
                 throw RbException(ss.str());
@@ -569,7 +563,7 @@ const MemberRules& Dist_phyloCTMC::getParameterRules(void) const
         dist_member_rules.push_back( new ArgumentRule( "treatAmbiguousAsGap", RlBoolean::getClassTypeSpec(), "Should we treat ambiguous characters as gaps/missing?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false ) ) );
 
         std::vector<std::string> codingOptions = {"all", "noabsencesites", "nopresencesites", "informative", "variable", "nosingletonpresence", "nosingletonabsence", "nosingletons"};
-        dist_member_rules.push_back(new OptionRule("coding", new RlString("all"), codingOptions, "What character patterns have been sampled?"));
+        dist_member_rules.push_back(new MultiOptionRule("coding", new RlString("all"), codingOptions, "|", "What character patterns have been sampled?"));
 
         dist_member_rules.push_back( new ArgumentRule( "storeInternalNodes", RlBoolean::getClassTypeSpec(), "Should we store internal node states in the character matrix?", ArgumentRule::BY_VALUE, ArgumentRule::ANY, new RlBoolean( false ) ) );
         

@@ -353,6 +353,14 @@ bool  MultiFormatReader::readFastaSequences(
                         }
                 else 
                         {
+                        // Skip ';' comment lines before the first record (legacy FASTA comments).
+                        if (matList.empty() && ftcb.current() == ';' && (ftcb.prev() == '\n' || ftcb.prev() == '\r'))
+                                {
+                                char next;
+                                if (!ftcb.skip_to_beginning_of_line(next))
+                                        break;
+                                continue;
+                                }
                         if (isgraph(ftcb.current()))
                                 {
                                 err << "Illegal non-whitespace occurring outside of a name/sequence pair.  Expecting the first name to startwith > but found \"" << ftcb.current() << "\".";

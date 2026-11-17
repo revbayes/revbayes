@@ -30,16 +30,16 @@ namespace RevBayesCore {
         IidDistribution(const IidDistribution<valueType> &d);
 
         // public member functions
-        IidDistribution*                                    clone(void) const;                                                                                  //!< Create an independent clone
-        double                                              computeLnProbability(void);
-        void                                                redrawValue(void);
+        IidDistribution*                                    clone(void) const override;                                                 //!< Create an independent clone
+        double                                              computeLnProbability(void) override;
+        void                                                redrawValue(void) override;
         
-        void prepareForClamping(RbVector<valueType>& v) override;
-        void repairCheckpointValue(RbVector<valueType>& v) override;
+        void                                                prepareForClamping(RbVector<valueType>& v) override;
+        void                                                repairCheckpointValue(RbVector<valueType>& v) override;
 
     protected:
         // Parameter management functions
-        void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP);                        //!< Swap a parameter
+        void                                                swapParameterInternal(const DagNode *oldP, const DagNode *newP) override;   //!< Swap a parameter
         
         
     private:
@@ -48,7 +48,7 @@ namespace RevBayesCore {
         void                                                simulate();
         
         // private members
-        std::int64_t                                                n_samples;
+        std::int64_t                                        n_samples;
         TypedDistribution<valueType>*                       value_prior;
         
     };
