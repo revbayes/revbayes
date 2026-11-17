@@ -3,13 +3,20 @@ name: Build and test
 on:
   push:
     branches:
-      - "*"
+      - "**"
   pull_request:
     branches:
     - "*"
 
+# A new push cancels the runs it supersedes, except on development and master
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/development' && github.ref != 'refs/heads/master' }}
+
 jobs:
   build:
+    # A branch in this repository is already tested by its push run, so only forks need the pull_request run
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
     strategy:
       matrix:
         name: [ubuntu-gcc-12,
@@ -466,7 +473,7 @@ jobs:
   notify:
     needs: build
     runs-on: ubuntu-latest
-    if: always()
+    if: always() && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository)
     steps:
       - uses: technote-space/workflow-conclusion-action@v3
     

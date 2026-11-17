@@ -174,7 +174,7 @@ ChromosomesCladogenicBirthDeathFunction* ChromosomesCladogenicBirthDeathFunction
 }
 
 
-double ChromosomesCladogenicBirthDeathFunction::computeDataAugmentedCladogeneticLnProbability(const std::vector<BranchHistory*>& histories,
+double ChromosomesCladogenicBirthDeathFunction::computeDataAugmentedCladogeneticLnProbability(const CharacterHistoryDiscrete& histories,
                                                                                               size_t node_index,
                                                                                               size_t left_index,
                                                                                               size_t right_index ) const
