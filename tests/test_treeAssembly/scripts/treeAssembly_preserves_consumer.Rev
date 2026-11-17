@@ -3,7 +3,6 @@
 # writing into the input tree.
 # Every line printed must be TRUE.
 seed(1)
-out = "output/treeAssembly_preserves_consumer.txt"
 
 chars <- readDiscreteCharacterData("data/primates_cytb_small.nex")
 taxa <- chars.taxa()
@@ -23,19 +22,19 @@ assembled := fnTreeAssembly(tree, bl)
 other ~ dnPhyloCTMC(tree=assembled, Q=fnJC(4), branchRates=1.0, type="DNA")
 other.clamp(chars)
 
-print(filename=out, "an assembly does not change what another consumer of the input tree sees:\n")
-print(filename=out, append=TRUE, abs(control.lnProbability() - ln_alone) < 1E-10, "\n")
+print("an assembly does not change what another consumer of the input tree sees:")
+print(abs(control.lnProbability() - ln_alone) < 1E-10)
 
 # a consumer built after the assembly computes from scratch, not from a cache
 after ~ dnPhyloCTMC(tree=tree, Q=fnJC(4), branchRates=0.02, type="DNA")
 after.clamp(chars)
-print(filename=out, append=TRUE, abs(after.lnProbability() - ln_alone) < 1E-10, "\n")
+print(abs(after.lnProbability() - ln_alone) < 1E-10)
 
-print(filename=out, append=TRUE, "the input tree keeps its own branch lengths and ages:\n")
-print(filename=out, append=TRUE, abs(tree.treeLength() - length_alone) < 1E-10, "\n")
-print(filename=out, append=TRUE, abs(tree.rootAge() - root_alone) < 1E-10, "\n")
+print("the input tree keeps its own branch lengths and ages:")
+print(abs(tree.treeLength() - length_alone) < 1E-10)
+print(abs(tree.rootAge() - root_alone) < 1E-10)
 
-print(filename=out, append=TRUE, "the assembled tree carries the lengths it was given:\n")
-print(filename=out, append=TRUE, abs(assembled.treeLength() - sum(bl)) < 1E-8, "\n")
+print("the assembled tree carries the lengths it was given:")
+print(abs(assembled.treeLength() - sum(bl)) < 1E-8)
 
 q()

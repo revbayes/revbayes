@@ -2,8 +2,7 @@
 # node age slides and subtree scales. The cached likelihood after the chain is compared with
 # one computed afresh from a checkpoint.
 # Every line printed must be TRUE.
-out = "output/treeAssembly_mcmc_timetree.txt"
-print(filename=out, "an assembled time tree carries the true likelihood under every move:\n")
+print("an assembled time tree carries the true likelihood under every move:")
 
 chars <- readDiscreteCharacterData("data/primates_cytb_small.nex")
 taxa <- chars.taxa()
@@ -42,6 +41,6 @@ for (rep in 1:3) {
     }
     agree = agree && abs(cached[cached.size()] - fresh[fresh.size()]) < 1E-6
 }
-print(filename=out, append=TRUE, agree, "\n")
+print(agree)
 
 q()

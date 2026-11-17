@@ -1,2 +1,0 @@
-treeAssembly with lengths derived from the input tree checkpoints correctly:
-TRUE	

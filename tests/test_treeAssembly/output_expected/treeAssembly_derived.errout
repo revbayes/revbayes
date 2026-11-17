@@ -1,0 +1,36 @@
+treeAssembly with lengths derived from the input tree checkpoints correctly:
+   Successfully read one character matrix from file 'data/primates_cytb_small.nex'
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 5 different moves, with a single move picked randomly per iteration
+   
+   Processing file "output/treeAssembly_derived_1_1.log"
+   Appending to previous MCMC simulation of 3000 iterations
+   This simulation runs 1 independent replicate.
+   The simulator uses 5 different moves, with a single move picked randomly per iteration
+   
+   Processing file "output/treeAssembly_derived_1_2.log"
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 5 different moves, with a single move picked randomly per iteration
+   
+   Processing file "output/treeAssembly_derived_2_1.log"
+   Appending to previous MCMC simulation of 3000 iterations
+   This simulation runs 1 independent replicate.
+   The simulator uses 5 different moves, with a single move picked randomly per iteration
+   
+   Processing file "output/treeAssembly_derived_2_2.log"
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 5 different moves, with a single move picked randomly per iteration
+   
+   Processing file "output/treeAssembly_derived_3_1.log"
+   Appending to previous MCMC simulation of 3000 iterations
+   This simulation runs 1 independent replicate.
+   The simulator uses 5 different moves, with a single move picked randomly per iteration
+   
+   Processing file "output/treeAssembly_derived_3_2.log"
+TRUE

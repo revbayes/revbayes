@@ -1,2 +1,0 @@
-a reader of the input tree stays right while an assembly hangs off it:
-TRUE	

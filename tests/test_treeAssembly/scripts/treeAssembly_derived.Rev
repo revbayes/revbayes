@@ -1,6 +1,5 @@
 # Branch lengths are computed from the input tree, so a tree move touches the tree assembly through both inputs.
-out = "output/treeAssembly_derived.txt"
-print(filename=out, "treeAssembly with lengths derived from the input tree checkpoints correctly:\n")
+print("treeAssembly with lengths derived from the input tree checkpoints correctly:")
 
 chars <- readDiscreteCharacterData("data/primates_cytb_small.nex")
 taxa <- chars.taxa()
@@ -35,6 +34,6 @@ for (rep in 1:3) {
     }
     agree = agree && abs(cached[cached.size()] - fresh[fresh.size()]) < 1E-6
 }
-print(filename=out, append=TRUE, agree, "\n")
+print(agree)
 
 q()

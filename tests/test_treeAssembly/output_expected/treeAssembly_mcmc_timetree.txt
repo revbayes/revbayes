@@ -1,2 +1,0 @@
-an assembled time tree carries the true likelihood under every move:
-TRUE	

@@ -2,8 +2,7 @@
 # fires no tree change event at all. The cached likelihood after the chain is compared with
 # one computed afresh from a checkpoint.
 # Every line printed must be TRUE.
-out = "output/treeAssembly_replaced_tree.txt"
-print(filename=out, "an assembly follows a tree that is replaced rather than edited:\n")
+print("an assembly follows a tree that is replaced rather than edited:")
 
 chars <- readDiscreteCharacterData("data/primates_cytb_small.nex")
 taxa <- chars.taxa()
@@ -49,6 +48,6 @@ for (rep in 1:3) {
     }
     agree = agree && abs(cached[cached.size()] - fresh[fresh.size()]) < 1E-6
 }
-print(filename=out, append=TRUE, agree, "\n")
+print(agree)
 
 q()

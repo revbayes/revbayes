@@ -2,7 +2,6 @@
 # it was given, and that none of them disturbs the input.
 # Every line printed must be TRUE.
 seed(1)
-out = "output/treeAssembly_independent.txt"
 
 chars <- readDiscreteCharacterData("data/primates_cytb_small.nex")
 taxa <- chars.taxa()
@@ -19,21 +18,21 @@ b := fnTreeAssembly(tree, long)
 for (i in 1:n) { mid[i] <- 1.0 }
 c := fnTreeAssembly(tree, mid)
 
-print(filename=out, "three assemblies on one tree each keep the lengths they were given:\n")
-print(filename=out, append=TRUE, abs(a.treeLength() - 0.25 * n) < 1E-8, "\n")
-print(filename=out, append=TRUE, abs(b.treeLength() - 4.0 * n) < 1E-8, "\n")
-print(filename=out, append=TRUE, abs(c.treeLength() - 1.0 * n) < 1E-8, "\n")
+print("three assemblies on one tree each keep the lengths they were given:")
+print(abs(a.treeLength() - 0.25 * n) < 1E-8)
+print(abs(b.treeLength() - 4.0 * n) < 1E-8)
+print(abs(c.treeLength() - 1.0 * n) < 1E-8)
 
-print(filename=out, append=TRUE, "and the input tree is untouched by any of them:\n")
-print(filename=out, append=TRUE, abs(tree.treeLength() - before) < 1E-10, "\n")
+print("and the input tree is untouched by any of them:")
+print(abs(tree.treeLength() - before) < 1E-10)
 
-print(filename=out, append=TRUE, "and they all have the shape of the input:\n")
+print("and they all have the shape of the input:")
 shape = TRUE
 for (i in 1:(tree.nnodes() - 1)) {
     shape = shape && a.parent(i) == tree.parent(i)
     shape = shape && b.parent(i) == tree.parent(i)
     shape = shape && c.parent(i) == tree.parent(i)
 }
-print(filename=out, append=TRUE, shape, "\n")
+print(shape)
 
 q()
