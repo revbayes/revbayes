@@ -22,6 +22,7 @@
 #include <iosfwd>
 #include <vector>
 
+#include "RlBranchLengthTree.h"
 #include "RlTree.h"
 #include "RlTypedFunction.h"
 #include "DeterministicNode.h"
@@ -36,7 +37,7 @@ namespace RevLanguage {
 class ArgumentRules;
 class TypeSpec;
     
-    class Func_treeAssembly :  public TypedFunction<Tree> {
+    class Func_treeAssembly :  public TypedFunction<BranchLengthTree> {
         
     public:
         Func_treeAssembly( void );
