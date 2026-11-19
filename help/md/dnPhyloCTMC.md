@@ -31,6 +31,8 @@ The `coding` argument specifies which site patterns could have been sampled and 
 
 For `type="Binary"` or `type="Restriction"`, you can combine options in a string separated by `"|"` or as a vector. For example, `coding="noabsencesites|nosingletonpresence"` and `coding=["noabsencesites", "nosingletonpresence"]` both exclude sites where all taxa have 0 or exactly one taxon has 1. Each option may appear only once. The options `"variable"` and `"nosingletons"` each combine the corresponding absence and presence exclusions, and `"informative"` combines `"variable"` with `"nosingletons"`. Combining codings for other data types gives an error.
 
+For Standard data, `coding="informative"` uses the algorithm of Koch and Holder (2012) to compute the exact probability of all parsimony-uninformative site patterns for any number of states. Memory use grows exponentially with the number of states, more than doubling with each additional state. Characters with many states, for example 10, can require many gigabytes of memory and cause the analysis to fail at the start. Memory use grows linearly with the number of taxa, the number of site rate categories or other site mixture components, and the number of distinct patterns of missing data across characters.
+
 For more details, see the tutorials on [graphical models](https://revbayes.github.io/tutorials/intro/graph_models) and on
 [specifying a phylogenetic continuous-time Markov chain](https://revbayes.github.io/tutorials/ctmc/) model.
 ## authors
@@ -71,3 +73,5 @@ For more details, see the tutorials on [graphical models](https://revbayes.githu
   doi: 10.1007/BF01734359
 - citation: Höhna S, Landis MJ, Heath TA (2017). Phylogenetic inference using `RevBayes`. Current Protocols in Bioinformatics, 57:6.16.1--6.16.34.
   doi: 10.1002/cpbi.22
+- citation: Koch MA, Holder MT (2012). An algorithm for calculating the probability of classes of data patterns on a genealogy. PLoS Currents.
+  doi: 10.1371/4fd1286980c08

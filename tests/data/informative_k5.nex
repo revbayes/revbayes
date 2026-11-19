@@ -1,0 +1,12 @@
+#NEXUS
+begin data;
+dimensions ntax=5 nchar=12;
+format datatype=standard missing=? symbols="01234";
+matrix
+A 012330140100
+B 012340141200
+C 12344120?300
+D 12343120??11
+E ????0233??2?
+;
+end;

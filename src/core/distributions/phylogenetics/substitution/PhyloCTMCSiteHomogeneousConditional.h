@@ -382,9 +382,9 @@ bool RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::isSitePatternC
 
     // find characters not intersecting common state
     // then get state counts
-    stateCounts.clear();
     for (size_t i = 0; i < common_states.size(); i++)
     {
+        stateCounts.clear();
         for (std::map<RbBitSet, size_t>::iterator it = charCounts.begin(); it != charCounts.end(); it++)
         {
             RbBitSet r = it->first;
@@ -396,18 +396,17 @@ bool RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::isSitePatternC
                 return true;
             }
 
-            for (size_t i = 0; i < r.size(); i++)
+            for (size_t j = 0; j < r.size(); j++)
             {
+                if ( r.test(j) == false ) continue;
+
                 // if a state is found more than once among characters lacking the common state
                 // then this site pattern is parsimony informative
-                if (stateCounts.find(i) != stateCounts.end() )
+                if ( stateCounts[j] > 0 )
                 {
                     return true;
                 }
-                else
-                {
-                    stateCounts[i] += r.test(i);
-                }
+                stateCounts[j]++;
             }
         }
     }
@@ -865,9 +864,10 @@ double RevBayesCore::PhyloCTMCSiteHomogeneousConditional<charType>::sumRootLikel
                         * 2. don't double-count patterns (num obs == num auto)
                         *
                         * if num obs == num auto + 1
-                        * then don't double count the all-autapomorphies pattern
+                        * then count the all-autapomorphies pattern only once, when a is its
+                        * smallest state (bits of c below a are the states below a)
                         */
-                        if ( (maskObservationCounts[mask] == popcount + 1 && a == 0) ||
+                        if ( (maskObservationCounts[mask] == popcount + 1 && (c & ((size_t(1) << a) - 1)) == 0) ||
                              maskObservationCounts[mask] > popcount + 1)
                         {
                             // iterate over initial states

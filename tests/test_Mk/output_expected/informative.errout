@@ -1,0 +1,6 @@
+   Successfully read one character matrix from file 'data/informative_k5.nex'
+   WARNING: There are 4 characters incompatible with the specified coding bias. These characters will be excluded.
+informative lnL matches brute force:	TRUE
+   Successfully read one character matrix from file 'data/informative_k5_all.nex'
+   WARNING: There are 565 characters incompatible with the specified coding bias. These characters will be excluded.
+informative patterns sum to one under the correction:	TRUE
