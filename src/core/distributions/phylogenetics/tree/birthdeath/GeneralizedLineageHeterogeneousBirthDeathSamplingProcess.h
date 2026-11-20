@@ -96,6 +96,9 @@ namespace RevBayesCore {
         double                                                            absolute_tolerance;
         double                                                            relative_tolerance;
         TensorPhylo::DistributionHandlerSharedPtr                         tp_ptr;
+        
+        // Build a TensorPhylo engine owned by this distribution and apply its settings.
+        void                                                              createTensorPhyloEngine(void);
 
         // simulation functions
         void                                                              simulateTree(void);

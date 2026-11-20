@@ -49,28 +49,7 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 	root_frequency(root_frequency_),
 	dirty_nodes( std::vector<bool>(2 * taxa.size() - 1, true) )
 {
-	try {
-		// create the pointer
-		tp_ptr = Plugin::loader().createTensorPhyloLik();
-
-		// set the random number generator
-		RandomNumberGenerator* rng = GLOBAL_RNG;
-		unsigned int seed = rng->getSeed();
-		tp_ptr->setSeed( size_t(seed) );
-
-	} catch (...) {
-		throw RbException("TensorPhylo is not loaded (use loadPlugin(...)).");
-	}
-	
-	// turn on/off debug
-	tp_ptr->setConditionalProbCompatibilityMode(false);
-	tp_ptr->setNumberOfThreads(n_proc);
-	tp_ptr->setAbsoluteTolerance(abs_tol_);
-	tp_ptr->setRelativeTolerance(rel_tol_);
-	tp_ptr->setMaxNumDenseSteps(n_dense_steps);
-//	tp_ptr->setLikelihoodApproximator(TensorPhylo::Interface::approximatorVersion_t::PARALLEL_BRANCHWISE);
-//	tp_ptr->setLikelihoodApproximator(TensorPhylo::Interface::approximatorVersion_t::SEQUENTIAL_BRANCHWISE);
-//	tp_ptr->setDebugMode(TensorPhylo::Interface::debugMode_t::DBG_FILE, "test.out");
+    createTensorPhyloEngine();
 
 	// add the parameters
 	addParameter(age);
@@ -87,58 +66,85 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 
     // update the kernel
     updateRootFrequency(true);
+}
 
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::createTensorPhyloEngine(void)
+{
+    try
+    {
+        // create the pointer
+        tp_ptr = Plugin::loader().createTensorPhyloLik();
+        
+        // set the random number generator
+        RandomNumberGenerator* rng = GLOBAL_RNG;
+        tp_ptr->setSeed( size_t(rng->getSeed()) );
+    }
+    catch (...)
+    {
+        throw RbException("TensorPhylo is not loaded (use loadPlugin(...)).");
+    }
+    
     // turn on/off debug
-	// tp_ptr->setApplyTreeLikCorrection(false);
-
+    tp_ptr->setConditionalProbCompatibilityMode(false);
+    tp_ptr->setNumberOfThreads(n_proc);
+    tp_ptr->setAbsoluteTolerance(absolute_tolerance);
+    tp_ptr->setRelativeTolerance(relative_tolerance);
+    tp_ptr->setMaxNumDenseSteps(n_dense_steps);
+//  tp_ptr->setLikelihoodApproximator(TensorPhylo::Interface::approximatorVersion_t::PARALLEL_BRANCHWISE);
+//  tp_ptr->setLikelihoodApproximator(TensorPhylo::Interface::approximatorVersion_t::SEQUENTIAL_BRANCHWISE);
+//  tp_ptr->setDebugMode(TensorPhylo::Interface::debugMode_t::DBG_FILE, "test.out");
+    
+    // turn on/off debug
+    // tp_ptr->setApplyTreeLikCorrection(false);
+    
     // set the condition type
     tp_ptr->setConditionalProbabilityType(TensorPhylo::Interface::TIME);
+    
     if ( condition_type != "time" )
     {
         if ( use_origin )
         {
-        	if ( condition_type == "survival" or condition_type == "sampledExtant" )
-        	{
-        		tp_ptr->setConditionalProbabilityType(TensorPhylo::Interface::STEM_SURVIVAL);
-        	}
-        	else if ( condition_type == "sampled" )
-        	{
-        		tp_ptr->setConditionalProbabilityType(TensorPhylo::Interface::STEM_ONE_SAMPLE);
-        	}
-        	else if ( condition_type == "tree" )
-        	{
-        		tp_ptr->setConditionalProbabilityType(TensorPhylo::Interface::STEM_TWO_SAMPLES);
-        	}
-        	else if ( condition_type == "treeExtant" )
-        	{
-        		tp_ptr->setConditionalProbabilityType(TensorPhylo::Interface::STEM_TWO_EXT_SAMPLES);
-        	}
-        	else
-        	{
-        		throw RbException("Invalid condition selected.");
-        	}
+            if ( condition_type == "survival" or condition_type == "sampledExtant" )
+            {
+                tp_ptr->setConditionalProbabilityType(TensorPhylo::Interface::STEM_SURVIVAL);
+            }
+            else if ( condition_type == "sampled" )
+            {
+                tp_ptr->setConditionalProbabilityType(TensorPhylo::Interface::STEM_ONE_SAMPLE);
+            }
+            else if ( condition_type == "tree" )
+            {
+                tp_ptr->setConditionalProbabilityType(TensorPhylo::Interface::STEM_TWO_SAMPLES);
+            }
+            else if ( condition_type == "treeExtant" )
+            {
+                tp_ptr->setConditionalProbabilityType(TensorPhylo::Interface::STEM_TWO_EXT_SAMPLES);
+            }
+            else
+            {
+                throw RbException("Invalid condition selected.");
+            }
         }
         else
         {
-        	if ( condition_type == "survival" or condition_type == "sampledExtant" )
-        	{
-        		tp_ptr->setConditionalProbabilityType(TensorPhylo::Interface::ROOT_MRCA);
-        	}
-        	else if ( condition_type == "sampled" )
-        	{
-        		tp_ptr->setConditionalProbabilityType(TensorPhylo::Interface::ROOT_SAMPLING);
-        	}
-        	else if ( condition_type == "sampledMRCA" )
-        	{
-        		tp_ptr->setConditionalProbabilityType(TensorPhylo::Interface::ROOT_SAMPLING_AND_MRCA);
-        	}
-        	else
-        	{
-        		throw RbException("Invalid condition selected.");
-        	}
+            if ( condition_type == "survival" or condition_type == "sampledExtant" )
+            {
+                tp_ptr->setConditionalProbabilityType(TensorPhylo::Interface::ROOT_MRCA);
+            }
+            else if ( condition_type == "sampled" )
+            {
+                tp_ptr->setConditionalProbabilityType(TensorPhylo::Interface::ROOT_SAMPLING);
+            }
+            else if ( condition_type == "sampledMRCA" )
+            {
+                tp_ptr->setConditionalProbabilityType(TensorPhylo::Interface::ROOT_SAMPLING_AND_MRCA);
+            }
+            else
+            {
+                throw RbException("Invalid condition selected.");
+            }
         }
     }
-
 }
 
 /**
