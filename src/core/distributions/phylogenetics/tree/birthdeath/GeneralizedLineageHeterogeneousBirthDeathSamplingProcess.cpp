@@ -36,8 +36,10 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
     double                                                          rel_tol_,
 	size_t                                                          n_dense_steps_
 ) : TypedDistribution<Tree>( new TreeDiscreteCharacterData() ),
-	n_proc(n_proc_),
 	n_dense_steps(n_dense_steps_),
+    n_proc(n_proc_),
+    absolute_tolerance(abs_tol_),
+    relative_tolerance(rel_tol_),
 	taxa(taxa_),
 	age(age_),
 	condition_type(condition_type_),
