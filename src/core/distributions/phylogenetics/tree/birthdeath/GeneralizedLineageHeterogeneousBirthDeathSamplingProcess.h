@@ -44,6 +44,8 @@ namespace RevBayesCore {
 																 double                        abs_tol_,
 																 double                        rel_tol_,
 																 size_t                        n_dense_steps_);
+        
+        GeneralizedLineageHeterogeneousBirthDeathSamplingProcess(const GeneralizedLineageHeterogeneousBirthDeathSamplingProcess& src);
 
         // pure virtual member functions
         virtual GeneralizedLineageHeterogeneousBirthDeathSamplingProcess* clone(void) const;
