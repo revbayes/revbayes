@@ -68,6 +68,67 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
     updateRootFrequency(true);
 }
 
+/**
+* Copy constructor.
+*
+* The parameter pointers are copied as-is. Cloning a model retargets them afterwards.
+* The TensorPhylo engine is not copied: all chains of an analysis with multiple runs
+* would otherwise score proposals on one shared likelihood object. Dirty flags keep
+* their in-class defaults, so the next likelihood evaluation uploads this object's
+* parameters. Character data is the exception. updateData() runs only when forced.
+*/
+GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHeterogeneousBirthDeathSamplingProcess(const GeneralizedLineageHeterogeneousBirthDeathSamplingProcess& src) :
+    TypedDistribution<Tree>(src),
+    n_dense_steps(src.n_dense_steps),
+    n_proc(src.n_proc),
+    absolute_tolerance(src.absolute_tolerance),
+    relative_tolerance(src.relative_tolerance),
+    taxa(src.taxa),
+    age(src.age),
+    condition_type(src.condition_type),
+    num_states(src.num_states),
+    use_origin(src.use_origin),
+    zero_indexed(src.zero_indexed),
+    root_frequency(src.root_frequency),
+    lambda_const(src.lambda_const),
+    lambda_var(src.lambda_var),
+    lambda_times(src.lambda_times),
+    mu_const(src.mu_const),
+    mu_var(src.mu_var),
+    mu_times(src.mu_times),
+    phi_const(src.phi_const),
+    phi_var(src.phi_var),
+    phi_times(src.phi_times),
+    delta_const(src.delta_const),
+    delta_var(src.delta_var),
+    delta_times(src.delta_times),
+    upsilon(src.upsilon),
+    upsilon_times(src.upsilon_times),
+    gamma(src.gamma),
+    gamma_times(src.gamma_times),
+    rho_simple(src.rho_simple),
+    rho(src.rho),
+    rho_times(src.rho_times),
+    xi(src.xi),
+    xi_times(src.xi_times),
+    eta_simple(src.eta_simple),
+    eta_const(src.eta_const),
+    eta_var(src.eta_var),
+    eta_times(src.eta_times),
+    omega_const(src.omega_const),
+    omega_var(src.omega_var),
+    omega_times(src.omega_times),
+    zeta(src.zeta),
+    dirty_nodes(src.dirty_nodes.size(), true)
+{
+    createTensorPhyloEngine();
+    
+    if ( static_cast<const TreeDiscreteCharacterData&>( this->getValue() ).hasCharacterData() )
+    {
+        updateData(true);
+    }
+}
+
 void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::createTensorPhyloEngine(void)
 {
     try
