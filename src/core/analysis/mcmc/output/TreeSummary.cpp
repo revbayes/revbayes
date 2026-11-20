@@ -779,7 +779,7 @@ double TreeSummary::maxdiff( bool verbose )
         {
             for(size_t j = i+1; j < split_freqs.size(); j++)
             {
-                double diff = abs(split_freqs[i] - split_freqs[j]);
+                double diff = std::abs(split_freqs[i] - split_freqs[j]);
 
                 if(diff > maxdiff)
                 {
