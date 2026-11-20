@@ -1,0 +1,145 @@
+   Attempting to read the contents of file "sim.1.extant.tre"
+   Successfully read file
+   Successfully read one character matrix from file 'data/out.1.dat.nex'
+   sp5
+   1 1 
+   sp7
+   1 1 
+   sp9
+   0 1 
+   sp11
+   1 1 
+   sp14
+   1 1 
+   sp15
+   1 1 
+   sp17
+   1 1 
+   sp21
+   0 1 
+   sp23
+   1 1 
+   sp24
+   1 1 
+   sp25
+   1 1 
+   sp26
+   1 1 
+   sp27
+   0 1 
+   sp28
+   1 1 
+   sp29
+   1 1 
+   sp30
+   1 1 
+   sp34
+   1 1 
+   sp35
+   1 1 
+   sp36
+   0 1 
+   sp37
+   1 1 
+   sp38
+   1 1 
+   sp39
+   1 1 
+   sp40
+   0 1 
+   sp41
+   1 1 
+   sp42
+   0 1 
+   sp43
+   1 1 
+   sp44
+   0 1 
+   sp46
+   1 0 
+   sp48
+   1 0 
+   sp49
+   1 0 
+   sp50
+   1 1 
+   sp51
+   1 1 
+   sp52
+   1 0 
+   sp53
+   1 1 
+   sp54
+   0 1 
+   sp55
+   1 1 
+   sp56
+   1 1 
+   sp58
+   1 0 
+   sp59
+   0 1 
+   sp60
+   1 1 
+   sp61
+   1 1 
+   sp62
+   1 0 
+   sp63
+   0 1 
+   sp64
+   1 0 
+   sp65
+   1 0 
+   sp66
+   1 0 
+   sp67
+   0 1 
+   sp68
+   1 0 
+   sp69
+   0 1 
+   sp70
+   0 1 
+anagenetic
+[ [ -0.0328053, 0, 0.0328053 ] ,[ 0, -0.00698246, 0.00698246 ] ,[ 0.000281916, 0.0874616, -0.0877435 ] ]
+   10
+   01
+   11
+cladogenetic
+   Warning: simulating tree under uniform model.
+   Warning: simulating tree under uniform model.
+   
+   Running burn-in phase of Monte Carlo sampler for 125 iterations.
+   This simulation runs 2 independent replicates.
+   The simulator uses 7 different moves in a random move schedule with 16 moves per iteration
+   
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+   
+   Running MCMC simulation
+   This simulation runs 2 independent replicates.
+   The simulator uses 7 different moves in a random move schedule with 16 moves per iteration
+   
+   Processing file 'output/stoch.log'
+   Processing file 'output/states.log'
+   Compiling stochastic character maps from 102 samples in the character map trace, using a burnin of 10 samples.
+   
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+   Compiling MAP ancestral states from 102 samples in the ancestral state trace, using a burnin of 10 samples.
+   
+   Calculating ancestral state posteriors...
+   
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+DONE

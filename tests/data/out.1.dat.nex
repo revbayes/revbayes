@@ -1,0 +1,57 @@
+#NEXUS
+Begin data;
+Dimensions ntax=50 nchar=2;
+Format datatype=Standard symbols="01";
+Matrix
+sp5 11
+sp7 11
+sp9 01
+sp11 11
+sp14 11
+sp15 11
+sp17 11
+sp21 01
+sp23 11
+sp24 11
+sp25 11
+sp26 11
+sp27 01
+sp28 11
+sp29 11
+sp30 11
+sp34 11
+sp35 11
+sp36 01
+sp37 11
+sp38 11
+sp39 11
+sp40 01
+sp41 11
+sp42 01
+sp43 11
+sp44 01
+sp46 10
+sp48 10
+sp49 10
+sp50 11
+sp51 11
+sp52 10
+sp53 11
+sp54 01
+sp55 11
+sp56 11
+sp58 10
+sp59 01
+sp60 11
+sp61 11
+sp62 10
+sp63 01
+sp64 10
+sp65 10
+sp66 10
+sp67 01
+sp68 10
+sp69 01
+sp70 01
+;
+End;
