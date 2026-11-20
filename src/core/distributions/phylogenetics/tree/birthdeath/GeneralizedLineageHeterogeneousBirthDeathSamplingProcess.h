@@ -85,15 +85,17 @@ namespace RevBayesCore {
     protected:
 
         // likelihoods
-        double current_ln_prob = 0.0;
-        double old_ln_prob = 0.0;
-        bool   probability_dirty = true;
-        bool   tp_can_reset = true;
+        double                                                            current_ln_prob = 0.0;
+        double                                                            old_ln_prob = 0.0;
+        bool                                                              probability_dirty = true;
+        bool                                                              tp_can_reset = true;
 
         // tensorphylo interface
-        size_t                                    n_dense_steps;
-        size_t                                    n_proc;
-        TensorPhylo::DistributionHandlerSharedPtr tp_ptr;
+        size_t                                                            n_dense_steps;
+        size_t                                                            n_proc;
+        double                                                            absolute_tolerance;
+        double                                                            relative_tolerance;
+        TensorPhylo::DistributionHandlerSharedPtr                         tp_ptr;
 
         // simulation functions
         void                                                              simulateTree(void);
