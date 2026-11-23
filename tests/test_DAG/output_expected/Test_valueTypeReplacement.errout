@@ -1,0 +1,13 @@
+   Error:	Cannot redefine 'x' with a different value type because existing expressions, moves, or monitors reference it.
+   1.25
+   2.5
+   4
+   8
+   3
+Referenced conversion: Natural 2 3
+Updated conversion: 3 4
+Unreferenced conversion: RealPos 3
+
+Vector conversion: Natural[] [ 4, 5] [ 4, 6]
+Simplex conversion: Simplex 0.5 [ 1.5, 1.5]
+

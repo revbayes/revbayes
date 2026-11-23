@@ -1,9 +1,11 @@
 #include <cstddef>
+#include <memory>
 #include <sstream>
 #include <string>
 #include <vector>
 
 #include "Argument.h"
+#include "AbstractModelObject.h"
 #include "ArgumentRule.h"
 #include "RbException.h"
 #include "RlFunction.h"
@@ -206,62 +208,6 @@ Argument ArgumentRule::fitArgument( Argument& arg ) const
                 RevPtr<RevVariable> valueVar = RevPtr<RevVariable>( new RevVariable(the_var->getRevObject().clone(),the_var->getName() ) );
                 return Argument( valueVar, arg.getLabel(), true );
             }
-//<<<<<<< HEAD
-//            else if ( the_var->getRevObject().isConvertibleTo( *it, convert_by_value ) != -1 )
-//            {
-//                // Fit by type conversion. For now, we also modify the type of the incoming variable wrapper.
-//                RevObject* convertedObject = the_var->getRevObject().convertTo( *it );
-//
-//                RevPtr<RevVariable> valueVar = RevPtr<RevVariable>( new RevVariable(convertedObject,the_var->getName() ) );
-//                return Argument( valueVar, arg.getLabel(), true );
-//                
-//            }
-//        } // if (by-value)
-//        else
-//        {
-//            if ( the_var->getRevObject().isType( *it ) )
-//            {
-//                // For now, change the required type of the incoming variable wrapper
-//                the_var->setRequiredTypeSpec( *it );
-//            
-//                if ( isEllipsis() == false )
-//                {
-//                    return Argument( the_var, arg.getLabel(), evalType == BY_CONSTANT_REFERENCE );
-//                }
-//                else
-//                {
-//                    return Argument( the_var, arg.getLabel(), true );
-//                }
-//            
-//            }
-//            else if ( the_var->getRevObject().isConvertibleTo( *it, convert_by_value ) != -1  && (*it).isDerivedOf( the_var->getRequiredTypeSpec() ) )
-//            {
-//                // Fit by type conversion. For now, we also modify the type of the incoming variable wrapper.
-//                RevObject* converted_object = the_var->getRevObject().convertTo( *it );
-//                
-//                RevPtr<RevVariable> the_new_var = NULL;
-//                if ( the_var->getRevObject().isConstant() == true )
-//                {
-//                    the_new_var = the_var;
-//                    the_new_var->replaceRevObject( converted_object );
-//                    the_new_var->setRequiredTypeSpec( *it );
-//                }
-//                else
-//                {
-//                    the_new_var = RevPtr<RevVariable>( new RevVariable(converted_object, the_var->getName() ) );
-//                }
-//                
-//                if ( !isEllipsis() )
-//                {
-//                    return Argument( the_new_var, arg.getLabel(), false );
-//                }
-//                else
-//                {
-//                    return Argument( the_new_var, arg.getLabel(), false );
-//                }
-//            }
-//=======
-//>>>>>>> bec51c4a9f3581046b7c8af121197e7ef0dae9d4
             else
             {
                 // For now, change the required type of the incoming variable wrapper
@@ -270,20 +216,43 @@ Argument ArgumentRule::fitArgument( Argument& arg ) const
                 return Argument( the_var, arg.getLabel(), isEllipsis() or evalType == BY_CONSTANT_REFERENCE );
             }
         }
+        // When fitting a reference argument, may we change the caller's variable to a type
+        // outside its declared requirement? convertTo creates a converted object. The code
+        // below can then install that object in the caller's variable.
+        // Previously, direct conversion of a reference argument required
+        // argTypeSpec.isDerivedOf(the_var->getRequiredTypeSpec()). If that check failed,
+        // we looked for a named conversion function and passed its result to the callee.
         else if ( the_var->getRevObject().isConvertibleTo( argTypeSpec, convert_by_value ) != -1 )
         {
-            // Fit by type conversion. For now, we also modify the type of the incoming variable wrapper.
-            RevObject* convertedObject = the_var->getRevObject().convertTo( argTypeSpec );
+            std::unique_ptr<RevObject> convertedObject(the_var->getRevObject().convertTo(argTypeSpec));
 
             RevPtr<RevVariable> the_new_var = nullptr;
             if ( the_var->getRevObject().isConstant() and not by_value )
             {
-                the_new_var = the_var;
-                the_new_var->replaceRevObject( convertedObject );
+                const auto& source = the_var->getRevObject();
+                auto* oldNode = source.hasDagNode() ? source.getDagNode() : nullptr;
+                auto* newNode = convertedObject->hasDagNode() ? convertedObject->getDagNode() : nullptr;
+
+                // Preserve existing users when fitting the argument would change their C++ value type.
+                // Decide before adding the conversion child, which itself becomes a user of the source.
+                if (oldNode && newNode &&
+                    (!oldNode->getChildren().empty() || !oldNode->getMoves().empty() ||
+                     !oldNode->getMonitors().empty()) && !oldNode->hasCompatibleValueType(*newNode))
+                {
+                    static_cast<AbstractModelObject&>(*convertedObject).makeConversionValue(
+                        static_cast<const AbstractModelObject&>(source));
+                    the_new_var = new RevVariable(convertedObject.release(), the_var->getName());
+                    the_new_var->setHiddenVariableState(true);
+                }
+                else
+                {
+                    the_new_var = the_var;
+                    the_new_var->replaceRevObject(convertedObject.release());
+                }
                 the_new_var->setRequiredTypeSpec( argTypeSpec );
             }
             else
-                the_new_var = RevPtr<RevVariable>( new RevVariable(convertedObject, the_var->getName() ) );
+                the_new_var = RevPtr<RevVariable>( new RevVariable(convertedObject.release(), the_var->getName() ) );
                 
             return Argument( the_new_var, arg.getLabel(), false );
         }

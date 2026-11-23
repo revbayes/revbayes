@@ -20,22 +20,28 @@ namespace RevBayesCore {
         virtual                                            ~TypedDagNode(void);                                                                                         //!< Virtual destructor
     
         // pure virtual methods
-        virtual TypedDagNode<valueType>*                    clone(void) const = 0;
+        virtual TypedDagNode<valueType>*                    clone(void) const override = 0;
+
+        // Compare value types independently of whether nodes are constant, deterministic, or stochastic.
+        bool hasCompatibleValueType(const DagNode& other) const override
+        {
+            return dynamic_cast<const TypedDagNode<valueType>*>(&other) != nullptr;
+        }
 
         // member functions
-        virtual AbstractTrace*                              createTraceObject(void) const;                                                                              //!< Create an empty trace object of the right trace type
-        virtual size_t                                      getNumberOfElements(void) const;                                                                            //!< Get the number of elements for this value
-        virtual std::string                                 getValueAsString(void) const;
-        virtual nlohmann::json                              getValueAsJSON(void) const;
-        virtual bool                                        isSimpleNumeric(void) const;                                                                                //!< Is this variable a simple numeric variable? Currently only integer and real number are.
-        virtual void                                        printName(std::ostream &o, const std::string &sep, int l=-1, bool left=true, bool fv=true) const;           //!< Monitor/Print this variable
-        virtual void                                        printValue(std::ostream &o, const std::string &sep, int l=-1, bool left=true, bool user=true, bool simple=true, bool flatten=true) const;  //!< Monitor/Print this variable
-        virtual void                                        writeToFile(const path &dir) const;                                                                         //!< Write the value of this node to a file within the given directory.
+        virtual AbstractTrace*                              createTraceObject(void) const override;                                                                     //!< Create an empty trace object of the right trace type
+        virtual size_t                                      getNumberOfElements(void) const override;                                                                   //!< Get the number of elements for this value
+        virtual std::string                                 getValueAsString(void) const override;
+        virtual nlohmann::json                              getValueAsJSON(void) const override;
+        virtual bool                                        isSimpleNumeric(void) const override;                                                                       //!< Is this variable a simple numeric variable? Currently only integers and real numbers are.
+        virtual void                                        printName(std::ostream &o, const std::string &sep, int l=-1, bool left=true, bool fv=true) const override;  //!< Monitor/Print this variable
+        virtual void                                        printValue(std::ostream &o, const std::string &sep, int l=-1, bool left=true, bool user=true, bool simple=true, bool flatten=true) const override;  //!< Monitor/Print this variable
+        virtual void                                        writeToFile(const path &dir) const override;                                                                //!< Write the value of this node to a file within the given directory.
 
         // getters and setters
         virtual valueType&                                  getValue(void) = 0;
         virtual const valueType&                            getValue(void) const = 0;
-        virtual void                                        setValueFromString(const std::string &v) = 0;                                                               //!< Set value from string.
+        virtual void                                        setValueFromString(const std::string &v) override = 0;                                                      //!< Set value from string.
 
         
     };

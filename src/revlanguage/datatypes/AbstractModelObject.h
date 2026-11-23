@@ -41,6 +41,8 @@ namespace RevLanguage {
         virtual RevBayesCore::DagNode*          getDagNode(void) const = 0;                                                     //!< Get the internal DAG node
         virtual bool                            hasDagNode(void) const = 0;                                                     //!< Do we have an internal DAG node
         virtual void                            setDagNode(RevBayesCore::DagNode *newNode) = 0;                                 //!< Set or replace the internal dag node (and keep me)
+        virtual void                            makeConversionValue(const AbstractModelObject& source) = 0;               //!< Depend on a source through its existing Rev conversion
+        virtual void                            setValueFromNode(const RevBayesCore::DagNode& source) = 0;                  //!< Copy a node's value into a constant of the same C++ value type
         virtual void                            setName(const std::string &n) = 0;                                              //!< Set the name of the variable (if applicable)
         
         virtual std::string                     getGuiName(void) = 0;
