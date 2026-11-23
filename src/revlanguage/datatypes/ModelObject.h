@@ -21,38 +21,38 @@ namespace RevLanguage {
         typedef rbType                          valueType;
        
         // Basic utility functions you have to override
-        virtual ModelObject*                    clone(void) const = 0;                                                      //!< Clone object
+        virtual ModelObject*                    clone(void) const override = 0;                                             //!< Clone object
         static const std::string&               getClassType(void);                                                         //!< Get Rev type (static)
         static const TypeSpec&                  getClassTypeSpec(void);                                                     //!< Get Rev type spec (static)
-        virtual const TypeSpec&                 getTypeSpec(void) const = 0;                                                //!< Get Rev type spec (instance)
+        virtual const TypeSpec&                 getTypeSpec(void) const override = 0;                                       //!< Get Rev type spec (instance)
     
         // Utility functions you might want to override
-        virtual RevPtr<RevVariable>             executeMethod(const std::string& name, const std::vector<Argument>& args, bool &found);  //!< Execute member functions
+        virtual RevPtr<RevVariable>             executeMethod(const std::string& name, const std::vector<Argument>& args, bool &found) override;  //!< Execute member functions
         
         // Basic utility functions you should not have to override
-        bool                                    isAssignable(void) const;                                                   //!< Is object or upstream members assignable?
-        bool                                    isConstant(void) const;                                                     //!< Is this variable and the internally stored deterministic node constant?
-        void                                    makeConstantValue(void);                                                    //!< Convert to constant object
+        bool                                    isAssignable(void) const override;                                          //!< Is object or upstream members assignable?
+        bool                                    isConstant(void) const override;                                            //!< Is this variable and the internally stored deterministic node constant?
+        void                                    makeConstantValue(void) override;                                           //!< Convert to constant object
         void                                    makeConversionValue(const AbstractModelObject& source) override;
         void                                    setValueFromNode(const RevBayesCore::DagNode& source) override;
-        ModelObject<rbType>*                    makeIndirectReference(void);                                                //!< Make reference to object
-        void                                    makeUserFunctionValue(UserFunction* fxn);                                   //!< Convert to user-defined Rev function object
-        void                                    setDagNode(RevBayesCore::DagNode *newNode);                                 //!< Set or replace the internal dag node (and keep me)
-        void                                    setName(const std::string &n);                                              //!< Set the name of the variable (if applicable)
+        ModelObject<rbType>*                    makeIndirectReference(void) override;                                       //!< Make reference to object
+        void                                    makeUserFunctionValue(UserFunction* fxn) override;                          //!< Convert to user-defined Rev function object
+        void                                    setDagNode(RevBayesCore::DagNode *newNode) override;                        //!< Set or replace the internal dag node (and keep me)
+        void                                    setName(const std::string &n) override;                                     //!< Set the name of the variable (if applicable)
         void                                    replaceVariable(RevObject *newVar);                                         //!< Replace the internal DAG node (and prepare to replace me...)
         
         // Getters and setters
-        RevBayesCore::TypedDagNode<rbType>*     getDagNode(void) const;                                                     //!< Get the internal DAG node
-        bool                                    hasDagNode(void) const;                                                     //!< Get the internal DAG node
+        RevBayesCore::TypedDagNode<rbType>*     getDagNode(void) const override;                                            //!< Get the internal DAG node
+        bool                                    hasDagNode(void) const override;                                            //!< Get the internal DAG node
         virtual const rbType&                   getValue(void) const;                                                       //!< Get the value (const)
         virtual rbType&                         getValue(void);                                                             //!< Get the value (non-const)
         void                                    setValue(rbType *x);                                                        //!< Set new constant value
-        virtual void                            printValue(std::ostream& o, bool user) const;                               //!< Print value
+        virtual void                            printValue(std::ostream& o, bool user) const override;                      //!< Print value
         virtual void                            printValue(std::ostream& o) const { printValue(o, true); };                 //!< Print value overload
 
-        virtual std::string                     getGuiName(void) { return ""; }
-        virtual std::string                     getGuiUnicodeSymbol(void) { return ""; }
-        virtual std::string                     getGuiInfo(void) { return ""; }
+        virtual std::string                     getGuiName(void) override { return ""; }
+        virtual std::string                     getGuiUnicodeSymbol(void) override { return ""; }
+        virtual std::string                     getGuiInfo(void) override { return ""; }
         
     protected:
         ModelObject(void);
