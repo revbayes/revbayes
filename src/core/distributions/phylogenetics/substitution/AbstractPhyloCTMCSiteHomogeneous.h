@@ -17,6 +17,7 @@
 #include "Tree.h"
 #include "TreeChangeEventListener.h"
 #include "TypedDistribution.h"
+#include "TypeUtilities.h"
 #include "SiteMixtureModel.h"
 
 #include <memory>
@@ -940,7 +941,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
                 // set the counts for this patter
                 process_pattern_counts[patternIndex] = pattern_counts[patternIndex+pattern_block_start];
 
-                charType &c = static_cast<charType &>( taxon.getCharacter(site_indices[indexOfSitePattern[patternIndex+pattern_block_start]]) );
+                charType &c = cast_to_derived<charType &>( taxon.getCharacter(site_indices[indexOfSitePattern[patternIndex+pattern_block_start]]) );
                 gap_matrix[node_index][patternIndex] = c.isGapState();
 
                 if ( using_ambiguous_characters == true )
@@ -2121,7 +2122,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::tipDrawJointCondi
     this->updateTransitionProbabilityMatrix( node_index );
 
     const AbstractHomologousDiscreteCharacterData& d = this->getValue();
-    const HomologousDiscreteCharacterData<charType>& dd = static_cast<const HomologousDiscreteCharacterData<charType>& >( d );
+    const HomologousDiscreteCharacterData<charType>& dd = cast_to_derived<const HomologousDiscreteCharacterData<charType>&>( d );
     const DiscreteTaxonData<charType>& td = dd.getTaxonData( node.getName() );
 
     // ideally sample ambiguous tip states given the underlying process and ancestral state
