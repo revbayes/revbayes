@@ -57,8 +57,9 @@ bool RevBayesCore::PhyloCTMCSiteHomogeneousBinary::isSitePatternCompatible( std:
 
 bool RevBayesCore::PhyloCTMCSiteHomogeneousBinary::isSitePatternCompatible( std::map<RbBitSet, size_t> charCounts )
 {
-    RbBitSet z(2, false);
-    RbBitSet o(2, false);
+    size_t width = charCounts.empty() ? 2 : charCounts.begin()->first.size();
+    RbBitSet z(width, false);
+    RbBitSet o(width, false);
     
     z.set(0);
     o.set(1);
