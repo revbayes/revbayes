@@ -59,7 +59,7 @@ RevPtr<RevVariable> Func_readVCF::execute( void )
     }
     else if ( type == "binary")
     {
-        RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::BinaryState> *aln = vcf_reader.readBinaryMatrix();
+        RevBayesCore::HomologousDiscreteCharacterData<RevBayesCore::StandardState> *aln = vcf_reader.readBinaryMatrix();
         rl_aln = new AbstractHomologousDiscreteCharacterData( aln );
     }
     return new RevVariable( rl_aln );

@@ -9,7 +9,6 @@
 #include "AminoAcidState.h"
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
-#include "BinaryState.h"
 #include "CodonState.h"
 #include "ConstantNode.h"
 #include "DagNode.h"
@@ -430,7 +429,7 @@ RevBayesCore::TypedDistribution< RevBayesCore::AbstractDiscreteTaxonData >* Dist
         }
 
         
-        RevBayesCore::CTMCProcess<RevBayesCore::BinaryState> *dist = new RevBayesCore::CTMCProcess<RevBayesCore::BinaryState>(2,this_num_sites);
+        RevBayesCore::CTMCProcess<RevBayesCore::StandardState> *dist = new RevBayesCore::CTMCProcess<RevBayesCore::StandardState>(2,this_num_sites);
 
         // set the root frequencies (by default these are NULL so this is OK)
         dist->setRootFrequencies( rf );

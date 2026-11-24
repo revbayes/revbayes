@@ -4,7 +4,6 @@
 #include <cstddef>
 #include <string>
 
-#include "BinaryState.h"
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "IntegerPos.h"

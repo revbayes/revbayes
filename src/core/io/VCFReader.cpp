@@ -19,9 +19,9 @@ VCFReader::VCFReader(const std::string &fn) : DelimitedDataReader(fn)
 }
 
 
-HomologousDiscreteCharacterData<BinaryState>* VCFReader::readBinaryMatrix( void )
+HomologousDiscreteCharacterData<StandardState>* VCFReader::readBinaryMatrix( void )
 {
-    HomologousDiscreteCharacterData<BinaryState> *matrix = new HomologousDiscreteCharacterData<BinaryState> ();
+    HomologousDiscreteCharacterData<StandardState> *matrix = new HomologousDiscreteCharacterData<StandardState> ();
     
     int start = 0;
     // Skip comments.
@@ -43,25 +43,25 @@ HomologousDiscreteCharacterData<BinaryState>* VCFReader::readBinaryMatrix( void 
         sample_names.push_back( format_line[j] );
     }
     size_t NUM_SAMPLES = sample_names.size();
-    std::vector< DiscreteTaxonData<BinaryState> > taxa;
+    std::vector< DiscreteTaxonData<StandardState> > taxa;
     if ( ploidy == HAPLOID )
     {
-        taxa = std::vector< DiscreteTaxonData<BinaryState> >( NUM_SAMPLES, DiscreteTaxonData<BinaryState>( Taxon("") ) );
+        taxa = std::vector< DiscreteTaxonData<StandardState> >( NUM_SAMPLES, DiscreteTaxonData<StandardState>( Taxon("") ) );
         for (size_t i=0; i<NUM_SAMPLES; ++i)
         {
             Taxon this_taxon = Taxon( sample_names[i] + "" );
-            taxa[i] = DiscreteTaxonData<BinaryState>( this_taxon );
+            taxa[i] = DiscreteTaxonData<StandardState>( this_taxon );
         }
     }
      else if ( ploidy == DIPLOID )
     {
-        taxa = std::vector< DiscreteTaxonData<BinaryState> >( 2*NUM_SAMPLES, DiscreteTaxonData<BinaryState>( Taxon("") ) );
+        taxa = std::vector< DiscreteTaxonData<StandardState> >( 2*NUM_SAMPLES, DiscreteTaxonData<StandardState>( Taxon("") ) );
         for (size_t i=0; i<NUM_SAMPLES; ++i)
         {
             Taxon this_taxon_A = Taxon( sample_names[i] + "_A" );
-            taxa[i] = DiscreteTaxonData<BinaryState>( this_taxon_A );
+            taxa[i] = DiscreteTaxonData<StandardState>( this_taxon_A );
             Taxon this_taxon_B = Taxon( sample_names[i] + "_B" );
-            taxa[i+NUM_SAMPLES] = DiscreteTaxonData<BinaryState>( this_taxon_B );
+            taxa[i+NUM_SAMPLES] = DiscreteTaxonData<StandardState>( this_taxon_B );
         }
     }
     else
@@ -69,7 +69,7 @@ HomologousDiscreteCharacterData<BinaryState>* VCFReader::readBinaryMatrix( void 
         throw RbException("Currently we have only implementations for haploid and diploid organisms.");
     }
     
-    BinaryState missing_state = BinaryState("0");
+    StandardState missing_state = StandardState("0", "01");
     missing_state.setMissingState( true );
     
     for (size_t i = start; i < chars.size(); ++i)
@@ -92,11 +92,11 @@ HomologousDiscreteCharacterData<BinaryState>* VCFReader::readBinaryMatrix( void 
                 // first allele
                 if ( allele_tokens[0] == "0")
                 {
-                    taxa[j].addCharacter( BinaryState("0") );
+                    taxa[j].addCharacter( StandardState("0", "01") );
                 }
                 else if ( allele_tokens[0] == "1" )
                 {
-                    taxa[j].addCharacter( BinaryState("1") );
+                    taxa[j].addCharacter( StandardState("1", "01") );
                 }
                 else if ( allele_tokens[0] == "." )
                 {
@@ -110,11 +110,11 @@ HomologousDiscreteCharacterData<BinaryState>* VCFReader::readBinaryMatrix( void 
                 // second allele
                 if ( allele_tokens[1] == "0")
                 {
-                    taxa[j+NUM_SAMPLES].addCharacter( BinaryState("0") );
+                    taxa[j+NUM_SAMPLES].addCharacter( StandardState("0", "01") );
                 }
                 else if ( allele_tokens[1] == "1" )
                 {
-                    taxa[j+NUM_SAMPLES].addCharacter( BinaryState("1") );
+                    taxa[j+NUM_SAMPLES].addCharacter( StandardState("1", "01") );
                 }
                 else if ( allele_tokens[1] == "." )
                 {
