@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <vector>
 #include <iosfwd>
@@ -198,8 +199,8 @@ RevPtr<RevVariable> DistanceMatrix::executeMethod(std::string const &name, const
 		{
 			found = true;
 			// get the member with given indices
-			const Natural& i = static_cast<const Natural&>( args[0].getVariable()->getRevObject() );
-			const Natural& j = static_cast<const Natural&>( args[1].getVariable()->getRevObject() );
+			const Natural& i = objectForRevType<Natural>(args[0].getVariable());
+			const Natural& j = objectForRevType<Natural>(args[1].getVariable());
 
 			if ( size() < (size_t)(i.getValue()) )
 			{
@@ -210,7 +211,7 @@ RevPtr<RevVariable> DistanceMatrix::executeMethod(std::string const &name, const
 				throw RbException("Index j out of bounds in getElement");
 			}
 
-			double element = static_cast< RevBayesCore::DistanceMatrix& >( this->dag_node->getValue() ).getElement(size_t(i.getValue()) - 1, size_t(j.getValue()) - 1);
+			double element = this->dag_node->getValue().getElement(size_t(i.getValue()) - 1, size_t(j.getValue()) - 1);
 			
 			return new RevVariable( new Real( element ) );
 
@@ -224,9 +225,9 @@ RevPtr<RevVariable> DistanceMatrix::executeMethod(std::string const &name, const
 		{
 			found = true;
 			// get the member with given indices
-			const Natural& i = static_cast<const Natural&>( args[0].getVariable()->getRevObject() );
-			const Natural& j = static_cast<const Natural&>( args[1].getVariable()->getRevObject() );
-			const Real& v = static_cast<const Real&>( args[2].getVariable()->getRevObject() );
+			const Natural& i = objectForRevType<Natural>(args[0].getVariable());
+			const Natural& j = objectForRevType<Natural>(args[1].getVariable());
+			const Real& v = objectForRevType<Real>(args[2].getVariable());
 
 			if ( size() < (size_t)(i.getValue()) )
 			{
@@ -237,7 +238,7 @@ RevPtr<RevVariable> DistanceMatrix::executeMethod(std::string const &name, const
 				throw RbException("Index j out of bounds in getElement");
 			}
 			
-			static_cast< RevBayesCore::DistanceMatrix& >( this->dag_node->getValue() ).getElement(size_t(i.getValue()) - 1, size_t(j.getValue()) - 1) = double(v.getValue() );
+			this->dag_node->getValue().getElement(size_t(i.getValue()) - 1, size_t(j.getValue()) - 1) = double(v.getValue() );
 			
 		}
 		return NULL;
@@ -254,7 +255,7 @@ RevPtr<RevVariable> DistanceMatrix::executeMethod(std::string const &name, const
 
 const Real* DistanceMatrix::getElement(size_t idx, size_t idy) const
 {
-	double element = static_cast< RevBayesCore::DistanceMatrix& >( this->dag_node->getValue() ).getElement(idx - 1, idy - 1);
+	double element = this->dag_node->getValue().getElement(idx - 1, idy - 1);
 	
 	return new Real( element ) ;
 
@@ -263,7 +264,7 @@ const Real* DistanceMatrix::getElement(size_t idx, size_t idy) const
 
 void DistanceMatrix::setElement(size_t idx, size_t idy, double& value) {
 
-	static_cast< RevBayesCore::DistanceMatrix& >( this->dag_node->getValue() ).getElement(idx - 1, idy - 1) = value;
+	this->dag_node->getValue().getElement(idx - 1, idy - 1) = value;
 	
 	return ;
 }

@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cmath>
 #include <cstddef>
 #include <ostream>
@@ -69,27 +70,27 @@ RevBayesCore::InverseWishartDistribution* Dist_inverseWishart::createDistributio
     
     if ( sigma->getRevObject() != RevNullObject::getInstance() )
     {
-        sg = static_cast<const MatrixRealSymmetric &>( sigma->getRevObject() ).getDagNode();
+        sg = dagNodeForRevType<MatrixRealSymmetric>(sigma);
     }
     
     if ( diagonal->getRevObject() != RevNullObject::getInstance() )
     {
-        dv = static_cast<const ModelVector<RealPos> &>( diagonal->getRevObject() ).getDagNode();
+        dv = dagNodeForRevType<ModelVector<RealPos>>(diagonal);
     }
     
     if ( kappa->getRevObject() != RevNullObject::getInstance() )
     {
-        ka = static_cast<const RealPos&>( kappa->getRevObject() ).getDagNode();
+        ka = dagNodeForRevType<RealPos>(kappa);
     }
     
     if ( df->getRevObject() != RevNullObject::getInstance() )
     {
-        deg = static_cast<const Natural &>( df->getRevObject()).getDagNode();
+        deg = dagNodeForRevType<Natural>(df);
     }
 
     if ( dim->getRevObject() != RevNullObject::getInstance() )
     {
-        dm = static_cast<const Natural &>( dim->getRevObject()).getDagNode();
+        dm = dagNodeForRevType<Natural>(dim);
     }
     
     RevBayesCore::InverseWishartDistribution* w =  NULL;

@@ -1,3 +1,5 @@
+#include "TypeUtilities.h"
+#include "RevTypeUtilities.h"
 #include "Move_MPQTree.h"
 
 #include <cstddef>
@@ -51,11 +53,11 @@ void Move_MPQTree::constructInternalObject( void ) {
     delete value;
     
     // now allocate a new sliding move
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree >* tmp_tree = static_cast<const Tree &>( tree->getRevObject() ).getDagNode();
-    RevBayesCore::StochasticNode<RevBayesCore::Tree > *t = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp_tree );
+    double w = valueForRevType<RealPos>(weight);
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree >* tmp_tree = dagNodeForRevType<Tree>(tree);
+    RevBayesCore::StochasticNode<RevBayesCore::Tree > *t = cast_to_derived<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp_tree );
 
-    bool ur = static_cast<const RlBoolean &>( update_root->getRevObject() ).getValue();
+    bool ur = valueForRevType<RlBoolean>(update_root);
     
     RevBayesCore::Proposal *p = new RevBayesCore::MPQTreeProposal(t, ur);
     // the proposal has nothing to tune

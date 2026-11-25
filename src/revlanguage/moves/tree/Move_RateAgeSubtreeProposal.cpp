@@ -1,3 +1,5 @@
+#include "TypeUtilities.h"
+#include "RevTypeUtilities.h"
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
 #include "MetropolisHastingsMove.h"
@@ -50,12 +52,12 @@ RevPtr<RevVariable> Move_RateAgeSubtreeProposal::executeMethod(const std::string
     {
         found = true;
         
-        RevBayesCore::MetropolisHastingsMove *m = static_cast<RevBayesCore::MetropolisHastingsMove*>(this->value);
-        RevBayesCore::RateAgeSubtreeProposal &prop = static_cast<RevBayesCore::RateAgeSubtreeProposal&>( m->getProposal() );
+        RevBayesCore::MetropolisHastingsMove *m = cast_to_derived<RevBayesCore::MetropolisHastingsMove*>(this->value);
+        RevBayesCore::RateAgeSubtreeProposal &prop = cast_to_derived<RevBayesCore::RateAgeSubtreeProposal&>( m->getProposal() );
 
-        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* tmpRates = static_cast<const ModelVector<RealPos> &>( args[0].getVariable()->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* tmpRates = dagNodeForRevType<ModelVector<RealPos>>(args[0].getVariable());
         std::vector< RevBayesCore::StochasticNode<double> *> rates;
-        RevBayesCore::DeterministicNode< RevBayesCore::RbVector<double> >*dnode = static_cast< RevBayesCore::DeterministicNode< RevBayesCore::RbVector<double> > *>( tmpRates );
+        RevBayesCore::DeterministicNode< RevBayesCore::RbVector<double> >*dnode = cast_to_derived< RevBayesCore::DeterministicNode< RevBayesCore::RbVector<double> > *>( tmpRates );
         
         RevBayesCore::VectorFunction<double>* funcVec = dynamic_cast<RevBayesCore::VectorFunction<double>*>( &dnode->getFunction() );
         if ( funcVec == NULL )
@@ -66,7 +68,7 @@ RevPtr<RevVariable> Move_RateAgeSubtreeProposal::executeMethod(const std::string
         
         for (std::vector<const RevBayesCore::TypedDagNode<double>* >::const_iterator it = pars.begin(); it != pars.end(); ++it)
         {
-            rates.push_back( const_cast<RevBayesCore::StochasticNode<double>* >(static_cast<const RevBayesCore::StochasticNode<double>* >( *it ) ) );
+            rates.push_back( const_cast<RevBayesCore::StochasticNode<double>* >(cast_to_derived<const RevBayesCore::StochasticNode<double>* >( *it ) ) );
         }
 
         prop.addRates( rates );
@@ -142,14 +144,14 @@ void Move_RateAgeSubtreeProposal::constructInternalObject( void )
     delete value;
     
     // now allocate a new element scaling move
-    double a = static_cast<const RealPos &>( alpha->getRevObject() ).getValue();
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    double r = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
-    bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    double a = valueForRevType<RealPos>(alpha);
+    double w = valueForRevType<RealPos>(weight);
+    double r = valueForRevType<Probability>(tuneTarget);
+    bool t = valueForRevType<RlBoolean>(tune);
 
     // get the tree
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = static_cast<const Tree&>( tree->getRevObject() ).getDagNode();
-    RevBayesCore::StochasticNode<RevBayesCore::Tree> *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tmp = dagNodeForRevType<Tree>(tree);
+    RevBayesCore::StochasticNode<RevBayesCore::Tree> *n = cast_to_derived<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
 
     // finally create the internal move object
     RevBayesCore::RateAgeSubtreeProposal *prop = new RevBayesCore::RateAgeSubtreeProposal(n, a, r);

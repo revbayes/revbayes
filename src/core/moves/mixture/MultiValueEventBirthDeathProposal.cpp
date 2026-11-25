@@ -1,3 +1,5 @@
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include "MultiValueEventBirthDeathProposal.h"
 
 #include <cmath>
@@ -392,7 +394,7 @@ void MultiValueEventBirthDeathProposal::undoProposal( void )
 {
     
     MultiValueEvent &mve = event_var->getValue();
-    const MultiValueEventDistribution &dist_mve = static_cast< const MultiValueEventDistribution &>( event_var->getDistribution() );
+    const MultiValueEventDistribution &dist_mve = cast_to_derived< const MultiValueEventDistribution &>( event_var->getDistribution() );
     std::int64_t n_events = mve.getNumberOfEvents();
     
     // undo the proposal
@@ -453,7 +455,7 @@ void MultiValueEventBirthDeathProposal::swapNodeInternal(DagNode *oldN, DagNode 
     
     if ( oldN == event_var )
     {
-        event_var = static_cast<StochasticNode<MultiValueEvent>* >(newN) ;
+        replaceNodeReference(event_var, newN) ;
     }
     
 }

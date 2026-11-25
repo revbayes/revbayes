@@ -1,3 +1,5 @@
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include "TimRateMatrixFunction.h"
 
 #include <vector>
@@ -52,8 +54,8 @@ void TimRateMatrixFunction::update( void )
     
     
     // set the base frequencies
-    static_cast< RateMatrix_TIM* >(value)->setStationaryFrequencies( f );
-    static_cast< RateMatrix_TIM* >(value)->setRates( r );
+    cast_to_derived< RateMatrix_TIM* >(value)->setStationaryFrequencies( f );
+    cast_to_derived< RateMatrix_TIM* >(value)->setRates( r );
     
     value->update();
     
@@ -66,11 +68,11 @@ void TimRateMatrixFunction::swapParameterInternal(const DagNode *oldP, const Dag
     
     if (oldP == base_frequencies)
     {
-        base_frequencies = static_cast<const TypedDagNode< Simplex >* >( newP );
+        replaceNodeReference(base_frequencies, newP);
     }
     else if (oldP == exchangeability_rates)
     {
-        exchangeability_rates = static_cast<const TypedDagNode< Simplex >* >( newP );
+        replaceNodeReference(exchangeability_rates, newP);
     }
     
 }

@@ -1,6 +1,8 @@
 #ifndef TipRejectionSampleProposal_H
 #define TipRejectionSampleProposal_H
 
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include "BranchHistoryDiscrete.h"
 #include "CharacterEventDiscrete.h"
 #include "DeterministicNode.h"
@@ -355,7 +357,7 @@ void RevBayesCore::TipRejectionSampleProposal<charType>::prepareProposal( void )
     const std::vector<CharacterEvent*>& curr_tip_state = p->getHistory(*node).getChildCharacters();
     for (size_t site_index = 0; site_index < num_sites; ++site_index)
     {
-        size_t s = static_cast<CharacterEventDiscrete*>(curr_tip_state[site_index])->getState();
+        size_t s = cast_to_derived<CharacterEventDiscrete*>(curr_tip_state[site_index])->getState();
         storedTipState[site_index] = s;
     }
 
@@ -420,7 +422,7 @@ void RevBayesCore::TipRejectionSampleProposal<charType>::sampleTipCharacters( vo
     for (it_s = sampledCharacters.begin(); it_s != sampledCharacters.end(); it_s++)
     {
         size_t site_index = *it_s;
-        size_t ancS  = static_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->getState();
+        size_t ancS  = cast_to_derived<CharacterEventDiscrete*>(nodeParentState[site_index])->getState();
 
         double u = GLOBAL_RNG->uniform01();
 
@@ -428,7 +430,7 @@ void RevBayesCore::TipRejectionSampleProposal<charType>::sampleTipCharacters( vo
         double sum = 0.0;
         for ( size_t i=0; i<numStates; ++i )
         {
-            if ( static_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->isValidState(i) )
+            if ( cast_to_derived<CharacterEventDiscrete*>(nodeChildState[site_index])->isValidState(i) )
             {
                 double p = tip_tp_matrix[ancS][i];
                 sum += p;
@@ -447,7 +449,7 @@ void RevBayesCore::TipRejectionSampleProposal<charType>::sampleTipCharacters( vo
             ++s;
         }
 
-        static_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->setState(s);
+        cast_to_derived<CharacterEventDiscrete*>(nodeChildState[site_index])->setState(s);
     }
 
 
@@ -503,15 +505,15 @@ void RevBayesCore::TipRejectionSampleProposal<charType>::swapNodeInternal(DagNod
 
     if (oldN == ctmc)
     {
-        ctmc = static_cast<StochasticNode<AbstractHomologousDiscreteCharacterData>* >(newN) ;
+        replaceNodeReference(ctmc, newN) ;
     }
     else if (oldN == q_map_site)
     {
-        q_map_site = static_cast<DeterministicNode<RateGenerator>* >(newN);
+        replaceNodeReference(q_map_site, newN);
     }
     else if (oldN == q_map_sequence)
     {
-        q_map_sequence = static_cast<DeterministicNode<RateGeneratorSequence>* >(newN);
+        replaceNodeReference(q_map_sequence, newN);
     }
 
     tip_branch_proposal->swapNode(oldN, newN);
@@ -571,7 +573,7 @@ void RevBayesCore::TipRejectionSampleProposal<charType>::undoProposal( void )
     for (size_t site_index = 0; site_index < num_sites; ++site_index)
     {
         size_t s = storedTipState[site_index];
-        static_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->setState(s);
+        cast_to_derived<CharacterEventDiscrete*>(nodeChildState[site_index])->setState(s);
     }
 
 

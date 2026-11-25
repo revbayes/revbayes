@@ -1,6 +1,8 @@
 #ifndef JointConditionalSiteMixtureAllocationMonitor_H
 #define JointConditionalSiteMixtureAllocationMonitor_H
 
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include "AbstractHomologousDiscreteCharacterData.h"
 #include "VariableMonitor.h"
 #include "Tree.h"
@@ -77,7 +79,7 @@ SiteMixtureAllocationMonitor<characterType>::SiteMixtureAllocationMonitor(Stocha
 {
     addVariable( ctmc );
 
-    AbstractPhyloCTMCSiteHomogeneous<characterType> *dist_ctmc = static_cast<AbstractPhyloCTMCSiteHomogeneous<characterType>* >( &ctmc->getDistribution() );
+    AbstractPhyloCTMCSiteHomogeneous<characterType> *dist_ctmc = cast_to_derived<AbstractPhyloCTMCSiteHomogeneous<characterType>* >( &ctmc->getDistribution() );
 
     // determine if the CTMC is using a site-rate mixture
     has_site_rate_mixture = dist_ctmc->hasSiteRateMixture();
@@ -123,7 +125,7 @@ void SiteMixtureAllocationMonitor<characterType>::monitorVariables(std::uint64_t
     auto& separator = to<SeparatorFormat>(format)->separator;
     
 	// make sure the CTMC has been already sampled mixture components
-	AbstractPhyloCTMCSiteHomogeneous<characterType> *dist_ctmc = static_cast<AbstractPhyloCTMCSiteHomogeneous<characterType>* >( &ctmc->getDistribution() );
+	AbstractPhyloCTMCSiteHomogeneous<characterType> *dist_ctmc = cast_to_derived<AbstractPhyloCTMCSiteHomogeneous<characterType>* >( &ctmc->getDistribution() );
 	size_t num_sites = dist_ctmc->getValue().getNumberOfIncludedCharacters();
 	dist_ctmc->drawSiteMixtureAllocations();
 
@@ -179,7 +181,7 @@ void SiteMixtureAllocationMonitor<characterType>::printFileHeader()
     auto& separator = to<SeparatorFormat>(format)->separator;
 
         // get the number of sites
-	AbstractPhyloCTMCSiteHomogeneous<characterType> *dist_ctmc = static_cast<AbstractPhyloCTMCSiteHomogeneous<characterType>* >( &ctmc->getDistribution() );
+	AbstractPhyloCTMCSiteHomogeneous<characterType> *dist_ctmc = cast_to_derived<AbstractPhyloCTMCSiteHomogeneous<characterType>* >( &ctmc->getDistribution() );
 	const TypedDagNode<Tree> *tree = dist_ctmc->getTree();
 	size_t num_sites = dist_ctmc->getValue().getNumberOfCharacters();
 
@@ -217,7 +219,7 @@ void SiteMixtureAllocationMonitor<characterType>::swapNode(DagNode *oldN, DagNod
 {
 	if ( oldN == ctmc )
 	{
-		ctmc = static_cast< StochasticNode<AbstractHomologousDiscreteCharacterData> *>( newN );
+		replaceNodeReference(ctmc, newN);
 	}
     
     Monitor::swapNode( oldN, newN );

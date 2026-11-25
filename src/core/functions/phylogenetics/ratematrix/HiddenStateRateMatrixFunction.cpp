@@ -1,3 +1,5 @@
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include "HiddenStateRateMatrixFunction.h"
 
 #include <cmath>
@@ -242,7 +244,7 @@ void HiddenStateRateMatrixFunction::update( void )
     }
     
     // finally set the rates in the actual matrix
-    static_cast< RateMatrix_FreeK* >(value)->setTransitionRates( all_rates_flat );
+    cast_to_derived< RateMatrix_FreeK* >(value)->setTransitionRates( all_rates_flat );
     value->update();
 }
 
@@ -252,27 +254,27 @@ void HiddenStateRateMatrixFunction::swapParameterInternal(const DagNode *oldP, c
     
     if (oldP == observed_transition_rates)
     {
-        observed_transition_rates = static_cast<const TypedDagNode< RbVector<RbVector<double> > >* >( newP );
+        replaceNodeReference(observed_transition_rates, newP);
     }
     else if (oldP == observed_transition_rates_flat)
     {
-        observed_transition_rates_flat = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(observed_transition_rates_flat, newP);
     }
     else if (oldP == hidden_transition_rates)
     {
-        hidden_transition_rates = static_cast<const TypedDagNode< RbVector<RbVector<double> > >* >( newP );
+        replaceNodeReference(hidden_transition_rates, newP);
     }
     else if (oldP == hidden_transition_rates_flat)
     {
-        hidden_transition_rates_flat = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(hidden_transition_rates_flat, newP);
     }
     else if (oldP == observed_rate_generator)
     {
-        observed_rate_generator = static_cast<const TypedDagNode< RateGenerator >* >( newP );
+        replaceNodeReference(observed_rate_generator, newP);
     }
     else if (oldP == hidden_rate_generator)
     {
-        hidden_rate_generator = static_cast<const TypedDagNode< RateGenerator >* >( newP );
+        replaceNodeReference(hidden_rate_generator, newP);
     }
     
 }

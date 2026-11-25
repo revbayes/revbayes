@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "AssembleOrder2ContinuousMRFFunction.h"
 
 #include <cmath>
@@ -74,11 +75,11 @@ void AssembleOrder2ContinuousMRFFunction::swapParameterInternal(const DagNode *o
 
     if (oldP == increments)
     {
-        increments = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(increments, newP);
     }
     else if (oldP == theta1)
     {
-        theta1 = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(theta1, newP);
     }
 
 }

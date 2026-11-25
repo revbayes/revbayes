@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "WishartDistribution.h"
 
 #include <cstdlib>
@@ -78,15 +79,15 @@ void WishartDistribution::swapParameterInternal(const DagNode *oldP, const DagNo
     }
     if (oldP == kappa)
     {
-        kappa = static_cast<const TypedDagNode<double>* >(newP);
+        replaceNodeReference(kappa, newP);
     }
     if (oldP == dim)
     {
-        dim = static_cast<const TypedDagNode<std::int64_t>* >(newP);
+        replaceNodeReference(dim, newP);
     }
     if (oldP == df)
     {
-        df = static_cast<const TypedDagNode<std::int64_t>* >(newP);
+        replaceNodeReference(df, newP);
     }
 }
 

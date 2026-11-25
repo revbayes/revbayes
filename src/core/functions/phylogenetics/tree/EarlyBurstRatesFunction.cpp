@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "EarlyBurstRatesFunction.h"
 
 #include <cstddef>
@@ -81,15 +82,15 @@ void EarlyBurstRatesFunction::swapParameterInternal(const DagNode *oldP, const D
     
     if (oldP == tau)
     {
-        tau = static_cast<const TypedDagNode<Tree>* >( newP );
+        replaceNodeReference(tau, newP);
     }
     if (oldP == sigma)
     {
-        sigma = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(sigma, newP);
     }
     if (oldP == lambda)
     {
-        lambda = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(lambda, newP);
     }
 }
 

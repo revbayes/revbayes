@@ -1,3 +1,5 @@
+#include "TypeUtilities.h"
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <sstream>
 #include <string>
@@ -54,11 +56,11 @@ RevPtr<RevVariable> Func_mccTree::execute( void )
     RevObject& b = args[arg_index++].getVariable()->getRevObject();
     if ( b.isType( TraceTree::getClassTypeSpec() ) )
     {
-        summary = &( static_cast<TraceTree &>(b).getValue() );
+        summary = &( cast_to_derived<TraceTree &>(b).getValue() );
     }
     else
     {
-        std::vector<TraceTree>& tt = static_cast<const WorkspaceVector<TraceTree> &>(b).getValue();
+        std::vector<TraceTree>& tt = cast_to_derived<const WorkspaceVector<TraceTree> &>(b).getValue();
 
         std::vector<RevBayesCore::TraceTree* > vec;
         for(size_t i = 0; i < tt.size(); i++)
@@ -69,18 +71,18 @@ RevPtr<RevVariable> Func_mccTree::execute( void )
         summary = new RevBayesCore::TreeSummary( vec, tt.front().getValue().isClock() );
     }
 
-    const std::string& filename = static_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+    const std::string& filename = valueForRevType<RlString>(args[arg_index++].getVariable());
     
     
     RevBayesCore::TraceTree::AnnotationReport report;
 
-    report.conditional_clade_ages        = static_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
-    report.conditional_clade_probs       = static_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
-    report.conditional_tree_ages         = static_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
-    report.node_ages_HPD                 = static_cast<const Probability &>(args[arg_index++].getVariable()->getRevObject()).getValue();
-    report.mean_node_ages                = static_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
-    report.sampled_ancestor_probs        = static_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
-    report.force_positive_branch_lengths = static_cast<const RlBoolean &>( this->args[arg_index++].getVariable()->getRevObject() ).getValue();
+    report.conditional_clade_ages        = valueForRevType<RlBoolean>(this->args[arg_index++].getVariable());
+    report.conditional_clade_probs       = valueForRevType<RlBoolean>(this->args[arg_index++].getVariable());
+    report.conditional_tree_ages         = valueForRevType<RlBoolean>(this->args[arg_index++].getVariable());
+    report.node_ages_HPD                 = valueForRevType<Probability>(args[arg_index++].getVariable());
+    report.mean_node_ages                = valueForRevType<RlBoolean>(this->args[arg_index++].getVariable());
+    report.sampled_ancestor_probs        = valueForRevType<RlBoolean>(this->args[arg_index++].getVariable());
+    report.force_positive_branch_lengths = valueForRevType<RlBoolean>(this->args[arg_index++].getVariable());
     
     bool verbose = true;
     RevBayesCore::Tree* tree = summary->mccTree(report, verbose);

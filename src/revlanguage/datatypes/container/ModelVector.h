@@ -1,6 +1,8 @@
 #ifndef ModelVector_H
 #define ModelVector_H
 
+#include "TypeUtilities.h"
+#include "RevTypeUtilities.h"
 #include "RlContainer.h"
 #include "ModelObject.h"
 #include "RbVector.h"
@@ -232,7 +234,7 @@ RevObject* ModelVector<rlType>::convertTo(const TypeSpec &type) const
             for ( std::vector<const RevBayesCore::DagNode*>::iterator i = args.begin(); i != args.end(); ++i )
             {
                 RevBayesCore::DagNode* node = const_cast<RevBayesCore::DagNode*>(*i);
-                RevBayesCore::TypedDagNode<elementType>* tnode = static_cast<RevBayesCore::TypedDagNode<elementType>* >( node );
+                RevBayesCore::TypedDagNode<elementType>* tnode = cast_to_derived<RevBayesCore::TypedDagNode<elementType>* >( node );
                 rlType orgElement = rlType( tnode );
                 theConvertedContainer->push_back( orgElement );
                 
@@ -282,8 +284,7 @@ RevPtr<RevVariable> ModelVector<rlType>::executeMethod( std::string const &name,
         
         if ( args[0].getVariable()->getRevObject().isType( ModelVector<rlType>::getClassTypeSpec() ) )
         {
-            const ModelVector<rlType> &v_x = static_cast<const ModelVector<rlType>&>( args[0].getVariable()->getRevObject() );
-            const RevBayesCore::RbVector<typename rlType::valueType> &x = v_x.getValue();
+            const RevBayesCore::RbVector<typename rlType::valueType> &x = valueForRevType<ModelVector<rlType>>(args[0].getVariable());
             for (size_t i = 0; i < x.size(); ++i )
             {
                 v.push_back( x[i] );
@@ -291,8 +292,7 @@ RevPtr<RevVariable> ModelVector<rlType>::executeMethod( std::string const &name,
         }
         else
         {
-            const rlType &rl_x = static_cast<const rlType&>( args[0].getVariable()->getRevObject() );
-            const typename rlType::valueType &x = rl_x.getValue();
+            const typename rlType::valueType &x = valueForRevType<rlType>(args[0].getVariable());
             v.push_back( x );
         }
         
@@ -302,8 +302,7 @@ RevPtr<RevVariable> ModelVector<rlType>::executeMethod( std::string const &name,
     {
         found = true;
         
-        const rlType &rl_x = static_cast<const rlType&>( args[0].getVariable()->getRevObject() );
-        const typename rlType::valueType &x = rl_x.getValue();
+        const typename rlType::valueType &x = valueForRevType<rlType>(args[0].getVariable());
         const RevBayesCore::RbVector<typename rlType::valueType> &v = this->dag_node->getValue();
         for (size_t i = 0; i < v.size(); ++i )
         {
@@ -330,8 +329,7 @@ RevPtr<RevVariable> ModelVector<rlType>::executeMethod( std::string const &name,
         
         if ( args[0].getVariable()->getRevObject().isType( ModelVector<rlType>::getClassTypeSpec() ) )
         {
-            const ModelVector<rlType> &v_x = static_cast<const ModelVector<rlType>&>( args[0].getVariable()->getRevObject() );
-            const RevBayesCore::RbVector<typename rlType::valueType> &x = v_x.getValue();
+            const RevBayesCore::RbVector<typename rlType::valueType> &x = valueForRevType<ModelVector<rlType>>(args[0].getVariable());
             for (size_t i = 0; i < x.size(); ++i )
             {
                 RevBayesCore::RbIterator<typename rlType::valueType> pos = v.find( x[i] );
@@ -343,8 +341,7 @@ RevPtr<RevVariable> ModelVector<rlType>::executeMethod( std::string const &name,
         }
         else
         {
-            const rlType &rl_x = static_cast<const rlType&>( args[0].getVariable()->getRevObject() );
-            const typename rlType::valueType &x = rl_x.getValue();
+            const typename rlType::valueType &x = valueForRevType<rlType>(args[0].getVariable());
             RevBayesCore::RbIterator<typename rlType::valueType> pos = v.find( x );
             if ( pos != v.end() )
             {
@@ -358,8 +355,7 @@ RevPtr<RevVariable> ModelVector<rlType>::executeMethod( std::string const &name,
     {
         found = true;
         
-        const rlType &rl_x = static_cast<const rlType&>( args[0].getVariable()->getRevObject() );
-        const typename rlType::valueType &x = rl_x.getValue();
+        const typename rlType::valueType &x = valueForRevType<rlType>(args[0].getVariable());
         const RevBayesCore::RbVector<typename rlType::valueType> &v = this->dag_node->getValue();
         for (size_t i = 0; i < v.size(); ++i )
         {
@@ -409,7 +405,7 @@ RevPtr<RevVariable> ModelVector<rlType>::executeMethod( std::string const &name,
     {
         found = true;
         
-        std::int64_t index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+        std::int64_t index = valueForRevType<Natural>(args[0].getVariable()) - 1;
         return RevPtr<RevVariable>( new RevVariable( getElement( index ) ) );
     }
     
@@ -560,7 +556,7 @@ double ModelVector<rlType>::isConvertibleTo( const TypeSpec& type, bool convert_
 
             if( type.getType() == "Simplex" )
             {
-                Probability* ro = static_cast<Probability*>( org_element.convertTo( Probability::getClassTypeSpec() ) );
+                Probability* ro = cast_to_derived<Probability*>( org_element.convertTo( Probability::getClassTypeSpec() ) );
                 sum += ro->getValue();
                 delete ro;
             }

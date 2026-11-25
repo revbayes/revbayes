@@ -1,3 +1,5 @@
+#include "TypeUtilities.h"
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <sstream>
 #include <string>
@@ -103,7 +105,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> TimeTree::executeMethod(std::strin
     {
         found = true;
         
-        double length = static_cast<const RealPos&>( args[0].getVariable()->getRevObject() ).getValue();
+        double length = valueForRevType<RealPos>(args[0].getVariable());
         this->dag_node->getValue().collapseNegativeBranchLengths(length);
         return NULL;
     }
@@ -130,7 +132,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> TimeTree::executeMethod(std::strin
     {
         found = true;
         
-        int index = (int)static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+        int index = (int)valueForRevType<Natural>(args[0].getVariable()) - 1;
         
         bool tf = this->dag_node->getValue().getNode((size_t)index).isRoot();
         return new RevVariable( new RlBoolean( tf ) );
@@ -155,11 +157,11 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> TimeTree::executeMethod(std::strin
         const RevObject& current = args[0].getVariable()->getRevObject();
         if ( current.isType( Natural::getClassTypeSpec() ) )
         {
-            size_t index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() ).getValue() - 1;
+            size_t index = valueForRevType<Natural>(args[0].getVariable()) - 1;
             const RevObject& new_value = args[1].getVariable()->getRevObject();
             if ( new_value.isType( RealPos::getClassTypeSpec() ) )
             {
-                double value = static_cast<const RealPos&>( new_value ).getValue();
+                double value = cast_to_derived<const RealPos&>( new_value ).getValue();
                 RevBayesCore::Tree &tree = dag_node->getValue();
                 tree.getNode(index).setAge(value);
             }

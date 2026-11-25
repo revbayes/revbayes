@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <sstream>
 #include <string>
 
@@ -34,7 +35,7 @@ RevPtr<RevVariable> Proc_StringToInt::execute( void )
 {
     
     // get the information from the arguments for reading the file
-    const std::string& string_val   = static_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
+    const std::string& string_val   = valueForRevType<RlString>(args[0].getVariable());
     
     if ( StringUtilities::isIntegerNumber( string_val ) == false )
     {

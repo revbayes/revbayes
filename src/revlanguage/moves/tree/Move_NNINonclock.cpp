@@ -1,3 +1,5 @@
+#include "TypeUtilities.h"
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -49,9 +51,9 @@ void Move_NNINonclock::constructInternalObject( void )
     delete value;
     
     // now allocate a new sliding move
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = static_cast<const BranchLengthTree &>( tree->getRevObject() ).getDagNode();
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree> *tmp = dagNodeForRevType<BranchLengthTree>(tree);
+    double w = valueForRevType<RealPos>(weight);
+    RevBayesCore::StochasticNode<RevBayesCore::Tree> *t = cast_to_derived<RevBayesCore::StochasticNode<RevBayesCore::Tree> *>( tmp );
     
     RevBayesCore::Proposal *p = new RevBayesCore::NearestNeighborInterchange_nonClockProposal( t );
     value = new RevBayesCore::MetropolisHastingsMove(p, w, false);

@@ -1,6 +1,8 @@
 #ifndef FixedNodeheightPruneAndRegraftCharacterHistoryProposal_H
 #define FixedNodeheightPruneAndRegraftCharacterHistoryProposal_H
 
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include "BranchHistoryDiscrete.h"
 #include "HomologousDiscreteCharacterData.h"
 #include "PathRejectionSampleProposal.h"
@@ -306,7 +308,7 @@ double RevBayesCore::FixedNodeheightPruneAndRegraftCharacterHistoryProposal<char
 //    std::cout << "Initial states one: ";
     for (size_t site_index = 0; site_index < num_sites; ++site_index)
     {
-        size_t s = static_cast<CharacterEventDiscrete*>(node_states_one[site_index])->getState();
+        size_t s = cast_to_derived<CharacterEventDiscrete*>(node_states_one[site_index])->getState();
         stored_node_states_one[site_index] = s;
 //        std::cout << s << " ";
     }
@@ -318,7 +320,7 @@ double RevBayesCore::FixedNodeheightPruneAndRegraftCharacterHistoryProposal<char
 //    std::cout << "Initial states two: ";
     for (size_t site_index = 0; site_index < num_sites; ++site_index)
     {
-        size_t s = static_cast<CharacterEventDiscrete*>(node_states_two[site_index])->getState();
+        size_t s = cast_to_derived<CharacterEventDiscrete*>(node_states_two[site_index])->getState();
         stored_node_states_two[site_index] = s;
 //        std::cout << s << " ";
     }
@@ -330,7 +332,7 @@ double RevBayesCore::FixedNodeheightPruneAndRegraftCharacterHistoryProposal<char
 //    std::cout << "Initial states three: ";
     for (size_t site_index = 0; site_index < num_sites; ++site_index)
     {
-        size_t s = static_cast<CharacterEventDiscrete*>(node_states_three[site_index])->getState();
+        size_t s = cast_to_derived<CharacterEventDiscrete*>(node_states_three[site_index])->getState();
         stored_node_states_three[site_index] = s;
 //        std::cout << s << " ";
     }
@@ -577,9 +579,9 @@ void RevBayesCore::FixedNodeheightPruneAndRegraftCharacterHistoryProposal<charTy
         for (size_t site_index = 0; site_index < num_sites; ++site_index)
         {
             size_t s = stored_node_states_one[site_index];
-            static_cast<CharacterEventDiscrete*>(node_states_one[site_index])->setState(s);
-            static_cast<CharacterEventDiscrete*>(left_states_one[site_index])->setState(s);
-            static_cast<CharacterEventDiscrete*>(right_states_one[site_index])->setState(s);
+            cast_to_derived<CharacterEventDiscrete*>(node_states_one[site_index])->setState(s);
+            cast_to_derived<CharacterEventDiscrete*>(left_states_one[site_index])->setState(s);
+            cast_to_derived<CharacterEventDiscrete*>(right_states_one[site_index])->setState(s);
 //            std::cout << s << " ";
         }
 //        std::cout << std::endl;
@@ -588,9 +590,9 @@ void RevBayesCore::FixedNodeheightPruneAndRegraftCharacterHistoryProposal<charTy
         for (size_t site_index = 0; site_index < num_sites; ++site_index)
         {
             size_t s = stored_node_states_two[site_index];
-            static_cast<CharacterEventDiscrete*>(node_states_two[site_index])->setState(s);
-            static_cast<CharacterEventDiscrete*>(left_states_two[site_index])->setState(s);
-            static_cast<CharacterEventDiscrete*>(right_states_two[site_index])->setState(s);
+            cast_to_derived<CharacterEventDiscrete*>(node_states_two[site_index])->setState(s);
+            cast_to_derived<CharacterEventDiscrete*>(left_states_two[site_index])->setState(s);
+            cast_to_derived<CharacterEventDiscrete*>(right_states_two[site_index])->setState(s);
 //            std::cout << s << " ";
         }
 //        std::cout << std::endl;
@@ -599,9 +601,9 @@ void RevBayesCore::FixedNodeheightPruneAndRegraftCharacterHistoryProposal<charTy
         for (size_t site_index = 0; site_index < num_sites; ++site_index)
         {
             size_t s = stored_node_states_three[site_index];
-            static_cast<CharacterEventDiscrete*>(node_states_three[site_index])->setState(s);
-            static_cast<CharacterEventDiscrete*>(left_states_three[site_index])->setState(s);
-            static_cast<CharacterEventDiscrete*>(right_states_three[site_index])->setState(s);
+            cast_to_derived<CharacterEventDiscrete*>(node_states_three[site_index])->setState(s);
+            cast_to_derived<CharacterEventDiscrete*>(left_states_three[site_index])->setState(s);
+            cast_to_derived<CharacterEventDiscrete*>(right_states_three[site_index])->setState(s);
 //            std::cout << s << " ";
         }
 //        std::cout << std::endl;
@@ -698,9 +700,9 @@ void RevBayesCore::FixedNodeheightPruneAndRegraftCharacterHistoryProposal<charTy
             
             for (size_t site_index = 0; site_index < num_sites; ++site_index)
             {
-                size_t ancS  = static_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->getState();
-                size_t desS1 = static_cast<CharacterEventDiscrete*>(leftChildState[site_index])->getState();
-                size_t desS2 = static_cast<CharacterEventDiscrete*>(rightChildState[site_index])->getState();
+                size_t ancS  = cast_to_derived<CharacterEventDiscrete*>(nodeParentState[site_index])->getState();
+                size_t desS1 = cast_to_derived<CharacterEventDiscrete*>(leftChildState[site_index])->getState();
+                size_t desS2 = cast_to_derived<CharacterEventDiscrete*>(rightChildState[site_index])->getState();
                 
                 double u = GLOBAL_RNG->uniform01();
                 
@@ -725,9 +727,9 @@ void RevBayesCore::FixedNodeheightPruneAndRegraftCharacterHistoryProposal<charTy
                     ++s;
                 }
                 
-                static_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->setState(s);
-                static_cast<CharacterEventDiscrete*>(leftParentState[site_index])->setState(s);
-                static_cast<CharacterEventDiscrete*>(rightParentState[site_index])->setState(s);
+                cast_to_derived<CharacterEventDiscrete*>(nodeChildState[site_index])->setState(s);
+                cast_to_derived<CharacterEventDiscrete*>(leftParentState[site_index])->setState(s);
+                cast_to_derived<CharacterEventDiscrete*>(rightParentState[site_index])->setState(s);
             }
             
         }
@@ -738,8 +740,8 @@ void RevBayesCore::FixedNodeheightPruneAndRegraftCharacterHistoryProposal<charTy
             
             for (size_t site_index = 0; site_index < num_sites; ++site_index)
             {
-                size_t desS1 = static_cast<CharacterEventDiscrete*>(leftChildState[site_index])->getState();
-                size_t desS2 = static_cast<CharacterEventDiscrete*>(rightChildState[site_index])->getState();
+                size_t desS1 = cast_to_derived<CharacterEventDiscrete*>(leftChildState[site_index])->getState();
+                size_t desS2 = cast_to_derived<CharacterEventDiscrete*>(rightChildState[site_index])->getState();
                 
                 double u = GLOBAL_RNG->uniform01();
                 
@@ -764,9 +766,9 @@ void RevBayesCore::FixedNodeheightPruneAndRegraftCharacterHistoryProposal<charTy
                     ++s;
                 }
                 
-                static_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->setState(s);
-                static_cast<CharacterEventDiscrete*>(leftParentState[site_index])->setState(s);
-                static_cast<CharacterEventDiscrete*>(rightParentState[site_index])->setState(s);
+                cast_to_derived<CharacterEventDiscrete*>(nodeChildState[site_index])->setState(s);
+                cast_to_derived<CharacterEventDiscrete*>(leftParentState[site_index])->setState(s);
+                cast_to_derived<CharacterEventDiscrete*>(rightParentState[site_index])->setState(s);
                 
             }
             
@@ -834,19 +836,19 @@ void RevBayesCore::FixedNodeheightPruneAndRegraftCharacterHistoryProposal<charTy
     
     if ( oldN == tree )
     {
-        tree = static_cast<StochasticNode<Tree>* >(newN);
+        replaceNodeReference(tree, newN);
     }
     else if ( oldN == ctmc )
     {
-        ctmc = static_cast<StochasticNode<AbstractHomologousDiscreteCharacterData>* >(newN);
+        replaceNodeReference(ctmc, newN);
     }
     else if ( oldN == rate_generator )
     {
-        rate_generator = static_cast<TypedDagNode<RateGenerator>* >(newN);
+        replaceNodeReference(rate_generator, newN);
     }
     else if ( oldN == rate_generator_sequence )
     {
-        rate_generator_sequence = static_cast<DeterministicNode<RateGeneratorSequence>* >(newN);
+        replaceNodeReference(rate_generator_sequence, newN);
     }
     
     node_proposal_one->swapNodeInternal(oldN, newN);

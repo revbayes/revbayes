@@ -4,8 +4,8 @@
 #include "DelimitedDataReader.h"
 #include "AbstractHomologousDiscreteCharacterData.h"
 #include "HomologousDiscreteCharacterData.h"
-#include "BinaryState.h"
 #include "DnaState.h"
+#include "StandardState.h"
 
 #include <string>
 #include <vector>
@@ -32,7 +32,7 @@ namespace RevBayesCore {
         VCFReader(const std::string &fn);
         
         HomologousDiscreteCharacterData<DnaState>*              readDNAMatrix( void );
-        HomologousDiscreteCharacterData<BinaryState>*           readBinaryMatrix( void );
+        HomologousDiscreteCharacterData<StandardState>*           readBinaryMatrix( void );
 
     protected:
         

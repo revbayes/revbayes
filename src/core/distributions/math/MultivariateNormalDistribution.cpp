@@ -1,3 +1,5 @@
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include "MultivariateNormalDistribution.h"
 
 #include <cmath>
@@ -134,8 +136,8 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> MultivariateNormalDistribution::ex
     {
         found = true;
         
-        int    index = (int)static_cast<const TypedDagNode<std::int64_t>   *>( args[0] )->getValue() - 1;
-        double v     = static_cast<const TypedDagNode<double>*>( args[1] )->getValue();
+        int    index = (int)cast_to_derived<const TypedDagNode<std::int64_t>   *>( args[0] )->getValue() - 1;
+        double v     = cast_to_derived<const TypedDagNode<double>*>( args[1] )->getValue();
         
         clampAt(index, v);
 
@@ -179,15 +181,15 @@ void MultivariateNormalDistribution::swapParameterInternal(const DagNode *oldP, 
     
     if (oldP == mean)
     {
-        mean = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(mean, newP);
     }
     if (oldP == covariance)
     {
-        covariance = static_cast<const TypedDagNode<MatrixReal >* >( newP );
+        replaceNodeReference(covariance, newP);
     }
     if (oldP == precision)
     {
-        precision = static_cast<const TypedDagNode<MatrixReal >* >( newP );
+        replaceNodeReference(precision, newP);
     }
     
 }

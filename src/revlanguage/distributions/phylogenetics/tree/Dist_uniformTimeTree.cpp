@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cmath>
 #include <iosfwd>
 #include <string>
@@ -60,8 +61,8 @@ RevBayesCore::UniformTimeTreeDistribution* Dist_uniformTimeTree::createDistribut
 {
 
     // Get the parameters
-    RevBayesCore::TypedDagNode<double>* a   = static_cast<const RealPos &>( root_age->getRevObject() ).getDagNode();
-    std::vector<RevBayesCore::Taxon> t = static_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
+    RevBayesCore::TypedDagNode<double>* a   = dagNodeForRevType<RealPos>(root_age);
+    std::vector<RevBayesCore::Taxon> t = valueForRevType<ModelVector<Taxon>>(taxa);
 
     RevBayesCore::UniformTimeTreeDistribution*   d = new RevBayesCore::UniformTimeTreeDistribution( a, t );
 

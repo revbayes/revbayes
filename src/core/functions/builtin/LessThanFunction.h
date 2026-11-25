@@ -22,6 +22,7 @@
 #ifndef LessThanFunction_H
 #define LessThanFunction_H
 
+#include "DagNodeTypeUtilities.h"
 #include "RbBoolean.h"
 #include "TypedFunction.h"
 
@@ -97,11 +98,11 @@ void RevBayesCore::LessThanFunction<leftValueType,rightValueType>::swapParameter
     
     if ( oldP == left )
     {
-        left = static_cast<const TypedDagNode<leftValueType>* >( newP );
+        replaceNodeReference(left, newP);
     }
     if ( oldP == right )
     {
-        right = static_cast<const TypedDagNode<rightValueType>* >( newP );
+        replaceNodeReference(right, newP);
     }
     
 }

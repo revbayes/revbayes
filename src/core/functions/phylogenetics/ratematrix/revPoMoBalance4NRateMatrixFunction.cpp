@@ -1,3 +1,5 @@
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include "revPoMoBalance4NRateMatrixFunction.h"
 #include "RbException.h"
 
@@ -55,12 +57,12 @@ void revPoMoBalance4NRateMatrixFunction::update( void )
     const std::vector<std::int64_t>&   Bf = B->getValue();
 
     // set the base frequencies
-    static_cast< RateMatrix_revPoMoBalance4N* >(value)->setN( n );
-    static_cast< RateMatrix_revPoMoBalance4N* >(value)->setPi( p );
-    static_cast< RateMatrix_revPoMoBalance4N* >(value)->setRho( r );
-    static_cast< RateMatrix_revPoMoBalance4N* >(value)->setPhi( s );
-    static_cast< RateMatrix_revPoMoBalance4N* >(value)->setBeta( b );
-    static_cast< RateMatrix_revPoMoBalance4N* >(value)->setB( Bf );
+    cast_to_derived< RateMatrix_revPoMoBalance4N* >(value)->setN( n );
+    cast_to_derived< RateMatrix_revPoMoBalance4N* >(value)->setPi( p );
+    cast_to_derived< RateMatrix_revPoMoBalance4N* >(value)->setRho( r );
+    cast_to_derived< RateMatrix_revPoMoBalance4N* >(value)->setPhi( s );
+    cast_to_derived< RateMatrix_revPoMoBalance4N* >(value)->setBeta( b );
+    cast_to_derived< RateMatrix_revPoMoBalance4N* >(value)->setB( Bf );
 
     value->update();
 }
@@ -72,32 +74,32 @@ void revPoMoBalance4NRateMatrixFunction::swapParameterInternal(const DagNode *ol
     
     if (oldP == N)
     { 
-        N = static_cast<const TypedDagNode< std::int64_t >* >( newP );
+        replaceNodeReference(N, newP);
     }
     
     if (oldP == pi)
     {
-        pi = static_cast<const TypedDagNode< Simplex >* >( newP );
+        replaceNodeReference(pi, newP);
     }
 
     if (oldP == rho)
     {
-        rho = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(rho, newP);
     }
 
     if (oldP == phi)
     {
-        phi = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(phi, newP);
     }
 
     if (oldP == beta)
     {
-        beta = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(beta, newP);
     }
 
     if (oldP == B)
     {
-        B = static_cast<const TypedDagNode< RbVector<std::int64_t> >* >( newP );
+        replaceNodeReference(B, newP);
     }
 
 

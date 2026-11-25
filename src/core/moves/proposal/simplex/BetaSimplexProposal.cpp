@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "BetaSimplexProposal.h"
 
 #include <cstddef>
@@ -224,7 +225,7 @@ void BetaSimplexProposal::undoProposal( void )
 void BetaSimplexProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     
-    variable = static_cast<StochasticNode<Simplex>* >(newN) ;
+    replaceNodeReference(variable, newN) ;
     
 }
 

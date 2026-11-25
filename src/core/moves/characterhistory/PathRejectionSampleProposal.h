@@ -1,6 +1,8 @@
 #ifndef PathRejectionSampleProposal_H
 #define PathRejectionSampleProposal_H
 
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include "BranchHistoryDiscrete.h"
 #include "CharacterEventDiscrete.h"
 #include "DeterministicNode.h"
@@ -242,7 +244,7 @@ double RevBayesCore::PathRejectionSampleProposal<charType>::computeLnProposal(co
         dt = currAge - eventAge;
 
         // get the new transition rate
-        double tr = rm.getRate( static_cast<CharacterEventDiscrete*>(currState[ (*it_h)->getSiteIndex() ])->getState(), static_cast<CharacterEventDiscrete*>(*it_h)->getState(), currAge, branchRate);
+        double tr = rm.getRate( cast_to_derived<CharacterEventDiscrete*>(currState[ (*it_h)->getSiteIndex() ])->getState(), cast_to_derived<CharacterEventDiscrete*>(*it_h)->getState(), currAge, branchRate);
         // unmodified rates, which are used to simulate the path
         double sr = rm.getSumOfUnmodifiedRates(counts, currAge, branchRate);
 
@@ -250,8 +252,8 @@ double RevBayesCore::PathRejectionSampleProposal<charType>::computeLnProposal(co
         lnP += log(tr) - (sr * dt);
 
         // update counts
-        counts[ static_cast<CharacterEventDiscrete*>(currState[idx])->getState() ] -= 1;
-        counts[ static_cast<CharacterEventDiscrete*>(*it_h)->getState() ] += 1;
+        counts[ cast_to_derived<CharacterEventDiscrete*>(currState[idx])->getState() ] -= 1;
+        counts[ cast_to_derived<CharacterEventDiscrete*>(*it_h)->getState() ] += 1;
 
         // update state
         currState[idx] = *it_h;
@@ -320,8 +322,8 @@ double RevBayesCore::PathRejectionSampleProposal<charType>::doProposal( void )
     {
         size_t site_index = *it_s;
         std::set<CharacterEvent*,CharacterEventCompare> tmpHistory;
-        size_t currState = static_cast<CharacterEventDiscrete*>(parent_states[site_index])->getState();
-        size_t endState  = static_cast<CharacterEventDiscrete*>(child_states[site_index])->getState();
+        size_t currState = cast_to_derived<CharacterEventDiscrete*>(parent_states[site_index])->getState();
+        size_t endState  = cast_to_derived<CharacterEventDiscrete*>(child_states[site_index])->getState();
 
         do
         {
@@ -329,7 +331,7 @@ double RevBayesCore::PathRejectionSampleProposal<charType>::doProposal( void )
             tmpHistory.clear();
 
             // proceed with rejection sampling
-            currState = static_cast<CharacterEventDiscrete*>(parent_states[site_index])->getState();
+            currState = cast_to_derived<CharacterEventDiscrete*>(parent_states[site_index])->getState();
             double end_age = node->getAge();
             double age = end_age + branch_length;
 
@@ -425,7 +427,7 @@ void RevBayesCore::PathRejectionSampleProposal<charType>::fillStateCounts(std::v
 {
     for (size_t i = 0; i < s.size(); ++i)
     {
-        counts[ static_cast<CharacterEventDiscrete*>(s[i])->getState() ] += 1;
+        counts[ cast_to_derived<CharacterEventDiscrete*>(s[i])->getState() ] += 1;
     }
 }
 
@@ -656,15 +658,15 @@ void RevBayesCore::PathRejectionSampleProposal<charType>::swapNodeInternal(DagNo
 {
     if (oldN == ctmc)
     {
-        ctmc = static_cast<StochasticNode<AbstractHomologousDiscreteCharacterData>* >(newN) ;
+        replaceNodeReference(ctmc, newN) ;
     }
     else if (oldN == q_map_site)
     {
-        q_map_site = static_cast<TypedDagNode<RateGenerator>* >(newN);
+        replaceNodeReference(q_map_site, newN);
     }
     else if (oldN == q_map_sequence)
     {
-        q_map_sequence = static_cast<TypedDagNode<RateGeneratorSequence>* >(newN);
+        replaceNodeReference(q_map_sequence, newN);
     }
 
 }

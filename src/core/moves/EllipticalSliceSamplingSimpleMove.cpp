@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include <cstddef>
 #include <cmath>
 #include <cassert>
@@ -415,7 +416,7 @@ void EllipticalSliceSamplingSimpleMove::swapNodeInternal(DagNode *oldN, DagNode 
     {
         if ( variables[i] == oldN )
         {
-            variables[i] = static_cast<StochasticNode<double> *>(newN);
+            replaceNodeReference(variables[i], newN);
             assert( not variables[i]->isClamped() );
         }
     }

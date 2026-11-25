@@ -1,6 +1,8 @@
 #ifndef RevBayes_development_branch_StochasticCharacterMappingMonitor_h
 #define RevBayes_development_branch_StochasticCharacterMappingMonitor_h
 
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include "AbstractHomologousDiscreteCharacterData.h"
 #include "StateDependentSpeciationExtinctionProcess.h"
 #include "GeneralizedLineageHeterogeneousBirthDeathSamplingProcess.h"
@@ -82,7 +84,7 @@ StochasticCharacterMappingMonitor<characterType>::StochasticCharacterMappingMoni
 
     // the cdbdp is both the tree and character evolution model
     addVariable( cdbdp );
-    tree = static_cast< StochasticNode<Tree> *>( cdbdp );
+    tree = cdbdp;
 
 }
 
@@ -99,7 +101,7 @@ StochasticCharacterMappingMonitor<characterType>::StochasticCharacterMappingMoni
     cdbdp = NULL;
 
     AbstractPhyloCTMCSiteHomogeneous<characterType> *ctmc_dist = NULL;
-    ctmc_dist = static_cast<AbstractPhyloCTMCSiteHomogeneous<characterType>* >( &ctmc->getDistribution() );
+    ctmc_dist = cast_to_derived<AbstractPhyloCTMCSiteHomogeneous<characterType>* >( &ctmc->getDistribution() );
     tree = const_cast<TypedDagNode<Tree>* >( ctmc_dist->getTree() );
 
     addVariable( tree );
@@ -165,7 +167,7 @@ void StochasticCharacterMappingMonitor<characterType>::monitorVariables(std::uin
     AbstractPhyloCTMCSiteHomogeneous<characterType> *ctmc_dist = NULL;
     if ( ctmc != NULL )
     {
-        ctmc_dist = static_cast<AbstractPhyloCTMCSiteHomogeneous<characterType>* >( &ctmc->getDistribution() );
+        ctmc_dist = cast_to_derived<AbstractPhyloCTMCSiteHomogeneous<characterType>* >( &ctmc->getDistribution() );
         num_nodes = tree->getValue().getNumberOfNodes();
     }
     else
@@ -262,16 +264,16 @@ void StochasticCharacterMappingMonitor<characterType>::swapNode(DagNode *oldN, D
 
     if ( oldN == tree )
     {
-        tree = static_cast< TypedDagNode<Tree> *>( newN );
+        replaceNodeReference(tree, newN);
     }
     else if ( oldN == ctmc )
     {
-        ctmc = static_cast< StochasticNode<AbstractHomologousDiscreteCharacterData> *>( newN );
+        replaceNodeReference(ctmc, newN);
     }
     else if ( oldN == cdbdp )
     {
-        cdbdp = static_cast< StochasticNode<Tree> *>( newN );
-        tree = static_cast< StochasticNode<Tree> *>( newN );
+        replaceNodeReference(cdbdp, newN);
+        replaceNodeReference(tree, newN);
     }
 
     VariableMonitor::swapNode( oldN, newN );

@@ -1,6 +1,8 @@
 #ifndef Move_UPPAllocation_H
 #define Move_UPPAllocation_H
 
+#include "TypeUtilities.h"
+#include "RevTypeUtilities.h"
 #include "RlMove.h"
 #include "TypedDagNode.h"
 
@@ -84,11 +86,11 @@ void RevLanguage::Move_UPPAllocation<rlValueType>::constructInternalObject( void
     delete value;
     
     // now allocate a new vector-scale move
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<typename rlValueType::valueType> >* tmp = static_cast<const ModelVector<rlValueType> &>( x->getRevObject() ).getDagNode();
+    double w = valueForRevType<RealPos>(weight);
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<typename rlValueType::valueType> >* tmp = dagNodeForRevType<ModelVector<rlValueType>>(x);
     //RevBayesCore::TypedDagNode< RevBayesCore::RbVector<typename valType::valueType> >* tmp = static_cast<const ModelVector<valType> &>( x->getRevObject() ).getDagNode();
     //RevBayesCore::StochasticNode< RevBayesCore::RbVector<typename valType::valueType> > *sn = static_cast<RevBayesCore::StochasticNode< RevBayesCore::RbVector<typename valType::valueType> > *>( tmp );
-    RevBayesCore::StochasticNode< RevBayesCore::RbVector<typename rlValueType::valueType> > *sn = static_cast<RevBayesCore::StochasticNode< RevBayesCore::RbVector<typename rlValueType::valueType> > *>( tmp );
+    RevBayesCore::StochasticNode< RevBayesCore::RbVector<typename rlValueType::valueType> > *sn = cast_to_derived<RevBayesCore::StochasticNode< RevBayesCore::RbVector<typename rlValueType::valueType> > *>( tmp );
     
     RevBayesCore::Proposal *p = new RevBayesCore::UPPAllocationProposal<typename rlValueType::valueType>( sn );
     value = new RevBayesCore::MetropolisHastingsMove(p, w, false);

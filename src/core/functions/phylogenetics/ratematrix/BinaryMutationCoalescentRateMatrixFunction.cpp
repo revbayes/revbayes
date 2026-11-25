@@ -1,3 +1,5 @@
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include "BinaryMutationCoalescentRateMatrixFunction.h"
 #include "RateMatrix_BinaryMutationCoalescent.h"
 #include "RbException.h"
@@ -34,9 +36,9 @@ void BinaryMutationCoalescentRateMatrixFunction::update( void )
 {
     
     // set the base frequencies
-    static_cast< RateMatrix_BinaryMutationCoalescent* >(value)->setMutationRate( mu->getValue() );
-    static_cast< RateMatrix_BinaryMutationCoalescent* >(value)->setEffectivePopulationSize( Ne->getValue() );
-    static_cast< RateMatrix_BinaryMutationCoalescent* >(value)->update();
+    cast_to_derived< RateMatrix_BinaryMutationCoalescent* >(value)->setMutationRate( mu->getValue() );
+    cast_to_derived< RateMatrix_BinaryMutationCoalescent* >(value)->setEffectivePopulationSize( Ne->getValue() );
+    cast_to_derived< RateMatrix_BinaryMutationCoalescent* >(value)->update();
     
 }
 
@@ -47,11 +49,11 @@ void BinaryMutationCoalescentRateMatrixFunction::swapParameterInternal(const Dag
     
     if (oldP == mu)
     {
-        mu = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(mu, newP);
     }
     else if (oldP == Ne)
     {
-        Ne = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(Ne, newP);
     }
     
 }

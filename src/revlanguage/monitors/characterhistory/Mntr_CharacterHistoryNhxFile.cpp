@@ -1,3 +1,5 @@
+#include "TypeUtilities.h"
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
 #include <set>
@@ -57,40 +59,40 @@ void Mntr_CharacterHistoryNhxFile::constructInternalObject( void ) {
     delete value;
     
     // now allocate a new sliding move
-    const std::string& fn = static_cast<const RlString &>( filename->getRevObject() ).getValue();
-    const std::string& sep = static_cast<const RlString &>( separator->getRevObject() ).getValue();
-    unsigned int g = (int)static_cast<const IntegerPos &>( printgen->getRevObject() ).getValue();
-    unsigned int mg = (int)static_cast<const IntegerPos &>( maxgen->getRevObject() ).getValue();
+    const std::string& fn = valueForRevType<RlString>(filename);
+    const std::string& sep = valueForRevType<RlString>(separator);
+    unsigned int g = (int)valueForRevType<IntegerPos>(printgen);
+    unsigned int mg = (int)valueForRevType<IntegerPos>(maxgen);
     
     int burn = 0;
 
     RevObject& b = burnin->getRevObject();
     if ( b.isType( Integer::getClassTypeSpec() ) )
     {
-        burn = (int)static_cast<const Integer &>(b).getValue();
+        burn = (int)cast_to_derived<const Integer &>(b).getValue();
     }
     else
     {
-        double f = static_cast<const Probability &>(b).getValue();
+        double f = cast_to_derived<const Probability &>(b).getValue();
         burn = int( mg*f );
     }
 
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree> *t = static_cast<const TimeTree &>( tree->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree> *t = dagNodeForRevType<TimeTree>(tree);
     
-    RevBayesCore::TypedDagNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_tdn   = static_cast<const RevLanguage::AbstractHomologousDiscreteCharacterData&>( ctmc->getRevObject() ).getDagNode();
-    RevBayesCore::StochasticNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_sn  = static_cast<RevBayesCore::StochasticNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* >(ctmc_tdn);
+    RevBayesCore::TypedDagNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_tdn   = dagNodeForRevType<RevLanguage::AbstractHomologousDiscreteCharacterData>(ctmc);
+    RevBayesCore::StochasticNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* ctmc_sn  = cast_to_derived<RevBayesCore::StochasticNode<RevBayesCore::AbstractHomologousDiscreteCharacterData>* >(ctmc_tdn);
     
-    const RevBayesCore::TimeAtlas* atl = &( static_cast<const RlAtlas&>( atlas->getRevObject() ).getValue() );
+    const RevBayesCore::TimeAtlas* atl = &( valueForRevType<RlAtlas>(atlas) );
     
-    bool pp = static_cast<const RlBoolean &>( posterior->getRevObject() ).getValue();
-    bool l = static_cast<const RlBoolean &>( likelihood->getRevObject() ).getValue();
-    bool pr = static_cast<const RlBoolean &>( prior->getRevObject() ).getValue();
+    bool pp = valueForRevType<RlBoolean>(posterior);
+    bool l = valueForRevType<RlBoolean>(likelihood);
+    bool pr = valueForRevType<RlBoolean>(prior);
     
     bool ap = false; // append disabled for now
     bool sm = true; // show metadata disabled for now
     bool sr = false; // show rates
     
-    std::string mt = static_cast<const RlString&>( type->getRevObject() ).getValue();
+    std::string mt = valueForRevType<RlString>(type);
     if (mt == "std")
         ; // value = XXXXXX
     else if (mt == "biogeo")

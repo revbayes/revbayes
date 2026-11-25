@@ -6,6 +6,8 @@
 //  Copyright (c) 2015 Michael Landis. All rights reserved.
 //
 
+#include "TypeUtilities.h"
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -74,12 +76,12 @@ void Move_LevyJump::constructInternalObject( void )
     delete value;
     
     // now allocate a new sliding move
-    double d = static_cast<const RealPos &>( delta->getRevObject() ).getValue();
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<double>* tmp = static_cast<const Real &>( x->getRevObject() ).getDagNode();
-    RevBayesCore::ContinuousStochasticNode *n = static_cast<RevBayesCore::ContinuousStochasticNode *>( tmp );
-    bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double d = valueForRevType<RealPos>(delta);
+    double w = valueForRevType<RealPos>(weight);
+    RevBayesCore::TypedDagNode<double>* tmp = dagNodeForRevType<Real>(x);
+    RevBayesCore::ContinuousStochasticNode *n = cast_to_derived<RevBayesCore::ContinuousStochasticNode *>( tmp );
+    bool t = valueForRevType<RlBoolean>(tune);
+    double tt = valueForRevType<Probability>(tuneTarget);
     
     RevBayesCore::Proposal *p = new RevBayesCore::LevyJumpProposal(n, d);
     p->setTargetAcceptanceRate(tt);

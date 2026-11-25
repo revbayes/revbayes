@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include <cstddef>
 #include <iosfwd>
 #include <set>
@@ -401,11 +402,11 @@ void PhyloBrownianProcessMVN::swapParameterInternal(const DagNode *oldP, const D
     
     if (oldP == homogeneous_root_state)
     {
-        homogeneous_root_state = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(homogeneous_root_state, newP);
     }
     else if (oldP == heterogeneous_root_state)
     {
-        heterogeneous_root_state = static_cast<const TypedDagNode< RbVector< double > >* >( newP );
+        replaceNodeReference(heterogeneous_root_state, newP);
     }
     else
     {

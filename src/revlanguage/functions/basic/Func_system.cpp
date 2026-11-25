@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstdlib>
 #include <iosfwd>
 #include <string>
@@ -46,7 +47,7 @@ RevPtr<RevVariable> Func_system::execute( void )
 
     RbSettings& s = RbSettings::userSettings();
 
-    const std::string& cmd = static_cast<const RlString &>( args[0].getVariable()->getRevObject() ).getValue();
+    const std::string& cmd = valueForRevType<RlString>(args[0].getVariable());
     
     // std::system return value is the shell wait status (encoding is implementation-defined); Rev does not expose it yet.
     const int system_status = std::system( cmd.c_str() );

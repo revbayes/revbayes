@@ -1,3 +1,5 @@
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
@@ -578,7 +580,7 @@ void UltrametricTreeDistribution::executeMethod(const std::string &n, const std:
     if ( n == "getSampleProbabilities" )
     {
 
-        bool log_transorm = static_cast<const TypedDagNode<Boolean>* >( args[0] )->getValue();
+        bool log_transorm = cast_to_derived<const TypedDagNode<Boolean>* >( args[0] )->getValue();
 
         rv.clear();
         rv.resize(num_samples);
@@ -590,7 +592,7 @@ void UltrametricTreeDistribution::executeMethod(const std::string &n, const std:
     else if ( n == "getBranchRates" )
     {
 
-        int index = static_cast<const TypedDagNode<int>* >( args[0] )->getValue();
+        int index = cast_to_derived<const TypedDagNode<std::int64_t>* >( args[0] )->getValue();
 
         Tree &this_tree = *value;
         size_t num_branches = this_tree.getNumberOfNodes() - 1;
@@ -751,12 +753,12 @@ void UltrametricTreeDistribution::swapParameterInternal( const DagNode *oldP, co
 {
     if (oldP == root_age )
     {
-        root_age = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(root_age, newP);
     }
 
     if (oldP == root_branch_fraction )
     {
-        root_branch_fraction = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(root_branch_fraction, newP);
     }
 
     try

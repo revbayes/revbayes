@@ -2,6 +2,7 @@
 #ifndef DirichletProcessPriorDistribution_H
 #define DirichletProcessPriorDistribution_H
 
+#include "DagNodeTypeUtilities.h"
 #include "RbVector.h"
 #include "TypedDagNode.h"
 #include "TypedDistribution.h"
@@ -367,7 +368,7 @@ void RevBayesCore::DirichletProcessPriorDistribution<valueType>::swapParameterIn
 //    }
     if (oldP == concentration)
     {
-        concentration = static_cast<const TypedDagNode< double > *>( newP );
+        replaceNodeReference(concentration, newP);
     }
     else
     {

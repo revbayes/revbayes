@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -42,8 +43,8 @@ Dist_inverseGamma* Dist_inverseGamma::clone( void ) const
 RevBayesCore::InverseGammaDistribution* Dist_inverseGamma::createDistribution( void ) const
 {
     // get the parameters
-    RevBayesCore::TypedDagNode<double>* sh      = static_cast<const RealPos &>( shape->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double>* r       = static_cast<const RealPos &>( rate->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* sh      = dagNodeForRevType<RealPos>(shape);
+    RevBayesCore::TypedDagNode<double>* r       = dagNodeForRevType<RealPos>(rate);
     RevBayesCore::InverseGammaDistribution* d   = new RevBayesCore::InverseGammaDistribution(sh, r);
     
     return d;

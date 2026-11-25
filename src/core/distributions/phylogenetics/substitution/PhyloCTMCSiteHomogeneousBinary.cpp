@@ -10,7 +10,7 @@
 #include "TypedDagNode.h"
 
 RevBayesCore::PhyloCTMCSiteHomogeneousBinary::PhyloCTMCSiteHomogeneousBinary(const TypedDagNode<Tree> *t, bool c, size_t nSites, bool amb, BinaryAscertainmentBias::Coding ty, bool internal, bool gapmatch) :
-PhyloCTMCSiteHomogeneousConditional<BinaryState>(  t, 2, c, nSites, amb, AscertainmentBias::Coding(ty), internal, gapmatch )
+PhyloCTMCSiteHomogeneousConditional<StandardState>(  t, 2, c, nSites, amb, AscertainmentBias::Coding(ty), internal, gapmatch )
 {
     
 }
@@ -57,8 +57,9 @@ bool RevBayesCore::PhyloCTMCSiteHomogeneousBinary::isSitePatternCompatible( std:
 
 bool RevBayesCore::PhyloCTMCSiteHomogeneousBinary::isSitePatternCompatible( std::map<RbBitSet, size_t> charCounts )
 {
-    RbBitSet z(2, false);
-    RbBitSet o(2, false);
+    size_t width = charCounts.empty() ? 2 : charCounts.begin()->first.size();
+    RbBitSet z(width, false);
+    RbBitSet o(width, false);
     
     z.set(0);
     o.set(1);
@@ -96,7 +97,7 @@ bool RevBayesCore::PhyloCTMCSiteHomogeneousBinary::isSitePatternCompatible( std:
 
 double RevBayesCore::PhyloCTMCSiteHomogeneousBinary::sumRootLikelihood( void )
 {
-    double sumPartialProbs = PhyloCTMCSiteHomogeneous<BinaryState>::sumRootLikelihood();
+    double sumPartialProbs = PhyloCTMCSiteHomogeneous<StandardState>::sumRootLikelihood();
     
     if (coding == BinaryAscertainmentBias::ALL)
         return sumPartialProbs;

@@ -6,6 +6,8 @@
 //  Copyright © 2016 Michael Landis. All rights reserved.
 //
 
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include <cstddef>
 #include <cmath>
 #include <iterator>
@@ -167,7 +169,7 @@ void SampledCladogenesisRootFrequenciesFunction::update( void ) {
         
         // get root history information
         const AbstractCharacterHistoryBirthDeathProcess* dist = dynamic_cast<const AbstractCharacterHistoryBirthDeathProcess* >( &tree->getDistribution() );
-        const CharacterHistoryDiscrete& tree_history = static_cast<const CharacterHistoryDiscrete&>(dist->getCharacterHistory());
+        const CharacterHistoryDiscrete& tree_history = cast_to_derived<const CharacterHistoryDiscrete&>(dist->getCharacterHistory());
         const BranchHistory& branch_history = tree_history[root.getIndex()];
         const std::multiset<CharacterEvent*,CharacterEventCompare>& events = branch_history.getHistory();
         
@@ -265,15 +267,15 @@ void SampledCladogenesisRootFrequenciesFunction::update( void ) {
 
 void SampledCladogenesisRootFrequenciesFunction::swapParameterInternal(const DagNode *oldP, const DagNode *newP) {
     if (oldP == rateMatrix) {
-        rateMatrix = static_cast<const TypedDagNode< RateGenerator >* >( newP );
+        replaceNodeReference(rateMatrix, newP);
     }
     else if (oldP == cladogenesisProbabilities) {
-        cladogenesisProbabilities = static_cast<const TypedDagNode< MatrixReal >* >( newP );
+        replaceNodeReference(cladogenesisProbabilities, newP);
     }
     else if (oldP == tree) {
-        tree = static_cast<const TypedDagNode<Tree>* >( newP );
+        replaceNodeReference(tree, newP);
     }
     else if (oldP == clock) {
-        clock = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(clock, newP);
     }
 }

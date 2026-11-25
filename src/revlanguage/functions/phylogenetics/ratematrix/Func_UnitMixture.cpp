@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "Func_UnitMixture.h"
 
 #include "RealPos.h"
@@ -80,13 +81,13 @@ Func_UnitMixture* Func_UnitMixture::clone( void ) const
 
 Core::TypedFunction< Core::SiteMixtureModel >* Func_UnitMixture::createFunction( void ) const
 {
-    Core::TypedDagNode< Core::RateGenerator >* model = dynamic_cast<const RateGenerator &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    Core::TypedDagNode< Core::RateGenerator >* model = dagNodeForRevType<RateGenerator>(this->args[0].getVariable());
 
-    Core::TypedDagNode< double >* rate = dynamic_cast<const RealPos &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    Core::TypedDagNode< double >* rate = dagNodeForRevType<RealPos>(this->args[2].getVariable());
 
     if (auto& root_freqs_var = *args[1].getVariable(); root_freqs_var.getRevObject() != RevNullObject::getInstance())
     {
-        Core::TypedDagNode< Core::Simplex >* root_freqs = dynamic_cast<const Simplex &>( root_freqs_var.getRevObject() ).getDagNode();
+        Core::TypedDagNode< Core::Simplex >* root_freqs = dagNodeForRevType<Simplex>(std::addressof(root_freqs_var));
         return Core::generic_function_ptr< Core::SiteMixtureModel >( UnitMixtureFunc, model, root_freqs, rate );
     }
     else

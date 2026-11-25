@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "LogicalAndFunction.h"
 #include "TypedDagNode.h"
 
@@ -51,11 +52,11 @@ void LogicalAndFunction::swapParameterInternal(const DagNode *oldP, const DagNod
     
     if ( oldP == left )
     {
-        left = static_cast<const TypedDagNode<Boolean>* >( newP );
+        replaceNodeReference(left, newP);
     }
     if ( oldP == right )
     {
-        right = static_cast<const TypedDagNode<Boolean>* >( newP );
+        replaceNodeReference(right, newP);
     }
     
 }

@@ -1,6 +1,8 @@
 #ifndef MixtureAllocationProposal_H
 #define MixtureAllocationProposal_H
 
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include <set>
 #include <string>
 
@@ -142,7 +144,7 @@ double RevBayesCore::MixtureAllocationProposal<mixtureType>::doProposal( void )
     // Get random number generator
     RandomNumberGenerator* rng     = GLOBAL_RNG;
     
-    MixtureDistribution<mixtureType>& dist = static_cast<MixtureDistribution<mixtureType> &>( variable->getDistribution() );
+    MixtureDistribution<mixtureType>& dist = cast_to_derived<MixtureDistribution<mixtureType> &>( variable->getDistribution() );
     
     // get the number of categories
     size_t n = dist.getNumberOfMixtureElements();
@@ -228,7 +230,7 @@ template <class mixtureType>
 void RevBayesCore::MixtureAllocationProposal<mixtureType>::undoProposal( void )
 {
     
-    MixtureDistribution<mixtureType>& dist = static_cast<MixtureDistribution<mixtureType> &>( variable->getDistribution() );
+    MixtureDistribution<mixtureType>& dist = cast_to_derived<MixtureDistribution<mixtureType> &>( variable->getDistribution() );
     dist.setCurrentIndex( oldCategory );
     
 }
@@ -244,7 +246,7 @@ template <class mixtureType>
 void RevBayesCore::MixtureAllocationProposal<mixtureType>::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     
-    variable = static_cast<StochasticNode<mixtureType>* >(newN) ;
+    replaceNodeReference(variable, newN) ;
     
 }
 

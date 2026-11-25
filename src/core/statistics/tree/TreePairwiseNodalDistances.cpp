@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "TreePairwiseNodalDistances.h"
 
 #include "Tree.h"
@@ -52,7 +53,7 @@ void TreePairwiseNodalDistances::swapParameterInternal(const DagNode *oldP, cons
     
     if (oldP == tree)
     {
-        tree = static_cast<const TypedDagNode<Tree>* >( newP );
+        replaceNodeReference(tree, newP);
     }
     
 }

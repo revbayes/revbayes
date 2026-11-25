@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "SubtreePruneRegraftProposal.h"
 
 #include <cmath>
@@ -330,6 +331,6 @@ void SubtreePruneRegraftProposal::undoProposal( void )
 void SubtreePruneRegraftProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     
-    tree = static_cast<StochasticNode<Tree>* >(newN) ;
+    replaceNodeReference(tree, newN) ;
     
 }

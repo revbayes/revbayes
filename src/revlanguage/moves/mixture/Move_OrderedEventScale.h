@@ -1,6 +1,8 @@
 #ifndef Move_OrderedEventScale_H
 #define Move_OrderedEventScale_H
 
+#include "TypeUtilities.h"
+#include "RevTypeUtilities.h"
 #include "RlMove.h"
 #include "RlOrderedEvents.h"
 #include "TypedDagNode.h"
@@ -89,11 +91,11 @@ void RevLanguage::Move_OrderedEventScale<rlValueType>::constructInternalObject( 
     delete value;
 
     // now allocate a new vector-scale move
-    double d = static_cast<const RealPos &>( lambda->getRevObject() ).getValue();
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
+    double d = valueForRevType<RealPos>(lambda);
+    double w = valueForRevType<RealPos>(weight);
 
-    RevBayesCore::TypedDagNode<RevBayesCore::OrderedEvents<typename rlValueType::valueType> >* tmp = static_cast<const RlOrderedEvents<rlValueType> &>( x->getRevObject() ).getDagNode();
-    RevBayesCore::StochasticNode<RevBayesCore::OrderedEvents<typename rlValueType::valueType> > *sn = static_cast<RevBayesCore::StochasticNode<RevBayesCore::OrderedEvents<typename rlValueType::valueType >> *>( tmp );
+    RevBayesCore::TypedDagNode<RevBayesCore::OrderedEvents<typename rlValueType::valueType> >* tmp = dagNodeForRevType<RlOrderedEvents<rlValueType>>(x);
+    RevBayesCore::StochasticNode<RevBayesCore::OrderedEvents<typename rlValueType::valueType> > *sn = cast_to_derived<RevBayesCore::StochasticNode<RevBayesCore::OrderedEvents<typename rlValueType::valueType >> *>( tmp );
 
     RevBayesCore::Proposal *p = new RevBayesCore::OrderedEventScaleProposal<typename rlValueType::valueType>( sn, d );
     value = new RevBayesCore::MetropolisHastingsMove(p, w, false);

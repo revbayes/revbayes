@@ -1,3 +1,5 @@
+#include "TypeUtilities.h"
+#include "RevTypeUtilities.h"
 #include "Mntr_StochasticBranchRate.h"
 
 #include <cstddef>
@@ -48,18 +50,18 @@ Mntr_StochasticBranchRate* Mntr_StochasticBranchRate::clone(void) const
 void Mntr_StochasticBranchRate::constructInternalObject( void )
 {
     
-    const std::string& file_name      = static_cast<const RlString  &>( filename->getRevObject()           ).getValue();
-    const std::string& sep            = static_cast<const RlString  &>( separator->getRevObject()          ).getValue();
-    unsigned int       print_gen      = (int)static_cast<const IntegerPos   &>( printgen->getRevObject()      ).getValue();
-    bool               app            = static_cast<const RlBoolean &>( append->getRevObject()             ).getValue();
-    bool               wv             = static_cast<const RlBoolean &>( version->getRevObject()            ).getValue();
+    const std::string& file_name      = valueForRevType<RlString>(filename);
+    const std::string& sep            = valueForRevType<RlString>(separator);
+    unsigned int       print_gen      = (int)valueForRevType<IntegerPos>(printgen);
+    bool               app            = valueForRevType<RlBoolean>(append);
+    bool               wv             = valueForRevType<RlBoolean>(version);
     
     RevBayesCore::StochasticBranchRateMonitor *m;
 
-    if ( static_cast<const RevLanguage::Tree&>( cdbdp->getRevObject() ).isModelObject() )
+    if ( objectForRevType<RevLanguage::Tree>(cdbdp).isModelObject() )
     {
-        RevBayesCore::TypedDagNode<RevBayesCore::Tree>* cdbdp_tdn = static_cast<const RevLanguage::Tree&>( cdbdp->getRevObject() ).getDagNode();
-        RevBayesCore::StochasticNode<RevBayesCore::Tree>* cdbdp_sn  = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree>* >( cdbdp_tdn );
+        RevBayesCore::TypedDagNode<RevBayesCore::Tree>* cdbdp_tdn = dagNodeForRevType<RevLanguage::Tree>(cdbdp);
+        RevBayesCore::StochasticNode<RevBayesCore::Tree>* cdbdp_sn  = cast_to_derived<RevBayesCore::StochasticNode<RevBayesCore::Tree>* >( cdbdp_tdn );
 
         RevBayesCore::StateDependentSpeciationExtinctionProcess *sse_process = NULL;
         sse_process = dynamic_cast<RevBayesCore::StateDependentSpeciationExtinctionProcess*>( &cdbdp_sn->getDistribution() );
@@ -69,10 +71,10 @@ void Mntr_StochasticBranchRate::constructInternalObject( void )
         m->setAppend( app );
         m->setPrintVersion( wv );
     }
-    else if ( static_cast<const RevLanguage::Tree&>( glhbdsp->getRevObject() ).isModelObject() )
+    else if ( objectForRevType<RevLanguage::Tree>(glhbdsp).isModelObject() )
     {
-        RevBayesCore::TypedDagNode<RevBayesCore::Tree>* glhbdsp_tdn = static_cast<const RevLanguage::Tree&>( glhbdsp->getRevObject() ).getDagNode();
-        RevBayesCore::StochasticNode<RevBayesCore::Tree>* glhbdsp_sn  = static_cast<RevBayesCore::StochasticNode<RevBayesCore::Tree>* >( glhbdsp_tdn );
+        RevBayesCore::TypedDagNode<RevBayesCore::Tree>* glhbdsp_tdn = dagNodeForRevType<RevLanguage::Tree>(glhbdsp);
+        RevBayesCore::StochasticNode<RevBayesCore::Tree>* glhbdsp_sn  = cast_to_derived<RevBayesCore::StochasticNode<RevBayesCore::Tree>* >( glhbdsp_tdn );
 
         m = new RevBayesCore::StochasticBranchRateMonitor( glhbdsp_sn, (std::uint64_t)print_gen, file_name, sep );
         m->setAppend( app );

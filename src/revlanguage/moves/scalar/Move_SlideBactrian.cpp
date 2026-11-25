@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -69,10 +70,10 @@ void Move_SlideBactrian::constructInternalObject( void )
     RevBayesCore::Proposal *p = NULL;
     
     // now allocate a new sliding move
-    double d = static_cast<const RealPos &>( sigma->getRevObject() ).getValue();
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    double r = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<double>* tmp = static_cast<const Real &>( x->getRevObject() ).getDagNode();
+    double d = valueForRevType<RealPos>(sigma);
+    double w = valueForRevType<RealPos>(weight);
+    double r = valueForRevType<Probability>(tuneTarget);
+    RevBayesCore::TypedDagNode<double>* tmp = dagNodeForRevType<Real>(x);
     RevBayesCore::ContinuousStochasticNode *n = dynamic_cast<RevBayesCore::ContinuousStochasticNode *>( tmp );
     if ( n != NULL )
     {
@@ -84,7 +85,7 @@ void Move_SlideBactrian::constructInternalObject( void )
         p = new RevBayesCore::SlideBactrianProposal(n2,d,r);
         
     }
-    bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
+    bool t = valueForRevType<RlBoolean>(tune);
     
     // finally create the internal move object
     //    value = new RevBayesCore::Move_SlideBactrian(n, d, t, w);

@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cmath>
 #include <iosfwd>
 #include <string>
@@ -73,8 +74,8 @@ RevBayesCore::NodeAgeConstrainedTreeDistribution* Dist_ConstrainedNodeAge::creat
 {
     
     // get the parameters
-    const RevBayesCore::RbVector<RevBayesCore::RbVector<RevBayesCore::Clade> >& c               = static_cast<const ModelVector< ModelVector< Clade > > &>( constraints->getRevObject() ).getValue();
-    const Distribution&                                                         rlDistribution  = static_cast<const Distribution &>( baseDistribution->getRevObject() );
+    const RevBayesCore::RbVector<RevBayesCore::RbVector<RevBayesCore::Clade> >& c               = valueForRevType<ModelVector< ModelVector< Clade > >>(constraints);
+    const Distribution&                                                         rlDistribution  = objectForRevType<Distribution>(baseDistribution);
     RevBayesCore::TypedDistribution<RevBayesCore::Tree>*                        base            = dynamic_cast<RevBayesCore::TypedDistribution<RevBayesCore::Tree>* >( rlDistribution.createDistribution() );
     
     // create the internal distribution object

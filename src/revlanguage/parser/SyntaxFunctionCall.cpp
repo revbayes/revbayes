@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include <cstddef>
 #include <sstream>
 #include <list>
@@ -159,7 +160,7 @@ RevPtr<RevVariable> SyntaxFunctionCall::evaluateContent( const std::shared_ptr<E
             
             if ( the_object.isType( Function::getClassTypeSpec() ) )
             {
-                func = static_cast<Function*>( the_object.clone() );
+                func = cast_to_derived<Function*>( the_object.clone() );
                 std::vector<bool> arg_mapped(args.size(), false);
                 found = func->checkArguments(args, NULL, arg_mapped);
             }

@@ -12,6 +12,8 @@
  * @version 1.0
  */
 
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include "ChromosomesPloidyRateMatrixFunction.h"
 
 #include "RateMatrix_ChromosomesPloidy.h"
@@ -69,21 +71,21 @@ void ChromosomesPloidyRateMatrixFunction::update( void ) {
     double e_p = eta_p->getValue();
     double be = beta->getValue();
 
-    static_cast< RateMatrix_ChromosomesPloidy* >(value)->setGamma_d( ga_d );
-    static_cast< RateMatrix_ChromosomesPloidy* >(value)->setDelta_d( de_d );
-    static_cast< RateMatrix_ChromosomesPloidy* >(value)->setRho_d( rh_d );
-    static_cast< RateMatrix_ChromosomesPloidy* >(value)->setEta_d( e_d );
-    static_cast< RateMatrix_ChromosomesPloidy* >(value)->setGamma_dl( ga_dl );
-    static_cast< RateMatrix_ChromosomesPloidy* >(value)->setDelta_dl( de_dl );
-    static_cast< RateMatrix_ChromosomesPloidy* >(value)->setGamma_p( ga_p );
-    static_cast< RateMatrix_ChromosomesPloidy* >(value)->setDelta_p( de_p );
-    static_cast< RateMatrix_ChromosomesPloidy* >(value)->setRho_p( rh_p );
-    static_cast< RateMatrix_ChromosomesPloidy* >(value)->setEta_p( e_p );
-    static_cast< RateMatrix_ChromosomesPloidy* >(value)->setGamma_pl( ga_pl );
-    static_cast< RateMatrix_ChromosomesPloidy* >(value)->setDelta_pl( de_pl );
-    static_cast< RateMatrix_ChromosomesPloidy* >(value)->setBeta( be );
+    cast_to_derived< RateMatrix_ChromosomesPloidy* >(value)->setGamma_d( ga_d );
+    cast_to_derived< RateMatrix_ChromosomesPloidy* >(value)->setDelta_d( de_d );
+    cast_to_derived< RateMatrix_ChromosomesPloidy* >(value)->setRho_d( rh_d );
+    cast_to_derived< RateMatrix_ChromosomesPloidy* >(value)->setEta_d( e_d );
+    cast_to_derived< RateMatrix_ChromosomesPloidy* >(value)->setGamma_dl( ga_dl );
+    cast_to_derived< RateMatrix_ChromosomesPloidy* >(value)->setDelta_dl( de_dl );
+    cast_to_derived< RateMatrix_ChromosomesPloidy* >(value)->setGamma_p( ga_p );
+    cast_to_derived< RateMatrix_ChromosomesPloidy* >(value)->setDelta_p( de_p );
+    cast_to_derived< RateMatrix_ChromosomesPloidy* >(value)->setRho_p( rh_p );
+    cast_to_derived< RateMatrix_ChromosomesPloidy* >(value)->setEta_p( e_p );
+    cast_to_derived< RateMatrix_ChromosomesPloidy* >(value)->setGamma_pl( ga_pl );
+    cast_to_derived< RateMatrix_ChromosomesPloidy* >(value)->setDelta_pl( de_pl );
+    cast_to_derived< RateMatrix_ChromosomesPloidy* >(value)->setBeta( be );
 
-    static_cast< RateMatrix_ChromosomesPloidy* >(value)->update();
+    cast_to_derived< RateMatrix_ChromosomesPloidy* >(value)->update();
     
 }
 
@@ -93,53 +95,53 @@ void ChromosomesPloidyRateMatrixFunction::swapParameterInternal(const DagNode *o
     
     if (oldP == gamma_d) 
     {
-        gamma_d = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(gamma_d, newP);
     }
     else if (oldP == delta_d) 
     {
-        delta_d = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(delta_d, newP);
     }
     else if (oldP == rho_d) 
     {
-        rho_d = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(rho_d, newP);
     } else if (oldP == eta_d) 
     {
-        eta_d = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(eta_d, newP);
     }
     else if (oldP == delta_dl) 
     {
-        delta_dl = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(delta_dl, newP);
     }
     else if (oldP == gamma_dl) 
     {
-        gamma_dl = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(gamma_dl, newP);
     }
     else if (oldP == gamma_p) 
     {
-        gamma_p = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(gamma_p, newP);
     }
     else if (oldP == delta_p) 
     {
-        delta_p = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(delta_p, newP);
     }
     else if (oldP == rho_p) 
     {
-        rho_p = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(rho_p, newP);
     } else if (oldP == eta_p) 
     {
-        eta_p = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(eta_p, newP);
     }
     else if (oldP == delta_pl) 
     {
-        delta_pl = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(delta_pl, newP);
     }
     else if (oldP == gamma_pl) 
     {
-        gamma_pl = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(gamma_pl, newP);
     }
     else if (oldP == beta) 
     {
-        beta = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(beta, newP);
     }
     
 }

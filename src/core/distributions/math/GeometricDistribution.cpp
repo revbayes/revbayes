@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "GeometricDistribution.h"
 
 #include "DistributionGeometric.h"
@@ -71,7 +72,7 @@ void GeometricDistribution::swapParameterInternal(const DagNode *oldP, const Dag
     
     if (oldP == p) 
     {
-        p = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(p, newP);
     }
 
 }

@@ -1,3 +1,5 @@
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include "PoMo4NRateMatrixFunction.h"
 #include "RbException.h"
 
@@ -54,9 +56,9 @@ void PoMo4NRateMatrixFunction::update( void )
     const std::vector<double>& f = phi->getValue();
 
     // set the base frequencies
-    static_cast< RateMatrix_PoMo4N* >(value)->setN( ni );
-    static_cast< RateMatrix_PoMo4N* >(value)->setMu( m );
-    static_cast< RateMatrix_PoMo4N* >(value)->setPhi( f );
+    cast_to_derived< RateMatrix_PoMo4N* >(value)->setN( ni );
+    cast_to_derived< RateMatrix_PoMo4N* >(value)->setMu( m );
+    cast_to_derived< RateMatrix_PoMo4N* >(value)->setPhi( f );
 
     value->update();
 }
@@ -68,17 +70,17 @@ void PoMo4NRateMatrixFunction::swapParameterInternal(const DagNode *oldP, const 
     
     if (oldP == N)
     {
-        N =  static_cast<const TypedDagNode< std::int64_t >* >( newP );
+        replaceNodeReference(N, newP);
     }
 
     if (oldP == mu)
     {
-        mu = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(mu, newP);
     }
 
     if (oldP == phi)
     {
-        phi = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(phi, newP);
     }
 
 }

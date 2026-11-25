@@ -1,3 +1,5 @@
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include "revPoMoKNRateMatrixFunction.h"
 #include "RbException.h"
 
@@ -71,11 +73,11 @@ void revPoMoKNRateMatrixFunction::update( void )
     const std::vector<double>&  f  = phi->getValue();
 
     // set the base frequencies
-    static_cast< RateMatrix_revPoMoKN* >(value)->setK( na );
-    static_cast< RateMatrix_revPoMoKN* >(value)->setN( ni );
-    static_cast< RateMatrix_revPoMoKN* >(value)->setPi( bf );
-    static_cast< RateMatrix_revPoMoKN* >(value)->setRho( ex );
-    static_cast< RateMatrix_revPoMoKN* >(value)->setPhi( f );
+    cast_to_derived< RateMatrix_revPoMoKN* >(value)->setK( na );
+    cast_to_derived< RateMatrix_revPoMoKN* >(value)->setN( ni );
+    cast_to_derived< RateMatrix_revPoMoKN* >(value)->setPi( bf );
+    cast_to_derived< RateMatrix_revPoMoKN* >(value)->setRho( ex );
+    cast_to_derived< RateMatrix_revPoMoKN* >(value)->setPhi( f );
 
     value->update();
 }
@@ -87,27 +89,27 @@ void revPoMoKNRateMatrixFunction::swapParameterInternal(const DagNode *oldP, con
     
     if (oldP == K)
     {
-        K = static_cast<const TypedDagNode< std::int64_t >* >( newP );
+        replaceNodeReference(K, newP);
     }
     
     if (oldP == N)
     {
-        N =  static_cast<const TypedDagNode< std::int64_t >* >( newP );
+        replaceNodeReference(N, newP);
     }
 
     if (oldP == pi)
     {
-        pi = static_cast<const TypedDagNode< Simplex >* >( newP );
+        replaceNodeReference(pi, newP);
     }
 
     if (oldP == rho)
     {
-        rho = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(rho, newP);
     }
 
     if (oldP == phi)
     {
-        phi = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(phi, newP);
     }
 
 }

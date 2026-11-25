@@ -1,3 +1,5 @@
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include "F81RateMatrixFunction.h"
 
 #include <vector>
@@ -46,7 +48,7 @@ void F81RateMatrixFunction::update( void )
     const std::vector<double>& f = base_frequencies->getValue();
     
     // set the base frequencies
-    static_cast< RateMatrix_F81* >(value)->setStationaryFrequencies( f );
+    cast_to_derived< RateMatrix_F81* >(value)->setStationaryFrequencies( f );
     
     value->update();
 }
@@ -57,7 +59,7 @@ void F81RateMatrixFunction::swapParameterInternal(const DagNode *oldP, const Dag
 {
     if (oldP == base_frequencies)
     {
-        base_frequencies = static_cast<const TypedDagNode< Simplex >* >( newP );
+        replaceNodeReference(base_frequencies, newP);
     }
 }
 

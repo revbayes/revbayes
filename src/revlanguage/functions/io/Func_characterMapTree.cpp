@@ -1,3 +1,5 @@
+#include "TypeUtilities.h"
+#include "RevTypeUtilities.h"
 #include <cmath>
 #include <cstddef>
 #include <sstream>
@@ -56,10 +58,10 @@ RevPtr<RevVariable> Func_characterMapTree::execute( void )
     size_t arg_index = 0;
     
     // get the input tree
-    const RevBayesCore::TypedDagNode<RevBayesCore::Tree> *it = static_cast<const Tree&>( this->args[arg_index++].getVariable()->getRevObject() ).getDagNode();
+    const RevBayesCore::TypedDagNode<RevBayesCore::Tree> *it = dagNodeForRevType<Tree>(this->args[arg_index++].getVariable());
     
     // get vector of ancestral state traces
-    const WorkspaceVector<AncestralStateTrace>& ast_vector = static_cast<const WorkspaceVector<AncestralStateTrace> &>( args[arg_index++].getVariable()->getRevObject() );
+    const WorkspaceVector<AncestralStateTrace>& ast_vector = objectForRevType<WorkspaceVector<AncestralStateTrace>>(args[arg_index++].getVariable());
     std::vector<RevBayesCore::AncestralStateTrace> ancestralstate_traces;
     for (int i = 0; i < ast_vector.size(); ++i)
     {
@@ -73,37 +75,36 @@ RevPtr<RevVariable> Func_characterMapTree::execute( void )
     {
         
         // get the ancestral state tree trace
-        const TraceTree& tt = static_cast<const TraceTree&>( tt_arg.getVariable()->getRevObject() );
-        tree_trace = tt.getValue();
+        tree_trace = valueForRevType<TraceTree>(tt_arg.getVariable());
     }
     
     // get the filename for the tree with MAP character history
-    RevBayesCore::path map_filename = static_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+    RevBayesCore::path map_filename = valueForRevType<RlString>(args[arg_index++].getVariable());
 
     // get the filename for the tree with posteriors for the MAP character history
-    RevBayesCore::path map_pp_filename = static_cast<const RlString&>( args[arg_index++].getVariable()->getRevObject() ).getValue();
+    RevBayesCore::path map_pp_filename = valueForRevType<RlString>(args[arg_index++].getVariable());
 
     // get the filename for the tree with shift probability for character history
     RevBayesCore::path map_shift_pp_filename = "";
     const Argument& map_shift_pp_filename_arg = args[arg_index++];
     if ( map_shift_pp_filename_arg.getVariable()->getRevObject() != RevNullObject::getInstance() )
     {
-        map_shift_pp_filename = static_cast<const RlString&>( map_shift_pp_filename_arg.getVariable()->getRevObject() ).getValue();
+        map_shift_pp_filename = valueForRevType<RlString>(map_shift_pp_filename_arg.getVariable());
     }
     
     int burnin;
     RevObject& b = args[arg_index++].getVariable()->getRevObject();
     if ( b.isType( Integer::getClassTypeSpec() ) )
     {
-        burnin = (int)static_cast<const Integer &>(b).getValue();
+        burnin = (int)cast_to_derived<const Integer &>(b).getValue();
     }
     else
     {
-        double burnin_frac = static_cast<const Probability &>(b).getValue();
+        double burnin_frac = cast_to_derived<const Probability &>(b).getValue();
         burnin = int( floor( ancestralstate_traces[0].size() * burnin_frac ) );
     }
 
-    std::string reconstruction = static_cast<const RlString &>(args[arg_index++].getVariable()->getRevObject()).getValue();
+    std::string reconstruction = valueForRevType<RlString>(args[arg_index++].getVariable());
     bool conditional = false;
     if ( reconstruction == "conditional" )
     {
@@ -114,9 +115,9 @@ RevPtr<RevVariable> Func_characterMapTree::execute( void )
         throw RbException("Joint ancestral state summaries are not yet implemented. Coming soon!");
     }
     
-    int num_time_slices = (int)static_cast<const Integer &>(args[arg_index++].getVariable()->getRevObject()).getValue();
+    int num_time_slices = (int)valueForRevType<Integer>(args[arg_index++].getVariable());
     
-    bool verbose = static_cast<const RlBoolean &>(args[arg_index++].getVariable()->getRevObject()).getValue();
+    bool verbose = valueForRevType<RlBoolean>(args[arg_index++].getVariable());
     
     // get the tree with ancestral states
     RevBayesCore::JointAncestralStateTrace joint_trace(ancestralstate_traces, tree_trace);

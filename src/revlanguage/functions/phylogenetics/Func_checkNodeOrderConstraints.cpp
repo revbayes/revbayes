@@ -6,6 +6,7 @@
 //  Copyright 2012 __MyCompanyName__. All rights reserved.
 //
 
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <iostream>
 #include <string>
@@ -60,8 +61,8 @@ Func_checkNodeOrderConstraints* Func_checkNodeOrderConstraints::clone( void ) co
 RevBayesCore::TypedFunction<RevBayesCore::Boolean>* Func_checkNodeOrderConstraints::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = static_cast<const TimeTree&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< RevBayesCore::RelativeNodeAgeConstraints>* c = static_cast<const RlRelativeNodeAgeConstraints &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = dagNodeForRevType<TimeTree>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode< RevBayesCore::RelativeNodeAgeConstraints>* c = dagNodeForRevType<RlRelativeNodeAgeConstraints>(this->args[1].getVariable());
     try {
         RevBayesCore::CheckNodeOrderConstraintsFunction* f = new RevBayesCore::CheckNodeOrderConstraintsFunction( tau, c );
         return f;

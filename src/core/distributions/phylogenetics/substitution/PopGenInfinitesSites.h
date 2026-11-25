@@ -2,7 +2,6 @@
 #define PopGenInfiniteSites_H
 
 #include "AbstractHomologousDiscreteCharacterData.h"
-#include "BinaryState.h"
 #include "Tree.h"
 #include "TypedDagNode.h"
 #include "TypedDistribution.h"

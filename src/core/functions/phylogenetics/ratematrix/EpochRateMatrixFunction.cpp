@@ -6,6 +6,8 @@
 //  Copyright (c) 2015 Michael Landis. All rights reserved.
 //
 
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include "EpochRateMatrixFunction.h"
 
 #include "RateGenerator.h"
@@ -54,9 +56,9 @@ void EpochRateMatrixFunction::update( void )
     
     
     // set the base frequencies
-    static_cast<RateGenerator_Epoch*>(value)->setEpochGenerators(rg);
-    static_cast<RateGenerator_Epoch*>(value)->setEpochRates(r);
-    static_cast<RateGenerator_Epoch*>(value)->setEpochTimes(t);
+    cast_to_derived<RateGenerator_Epoch*>(value)->setEpochGenerators(rg);
+    cast_to_derived<RateGenerator_Epoch*>(value)->setEpochRates(r);
+    cast_to_derived<RateGenerator_Epoch*>(value)->setEpochTimes(t);
     
     value->update();
     
@@ -69,15 +71,15 @@ void EpochRateMatrixFunction::swapParameterInternal(const DagNode *oldP, const D
     
     if (oldP == epochRateGenerators)
     {
-        epochRateGenerators = static_cast<const TypedDagNode< RbVector<RateGenerator> >* >( newP );
+        replaceNodeReference(epochRateGenerators, newP);
     }
     else if (oldP == epochTimes)
     {
-        epochTimes = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(epochTimes, newP);
     }
     else if (oldP == epochRates)
     {
-        epochRates = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(epochRates, newP);
     }
 
     

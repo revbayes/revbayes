@@ -1,4 +1,5 @@
 #include "TimeInterval.h"
+#include "DagNodeTypeUtilities.h"
 #include <cstddef>
 #include <algorithm>
 #include <cmath>
@@ -397,7 +398,7 @@ void DemographyCoalescent::swapParameterInternal(const DagNode *oldP, const DagN
     bool found = false;
     if ( oldP == intervals )
     {
-        intervals = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(intervals, newP);
         found = true;
     }
     else

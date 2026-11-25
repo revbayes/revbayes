@@ -6,6 +6,8 @@
 //  Copyright © 2017 Michael Landis. All rights reserved.
 //
 
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include "RangeEvolutionRateModifierFunction.h"
 
 #include "RangeEvolutionRateModifier.h"
@@ -58,13 +60,13 @@ void RangeEvolutionRateModifierFunction::update( void )
 {
     
     double gf = gainFactor->getValue();
-    static_cast<RangeEvolutionRateModifier*>(value)->setGainFactor(gf);
+    cast_to_derived<RangeEvolutionRateModifier*>(value)->setGainFactor(gf);
     
     double lf = lossFactor->getValue();
-    static_cast<RangeEvolutionRateModifier*>(value)->setLossFactor(lf);
+    cast_to_derived<RangeEvolutionRateModifier*>(value)->setLossFactor(lf);
     
     RbVector<RbVector<double> > c = context_matrix->getValue();
-    static_cast<RangeEvolutionRateModifier*>(value)->setContextMatrix(c);
+    cast_to_derived<RangeEvolutionRateModifier*>(value)->setContextMatrix(c);
 
 }
 
@@ -75,14 +77,14 @@ void RangeEvolutionRateModifierFunction::swapParameterInternal(const DagNode *ol
     
     if (oldP == gainFactor)
     {
-        gainFactor = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(gainFactor, newP);
     }
     else if (oldP == lossFactor)
     {
-        lossFactor = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(lossFactor, newP);
     }
     else if (oldP == context_matrix)
     {
-        context_matrix = static_cast<const TypedDagNode<RbVector<RbVector<double> > >* >( newP );
+        replaceNodeReference(context_matrix, newP);
     }
 }
