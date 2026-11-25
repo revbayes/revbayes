@@ -1,0 +1,47 @@
+an assembly follows a tree that is replaced rather than edited:
+   Successfully read one character matrix from file 'data/primates_cytb_small.nex'
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 3 different moves in a random move schedule with 12 moves per iteration
+   
+   Processing file "output/treeAssembly_replaced_tree_pool.trees"
+
+Progress:
+0---------------25---------------50---------------75--------------100
+********************************************************************
+
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 10 different moves, with a single move picked randomly per iteration
+   
+   Processing file "output/treeAssembly_replaced_tree_1_1.log"
+   Appending to previous MCMC simulation of 3000 iterations
+   This simulation runs 1 independent replicate.
+   The simulator uses 10 different moves, with a single move picked randomly per iteration
+   
+   Processing file "output/treeAssembly_replaced_tree_1_2.log"
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 10 different moves, with a single move picked randomly per iteration
+   
+   Processing file "output/treeAssembly_replaced_tree_2_1.log"
+   Appending to previous MCMC simulation of 3000 iterations
+   This simulation runs 1 independent replicate.
+   The simulator uses 10 different moves, with a single move picked randomly per iteration
+   
+   Processing file "output/treeAssembly_replaced_tree_2_2.log"
+   
+   Running MCMC simulation
+   This simulation runs 1 independent replicate.
+   The simulator uses 10 different moves, with a single move picked randomly per iteration
+   
+   Processing file "output/treeAssembly_replaced_tree_3_1.log"
+   Appending to previous MCMC simulation of 3000 iterations
+   This simulation runs 1 independent replicate.
+   The simulator uses 10 different moves, with a single move picked randomly per iteration
+   
+   Processing file "output/treeAssembly_replaced_tree_3_2.log"
+TRUE
