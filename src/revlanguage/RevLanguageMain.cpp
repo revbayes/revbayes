@@ -105,6 +105,8 @@ int RevLanguageMain::startRevLanguageEnvironment(const std::vector<std::string> 
         }
     }
 
+//    RevClient::execute_file("scripts/test_ESSEF.Rev", echo, continue_on_error);
+    RevClient::execute_file("mcmc_ESFBD.Rev", echo, continue_on_error);
     // 6. Evaluate a filename if given.
     try
     {
