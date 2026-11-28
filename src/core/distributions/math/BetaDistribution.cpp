@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "BetaDistribution.h"
 
 #include "DistributionBeta.h"
@@ -90,10 +91,10 @@ void BetaDistribution::swapParameterInternal( const DagNode *oldP, const DagNode
 {
     if (oldP == alpha)
     {
-        alpha = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(alpha, newP);
     }
     if (oldP == beta)
     {
-        beta = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(beta, newP);
     }
 }

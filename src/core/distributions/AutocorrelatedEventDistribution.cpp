@@ -1,3 +1,5 @@
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include "AutocorrelatedEventDistribution.h"
 
 #include <cstddef>
@@ -275,18 +277,18 @@ void AutocorrelatedEventDistribution::executeMethod(const std::string &n, const 
     
     if ( n == "getValues" )
     {
-        const std::string &val_name = static_cast<const TypedDagNode<std::string> * >( args[0] )->getValue();
+        const std::string &val_name = cast_to_derived<const TypedDagNode<std::string> * >( args[0] )->getValue();
         rv = value->getValues( val_name );
         
     }
     else if ( n == "getRealValues" )
     {
-        const std::string &val_name = static_cast<const TypedDagNode<std::string> * >( args[0] )->getValue();
+        const std::string &val_name = cast_to_derived<const TypedDagNode<std::string> * >( args[0] )->getValue();
         rv = value->getValues( val_name );
     }
     else if ( n == "getRealPosValues" )
     {
-        const std::string &val_name = static_cast<const TypedDagNode<std::string> * >( args[0] )->getValue();
+        const std::string &val_name = cast_to_derived<const TypedDagNode<std::string> * >( args[0] )->getValue();
         rv = value->getValues( val_name );
     }
     else
@@ -476,7 +478,7 @@ void AutocorrelatedEventDistribution::swapParameterInternal( const DagNode *oldP
     
     if ( oldP == autocorrelation_sigmas )
     {
-        autocorrelation_sigmas = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(autocorrelation_sigmas, newP);
         found = true;
     }
     

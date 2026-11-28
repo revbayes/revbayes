@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <ostream>
 #include <string>
 
@@ -43,10 +44,10 @@ void LinearDemographicFunction::constructInternalObject( void )
     delete value;
     
     // now allocate space for a new LinearDemographicFunction object
-    RevBayesCore::TypedDagNode<double> *t0 = static_cast<const RealPos &>( time_recent->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double> *t1 = static_cast<const RealPos &>( time_ancient->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double> *N0 = static_cast<const RealPos &>( theta_recent->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<double> *N1 = static_cast<const RealPos &>( theta_ancient->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double> *t0 = dagNodeForRevType<RealPos>(time_recent);
+    RevBayesCore::TypedDagNode<double> *t1 = dagNodeForRevType<RealPos>(time_ancient);
+    RevBayesCore::TypedDagNode<double> *N0 = dagNodeForRevType<RealPos>(theta_recent);
+    RevBayesCore::TypedDagNode<double> *N1 = dagNodeForRevType<RealPos>(theta_ancient);
     
     value = new RevBayesCore::LinearDemographicFunction( N0, N1, t0, t1 );
 }

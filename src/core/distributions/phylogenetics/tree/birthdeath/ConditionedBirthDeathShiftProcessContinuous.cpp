@@ -1,3 +1,5 @@
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include <cstddef>
 #include <algorithm>
 #include <cmath>
@@ -418,7 +420,7 @@ double ConditionedBirthDeathShiftProcessContinuous::computeStartValue(size_t i, 
         const BranchHistory &bh = branch_histories[ node_index ];
         const std::multiset<CharacterEvent*, CharacterEventCompare> &h = bh.getHistory();
         
-        CharacterEventContinuous *event = static_cast<CharacterEventContinuous*>(*h.begin());
+        CharacterEventContinuous *event = cast_to_derived<CharacterEventContinuous*>(*h.begin());
         return event->getState(j);
         
     }
@@ -468,7 +470,7 @@ double ConditionedBirthDeathShiftProcessContinuous::computeStateValue(size_t i, 
             const std::multiset<CharacterEvent*, CharacterEventCompare> &h = bh.getHistory();
             for (std::multiset<CharacterEvent*,CharacterEventCompare>::const_iterator it=h.begin(); it!=h.end(); ++it)
             {
-                CharacterEventContinuous* event = static_cast<CharacterEventContinuous*>(*it);
+                CharacterEventContinuous* event = cast_to_derived<CharacterEventContinuous*>(*it);
                 double event_time = event->getAge();
                 if ( event_time > time )
                 {
@@ -565,7 +567,7 @@ void ConditionedBirthDeathShiftProcessContinuous::executeMethod(const std::strin
             double branch_length = node.getBranchLength();
             for (std::multiset<CharacterEvent*,CharacterEventCompare>::const_iterator it=hist.begin(); it!=hist.end(); ++it)
             {
-                CharacterEventContinuous* event = static_cast<CharacterEventContinuous*>(*it);
+                CharacterEventContinuous* event = cast_to_derived<CharacterEventContinuous*>(*it);
                 double end_time = event->getAge() - node.getAge();
                 double time_interval = (end_time - begin_time) / branch_length;
                 
@@ -601,7 +603,7 @@ void ConditionedBirthDeathShiftProcessContinuous::executeMethod(const std::strin
             double branch_length = node.getBranchLength();
             for (std::multiset<CharacterEvent*,CharacterEventCompare>::const_iterator it=hist.begin(); it!=hist.end(); ++it)
             {
-                CharacterEventContinuous* event = static_cast<CharacterEventContinuous*>(*it);
+                CharacterEventContinuous* event = cast_to_derived<CharacterEventContinuous*>(*it);
                 double end_time = event->getAge() - node.getAge();
                 double time_interval = (end_time - begin_time) / branch_length;
                 
@@ -764,14 +766,14 @@ void ConditionedBirthDeathShiftProcessContinuous::initializeBranchHistories(cons
         if ( parents.size() > 0 )
         {
             CharacterEvent *ce = parents[0];
-            static_cast<CharacterEventContinuous*>( ce )->resize( 2 );
-            static_cast<CharacterEventContinuous*>( ce )->setState( val, idx );
+            cast_to_derived<CharacterEventContinuous*>( ce )->resize( 2 );
+            cast_to_derived<CharacterEventContinuous*>( ce )->setState( val, idx );
         }
         if ( children.size() > 0 )
         {
             CharacterEvent *ce = children[0];
-            static_cast<CharacterEventContinuous*>( ce )->resize( 2 );
-            static_cast<CharacterEventContinuous*>( ce )->setState( val, idx );
+            cast_to_derived<CharacterEventContinuous*>( ce )->resize( 2 );
+            cast_to_derived<CharacterEventContinuous*>( ce )->setState( val, idx );
         }
     }
     
@@ -989,23 +991,23 @@ void ConditionedBirthDeathShiftProcessContinuous::swapParameterInternal( const D
 {
     if (oldP == root_age)
     {
-        root_age = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(root_age, newP);
     }
     else if (oldP == root_speciation)
     {
-        root_speciation = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(root_speciation, newP);
     }
     else if (oldP == root_extinction)
     {
-        root_extinction = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(root_extinction, newP);
     }
     else if (oldP == shift_rate)
     {
-        shift_rate = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(shift_rate, newP);
     }
     else if (oldP == rho)
     {
-        rho = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(rho, newP);
     }
     
     if ( base_distribution_speciation != NULL )

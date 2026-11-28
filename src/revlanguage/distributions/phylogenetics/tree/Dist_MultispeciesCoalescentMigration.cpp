@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cmath>
 #include <cstddef>
 #include <iosfwd>
@@ -80,20 +81,20 @@ RevBayesCore::MultispeciesCoalescentMigration* Dist_MultispeciesCoalescentMigrat
 {
 
     // Get the parameters
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* st = static_cast<const TimeTree &>( species_tree->getRevObject() ).getDagNode();
-    const std::vector<RevBayesCore::Taxon>      &t  = static_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* st = dagNodeForRevType<TimeTree>(species_tree);
+    const std::vector<RevBayesCore::Taxon>      &t  = valueForRevType<ModelVector<Taxon>>(taxa);
 
     // get the number of nodes for the tree
     size_t n_nodes = st->getValue().getNumberOfNodes();
 
-    RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>*    q = static_cast<const RateGenerator &   >( Q->getRevObject()        ).getDagNode();
-    RevBayesCore::TypedDagNode<double>*                         d = static_cast<const RealPos &         >( delta->getRevObject()    ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::RateGenerator>*    q = dagNodeForRevType<RateGenerator>(Q);
+    RevBayesCore::TypedDagNode<double>*                         d = dagNodeForRevType<RealPos>(delta);
 
     RevBayesCore::MultispeciesCoalescentMigration*   dist = new RevBayesCore::MultispeciesCoalescentMigration( st, t, q, d );
 
     if ( Ne->getRequiredTypeSpec().isDerivedOf( ModelVector<RealPos>::getClassTypeSpec() ) )
     {
-        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* ne_node = static_cast<const ModelVector<RealPos> &>( Ne->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* ne_node = dagNodeForRevType<ModelVector<RealPos>>(Ne);
 
         // sanity check
         if ( n_nodes != ne_node->getValue().size() )
@@ -105,7 +106,7 @@ RevBayesCore::MultispeciesCoalescentMigration* Dist_MultispeciesCoalescentMigrat
     }
     else
     {
-        RevBayesCore::TypedDagNode<double>* ne_node = static_cast<const RealPos &>( Ne->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<double>* ne_node = dagNodeForRevType<RealPos>(Ne);
         dist->setNe( ne_node );
     }
     dist->redrawValue();

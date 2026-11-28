@@ -5,7 +5,6 @@
 #include <map>
 #include <vector>
 
-#include "BinaryState.h"
 #include "PhyloCTMCSiteHomogeneousConditional.h"
 #include "AbstractPhyloCTMCSiteHomogeneous.h"
 #include "DiscreteTaxonData.h"
@@ -15,6 +14,7 @@
 #include "RbException.h"
 #include "TypedDistribution.h"
 #include "RbBitSet.h"
+#include "StandardState.h"
 
 namespace RevBayesCore {
 class Tree;
@@ -33,7 +33,7 @@ template <class valueType> class TypedDagNode;
                   };
     };
 
-    class PhyloCTMCSiteHomogeneousBinary : public PhyloCTMCSiteHomogeneousConditional<BinaryState> {
+    class PhyloCTMCSiteHomogeneousBinary : public PhyloCTMCSiteHomogeneousConditional<StandardState> {
 
         public:
             PhyloCTMCSiteHomogeneousBinary(const TypedDagNode< Tree > *t, bool c, size_t nSites, bool amb, BinaryAscertainmentBias::Coding cod = BinaryAscertainmentBias::ALL, bool internal = false, bool gapmatch = true);

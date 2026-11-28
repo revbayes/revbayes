@@ -4,6 +4,7 @@
 //  Created by Will Freyman on 6/22/16.
 //
 
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <iosfwd>
 #include <string>
@@ -59,14 +60,14 @@ Func_chromosomesCladoEventsBD* Func_chromosomesCladoEventsBD::clone( void ) cons
 RevBayesCore::TypedFunction< RevBayesCore::CladogeneticSpeciationRateMatrix >* Func_chromosomesCladoEventsBD::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* sr = static_cast<const ModelVector<RealPos> &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    int ns = (int)static_cast<const Natural &>( this->args[2].getVariable()->getRevObject() ).getValue();
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* sr = dagNodeForRevType<ModelVector<RealPos>>(this->args[0].getVariable());
+    int ns = (int)valueForRevType<Natural>(this->args[2].getVariable());
     
     RevBayesCore::ChromosomesCladogenicBirthDeathFunction* f = new RevBayesCore::ChromosomesCladogenicBirthDeathFunction( sr, ns );
     
     if (this->args[1].getVariable()->getRevObject() != RevNullObject::getInstance())
     {    
-        RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* rm = static_cast<const ModelVector<RealPos> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+        RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* rm = dagNodeForRevType<ModelVector<RealPos>>(this->args[1].getVariable());
         if (rm->getValue().size() > 1)
         {
             throw RbException("Only one hidden rate category currently implemented.");

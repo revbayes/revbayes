@@ -1,3 +1,5 @@
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include <cstddef>
 #include <cmath>
 #include <iostream>
@@ -96,7 +98,7 @@ double BurstEventProposal::doProposal( void )
     RandomNumberGenerator* rng     = GLOBAL_RNG;
     
     Tree &tree = psi->getValue();
-    BirthDeathBurstProcess *dist = static_cast<BirthDeathBurstProcess *>( &psi->getDistribution() );
+    BirthDeathBurstProcess *dist = cast_to_derived<BirthDeathBurstProcess *>( &psi->getDistribution() );
     
     double burst_age = dist->getBurstTime();
     
@@ -200,7 +202,7 @@ void BurstEventProposal::undoProposal( void )
     // undo the proposal (only if succeeded)
     if ( failed == false)
     {
-        BirthDeathBurstProcess *dist = static_cast<BirthDeathBurstProcess *>( &psi->getDistribution() );
+        BirthDeathBurstProcess *dist = cast_to_derived<BirthDeathBurstProcess *>( &psi->getDistribution() );
         size_t node_index= stored_node->getIndex();
         
         if ( dist->isBurstSpeciation( node_index )  == true )
@@ -230,7 +232,7 @@ void BurstEventProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
     
     if ( oldN == psi )
     {
-        psi = static_cast<StochasticNode<Tree>* >(newN) ;
+        replaceNodeReference(psi, newN) ;
     }
     
 }

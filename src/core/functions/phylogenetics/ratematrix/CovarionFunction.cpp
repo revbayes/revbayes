@@ -1,3 +1,5 @@
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include "CovarionFunction.h"
 
 #include <cstddef>
@@ -132,7 +134,7 @@ void CovarionFunction::update( void )
     }
     
     // finally set the rates in the actual matrix
-    static_cast< RateMatrix_FreeK* >(value)->setTransitionRates( all_rates_flat );
+    cast_to_derived< RateMatrix_FreeK* >(value)->setTransitionRates( all_rates_flat );
 
     // set the emitted letters for each covarion state in the actual matrix
     std::vector<int> emit(num_states);
@@ -140,7 +142,7 @@ void CovarionFunction::update( void )
     {
         emit[i] = i % num_org_states;
     }
-    static_cast< RateMatrix_FreeK* >(value)->set_emitted_letters( emit);
+    cast_to_derived< RateMatrix_FreeK* >(value)->set_emitted_letters( emit);
 
     value->update();
 }
@@ -151,15 +153,15 @@ void CovarionFunction::swapParameterInternal(const DagNode *oldP, const DagNode 
     
     if (oldP == rate_matrices)
     {
-        rate_matrices = static_cast<const TypedDagNode< RbVector<RateGenerator> >* >( newP );
+        replaceNodeReference(rate_matrices, newP);
     }
     else if (oldP == rate_scalars)
     {
-        rate_scalars = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(rate_scalars, newP);
     }
     else if (oldP == switch_rates)
     {
-        switch_rates = static_cast<const TypedDagNode< RbVector<RbVector<double> > >* >( newP );
+        replaceNodeReference(switch_rates, newP);
     }
     
 }

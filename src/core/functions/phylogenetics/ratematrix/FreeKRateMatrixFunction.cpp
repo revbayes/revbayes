@@ -1,3 +1,5 @@
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include "FreeKRateMatrixFunction.h"
 
 #include <cmath>
@@ -73,14 +75,14 @@ void FreeKRateMatrixFunction::update( void )
         }
 
         // set the flattened rates
-        static_cast< RateMatrix_FreeK* >(value)->setTransitionRates(r_flat);
+        cast_to_derived< RateMatrix_FreeK* >(value)->setTransitionRates(r_flat);
     }
     else if (transition_rates == NULL && transition_rates_flat != NULL)
     {
         const std::vector<double>& r = transition_rates_flat->getValue();
         
         // set the flattened rates
-        static_cast< RateMatrix_FreeK* >(value)->setTransitionRates(r);
+        cast_to_derived< RateMatrix_FreeK* >(value)->setTransitionRates(r);
     }
 
     value->update();
@@ -93,11 +95,11 @@ void FreeKRateMatrixFunction::swapParameterInternal(const DagNode *oldP, const D
     
     if (oldP == transition_rates)
     {
-        transition_rates = static_cast<const TypedDagNode< RbVector<RbVector<double> > >* >( newP );
+        replaceNodeReference(transition_rates, newP);
     }
     else if (oldP == transition_rates_flat)
     {
-        transition_rates_flat = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(transition_rates_flat, newP);
     }
     
 }

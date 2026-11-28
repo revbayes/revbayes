@@ -1,3 +1,5 @@
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include "CharacterHistoryNodeMonitor.h"
 
 #include <cstddef>
@@ -83,7 +85,7 @@ std::string CharacterHistoryNodeMonitor::buildCharacterHistoryString(TopologyNod
     {
         if (i != 0)
             ss << ",";
-        ss << static_cast<CharacterEventDiscrete*>(characters[i])->getState();
+        ss << cast_to_derived<CharacterEventDiscrete*>(characters[i])->getState();
     }
     
     return ss.str();
@@ -248,14 +250,14 @@ void CharacterHistoryNodeMonitor::swapNode(DagNode *oldN, DagNode *newN)
     // bool found = false;
     if ( oldN == tree )
     {
-        tree = static_cast< TypedDagNode< Tree > *>( newN );
+        replaceNodeReference(tree, newN);
         // found = true;
     }
     for (size_t i = 0; i < branchHistories.size(); i++)
     {
         if (oldN == branchHistories[i])
         {
-            branchHistories[i] = static_cast<StochasticNode<BranchHistory>* >(newN);
+            replaceNodeReference(branchHistories[i], newN);
             // found = true;
         }
     }

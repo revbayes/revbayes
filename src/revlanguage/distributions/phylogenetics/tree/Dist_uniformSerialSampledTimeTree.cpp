@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cmath>
 #include <iosfwd>
 #include <string>
@@ -60,10 +61,10 @@ RevBayesCore::UniformSerialSampledTimeTreeDistribution* Dist_uniformSerialSample
 {
 
     // Get the parameters
-    std::vector<RevBayesCore::Taxon> t = static_cast<const ModelVector<Taxon> &>( taxa->getRevObject() ).getValue();
+    std::vector<RevBayesCore::Taxon> t = valueForRevType<ModelVector<Taxon>>(taxa);
 
     // the start age
-    RevBayesCore::TypedDagNode<double>* a = static_cast<const RealPos &>( start_age->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* a = dagNodeForRevType<RealPos>(start_age);
 
     // the start condition
     bool ur = ( start_condition == "originAge" ? false : true );

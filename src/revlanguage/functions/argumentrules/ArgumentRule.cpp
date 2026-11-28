@@ -10,6 +10,7 @@
 #include "RbException.h"
 #include "RlFunction.h"
 #include "TypeSpec.h"
+#include "TypeUtilities.h"
 #include "Workspace.h"
 #include "DagNode.h"
 #include "Environment.h"
@@ -239,8 +240,8 @@ Argument ArgumentRule::fitArgument( Argument& arg ) const
                     (!oldNode->getChildren().empty() || !oldNode->getMoves().empty() ||
                      !oldNode->getMonitors().empty()) && !oldNode->hasCompatibleValueType(*newNode))
                 {
-                    static_cast<AbstractModelObject&>(*convertedObject).makeConversionValue(
-                        static_cast<const AbstractModelObject&>(source));
+                    cast_to_derived<AbstractModelObject&>(*convertedObject).makeConversionValue(
+                        cast_to_derived<const AbstractModelObject&>(source));
                     the_new_var = new RevVariable(convertedObject.release(), the_var->getName());
                     the_new_var->setHiddenVariableState(true);
                 }

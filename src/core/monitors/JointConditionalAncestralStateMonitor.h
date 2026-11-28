@@ -1,6 +1,8 @@
 #ifndef JointConditionalJointConditionalAncestralStateMonitor_H
 #define JointConditionalJointConditionalAncestralStateMonitor_H
 
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include "AbstractHomologousDiscreteCharacterData.h"
 #include "StateDependentSpeciationExtinctionProcess.h"
 #include "GeneralizedLineageHeterogeneousBirthDeathSamplingProcess.h"
@@ -148,7 +150,7 @@ void JointConditionalAncestralStateMonitor<characterType>::monitorVariables(std:
     GeneralizedLineageHeterogeneousBirthDeathSamplingProcess *dist_glhbdsp = NULL;
     if ( ctmc != NULL )
     {
-        dist_ctmc = static_cast<AbstractPhyloCTMCSiteHomogeneous<characterType>* >( &ctmc->getDistribution() );
+        dist_ctmc = cast_to_derived<AbstractPhyloCTMCSiteHomogeneous<characterType>* >( &ctmc->getDistribution() );
         num_sites = dist_ctmc->getValue().getNumberOfCharacters();
         num_nodes = tree->getValue().getNumberOfNodes();
     }
@@ -312,16 +314,16 @@ void JointConditionalAncestralStateMonitor<characterType>::swapNode(DagNode *old
 	
 	if ( oldN == tree )
 	{
-		tree = static_cast< TypedDagNode<Tree> *>( newN );
+		replaceNodeReference(tree, newN);
 	}
 	else if ( oldN == ctmc )
 	{
-		ctmc = static_cast< StochasticNode<AbstractHomologousDiscreteCharacterData> *>( newN );
+		replaceNodeReference(ctmc, newN);
 	}
     else if ( oldN == cdbdp )
     {
-        cdbdp = static_cast< StochasticNode<Tree> *>( newN );
-        tree = static_cast< StochasticNode<Tree> *>( newN );
+        replaceNodeReference(cdbdp, newN);
+        replaceNodeReference(tree, newN);
     }
     
     Monitor::swapNode( oldN, newN );

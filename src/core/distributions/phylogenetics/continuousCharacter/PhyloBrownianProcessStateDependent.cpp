@@ -1,3 +1,5 @@
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include <cmath>
 #include <cstddef>
 #include <deque>
@@ -209,7 +211,7 @@ void PhyloBrownianProcessStateDependent::recursiveComputeLnProbability( const To
 
                 for (std::multiset<CharacterEvent*,CharacterEventCompare>::const_iterator it=hist_left.begin(); it!=hist_left.end(); ++it)
                 {
-                    CharacterEventDiscrete* event = static_cast<CharacterEventDiscrete*>(*it);
+                    CharacterEventDiscrete* event = cast_to_derived<CharacterEventDiscrete*>(*it);
                     double event_time = event->getAge();
 
                     // we need to set the current rate category
@@ -223,7 +225,7 @@ void PhyloBrownianProcessStateDependent::recursiveComputeLnProbability( const To
                     // update our variables
                     begin_time_left     = event_time;
                 }
-                size_t last_state_left  = static_cast<CharacterEventDiscrete*>(bh_left.getParentCharacters()[0])->getState();
+                size_t last_state_left  = cast_to_derived<CharacterEventDiscrete*>(bh_left.getParentCharacters()[0])->getState();
                 double sigma_left = computeStateDependentSigma( last_state_left );
                 v_left += (sigma_left*sigma_left) * (node.getAge() - begin_time_left);
             }
@@ -238,7 +240,7 @@ void PhyloBrownianProcessStateDependent::recursiveComputeLnProbability( const To
 
             for (std::multiset<CharacterEvent*,CharacterEventCompare>::const_iterator it=hist_right.begin(); it!=hist_right.end(); ++it)
             {
-                CharacterEventDiscrete* event = static_cast<CharacterEventDiscrete*>(*it);
+                CharacterEventDiscrete* event = cast_to_derived<CharacterEventDiscrete*>(*it);
                 double event_time = event->getAge();
 
                 // we need to set the current rate category
@@ -252,7 +254,7 @@ void PhyloBrownianProcessStateDependent::recursiveComputeLnProbability( const To
                 // update our variables
                 begin_time_right     = event_time;
             }
-            size_t last_state_right  = static_cast<CharacterEventDiscrete*>(bh_right.getParentCharacters()[0])->getState();
+            size_t last_state_right  = cast_to_derived<CharacterEventDiscrete*>(bh_right.getParentCharacters()[0])->getState();
             double sigma_right = computeStateDependentSigma( last_state_right );
             v_right += (sigma_right*sigma_right) * (node.getAge() - begin_time_right);
 
@@ -711,7 +713,7 @@ void PhyloBrownianProcessStateDependent::simulateRecursively( const TopologyNode
             for (std::multiset<CharacterEvent*, CharacterEventCompare>::const_iterator iter = history.begin(); iter != history.end(); ++iter)
             {
                 // get the state change event
-                CharacterEventDiscrete* event = static_cast<CharacterEventDiscrete*>(*iter);
+                CharacterEventDiscrete* event = cast_to_derived<CharacterEventDiscrete*>(*iter);
 
                 // calculate the times
                 double event_time = event->getAge();
@@ -727,7 +729,7 @@ void PhyloBrownianProcessStateDependent::simulateRecursively( const TopologyNode
             }
 
             // do it again, since the iterator above only does n-1 of the episodes
-            size_t first_state = static_cast<CharacterEventDiscrete*>(bh.getParentCharacters()[0])->getState();
+            size_t first_state = cast_to_derived<CharacterEventDiscrete*>(bh.getParentCharacters()[0])->getState();
             double first_delta_t = node.getAge() - begin_time;
 
             times.push_front(first_delta_t);
@@ -851,16 +853,16 @@ void PhyloBrownianProcessStateDependent::swapParameterInternal(const DagNode *ol
 
     if (oldP == homogeneous_sigma)
     {
-        homogeneous_sigma = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(homogeneous_sigma, newP);
     }
     else if (oldP == state_dependent_sigma)
     {
-        state_dependent_sigma = static_cast<const TypedDagNode< RbVector< double > >* >( newP );
+        replaceNodeReference(state_dependent_sigma, newP);
     }
 
     if (oldP == character_histories)
     {
-        character_histories = static_cast<const TypedDagNode< CharacterHistoryDiscrete >* >( newP );
+        replaceNodeReference(character_histories, newP);
     }
 
 }

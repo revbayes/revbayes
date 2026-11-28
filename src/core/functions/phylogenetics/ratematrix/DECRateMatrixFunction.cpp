@@ -1,3 +1,5 @@
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include "DECRateMatrixFunction.h"
 
 #include <cmath>
@@ -69,9 +71,9 @@ void DECRateMatrixFunction::update( void )
     const std::vector<double>& rs               = rangeSize->getValue();
         
     // set the base frequencies
-    static_cast< RateMatrix_DECRateMatrix* >(value)->setDispersalRates(dr);
-    static_cast< RateMatrix_DECRateMatrix* >(value)->setExtirpationRates(er);
-    static_cast< RateMatrix_DECRateMatrix* >(value)->setRangeSize(rs);
+    cast_to_derived< RateMatrix_DECRateMatrix* >(value)->setDispersalRates(dr);
+    cast_to_derived< RateMatrix_DECRateMatrix* >(value)->setExtirpationRates(er);
+    cast_to_derived< RateMatrix_DECRateMatrix* >(value)->setRangeSize(rs);
     
     value->update();
 }
@@ -80,12 +82,12 @@ void DECRateMatrixFunction::update( void )
 
 void DECRateMatrixFunction::swapParameterInternal(const DagNode *oldP, const DagNode *newP) {
     if (oldP == dispersalRates) {
-        dispersalRates = static_cast<const TypedDagNode< RbVector<RbVector<double> > >* >( newP );
+        replaceNodeReference(dispersalRates, newP);
     }
     else if (oldP == extirpationRates) {
-        extirpationRates = static_cast<const TypedDagNode< RbVector<RbVector<double> > >* >( newP );
+        replaceNodeReference(extirpationRates, newP);
     }
     else if (oldP == rangeSize) {
-        rangeSize = static_cast<const TypedDagNode< Simplex >* >( newP );
+        replaceNodeReference(rangeSize, newP);
     }
 }

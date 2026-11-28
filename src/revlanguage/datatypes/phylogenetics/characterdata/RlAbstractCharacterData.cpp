@@ -1,3 +1,5 @@
+#include "TypeUtilities.h"
+#include "RevTypeUtilities.h"
 #include "RlAbstractCharacterData.h"
 
 #include <cstddef>
@@ -131,12 +133,12 @@ RevPtr<RevVariable> AbstractCharacterData::executeCharacterDataMethod(std::strin
         const RevObject& argument = args[0].getVariable()->getRevObject();
         if ( argument.isType( RlString::getClassTypeSpec() ) )
         {
-            const std::string &n = static_cast<const RlString&>( argument ).getValue();
+            const std::string &n = cast_to_derived<const RlString&>( argument ).getValue();
             charDataObject->addMissingTaxon( n );
         }
         else if ( argument.isType( ModelVector<RlString>::getClassTypeSpec() ) )
         {
-            const ModelVector<RlString>& n = static_cast<const ModelVector<RlString>&>( argument );
+            const ModelVector<RlString>& n = cast_to_derived<const ModelVector<RlString>&>( argument );
             for ( size_t i=0; i<n.size(); ++i )
             {
                 charDataObject->addMissingTaxon( n[i] );
@@ -144,12 +146,12 @@ RevPtr<RevVariable> AbstractCharacterData::executeCharacterDataMethod(std::strin
         }
         else if ( argument.isType( Taxon::getClassTypeSpec() ) )
         {
-            const std::string &n = static_cast<const Taxon&>( argument ).getValue().getName();
+            const std::string &n = cast_to_derived<const Taxon&>( argument ).getValue().getName();
             charDataObject->addMissingTaxon( n );
         }
         else if ( argument.isType( ModelVector<Taxon>::getClassTypeSpec() ) )
         {
-            const ModelVector<Taxon>& n = static_cast<const ModelVector<Taxon>&>( argument );
+            const ModelVector<Taxon>& n = cast_to_derived<const ModelVector<Taxon>&>( argument );
             for ( size_t i=0; i<n.size(); ++i )
             {
                 charDataObject->addMissingTaxon( n[i].getName() );
@@ -171,12 +173,12 @@ RevPtr<RevVariable> AbstractCharacterData::executeCharacterDataMethod(std::strin
         const RevObject& argument = args[0].getVariable()->getRevObject();
         if ( argument.isType( RlString::getClassTypeSpec() ) )
         {
-            const std::string &n = static_cast<const RlString&>( argument ).getValue();
+            const std::string &n = cast_to_derived<const RlString&>( argument ).getValue();
             charDataObject->deleteTaxon( n );
         }
         else if ( argument.isType( ModelVector<RlString>::getClassTypeSpec() ) )
         {
-            const ModelVector<RlString>& x = static_cast<const ModelVector<RlString>&>( argument );
+            const ModelVector<RlString>& x = cast_to_derived<const ModelVector<RlString>&>( argument );
             RevBayesCore::AbstractCharacterData &v = *charDataObject;
             for ( size_t i=0; i<x.size(); i++ )
             {
@@ -192,17 +194,17 @@ RevPtr<RevVariable> AbstractCharacterData::executeCharacterDataMethod(std::strin
         const RevObject& argument = args[0].getVariable()->getRevObject();
         if ( argument.isType( RlString::getClassTypeSpec() ) )
         {
-            const std::string &n = static_cast<const RlString&>( argument ).getValue();
+            const std::string &n = cast_to_derived<const RlString&>( argument ).getValue();
             charDataObject->excludeTaxon( n );
         }
         else if ( argument.isType( Taxon::getClassTypeSpec() ) )
         {
-            const std::string &n = static_cast<const Taxon&>( argument ).getValue().getSpeciesName();
+            const std::string &n = cast_to_derived<const Taxon&>( argument ).getValue().getSpeciesName();
             charDataObject->excludeTaxon( n );
         }
         else if ( argument.isType( ModelVector<RlString>::getClassTypeSpec() ) )
         {
-            const ModelVector<RlString>& x = static_cast<const ModelVector<RlString>&>( argument );
+            const ModelVector<RlString>& x = cast_to_derived<const ModelVector<RlString>&>( argument );
             RevBayesCore::AbstractCharacterData &v = *charDataObject;
             for ( size_t i=0; i<x.size(); i++ )
             {
@@ -211,7 +213,7 @@ RevPtr<RevVariable> AbstractCharacterData::executeCharacterDataMethod(std::strin
         }
         else if ( argument.isType( ModelVector<Taxon>::getClassTypeSpec() ) )
         {
-            const ModelVector<Taxon>& x = static_cast<const ModelVector<Taxon>&>( argument );
+            const ModelVector<Taxon>& x = cast_to_derived<const ModelVector<Taxon>&>( argument );
             RevBayesCore::AbstractCharacterData &v = *charDataObject;
             for ( size_t i=0; i<x.size(); i++ )
             {
@@ -227,14 +229,14 @@ RevPtr<RevVariable> AbstractCharacterData::executeCharacterDataMethod(std::strin
         const RevObject& argument = args[0].getVariable()->getRevObject();
         if ( argument.isType( RlString::getClassTypeSpec() ) )
         {
-            const std::string &n = static_cast<const RlString&>( argument ).getValue();
+            const std::string &n = cast_to_derived<const RlString&>( argument ).getValue();
             // remember that we internally store the character indeces from 0 to n-1
             // but externally represent it as 1 to n
             charDataObject->includeTaxon( n );
         }
         else if ( argument.isType( ModelVector<RlString>::getClassTypeSpec() ) )
         {
-            const ModelVector<RlString>& x = static_cast<const ModelVector<RlString>&>( argument );
+            const ModelVector<RlString>& x = cast_to_derived<const ModelVector<RlString>&>( argument );
             RevBayesCore::AbstractCharacterData &v = *charDataObject;
             for ( size_t i=0; i<x.size(); i++ )
             {
@@ -255,8 +257,7 @@ RevPtr<RevVariable> AbstractCharacterData::executeCharacterDataMethod(std::strin
     {
         found = true;
         
-        const RevObject& argument = args[0].getVariable()->getRevObject();
-        const std::string &n = static_cast<const RlString&>( argument ).getValue();
+        const std::string &n = valueForRevType<RlString>(args[0].getVariable());
         
         bool tf = charDataObject->isSequenceMissing( n );
 
@@ -286,8 +287,7 @@ RevPtr<RevVariable> AbstractCharacterData::executeCharacterDataMethod(std::strin
     {
         found = true;
         
-        const RevObject& argument = args[0].getVariable()->getRevObject();
-        const std::string &n = static_cast<const RlString&>( argument ).getValue();
+        const std::string &n = valueForRevType<RlString>(args[0].getVariable());
         
         double p = charDataObject->getPercentageMissing( n );
         
@@ -308,11 +308,11 @@ RevPtr<RevVariable> AbstractCharacterData::executeCharacterDataMethod(std::strin
         const RevObject& data_name = args[0].getVariable()->getRevObject();
         if ( data_name.isType( RlString::getClassTypeSpec() ) )
         {
-            std::string n = std::string( static_cast<const RlString&>( data_name ).getValue() );
+            std::string n = std::string( cast_to_derived<const RlString&>( data_name ).getValue() );
             const RevObject& tip_name = args[1].getVariable()->getRevObject();
             if ( tip_name.isType( RlString::getClassTypeSpec() ) )
             {
-                std::string name = std::string( static_cast<const RlString&>( tip_name ).getValue() );
+                std::string name = std::string( cast_to_derived<const RlString&>( tip_name ).getValue() );
                 charDataObject->setHomeologPhase( n ,name );
             }
         }
@@ -325,11 +325,11 @@ RevPtr<RevVariable> AbstractCharacterData::executeCharacterDataMethod(std::strin
         const RevObject& current = args[0].getVariable()->getRevObject();
         if ( current.isType( RlString::getClassTypeSpec() ) )
         {
-            std::string n = std::string( static_cast<const RlString&>( current ).getValue() );
+            std::string n = std::string( cast_to_derived<const RlString&>( current ).getValue() );
             const RevObject& new_name = args[1].getVariable()->getRevObject();
             if ( new_name.isType( RlString::getClassTypeSpec() ) )
             {
-                std::string name = std::string( static_cast<const RlString&>( new_name ).getValue() );
+                std::string name = std::string( cast_to_derived<const RlString&>( new_name ).getValue() );
                 charDataObject->setTaxonName( n ,name );
                // std::cout << "new name: "<< dagNode->getValue().getTaxonData( n ).getTaxonName() << std::endl;
             }
@@ -343,11 +343,11 @@ RevPtr<RevVariable> AbstractCharacterData::executeCharacterDataMethod(std::strin
         const RevObject& current = args[0].getVariable()->getRevObject();
         if ( current.isType( RlString::getClassTypeSpec() ) )
         {
-            std::string n = std::string( static_cast<const RlString&>( current ).getValue() );
+            std::string n = std::string( cast_to_derived<const RlString&>( current ).getValue() );
             const RevObject& new_taxon_object = args[1].getVariable()->getRevObject();
             if ( new_taxon_object.isType( Taxon::getClassTypeSpec() ) )
             {
-                const RevBayesCore::Taxon &t = static_cast<const Taxon&>( new_taxon_object ).getValue();
+                const RevBayesCore::Taxon &t = cast_to_derived<const Taxon&>( new_taxon_object ).getValue();
                 charDataObject->setTaxonObject( n ,t );
                 // std::cout << "new name: "<< dagNode->getValue().getTaxonData( n ).getTaxonName() << std::endl;
             }
@@ -366,8 +366,7 @@ RevPtr<RevVariable> AbstractCharacterData::executeCharacterDataMethod(std::strin
     {
         found = true;
         
-        const RevObject& argument = args[0].getVariable()->getRevObject();
-        const std::string &n = static_cast<const RlString&>( argument ).getValue();
+        const std::string &n = valueForRevType<RlString>(args[0].getVariable());
         int index = (int)charDataObject->getIndexOfTaxon( n ) + 1;
         
         return new RevVariable( new Natural(index) );

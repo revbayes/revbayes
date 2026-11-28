@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "SegregatingSitesFunction.h"
 
 #include "AbstractHomologousDiscreteCharacterData.h"
@@ -47,7 +48,7 @@ void SegregatingSitesFunction::swapParameterInternal(const DagNode *oldP, const 
     
     if (oldP == alignment)
     {
-        alignment = static_cast<const TypedDagNode< AbstractHomologousDiscreteCharacterData >* >( newP );
+        replaceNodeReference(alignment, newP);
     }
     
 }

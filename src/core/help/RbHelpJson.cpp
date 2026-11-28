@@ -12,6 +12,7 @@
 #include "RbHelpSystem.h"
 #include "RbHelpType.h"
 #include "StringUtilities.h"
+#include "TypeUtilities.h"
 #include "nlohmann-json.h"
 
 using nlohmann::ordered_json;
@@ -160,7 +161,7 @@ std::string RevBayesCore::renderHelpJson(void)
         std::string base = name.substr(1);
         if (type_names.count("dn" + base) || type_names.count("dn" + StringUtilities::firstCharToUpper(base))) continue;
 
-        const RbHelpFunction& entry = static_cast<const RbHelpFunction&>(help.getHelp(name));
+        const RbHelpFunction& entry = cast_to_derived<const RbHelpFunction&>(help.getHelp(name));
         if (entry.getUsage() == "c_name()") continue;
 
         entries.push_back(toJson(entry, FUNCTION));
@@ -172,7 +173,7 @@ std::string RevBayesCore::renderHelpJson(void)
         if (name.find("[]") != std::string::npos) continue;
         if (name.empty() || name == "c_name" || function_names.count(name)) continue;
 
-        const RbHelpType& entry = static_cast<const RbHelpType&>(help.getHelp(name));
+        const RbHelpType& entry = cast_to_derived<const RbHelpType&>(help.getHelp(name));
         entries.push_back(toJson(entry));
     }
 

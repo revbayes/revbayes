@@ -1,3 +1,5 @@
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include <boost/assign/list_of.hpp>
 #include <algorithm>
 #include <cmath>
@@ -334,7 +336,7 @@ void StateDependentSpeciationExtinctionProcess::computeNodeProbability(const Rev
         if ( node.isTip() == true )
         {
             // this is a tip node
-            TreeDiscreteCharacterData* tree = static_cast<TreeDiscreteCharacterData*>( this->value );
+            TreeDiscreteCharacterData* tree = cast_to_derived<TreeDiscreteCharacterData*>( this->value );
 
             std::vector<double> sampling;
             std::vector<double> extinction;
@@ -709,7 +711,7 @@ void StateDependentSpeciationExtinctionProcess::fireTreeChangeEvent( const RevBa
 
 const RevBayesCore::AbstractHomologousDiscreteCharacterData& StateDependentSpeciationExtinctionProcess::getCharacterData() const
 {
-    return static_cast<TreeDiscreteCharacterData*>(this->value)->getCharacterData();
+    return cast_to_derived<TreeDiscreteCharacterData*>(this->value)->getCharacterData();
 }
 
 
@@ -836,7 +838,7 @@ void StateDependentSpeciationExtinctionProcess::recursivelyDrawJointConditionalA
     
     if ( node.isTip() == true )
     {
-        const AbstractHomologousDiscreteCharacterData& data = static_cast<TreeDiscreteCharacterData*>(this->value)->getCharacterData();
+        const AbstractHomologousDiscreteCharacterData& data = cast_to_derived<TreeDiscreteCharacterData*>(this->value)->getCharacterData();
         const AbstractDiscreteTaxonData& taxon_data = data.getTaxonData( node.getName() );
         
         const DiscreteCharacterState &char_state = taxon_data.getCharacter(0);
@@ -1288,7 +1290,7 @@ bool StateDependentSpeciationExtinctionProcess::recursivelyDrawStochasticCharact
     {
         // the last time slice of the branch will be the observed state
         
-        AbstractHomologousDiscreteCharacterData& data = static_cast<TreeDiscreteCharacterData*>(this->value)->getCharacterData();
+        AbstractHomologousDiscreteCharacterData& data = cast_to_derived<TreeDiscreteCharacterData*>(this->value)->getCharacterData();
         AbstractDiscreteTaxonData& taxon_data = data.getTaxonData( node.getName() );
         
         DiscreteCharacterState &char_state = taxon_data.getCharacter(0);
@@ -1524,7 +1526,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> StateDependentSpeciationExtinction
     {
         found = true;
         
-        const AbstractHomologousDiscreteCharacterData& v = static_cast<const TypedDagNode<AbstractHomologousDiscreteCharacterData > *>( args[0] )->getValue();
+        const AbstractHomologousDiscreteCharacterData& v = cast_to_derived<const TypedDagNode<AbstractHomologousDiscreteCharacterData > *>( args[0] )->getValue();
     
         // check if the tip names match
         bool match = true;
@@ -1551,7 +1553,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> StateDependentSpeciationExtinction
             throw RbException("To clamp a character data object all taxa present in the tree must be present in the character data.");
         }
         
-        static_cast<TreeDiscreteCharacterData*>(this->value)->setCharacterData( v.clone() );
+        cast_to_derived<TreeDiscreteCharacterData*>(this->value)->setCharacterData( v.clone() );
    
         // Sebastian (20210519): We should not waste computations here if we actually don't need it. Try to do lazy evaluations.
         // I keep this here if we find out later that these were indeed.
@@ -1872,7 +1874,7 @@ void StateDependentSpeciationExtinctionProcess::redrawValue( void )
                 this_tip_data.addCharacter(state);
                 tip_data->addTaxonData(this_tip_data);
             }
-            static_cast<TreeDiscreteCharacterData*>(this->value)->setCharacterData(tip_data);
+            cast_to_derived<TreeDiscreteCharacterData*>(this->value)->setCharacterData(tip_data);
            
             // simulate character history over the new tree
             size_t num_nodes = value->getNumberOfNodes();
@@ -1881,11 +1883,11 @@ void StateDependentSpeciationExtinctionProcess::redrawValue( void )
                 std::vector<std::string> character_histories(num_nodes);
                 drawStochasticCharacterMap(character_histories, true);
             }
-            static_cast<TreeDiscreteCharacterData*>(this->value)->setTimeInStates(time_in_states);
+            cast_to_derived<TreeDiscreteCharacterData*>(this->value)->setTimeInStates(time_in_states);
 
             success = true;
         }
-        else if ( condition_on_tip_states == true && static_cast<TreeDiscreteCharacterData *>(this->value)->hasCharacterData() == true )
+        else if ( condition_on_tip_states == true && cast_to_derived<TreeDiscreteCharacterData *>(this->value)->hasCharacterData() == true )
         {
             success = simulateTreeConditionedOnTips(attempts);
         }
@@ -2090,7 +2092,7 @@ void StateDependentSpeciationExtinctionProcess::setValue(Tree *v, bool f )
 
     // delegate to super class
     //    TypedDistribution<Tree>::setValue(v, f);
-    static_cast<TreeDiscreteCharacterData *>(this->value)->setTree( *v );
+    cast_to_derived<TreeDiscreteCharacterData *>(this->value)->setTree( *v );
 
     resizeVectors(v->getNumberOfNodes());
     
@@ -2124,7 +2126,7 @@ void StateDependentSpeciationExtinctionProcess::setValue(Tree *v, bool f )
         this_tip_data.addCharacter(state);
         tip_data->addTaxonData(this_tip_data);
     }
-    static_cast<TreeDiscreteCharacterData*>(this->value)->setCharacterData(tip_data);
+    cast_to_derived<TreeDiscreteCharacterData*>(this->value)->setCharacterData(tip_data);
     
     // Sebastian (20210519): We should not waste computations here if we actually don't need it. Try to do lazy evaluations.
     // I keep this here if we find out later that these were indeed.
@@ -2135,7 +2137,7 @@ void StateDependentSpeciationExtinctionProcess::setValue(Tree *v, bool f )
 //        std::vector<std::string> character_histories(num_nodes);
 //        drawStochasticCharacterMap(character_histories);
 //    }
-    static_cast<TreeDiscreteCharacterData*>(this->value)->setTimeInStates(time_in_states);
+    cast_to_derived<TreeDiscreteCharacterData*>(this->value)->setTimeInStates(time_in_states);
 }
 
 
@@ -2159,7 +2161,7 @@ bool StateDependentSpeciationExtinctionProcess::simulateTreeConditionedOnTips( s
     std::vector< std::vector<size_t> > extinct_lineages_in_state = std::vector< std::vector<size_t> >(num_states, std::vector<size_t>());
 
     // CharacterData object to hold the tip states
-    const AbstractHomologousDiscreteCharacterData& tip_data = static_cast<TreeDiscreteCharacterData*>(this->value)->getCharacterData();
+    const AbstractHomologousDiscreteCharacterData& tip_data = cast_to_derived<TreeDiscreteCharacterData*>(this->value)->getCharacterData();
     if ( tip_data.getNumberOfTaxa() < 2 )
     {
         throw RbException("Simulations conditioned on the tip states require at least two extant lineages.");
@@ -2563,11 +2565,11 @@ bool StateDependentSpeciationExtinctionProcess::simulateTreeConditionedOnTips( s
     
     // set the simulated values
     value->getTreeChangeEventHandler().removeListener( this );
-    static_cast<TreeDiscreteCharacterData *>(this->value)->setTree( *sim_tree );
+    cast_to_derived<TreeDiscreteCharacterData *>(this->value)->setTree( *sim_tree );
     delete sim_tree;
     nodes.clear();
     value->getTreeChangeEventHandler().addListener( this );
-    static_cast<TreeDiscreteCharacterData*>(this->value)->setTimeInStates(time_in_states);
+    cast_to_derived<TreeDiscreteCharacterData*>(this->value)->setTimeInStates(time_in_states);
     return true;
     
 }
@@ -3126,11 +3128,11 @@ bool StateDependentSpeciationExtinctionProcess::simulateTree( size_t attempts )
     
     // set the simulated values
     value->getTreeChangeEventHandler().removeListener( this );
-    static_cast<TreeDiscreteCharacterData *>(this->value)->setTree( *sim_tree );
+    cast_to_derived<TreeDiscreteCharacterData *>(this->value)->setTree( *sim_tree );
     delete sim_tree;
     value->getTreeChangeEventHandler().addListener( this );
-    static_cast<TreeDiscreteCharacterData*>(this->value)->setCharacterData(tip_data);
-    static_cast<TreeDiscreteCharacterData*>(this->value)->setTimeInStates(time_in_states);
+    cast_to_derived<TreeDiscreteCharacterData*>(this->value)->setCharacterData(tip_data);
+    cast_to_derived<TreeDiscreteCharacterData*>(this->value)->setTimeInStates(time_in_states);
     return true;
     
 }
@@ -3149,43 +3151,43 @@ void StateDependentSpeciationExtinctionProcess::swapParameterInternal(const DagN
     
     if ( oldP == process_age )
     {
-        process_age = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(process_age, newP);
     }
     if ( oldP == mu )
     {
-        mu = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+        replaceNodeReference(mu, newP);
     }
     if ( oldP == lambda )
     {
-        lambda = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+        replaceNodeReference(lambda, newP);
     }
     if ( oldP == phi )
     {
-        phi = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+        replaceNodeReference(phi, newP);
     }
     if ( oldP == Q )
     {
-        Q = static_cast<const TypedDagNode<RateGenerator>* >( newP );
+        replaceNodeReference(Q, newP);
     }
     if ( oldP == rate )
     {
-        rate = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(rate, newP);
     }
     if ( oldP == pi )
     {
-        pi = static_cast<const TypedDagNode<Simplex>* >( newP );
+        replaceNodeReference(pi, newP);
     }
     if ( oldP == rho )
     {
-        rho = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(rho, newP);
     }
     if ( oldP == rho_per_state )
     {
-        rho_per_state = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+        replaceNodeReference(rho_per_state, newP);
     }
     if ( oldP == cladogenesis_matrix )
     {
-        cladogenesis_matrix = static_cast<const TypedDagNode<CladogeneticSpeciationRateMatrix>* >( newP );
+        replaceNodeReference(cladogenesis_matrix, newP);
     }
     
 }

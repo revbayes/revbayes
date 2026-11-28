@@ -1,3 +1,5 @@
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include "CodonSynonymousNonsynonymousHKYRateMatrixFunction.h"
 
 #include <vector>
@@ -49,9 +51,9 @@ void CodonSynonymousNonsynonymousHKYRateMatrixFunction::update( void )
     
     
     // set the base frequencies
-    static_cast< RateMatrix_CodonSynonymousNonsynonymousHKY* >(value)->setNucleotideFrequencies( f );
-    static_cast< RateMatrix_CodonSynonymousNonsynonymousHKY* >(value)->setKappa( k );
-    static_cast< RateMatrix_CodonSynonymousNonsynonymousHKY* >(value)->setOmega( o );
+    cast_to_derived< RateMatrix_CodonSynonymousNonsynonymousHKY* >(value)->setNucleotideFrequencies( f );
+    cast_to_derived< RateMatrix_CodonSynonymousNonsynonymousHKY* >(value)->setKappa( k );
+    cast_to_derived< RateMatrix_CodonSynonymousNonsynonymousHKY* >(value)->setOmega( o );
     
     value->update();
 }
@@ -63,17 +65,17 @@ void CodonSynonymousNonsynonymousHKYRateMatrixFunction::swapParameterInternal(co
     
     if (oldP == base_frequencies)
     {
-        base_frequencies = static_cast<const TypedDagNode< Simplex >* >( newP );
+        replaceNodeReference(base_frequencies, newP);
     }
     
     if (oldP == kappa)
     {
-        kappa = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(kappa, newP);
     }
     
     if (oldP == omega)
     {
-        omega = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(omega, newP);
     }
     
 }

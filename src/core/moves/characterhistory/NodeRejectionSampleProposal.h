@@ -1,6 +1,8 @@
 #ifndef NodeRejectionSampleProposal_H
 #define NodeRejectionSampleProposal_H
 
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include "AbstractRateMatrix.h"
 #include "BranchHistoryDiscrete.h"
 #include "CharacterEventDiscrete.h"
@@ -370,7 +372,7 @@ size_t RevBayesCore::NodeRejectionSampleProposal<charType>::getNodeStateIndex(To
     TreeHistoryCtmc<charType>* p = dynamic_cast< TreeHistoryCtmc<charType>* >(&ctmc->getDistribution());
 
     const std::vector<CharacterEvent*>& nodeState = p->getHistory(*node).getChildCharacters();
-    size_t stateIndex = static_cast<CharacterEventDiscrete*>(nodeState[0])->getState();
+    size_t stateIndex = cast_to_derived<CharacterEventDiscrete*>(nodeState[0])->getState();
 
     return stateIndex;
 }
@@ -457,7 +459,7 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::prepareProposal( void 
     const std::vector<CharacterEvent*>& nodeState = p->getHistory(*node).getChildCharacters();
     for (size_t site_index = 0; site_index < num_sites; ++site_index)
     {
-        size_t s = static_cast<CharacterEventDiscrete*>(nodeState[site_index])->getState();
+        size_t s = cast_to_derived<CharacterEventDiscrete*>(nodeState[site_index])->getState();
         storedNodeState[site_index] = s;
     }
 
@@ -467,7 +469,7 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::prepareProposal( void 
         const std::vector<CharacterEvent*>& subrootState = p->getHistory(*node).getParentCharacters();
         for (size_t site_index = 0; site_index < num_sites; ++site_index)
         {
-            size_t s = static_cast<CharacterEventDiscrete*>(subrootState[site_index])->getState();
+            size_t s = cast_to_derived<CharacterEventDiscrete*>(subrootState[site_index])->getState();
             storedSubrootState[site_index] = s;
         }
     }
@@ -553,9 +555,9 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::sampleNodeCharacters( 
     {
         size_t site_index = *it_s;
 
-        size_t ancS  = static_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->getState();
-        size_t desS1 = static_cast<CharacterEventDiscrete*>(leftChildState[site_index])->getState();
-        size_t desS2 = static_cast<CharacterEventDiscrete*>(rightChildState[site_index])->getState();
+        size_t ancS  = cast_to_derived<CharacterEventDiscrete*>(nodeParentState[site_index])->getState();
+        size_t desS1 = cast_to_derived<CharacterEventDiscrete*>(leftChildState[site_index])->getState();
+        size_t desS2 = cast_to_derived<CharacterEventDiscrete*>(rightChildState[site_index])->getState();
 
         double u = GLOBAL_RNG->uniform01();
 
@@ -579,9 +581,9 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::sampleNodeCharacters( 
             ++s;
         }
 
-        static_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->setState(s);
-        static_cast<CharacterEventDiscrete*>(leftParentState[site_index])->setState(s);
-        static_cast<CharacterEventDiscrete*>(rightParentState[site_index])->setState(s);
+        cast_to_derived<CharacterEventDiscrete*>(nodeChildState[site_index])->setState(s);
+        cast_to_derived<CharacterEventDiscrete*>(leftParentState[site_index])->setState(s);
+        cast_to_derived<CharacterEventDiscrete*>(rightParentState[site_index])->setState(s);
     }
 
 }
@@ -633,8 +635,8 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::sampleRootCharacters( 
     for (it_s = sampledCharacters.begin(); it_s != sampledCharacters.end(); it_s++)
     {
         size_t site_index = *it_s;
-        size_t desS1 = static_cast<CharacterEventDiscrete*>(leftChildState[site_index])->getState();
-        size_t desS2 = static_cast<CharacterEventDiscrete*>(rightChildState[site_index])->getState();
+        size_t desS1 = cast_to_derived<CharacterEventDiscrete*>(leftChildState[site_index])->getState();
+        size_t desS2 = cast_to_derived<CharacterEventDiscrete*>(rightChildState[site_index])->getState();
 
         double u = GLOBAL_RNG->uniform01();
 
@@ -658,9 +660,9 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::sampleRootCharacters( 
             ++s;
         }
 
-        static_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->setState(s);
-        static_cast<CharacterEventDiscrete*>(leftParentState[site_index])->setState(s);
-        static_cast<CharacterEventDiscrete*>(rightParentState[site_index])->setState(s);
+        cast_to_derived<CharacterEventDiscrete*>(nodeChildState[site_index])->setState(s);
+        cast_to_derived<CharacterEventDiscrete*>(leftParentState[site_index])->setState(s);
+        cast_to_derived<CharacterEventDiscrete*>(rightParentState[site_index])->setState(s);
     }
 }
 
@@ -737,7 +739,7 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::sampleSubRootCharacter
             ++s;
         }
         //            std::cout << s;
-        static_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->setState(s);
+        cast_to_derived<CharacterEventDiscrete*>(nodeParentState[site_index])->setState(s);
     }
 
     //  for (size_t site_index = 0; site_index < num_sites; ++site_index)
@@ -745,9 +747,9 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::sampleSubRootCharacter
     {
         size_t site_index = *it_s;
 
-        size_t ancS  = static_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->getState();
-        size_t desS1 = static_cast<CharacterEventDiscrete*>(leftChildState[site_index])->getState();
-        size_t desS2 = static_cast<CharacterEventDiscrete*>(rightChildState[site_index])->getState();
+        size_t ancS  = cast_to_derived<CharacterEventDiscrete*>(nodeParentState[site_index])->getState();
+        size_t desS1 = cast_to_derived<CharacterEventDiscrete*>(leftChildState[site_index])->getState();
+        size_t desS2 = cast_to_derived<CharacterEventDiscrete*>(rightChildState[site_index])->getState();
 //
 
         double u = GLOBAL_RNG->uniform01();
@@ -771,9 +773,9 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::sampleSubRootCharacter
             }
             ++s;
         }
-        static_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->setState(s);
-        static_cast<CharacterEventDiscrete*>(leftParentState[site_index])->setState(s);
-        static_cast<CharacterEventDiscrete*>(rightParentState[site_index])->setState(s);
+        cast_to_derived<CharacterEventDiscrete*>(nodeChildState[site_index])->setState(s);
+        cast_to_derived<CharacterEventDiscrete*>(leftParentState[site_index])->setState(s);
+        cast_to_derived<CharacterEventDiscrete*>(rightParentState[site_index])->setState(s);
     }
 }
 
@@ -855,15 +857,15 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::swapNodeInternal(DagNo
 
     if (oldN == ctmc)
     {
-        ctmc = static_cast<StochasticNode<AbstractHomologousDiscreteCharacterData>* >(newN) ;
+        replaceNodeReference(ctmc, newN) ;
     }
     else if (oldN == q_map_site)
     {
-        q_map_site = static_cast<DeterministicNode<RateGenerator>* >(newN);
+        replaceNodeReference(q_map_site, newN);
     }
     else if (oldN == q_map_sequence)
     {
-        q_map_sequence = static_cast<DeterministicNode<RateGeneratorSequence>* >(newN);
+        replaceNodeReference(q_map_sequence, newN);
     }
 
     nodeProposal->swapNode(oldN, newN);
@@ -927,9 +929,9 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::undoProposal( void )
     for (size_t site_index = 0; site_index < num_sites; ++site_index)
     {
         size_t s = storedNodeState[site_index];
-        static_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->setState(s);
-        static_cast<CharacterEventDiscrete*>(leftParentState[site_index])->setState(s);
-        static_cast<CharacterEventDiscrete*>(rightParentState[site_index])->setState(s);
+        cast_to_derived<CharacterEventDiscrete*>(nodeChildState[site_index])->setState(s);
+        cast_to_derived<CharacterEventDiscrete*>(leftParentState[site_index])->setState(s);
+        cast_to_derived<CharacterEventDiscrete*>(rightParentState[site_index])->setState(s);
     }
 
     // restore subroot state if needed
@@ -944,7 +946,7 @@ void RevBayesCore::NodeRejectionSampleProposal<charType>::undoProposal( void )
             {
                 size_t s = storedSubrootState[site_index];
                 //            std::cout << s;
-                static_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->setState(s);
+                cast_to_derived<CharacterEventDiscrete*>(nodeParentState[site_index])->setState(s);
             }
             //        std::cout << "\n";
         }

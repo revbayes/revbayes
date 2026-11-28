@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "DPPGibbsConcentrationMove.h"
 
 #include <cmath>
@@ -90,22 +91,22 @@ void RevBayesCore::DPPGibbsConcentrationMove::swapNodeInternal(DagNode *oldN, Da
     // call the parent method
     if (oldN == variable)
     {
-		variable = static_cast< StochasticNode<double>* >( newN );
+		replaceNodeReference(variable, newN);
 	}
     
     if (oldN == numCats)
     {
-        numCats = static_cast<DeterministicNode<std::int64_t>* >(newN);
+        replaceNodeReference(numCats, newN);
     }
 	
     if (oldN == gammaShape)
     {
-        gammaShape = static_cast<TypedDagNode<double>* >(newN);
+        replaceNodeReference(gammaShape, newN);
     }
 	
     if (oldN == gammaRate)
     {
-        gammaRate = static_cast<TypedDagNode<double>* >(newN);
+        replaceNodeReference(gammaRate, newN);
     }
 
 }

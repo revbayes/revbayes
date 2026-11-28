@@ -1,6 +1,7 @@
 #ifndef AncestralStateMonitor_H
 #define AncestralStateMonitor_H
 
+#include "DagNodeTypeUtilities.h"
 #include "VariableMonitor.h"
 #include "Tree.h"
 #include "TypedDagNode.h"
@@ -230,7 +231,7 @@ void AncestralStateMonitor<characterType>::swapNode(DagNode *oldN, DagNode* newN
 	
 	if ( oldN == tree ) 
 	{
-		tree = static_cast< TypedDagNode<Tree> *>( newN );
+		replaceNodeReference(tree, newN);
 	}
 	else if ( oldN == ctmc )
 	{

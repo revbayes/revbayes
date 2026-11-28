@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -48,20 +49,20 @@ Func_chromosomesPloidy* Func_chromosomesPloidy::clone( void ) const
 RevBayesCore::TypedFunction< RevBayesCore::RateGenerator >* Func_chromosomesPloidy::createFunction( void ) const {
     
     
-    RevBayesCore::TypedDagNode< std::int64_t >* n           = static_cast<const Natural &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< double >* gamma_d  = static_cast<const RealPos &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< double >* delta_d  = static_cast<const RealPos &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< double >* rho_d    = static_cast<const RealPos &>( this->args[3].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< double >* eta_d    = static_cast<const RealPos &>( this->args[4].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< double >* gamma_dl = static_cast<const Real &>( this->args[5].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< double >* delta_dl = static_cast<const Real &>( this->args[6].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< double >* gamma_p  = static_cast<const RealPos &>( this->args[7].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< double >* delta_p  = static_cast<const RealPos &>( this->args[8].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< double >* rho_p    = static_cast<const RealPos &>( this->args[9].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< double >* eta_p    = static_cast<const RealPos &>( this->args[10].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< double >* gamma_pl = static_cast<const Real &>( this->args[11].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< double >* delta_pl = static_cast<const Real &>( this->args[12].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< double >* beta     = static_cast<const Real &>( this->args[13].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< std::int64_t >* n           = dagNodeForRevType<Natural>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode< double >* gamma_d  = dagNodeForRevType<RealPos>(this->args[1].getVariable());
+    RevBayesCore::TypedDagNode< double >* delta_d  = dagNodeForRevType<RealPos>(this->args[2].getVariable());
+    RevBayesCore::TypedDagNode< double >* rho_d    = dagNodeForRevType<RealPos>(this->args[3].getVariable());
+    RevBayesCore::TypedDagNode< double >* eta_d    = dagNodeForRevType<RealPos>(this->args[4].getVariable());
+    RevBayesCore::TypedDagNode< double >* gamma_dl = dagNodeForRevType<Real>(this->args[5].getVariable());
+    RevBayesCore::TypedDagNode< double >* delta_dl = dagNodeForRevType<Real>(this->args[6].getVariable());
+    RevBayesCore::TypedDagNode< double >* gamma_p  = dagNodeForRevType<RealPos>(this->args[7].getVariable());
+    RevBayesCore::TypedDagNode< double >* delta_p  = dagNodeForRevType<RealPos>(this->args[8].getVariable());
+    RevBayesCore::TypedDagNode< double >* rho_p    = dagNodeForRevType<RealPos>(this->args[9].getVariable());
+    RevBayesCore::TypedDagNode< double >* eta_p    = dagNodeForRevType<RealPos>(this->args[10].getVariable());
+    RevBayesCore::TypedDagNode< double >* gamma_pl = dagNodeForRevType<Real>(this->args[11].getVariable());
+    RevBayesCore::TypedDagNode< double >* delta_pl = dagNodeForRevType<Real>(this->args[12].getVariable());
+    RevBayesCore::TypedDagNode< double >* beta     = dagNodeForRevType<Real>(this->args[13].getVariable());
 
     RevBayesCore::ChromosomesPloidyRateMatrixFunction* f = new RevBayesCore::ChromosomesPloidyRateMatrixFunction( n, gamma_d, delta_d, rho_d, eta_d, gamma_dl, delta_dl, gamma_p, delta_p, rho_p, eta_p, gamma_pl, delta_pl, beta);
     

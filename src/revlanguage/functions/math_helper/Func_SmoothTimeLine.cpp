@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <iosfwd>
 #include <vector>
@@ -58,9 +59,9 @@ Func_SmoothTimeLine* Func_SmoothTimeLine::clone( void ) const
 RevBayesCore::TypedFunction<RevBayesCore::RbVector<double> >* Func_SmoothTimeLine::createFunction( void ) const
 {
 
-    RevBayesCore::TypedDagNode<double>* max_t                              = static_cast<const Real&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* times = static_cast<const ModelVector<RealPos> &>( this->args[1].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* values = static_cast<const ModelVector<RealPos> &>( this->args[2].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* max_t                              = dagNodeForRevType<Real>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* times = dagNodeForRevType<ModelVector<RealPos>>(this->args[1].getVariable());
+    RevBayesCore::TypedDagNode<RevBayesCore::RbVector<double> >* values = dagNodeForRevType<ModelVector<RealPos>>(this->args[2].getVariable());
 
     RevBayesCore::SmoothTimeLineFunction* f = new RevBayesCore::SmoothTimeLineFunction( max_t, times, values );
       return f;

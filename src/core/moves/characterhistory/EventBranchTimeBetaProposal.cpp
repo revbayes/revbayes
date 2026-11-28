@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include <cstddef>
 #include <iostream>
 
@@ -235,7 +236,7 @@ void EventBranchTimeBetaProposal::undoProposal( void )
 void EventBranchTimeBetaProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     
-    variable = static_cast< StochasticNode<Tree>* >(newN) ;
+    replaceNodeReference(variable, newN) ;
     
     distribution = dynamic_cast< AbstractCharacterHistoryBirthDeathProcess* >( &variable->getDistribution() );
     if ( distribution == NULL )

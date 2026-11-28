@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include "RlContinuousStochasticNode.h"
 
 #include <cmath>
@@ -161,7 +162,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> RevLanguage::ContinuousStochasticN
         found = true;
         
         // get the observation
-        const double &observation = static_cast<const Real &>( args[0].getVariable()->getRevObject() ).getValue();
+        const double &observation = valueForRevType<Real>(args[0].getVariable());
         
         // clamp
         this->clamp( new double(observation) );
@@ -205,7 +206,7 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> RevLanguage::ContinuousStochasticN
         found = true;
         
         // get the observation
-        const double &observation = static_cast<const Real &>( args[0].getVariable()->getRevObject() ).getValue();
+        const double &observation = valueForRevType<Real>(args[0].getVariable());
         
         // set value
         this->setValue( new double(observation) );

@@ -1,3 +1,5 @@
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include <boost/numeric/odeint.hpp> // IWYU pragma: keep
 #include <algorithm>
 #include <cmath>
@@ -389,7 +391,7 @@ size_t HeterogeneousRateBirthDeath::computeStartIndex(size_t i) const
         const BranchHistory &bh = branch_histories[ node_index ];
         const std::multiset<CharacterEvent*, CharacterEventCompare> &h = bh.getHistory();
         CharacterEvent *event = *(h.begin());
-        return static_cast<CharacterEventDiscrete*>(event)->getState();
+        return cast_to_derived<CharacterEventDiscrete*>(event)->getState();
     }
     else
     {
@@ -421,7 +423,7 @@ size_t HeterogeneousRateBirthDeath::computeStateIndex(size_t i, double time) con
             const std::multiset<CharacterEvent*, CharacterEventCompare> &h = bh.getHistory();
             for (std::multiset<CharacterEvent*,CharacterEventCompare>::const_iterator it=h.begin(); it!=h.end(); ++it)
             {
-                CharacterEventDiscrete* event = static_cast<CharacterEventDiscrete*>(*it);
+                CharacterEventDiscrete* event = cast_to_derived<CharacterEventDiscrete*>(*it);
                 double event_time = event->getAge();
                 if ( event_time > time )
                 {
@@ -524,7 +526,7 @@ void HeterogeneousRateBirthDeath::executeMethod(const std::string &n, const std:
             double branch_length = node.getBranchLength();
             for (std::multiset<CharacterEvent*,CharacterEventCompare>::const_iterator it=hist.begin(); it!=hist.end(); ++it)
             {
-                CharacterEventDiscrete* event = static_cast<CharacterEventDiscrete*>(*it);
+                CharacterEventDiscrete* event = cast_to_derived<CharacterEventDiscrete*>(*it);
                 double end_time = event->getAge() - node.getAge();
                 double time_interval = (end_time - begin_time) / branch_length;
                 
@@ -561,7 +563,7 @@ void HeterogeneousRateBirthDeath::executeMethod(const std::string &n, const std:
             double branch_length = node.getBranchLength();
             for (std::multiset<CharacterEvent*,CharacterEventCompare>::const_iterator it=hist.begin(); it!=hist.end(); ++it)
             {
-                CharacterEventDiscrete* event = static_cast<CharacterEventDiscrete*>(*it);
+                CharacterEventDiscrete* event = cast_to_derived<CharacterEventDiscrete*>(*it);
                 double end_time = event->getAge() - node.getAge();
                 double time_interval = (end_time - begin_time) / branch_length;
                 
@@ -744,27 +746,27 @@ void HeterogeneousRateBirthDeath::swapParameterInternal( const DagNode *oldP, co
 {
     if (oldP == root_age)
     {
-        root_age = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(root_age, newP);
     }
     else if (oldP == root_state)
     {
-        root_state = static_cast<const TypedDagNode<std::int64_t>* >( newP );
+        replaceNodeReference(root_state, newP);
     }
     else if (oldP == speciation)
     {
-        speciation = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+        replaceNodeReference(speciation, newP);
     }
     else if (oldP == extinction)
     {
-        extinction = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+        replaceNodeReference(extinction, newP);
     }
     else if (oldP == event_rate)
     {
-        event_rate = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(event_rate, newP);
     }
     else if (oldP == rho)
     {
-        rho = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(rho, newP);
     }
     
 }

@@ -1,3 +1,5 @@
+#include "TypeUtilities.h"
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <ostream>
 #include <string>
@@ -52,12 +54,12 @@ void Move_ContinuousCharacterDataSlide::constructInternalObject( void )
     delete value;
     
     // now allocate a new vector-slide move
-    double l = static_cast<const RealPos &>( delta->getRevObject() ).getValue();
-    double w = static_cast<const RealPos &>( weight->getRevObject() ).getValue();
-    RevBayesCore::TypedDagNode<RevBayesCore::ContinuousCharacterData>* tmp = static_cast<const ContinuousCharacterData &>( x->getRevObject() ).getDagNode();
-    RevBayesCore::StochasticNode<RevBayesCore::ContinuousCharacterData> *n = static_cast<RevBayesCore::StochasticNode<RevBayesCore::ContinuousCharacterData> *>( tmp );
-    bool t = static_cast<const RlBoolean &>( tune->getRevObject() ).getValue();
-    double tt = static_cast<const Probability &>( tuneTarget->getRevObject() ).getValue();
+    double l = valueForRevType<RealPos>(delta);
+    double w = valueForRevType<RealPos>(weight);
+    RevBayesCore::TypedDagNode<RevBayesCore::ContinuousCharacterData>* tmp = dagNodeForRevType<ContinuousCharacterData>(x);
+    RevBayesCore::StochasticNode<RevBayesCore::ContinuousCharacterData> *n = cast_to_derived<RevBayesCore::StochasticNode<RevBayesCore::ContinuousCharacterData> *>( tmp );
+    bool t = valueForRevType<RlBoolean>(tune);
+    double tt = valueForRevType<Probability>(tuneTarget);
     
     RevBayesCore::Proposal *p = new RevBayesCore::ContinuousCharacterDataSlideProposal(n, l);
     p->setTargetAcceptanceRate(tt);

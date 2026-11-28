@@ -1,6 +1,8 @@
 #ifndef DPPAllocateAuxGibbsMove_H
 #define DPPAllocateAuxGibbsMove_H
 
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include "DirichletProcessPriorDistribution.h"
 #include "AbstractGibbsMove.h"
 #include "RbMathLogic.h"
@@ -91,7 +93,7 @@ void RevBayesCore::DPPAllocateAuxGibbsMove<valueType>::performGibbsMove( void )
     // Get random number generator    
     RandomNumberGenerator* rng     = GLOBAL_RNG;
     
-    DirichletProcessPriorDistribution<valueType>& dist = static_cast<DirichletProcessPriorDistribution<valueType> &>( variable->getDistribution() );
+    DirichletProcessPriorDistribution<valueType>& dist = cast_to_derived<DirichletProcessPriorDistribution<valueType> &>( variable->getDistribution() );
     
     dist.createRestaurantVectors();
     int num_tables = dist.getNumberOfCategories();
@@ -193,7 +195,7 @@ template <class valueType>
 void RevBayesCore::DPPAllocateAuxGibbsMove<valueType>::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
 
-    variable = static_cast<StochasticNode< RbVector<valueType> > * >( newN );
+    replaceNodeReference(variable, newN);
 
 }
 

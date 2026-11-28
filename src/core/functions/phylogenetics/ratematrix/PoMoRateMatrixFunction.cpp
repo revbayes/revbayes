@@ -1,3 +1,5 @@
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include "PoMoRateMatrixFunction.h"
 
 #include "RateMatrix_PoMo.h"
@@ -69,9 +71,9 @@ void PoMoRateMatrixFunction::update( void )
     
     
     // set the base frequencies
-    static_cast< RateMatrix_PoMo* >(value)->setMutationRates( r );
-    static_cast< RateMatrix_PoMo* >(value)->setSelectionCoefficients( s );
-    static_cast< RateMatrix_PoMo* >(value)->update();
+    cast_to_derived< RateMatrix_PoMo* >(value)->setMutationRates( r );
+    cast_to_derived< RateMatrix_PoMo* >(value)->setSelectionCoefficients( s );
+    cast_to_derived< RateMatrix_PoMo* >(value)->update();
     
 }
 
@@ -82,11 +84,11 @@ void PoMoRateMatrixFunction::swapParameterInternal(const DagNode *oldP, const Da
     
     if (oldP == mutationRates)
     {
-        mutationRates = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(mutationRates, newP);
     }
     else if (oldP == selectionCoefficients)
     {
-        selectionCoefficients = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(selectionCoefficients, newP);
     }
     
 }

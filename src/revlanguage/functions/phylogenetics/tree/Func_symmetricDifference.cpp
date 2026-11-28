@@ -6,6 +6,7 @@
 //  Copyright 2012 __MyCompanyName__. All rights reserved.
 //
 
+#include "RevTypeUtilities.h"
 #include "Func_symmetricDifference.h"
 
 #include "RlTimeTree.h"
@@ -47,8 +48,8 @@ Func_symmetricDifference* Func_symmetricDifference::clone( void ) const {
 RevBayesCore::TypedFunction< double >* Func_symmetricDifference::createFunction( void ) const
 {
     
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = static_cast<const Tree&>( this->args[0].getVariable()->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau2 = static_cast<const Tree&>( this->args[1].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau = dagNodeForRevType<Tree>(this->args[0].getVariable());
+    RevBayesCore::TypedDagNode<RevBayesCore::Tree>* tau2 = dagNodeForRevType<Tree>(this->args[1].getVariable());
     RevBayesCore::SymmetricDifferenceStatistic* f = new RevBayesCore::SymmetricDifferenceStatistic( tau, tau2 );
     
     return f;

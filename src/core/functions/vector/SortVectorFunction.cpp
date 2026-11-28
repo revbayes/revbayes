@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "SortVectorFunction.h"
 
 #include "TypedDagNode.h"
@@ -58,6 +59,6 @@ void SortVectorFunction::update( void )
 void SortVectorFunction::swapParameterInternal( const DagNode *oldP, const DagNode *newP )
 {
     if ( oldP == realVector )
-        realVector = static_cast< const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(realVector, newP);
 }
 

@@ -1,3 +1,5 @@
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include <cmath>
 #include <cstddef>
 #include <deque>
@@ -246,7 +248,7 @@ void PhyloOrnsteinUhlenbeckStateDependent::recursiveComputeLnProbability( const 
             for (std::multiset<CharacterEvent*, CharacterEventCompare>::const_iterator iter = hist_left.begin(); iter != hist_left.end(); ++iter)
             {
                 // get the state change event
-                CharacterEventDiscrete* event = static_cast<CharacterEventDiscrete*>(*iter);
+                CharacterEventDiscrete* event = cast_to_derived<CharacterEventDiscrete*>(*iter);
 
                 // get the state index
                 size_t current_state = event->getState();
@@ -262,7 +264,7 @@ void PhyloOrnsteinUhlenbeckStateDependent::recursiveComputeLnProbability( const 
             }
 
             // do it again, since the iterator above only does n-1 of the episodes
-            size_t state_left = static_cast<CharacterEventDiscrete*>(bh_left.getParentCharacters()[0])->getState();
+            size_t state_left = cast_to_derived<CharacterEventDiscrete*>(bh_left.getParentCharacters()[0])->getState();
             double delta_t_left = node.getAge() - begin_time_left;
             times_left.push_back(delta_t_left);
             states_left.push_back(state_left);
@@ -290,7 +292,7 @@ void PhyloOrnsteinUhlenbeckStateDependent::recursiveComputeLnProbability( const 
             for (std::multiset<CharacterEvent*, CharacterEventCompare>::const_iterator iter = hist_right.begin(); iter != hist_right.end(); ++iter)
             {
                 // get the state change event
-                CharacterEventDiscrete* event = static_cast<CharacterEventDiscrete*>(*iter);
+                CharacterEventDiscrete* event = cast_to_derived<CharacterEventDiscrete*>(*iter);
 
                 // get the state index
                 size_t current_state = event->getState();
@@ -306,7 +308,7 @@ void PhyloOrnsteinUhlenbeckStateDependent::recursiveComputeLnProbability( const 
             }
 
             // do it again, since the iterator above only does n-1 of the episodes
-            size_t state_right = static_cast<CharacterEventDiscrete*>(bh_right.getParentCharacters()[0])->getState();
+            size_t state_right = cast_to_derived<CharacterEventDiscrete*>(bh_right.getParentCharacters()[0])->getState();
             double delta_t_right = node.getAge() - begin_time_right;
             times_right.push_back(delta_t_right);
             states_right.push_back(state_right);
@@ -361,7 +363,7 @@ void PhyloOrnsteinUhlenbeckStateDependent::recursiveComputeLnProbability( const 
                 {
                     double var_root;
                     double root_value;
-                    size_t last_state_left  = static_cast<CharacterEventDiscrete*>(bh_left.getParentCharacters()[0])->getState();
+                    size_t last_state_left  = cast_to_derived<CharacterEventDiscrete*>(bh_left.getParentCharacters()[0])->getState();
                     if (root_treatment == OPTIMUM)
                     {
                         double theta = computeStateDependentTheta ( last_state_left );
@@ -902,7 +904,7 @@ void PhyloOrnsteinUhlenbeckStateDependent::simulateRecursively( const TopologyNo
             for (std::multiset<CharacterEvent*, CharacterEventCompare>::const_iterator iter = history.begin(); iter != history.end(); ++iter)
             {
                 // get the state change event
-                CharacterEventDiscrete* event = static_cast<CharacterEventDiscrete*>(*iter);
+                CharacterEventDiscrete* event = cast_to_derived<CharacterEventDiscrete*>(*iter);
 
                 // calculate the times
                 double event_time = event->getAge();
@@ -918,7 +920,7 @@ void PhyloOrnsteinUhlenbeckStateDependent::simulateRecursively( const TopologyNo
             }
 
             // do it again, since the iterator above only does n-1 of the episodes
-            size_t first_state = static_cast<CharacterEventDiscrete*>(bh.getParentCharacters()[0])->getState();
+            size_t first_state = cast_to_derived<CharacterEventDiscrete*>(bh.getParentCharacters()[0])->getState();
             double first_delta_t = node.getAge() - begin_time;
 
             times.push_front(first_delta_t);
@@ -971,7 +973,7 @@ std::vector<double> PhyloOrnsteinUhlenbeckStateDependent::simulateRootCharacters
         size_t left_index = left->getIndex();
         const CharacterHistory& left_history = character_histories->getValue();
         const BranchHistory& bh_left = left_history.getHistory(left_index);
-        size_t root_value_index  = static_cast<CharacterEventDiscrete*>(bh_left.getParentCharacters()[0])->getState();
+        size_t root_value_index  = cast_to_derived<CharacterEventDiscrete*>(bh_left.getParentCharacters()[0])->getState();
         theta = computeStateDependentTheta(root_value_index);
         double sigma = computeStateDependentSigma(root_value_index);
         double alpha = computeStateDependentAlpha(root_value_index);
@@ -1079,39 +1081,39 @@ void PhyloOrnsteinUhlenbeckStateDependent::swapParameterInternal(const DagNode *
 
     if (oldP == root_value)
     {
-        root_value = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(root_value, newP);
     }
 
     if (oldP == homogeneous_alpha)
     {
-        homogeneous_alpha = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(homogeneous_alpha, newP);
     }
     else if (oldP == state_dependent_alpha)
     {
-        state_dependent_alpha = static_cast<const TypedDagNode< RbVector< double > >* >( newP );
+        replaceNodeReference(state_dependent_alpha, newP);
     }
 
     if (oldP == homogeneous_sigma)
     {
-        homogeneous_sigma = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(homogeneous_sigma, newP);
     }
     else if (oldP == state_dependent_sigma)
     {
-        state_dependent_sigma = static_cast<const TypedDagNode< RbVector< double > >* >( newP );
+        replaceNodeReference(state_dependent_sigma, newP);
     }
 
     if (oldP == homogeneous_theta)
     {
-        homogeneous_theta = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(homogeneous_theta, newP);
     }
     else if (oldP == state_dependent_theta)
     {
-        state_dependent_theta = static_cast<const TypedDagNode< RbVector< double > >* >( newP );
+        replaceNodeReference(state_dependent_theta, newP);
     }
 
     if (oldP == character_histories)
     {
-        character_histories = static_cast<const TypedDagNode< CharacterHistoryDiscrete >* >( newP );
+        replaceNodeReference(character_histories, newP);
     }
 
 }

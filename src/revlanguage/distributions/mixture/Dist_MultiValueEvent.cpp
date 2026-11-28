@@ -1,3 +1,5 @@
+#include "TypeUtilities.h"
+#include "RevTypeUtilities.h"
 #include <cmath>
 #include <cstddef>
 #include <iosfwd>
@@ -87,20 +89,20 @@ RevBayesCore::MultiValueEventDistribution* Dist_MultiValueEvent::createDistribut
 {
     // get the parameters
 //    const WorkspaceVector<TypedDistribution<Real> >& rl_vp                   = static_cast<const WorkspaceVector<TypedDistribution<Real> > &>( value_priors->getRevObject() );
-    const WorkspaceVector<Distribution>& rl_vp                   = static_cast<const WorkspaceVector<Distribution > &>( value_priors->getRevObject() );
+    const WorkspaceVector<Distribution>& rl_vp                   = objectForRevType<WorkspaceVector<Distribution >>(value_priors);
     std::vector<RevBayesCore::TypedDistribution<double>* > vp;
     for (size_t i=0; i<rl_vp.size();++i)
     {
-        RevBayesCore::TypedDistribution<double>* tmp = static_cast<RevBayesCore::TypedDistribution<double>* >( rl_vp[i].createDistribution() );
+        RevBayesCore::TypedDistribution<double>* tmp = cast_to_derived<RevBayesCore::TypedDistribution<double>* >( rl_vp[i].createDistribution() );
         vp.push_back( tmp );
     }
     
-    const Distribution& rl_ep                                           = static_cast<const Distribution &>( event_number_prior->getRevObject() );
-    RevBayesCore::TypedDistribution<std::int64_t>* ep                           = static_cast<RevBayesCore::TypedDistribution<std::int64_t>* >( rl_ep.createDistribution() );
+    const Distribution& rl_ep                                           = objectForRevType<Distribution>(event_number_prior);
+    RevBayesCore::TypedDistribution<std::int64_t>* ep                           = cast_to_derived<RevBayesCore::TypedDistribution<std::int64_t>* >( rl_ep.createDistribution() );
 
-    const std::vector<std::string>& n = static_cast<const ModelVector<RlString> &>( names->getRevObject() ).getValue();
+    const std::vector<std::string>& n = valueForRevType<ModelVector<RlString>>(names);
     // offsets
-    const std::vector<std::int64_t> & m = static_cast<const ModelVector<Natural> &>( min_elements->getRevObject() ).getValue();
+    const std::vector<std::int64_t> & m = valueForRevType<ModelVector<Natural>>(min_elements);
 
     
     RevBayesCore::MultiValueEventDistribution* d    = new RevBayesCore::MultiValueEventDistribution(ep, vp, n, m);

@@ -1,3 +1,5 @@
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include <cstddef>
 #include <cmath>
 #include <iostream>
@@ -134,7 +136,7 @@ double EventBirthDeathFromAgeProposal::doBirthProposal( void )
     was_birth_proposal = true;
     
     RandomNumberGenerator *rng = GLOBAL_RNG;
-    CharacterHistoryDiscrete &history = static_cast<CharacterHistoryDiscrete&>(distribution->getCharacterHistory());
+    CharacterHistoryDiscrete &history = cast_to_derived<CharacterHistoryDiscrete&>(distribution->getCharacterHistory());
     
     size_t num_events_before = history.getNumberEvents();
     size_t num_branches = history.getNumberBranches();
@@ -171,7 +173,7 @@ double EventBirthDeathFromAgeProposal::doDeathProposal( void )
     // set the flag that this was a death proposal
     was_birth_proposal = false;
     
-    CharacterHistoryDiscrete &history = static_cast<CharacterHistoryDiscrete&>(distribution->getCharacterHistory());
+    CharacterHistoryDiscrete &history = cast_to_derived<CharacterHistoryDiscrete&>(distribution->getCharacterHistory());
     
     size_t num_events_before = history.getNumberEvents();
     size_t num_branches = history.getNumberBranches();
@@ -256,7 +258,7 @@ void EventBirthDeathFromAgeProposal::undoProposal( void )
 void EventBirthDeathFromAgeProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     
-    variable = static_cast< StochasticNode<Tree>* >(newN) ;
+    replaceNodeReference(variable, newN) ;
     
     distribution = dynamic_cast< AbstractCharacterHistoryBirthDeathProcess* >( &variable->getDistribution() );
     if ( distribution == NULL )

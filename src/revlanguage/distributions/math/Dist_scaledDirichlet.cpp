@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <cmath>
 #include <cstddef>
 #include <ostream>
@@ -59,8 +60,8 @@ RevBayesCore::ScaledDirichletDistribution* Dist_scaledDirichlet::createDistribut
 {
 
     // get the parameters
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* a = static_cast<const ModelVector<RealPos> &>( alpha->getRevObject() ).getDagNode();
-    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* b = static_cast<const ModelVector<RealPos> &>( beta->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* a = dagNodeForRevType<ModelVector<RealPos>>(alpha);
+    RevBayesCore::TypedDagNode< RevBayesCore::RbVector<double> >* b = dagNodeForRevType<ModelVector<RealPos>>(beta);
     RevBayesCore::ScaledDirichletDistribution* d              = new RevBayesCore::ScaledDirichletDistribution( a, b );
     
     return d;

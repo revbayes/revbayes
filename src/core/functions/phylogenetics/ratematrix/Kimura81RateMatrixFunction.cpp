@@ -1,3 +1,5 @@
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include "Kimura81RateMatrixFunction.h"
 
 #include <vector>
@@ -56,8 +58,8 @@ void Kimura81RateMatrixFunction::update( void )
     
     
     // set the base frequencies
-    static_cast< RateMatrix_Kimura81* >(value)->setStationaryFrequencies( f );
-    static_cast< RateMatrix_Kimura81* >(value)->setKappa(k1, k2);
+    cast_to_derived< RateMatrix_Kimura81* >(value)->setStationaryFrequencies( f );
+    cast_to_derived< RateMatrix_Kimura81* >(value)->setKappa(k1, k2);
     
     value->update();
     
@@ -70,17 +72,17 @@ void Kimura81RateMatrixFunction::swapParameterInternal(const DagNode *oldP, cons
     
     if (oldP == base_frequencies)
     {
-        base_frequencies = static_cast<const TypedDagNode< Simplex >* >( newP );
+        replaceNodeReference(base_frequencies, newP);
     }
     
     if (oldP == kappa_1)
     {
-        kappa_1 = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(kappa_1, newP);
     }
     
     if (oldP == kappa_2)
     {
-        kappa_2 = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(kappa_2, newP);
     }
     
 }

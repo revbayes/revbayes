@@ -1,3 +1,5 @@
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include "AdaptiveReversibleJumpProposal.h"
 #include "DistributionNormal.h"
 #include "RandomNumberFactory.h"
@@ -156,7 +158,7 @@ double RevBayesCore::AdaptiveReversibleJumpProposal::doProposal( void )
     
     
     double& v = variable->getValue();
-    ReversibleJumpMixtureConstantDistribution<double> &d = static_cast< ReversibleJumpMixtureConstantDistribution<double>& >( variable->getDistribution() );
+    ReversibleJumpMixtureConstantDistribution<double> &d = cast_to_derived< ReversibleJumpMixtureConstantDistribution<double>& >( variable->getDistribution() );
     
     // copy value
     stored_value = v;
@@ -324,7 +326,7 @@ void RevBayesCore::AdaptiveReversibleJumpProposal::undoProposal( void )
     variable->setValue( new double(stored_value) );
     
     // also reset the index
-    ReversibleJumpMixtureConstantDistribution<double> &d = static_cast< ReversibleJumpMixtureConstantDistribution<double>& >( variable->getDistribution() );
+    ReversibleJumpMixtureConstantDistribution<double> &d = cast_to_derived< ReversibleJumpMixtureConstantDistribution<double>& >( variable->getDistribution() );
     d.setCurrentIndex( stored_index );
 }
 
@@ -338,6 +340,6 @@ void RevBayesCore::AdaptiveReversibleJumpProposal::undoProposal( void )
 void RevBayesCore::AdaptiveReversibleJumpProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     
-    variable = static_cast<StochasticNode<double>* >(newN) ;
+    replaceNodeReference(variable, newN) ;
     
 }

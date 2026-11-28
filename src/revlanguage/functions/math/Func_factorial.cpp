@@ -9,7 +9,7 @@
 #include "Argument.h"
 #include "ArgumentRule.h"
 #include "ArgumentRules.h"
-#include "RevVariable.h"
+#include "RevTypeUtilities.h"
 #include "TypeSpec.h"
 
 using namespace RevLanguage;
@@ -33,9 +33,7 @@ Func_factorial* Func_factorial::clone(void) const
 RevBayesCore::TypedFunction<double>* Func_factorial::createFunction(void) const
 {
     RevBayesCore::TypedDagNode<std::int64_t>* n =
-        static_cast<const Natural&>(
-            this->args[0].getVariable()->getRevObject()
-        ).getDagNode();
+        dagNodeForRevType<Natural>(this->args[0].getVariable());
 
     return RevBayesCore::generic_function_ptr<double>(my_factorial, n);
 }

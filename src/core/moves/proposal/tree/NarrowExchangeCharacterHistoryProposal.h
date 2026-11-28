@@ -1,6 +1,8 @@
 #ifndef NarrowExchangeCharacterHistoryProposal_H
 #define NarrowExchangeCharacterHistoryProposal_H
 
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include "BranchHistoryDiscrete.h"
 #include "CharacterEventDiscrete.h"
 #include "HomologousDiscreteCharacterData.h"
@@ -227,10 +229,10 @@ double RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType>::computeNo
         for (size_t site_index = 0; site_index < num_sites; ++site_index)
         {
             
-            size_t node_state              = static_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->getState();
-            size_t brother_state           = static_cast<CharacterEventDiscrete*>(brotherChildState[site_index])->getState();
-            size_t uncle_state             = static_cast<CharacterEventDiscrete*>(uncleChildState[site_index])->getState();
-            size_t great_grandparent_state = static_cast<CharacterEventDiscrete*>(greatGrandparentState[site_index])->getState();
+            size_t node_state              = cast_to_derived<CharacterEventDiscrete*>(nodeChildState[site_index])->getState();
+            size_t brother_state           = cast_to_derived<CharacterEventDiscrete*>(brotherChildState[site_index])->getState();
+            size_t uncle_state             = cast_to_derived<CharacterEventDiscrete*>(uncleChildState[site_index])->getState();
+            size_t great_grandparent_state = cast_to_derived<CharacterEventDiscrete*>(greatGrandparentState[site_index])->getState();
             
             double sum = 0.0;
             
@@ -250,8 +252,8 @@ double RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType>::computeNo
                 
             }
             
-            size_t parent_state = static_cast<CharacterEventDiscrete*>(parentChildState[site_index])->getState();
-            size_t grandparent_state = static_cast<CharacterEventDiscrete*>(grandparentChildState[site_index])->getState();
+            size_t parent_state = cast_to_derived<CharacterEventDiscrete*>(parentChildState[site_index])->getState();
+            size_t grandparent_state = cast_to_derived<CharacterEventDiscrete*>(grandparentChildState[site_index])->getState();
             lnP += log(state_probs[ num_states * grandparent_state + parent_state ] / sum);
 
         }
@@ -267,9 +269,9 @@ double RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType>::computeNo
         for (size_t site_index = 0; site_index < num_sites; ++site_index)
         {
             
-            size_t node_state              = static_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->getState();
-            size_t brother_state           = static_cast<CharacterEventDiscrete*>(brotherChildState[site_index])->getState();
-            size_t uncle_state             = static_cast<CharacterEventDiscrete*>(uncleChildState[site_index])->getState();
+            size_t node_state              = cast_to_derived<CharacterEventDiscrete*>(nodeChildState[site_index])->getState();
+            size_t brother_state           = cast_to_derived<CharacterEventDiscrete*>(brotherChildState[site_index])->getState();
+            size_t uncle_state             = cast_to_derived<CharacterEventDiscrete*>(uncleChildState[site_index])->getState();
             
             double sum = 0.0;
             
@@ -289,8 +291,8 @@ double RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType>::computeNo
                 
             }
             
-            size_t parent_state = static_cast<CharacterEventDiscrete*>(parentChildState[site_index])->getState();
-            size_t grandparent_state = static_cast<CharacterEventDiscrete*>(grandparentChildState[site_index])->getState();
+            size_t parent_state = cast_to_derived<CharacterEventDiscrete*>(parentChildState[site_index])->getState();
+            size_t grandparent_state = cast_to_derived<CharacterEventDiscrete*>(grandparentChildState[site_index])->getState();
             lnP += log(state_probs[ num_states * grandparent_state + parent_state ] / sum);
 
         }
@@ -350,9 +352,9 @@ double RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType>::computeLn
             
             for (size_t site_index = 0; site_index < num_sites; ++site_index)
             {
-                size_t ancS  = static_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->getState();
-                size_t desS1 = static_cast<CharacterEventDiscrete*>(leftChildState[site_index])->getState();
-                size_t desS2 = static_cast<CharacterEventDiscrete*>(rightChildState[site_index])->getState();
+                size_t ancS  = cast_to_derived<CharacterEventDiscrete*>(nodeParentState[site_index])->getState();
+                size_t desS1 = cast_to_derived<CharacterEventDiscrete*>(leftChildState[site_index])->getState();
+                size_t desS2 = cast_to_derived<CharacterEventDiscrete*>(rightChildState[site_index])->getState();
                 
                 std::vector<double> state_probs(num_states,0.0);
                 double sum = 0.0;
@@ -363,7 +365,7 @@ double RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType>::computeLn
                     state_probs[i] = p;
                 }
                 
-                size_t s = static_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->getState();
+                size_t s = cast_to_derived<CharacterEventDiscrete*>(nodeChildState[site_index])->getState();
                 lnP += log(state_probs[s]/sum);
             }
             
@@ -375,8 +377,8 @@ double RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType>::computeLn
             
             for (size_t site_index = 0; site_index < num_sites; ++site_index)
             {
-                size_t desS1 = static_cast<CharacterEventDiscrete*>(leftChildState[site_index])->getState();
-                size_t desS2 = static_cast<CharacterEventDiscrete*>(rightChildState[site_index])->getState();
+                size_t desS1 = cast_to_derived<CharacterEventDiscrete*>(leftChildState[site_index])->getState();
+                size_t desS2 = cast_to_derived<CharacterEventDiscrete*>(rightChildState[site_index])->getState();
                 
                 std::vector<double> state_probs(num_states,0.0);
                 double sum = 0.0;
@@ -387,7 +389,7 @@ double RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType>::computeLn
                     state_probs[i] = p;
                 }
                 
-                size_t s = static_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->getState();
+                size_t s = cast_to_derived<CharacterEventDiscrete*>(nodeChildState[site_index])->getState();
                 lnP += log(state_probs[s]/sum);
                 
             }
@@ -493,7 +495,7 @@ double RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType>::doProposa
         stored_parent_node_states.resize(num_sites, 0);
         for (size_t site_index = 0; site_index < num_sites; ++site_index)
         {
-            size_t s = static_cast<CharacterEventDiscrete*>(parent_node_states[site_index])->getState();
+            size_t s = cast_to_derived<CharacterEventDiscrete*>(parent_node_states[site_index])->getState();
             stored_parent_node_states[site_index] = s;
         }
         
@@ -502,7 +504,7 @@ double RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType>::doProposa
         stored_grandparent_node_states.resize(num_sites, 0);
         for (size_t site_index = 0; site_index < num_sites; ++site_index)
         {
-            size_t s = static_cast<CharacterEventDiscrete*>(grandparent_node_states[site_index])->getState();
+            size_t s = cast_to_derived<CharacterEventDiscrete*>(grandparent_node_states[site_index])->getState();
             stored_grandparent_node_states[site_index] = s;
         }
 
@@ -633,9 +635,9 @@ void RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType>::undoProposa
         for (size_t site_index = 0; site_index < num_sites; ++site_index)
         {
             size_t s = stored_parent_node_states[site_index];
-            static_cast<CharacterEventDiscrete*>(parentState[site_index])->setState(s);
-            static_cast<CharacterEventDiscrete*>(leftChildState[site_index])->setState(s);
-            static_cast<CharacterEventDiscrete*>(rightChildState[site_index])->setState(s);
+            cast_to_derived<CharacterEventDiscrete*>(parentState[site_index])->setState(s);
+            cast_to_derived<CharacterEventDiscrete*>(leftChildState[site_index])->setState(s);
+            cast_to_derived<CharacterEventDiscrete*>(rightChildState[site_index])->setState(s);
         }
         
         // restore the grandparent states
@@ -645,9 +647,9 @@ void RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType>::undoProposa
         for (size_t site_index = 0; site_index < num_sites; ++site_index)
         {
             size_t s = stored_grandparent_node_states[site_index];
-            static_cast<CharacterEventDiscrete*>(grandparentState[site_index])->setState(s);
-            static_cast<CharacterEventDiscrete*>(leftGrandparentChildState[site_index])->setState(s);
-            static_cast<CharacterEventDiscrete*>(rightGrandparentChildState[site_index])->setState(s);
+            cast_to_derived<CharacterEventDiscrete*>(grandparentState[site_index])->setState(s);
+            cast_to_derived<CharacterEventDiscrete*>(leftGrandparentChildState[site_index])->setState(s);
+            cast_to_derived<CharacterEventDiscrete*>(rightGrandparentChildState[site_index])->setState(s);
         }
         
         // restore path states
@@ -718,10 +720,10 @@ void RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType>::sampleNodeC
         for (size_t site_index = 0; site_index < num_sites; ++site_index)
         {
          
-            size_t node_state              = static_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->getState();
-            size_t brother_state           = static_cast<CharacterEventDiscrete*>(brotherChildState[site_index])->getState();
-            size_t uncle_state             = static_cast<CharacterEventDiscrete*>(uncleChildState[site_index])->getState();
-            size_t great_grandparent_state = static_cast<CharacterEventDiscrete*>(greatGrandparentState[site_index])->getState();
+            size_t node_state              = cast_to_derived<CharacterEventDiscrete*>(nodeChildState[site_index])->getState();
+            size_t brother_state           = cast_to_derived<CharacterEventDiscrete*>(brotherChildState[site_index])->getState();
+            size_t uncle_state             = cast_to_derived<CharacterEventDiscrete*>(uncleChildState[site_index])->getState();
+            size_t great_grandparent_state = cast_to_derived<CharacterEventDiscrete*>(greatGrandparentState[site_index])->getState();
 
             double sum = 0.0;
             
@@ -765,13 +767,13 @@ void RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType>::sampleNodeC
             // now that we've chosen the new states, we need to assign them
             Found:
             
-                static_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->setState(new_parent_state);
-                static_cast<CharacterEventDiscrete*>(brotherParentState[site_index])->setState(new_parent_state);
-                static_cast<CharacterEventDiscrete*>(parentChildState[site_index])->setState(new_parent_state);
+                cast_to_derived<CharacterEventDiscrete*>(nodeParentState[site_index])->setState(new_parent_state);
+                cast_to_derived<CharacterEventDiscrete*>(brotherParentState[site_index])->setState(new_parent_state);
+                cast_to_derived<CharacterEventDiscrete*>(parentChildState[site_index])->setState(new_parent_state);
             
-                static_cast<CharacterEventDiscrete*>(uncleParentState[site_index])->setState(new_grandparent_state);
-                static_cast<CharacterEventDiscrete*>(parentParentState[site_index])->setState(new_grandparent_state);
-                static_cast<CharacterEventDiscrete*>(grandparentChildState[site_index])->setState(new_grandparent_state);
+                cast_to_derived<CharacterEventDiscrete*>(uncleParentState[site_index])->setState(new_grandparent_state);
+                cast_to_derived<CharacterEventDiscrete*>(parentParentState[site_index])->setState(new_grandparent_state);
+                cast_to_derived<CharacterEventDiscrete*>(grandparentChildState[site_index])->setState(new_grandparent_state);
             
         }
         
@@ -786,9 +788,9 @@ void RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType>::sampleNodeC
         for (size_t site_index = 0; site_index < num_sites; ++site_index)
         {
             
-            size_t node_state              = static_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->getState();
-            size_t brother_state           = static_cast<CharacterEventDiscrete*>(brotherChildState[site_index])->getState();
-            size_t uncle_state             = static_cast<CharacterEventDiscrete*>(uncleChildState[site_index])->getState();
+            size_t node_state              = cast_to_derived<CharacterEventDiscrete*>(nodeChildState[site_index])->getState();
+            size_t brother_state           = cast_to_derived<CharacterEventDiscrete*>(brotherChildState[site_index])->getState();
+            size_t uncle_state             = cast_to_derived<CharacterEventDiscrete*>(uncleChildState[site_index])->getState();
             
             double sum = 0.0;
             
@@ -832,13 +834,13 @@ void RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType>::sampleNodeC
             // now that we've chosen the new states, we need to assign them
             FoundRoot:
             
-                static_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->setState(new_parent_state);
-                static_cast<CharacterEventDiscrete*>(brotherParentState[site_index])->setState(new_parent_state);
-                static_cast<CharacterEventDiscrete*>(parentChildState[site_index])->setState(new_parent_state);
+                cast_to_derived<CharacterEventDiscrete*>(nodeParentState[site_index])->setState(new_parent_state);
+                cast_to_derived<CharacterEventDiscrete*>(brotherParentState[site_index])->setState(new_parent_state);
+                cast_to_derived<CharacterEventDiscrete*>(parentChildState[site_index])->setState(new_parent_state);
             
-                static_cast<CharacterEventDiscrete*>(uncleParentState[site_index])->setState(new_grandparent_state);
-                static_cast<CharacterEventDiscrete*>(parentParentState[site_index])->setState(new_grandparent_state);
-                static_cast<CharacterEventDiscrete*>(grandparentChildState[site_index])->setState(new_grandparent_state);
+                cast_to_derived<CharacterEventDiscrete*>(uncleParentState[site_index])->setState(new_grandparent_state);
+                cast_to_derived<CharacterEventDiscrete*>(parentParentState[site_index])->setState(new_grandparent_state);
+                cast_to_derived<CharacterEventDiscrete*>(grandparentChildState[site_index])->setState(new_grandparent_state);
 
         }
 
@@ -894,9 +896,9 @@ void RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType>::sampleNodeC
             
             for (size_t site_index = 0; site_index < num_sites; ++site_index)
             {
-                size_t ancS  = static_cast<CharacterEventDiscrete*>(nodeParentState[site_index])->getState();
-                size_t desS1 = static_cast<CharacterEventDiscrete*>(leftChildState[site_index])->getState();
-                size_t desS2 = static_cast<CharacterEventDiscrete*>(rightChildState[site_index])->getState();
+                size_t ancS  = cast_to_derived<CharacterEventDiscrete*>(nodeParentState[site_index])->getState();
+                size_t desS1 = cast_to_derived<CharacterEventDiscrete*>(leftChildState[site_index])->getState();
+                size_t desS2 = cast_to_derived<CharacterEventDiscrete*>(rightChildState[site_index])->getState();
                 
                 double u = GLOBAL_RNG->uniform01();
                 
@@ -921,9 +923,9 @@ void RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType>::sampleNodeC
                     ++s;
                 }
                 
-                static_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->setState(s);
-                static_cast<CharacterEventDiscrete*>(leftParentState[site_index])->setState(s);
-                static_cast<CharacterEventDiscrete*>(rightParentState[site_index])->setState(s);
+                cast_to_derived<CharacterEventDiscrete*>(nodeChildState[site_index])->setState(s);
+                cast_to_derived<CharacterEventDiscrete*>(leftParentState[site_index])->setState(s);
+                cast_to_derived<CharacterEventDiscrete*>(rightParentState[site_index])->setState(s);
             }
             
         }
@@ -934,8 +936,8 @@ void RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType>::sampleNodeC
             
             for (size_t site_index = 0; site_index < num_sites; ++site_index)
             {
-                size_t desS1 = static_cast<CharacterEventDiscrete*>(leftChildState[site_index])->getState();
-                size_t desS2 = static_cast<CharacterEventDiscrete*>(rightChildState[site_index])->getState();
+                size_t desS1 = cast_to_derived<CharacterEventDiscrete*>(leftChildState[site_index])->getState();
+                size_t desS2 = cast_to_derived<CharacterEventDiscrete*>(rightChildState[site_index])->getState();
                 
                 double u = GLOBAL_RNG->uniform01();
                 
@@ -960,9 +962,9 @@ void RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType>::sampleNodeC
                     ++s;
                 }
                 
-                static_cast<CharacterEventDiscrete*>(nodeChildState[site_index])->setState(s);
-                static_cast<CharacterEventDiscrete*>(leftParentState[site_index])->setState(s);
-                static_cast<CharacterEventDiscrete*>(rightParentState[site_index])->setState(s);
+                cast_to_derived<CharacterEventDiscrete*>(nodeChildState[site_index])->setState(s);
+                cast_to_derived<CharacterEventDiscrete*>(leftParentState[site_index])->setState(s);
+                cast_to_derived<CharacterEventDiscrete*>(rightParentState[site_index])->setState(s);
                 
             }
             
@@ -1027,19 +1029,19 @@ void RevBayesCore::NarrowExchangeCharacterHistoryProposal<charType>::swapNodeInt
     
     if ( oldN == tree )
     {
-        tree = static_cast<StochasticNode<Tree>* >(newN);
+        replaceNodeReference(tree, newN);
     }
     else if ( oldN == ctmc )
     {
-        ctmc = static_cast<StochasticNode<AbstractHomologousDiscreteCharacterData>* >(newN);
+        replaceNodeReference(ctmc, newN);
     }
     else if ( oldN == rate_generator )
     {
-        rate_generator = static_cast<TypedDagNode<RateGenerator>* >(newN);
+        replaceNodeReference(rate_generator, newN);
     }
     else if ( oldN == rate_generator_sequence )
     {
-        rate_generator_sequence = static_cast<DeterministicNode<RateGeneratorSequence>* >(newN);
+        replaceNodeReference(rate_generator_sequence, newN);
     }
     
     node_proposal->swapNodeInternal(oldN, newN);

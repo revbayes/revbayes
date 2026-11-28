@@ -1,3 +1,5 @@
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include "revPoMoNeutralM4NRateMatrixFunction.h"
 #include "RateMatrix_revPoMoNeutralM4N.h"
 #include "RbException.h"
@@ -55,11 +57,11 @@ void revPoMoNeutralM4NRateMatrixFunction::update( void )
     const std::vector<double>& ex = rho->getValue();
 
     // set parameters
-    static_cast< RateMatrix_revPoMoNeutralM4N* >(value)->setN( n );
-    static_cast< RateMatrix_revPoMoNeutralM4N* >(value)->setM( m );
-    static_cast< RateMatrix_revPoMoNeutralM4N* >(value)->setPi( bf );
-    static_cast< RateMatrix_revPoMoNeutralM4N* >(value)->setRho( ex );
-    static_cast< RateMatrix_revPoMoNeutralM4N* >(value)->update();
+    cast_to_derived< RateMatrix_revPoMoNeutralM4N* >(value)->setN( n );
+    cast_to_derived< RateMatrix_revPoMoNeutralM4N* >(value)->setM( m );
+    cast_to_derived< RateMatrix_revPoMoNeutralM4N* >(value)->setPi( bf );
+    cast_to_derived< RateMatrix_revPoMoNeutralM4N* >(value)->setRho( ex );
+    cast_to_derived< RateMatrix_revPoMoNeutralM4N* >(value)->update();
 }
 
 
@@ -67,22 +69,22 @@ void revPoMoNeutralM4NRateMatrixFunction::swapParameterInternal(const DagNode *o
 {
     if (oldP == N )
     {
-        N = static_cast< const TypedDagNode< std::int64_t >* >( newP );
+        replaceNodeReference(N, newP);
     }
 
     else if (oldP == M )
     {
-        M = static_cast< const TypedDagNode< std::int64_t >* >( newP );
+        replaceNodeReference(M, newP);
     }
 
     else if (oldP == pi)
     {
-        pi = static_cast<const TypedDagNode< Simplex >* >( newP );
+        replaceNodeReference(pi, newP);
     }
     
     else if (oldP == rho)
     {
-        rho = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(rho, newP);
     }
 
 

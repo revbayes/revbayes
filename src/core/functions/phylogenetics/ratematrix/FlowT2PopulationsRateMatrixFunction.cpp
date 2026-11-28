@@ -1,3 +1,5 @@
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include "FlowT2PopulationsRateMatrixFunction.h"
 #include "RbException.h"
 
@@ -58,10 +60,10 @@ void FlowT2PopulationsRateMatrixFunction::update( void )
     const std::vector<double>& s = sigma->getValue();
 
     // set the base frequencies
-    static_cast< RateMatrix_FlowT2Populations* >(value)->setNu( n );
-    static_cast< RateMatrix_FlowT2Populations* >(value)->setMu( m );
-    static_cast< RateMatrix_FlowT2Populations* >(value)->setLambda( l );
-    static_cast< RateMatrix_FlowT2Populations* >(value)->setSigma( s );
+    cast_to_derived< RateMatrix_FlowT2Populations* >(value)->setNu( n );
+    cast_to_derived< RateMatrix_FlowT2Populations* >(value)->setMu( m );
+    cast_to_derived< RateMatrix_FlowT2Populations* >(value)->setLambda( l );
+    cast_to_derived< RateMatrix_FlowT2Populations* >(value)->setSigma( s );
 
     value->update();
 }
@@ -73,22 +75,22 @@ void FlowT2PopulationsRateMatrixFunction::swapParameterInternal(const DagNode *o
     
     if (oldP == nu)
     {
-        nu = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(nu, newP);
     }
     
     if (oldP == mu)
     {
-        mu = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(mu, newP);
     }
 
     if (oldP == lambda)
     {
-        lambda = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(lambda, newP);
     }
 
     if (oldP == sigma)
     {
-        sigma = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(sigma, newP);
     }
 
 }

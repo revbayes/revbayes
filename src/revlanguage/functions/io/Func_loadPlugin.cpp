@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <sstream>
 #include <vector>
 
@@ -31,8 +32,8 @@ RevPtr<RevVariable> Func_loadPlugin::execute( void )
 {
 
 	// get the information from the arguments for reading the file
-	const RlString&    pn  = static_cast<const RlString&>( args[0].getVariable()->getRevObject() );
-	const RlString&    fn  = static_cast<const RlString&>( args[1].getVariable()->getRevObject() );
+	const RlString&    pn  = objectForRevType<RlString>(args[0].getVariable());
+	const RlString&    fn  = objectForRevType<RlString>(args[1].getVariable());
 
 	if(pn.getValue() == "TensorPhylo") {
 

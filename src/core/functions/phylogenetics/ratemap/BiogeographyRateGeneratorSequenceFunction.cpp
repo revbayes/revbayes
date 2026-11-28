@@ -1,3 +1,5 @@
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include "BiogeographyRateGeneratorSequenceFunction.h"
 
 #include <string>
@@ -45,7 +47,7 @@ void BiogeographyRateGeneratorSequenceFunction::update( void )
     
     // set the gainLossRate
     const RateGenerator& rm = homogeneousRateMatrix->getValue();
-    static_cast< RateGeneratorSequence_Biogeography* >(value)->setRateMatrix(&rm);
+    cast_to_derived< RateGeneratorSequence_Biogeography* >(value)->setRateMatrix(&rm);
 
     
     // set the distancePower
@@ -108,11 +110,11 @@ void BiogeographyRateGeneratorSequenceFunction::swapParameterInternal(const DagN
 
     if (oldP == homogeneousRateMatrix)
     {
-        homogeneousRateMatrix = static_cast<const TypedDagNode<RateGenerator>* >( newP );
+        replaceNodeReference(homogeneousRateMatrix, newP);
     }
     else if (oldP == distanceRateModifier)
     {
-        distanceRateModifier = static_cast<const TypedDagNode<CharacterHistoryRateModifier>* >( newP );
+        replaceNodeReference(distanceRateModifier, newP);
     }
 
 }

@@ -1,3 +1,5 @@
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include "ReversiblePoMoRateMatrixFunction.h"
 
 #include "Cloneable.h"
@@ -44,13 +46,13 @@ void ReversiblePoMoRateMatrixFunction::update( void )
 {
 
     // set the exchangeability rates
-    static_cast< RateMatrix_ReversiblePoMo* >(value)->setExchangeabilityRates( static_cast< const RbVector<double>& > ( exchangeabilities->getValue() ) );
+    cast_to_derived< RateMatrix_ReversiblePoMo* >(value)->setExchangeabilityRates( exchangeabilities->getValue() );
 
     // set the stationary frequencies
-    static_cast< RateMatrix_ReversiblePoMo* >(value)->setStationaryFrequencies( static_cast< const Simplex& > ( equilibrium_frequencies->getValue() ) );
+    cast_to_derived< RateMatrix_ReversiblePoMo* >(value)->setStationaryFrequencies( equilibrium_frequencies->getValue() );
 
     // now update the matrix
-    static_cast< RateMatrix_ReversiblePoMo* >(value)->update();
+    cast_to_derived< RateMatrix_ReversiblePoMo* >(value)->update();
 
 }
 
@@ -65,11 +67,11 @@ void ReversiblePoMoRateMatrixFunction::swapParameterInternal(const DagNode *oldP
     // }
     if (oldP == exchangeabilities)
     {
-        exchangeabilities = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(exchangeabilities, newP);
     }
     else if (oldP == equilibrium_frequencies)
     {
-        equilibrium_frequencies = static_cast<const TypedDagNode< Simplex >* >( newP );
+        replaceNodeReference(equilibrium_frequencies, newP);
     }
 
 }

@@ -6,6 +6,8 @@
 //  Copyright © 2017 Michael Landis. All rights reserved.
 //
 
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include "StateCountRateModifierFunction.h"
 
 #include "StateCountRateModifier.h"
@@ -55,7 +57,7 @@ void StateCountRateModifierFunction::update( void )
 {
     
     RbVector<double> sf = stateFactors->getValue();
-    static_cast<StateCountRateModifier*>(value)->setStateFactors(sf);
+    cast_to_derived<StateCountRateModifier*>(value)->setStateFactors(sf);
     
 }
 
@@ -66,6 +68,6 @@ void StateCountRateModifierFunction::swapParameterInternal(const DagNode *oldP, 
 
     if (oldP == stateFactors)
     {
-        stateFactors = static_cast<const TypedDagNode<RbVector<double> >* >( newP );
+        replaceNodeReference(stateFactors, newP);
     }
 }

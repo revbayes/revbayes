@@ -1,6 +1,7 @@
 #ifndef ModelObject_H
 #define ModelObject_H
 
+#include "TypeUtilities.h"
 #include "AbstractModelObject.h"
 #include "MethodTable.h"
 #include "RevObject.h"
@@ -320,7 +321,7 @@ void RevLanguage::ModelObject<rbType>::makeConversionValue(const AbstractModelOb
 template <typename rbType>
 void RevLanguage::ModelObject<rbType>::setValueFromNode(const RevBayesCore::DagNode& source)
 {
-    const auto& value = static_cast<const RevBayesCore::TypedDagNode<rbType>&>(source).getValue();
+    const auto& value = cast_to_derived<const RevBayesCore::TypedDagNode<rbType>&>(source).getValue();
     setValue(RevBayesCore::Cloner<rbType, IsDerivedFrom<rbType, RevBayesCore::Cloneable>::Is>::createClone(value));
 }
 
@@ -441,6 +442,8 @@ void RevLanguage::ModelObject<rbType>::setName(std::string const &n)
 template <typename rbType>
 void RevLanguage::ModelObject<rbType>::setDagNode(RevBayesCore::DagNode* newNode)
 {
+    // Validate before changing the graph or releasing the old node.
+    auto* replacement = cast_to_derived<RevBayesCore::TypedDagNode<rbType>*>(newNode);
     
     // Take care of the old value node
     if ( dag_node != NULL )
@@ -460,7 +463,7 @@ void RevLanguage::ModelObject<rbType>::setDagNode(RevBayesCore::DagNode* newNode
     }
     
     // Set the new value node
-    dag_node = static_cast< RevBayesCore::TypedDagNode<rbType>* >( newNode );
+    dag_node = replacement;
     
     // Increment the reference count to the new value node
     if ( dag_node != NULL )

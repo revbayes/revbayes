@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "BetaProbabilityProposal.h"
 
 #include <iostream>
@@ -177,7 +178,7 @@ void BetaProbabilityProposal::undoProposal( void )
 void BetaProbabilityProposal::swapNodeInternal(DagNode *oldN, DagNode *newN)
 {
     
-    variable = static_cast<StochasticNode<double>* >(newN) ;
+    replaceNodeReference(variable, newN) ;
     
 }
 

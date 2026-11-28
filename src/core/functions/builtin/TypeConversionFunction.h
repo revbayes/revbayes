@@ -1,6 +1,7 @@
 #ifndef TypeConversionFunction_H
 #define TypeConversionFunction_H
 
+#include "DagNodeTypeUtilities.h"
 #include "TypedFunction.h"
 
 #include <string>
@@ -62,7 +63,7 @@ void  RevBayesCore::TypeConversionFunction<rbTypeFrom, rbTypeTo>::swapParameterI
 
     if ( oldP == argumentNode )
     {
-        argumentNode = static_cast<const TypedDagNode< rbTypeFrom > *>(newP);
+        replaceNodeReference(argumentNode, newP);
     }
     
 }

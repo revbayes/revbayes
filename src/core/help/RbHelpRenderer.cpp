@@ -1,3 +1,4 @@
+#include "TypeUtilities.h"
 #include "RbHelpRenderer.h"
 
 #include <string>
@@ -299,11 +300,11 @@ std::string HelpRenderer::renderHelp(const RbHelpEntry &entryHelp, size_t w)
 {
     if ( dynamic_cast< const RbHelpFunction *>( &entryHelp ) != NULL)
     {
-        return renderHelp( static_cast<const RbHelpFunction &>( entryHelp ), w);
+        return renderHelp( cast_to_derived<const RbHelpFunction &>( entryHelp ), w);
     }
     else if ( dynamic_cast< const RbHelpType *>( &entryHelp ) != NULL)
     {
-        return renderHelp( static_cast<const RbHelpType &>( entryHelp ), w);
+        return renderHelp( cast_to_derived<const RbHelpType &>( entryHelp ), w);
     }
 
     throw RbException("Unexpected help type.");

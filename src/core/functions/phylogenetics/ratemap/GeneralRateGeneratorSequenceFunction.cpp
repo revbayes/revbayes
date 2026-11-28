@@ -6,6 +6,8 @@
 //  Copyright (c) 2014 Michael Landis. All rights reserved.
 //
 
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include "GeneralRateGeneratorSequenceFunction.h"
 
 #include <string>
@@ -59,11 +61,11 @@ void GeneralRateGeneratorSequenceFunction::update( void )
     
     if (rateModifiers != NULL) {
         const RbVector<CharacterHistoryRateModifier>& rate_mods = rateModifiers->getValue();
-        static_cast< RateGeneratorSequenceUsingMatrix* >(value)->setRateModifiers( &rate_mods );
+        cast_to_derived< RateGeneratorSequenceUsingMatrix* >(value)->setRateModifiers( &rate_mods );
     }
 
     // set the rate modifiers in RateGeneratorSequence!!
-    static_cast< RateGeneratorSequenceUsingMatrix* >(value)->setRateMatrix( &rm );
+    cast_to_derived< RateGeneratorSequenceUsingMatrix* >(value)->setRateMatrix( &rm );
     
 
     value->updateMap();
@@ -106,10 +108,10 @@ void GeneralRateGeneratorSequenceFunction::swapParameterInternal(const DagNode *
 {
     if (oldP == homogeneousRateMatrix)
     {
-        homogeneousRateMatrix = static_cast<const TypedDagNode<RateGenerator>* >( newP );
+        replaceNodeReference(homogeneousRateMatrix, newP);
     }
     else if (oldP == rateModifiers)
     {
-        rateModifiers = static_cast<const TypedDagNode<RbVector<CharacterHistoryRateModifier> >* >( newP );
+        replaceNodeReference(rateModifiers, newP);
     }
 }

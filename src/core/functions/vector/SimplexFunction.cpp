@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "SimplexFunction.h"
 
 #include <cstddef>
@@ -61,7 +62,7 @@ void SimplexFunction::swapParameterInternal(const DagNode *oldP, const DagNode *
     for (size_t i = 0; i < simplexParams.size(); ++i) {
         if (oldP == simplexParams[i])
         {
-            simplexParams[i] = static_cast<const TypedDagNode<double>* >( newP );
+            replaceNodeReference(simplexParams[i], newP);
             // don't jump out of the loop because we could have the same parameter multiple times for this vector, e.g., v(a,a,b,a)
         }
     }

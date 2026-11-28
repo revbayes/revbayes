@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include "CheckNodeOrderConstraintsFunction.h"
 
 #include <cstddef>
@@ -118,11 +119,11 @@ void CheckNodeOrderConstraintsFunction::swapParameterInternal(const DagNode *old
     
     if (oldP == tau)
     {
-        tau = static_cast<const TypedDagNode<Tree>* >( newP );
+        replaceNodeReference(tau, newP);
     }
     else if (oldP == constraints)
     {
-        constraints = static_cast<const TypedDagNode<RelativeNodeAgeConstraints>* >( newP );
+        replaceNodeReference(constraints, newP);
         updateSetOfConstrainedNodes();
     }
 }

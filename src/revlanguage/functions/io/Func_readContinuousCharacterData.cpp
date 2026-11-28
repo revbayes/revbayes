@@ -1,3 +1,5 @@
+#include "TypeUtilities.h"
+#include "RevTypeUtilities.h"
 #include <cstddef>
 #include <set>
 #include <sstream>
@@ -57,8 +59,8 @@ RevPtr<RevVariable> Func_readContinuousCharacterData::execute( void )
 {
     
     // get the information from the arguments for reading the file
-    RevBayesCore::path fn = static_cast<const RlString&>( args[0].getVariable()->getRevObject() ).getValue();
-    bool return_as_vector = static_cast<const RlBoolean&>( args[1].getVariable()->getRevObject() ).getValue();
+    RevBayesCore::path fn = valueForRevType<RlString>(args[0].getVariable());
+    bool return_as_vector = valueForRevType<RlBoolean>(args[1].getVariable());
     
     // check that the file/path name has been correctly specified
     if ( not RevBayesCore::exists( fn ))
@@ -147,7 +149,7 @@ RevPtr<RevVariable> Func_readContinuousCharacterData::execute( void )
                 
                 if ( data_type == "Continuous" )
                 {
-                    RevBayesCore::ContinuousCharacterData *coreM = static_cast<RevBayesCore::ContinuousCharacterData *>( *it );
+                    RevBayesCore::ContinuousCharacterData *coreM = cast_to_derived<RevBayesCore::ContinuousCharacterData *>( *it );
                     
                     ContinuousCharacterData mCC = ContinuousCharacterData (coreM );
                     m->push_back( mCC );

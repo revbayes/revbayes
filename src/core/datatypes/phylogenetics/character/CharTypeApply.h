@@ -1,7 +1,6 @@
 #ifndef CharTypeApply_H
 #define CharTypeApply_H
 
-#include "BinaryState.h"
 #include "NaturalNumbersState.h"
 #include "DnaState.h"
 #include "RnaState.h"
@@ -45,13 +44,9 @@ void apply_to_character_type(const F& f, const std::string& character_type)
     {
         f.template operator()<Core::RnaState>();
     }
-    else if (character_type == "Standard")
+    else if (character_type == "Standard" || character_type == "Binary" || character_type == "Restriction")
     {
         f.template operator()<Core::StandardState>();
-    }
-    else if (character_type == "Binary" || character_type == "Restriction")
-    {
-        f.template operator()<Core::BinaryState>();
     }
     else
     {

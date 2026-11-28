@@ -1,3 +1,5 @@
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include "OrderedRateMatrixFunction.h"
 
 #include "RateMatrix_FreeK.h"
@@ -52,7 +54,7 @@ void OrderedRateMatrixFunction::update( void )
     double l = lambda->getValue();
     double m = mu->getValue();
 
-    size_t n = static_cast< RateMatrix_FreeK* >(value)->getNumberOfStates();
+    size_t n = cast_to_derived< RateMatrix_FreeK* >(value)->getNumberOfStates();
     
     std::vector<double> r_flat( n * (n-1) );
     size_t k = 0;
@@ -81,7 +83,7 @@ void OrderedRateMatrixFunction::update( void )
     }
 
     // set the flattened rates
-    static_cast< RateMatrix_FreeK* >(value)->setTransitionRates(r_flat);
+    cast_to_derived< RateMatrix_FreeK* >(value)->setTransitionRates(r_flat);
 
     value->update();
     
@@ -94,12 +96,12 @@ void OrderedRateMatrixFunction::swapParameterInternal(const DagNode *oldP, const
     
     if (oldP == lambda)
     {
-        lambda = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(lambda, newP);
     }
     
     if (oldP == mu)
     {
-        mu = static_cast<const TypedDagNode<double>* >( newP );
+        replaceNodeReference(mu, newP);
     }
     
     

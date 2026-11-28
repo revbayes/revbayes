@@ -1,3 +1,5 @@
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include "PhylowoodNhxMonitor.h"
 
 #include <iostream>
@@ -82,13 +84,13 @@ void PhylowoodNhxMonitor::updateCharacterCounts(TopologyNode* n, std::string brE
     {
         characters = bh.getChildCharacters();
         for (size_t i = 0; i < characters.size(); i++)
-            childCharacterCounts[n->getIndex()][i] += static_cast<CharacterEventDiscrete*>(characters[i])->getState();
+            childCharacterCounts[n->getIndex()][i] += cast_to_derived<CharacterEventDiscrete*>(characters[i])->getState();
     }
     else if (brEnd=="parent")
     {
         characters = bh.getParentCharacters();
         for (size_t i = 0; i < characters.size(); i++)
-            parentCharacterCounts[n->getIndex()][i] += static_cast<CharacterEventDiscrete*>(characters[i])->getState();
+            parentCharacterCounts[n->getIndex()][i] += cast_to_derived<CharacterEventDiscrete*>(characters[i])->getState();
     }
     
 }
@@ -332,14 +334,14 @@ void PhylowoodNhxMonitor::swapNode(DagNode *oldN, DagNode *newN)
     // bool found = false;
     if ( oldN == tree )
     {
-        tree = static_cast< TypedDagNode< Tree > *>( newN );
+        replaceNodeReference(tree, newN);
         // found = true;
     }
     for (size_t i = 0; i < branchHistories.size(); i++)
     {
         if (oldN == branchHistories[i])
         {
-            branchHistories[i] = static_cast<StochasticNode<BranchHistory>* >(newN);
+            replaceNodeReference(branchHistories[i], newN);
             // found = true;
         }
     }

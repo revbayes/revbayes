@@ -1,3 +1,4 @@
+#include "DagNodeTypeUtilities.h"
 #include <cstddef>
 #include <cmath>
 #include <iostream>
@@ -357,7 +358,7 @@ void SpeciesSubtreeScaleBetaProposal::swapNodeInternal(DagNode *oldN, DagNode *n
 
     if ( oldN == speciesTree )
     {
-        speciesTree = static_cast<StochasticNode<Tree>* >(newN) ;
+        replaceNodeReference(speciesTree, newN) ;
     }
     else
     {
@@ -365,7 +366,7 @@ void SpeciesSubtreeScaleBetaProposal::swapNodeInternal(DagNode *oldN, DagNode *n
         {
             if ( oldN == geneTrees[i] )
             {
-                geneTrees[i] = static_cast<StochasticNode<Tree>* >(newN) ;
+                replaceNodeReference(geneTrees[i], newN) ;
             }
         }
     }

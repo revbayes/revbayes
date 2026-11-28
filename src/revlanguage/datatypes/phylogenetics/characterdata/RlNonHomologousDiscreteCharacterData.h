@@ -1,6 +1,8 @@
 #ifndef RlNonHomologousDiscreteCharacterData_H
 #define RlNonHomologousDiscreteCharacterData_H
 
+#include "TypeUtilities.h"
+#include "RevTypeUtilities.h"
 #include "NonHomologousDiscreteCharacterData.h"
 #include "ModelObject.h"
 #include "RlAbstractNonHomologousDiscreteCharacterData.h"
@@ -109,14 +111,14 @@ RevLanguage::RevPtr<RevLanguage::RevVariable> RevLanguage::NonHomologousDiscrete
         found = true;
         
         // get the member with give index
-        const Natural& index = static_cast<const Natural&>( args[0].getVariable()->getRevObject() );
+        const Natural& index = objectForRevType<Natural>(args[0].getVariable());
         
         if (this->dag_node->getValue().getNumberOfTaxa() < (size_t)(index.getValue()) )
         {
             throw RbException("Index out of bounds in []");
         }
         
-        const RevBayesCore::DiscreteTaxonData<typename rlType::valueType>& element = static_cast< RevBayesCore::NonHomologousDiscreteCharacterData<typename rlType::valueType>& >( this->dag_node->getValue() ).getTaxonData(size_t(index.getValue()) - 1);
+        const RevBayesCore::DiscreteTaxonData<typename rlType::valueType>& element = cast_to_derived< RevBayesCore::NonHomologousDiscreteCharacterData<typename rlType::valueType>& >( this->dag_node->getValue() ).getTaxonData(size_t(index.getValue()) - 1);
         
         return new RevVariable( new DiscreteTaxonData<rlType>( new RevBayesCore::DiscreteTaxonData<typename rlType::valueType>( element ) ) );
     }

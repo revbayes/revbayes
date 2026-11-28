@@ -1,3 +1,5 @@
+#include "TypeUtilities.h"
+#include "RevTypeUtilities.h"
 #include "Transform_Logit.h"
 
 #include "ArgumentRule.h"
@@ -30,8 +32,8 @@ RevBayesCore::TransformedDistribution* Transform_Logit::createDistribution( void
     using namespace Transforms;
 
     // get the parameters
-    const Distribution& rl_vp                      = static_cast<const Distribution &>( base_distribution->getRevObject() );
-    RevBayesCore::TypedDistribution<double>* vp    = static_cast<RevBayesCore::TypedDistribution<double>* >( rl_vp.createDistribution() );
+    const Distribution& rl_vp                      = objectForRevType<Distribution>(base_distribution);
+    RevBayesCore::TypedDistribution<double>* vp    = cast_to_derived<RevBayesCore::TypedDistribution<double>* >( rl_vp.createDistribution() );
 
     RevBayesCore::TransformedDistribution* d = new RevBayesCore::TransformedDistribution(*vp, logit_transform, logit_inverse, log_logit_prime);
 

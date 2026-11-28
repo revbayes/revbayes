@@ -1,3 +1,4 @@
+#include "RevTypeUtilities.h"
 #include <iosfwd>
 #include <string>
 #include <vector>
@@ -43,7 +44,7 @@ Func_exp* Func_exp::clone( void ) const {
 RevBayesCore::TypedFunction<double>* Func_exp::createFunction() const
 {
     
-    RevBayesCore::TypedDagNode<double>* arg = static_cast<const Real &>( this->args[0].getVariable()->getRevObject() ).getDagNode();
+    RevBayesCore::TypedDagNode<double>* arg = dagNodeForRevType<Real>(this->args[0].getVariable());
     RevBayesCore::ExponentialFunction* f = new RevBayesCore::ExponentialFunction( arg );
     
     return f;

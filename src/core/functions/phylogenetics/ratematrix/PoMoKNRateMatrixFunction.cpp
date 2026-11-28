@@ -1,3 +1,5 @@
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include "PoMoKNRateMatrixFunction.h"
 #include "RbException.h"
 
@@ -67,10 +69,10 @@ void PoMoKNRateMatrixFunction::update( void )
     const std::vector<double>& f = phi->getValue();
 
     // set the base frequencies
-    static_cast< RateMatrix_PoMoKN* >(value)->setK( na );
-    static_cast< RateMatrix_PoMoKN* >(value)->setN( ni );
-    static_cast< RateMatrix_PoMoKN* >(value)->setMu( m );
-    static_cast< RateMatrix_PoMoKN* >(value)->setPhi( f );
+    cast_to_derived< RateMatrix_PoMoKN* >(value)->setK( na );
+    cast_to_derived< RateMatrix_PoMoKN* >(value)->setN( ni );
+    cast_to_derived< RateMatrix_PoMoKN* >(value)->setMu( m );
+    cast_to_derived< RateMatrix_PoMoKN* >(value)->setPhi( f );
 
     value->update();
 }
@@ -82,22 +84,22 @@ void PoMoKNRateMatrixFunction::swapParameterInternal(const DagNode *oldP, const 
     
     if (oldP == K)
     {
-        K = static_cast<const TypedDagNode< std::int64_t >* >( newP );
+        replaceNodeReference(K, newP);
     }
     
     if (oldP == N)
     {
-        N =  static_cast<const TypedDagNode< std::int64_t >* >( newP );
+        replaceNodeReference(N, newP);
     }
 
     if (oldP == mu)
     {
-        mu = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(mu, newP);
     }
 
     if (oldP == phi)
     {
-        phi = static_cast<const TypedDagNode< RbVector<double> >* >( newP );
+        replaceNodeReference(phi, newP);
     }
 
 }

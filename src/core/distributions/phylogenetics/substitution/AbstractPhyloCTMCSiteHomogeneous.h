@@ -1,6 +1,8 @@
 #ifndef AbstractPhyloCTMCSiteHomogeneous_H
 #define AbstractPhyloCTMCSiteHomogeneous_H
 
+#include "TypeUtilities.h"
+#include "DagNodeTypeUtilities.h"
 #include "AbstractHomologousDiscreteCharacterData.h"
 #include "ConstantNode.h"
 #include "DiscreteTaxonData.h"
@@ -17,6 +19,7 @@
 #include "Tree.h"
 #include "TreeChangeEventListener.h"
 #include "TypedDistribution.h"
+#include "TypeUtilities.h"
 #include "SiteMixtureModel.h"
 
 #include <memory>
@@ -940,7 +943,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::compress( void )
                 // set the counts for this patter
                 process_pattern_counts[patternIndex] = pattern_counts[patternIndex+pattern_block_start];
 
-                charType &c = static_cast<charType &>( taxon.getCharacter(site_indices[indexOfSitePattern[patternIndex+pattern_block_start]]) );
+                charType &c = cast_to_derived<charType &>( taxon.getCharacter(site_indices[indexOfSitePattern[patternIndex+pattern_block_start]]) );
                 gap_matrix[node_index][patternIndex] = c.isGapState();
 
                 if ( using_ambiguous_characters == true )
@@ -1863,7 +1866,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::executeMethod(con
 
         // now either sample the site rates according to the conditional posterior probability of each rate category
         // or compute them as the posterior mean
-        std::string method = static_cast<const TypedDagNode<std::string>* >( args[0] )->getValue();
+        std::string method = cast_to_derived<const TypedDagNode<std::string>* >( args[0] )->getValue();
 
         if (method == "sampling")
         {
@@ -2121,7 +2124,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::tipDrawJointCondi
     this->updateTransitionProbabilityMatrix( node_index );
 
     const AbstractHomologousDiscreteCharacterData& d = this->getValue();
-    const HomologousDiscreteCharacterData<charType>& dd = static_cast<const HomologousDiscreteCharacterData<charType>& >( d );
+    const HomologousDiscreteCharacterData<charType>& dd = cast_to_derived<const HomologousDiscreteCharacterData<charType>&>( d );
     const DiscreteTaxonData<charType>& td = dd.getTaxonData( node.getName() );
 
     // ideally sample ambiguous tip states given the underlying process and ancestral state
@@ -2952,7 +2955,7 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::setValue(Abstract
     this->compress();
 
     // now we also set the template state
-    template_state = charType( static_cast<const charType&>( this->value->getTaxonData(0).getCharacter(0) ) );
+    template_state = charType( cast_to_derived<const charType&>( this->value->getTaxonData(0).getCharacter(0) ) );
     template_state.setToFirstState();
     template_state.setGapState( false );
     template_state.setMissingState( false );
@@ -4066,57 +4069,58 @@ void RevBayesCore::AbstractPhyloCTMCSiteHomogeneous<charType>::swapParameterInte
 
     if (oldP == homogeneous_clock_rate)
     {
-        homogeneous_clock_rate = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(homogeneous_clock_rate, newP);
     }
     else if (oldP == heterogeneous_clock_rates)
     {
-        heterogeneous_clock_rates = static_cast<const TypedDagNode< RbVector< double > >* >( newP );
+        replaceNodeReference(heterogeneous_clock_rates, newP);
     }
     else if (oldP == mixture_model)
     {
-        mixture_model = static_cast<const TypedDagNode< SiteMixtureModel >* >( newP );
+        replaceNodeReference(mixture_model, newP);
     }
     else if (oldP == homogeneous_rate_matrix)
     {
-        homogeneous_rate_matrix = static_cast<const TypedDagNode< RateGenerator >* >( newP );
+        replaceNodeReference(homogeneous_rate_matrix, newP);
     }
     else if (oldP == heterogeneous_rate_matrices)
     {
-        heterogeneous_rate_matrices = static_cast<const TypedDagNode< RbVector< RateGenerator > >* >( newP );
+        replaceNodeReference(heterogeneous_rate_matrices, newP);
     }
     else if (oldP == observation_error_probability)
     {
-        observation_error_probability = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(observation_error_probability, newP);
     }
     else if (oldP == observation_error_frequencies)
     {
-        observation_error_frequencies = static_cast<const TypedDagNode< Simplex >* >( newP );
+        replaceNodeReference(observation_error_frequencies, newP);
     }
     else if (oldP == root_frequencies)
     {
-        root_frequencies = static_cast<const TypedDagNode< Simplex >* >( newP );
+        replaceNodeReference(root_frequencies, newP);
     }
     else if (oldP == site_matrix_probs)
     {
-        site_matrix_probs = static_cast<const TypedDagNode< Simplex >* >( newP );
+        replaceNodeReference(site_matrix_probs, newP);
     }
     else if (oldP == site_rates)
     {
-        site_rates = static_cast<const TypedDagNode< RbVector< double > >* >( newP );
+        replaceNodeReference(site_rates, newP);
     }
     else if (oldP == site_rates_probs)
     {
-        site_rates_probs = static_cast<const TypedDagNode< Simplex >* >( newP );
+        replaceNodeReference(site_rates_probs, newP);
     }
     else if (oldP == p_inv)
     {
-        p_inv = static_cast<const TypedDagNode< double >* >( newP );
+        replaceNodeReference(p_inv, newP);
     }
     else if (oldP == tau)
     {
+        // Check the replacement before detaching the old tree's listener.
+        const auto* replacement = cast_to_derived<decltype(this->tau)>(newP);
         tau->getValue().getTreeChangeEventHandler().removeListener( this );
-
-        tau = static_cast<const TypedDagNode<Tree>* >( newP );
+        tau = replacement;
 
         tau->getValue().getTreeChangeEventHandler().addListener( this );
 
