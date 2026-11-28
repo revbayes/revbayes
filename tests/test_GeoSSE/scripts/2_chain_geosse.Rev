@@ -1,0 +1,214 @@
+################################################################################
+#
+# RevBayes Test-Script: A complex GeoSSE analysis that tests several features at
+#                       once, including loading TensorPhylo and the ability of
+#                       dnGLHBDSP to handle multiple runs on the same process
+#
+# authors: David Cerny
+#
+################################################################################
+
+# Rev code below originally provided by Anna Nagel
+# (see https://github.com/revbayes/revbayes/issues/903)
+
+seed(1)
+
+# load TensorPhylo plugin
+loadPlugin("TensorPhylo")
+
+# FILESYSTEM
+dat_fp      = "data/"
+out_fp      = "output/"
+bg_fn       = dat_fp + "out.1.dat.nex"
+phy_fn      = dat_fp + "sim.1.extant.tre"
+
+# PHYLOGENETIC DATA
+phy         <- readTrees(phy_fn)[1]
+tree_height <- phy.rootAge()
+taxa        = phy.taxa()
+num_taxa    = taxa.size()
+
+# BIOGEOGRAPHIC DATA
+bg_01       = readDiscreteCharacterData(bg_fn)
+
+# To see where each lineage is, we can do:     #
+bg_01.show()
+# Note how the biogeographic ranges are shown  #
+# as bit (present/absent in a region) patterns #
+
+num_regions = bg_01.nchar()                 # This is going to be 2
+num_ranges  = abs(2^num_regions - 1)
+num_pairs   = num_regions^2 - num_regions   # 2^2 - 2 = 2
+bg_dat      = formatDiscreteCharacterData(bg_01, format="GeoSSE", numStates=num_ranges)
+
+rate_param = 1/.1
+# MODEL RATES
+
+N = 2
+
+# This is 3
+for (i in 1:num_ranges) {
+    mu[i] <- 0.0
+
+    # This is 2
+    if (i <= num_regions) {
+        mu[i] ~ dnExp(rate_param) 
+	r_e[i] := mu[i]
+    }
+}
+
+# Michael's example
+for (i in 1:N) {
+    r_d[i][i] <- 0.0
+    for (j in 1:N) {
+        if (i != j) {
+            r_d[i][j] ~ dnExp(rate_param)
+        }
+    }
+}
+
+disp_A_B := r_d[1][2]
+disp_B_A := r_d[2][1]
+
+print("anagenetic")
+
+## ANAGENETIC RATE MATRIX
+Q_bg := fnBiogeographyRateMatrix(
+    dispersalRates=r_d,
+    extirpationRates=r_e,
+    maxRangeSize=num_regions
+)
+print(Q_bg)
+
+# We have 3 states, 'A', 'B', and 'AB', that should have #
+# both a numerical and a bit-pattern representations     #
+#                                                        #
+# We can check it by doing:                              #
+
+Q_bg.getStateDescriptions()[1] # for state 1, '10' -> 'A'
+Q_bg.getStateDescriptions()[2] # for state 2, '01' -> 'B'
+Q_bg.getStateDescriptions()[3] # for state 3, '11' -> 'AB'
+
+print("cladogenetic")
+
+speciation_wide_sympatry[1] ~ dnExp(rate_param) #dnLognormal(rate_mean, rate_sd)
+speciation_wide_sympatry[2] ~ dnExp(rate_param) #dnLognormal(rate_mean, rate_sd)
+mvi = 1
+mv[mvi++] = ( mvSlide( speciation_wide_sympatry[1], weight=4 ) )
+mv[mvi++] = ( mvSlide( speciation_wide_sympatry[2], weight=4 ) )
+
+# Define the widespread sympatric cladogenetic events:
+clado_events[1] = [0, 0, 0] # 01 -> 01, 01
+clado_events[2] = [1, 1, 1] # 10 -> 10, 10
+
+# and assign each the same speciation rate:
+speciation_rates[1] := speciation_wide_sympatry[1]/2
+speciation_rates[2] := speciation_wide_sympatry[2]/2
+
+# Subset sympatry is where one daughter lineage inherits the full
+# ancestral range but the other lineage inherits only a single region.
+# AB -> A,AB or AB, A 
+# or    B,AB or AB, B
+speciation_sub_sympatry[1] := speciation_wide_sympatry[1] #~ dnExp(rate_param) #dnLognormal(rate_mean, rate_sd)
+speciation_sub_sympatry[2] := speciation_wide_sympatry[2] #~ dnExp(rate_param) #dnLognormal(rate_mean, rate_sd)
+
+# Define the subset sympatry events and assign each a speciation rate:
+clado_events[3] = [2, 2, 0] # 11 -> 11, 01
+clado_events[4] = [2, 0, 2] # 11 -> 01, 11
+clado_events[5] = [2, 2, 1] # 11 -> 11, 10
+clado_events[6] = [2, 1, 2] # 11 -> 10, 11
+speciation_rates[3] := speciation_sub_sympatry[1]/2
+speciation_rates[4] := speciation_sub_sympatry[1]/2
+speciation_rates[5] := speciation_sub_sympatry[2]/2
+speciation_rates[6] := speciation_sub_sympatry[2]/2
+
+# Allopatric cladogenesis is when the two daughter lineages
+# split the ancestral range:
+speciation_allopatry ~ dnExp(rate_param)
+mv[mvi++] = ( mvSlide( speciation_allopatry, weight=4 ) )
+
+# Define the allopatric events:
+clado_events[7] = [2, 0, 1] # 11 -> 01, 10
+clado_events[8] = [2, 1, 0] # 11 -> 10, 01
+speciation_rates[7] := speciation_allopatry/2
+speciation_rates[8] := speciation_allopatry/2
+
+# Now let's create a deterministic variable to monitor the overall speciation rate
+total_speciation := sum(speciation_rates)
+
+# Finally, we construct the cladogenetic speciation rate
+# matrix from the cladogenetic event types and the speciation rates
+clado_matrix := fnCladogeneticSpeciationRateMatrix(clado_events, speciation_rates, 3)
+
+omega := clado_matrix.getCladogeneticProbabilityMatrix()
+lambda := clado_matrix.getSpeciationRateSumPerState()
+
+## PI (equilibrium or stationary frequencies)
+pi_base <- rep(1,num_ranges)
+pi <- simplex(pi_base)
+
+# TREE
+timetree ~ dnGLHBDSP(
+    rootAge     = tree_height,
+    lambda      = lambda,
+    mu          = mu,
+    eta         = Q_bg,
+    omega       = omega,
+    pi          = pi,
+    rho         = 1,
+    condition   = "time",
+    taxa        = taxa,
+    nStates     = num_ranges,
+    nProc       = 1
+)
+timetree.clamp(phy)
+timetree.clampCharData(bg_dat)
+
+# MCMC MOVES
+mv[mvi++] = mvScale(mu[1], weight=1)
+mv[mvi++] = mvScale(mu[2], weight=1)
+mv[mvi++] = mvScale(r_d[1][2], weight=1)
+mv[mvi++] = mvScale(r_d[2][1], weight=1)
+
+# MCMC MONITORS
+mni = 1
+mn[mni++] = mnModel(printgen=10, filename=out_fp + "model.log")
+mn[mni++] = mnJointConditionalAncestralState(glhbdsp=timetree, tree=timetree,
+                                             printgen=10, withTips=true, withStartStates=true,
+                                             type="NaturalNumbers", filename=out_fp + "states.log")
+mn[mni++] = mnStochasticCharacterMap(glhbdsp=timetree, printgen=10, filename=out_fp + "stoch.log")
+
+# STATE LABELS
+lbl_fn = out_fp + "range_label.txt"
+write("index,range\n", file=lbl_fn)
+state_labels = Q_bg.getStateDescriptions()
+for (i in 1:state_labels.size()) {
+    write( (i-1), ",", state_labels[i], "\n", file=lbl_fn, append=true, separator="")
+}
+
+mdl = model(clado_matrix)
+
+# MCMC WITH 2 CHAINS
+ch = mcmc(mv, mn, mdl, nruns=2, combine="mixed")
+ch.burnin(125, tuningInterval=5)
+ch.run(500)
+
+# ANCESTRAL STATES
+f_burn = 0.1
+x_stoch = readAncestralStateTrace(file=out_fp + "stoch.log")
+x_states = readAncestralStateTrace(file=out_fp + "states.log")
+summarizeCharacterMaps(x_stoch,timetree,file=out_fp + "events.tsv", burnin=f_burn)
+state_tree = ancestralStateTree(tree=timetree,
+                                ancestral_state_trace_vector=x_states,
+                                include_start_states=true,
+                                file=out_fp + "ase.tre",
+                                summary_statistic="MAP",
+                                reconstruction="marginal",
+                                burnin=f_burn,
+                                nStates=3,
+                                site=1)
+writeNexus(state_tree, filename=out_fp + "ase.nex")
+
+print("DONE")
+clear()
+q()

@@ -1,2 +1,0 @@
-loadPlugin("TensorPhylo")
-print("Loaded TensorPhylo plugin.")

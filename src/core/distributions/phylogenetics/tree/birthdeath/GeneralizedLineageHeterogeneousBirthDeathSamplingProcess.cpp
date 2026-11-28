@@ -38,8 +38,10 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
     double                                                          rel_tol_,
 	size_t                                                          n_dense_steps_
 ) : TypedDistribution<Tree>( new TreeDiscreteCharacterData() ),
-	n_proc(n_proc_),
 	n_dense_steps(n_dense_steps_),
+    n_proc(n_proc_),
+    absolute_tolerance(abs_tol_),
+    relative_tolerance(rel_tol_),
 	taxa(taxa_),
 	age(age_),
 	condition_type(condition_type_),
@@ -49,28 +51,7 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 	root_frequency(root_frequency_),
 	dirty_nodes( std::vector<bool>(2 * taxa.size() - 1, true) )
 {
-	try {
-		// create the pointer
-		tp_ptr = Plugin::loader().createTensorPhyloLik();
-
-		// set the random number generator
-		RandomNumberGenerator* rng = GLOBAL_RNG;
-		unsigned int seed = rng->getSeed();
-		tp_ptr->setSeed( size_t(seed) );
-
-	} catch (...) {
-		throw RbException("TensorPhylo is not loaded (use loadPlugin(...)).");
-	}
-	
-	// turn on/off debug
-	tp_ptr->setConditionalProbCompatibilityMode(false);
-	tp_ptr->setNumberOfThreads(n_proc);
-	tp_ptr->setAbsoluteTolerance(abs_tol_);
-	tp_ptr->setRelativeTolerance(rel_tol_);
-	tp_ptr->setMaxNumDenseSteps(n_dense_steps);
-//	tp_ptr->setLikelihoodApproximator(TensorPhylo::Interface::approximatorVersion_t::PARALLEL_BRANCHWISE);
-//	tp_ptr->setLikelihoodApproximator(TensorPhylo::Interface::approximatorVersion_t::SEQUENTIAL_BRANCHWISE);
-//	tp_ptr->setDebugMode(TensorPhylo::Interface::debugMode_t::DBG_FILE, "test.out");
+    createTensorPhyloEngine();
 
 	// add the parameters
 	addParameter(age);
@@ -87,58 +68,146 @@ GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHete
 
     // update the kernel
     updateRootFrequency(true);
+}
 
+/**
+* Copy constructor.
+*
+* The parameter pointers are copied as-is. Cloning a model retargets them afterwards.
+* The TensorPhylo engine is not copied: all chains of an analysis with multiple runs
+* would otherwise score proposals on one shared likelihood object. Dirty flags keep
+* their in-class defaults, so the next likelihood evaluation uploads this object's
+* parameters. Character data is the exception. updateData() runs only when forced.
+*/
+GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::GeneralizedLineageHeterogeneousBirthDeathSamplingProcess(const GeneralizedLineageHeterogeneousBirthDeathSamplingProcess& src) :
+    TypedDistribution<Tree>(src),
+    n_dense_steps(src.n_dense_steps),
+    n_proc(src.n_proc),
+    absolute_tolerance(src.absolute_tolerance),
+    relative_tolerance(src.relative_tolerance),
+    taxa(src.taxa),
+    age(src.age),
+    condition_type(src.condition_type),
+    num_states(src.num_states),
+    use_origin(src.use_origin),
+    zero_indexed(src.zero_indexed),
+    root_frequency(src.root_frequency),
+    lambda_const(src.lambda_const),
+    lambda_var(src.lambda_var),
+    lambda_times(src.lambda_times),
+    mu_const(src.mu_const),
+    mu_var(src.mu_var),
+    mu_times(src.mu_times),
+    phi_const(src.phi_const),
+    phi_var(src.phi_var),
+    phi_times(src.phi_times),
+    delta_const(src.delta_const),
+    delta_var(src.delta_var),
+    delta_times(src.delta_times),
+    upsilon(src.upsilon),
+    upsilon_times(src.upsilon_times),
+    gamma(src.gamma),
+    gamma_times(src.gamma_times),
+    rho_simple(src.rho_simple),
+    rho(src.rho),
+    rho_times(src.rho_times),
+    xi(src.xi),
+    xi_times(src.xi_times),
+    eta_simple(src.eta_simple),
+    eta_const(src.eta_const),
+    eta_var(src.eta_var),
+    eta_times(src.eta_times),
+    omega_const(src.omega_const),
+    omega_var(src.omega_var),
+    omega_times(src.omega_times),
+    zeta(src.zeta),
+    dirty_nodes(src.dirty_nodes.size(), true)
+{
+    createTensorPhyloEngine();
+    
+    if ( static_cast<const TreeDiscreteCharacterData&>( this->getValue() ).hasCharacterData() )
+    {
+        updateData(true);
+    }
+}
+
+void GeneralizedLineageHeterogeneousBirthDeathSamplingProcess::createTensorPhyloEngine(void)
+{
+    try
+    {
+        // create the pointer
+        tp_ptr = Plugin::loader().createTensorPhyloLik();
+        
+        // set the random number generator
+        RandomNumberGenerator* rng = GLOBAL_RNG;
+        tp_ptr->setSeed( size_t(rng->getSeed()) );
+    }
+    catch (...)
+    {
+        throw RbException("TensorPhylo is not loaded (use loadPlugin(...)).");
+    }
+    
     // turn on/off debug
-	// tp_ptr->setApplyTreeLikCorrection(false);
-
+    tp_ptr->setConditionalProbCompatibilityMode(false);
+    tp_ptr->setNumberOfThreads(n_proc);
+    tp_ptr->setAbsoluteTolerance(absolute_tolerance);
+    tp_ptr->setRelativeTolerance(relative_tolerance);
+    tp_ptr->setMaxNumDenseSteps(n_dense_steps);
+//  tp_ptr->setLikelihoodApproximator(TensorPhylo::Interface::approximatorVersion_t::PARALLEL_BRANCHWISE);
+//  tp_ptr->setLikelihoodApproximator(TensorPhylo::Interface::approximatorVersion_t::SEQUENTIAL_BRANCHWISE);
+//  tp_ptr->setDebugMode(TensorPhylo::Interface::debugMode_t::DBG_FILE, "test.out");
+    
+    // turn on/off debug
+    // tp_ptr->setApplyTreeLikCorrection(false);
+    
     // set the condition type
     tp_ptr->setConditionalProbabilityType(TensorPhylo::Interface::TIME);
+    
     if ( condition_type != "time" )
     {
         if ( use_origin )
         {
-        	if ( condition_type == "survival" or condition_type == "sampledExtant" )
-        	{
-        		tp_ptr->setConditionalProbabilityType(TensorPhylo::Interface::STEM_SURVIVAL);
-        	}
-        	else if ( condition_type == "sampled" )
-        	{
-        		tp_ptr->setConditionalProbabilityType(TensorPhylo::Interface::STEM_ONE_SAMPLE);
-        	}
-        	else if ( condition_type == "tree" )
-        	{
-        		tp_ptr->setConditionalProbabilityType(TensorPhylo::Interface::STEM_TWO_SAMPLES);
-        	}
-        	else if ( condition_type == "treeExtant" )
-        	{
-        		tp_ptr->setConditionalProbabilityType(TensorPhylo::Interface::STEM_TWO_EXT_SAMPLES);
-        	}
-        	else
-        	{
-        		throw RbException("Invalid condition selected.");
-        	}
+            if ( condition_type == "survival" or condition_type == "sampledExtant" )
+            {
+                tp_ptr->setConditionalProbabilityType(TensorPhylo::Interface::STEM_SURVIVAL);
+            }
+            else if ( condition_type == "sampled" )
+            {
+                tp_ptr->setConditionalProbabilityType(TensorPhylo::Interface::STEM_ONE_SAMPLE);
+            }
+            else if ( condition_type == "tree" )
+            {
+                tp_ptr->setConditionalProbabilityType(TensorPhylo::Interface::STEM_TWO_SAMPLES);
+            }
+            else if ( condition_type == "treeExtant" )
+            {
+                tp_ptr->setConditionalProbabilityType(TensorPhylo::Interface::STEM_TWO_EXT_SAMPLES);
+            }
+            else
+            {
+                throw RbException("Invalid condition selected.");
+            }
         }
         else
         {
-        	if ( condition_type == "survival" or condition_type == "sampledExtant" )
-        	{
-        		tp_ptr->setConditionalProbabilityType(TensorPhylo::Interface::ROOT_MRCA);
-        	}
-        	else if ( condition_type == "sampled" )
-        	{
-        		tp_ptr->setConditionalProbabilityType(TensorPhylo::Interface::ROOT_SAMPLING);
-        	}
-        	else if ( condition_type == "sampledMRCA" )
-        	{
-        		tp_ptr->setConditionalProbabilityType(TensorPhylo::Interface::ROOT_SAMPLING_AND_MRCA);
-        	}
-        	else
-        	{
-        		throw RbException("Invalid condition selected.");
-        	}
+            if ( condition_type == "survival" or condition_type == "sampledExtant" )
+            {
+                tp_ptr->setConditionalProbabilityType(TensorPhylo::Interface::ROOT_MRCA);
+            }
+            else if ( condition_type == "sampled" )
+            {
+                tp_ptr->setConditionalProbabilityType(TensorPhylo::Interface::ROOT_SAMPLING);
+            }
+            else if ( condition_type == "sampledMRCA" )
+            {
+                tp_ptr->setConditionalProbabilityType(TensorPhylo::Interface::ROOT_SAMPLING_AND_MRCA);
+            }
+            else
+            {
+                throw RbException("Invalid condition selected.");
+            }
         }
     }
-
 }
 
 /**
